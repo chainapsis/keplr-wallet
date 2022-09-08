@@ -8,7 +8,7 @@ import { Back } from "../components/back";
 
 export const ReceiveScreen = observer(() => {
   const { multisigStore } = useStore();
-  const address = multisigStore.getProxyAddress();
+  const { address } = multisigStore.proxyAddress;
 
   const onShare = async (text) => {
     try {

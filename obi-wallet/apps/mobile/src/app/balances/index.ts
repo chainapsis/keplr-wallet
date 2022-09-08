@@ -1,27 +1,32 @@
-import { Coin, StargateClient } from "@cosmjs/stargate";
+import { Coin } from "@cosmjs/stargate";
 import { useEffect, useState } from "react";
 
+import { useStargateClient } from "../stargate-client";
 import { useStore } from "../stores";
 
 export function useBalances() {
   const { multisigStore } = useStore();
-  const address = multisigStore.getProxyAddress();
+  const { address } = multisigStore.proxyAddress;
 
+  const client = useStargateClient();
   const [balances, setBalances] = useState<readonly Coin[]>([]);
 
   useEffect(() => {
     function f() {
       (async () => {
-        const rcp = "https://rpc.uni.junonetwork.io/";
-        const client = await StargateClient.connect(rcp);
-        setBalances(await client.getAllBalances(address));
+        if (client) {
+          setBalances(await client.getAllBalances(address));
+        }
       })();
       return setTimeout(() => {
         f();
       }, 5000);
     }
-    f();
-  }, [address]);
+    const timeout = f();
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [address, client]);
 
   return balances;
 }
@@ -41,6 +46,13 @@ export function formatCoin(coin: Coin) {
       };
     }
     default:
-      throw new Error("Unknown coin denom");
+      return {
+        icon: null,
+        denom: coin.denom,
+        digits: 6,
+        label: "Unknown Coin",
+        amount: coin.amount,
+        valueInUsd: 0,
+      };
   }
 }

@@ -53,9 +53,8 @@ export const SendScreen = observer(() => {
   const [amount, setAmount] = useState("");
 
   const { multisigStore } = useStore();
-  const multisig = multisigStore.getCurrentAdmin("juno");
-
-  console.log(multisigStore.getCurrentAdmin("juno"));
+  const { prefix } = multisigStore.currentChainInformation;
+  const multisig = multisigStore.getCurrentAdmin(prefix);
 
   const encodeObjects = useMemo(() => {
     if (!selectedCoin) return [];
@@ -85,7 +84,7 @@ export const SendScreen = observer(() => {
 
     const value: MsgExecuteContract = {
       sender: multisig.multisig.address,
-      contract: multisigStore.getProxyAddress(),
+      contract: multisigStore.proxyAddress.address,
       msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
       funds: [],
     };

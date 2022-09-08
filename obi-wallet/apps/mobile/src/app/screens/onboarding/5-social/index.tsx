@@ -9,6 +9,7 @@ import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../button";
+import { useStargateClient } from "../../../stargate-client";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import { Background } from "../../components/background";
@@ -27,6 +28,8 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
     const { multisigStore } = useStore();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
+
+    const client = useStargateClient();
 
     useEffect(() => {
       const { social } = multisigStore.getNextAdmin("");
@@ -50,6 +53,19 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
         );
       }
     }, [multisigStore, navigation]);
+
+    async function getAccountPubkey(key: string) {
+      try {
+        const { pubkey } = await client.getAccount(key);
+        return pubkey;
+      } catch (e) {
+        console.log(e);
+        Alert.alert(
+          "We don’t see any activity for this address.",
+          "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."
+        );
+      }
+    }
 
     return (
       <KeyboardAvoidingView
@@ -154,18 +170,3 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
     );
   }
 );
-
-async function getAccountPubkey(key: string) {
-  const rcp = "https://rpc.uni.junonetwork.io/";
-  const client = await SigningStargateClient.connect(rcp);
-  try {
-    const { pubkey } = await client.getAccount(key);
-    return pubkey;
-  } catch (e) {
-    console.log(e);
-    Alert.alert(
-      "We don’t see any activity for this address.",
-      "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."
-    );
-  }
-}

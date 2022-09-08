@@ -26,12 +26,15 @@ import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
+import { lendFees } from "../../../fee-lender-worker";
+import { useStargateClient } from "../../../stargate-client";
+import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import {
   parseSignatureTextMessageResponse,
@@ -65,8 +68,12 @@ export function SignatureModal({
   onConfirm,
   ...props
 }: SignatureModalProps) {
+  const client = useStargateClient();
   const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
   const phoneNumberBottomSheetRef = useRef<BottomSheetRef>();
+  const { multisigStore } = useStore();
+
+  const { currentChainInformation } = multisigStore;
 
   const numberOfSignatures = signatures.size;
   const enoughSignatures =
@@ -77,26 +84,24 @@ export function SignatureModal({
     `-- SIGNATURES: ${numberOfSignatures} / ${multisig.multisig.publicKey.value.threshold}`
   );
 
-  async function getMessage() {
-    const rcp = "https://rpc.uni.junonetwork.io/";
-    const client = await SigningStargateClient.connect(rcp);
-
+  const getMessage = useCallback(async () => {
     const account = await client.getAccount(multisig.multisig.address);
+
     const fee = {
-      amount: coins(6000, "ujunox"),
+      amount: coins(1000, currentChainInformation.denom),
       gas: "200000",
     };
 
     const signDoc: StdSignDoc = {
       memo: "",
       account_number: account.accountNumber.toString(),
-      chain_id: "uni-3",
+      chain_id: currentChainInformation.chainId,
       fee: fee,
       msgs: messages,
       sequence: account.sequence.toString(),
     };
     return new Sha256(serializeSignDoc(signDoc)).digest();
-  }
+  }, [client, messages, multisig.multisig.address, currentChainInformation]);
 
   function getKey({ id, title }: { id: MultisigKey; title: string }): Key[] {
     if (!multisig[id]) return [];
@@ -246,6 +251,10 @@ export function useSignatureModalProps({
 }) {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
   const [modalKey, setModalKey] = useState(0);
+  const { multisigStore } = useStore();
+  const { currentChainInformation } = multisigStore;
+
+  const client = useStargateClient();
 
   const signatureModalProps = useMemo(() => {
     const aminoMessages = encodeObjects.map((encodeObject) => {
@@ -266,6 +275,7 @@ export function useSignatureModalProps({
         setModalKey((value) => value + 1);
       },
       async onConfirm(signatures: Map<string, Uint8Array>) {
+        const { chainId, denom } = currentChainInformation;
         const body: TxBodyEncodeObject = {
           typeUrl: "/cosmos.tx.v1beta1.TxBody",
           value: {
@@ -275,14 +285,18 @@ export function useSignatureModalProps({
         };
         const bodyBytes = registry.encode(body);
 
-        const rcp = "https://rpc.uni.junonetwork.io/";
-        const client = await SigningStargateClient.connect(rcp);
-        const account = await client.getAccount(multisig.multisig.address);
+        const address = multisig.multisig.address;
 
         const fee = {
-          amount: coins(6000, "ujunox"),
+          amount: coins(1000, denom),
           gas: "200000",
         };
+
+        if (!(await client.getAccount(address))) {
+          await lendFees({ chainId, address });
+        }
+
+        const account = await client.getAccount(multisig.multisig.address);
         const tx = makeMultisignedTx(
           multisig.multisig.publicKey,
           account.sequence,
@@ -295,12 +309,17 @@ export function useSignatureModalProps({
           Uint8Array.from(TxRaw.encode(tx).finish())
         );
         await onConfirm(result);
-
-        setSignatureModalVisible(false);
-        setModalKey((value) => value + 1);
       },
     };
-  }, [encodeObjects, modalKey, multisig, onConfirm, signatureModalVisible]);
+  }, [
+    encodeObjects,
+    modalKey,
+    signatureModalVisible,
+    multisig,
+    currentChainInformation,
+    client,
+    onConfirm,
+  ]);
 
   return {
     signatureModalProps,

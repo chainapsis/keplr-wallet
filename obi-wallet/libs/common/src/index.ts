@@ -1,4 +1,5 @@
 export * from "./card";
+export * from "./chains";
 export * from "./config";
 export * from "./config.ui";
 export * from "./env";

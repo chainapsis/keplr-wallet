@@ -91,7 +91,7 @@ export function SettingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment 
+      {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment
       <Setting
         Icon={AccountSettingsIcon}
         title="Account settings"
@@ -127,54 +127,6 @@ export function SettingsScreen() {
         Icon={LogoutIcon}
         title="Log out"
         subtitle="Save your keys before logging out"
-      />
-
-      <Setting
-        Icon={HelpAndSupport}
-        title="Fund proxy wallet"
-        subtitle="Send some funds from your biometrics wallet"
-        onPress={async () => {
-          const rcp = "https://rpc.uni.junonetwork.io/";
-          const { publicKey, privateKey } = await getBiometricsKeyPair();
-          const wallet = await Secp256k1Wallet.fromKey(
-            new Uint8Array(Buffer.from(privateKey, "base64")),
-            "juno"
-          );
-          const biometricsAddress = pubkeyToAddress(
-            {
-              type: pubkeyType.secp256k1,
-              value: publicKey,
-            },
-            "juno"
-          );
-          const client = await SigningStargateClient.connectWithSigner(
-            rcp,
-            wallet
-          );
-
-          const fee = {
-            amount: coins(6000, "ujunox"),
-            gas: "200000",
-          };
-
-          const result = await client.sendTokens(
-            biometricsAddress,
-            multisigStore.getProxyAddress(),
-            coins(100000, "ujunox"),
-            fee,
-            ""
-          );
-          console.log({ result });
-
-          const result2 = await client.sendTokens(
-            biometricsAddress,
-            multisigStore.getCurrentAdmin("juno").multisig.address,
-            coins(100000, "ujunox"),
-            fee,
-            ""
-          );
-          console.log({ result2 });
-        }}
       />
 
       <View

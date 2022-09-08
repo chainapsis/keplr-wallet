@@ -2,7 +2,7 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { Chain, chains, Text } from "@obi-wallet/common";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createDrawerNavigator,
@@ -11,8 +11,11 @@ import {
   DrawerScreenProps,
 } from "@react-navigation/drawer";
 import { ParamListBase } from "@react-navigation/native";
+import { observer } from "mobx-react-lite";
+import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
+import { useStore } from "../../stores";
 import { isSmallScreenNumber } from "../components/screen-size";
 import { DappExplorer } from "../dapp-explorer";
 import { NFTs } from "../loop-web-apps/nfts";
@@ -30,103 +33,112 @@ import SettingsIcon from "./assets/settingsIcon.svg";
 import TradeIcon from "./assets/tradeIcon.svg";
 import { Assets } from "./components/assets";
 
-const networks = [
-  {
-    chainId: "uni-3",
-    label: "Juno Mainnet",
-  },
-];
+const enabledChains: Chain[] = ENABLED_CHAINS.split(",");
+const networks = Object.values(chains).filter((network) => {
+  return enabledChains.includes(network.chainId);
+});
 
 export type TabNavigationProps = DrawerScreenProps<ParamListBase>;
 
-export function TabNavigation({ route }: TabNavigationProps) {
-  const Tab = createBottomTabNavigator();
+export const TabNavigation = observer<TabNavigationProps>(
+  ({ route: { params } }) => {
+    const Tab = createBottomTabNavigator();
+    const { multisigStore } = useStore();
 
-  const currentNetwork = route.name;
-  const initialParams = { currentNetwork };
+    const { currentChainInformation } = multisigStore;
+    const currentNetwork = currentChainInformation.label;
+    const initialParams = { currentNetwork };
 
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let icon;
+    // TODO: network switching is buggy atm
 
-          if (route.name === "Home") {
-            icon = faHome;
-          }
-          switch (route.name) {
-            case "Assets":
-              return !focused ? <AssetsIcon /> : <AssetsIconActive />;
-            case "Apps":
-              return !focused ? <AppsIcon /> : <AppsIconActive />;
-            case "NFTs":
-              return !focused ? <NFTsIcon /> : <NFTsIconActive />;
-            case "Trade":
-              return !focused ? <TradeIcon /> : <TradeIconActive />;
-            case "Settings":
-              return !focused ? <SettingsIcon /> : <SettingsIconActive />;
-            default:
-              icon = faChevronLeft;
-              break;
-          }
+    return (
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let icon;
 
-          return <FontAwesomeIcon icon={icon} />;
-        },
-        tabBarStyle: {
-          backgroundColor: "#17162C",
-          borderTopColor: "#1E1D33",
-          borderTopWidth: 1,
-          paddingTop: isSmallScreenNumber(10, 15),
-          paddingBottom: isSmallScreenNumber(10, 30),
-          height: isSmallScreenNumber(65, 85),
-        },
+            if (route.name === "Home") {
+              icon = faHome;
+            }
+            switch (route.name) {
+              case "Assets":
+                return !focused ? <AssetsIcon /> : <AssetsIconActive />;
+              case "Apps":
+                return !focused ? <AppsIcon /> : <AppsIconActive />;
+              case "NFTs":
+                return !focused ? <NFTsIcon /> : <NFTsIconActive />;
+              case "Trade":
+                return !focused ? <TradeIcon /> : <TradeIconActive />;
+              case "Settings":
+                return !focused ? <SettingsIcon /> : <SettingsIconActive />;
+              default:
+                icon = faChevronLeft;
+                break;
+            }
 
-        headerShown: false,
+            return <FontAwesomeIcon icon={icon} />;
+          },
+          tabBarStyle: {
+            backgroundColor: "#17162C",
+            borderTopColor: "#1E1D33",
+            borderTopWidth: 1,
+            paddingTop: isSmallScreenNumber(10, 15),
+            paddingBottom: isSmallScreenNumber(10, 30),
+            height: isSmallScreenNumber(65, 85),
+          },
 
-        tabBarActiveTintColor: "#F6F5FF",
-        tabBarInactiveTintColor: "#4D5070",
-        tabBarLabelStyle: {
-          fontFamily: "Inter",
-          fontSize: 10,
-          fontWeight: "500",
-          textTransform: "uppercase",
-          marginTop: 10,
-          letterSpacing: 0.6,
-        },
-      })}
-    >
-      <Tab.Screen
-        name="Assets"
-        component={Assets}
-        initialParams={initialParams}
-      />
-      <Tab.Screen name="NFTs" component={NFTs} initialParams={initialParams} />
-      <Tab.Screen
-        name="Apps"
-        component={DappExplorer}
-        initialParams={initialParams}
-      />
-      <Tab.Screen
-        name="Trade"
-        component={Trade}
-        initialParams={initialParams}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        initialParams={initialParams}
-      />
-    </Tab.Navigator>
-  );
-}
+          headerShown: false,
+
+          tabBarActiveTintColor: "#F6F5FF",
+          tabBarInactiveTintColor: "#4D5070",
+          tabBarLabelStyle: {
+            fontFamily: "Inter",
+            fontSize: 10,
+            fontWeight: "500",
+            textTransform: "uppercase",
+            marginTop: 10,
+            letterSpacing: 0.6,
+          },
+        })}
+      >
+        <Tab.Screen
+          name="Assets"
+          component={Assets}
+          initialParams={initialParams}
+        />
+        <Tab.Screen
+          name="NFTs"
+          component={NFTs}
+          initialParams={initialParams}
+        />
+        <Tab.Screen
+          name="Apps"
+          component={DappExplorer}
+          initialParams={initialParams}
+        />
+        <Tab.Screen
+          name="Trade"
+          component={Trade}
+          initialParams={initialParams}
+        />
+        <Tab.Screen
+          name="Settings"
+          component={SettingsScreen}
+          initialParams={initialParams}
+        />
+      </Tab.Navigator>
+    );
+  }
+);
 
 export function HomeScreen() {
   const Drawer = createDrawerNavigator();
+  const { multisigStore } = useStore();
 
   return (
     <Drawer.Navigator
       useLegacyImplementation={true}
-      initialRouteName="Home"
+      initialRouteName={multisigStore.currentChainInformation.label}
       screenOptions={{
         headerShown: false,
         drawerActiveTintColor: "#F6F5FF",
@@ -146,6 +158,7 @@ export function HomeScreen() {
             key={network.chainId}
             name={network.label}
             component={TabNavigation}
+            initialParams={{ currentChain: network.chainId }}
           />
         );
       })}
