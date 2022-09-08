@@ -116,7 +116,9 @@ export class MultisigStore {
       }
     }
 
-    this.loading = false;
+    runInAction(() => {
+      this.loading = false;
+    });
   }
 
   @action
