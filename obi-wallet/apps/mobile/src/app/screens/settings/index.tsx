@@ -1,44 +1,29 @@
-import {
-  coins,
-  pubkeyToAddress,
-  pubkeyType,
-  Secp256k1Wallet,
-} from "@cosmjs/amino";
-import { SigningStargateClient } from "@cosmjs/stargate";
-import {
-  faChevronRight,
-  width,
-} from "@fortawesome/free-solid-svg-icons/faChevronRight";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { FC } from "react";
 import {
+  Linking,
   StyleSheet,
   Text,
-  View,
   TouchableOpacity,
-  Linking,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
-import { getBiometricsKeyPair } from "../../biometrics";
-import { useStore } from "../../stores";
 import { Account } from "../account";
 import { Create } from "../account/create";
 import { useNavigation } from "../onboarding/stack";
-import AccountSettingsIcon from "./assets/banksettings.svg";
 import MultiSigIcon from "./assets/edit.svg";
 import HelpAndSupport from "./assets/headset.svg";
 import ObiLogo from "./assets/obi-logo.svg";
 import LogoutIcon from "./assets/power-red.svg";
-import UserImage from "./assets/user.svg";
 import { KeysConfigScreen } from "./keys-config";
 import { Stack } from "./stack";
 
 export function SettingsScreen() {
   const navigation = useNavigation();
-  const { multisigStore } = useStore();
 
   return (
     <SafeAreaView style={styles.container}>

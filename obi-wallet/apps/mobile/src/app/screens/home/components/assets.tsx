@@ -20,7 +20,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { formatCoin, useBalances } from "../../../balances";
+import { ExtendedCoin, formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
 import {
   isSmallScreenNumber,
@@ -408,7 +408,7 @@ const AssetsList = observer(() => {
   );
 });
 
-function AssetsListItem({ item }: ListRenderItemInfo<Coin>) {
+function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
   const { icon, denom, label, amount, valueInUsd } = formatCoin(item);
 
   return (

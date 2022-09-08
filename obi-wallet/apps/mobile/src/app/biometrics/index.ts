@@ -10,11 +10,8 @@ import * as Keychain from "react-native-keychain";
 import secp256k1 from "secp256k1";
 
 import { rootStore } from "../../background/root-store";
+import { createSigningStargateClient, createStargateClient } from "../clients";
 import { lendFees } from "../fee-lender-worker";
-import {
-  createSigningStargateClient,
-  createStargateClient,
-} from "../stargate-client";
 
 const BIOMETRICS_KEY = "obi-wallet-biometrics";
 

@@ -32,8 +32,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
+import { useStargateClient } from "../../../clients";
 import { lendFees } from "../../../fee-lender-worker";
-import { useStargateClient } from "../../../stargate-client";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import {
@@ -88,7 +88,7 @@ export function SignatureModal({
     const account = await client.getAccount(multisig.multisig.address);
 
     const fee = {
-      amount: coins(1000, currentChainInformation.denom),
+      amount: coins(6000, currentChainInformation.denom),
       gas: "200000",
     };
 
@@ -288,7 +288,7 @@ export function useSignatureModalProps({
         const address = multisig.multisig.address;
 
         const fee = {
-          amount: coins(1000, denom),
+          amount: coins(6000, denom),
           gas: "200000",
         };
 

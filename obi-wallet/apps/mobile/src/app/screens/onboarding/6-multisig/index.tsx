@@ -5,13 +5,12 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useState } from "react";
-import { Alert, View } from "react-native";
+import { useEffect, useMemo } from "react";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, IconButton } from "../../../button";
-import { Loader } from "../../../loader";
-import { useStargateClient } from "../../../stargate-client";
+import { IconButton } from "../../../button";
+import { useStargateClient } from "../../../clients";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
@@ -66,8 +65,8 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
       const rawMessage = {
         admin: multisig.multisig.address,
         hot_wallets: [],
-        uusd_fee_debt: "0",
-        fee_lend_repay_wallet: multisig.multisig.address,
+        uusd_fee_debt: currentChainInformation.startingUsdDebt,
+        fee_lend_repay_wallet: currentChainInformation.debtRepayAddress,
         home_network: currentChainInformation.chainId,
       };
 
@@ -118,8 +117,6 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
       },
     });
 
-    const [loading, setLoading] = useState(false);
-
     useEffect(() => {
       if (encodeObjects.length > 0) {
         openSignatureModal();
@@ -158,24 +155,6 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
               />
             </IconButton>
           </View>
-
-          {loading ? <Loader loadingText="Preparing Wallet..." /> : null}
-
-          <Button
-            flavor="blue"
-            label="Create Multisig Wallet"
-            style={{
-              marginVertical: 20,
-            }}
-            disabled={loading}
-            onPress={() => {
-              try {
-                openSignatureModal();
-              } catch (e) {
-                Alert.alert("Error Multisig", e.message);
-              }
-            }}
-          />
         </View>
       </SafeAreaView>
     );

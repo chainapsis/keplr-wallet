@@ -1,5 +1,4 @@
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
-import { Coin } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -14,7 +13,7 @@ import { Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { formatCoin, useBalances } from "../../balances";
+import { ExtendedCoin, formatCoin, useBalances } from "../../balances";
 import { Button } from "../../button";
 import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
@@ -27,7 +26,7 @@ import {
 
 export const SendScreen = observer(() => {
   const balances = useBalances();
-  const [selectedCoin, setSelectedCoin] = useState<Coin | undefined>(
+  const [selectedCoin, setSelectedCoin] = useState<ExtendedCoin | undefined>(
     balances[0]
   );
   const [denominationOpened, setDenominationOpened] = useState(false);
@@ -316,7 +315,7 @@ export const SendScreen = observer(() => {
 });
 
 interface CoinRendererProps {
-  item: Coin;
+  item: ExtendedCoin;
   selected: boolean;
   onPress: () => void;
 }

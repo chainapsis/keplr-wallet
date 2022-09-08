@@ -1,4 +1,3 @@
-import { SigningStargateClient } from "@cosmjs/stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -9,7 +8,7 @@ import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../button";
-import { useStargateClient } from "../../../stargate-client";
+import { useStargateClient } from "../../../clients";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import { Background } from "../../components/background";
