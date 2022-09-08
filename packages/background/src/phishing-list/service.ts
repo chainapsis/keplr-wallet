@@ -9,6 +9,8 @@ export class PhishingListService {
   constructor(
     public readonly opts: {
       readonly blockListUrl: string;
+      readonly fetchingIntervalMs: number;
+      readonly retryIntervalMs: number;
     }
   ) {}
 
@@ -29,6 +31,7 @@ export class PhishingListService {
       this.timeoutId = undefined;
     }
 
+    let failed = false;
     try {
       const res = await Axios.get<string>(this.opts.blockListUrl);
 
@@ -52,12 +55,16 @@ export class PhishingListService {
 
       this.map = map;
     } catch (e) {
+      failed = true;
       console.log(e);
     }
 
-    this.timeoutId = setTimeout(() => {
-      this.startFetchPhishingList();
-    }, 5000);
+    this.timeoutId = setTimeout(
+      () => {
+        this.startFetchPhishingList();
+      },
+      failed ? this.opts.retryIntervalMs : this.opts.fetchingIntervalMs
+    );
   }
 
   checkURLIsPhishing(url: string): boolean {

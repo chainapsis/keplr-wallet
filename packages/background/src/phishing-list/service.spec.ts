@@ -180,6 +180,8 @@ describe("Test phishing list service", () => {
   test("Test basic PhishingListService with valid cases", async () => {
     const service = new PhishingListService({
       blockListUrl: `http://127.0.0.1:${port}/list1`,
+      fetchingIntervalMs: 3600,
+      retryIntervalMs: 3600,
     });
     eachService = service;
 
@@ -193,6 +195,8 @@ describe("Test phishing list service", () => {
   test("Test basic PhishingListService with strange separators", async () => {
     const service = new PhishingListService({
       blockListUrl: `http://127.0.0.1:${port}/list2`,
+      fetchingIntervalMs: 3600,
+      retryIntervalMs: 3600,
     });
     eachService = service;
 
@@ -206,6 +210,8 @@ describe("Test phishing list service", () => {
   test("Test basic PhishingListService with strange cases", async () => {
     const service = new PhishingListService({
       blockListUrl: `http://127.0.0.1:${port}/list3`,
+      fetchingIntervalMs: 3600,
+      retryIntervalMs: 3600,
     });
     eachService = service;
 
