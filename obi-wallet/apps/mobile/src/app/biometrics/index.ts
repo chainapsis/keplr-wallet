@@ -126,13 +126,13 @@ export async function createBiometricSignature({
       chainId,
       signer,
     });
-    await signingClient.sendTokens(
-      address,
-      address,
-      coins(1, denom),
-      "auto",
-      ""
-    );
+
+    const fee = {
+      amount: coins(6000, multisigStore.currentChainInformation.denom),
+      gas: "200000",
+    };
+
+    await signingClient.sendTokens(address, address, coins(1, denom), fee, "");
   }
 
   const privateKey = new Uint8Array(

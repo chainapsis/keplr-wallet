@@ -28,11 +28,10 @@ export function useCosmWasmClient() {
   const { multisigStore } = useStore();
   const [client, setClient] = useState(null);
 
-  const { rcp } = multisigStore.currentChainInformation;
-
   useEffect(() => {
     let client = null;
     (async () => {
+      const { rcp } = multisigStore.currentChainInformation;
       client = await CosmWasmClient.connect(rcp);
       setClient(client);
     })();
@@ -42,7 +41,7 @@ export function useCosmWasmClient() {
         setClient(null);
       }
     };
-  }, [rcp]);
+  }, [multisigStore.currentChainInformation]);
 
   return client;
 }
@@ -51,11 +50,10 @@ export function useStargateClient() {
   const { multisigStore } = useStore();
   const [client, setClient] = useState(null);
 
-  const { rcp } = multisigStore.currentChainInformation;
-
   useEffect(() => {
     let client = null;
     (async () => {
+      const { rcp } = multisigStore.currentChainInformation;
       client = await StargateClient.connect(rcp);
       setClient(client);
     })();
@@ -65,7 +63,7 @@ export function useStargateClient() {
         setClient(null);
       }
     };
-  }, [rcp]);
+  }, [multisigStore.currentChainInformation]);
 
   return client;
 }
