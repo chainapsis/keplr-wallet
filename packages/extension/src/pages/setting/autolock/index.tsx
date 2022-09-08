@@ -34,8 +34,8 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
 
   const requester = new InExtensionMessageRequester();
 
-  const minInterval = 0;
-  const maxInterval = 10000;
+  const minDuration = 0;
+  const maxDuration = 4320;
 
   const { setValue, register, handleSubmit, errors } = useForm<FormData>({
     defaultValues: {
@@ -97,7 +97,7 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
                 }),
                 validate: (input: string): string | undefined => {
                   const interval = parseInt(input);
-                  if (interval < minInterval || interval > maxInterval) {
+                  if (interval < minDuration || interval > maxDuration) {
                     return intl.formatMessage({
                       id: "setting.autolock.error.out-of-range",
                     });
