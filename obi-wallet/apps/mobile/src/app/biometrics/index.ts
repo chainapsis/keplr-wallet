@@ -100,7 +100,6 @@ export async function createBiometricSignature({
 
   if (!credentials) throw new Error("No biometrics keypair found");
 
-  console.log("Checking if factor ready");
   const { multisigStore } = rootStore;
   const chainId = multisigStore.currentChain;
   const { prefix, denom } = chains[chainId];

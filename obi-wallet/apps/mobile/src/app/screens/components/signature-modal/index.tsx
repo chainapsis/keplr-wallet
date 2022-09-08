@@ -85,7 +85,13 @@ export function SignatureModal({
   );
 
   const getMessage = useCallback(async () => {
-    const account = await client.getAccount(multisig.multisig.address);
+    const { address } = multisig.multisig;
+
+    if (!(await client.getAccount(address))) {
+      await lendFees({ chainId: currentChainInformation.chainId, address });
+    }
+
+    const account = await client.getAccount(multisig);
 
     const fee = {
       amount: coins(6000, currentChainInformation.denom),
@@ -101,7 +107,7 @@ export function SignatureModal({
       sequence: account.sequence.toString(),
     };
     return new Sha256(serializeSignDoc(signDoc)).digest();
-  }, [client, messages, multisig.multisig.address, currentChainInformation]);
+  }, [multisig, client, currentChainInformation, messages]);
 
   function getKey({ id, title }: { id: MultisigKey; title: string }): Key[] {
     if (!multisig[id]) return [];
