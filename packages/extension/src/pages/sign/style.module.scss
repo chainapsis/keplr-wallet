@@ -30,6 +30,7 @@
 
 .buttons {
   display: flex;
+  padding-top: 15px;
 }
 
 .button {
@@ -43,7 +44,8 @@
 }
 
 .tab-container {
-  height: 400px;
+  height: 342px;
+  overflow: auto;
 
   &.data-tab {
     overflow: auto;

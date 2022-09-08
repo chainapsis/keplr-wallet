@@ -114,7 +114,7 @@ export const SettingPage: FunctionComponent = observer(() => {
             []
           )}
         />
-        <PageButton
+        {/* <PageButton
           title="Show Advanced IBC Transfers"
           onClick={() => {
             uiConfigStore.setShowAdvancedIBCTransfer(
@@ -139,7 +139,7 @@ export const SettingPage: FunctionComponent = observer(() => {
               <span className="custom-toggle-slider rounded-circle" />
             </label>,
           ]}
-        />
+        /> */}
         <PageButton
           title={intl.formatMessage({
             id: "setting.credit",

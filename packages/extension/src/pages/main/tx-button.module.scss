@@ -3,17 +3,22 @@
 .container-tx-button {
   display: flex;
   flex-direction: row;
+  justify-content: space-evenly;
 
   .button {
     flex: 1;
-    padding-right: 1rem !important;
-    padding-left: 1rem !important;
-
+    padding-right: 0.8rem !important;
+    padding-left: 0.8rem !important;
     margin-right: $layout-margin;
     margin-left: 0px;
     &:last-child {
       margin-right: 0;
     }
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    width: 96px;
   }
 }
 
