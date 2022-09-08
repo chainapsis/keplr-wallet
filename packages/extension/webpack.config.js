@@ -137,7 +137,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./src/index.html",
       filename: "popup.html",
-      excludeChunks: ["background", "contentScripts", "injectedScript"],
+      chunks: ["popup"],
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",
