@@ -13,7 +13,7 @@ import {
 import { ParamListBase } from "@react-navigation/native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
-import { screenWidth, smallDeviceMaxWidth } from "../components/screen-size";
+import { isSmallScreenNumber } from "../components/screen-size";
 import { DappExplorer } from "../dapp-explorer";
 import { NFTs } from "../loop-web-apps/nfts";
 import { Trade } from "../loop-web-apps/trade";
@@ -76,9 +76,9 @@ export function TabNavigation({ route }: TabNavigationProps) {
           backgroundColor: "#17162C",
           borderTopColor: "#1E1D33",
           borderTopWidth: 1,
-          paddingTop: screenWidth <= smallDeviceMaxWidth ? 10 : 15,
-          paddingBottom: screenWidth <= smallDeviceMaxWidth ? 10 : 30,
-          height: screenWidth <= smallDeviceMaxWidth ? 65 : 85,
+          paddingTop: isSmallScreenNumber(10, 15),
+          paddingBottom: isSmallScreenNumber(10, 30),
+          height: isSmallScreenNumber(65, 85),
         },
 
         headerShown: false,
@@ -90,7 +90,7 @@ export function TabNavigation({ route }: TabNavigationProps) {
           fontSize: 10,
           fontWeight: "500",
           textTransform: "uppercase",
-          marginTop: screenWidth <= smallDeviceMaxWidth ? 10 : 10,
+          marginTop: 10,
           letterSpacing: 0.6,
         },
       })}
