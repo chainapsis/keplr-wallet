@@ -1,5 +1,6 @@
 import { Text } from "@obi-wallet/common";
 import { Dispatch, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { View } from "react-native";
 
 import { SECURITY_QUESTIONS } from "../../../../config";
@@ -39,6 +40,8 @@ export function SecurityQuestionInput({
   const [securityQuestions, setSecurityQuestions] =
     useState(SECURITY_QUESTIONS);
 
+  const intl = useIntl();
+
   return (
     <View style={{ zIndex: 999 }}>
       <Text
@@ -50,7 +53,10 @@ export function SecurityQuestionInput({
           marginBottom: 12,
         }}
       >
-        Security Question
+        <FormattedMessage
+          id="onboarding2.securityquestion"
+          defaultMessage="Security Question"
+        />
       </Text>
 
       <DropDownPicker
@@ -64,8 +70,8 @@ export function SecurityQuestionInput({
       />
 
       <TextInput
-        label="Answer"
-        placeholder="Type your answer here"
+        label={intl.formatMessage({ id: "onboarding2.answer" })}
+        placeholder={intl.formatMessage({ id: "onboarding2.answerlabel" })}
         style={{ marginTop: 25 }}
         value={securityAnswer}
         onChangeText={onSecurityAnswerChange}

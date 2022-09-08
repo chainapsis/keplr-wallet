@@ -1,5 +1,6 @@
 import { TouchableOpacity } from "@gorhom/bottom-sheet/src";
 import { observer } from "mobx-react-lite";
+import { FormattedMessage } from "react-intl";
 import { Share, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -50,7 +51,7 @@ export const ReceiveScreen = observer(() => {
               fontWeight: "600",
             }}
           >
-            Receive
+            <FormattedMessage id="receive.receive" defaultMessage="Receive" />
           </Text>
         </View>
       </View>
@@ -73,7 +74,10 @@ export const ReceiveScreen = observer(() => {
               fontWeight: "500",
             }}
           >
-            Tap to share your address
+            <FormattedMessage
+              id="receive.taptoshare"
+              defaultMessage="Tap to share your address"
+            />
           </Text>
           <Text
             style={{

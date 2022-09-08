@@ -1,6 +1,7 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
+import { useIntl } from "react-intl";
 import { View } from "react-native";
 
 import { Button } from "../../../button";
@@ -18,6 +19,8 @@ export function SendMagicSmsButton({
   onPress,
   disabled,
 }: SendMagicSmsButtonProps) {
+  const intl = useIntl();
+
   return (
     <View>
       {description ? (
@@ -44,7 +47,7 @@ export function SendMagicSmsButton({
         </View>
       ) : null}
       <Button
-        label="Send Magic SMS"
+        label={intl.formatMessage({ id: "onboarding2.sendmagicsms" })}
         LeftIcon={SMS}
         flavor="blue"
         disabled={disabled}

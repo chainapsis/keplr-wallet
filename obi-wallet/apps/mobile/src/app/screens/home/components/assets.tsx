@@ -114,7 +114,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
                 fontWeight: "500",
               }}
             >
-              <FormattedMessage id="network" defaultMessage="Network" />
+              <FormattedMessage id="assets.network" defaultMessage="Network" />
             </Text>
             <Text style={{ color: "#F6F5FF", fontSize: 14 }}>
               {isSmallScreenSubstr(currentNetwork, "...", 15, 16)}
@@ -142,7 +142,10 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
               textAlign: "right",
             }}
           >
-            <FormattedMessage id="walletName" defaultMessage="Wallet name" />
+            <FormattedMessage
+              id="assets.walletname"
+              defaultMessage="Wallet name"
+            />
           </Text>
           <Text
             style={{
@@ -191,7 +194,7 @@ const BalanceAndActions = observer(() => {
           letterSpacing: 0.7,
         }}
       >
-        <FormattedMessage id="balance" defaultMessage="Balance" />
+        <FormattedMessage id="assets.balance" defaultMessage="Balance" />
       </Text>
 
       <View
@@ -263,7 +266,7 @@ const BalanceAndActions = observer(() => {
               textTransform: "uppercase",
             }}
           >
-            <FormattedMessage id="send" defaultMessage="Send" />
+            <FormattedMessage id="assets.send" defaultMessage="Send" />
           </Text>
         </View>
         <View style={{ alignItems: "center" }}>
@@ -290,7 +293,7 @@ const BalanceAndActions = observer(() => {
               textTransform: "uppercase",
             }}
           >
-            <FormattedMessage id="receive" defaultMessage="Receive" />
+            <FormattedMessage id="assets.receive" defaultMessage="Receive" />
           </Text>
         </View>
         {/*<View style={{ alignItems: "center" }}>*/}
@@ -366,7 +369,7 @@ const AssetsList = observer(() => {
               textTransform: "uppercase",
             }}
           >
-            <FormattedMessage id="name" defaultMessage="Name" />
+            <FormattedMessage id="assets.name" defaultMessage="Name" />
           </Text>
           <View
             style={{
@@ -381,7 +384,10 @@ const AssetsList = observer(() => {
                 textTransform: "uppercase",
               }}
             >
-              <FormattedMessage id="holdings" defaultMessage="Holdings" />
+              <FormattedMessage
+                id="assets.holdings"
+                defaultMessage="Holdings"
+              />
             </Text>
             <IconButton
               style={{ justifyContent: "center", marginBottom: 5 }}

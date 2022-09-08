@@ -38,10 +38,10 @@ export function NFTs() {
             style={{ marginBottom: 20 }}
           />
           <Text style={{ color: "white", fontSize: 20, fontWeight: "700" }}>
-          <FormattedMessage
-          id="loadingnfts"
-          defaultMessage="Loading NFTs.."
-        />
+            <FormattedMessage
+              id="menu.loadingnfts"
+              defaultMessage="Loading NFTs.."
+            />
           </Text>
         </View>
       )}

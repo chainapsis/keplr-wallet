@@ -12,6 +12,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { FC } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   StyleSheet,
   Text,
@@ -39,6 +40,7 @@ import { Stack } from "./stack";
 export function SettingsScreen() {
   const navigation = useNavigation();
   const { multisigStore } = useStore();
+  const intl = useIntl();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -101,8 +103,10 @@ export function SettingsScreen() {
       */}
       <Setting
         Icon={MultiSigIcon}
-        title="Multisig settings"
-        subtitle="Manage email, face-id, sms key etc."
+        title={intl.formatMessage({ id: "settings.multigsigsettings" })}
+        subtitle={intl.formatMessage({
+          id: "settings.multigsigsettings.subtext",
+        })}
         onPress={() => navigation.navigate("MultiSigSettings")}
       />
       <View
@@ -113,26 +117,30 @@ export function SettingsScreen() {
         ]}
       >
         <View style={[styles.separator]} />
-        <Text style={[styles.separatorText]}>MORE</Text>
+        <Text style={[styles.separatorText]}>
+          <FormattedMessage id="settings.more" defaultMessage="More" />
+        </Text>
         <View style={[styles.separator]} />
       </View>
       <Setting
         Icon={HelpAndSupport}
-        title="Help & support"
-        subtitle="Any question. We are happy to help "
+        title={intl.formatMessage({ id: "settings.helpsupport" })}
+        subtitle={intl.formatMessage({ id: "settings.helpsupport.subtext" })}
         onPress={() => Linking.openURL("https://loop.markets/help")}
       />
 
       <Setting
         Icon={LogoutIcon}
-        title="Log out"
-        subtitle="Save your keys before logging out"
+        title={intl.formatMessage({ id: "settings.logout" })}
+        subtitle={intl.formatMessage({ id: "settings.logout.subtext" })}
       />
 
       <Setting
         Icon={HelpAndSupport}
-        title="Fund proxy wallet"
-        subtitle="Send some funds from your biometrics wallet"
+        title={intl.formatMessage({ id: "settings.fundproxywallet" })}
+        subtitle={intl.formatMessage({
+          id: "settings.fundproxywallet.subtext",
+        })}
         onPress={async () => {
           const rcp = "https://rpc.uni.junonetwork.io/";
           const { publicKey, privateKey } = await getBiometricsKeyPair();
@@ -201,7 +209,10 @@ export function SettingsScreen() {
               fontSize: 10,
             }}
           >
-            Terms of Service
+            <FormattedMessage
+              id="settings.terms"
+              defaultMessage="Terms of Service"
+            />
           </Text>
           <Text
             onPress={() => {
@@ -213,7 +224,10 @@ export function SettingsScreen() {
               fontSize: 10,
             }}
           >
-            Privacy Policy
+            <FormattedMessage
+              id="settings.privacy"
+              defaultMessage="Privacy Policy"
+            />
           </Text>
         </View>
       </View>
@@ -283,6 +297,7 @@ const styles = StyleSheet.create({
   separatorText: {
     color: "#787B9C",
     marginHorizontal: 35,
+    textTransform: "uppercase",
   },
   heading: {
     color: "#F6F5FF",

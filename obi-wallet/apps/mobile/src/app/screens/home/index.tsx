@@ -58,15 +58,15 @@ export function TabNavigation({ route }: TabNavigationProps) {
             icon = faHome;
           }
           switch (route.name) {
-            case intl.formatMessage({ id: "assets" }):
+            case intl.formatMessage({ id: "menu.assets" }):
               return !focused ? <AssetsIcon /> : <AssetsIconActive />;
-            case intl.formatMessage({ id: "apps" }):
+            case intl.formatMessage({ id: "menu.apps" }):
               return !focused ? <AppsIcon /> : <AppsIconActive />;
-            case intl.formatMessage({ id: "nfts" }):
+            case intl.formatMessage({ id: "menu.nfts" }):
               return !focused ? <NFTsIcon /> : <NFTsIconActive />;
-            case intl.formatMessage({ id: "trade" }):
+            case intl.formatMessage({ id: "menu.trade" }):
               return !focused ? <TradeIcon /> : <TradeIconActive />;
-            case intl.formatMessage({ id: "settings" }):
+            case intl.formatMessage({ id: "menu.settings" }):
               return !focused ? <SettingsIcon /> : <SettingsIconActive />;
             default:
               icon = faChevronLeft;
@@ -99,27 +99,27 @@ export function TabNavigation({ route }: TabNavigationProps) {
       })}
     >
       <Tab.Screen
-        name={intl.formatMessage({ id: "assets" })}
+        name={intl.formatMessage({ id: "menu.assets" })}
         component={Assets}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name={intl.formatMessage({ id: "nfts" })}
+        name={intl.formatMessage({ id: "menu.nfts" })}
         component={NFTs}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name={intl.formatMessage({ id: "apps" })}
+        name={intl.formatMessage({ id: "menu.apps" })}
         component={DappExplorer}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name={intl.formatMessage({ id: "trade" })}
+        name={intl.formatMessage({ id: "menu.trade" })}
         component={Trade}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name={intl.formatMessage({ id: "settings" })}
+        name={intl.formatMessage({ id: "menu.settings" })}
         component={SettingsScreen}
         initialParams={initialParams}
       />
@@ -187,10 +187,7 @@ function CustomDrawerContent(props) {
           textTransform: "uppercase",
         }}
       >
-        <FormattedMessage
-          id="networks"
-          defaultMessage="Networks"
-        />
+        <FormattedMessage id="sidemenu.networks" defaultMessage="Networks" />
       </Text>
       <DrawerItemList {...props} />
       <Text
@@ -203,7 +200,7 @@ function CustomDrawerContent(props) {
         }}
       >
         <FormattedMessage
-          id="morecomingsoon"
+          id="sidemenu.morecomingsoon"
           defaultMessage="More coming soon"
         />
       </Text>

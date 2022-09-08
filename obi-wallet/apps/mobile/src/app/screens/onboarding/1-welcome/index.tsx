@@ -1,5 +1,6 @@
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Image, ImageBackground, SafeAreaView, View } from "react-native";
 
 import { Button } from "../../../button";
@@ -13,6 +14,8 @@ export type WelcomeOnboardingProps = NativeStackScreenProps<
 >;
 
 export function WelcomeOnboarding({ navigation }: WelcomeOnboardingProps) {
+  const intl = useIntl();
+
   return (
     <ImageBackground
       source={require("./assets/background.png")}
@@ -43,7 +46,10 @@ export function WelcomeOnboarding({ navigation }: WelcomeOnboardingProps) {
               marginTop: 32,
             }}
           >
-            Welcome to Loop
+            <FormattedMessage
+              id="onboarding1.welcometoloop"
+              defaultMessage="Welcome to Loop"
+            />
           </Text>
           <Text
             style={{
@@ -53,10 +59,13 @@ export function WelcomeOnboarding({ navigation }: WelcomeOnboardingProps) {
               marginTop: 12,
             }}
           >
-            Loop, powered by Obi, is the world’s most powerful wallet for Web3.
+            <FormattedMessage
+              id="onboarding1.welcomesubtext"
+              defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
+            />
           </Text>
           <Button
-            label="Get Started"
+            label={intl.formatMessage({ id: "onboarding1.getstarted" })}
             RightIcon={GetStarted}
             flavor="blue"
             style={{
@@ -67,7 +76,7 @@ export function WelcomeOnboarding({ navigation }: WelcomeOnboardingProps) {
             }}
           />
           <Button
-            label="Recover Wallet"
+            label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}
             LeftIcon={RecoverWallet}
             flavor="purple"
             style={{

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -49,6 +50,8 @@ export function PhoneNumberConfirmOnboarding({
     }
   }, [verifyButtonDisabled, setVerifyButtonDisabled, key]);
 
+  const intl = useIntl();
+
   return (
     <KeyboardAvoidingView
       style={{
@@ -92,7 +95,10 @@ export function PhoneNumberConfirmOnboarding({
                     marginTop: 32,
                   }}
                 >
-                  Authenticate Your Keys
+                  <FormattedMessage
+                    id="onboarding3.authyourkeys"
+                    defaultMessage="Authenticate Your Keys"
+                  />
                 </Text>
                 <Text
                   style={{
@@ -101,12 +107,17 @@ export function PhoneNumberConfirmOnboarding({
                     marginTop: 10,
                   }}
                 >
-                  Paste in the response you received.
+                  <FormattedMessage
+                    id="onboarding3.pastereponse"
+                    defaultMessage="Paste in the response you received."
+                  />
                 </Text>
               </View>
             </View>
             <TextInput
-              placeholder="8-Digits SMS-Code"
+              placeholder={intl.formatMessage({
+                id: "onboarding3.smscodelabel",
+              })}
               textContentType="oneTimeCode"
               keyboardType="number-pad"
               style={{ marginTop: 25 }}
@@ -121,11 +132,14 @@ export function PhoneNumberConfirmOnboarding({
               }}
             >
               <Text style={{ color: "rgba(246, 245, 255, 0.6)", fontSize: 12 }}>
-                Didn’t receive a response?
+                <FormattedMessage
+                  id="onboarding3.noresponselabel"
+                  defaultMessage="Didn’t receive a response?"
+                />
               </Text>
 
               <InlineButton
-                label="Resend"
+                label={intl.formatMessage({ id: "onboarding3.sendagain" })}
                 onPress={async () => {
                   setKey("");
                   await sendPublicKeyTextMessage({

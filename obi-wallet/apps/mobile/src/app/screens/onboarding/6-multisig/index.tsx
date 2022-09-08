@@ -14,6 +14,7 @@ import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useState } from "react";
+import { useIntl } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -121,6 +122,8 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
 
     const [loading, setLoading] = useState(false);
 
+    const intl = useIntl();
+
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <SignatureModal {...signatureModalProps} />
@@ -152,12 +155,18 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
             </IconButton>
           </View>
 
-          {loading ? <Loader loadingText="Preparing Wallet..." /> : null}
+          {loading ? (
+            <Loader
+              loadingText={intl.formatMessage({
+                id: "onboarding6.loadingtext",
+              })}
+            />
+          ) : null}
 
           <View>
             <Button
               flavor="green"
-              label="Prepare Multisig Wallet"
+              label={intl.formatMessage({ id: "onboarding6.preparewallet" })}
               disabled={loading}
               onPress={async () => {
                 setLoading(true);
@@ -210,7 +219,9 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
             />
             <Button
               flavor="blue"
-              label="Create Multisig Wallet"
+              label={intl.formatMessage({
+                id: "onboarding6.createmultisigwallet",
+              })}
               style={{
                 marginVertical: 20,
               }}

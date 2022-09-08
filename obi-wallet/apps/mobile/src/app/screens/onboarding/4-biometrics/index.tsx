@@ -5,6 +5,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -46,6 +47,8 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
         );
       }
     }, [multisigStore, navigation]);
+
+    const intl = useIntl();
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -115,7 +118,10 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                 marginTop: 79,
               }}
             >
-              Authenticate Your Keys
+              <FormattedMessage
+                id="onboarding4.authyourkeys"
+                defaultMessage="Authenticate Your Keys"
+              />
             </Text>
             <Text
               style={{
@@ -125,13 +131,15 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                 marginTop: 10,
               }}
             >
-              With Obi, your Biometrics, iCloud, and phone number work as a
-              multi-factor authenticator.
+              <FormattedMessage
+                id="onboarding4.authyourkeys.subtext"
+                defaultMessage="With Obi, your Biometrics, iCloud, and phone number work as a multi-factor authenticator."
+              />
             </Text>
           </View>
 
           <Button
-            label="Scan My Biometrics"
+            label={intl.formatMessage({ id: "onboarding4.biometrics.button" })}
             flavor="blue"
             LeftIcon={Scan}
             onPress={async () => {

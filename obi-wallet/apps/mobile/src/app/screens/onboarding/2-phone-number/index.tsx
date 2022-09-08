@@ -4,6 +4,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, Image, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -156,6 +157,8 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
       setPhoneNumber(phoneCountryCode + phoneNumberWithoutCountryCode);
     };
 
+    const intl = useIntl();
+
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <Background />
@@ -201,7 +204,10 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
                       marginTop: 32,
                     }}
                   >
-                    Authenticate Your Keys
+                    <FormattedMessage
+                      id="onboarding2.authyourkeys"
+                      defaultMessage="Authenticate Your Keys"
+                    />
                   </Text>
                   <Text
                     style={{
@@ -210,7 +216,10 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
                       marginTop: 10,
                     }}
                   >
-                    Please answer a security question.
+                    <FormattedMessage
+                      id="onboarding2.authyourkeyssubtext"
+                      defaultMessage="Please answer a security question."
+                    />
                   </Text>
                 </View>
               </View>
@@ -223,10 +232,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
               />
 
               <PhoneInput
-                label="Phone number"
+                label={intl.formatMessage({ id: "onboarding2.phonenr" })}
                 keyboardType="phone-pad"
                 textContentType="telephoneNumber"
-                placeholder="Type your phone number here"
+                placeholder={intl.formatMessage({
+                  id: "onboarding2.phonenrlabel",
+                })}
                 style={{ marginTop: 25 }}
                 value={phoneNumberWithoutCountryCode}
                 onChangeText={(e) => {
@@ -240,7 +251,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
             </View>
 
             <SendMagicSmsButton
-              description="Now send your encrypted answer to activate your messaging key."
+              description={intl.formatMessage({ id: "onboarding2.bottominfo" })}
               onPress={async () => {
                 setMagicButtonDisabledDoubleclick(true);
 
