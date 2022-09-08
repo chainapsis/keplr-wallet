@@ -91,7 +91,7 @@ export function SignatureModal({
       await lendFees({ chainId: currentChainInformation.chainId, address });
     }
 
-    const account = await client.getAccount(multisig);
+    const account = await client.getAccount(address);
 
     const fee = {
       amount: coins(6000, currentChainInformation.denom),
