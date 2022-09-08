@@ -7,8 +7,8 @@
 
   .button {
     flex: 1;
-    padding-right: 1rem !important;
-    padding-left: 1rem !important;
+    padding-right: 0.8rem !important;
+    padding-left: 0.8rem !important;
     margin-right: $layout-margin;
     margin-left: 0px;
     &:last-child {
@@ -18,7 +18,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     -webkit-box-orient: vertical;
-    max-width: 10ch;
+    width: 96px;
   }
 }
 
