@@ -134,6 +134,7 @@
     "@react-native-community/cli": "^9.0.0",
     "@react-native-community/cli-platform-android": "^9.0.0",
     "@react-native-community/cli-platform-ios": "^9.0.0",
+    "@sentry/react-native": "^4.3.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/jest-native": "^4.0.11",
     "@testing-library/react-native": "^11.0.0",

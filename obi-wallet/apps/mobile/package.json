@@ -20,6 +20,7 @@
     "@react-navigation/drawer": "*",
     "@react-navigation/native": "*",
     "@react-navigation/native-stack": "*",
+    "@sentry/react-native": "*",
     "@testing-library/jest-native": "*",
     "axios": "*",
     "big-integer": "*",

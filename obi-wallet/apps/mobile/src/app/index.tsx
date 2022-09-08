@@ -1,5 +1,6 @@
 import { messages } from "@obi-wallet/common";
 import { NavigationContainer } from "@react-navigation/native";
+import * as Sentry from "@sentry/react-native";
 import { IntlProvider } from "react-intl";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -13,7 +14,7 @@ import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
 import { StoreContext } from "./stores";
 
-export function App() {
+export const App = Sentry.wrap(() => {
   return (
     <StoreContext.Provider value={rootStore}>
       <IntlProvider
@@ -65,4 +66,4 @@ export function App() {
       </IntlProvider>
     </StoreContext.Provider>
   );
-}
+});
