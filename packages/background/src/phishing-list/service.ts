@@ -4,6 +4,8 @@ import { parseDomainUntilSecondLevel } from "./utils";
 export class PhishingListService {
   protected map: Map<string, boolean> = new Map();
 
+  protected _hasInited: boolean = false;
+  protected _hasStopped: boolean = false;
   protected timeoutId?: NodeJS.Timeout;
 
   constructor(
@@ -14,6 +16,10 @@ export class PhishingListService {
     }
   ) {}
 
+  get hasInited(): boolean {
+    return this._hasInited;
+  }
+
   init() {
     this.startFetchPhishingList();
   }
@@ -23,12 +29,17 @@ export class PhishingListService {
       clearTimeout(this.timeoutId);
       this.timeoutId = undefined;
     }
+    this._hasStopped = true;
   }
 
   async startFetchPhishingList() {
     if (this.timeoutId != null) {
       clearTimeout(this.timeoutId);
       this.timeoutId = undefined;
+    }
+
+    if (this._hasStopped) {
+      return;
     }
 
     let failed = false;
@@ -53,18 +64,21 @@ export class PhishingListService {
         }
       }
 
+      this._hasInited = true;
       this.map = map;
     } catch (e) {
       failed = true;
       console.log(e);
     }
 
-    this.timeoutId = setTimeout(
-      () => {
-        this.startFetchPhishingList();
-      },
-      failed ? this.opts.retryIntervalMs : this.opts.fetchingIntervalMs
-    );
+    if (!this._hasStopped) {
+      this.timeoutId = setTimeout(
+        () => {
+          this.startFetchPhishingList();
+        },
+        failed ? this.opts.retryIntervalMs : this.opts.fetchingIntervalMs
+      );
+    }
   }
 
   checkURLIsPhishing(url: string): boolean {

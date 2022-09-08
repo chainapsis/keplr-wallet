@@ -159,15 +159,32 @@ describe("Test phishing list service", () => {
   });
 
   afterEach(() => {
-    if (closeServer) {
-      closeServer();
-      closeServer = undefined;
-    }
     if (eachService) {
       eachService.stop();
       eachService = undefined;
     }
+
+    if (closeServer) {
+      closeServer();
+      closeServer = undefined;
+    }
   });
+
+  const waitServiceInit = (service: PhishingListService) => {
+    return new Promise<void>((resolve) => {
+      if (service.hasInited) {
+        resolve();
+        return;
+      }
+
+      const intervalId = setInterval(() => {
+        if (service.hasInited) {
+          resolve();
+          clearInterval(intervalId);
+        }
+      }, 10);
+    });
+  };
 
   const testCheckURLIsPhishing = (service: PhishingListService) => {
     for (const phishing of phishings) {
@@ -214,7 +231,7 @@ describe("Test phishing list service", () => {
 
     service.init();
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await waitServiceInit(service);
 
     testCheckURLIsPhishing(service);
   });
@@ -229,7 +246,7 @@ describe("Test phishing list service", () => {
 
     service.init();
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await waitServiceInit(service);
 
     testCheckURLIsPhishing(service);
   });
@@ -244,7 +261,7 @@ describe("Test phishing list service", () => {
 
     service.init();
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await waitServiceInit(service);
 
     testCheckURLIsPhishing(service);
   });
@@ -259,7 +276,7 @@ describe("Test phishing list service", () => {
 
     service.init();
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await waitServiceInit(service);
 
     testCheckURLIsPhishing(service);
     expect(service.checkURLIsPhishing("https://added.domain")).toBe(false);
@@ -306,7 +323,7 @@ describe("Test phishing list service", () => {
       }
     };
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await waitServiceInit(service);
 
     testPhishingUntil(1);
     expect(getQueryCount()).toBe(1);
