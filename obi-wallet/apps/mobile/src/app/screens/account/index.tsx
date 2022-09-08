@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Back } from "../components/back";
 import { Background } from "../components/background";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
+import ObiLogo from "../settings/assets/obi-logo.svg";
 import { useNavigation } from "../settings/stack";
 import InheritanceIcon from "./assets/inheritanceIcon.svg";
 import SpendingIcon from "./assets/spendingIcon.svg";
@@ -65,6 +66,7 @@ export function Account() {
           Account
         </Text>
       </View>
+
       <View
         style={{
           height: 165,
@@ -91,26 +93,78 @@ export function Account() {
           >
             <FontAwesomeIcon icon={faGear} style={{ color: "#F6F5FF" }} />
           </TouchableHighlight> */}
-          <Text
+
+          <View
             style={{
-              color: "#787B9C",
-              marginTop: 8,
-              fontSize: 11,
-              fontWeight: "500",
+              flexDirection: "column",
+              justifyContent: "flex-start",
             }}
           >
-            BALANCE
-          </Text>
-          <Text
-            style={{
-              color: "#F6F5FF",
-              marginTop: 10,
-              fontSize: 20,
-              fontWeight: "500",
-            }}
-          >
-            $38,166.92
-          </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                height: 50,
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  borderRadius: 32,
+                  backgroundColor: "white",
+                  marginRight: 17,
+                }}
+              >
+                <ObiLogo
+                  style={{
+                    width: 42,
+                    height: 42,
+                  }}
+                />
+              </TouchableOpacity>
+
+              <View style={{ flexDirection: "column" }}>
+                <Text
+                  style={{
+                    color: "#F6F5FF",
+                    fontSize: 18,
+                    fontWeight: "700",
+                  }}
+                >
+                  Obi Secure Multisig Account
+                </Text>
+              </View>
+            </View>
+
+            <View
+              style={{
+                marginTop: 10,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#787B9C",
+                  marginTop: 8,
+                  marginLeft: 10,
+                  fontSize: 11,
+                  fontWeight: "500",
+                }}
+              >
+                BALANCE
+              </Text>
+              <Text
+                style={{
+                  color: "#F6F5FF",
+                  marginTop: 10,
+                  marginLeft: 10,
+                  fontSize: 20,
+                  fontWeight: "500",
+                }}
+              >
+                $38,166.92
+              </Text>
+            </View>
+          </View>
+
           {/* <TouchableHighlight
             style={{
               height: 29,
@@ -131,6 +185,8 @@ export function Account() {
           </TouchableHighlight> */}
         </ImageBackground>
       </View>
+
+      {/* 
       <View
         style={{
           backgroundColor: "#16152D",
@@ -144,7 +200,7 @@ export function Account() {
             source={require("./assets/avatars/avatars-3.png")}
             style={{ height: 42, width: 42, borderRadius: 42 }}
           />
-          <View style={{ paddingLeft: 10, flex: 1 }}>
+          <View style={{ paddingLeft: 15, flex: 1, justifyContent: "space-around"}}>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
@@ -153,10 +209,10 @@ export function Account() {
               >
                 $4,582
               </Text>
-              {/* <FontAwesomeIcon
+              <FontAwesomeIcon
                 icon={faCheckCircle}
                 style={{ width: 16, height: 16, color: "#7AD6AE" }}
-              /> */}
+              /> 
             </View>
             <Text
               style={{
@@ -231,7 +287,7 @@ export function Account() {
           </View>
         </View>
       </View>
-
+        */}
       <View
         style={{
           flex: 3,
@@ -336,11 +392,11 @@ export function Account() {
   );
 }
 const options = [
-  {
-    key: 0,
-    name: "spending",
-    icon: SpendingIcon,
-  },
+  // {
+  //  key: 0,
+  //  name: "spending",
+  //  icon: SpendingIcon,
+  // },
   // {
   //   key: 1,
   //   name: "inheritance",

@@ -5,7 +5,10 @@ import {
   Secp256k1Wallet,
 } from "@cosmjs/amino";
 import { SigningStargateClient } from "@cosmjs/stargate";
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
+import {
+  faChevronRight,
+  width,
+} from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { FC } from "react";
@@ -27,6 +30,7 @@ import { useNavigation } from "../onboarding/stack";
 import AccountSettingsIcon from "./assets/banksettings.svg";
 import MultiSigIcon from "./assets/edit.svg";
 import HelpAndSupport from "./assets/headset.svg";
+import ObiLogo from "./assets/obi-logo.svg";
 import LogoutIcon from "./assets/power-red.svg";
 import UserImage from "./assets/user.svg";
 import { KeysConfigScreen } from "./keys-config";
@@ -46,12 +50,37 @@ export function SettingsScreen() {
           marginBottom: 10,
         }}
       >
-        <UserImage />
-        <View style={{ flex: 1, paddingLeft: 10, justifyContent: "center" }}>
-          <Text style={styles.heading}>Farzad morris</Text>
-          <Text style={styles.subHeading}>Profile picture, name and mail</Text>
-        </View>
-        <View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            paddingLeft: 0,
+            alignItems: "center",
+            marginBottom: 10,
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              borderRadius: 32,
+              backgroundColor: "white",
+              marginRight: 17,
+            }}
+          >
+            <ObiLogo
+              style={{
+                width: 64,
+                height: 64,
+              }}
+            />
+          </TouchableOpacity>
+
+          <View style={{ flexDirection: "column" }}>
+            <Text style={styles.heading}>Obi Secure Multisig Account</Text>
+            {/*<Text style={styles.subHeading}>
+              Profile picture, name and mail
+            </Text>*/}
+          </View>
+
           <TouchableOpacity
             style={{ flex: 1, justifyContent: "center", paddingLeft: 20 }}
           >
@@ -62,12 +91,14 @@ export function SettingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment 
       <Setting
         Icon={AccountSettingsIcon}
         title="Account settings"
         subtitle="Manage accounts & sub-accounts "
         onPress={() => navigation.navigate("AccountsSettings")}
       />
+      */}
       <Setting
         Icon={MultiSigIcon}
         title="Multisig settings"
@@ -146,8 +177,46 @@ export function SettingsScreen() {
         }}
       />
 
-      <View style={[styles.flex1]}></View>
-      <View style={[styles.flex1]}></View>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "flex-end",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            onPress={() => {
+              navigation.navigate("AddSubAccount");
+            }}
+            style={{
+              color: "#F6F5FF",
+              paddingRight: 10,
+              fontSize: 10,
+            }}
+          >
+            Terms of Service
+          </Text>
+          <Text
+            onPress={() => {
+              navigation.navigate("AddSubAccount");
+            }}
+            style={{
+              color: "#F6F5FF",
+              marginLeft: 10,
+              fontSize: 10,
+            }}
+          >
+            Privacy Policy
+          </Text>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -220,6 +289,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     fontFamily: "Inter",
+    paddingBottom: 4,
   },
   subHeading: {
     color: "#F6F5FF",
