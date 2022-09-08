@@ -30,7 +30,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
     const [currentUrl, setCurrentUrl] = useState(app.url);
     const [loaded, setLoaded] = useState(false);
     const [title, setTitle] = useState(app.label);
-    const WebViewRef = useRef<WebView>(null);
+    const webViewRef = useRef<WebView>(null);
 
     const safeArea = useSafeAreaInsets();
 
@@ -133,7 +133,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
 
         <ConnectedWebView
           url={currentUrl}
-          webViewRef={WebViewRef}
+          webViewRef={webViewRef}
           onLoadEnd={() => {
             setLoaded(true);
           }}
@@ -172,7 +172,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
               }}
             >
               <FavButton app={currentAppMetadata} />
-              <RefreshButton onPress={() => WebViewRef.current.reload()} />
+              <RefreshButton onPress={() => webViewRef.current.reload()} />
               <ShareButton url={currentUrl} />
             </View>
           </BottomSheetView>
@@ -201,10 +201,6 @@ const FavButton = observer<{ app: App }>(({ app }) => {
         ) : (
           <Fav width={24} height={24} fill="black" />
         )
-        // <FontAwesomeIcon
-        //   icon={isFavorite ? faHeart : faBookmark}
-        //   style={{ color: "black" }}
-        // />
       }
       label={isFavorite ? "Remove" : "Add"}
     />

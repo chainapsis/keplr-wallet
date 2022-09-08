@@ -40,6 +40,8 @@ export async function getBiometricsPublicKey() {
 
     await Keychain.setGenericPassword(publicKey, privateKey, {
       service: BIOMETRICS_KEY,
+      accessControl:
+        Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
     });
     return publicKey;
   }
@@ -51,6 +53,8 @@ export async function getBiometricsPrivateKey() {
       title: "Authentication Required",
     },
     service: BIOMETRICS_KEY,
+    accessControl:
+      Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
   });
 
   if (credentials) {

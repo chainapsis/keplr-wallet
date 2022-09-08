@@ -1,6 +1,6 @@
 import EventEmitter from "eventemitter3";
 import { observer } from "mobx-react-lite";
-import { Ref, useCallback, useEffect, useMemo, useRef } from "react";
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   WebView,
   WebViewMessageEvent,
@@ -13,7 +13,7 @@ import { useStore } from "../../../stores";
 
 export interface ConnectedWebViewProps extends Omit<WebViewProps, "source"> {
   url: string;
-  webViewRef: Ref<WebView>;
+  webViewRef: MutableRefObject<WebView>;
 }
 
 export const ConnectedWebView = observer(
@@ -39,8 +39,8 @@ export const ConnectedWebView = observer(
             webViewRef.current?.injectJavaScript(
               `
                 window.postMessage(${JSON.stringify(
-                  message
-                )}, window.location.origin);
+                message
+              )}, window.location.origin);
                 true; // note: this is required, or you'll sometimes get silent failures
               `
             );
