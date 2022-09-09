@@ -112,7 +112,7 @@ const StateRenderer: FunctionComponent = observer(() => {
     return <LockPage />;
   } else if (keyRingStore.status === KeyRingStatus.EMPTY) {
     browser.tabs.create({
-      url: "/popup.html#/register",
+      url: "/renewal.html#/register",
     });
     window.close();
     return (

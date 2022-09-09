@@ -73,6 +73,7 @@ module.exports = {
   watch: isEnvDevelopment,
   entry: {
     popup: ["./src/index.tsx"],
+    renewal: ["./src/renewal.tsx"],
     background: ["./src/background/background.ts"],
     contentScripts: ["./src/content-scripts/content-scripts.ts"],
     injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
@@ -88,7 +89,7 @@ module.exports = {
           return false;
         }
 
-        return chunk.name === "popup";
+        return chunk.name === "popup" || chunk.name === "renewal";
       },
       cacheGroups: {
         popup: {
@@ -138,6 +139,11 @@ module.exports = {
       template: "./src/index.html",
       filename: "popup.html",
       chunks: ["popup"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/renewal.html",
+      filename: "renewal.html",
+      chunks: ["renewal"],
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",

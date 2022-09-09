@@ -49,7 +49,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                 analyticsStore.logEvent("Add additional account started");
 
                 browser.tabs.create({
-                  url: "/popup.html#/register",
+                  url: "/renewal.html#/register",
                 });
               }}
             >
