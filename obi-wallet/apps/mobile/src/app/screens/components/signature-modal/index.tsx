@@ -27,6 +27,7 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { useMemo, useRef, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -136,7 +137,8 @@ export function SignatureModal({
       },
     ];
   }
-
+  // ToDo: Translation not yet implemented: useIntl not working here:
+  // "signature.modal.biometricsignature"   "signature.modal.phonesignature"
   const data: Key[] = [
     ...getKey({ id: "biometrics", title: "Biometrics Signature" }),
     ...getKey({ id: "phoneNumber", title: "Phone Number Signature" }),
@@ -180,6 +182,7 @@ export function SignatureModal({
           <View>
             <Button
               flavor="blue"
+              // ToDo: Translation not yet implemented: useIntl not working here: "signature.modal.cancel"
               label="Cancel"
               onPress={() => {
                 onCancel();
@@ -188,6 +191,7 @@ export function SignatureModal({
             <Button
               disabled={!enoughSignatures}
               flavor="green"
+              // ToDo: Translation not yet implemented: useIntl not working here: "signature.modal.confirm"
               label="Confirm"
               style={{
                 marginVertical: 20,
@@ -346,9 +350,13 @@ function PhoneNumberBottomSheetContent({
               marginTop: 10,
             }}
           >
-            Paste in the response you received.
+            <FormattedMessage
+              id="signature.pasteresponse"
+              defaultMessage="Paste in the response you received."
+            />
           </Text>
           <TextInput
+            // ToDo: Translation not yet implemented: useIntl not working here: "signature.smscodelabel"
             placeholder="8-Digits SMS-Code"
             textContentType="oneTimeCode"
             keyboardType="number-pad"
@@ -365,10 +373,14 @@ function PhoneNumberBottomSheetContent({
             }}
           >
             <Text style={{ color: "rgba(246, 245, 255, 0.6)", fontSize: 12 }}>
-              Didn’t receive a response?
+              <FormattedMessage
+                id="signature.noresponselabel"
+                defaultMessage="Didn't receive a response?"
+              />
             </Text>
 
             <InlineButton
+              // ToDo: Translation not yet implemented: useIntl not working here: "signature.sendagain"
               label="Resend"
               onPress={async () => {
                 const message = await getMessage();
@@ -388,6 +400,7 @@ function PhoneNumberBottomSheetContent({
               onSuccess(await parseSignatureTextMessageResponse(key));
             } catch (e) {
               console.error(e);
+              // ToDo: Translation not yet implemented: useIntl not working here: "general.error"
               Alert.alert("Error VerifyAndProceedButton (1)", e.message);
             }
           }}

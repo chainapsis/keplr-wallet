@@ -2,6 +2,11 @@
   "home.appStoreLabel": "App Store",
   
   "general.error": "Error",
+  "general.comingsoon": "Coming Soon",
+  "general.active": "Active",
+  "general.notactive": "Not Active",
+  "general.yes": "Yes",
+  "general.no": "No",
 
   "assets.network": "Network",
   "assets.walletname": "Wallet name",
@@ -104,6 +109,15 @@
   "onboarding6.createmultisigwallet": "Create Multisig Wallet",
   "onboarding6.loadingtext": "Preparing wallet…",
 
+  "signature.modal.biometricsignature": "Biometrics Signature",
+  "signature.modal.phonesignature": "Phone Number Signature",
+  "signature.modal.cancel": "Cancel",
+  "signature.modal.confirm": "Confirm",
+  "signature.pasteresponse": "Paste in the response you received.",
+  "signature.smscodelabel": "8-Digits SMS-Code",
+  "signature.noresponselabel": "Didn't receive a response?",
+  "signature.sendagain": "Resend",
+
   "settings.multigsigsettings": "Multisig settings",
   "settings.multigsigsettings.subtext": "Manage email, face-id, sms key etc.",
   "settings.more": "More",
@@ -114,6 +128,20 @@
   "settings.fundproxywallet": "Fund Proxy Wallet",
   "settings.fundproxywallet.subtext": "Send some funds from your biometrics wallet",
   "settings.terms": "Terms of Service",
-  "settings.": "Privacy Policy"
+  "settings.privacy": "Privacy Policy",
+
+  "settings.multisig.title": "Manage Multisig",
+  "settings.multisig.subtitle": "Add/edit keys to improve security. Tap on any of the following",
+  "settings.multisig.risk.norisk": "No Security Risk",
+  "settings.multisig.risk.low": "Low Security Risk",
+  "settings.multisig.risk.medium": "Medium Security Risk",
+  "settings.multisig.risk.high": "High Security Risk",
+  "settings.multisig.risk.stepremaining": "step remaining",
+  "settings.multisig.risk.stepsremaining": "steps remaining",
+  "settings.multisig.option.phonekey": "Phone Number Key",
+  "settings.multisig.option.biometricskey": "Biometrics Key",
+  "settings.multisig.option.socialkey": "Social Key",
+  "settings.multisig.option.emailkey": "Email",
+  "settings.multisig.option.cloudkey": "Cloud"
 }
 
