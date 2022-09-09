@@ -1,7 +1,7 @@
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Linking,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import codePush from "react-native-code-push";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
@@ -24,6 +25,14 @@ import { Stack } from "./stack";
 
 export function SettingsScreen() {
   const navigation = useNavigation();
+  const [appMetadata, setAppMetadata] = useState(null);
+  useEffect(() => {
+    const getCodePushMetadata = async () => {
+      const r = await codePush.getUpdateMetadata();
+      setAppMetadata(r);
+    };
+    getCodePushMetadata();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -113,7 +122,9 @@ export function SettingsScreen() {
         title="Log out"
         subtitle="Save your keys before logging out"
       />
-
+      <Text style={{ color: "white", textAlign: "center" }}>
+        Obi {appMetadata?.appVersion} {appMetadata?.label}
+      </Text>
       <View
         style={{
           flex: 1,
