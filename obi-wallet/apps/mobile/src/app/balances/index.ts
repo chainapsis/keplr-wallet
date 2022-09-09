@@ -27,12 +27,7 @@ export function useBalances() {
     async function f() {
       if (client && wasmClient) {
         const balances = await client.getAllBalances(address);
-        const chainId = multisigStore.currentChainInformation.chainId;
-        const custom_balances = await getCustomBalances(
-          address,
-          wasmClient,
-          chainId
-        );
+        const custom_balances = await getCustomBalances(address, wasmClient);
         for (const balance of custom_balances) {
           balances.push(balance);
         }
@@ -44,21 +39,16 @@ export function useBalances() {
     return () => {
       clearInterval(interval);
     };
-  }, [
-    address,
-    client,
-    wasmClient,
-    multisigStore.currentChainInformation.chainId,
-  ]);
+  }, [address, client, wasmClient]);
 
   return balances;
 }
 
 export async function getCustomBalances(
   user_address: string,
-  client: CosmWasmClient,
-  chainId: string
+  client: CosmWasmClient
 ) {
+  const chainId = rootStore.multisigStore.currentChain;
   try {
     if (chainId === "juno-1") {
       const token_res = await client.queryContractSmart(LOOP_JUNO1_ADDRESS, {
