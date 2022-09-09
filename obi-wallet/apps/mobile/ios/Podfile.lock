@@ -10,13 +10,13 @@ PODS:
     - AppCenter/Crashes (~> 4.0)
     - AppCenterReactNativeShared (~> 4.0)
     - React-Core
-  - AppCenter/Analytics (4.4.3):
+  - AppCenter/Analytics (4.4.2):
     - AppCenter/Core
-  - AppCenter/Core (4.4.3)
-  - AppCenter/Crashes (4.4.3):
+  - AppCenter/Core (4.4.2)
+  - AppCenter/Crashes (4.4.2):
     - AppCenter/Core
-  - AppCenterReactNativeShared (4.4.5):
-    - AppCenter/Core (= 4.4.3)
+  - AppCenterReactNativeShared (4.4.4):
+    - AppCenter/Core (= 4.4.2)
   - Base64 (1.1.2)
   - boost (1.76.0)
   - BVLinearGradient (2.6.2):
@@ -654,11 +654,11 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AppCenter: 3fd04aa1b166e16fdb03ec81dabe488aece83fbd
+  AppCenter: b0eca112a27b71e97488ffa1949ee38c7abd4b79
   appcenter-analytics: 1aea9ada8922d2e2df3e069a28eda21157c9d30d
   appcenter-core: c593b2e4ac28d6a21b6a217c4a5e6b3de7b0b00f
   appcenter-crashes: d9ae1c9296974c1c433600fa2f320e0ba1f12bdf
-  AppCenterReactNativeShared: f395caeabde0dc3a11609dbcb737d0f14cd40e79
+  AppCenterReactNativeShared: 0906af7a6bf95075d6c607189820a2e81fceb6fe
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   BVLinearGradient: 34a999fda29036898a09c6a6b728b0b4189e1a44

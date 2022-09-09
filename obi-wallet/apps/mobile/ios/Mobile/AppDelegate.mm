@@ -93,7 +93,7 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"src/main"];
 #else
-  return return [CodePush bundleURL];
+  return [CodePush bundleURL];
 #endif
 }
 
