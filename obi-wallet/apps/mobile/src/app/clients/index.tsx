@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { useStore } from "../stores";
 
 export async function createStargateClient(chainId: Chain) {
-  const { rcp } = chains[chainId];
-  return await StargateClient.connect(rcp);
+  const { rpc } = chains[chainId];
+  return await StargateClient.connect(rpc);
 }
 
 export async function createSigningStargateClient({
@@ -18,8 +18,8 @@ export async function createSigningStargateClient({
   chainId: Chain;
   signer: OfflineSigner;
 }) {
-  const { prefix, rcp } = chains[chainId];
-  return await SigningStargateClient.connectWithSigner(rcp, signer, {
+  const { prefix, rpc } = chains[chainId];
+  return await SigningStargateClient.connectWithSigner(rpc, signer, {
     prefix,
   });
 }
@@ -31,8 +31,8 @@ export function useCosmWasmClient() {
   useEffect(() => {
     let client = null;
     (async () => {
-      const { rcp } = multisigStore.currentChainInformation;
-      client = await CosmWasmClient.connect(rcp);
+      const { rpc } = multisigStore.currentChainInformation;
+      client = await CosmWasmClient.connect(rpc);
       setClient(client);
     })();
     return () => {
@@ -53,8 +53,8 @@ export function useStargateClient() {
   useEffect(() => {
     let client = null;
     (async () => {
-      const { rcp } = multisigStore.currentChainInformation;
-      client = await StargateClient.connect(rcp);
+      const { rpc } = multisigStore.currentChainInformation;
+      client = await StargateClient.connect(rpc);
       setClient(client);
     })();
     return () => {
