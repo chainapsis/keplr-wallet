@@ -26,7 +26,7 @@ import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -34,6 +34,7 @@ import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
 import { useStargateClient } from "../../../clients";
 import { lendFees } from "../../../fee-lender-worker";
+import { Loader } from "../../../loader";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import {
@@ -153,10 +154,30 @@ export function SignatureModal({
     ...getKey({ id: "phoneNumber", title: "Phone Number Signature" }),
   ];
 
+  const [showLoader, setShowLoader] = useState(false);
+
   return (
     // TODO: use useSafeArea thingy instead.
     <Modal {...props}>
       <SafeAreaView style={{ flex: 1 }}>
+        {showLoader && (
+          <Loader
+            loadingText="Verifying..."
+            styleBackdrop={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 999,
+              position: "absolute",
+              backgroundColor: "#100F1D",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+            styleBox={{}}
+          />
+        )}
         <Background />
         <View
           style={{
@@ -204,7 +225,15 @@ export function SignatureModal({
                 marginVertical: 20,
               }}
               onPress={async () => {
-                onConfirm(signatures);
+                try {
+                  setShowLoader(true);
+                  await onConfirm(signatures);
+                  setShowLoader(false);
+                } catch (e) {
+                  setShowLoader(false);
+                  console.error(e);
+                  Alert.alert("Error confirming signature", e.message);
+                }
               }}
             />
           </View>
@@ -353,6 +382,34 @@ function PhoneNumberBottomSheetContent({
   const [sentMessage, setSentMessage] = useState(false);
   const [key, setKey] = useState("");
 
+  const [magicButtonDisabled, setMagicButtonDisabled] = useState(true); // Magic Button disabled by default
+  const [magicButtonDisabledDoubleclick, setMagicButtonDisabledDoubleclick] =
+    useState(false); // Magic Button disabled on button-click to prevent double-click
+
+  const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
+  const [verifyButtonDisabledDoubleclick, setVerifyButtonDisabledDoubleclick] =
+    useState(false); // Magic Button disable on button-click
+
+  const minInputCharsSecurityAnswer = 3;
+  const minInputCharsSMSCode = 8;
+
+  useEffect(() => {
+    if (securityAnswer.length >= minInputCharsSecurityAnswer) {
+      setMagicButtonDisabled(false); // Enable Magic Button if checks are okay
+    } else {
+      setMagicButtonDisabled(true);
+    }
+  }, [magicButtonDisabled, setMagicButtonDisabled, securityAnswer]);
+
+  useEffect(() => {
+    if (key.length >= minInputCharsSMSCode) {
+      setVerifyButtonDisabled(false); // Enable Magic Button if checks are okay
+    } else {
+      setVerifyButtonDisabled(true);
+      setVerifyButtonDisabledDoubleclick(false);
+    }
+  }, [verifyButtonDisabled, setVerifyButtonDisabled, key]);
+
   if (sentMessage) {
     return (
       <View
@@ -410,12 +467,20 @@ function PhoneNumberBottomSheetContent({
         <VerifyAndProceedButton
           onPress={async () => {
             try {
+              setVerifyButtonDisabledDoubleclick(true);
               onSuccess(await parseSignatureTextMessageResponse(key));
+              setVerifyButtonDisabledDoubleclick(false);
             } catch (e) {
+              setVerifyButtonDisabledDoubleclick(false);
               console.error(e);
               Alert.alert("Error VerifyAndProceedButton (1)", e.message);
             }
           }}
+          disabled={
+            verifyButtonDisabledDoubleclick
+              ? verifyButtonDisabledDoubleclick
+              : verifyButtonDisabled
+          }
         />
       </View>
     );
@@ -439,14 +504,30 @@ function PhoneNumberBottomSheetContent({
 
       <SendMagicSmsButton
         onPress={async () => {
-          const message = await getMessage();
-          await sendSignatureTextMessage({
-            phoneNumber: payload.phoneNumber,
-            securityAnswer,
-            message,
-          });
-          setSentMessage(true);
+          setMagicButtonDisabledDoubleclick(true);
+
+          try {
+            const message = await getMessage();
+            await sendSignatureTextMessage({
+              phoneNumber: payload.phoneNumber,
+              securityAnswer,
+              message,
+            });
+
+            setSentMessage(true);
+
+            setMagicButtonDisabledDoubleclick(false);
+          } catch (e) {
+            setMagicButtonDisabledDoubleclick(false);
+            console.error(e);
+            Alert.alert("Sending SMS failed.", e.message);
+          }
         }}
+        disabled={
+          magicButtonDisabledDoubleclick
+            ? magicButtonDisabledDoubleclick
+            : magicButtonDisabled
+        }
       />
     </View>
   );
