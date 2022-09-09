@@ -1871,6 +1871,16 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "ustrd",
         coinDecimals: 6,
       },
+      {
+        coinDenom: "stATOM",
+        coinMinimalDenom: "stuatom",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stOSMO",
+        coinMinimalDenom: "stuosmo",
+        coinDecimals: 6,
+      },
     ],
     feeCurrencies: [
       {
