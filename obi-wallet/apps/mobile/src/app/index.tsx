@@ -11,7 +11,7 @@ import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
 
-const language = "de";
+const language = "en";
 
 export function App() {
   return (
