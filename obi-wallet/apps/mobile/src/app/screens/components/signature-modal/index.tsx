@@ -20,7 +20,6 @@ import {
   defaultRegistryTypes,
   DeliverTxResponse,
   makeMultisignedTx,
-  SigningStargateClient,
 } from "@cosmjs/stargate";
 import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
@@ -79,10 +78,6 @@ export function SignatureModal({
   const enoughSignatures =
     numberOfSignatures >=
     parseInt(multisig.multisig.publicKey.value.threshold, 10);
-
-  console.log(
-    `-- SIGNATURES: ${numberOfSignatures} / ${multisig.multisig.publicKey.value.threshold}`
-  );
 
   const getMessage = useCallback(async () => {
     const { address } = multisig.multisig;

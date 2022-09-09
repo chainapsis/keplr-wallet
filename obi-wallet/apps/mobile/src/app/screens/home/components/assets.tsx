@@ -1,19 +1,17 @@
-import { Coin } from "@cosmjs/stargate";
 import { faAngleDoubleLeft } from "@fortawesome/free-solid-svg-icons/faAngleDoubleLeft";
 import { faSortAsc } from "@fortawesome/free-solid-svg-icons/faSortAsc";
 import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import {
   FlatList,
-  Image,
   ImageBackground,
   ListRenderItemInfo,
+  RefreshControl,
   TouchableHighlight,
   TouchableOpacity,
   View,
@@ -22,6 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ExtendedCoin, formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
+import { useStore } from "../../../stores";
 import {
   isSmallScreenNumber,
   isSmallScreenSubstr,
@@ -30,12 +29,9 @@ import ObiLogo from "../../settings/assets/obi-logo.svg";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
-export type AssetsProps = BottomTabScreenProps<
-  Record<string, { currentNetwork: string }>
->;
-
-export function Assets({ route }: AssetsProps) {
-  const { currentNetwork } = route.params;
+export const Assets = observer(() => {
+  const { multisigStore } = useStore();
+  const currentNetwork = multisigStore.currentChainInformation.label;
 
   return (
     <ImageBackground
@@ -63,7 +59,7 @@ export function Assets({ route }: AssetsProps) {
       </SafeAreaView>
     </ImageBackground>
   );
-}
+});
 
 export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
   const navigation =
@@ -180,7 +176,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
 }
 
 const BalanceAndActions = observer(() => {
-  const balances = useBalances();
+  const { balances } = useBalances();
   const balanceInUsd = balances.reduce(
     (acc, coin) => acc + formatCoin(coin).valueInUsd,
     0
@@ -338,7 +334,12 @@ const BalanceAndActions = observer(() => {
 
 const AssetsList = observer(() => {
   const [sortAscending, setSortAscending] = useState(true);
-  const [...balances] = useBalances();
+  const {
+    balances: unsortedBalances,
+    refreshBalances,
+    refreshing,
+  } = useBalances();
+  const balances = [...unsortedBalances];
   balances.sort((a, b) => {
     const [first, second] = sortAscending ? [b, a] : [a, b];
     return formatCoin(first).valueInUsd - formatCoin(second).valueInUsd;
@@ -409,16 +410,20 @@ const AssetsList = observer(() => {
           </View>
         </View>
 
-        <View>
-          <FlatList
-            keyExtractor={(coin) => coin.denom}
-            data={balances}
-            renderItem={(props) => <AssetsListItem {...props} />}
-            style={{
-              marginTop: 28,
-            }}
-          />
-        </View>
+        <FlatList
+          keyExtractor={(coin) => coin.denom}
+          data={balances}
+          renderItem={(props) => <AssetsListItem {...props} />}
+          style={{
+            marginTop: 28,
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refreshBalances}
+            />
+          }
+        />
       </View>
     </View>
   );

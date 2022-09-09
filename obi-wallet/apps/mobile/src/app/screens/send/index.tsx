@@ -8,8 +8,8 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet/src";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { useMemo, useRef, useState } from "react";
+import { RefreshControl, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -25,9 +25,11 @@ import {
 } from "../components/signature-modal";
 
 export const SendScreen = observer(() => {
-  const balances = useBalances();
+  const { balances, refreshing, refreshBalances } = useBalances();
   const [selectedCoin, setSelectedCoin] = useState<ExtendedCoin | undefined>(
-    balances[0]
+    () => {
+      return balances.length > 0 ? balances[0] : undefined;
+    }
   );
   const [denominationOpened, setDenominationOpened] = useState(false);
   const refBottomSheet = useRef(null);
@@ -40,20 +42,13 @@ export const SendScreen = observer(() => {
     }
   };
 
-  useEffect(() => {
-    if (!selectedCoin) {
-      setSelectedCoin(balances[0]);
-    }
-  }, [balances, selectedCoin]);
-
   const hydratedSelectedCoin = selectedCoin ? formatCoin(selectedCoin) : null;
 
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
 
   const { multisigStore } = useStore();
-  const { prefix } = multisigStore.currentChainInformation;
-  const multisig = multisigStore.getCurrentAdmin(prefix);
+  const multisig = multisigStore.currentAdmin;
 
   const encodeObjects = useMemo(() => {
     if (!selectedCoin) return [];
@@ -307,6 +302,12 @@ export const SendScreen = observer(() => {
                 }}
               />
             )}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={refreshBalances}
+              />
+            }
           />
         </BottomSheetView>
       </BottomSheet>
