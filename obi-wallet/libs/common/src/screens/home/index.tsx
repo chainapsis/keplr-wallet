@@ -16,7 +16,7 @@ import {
 
 import { Card } from "../../card";
 import { FontAwesomeIcon } from "../../font-awesome-icon";
-import { App, AppsStore } from "../../stores";
+import { App, AppsStore, MultisigStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 
@@ -29,16 +29,18 @@ const styles = StyleSheet.create({
 
 export interface HomeProps {
   appsStore: AppsStore;
+  multisigStore: MultisigStore;
   onAppPress: (app: App) => void;
-  onAppStorePress: () => void;
   marginBottom?: number;
 }
 
 export const Home = observer<HomeProps>(
-  ({ appsStore, onAppPress, onAppStorePress, marginBottom }) => {
+  ({ appsStore, onAppPress, marginBottom, multisigStore }) => {
     const [editMode, setEditMode] = useState(false);
     const [url, setUrl] = useState("www.keplr_wallet.com");
     const intl = useIntl();
+
+    const proxy = multisigStore.proxyAddress;
 
     return (
       <KeyboardAvoidingView
@@ -79,10 +81,14 @@ export const Home = observer<HomeProps>(
                 );
               })}
               <Tile
-                img="https://place-hold.it/180x180"
-                label={intl.formatMessage({ id: "home.appStoreLabel" })}
+                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
+                label="Fund Wallet"
                 onPress={() => {
-                  onAppStorePress();
+                  onAppPress({
+                    label: "Fund Wallet",
+                    url: `https://app.kado.money?address=${proxy?.address}`,
+                    icon: "https://place-hold.it/180x180",
+                  });
                 }}
               />
             </Tiles>
