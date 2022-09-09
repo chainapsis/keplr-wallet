@@ -6,6 +6,9 @@ import { rootStore } from "../../background/root-store";
 import { useCosmWasmClient, useStargateClient } from "../clients";
 import { useStore } from "../stores";
 
+const LOOP_JUNO1_ADDRESS =
+  "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup";
+
 export interface ExtendedCoin {
   denom: string;
   amount: string;
@@ -24,6 +27,15 @@ export function useBalances() {
     async function f() {
       if (client && wasmClient) {
         const balances = await client.getAllBalances(address);
+        const chainId = multisigStore.currentChainInformation.chainId;
+        const custom_balances = await getCustomBalances(
+          address,
+          wasmClient,
+          chainId
+        );
+        for (const balance of custom_balances) {
+          balances.push(balance);
+        }
         setBalances(await extendCoinsWithPrices({ balances, wasmClient }));
       }
     }
@@ -32,9 +44,34 @@ export function useBalances() {
     return () => {
       clearInterval(interval);
     };
-  }, [address, client, wasmClient]);
+  }, [
+    address,
+    client,
+    wasmClient,
+    multisigStore.currentChainInformation.chainId,
+  ]);
 
   return balances;
+}
+
+export async function getCustomBalances(
+  user_address: string,
+  client: CosmWasmClient,
+  chainId: string
+) {
+  try {
+    if (chainId === "juno-1") {
+      const token_res = await client.queryContractSmart(LOOP_JUNO1_ADDRESS, {
+        token_info: {},
+      });
+      const balance_res = await client.queryContractSmart(LOOP_JUNO1_ADDRESS, {
+        balance: { address: user_address },
+      });
+      return [{ denom: token_res.symbol, amount: balance_res.balance }]; // name not handled yet
+    }
+  } catch (e) {
+    console.log("Could not get balance for " + LOOP_JUNO1_ADDRESS + ": " + e);
+  }
 }
 
 export async function extendCoinsWithPrices({
@@ -145,7 +182,7 @@ export function getContractRoute(asset: string, network: string) {
           ];
         case "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034":
           return null; //axlUSDC
-        case "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup": //LOOP
+        case LOOP_JUNO1_ADDRESS:
           return [
             "",
             "juno1utkr0ep06rkxgsesq6uryug93daklyd6wneesmtvxjkz0xjlte9qdj2s8q",
