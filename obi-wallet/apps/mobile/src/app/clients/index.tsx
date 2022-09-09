@@ -1,4 +1,3 @@
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { OfflineSigner } from "@cosmjs/launchpad";
 import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { Chain, chains } from "@obi-wallet/common";
@@ -22,28 +21,6 @@ export async function createSigningStargateClient({
   return await SigningStargateClient.connectWithSigner(rpc, signer, {
     prefix,
   });
-}
-
-export function useCosmWasmClient() {
-  const { multisigStore } = useStore();
-  const [client, setClient] = useState(null);
-
-  useEffect(() => {
-    let client = null;
-    (async () => {
-      const { rpc } = multisigStore.currentChainInformation;
-      client = await CosmWasmClient.connect(rpc);
-      setClient(client);
-    })();
-    return () => {
-      if (client) {
-        client.disconnect();
-        setClient(null);
-      }
-    };
-  }, [multisigStore.currentChainInformation]);
-
-  return client;
 }
 
 export function useStargateClient() {

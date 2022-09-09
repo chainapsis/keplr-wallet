@@ -11,6 +11,7 @@ import {
   FlatList,
   ImageBackground,
   ListRenderItemInfo,
+  RefreshControl,
   TouchableHighlight,
   TouchableOpacity,
   View,
@@ -175,7 +176,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
 }
 
 const BalanceAndActions = observer(() => {
-  const balances = useBalances();
+  const { balances } = useBalances();
   const balanceInUsd = balances.reduce(
     (acc, coin) => acc + formatCoin(coin).valueInUsd,
     0
@@ -333,7 +334,12 @@ const BalanceAndActions = observer(() => {
 
 const AssetsList = observer(() => {
   const [sortAscending, setSortAscending] = useState(true);
-  const [...balances] = useBalances();
+  const {
+    balances: unsortedBalances,
+    refreshBalances,
+    refreshing,
+  } = useBalances();
+  const balances = [...unsortedBalances];
   balances.sort((a, b) => {
     const [first, second] = sortAscending ? [b, a] : [a, b];
     return formatCoin(first).valueInUsd - formatCoin(second).valueInUsd;
@@ -404,16 +410,20 @@ const AssetsList = observer(() => {
           </View>
         </View>
 
-        <View>
-          <FlatList
-            keyExtractor={(coin) => coin.denom}
-            data={balances}
-            renderItem={(props) => <AssetsListItem {...props} />}
-            style={{
-              marginTop: 28,
-            }}
-          />
-        </View>
+        <FlatList
+          keyExtractor={(coin) => coin.denom}
+          data={balances}
+          renderItem={(props) => <AssetsListItem {...props} />}
+          style={{
+            marginTop: 28,
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refreshBalances}
+            />
+          }
+        />
       </View>
     </View>
   );
