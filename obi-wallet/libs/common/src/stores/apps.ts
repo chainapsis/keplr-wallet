@@ -10,18 +10,7 @@ export interface App {
 // TODO: this is probably something that we want to fetch dynamically from a server / GitHub.
 // This way, we won't need to bundle the images with the mobile app and can update the list
 // without having to update the mobile app.
-const knownApps: App[] = [
-  {
-    label: "Cosmostation",
-    url: "https://www.cosmostation.io",
-    icon: "https://place-hold.it/180x180",
-  },
-  {
-    label: "Osmosis",
-    url: "https://app.osmosis.zone",
-    icon: "https://uploads-ssl.webflow.com/623a0c9828949e55356286f9/625480558574551ef368eef4_icon-256.png",
-  },
-];
+const knownApps: App[] = [];
 
 export class AppsStore {
   @observable
