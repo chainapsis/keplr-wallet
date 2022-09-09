@@ -13,6 +13,7 @@ import {
 import { App } from "./app";
 import { initBackground } from "./background";
 import { initSentry } from "./background/sentry";
+import { envInvariant } from "./helpers/invariant";
 
 initSentry();
 initBackground();
@@ -21,6 +22,16 @@ AppRegistry.registerComponent("Mobile", () => {
   let Component = Sentry.wrap(App);
 
   if (!__DEV__) {
+    envInvariant("APP_ENV", APP_ENV);
+    envInvariant(
+      "APP_CENTER_DEPLOYMENT_KEY_PRODUCTION",
+      APP_CENTER_DEPLOYMENT_KEY_PRODUCTION
+    );
+    envInvariant(
+      "APP_CENTER_DEPLOYMENT_KEY_STAGING",
+      APP_CENTER_DEPLOYMENT_KEY_STAGING
+    );
+
     Component = codePush({
       deploymentKey:
         APP_ENV === "production"

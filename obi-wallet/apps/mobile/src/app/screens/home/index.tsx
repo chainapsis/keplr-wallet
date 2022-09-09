@@ -15,6 +15,7 @@ import { observer } from "mobx-react-lite";
 import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
+import { envInvariant } from "../../../helpers/invariant";
 import { useStore } from "../../stores";
 import {
   isSmallScreenNumber,
@@ -36,6 +37,7 @@ import SettingsIcon from "./assets/settingsIcon.svg";
 import TradeIcon from "./assets/tradeIcon.svg";
 import { Assets } from "./components/assets";
 
+envInvariant("ENABLED_CHAINS", ENABLED_CHAINS);
 const enabledChains: Chain[] = ENABLED_CHAINS.split(",");
 const networks = Object.values(chains).filter((network) => {
   return enabledChains.includes(network.chainId);
