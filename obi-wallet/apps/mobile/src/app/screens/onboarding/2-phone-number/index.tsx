@@ -30,7 +30,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
     const { multisigStore } = useStore();
 
     useEffect(() => {
-      const { phoneNumber } = multisigStore.getNextAdmin("");
+      const { phoneNumber } = multisigStore.nextAdmin;
       if (phoneNumber) {
         Alert.alert(
           "You already have a phone number key",

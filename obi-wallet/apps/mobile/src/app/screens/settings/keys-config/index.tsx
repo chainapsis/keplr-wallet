@@ -44,8 +44,7 @@ const getSVG = (number: number) => {
 
 export const KeysConfigScreen = observer(() => {
   const { multisigStore } = useStore();
-  const { prefix } = multisigStore.currentChainInformation;
-  const currentAdmin = multisigStore.getCurrentAdmin(prefix);
+  const currentAdmin = multisigStore.currentAdmin;
   const refBottomSheet = useRef<BottomSheet>();
   const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
 

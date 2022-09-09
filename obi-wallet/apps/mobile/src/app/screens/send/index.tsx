@@ -52,8 +52,7 @@ export const SendScreen = observer(() => {
   const [amount, setAmount] = useState("");
 
   const { multisigStore } = useStore();
-  const { prefix } = multisigStore.currentChainInformation;
-  const multisig = multisigStore.getCurrentAdmin(prefix);
+  const multisig = multisigStore.currentAdmin;
 
   const encodeObjects = useMemo(() => {
     if (!selectedCoin) return [];

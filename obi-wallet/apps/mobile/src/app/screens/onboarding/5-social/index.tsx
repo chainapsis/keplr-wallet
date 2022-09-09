@@ -31,7 +31,7 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
     const client = useStargateClient();
 
     useEffect(() => {
-      const { social } = multisigStore.getNextAdmin("");
+      const { social } = multisigStore.nextAdmin;
 
       if (social) {
         Alert.alert(

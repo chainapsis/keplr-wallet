@@ -61,7 +61,7 @@ export const Home = observer<HomeProps>(
               />
             ) : null}
             <Tiles>
-              {appsStore.getFavorites().map((app) => {
+              {appsStore.favorites.map((app) => {
                 return (
                   <Tile
                     key={app.url}

@@ -15,7 +15,7 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
   const { multisigStore } = useStore();
 
-  switch (multisigStore.getState()) {
+  switch (multisigStore.state) {
     case MultisigState.LOADING:
       // TODO: show splash screen
       return null;

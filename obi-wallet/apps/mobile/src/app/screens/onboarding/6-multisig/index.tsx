@@ -28,7 +28,7 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
   ({ navigation }) => {
     const { multisigStore } = useStore();
     const { currentChainInformation } = multisigStore;
-    const multisig = multisigStore.getNextAdmin(currentChainInformation.prefix);
+    const multisig = multisigStore.nextAdmin;
 
     const client = useStargateClient();
 
