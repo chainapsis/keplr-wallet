@@ -173,7 +173,11 @@ export function PhoneNumberConfirmOnboarding({
               } catch (e) {
                 setVerifyButtonDisabledDoubleclick(false);
                 console.error(e);
-                Alert.alert("Error VerifyAndProceedButton (2)", e.message);
+                Alert.alert(
+                  intl.formatMessage({ id: "general.error" }) +
+                    " VerifyAndProceedButton (2)",
+                  e.message
+                );
               }
             }}
             disabled={

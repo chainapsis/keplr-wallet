@@ -30,15 +30,23 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
       const { biometrics } = multisigStore.getNextAdmin("");
       if (biometrics) {
         Alert.alert(
-          "You already have a biometrics key",
-          `Do you want to reuse your existing biometrics key?`,
+          intl.formatMessage({
+            id: "onboarding4.error.biometrickeyexists.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding4.error.biometrickeyexists.text",
+          }),
           [
             {
-              text: "Generate a new key",
+              text: intl.formatMessage({
+                id: "onboarding4.error.biometrickeyexists.newkey",
+              }),
               style: "cancel",
             },
             {
-              text: "Yes",
+              text: intl.formatMessage({
+                id: "onboarding4.error.biometrickeyexists.yes",
+              }),
               onPress: () => {
                 navigation.navigate("onboarding5");
               },
@@ -154,7 +162,11 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                 navigation.navigate("onboarding5");
               } catch (e) {
                 console.error(e);
-                Alert.alert("Error ScanMyBiometrics", e.message);
+                Alert.alert(
+                  intl.formatMessage({ id: "general.error" }) +
+                    " ScanMyBiometrics",
+                  e.message
+                );
               }
             }}
           />

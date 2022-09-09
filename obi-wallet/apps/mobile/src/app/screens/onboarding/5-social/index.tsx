@@ -34,15 +34,20 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
 
       if (social) {
         Alert.alert(
-          "You already have a social key",
-          `Do you want to reuse your existing social key for ${social.address}?`,
+          intl.formatMessage({ id: "onboarding4.error.socialkeyexists.title" }),
+          intl.formatMessage({ id: "onboarding4.error.socialkeyexists.text" }) +
+            ` ${social.address}?`,
           [
             {
-              text: "Generate a new key",
+              text: intl.formatMessage({
+                id: "onboarding4.error.socialkeyexists.newkey",
+              }),
               style: "cancel",
             },
             {
-              text: "Yes",
+              text: intl.formatMessage({
+                id: "onboarding4.error.socialkeyexists.yes",
+              }),
               onPress: () => {
                 navigation.navigate("onboarding6");
               },
@@ -173,6 +178,8 @@ async function getAccountPubkey(key: string) {
     return pubkey;
   } catch (e) {
     console.log(e);
+    // ToDo: This Alert needs to have translation implemented, but useIntl not working here
+    // "onboarding5.error.notactiveaddress.title" && "onboarding5.error.notactiveaddress.text"
     Alert.alert(
       "We don’t see any activity for this address.",
       "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."

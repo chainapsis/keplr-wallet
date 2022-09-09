@@ -1,6 +1,8 @@
 {
   "home.appStoreLabel": "App Store",
-  
+
+  "general.error": "Error",
+
   "assets.network": "Netzwerk",
   "assets.walletname": "Wallet Name",
   "assets.balance": "Kontostand",
@@ -48,6 +50,28 @@
   "onboarding2.bottominfo": "Sende jetzt deine verschlüsselte Antwort um deinen Nachrichten-Key zu aktivieren.",
   "onboarding2.sendmagicsms": "Magic SMS Senden",
 
+  "onboarding2.error.phonekeyexists.title": "You already have a phone number key",
+  "onboarding2.error.phonekeyexists.text": "Do you want to reuse your existing phone number key for phone number",
+  "onboarding2.error.phonekeyexists.generatenew": "Generate a new key",
+  "onboarding2.error.phonekeyexists.yes": "Yes",
+
+  "onboarding2.error.securityanswermissing.title": "Security answer missing",
+  "onboarding2.error.securityanswermissing.text": "Please enter your security answer.",
+
+  "onboarding2.error.securityanswertooshort.title": "Security answer too short",
+  "onboarding2.error.securityanswertooshort.text": "Please enter a longer security answer.",
+
+  "onboarding2.error.securityanswerwhitespaces.title": "Security answer error",
+  "onboarding2.error.securityanswerwhitespaces.text": "Please remove the whitespaces in the beginning and end of your security answer.",
+
+  "onboarding2.error.phonenrmissing.title": "Phone number missing",
+  "onboarding2.error.phonenrmissing.text": "Please enter a valid phone number.",
+
+  "onboarding2.error.phonenrnospecialchars.title": "Phone number error",
+  "onboarding2.error.phonenrnospecialchars.text": "Please enter a valid phone number (international format).",
+
+  "onboarding2.error.sendingsmsfailed": "Sending SMS failed.",
+
   "onboarding3.authyourkeys": "Authentifiziere Deine Keys",
   "onboarding3.pastereponse": "Füge die Antwort ein, die du erhalten hast.",
   "onboarding3.smscodelabel": "8-Stelliger SMS-Code",
@@ -59,10 +83,22 @@
   "onboarding4.authyourkeys.subtext": "Mit Obi verwendest du deine Biometrie, iCloud und Telefonnummer als Multi-Factor-Authentifizierung.",
   "onboarding4.biometrics.button": "Scanne Meine Biometrie",
 
+  "onboarding4.error.biometrickeyexists.title": "You already have a biometrics key",
+  "onboarding4.error.biometrickeyexists.text": "Do you want to reuse your existing biometrics key?",
+  "onboarding4.error.biometrickeyexists.newkey": "Generate a new key",
+  "onboarding4.error.biometrickeyexists.yes": "Yes",
+
   "onboarding5.setsocialkey": "Lege deinen Social Key fest",
   "onboarding5.setsocialkey.subtext": "Gib die juno-Adresse eines vertrauenswüdigen Freundes ein, der dir helfen kann deinen Account wiederherzustellen.",
   "onboarding5.setsocialkey.subtext2": "…oder verwende den standard Obi-Account, wenn du keinem deiner Freunde traust.",
   "onboarding5.useobiaccount": "Verwende Obi Account",
+
+  "onboarding4.error.socialkeyexists.title": "You already have a social key",
+  "onboarding4.error.socialkeyexists.text": "Do you want to reuse your existing social key for",
+  "onboarding4.error.socialkeyexists.newkey": "Generate a new key",
+  "onboarding5.error.socialkeyexists.yes": "Yes",
+  "onboarding5.error.notactiveaddress.title": "We don't see any activity for this address.",
+  "onboarding5.error.notactiveaddress.text": "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address.",
 
   "onboarding6.preparewallet": "Multisig Wallet Vorbereiten",
   "onboarding6.createmultisigwallet": "Multisig Wallet Erstellen",
@@ -78,5 +114,5 @@
   "settings.fundproxywallet": "Geld auf Proxy Wallet schicken",
   "settings.fundproxywallet.subtext": "Sende etwas Geld aus deinem Biometrie-Wallet",
   "settings.terms": "Nutzungsbedingungen",
-  "settings.privacy": "Datenschutzbestimmungen",
+  "settings.privacy": "Datenschutzbestimmungen"
 }

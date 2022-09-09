@@ -34,15 +34,20 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
       const { phoneNumber } = multisigStore.getNextAdmin("");
       if (phoneNumber) {
         Alert.alert(
-          "You already have a phone number key",
-          `Do you want to reuse your existing phone number key for phone number ${phoneNumber.phoneNumber}?`,
+          intl.formatMessage({ id: "onboarding2.error.phonekeyexists.title" }),
+          intl.formatMessage({ id: "onboarding2.error.phonekeyexists.text" }) +
+            ` ${phoneNumber.phoneNumber}?`,
           [
             {
-              text: "Generate a new key",
+              text: intl.formatMessage({
+                id: "onboarding2.error.phonekeyexists.generatenew",
+              }),
               style: "cancel",
             },
             {
-              text: "Yes",
+              text: intl.formatMessage({
+                id: "onboarding2.error.phonekeyexists.yes",
+              }),
               onPress: () => {
                 navigation.navigate("onboarding4");
               },
@@ -90,8 +95,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
     const handleSecurityAnswer = () => {
       if (!securityAnswer) {
         Alert.alert(
-          "Security answer missing",
-          `Please enter your security answer.`
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswermissing.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswermissing.text",
+          })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -102,8 +111,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
         securityAnswer.length < minInputCharsSecurityAnswer
       ) {
         Alert.alert(
-          "Security answer too short",
-          `Your security answer needs to have at least ${minInputCharsSecurityAnswer} characters.`
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswertooshort.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswertooshort.text",
+          })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -115,8 +128,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
         securityAnswer.endsWith(" ")
       ) {
         Alert.alert(
-          "Security answer error",
-          `Please remove the whitespaces in the beginning and end of your security answer.`
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswerwhitespaces.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswerwhitespaces.text",
+          })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -128,8 +145,8 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
     const handlePhoneNumber = () => {
       if (!phoneNumberWithoutCountryCode || !phoneCountryCode || !phoneNumber) {
         Alert.alert(
-          "Phone number missing",
-          `Please enter a valid phone number.`
+          intl.formatMessage({ id: "onboarding2.error.phonenrmissing.title" }),
+          intl.formatMessage({ id: "onboarding2.error.phonenrmissing.text" })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -141,8 +158,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
       );
       if (!onlyDigitsInPhoneNumber) {
         Alert.alert(
-          "Phone number error",
-          `Please enter a valid phone number (international format).`
+          intl.formatMessage({
+            id: "onboarding2.error.phonenrnospecialchars.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding2.error.phonenrnospecialchars.text",
+          })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -275,7 +296,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
                   } catch (e) {
                     setMagicButtonDisabledDoubleclick(false);
                     console.error(e);
-                    Alert.alert("Sending SMS failed.", e.message);
+                    Alert.alert(
+                      intl.formatMessage({
+                        id: "onboarding2.error.sendingsmsfailed",
+                      }),
+                      e.message
+                    );
                   }
                 } else {
                   setMagicButtonDisabledDoubleclick(false);
