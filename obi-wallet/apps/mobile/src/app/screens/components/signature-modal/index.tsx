@@ -231,9 +231,10 @@ export function SignatureModal({
                   await onConfirm(signatures);
                   setShowLoader(false);
                 } catch (e) {
+                  const error = e as Error;
                   setShowLoader(false);
-                  console.error(e);
-                  Alert.alert("Error confirming signature", e.message);
+                  console.error(error);
+                  Alert.alert("Error confirming signature", error.message);
                 }
               }}
             />
@@ -534,9 +535,10 @@ function PhoneNumberBottomSheetContent({
 
             setMagicButtonDisabledDoubleclick(false);
           } catch (e) {
+            const error = e as Error;
             setMagicButtonDisabledDoubleclick(false);
-            console.error(e);
-            Alert.alert("Sending SMS failed.", e.message);
+            console.error(error);
+            Alert.alert("Sending SMS failed.", error.message);
           }
         }}
         disabled={
