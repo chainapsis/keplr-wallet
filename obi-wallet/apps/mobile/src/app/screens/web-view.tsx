@@ -4,7 +4,7 @@ import { faShare } from "@fortawesome/free-solid-svg-icons/faShare";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { App, Text, fetchMeta } from "@obi-wallet/common";
+import { App, fetchMeta, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
@@ -35,52 +35,55 @@ export const WebViewScreen = observer<WebViewScreenProps>(
     const safeArea = useSafeAreaInsets();
 
     useEffect(() => {
-      const fetchMetadata = async () => {
-        //fetch title from app url html
-        try {
-          const { title, icon } = await fetchMeta(app.url);
-          //
-          // const res = await axios.get(app.url);
-          // const html = res.data;
-          // const root = await parse(html);
-          // // get the page manifest
-          // const manifest = root.querySelector('link[rel="manifest"]');
-          // const manifestUrl = manifest?.attributes.href;
-          // console.log({ manifestUrl });
-          // //get host from currentUrl
-          // const host = currentUrl.split("/")[2];
-          // console.log({ host }, host + manifestUrl);
-          // const manifestRes = await axios.get("https://" + host + manifestUrl);
-          // console.log(manifestRes.data.icons);
-          // //get the largest icon from manifestres.data.icons
-          // const largestIcon = manifestRes.data.icons.sort(
-          //   (a, b) => b.sizes.length - a.sizes.length
-          // )[0];
-          // // if largestIcon is a url keep it else compose it from host and largestIcon.src
-          // const icon = largestIcon.src.startsWith("http")
-          //   ? largestIcon.src
-          //   : "https://" + host + largestIcon.src;
-
-          const normalizedIcon = icon.endsWith("/")
-            ? icon.substr(0, icon.length - 1)
-            : icon;
-
-          setCurrentAppMetadata({ ...app, icon: normalizedIcon, label: title });
-        } catch (e) {
-          console.log(e);
-        }
-      };
       if (loaded) {
-        fetchMetadata();
+        void (async () => {
+          //fetch title from app url html
+          try {
+            const { title, icon } = await fetchMeta(app.url);
+            //
+            // const res = await axios.get(app.url);
+            // const html = res.data;
+            // const root = await parse(html);
+            // // get the page manifest
+            // const manifest = root.querySelector('link[rel="manifest"]');
+            // const manifestUrl = manifest?.attributes.href;
+            // console.log({ manifestUrl });
+            // //get host from currentUrl
+            // const host = currentUrl.split("/")[2];
+            // console.log({ host }, host + manifestUrl);
+            // const manifestRes = await axios.get("https://" + host + manifestUrl);
+            // console.log(manifestRes.data.icons);
+            // //get the largest icon from manifestres.data.icons
+            // const largestIcon = manifestRes.data.icons.sort(
+            //   (a, b) => b.sizes.length - a.sizes.length
+            // )[0];
+            // // if largestIcon is a url keep it else compose it from host and largestIcon.src
+            // const icon = largestIcon.src.startsWith("http")
+            //   ? largestIcon.src
+            //   : "https://" + host + largestIcon.src;
+
+            const normalizedIcon = icon?.endsWith("/")
+              ? icon.substr(0, icon.length - 1)
+              : icon;
+
+            setCurrentAppMetadata({
+              ...app,
+              icon: normalizedIcon,
+              label: title ?? app.url,
+            });
+          } catch (e) {
+            console.log(e);
+          }
+        })();
       }
     }, [app, currentUrl, loaded]);
 
-    const refBottomSheet = useRef<BottomSheet>(null);
-    const triggerBottomSheet = (index) => {
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    const triggerBottomSheet = (index: number) => {
       if (index === -1) {
-        refBottomSheet.current.close();
+        bottomSheetRef.current?.close();
       } else {
-        refBottomSheet.current.snapToIndex(index);
+        bottomSheetRef.current?.snapToIndex(index);
       }
     };
     return (
@@ -149,7 +152,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
           handleStyle={{ backgroundColor: "transparent" }}
           snapPoints={["25%"]}
           enablePanDownToClose={true}
-          ref={refBottomSheet}
+          ref={bottomSheetRef}
           index={-1}
         >
           <BottomSheetView style={{ flex: 1, backgroundColor: "transparent" }}>

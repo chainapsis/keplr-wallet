@@ -1,7 +1,5 @@
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Linking,
   StyleSheet,
@@ -9,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import codePush, { LocalPackage } from "react-native-code-push";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
@@ -24,6 +23,12 @@ import { Stack } from "./stack";
 
 export function SettingsScreen() {
   const navigation = useNavigation();
+  const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
+  useEffect(() => {
+    void (async () => {
+      setAppMetadata(await codePush.getUpdateMetadata());
+    })();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -32,7 +37,7 @@ export function SettingsScreen() {
           marginTop: 61,
           flexDirection: "row",
           justifyContent: "space-between",
-          marginBottom: 10,
+          marginBottom: 40,
         }}
       >
         <View
@@ -65,7 +70,7 @@ export function SettingsScreen() {
               Profile picture, name and mail
             </Text>*/}
           </View>
-
+          {/*
           <TouchableOpacity
             style={{ flex: 1, justifyContent: "center", paddingLeft: 20 }}
           >
@@ -74,16 +79,17 @@ export function SettingsScreen() {
               style={styles.chevronRight}
             />
           </TouchableOpacity>
+          */}
         </View>
       </View>
       {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment
-      <Setting
-        Icon={AccountSettingsIcon}
-        title="Account settings"
-        subtitle="Manage accounts & sub-accounts "
-        onPress={() => navigation.navigate("AccountsSettings")}
-      />
-      */}
+          <Setting
+            Icon={AccountSettingsIcon}
+            title="Account settings"
+            subtitle="Manage accounts & sub-accounts "
+            onPress={() => navigation.navigate("AccountsSettings")}
+          />
+          */}
       <Setting
         Icon={MultiSigIcon}
         title="Multisig settings"
@@ -113,7 +119,9 @@ export function SettingsScreen() {
         title="Log out"
         subtitle="Save your keys before logging out"
       />
-
+      <Text style={{ color: "white", textAlign: "center" }}>
+        Obi {appMetadata?.appVersion} {appMetadata?.label}
+      </Text>
       <View
         style={{
           flex: 1,
@@ -202,7 +210,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   flex1: {
-    flex: 1,
+    flex: 0,
     marginBottom: 20,
   },
   text: {

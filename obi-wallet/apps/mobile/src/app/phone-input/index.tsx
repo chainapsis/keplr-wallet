@@ -78,7 +78,7 @@ export function PhoneInput({
   label?: string;
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
-  handlePhoneNumberCountryCode?: (param: string) => void;
+  handlePhoneNumberCountryCode: (param: string) => void;
 }) {
   const [visible, setVisible] = useState(false);
   const switchVisible = () => setVisible(!visible);
@@ -87,7 +87,7 @@ export function PhoneInput({
     setCountry(country);
   };
   // Default Selection
-  const [countryCode, setCountryCode] = useState<CountryCode | undefined>("US");
+  const [countryCode, setCountryCode] = useState<CountryCode>("US");
   const [country, setCountry] = useState<Country>({
     callingCode: ["1"],
     cca2: "US",

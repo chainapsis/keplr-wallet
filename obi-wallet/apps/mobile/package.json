@@ -20,7 +20,11 @@
     "@react-navigation/drawer": "*",
     "@react-navigation/native": "*",
     "@react-navigation/native-stack": "*",
+    "@sentry/react-native": "*",
     "@testing-library/jest-native": "*",
+    "appcenter": "*",
+    "appcenter-analytics": "*",
+    "appcenter-crashes": "*",
     "axios": "*",
     "big-integer": "*",
     "buffer": "*",
@@ -40,6 +44,7 @@
     "react-intl": "*",
     "react-native": "*",
     "react-native-asset": "*",
+    "react-native-code-push": "*",
     "react-native-config": "*",
     "react-native-country-picker-modal": "*",
     "react-native-crypto": "*",
@@ -60,6 +65,7 @@
     "react-native-url-polyfill": "*",
     "react-native-webview": "*",
     "rooks": "*",
-    "secp256k1": "*"
+    "secp256k1": "*",
+    "tiny-invariant": "*"
   }
 }

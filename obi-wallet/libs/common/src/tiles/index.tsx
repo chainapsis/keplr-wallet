@@ -42,7 +42,7 @@ export function Tiles({ children }: { children: ReactNode }) {
 }
 
 export interface TileProps {
-  img?: string;
+  img: string | null;
   label: string;
   disabled?: boolean;
   onRemove?: () => void;

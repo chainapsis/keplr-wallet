@@ -92,9 +92,7 @@ export function KeyListItem({ item }: KeyListItemProps) {
         flexDirection: "row",
         borderRadius: 12,
       }}
-      onPress={() => {
-        onPress();
-      }}
+      onPress={onPress}
     >
       <View style={{ flex: 2, justifyContent: "center", alignItems: "center" }}>
         <View

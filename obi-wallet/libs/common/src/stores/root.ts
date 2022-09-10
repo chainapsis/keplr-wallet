@@ -14,11 +14,13 @@ import { KVStore } from "../kv-store";
 import { MessageRequesterInternal } from "../message-requester";
 import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
+import { BalancesStore } from "./balances";
 import { ChainStore } from "./chain";
 import { MultisigStore } from "./multisig";
 
 export class RootStore {
   public readonly appsStore: AppsStore;
+  public readonly balancesStore: BalancesStore;
   public readonly chainStore: ChainStore;
   public readonly chainSuggestStore: ChainSuggestStore;
   public readonly interactionStore: InteractionStore;
@@ -51,6 +53,7 @@ export class RootStore {
       defaultChain,
       new KVStore("multisig-store")
     );
+    this.balancesStore = new BalancesStore(this.multisigStore);
 
     router.listen(APP_PORT);
   }
