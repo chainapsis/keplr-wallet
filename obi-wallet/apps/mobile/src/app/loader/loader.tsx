@@ -1,26 +1,23 @@
 import { Text } from "@obi-wallet/common";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, StyleProp, View, ViewStyle } from "react-native";
 
 interface LoaderProps {
   loadingText?: string;
+  style?: StyleProp<ViewStyle>;
 }
 
-export function Loader({ loadingText }: LoaderProps) {
+export function Loader({ loadingText, style }: LoaderProps) {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <ActivityIndicator size="large" color="#fff" />
+    <View style={style}>
+      <ActivityIndicator size="large" color="#8877EA" />
 
       {loadingText ? (
         <Text
           style={{
-            color: "#fff",
+            color: "#F6F5FF",
             paddingTop: 15,
+            fontSize: 11,
+            letterSpacing: 0.25,
           }}
         >
           {loadingText}
