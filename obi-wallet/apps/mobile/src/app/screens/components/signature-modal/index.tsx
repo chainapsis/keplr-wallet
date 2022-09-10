@@ -154,7 +154,7 @@ export function SignatureModal({
     ...getKey({ id: "phoneNumber", title: "Phone Number Signature" }),
   ];
 
-  const [showLoader, setShowLoader] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
 
   return (
     // TODO: use useSafeArea thingy instead.
@@ -162,8 +162,8 @@ export function SignatureModal({
       <SafeAreaView style={{ flex: 1 }}>
         {showLoader && (
           <Loader
-            loadingText="Verifying..."
-            styleBackdrop={{
+            loadingText="Loading..."
+            style={{
               flex: 1,
               justifyContent: "center",
               alignItems: "center",
@@ -175,7 +175,6 @@ export function SignatureModal({
               right: 0,
               bottom: 0,
             }}
-            styleBox={{}}
           />
         )}
         <Background />
