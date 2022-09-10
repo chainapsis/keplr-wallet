@@ -175,7 +175,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
               }}
             >
               <FavButton app={currentAppMetadata} />
-              <RefreshButton onPress={() => webViewRef.current.reload()} />
+              <RefreshButton onPress={() => webViewRef.current?.reload()} />
               <ShareButton url={currentUrl} />
             </View>
           </BottomSheetView>
@@ -236,7 +236,8 @@ export function ShareButton({ url }: { url: string }) {
       } else if (result.action === Share.dismissedAction) {
         // dismissed
       }
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       alert(error.message);
     }
   };
