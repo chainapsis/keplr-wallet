@@ -40,7 +40,7 @@ import TradeIcon from "./assets/tradeIcon.svg";
 import { Assets } from "./components/assets";
 
 envInvariant("ENABLED_CHAINS", ENABLED_CHAINS);
-const enabledChains: Chain[] = ENABLED_CHAINS.split(",");
+const enabledChains = ENABLED_CHAINS.split(",") as Chain[];
 const networks = Object.values(chains).filter((network) => {
   return enabledChains.includes(network.chainId);
 });

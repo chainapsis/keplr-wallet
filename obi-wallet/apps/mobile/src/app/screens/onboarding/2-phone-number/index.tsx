@@ -151,7 +151,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
     };
 
     // Function passed down to child component "PhoneInput" as property
-    const handlePhoneNumberCountryCode = (countryCode) => {
+    const handlePhoneNumberCountryCode = (countryCode: string) => {
       setPhoneCountryCode(countryCode);
       setPhoneNumber(phoneCountryCode + phoneNumberWithoutCountryCode);
     };
@@ -262,9 +262,10 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
 
                     setMagicButtonDisabledDoubleclick(false);
                   } catch (e) {
+                    const error = e as Error;
                     setMagicButtonDisabledDoubleclick(false);
-                    console.error(e);
-                    Alert.alert("Sending SMS failed.", e.message);
+                    console.error(error);
+                    Alert.alert("Sending SMS failed.", error.message);
                   }
                 } else {
                   setMagicButtonDisabledDoubleclick(false);

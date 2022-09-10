@@ -1,7 +1,11 @@
 import { Text } from "@obi-wallet/common";
 import { ActivityIndicator, View } from "react-native";
 
-export function Loader({ loadingText }) {
+interface LoaderProps {
+  loadingText?: string;
+}
+
+export function Loader({ loadingText }: LoaderProps) {
   return (
     <View
       style={{

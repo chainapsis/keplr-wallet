@@ -49,7 +49,7 @@ export const ConnectedWebView = observer(
       );
     }, [eventEmitter, keplr]);
 
-    const webviewRef = useRef<WebView>();
+    const webviewRef = useRef<WebView>(null);
 
     const { permissionStore } = useStore();
 

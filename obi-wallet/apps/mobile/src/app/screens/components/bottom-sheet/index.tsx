@@ -1,10 +1,10 @@
 import OriginalBottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { MutableRefObject, ReactNode } from "react";
+import { ReactNode, Ref } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface BottomSheetProps {
   children: ReactNode;
-  bottomSheetRef: MutableRefObject<OriginalBottomSheet>;
+  bottomSheetRef: Ref<OriginalBottomSheet>;
 }
 
 export type BottomSheetRef = OriginalBottomSheet;

@@ -65,6 +65,7 @@
     "react-native-url-polyfill": "*",
     "react-native-webview": "*",
     "rooks": "*",
-    "secp256k1": "*"
+    "secp256k1": "*",
+    "tiny-invariant": "*"
   }
 }

@@ -1,17 +1,10 @@
 import { KVStore, toGenerator } from "@keplr-wallet/common";
-import {
-  action,
-  flow,
-  makeObservable,
-  observable,
-  runInAction,
-  toJS,
-} from "mobx";
+import { action, flow, makeObservable, observable, toJS } from "mobx";
 
 export interface App {
   label: string;
   url: string;
-  icon?: string;
+  icon: string | null;
 }
 
 // TODO: this is probably something that we want to fetch dynamically from a server / GitHub.
