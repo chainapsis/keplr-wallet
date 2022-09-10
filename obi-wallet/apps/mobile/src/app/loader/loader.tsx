@@ -1,7 +1,7 @@
 import { Text } from "@obi-wallet/common";
 import { ActivityIndicator, View } from "react-native";
 
-interface LoaderProps extends React.HTMLAttributes<HTMLAllCollection> {
+interface LoaderProps {
   loadingText?: string;
   style?: any;
 }

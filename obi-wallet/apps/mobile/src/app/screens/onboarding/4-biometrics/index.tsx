@@ -26,7 +26,7 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
     const { multisigStore } = useStore();
 
     useEffect(() => {
-      const { biometrics } = multisigStore.getNextAdmin("");
+      const { biometrics } = multisigStore.nextAdmin;
       if (biometrics) {
         Alert.alert(
           "You already have a biometrics key",
@@ -145,8 +145,9 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                 });
                 navigation.navigate("onboarding5");
               } catch (e) {
-                console.error(e);
-                Alert.alert("Error ScanMyBiometrics", e.message);
+                const error = e as Error;
+                console.error(error);
+                Alert.alert("Error ScanMyBiometrics", error.message);
               }
             }}
           />

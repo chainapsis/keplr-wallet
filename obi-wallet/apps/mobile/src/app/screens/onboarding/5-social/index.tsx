@@ -31,7 +31,7 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
     const client = useStargateClient();
 
     useEffect(() => {
-      const { social } = multisigStore.getNextAdmin("");
+      const { social } = multisigStore.nextAdmin;
 
       if (social) {
         Alert.alert(
@@ -55,14 +55,16 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
 
     async function getAccountPubkey(key: string) {
       try {
-        const { pubkey } = await client.getAccount(key);
-        return pubkey;
+        if (!client) return null;
+        const account = await client.getAccount(key);
+        return account?.pubkey;
       } catch (e) {
         console.log(e);
         Alert.alert(
           "We don’t see any activity for this address.",
           "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."
         );
+        return null;
       }
     }
 

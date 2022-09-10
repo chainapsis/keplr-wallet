@@ -6,17 +6,23 @@ import { Chain, chains, Text } from "@obi-wallet/common";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createDrawerNavigator,
+  DrawerContentComponentProps,
   DrawerContentScrollView,
-  DrawerItemList,
+  DrawerItem,
   DrawerScreenProps,
 } from "@react-navigation/drawer";
 import { ParamListBase } from "@react-navigation/native";
+import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
+import { envInvariant } from "../../../helpers/invariant";
 import { useStore } from "../../stores";
-import { isSmallScreenNumber } from "../components/screen-size";
+import {
+  getScreenDimensions,
+  isSmallScreenNumber,
+} from "../components/screen-size";
 import { DappExplorer } from "../dapp-explorer";
 import { NFTs } from "../loop-web-apps/nfts";
 import { Trade } from "../loop-web-apps/trade";
@@ -33,103 +39,81 @@ import SettingsIcon from "./assets/settingsIcon.svg";
 import TradeIcon from "./assets/tradeIcon.svg";
 import { Assets } from "./components/assets";
 
-const enabledChains: Chain[] = ENABLED_CHAINS.split(",");
+envInvariant("ENABLED_CHAINS", ENABLED_CHAINS);
+const enabledChains = ENABLED_CHAINS.split(",") as Chain[];
 const networks = Object.values(chains).filter((network) => {
   return enabledChains.includes(network.chainId);
 });
 
 export type TabNavigationProps = DrawerScreenProps<ParamListBase>;
 
-export const TabNavigation = observer<TabNavigationProps>(
-  ({ route: { params } }) => {
-    const Tab = createBottomTabNavigator();
-    const { multisigStore } = useStore();
+export function TabNavigation() {
+  const Tab = createBottomTabNavigator();
 
-    const { currentChainInformation } = multisigStore;
-    const currentNetwork = currentChainInformation.label;
-    const initialParams = { currentNetwork };
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let icon;
 
-    // TODO: network switching is buggy atm
+          if (route.name === "Home") {
+            icon = faHome;
+          }
+          switch (route.name) {
+            case "Assets":
+              return !focused ? <AssetsIcon /> : <AssetsIconActive />;
+            case "Apps":
+              return !focused ? <AppsIcon /> : <AppsIconActive />;
+            case "NFTs":
+              return !focused ? <NFTsIcon /> : <NFTsIconActive />;
+            case "Trade":
+              return !focused ? <TradeIcon /> : <TradeIconActive />;
+            case "Settings":
+              return !focused ? <SettingsIcon /> : <SettingsIconActive />;
+            default:
+              icon = faChevronLeft;
+              break;
+          }
 
-    return (
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let icon;
+          return <FontAwesomeIcon icon={icon} />;
+        },
+        tabBarStyle: {
+          backgroundColor: "#17162C",
+          borderTopColor: "#1E1D33",
+          borderTopWidth: 1,
+          paddingTop: isSmallScreenNumber(15, 15),
+          paddingBottom: isSmallScreenNumber(
+            getScreenDimensions().SCREEN_HEIGHT <= 667 ? 15 : 25,
+            27
+          ),
+          height: isSmallScreenNumber(
+            getScreenDimensions().SCREEN_HEIGHT <= 667 ? 70 : 82,
+            85
+          ),
+        },
 
-            if (route.name === "Home") {
-              icon = faHome;
-            }
-            switch (route.name) {
-              case "Assets":
-                return !focused ? <AssetsIcon /> : <AssetsIconActive />;
-              case "Apps":
-                return !focused ? <AppsIcon /> : <AppsIconActive />;
-              case "NFTs":
-                return !focused ? <NFTsIcon /> : <NFTsIconActive />;
-              case "Trade":
-                return !focused ? <TradeIcon /> : <TradeIconActive />;
-              case "Settings":
-                return !focused ? <SettingsIcon /> : <SettingsIconActive />;
-              default:
-                icon = faChevronLeft;
-                break;
-            }
+        headerShown: false,
 
-            return <FontAwesomeIcon icon={icon} />;
-          },
-          tabBarStyle: {
-            backgroundColor: "#17162C",
-            borderTopColor: "#1E1D33",
-            borderTopWidth: 1,
-            paddingTop: isSmallScreenNumber(10, 15),
-            paddingBottom: isSmallScreenNumber(10, 30),
-            height: isSmallScreenNumber(65, 85),
-          },
-
-          headerShown: false,
-
-          tabBarActiveTintColor: "#F6F5FF",
-          tabBarInactiveTintColor: "#4D5070",
-          tabBarLabelStyle: {
-            fontFamily: "Inter",
-            fontSize: 10,
-            fontWeight: "500",
-            textTransform: "uppercase",
-            marginTop: 10,
-            letterSpacing: 0.6,
-          },
-        })}
-      >
-        <Tab.Screen
-          name="Assets"
-          component={Assets}
-          initialParams={initialParams}
-        />
-        <Tab.Screen
-          name="NFTs"
-          component={NFTs}
-          initialParams={initialParams}
-        />
-        <Tab.Screen
-          name="Apps"
-          component={DappExplorer}
-          initialParams={initialParams}
-        />
-        <Tab.Screen
-          name="Trade"
-          component={Trade}
-          initialParams={initialParams}
-        />
-        <Tab.Screen
-          name="Settings"
-          component={SettingsScreen}
-          initialParams={initialParams}
-        />
-      </Tab.Navigator>
-    );
-  }
-);
+        tabBarActiveTintColor: "#F6F5FF",
+        tabBarInactiveTintColor: "#4D5070",
+        tabBarLabelStyle: {
+          fontFamily: "Inter",
+          fontSize: 10,
+          fontWeight: "500",
+          textTransform: "uppercase",
+          marginTop: 10,
+          letterSpacing: 0.6,
+        },
+      })}
+    >
+      <Tab.Screen name="Assets" component={Assets} />
+      <Tab.Screen name="NFTs" component={NFTs} />
+      <Tab.Screen name="Apps" component={DappExplorer} />
+      <Tab.Screen name="Trade" component={Trade} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+    </Tab.Navigator>
+  );
+}
 
 export function HomeScreen() {
   const Drawer = createDrawerNavigator();
@@ -141,33 +125,18 @@ export function HomeScreen() {
       initialRouteName={multisigStore.currentChainInformation.label}
       screenOptions={{
         headerShown: false,
-        drawerActiveTintColor: "#F6F5FF",
-        drawerActiveBackgroundColor: "#27253E",
-        drawerInactiveTintColor: "#787B9C",
-        drawerLabelStyle: {
-          fontFamily: "Inter",
-          fontSize: 16,
-          fontWeight: "500",
-        },
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      {networks.map((network) => {
-        return (
-          <Drawer.Screen
-            key={network.chainId}
-            name={network.label}
-            component={TabNavigation}
-            initialParams={{ currentChain: network.chainId }}
-          />
-        );
-      })}
+      <Drawer.Screen name="home" component={TabNavigation} />
     </Drawer.Navigator>
   );
 }
 
-function CustomDrawerContent(props) {
+const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
   const { navigation } = props;
+  const { multisigStore } = useStore();
+
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: "#100F1E" }}>
       <TouchableHighlight
@@ -195,7 +164,28 @@ function CustomDrawerContent(props) {
       >
         Networks
       </Text>
-      <DrawerItemList {...props} />
+
+      {networks.map((network) => {
+        return (
+          <DrawerItem
+            focused={multisigStore.currentChain === network.chainId}
+            key={network.chainId}
+            label={network.label}
+            activeTintColor="#F6F5FF"
+            inactiveTintColor="#787B9C"
+            activeBackgroundColor="#27253E"
+            labelStyle={{
+              fontFamily: "Inter",
+              fontSize: 16,
+              fontWeight: "500",
+            }}
+            onPress={action(() => {
+              multisigStore.currentChain = network.chainId;
+              navigation.closeDrawer();
+            })}
+          />
+        );
+      })}
       <Text
         style={{
           color: "#787B9C",
@@ -209,4 +199,4 @@ function CustomDrawerContent(props) {
       </Text>
     </DrawerContentScrollView>
   );
-}
+});

@@ -8,6 +8,17 @@ import {
 } from "react-native-dotenv";
 
 import { rootStore } from "../../background/root-store";
+import { envInvariant } from "../../helpers/invariant";
+
+envInvariant("PHONE_NUMBER_KEY_SECRET", PHONE_NUMBER_KEY_SECRET);
+envInvariant(
+  "PHONE_NUMBER_TWILIO_BASIC_AUTH_USER",
+  PHONE_NUMBER_TWILIO_BASIC_AUTH_USER
+);
+envInvariant(
+  "PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD",
+  PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD
+);
 
 const DEV_SHARED_SECRET = PHONE_NUMBER_KEY_SECRET;
 const TWILIO_BASIC_AUTH = `Basic ${Buffer.from(
@@ -27,8 +38,9 @@ export async function sendPublicKeyTextMessage({
       phoneNumber,
     });
   } catch (e) {
-    console.error(e);
-    Alert.alert("Error sendPublicKeyTextMessage", e.message);
+    const error = e as Error;
+    console.error(error);
+    Alert.alert("Error sendPublicKeyTextMessage", error.message);
   }
 }
 
@@ -36,7 +48,7 @@ export async function parsePublicKeyTextMessageResponse(key: string) {
   try {
     const decrypted = await fetchAndDecryptResponse(key);
 
-    if (!decrypted.startsWith("pubkey:")) {
+    if (!decrypted?.startsWith("pubkey:")) {
       console.error("This doesn't seem to be a public key");
       Alert.alert("Wrong SMS-Code?", `The code you've entered is not correct.`);
       return null;
@@ -44,8 +56,10 @@ export async function parsePublicKeyTextMessageResponse(key: string) {
 
     return decrypted.replace("pubkey:", "");
   } catch (e) {
-    console.error(e);
-    Alert.alert("Error parsePublicKeyTextMessageResponse", e.message);
+    const error = e as Error;
+    console.error(error);
+    Alert.alert("Error parsePublicKeyTextMessageResponse", error.message);
+    return null;
   }
 }
 
@@ -66,8 +80,9 @@ export async function sendSignatureTextMessage({
       phoneNumber,
     });
   } catch (e) {
-    console.error(e);
-    Alert.alert("Error sendSignatureTextMessage", e.message);
+    const error = e as Error;
+    console.error(error);
+    Alert.alert("Error sendSignatureTextMessage", error.message);
   }
 }
 
@@ -75,7 +90,7 @@ export async function parseSignatureTextMessageResponse(key: string) {
   try {
     const decrypted = await fetchAndDecryptResponse(key);
 
-    if (!decrypted.startsWith("signature::")) {
+    if (!decrypted?.startsWith("signature::")) {
       console.error("This doesn't seem to be a signature");
       return null;
     }
@@ -83,8 +98,10 @@ export async function parseSignatureTextMessageResponse(key: string) {
     const signature = decrypted.replace("signature::", "");
     return new Uint8Array(Buffer.from(signature, "base64"));
   } catch (e) {
-    console.error(e);
-    Alert.alert("Error parseSignatureTextMessageResponse", e.message);
+    const error = e as Error;
+    console.error(error);
+    Alert.alert("Error parseSignatureTextMessageResponse", error.message);
+    return null;
   }
 }
 
@@ -112,19 +129,21 @@ async function encryptAndSendMessage({
       },
     });
   } catch (e) {
-    console.error(e);
-    Alert.alert("Error fetchTwilio", e.message);
+    const error = e as Error;
+    console.error(error);
+    Alert.alert("Error fetchTwilio", error.message);
   }
 }
 
 async function fetchAndDecryptResponse(key: string) {
   try {
     const result = await fetch(`https://obi-hastebin.herokuapp.com/raw/${key}`);
-    const message = await result.text();
-    return message;
+    return await result.text();
   } catch (e) {
-    console.error(e);
-    Alert.alert("Error fetchAndDecryptResponse", e.message);
+    const error = e as Error;
+    console.error(error);
+    Alert.alert("Error fetchAndDecryptResponse", error.message);
+    return null;
   }
 
   // Decryption hasn't been implemented on Twilio yet
@@ -150,8 +169,9 @@ export async function getMessageBody(message: string) {
     // Possible errors
     // - options validation
     // - "Invalid input - it is not base32 encoded string"
-    console.error(e);
-    Alert.alert("Error getMessageBody (1)", e.message);
+    const error = e as Error;
+    console.error(error);
+    Alert.alert("Error getMessageBody (1)", error.message);
   }
   const encrypted = AES.encrypt(message, token).toString();
 
@@ -166,7 +186,8 @@ export async function getMessageBody(message: string) {
     const { key } = JSON.parse(await result.text());
     return key;
   } catch (e) {
-    console.error(e);
-    Alert.alert("Error getMessageBody (2)", e.message);
+    const error = e as Error;
+    console.error(error);
+    Alert.alert("Error getMessageBody (2)", error.message);
   }
 }

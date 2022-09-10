@@ -20,7 +20,6 @@ import {
   defaultRegistryTypes,
   DeliverTxResponse,
   makeMultisignedTx,
-  SigningStargateClient,
 } from "@cosmjs/stargate";
 import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
@@ -29,6 +28,7 @@ import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import invariant from "tiny-invariant";
 
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
@@ -54,7 +54,7 @@ import { VerifyAndProceedButton } from "../phone-number/verify-and-proceed-butto
 export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
   rawMessages: EncodeObject[];
-  multisig: Multisig;
+  multisig?: Multisig | null;
 
   onCancel(): void;
 
@@ -71,28 +71,28 @@ export function SignatureModal({
 }: SignatureModalProps) {
   const client = useStargateClient();
   const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
-  const phoneNumberBottomSheetRef = useRef<BottomSheetRef>();
+  const phoneNumberBottomSheetRef = useRef<BottomSheetRef>(null);
   const { multisigStore } = useStore();
 
   const { currentChainInformation } = multisigStore;
 
   const numberOfSignatures = signatures.size;
-  const enoughSignatures =
-    numberOfSignatures >=
-    parseInt(multisig.multisig.publicKey.value.threshold, 10);
-
-  console.log(
-    `-- SIGNATURES: ${numberOfSignatures} / ${multisig.multisig.publicKey.value.threshold}`
-  );
+  const threshold = multisig?.multisig?.publicKey.value.threshold;
+  const enoughSignatures = threshold
+    ? numberOfSignatures >= parseInt(threshold, 10)
+    : false;
 
   const getMessage = useCallback(async () => {
-    const { address } = multisig.multisig;
+    const address = multisig?.multisig?.address;
 
+    invariant(address, "Expected `address` to exist.");
+    invariant(client, "Expected `client` to be connected.");
     if (!(await client.getAccount(address))) {
       await lendFees({ chainId: currentChainInformation.chainId, address });
     }
 
     const account = await client.getAccount(address);
+    invariant(account, "Expected `account` to be ready.");
 
     const fee = {
       amount: coins(6000, currentChainInformation.denom),
@@ -111,9 +111,10 @@ export function SignatureModal({
   }, [multisig, client, currentChainInformation, messages]);
 
   function getKey({ id, title }: { id: MultisigKey; title: string }): Key[] {
-    if (!multisig[id]) return [];
+    const factor = multisig?.[id];
+    if (!factor) return [];
 
-    const alreadySigned = signatures.has(multisig[id].address);
+    const alreadySigned = signatures.has(factor.address);
 
     return [
       {
@@ -130,15 +131,16 @@ export function SignatureModal({
                 payload: message,
               });
 
+              const biometrics = multisig?.biometrics;
+              invariant(biometrics, "Expected biometrics key to exist.");
+
               setSignatures((signatures) => {
-                return new Map(
-                  signatures.set(multisig.biometrics.address, signature)
-                );
+                return new Map(signatures.set(biometrics.address, signature));
               });
               break;
             }
             case "phoneNumber":
-              phoneNumberBottomSheetRef.current.snapToIndex(0);
+              phoneNumberBottomSheetRef.current?.snapToIndex(0);
               break;
             case "cloud":
               console.log("Not implemented yet");
@@ -155,6 +157,7 @@ export function SignatureModal({
   ];
 
   const [showLoader, setShowLoader] = useState(true);
+  if (!threshold) return null;
 
   return (
     // TODO: use useSafeArea thingy instead.
@@ -203,8 +206,7 @@ export function SignatureModal({
               </Text>
             </ScrollView>
             <Text style={{ color: "#ffffff" }}>
-              Signatures: {numberOfSignatures} /{" "}
-              {multisig.multisig.publicKey.value.threshold}
+              Signatures: {numberOfSignatures} / {threshold}
             </Text>
           </View>
           <KeysList data={data} />
@@ -237,21 +239,25 @@ export function SignatureModal({
             />
           </View>
         </View>
-        <BottomSheet bottomSheetRef={phoneNumberBottomSheetRef}>
-          <PhoneNumberBottomSheetContent
-            payload={multisig.phoneNumber}
-            getMessage={getMessage}
-            onSuccess={(signature) => {
-              setSignatures((signatures) => {
-                return new Map(
-                  signatures.set(multisig.phoneNumber.address, signature)
-                );
-              });
+        {multisig?.phoneNumber ? (
+          <BottomSheet bottomSheetRef={phoneNumberBottomSheetRef}>
+            <PhoneNumberBottomSheetContent
+              payload={multisig.phoneNumber}
+              getMessage={getMessage}
+              onSuccess={(signature) => {
+                setSignatures((signatures) => {
+                  const { phoneNumber } = multisig;
+                  invariant(phoneNumber, "Expected phone number key to exist.");
+                  return new Map(
+                    signatures.set(phoneNumber.address, signature)
+                  );
+                });
 
-              phoneNumberBottomSheetRef.current.close();
-            }}
-          />
-        </BottomSheet>
+                phoneNumberBottomSheetRef.current?.close();
+              }}
+            />
+          </BottomSheet>
+        ) : null}
       </SafeAreaView>
     </Modal>
   );
@@ -279,10 +285,13 @@ export function useSignatureModalProps({
   encodeObjects,
   onConfirm,
 }: {
-  multisig?: Multisig;
+  multisig?: Multisig | null;
   encodeObjects: EncodeObject[];
   onConfirm(response: DeliverTxResponse): Promise<void>;
-}) {
+}): {
+  signatureModalProps: SignatureModalProps;
+  openSignatureModal: () => void;
+} {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
   const [modalKey, setModalKey] = useState(0);
   const { multisigStore } = useStore();
@@ -309,6 +318,8 @@ export function useSignatureModalProps({
         setModalKey((value) => value + 1);
       },
       async onConfirm(signatures: Map<string, Uint8Array>) {
+        if (!client || !multisig?.multisig) return;
+
         const { chainId, denom } = currentChainInformation;
         const body: TxBodyEncodeObject = {
           typeUrl: "/cosmos.tx.v1beta1.TxBody",
@@ -331,6 +342,8 @@ export function useSignatureModalProps({
         }
 
         const account = await client.getAccount(multisig.multisig.address);
+        invariant(account, "Expected `account` to be ready.");
+
         const tx = makeMultisignedTx(
           multisig.multisig.publicKey,
           account.sequence,
@@ -409,6 +422,8 @@ function PhoneNumberBottomSheetContent({
     }
   }, [verifyButtonDisabled, setVerifyButtonDisabled, key]);
 
+  if (!payload) return null;
+
   if (sentMessage) {
     return (
       <View
@@ -467,12 +482,14 @@ function PhoneNumberBottomSheetContent({
           onPress={async () => {
             try {
               setVerifyButtonDisabledDoubleclick(true);
-              onSuccess(await parseSignatureTextMessageResponse(key));
+              const response = await parseSignatureTextMessageResponse(key);
+              if (response) onSuccess(response);
               setVerifyButtonDisabledDoubleclick(false);
             } catch (e) {
+              const error = e as Error;
               setVerifyButtonDisabledDoubleclick(false);
-              console.error(e);
-              Alert.alert("Error VerifyAndProceedButton (1)", e.message);
+              console.error(error);
+              Alert.alert("Error VerifyAndProceedButton (1)", error.message);
             }
           }}
           disabled={

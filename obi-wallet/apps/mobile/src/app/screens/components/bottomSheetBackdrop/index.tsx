@@ -1,7 +1,11 @@
-import { TouchableOpacity } from "@gorhom/bottom-sheet/src";
 import { BlurView } from "@react-native-community/blur";
 import React from "react";
-import { useWindowDimensions, StyleProp, ViewStyle } from "react-native";
+import {
+  useWindowDimensions,
+  StyleProp,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
 
 interface BottomSheetBackdropProps {
   onPress: () => void;
@@ -15,9 +19,7 @@ export function BottomSheetBackdrop({
   visible,
 }: BottomSheetBackdropProps) {
   const dimensions = useWindowDimensions();
-  if (visible === false) {
-    return null;
-  }
+  if (!visible) return null;
 
   return (
     <TouchableOpacity

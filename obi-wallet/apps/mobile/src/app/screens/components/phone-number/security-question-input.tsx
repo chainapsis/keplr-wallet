@@ -7,9 +7,7 @@ import { DropDownPicker } from "../../../drop-down-picker";
 import { TextInput } from "../../../text-input";
 
 export type SetStateCallback<S> = (prevState: S) => S;
-export type OnSecurityQuestionChange = Dispatch<
-  SetStateCallback<string | null>
->;
+export type OnSecurityQuestionChange = Dispatch<SetStateCallback<string>>;
 
 export type SecurityQuestionInputProps = {
   securityQuestion: string;
