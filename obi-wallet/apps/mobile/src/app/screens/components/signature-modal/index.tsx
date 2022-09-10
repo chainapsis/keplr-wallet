@@ -2,6 +2,7 @@ import { AminoMsg, coins, serializeSignDoc, StdSignDoc } from "@cosmjs/amino";
 import { createWasmAminoConverters } from "@cosmjs/cosmwasm-stargate";
 import { wasmTypes } from "@cosmjs/cosmwasm-stargate/build/modules";
 import { Sha256 } from "@cosmjs/crypto/build/sha";
+
 import {
   EncodeObject,
   Registry,
@@ -27,8 +28,11 @@ import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { TouchableOpacity } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
+
 
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
@@ -50,7 +54,7 @@ import {
 } from "../phone-number/security-question-input";
 import { SendMagicSmsButton } from "../phone-number/send-magic-sms-button";
 import { VerifyAndProceedButton } from "../phone-number/verify-and-proceed-button";
-
+import ArrowUpIcon from './assets/arrowUpIcon.svg'
 export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
   rawMessages: EncodeObject[];
@@ -60,7 +64,11 @@ export interface SignatureModalProps extends ModalProps {
 
   onConfirm(signatures: Map<string, Uint8Array>): void;
 }
-
+// const tabs = ["txDetails", "data"]
+enum tabs {
+  txDetails,
+  data
+}
 export function SignatureModal({
   messages,
   rawMessages,
@@ -71,9 +79,10 @@ export function SignatureModal({
 }: SignatureModalProps) {
   const client = useStargateClient();
   const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
-  const phoneNumberBottomSheetRef = useRef<BottomSheetRef>(null);
+  const safeArea = useSafeAreaInsets()
+  const phoneNumberBottomSheetRef = useRef<BottomSheetRef>();
   const { multisigStore } = useStore();
-
+  const [selectedTab, setSelectedTab] = useState(tabs.txDetails)
   const { currentChainInformation } = multisigStore;
 
   const numberOfSignatures = signatures.size;
@@ -83,7 +92,7 @@ export function SignatureModal({
     : false;
 
   const getMessage = useCallback(async () => {
-    const address = multisig?.multisig?.address;
+    const { address } = multisig?.multisig;
 
     invariant(address, "Expected `address` to exist.");
     invariant(client, "Expected `client` to be connected.");
@@ -155,10 +164,25 @@ export function SignatureModal({
     ...getKey({ id: "biometrics", title: "Biometrics Signature" }),
     ...getKey({ id: "phoneNumber", title: "Phone Number Signature" }),
   ];
+  const renderMSGs = (msgs) => {
+    if (msgs.length === 0) {
+      return null
+    }
+    return msgs.map(msg => (<View style={{ height: 50, flexDirection: 'row', borderBottomColor: 'rgba(255,255,255, 0.6)', borderBottomWidth: 1, }}>
+      <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <ArrowUpIcon />
+      </View>
+      <View style={{ flex: 1, justifyContent: 'space-around', paddingLeft: 10 }}>
+        <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>
+          Create Obi Wallet
+        </Text>
+        <Text style={{ color: 'white', opacity: .6 }}>Value</Text>
+      </View>
 
-  const [showLoader, setShowLoader] = useState(true);
+    </View>))
+  }
+  const [showLoader, setShowLoader] = useState(false);
   if (!threshold) return null;
-
   return (
     // TODO: use useSafeArea thingy instead.
     <Modal {...props}>
@@ -181,35 +205,81 @@ export function SignatureModal({
           />
         )}
         <Background />
+        <View style={{ height: 50, flexDirection: 'row', marginTop: safeArea.top, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'white', fontSize: 16, fontWeight: '500' }}>Confirm Transaction </Text>
+          <Text style={{ position: 'absolute', right: 10, color: 'white' }}>{numberOfSignatures}/2</Text>
+        </View>
+        <View
+          style={{
+            height: 4,
+            backgroundColor: "#1E1D3A",
+          }}
+        >
+          <LinearGradient
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            colors={["#FCCFF7", "#E659D6", "#8877EA", "#86E2EE", "#1E1D3A"]}
+            style={{ flex: 1, width: `${(numberOfSignatures / 2) * 100}%`, borderRadius: 4 }}
+          />
+        </View>
+        <View style={{ height: 30, flexDirection: 'row', paddingTop: 10 }}>
+          <View style={{ flex: 1, }}>
+            <TouchableOpacity onPress={() => {
+              setSelectedTab(tabs.txDetails)
+            }}
+              style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center', }}>
+              <Text style={{ color: selectedTab === tabs.txDetails ? "#89F5C2" : 'white', textDecorationLine: selectedTab === tabs.txDetails ? 'underline' : 'none' }}>Tx Details</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ flex: 1 }}>
+            <TouchableOpacity onPress={() => {
+              setSelectedTab(tabs.data)
+            }}
+              style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center', }}>
+              <Text style={{ color: selectedTab === tabs.data ? "#89F5C2" : 'white', textDecorationLine: selectedTab === tabs.data ? 'underline' : 'none' }}> DATA</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
         <View
           style={{
             flex: 1,
             paddingHorizontal: 20,
             justifyContent: "space-between",
+
           }}
         >
           <View
             style={{
-              marginTop: 50,
+              marginTop: 10,
+
             }}
           >
-            <Text style={{ color: "#ffffff" }}>
-              Do you want to sign the following messages?
-            </Text>
             <ScrollView
               style={{
-                height: 300,
+                height: 250,
+                padding: 10
               }}
             >
-              <Text style={{ color: "#ffffff" }}>
-                {JSON.stringify(messages, null, 2)}
-              </Text>
+              {
+                selectedTab === tabs.data ?
+
+                  <Text style={{ color: "#ffffff" }}>
+                    {JSON.stringify(messages, null, 2)}
+                  </Text> : renderMSGs(messages)
+              }
             </ScrollView>
             <Text style={{ color: "#ffffff" }}>
-              Signatures: {numberOfSignatures} / {threshold}
+              Signatures: {numberOfSignatures} /{" "}
+              {multisig?.multisig?.publicKey.value.threshold}
             </Text>
           </View>
-          <KeysList data={data} />
+
+
+          <KeysList data={data} style={{
+            marginVertical: 10
+          }} />
+
+
           <View>
             <Button
               flavor="blue"
