@@ -371,16 +371,25 @@ export class KeyRing {
         "hex"
       );
     } else if (this.type === "ledger") {
-      const encodedPubkeys = JSON.parse(
-        Buffer.from(
-          await Crypto.decrypt(this.crypto, this.keyStore, password)
-        ).toString()
+      const pubKeys: Record<string, Uint8Array> = {};
+      const cipherText = await Crypto.decrypt(
+        this.crypto,
+        this.keyStore,
+        password
       );
 
-      const pubKeys: Record<string, Uint8Array> = {};
-      Object.keys(encodedPubkeys).forEach(
-        (k) => (pubKeys[k] = Buffer.from(encodedPubkeys[k], "hex"))
-      );
+      try {
+        const encodedPubkeys = JSON.parse(Buffer.from(cipherText).toString());
+        Object.keys(encodedPubkeys).forEach(
+          (k) => (pubKeys[k] = Buffer.from(encodedPubkeys[k], "hex"))
+        );
+      } catch (e) {
+        // Error parsing JSON, parse as Legacy bytes
+        const key = Buffer.from(Buffer.from(cipherText).toString(), "hex");
+        const path = this.getPathForCoinType(118, this.keyStore.bip44HDPath);
+        pubKeys[path] = key;
+      }
+
       this.ledgerPublicKeyCache = pubKeys;
     } else {
       throw new KeplrError("keyring", 145, "Unexpected type of keyring");
