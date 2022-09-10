@@ -412,6 +412,11 @@ const LedgerNanoBLESelector: FunctionComponent<{
             Please open Cosmos App
           </Text>
         ) : null}
+        {!isConnecting && initErrorOn === LedgerInitErrorOn.Support ? (
+          <Text style={style.flatten(["subtitle3", "color-text-low"])}>
+            This app or coinType is unsupported
+          </Text>
+        ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.Unknown ? (
           <Text style={style.flatten(["subtitle3", "color-text-low"])}>
             Unknown error
