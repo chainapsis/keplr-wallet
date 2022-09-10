@@ -8,6 +8,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../button";
 import { useStargateClient } from "../../../clients";
@@ -21,7 +22,7 @@ import { StackParamList } from "../stack";
 
 export type MultisigOnboardingProps = NativeStackScreenProps<
   StackParamList,
-  "onboarding5"
+  "onboarding6"
 >;
 
 export const MultisigOnboarding = observer<MultisigOnboardingProps>(
@@ -34,7 +35,7 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
 
     useEffect(() => {
       (async () => {
-        async function hydrateBalances(address: string | null) {
+        async function hydrateBalances(address?: string | null) {
           if (address && client) {
             return { address, balances: await client.getAllBalances(address) };
           } else {
@@ -83,13 +84,14 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
         value,
       };
       return [message];
-    }, [currentChainInformation, multisig.multisig.address]);
+    }, [currentChainInformation, multisig]);
 
     const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
       multisig,
       encodeObjects,
       async onConfirm(response) {
         try {
+          invariant(response.rawLog, "Expected `response` to have `rawLog`.");
           const rawLog = JSON.parse(response.rawLog) as [
             {
               events: [
@@ -103,10 +105,17 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
           const instantiateEvent = rawLog[0].events.find((e) => {
             return e.type === "instantiate";
           });
+          invariant(
+            instantiateEvent,
+            "Expected `rawLog` to contain `instantiate` event."
+          );
           const contractAddress = instantiateEvent.attributes.find((a) => {
             return a.key === "_contract_address";
           });
-
+          invariant(
+            contractAddress,
+            "Expected `instantiateEvent` to contain `_contract_address` attribute."
+          );
           multisigStore.finishProxySetup({
             address: contractAddress.value,
             codeId: multisigStore.currentChainInformation.currentCodeId,

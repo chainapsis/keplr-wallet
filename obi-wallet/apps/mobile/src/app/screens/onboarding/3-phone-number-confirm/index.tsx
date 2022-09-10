@@ -157,9 +157,10 @@ export function PhoneNumberConfirmOnboarding({
                   setVerifyButtonDisabledDoubleclick(false);
                 }
               } catch (e) {
+                const error = e as Error;
                 setVerifyButtonDisabledDoubleclick(false);
-                console.error(e);
-                Alert.alert("Error VerifyAndProceedButton (2)", e.message);
+                console.error(error);
+                Alert.alert("Error VerifyAndProceedButton (2)", error.message);
               }
             }}
             disabled={

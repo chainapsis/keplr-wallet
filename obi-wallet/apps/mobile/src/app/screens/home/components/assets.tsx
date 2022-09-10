@@ -4,7 +4,7 @@ import { faSortDesc } from "@fortawesome/free-solid-svg-icons/faSortDesc";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import {
@@ -20,6 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ExtendedCoin, formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
+import { StackParamList } from "../../../stack";
 import { useStore } from "../../../stores";
 import {
   isSmallScreenNumber,
@@ -182,8 +183,7 @@ const BalanceAndActions = observer(() => {
     0
   );
 
-  const navigation =
-    useNavigation<DrawerNavigationProp<Record<string, object>>>();
+  const navigation = useNavigation<NavigationProp<StackParamList>>();
   return (
     <View
       style={{

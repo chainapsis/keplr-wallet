@@ -1,0 +1,150 @@
+diff --git a/node_modules/@gorhom/bottom-sheet/src/.DS_Store b/node_modules/@gorhom/bottom-sheet/src/.DS_Store
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@gorhom/bottom-sheet/src/components/.DS_Store b/node_modules/@gorhom/bottom-sheet/src/components/.DS_Store
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@gorhom/bottom-sheet/src/components/bottomSheet/BottomSheet.tsx b/node_modules/@gorhom/bottom-sheet/src/components/bottomSheet/BottomSheet.tsx
+index b166440..df4bdd5 100644
+--- a/node_modules/@gorhom/bottom-sheet/src/components/bottomSheet/BottomSheet.tsx
++++ b/node_modules/@gorhom/bottom-sheet/src/components/bottomSheet/BottomSheet.tsx
+@@ -1613,6 +1613,7 @@ const BottomSheetComponent = forwardRef<BottomSheet, BottomSheetProps>(
+                     key="BottomSheetRootDraggableView"
+                     style={contentContainerStyle}
+                   >
++                    {/* @ts-ignore */}
+                     {typeof Content === 'function' ? <Content /> : Content}
+ 
+                     {footerComponent && (
+diff --git a/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetFooter/BottomSheetFooter.tsx b/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetFooter/BottomSheetFooter.tsx
+index fff8d64..df18029 100644
+--- a/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetFooter/BottomSheetFooter.tsx
++++ b/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetFooter/BottomSheetFooter.tsx
+@@ -61,6 +61,7 @@ function BottomSheetFooterComponent({
+       onLayout={handleContainerLayout}
+       style={containerStyle}
+     >
++      {/* @ts-ignore */}
+       {typeof children === 'function' ? children() : children}
+     </Animated.View>
+   ) : null;
+diff --git a/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetModal/BottomSheetModal.tsx b/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetModal/BottomSheetModal.tsx
+index e0070c5..e44aa9c 100644
+--- a/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetModal/BottomSheetModal.tsx
++++ b/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetModal/BottomSheetModal.tsx
+@@ -142,25 +142,25 @@ const BottomSheetModalComponent = forwardRef<
+     }
+     bottomSheetRef.current?.snapToPosition(...args);
+   }, []);
+-  const handleExpand = useCallback((...args) => {
++  const handleExpand = useCallback((...args: any) => {
+     if (minimized.current) {
+       return;
+     }
+     bottomSheetRef.current?.expand(...args);
+   }, []);
+-  const handleCollapse = useCallback((...args) => {
++  const handleCollapse = useCallback((...args: any) => {
+     if (minimized.current) {
+       return;
+     }
+     bottomSheetRef.current?.collapse(...args);
+   }, []);
+-  const handleClose = useCallback((...args) => {
++  const handleClose = useCallback((...args: any) => {
+     if (minimized.current) {
+       return;
+     }
+     bottomSheetRef.current?.close(...args);
+   }, []);
+-  const handleForceClose = useCallback((...args) => {
++  const handleForceClose = useCallback((...args: any) => {
+     if (minimized.current) {
+       return;
+     }
+@@ -382,6 +382,7 @@ const BottomSheetModalComponent = forwardRef<
+         onChange={handleBottomSheetOnChange}
+         onClose={handleBottomSheetOnClose}
+         children={
++          // @ts-ignore
+           typeof Content === 'function' ? <Content data={data} /> : Content
+         }
+         $modal={true}
+diff --git a/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetTextInput/BottomSheetTextInput.tsx b/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetTextInput/BottomSheetTextInput.tsx
+index eae09f7..d0a541a 100644
+--- a/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetTextInput/BottomSheetTextInput.tsx
++++ b/node_modules/@gorhom/bottom-sheet/src/components/bottomSheetTextInput/BottomSheetTextInput.tsx
+@@ -1,19 +1,18 @@
+ import React, { memo, useCallback, forwardRef } from 'react';
+-import { TextInput } from 'react-native-gesture-handler';
+-import { useBottomSheetInternal } from '../../hooks';
+-import type { BottomSheetTextInputProps } from './types';
++import { NativeSyntheticEvent, TextInputFocusEventData } from 'react-native';
++import {TextInput} from 'react-native-gesture-handler';
++import {useBottomSheetInternal} from '../../hooks';
++import type {BottomSheetTextInputProps} from './types';
+ 
+-const BottomSheetTextInputComponent = forwardRef<
+-  TextInput,
+-  BottomSheetTextInputProps
+->(({ onFocus, onBlur, ...rest }, ref) => {
++const BottomSheetTextInputComponent = forwardRef<TextInput,
++  BottomSheetTextInputProps>(({onFocus, onBlur, ...rest}, ref) => {
+   //#region hooks
+-  const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
++  const {shouldHandleKeyboardEvents} = useBottomSheetInternal();
+   //#endregion
+ 
+   //#region callbacks
+   const handleOnFocus = useCallback(
+-    args => {
++    (args: NativeSyntheticEvent<TextInputFocusEventData>) => {
+       shouldHandleKeyboardEvents.value = true;
+       if (onFocus) {
+         onFocus(args);
+@@ -22,7 +21,7 @@ const BottomSheetTextInputComponent = forwardRef<
+     [onFocus, shouldHandleKeyboardEvents]
+   );
+   const handleOnBlur = useCallback(
+-    args => {
++      (args: NativeSyntheticEvent<TextInputFocusEventData>) => {
+       shouldHandleKeyboardEvents.value = false;
+       if (onBlur) {
+         onBlur(args);
+diff --git a/node_modules/@gorhom/bottom-sheet/src/hooks/useBottomSheetDynamicSnapPoints.ts b/node_modules/@gorhom/bottom-sheet/src/hooks/useBottomSheetDynamicSnapPoints.ts
+index a1c2573..ce93c2d 100644
+--- a/node_modules/@gorhom/bottom-sheet/src/hooks/useBottomSheetDynamicSnapPoints.ts
++++ b/node_modules/@gorhom/bottom-sheet/src/hooks/useBottomSheetDynamicSnapPoints.ts
+@@ -43,6 +43,7 @@ export const useBottomSheetDynamicSnapPoints = (
+   const handleContentLayout = useCallback(
+     ({
+       nativeEvent: {
++        // @ts-ignore
+         layout: { height },
+       },
+     }) => {
+diff --git a/node_modules/@gorhom/bottom-sheet/src/hooks/useReactiveSharedValue.ts b/node_modules/@gorhom/bottom-sheet/src/hooks/useReactiveSharedValue.ts
+index 4291b09..6ad1cb4 100644
+--- a/node_modules/@gorhom/bottom-sheet/src/hooks/useReactiveSharedValue.ts
++++ b/node_modules/@gorhom/bottom-sheet/src/hooks/useReactiveSharedValue.ts
+@@ -11,6 +11,7 @@ export const useReactiveSharedValue = <T>(
+   const initialValueRef = useRef<T>(null);
+   const valueRef = useRef<Animated.SharedValue<T>>(null);
+ 
++  // @ts-ignore
+   if (typeof value === 'object' && 'value' in value) {
+     /**
+      * if provided value is a shared value,
+diff --git a/node_modules/@gorhom/bottom-sheet/src/hooks/useStableCallback.ts b/node_modules/@gorhom/bottom-sheet/src/hooks/useStableCallback.ts
+index a868620..1c788ab 100644
+--- a/node_modules/@gorhom/bottom-sheet/src/hooks/useStableCallback.ts
++++ b/node_modules/@gorhom/bottom-sheet/src/hooks/useStableCallback.ts
+@@ -8,7 +8,7 @@ type Callback = (...args: any[]) => any;
+ export const useStableCallback = (callback: Callback) => {
+   const callbackRef = useRef<Callback>();
+   const memoCallback = useCallback(
+-    (...args) => callbackRef.current && callbackRef.current(...args),
++    (...args: any) => callbackRef.current && callbackRef.current(...args),
+     []
+   );
+   useEffect(() => {

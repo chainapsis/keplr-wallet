@@ -1,6 +1,5 @@
-import { TouchableOpacity } from "@gorhom/bottom-sheet/src";
 import { observer } from "mobx-react-lite";
-import { Share, Text, View } from "react-native";
+import { Share, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useStore } from "../../stores";
@@ -8,9 +7,11 @@ import { Back } from "../components/back";
 
 export const ReceiveScreen = observer(() => {
   const { multisigStore } = useStore();
-  const { address } = multisigStore.proxyAddress;
+  const address = multisigStore.proxyAddress?.address;
 
-  const onShare = async (text) => {
+  if (!address) return null;
+
+  const onShare = async (text: string) => {
     try {
       const result = await Share.share({
         message: text,
@@ -24,7 +25,8 @@ export const ReceiveScreen = observer(() => {
       } else if (result.action === Share.dismissedAction) {
         // dismissed
       }
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       alert(error.message);
     }
   };

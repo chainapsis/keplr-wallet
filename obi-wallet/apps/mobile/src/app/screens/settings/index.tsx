@@ -1,5 +1,3 @@
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { FC, useEffect, useState } from "react";
 import {
@@ -9,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import codePush from "react-native-code-push";
+import codePush, { LocalPackage } from "react-native-code-push";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
@@ -25,13 +23,11 @@ import { Stack } from "./stack";
 
 export function SettingsScreen() {
   const navigation = useNavigation();
-  const [appMetadata, setAppMetadata] = useState(null);
+  const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
   useEffect(() => {
-    const getCodePushMetadata = async () => {
-      const r = await codePush.getUpdateMetadata();
-      setAppMetadata(r);
-    };
-    getCodePushMetadata();
+    void (async () => {
+      setAppMetadata(await codePush.getUpdateMetadata());
+    })();
   }, []);
 
   return (

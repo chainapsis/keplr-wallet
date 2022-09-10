@@ -1,9 +1,9 @@
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Text } from "@obi-wallet/common";
-import { useRef, useState } from "react";
+import { ComponentType, FC, useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -14,6 +14,7 @@ import {
 import { TouchableOpacity } from "react-native-gesture-handler";
 import LinearGradient from "react-native-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SvgProps } from "react-native-svg";
 
 import { Back } from "../components/back";
 import { Background } from "../components/background";
@@ -28,23 +29,25 @@ import { Spending } from "./spending";
 export function Account() {
   const safeArea = useSafeAreaInsets();
   const navigation = useNavigation();
-  const refBottomSheet = useRef(null);
-  const [SelectedMenu, setSelectedMenu] = useState("");
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [selectedMenu, setSelectedMenu] = useState("");
 
-  const triggerBottomSheet = (selection) => {
-    if (!selection) {
-      refBottomSheet.current.close();
-    } else {
+  const triggerBottomSheet = (selection?: Option) => {
+    if (selection) {
       setSelectedMenu(selection.name);
-      refBottomSheet.current.snapToIndex(0);
+      bottomSheetRef.current?.snapToIndex(0);
+    } else {
+      bottomSheetRef.current?.close();
     }
   };
   const renderSelectionContent = () => {
-    switch (SelectedMenu) {
+    switch (selectedMenu) {
       case "spending":
         return <Spending />;
       case "inheritance":
         return <Inheritance />;
+      default:
+        return null;
     }
   };
 
@@ -186,7 +189,7 @@ export function Account() {
         </ImageBackground>
       </View>
 
-      {/* 
+      {/*
       <View
         style={{
           backgroundColor: "#16152D",
@@ -212,7 +215,7 @@ export function Account() {
               <FontAwesomeIcon
                 icon={faCheckCircle}
                 style={{ width: 16, height: 16, color: "#7AD6AE" }}
-              /> 
+              />
             </View>
             <Text
               style={{
@@ -364,16 +367,16 @@ export function Account() {
         /> */}
       </View>
       <BottomSheetBackdrop
-        onPress={() => triggerBottomSheet(false)}
-        visible={Boolean(SelectedMenu)}
+        onPress={() => triggerBottomSheet()}
+        visible={Boolean(selectedMenu)}
       />
       <BottomSheet
         handleIndicatorStyle={{ backgroundColor: "white" }}
         backgroundStyle={{ backgroundColor: "#100F1E" }}
         handleStyle={{ backgroundColor: "transparent" }}
-        snapPoints={SelectedMenu === "inheritance" ? ["70%"] : ["40"]}
+        snapPoints={selectedMenu === "inheritance" ? ["70%"] : ["40"]}
         enablePanDownToClose={true}
-        ref={refBottomSheet}
+        ref={bottomSheetRef}
         index={-1}
         backdropComponent={(props) => null}
         onClose={() => setSelectedMenu("")}
@@ -391,27 +394,39 @@ export function Account() {
     </View>
   );
 }
-const options = [
+
+interface Option {
+  key: number;
+  name: string;
+  Icon: ComponentType<SvgProps>;
+}
+
+const options: Option[] = [
   // {
   //  key: 0,
   //  name: "spending",
-  //  icon: SpendingIcon,
+  //  Icon: SpendingIcon,
   // },
   // {
   //   key: 1,
   //   name: "inheritance",
-  //   icon: InheritanceIcon,
+  //   Icon: InheritanceIcon,
   // },
 ];
 
-function Option({ item, onPress }) {
+interface OptionProps {
+  item: Option;
+  onPress: () => void;
+}
+
+function Option({ item, onPress }: OptionProps) {
   return (
     <TouchableOpacity
       style={{ height: 60, justifyContent: "center", alignItems: "center" }}
       onPress={onPress}
     >
       <>
-        <item.icon
+        <item.Icon
           style={{
             width: 40,
             height: 40,

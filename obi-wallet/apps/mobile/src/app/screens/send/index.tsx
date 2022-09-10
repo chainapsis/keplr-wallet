@@ -2,14 +2,11 @@ import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import BottomSheet, {
-  BottomSheetView,
-  TouchableOpacity,
-} from "@gorhom/bottom-sheet/src";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
 import { useMemo, useRef, useState } from "react";
-import { RefreshControl, Text, View } from "react-native";
+import { RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -32,13 +29,13 @@ export const SendScreen = observer(() => {
     }
   );
   const [denominationOpened, setDenominationOpened] = useState(false);
-  const refBottomSheet = useRef(null);
-  const triggerBottomSheet = (open) => {
-    if (!open) {
-      refBottomSheet.current.close();
-    } else {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const triggerBottomSheet = (open: boolean) => {
+    if (open) {
       setDenominationOpened(true);
-      refBottomSheet.current.snapToIndex(0);
+      bottomSheetRef.current?.snapToIndex(0);
+    } else {
+      bottomSheetRef.current?.close();
     }
   };
 
@@ -51,7 +48,12 @@ export const SendScreen = observer(() => {
   const multisig = multisigStore.currentAdmin;
 
   const encodeObjects = useMemo(() => {
-    if (!selectedCoin) return [];
+    if (
+      !selectedCoin ||
+      !multisig?.multisig?.address ||
+      !multisigStore.proxyAddress
+    )
+      return [];
 
     const { digits } = formatCoin(selectedCoin);
     const normalizedAmount =
@@ -88,7 +90,7 @@ export const SendScreen = observer(() => {
       value,
     };
     return [message];
-  }, [address, amount, multisig.multisig.address, multisigStore, selectedCoin]);
+  }, [address, amount, multisig, multisigStore, selectedCoin]);
 
   const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
     multisig,
@@ -243,7 +245,7 @@ export const SendScreen = observer(() => {
         handleStyle={{ backgroundColor: "transparent" }}
         snapPoints={["60"]}
         enablePanDownToClose={true}
-        ref={refBottomSheet}
+        ref={bottomSheetRef}
         index={-1}
         backdropComponent={(props) => null}
         onClose={() => {
