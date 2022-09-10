@@ -1,5 +1,6 @@
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
+import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
@@ -136,10 +137,43 @@ export const SendScreen = observer(() => {
             label="to"
             placeholder="Wallet Address"
             style={{ flex: 1 }}
+            inputStyle={{
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              borderRightWidth: 0,
+            }}
             value={address}
             onChangeText={setAddress}
           />
-          {/* <View style={{ width: 64, height: 64, backgroundColor: 'red' }} /> */}
+          <TouchableOpacity
+            style={{
+              width: 56,
+              height: 56,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 5,
+              borderTopRightRadius: 12,
+              borderBottomRightRadius: 12,
+              borderWidth: 1,
+              borderColor: "#2F2B4C",
+              borderLeftWidth: 0,
+            }}
+          >
+            <View
+              style={{
+                position: "absolute",
+                width: 1,
+                backgroundColor: "#2F2B4C",
+                height: "100%",
+                left: 0,
+              }}
+            />
+            <FontAwesomeIcon
+              icon={faQrcode}
+              style={{ color: "#887CEB" }}
+              size={32}
+            />
+          </TouchableOpacity>
         </View>
         <View style={{ marginTop: 35 }}>
           <Text style={{ color: "#787B9C", fontSize: 10, marginBottom: 12 }}>

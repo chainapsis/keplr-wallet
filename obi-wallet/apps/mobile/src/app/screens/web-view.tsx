@@ -1,6 +1,6 @@
-import { faBookmark } from "@fortawesome/free-solid-svg-icons/faBookmark";
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons/faEllipsis";
-import { faHeart } from "@fortawesome/free-solid-svg-icons/faHeart";
+import { faRotateRight } from "@fortawesome/free-solid-svg-icons/faRotateRight";
+import { faShare } from "@fortawesome/free-solid-svg-icons/faShare";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
@@ -8,12 +8,15 @@ import { App, fetchMeta, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { Share, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { WebView } from "react-native-webview";
 
 import { StackParamList } from "../stack";
 import { useStore } from "../stores";
 import { ConnectedWebView } from "./components/connected-web-view";
+import Fav from "./webview-assets/favorite-24px.svg";
+import UnFav from "./webview-assets/unfavorite-24px.svg";
 
 export type WebViewScreenProps = NativeStackScreenProps<
   StackParamList,
@@ -27,6 +30,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
     const [currentUrl, setCurrentUrl] = useState(app.url);
     const [loaded, setLoaded] = useState(false);
     const [title, setTitle] = useState(app.label);
+    const webViewRef = useRef<WebView>(null);
 
     const safeArea = useSafeAreaInsets();
 
@@ -117,20 +121,22 @@ export const WebViewScreen = observer<WebViewScreenProps>(
             </Text>
           </View>
           <View>
-            {/* <FavButton app={currentAppMetadata} /> */}
             <TouchableOpacity onPress={() => triggerBottomSheet(0)}>
               <FontAwesomeIcon
                 icon={faEllipsis}
                 style={{
                   color: "white",
+                  margin: 5,
                   transform: [{ rotate: "90deg" }],
                 }}
               />
             </TouchableOpacity>
           </View>
         </View>
+
         <ConnectedWebView
           url={currentUrl}
+          webViewRef={webViewRef}
           onLoadEnd={() => {
             setLoaded(true);
           }}
@@ -144,12 +150,22 @@ export const WebViewScreen = observer<WebViewScreenProps>(
           handleIndicatorStyle={{ backgroundColor: "white" }}
           backgroundStyle={{ backgroundColor: "#24243C" }}
           handleStyle={{ backgroundColor: "transparent" }}
-          snapPoints={["40%", "80%"]}
+          snapPoints={["25%"]}
           enablePanDownToClose={true}
           ref={bottomSheetRef}
           index={-1}
         >
           <BottomSheetView style={{ flex: 1, backgroundColor: "transparent" }}>
+            <TouchableOpacity
+              onPress={() => triggerBottomSheet(-1)}
+              style={{
+                alignSelf: "flex-end",
+                marginRight: 10,
+                marginBottom: 10,
+              }}
+            >
+              <FontAwesomeIcon icon={faTimes} style={{ color: "white" }} />
+            </TouchableOpacity>
             <View
               style={{
                 flexDirection: "row",
@@ -159,9 +175,8 @@ export const WebViewScreen = observer<WebViewScreenProps>(
               }}
             >
               <FavButton app={currentAppMetadata} />
-              <TouchableOpacity onPress={() => triggerBottomSheet(-1)}>
-                <FontAwesomeIcon icon={faTimes} style={{ color: "white" }} />
-              </TouchableOpacity>
+              <RefreshButton onPress={() => webViewRef.current?.reload()} />
+              <ShareButton url={currentUrl} />
             </View>
           </BottomSheetView>
         </BottomSheet>
@@ -175,7 +190,7 @@ const FavButton = observer<{ app: App }>(({ app }) => {
   const isFavorite = appsStore.hasFavorite(app.url);
 
   return (
-    <TouchableOpacity
+    <SheetButton
       onPress={() => {
         if (isFavorite) {
           appsStore.removeFavoriteByUrl(app.url);
@@ -183,19 +198,88 @@ const FavButton = observer<{ app: App }>(({ app }) => {
           appsStore.addFavorite(app);
         }
       }}
-      style={{
-        height: 36,
-        width: 36,
-        backgroundColor: "gray",
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 12,
-      }}
-    >
-      <FontAwesomeIcon
-        icon={isFavorite ? faHeart : faBookmark}
-        style={{ color: "black" }}
-      />
-    </TouchableOpacity>
+      IconComponent={
+        isFavorite ? (
+          <UnFav width={24} height={24} fill="black" />
+        ) : (
+          <Fav width={24} height={24} fill="black" />
+        )
+      }
+      label={isFavorite ? "Remove" : "Add"}
+    />
   );
 });
+
+export function RefreshButton({ onPress }: { onPress: () => void }) {
+  return (
+    <SheetButton
+      onPress={() => onPress()}
+      IconComponent={
+        <FontAwesomeIcon icon={faRotateRight} style={{ color: "black" }} />
+      }
+      label="Refresh"
+    />
+  );
+}
+export function ShareButton({ url }: { url: string }) {
+  const onShare = async () => {
+    try {
+      const result = await Share.share({
+        message: url,
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (e) {
+      const error = e as Error;
+      alert(error.message);
+    }
+  };
+
+  return (
+    <SheetButton
+      onPress={() => onShare()}
+      IconComponent={
+        <FontAwesomeIcon icon={faShare} style={{ color: "black" }} />
+      }
+      label="Share"
+    />
+  );
+}
+
+export function SheetButton({
+  onPress,
+  IconComponent,
+  label,
+}: {
+  onPress: () => void;
+  IconComponent: JSX.Element;
+  label: string;
+}) {
+  return (
+    <View style={{ justifyContent: "center", alignItems: "center", width: 60 }}>
+      <TouchableOpacity
+        onPress={() => onPress()}
+        style={{
+          height: 50,
+          width: 50,
+          backgroundColor: "gray",
+          justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 12,
+        }}
+      >
+        {IconComponent}
+      </TouchableOpacity>
+      <Text style={{ marginTop: 5, color: "white", opacity: 0.6 }}>
+        {label}
+      </Text>
+    </View>
+  );
+}
