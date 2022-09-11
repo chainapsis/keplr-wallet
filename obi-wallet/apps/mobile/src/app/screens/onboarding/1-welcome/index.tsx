@@ -4,6 +4,7 @@ import { useIntl, FormattedMessage } from "react-intl";
 import { Image, ImageBackground, SafeAreaView, View } from "react-native";
 
 import { Button } from "../../../button";
+import { LanguagePicker } from "../../../language-picker";
 import { StackParamList } from "../stack";
 import GetStarted from "./assets/get-started.svg";
 import RecoverWallet from "./assets/recover-wallet.svg";
@@ -32,12 +33,15 @@ export function WelcomeOnboarding({ navigation }: WelcomeOnboardingProps) {
           justifyContent: "flex-end",
         }}
       >
+        <LanguagePicker />
+
         <View
           style={{
             paddingHorizontal: 20,
           }}
         >
           <Image source={require("./assets/loop.png")} />
+
           <Text
             style={{
               color: "#F6F5FF",

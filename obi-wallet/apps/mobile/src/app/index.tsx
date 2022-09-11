@@ -11,9 +11,9 @@ import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
 
-const language = "en";
-
 export function App() {
+  const language = "en";
+
   return (
     <IntlProvider
       defaultLocale="en"
