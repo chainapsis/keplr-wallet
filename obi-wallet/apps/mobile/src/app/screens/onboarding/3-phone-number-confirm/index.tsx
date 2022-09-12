@@ -31,7 +31,7 @@ export function PhoneNumberConfirmOnboarding({
 }: PhoneNumberConfirmOnboardingProps) {
   const { params } = route;
 
-  const { multisigStore } = useStore();
+  const { demoStore, multisigStore } = useStore();
   const [key, setKey] = useState("");
 
   const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
@@ -128,10 +128,12 @@ export function PhoneNumberConfirmOnboarding({
                 label="Resend"
                 onPress={async () => {
                   setKey("");
-                  await sendPublicKeyTextMessage({
-                    phoneNumber: params.phoneNumber,
-                    securityAnswer: params.securityAnswer,
-                  });
+                  if (!demoStore.demoMode) {
+                    await sendPublicKeyTextMessage({
+                      phoneNumber: params.phoneNumber,
+                      securityAnswer: params.securityAnswer,
+                    });
+                  }
                 }}
               />
             </View>
@@ -141,16 +143,20 @@ export function PhoneNumberConfirmOnboarding({
             onPress={async () => {
               try {
                 setVerifyButtonDisabledDoubleclick(true);
-                const publicKey = await parsePublicKeyTextMessageResponse(key);
+                const publicKey = demoStore.demoMode
+                  ? "demo"
+                  : await parsePublicKeyTextMessageResponse(key);
                 if (publicKey) {
-                  multisigStore.setPhoneNumberKey({
-                    publicKey: {
-                      type: pubkeyType.secp256k1,
-                      value: publicKey,
-                    },
-                    phoneNumber: params.phoneNumber,
-                    securityQuestion: params.securityQuestion,
-                  });
+                  if (!demoStore.demoMode) {
+                    multisigStore.setPhoneNumberKey({
+                      publicKey: {
+                        type: pubkeyType.secp256k1,
+                        value: publicKey,
+                      },
+                      phoneNumber: params.phoneNumber,
+                      securityQuestion: params.securityQuestion,
+                    });
+                  }
                   setVerifyButtonDisabledDoubleclick(false);
                   navigation.navigate("onboarding4");
                 } else {

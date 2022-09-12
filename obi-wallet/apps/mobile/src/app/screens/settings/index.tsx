@@ -1,4 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { action } from "mobx";
+import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
 import {
   Linking,
@@ -11,8 +13,10 @@ import codePush, { LocalPackage } from "react-native-code-push";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
+import { useStore } from "../../stores";
 import { Account } from "../account";
 import { Create } from "../account/create";
+import { DemoModeToggle } from "../components/demo-mode-toggle";
 import { useNavigation } from "../onboarding/stack";
 import MultiSigIcon from "./assets/edit.svg";
 import HelpAndSupport from "./assets/headset.svg";
@@ -21,7 +25,8 @@ import LogoutIcon from "./assets/power-red.svg";
 import { KeysConfigScreen } from "./keys-config";
 import { Stack } from "./stack";
 
-export function SettingsScreen() {
+export const SettingsScreen = observer(() => {
+  const { demoStore, multisigStore } = useStore();
   const navigation = useNavigation();
   const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
   useEffect(() => {
@@ -118,10 +123,19 @@ export function SettingsScreen() {
         Icon={LogoutIcon}
         title="Log out"
         subtitle="Save your keys before logging out"
+        onPress={() => {
+          if (demoStore.demoMode) {
+            demoStore.logout();
+          } else {
+            multisigStore.logout();
+          }
+        }}
       />
-      <Text style={{ color: "white", textAlign: "center" }}>
-        Obi {appMetadata?.appVersion} {appMetadata?.label}
-      </Text>
+      <DemoModeToggle>
+        <Text style={{ color: "white", textAlign: "center" }}>
+          Obi {appMetadata?.appVersion} {appMetadata?.label}
+        </Text>
+      </DemoModeToggle>
       <View
         style={{
           flex: 1,
@@ -164,7 +178,7 @@ export function SettingsScreen() {
       </View>
     </SafeAreaView>
   );
-}
+});
 
 interface SettingProps {
   Icon: FC<SvgProps>;

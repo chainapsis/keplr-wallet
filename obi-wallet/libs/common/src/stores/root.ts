@@ -16,6 +16,7 @@ import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
 import { BalancesStore } from "./balances";
 import { ChainStore } from "./chain";
+import { DemoStore } from "./demo";
 import { MultisigStore } from "./multisig";
 
 export class RootStore {
@@ -23,6 +24,7 @@ export class RootStore {
   public readonly balancesStore: BalancesStore;
   public readonly chainStore: ChainStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+  public readonly demoStore: DemoStore;
   public readonly interactionStore: InteractionStore;
   public readonly multisigStore: MultisigStore;
   public readonly permissionStore: PermissionStore;
@@ -48,7 +50,7 @@ export class RootStore {
     );
 
     this.appsStore = new AppsStore(new KVStore("apps-store"));
-
+    this.demoStore = new DemoStore();
     this.multisigStore = new MultisigStore(
       defaultChain,
       new KVStore("multisig-store")

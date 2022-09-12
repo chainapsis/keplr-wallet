@@ -6,8 +6,10 @@ import { useStore } from "../../stores";
 import { Back } from "../components/back";
 
 export const ReceiveScreen = observer(() => {
-  const { multisigStore } = useStore();
-  const address = multisigStore.proxyAddress?.address;
+  const { demoStore, multisigStore } = useStore();
+  const address = demoStore.demoMode
+    ? "demo-address"
+    : multisigStore.proxyAddress?.address;
 
   if (!address) return null;
 
