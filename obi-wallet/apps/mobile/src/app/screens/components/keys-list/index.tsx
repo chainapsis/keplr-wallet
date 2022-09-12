@@ -44,7 +44,7 @@ export type HydratedKeyListItem = Key & KeyMetaData;
 
 export interface KeysListProps {
   data: Key[];
-  style: StyleProp<ViewStyle>;
+  style?: StyleProp<ViewStyle>;
 }
 const comingSoonKeys: HydratedKeyListItem[] = [
   {
