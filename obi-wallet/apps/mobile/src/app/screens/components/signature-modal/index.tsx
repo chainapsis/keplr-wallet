@@ -34,6 +34,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import invariant from "tiny-invariant";
 
 
+
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
 import { useStargateClient } from "../../../clients";
@@ -90,7 +91,7 @@ export function SignatureModal({
   const enoughSignatures = threshold
     ? numberOfSignatures >= parseInt(threshold, 10)
     : false;
-
+  console.log({ client, currentChainInformation })
   const getMessage = useCallback(async () => {
     const { address } = multisig?.multisig;
 
@@ -175,6 +176,7 @@ export function SignatureModal({
       <View style={{ flex: 1, justifyContent: 'space-around', paddingLeft: 10 }}>
         <Text style={{ color: 'white', fontWeight: '600', fontSize: 16 }}>
           Create Obi Wallet
+          {/* {renderDirectMessage(msg)} */}
         </Text>
         <Text style={{ color: 'white', opacity: .6 }}>Value</Text>
       </View>
@@ -182,7 +184,7 @@ export function SignatureModal({
     </View>))
   }
   const [showLoader, setShowLoader] = useState(false);
-  if (!threshold) return null;
+  if (!threshold || !client) return null;
   return (
     // TODO: use useSafeArea thingy instead.
     <Modal {...props}>
