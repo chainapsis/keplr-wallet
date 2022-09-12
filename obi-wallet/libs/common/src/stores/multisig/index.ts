@@ -248,4 +248,9 @@ export class MultisigStore {
     const threshold = publicKeys.length >= 4 ? 2 : 1;
     return createMultisigThresholdPubkey(publicKeys, threshold);
   }
+
+  @action
+  public logout() {
+    this.serializedCurrentAdmin = null;
+  }
 }
