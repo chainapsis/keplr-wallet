@@ -14,7 +14,9 @@ import { MessageRequesterInternal } from "../message-requester";
 import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
 import { ChainStore } from "./chain";
+import { LanguageStore } from "./languages";
 import { MultisigStore } from "./multisig";
+
 
 export class RootStore {
   public readonly appsStore: AppsStore;
@@ -23,6 +25,7 @@ export class RootStore {
   public readonly interactionStore: InteractionStore;
   public readonly multisigStore: MultisigStore;
   public readonly permissionStore: PermissionStore;
+  public readonly languageStore: LanguageStore;
 
   constructor() {
     const router = new RouterUi(produceEnv);
@@ -47,6 +50,8 @@ export class RootStore {
     this.appsStore = new AppsStore(new KVStore("apps-store"));
 
     this.multisigStore = new MultisigStore(new KVStore("multisig-store"));
+
+    this.languageStore = new LanguageStore(new KVStore("language-store"));
 
     router.listen(APP_PORT);
   }

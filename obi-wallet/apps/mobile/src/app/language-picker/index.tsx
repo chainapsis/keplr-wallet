@@ -8,15 +8,17 @@ import { Image, View } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useStore } from "../../app/stores";
 import { getScreenDimensions } from "../screens/components/screen-size";
-import { languageArray } from "./languages";
 
-interface Props {
-  data: Array<{ label: string; value: string }>;
-}
 
-export const LanguagePicker = observer<Props>(({ data }) => {
-  const [currentLanguage, setCurrentLanguage] = useState(languageArray[0]); // Default: English
+export const LanguagePicker = observer(() => {
+
+const languageStore = useStore().languageStore
+
+  const GetLanguages = languageStore.getLanguages();
+  const currentLanguage = languageStore.currentLanguage;
+
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   const handleShowDropdown = () => {
@@ -25,12 +27,11 @@ export const LanguagePicker = observer<Props>(({ data }) => {
       : setShowLanguageDropdown(true);
   };
 
-  const handleLanguageChoice = (code) => {
-    const language = languageArray.find(
-      (object) => object.languagecode === code
+  const handleLanguageChoice = (langCode) => {
+    const language = GetLanguages.find(
+      (object) => object.languagecode === langCode
     );
-
-    setCurrentLanguage(language);
+    languageStore.setCurrentLanguage(language);
     setShowLanguageDropdown(false);
   };
 
@@ -75,10 +76,12 @@ export const LanguagePicker = observer<Props>(({ data }) => {
               height: 50,
             }}
           >
+{console.log('test1', currentLanguage)}
             <Image
               style={{ width: 25, height: 25, marginRight: 10 }}
               source={currentLanguage.flag}
             />
+            
             <Text
               style={{ fontSize: 14, color: "#F6F5FF", letterSpacing: 0.3 }}
             >
@@ -94,7 +97,7 @@ export const LanguagePicker = observer<Props>(({ data }) => {
         </TouchableWithoutFeedback>
 
         {showLanguageDropdown &&
-          languageArray.map((object) => {
+          GetLanguages.map((object) => {
             if (currentLanguage.languagecode === object.languagecode) {
               return null;
             } else {
@@ -113,6 +116,7 @@ export const LanguagePicker = observer<Props>(({ data }) => {
                     width: 145,
                   }}
                 >
+
                   <Image
                     style={{ width: 25, height: 25, marginRight: 10 }}
                     source={object.flag}

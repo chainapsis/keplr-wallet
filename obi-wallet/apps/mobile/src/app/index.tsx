@@ -1,5 +1,6 @@
 import { messages } from "@obi-wallet/common";
 import { NavigationContainer } from "@react-navigation/native";
+import { observer } from "mobx-react-lite";
 import { IntlProvider } from "react-intl";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -10,9 +11,15 @@ import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
+import { useStore } from "./stores";
 
-export function App() {
-  const language = "en";
+export const App = observer(() => {
+  // ToDo: After local changes of Language, it needs to be saved somewhere on the phones storage?
+
+  const languageStore = useStore().languageStore;
+  const currentLanguage = languageStore.currentLanguage;
+  const language = currentLanguage.languagecode;
+  console.log("# App() - Language:", language);
 
   return (
     <IntlProvider
@@ -72,4 +79,4 @@ export function App() {
       </SafeAreaProvider>
     </IntlProvider>
   );
-}
+});
