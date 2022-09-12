@@ -17,8 +17,7 @@ export const App = observer(() => {
   // ToDo: After local changes of Language, it needs to be saved somewhere on the phones storage?
 
   const languageStore = useStore().languageStore;
-  const currentLanguage = languageStore.currentLanguage;
-  const language = currentLanguage.languagecode;
+  const language = languageStore.currentLanguage.languagecode;
   console.log("# App() - Language:", language);
 
   return (
