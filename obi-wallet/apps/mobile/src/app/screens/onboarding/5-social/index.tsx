@@ -24,13 +24,15 @@ export type SocialOnboardingProps = NativeStackScreenProps<
 
 export const SocialOnboarding = observer<SocialOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
+    const { demoStore, multisigStore } = useStore();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
 
     const client = useStargateClient();
 
     useEffect(() => {
+      if (demoStore.demoMode) return;
+
       const { social } = multisigStore.nextAdmin;
 
       if (social) {
@@ -51,7 +53,7 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
           ]
         );
       }
-    }, [multisigStore, navigation]);
+    }, [demoStore, multisigStore, navigation]);
 
     async function getAccountPubkey(key: string) {
       try {
@@ -154,12 +156,16 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                 disabled={fetchingPubKey}
                 onPress={async () => {
                   setFetchingPubKey(true);
-                  const publicKey = await getAccountPubkey(address);
+                  const publicKey = demoStore.demoMode
+                    ? { type: "demo", value: "demo" }
+                    : await getAccountPubkey(address);
                   setFetchingPubKey(false);
                   if (publicKey) {
-                    multisigStore.setSocialPublicKey({
-                      publicKey: publicKey,
-                    });
+                    if (!demoStore.demoMode) {
+                      multisigStore.setSocialPublicKey({
+                        publicKey: publicKey,
+                      });
+                    }
                     navigation.navigate("onboarding6");
                   }
                 }}

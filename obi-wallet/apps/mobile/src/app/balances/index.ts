@@ -10,21 +10,23 @@ export interface ExtendedCoin {
 }
 
 export function useBalances() {
-  const { balancesStore } = useStore();
+  const { demoStore, balancesStore } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshBalances = useCallback(async () => {
     setRefreshing(true);
-    await balancesStore.fetchBalances();
+    if (!demoStore.demoMode) {
+      await balancesStore.fetchBalances();
+    }
     setRefreshing(false);
-  }, [balancesStore]);
+  }, [demoStore, balancesStore]);
 
   useEffect(() => {
     void refreshBalances();
   }, [refreshBalances]);
 
   return {
-    balances: balancesStore.balances,
+    balances: demoStore.demoMode ? [] : balancesStore.balances,
     refreshBalances,
     refreshing,
   };

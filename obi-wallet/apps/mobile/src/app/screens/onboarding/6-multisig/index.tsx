@@ -1,6 +1,8 @@
+import { pubkeyType } from "@cosmjs/amino";
 import { MsgInstantiateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Multisig } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
@@ -10,6 +12,7 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
+import { SECURITY_QUESTIONS } from "../../../../config";
 import { IconButton } from "../../../button";
 import { useStargateClient } from "../../../clients";
 import { useStore } from "../../../stores";
@@ -25,15 +28,57 @@ export type MultisigOnboardingProps = NativeStackScreenProps<
   "onboarding6"
 >;
 
+const demoModeMultisig: Multisig = {
+  multisig: {
+    address: "demo-multisig",
+    publicKey: {
+      type: pubkeyType.multisigThreshold,
+      value: {
+        threshold: "1",
+        pubkeys: [],
+      },
+    },
+  },
+  biometrics: {
+    address: "demo-biometrics",
+    publicKey: {
+      type: pubkeyType.secp256k1,
+      value: "demo-biometrics",
+    },
+  },
+  phoneNumber: {
+    address: "demo-phone-number",
+    phoneNumber: "demo-phone-number",
+    securityQuestion: SECURITY_QUESTIONS[0].value,
+    publicKey: {
+      type: pubkeyType.secp256k1,
+      value: "demo-phone-number",
+    },
+  },
+  social: {
+    address: "demo-social",
+    publicKey: {
+      type: pubkeyType.secp256k1,
+      value: "demo-social",
+    },
+  },
+  cloud: null,
+  email: null,
+};
+
 export const MultisigOnboarding = observer<MultisigOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
+    const { demoStore, multisigStore } = useStore();
     const { currentChainInformation } = multisigStore;
-    const multisig = multisigStore.nextAdmin;
+    const multisig = demoStore.demoMode
+      ? demoModeMultisig
+      : multisigStore.nextAdmin;
 
     const client = useStargateClient();
 
     useEffect(() => {
+      if (demoStore.demoMode) return;
+
       (async () => {
         async function hydrateBalances(address?: string | null) {
           if (address && client) {
@@ -55,6 +100,7 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
       })();
     }, [
       client,
+      demoStore,
       multisig.biometrics?.address,
       multisig.multisig?.address,
       multisig.phoneNumber?.address,
@@ -90,6 +136,11 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
       multisig,
       encodeObjects,
       async onConfirm(response) {
+        if (demoStore.demoMode) {
+          demoStore.finishOnboarding();
+          return;
+        }
+
         try {
           invariant(response.rawLog, "Expected `response` to have `rawLog`.");
           const rawLog = JSON.parse(response.rawLog) as [

@@ -23,9 +23,11 @@ export type BiometricsOnboardingProps = NativeStackScreenProps<
 
 export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
+    const { demoStore, multisigStore } = useStore();
 
     useEffect(() => {
+      if (demoStore.demoMode) return;
+
       const { biometrics } = multisigStore.nextAdmin;
       if (biometrics) {
         Alert.alert(
@@ -45,7 +47,7 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
           ]
         );
       }
-    }, [multisigStore, navigation]);
+    }, [demoStore, multisigStore, navigation]);
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -136,13 +138,15 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
             LeftIcon={Scan}
             onPress={async () => {
               try {
-                const publicKey = await getBiometricsPublicKey();
-                multisigStore.setBiometricsPublicKey({
-                  publicKey: {
-                    type: pubkeyType.secp256k1,
-                    value: publicKey,
-                  },
-                });
+                if (!demoStore.demoMode) {
+                  const publicKey = await getBiometricsPublicKey();
+                  multisigStore.setBiometricsPublicKey({
+                    publicKey: {
+                      type: pubkeyType.secp256k1,
+                      value: publicKey,
+                    },
+                  });
+                }
                 navigation.navigate("onboarding5");
               } catch (e) {
                 const error = e as Error;

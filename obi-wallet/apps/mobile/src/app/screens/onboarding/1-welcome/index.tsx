@@ -3,6 +3,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image, ImageBackground, SafeAreaView, View } from "react-native";
 
 import { Button } from "../../../button";
+import { DemoModeToggle } from "../../components/demo-mode-toggle";
 import { StackParamList } from "../stack";
 import GetStarted from "./assets/get-started.svg";
 import RecoverWallet from "./assets/recover-wallet.svg";
@@ -34,7 +35,9 @@ export function WelcomeOnboarding({ navigation }: WelcomeOnboardingProps) {
             paddingHorizontal: 20,
           }}
         >
-          <Image source={require("./assets/loop.png")} />
+          <DemoModeToggle>
+            <Image source={require("./assets/loop.png")} />
+          </DemoModeToggle>
           <Text
             style={{
               color: "#F6F5FF",

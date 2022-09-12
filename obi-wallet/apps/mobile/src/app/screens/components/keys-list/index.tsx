@@ -1,6 +1,12 @@
 import { MultisigKey, Text } from "@obi-wallet/common";
 import { FC } from "react";
-import { FlatList, StyleProp, TouchableOpacity, View, ViewStyle } from "react-native";
+import {
+  FlatList,
+  StyleProp,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native";
 import { SvgProps } from "react-native-svg";
 
 import People from "../../onboarding/5-social/assets/people-alt-twotone-24px.svg";
@@ -38,7 +44,7 @@ export type HydratedKeyListItem = Key & KeyMetaData;
 
 export interface KeysListProps {
   data: Key[];
-  style: StyleProp<ViewStyle>
+  style: StyleProp<ViewStyle>;
 }
 const comingSoonKeys: HydratedKeyListItem[] = [
   {
