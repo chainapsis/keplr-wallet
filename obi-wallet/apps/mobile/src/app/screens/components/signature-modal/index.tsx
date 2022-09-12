@@ -555,6 +555,7 @@ const PhoneNumberBottomSheetContent =
             securityQuestion={payload.securityQuestion}
             securityAnswer={securityAnswer}
             onSecurityAnswerChange={setSecurityAnswer}
+            CustomTextInput={BottomSheetTextInput}
           />
 
           <SendMagicSmsButton
