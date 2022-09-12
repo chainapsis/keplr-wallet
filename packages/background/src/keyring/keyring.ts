@@ -371,6 +371,8 @@ export class KeyRing {
         "hex"
       );
     } else if (this.type === "ledger") {
+      // Attempt to decode the ciphertext as a JSON public key map. If that fails,
+      // try decoding as a single public key hex.
       const pubKeys: Record<string, Uint8Array> = {};
       const cipherText = await Crypto.decrypt(
         this.crypto,
@@ -384,7 +386,7 @@ export class KeyRing {
           (k) => (pubKeys[k] = Buffer.from(encodedPubkeys[k], "hex"))
         );
       } catch (e) {
-        // Error parsing JSON, parse as Legacy bytes
+        // Decode as bytes (Legacy representation)
         const key = Buffer.from(Buffer.from(cipherText).toString(), "hex");
         const path = this.getPathForCoinType(118, this.keyStore.bip44HDPath);
         pubKeys[path] = key;
@@ -648,6 +650,9 @@ export class KeyRing {
       if (useEthereumAddress) {
         const path = this.getPathForCoinType(coinType);
 
+        // Check the cache to see if the key has already been loaded. If not,
+        // ask the Ledger object to load the appropriate public key, and throw
+        // an error to indicate next steps in the UI.
         if (!Object.keys(this.ledgerPublicKeyCache).includes(path)) {
           this.loadLedgerPublicKey(coinType);
           throw new KeplrError(
@@ -658,6 +663,7 @@ export class KeyRing {
         }
 
         const pubKey = this.ledgerPublicKeyCache[path];
+        // Generate the Ethereum address for this public key
         const address = computeAddress(pubKey);
 
         return {
@@ -836,11 +842,12 @@ export class KeyRing {
 
       // Use default coinType and let the Ledger deliver errors with incompatibility
       const path = this.getPathForCoinType(defaultCoinType);
+      const key = pubKeys[path];
 
       return this.ledgerKeeper.signEthereum(
         type,
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
-        pubKeys[path],
+        key,
         message
       );
     }
@@ -1251,9 +1258,9 @@ export class KeyRing {
     return num;
   }
 
-  // Get the BIP44 path for the coinType in the key store
+  // Get the BIP44 path for the coinType as a string, e.g. m/44'/118'/0'/0/0, using either
+  // the keyStore's cached hdpath or the argument.
   private getPathForCoinType(coinType: number, _hdpath?: BIP44HDPath): string {
-    // Use cached BIP44Path, if empty default to argument
     const hdpath = this.keyStore
       ? KeyRing.getKeyStoreBIP44Path(this.keyStore)
       : _hdpath;
@@ -1265,8 +1272,8 @@ export class KeyRing {
     return Ledger.pathToString(Ledger.createPath(coinType, hdpath));
   }
 
-  // Load a Ledger public key for a coinType that's not 118, since that is
-  // loaded at the start.
+  // Load the public key for the given coinType using the appropriate Ledger app,
+  // provided the coinType is supported by Ledger.
   private async loadLedgerPublicKey(coinType: number) {
     if (!this._ledgerPublicKeyCache || !this.ledgerPublicKeyCache) {
       throw new KeplrError("keyring", 150, "Ledger not initialized");
@@ -1277,14 +1284,14 @@ export class KeyRing {
     }
 
     const pubkey = await this.ledgerKeeper.getPublicKey(
-      undefined, // Skip popup interaction
+      undefined,
       coinType,
       KeyRing.getKeyStoreBIP44Path(this.keyStore)
     );
 
     const path = this.getPathForCoinType(coinType);
 
-    // Update in-memory cache
+    // Update local cache
     this._ledgerPublicKeyCache[path] = pubkey;
 
     const publicKeyCache: Record<string, Uint8Array> = {};
@@ -1299,7 +1306,8 @@ export class KeyRing {
     const keyStoreType = this.keyStore.type ?? "mnemonic";
     const keyStoreMeta = this.keyStore.meta ?? {};
 
-    // New key store is functionally equivalent, except for the ciphertext
+    // Create a new keystore that is equivalent in all ways, except for the ciphertext,
+    // to persist the new public key.
     const newKeyStore = await Crypto.encrypt(
       this.crypto,
       this.keyStore.crypto.kdf,
@@ -1310,7 +1318,7 @@ export class KeyRing {
       this.keyStore.bip44HDPath
     );
 
-    // Replace keystore in local memory
+    // Replace the keystore in the MultiKeyStore
     let index: number | undefined;
     this.multiKeyStore.forEach((k, i) => {
       if (

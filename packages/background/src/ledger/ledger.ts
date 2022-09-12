@@ -150,6 +150,7 @@ export class Ledger {
         );
 
         const pubKey = Buffer.from(result.publicKey, "hex");
+        // Compress the public key
         return publicKeyConvert(pubKey, true);
       } catch (e: any) {
         throw new Error(e);
