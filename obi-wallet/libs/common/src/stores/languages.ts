@@ -1,5 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
-import { action, makeObservable, observable, runInAction, toJS } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
 
 export interface LangProps {
   languagecode: string;
@@ -9,19 +9,19 @@ export interface LangProps {
 
 const languageArray: LangProps[] = [
   {
-      languagecode: "en",
-      language: "English",
-      flag: require('../languages/flag-us.png'),
+    languagecode: "en",
+    language: "English",
+    flag: require("../languages/flag-us.png"),
   },
   {
-      languagecode: "de",
-      language: "Deutsch",
-      flag: require('../languages/flag-de.png'),
+    languagecode: "de",
+    language: "Deutsch",
+    flag: require("../languages/flag-de.png"),
   },
   {
-      languagecode: "es",
-      language: "Espanol",
-      flag: require('../languages/flag-es.png'),
+    languagecode: "es",
+    language: "Espanol",
+    flag: require("../languages/flag-es.png"),
   },
 ];
 
@@ -30,7 +30,7 @@ export class LanguageStore {
   protected languages: LangProps[] = [];
 
   @observable
-  public currentLanguage: LangProps = languageArray[0]
+  public currentLanguage: LangProps = languageArray[0];
 
   constructor(protected kvStore: KVStore) {
     makeObservable(this);
@@ -43,7 +43,9 @@ export class LanguageStore {
 
   @observable
   public async init() {
-    const currentLanguage = await this.kvStore.get<LangProps | undefined>("currentLanguage");
+    const currentLanguage = await this.kvStore.get<LangProps | undefined>(
+      "currentLanguage"
+    );
     runInAction(() => {
       if (currentLanguage) {
         this.currentLanguage = currentLanguage;
@@ -53,9 +55,8 @@ export class LanguageStore {
 
   @action
   public async setCurrentLanguage(selectedLanguage: LangProps) {
-    this.currentLanguage = selectedLanguage
+    this.currentLanguage = selectedLanguage;
     const data = selectedLanguage;
     await this.kvStore.set("currentLanguage", data);
   }
-
 }

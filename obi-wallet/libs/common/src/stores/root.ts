@@ -17,7 +17,6 @@ import { ChainStore } from "./chain";
 import { LanguageStore } from "./languages";
 import { MultisigStore } from "./multisig";
 
-
 export class RootStore {
   public readonly appsStore: AppsStore;
   public readonly chainStore: ChainStore;

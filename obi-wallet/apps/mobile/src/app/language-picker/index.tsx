@@ -11,10 +11,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useStore } from "../../app/stores";
 import { getScreenDimensions } from "../screens/components/screen-size";
 
-
 export const LanguagePicker = observer(() => {
-
-const languageStore = useStore().languageStore
+  const languageStore = useStore().languageStore;
 
   const GetLanguages = languageStore.getLanguages();
   const currentLanguage = languageStore.currentLanguage;
@@ -76,12 +74,12 @@ const languageStore = useStore().languageStore
               height: 50,
             }}
           >
-{console.log('test1', currentLanguage)}
+            {console.log("test1", currentLanguage)}
             <Image
               style={{ width: 25, height: 25, marginRight: 10 }}
               source={currentLanguage.flag}
             />
-            
+
             <Text
               style={{ fontSize: 14, color: "#F6F5FF", letterSpacing: 0.3 }}
             >
@@ -116,7 +114,6 @@ const languageStore = useStore().languageStore
                     width: 145,
                   }}
                 >
-
                   <Image
                     style={{ width: 25, height: 25, marginRight: 10 }}
                     source={object.flag}

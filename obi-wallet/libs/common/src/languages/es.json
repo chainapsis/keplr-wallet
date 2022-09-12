@@ -9,7 +9,7 @@
   "general.no": "No",
 
   "assets.network": "Red",
-  "assets.walletname": "Nombre De La Billetera" ,
+  "assets.walletname": "Nombre De La Billetera",
   "assets.balance": "Balance",
   "assets.send": "Enviar",
   "assets.receive": "Recibir",
@@ -20,17 +20,17 @@
   "menu.nfts": "NFTs",
   "menu.loadingnfts": "Cargando NFTs...",
   "menu.apps": "Apps",
-  "menu.trade": "Negociar" ,
+  "menu.trade": "Negociar",
   "menu.trade.loading": "Cargando...",
   "menu.settings": "Configuraciones",
 
   "sidemenu.networks": "Redes",
-  "sidemenu.morecomingsoon":  "Mucho Más Próximamente",
+  "sidemenu.morecomingsoon": "Mucho Más Próximamente",
 
   "send.to": "Para",
   "send.walletaddress": "Dirección De La Billetera",
   "send.amount": "Monto",
-  "send.next": "Siguiente" ,
+  "send.next": "Siguiente",
   "send.denomination": "Activo",
   "send.selectcoin": "Selecciona el activo que deseas enviar",
   "send.holdings": "Fondos",
@@ -48,7 +48,7 @@
   "onboarding2.authyourkeys": "Crear una clave de número de teléfono",
   "onboarding2.authyourkeyssubtext": "Por favor responde una pregunta de seguridad. No almacenamos esta información",
   "onboarding2.securityquestion": "Pregunta de Seguridad",
-  "onboarding2.answer":  "Respuesta",
+  "onboarding2.answer": "Respuesta",
   "onboarding2.answerlabel": "Escribe tu respuesta aquí",
   "onboarding2.phonenr": "Número de teléfono",
   "onboarding2.phonenrlabel": "Escribe tu número de teléfono aquí",
@@ -92,7 +92,7 @@
   "onboarding4.error.biometrickeyexists.text": "¿Quieres reutilizar tu clave biométrica existente?",
   "onboarding4.error.biometrickeyexists.newkey": "Generar una nueva clave",
   "onboarding4.error.biometrickeyexists.yes": "Sí",
- 
+
   "onboarding5.setsocialkey": "Establecer una Clave Social",
   "onboarding5.setsocialkey.subtext": "Ingresa o escanea la dirección de Juno de un amigo de confianza que pueda ayudarte a recuperar tu cuenta. Tu amigo no puede acceder a tu cuenta",
   "onboarding5.setsocialkey.subtext2": "…o puedes usar la cuenta predeterminada de Obi si no confías en ninguno de tus amigos. Obi no puede acceder a tu cuenta",
@@ -146,4 +146,3 @@
 
   "appscreen.kado": "Compra Cripto"
 }
-

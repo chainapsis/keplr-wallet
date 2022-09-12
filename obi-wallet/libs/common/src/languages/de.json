@@ -23,10 +23,10 @@
   "menu.trade": "Handeln",
   "menu.trade.loading": "Lade...",
   "menu.settings": "Einstellungen",
-  
+
   "sidemenu.networks": "Netzwerke",
   "sidemenu.morecomingsoon": "Weitere folgen in Kürze",
-  
+
   "send.to": "An",
   "send.walletaddress": "Wallet Addresse",
   "send.amount": "Betrag",
@@ -36,7 +36,7 @@
   "send.holdings": "Bestände",
   "send.name": "Name",
   "send.send": "Send",
-  
+
   "receive.receive": "Empfangen",
   "receive.taptoshare": "Tippen um Adresse zu teilen",
 

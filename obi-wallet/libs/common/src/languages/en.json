@@ -1,6 +1,6 @@
 {
   "home.appStoreLabel": "App Store",
-  
+
   "general.error": "Error",
   "general.comingsoon": "Coming Soon",
   "general.active": "Active",
@@ -23,10 +23,10 @@
   "menu.trade": "Trade",
   "menu.trade.loading": "Loading...",
   "menu.settings": "Settings",
-  
+
   "sidemenu.networks": "Networks",
   "sidemenu.morecomingsoon": "More coming soon",
-  
+
   "send.to": "To",
   "send.walletaddress": "Wallet Address",
   "send.amount": "Amount",
@@ -146,4 +146,3 @@
 
   "appscreen.kado": "Buy Crypto"
 }
-
