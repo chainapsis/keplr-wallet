@@ -94,7 +94,7 @@ export function PhoneInput({
     } else if (langCode === "es") {
       return "spa";
     } else {
-      return "common";  // English
+      return "common"; // English
     }
   };
 
