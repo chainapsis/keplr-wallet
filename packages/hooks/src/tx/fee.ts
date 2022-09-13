@@ -6,11 +6,7 @@ import {
   IGasConfig,
 } from "./types";
 import { TxChainSetter } from "./chain";
-import {
-  ChainGetter,
-  CoinPrimitive,
-  IQueriesStore,
-} from "@keplr-wallet/stores";
+import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Coin, CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { FeeCurrency } from "@keplr-wallet/types";
@@ -18,6 +14,7 @@ import { computedFn } from "mobx-utils";
 import { StdFee } from "@cosmjs/launchpad";
 import { useState } from "react";
 import { InsufficientFeeError, NotLoadedFeeError } from "./errors";
+import { QueriesStore } from "./internal";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
@@ -46,7 +43,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   constructor(
     chainGetter: ChainGetter,
-    protected readonly queriesStore: IQueriesStore,
+    protected readonly queriesStore: QueriesStore,
     initialChainId: string,
     sender: string,
     protected readonly amountConfig: IAmountConfig,
@@ -97,13 +94,24 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   get feeCurrencies(): FeeCurrency[] {
+    if (
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("osmosis-txfees") &&
+      this.queriesStore.get(this.chainId).osmosis
+    ) {
+      const txFees = this.queriesStore.get(this.chainId).osmosis!
+        .queryTxFeesFeeTokens;
+
+      return this.chainInfo.feeCurrencies.concat(txFees.feeCurrencies);
+    }
+
     return this.chainInfo.feeCurrencies;
   }
 
   @computed
   get feeCurrency(): FeeCurrency | undefined {
     if (this._manualFee) {
-      for (const currency of this.chainInfo.feeCurrencies) {
+      for (const currency of this.feeCurrencies) {
         if (currency.coinMinimalDenom === this._manualFee.denom) {
           return currency;
         }
@@ -117,14 +125,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     if (this._autoFeeCoinMinimalDenom) {
-      for (const currency of this.chainInfo.feeCurrencies) {
+      for (const currency of this.feeCurrencies) {
         if (currency.coinMinimalDenom === this._autoFeeCoinMinimalDenom) {
           return currency;
         }
       }
     }
 
-    return this.chainInfo.feeCurrencies[0];
+    return this.feeCurrencies[0];
   }
 
   toStdFee(): StdFee {
@@ -283,7 +291,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
 export const useFeeConfig = (
   chainGetter: ChainGetter,
-  queriesStore: IQueriesStore,
+  queriesStore: QueriesStore,
   chainId: string,
   sender: string,
   amountConfig: IAmountConfig,

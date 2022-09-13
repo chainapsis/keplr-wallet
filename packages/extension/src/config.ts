@@ -215,7 +215,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         },
       },
     ],
-    features: ["ibc-transfer", "ibc-go", "cosmwasm"],
+    features: ["ibc-transfer", "ibc-go", "cosmwasm", "osmosis-txfees"],
   },
   {
     rpc: SECRET_NETWORK_RPC_ENDPOINT,
