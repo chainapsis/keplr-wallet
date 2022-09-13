@@ -13,7 +13,7 @@ import {
 } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Coin, CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
-import { Currency } from "@keplr-wallet/types";
+import { FeeCurrency } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
 import { StdFee } from "@cosmjs/launchpad";
 import { useState } from "react";
@@ -23,6 +23,8 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable
   protected _sender: string;
 
+  @observable
+  protected _autoFeeCoinMinimalDenom: string | undefined = undefined;
   @observable
   protected _feeType: FeeType | undefined = undefined;
 
@@ -75,6 +77,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     this._manualFee = undefined;
   }
 
+  @action
+  setAutoFeeCoinMinimalDenom(denom: string | undefined) {
+    this._autoFeeCoinMinimalDenom = denom;
+  }
+
   get isManual(): boolean {
     return this.feeType === undefined;
   }
@@ -89,12 +96,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     this._feeType = undefined;
   }
 
-  get feeCurrencies(): Currency[] {
+  get feeCurrencies(): FeeCurrency[] {
     return this.chainInfo.feeCurrencies;
   }
 
   @computed
-  get feeCurrency(): Currency | undefined {
+  get feeCurrency(): FeeCurrency | undefined {
     if (this._manualFee) {
       for (const currency of this.chainInfo.feeCurrencies) {
         if (currency.coinMinimalDenom === this._manualFee.denom) {
@@ -107,6 +114,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         coinDenom: this._manualFee.denom,
         coinDecimals: 0,
       };
+    }
+
+    if (this._autoFeeCoinMinimalDenom) {
+      for (const currency of this.chainInfo.feeCurrencies) {
+        if (currency.coinMinimalDenom === this._autoFeeCoinMinimalDenom) {
+          return currency;
+        }
+      }
     }
 
     return this.chainInfo.feeCurrencies[0];
@@ -170,9 +185,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       throw new Error("Fee currency not set");
     }
 
-    const gasPriceStep = this.chainInfo.gasPriceStep
-      ? this.chainInfo.gasPriceStep
-      : DefaultGasPriceStep;
+    const gasPriceStep = this.feeCurrency?.gasPriceStep ?? DefaultGasPriceStep;
 
     const gasPrice = new Dec(gasPriceStep[feeType].toString());
     const feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));

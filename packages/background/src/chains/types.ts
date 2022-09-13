@@ -5,6 +5,7 @@ import {
   Currency,
   CW20Currency,
   Secret20Currency,
+  WithGasPriceStep,
 } from "@keplr-wallet/types";
 
 import Joi, { ObjectSchema } from "joi";
@@ -64,6 +65,12 @@ export const Secret20CurrencySchema = (CurrencySchema as ObjectSchema<Secret20Cu
     }
   });
 
+const GasPriceStepSchema = Joi.object({
+  low: Joi.number().required(),
+  average: Joi.number().required(),
+  high: Joi.number().required(),
+});
+
 export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixAccAddr: Joi.string().required(),
   bech32PrefixAccPub: Joi.string().required(),
@@ -94,14 +101,16 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     .min(1)
     .items(CurrencySchema, CW20CurrencySchema, Secret20CurrencySchema)
     .required(),
-  feeCurrencies: Joi.array().min(1).items(CurrencySchema).required(),
+  feeCurrencies: Joi.array()
+    .min(1)
+    .items(
+      (CurrencySchema as Joi.ObjectSchema<WithGasPriceStep<Currency>>).keys({
+        gasPriceStep: GasPriceStepSchema,
+      })
+    )
+    .required(),
   coinType: Joi.number().integer(),
   beta: Joi.boolean(),
-  gasPriceStep: Joi.object({
-    low: Joi.number().required(),
-    average: Joi.number().required(),
-    high: Joi.number().required(),
-  }),
   features: Joi.array()
     .items(
       Joi.string().valid(

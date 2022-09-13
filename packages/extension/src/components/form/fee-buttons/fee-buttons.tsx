@@ -9,7 +9,11 @@ import styleFeeButtons from "./fee-buttons.module.scss";
 
 import {
   Button,
+  ButtonDropdown,
   ButtonGroup,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
   FormFeedback,
   FormGroup,
   FormText,
@@ -27,10 +31,11 @@ import {
 } from "@keplr-wallet/hooks";
 import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
 import { useLanguage } from "../../../languages";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { GasInput } from "../gas-input";
 import { action, makeObservable, observable } from "mobx";
 import { GasContainer } from "../gas-form";
+import styleCoinInput from "../coin-input.module.scss";
 
 export interface FeeButtonsProps {
   feeConfig: IFeeConfig;
@@ -83,6 +88,9 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
 
     return (
       <React.Fragment>
+        {feeConfig.feeCurrencies.length > 1 ? (
+          <FeeCurrencySelector feeConfig={feeConfig} />
+        ) : null}
         {feeConfig.feeCurrency ? (
           <FeeButtonsInner
             feeConfig={feeConfig}
@@ -108,6 +116,61 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     );
   }
 );
+
+export const FeeCurrencySelector: FunctionComponent<{
+  feeConfig: IFeeConfig;
+}> = observer(({ feeConfig }) => {
+  const [randomId] = useState(() => {
+    const bytes = new Uint8Array(4);
+    crypto.getRandomValues(bytes);
+    return Buffer.from(bytes).toString("hex");
+  });
+
+  const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
+
+  return (
+    <FormGroup>
+      <Label
+        for={`selector-${randomId}`}
+        className="form-control-label"
+        style={{ width: "100%" }}
+      >
+        <FormattedMessage id="Fee Token" />
+      </Label>
+      <ButtonDropdown
+        id={`selector-${randomId}`}
+        className={styleCoinInput.tokenSelector}
+        isOpen={isOpenTokenSelector}
+        toggle={() => setIsOpenTokenSelector((value) => !value)}
+      >
+        <DropdownToggle caret>
+          {feeConfig.feeCurrency?.coinDenom || "Unknown"}
+        </DropdownToggle>
+        <DropdownMenu>
+          {feeConfig.feeCurrencies.map((currency) => {
+            return (
+              <DropdownItem
+                key={currency.coinMinimalDenom}
+                active={
+                  currency.coinMinimalDenom === feeConfig.feeCurrency?.coinDenom
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  feeConfig.setAutoFeeCoinMinimalDenom(
+                    currency.coinMinimalDenom
+                  );
+                }}
+              >
+                {currency.coinDenom}
+              </DropdownItem>
+            );
+          })}
+        </DropdownMenu>
+      </ButtonDropdown>
+    </FormGroup>
+  );
+});
 
 export const FeeButtonsInner: FunctionComponent<
   Pick<

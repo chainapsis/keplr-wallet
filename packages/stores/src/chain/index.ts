@@ -12,6 +12,7 @@ import {
   BIP44,
   ChainInfo,
   Currency,
+  FeeCurrency,
 } from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -248,14 +249,8 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
     return this.raw.features;
   }
 
-  get feeCurrencies(): Currency[] {
+  get feeCurrencies(): FeeCurrency[] {
     return this.raw.feeCurrencies;
-  }
-
-  get gasPriceStep():
-    | { low: number; average: number; high: number }
-    | undefined {
-    return this.raw.gasPriceStep;
   }
 
   get rest(): string {
