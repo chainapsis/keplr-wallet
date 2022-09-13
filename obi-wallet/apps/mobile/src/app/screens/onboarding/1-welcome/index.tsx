@@ -4,7 +4,7 @@ import { useIntl, FormattedMessage } from "react-intl";
 import { Image, ImageBackground, SafeAreaView, View } from "react-native";
 
 import { Button } from "../../../button";
-import { LanguagePicker } from "../../../language-picker";
+import { LanguagePicker } from "../../../language-picker/languagepicker";
 import { StackParamList } from "../stack";
 import GetStarted from "./assets/get-started.svg";
 import RecoverWallet from "./assets/recover-wallet.svg";
@@ -33,7 +33,9 @@ export function WelcomeOnboarding({ navigation }: WelcomeOnboardingProps) {
           justifyContent: "flex-end",
         }}
       >
-        <LanguagePicker />
+        <View style={{ position: "absolute", top: 20, left: 20 }}>
+          <LanguagePicker />
+        </View>
 
         <View
           style={{

@@ -1,28 +1,43 @@
 import { KVStore } from "@keplr-wallet/common";
 import { action, makeObservable, observable, runInAction } from "mobx";
-import { Platform, NativeModules } from "react-native";
+import { Platform, NativeModules, Image } from "react-native";
 
 export interface LangProps {
   languagecode: string;
   language: string;
-  flag: string;
+  icon: any;
 }
 
 const languageArray: LangProps[] = [
   {
     languagecode: "en",
     language: "English",
-    flag: require("../languages/flag-us.png"),
+    icon: () => (
+      <Image
+        source={require("./assets/flag-us.png")}
+        style={{ width: 25, height: 25, marginRight: 10 }}
+      />
+    ),
   },
   {
     languagecode: "de",
     language: "Deutsch",
-    flag: require("../languages/flag-de.png"),
+    icon: () => (
+      <Image
+        source={require("./assets/flag-de.png")}
+        style={{ width: 25, height: 25, marginRight: 10 }}
+      />
+    ),
   },
   {
     languagecode: "es",
     language: "Espanol",
-    flag: require("../languages/flag-es.png"),
+    icon: () => (
+      <Image
+        source={require("./assets/flag-es.png")}
+        style={{ width: 25, height: 25, marginRight: 10 }}
+      />
+    ),
   },
 ];
 
