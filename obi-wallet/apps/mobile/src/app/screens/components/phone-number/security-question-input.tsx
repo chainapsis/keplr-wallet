@@ -70,8 +70,14 @@ export function SecurityQuestionInput({
       />
 
       <TextInput
-        label={intl.formatMessage({ id: "onboarding2.answer" })}
-        placeholder={intl.formatMessage({ id: "onboarding2.answerlabel" })}
+        label={intl.formatMessage({
+          id: "onboarding2.answer",
+          defaultMessage: "Answer",
+        })}
+        placeholder={intl.formatMessage({
+          id: "onboarding2.answerlabel",
+          defaultMessage: "Type your answer here",
+        })}
         style={{ marginTop: 25 }}
         value={securityAnswer}
         onChangeText={onSecurityAnswerChange}

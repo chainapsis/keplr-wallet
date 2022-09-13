@@ -141,8 +141,11 @@ export const SendScreen = observer(() => {
           }}
         >
           <TextInput
-            label={intl.formatMessage({ id: "send.to" })}
-            placeholder={intl.formatMessage({ id: "send.walletaddress" })}
+            label={intl.formatMessage({ id: "send.to", defaultMessage: "To" })}
+            placeholder={intl.formatMessage({
+              id: "send.walletaddress",
+              defaultMessage: "Wallet Address",
+            })}
             style={{ flex: 1 }}
             value={address}
             onChangeText={setAddress}
@@ -244,7 +247,7 @@ export const SendScreen = observer(() => {
       </View>
       <Button
         flavor="blue"
-        label={intl.formatMessage({ id: "send.next" })}
+        label={intl.formatMessage({ id: "send.next", defaultMessage: "Next" })}
         disabled={!address || !amount || !selectedCoin}
         onPress={() => {
           openSignatureModal();

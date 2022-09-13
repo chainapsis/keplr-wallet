@@ -86,21 +86,26 @@ export const KeysConfigScreen = observer(() => {
   const data: (Key & { activated: boolean })[] = [
     getKey({
       id: "phoneNumber",
-      title: intl.formatMessage({ id: "settings.multisig.option.phonekey" }),
+      title: intl.formatMessage({
+        id: "settings.multisig.option.phonekey",
+        defaultMessage: "Phone Number Key",
+      }),
     }),
     getKey({
       id: "biometrics",
       title: intl.formatMessage({
         id: "settings.multisig.option.biometricskey",
+        defaultMessage: "Biometrics Key",
       }),
     }),
     getKey({
       id: "social",
       title: intl.formatMessage({
         id: "settings.multisig.option.socialkey",
+        defaultMessage: "Social Key",
       }),
     }),
-    // getKey({ id: "cloud", title: intl.formatMessage({ id: "settings.multisig.option.cloudkey" }) }),
+    // getKey({ id: "cloud", title: intl.formatMessage({ id: "settings.multisig.option.cloudkey", defaultMessage:"Cloud" }) }),
   ];
 
   const activatedKeys = data.filter((item) => item.activated).length;

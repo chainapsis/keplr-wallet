@@ -103,9 +103,13 @@ export function SettingsScreen() {
       */}
       <Setting
         Icon={MultiSigIcon}
-        title={intl.formatMessage({ id: "settings.multigsigsettings" })}
+        title={intl.formatMessage({
+          id: "settings.multigsigsettings",
+          defaultMessage: "Key Settings",
+        })}
         subtitle={intl.formatMessage({
           id: "settings.multigsigsettings.subtext",
+          defaultMessage: "Manage your SMS, social, and other keys.",
         })}
         onPress={() => navigation.navigate("MultiSigSettings")}
       />
@@ -124,22 +128,38 @@ export function SettingsScreen() {
       </View>
       <Setting
         Icon={HelpAndSupport}
-        title={intl.formatMessage({ id: "settings.helpsupport" })}
-        subtitle={intl.formatMessage({ id: "settings.helpsupport.subtext" })}
+        title={intl.formatMessage({
+          id: "settings.helpsupport",
+          defaultMessage: "Help & Support",
+        })}
+        subtitle={intl.formatMessage({
+          id: "settings.helpsupport.subtext",
+          defaultMessage: "Contact Loop support.",
+        })}
         onPress={() => Linking.openURL("https://loop.markets/help")}
       />
 
       <Setting
         Icon={LogoutIcon}
-        title={intl.formatMessage({ id: "settings.logout" })}
-        subtitle={intl.formatMessage({ id: "settings.logout.subtext" })}
+        title={intl.formatMessage({
+          id: "settings.logout",
+          defaultMessage: "Log Out",
+        })}
+        subtitle={intl.formatMessage({
+          id: "settings.logout.subtext",
+          defaultMessage: "Save your keys before logging out",
+        })}
       />
 
       <Setting
         Icon={HelpAndSupport}
-        title={intl.formatMessage({ id: "settings.fundproxywallet" })}
+        title={intl.formatMessage({
+          id: "settings.fundproxywallet",
+          defaultMessage: "Fund Proxy Wallet",
+        })}
         subtitle={intl.formatMessage({
           id: "settings.fundproxywallet.subtext",
+          defaultMessage: "Send some funds from your biometrics wallet",
         })}
         onPress={async () => {
           const rcp = "https://rpc.uni.junonetwork.io/";

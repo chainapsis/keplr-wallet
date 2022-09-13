@@ -16,7 +16,10 @@ export function VerifyAndProceedButton({
 
   return (
     <Button
-      label={intl.formatMessage({ id: "onboarding3.verifyandproceed" })}
+      label={intl.formatMessage({
+        id: "onboarding3.verifyandproceed",
+        defaultMessage: "Verify & Proceed",
+      })}
       LeftIcon={ShieldCheck}
       flavor={disabled ? "gray" : "blue"}
       onPress={onPress}

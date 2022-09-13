@@ -58,15 +58,30 @@ export function TabNavigation({ route }: TabNavigationProps) {
             icon = faHome;
           }
           switch (route.name) {
-            case intl.formatMessage({ id: "menu.assets" }):
+            case intl.formatMessage({
+              id: "menu.assets",
+              defaultMessage: "Assets",
+            }):
               return !focused ? <AssetsIcon /> : <AssetsIconActive />;
-            case intl.formatMessage({ id: "menu.apps" }):
+            case intl.formatMessage({
+              id: "menu.apps",
+              defaultMessage: "Apps",
+            }):
               return !focused ? <AppsIcon /> : <AppsIconActive />;
-            case intl.formatMessage({ id: "menu.nfts" }):
+            case intl.formatMessage({
+              id: "menu.nfts",
+              defaultMessage: "NFTs",
+            }):
               return !focused ? <NFTsIcon /> : <NFTsIconActive />;
-            case intl.formatMessage({ id: "menu.trade" }):
+            case intl.formatMessage({
+              id: "menu.trade",
+              defaultMessage: "Trade",
+            }):
               return !focused ? <TradeIcon /> : <TradeIconActive />;
-            case intl.formatMessage({ id: "menu.settings" }):
+            case intl.formatMessage({
+              id: "menu.settings",
+              defaultMessage: "Settings",
+            }):
               return !focused ? <SettingsIcon /> : <SettingsIconActive />;
             default:
               icon = faChevronLeft;
@@ -99,27 +114,36 @@ export function TabNavigation({ route }: TabNavigationProps) {
       })}
     >
       <Tab.Screen
-        name={intl.formatMessage({ id: "menu.assets" })}
+        name={intl.formatMessage({
+          id: "menu.assets",
+          defaultMessage: "Assets",
+        })}
         component={Assets}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name={intl.formatMessage({ id: "menu.nfts" })}
+        name={intl.formatMessage({ id: "menu.nfts", defaultMessage: "NFTs" })}
         component={NFTs}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name={intl.formatMessage({ id: "menu.apps" })}
+        name={intl.formatMessage({
+          id: "menu.apps",
+          defaultMessage: "Loading NFTs...",
+        })}
         component={DappExplorer}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name={intl.formatMessage({ id: "menu.trade" })}
+        name={intl.formatMessage({ id: "menu.trade", defaultMessage: "Apps" })}
         component={Trade}
         initialParams={initialParams}
       />
       <Tab.Screen
-        name={intl.formatMessage({ id: "menu.settings" })}
+        name={intl.formatMessage({
+          id: "menu.settings",
+          defaultMessage: "Trade",
+        })}
         component={SettingsScreen}
         initialParams={initialParams}
       />

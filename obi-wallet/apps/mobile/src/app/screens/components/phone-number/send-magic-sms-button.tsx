@@ -47,7 +47,10 @@ export function SendMagicSmsButton({
         </View>
       ) : null}
       <Button
-        label={intl.formatMessage({ id: "onboarding2.sendmagicsms" })}
+        label={intl.formatMessage({
+          id: "onboarding2.sendmagicsms",
+          defaultMessage: "Get Magic SMS",
+        })}
         LeftIcon={SMS}
         flavor="blue"
         disabled={disabled}
