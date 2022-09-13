@@ -11,7 +11,10 @@ import { Buffer } from "buffer/";
 import { EthSignType } from "@keplr-wallet/types";
 
 export class LedgerService {
-  private previousInitAborter: ((e: Error) => void) | undefined;
+  private previousInitAborter: Record<
+    number,
+    ((e: Error) => void) | undefined
+  > = {};
 
   protected options: LedgerOptions;
 
@@ -199,8 +202,9 @@ export class LedgerService {
     env: Env | undefined,
     coinType: number
   ): Promise<{ ledger: Ledger; retryCount: number }> {
-    if (this.previousInitAborter) {
-      this.previousInitAborter(
+    const initAborter = this.previousInitAborter[coinType];
+    if (initAborter) {
+      initAborter(
         new Error(
           "New ledger request occurred before the ledger was initialized"
         )
@@ -226,7 +230,7 @@ export class LedgerService {
 
     // This ensures that the ledger connection is not executed concurrently.
     // Without this, the prior signing request can be delivered to the ledger and possibly make a user take a mistake.
-    this.previousInitAborter = aborter.abort;
+    this.previousInitAborter[coinType] = aborter.abort;
 
     let retryCount = 0;
     let initArgs: any[] = [];
@@ -239,7 +243,7 @@ export class LedgerService {
         }
 
         const ledger = await Ledger.init(transportIniter, initArgs, coinType);
-        this.previousInitAborter = undefined;
+        this.previousInitAborter[coinType] = undefined;
         return {
           ledger,
           retryCount,
