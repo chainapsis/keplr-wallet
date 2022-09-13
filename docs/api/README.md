@@ -133,8 +133,9 @@ If the webpage has permission and Keplr is unlocked, this function will return t
 }
 ```
 
-It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient mane.  
-`isNanoLedger` field in the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./cosmjs.md#types-of-offline-signers)
+It also returns the nickname for the key store currently selected, which should allow the webpage to display the current key store selected to the user in a more convenient manner.  
+
+The `isNanoLedger` field of the return type is used to indicate whether the selected account is from the Ledger Nano. Because current Cosmos app in the Ledger Nano doesn't support the direct (protobuf) format msgs, this field can be used to select the amino or direct signer. [Ref](./cosmjs.md#types-of-offline-signers)
 
 ### Sign Amino
 
@@ -174,8 +175,9 @@ sendTx(
 ): Promise<Uint8Array>;
 ```
 
-This function requests Keplr to delegates the broadcasting of the transaction to Keplr's LCD endpoints (rather than the webpage broadcasting the transaction).
-This method returns the transaction hash if it succeeds to broadcast, if else the method will throw an error.
+This function requests Keplr to delegate the broadcasting of the transaction to Keplr's LCD endpoints (rather than the webpage broadcasting the transaction).
+
+This method returns the transaction hash if the broadcast succeeds; otherwise, the method will throw an error.
 When Keplr broadcasts the transaction, Keplr will send the notification on the transaction's progress.
 
 ### Request Signature for Arbitrary Message
@@ -248,7 +250,7 @@ export interface KeplrSignOptions {
 ```
 Keplr v0.8.11+ offers additional options to customize interactions between the frontend website and Keplr extension.
 
-If `preferNoSetFee` is set to true, Keplr will prioritize the frontend-suggested fee rather than overriding the tx fee setting of the signing page.
+If `preferNoSetFee` is set to true, Keplr will prioritize the frontend-suggested fee rather than overriding the transaction fee setting of the signing page.
 
 If `preferNoSetMemo` is set to true, Keplr will not override the memo and set fix memo as the front-end set memo.
 
