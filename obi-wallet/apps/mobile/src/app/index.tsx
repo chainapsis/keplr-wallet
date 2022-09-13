@@ -14,11 +14,8 @@ import { Stack } from "./stack";
 import { useStore } from "./stores";
 
 export const App = observer(() => {
-  // ToDo: After change of Language, it needs to be saved somewhere on the phones storage?
-
   const languageStore = useStore().languageStore;
   const language = languageStore.currentLanguage.languagecode;
-  console.log("# App() - Language:", language);
 
   return (
     <IntlProvider

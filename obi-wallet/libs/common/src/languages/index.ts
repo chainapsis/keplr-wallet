@@ -2,13 +2,13 @@ import MessagesDe from "./de.json";
 import MessagesEn from "./en.json";
 import MessagesEs from "./es.json";
 
-export type IntlMessage = Record<string, string>;
-export type IntlMessages = { [lang: string]: Record<string, string> };
+export type IntlMessage = Record<string, any>;
+export type IntlMessages = { [lang: string]: Record<string, any> };
 
 export const messages: IntlMessages = {
   en: MessagesEn,
   de: MessagesDe,
-  //es: MessagesEs  // ToDo: How to connect this 3rd language?
+  es: MessagesEs,
 };
 
 export type TypeLanguageToFiatCurrency = { ["default"]: string } & {

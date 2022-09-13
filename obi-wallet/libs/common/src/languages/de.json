@@ -45,7 +45,7 @@
   "onboarding1.getstarted": "Loslegen",
   "onboarding1.recoverwallet": "Wallet Wiederherstellen",
 
-  "onboarding2.authyourkeys": "Erstelle einen Telefonnummern Key",
+  "onboarding2.authyourkeys": "Erstelle einen Telefon-Key",
   "onboarding2.authyourkeyssubtext": "Bitte beantworte eine Sicherheitsfrage.",
   "onboarding2.securityquestion": "Sicherheitsfrage",
   "onboarding2.answer": "Antwort",
@@ -77,7 +77,7 @@
 
   "onboarding2.error.sendingsmsfailed": "Senden der SMS fehlgeschlagen.",
 
-  "onboarding3.authyourkeys": "Erstelle einen Telefonnummern Key",
+  "onboarding3.authyourkeys": "Erstelle einen Telefon-Key",
   "onboarding3.pastereponse": "Füge die Antwort ein, die du erhalten hast.",
   "onboarding3.smscodelabel": "8-Stelliger SMS-Code",
   "onboarding3.noresponselabel": "Keine Antwort erhalten?",
