@@ -142,5 +142,14 @@
   "settings.multisig.option.biometricskey": "Biometrie Key",
   "settings.multisig.option.socialkey": "Social Key",
   "settings.multisig.option.emailkey": "E-Mail",
-  "settings.multisig.option.cloudkey": "Cloud"
+  "settings.multisig.option.cloudkey": "Cloud",
+
+  "appscreen.kado": "Crypto's Kaufen",
+
+  "onboarding2.securityquestion.birthplace" : "In welcher Stadt wurdest du geboren?",
+  "onboarding2.securityquestion.schoolname" : "Welchen vollständigen Namen hat die letzte Grundschule, die du besucht hast?",
+  "onboarding2.securityquestion.mothersmaidenname" : "Was ist der Mädchenname deiner Mutter?",
+  "onboarding2.securityquestion.nickname" : "Welchen Nicknamen hattest du in deiner Kindheit?",
+  "onboarding2.securityquestion.firstcar" : "Von welcher Marke war dein erstes Auto?",
+  "onboarding2.securityquestion.firstkiss" : "Welchen Namen hatte das Mädchen deines ersten Kusses?",
 }

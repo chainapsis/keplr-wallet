@@ -8,6 +8,7 @@ export type IntlMessages = { [lang: string]: Record<string, string> };
 export const messages: IntlMessages = {
   en: MessagesEn,
   de: MessagesDe,
+  //es: MessagesEs  // ToDo: How to connect this 3rd language?
 };
 
 export type TypeLanguageToFiatCurrency = { ["default"]: string } & {

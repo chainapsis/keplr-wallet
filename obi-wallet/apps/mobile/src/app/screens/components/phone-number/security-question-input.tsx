@@ -82,7 +82,7 @@ export function SecurityQuestionInput({
 
 export function useSecurityQuestionInput() {
   const [securityQuestion, setSecurityQuestion] = useState(
-    SECURITY_QUESTIONS[0].value
+    SECURITY_QUESTIONS()[0].value
   );
   const [securityAnswer, setSecurityAnswer] = useState("");
 

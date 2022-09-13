@@ -144,5 +144,12 @@
   "settings.multisig.option.emailkey": "Email",
   "settings.multisig.option.cloudkey": "Cloud",
 
-  "appscreen.kado": "Buy Crypto"
+  "appscreen.kado": "Buy Crypto",
+
+  "onboarding2.securityquestion.birthplace" : "What city were you born in?",
+  "onboarding2.securityquestion.schoolname" : "What is the full name of the last elementary/primary school I attended?",
+  "onboarding2.securityquestion.mothersmaidenname" : "What is your mother's maiden name?",
+  "onboarding2.securityquestion.nickname" : "What was your childhood nickname?",
+  "onboarding2.securityquestion.firstcar" : "What was the make of your first car?",
+  "onboarding2.securityquestion.firstkiss" : "What is the full name of my first kiss?",
 }
