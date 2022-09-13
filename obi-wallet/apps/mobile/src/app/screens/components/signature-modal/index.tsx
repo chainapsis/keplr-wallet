@@ -27,12 +27,13 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { useMemo, useRef, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
+import { IntlCache } from "../../../language-picker/react-intl-inject";
 import { TextInput } from "../../../text-input";
 import {
   parseSignatureTextMessageResponse,
@@ -137,11 +138,22 @@ export function SignatureModal({
       },
     ];
   }
-  // ToDo: Translation not yet implemented: useIntl not working here:
-  // "signature.modal.biometricsignature"   "signature.modal.phonesignature"
+
   const data: Key[] = [
-    ...getKey({ id: "biometrics", title: "Biometrics Signature" }),
-    ...getKey({ id: "phoneNumber", title: "Phone Number Signature" }),
+    ...getKey({
+      id: "biometrics",
+      title: IntlCache().formatMessage({
+        id: "signature.modal.biometricsignature",
+        defaultMessage: "Biometrics Signature",
+      }),
+    }),
+    ...getKey({
+      id: "phoneNumber",
+      title: IntlCache().formatMessage({
+        id: "signature.modal.phonesignature",
+        defaultMessage: "Phone Number Signature",
+      }),
+    }),
   ];
 
   return (
@@ -182,8 +194,10 @@ export function SignatureModal({
           <View>
             <Button
               flavor="blue"
-              // ToDo: Translation not yet implemented: useIntl not working here: "signature.modal.cancel"
-              label="Cancel"
+              label={IntlCache().formatMessage({
+                id: "signature.modal.cancel",
+                defaultMessage: "Cancel",
+              })}
               onPress={() => {
                 onCancel();
               }}
@@ -191,8 +205,10 @@ export function SignatureModal({
             <Button
               disabled={!enoughSignatures}
               flavor="green"
-              // ToDo: Translation not yet implemented: useIntl not working here: "signature.modal.confirm"
-              label="Confirm"
+              label={IntlCache().formatMessage({
+                id: "signature.modal.confirm",
+                defaultMessage: "Confirm",
+              })}
               style={{
                 marginVertical: 20,
               }}
@@ -356,8 +372,10 @@ function PhoneNumberBottomSheetContent({
             />
           </Text>
           <TextInput
-            // ToDo: Translation not yet implemented: useIntl not working here: "signature.smscodelabel"
-            placeholder="8-Digits SMS-Code"
+            placeholder={IntlCache().formatMessage({
+              id: "signature.smscodelabel",
+              defaultMessage: "8-Digits SMS-Code",
+            })}
             textContentType="oneTimeCode"
             keyboardType="number-pad"
             style={{ marginTop: 25 }}
@@ -380,8 +398,10 @@ function PhoneNumberBottomSheetContent({
             </Text>
 
             <InlineButton
-              // ToDo: Translation not yet implemented: useIntl not working here: "signature.sendagain"
-              label="Resend"
+              label={IntlCache().formatMessage({
+                id: "signature.sendagain",
+                defaultMessage: "Resend",
+              })}
               onPress={async () => {
                 const message = await getMessage();
                 await sendSignatureTextMessage({
@@ -400,8 +420,13 @@ function PhoneNumberBottomSheetContent({
               onSuccess(await parseSignatureTextMessageResponse(key));
             } catch (e) {
               console.error(e);
-              // ToDo: Translation not yet implemented: useIntl not working here: "general.error"
-              Alert.alert("Error VerifyAndProceedButton (1)", e.message);
+              Alert.alert(
+                IntlCache().formatMessage({
+                  id: "general.error",
+                  defaultMessage: "Error",
+                }) + "VerifyAndProceedButton (1)",
+                e.message
+              );
             }
           }}
         />
