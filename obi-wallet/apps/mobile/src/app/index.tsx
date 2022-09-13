@@ -14,7 +14,7 @@ import { Stack } from "./stack";
 import { useStore } from "./stores";
 
 export const App = observer(() => {
-  // ToDo: After local changes of Language, it needs to be saved somewhere on the phones storage?
+  // ToDo: After change of Language, it needs to be saved somewhere on the phones storage?
 
   const languageStore = useStore().languageStore;
   const language = languageStore.currentLanguage.languagecode;
@@ -36,6 +36,14 @@ export const App = observer(() => {
             timeZoneName: "short",
           },
           de: {
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            hour12: false,
+            minute: "2-digit",
+            timeZoneName: "short",
+          },
+          es: {
             month: "short",
             day: "2-digit",
             hour: "2-digit",

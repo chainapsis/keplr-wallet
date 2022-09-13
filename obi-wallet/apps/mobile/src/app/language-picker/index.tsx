@@ -51,7 +51,6 @@ export const LanguagePicker = observer(() => {
         style={{
           width: getScreenDimensions().SCREEN_WIDTH,
           height: getScreenDimensions().SCREEN_HEIGHT,
-          zIndex: 1,
         }}
       >
         <TouchableWithoutFeedback
@@ -74,12 +73,10 @@ export const LanguagePicker = observer(() => {
               height: 50,
             }}
           >
-            {console.log("test1", currentLanguage)}
             <Image
               style={{ width: 25, height: 25, marginRight: 10 }}
               source={currentLanguage.flag}
             />
-
             <Text
               style={{ fontSize: 14, color: "#F6F5FF", letterSpacing: 0.3 }}
             >
