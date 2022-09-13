@@ -283,7 +283,11 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "low",
               })}
             >
-              {lowFee.trim(true).toString()}
+              {
+                // Hide ibc metadata because there is no space to display the ibc metadata.
+                // Generally, user can distinguish the ibc metadata because the ibc metadata should be shown in the fee currency selector.
+                lowFee.hideIBCMetadata(true).trim(true).toString()
+              }
             </div>
           </Button>
           <Button
@@ -312,7 +316,7 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "average",
               })}
             >
-              {feeConfig.getFeeTypePretty("average").trim(true).toString()}
+              {averageFee.hideIBCMetadata(true).trim(true).toString()}
             </div>
           </Button>
           <Button
@@ -339,7 +343,7 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "high",
               })}
             >
-              {feeConfig.getFeeTypePretty("high").trim(true).toString()}
+              {highFee.hideIBCMetadata(true).trim(true).toString()}
             </div>
           </Button>
         </ButtonGroup>
