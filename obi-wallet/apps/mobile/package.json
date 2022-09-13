@@ -55,6 +55,7 @@
     "react-native-keyboard-aware-scroll-view": "*",
     "react-native-keychain": "*",
     "react-native-linear-gradient": "*",
+    "react-native-qrcode-svg": "*",
     "react-native-randombytes": "*",
     "react-native-reanimated": "*",
     "react-native-safe-area-context": "*",
