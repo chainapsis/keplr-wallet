@@ -2,16 +2,23 @@
 require("setimmediate");
 // Shim ------------
 
-import React from "react";
+import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
+import { Normalize } from "styled-normalize";
 
 import { HashRouter, Route } from "react-router-dom";
 
 import { RegisterPage } from "./renewal/pages/register";
 
-ReactDOM.render(
-  <HashRouter>
-    <Route exact path="/register" component={RegisterPage} />
-  </HashRouter>,
-  document.getElementById("app")
-);
+const App: FunctionComponent = () => {
+  return (
+    <React.Fragment>
+      <Normalize />
+      <HashRouter>
+        <Route exact path="/register" component={RegisterPage} />
+      </HashRouter>
+    </React.Fragment>
+  );
+};
+
+ReactDOM.render(<App />, document.getElementById("app"));

@@ -77,6 +77,8 @@
     "sha.js": "^2.4.11",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
+    "styled-components": "^5.3.5",
+    "styled-normalize": "^8.0.7",
     "utility-types": "^3.10.0",
     "webextension-polyfill": "^0.7.0"
   },
@@ -93,6 +95,7 @@
     "@types/react-router-dom": "^5.1.2",
     "@types/reactstrap": "^8.4.2",
     "@types/sha.js": "^2.4.0",
+    "@types/styled-components": "^5.1.26",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "deepmerge": "^4.2.2",
