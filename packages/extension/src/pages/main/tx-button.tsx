@@ -110,7 +110,14 @@ export const TxButtonView: FunctionComponent = observer(() => {
       >
         <Button
           className={styleTxButton.button}
-          disabled={!hasAssets}
+          style={
+            !hasAssets
+              ? {
+                  opacity: 0.5,
+                  pointerEvents: "none",
+                }
+              : { opacity: 1, pointerEvents: "auto" }
+          }
           color="primary"
           outline
           data-loading={accountInfo.isSendingMsg === "send"}
@@ -149,9 +156,16 @@ export const TxButtonView: FunctionComponent = observer(() => {
       >
         <Button
           className={styleTxButton.button}
+          style={
+            !accountInfo.isReadyToSendMsgs || !isRewardExist
+              ? {
+                  opacity: 0.5,
+                  pointerEvents: "none",
+                }
+              : { opacity: 1, pointerEvents: "auto" }
+          }
           outline
           color="primary"
-          disabled={!accountInfo.isReadyToSendMsgs || !isRewardExist}
           onClick={withdrawAllRewards}
           data-loading={accountInfo.isSendingMsg === "withdrawRewards"}
           onMouseEnter={() => {
@@ -197,7 +211,14 @@ export const TxButtonView: FunctionComponent = observer(() => {
         >
           <Button
             className={styleTxButton.button}
-            disabled={!isStakableExist}
+            style={
+              !isStakableExist
+                ? {
+                    opacity: 0.5,
+                    pointerEvents: "none",
+                  }
+                : { opacity: 1, pointerEvents: "auto" }
+            }
             color="primary"
             outline
             onMouseEnter={() => {
