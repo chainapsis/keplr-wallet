@@ -193,6 +193,42 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       throw new Error("Fee currency not set");
     }
 
+    if (
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("osmosis-txfees") &&
+      this.queriesStore.get(this.chainId).osmosis &&
+      this.queriesStore
+        .get(this.chainId)
+        .osmosis?.queryTxFeesFeeTokens.isTxFeeToken(
+          this.feeCurrency.coinMinimalDenom
+        )
+    ) {
+      const gasPriceStep =
+        this.feeCurrencies[0].gasPriceStep ?? DefaultGasPriceStep;
+
+      const gasPrice = new Dec(gasPriceStep[feeType].toString());
+      let feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));
+
+      const spotPriceDec = this.queriesStore
+        .get(this.chainId)
+        .osmosis!.queryTxFeesSpotPriceByDenom.getQueryDenom(
+          this.feeCurrency.coinMinimalDenom
+        ).spotPriceDec;
+      if (spotPriceDec.gt(new Dec(0))) {
+        // If you calculate only the spot price, slippage cannot be considered. However, rather than performing the actual calculation here, the slippage problem is avoided by simply giving an additional value of 1%.
+        feeAmount = feeAmount.quo(spotPriceDec).mul(new Dec(1.01));
+      } else {
+        // 0 fee amount makes the simulation twice because there will be no zero fee immediately.
+        // To reduce this problem, just set the fee amount as 1.
+        feeAmount = new Dec(1);
+      }
+
+      return {
+        denom: this.feeCurrency.coinMinimalDenom,
+        amount: feeAmount.roundUp().toString(),
+      };
+    }
+
     const gasPriceStep = this.feeCurrency?.gasPriceStep ?? DefaultGasPriceStep;
 
     const gasPrice = new Dec(gasPriceStep[feeType].toString());
@@ -237,6 +273,33 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     const fee = this.getFeePrimitive();
     if (!fee) {
       return undefined;
+    }
+
+    if (
+      this.feeCurrency &&
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("osmosis-txfees") &&
+      this.queriesStore.get(this.chainId).osmosis &&
+      this.queriesStore
+        .get(this.chainId)
+        .osmosis?.queryTxFeesFeeTokens.isTxFeeToken(
+          this.feeCurrency.coinMinimalDenom
+        )
+    ) {
+      const spotPrice = this.queriesStore
+        .get(this.chainId)
+        .osmosis!.queryTxFeesSpotPriceByDenom.getQueryDenom(
+          this.feeCurrency.coinMinimalDenom
+        );
+
+      if (spotPrice.isFetching) {
+        // Show loading indicator
+        return new NotLoadedFeeError(
+          `spot price of ${this.feeCurrency.coinMinimalDenom} is loading`
+        );
+      } else if (spotPrice.error) {
+        return new Error("Failed to fetch spot price");
+      }
     }
 
     const amount = this.amountConfig.getAmountPrimitive();
