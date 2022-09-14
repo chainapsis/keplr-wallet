@@ -11,9 +11,22 @@ export const DescriptionView: FunctionComponent = () => {
         src={require("../../../public/assets/img/icons8-lock.svg")}
         alt="lock"
       />
+
       <p>
         <FormattedMessage id="setting.autolock.description" />
       </p>
+
+      {/* <p>
+        <FormattedMessage id="setting.autolock.description.title" />
+      </p>
+      <b>
+        <FormattedMessage
+          id="setting.autolock.description.note"
+          values={{
+            br: <br />,
+          }}
+        />
+      </b> */}
     </div>
   );
 };

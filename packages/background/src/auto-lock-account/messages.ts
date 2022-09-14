@@ -1,9 +1,9 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 
-export class GetAutoLockAccountIntervalMsg extends Message<number> {
+export class GetAutoLockAccountDurationMsg extends Message<number> {
   public static type() {
-    return "get-auto-lock-account-interval";
+    return "get-auto-lock-account-duration";
   }
 
   constructor() {
@@ -19,16 +19,16 @@ export class GetAutoLockAccountIntervalMsg extends Message<number> {
   }
 
   type(): string {
-    return GetAutoLockAccountIntervalMsg.type();
+    return GetAutoLockAccountDurationMsg.type();
   }
 }
 
-export class UpdateAutoLockAccountIntervalMsg extends Message<void> {
+export class UpdateAutoLockAccountDurationMsg extends Message<void> {
   public static type() {
-    return "update-auto-lock-account-interval";
+    return "update-auto-lock-account-duration";
   }
 
-  constructor(public readonly interval: number) {
+  constructor(public readonly duration: number) {
     super();
   }
 
@@ -41,28 +41,6 @@ export class UpdateAutoLockAccountIntervalMsg extends Message<void> {
   }
 
   type(): string {
-    return UpdateAutoLockAccountIntervalMsg.type();
-  }
-}
-
-export class UpdateAppLastUsedTimeMsg extends Message<void> {
-  public static type() {
-    return "update-app-last-used-time";
-  }
-
-  constructor() {
-    super();
-  }
-
-  validateBasic(): void {
-    // noop
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return UpdateAppLastUsedTimeMsg.type();
+    return UpdateAutoLockAccountDurationMsg.type();
   }
 }

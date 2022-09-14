@@ -6,9 +6,8 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import {
-  GetAutoLockAccountIntervalMsg,
-  UpdateAutoLockAccountIntervalMsg,
-  UpdateAppLastUsedTimeMsg,
+  GetAutoLockAccountDurationMsg,
+  UpdateAutoLockAccountDurationMsg,
 } from "./messages";
 import { AutoLockAccountService } from "./service";
 
@@ -17,20 +16,15 @@ export const getHandler: (service: AutoLockAccountService) => Handler = (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
-      case GetAutoLockAccountIntervalMsg:
-        return handleGetAutoLockAccountIntervalMsg(service)(
+      case GetAutoLockAccountDurationMsg:
+        return handleGetAutoLockAccountDurationMsg(service)(
           env,
-          msg as GetAutoLockAccountIntervalMsg
+          msg as GetAutoLockAccountDurationMsg
         );
-      case UpdateAutoLockAccountIntervalMsg:
-        return handleUpdateAutoLockAccountIntervalMsg(service)(
+      case UpdateAutoLockAccountDurationMsg:
+        return handleUpdateAutoLockAccountDurationMsg(service)(
           env,
-          msg as UpdateAutoLockAccountIntervalMsg
-        );
-      case UpdateAppLastUsedTimeMsg:
-        return handleUpdateAppLastUsedTimeMsg(service)(
-          env,
-          msg as UpdateAppLastUsedTimeMsg
+          msg as UpdateAutoLockAccountDurationMsg
         );
       default:
         throw new KeplrError("auto-lock-account", 100, "Unknown msg type");
@@ -38,26 +32,18 @@ export const getHandler: (service: AutoLockAccountService) => Handler = (
   };
 };
 
-const handleGetAutoLockAccountIntervalMsg: (
+const handleGetAutoLockAccountDurationMsg: (
   service: AutoLockAccountService
-) => InternalHandler<GetAutoLockAccountIntervalMsg> = (service) => {
+) => InternalHandler<GetAutoLockAccountDurationMsg> = (service) => {
   return () => {
-    return service.getAutoLockInterval();
+    return service.getAutoLockDuration();
   };
 };
 
-const handleUpdateAutoLockAccountIntervalMsg: (
+const handleUpdateAutoLockAccountDurationMsg: (
   service: AutoLockAccountService
-) => InternalHandler<UpdateAutoLockAccountIntervalMsg> = (service) => {
+) => InternalHandler<UpdateAutoLockAccountDurationMsg> = (service) => {
   return (_, msg) => {
-    return service.updateAutoLockInterval(msg.interval);
-  };
-};
-
-const handleUpdateAppLastUsedTimeMsg: (
-  service: AutoLockAccountService
-) => InternalHandler<UpdateAppLastUsedTimeMsg> = (service) => {
-  return () => {
-    return service.updateAppLastUsedTime();
+    return service.updateAutoLockDuration(msg.duration);
   };
 };

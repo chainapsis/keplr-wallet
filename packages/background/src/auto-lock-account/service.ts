@@ -6,38 +6,37 @@ export class AutoLockAccountService {
   protected keyringService!: KeyRingService;
 
   // Unit: ms
-  protected autoLockInterval: number = 0;
+  protected autoLockDuration: number = 0;
 
   protected monitoringAppIsActiveTimer: NodeJS.Timeout | null = null;
   protected monitoringInterval: number = 10000;
 
-  protected appLastUsedTime: number | null = null;
-
-  protected readonly ALARM_NAME_AUTOLOCK = "autolock-alarm";
+  protected autoLockTimer: NodeJS.Timeout | null = null;
+  protected latestActiveTime: number | null = null;
 
   constructor(protected readonly kvStore: KVStore) {}
 
   async init(keyringService: KeyRingService) {
     this.keyringService = keyringService;
-    await this.loadInterval();
+    await this.loadDuration();
     this.startMonitoringSchedule();
 
-    browser.alarms.onAlarm.addListener((alarm) => {
-      this.alarmHandler(alarm);
-    });
-    window.addEventListener("beforeunload", () => {
-      this.lock();
+    browser.idle.onStateChanged.addListener((idle) => {
+      this.stateChangedHandler(idle);
     });
   }
 
-  private alarmHandler(alarm: browser.alarms.Alarm) {
-    if (alarm.name === this.ALARM_NAME_AUTOLOCK) this.lock();
+  private stateChangedHandler(newState: browser.idle.IdleState) {
+    if (this.autoLockDuration > 0) {
+      if ((newState as any) === "locked") this.lock();
+    }
   }
 
   private startMonitoringSchedule() {
     this.stopMonitoringSchedule();
-    if (this.autoLockInterval > 0) {
+    if (this.autoLockDuration > 0) {
       this.monitoringAppIsActiveTimer = setTimeout(() => {
+        this.updateLatestActiveTime();
         const isAppActive = this.getAppIsActive();
         if (isAppActive) {
           this.stopAutoLockAccountSchedule();
@@ -56,21 +55,26 @@ export class AutoLockAccountService {
     }
   }
 
+  private updateLatestActiveTime() {
+    for (const view of browser.extension.getViews()) {
+      const background = browser.extension.getBackgroundPage();
+      if (!background || background.location.href !== view.location.href) {
+        const now = Date.now();
+        this.latestActiveTime = now;
+        this.stopAutoLockAccountSchedule();
+      }
+    }
+  }
+
   private getAppIsActive(): boolean {
     const now = Date.now();
-    let appIsActive = false;
-    if (this.appLastUsedTime != null) {
-      if (this.appLastUsedTime + this.monitoringInterval > now) {
-        appIsActive = true;
-        this.appLastUsedTime = now;
-      } else {
-        appIsActive = false;
+    if (this.latestActiveTime != null) {
+      if (this.latestActiveTime + this.monitoringInterval > now) {
+        return true;
       }
-    } else {
-      this.appLastUsedTime = now;
     }
 
-    return appIsActive;
+    return false;
   }
 
   private startAutoLockAccountSchedule() {
@@ -80,23 +84,16 @@ export class AutoLockAccountService {
         this.keyringService.keyRingStatus === KeyRingStatus.NOTLOADED)
     )
       return;
-
-    browser.alarms.get(this.ALARM_NAME_AUTOLOCK).then((result) => {
-      if (!result) {
-        if (this.autoLockInterval > 0) {
-          const interval = this.autoLockInterval / 60000;
-          browser.alarms.create(this.ALARM_NAME_AUTOLOCK, {
-            periodInMinutes: interval,
-          });
-        }
-      }
-    });
+    this.autoLockTimer = setTimeout(() => {
+      this.lock();
+    }, this.autoLockDuration);
   }
 
   private stopAutoLockAccountSchedule() {
-    browser.alarms.get(this.ALARM_NAME_AUTOLOCK).then((result) => {
-      if (result) browser.alarms.clear(this.ALARM_NAME_AUTOLOCK);
-    });
+    if (this.autoLockTimer != null) {
+      clearTimeout(this.autoLockTimer);
+      this.autoLockTimer = null;
+    }
   }
 
   private lock() {
@@ -108,38 +105,31 @@ export class AutoLockAccountService {
     }
   }
 
-  public updateAppLastUsedTime() {
-    if (this.autoLockInterval > 0) {
-      this.stopAutoLockAccountSchedule();
-      this.appLastUsedTime = Date.now();
-    }
+  public getAutoLockDuration(): number {
+    return this.autoLockDuration;
   }
 
-  public getAutoLockInterval(): number {
-    return this.autoLockInterval;
-  }
-
-  async updateAutoLockInterval(interval: number) {
-    this.saveInterval(interval);
-    await this.loadInterval();
-    if (this.autoLockInterval > 0) {
+  async updateAutoLockDuration(duration: number) {
+    this.saveDuration(duration);
+    await this.loadDuration();
+    if (this.autoLockDuration > 0) {
       this.startMonitoringSchedule();
     } else {
       this.stopMonitoringSchedule();
     }
   }
 
-  private saveInterval(interval: number) {
-    this.kvStore.set("autoLockInterval", interval);
+  private saveDuration(duration: number) {
+    this.kvStore.set("autoLockDuration", duration);
   }
 
-  private async loadInterval() {
-    let interval = await this.kvStore.get<number>("autoLockInterval");
+  private async loadDuration() {
+    let duration = await this.kvStore.get<number>("autoLockDuration");
 
-    if (interval == null) {
-      interval = 0;
-      this.saveInterval(interval);
+    if (duration == null) {
+      duration = 0;
+      this.saveDuration(duration);
     }
-    this.autoLockInterval = interval;
+    this.autoLockDuration = duration;
   }
 }

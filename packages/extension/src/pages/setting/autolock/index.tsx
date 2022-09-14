@@ -17,15 +17,15 @@ import useForm from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import {
-  GetAutoLockAccountIntervalMsg,
-  UpdateAutoLockAccountIntervalMsg,
+  GetAutoLockAccountDurationMsg,
+  UpdateAutoLockAccountDurationMsg,
 } from "@keplr-wallet/background/src/auto-lock-account";
 
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 interface FormData {
-  interval: string;
+  duration: string;
 }
 
 export const SettingAutoLockPage: FunctionComponent = observer(() => {
@@ -39,26 +39,26 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
 
   const { setValue, register, handleSubmit, errors } = useForm<FormData>({
     defaultValues: {
-      interval: "0",
+      duration: "0",
     },
   });
 
-  const getAutoLockInterval = useCallback(async () => {
-    const msg = new GetAutoLockAccountIntervalMsg();
-    requester.sendMessage(BACKGROUND_PORT, msg).then(function (interval) {
-      setValue("interval", interval / 60000 + "");
+  const getAutoLockDuration = useCallback(async () => {
+    const msg = new GetAutoLockAccountDurationMsg();
+    requester.sendMessage(BACKGROUND_PORT, msg).then(function (duration) {
+      setValue("duration", duration / 60000 + "");
     });
   }, []);
 
   useEffect(() => {
-    getAutoLockInterval();
-  }, [getAutoLockInterval]);
+    getAutoLockDuration();
+  }, [getAutoLockDuration]);
 
-  function updateAutoLockInterval(input: string) {
-    let interval = parseInt(input);
-    if (interval >= 0) {
-      interval = interval * 60000;
-      const msg = new UpdateAutoLockAccountIntervalMsg(interval);
+  function updateAutoLockDuration(input: string) {
+    let duration = parseInt(input);
+    if (duration >= 0) {
+      duration = duration * 60000;
+      const msg = new UpdateAutoLockAccountDurationMsg(duration);
       requester.sendMessage(BACKGROUND_PORT, msg);
     }
     history.goBack();
@@ -83,21 +83,21 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
           <Form
             onSubmit={handleSubmit(async (data) => {
               setIsLoading(true);
-              updateAutoLockInterval(data.interval);
+              updateAutoLockDuration(data.duration);
             })}
           >
             <Input
               label={intl.formatMessage({
-                id: "setting.autolock.interval",
+                id: "setting.autolock.duration",
               })}
-              name="interval"
+              name="duration"
               ref={register({
                 required: intl.formatMessage({
                   id: "setting.autolock.error.required",
                 }),
                 validate: (input: string): string | undefined => {
-                  const interval = parseInt(input);
-                  if (interval < minDuration || interval > maxDuration) {
+                  const duration = parseInt(input);
+                  if (duration < minDuration || duration > maxDuration) {
                     return intl.formatMessage({
                       id: "setting.autolock.error.out-of-range",
                     });
@@ -106,7 +106,7 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
               })}
               type="text"
               pattern="[0-9]*"
-              error={errors.interval && errors.interval.message}
+              error={errors.duration && errors.duration.message}
             />
             <Button
               type="submit"
