@@ -5,7 +5,7 @@ import {
   PubKeySecp256k1,
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
-import { Ledger, LedgerService } from "../ledger";
+import { Ledger, LedgerApp, LedgerService } from "../ledger";
 import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 import { ChainInfo, EthSignType } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
@@ -309,6 +309,7 @@ export class KeyRing {
     // Get public key first
     const publicKey = await this.ledgerKeeper.getPublicKey(
       env,
+      LedgerApp.Cosmos,
       118,
       bip44HDPath
     );
@@ -654,7 +655,7 @@ export class KeyRing {
         // ask the Ledger object to load the appropriate public key, and throw
         // an error to indicate next steps in the UI.
         if (!Object.keys(this.ledgerPublicKeyCache).includes(path)) {
-          this.loadLedgerPublicKey(coinType);
+          this.loadLedgerPublicKey(coinType, LedgerApp.Ethereum);
           throw new KeplrError(
             "keyring",
             153,
@@ -994,6 +995,7 @@ export class KeyRing {
     // Get public key first
     const publicKey = await this.ledgerKeeper.getPublicKey(
       env,
+      LedgerApp.Cosmos,
       118,
       bip44HDPath
     );
@@ -1274,7 +1276,7 @@ export class KeyRing {
 
   // Load the public key for the given coinType using the appropriate Ledger app,
   // provided the coinType is supported by Ledger.
-  private async loadLedgerPublicKey(coinType: number) {
+  private async loadLedgerPublicKey(coinType: number, ledgerApp: LedgerApp) {
     if (!this._ledgerPublicKeyCache || !this.ledgerPublicKeyCache) {
       throw new KeplrError("keyring", 150, "Ledger not initialized");
     }
@@ -1285,6 +1287,7 @@ export class KeyRing {
 
     const pubkey = await this.ledgerKeeper.getPublicKey(
       undefined,
+      ledgerApp,
       coinType,
       KeyRing.getKeyStoreBIP44Path(this.keyStore)
     );

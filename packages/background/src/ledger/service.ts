@@ -1,4 +1,9 @@
-import { Ledger, LedgerWebHIDIniter, LedgerWebUSBIniter } from "./ledger";
+import {
+  Ledger,
+  LedgerApp,
+  LedgerWebHIDIniter,
+  LedgerWebUSBIniter,
+} from "./ledger";
 
 import delay from "delay";
 
@@ -43,13 +48,14 @@ export class LedgerService {
 
   async getPublicKey(
     env: Env | undefined,
+    ledgerApp: LedgerApp,
     coinType: number,
     bip44HDPath: BIP44HDPath
   ): Promise<Uint8Array> {
-    return await this.useLedger(env, coinType, async (ledger, retryCount) => {
+    return await this.useLedger(env, ledgerApp, async (ledger, retryCount) => {
       try {
         // Cosmos App on Ledger doesn't support the coin type other than 118.
-        return await ledger.getPublicKey([
+        return await ledger.getPublicKey(ledgerApp, [
           44,
           coinType,
           bip44HDPath.account,
@@ -74,12 +80,14 @@ export class LedgerService {
     expectedPubKey: Uint8Array,
     message: Uint8Array
   ): Promise<Uint8Array> {
+    const ledgerApp = LedgerApp.Cosmos;
+
     return await this.useLedger(
       env,
-      118,
+      ledgerApp,
       async (ledger, retryCount: number) => {
         try {
-          const pubKey = await ledger.getPublicKey([
+          const pubKey = await ledger.getPublicKey(ledgerApp, [
             44,
             118,
             bip44HDPath.account,
@@ -131,12 +139,14 @@ export class LedgerService {
     expectedPubKey: Uint8Array,
     message: Uint8Array
   ): Promise<Uint8Array> {
+    const ledgerApp = LedgerApp.Ethereum;
+
     return await this.useLedger(
       undefined,
-      60,
+      ledgerApp,
       async (ledger, retryCount: number) => {
         try {
-          const pubKey = await ledger.getPublicKey([
+          const pubKey = await ledger.getPublicKey(ledgerApp, [
             44,
             60,
             bip44HDPath.account,
@@ -184,12 +194,12 @@ export class LedgerService {
 
   async useLedger<T>(
     env: Env | undefined,
-    coinType: number,
+    ledgerApp: LedgerApp,
     fn: (ledger: Ledger, retryCount: number) => Promise<T>
   ): Promise<T> {
     let ledger: { ledger: Ledger; retryCount: number } | undefined;
     try {
-      ledger = await this.initLedger(env, coinType);
+      ledger = await this.initLedger(env, ledgerApp);
       return await fn(ledger.ledger, ledger.retryCount);
     } finally {
       if (ledger) {
@@ -200,9 +210,9 @@ export class LedgerService {
 
   async initLedger(
     env: Env | undefined,
-    coinType: number
+    ledgerApp: LedgerApp
   ): Promise<{ ledger: Ledger; retryCount: number }> {
-    const initAborter = this.previousInitAborter[coinType];
+    const initAborter = this.previousInitAborter[ledgerApp];
     if (initAborter) {
       initAborter(
         new Error(
@@ -230,7 +240,7 @@ export class LedgerService {
 
     // This ensures that the ledger connection is not executed concurrently.
     // Without this, the prior signing request can be delivered to the ledger and possibly make a user take a mistake.
-    this.previousInitAborter[coinType] = aborter.abort;
+    this.previousInitAborter[ledgerApp] = aborter.abort;
 
     let retryCount = 0;
     let initArgs: any[] = [];
@@ -242,8 +252,8 @@ export class LedgerService {
           throw new KeplrError("ledger", 112, `Unknown mode: ${mode}`);
         }
 
-        const ledger = await Ledger.init(transportIniter, initArgs, coinType);
-        this.previousInitAborter[coinType] = undefined;
+        const ledger = await Ledger.init(transportIniter, initArgs, ledgerApp);
+        this.previousInitAborter[ledgerApp] = undefined;
         return {
           ledger,
           retryCount,

@@ -11,6 +11,11 @@ import { EthSignType } from "@keplr-wallet/types";
 import { BIP44HDPath } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 
+export enum LedgerApp {
+  Cosmos,
+  Ethereum,
+}
+
 export enum LedgerInitErrorOn {
   Transport,
   App,
@@ -25,10 +30,6 @@ export const LedgerWebUSBIniter: TransportIniter = async () => {
 export const LedgerWebHIDIniter: TransportIniter = async () => {
   return await TransportWebHID.create();
 };
-
-// 118 - Cosmos App
-// 60 - Ethereum App
-export const SupportedCoinTypes = [60, 118];
 
 export class LedgerInitError extends Error {
   constructor(public readonly errorOn: LedgerInitErrorOn, message?: string) {
@@ -48,18 +49,11 @@ export class Ledger {
   static async init(
     transportIniter: TransportIniter,
     initArgs: any[] = [],
-    coinType: number = 118
+    app: LedgerApp = LedgerApp.Cosmos
   ): Promise<Ledger> {
     const transport = await transportIniter(...initArgs);
     try {
-      if (!SupportedCoinTypes.includes(coinType)) {
-        throw new LedgerInitError(
-          LedgerInitErrorOn.Support,
-          "This app or coinType is not supported."
-        );
-      }
-
-      if (coinType === 60) {
+      if (app === LedgerApp.Ethereum) {
         const ethereumApp = new Eth(transport);
         const ledger = new Ledger(null, ethereumApp);
 
@@ -118,28 +112,8 @@ export class Ledger {
     };
   }
 
-  async getPublicKey(path: number[]): Promise<Uint8Array> {
-    const coinType = path[1];
-    if (!SupportedCoinTypes.includes(coinType)) {
-      throw new KeplrError(
-        "ledger",
-        100,
-        `Invalid coin type in path: expected 60 or 118 but got ${coinType}`
-      );
-    }
-
-    if (coinType === 118) {
-      if (!this.cosmosApp) {
-        throw new KeplrError("ledger", 100, "Cosmos App not initialized");
-      }
-
-      const result = await this.cosmosApp.publicKey(path);
-      if (result.error_message !== "No errors") {
-        throw new Error(result.error_message);
-      }
-
-      return result.compressed_pk;
-    } else {
+  async getPublicKey(app: LedgerApp, path: number[]): Promise<Uint8Array> {
+    if (app === LedgerApp.Ethereum) {
       if (!this.ethereumApp) {
         throw new KeplrError("ledger", 100, "Ethereum App not initialized");
       }
@@ -155,6 +129,17 @@ export class Ledger {
       } catch (e: any) {
         throw new Error(e);
       }
+    } else {
+      if (!this.cosmosApp) {
+        throw new KeplrError("ledger", 100, "Cosmos App not initialized");
+      }
+
+      const result = await this.cosmosApp.publicKey(path);
+      if (result.error_message !== "No errors") {
+        throw new Error(result.error_message);
+      }
+
+      return result.compressed_pk;
     }
   }
 
