@@ -19,8 +19,6 @@ import { useConfirm } from "../../components/confirm";
 import { ChainUpdaterService } from "@keplr-wallet/background";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
-import bellIcon from "../../public/assets/icon/bell.png";
-import { DepositView } from "./deposit";
 // import { IBCTransferView } from "./ibc-transfer";
 
 export const MainPage: FunctionComponent = observer(() => {

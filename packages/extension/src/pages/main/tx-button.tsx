@@ -14,7 +14,6 @@ import { FormattedMessage } from "react-intl";
 import { useHistory } from "react-router";
 
 import { Dec } from "@keplr-wallet/unit";
-import classnames from "classnames";
 
 import send from "../../public/assets/icon/send.png";
 import reward from "../../public/assets/icon/reward.png";
