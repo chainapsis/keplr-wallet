@@ -9,15 +9,12 @@
  */
 
 /* eslint-env node */
-
-"use strict";
-
-const babelRegisterOnly = require("metro-babel-register");
-const createCacheKeyFunction =
-  require("@jest/create-cache-key-function").default;
-
 const { transformSync: babelTransformSync } = require("@babel/core");
 const generate = require("@babel/generator").default;
+const createCacheKeyFunction =
+  require("@jest/create-cache-key-function").default;
+const babelRegisterOnly = require("metro-babel-register");
+const transformer = require("metro-react-native-babel-transformer");
 
 const nodeFiles = new RegExp(
   [
@@ -28,7 +25,6 @@ const nodeOptions = babelRegisterOnly.config([nodeFiles]);
 
 babelRegisterOnly([]);
 
-const transformer = require("metro-react-native-babel-transformer");
 module.exports = {
   process(src /*: string */, file /*: string */) /*: {code: string, ...} */ {
     if (nodeFiles.test(file)) {
