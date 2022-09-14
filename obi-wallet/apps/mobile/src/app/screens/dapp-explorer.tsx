@@ -11,7 +11,7 @@ export function DappExplorer() {
   const safeArea = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#090817" }}>
+    <SafeAreaView style={{ backgroundColor: "#090817", flex: 1 }}>
       <Home
         appsStore={appsStore}
         multisigStore={multisigStore}

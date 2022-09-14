@@ -130,7 +130,7 @@ export const KeysConfigScreen = observer(() => {
         </Text>
       </View>
       <View style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>
-        {getSVG(activatedKeys)}
+        <View>{getSVG(activatedKeys)}</View>
         <Text
           style={[
             styles.heading,
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 10,
-    marginTop: 47,
+    marginTop: 30,
   },
   subHeading: {
     color: "#999CB6",

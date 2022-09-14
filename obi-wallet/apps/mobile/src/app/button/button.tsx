@@ -107,6 +107,10 @@ export function Button({
   if (Platform.OS === "ios") {
     return <TouchableHighlight {...buttonProps} />;
   } else {
-    return <TouchableNativeFeedback {...buttonProps} />;
+    return (
+      <TouchableNativeFeedback {...buttonProps}>
+        <View {...buttonProps} />
+      </TouchableNativeFeedback>
+    );
   }
 }

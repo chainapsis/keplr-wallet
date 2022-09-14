@@ -24,6 +24,7 @@ export function VerifyAndProceedButton({
       flavor={disabled ? "gray" : "blue"}
       onPress={onPress}
       disabled={disabled}
+      style={{ marginBottom: 20 }}
     />
   );
 }
