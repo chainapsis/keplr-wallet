@@ -203,17 +203,6 @@ export const EmbedChainInfos: ChainInfo[] = [
           high: 0.04,
         },
       },
-      {
-        coinDenom: "ION",
-        coinMinimalDenom: "uion",
-        coinDecimals: 6,
-        coinGeckoId: "ion",
-        gasPriceStep: {
-          low: 0,
-          average: 0.000001,
-          high: 0.000004,
-        },
-      },
     ],
     features: ["ibc-transfer", "ibc-go", "cosmwasm", "osmosis-txfees"],
   },
