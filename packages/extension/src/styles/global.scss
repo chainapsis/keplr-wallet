@@ -1,5 +1,9 @@
 @charset "utf-8";
 
+$theme-colors: (
+  "primary": #3b82f6,
+);
+
 @import "../../../../node_modules/argon-dashboard-react/src/assets/plugins/nucleo/css/nucleo.css";
 
 $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
@@ -39,6 +43,26 @@ html {
   background-color: white;
 
   overflow: auto;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0%);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #dae2ed;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #d0def5;
 }
 
 body {

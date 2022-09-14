@@ -45,12 +45,10 @@
   position: relative;
 
   .center-text {
-    position: absolute;
     z-index: 1;
     text-align: center;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
 
     .big {
       font-size: 13px;
@@ -74,21 +72,109 @@
   }
 }
 
-.legend {
-  display: flex;
+.legendContainer {
+  margin: 12px;
   width: 100%;
 
-  .label {
-    letter-spacing: -0.3px;
-    flex: 1;
+  .legend {
     display: flex;
-    justify-content: flex-end;
+    width: 100%;
+
+    .label {
+      letter-spacing: -0.3px;
+      flex: 1;
+      display: flex;
+    }
+
+    .value {
+      letter-spacing: -0.3px;
+      flex: 1;
+      display: flex;
+      font-weight: bold;
+    }
+  }
+}
+
+.progressDiv {
+  background-color: #d43bf6;
+  border-radius: 2px;
+  position: relative;
+}
+
+.progressAvailable {
+  background-color: #5e72e4;
+  height: 20px;
+  border-radius: 2px;
+  transition: 1s ease;
+  transition-delay: 0.5s;
+  z-index: 2;
+  position: absolute;
+}
+
+.progressStake {
+  background-color: #11cdef;
+  height: 20px;
+  border-radius: 2px;
+  transition: 1.5s ease;
+  transition-delay: 0.5s;
+  position: static;
+  z-index: 1;
+}
+
+.hr {
+  margin: $main-card-padding 0;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .title {
+    margin: 24px 0 16px;
+    color: #525f7f;
+    font-weight: 700;
+    font-size: 20px;
   }
 
-  .value {
-    letter-spacing: -0.3px;
-    flex: 1;
+  .buyButton {
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  img {
+    width: 170px;
+    height: 170px;
+  }
+
+  p {
+    margin-top: 14px;
+    font-size: 16px;
+    font-weight: 400;
+    color: #525f7f;
+    text-align: center;
+  }
+
+  button {
+    width: 100%;
+    background-color: #3b82f6;
+    font-weight: 700;
+    color: #fff;
+    font-size: 14px;
+    height: 35px;
+    border: none;
+    outline: none;
+    border-radius: 6px;
     display: flex;
-    font-weight: bold;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+
+    img {
+      width: 14px;
+      height: 14px;
+    }
   }
 }

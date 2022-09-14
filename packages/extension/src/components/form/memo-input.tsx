@@ -30,12 +30,13 @@ export const MemoInput: FunctionComponent<MemoInputProps> = observer(
             {label}
           </Label>
         ) : null}
+        
         <Input
           id={inputId}
           className="form-control-alternative"
           type="textarea"
           rows={rows ? rows : 2}
-          style={{ resize: "none" }}
+          style={{ resize: "none",boxShadow:"0 3px 3px rgb(50 50 93 / 15%), 0 1px 0 rgb(0 0 0 / 2%)"}}
           value={memoConfig.memo}
           onChange={(e) => {
             memoConfig.setMemo(e.target.value);

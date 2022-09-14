@@ -3,6 +3,7 @@ import React, { CSSProperties, FunctionComponent, useState } from "react";
 import { MenuProvider, MenuContext } from "../menu";
 
 import { Header, Props as HeaderProps } from "../header";
+import { BottomNav } from "../bottom-nav";
 
 import style from "./style.module.scss";
 
@@ -33,6 +34,7 @@ export const HeaderLayout: FunctionComponent<Props> = (props) => {
       <div className={style.container} style={props.style}>
         <Header {...props} isMenuOpen={isMenuOpen} />
         <div className={style.innerContainer}>{children}</div>
+        <BottomNav />
       </div>
     </MenuProvider>
   );

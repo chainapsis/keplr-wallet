@@ -1,0 +1,42 @@
+@import "../../styles/var";
+
+.right {
+  height: $header-height;
+  padding-right: $layout-padding;
+
+  display: flex;
+  flex-direction: column;
+
+  .sign-out {
+    font-size: 20px;
+    padding: 0 8px;
+
+    i {
+      cursor: pointer;
+      color: #8f8f8f;
+
+      &:hover {
+        color: black;
+      }
+    }
+  }
+}
+
+.container-account-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  // height: 360px - 2 * $main-card-padding;
+}
+
+.card {
+  margin-bottom: $layout-margin;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  :global(.card-body) {
+    padding: $main-card-padding;
+  }
+}

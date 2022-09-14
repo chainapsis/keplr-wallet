@@ -1,115 +1,137 @@
-import React, { FunctionComponent } from "react";
-
-import { Dec, DecUtils } from "@keplr-wallet/unit";
-
 import { observer } from "mobx-react-lite";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+import { FormattedMessage } from "react-intl";
+import { ToolTip } from "../../components/tooltip";
+import { useLanguage } from "../../languages";
 import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
-import { ToolTip } from "../../components/tooltip";
-import { FormattedMessage, useIntl } from "react-intl";
-import { useLanguage } from "../../languages";
+import { TxButtonView } from "./tx-button";
+import walletIcon from "../../public/assets/icon/wallet.png";
+import buyIcon from "../../public/assets/icon/buy.png";
+import { DepositView } from "./deposit";
+import { DepositModal } from "./qr-code";
+import { useNotification } from "../../components/notification";
+import { useIntl } from "react-intl";
+import { WalletStatus } from "@keplr-wallet/stores";
 
-const LazyDoughnut = React.lazy(async () => {
-  const module = await import(
-    /* webpackChunkName: "reactChartJS" */ "react-chartjs-2"
+export const ProgressBar = ({
+  width,
+  data,
+}: {
+  width: number;
+  data: number[];
+}) => {
+  const [values, setValues] = useState([0, 0]);
+
+  useEffect(() => {
+    const total = data[0] + data[1] + data[2];
+    const percentageAvailable = data[0] / total;
+    const percentageStake = data[1] / total;
+    setValues([percentageAvailable * width, percentageStake * width]);
+  }, [width, data[0], data[1], data[2]]);
+
+  return (
+    <div>
+      <div className={styleAsset.progressDiv} style={{ width }}>
+        <div
+          style={{ width: `${values[0]}px` }}
+          className={styleAsset.progressAvailable}
+        />
+        <div
+          style={{ width: `${values[0] + values[1]}px` }}
+          className={styleAsset.progressStake}
+        />
+      </div>
+    </div>
   );
+};
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const chartJS = module.Chart as any;
-
-  chartJS.pluginService.register({
-    beforeDraw: function (chart: any): void {
-      const round = {
-        x: (chart.chartArea.left + chart.chartArea.right) / 2,
-        y: (chart.chartArea.top + chart.chartArea.bottom) / 2,
-        radius: (chart.outerRadius + chart.innerRadius) / 2,
-        thickness: (chart.outerRadius - chart.innerRadius) / 2,
-      };
-
-      const ctx = chart.chart.ctx;
-
-      // Draw the background circle.
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(round.x, round.y, round.radius, 0, 2 * Math.PI);
-      ctx.closePath();
-      ctx.lineWidth = round.thickness * 2;
-      ctx.strokeStyle = "#f4f5f7";
-      ctx.stroke();
-      ctx.restore();
-    },
-    beforeTooltipDraw: function (chart: any): void {
-      const data = chart.getDatasetMeta(0).data;
-
-      const round = {
-        x: (chart.chartArea.left + chart.chartArea.right) / 2,
-        y: (chart.chartArea.top + chart.chartArea.bottom) / 2,
-        radius: (chart.outerRadius + chart.innerRadius) / 2,
-        thickness: (chart.outerRadius - chart.innerRadius) / 2,
-      };
-
-      const ctx = chart.chart.ctx;
-
-      const drawCircle = (angle: number, color: string) => {
-        ctx.save();
-        ctx.translate(round.x, round.y);
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(
-          round.radius * Math.sin(angle),
-          round.radius * Math.cos(angle),
-          round.thickness,
-          0,
-          2 * Math.PI
-        );
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-      };
-
-      const drawCircleEndEachOther = (arc1: any, arc2: any) => {
-        const startAngle1 = Math.PI / 2 - arc1._view.startAngle;
-        const endAngle1 = Math.PI / 2 - arc1._view.endAngle;
-
-        const startAngle2 = Math.PI / 2 - arc2._view.startAngle;
-        // Nomalize
-        const endAngle2 = Math.atan2(
-          Math.sin(Math.PI / 2 - arc2._view.endAngle),
-          Math.cos(Math.PI / 2 - arc2._view.endAngle)
-        );
-
-        // If the end of the first arc and the end of the second arc overlap,
-        // Don't draw the first arc's end because it overlaps and looks weird.
-        if (Math.abs(startAngle1 - endAngle2) > (Math.PI / 180) * 3) {
-          drawCircle(startAngle1, arc1._view.backgroundColor);
-        }
-        if (Math.abs(endAngle1 - startAngle2) > (Math.PI / 180) * 3) {
-          drawCircle(endAngle1, arc1._view.backgroundColor);
-        }
-
-        if (
-          Math.abs(startAngle2) > (Math.PI / 180) * 3 ||
-          Math.abs(endAngle2) > (Math.PI / 180) * 3
-        ) {
-          drawCircle(startAngle2, arc2._view.backgroundColor);
-          drawCircle(endAngle2, arc2._view.backgroundColor);
-        }
-      };
-
-      if (data.length == 2) {
-        drawCircleEndEachOther(data[0], data[1]);
-      }
-    },
-  });
-
-  return { default: module.Doughnut };
-});
-
-export const AssetStakedChartView: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
+const EmptyState = ({
+  chainName,
+  denom,
+  chainId,
+  bech32Address,
+  walletStatus,
+}: {
+  chainName: string;
+  denom: string;
+  chainId: string;
+  bech32Address: string;
+  walletStatus: WalletStatus;
+}) => {
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
 
   const intl = useIntl();
+
+  const notification = useNotification();
+
+  const copyAddress = useCallback(
+    async (address: string) => {
+      if (walletStatus === WalletStatus.Loaded) {
+        await navigator.clipboard.writeText(address);
+        notification.push({
+          placement: "top-center",
+          type: "success",
+          duration: 2,
+          content: intl.formatMessage({
+            id: "main.address.copied",
+          }),
+          canDelete: true,
+          transition: {
+            duration: 0.25,
+          },
+        });
+      }
+    },
+    [walletStatus, bech32Address, notification, intl]
+  );
+
+  return (
+    <div className={styleAsset.emptyState}>
+      <DepositModal
+        chainName={chainName}
+        bech32Address={bech32Address}
+        isDepositOpen={isDepositOpen}
+        setIsDepositOpen={setIsDepositOpen}
+      />
+
+      <h1 className={styleAsset.title}>No funds added</h1>
+      <img src={walletIcon} alt="no fund" />
+      <p className={styleAsset.desc}>
+        That’s okay, you can deposit tokens to your address or buy some.
+      </p>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          copyAddress(bech32Address);
+          setIsDepositOpen(true);
+        }}
+      >
+        Deposit {denom}
+      </button>
+      {chainId == "fetchhub-4" && (
+        <a
+          href={"https://indacoin.io/buy-fetch.ai-with-card"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styleAsset.buyButton}
+        >
+          <button>
+            <img src={buyIcon} alt="buy tokens" /> Buy Tokens
+          </button>
+        </a>
+      )}
+    </div>
+  );
+};
+
+export const AssetView: FunctionComponent = observer(() => {
+  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const language = useLanguage();
 
@@ -135,12 +157,22 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
     .getQueryBech32Address(accountInfo.bech32Address)
     .total.upperCase(true);
 
+  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
+    accountInfo.bech32Address
+  );
+
+  const stakableReward = rewards.stakableReward;
+
   const stakedSum = delegated.add(unbonding);
 
-  const total = stakable.add(stakedSum);
+  const total = stakable.add(stakedSum).add(stakableReward);
 
   const stakablePrice = priceStore.calculatePrice(stakable, fiatCurrency);
   const stakedSumPrice = priceStore.calculatePrice(stakedSum, fiatCurrency);
+  const stakableRewardPrice = priceStore.calculatePrice(
+    stakableReward,
+    fiatCurrency
+  );
 
   const totalPrice = priceStore.calculatePrice(total, fiatCurrency);
 
@@ -153,163 +185,117 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
     stakedSumPrice
       ? parseFloat(stakedSumPrice.toDec().toString())
       : parseFloat(stakedSum.toDec().toString()),
+    stakableRewardPrice
+      ? parseFloat(stakableRewardPrice.toDec().toString())
+      : parseFloat(stakableReward.toDec().toString()),
   ];
+
+  const hasBalance = totalPrice
+    ? !totalPrice.toDec().isZero()
+    : !total.toDec().isZero();
+
+  if (!hasBalance) {
+    return (
+      <EmptyState
+        chainName={current.chainName}
+        denom={chainStore.current.stakeCurrency.coinDenom}
+        chainId={chainStore.current.chainId}
+        bech32Address={accountInfo.bech32Address}
+        walletStatus={accountInfo.walletStatus}
+      />
+    );
+  }
 
   return (
     <React.Fragment>
-      <div className={styleAsset.containerChart}>
-        <div className={styleAsset.centerText}>
-          <div className={styleAsset.big}>
-            <FormattedMessage id="main.account.chart.total-balance" />
-          </div>
-          <div className={styleAsset.small}>
-            {totalPrice
-              ? totalPrice.toString()
-              : total.shrink(true).trim(true).maxDecimals(6).toString()}
-          </div>
-          <div className={styleAsset.indicatorIcon}>
-            <React.Fragment>
-              {balanceStakableQuery.isFetching ? (
-                <i className="fas fa-spinner fa-spin" />
-              ) : balanceStakableQuery.error ? (
-                <ToolTip
-                  tooltip={
-                    balanceStakableQuery.error?.message ||
-                    balanceStakableQuery.error?.statusText
-                  }
-                  theme="dark"
-                  trigger="hover"
-                  options={{
-                    placement: "top",
-                  }}
-                >
-                  <i className="fas fa-exclamation-triangle text-danger" />
-                </ToolTip>
-              ) : null}
-            </React.Fragment>
-          </div>
-        </div>
-        <React.Suspense fallback={<div style={{ height: "150px" }} />}>
-          <LazyDoughnut
-            data={{
-              datasets: [
-                {
-                  data,
-                  backgroundColor: ["#5e72e4", "#11cdef"],
-                  borderWidth: [0, 0],
-                },
-              ],
-
-              labels: [
-                intl.formatMessage({
-                  id: "main.account.chart.available-balance",
-                }),
-                intl.formatMessage({
-                  id: "main.account.chart.staked-balance",
-                }),
-              ],
-            }}
-            options={{
-              rotation: 0.5 * Math.PI,
-              cutoutPercentage: 85,
-              legend: {
-                display: false,
-              },
-              tooltips: {
-                callbacks: {
-                  label: (item) => {
-                    let ratio = new Dec(0);
-                    // There are only two labels (stakable, staked (including unbondings)).
-                    if (item.index === 0) {
-                      if (!total.toDec().equals(new Dec(0))) {
-                        ratio = stakable
-                          .toDec()
-                          .quo(total.toDec())
-                          .mul(DecUtils.getPrecisionDec(2));
-                      }
-
-                      return `${
-                        stakablePrice
-                          ? stakablePrice.toString()
-                          : stakable
-                              .separator("")
-                              .trim(true)
-                              .shrink(true)
-                              .maxDecimals(6)
-                              .toString()
-                      } (${ratio.toString(1)}%)`;
-                    } else if (item.index === 1) {
-                      if (!total.toDec().equals(new Dec(0))) {
-                        ratio = stakedSum
-                          .toDec()
-                          .quo(total.toDec())
-                          .mul(DecUtils.getPrecisionDec(2));
-                      }
-
-                      return `${
-                        stakedSumPrice
-                          ? stakedSumPrice.toString()
-                          : stakedSum
-                              .separator("")
-                              .trim(true)
-                              .shrink(true)
-                              .maxDecimals(6)
-                              .toString()
-                      } (${ratio.toString(1)}%)`;
+      <div className={styleAsset.containerAsset}>
+        <div className={styleAsset.containerChart}>
+          <div className={styleAsset.centerText}>
+            <div className={styleAsset.big}>
+              <FormattedMessage id="main.account.chart.total-balance" />
+            </div>
+            <div
+              className={styleAsset.small}
+              style={{
+                marginBottom: "20px",
+              }}
+            >
+              {totalPrice
+                ? totalPrice.toString()
+                : total.shrink(true).trim(true).maxDecimals(6).toString()}
+            </div>
+            <div className={styleAsset.indicatorIcon}>
+              <React.Fragment>
+                {balanceStakableQuery.isFetching ? (
+                  <i className="fas fa-spinner fa-spin" />
+                ) : balanceStakableQuery.error ? (
+                  <ToolTip
+                    tooltip={
+                      balanceStakableQuery.error?.message ||
+                      balanceStakableQuery.error?.statusText
                     }
-
-                    return "Unexpected error";
-                  },
-                },
-              },
-            }}
-          />
-        </React.Suspense>
-      </div>
-      <div style={{ marginTop: "12px", width: "100%" }}>
-        <div className={styleAsset.legend}>
-          <div className={styleAsset.label} style={{ color: "#5e72e4" }}>
-            <span className="badge-dot badge badge-secondary">
-              <i className="bg-primary" />
-            </span>
-            <FormattedMessage id="main.account.chart.available-balance" />
+                    theme="dark"
+                    trigger="hover"
+                    options={{
+                      placement: "top",
+                    }}
+                  >
+                    <i className="fas fa-exclamation-triangle text-danger" />
+                  </ToolTip>
+                ) : null}
+              </React.Fragment>
+            </div>
           </div>
-          <div style={{ minWidth: "16px" }} />
-          <div
-            className={styleAsset.value}
-            style={{
-              color: "#525f7f",
-            }}
-          >
-            {stakable.shrink(true).maxDecimals(6).toString()}
+          <ProgressBar width={300} data={data} />
+        </div>
+        <div className={styleAsset.legendContainer}>
+          <div className={styleAsset.legend}>
+            <div className={styleAsset.label} style={{ color: "#5e72e4" }}>
+              <FormattedMessage id="main.account.chart.available-balance" />
+            </div>
+            <div style={{ minWidth: "16px" }} />
+            <div
+              className={styleAsset.value}
+              style={{
+                color: "#525f7f",
+              }}
+            >
+              {stakable.shrink(true).maxDecimals(6).toString()}
+            </div>
+          </div>
+          <div className={styleAsset.legend}>
+            <div className={styleAsset.label} style={{ color: "#11cdef" }}>
+              <FormattedMessage id="main.account.chart.staked-balance" />
+            </div>
+            <div style={{ minWidth: "16px" }} />
+            <div
+              className={styleAsset.value}
+              style={{
+                color: "#525f7f",
+              }}
+            >
+              {stakedSum.shrink(true).maxDecimals(6).toString()}
+            </div>
+          </div>
+          <div className={styleAsset.legend}>
+            <div className={styleAsset.label} style={{ color: "#D43BF6" }}>
+              <FormattedMessage id="main.account.chart.reward-balance" />
+            </div>
+            <div style={{ minWidth: "16px" }} />
+            <div
+              className={styleAsset.value}
+              style={{
+                color: "#525f7f",
+              }}
+            >
+              {stakableReward.shrink(true).maxDecimals(6).toString()}
+            </div>
           </div>
         </div>
-        <div className={styleAsset.legend}>
-          <div className={styleAsset.label} style={{ color: "#11cdef" }}>
-            <span className="badge-dot badge badge-secondary">
-              <i className="bg-info" />
-            </span>
-            <FormattedMessage id="main.account.chart.staked-balance" />
-          </div>
-          <div style={{ minWidth: "16px" }} />
-          <div
-            className={styleAsset.value}
-            style={{
-              color: "#525f7f",
-            }}
-          >
-            {stakedSum.shrink(true).maxDecimals(6).toString()}
-          </div>
-        </div>
       </div>
+      <TxButtonView />
+      <hr className={styleAsset.hr} />
+      <DepositView />
     </React.Fragment>
   );
 });
-
-export const AssetView: FunctionComponent = () => {
-  return (
-    <div className={styleAsset.containerAsset}>
-      <AssetStakedChartView />
-    </div>
-  );
-};
