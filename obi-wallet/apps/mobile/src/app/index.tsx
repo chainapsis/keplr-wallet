@@ -4,15 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { IntlProvider } from "react-intl";
 import { AppState, StatusBar } from "react-native";
 import codePush from "react-native-code-push";
-import {
-  APP_CENTER_DEPLOYMENT_KEY_PRODUCTION,
-  APP_CENTER_DEPLOYMENT_KEY_STAGING,
-  APP_ENV,
-} from "react-native-dotenv";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { rootStore } from "../background/root-store";
-import { envInvariant } from "../helpers/invariant";
+import { deploymentKey } from "./code-push";
 import { Loader } from "./loader";
 import { ReceiveScreen } from "./screens/receive";
 import { SendScreen } from "./screens/send";
@@ -25,7 +20,7 @@ import { StoreContext } from "./stores";
 export function App() {
   const [updating, setUpdating] = useState(false);
   const appState = useRef(AppState.currentState);
-  const lastUpdate = useRef(new Date());
+  const lastUpdate = useRef(0);
 
   useEffect(() => {
     const listener = AppState.addEventListener(
@@ -35,25 +30,8 @@ export function App() {
           appState.current.match(/inactive|background|unknown/) &&
           nextAppState === "active"
         ) {
-          const timeSinceLastUpdate =
-            new Date().getTime() - lastUpdate.current.getTime();
-
-          if (timeSinceLastUpdate > 60 * 1000 && !__DEV__) {
-            envInvariant("APP_ENV", APP_ENV);
-            envInvariant(
-              "APP_CENTER_DEPLOYMENT_KEY_PRODUCTION",
-              APP_CENTER_DEPLOYMENT_KEY_PRODUCTION
-            );
-            envInvariant(
-              "APP_CENTER_DEPLOYMENT_KEY_STAGING",
-              APP_CENTER_DEPLOYMENT_KEY_STAGING
-            );
-
-            const deploymentKey =
-              APP_ENV === "production"
-                ? APP_CENTER_DEPLOYMENT_KEY_PRODUCTION
-                : APP_CENTER_DEPLOYMENT_KEY_STAGING;
-
+          const timeSinceLastUpdate = new Date().getTime() - lastUpdate.current;
+          if (timeSinceLastUpdate > 5 * 1000 && !__DEV__) {
             if (await codePush.checkForUpdate(deploymentKey)) {
               await setUpdating(true);
               await codePush.sync({
@@ -64,7 +42,7 @@ export function App() {
             }
           }
 
-          lastUpdate.current = new Date();
+          lastUpdate.current = new Date().getTime();
         }
 
         appState.current = nextAppState;

@@ -6,6 +6,7 @@ import "react-native-gesture-handler";
 import codePush from "react-native-code-push";
 
 import { App } from "./app";
+import { deploymentKey } from "./app/code-push";
 import { initBackground } from "./background";
 import { initSentry } from "./background/sentry";
 
@@ -18,6 +19,7 @@ AppRegistry.registerComponent("Mobile", () => {
   if (!__DEV__) {
     Component = codePush({
       checkFrequency: codePush.CheckFrequency.MANUAL,
+      deploymentKey,
     })(Component);
   }
 
