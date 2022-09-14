@@ -1,4 +1,4 @@
-import { AppCurrency, Currency } from "@keplr-wallet/types";
+import { AppCurrency, Currency, FeeCurrency } from "@keplr-wallet/types";
 import { StdFee } from "@cosmjs/launchpad";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { CoinPrimitive } from "@keplr-wallet/stores";
@@ -37,6 +37,10 @@ export interface IFeeConfig extends ITxChainSetter {
   toStdFee(): StdFee;
   fee: CoinPretty | undefined;
   getFeeTypePretty(feeType: FeeType): CoinPretty;
+  getFeeTypePrettyForFeeCurrency(
+    feeCurrency: FeeCurrency,
+    feeType: FeeType
+  ): CoinPretty;
   getFeePrimitive(): CoinPrimitive | undefined;
   isManual: boolean;
   error: Error | undefined;

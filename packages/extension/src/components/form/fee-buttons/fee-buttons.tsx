@@ -33,7 +33,7 @@ import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
 import { useLanguage } from "../../../languages";
 import { FormattedMessage, useIntl } from "react-intl";
 import { GasInput } from "../gas-input";
-import { action, makeObservable, observable } from "mobx";
+import { action, autorun, makeObservable, observable } from "mobx";
 import { GasContainer } from "../gas-form";
 import styleCoinInput from "../coin-input.module.scss";
 import { useStore } from "../../../stores";
@@ -86,9 +86,77 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     gasSimulator,
     showFeeCurrencySelectorUnderSetGas,
   }) => {
+    const { queriesStore } = useStore();
+
     // This may be not the good way to handle the states across the components.
     // But, rather than using the context API with boilerplate code, just use the mobx state to simplify the logic.
     const [feeButtonState] = useState(() => new FeeButtonState());
+
+    useEffect(() => {
+      // Try to find other fee currency if the account doesn't have enough fee to pay.
+      // This logic can be slightly complex, so use mobx's `autorun`.
+      // This part fairly different with the approach of react's hook.
+      let skip = false;
+      // Try until 500ms to avoid the confusion to user.
+      const timeoutId = setTimeout(() => {
+        skip = true;
+      }, 500);
+
+      const disposer = autorun(() => {
+        if (
+          !skip &&
+          !feeConfig.isManual &&
+          feeConfig.feeCurrencies.length > 1 &&
+          feeConfig.feeCurrency &&
+          feeConfig.feeCurrencies[0].coinMinimalDenom ===
+            feeConfig.feeCurrency.coinMinimalDenom
+        ) {
+          const queryBalances = queriesStore
+            .get(feeConfig.chainId)
+            .queryBalances.getQueryBech32Address(feeConfig.sender);
+
+          // Basically, `FeeConfig` implementation select the first fee currency as default.
+          // So, let's put the priority to first fee currency.
+          const firstFeeCurrency = feeConfig.feeCurrencies[0];
+          const firstFeeCurrencyBal = queryBalances.getBalanceFromCurrency(
+            firstFeeCurrency
+          );
+
+          if (feeConfig.feeType) {
+            const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+              firstFeeCurrency,
+              feeConfig.feeType
+            );
+            if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
+              // Not enough balances for fee.
+              // Try to find other fee currency to send.
+              for (const feeCurrency of feeConfig.feeCurrencies) {
+                const feeCurrencyBal = queryBalances.getBalanceFromCurrency(
+                  feeCurrency
+                );
+                const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+                  feeCurrency,
+                  feeConfig.feeType
+                );
+
+                if (feeCurrencyBal.toDec().gte(fee.toDec())) {
+                  feeConfig.setAutoFeeCoinMinimalDenom(
+                    feeCurrency.coinMinimalDenom
+                  );
+                  skip = true;
+                  return;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return () => {
+        clearTimeout(timeoutId);
+        disposer();
+      };
+    }, [feeConfig, queriesStore]);
 
     return (
       <React.Fragment>

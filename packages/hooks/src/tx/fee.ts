@@ -230,7 +230,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     if (this.feeType) {
-      return this.getFeeTypePrimitive(this.feeType);
+      return this.getFeeTypePrimitive(this.feeCurrency, this.feeType);
     }
 
     // If fee is not set, just return with empty fee amount.
@@ -265,15 +265,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     return false;
   }
 
-  protected getFeeTypePrimitive(feeType: FeeType): CoinPrimitive {
+  protected getFeeTypePrimitive(
+    feeCurrency: FeeCurrency,
+    feeType: FeeType
+  ): CoinPrimitive {
     if (this._manualFee) {
       throw new Error(
         "Can't calculate fee from fee type. Because fee config uses the manual fee now"
       );
-    }
-
-    if (!this.feeCurrency) {
-      throw new Error("Fee currency not set");
     }
 
     if (
@@ -283,7 +282,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       this.queriesStore
         .get(this.chainId)
         .osmosis?.queryTxFeesFeeTokens.isTxFeeToken(
-          this.feeCurrency.coinMinimalDenom
+          feeCurrency.coinMinimalDenom
         )
     ) {
       const gasPriceStep =
@@ -295,7 +294,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       const spotPriceDec = this.queriesStore
         .get(this.chainId)
         .osmosis!.queryTxFeesSpotPriceByDenom.getQueryDenom(
-          this.feeCurrency.coinMinimalDenom
+          feeCurrency.coinMinimalDenom
         ).spotPriceDec;
       if (spotPriceDec.gt(new Dec(0))) {
         // If you calculate only the spot price, slippage cannot be considered. However, rather than performing the actual calculation here, the slippage problem is avoided by simply giving an additional value of 1%.
@@ -307,7 +306,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       }
 
       return {
-        denom: this.feeCurrency.coinMinimalDenom,
+        denom: feeCurrency.coinMinimalDenom,
         amount: feeAmount.roundUp().toString(),
       };
     }
@@ -318,7 +317,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     const feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));
 
     return {
-      denom: this.feeCurrency.coinMinimalDenom,
+      denom: feeCurrency.coinMinimalDenom,
       amount: feeAmount.roundUp().toString(),
     };
   }
@@ -334,7 +333,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       throw new Error("Fee currency not set");
     }
 
-    const feeTypePrimitive = this.getFeeTypePrimitive(feeType);
+    const feeTypePrimitive = this.getFeeTypePrimitive(
+      this.feeCurrency,
+      feeType
+    );
     const feeCurrency = this.feeCurrency;
 
     return new CoinPretty(
@@ -342,6 +344,23 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       new Int(feeTypePrimitive.amount)
     ).maxDecimals(feeCurrency.coinDecimals);
   });
+
+  readonly getFeeTypePrettyForFeeCurrency = computedFn(
+    (feeCurrency: FeeCurrency, feeType: FeeType) => {
+      if (this._manualFee) {
+        throw new Error(
+          "Can't calculate fee from fee type. Because fee config uses the manual fee now"
+        );
+      }
+
+      const feeTypePrimitive = this.getFeeTypePrimitive(feeCurrency, feeType);
+
+      return new CoinPretty(
+        feeCurrency,
+        new Int(feeTypePrimitive.amount)
+      ).maxDecimals(feeCurrency.coinDecimals);
+    }
+  );
 
   @computed
   get error(): Error | undefined {
