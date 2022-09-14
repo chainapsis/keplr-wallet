@@ -1805,21 +1805,41 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "USDC",
         coinMinimalDenom: "gravity0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
         coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01 * 0.02,
+          average: 0.025 * 0.02,
+          high: 0.04 * 0.02,
+        },
       },
       {
         coinDenom: "WETH",
         coinMinimalDenom: "gravity0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         coinDecimals: 18,
+        gasPriceStep: {
+          low: 0.01 * 10 ** 12 * 0.000013,
+          average: 0.025 * 10 ** 12 * 0.000013,
+          high: 0.04 * 10 ** 12 * 0.000013,
+        },
       },
       {
         coinDenom: "WBTC",
         coinMinimalDenom: "gravity0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
         coinDecimals: 8,
+        gasPriceStep: {
+          low: 0.01 * 10 ** 2 * 0.000001,
+          average: 0.025 * 10 ** 2 * 0.000001,
+          high: 0.04 * 10 ** 2 * 0.000001,
+        },
       },
       {
         coinDenom: "USDT",
         coinMinimalDenom: "gravity0xdAC17F958D2ee523a2206206994597C13D831ec7",
         coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01 * 0.02,
+          average: 0.025 * 0.02,
+          high: 0.04 * 0.02,
+        },
       },
     ],
     features: ["ibc-transfer", "ibc-go"],
