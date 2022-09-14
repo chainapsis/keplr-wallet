@@ -90,7 +90,7 @@ export class Keplr implements IKeplr {
       }
       delete chainInfo.gasPriceStep;
 
-      console.log("TODO: Describe something");
+      console.warn("TODO: Describe something");
     }
 
     const msg = new SuggestChainInfoMsg(chainInfo);
