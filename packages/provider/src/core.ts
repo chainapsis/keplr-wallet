@@ -63,7 +63,36 @@ export class Keplr implements IKeplr {
     );
   }
 
-  async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+  async experimentalSuggestChain(
+    chainInfo: ChainInfo & {
+      // Legacy
+      gasPriceStep?: {
+        readonly low: number;
+        readonly average: number;
+        readonly high: number;
+      };
+    }
+  ): Promise<void> {
+    if (chainInfo.gasPriceStep) {
+      // Gas price step in ChainInfo is legacy format.
+      // Try to change the recent format for backward-compatibility.
+      const gasPriceStep = { ...chainInfo.gasPriceStep };
+      for (const feeCurrency of chainInfo.feeCurrencies) {
+        if (!feeCurrency.gasPriceStep) {
+          (feeCurrency as {
+            gasPriceStep?: {
+              readonly low: number;
+              readonly average: number;
+              readonly high: number;
+            };
+          }).gasPriceStep = gasPriceStep;
+        }
+      }
+      delete chainInfo.gasPriceStep;
+
+      console.log("TODO: Describe something");
+    }
+
     const msg = new SuggestChainInfoMsg(chainInfo);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
