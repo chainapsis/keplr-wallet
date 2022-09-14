@@ -139,11 +139,11 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.mobile"
+        applicationId "money.obi.loop.conrad"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.1"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
         testBuildType System.getProperty('testBuildType', 'debug')  // This will later be used to control the test apk build type
@@ -226,6 +226,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (project.hasProperty('LOOP_OBI_UPLOAD_STORE_FILE')) {
+                storeFile file(LOOP_OBI_UPLOAD_STORE_FILE)
+                storePassword LOOP_OBI_UPLOAD_STORE_PASSWORD
+                keyAlias LOOP_OBI_UPLOAD_KEY_ALIAS
+                keyPassword LOOP_OBI_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
@@ -234,7 +242,7 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             // Typical pro-guard definitions
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
