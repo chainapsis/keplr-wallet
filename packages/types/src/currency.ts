@@ -66,3 +66,18 @@ export interface FiatCurrency {
   readonly maxDecimals: number;
   readonly locale: string;
 }
+
+export type WithGasPriceStep<T> = T & {
+  /**
+   * This is used to set the fee of the transaction.
+   * If this field is empty, it just use the default gas price step (low: 0.01, average: 0.025, high: 0.04).
+   * And, set field's type as primitive number because it is hard to restore the prototype after deserialzing if field's type is `Dec`.
+   */
+  readonly gasPriceStep?: {
+    readonly low: number;
+    readonly average: number;
+    readonly high: number;
+  };
+};
+
+export type FeeCurrency = WithGasPriceStep<AppCurrency>;

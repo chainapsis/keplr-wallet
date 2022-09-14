@@ -9,7 +9,11 @@ import styleFeeButtons from "./fee-buttons.module.scss";
 
 import {
   Button,
+  ButtonDropdown,
   ButtonGroup,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
   FormFeedback,
   FormGroup,
   FormText,
@@ -27,10 +31,12 @@ import {
 } from "@keplr-wallet/hooks";
 import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
 import { useLanguage } from "../../../languages";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { GasInput } from "../gas-input";
-import { action, makeObservable, observable } from "mobx";
+import { action, autorun, makeObservable, observable } from "mobx";
 import { GasContainer } from "../gas-form";
+import styleCoinInput from "../coin-input.module.scss";
+import { useStore } from "../../../stores";
 
 export interface FeeButtonsProps {
   feeConfig: IFeeConfig;
@@ -47,6 +53,8 @@ export interface FeeButtonsProps {
 
   gasLabel?: string;
   gasSimulator?: IGasSimulator;
+
+  showFeeCurrencySelectorUnderSetGas?: boolean;
 }
 
 class FeeButtonState {
@@ -76,13 +84,86 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
     gasLabel,
     gasSimulator,
+    showFeeCurrencySelectorUnderSetGas,
   }) => {
+    const { queriesStore } = useStore();
+
     // This may be not the good way to handle the states across the components.
     // But, rather than using the context API with boilerplate code, just use the mobx state to simplify the logic.
     const [feeButtonState] = useState(() => new FeeButtonState());
 
+    useEffect(() => {
+      // Try to find other fee currency if the account doesn't have enough fee to pay.
+      // This logic can be slightly complex, so use mobx's `autorun`.
+      // This part fairly different with the approach of react's hook.
+      let skip = false;
+      // Try until 500ms to avoid the confusion to user.
+      const timeoutId = setTimeout(() => {
+        skip = true;
+      }, 500);
+
+      const disposer = autorun(() => {
+        if (
+          !skip &&
+          !feeConfig.isManual &&
+          feeConfig.feeCurrencies.length > 1 &&
+          feeConfig.feeCurrency &&
+          feeConfig.feeCurrencies[0].coinMinimalDenom ===
+            feeConfig.feeCurrency.coinMinimalDenom
+        ) {
+          const queryBalances = queriesStore
+            .get(feeConfig.chainId)
+            .queryBalances.getQueryBech32Address(feeConfig.sender);
+
+          // Basically, `FeeConfig` implementation select the first fee currency as default.
+          // So, let's put the priority to first fee currency.
+          const firstFeeCurrency = feeConfig.feeCurrencies[0];
+          const firstFeeCurrencyBal = queryBalances.getBalanceFromCurrency(
+            firstFeeCurrency
+          );
+
+          if (feeConfig.feeType) {
+            const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+              firstFeeCurrency,
+              feeConfig.feeType
+            );
+            if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
+              // Not enough balances for fee.
+              // Try to find other fee currency to send.
+              for (const feeCurrency of feeConfig.feeCurrencies) {
+                const feeCurrencyBal = queryBalances.getBalanceFromCurrency(
+                  feeCurrency
+                );
+                const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+                  feeCurrency,
+                  feeConfig.feeType
+                );
+
+                if (feeCurrencyBal.toDec().gte(fee.toDec())) {
+                  feeConfig.setAutoFeeCoinMinimalDenom(
+                    feeCurrency.coinMinimalDenom
+                  );
+                  skip = true;
+                  return;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return () => {
+        clearTimeout(timeoutId);
+        disposer();
+      };
+    }, [feeConfig, queriesStore]);
+
     return (
       <React.Fragment>
+        {feeConfig.feeCurrencies.length > 1 &&
+        !showFeeCurrencySelectorUnderSetGas ? (
+          <FeeCurrencySelector feeConfig={feeConfig} />
+        ) : null}
         {feeConfig.feeCurrency ? (
           <FeeButtonsInner
             feeConfig={feeConfig}
@@ -95,11 +176,27 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
         ) : null}
         {feeButtonState.isGasInputOpen || !feeConfig.feeCurrency ? (
           gasSimulator ? (
-            <GasContainer
-              label={gasLabel}
-              gasConfig={gasConfig}
-              gasSimulator={gasSimulator}
-            />
+            showFeeCurrencySelectorUnderSetGas ? (
+              <React.Fragment>
+                <FeeCurrencySelector feeConfig={feeConfig} />
+                <GasContainer
+                  label={gasLabel}
+                  gasConfig={gasConfig}
+                  gasSimulator={gasSimulator}
+                />
+              </React.Fragment>
+            ) : (
+              <GasContainer
+                label={gasLabel}
+                gasConfig={gasConfig}
+                gasSimulator={gasSimulator}
+              />
+            )
+          ) : showFeeCurrencySelectorUnderSetGas ? (
+            <React.Fragment>
+              <FeeCurrencySelector feeConfig={feeConfig} />
+              <GasInput label={gasLabel} gasConfig={gasConfig} />
+            </React.Fragment>
           ) : (
             <GasInput label={gasLabel} gasConfig={gasConfig} />
           )
@@ -108,6 +205,85 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     );
   }
 );
+
+export const FeeCurrencySelector: FunctionComponent<{
+  feeConfig: IFeeConfig;
+}> = observer(({ feeConfig }) => {
+  const { queriesStore } = useStore();
+  const queryBalances = queriesStore
+    .get(feeConfig.chainId)
+    .queryBalances.getQueryBech32Address(feeConfig.sender);
+
+  const [randomId] = useState(() => {
+    const bytes = new Uint8Array(4);
+    crypto.getRandomValues(bytes);
+    return Buffer.from(bytes).toString("hex");
+  });
+
+  const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
+
+  const firstFeeCurrencyDenom =
+    feeConfig.feeCurrencies.length > 0
+      ? feeConfig.feeCurrencies[0].coinMinimalDenom
+      : "";
+
+  // Show the fee currencies that account has.
+  // But, always show the first fee currency to reduce the confusion to user because first fee currency has priority.
+  const selectableCurrencies = feeConfig.feeCurrencies.filter((cur) => {
+    if (
+      firstFeeCurrencyDenom &&
+      cur.coinMinimalDenom === firstFeeCurrencyDenom
+    ) {
+      return true;
+    }
+
+    const bal = queryBalances.getBalanceFromCurrency(cur);
+    return !bal.toDec().isZero();
+  });
+
+  return (
+    <FormGroup>
+      <Label
+        for={`selector-${randomId}`}
+        className="form-control-label"
+        style={{ width: "100%" }}
+      >
+        <FormattedMessage id="input.fee.selector.fee-currency" />
+      </Label>
+      <ButtonDropdown
+        id={`selector-${randomId}`}
+        className={styleCoinInput.tokenSelector}
+        isOpen={isOpenTokenSelector}
+        toggle={() => setIsOpenTokenSelector((value) => !value)}
+      >
+        <DropdownToggle caret>
+          {feeConfig.feeCurrency?.coinDenom || "Unknown"}
+        </DropdownToggle>
+        <DropdownMenu>
+          {selectableCurrencies.map((currency) => {
+            return (
+              <DropdownItem
+                key={currency.coinMinimalDenom}
+                active={
+                  currency.coinMinimalDenom === feeConfig.feeCurrency?.coinDenom
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  feeConfig.setAutoFeeCoinMinimalDenom(
+                    currency.coinMinimalDenom
+                  );
+                }}
+              >
+                {currency.coinDenom}
+              </DropdownItem>
+            );
+          })}
+        </DropdownMenu>
+      </ButtonDropdown>
+    </FormGroup>
+  );
+});
 
 export const FeeButtonsInner: FunctionComponent<
   Pick<
@@ -220,7 +396,11 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "low",
               })}
             >
-              {lowFee.trim(true).toString()}
+              {
+                // Hide ibc metadata because there is no space to display the ibc metadata.
+                // Generally, user can distinguish the ibc metadata because the ibc metadata should be shown in the fee currency selector.
+                lowFee.hideIBCMetadata(true).trim(true).toString()
+              }
             </div>
           </Button>
           <Button
@@ -249,7 +429,7 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "average",
               })}
             >
-              {feeConfig.getFeeTypePretty("average").trim(true).toString()}
+              {averageFee.hideIBCMetadata(true).trim(true).toString()}
             </div>
           </Button>
           <Button
@@ -276,7 +456,7 @@ export const FeeButtonsInner: FunctionComponent<
                 "text-muted": feeConfig.feeType !== "high",
               })}
             >
-              {feeConfig.getFeeTypePretty("high").trim(true).toString()}
+              {highFee.hideIBCMetadata(true).trim(true).toString()}
             </div>
           </Button>
         </ButtonGroup>
@@ -297,6 +477,7 @@ export const FeeButtonsInner: FunctionComponent<
               feeButtonState.setIsGasInputOpen(!feeButtonState.isGasInputOpen);
             }}
           >
+            {/* XXX: In fact, it is not only set gas, but fee currency can also be set depending on the option. */}
             {!feeButtonState.isGasInputOpen
               ? intl.formatMessage({
                   id: "input.fee.toggle.set-gas",

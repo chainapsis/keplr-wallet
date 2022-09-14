@@ -30,6 +30,7 @@
 
 .buttons {
   display: flex;
+  margin-top: 12px;
 }
 
 .button {
@@ -37,13 +38,15 @@
 }
 
 .container {
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .tab-container {
-  height: 400px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 
   &.data-tab {
     overflow: auto;
@@ -51,6 +54,7 @@
 }
 
 .message {
+  margin-bottom: 0;
   height: 400px;
   font-size: 12px;
   overflow: visible;
