@@ -1794,6 +1794,26 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "ugraviton",
         coinDecimals: 6,
       },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "gravity0xA0b73E1Ff0B80914AB6fe0444E65848C4C34450b",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "WETH",
+        coinMinimalDenom: "gravity0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "WBTC",
+        coinMinimalDenom: "gravity0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "USDT",
+        coinMinimalDenom: "gravity0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        coinDecimals: 6,
+      }
     ],
     feeCurrencies: [
       {
@@ -1801,6 +1821,26 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "ugraviton",
         coinDecimals: 6,
       },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "gravity0xA0b73E1Ff0B80914AB6fe0444E65848C4C34450b",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "WETH",
+        coinMinimalDenom: "gravity0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "WBTC",
+        coinMinimalDenom: "gravity0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "USDT",
+        coinMinimalDenom: "gravity0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        coinDecimals: 6,
+      }
     ],
     features: ["ibc-transfer", "ibc-go"],
   },
