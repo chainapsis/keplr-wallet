@@ -61,6 +61,7 @@ export function SecurityQuestionInput({
         setOpen={setDropdownPickerOpen}
         setValue={onSecurityQuestionChange}
         setItems={setSecurityQuestions}
+        listMode="SCROLLVIEW"
       />
 
       <TextInput
