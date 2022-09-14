@@ -297,6 +297,7 @@
   "input.fee.error.insufficient": "Insufficient available balance for transaction fee",
   "input.fee.toggle.set-gas": "Advanced",
   "input.fee.toggle.set-gas.close": "Close",
+  "input.fee.selector.fee-currency": "Fee Token",
 
   "confirm.yes": "Yes",
   "confirm.no": "No",

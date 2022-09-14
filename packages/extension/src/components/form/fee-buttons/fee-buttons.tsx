@@ -180,7 +180,7 @@ export const FeeCurrencySelector: FunctionComponent<{
         className="form-control-label"
         style={{ width: "100%" }}
       >
-        <FormattedMessage id="Fee Token" />
+        <FormattedMessage id="input.fee.selector.fee-currency" />
       </Label>
       <ButtonDropdown
         id={`selector-${randomId}`}
