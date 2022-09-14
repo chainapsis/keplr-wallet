@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -48,6 +48,9 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
         );
       }
     }, [demoStore, multisigStore, navigation]);
+
+    const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
+      useState(false);
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -137,6 +140,8 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
             flavor="blue"
             LeftIcon={Scan}
             onPress={async () => {
+              setButtonDisabledDoubleclick(true);
+
               try {
                 if (!demoStore.demoMode) {
                   const publicKey = await getBiometricsPublicKey();
@@ -147,13 +152,17 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                     },
                   });
                 }
+
                 navigation.navigate("onboarding5");
+                setButtonDisabledDoubleclick(false);
               } catch (e) {
+                setButtonDisabledDoubleclick(false);
                 const error = e as Error;
                 console.error(error);
                 Alert.alert("Error ScanMyBiometrics", error.message);
               }
             }}
+            disabled={buttonDisabledDoubleclick}
           />
         </View>
       </SafeAreaView>
