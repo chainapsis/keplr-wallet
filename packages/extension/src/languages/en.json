@@ -118,7 +118,7 @@
   "setting.endpoints.button.reset": "Reset",
   "setting.endpoints.button.confirm": "Confirm",
 
-  "setting.autolock": "Auto-Lock",
+  "setting.autolock": "Auto-Lock Timer",
   "setting.autolock.paragraph": "Your can set to Auto-Lock Account time",
   "setting.autolock.duration": "Duration (Unit : minute)",
   "setting.autolock.description": "Note : Logging out of your device will activate Auto-Lock regardless of the set duration.",

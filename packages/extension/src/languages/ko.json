@@ -110,7 +110,7 @@
   "setting.endpoints.button.reset": "초기화",
   "setting.endpoints.button.confirm": "확인",
 
-  "setting.autolock": "자동 잠금",
+  "setting.autolock": "자동 잠금 타이머",
   "setting.autolock.paragraph": "지갑 자동 잠금 기능을 설정할 수 있습니다.",
   "setting.autolock.duration": "잠금 주기 (단위 : 분)",
   "setting.autolock.description": "알림 : 추가적으로, 자동 잠금 기능이 활성화 된 경우 기기가 잠금 상태가 되면 설정된 시간과 관계없이 자동으로 지갑을 잠급니다.",
