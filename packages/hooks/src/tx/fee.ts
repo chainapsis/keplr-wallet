@@ -148,7 +148,19 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       }
     }
 
-    return this.chainInfo.feeCurrencies;
+    const res: FeeCurrency[] = [];
+
+    for (const feeCurrency of this.chainInfo.feeCurrencies) {
+      const cur = this.chainInfo.findCurrency(feeCurrency.coinMinimalDenom);
+      if (cur) {
+        res.push({
+          ...feeCurrency,
+          ...cur,
+        });
+      }
+    }
+
+    return res;
   }
 
   @computed
