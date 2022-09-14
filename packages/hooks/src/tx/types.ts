@@ -27,6 +27,8 @@ export interface IGasConfig extends ITxChainSetter {
 }
 
 export interface IFeeConfig extends ITxChainSetter {
+  sender: string;
+  setSender(sender: string): void;
   feeType: FeeType | undefined;
   setFeeType(feeType: FeeType | undefined): void;
   setAutoFeeCoinMinimalDenom(denom: string | undefined): void;

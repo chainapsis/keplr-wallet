@@ -63,6 +63,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     this.additionAmountToNeedFee = additionAmountToNeedFee;
   }
 
+  get sender(): string {
+    return this._sender;
+  }
+
   @action
   setSender(sender: string) {
     this._sender = sender;
@@ -93,16 +97,55 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     this._feeType = undefined;
   }
 
+  @computed
   get feeCurrencies(): FeeCurrency[] {
-    if (
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("osmosis-txfees") &&
-      this.queriesStore.get(this.chainId).osmosis
-    ) {
-      const txFees = this.queriesStore.get(this.chainId).osmosis!
-        .queryTxFeesFeeTokens;
+    if (this.canOsmosisTxFeesAndReady()) {
+      const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
 
-      return this.chainInfo.feeCurrencies.concat(txFees.feeCurrencies);
+      if (queryOsmosis) {
+        const txFees = queryOsmosis.queryTxFeesFeeTokens;
+
+        const exists: { [denom: string]: boolean | undefined } = {};
+
+        // To reduce the confusion, add the priority to native (not ibc token) currency.
+        // And, put the most priority to the base denom.
+        // Remainings are sorted in alphabetical order.
+        return this.chainInfo.feeCurrencies
+          .concat(txFees.feeCurrencies)
+          .filter((cur) => {
+            if (!exists[cur.coinMinimalDenom]) {
+              exists[cur.coinMinimalDenom] = true;
+              return true;
+            }
+
+            return false;
+          })
+          .sort((cur1, cur2) => {
+            if (
+              cur1.coinMinimalDenom ===
+              queryOsmosis.queryTxFeesBaseDenom.baseDenom
+            ) {
+              return -1;
+            }
+            if (
+              cur2.coinMinimalDenom ===
+              queryOsmosis.queryTxFeesBaseDenom.baseDenom
+            ) {
+              return 1;
+            }
+
+            const cur1IsIBCToken = cur1.coinMinimalDenom.startsWith("ibc/");
+            const cur2IsIBCToken = cur2.coinMinimalDenom.startsWith("ibc/");
+            if (cur1IsIBCToken && !cur2IsIBCToken) {
+              return 1;
+            }
+            if (!cur1IsIBCToken && cur2IsIBCToken) {
+              return -1;
+            }
+
+            return cur1.coinMinimalDenom < cur2.coinMinimalDenom ? -1 : 1;
+          });
+      }
     }
 
     return this.chainInfo.feeCurrencies;
@@ -180,6 +223,34 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     // If fee is not set, just return with empty fee amount.
     return undefined;
+  }
+
+  protected canOsmosisTxFeesAndReady(): boolean {
+    if (
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("osmosis-txfees")
+    ) {
+      if (!this.queriesStore.get(this.chainId).osmosis) {
+        console.log(
+          "Chain has osmosis-txfees feature. But no osmosis queries provided."
+        );
+        return false;
+      }
+
+      const queryBaseDenom = this.queriesStore.get(this.chainId).osmosis!
+        .queryTxFeesBaseDenom;
+
+      if (
+        queryBaseDenom.baseDenom &&
+        this.chainInfo.feeCurrencies.find(
+          (cur) => cur.coinMinimalDenom === queryBaseDenom.baseDenom
+        )
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   protected getFeeTypePrimitive(feeType: FeeType): CoinPrimitive {

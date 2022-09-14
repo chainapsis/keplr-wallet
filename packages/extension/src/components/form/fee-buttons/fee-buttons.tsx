@@ -36,6 +36,7 @@ import { GasInput } from "../gas-input";
 import { action, makeObservable, observable } from "mobx";
 import { GasContainer } from "../gas-form";
 import styleCoinInput from "../coin-input.module.scss";
+import { useStore } from "../../../stores";
 
 export interface FeeButtonsProps {
   feeConfig: IFeeConfig;
@@ -120,6 +121,11 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
 export const FeeCurrencySelector: FunctionComponent<{
   feeConfig: IFeeConfig;
 }> = observer(({ feeConfig }) => {
+  const { queriesStore } = useStore();
+  const queryBalances = queriesStore
+    .get(feeConfig.chainId)
+    .queryBalances.getQueryBech32Address(feeConfig.sender);
+
   const [randomId] = useState(() => {
     const bytes = new Uint8Array(4);
     crypto.getRandomValues(bytes);
@@ -127,6 +133,25 @@ export const FeeCurrencySelector: FunctionComponent<{
   });
 
   const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
+
+  const firstFeeCurrencyDenom =
+    feeConfig.feeCurrencies.length > 0
+      ? feeConfig.feeCurrencies[0].coinMinimalDenom
+      : "";
+
+  // Show the fee currencies that account has.
+  // But, always show the first fee currency to reduce the confusion to user because first fee currency has priority.
+  const selectableCurrencies = feeConfig.feeCurrencies.filter((cur) => {
+    if (
+      firstFeeCurrencyDenom &&
+      cur.coinMinimalDenom === firstFeeCurrencyDenom
+    ) {
+      return true;
+    }
+
+    const bal = queryBalances.getBalanceFromCurrency(cur);
+    return !bal.toDec().isZero();
+  });
 
   return (
     <FormGroup>
@@ -147,7 +172,7 @@ export const FeeCurrencySelector: FunctionComponent<{
           {feeConfig.feeCurrency?.coinDenom || "Unknown"}
         </DropdownToggle>
         <DropdownMenu>
-          {feeConfig.feeCurrencies.map((currency) => {
+          {selectableCurrencies.map((currency) => {
             return (
               <DropdownItem
                 key={currency.coinMinimalDenom}
