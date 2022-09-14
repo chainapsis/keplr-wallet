@@ -53,6 +53,8 @@ export interface FeeButtonsProps {
 
   gasLabel?: string;
   gasSimulator?: IGasSimulator;
+
+  showFeeCurrencySelectorUnderSetGas?: boolean;
 }
 
 class FeeButtonState {
@@ -82,6 +84,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     feeSelectLabels = { low: "Low", average: "Average", high: "High" },
     gasLabel,
     gasSimulator,
+    showFeeCurrencySelectorUnderSetGas,
   }) => {
     // This may be not the good way to handle the states across the components.
     // But, rather than using the context API with boilerplate code, just use the mobx state to simplify the logic.
@@ -89,7 +92,8 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
 
     return (
       <React.Fragment>
-        {feeConfig.feeCurrencies.length > 1 ? (
+        {feeConfig.feeCurrencies.length > 1 &&
+        !showFeeCurrencySelectorUnderSetGas ? (
           <FeeCurrencySelector feeConfig={feeConfig} />
         ) : null}
         {feeConfig.feeCurrency ? (
@@ -104,11 +108,27 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
         ) : null}
         {feeButtonState.isGasInputOpen || !feeConfig.feeCurrency ? (
           gasSimulator ? (
-            <GasContainer
-              label={gasLabel}
-              gasConfig={gasConfig}
-              gasSimulator={gasSimulator}
-            />
+            showFeeCurrencySelectorUnderSetGas ? (
+              <React.Fragment>
+                <FeeCurrencySelector feeConfig={feeConfig} />
+                <GasContainer
+                  label={gasLabel}
+                  gasConfig={gasConfig}
+                  gasSimulator={gasSimulator}
+                />
+              </React.Fragment>
+            ) : (
+              <GasContainer
+                label={gasLabel}
+                gasConfig={gasConfig}
+                gasSimulator={gasSimulator}
+              />
+            )
+          ) : showFeeCurrencySelectorUnderSetGas ? (
+            <React.Fragment>
+              <FeeCurrencySelector feeConfig={feeConfig} />
+              <GasInput label={gasLabel} gasConfig={gasConfig} />
+            </React.Fragment>
           ) : (
             <GasInput label={gasLabel} gasConfig={gasConfig} />
           )
@@ -389,6 +409,7 @@ export const FeeButtonsInner: FunctionComponent<
               feeButtonState.setIsGasInputOpen(!feeButtonState.isGasInputOpen);
             }}
           >
+            {/* XXX: In fact, it is not only set gas, but fee currency can also be set depending on the option. */}
             {!feeButtonState.isGasInputOpen
               ? intl.formatMessage({
                   id: "input.fee.toggle.set-gas",

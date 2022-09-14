@@ -136,6 +136,7 @@ export const DetailsTab: FunctionComponent<{
             priceStore={priceStore}
             label={intl.formatMessage({ id: "sign.info.fee" })}
             gasLabel={intl.formatMessage({ id: "sign.info.gas" })}
+            showFeeCurrencySelectorUnderSetGas={true}
           />
         ) : (
           <React.Fragment>
