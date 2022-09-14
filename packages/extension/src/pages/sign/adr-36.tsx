@@ -47,7 +47,7 @@ export const ADR36SignDocDetailsTab: FunctionComponent<{
   }, [signDocWrapper.aminoSignDoc.msgs, isADR36WithString]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <div className={styleDetailsTab.msgContainer} style={{ flex: "none" }}>
         <MsgRender icon="fas fa-pen-nib" title={renderTitleText()}>
           {origin ?? "Unknown"}
@@ -75,6 +75,7 @@ export const ADR36SignDocDetailsTab: FunctionComponent<{
             padding: "20px",
             border: "1px solid #9092B6",
             borderRadius: "8px",
+            maxHeight: "220px",
           }}
         >
           {signValue}
@@ -83,7 +84,7 @@ export const ADR36SignDocDetailsTab: FunctionComponent<{
       <Label for="chain-name" className="form-control-label">
         Requested Network
       </Label>
-      <div id="chain-name" style={{ marginBottom: "8px" }}>
+      <div id="chain-name">
         <div>{chainStore.current.chainName}</div>
       </div>
     </div>

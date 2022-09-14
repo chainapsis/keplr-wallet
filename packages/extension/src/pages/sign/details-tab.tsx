@@ -108,6 +108,7 @@ export const DetailsTab: FunctionComponent<{
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
           {renderedMsgs}
         </div>
+        <div style={{ flex: 1 }} />
         {!preferNoSetMemo ? (
           <MemoInput
             memoConfig={memoConfig}
