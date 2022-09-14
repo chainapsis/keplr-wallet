@@ -9,6 +9,6 @@ export function initSentry() {
   Sentry.init({
     dsn: SENTRY_DSN,
     tracesSampleRate: __DEV__ ? 1.0 : 0.5,
-    environment: APP_ENV,
+    environment: __DEV__ ? "development" : APP_ENV,
   });
 }
