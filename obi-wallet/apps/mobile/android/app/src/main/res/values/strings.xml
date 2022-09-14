@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Mobile</string>
+    <string moduleConfig="true" name="CodePushDeploymentKey">${APP_CENTER_DEPLOYMENT_KEY}</string>
 </resources>
