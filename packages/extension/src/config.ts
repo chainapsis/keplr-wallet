@@ -1803,7 +1803,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
       {
         coinDenom: "USDC",
-        coinMinimalDenom: "gravity0xA0b73E1Ff0B80914AB6fe0444E65848C4C34450b",
+        coinMinimalDenom: "gravity0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
         coinDecimals: 6,
       },
       {
