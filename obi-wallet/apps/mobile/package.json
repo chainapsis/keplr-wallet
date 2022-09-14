@@ -26,7 +26,6 @@
     "appcenter-analytics": "*",
     "appcenter-crashes": "*",
     "axios": "*",
-    "big-integer": "*",
     "buffer": "*",
     "crypto-js": "*",
     "eventemitter3": "*",
