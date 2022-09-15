@@ -20536,7 +20536,7 @@ proto-list@~1.2.1:
   resolved "https://registry.yarnpkg.com/proto-list/-/proto-list-1.2.4.tgz#212d5bfe1318306a420f6402b8e26ff39647a849"
   integrity sha1-IS1b/hMYMGpCD2QCuOJv85ZHqEk=
 
-protobufjs@^6.11.2, protobufjs@^6.8.8:
+protobufjs@6.11.3, protobufjs@^6.11.2, protobufjs@^6.8.8:
   version "6.11.3"
   resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.11.3.tgz#637a527205a35caa4f3e2a9a4a13ddffe0e7af74"
   integrity sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==
@@ -22359,10 +22359,10 @@ secp256k1@^4.0.1, secp256k1@^4.0.2:
     node-addon-api "^2.0.0"
     node-gyp-build "^4.2.0"
 
-secretjs@^0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.0.tgz#43964e96ae591397819d7a694694c61c5306311d"
-  integrity sha512-n4Cc8qhUPuYDRexBoY4g7s9ohvAMoBEi0f9rM88xEyTr9Y7o3HmG/jez02jWQL5DzUtT54/PK3/RQGbiTO5n3g==
+secretjs@0.17.7, secretjs@^0.17.7:
+  version "0.17.7"
+  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.7.tgz#a1aef5866a35cf673be9ddd717d20729afd056ac"
+  integrity sha512-j39l9+vR2A8067QBqDDejS7LmRLgdkG4uRw2Ar6HMfzDGo26eTh7cIXVlVu/yHBumxtQzKun20epOXwuYHXjQg==
   dependencies:
     "@iov/crypto" "2.1.0"
     "@iov/encoding" "2.1.0"
@@ -22373,7 +22373,7 @@ secretjs@^0.17.0:
     js-crypto-hkdf "0.7.3"
     miscreant "0.3.2"
     pako "1.0.11"
-    protobufjs "^6.11.2"
+    protobufjs "6.11.3"
     secure-random "1.1.2"
 
 secure-random@1.1.2:
