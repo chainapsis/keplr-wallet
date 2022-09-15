@@ -71,43 +71,45 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
               Loop, powered by Obi, is the world’s most powerful wallet for
               Web3.
             </Text>
-            <View style={{ paddingVertical: 20 }}>
-              <Button
-                label="Get Started"
-                RightIcon={GetStarted}
-                flavor="blue"
-                onPress={action(() => {
-                  demoStore.demoMode = false;
-                  navigation.navigate("onboarding2");
-                })}
-              />
-              <View style={{ marginTop: 20 }}>
-                <Button
-                  label="Enter Demo Mode"
-                  RightIcon={GetStarted}
-                  flavor="green"
-                  onPress={action(() => {
-                    demoStore.demoMode = true;
-                    navigation.navigate("onboarding2");
-                    Alert.alert(
-                      "Demo Mode",
-                      "You have entered the app in demo mode. This allows you finish the onboarding process with any."
-                    );
-                  })}
-                />
-                {/*<Button*/}
-                {/*  label="Recover Wallet"*/}
-                {/*  LeftIcon={RecoverWallet}*/}
-                {/*  flavor="purple"*/}
-                {/*  style={{*/}
-                {/*    marginTop: 20,*/}
-                {/*  }}*/}
-                {/*  onPress={() => {*/}
-                {/*    navigation.navigate("onboarding2");*/}
-                {/*  }}*/}
-                {/*/>*/}
-              </View>
-            </View>
+            <Button
+              label="Get Started"
+              RightIcon={GetStarted}
+              flavor="blue"
+              style={{
+                marginTop: 40,
+              }}
+              onPress={action(() => {
+                demoStore.demoMode = false;
+                navigation.navigate("onboarding2");
+              })}
+            />
+            <Button
+              label="Enter Demo Mode"
+              RightIcon={GetStarted}
+              flavor="green"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={action(() => {
+                demoStore.demoMode = true;
+                navigation.navigate("onboarding2");
+                Alert.alert(
+                  "Demo Mode",
+                  "You have entered the app in demo mode. This allows you finish the onboarding process with any."
+                );
+              })}
+            />
+            {/*<Button*/}
+            {/*  label="Recover Wallet"*/}
+            {/*  LeftIcon={RecoverWallet}*/}
+            {/*  flavor="purple"*/}
+            {/*  style={{*/}
+            {/*    marginTop: 20,*/}
+            {/*  }}*/}
+            {/*  onPress={() => {*/}
+            {/*    navigation.navigate("onboarding2");*/}
+            {/*  }}*/}
+            {/*/>*/}
           </View>
         </SafeAreaView>
       </ImageBackground>

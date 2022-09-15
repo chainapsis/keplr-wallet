@@ -19,7 +19,7 @@ export function SendMagicSmsButton({
   disabled,
 }: SendMagicSmsButtonProps) {
   return (
-    <View style={{ marginVertical: 20 }}>
+    <View>
       {description ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
           <FontAwesomeIcon
@@ -43,13 +43,14 @@ export function SendMagicSmsButton({
           </Text>
         </View>
       ) : null}
-      <View style={{ marginVertical: 10 }}></View>
       <Button
         label="Send Magic SMS"
         LeftIcon={SMS}
         flavor="blue"
         disabled={disabled}
-        style={{}}
+        style={{
+          marginVertical: 20,
+        }}
         onPress={onPress}
       />
     </View>
