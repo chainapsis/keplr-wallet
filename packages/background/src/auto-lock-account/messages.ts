@@ -50,3 +50,25 @@ export class UpdateAutoLockAccountDurationMsg extends Message<void> {
     return UpdateAutoLockAccountDurationMsg.type();
   }
 }
+
+export class StartAutoLockMonitoringMsg extends Message<void> {
+  public static type() {
+    return "start-auto-lock-monitoring";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return StartAutoLockMonitoringMsg.type();
+  }
+}

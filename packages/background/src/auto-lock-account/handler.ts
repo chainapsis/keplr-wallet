@@ -8,6 +8,7 @@ import {
 import {
   GetAutoLockAccountDurationMsg,
   UpdateAutoLockAccountDurationMsg,
+  StartAutoLockMonitoringMsg,
 } from "./messages";
 import { AutoLockAccountService } from "./service";
 
@@ -25,6 +26,11 @@ export const getHandler: (service: AutoLockAccountService) => Handler = (
         return handleUpdateAutoLockAccountDurationMsg(service)(
           env,
           msg as UpdateAutoLockAccountDurationMsg
+        );
+      case StartAutoLockMonitoringMsg:
+        return handleStartAutoLockMonitoringMsg(service)(
+          env,
+          msg as StartAutoLockMonitoringMsg
         );
       default:
         throw new KeplrError("auto-lock-account", 100, "Unknown msg type");
@@ -45,5 +51,13 @@ const handleUpdateAutoLockAccountDurationMsg: (
 ) => InternalHandler<UpdateAutoLockAccountDurationMsg> = (service) => {
   return (_, msg) => {
     return service.updateAutoLockDuration(msg.duration);
+  };
+};
+
+const handleStartAutoLockMonitoringMsg: (
+  service: AutoLockAccountService
+) => InternalHandler<StartAutoLockMonitoringMsg> = (service) => {
+  return () => {
+    return service.startAppStateCheckTimer();
   };
 };

@@ -8,7 +8,7 @@ export class AutoLockAccountService {
   // Unit: ms
   protected autoLockDuration: number = 0;
 
-  protected monitoringAppIsActiveTimer: NodeJS.Timeout | null = null;
+  protected appStateCheckTimer: NodeJS.Timeout | null = null;
   protected monitoringInterval: number = 10000;
 
   protected autoLockTimer: NodeJS.Timeout | null = null;
@@ -19,7 +19,6 @@ export class AutoLockAccountService {
   async init(keyringService: KeyRingService) {
     this.keyringService = keyringService;
     await this.loadDuration();
-    this.startMonitoringSchedule();
 
     browser.idle.onStateChanged.addListener((idle) => {
       this.stateChangedHandler(idle);
@@ -28,30 +27,34 @@ export class AutoLockAccountService {
 
   private stateChangedHandler(newState: browser.idle.IdleState) {
     if (this.autoLockDuration > 0) {
-      if ((newState as any) === "locked") this.lock();
+      if ((newState as any) === "locked") {
+        this.stopAutoLockTimer();
+        this.lock();
+      }
     }
   }
 
-  private startMonitoringSchedule() {
-    this.stopMonitoringSchedule();
+  startAppStateCheckTimer() {
+    this.stopAppStateCheckTimer();
     if (this.autoLockDuration > 0) {
-      this.monitoringAppIsActiveTimer = setTimeout(() => {
+      this.appStateCheckTimer = setTimeout(() => {
         this.updateLatestActiveTime();
         const isAppActive = this.getAppIsActive();
         if (isAppActive) {
-          this.stopAutoLockAccountSchedule();
+          this.stopAutoLockTimer();
+          this.startAppStateCheckTimer();
         } else {
-          this.startAutoLockAccountSchedule();
+          this.startAutoLockTimer();
+          this.stopAppStateCheckTimer();
         }
-        this.startMonitoringSchedule();
       }, this.monitoringInterval);
     }
   }
 
-  private stopMonitoringSchedule() {
-    if (this.monitoringAppIsActiveTimer != null) {
-      clearTimeout(this.monitoringAppIsActiveTimer);
-      this.monitoringAppIsActiveTimer = null;
+  private stopAppStateCheckTimer() {
+    if (this.appStateCheckTimer != null) {
+      clearTimeout(this.appStateCheckTimer);
+      this.appStateCheckTimer = null;
     }
   }
 
@@ -61,7 +64,7 @@ export class AutoLockAccountService {
       if (!background || background.location.href !== view.location.href) {
         const now = Date.now();
         this.latestActiveTime = now;
-        this.stopAutoLockAccountSchedule();
+        this.stopAutoLockTimer();
       }
     }
   }
@@ -77,7 +80,7 @@ export class AutoLockAccountService {
     return false;
   }
 
-  private startAutoLockAccountSchedule() {
+  private startAutoLockTimer() {
     if (
       this.keyringService != null &&
       (this.keyringService.keyRingStatus === KeyRingStatus.LOCKED ||
@@ -89,7 +92,7 @@ export class AutoLockAccountService {
     }, this.autoLockDuration);
   }
 
-  private stopAutoLockAccountSchedule() {
+  private stopAutoLockTimer() {
     if (this.autoLockTimer != null) {
       clearTimeout(this.autoLockTimer);
       this.autoLockTimer = null;
@@ -113,9 +116,9 @@ export class AutoLockAccountService {
     this.saveDuration(duration);
     await this.loadDuration();
     if (this.autoLockDuration > 0) {
-      this.startMonitoringSchedule();
+      this.startAppStateCheckTimer();
     } else {
-      this.stopMonitoringSchedule();
+      this.stopAppStateCheckTimer();
     }
   }
 
