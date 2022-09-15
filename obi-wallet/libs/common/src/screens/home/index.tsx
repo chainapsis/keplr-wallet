@@ -75,8 +75,8 @@ export const Home = observer<HomeProps>(
                     onRemove={
                       editMode
                         ? () => {
-                            appsStore.removeFavoriteByUrl(app.url);
-                          }
+                          appsStore.removeFavoriteByUrl(app.url);
+                        }
                         : undefined
                     }
                     onPress={() => {
@@ -85,204 +85,6 @@ export const Home = observer<HomeProps>(
                   />
                 );
               })}
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                // TODO: i18n
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    // TODO: i18n
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
             </Tiles>
           </ScrollView>
           <KeyboardAvoidingView
@@ -402,8 +204,8 @@ export const Home = observer<HomeProps>(
                       const newUrl = url.includes("https://")
                         ? url.replace("https://", "")
                         : url.includes("http://")
-                        ? url.replace("http://", "")
-                        : url;
+                          ? url.replace("http://", "")
+                          : url;
 
                       const searchParam = newUrl.split(" ").join("+");
                       const newSearchUrl = `https://www.google.com/search?q=${searchParam}`;
