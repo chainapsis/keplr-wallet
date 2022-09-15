@@ -34,6 +34,7 @@
     "io-ts": "*",
     "isomorphic-unfetch": "*",
     "long": "*",
+    "metro-babel-register": "*",
     "mobx": "*",
     "mobx-react-lite": "*",
     "node-html-parser": "*",
