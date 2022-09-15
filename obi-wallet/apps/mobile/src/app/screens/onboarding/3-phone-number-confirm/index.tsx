@@ -37,6 +37,18 @@ export function PhoneNumberConfirmOnboarding({
   const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
   const [verifyButtonDisabledDoubleclick, setVerifyButtonDisabledDoubleclick] =
     useState(false); // Magic Button disable on button-click
+  const [resendButtonDisabled, setResendButtonDisabled] = useState(false);
+  const [resendCounter, setResendCounter] = useState(0);
+  const [resendButtonHit, setResendButtonHit] = useState(false);
+
+  useEffect(() => {
+    if (resendCounter > 0) {
+      setResendButtonDisabled(true);
+      setTimeout(() => setResendCounter(resendCounter - 1), 1000);
+    } else {
+      setResendButtonDisabled(false);
+    }
+  }, [resendCounter]);
 
   const minInputCharsSMSCode = 8;
 
@@ -127,6 +139,9 @@ export function PhoneNumberConfirmOnboarding({
               <InlineButton
                 label="Resend"
                 onPress={async () => {
+                  setResendCounter(20);
+                  setResendButtonHit(true);
+
                   setKey("");
                   if (!demoStore.demoMode) {
                     await sendPublicKeyTextMessage({
@@ -135,46 +150,78 @@ export function PhoneNumberConfirmOnboarding({
                     });
                   }
                 }}
+                disabled={resendButtonDisabled}
               />
             </View>
-          </View>
 
-          <VerifyAndProceedButton
-            onPress={async () => {
-              try {
-                setVerifyButtonDisabledDoubleclick(true);
-                const publicKey = demoStore.demoMode
-                  ? "demo"
-                  : await parsePublicKeyTextMessageResponse(key);
-                if (publicKey) {
-                  if (!demoStore.demoMode) {
-                    multisigStore.setPhoneNumberKey({
-                      publicKey: {
-                        type: pubkeyType.secp256k1,
-                        value: publicKey,
-                      },
-                      phoneNumber: params.phoneNumber,
-                      securityQuestion: params.securityQuestion,
-                    });
+            {resendButtonDisabled && (
+              <Text
+                style={{
+                  color: "rgba(246, 245, 255, 0.6)",
+                  fontSize: 12,
+                  marginVertical: 10,
+                }}
+              >
+                Your Magic SMS has been resent! Give it some time to arrive. You
+                can try again in {resendCounter}{" "}
+                {resendCounter > 0 ? "seconds" : "second"}.
+              </Text>
+            )}
+
+            {resendButtonHit && (
+              <Text
+                style={{
+                  color: "rgba(246, 245, 255, 0.6)",
+                  fontSize: 12,
+                  marginVertical: 10,
+                }}
+              >
+                If you haven't received the SMS please check your phone number
+                for typing errors: {params.phoneNumber}
+              </Text>
+            )}
+          </View>
+          <View style={{ marginVertical: 20 }}>
+            <VerifyAndProceedButton
+              onPress={async () => {
+                try {
+                  setVerifyButtonDisabledDoubleclick(true);
+                  const publicKey = demoStore.demoMode
+                    ? "demo"
+                    : await parsePublicKeyTextMessageResponse(key);
+                  if (publicKey) {
+                    if (!demoStore.demoMode) {
+                      multisigStore.setPhoneNumberKey({
+                        publicKey: {
+                          type: pubkeyType.secp256k1,
+                          value: publicKey,
+                        },
+                        phoneNumber: params.phoneNumber,
+                        securityQuestion: params.securityQuestion,
+                      });
+                    }
+                    setVerifyButtonDisabledDoubleclick(false);
+                    navigation.navigate("onboarding4");
+                  } else {
+                    setVerifyButtonDisabledDoubleclick(false);
                   }
+                } catch (e) {
+                  const error = e as Error;
                   setVerifyButtonDisabledDoubleclick(false);
-                  navigation.navigate("onboarding4");
-                } else {
-                  setVerifyButtonDisabledDoubleclick(false);
+                  console.error(error);
+                  Alert.alert(
+                    "Error VerifyAndProceedButton (2)",
+                    error.message
+                  );
                 }
-              } catch (e) {
-                const error = e as Error;
-                setVerifyButtonDisabledDoubleclick(false);
-                console.error(error);
-                Alert.alert("Error VerifyAndProceedButton (2)", error.message);
+              }}
+              disabled={
+                verifyButtonDisabledDoubleclick
+                  ? verifyButtonDisabledDoubleclick
+                  : verifyButtonDisabled
               }
-            }}
-            disabled={
-              verifyButtonDisabledDoubleclick
-                ? verifyButtonDisabledDoubleclick
-                : verifyButtonDisabled
-            }
-          />
+            />
+          </View>
         </View>
       </SafeAreaView>
     </KeyboardAvoidingView>

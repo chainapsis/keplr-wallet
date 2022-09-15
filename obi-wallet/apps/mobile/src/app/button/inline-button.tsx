@@ -5,6 +5,7 @@ import {
   TouchableHighlight,
   TouchableNativeFeedback,
   TouchableWithoutFeedbackProps,
+  View,
 } from "react-native";
 
 const baseStyles = StyleSheet.create({
@@ -38,9 +39,5 @@ export function InlineButton({ label, ...props }: InlineButtonProps) {
     style: [baseStyles.button, props.style],
   };
 
-  if (Platform.OS === "ios") {
-    return <TouchableHighlight {...buttonProps} />;
-  } else {
-    return <TouchableNativeFeedback {...buttonProps} />;
-  }
+  return <TouchableHighlight {...buttonProps} />;
 }
