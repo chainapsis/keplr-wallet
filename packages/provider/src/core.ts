@@ -90,7 +90,9 @@ export class Keplr implements IKeplr {
       }
       delete chainInfo.gasPriceStep;
 
-      console.warn("TODO: Describe something");
+      console.warn(
+        "The `gasPriceStep` field of the `ChainInfo` has been moved under `feeCurrencies`. This is automatically handled as of right now, but the upcoming update would potentially cause errors."
+      );
     }
 
     const msg = new SuggestChainInfoMsg(chainInfo);
