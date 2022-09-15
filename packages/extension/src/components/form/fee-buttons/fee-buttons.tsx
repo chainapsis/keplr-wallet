@@ -176,6 +176,7 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
         ) : null}
         {feeButtonState.isGasInputOpen || !feeConfig.feeCurrency ? (
           gasSimulator ? (
+            feeConfig.feeCurrencies.length > 1 &&
             showFeeCurrencySelectorUnderSetGas ? (
               <React.Fragment>
                 <FeeCurrencySelector feeConfig={feeConfig} />
@@ -192,7 +193,8 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
                 gasSimulator={gasSimulator}
               />
             )
-          ) : showFeeCurrencySelectorUnderSetGas ? (
+          ) : feeConfig.feeCurrencies.length > 1 &&
+            showFeeCurrencySelectorUnderSetGas ? (
             <React.Fragment>
               <FeeCurrencySelector feeConfig={feeConfig} />
               <GasInput label={gasLabel} gasConfig={gasConfig} />
