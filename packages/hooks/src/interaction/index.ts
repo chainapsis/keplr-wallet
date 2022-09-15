@@ -5,7 +5,12 @@ import queryString from "querystring";
 import { disableScroll, fitPopupWindow } from "@keplr-wallet/popup";
 import { useEffect, useRef } from "react";
 
-export const useInteractionInfo = (cleanUp?: () => void) => {
+export const useInteractionInfo = (
+  cleanUp?: () => void,
+  options: {
+    enableScroll?: boolean;
+  } = {}
+) => {
   const location = useLocation();
   let search = location.search;
   if (search.startsWith("?")) {
@@ -23,7 +28,9 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
 
   useEffect(() => {
     if (result.interaction && !result.interactionInternal) {
-      disableScroll();
+      if (!options.enableScroll) {
+        disableScroll();
+      }
       fitPopupWindow();
     }
   }, [result.interaction, result.interactionInternal]);

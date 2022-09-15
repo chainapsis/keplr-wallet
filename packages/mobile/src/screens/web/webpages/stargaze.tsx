@@ -5,8 +5,8 @@ export const StargazeWebpageScreen: FunctionComponent = () => {
   return (
     <WebpageScreen
       name="Stargaze"
-      source={{ uri: "https://app.stargaze.zone" }}
-      originWhitelist={["https://app.stargaze.zone"]}
+      source={{ uri: "https://www.stargaze.zone" }}
+      originWhitelist={["https://www.stargaze.zone"]}
       allowsInlineMediaPlayback={true}
     />
   );

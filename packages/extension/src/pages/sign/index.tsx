@@ -148,13 +148,18 @@ export const SignPage: FunctionComponent = observer(() => {
     signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo ===
       true || isProcessing;
 
-  const interactionInfo = useInteractionInfo(() => {
-    if (needSetIsProcessing) {
-      setIsProcessing(true);
-    }
+  const interactionInfo = useInteractionInfo(
+    () => {
+      if (needSetIsProcessing) {
+        setIsProcessing(true);
+      }
 
-    signInteractionStore.rejectAll();
-  });
+      signInteractionStore.rejectAll();
+    },
+    {
+      enableScroll: true,
+    }
+  );
 
   const currentChainId = chainStore.current.chainId;
   const currentChainIdentifier = useMemo(
@@ -227,7 +232,8 @@ export const SignPage: FunctionComponent = observer(() => {
             }
           : undefined
       }
-      style={{ background: "white" }}
+      style={{ background: "white", height: "auto", minHeight: "100%" }}
+      innerStyle={{ display: "flex", flexDirection: "column" }}
     >
       {
         /*
@@ -296,7 +302,6 @@ export const SignPage: FunctionComponent = observer(() => {
                 )
               ) : null}
             </div>
-            <div style={{ flex: 1 }} />
             <div className={style.buttons}>
               {keyRingStore.keyRingType === "ledger" &&
               signInteractionStore.isLoading ? (

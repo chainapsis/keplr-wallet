@@ -108,6 +108,7 @@ export const DetailsTab: FunctionComponent<{
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
           {renderedMsgs}
         </div>
+        <div style={{ flex: 1 }} />
         {!preferNoSetMemo ? (
           <MemoInput
             memoConfig={memoConfig}
@@ -135,6 +136,7 @@ export const DetailsTab: FunctionComponent<{
             priceStore={priceStore}
             label={intl.formatMessage({ id: "sign.info.fee" })}
             gasLabel={intl.formatMessage({ id: "sign.info.gas" })}
+            showFeeCurrencySelectorUnderSetGas={true}
           />
         ) : (
           <React.Fragment>
