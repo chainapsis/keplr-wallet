@@ -1,13 +1,13 @@
 {
   "name": "obi-wallet",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "private": true,
   "license": "MIT",
   "scripts": {
     "_runAll": "nx run-many --projects=mobile,common --output-style=static",
     "checks": "yarn lint && yarn test",
-    "codepush-android": "cd ./apps/mobile && appcenter codepush release-react -a Obi-Money/loop-obi-android -d Staging -e ./src/main.tsx",
-    "codepush-ios": "cd ./apps/mobile && appcenter codepush release-react -a Obi-Money/loop-obi-ios -d Staging -e ./src/main.tsx",
+    "codepush-android": "nx bundle-android mobile --dev false && appcenter codepush release -a Obi-Money/loop-obi-android -d Staging -c ./dist/apps/mobile/android -t $npm_package_version",
+    "codepush-ios": "nx bundle-ios mobile --dev false && appcenter codepush release -a Obi-Money/loop-obi-ios -d Staging -c ./dist/apps/mobile/ios -t $npm_package_version",
     "format": "prettier --write . && yarn lint:eslint --fix",
     "postinstall": "patch-package",
     "lint": "yarn lint:tsc && yarn lint:prettier && yarn lint:eslint",
