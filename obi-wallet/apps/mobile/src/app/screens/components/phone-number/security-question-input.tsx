@@ -37,8 +37,10 @@ export function SecurityQuestionInput({
   CustomTextInput = OriginalTextInput,
 }: SecurityQuestionInputProps) {
   const [dropdownPickerOpen, setDropdownPickerOpen] = useState(false);
-  const [securityQuestions, setSecurityQuestions] =
-    useState(SECURITY_QUESTIONS);
+  const initialSecurityQuestion = SECURITY_QUESTIONS();
+  const [securityQuestions, setSecurityQuestions] = useState(
+    initialSecurityQuestion
+  );
 
   const intl = useIntl();
 

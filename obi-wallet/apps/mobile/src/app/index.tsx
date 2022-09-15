@@ -16,10 +16,10 @@ import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
-import { StoreContext, useStore } from "./stores";
+import { StoreContext } from "./stores";
 
 export const App = observer(() => {
-  const { languageStore } = useStore();
+  const { languageStore } = rootStore;
   const language = languageStore.currentLanguage.languagecode;
   const [updating, setUpdating] = useState(false);
   const appState = useRef(AppState.currentState);

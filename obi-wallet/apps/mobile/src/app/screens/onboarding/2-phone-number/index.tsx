@@ -29,6 +29,7 @@ export type PhoneNumberOnboardingProps = NativeStackScreenProps<
 export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
   ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
+    const intl = useIntl();
 
     useEffect(() => {
       if (demoStore.demoMode) return;
@@ -57,7 +58,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
           ]
         );
       }
-    }, [demoStore, multisigStore, navigation]);
+    }, [demoStore, intl, multisigStore, navigation]);
 
     const {
       securityQuestion,
@@ -179,8 +180,6 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
       setPhoneCountryCode(countryCode);
       setPhoneNumber(phoneCountryCode + phoneNumberWithoutCountryCode);
     };
-
-    const intl = useIntl();
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
