@@ -238,7 +238,6 @@ android {
     }
     buildTypes {
         debug {
-            resValue "string", "CodePushDeploymentKey","$System.env.APP_CENTER_DEPLOYMENT_KEY"
             signingConfig signingConfigs.debug
         }
         release {
@@ -251,7 +250,6 @@ android {
 
             // Detox-specific additions to pro-guard
             proguardFile "${rootProject.projectDir}/../node_modules/detox/android/detox/proguard-rules-app.pro"
-            resValue "string", "CodePushDeploymentKey","dIww8oxbK8Xet6S9k32G75mckzmlQxLEp_RqN"
         }
     }
 
