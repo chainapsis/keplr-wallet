@@ -4,6 +4,7 @@ import {
   ChainInfoSchema,
   CurrencySchema,
   CW20CurrencySchema,
+  FeeCurrencySchema,
   Secret20CurrencySchema,
 } from "./types";
 import {
@@ -11,6 +12,7 @@ import {
   ChainInfo,
   Currency,
   CW20Currency,
+  FeeCurrency,
   Secret20Currency,
 } from "@keplr-wallet/types";
 import { Bech32Config } from "@keplr-wallet/types";
@@ -398,6 +400,142 @@ describe("Test chain info schema", () => {
     }, "Should throw error when coin decimal is not integer");
   });
 
+  it("test fee currency schema", async () => {
+    await assert.doesNotReject(async () => {
+      const currency: FeeCurrency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+    });
+
+    await assert.doesNotReject(async () => {
+      let currency: FeeCurrency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+        gasPriceStep: {
+          low: 0.1,
+          average: 0.2,
+          high: 0.3,
+        },
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+
+      currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+        gasPriceStep: {
+          low: 0.2,
+          average: 0.2,
+          high: 0.3,
+        },
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+
+      currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+        gasPriceStep: {
+          low: 0.2,
+          average: 0.3,
+          high: 0.3,
+        },
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+
+      currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+        gasPriceStep: {
+          low: 0.3,
+          average: 0.3,
+          high: 0.3,
+        },
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+
+      currency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+        gasPriceStep: {
+          low: 0,
+          average: 0,
+          high: 0,
+        },
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+    });
+
+    await assert.rejects(async () => {
+      const currency: FeeCurrency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+        // @ts-ignore
+        gasPriceStep: {
+          low: 0.1,
+        },
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+    }, "should reject if gas price step is incomplete");
+
+    await assert.rejects(async () => {
+      const currency: FeeCurrency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+        gasPriceStep: {
+          low: 0.3,
+          average: 0.2,
+          high: 0.3,
+        },
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+    }, "should reject if low in gas price step is greater than average");
+
+    await assert.rejects(async () => {
+      const currency: FeeCurrency = {
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+        gasPriceStep: {
+          low: 0.1,
+          average: 0.3,
+          high: 0.2,
+        },
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+    }, "should reject if average in gas price step is greater than high");
+
+    await assert.rejects(async () => {
+      const currency: FeeCurrency = {
+        type: "cw20",
+        contractAddress:
+          "tokens like CW20/IBC etc... can not be fee currency yet",
+        coinDenom: "TEST",
+        coinMinimalDenom: "utest",
+        coinDecimals: 0,
+      };
+
+      await FeeCurrencySchema.validateAsync(currency);
+    });
+  });
+
   it("test bech32 config schema", async () => {
     await assert.doesNotReject(async () => {
       const bech32Config: Bech32Config = {
@@ -532,6 +670,11 @@ describe("Test chain info schema", () => {
             coinDenom: "TEST",
             coinMinimalDenom: "utest",
             coinDecimals: 6,
+            gasPriceStep: {
+              low: 0.1,
+              average: 0.2,
+              high: 0.3,
+            },
           },
         ],
       };
@@ -561,6 +704,84 @@ describe("Test chain info schema", () => {
       // But, after being validated, the unknown field should be stripped.
       assert.strictEqual(validated["unknownField"], undefined);
     });
+
+    await assert.doesNotReject(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo.currencies = [
+        {
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6,
+        },
+        {
+          coinDenom: "TEST2",
+          coinMinimalDenom: "utest2",
+          coinDecimals: 6,
+        },
+      ];
+      // @ts-ignore
+      chainInfo.feeCurrencies = [
+        {
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6,
+        },
+        {
+          coinDenom: "TEST2",
+          coinMinimalDenom: "utest2",
+          coinDecimals: 6,
+        },
+      ];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "should permit multiple currencies/feeCurrencies");
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo.currencies = [
+        {
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6,
+        },
+        {
+          coinDenom: "TEST2",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6,
+        },
+      ];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "should reject if duplication exists in currencies");
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo.feeCurrencies = [
+        {
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6,
+        },
+        {
+          coinDenom: "TEST2",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6,
+        },
+      ];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "should reject if duplication exists in feeCurrencies");
+
+    await assert.doesNotReject(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo.feeCurrencies[0].gasPriceStep = undefined;
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "gas price step in fee currencies should be nullable");
 
     await assert.doesNotReject(async () => {
       let chainInfo = generatePlainChainInfo();
@@ -593,6 +814,23 @@ describe("Test chain info schema", () => {
         );
       }
     });
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      // @ts-ignore
+      chainInfo["feeCurrencies"] = [
+        {
+          type: "cw20",
+          contractAddress:
+            "tokens like CW20/IBC etc... can not be fee currency yet",
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 0,
+        },
+      ];
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw if fee currencies includes invalids");
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
