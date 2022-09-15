@@ -104,7 +104,7 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
                   }
                 },
               })}
-              type="text"
+              type="number"
               pattern="[0-9]*"
               error={errors.duration && errors.duration.message}
             />
