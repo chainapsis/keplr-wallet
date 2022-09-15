@@ -5,7 +5,11 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { LedgerGetWebHIDFlagMsg, LedgerSetWebHIDFlagMsg } from "./messages";
+import {
+  LedgerGetAppInUseMsg,
+  LedgerGetWebHIDFlagMsg,
+  LedgerSetWebHIDFlagMsg,
+} from "./messages";
 import { LedgerService } from "./service";
 
 export const getHandler: (service: LedgerService) => Handler = (
@@ -22,6 +26,11 @@ export const getHandler: (service: LedgerService) => Handler = (
         return handleLedgerSetWebHIDFlagMsg(service)(
           env,
           msg as LedgerSetWebHIDFlagMsg
+        );
+      case LedgerGetAppInUseMsg:
+        return handleLedgerGetAppInUseMsg(service)(
+          env,
+          msg as LedgerGetAppInUseMsg
         );
       default:
         throw new KeplrError("ledger", 111, "Unknown msg type");
@@ -42,5 +51,13 @@ const handleLedgerSetWebHIDFlagMsg: (
 ) => InternalHandler<LedgerSetWebHIDFlagMsg> = (service) => {
   return async (_env, msg) => {
     return await service.setWebHIDFlag(msg.flag);
+  };
+};
+
+const handleLedgerGetAppInUseMsg: (
+  service: LedgerService
+) => InternalHandler<LedgerGetAppInUseMsg> = (service) => {
+  return async (_env, _msg) => {
+    return await service.getLedgerAppInUse();
   };
 };

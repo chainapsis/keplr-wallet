@@ -52,7 +52,11 @@ export const AccountView: FunctionComponent = observer(() => {
                 id: "setting.keyring.unnamed-account",
               })
             : accountInfo.walletStatus === WalletStatus.Rejected
-            ? "Unable to Load Key"
+            ? accountInfo.rejectionReason &&
+              accountInfo.rejectionReason instanceof KeplrError &&
+              accountInfo.rejectionReason.code === 153
+              ? "Connect with Ledger"
+              : "Unable to Load Key"
             : "Loading..."}
         </div>
         <div style={{ flex: 1 }} />

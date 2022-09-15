@@ -778,7 +778,7 @@ export class KeyRing {
 
     // Sign with Evmos/Ethereum
     if (useEthereumSigning) {
-      return this.signEthereum(chainId, defaultCoinType, message);
+      return this.signEthereum(env, chainId, defaultCoinType, message);
     }
 
     if (this.keyStore.type === "ledger") {
@@ -817,6 +817,7 @@ export class KeyRing {
   }
 
   public async signEthereum(
+    env: Env,
     chainId: string,
     defaultCoinType: number,
     message: Uint8Array,
@@ -846,6 +847,7 @@ export class KeyRing {
       const key = pubKeys[path];
 
       return this.ledgerKeeper.signEthereum(
+        env,
         type,
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
         key,
@@ -1262,16 +1264,25 @@ export class KeyRing {
 
   // Get the BIP44 path for the coinType as a string, e.g. m/44'/118'/0'/0/0, using either
   // the keyStore's cached hdpath or the argument.
-  private getPathForCoinType(coinType: number, _hdpath?: BIP44HDPath): string {
-    const hdpath = this.keyStore
+  private getPathForCoinType(
+    coinType: number,
+    _bip44HDPath?: BIP44HDPath
+  ): string {
+    const bip44HDPath = this.keyStore
       ? KeyRing.getKeyStoreBIP44Path(this.keyStore)
-      : _hdpath;
+      : _bip44HDPath;
 
-    if (!hdpath) {
+    if (!bip44HDPath) {
       throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
-    return Ledger.pathToString(Ledger.createPath(coinType, hdpath));
+    return Ledger.pathToString([
+      44,
+      coinType,
+      bip44HDPath.account,
+      bip44HDPath.addressIndex,
+      bip44HDPath.change,
+    ]);
   }
 
   // Load the public key for the given coinType using the appropriate Ledger app,

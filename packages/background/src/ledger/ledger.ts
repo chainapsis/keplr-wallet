@@ -8,7 +8,6 @@ import { signatureImport, publicKeyConvert } from "secp256k1";
 import { KeplrError } from "@keplr-wallet/router";
 import Eth from "@ledgerhq/hw-app-eth";
 import { EthSignType } from "@keplr-wallet/types";
-import { BIP44HDPath } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 
 export enum LedgerApp {
@@ -56,6 +55,11 @@ export class Ledger {
       if (app === LedgerApp.Ethereum) {
         const ethereumApp = new Eth(transport);
         const ledger = new Ledger(null, ethereumApp);
+
+        // Ensure device is open and responsive. Getting the address
+        // will throw if the Ethereum app is not open, as intended.
+        const defaultPath = "m/44'/60'/0/0/0";
+        await ethereumApp.getAddress(defaultPath);
 
         return ledger;
       }
@@ -211,10 +215,6 @@ export class Ledger {
 
   static async isWebHIDSupported(): Promise<boolean> {
     return await TransportWebHID.isSupported();
-  }
-
-  static createPath(coinType: number, fields: BIP44HDPath) {
-    return [44, coinType, fields.account, fields.change, fields.addressIndex];
   }
 
   // Convert a path represented by number[] to the string format
