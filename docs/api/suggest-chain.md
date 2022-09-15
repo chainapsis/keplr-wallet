@@ -36,18 +36,7 @@ interface ChainInfo {
     * This indicates which coin or token can be used for fee to send transaction.
     * You can get actual currency information from Currencies.
     */
-    readonly feeCurrencies: Currency[];
-    
-    /**
-    * This is used to set the fee of the transaction.
-    * If this field is empty, it just use the default gas price step (low: 0.01, average: 0.025, high: 0.04).
-    * And, set field's type as primitive number because it is hard to restore the prototype after deserialzing if field's type is `Dec`.
-    */
-    readonly gasPriceStep?: {
-        low: number;
-        average: number;
-        high: number;
-    };
+    readonly feeCurrencies: FeeCurrency[];
     
     /**
     * Indicate the features supported by this chain. Ex) cosmwasm, secretwasm ...
@@ -72,8 +61,7 @@ experimentalSuggestChain(chainInfo: SuggestingChainInfo): Promise<void>
 | `bip44.coinType` | 118 | BIP44 coin type for address derivation. We recommend using `118`(Cosmos Hub) as this would provide good Ledger hardware wallet compatibility by utilizing the Cosmos Ledger app. |
 | `bech32Config` | ```{ bech32PrefixAccAddr: "cosmos", bech32PrefixAccPub: "cosmos" + "pub", bech32PrefixValAddr: "cosmos" + "valoper", bech32PrefixValPub: "cosmos" + "valoperpub", bech32PrefixConsAddr: "cosmos" + "valcons", bech32PrefixConsPub: "cosmos" + "valconspub"}``` | Bech32 config using the address prefix of the chain |
 | `currencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }, ]``` | (TBD) |
-| `feeCurrencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }, ]``` | List of fee tokens accepted by the chain's validator. |
-| `gasPriceStep` | ```{ low: 0.01, average: 0.025, high: 0.03, }``` | Three `gasPrice` values (low, average, high) to estimate transaction fee. |
+| `feeCurrencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",     gasPriceStep: {     low: 0.01,     avergage: 0.025,     high: 0.04     }   }, ]``` | List of fee tokens accepted by the chain's validator. Each fee token can have gas price step. Gas price step is used to set the fee of the transaction. If this field is empty, it would use the default gas price step (low: 0.01, average: 0.025, high: 0.04). |
 | `features` | [] | `secretwasm` - Secret Network WASM smart contract transaction support `ibc-transfer` - For IBC transfers (ICS 20) enabled chains. For Stargate (cosmos-sdk v0.40+) chains, Keplr will check the on-chain params and automatically enable IBC transfers if it’s available) `cosmwasm` - For CosmWasm smart contract support (currently broken, in the process of being fixed)  `ibc-go` - For chains that use the ibc-go module separated from the cosmos-sdk |
 :::  
 
@@ -109,6 +97,11 @@ await window.keplr.experimentalSuggestChain({
             coinMinimalDenom: "uatom",
             coinDecimals: 6,
             coinGeckoId: "cosmos",
+            gasPriceStep: {
+                low: 0.01,
+                average: 0.025,
+                high: 0.04,
+            },
         },
     ],
     stakeCurrency: {
@@ -116,11 +109,6 @@ await window.keplr.experimentalSuggestChain({
         coinMinimalDenom: "uatom",
         coinDecimals: 6,
         coinGeckoId: "cosmos",
-    },
-    gasPriceStep: {
-        low: 0.01,
-        average: 0.025,
-        high: 0.03,
     },
 });
 ```
