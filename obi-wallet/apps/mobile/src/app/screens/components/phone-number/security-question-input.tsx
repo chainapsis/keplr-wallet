@@ -1,21 +1,20 @@
-import { Text } from "@obi-wallet/common";
-import { Dispatch, useState } from "react";
+import { Text, TextInput as OriginalTextInput } from "@obi-wallet/common";
+import { ComponentType, Dispatch, useState } from "react";
 import { useIntl, FormattedMessage } from "react-intl";
-import { View } from "react-native";
+import { TextInputProps, View } from "react-native";
 
 import { SECURITY_QUESTIONS } from "../../../../config";
 import { DropDownPicker } from "../../../drop-down-picker";
 import { TextInput } from "../../../text-input";
 
 export type SetStateCallback<S> = (prevState: S) => S;
-export type OnSecurityQuestionChange = Dispatch<
-  SetStateCallback<string | null>
->;
+export type OnSecurityQuestionChange = Dispatch<SetStateCallback<string>>;
 
 export type SecurityQuestionInputProps = {
   securityQuestion: string;
   securityAnswer: string;
   onSecurityAnswerChange: (securityAnswer: string) => void;
+  CustomTextInput?: ComponentType<TextInputProps>;
 } & (
   | {
       disabled: true;
@@ -35,6 +34,7 @@ export function SecurityQuestionInput({
   },
   securityAnswer,
   onSecurityAnswerChange,
+  CustomTextInput = OriginalTextInput,
 }: SecurityQuestionInputProps) {
   const [dropdownPickerOpen, setDropdownPickerOpen] = useState(false);
   const [securityQuestions, setSecurityQuestions] =
@@ -67,6 +67,7 @@ export function SecurityQuestionInput({
         setOpen={setDropdownPickerOpen}
         setValue={onSecurityQuestionChange}
         setItems={setSecurityQuestions}
+        listMode="SCROLLVIEW"
       />
 
       <TextInput
@@ -81,6 +82,7 @@ export function SecurityQuestionInput({
         style={{ marginTop: 25 }}
         value={securityAnswer}
         onChangeText={onSecurityAnswerChange}
+        CustomTextInput={CustomTextInput}
       />
     </View>
   );

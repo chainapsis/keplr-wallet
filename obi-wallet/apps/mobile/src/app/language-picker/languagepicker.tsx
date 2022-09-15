@@ -2,25 +2,27 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useStore } from "../../app/stores";
+import { useStore } from "../stores";
 import { DropDownPicker } from "./index";
 
 export const LanguagePicker = observer(() => {
   const languageStore = useStore().languageStore;
 
-  const GetLanguages = languageStore.getLanguages();
+  const languages = languageStore.getLanguages();
   const currentLanguage = languageStore.currentLanguage;
 
-  const handleLanguageChoice = (langCode) => {
-    const language = GetLanguages.find(
+  const handleLanguageChoice = (langCode: string | null) => {
+    const language = languages.find(
       (object) => object.languagecode === langCode
     );
-    languageStore.setCurrentLanguage(language);
+    if (language) {
+      void languageStore.setCurrentLanguage(language);
+    }
   };
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(currentLanguage.languagecode); // Default: Current Device Language on first load
-  const [items, setItems] = useState(GetLanguages);
+  const [items, setItems] = useState(languages);
 
   return (
     <SafeAreaView

@@ -1,46 +1,40 @@
-import {
-  coins,
-  pubkeyToAddress,
-  pubkeyType,
-  Secp256k1Wallet,
-} from "@cosmjs/amino";
-import { SigningStargateClient } from "@cosmjs/stargate";
-import {
-  faChevronRight,
-  width,
-} from "@fortawesome/free-solid-svg-icons/faChevronRight";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { FC } from "react";
+import { observer } from "mobx-react-lite";
+import { FC, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
+  Linking,
   StyleSheet,
   Text,
-  View,
   TouchableOpacity,
-  Linking,
+  View,
 } from "react-native";
+import codePush, { LocalPackage } from "react-native-code-push";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
-import { getBiometricsKeyPair } from "../../biometrics";
 import { useStore } from "../../stores";
 import { Account } from "../account";
 import { Create } from "../account/create";
+import { DemoModeToggle } from "../components/demo-mode-toggle";
 import { useNavigation } from "../onboarding/stack";
-import AccountSettingsIcon from "./assets/banksettings.svg";
 import MultiSigIcon from "./assets/edit.svg";
 import HelpAndSupport from "./assets/headset.svg";
 import ObiLogo from "./assets/obi-logo.svg";
 import LogoutIcon from "./assets/power-red.svg";
-import UserImage from "./assets/user.svg";
 import { KeysConfigScreen } from "./keys-config";
 import { Stack } from "./stack";
 
-export function SettingsScreen() {
-  const navigation = useNavigation();
-  const { multisigStore } = useStore();
+export const SettingsScreen = observer(() => {
+  const { demoStore, multisigStore } = useStore();
   const intl = useIntl();
+  const navigation = useNavigation();
+  const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
+  useEffect(() => {
+    void (async () => {
+      setAppMetadata(await codePush.getUpdateMetadata());
+    })();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -49,7 +43,7 @@ export function SettingsScreen() {
           marginTop: 61,
           flexDirection: "row",
           justifyContent: "space-between",
-          marginBottom: 10,
+          marginBottom: 40,
         }}
       >
         <View
@@ -82,7 +76,7 @@ export function SettingsScreen() {
               Profile picture, name and mail
             </Text>*/}
           </View>
-
+          {/*
           <TouchableOpacity
             style={{ flex: 1, justifyContent: "center", paddingLeft: 20 }}
           >
@@ -91,16 +85,17 @@ export function SettingsScreen() {
               style={styles.chevronRight}
             />
           </TouchableOpacity>
+          */}
         </View>
       </View>
-      {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment 
-      <Setting
-        Icon={AccountSettingsIcon}
-        title="Account settings"
-        subtitle="Manage accounts & sub-accounts "
-        onPress={() => navigation.navigate("AccountsSettings")}
-      />
-      */}
+      {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment
+          <Setting
+            Icon={AccountSettingsIcon}
+            title="Account settings"
+            subtitle="Manage accounts & sub-accounts "
+            onPress={() => navigation.navigate("AccountsSettings")}
+          />
+          */}
       <Setting
         Icon={MultiSigIcon}
         title={intl.formatMessage({
@@ -149,62 +144,19 @@ export function SettingsScreen() {
           id: "settings.logout.subtext",
           defaultMessage: "Save your keys before logging out",
         })}
-      />
-
-      <Setting
-        Icon={HelpAndSupport}
-        title={intl.formatMessage({
-          id: "settings.fundproxywallet",
-          defaultMessage: "Fund Proxy Wallet",
-        })}
-        subtitle={intl.formatMessage({
-          id: "settings.fundproxywallet.subtext",
-          defaultMessage: "Send some funds from your biometrics wallet",
-        })}
-        onPress={async () => {
-          const rcp = "https://rpc.uni.junonetwork.io/";
-          const { publicKey, privateKey } = await getBiometricsKeyPair();
-          const wallet = await Secp256k1Wallet.fromKey(
-            new Uint8Array(Buffer.from(privateKey, "base64")),
-            "juno"
-          );
-          const biometricsAddress = pubkeyToAddress(
-            {
-              type: pubkeyType.secp256k1,
-              value: publicKey,
-            },
-            "juno"
-          );
-          const client = await SigningStargateClient.connectWithSigner(
-            rcp,
-            wallet
-          );
-
-          const fee = {
-            amount: coins(6000, "ujunox"),
-            gas: "200000",
-          };
-
-          const result = await client.sendTokens(
-            biometricsAddress,
-            multisigStore.getProxyAddress(),
-            coins(100000, "ujunox"),
-            fee,
-            ""
-          );
-          console.log({ result });
-
-          const result2 = await client.sendTokens(
-            biometricsAddress,
-            multisigStore.getCurrentAdmin("juno").multisig.address,
-            coins(100000, "ujunox"),
-            fee,
-            ""
-          );
-          console.log({ result2 });
+        onPress={() => {
+          if (demoStore.demoMode) {
+            demoStore.logout();
+          } else {
+            multisigStore.logout();
+          }
         }}
       />
-
+      <DemoModeToggle>
+        <Text style={{ color: "white", textAlign: "center" }}>
+          Obi {appMetadata?.appVersion} {appMetadata?.label}
+        </Text>
+      </DemoModeToggle>
       <View
         style={{
           flex: 1,
@@ -253,7 +205,7 @@ export function SettingsScreen() {
       </View>
     </SafeAreaView>
   );
-}
+});
 
 interface SettingProps {
   Icon: FC<SvgProps>;
@@ -299,7 +251,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   flex1: {
-    flex: 1,
+    flex: 0,
     marginBottom: 20,
   },
   text: {

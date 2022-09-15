@@ -80,7 +80,7 @@ export function PhoneInput({
   label?: string;
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
-  handlePhoneNumberCountryCode?: (param: string) => void;
+  handlePhoneNumberCountryCode: (param: string) => void;
 }) {
   const languageStore = useStore().languageStore;
   const language = languageStore.currentLanguage.languagecode;
@@ -88,7 +88,7 @@ export function PhoneInput({
   // possible Languages to add
   // "common","cym","deu","fra","hrv","ita","jpn","nld","por","rus","spa","svk","fin","zho","isr";
 
-  const dropdownLanguage = (langCode) => {
+  const dropdownLanguage = (langCode: string) => {
     if (langCode === "de") {
       return "deu";
     } else if (langCode === "es") {
@@ -105,7 +105,7 @@ export function PhoneInput({
     setCountry(country);
   };
   // Default Selection
-  const [countryCode, setCountryCode] = useState<CountryCode | undefined>("US");
+  const [countryCode, setCountryCode] = useState<CountryCode>("US");
   const [country, setCountry] = useState<Country>({
     callingCode: ["1"],
     cca2: "US",

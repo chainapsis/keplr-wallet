@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,10 +24,12 @@ export type BiometricsOnboardingProps = NativeStackScreenProps<
 
 export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
+    const { demoStore, multisigStore } = useStore();
 
     useEffect(() => {
-      const { biometrics } = multisigStore.getNextAdmin("");
+      if (demoStore.demoMode) return;
+
+      const { biometrics } = multisigStore.nextAdmin;
       if (biometrics) {
         Alert.alert(
           intl.formatMessage({
@@ -54,9 +56,11 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
           ]
         );
       }
-    }, [multisigStore, navigation]);
+    }, [demoStore, multisigStore, navigation]);
 
     const intl = useIntl();
+    const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
+      useState(false);
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -151,24 +155,33 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
             flavor="blue"
             LeftIcon={Scan}
             onPress={async () => {
+              setButtonDisabledDoubleclick(true);
+
               try {
-                const publicKey = await getBiometricsPublicKey();
-                multisigStore.setBiometricsPublicKey({
-                  publicKey: {
-                    type: pubkeyType.secp256k1,
-                    value: publicKey,
-                  },
-                });
+                if (!demoStore.demoMode) {
+                  const publicKey = await getBiometricsPublicKey();
+                  multisigStore.setBiometricsPublicKey({
+                    publicKey: {
+                      type: pubkeyType.secp256k1,
+                      value: publicKey,
+                    },
+                  });
+                }
+
                 navigation.navigate("onboarding5");
+                setButtonDisabledDoubleclick(false);
               } catch (e) {
-                console.error(e);
+                setButtonDisabledDoubleclick(false);
+                const error = e as Error;
+                console.error(error);
                 Alert.alert(
                   intl.formatMessage({ id: "general.error" }) +
                     " ScanMyBiometrics",
-                  e.message
+                  error.message
                 );
               }
             }}
+            disabled={buttonDisabledDoubleclick}
           />
         </View>
       </SafeAreaView>

@@ -1,21 +1,18 @@
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
-import { Coin } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
+import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import BottomSheet, {
-  BottomSheetView,
-  TouchableOpacity,
-} from "@gorhom/bottom-sheet/src";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from "react-intl";
-import { Text, View } from "react-native";
+import { RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { formatCoin, useBalances } from "../../balances";
+import { ExtendedCoin, formatCoin, useBalances } from "../../balances";
 import { Button } from "../../button";
 import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
@@ -27,26 +24,22 @@ import {
 } from "../components/signature-modal";
 
 export const SendScreen = observer(() => {
-  const balances = useBalances();
-  const [selectedCoin, setSelectedCoin] = useState<Coin | undefined>(
-    balances[0]
+  const { balances, refreshing, refreshBalances } = useBalances();
+  const [selectedCoin, setSelectedCoin] = useState<ExtendedCoin | undefined>(
+    () => {
+      return balances.length > 0 ? balances[0] : undefined;
+    }
   );
   const [denominationOpened, setDenominationOpened] = useState(false);
-  const refBottomSheet = useRef(null);
-  const triggerBottomSheet = (open) => {
-    if (!open) {
-      refBottomSheet.current.close();
-    } else {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const triggerBottomSheet = (open: boolean) => {
+    if (open) {
       setDenominationOpened(true);
-      refBottomSheet.current.snapToIndex(0);
+      bottomSheetRef.current?.snapToIndex(0);
+    } else {
+      bottomSheetRef.current?.close();
     }
   };
-
-  useEffect(() => {
-    if (!selectedCoin) {
-      setSelectedCoin(balances[0]);
-    }
-  }, [balances, selectedCoin]);
 
   const hydratedSelectedCoin = selectedCoin ? formatCoin(selectedCoin) : null;
 
@@ -54,12 +47,15 @@ export const SendScreen = observer(() => {
   const [amount, setAmount] = useState("");
 
   const { multisigStore } = useStore();
-  const multisig = multisigStore.getCurrentAdmin("juno");
-
-  console.log(multisigStore.getCurrentAdmin("juno"));
+  const multisig = multisigStore.currentAdmin;
 
   const encodeObjects = useMemo(() => {
-    if (!selectedCoin) return [];
+    if (
+      !selectedCoin ||
+      !multisig?.multisig?.address ||
+      !multisigStore.proxyAddress
+    )
+      return [];
 
     const { digits } = formatCoin(selectedCoin);
     const normalizedAmount =
@@ -86,7 +82,7 @@ export const SendScreen = observer(() => {
 
     const value: MsgExecuteContract = {
       sender: multisig.multisig.address,
-      contract: multisigStore.getProxyAddress(),
+      contract: multisigStore.proxyAddress.address,
       msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
       funds: [],
     };
@@ -96,7 +92,7 @@ export const SendScreen = observer(() => {
       value,
     };
     return [message];
-  }, [address, amount, multisig.multisig.address, multisigStore, selectedCoin]);
+  }, [address, amount, multisig, multisigStore, selectedCoin]);
 
   const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
     multisig,
@@ -147,10 +143,43 @@ export const SendScreen = observer(() => {
               defaultMessage: "Wallet Address",
             })}
             style={{ flex: 1 }}
+            inputStyle={{
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              borderRightWidth: 0,
+            }}
             value={address}
             onChangeText={setAddress}
           />
-          {/* <View style={{ width: 64, height: 64, backgroundColor: 'red' }} /> */}
+          <TouchableOpacity
+            style={{
+              width: 56,
+              height: 56,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 5,
+              borderTopRightRadius: 12,
+              borderBottomRightRadius: 12,
+              borderWidth: 1,
+              borderColor: "#2F2B4C",
+              borderLeftWidth: 0,
+            }}
+          >
+            <View
+              style={{
+                position: "absolute",
+                width: 1,
+                backgroundColor: "#2F2B4C",
+                height: "100%",
+                left: 0,
+              }}
+            />
+            <FontAwesomeIcon
+              icon={faQrcode}
+              style={{ color: "#887CEB" }}
+              size={32}
+            />
+          </TouchableOpacity>
         </View>
         <View style={{ marginTop: 35 }}>
           <Text
@@ -263,7 +292,7 @@ export const SendScreen = observer(() => {
         handleStyle={{ backgroundColor: "transparent" }}
         snapPoints={["60"]}
         enablePanDownToClose={true}
-        ref={refBottomSheet}
+        ref={bottomSheetRef}
         index={-1}
         backdropComponent={(props) => null}
         onClose={() => {
@@ -342,6 +371,12 @@ export const SendScreen = observer(() => {
                 }}
               />
             )}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={refreshBalances}
+              />
+            }
           />
         </BottomSheetView>
       </BottomSheet>
@@ -350,7 +385,7 @@ export const SendScreen = observer(() => {
 });
 
 interface CoinRendererProps {
-  item: Coin;
+  item: ExtendedCoin;
   selected: boolean;
   onPress: () => void;
 }

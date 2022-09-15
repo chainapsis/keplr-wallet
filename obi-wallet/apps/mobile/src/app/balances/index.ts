@@ -1,46 +1,87 @@
-import { Coin, StargateClient } from "@cosmjs/stargate";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import { rootStore } from "../../background/root-store";
 import { useStore } from "../stores";
 
-export function useBalances() {
-  const { multisigStore } = useStore();
-  const address = multisigStore.getProxyAddress();
-
-  const [balances, setBalances] = useState<readonly Coin[]>([]);
-
-  useEffect(() => {
-    function f() {
-      (async () => {
-        const rcp = "https://rpc.uni.junonetwork.io/";
-        const client = await StargateClient.connect(rcp);
-        setBalances(await client.getAllBalances(address));
-      })();
-      return setTimeout(() => {
-        f();
-      }, 5000);
-    }
-    f();
-  }, [address]);
-
-  return balances;
+export interface ExtendedCoin {
+  denom: string;
+  amount: string;
+  usdPrice: number;
 }
 
-export function formatCoin(coin: Coin) {
+export function useBalances() {
+  const { demoStore, balancesStore } = useStore();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refreshBalances = useCallback(async () => {
+    setRefreshing(true);
+    if (!demoStore.demoMode) {
+      await balancesStore.fetchBalances();
+    }
+    setRefreshing(false);
+  }, [demoStore, balancesStore]);
+
+  useEffect(() => {
+    void refreshBalances();
+  }, [refreshBalances]);
+
+  return {
+    balances: demoStore.demoMode ? [] : balancesStore.balances,
+    refreshBalances,
+    refreshing,
+  };
+}
+
+export function formatCoin(coin: ExtendedCoin) {
+  const { denom } = rootStore.multisigStore.currentChainInformation;
   switch (coin.denom) {
-    case "ujunox": {
+    case denom: {
       const digits = 6;
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
         icon: null,
-        denom: "JUNOX",
+        denom: denom.slice(1).toUpperCase(),
         digits,
-        label: "Juno-testnet Staking Coin",
+        label: denom[1].toUpperCase() + denom.slice(2),
         amount,
-        valueInUsd: amount * 0,
+        valueInUsd: 0,
       };
     }
-    default:
-      throw new Error("Unknown coin denom");
+    case "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034": {
+      const digits = 6;
+      const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
+      return {
+        icon: null,
+        denom: "axlUSDC",
+        digits,
+        label: "USDC (Axelar)",
+        amount,
+        valueInUsd: amount,
+      };
+    }
+    case "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup": {
+      const digits = 6;
+      const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
+      return {
+        icon: null,
+        denom: "LOOP",
+        digits,
+        label: "Loop",
+        amount,
+        valueInUsd: coin.usdPrice * amount,
+      };
+    }
+    default: {
+      const digits = 6;
+      const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
+      return {
+        icon: null,
+        denom: coin.denom,
+        digits: 6,
+        label: "Unknown Token",
+        amount: amount,
+        valueInUsd: 0,
+      };
+    }
   }
 }

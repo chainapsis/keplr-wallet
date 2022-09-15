@@ -28,10 +28,12 @@ export type PhoneNumberOnboardingProps = NativeStackScreenProps<
 
 export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
+    const { demoStore, multisigStore } = useStore();
 
     useEffect(() => {
-      const { phoneNumber } = multisigStore.getNextAdmin("");
+      if (demoStore.demoMode) return;
+
+      const { phoneNumber } = multisigStore.nextAdmin;
       if (phoneNumber) {
         Alert.alert(
           intl.formatMessage({ id: "onboarding2.error.phonekeyexists.title" }),
@@ -55,7 +57,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
           ]
         );
       }
-    }, [multisigStore, navigation]);
+    }, [demoStore, multisigStore, navigation]);
 
     const {
       securityQuestion,
@@ -173,7 +175,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
     };
 
     // Function passed down to child component "PhoneInput" as property
-    const handlePhoneNumberCountryCode = (countryCode) => {
+    const handlePhoneNumberCountryCode = (countryCode: string) => {
       setPhoneCountryCode(countryCode);
       setPhoneNumber(phoneCountryCode + phoneNumberWithoutCountryCode);
     };
@@ -281,10 +283,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
 
                 if (checkSecurityAnswer && checkPhoneNumber) {
                   try {
-                    await sendPublicKeyTextMessage({
-                      phoneNumber,
-                      securityAnswer,
-                    });
+                    if (!demoStore.demoMode) {
+                      await sendPublicKeyTextMessage({
+                        phoneNumber,
+                        securityAnswer,
+                      });
+                    }
 
                     navigation.navigate("onboarding3", {
                       phoneNumber,
@@ -294,13 +298,14 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
 
                     setMagicButtonDisabledDoubleclick(false);
                   } catch (e) {
+                    const error = e as Error;
                     setMagicButtonDisabledDoubleclick(false);
-                    console.error(e);
+                    console.error(error);
                     Alert.alert(
                       intl.formatMessage({
                         id: "onboarding2.error.sendingsmsfailed",
                       }),
-                      e.message
+                      error.message
                     );
                   }
                 } else {

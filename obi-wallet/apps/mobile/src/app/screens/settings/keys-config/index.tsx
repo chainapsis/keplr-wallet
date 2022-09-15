@@ -45,15 +45,15 @@ const getSVG = (number: number) => {
 
 export const KeysConfigScreen = observer(() => {
   const { multisigStore } = useStore();
-  const currentAdmin = multisigStore.getCurrentAdmin("juno");
-  const refBottomSheet = useRef<BottomSheet>();
+  const currentAdmin = multisigStore.currentAdmin;
+  const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
 
-  const triggerBottomSheet = (index) => {
+  const triggerBottomSheet = (index: number) => {
     if (index === -1) {
-      refBottomSheet.current.close();
+      bottomSheetRef.current?.close();
     } else {
-      refBottomSheet.current.snapToIndex(index);
+      bottomSheetRef.current?.snapToIndex(index);
     }
   };
 
@@ -64,7 +64,7 @@ export const KeysConfigScreen = observer(() => {
     id: MultisigKey;
     title: string;
   }): Key & { activated: boolean } {
-    const activated = currentAdmin[id] !== null;
+    const activated = currentAdmin?.[id] !== null;
     return {
       id,
       title,
@@ -157,7 +157,7 @@ export const KeysConfigScreen = observer(() => {
         handleStyle={{ backgroundColor: "transparent" }}
         snapPoints={["50%"]}
         enablePanDownToClose={true}
-        ref={refBottomSheet}
+        ref={bottomSheetRef}
         index={-1}
       >
         <BottomSheetView

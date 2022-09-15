@@ -1,43 +1,32 @@
-import { KVStore } from "@keplr-wallet/common";
-import { action, makeObservable, observable, runInAction, toJS } from "mobx";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { action, flow, makeObservable, observable, toJS } from "mobx";
 
 export interface App {
   label: string;
   url: string;
-  icon?: string;
+  icon: string | null;
 }
 
 // TODO: this is probably something that we want to fetch dynamically from a server / GitHub.
 // This way, we won't need to bundle the images with the mobile app and can update the list
 // without having to update the mobile app.
-const knownApps: App[] = [
-  {
-    label: "Cosmostation",
-    url: "https://www.cosmostation.io",
-    icon: "https://place-hold.it/180x180",
-  },
-  {
-    label: "Osmosis",
-    url: "https://app.osmosis.zone",
-    icon: "https://uploads-ssl.webflow.com/623a0c9828949e55356286f9/625480558574551ef368eef4_icon-256.png",
-  },
-];
+const knownApps: App[] = [];
 
 export class AppsStore {
   @observable
-  protected favorites: App[] = [];
+  public favorites: App[] = [];
 
   constructor(protected readonly kvStore: KVStore) {
     makeObservable(this);
-    void this.init();
+    this.init();
   }
 
-  @action
-  protected async init() {
-    const favorites = await this.kvStore.get<App[] | undefined>("favorites");
-    runInAction(() => {
-      this.favorites = favorites ?? knownApps;
-    });
+  @flow
+  protected *init() {
+    const favorites = yield* toGenerator(
+      this.kvStore.get<App[] | undefined>("favorites")
+    );
+    this.favorites = favorites ?? knownApps;
   }
 
   protected async save() {
@@ -47,10 +36,6 @@ export class AppsStore {
 
   public getKnownApps() {
     return knownApps;
-  }
-
-  public getFavorites() {
-    return this.favorites;
   }
 
   public hasFavorite(url: string) {

@@ -7,26 +7,31 @@ import {
   PermissionStore,
 } from "@keplr-wallet/stores";
 
+import { Chain } from "../chains";
 import { EmbedChainInfos } from "../config";
 import { produceEnv } from "../env";
 import { KVStore } from "../kv-store";
 import { MessageRequesterInternal } from "../message-requester";
 import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
+import { BalancesStore } from "./balances";
 import { ChainStore } from "./chain";
+import { DemoStore } from "./demo";
 import { LanguageStore } from "./languages";
 import { MultisigStore } from "./multisig";
 
 export class RootStore {
   public readonly appsStore: AppsStore;
+  public readonly balancesStore: BalancesStore;
   public readonly chainStore: ChainStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+  public readonly demoStore: DemoStore;
   public readonly interactionStore: InteractionStore;
   public readonly multisigStore: MultisigStore;
   public readonly permissionStore: PermissionStore;
   public readonly languageStore: LanguageStore;
 
-  constructor() {
+  constructor(defaultChain: Chain) {
     const router = new RouterUi(produceEnv);
     ObservableQueryBase.experimentalDeferInitialQueryController =
       new DeferInitialQueryController();
@@ -47,9 +52,13 @@ export class RootStore {
     );
 
     this.appsStore = new AppsStore(new KVStore("apps-store"));
+    this.demoStore = new DemoStore();
+    this.multisigStore = new MultisigStore(
+      defaultChain,
+      new KVStore("multisig-store")
+    );
 
-    this.multisigStore = new MultisigStore(new KVStore("multisig-store"));
-
+    this.balancesStore = new BalancesStore(this.multisigStore);
     this.languageStore = new LanguageStore(new KVStore("language-store"));
 
     router.listen(APP_PORT);

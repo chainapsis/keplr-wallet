@@ -1,4 +1,3 @@
-import { SigningStargateClient } from "@cosmjs/stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -10,6 +9,7 @@ import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../button";
+import { useStargateClient } from "../../../clients";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import { Background } from "../../components/background";
@@ -25,12 +25,16 @@ export type SocialOnboardingProps = NativeStackScreenProps<
 
 export const SocialOnboarding = observer<SocialOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
+    const { demoStore, multisigStore } = useStore();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
 
+    const client = useStargateClient();
+
     useEffect(() => {
-      const { social } = multisigStore.getNextAdmin("");
+      if (demoStore.demoMode) return;
+
+      const { social } = multisigStore.nextAdmin;
 
       if (social) {
         Alert.alert(
@@ -55,9 +59,24 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
           ]
         );
       }
-    }, [multisigStore, navigation]);
+    }, [demoStore, multisigStore, navigation]);
 
     const intl = useIntl();
+
+    async function getAccountPubkey(key: string) {
+      try {
+        if (!client) return null;
+        const account = await client.getAccount(key);
+        return account?.pubkey;
+      } catch (e) {
+        console.log(e);
+        Alert.alert(
+          "We don’t see any activity for this address.",
+          "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."
+        );
+        return null;
+      }
+    }
 
     return (
       <KeyboardAvoidingView
@@ -152,12 +171,16 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                 disabled={fetchingPubKey}
                 onPress={async () => {
                   setFetchingPubKey(true);
-                  const publicKey = await getAccountPubkey(address);
+                  const publicKey = demoStore.demoMode
+                    ? { type: "demo", value: "demo" }
+                    : await getAccountPubkey(address);
                   setFetchingPubKey(false);
                   if (publicKey) {
-                    multisigStore.setSocialPublicKey({
-                      publicKey: publicKey,
-                    });
+                    if (!demoStore.demoMode) {
+                      multisigStore.setSocialPublicKey({
+                        publicKey: publicKey,
+                      });
+                    }
                     navigation.navigate("onboarding6");
                   }
                 }}
@@ -169,20 +192,3 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
     );
   }
 );
-
-async function getAccountPubkey(key: string) {
-  const rcp = "https://rpc.uni.junonetwork.io/";
-  const client = await SigningStargateClient.connect(rcp);
-  try {
-    const { pubkey } = await client.getAccount(key);
-    return pubkey;
-  } catch (e) {
-    console.log(e);
-    // ToDo: This Alert needs to have translation implemented, but useIntl not working here
-    // "onboarding5.error.notactiveaddress.title" && "onboarding5.error.notactiveaddress.text"
-    Alert.alert(
-      "We don’t see any activity for this address.",
-      "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."
-    );
-  }
-}

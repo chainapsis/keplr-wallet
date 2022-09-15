@@ -1,17 +1,21 @@
-import { TouchableOpacity } from "@gorhom/bottom-sheet/src";
 import { observer } from "mobx-react-lite";
 import { FormattedMessage } from "react-intl";
-import { Share, Text, View } from "react-native";
+import { Share, Text, TouchableOpacity, View } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useStore } from "../../stores";
 import { Back } from "../components/back";
 
 export const ReceiveScreen = observer(() => {
-  const { multisigStore } = useStore();
-  const address = multisigStore.getProxyAddress();
+  const { demoStore, multisigStore } = useStore();
+  const address = demoStore.demoMode
+    ? "demo-address"
+    : multisigStore.proxyAddress?.address;
 
-  const onShare = async (text) => {
+  if (!address) return null;
+
+  const onShare = async (text: string) => {
     try {
       const result = await Share.share({
         message: text,
@@ -25,7 +29,8 @@ export const ReceiveScreen = observer(() => {
       } else if (result.action === Share.dismissedAction) {
         // dismissed
       }
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       alert(error.message);
     }
   };
@@ -57,6 +62,16 @@ export const ReceiveScreen = observer(() => {
       </View>
 
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{
+            borderRadius: 16,
+            backgroundColor: "white",
+            padding: 10,
+            marginBottom: "30%",
+          }}
+        >
+          <QRCode value={address} size={200} />
+        </View>
         <TouchableOpacity
           style={{
             backgroundColor: "#17162C",

@@ -6,12 +6,17 @@ import { SocialOnboarding } from "./5-social";
 import { MultisigOnboarding } from "./6-multisig";
 import { Stack } from "./stack";
 
-export function OnboardingScreen() {
+export interface OnboardingScreensProps {
+  initialRouteName?: string;
+}
+
+export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
       }}
+      initialRouteName={initialRouteName}
     >
       <Stack.Screen name="onboarding1" component={WelcomeOnboarding} />
       <Stack.Screen name="onboarding2" component={PhoneNumberOnboarding} />

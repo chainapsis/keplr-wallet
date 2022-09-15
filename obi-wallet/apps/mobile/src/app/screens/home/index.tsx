@@ -2,19 +2,28 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { Chain, chains, Text } from "@obi-wallet/common";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createDrawerNavigator,
+  DrawerContentComponentProps,
   DrawerContentScrollView,
-  DrawerItemList,
+  DrawerItem,
   DrawerScreenProps,
 } from "@react-navigation/drawer";
 import { ParamListBase } from "@react-navigation/native";
-import { useIntl, FormattedMessage } from "react-intl";
+import { action } from "mobx";
+import { observer } from "mobx-react-lite";
+import { FormattedMessage, useIntl } from "react-intl";
+import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
-import { isSmallScreenNumber } from "../components/screen-size";
+import { envInvariant } from "../../../helpers/invariant";
+import { useStore } from "../../stores";
+import {
+  getScreenDimensions,
+  isSmallScreenNumber,
+} from "../components/screen-size";
 import { DappExplorer } from "../dapp-explorer";
 import { NFTs } from "../loop-web-apps/nfts";
 import { Trade } from "../loop-web-apps/trade";
@@ -31,22 +40,38 @@ import SettingsIcon from "./assets/settingsIcon.svg";
 import TradeIcon from "./assets/tradeIcon.svg";
 import { Assets } from "./components/assets";
 
-const networks = [
-  {
-    chainId: "uni-3",
-    label: "Juno Mainnet",
-  },
-];
+envInvariant("ENABLED_CHAINS", ENABLED_CHAINS);
+const enabledChains = ENABLED_CHAINS.split(",") as Chain[];
+const networks = Object.values(chains).filter((network) => {
+  return enabledChains.includes(network.chainId);
+});
 
 export type TabNavigationProps = DrawerScreenProps<ParamListBase>;
 
-export function TabNavigation({ route }: TabNavigationProps) {
+export function TabNavigation() {
   const Tab = createBottomTabNavigator();
-
-  const currentNetwork = route.name;
-  const initialParams = { currentNetwork };
-
   const intl = useIntl();
+
+  const assets = intl.formatMessage({
+    id: "menu.assets",
+    defaultMessage: "Assets",
+  });
+  const apps = intl.formatMessage({
+    id: "menu.apps",
+    defaultMessage: "Apps",
+  });
+  const nfts = intl.formatMessage({
+    id: "menu.nfts",
+    defaultMessage: "NFTs",
+  });
+  const trade = intl.formatMessage({
+    id: "menu.trade",
+    defaultMessage: "Trade",
+  });
+  const settings = intl.formatMessage({
+    id: "menu.settings",
+    defaultMessage: "Settings",
+  });
 
   return (
     <Tab.Navigator
@@ -58,30 +83,15 @@ export function TabNavigation({ route }: TabNavigationProps) {
             icon = faHome;
           }
           switch (route.name) {
-            case intl.formatMessage({
-              id: "menu.assets",
-              defaultMessage: "Assets",
-            }):
+            case assets:
               return !focused ? <AssetsIcon /> : <AssetsIconActive />;
-            case intl.formatMessage({
-              id: "menu.apps",
-              defaultMessage: "Apps",
-            }):
+            case apps:
               return !focused ? <AppsIcon /> : <AppsIconActive />;
-            case intl.formatMessage({
-              id: "menu.nfts",
-              defaultMessage: "NFTs",
-            }):
+            case nfts:
               return !focused ? <NFTsIcon /> : <NFTsIconActive />;
-            case intl.formatMessage({
-              id: "menu.trade",
-              defaultMessage: "Trade",
-            }):
+            case trade:
               return !focused ? <TradeIcon /> : <TradeIconActive />;
-            case intl.formatMessage({
-              id: "menu.settings",
-              defaultMessage: "Settings",
-            }):
+            case settings:
               return !focused ? <SettingsIcon /> : <SettingsIconActive />;
             default:
               icon = faChevronLeft;
@@ -94,9 +104,15 @@ export function TabNavigation({ route }: TabNavigationProps) {
           backgroundColor: "#17162C",
           borderTopColor: "#1E1D33",
           borderTopWidth: 1,
-          paddingTop: isSmallScreenNumber(10, 15),
-          paddingBottom: isSmallScreenNumber(10, 30),
-          height: isSmallScreenNumber(65, 85),
+          paddingTop: isSmallScreenNumber(15, 15),
+          paddingBottom: isSmallScreenNumber(
+            getScreenDimensions().SCREEN_HEIGHT <= 667 ? 15 : 25,
+            27
+          ),
+          height: isSmallScreenNumber(
+            getScreenDimensions().SCREEN_HEIGHT <= 667 ? 70 : 82,
+            85
+          ),
         },
 
         headerShown: false,
@@ -113,79 +129,37 @@ export function TabNavigation({ route }: TabNavigationProps) {
         },
       })}
     >
-      <Tab.Screen
-        name={intl.formatMessage({
-          id: "menu.assets",
-          defaultMessage: "Assets",
-        })}
-        component={Assets}
-        initialParams={initialParams}
-      />
-      <Tab.Screen
-        name={intl.formatMessage({ id: "menu.nfts", defaultMessage: "NFTs" })}
-        component={NFTs}
-        initialParams={initialParams}
-      />
-      <Tab.Screen
-        name={intl.formatMessage({
-          id: "menu.apps",
-          defaultMessage: "Loading NFTs...",
-        })}
-        component={DappExplorer}
-        initialParams={initialParams}
-      />
-      <Tab.Screen
-        name={intl.formatMessage({ id: "menu.trade", defaultMessage: "Apps" })}
-        component={Trade}
-        initialParams={initialParams}
-      />
-      <Tab.Screen
-        name={intl.formatMessage({
-          id: "menu.settings",
-          defaultMessage: "Trade",
-        })}
-        component={SettingsScreen}
-        initialParams={initialParams}
-      />
+      <Tab.Screen name={assets} component={Assets} />
+      <Tab.Screen name={nfts} component={NFTs} />
+      <Tab.Screen name={apps} component={DappExplorer} />
+      <Tab.Screen name={trade} component={Trade} />
+      <Tab.Screen name={settings} component={SettingsScreen} />
     </Tab.Navigator>
   );
 }
 
 export function HomeScreen() {
   const Drawer = createDrawerNavigator();
+  const { multisigStore } = useStore();
 
   return (
     <Drawer.Navigator
       useLegacyImplementation={true}
-      initialRouteName="Home"
+      initialRouteName={multisigStore.currentChainInformation.label}
       screenOptions={{
         headerShown: false,
-        drawerActiveTintColor: "#F6F5FF",
-        drawerActiveBackgroundColor: "#27253E",
-        drawerInactiveTintColor: "#787B9C",
-        drawerLabelStyle: {
-          fontFamily: "Inter",
-          fontSize: 16,
-          fontWeight: "500",
-        },
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      {networks.map((network) => {
-        return (
-          <Drawer.Screen
-            key={network.chainId}
-            name={network.label}
-            component={TabNavigation}
-          />
-        );
-      })}
+      <Drawer.Screen name="home" component={TabNavigation} />
     </Drawer.Navigator>
   );
 }
 
-function CustomDrawerContent(props) {
+const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
   const { navigation } = props;
+  const { multisigStore } = useStore();
+
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: "#100F1E" }}>
       <TouchableHighlight
@@ -213,7 +187,28 @@ function CustomDrawerContent(props) {
       >
         <FormattedMessage id="sidemenu.networks" defaultMessage="Networks" />
       </Text>
-      <DrawerItemList {...props} />
+
+      {networks.map((network) => {
+        return (
+          <DrawerItem
+            focused={multisigStore.currentChain === network.chainId}
+            key={network.chainId}
+            label={network.label}
+            activeTintColor="#F6F5FF"
+            inactiveTintColor="#787B9C"
+            activeBackgroundColor="#27253E"
+            labelStyle={{
+              fontFamily: "Inter",
+              fontSize: 16,
+              fontWeight: "500",
+            }}
+            onPress={action(() => {
+              multisigStore.currentChain = network.chainId;
+              navigation.closeDrawer();
+            })}
+          />
+        );
+      })}
       <Text
         style={{
           color: "#787B9C",
@@ -230,4 +225,4 @@ function CustomDrawerContent(props) {
       </Text>
     </DrawerContentScrollView>
   );
-}
+});

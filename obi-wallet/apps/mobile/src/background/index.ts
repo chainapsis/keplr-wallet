@@ -19,10 +19,10 @@ import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { BACKGROUND_PORT, Env } from "@keplr-wallet/router";
 import { BIP44, EthSignType, KeplrSignOptions } from "@keplr-wallet/types";
 import {
+  Chain,
   EmbedChainInfos,
   KVStore,
   MessageRequesterInternalToUi,
-  migrateSerializedProxyAddress,
   PrivilegedOrigins,
   produceEnv,
   RouterBackground,
@@ -32,6 +32,7 @@ import { Buffer } from "buffer";
 import scrypt from "scrypt-js";
 
 class KeyRingService extends AbstractKeyRingService {
+  // @ts-expect-error
   protected kvStore: KVStore;
 
   addLedgerKey(
@@ -41,6 +42,7 @@ class KeyRingService extends AbstractKeyRingService {
     bip44HDPath: BIP44HDPath
   ): Promise<{ multiKeyStoreInfo: MultiKeyStoreInfoWithSelected }> {
     console.log("Not implemented, addLedgerKey");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined });
   }
 
@@ -51,6 +53,7 @@ class KeyRingService extends AbstractKeyRingService {
     bip44HDPath: BIP44HDPath
   ): Promise<{ multiKeyStoreInfo: MultiKeyStoreInfoWithSelected }> {
     console.log("Not implemented, addMnemonicKey");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined });
   }
 
@@ -60,6 +63,7 @@ class KeyRingService extends AbstractKeyRingService {
     meta: Record<string, string>
   ): Promise<{ multiKeyStoreInfo: MultiKeyStoreInfoWithSelected }> {
     console.log("Not implemented, addPrivateKey");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined });
   }
 
@@ -67,6 +71,7 @@ class KeyRingService extends AbstractKeyRingService {
     index: number
   ): Promise<{ multiKeyStoreInfo: MultiKeyStoreInfoWithSelected }> {
     console.log("Not implemented, changeKeyStoreFromMultiKeyStore");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined });
   }
 
@@ -86,6 +91,7 @@ class KeyRingService extends AbstractKeyRingService {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     console.log("Not implemented, createLedgerKey");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined, status: undefined });
   }
 
@@ -100,6 +106,7 @@ class KeyRingService extends AbstractKeyRingService {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     console.log("Not implemented, createMnemonicKey");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined, status: undefined });
   }
 
@@ -113,6 +120,7 @@ class KeyRingService extends AbstractKeyRingService {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     console.log("Not implemented, createPrivateKey");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined, status: undefined });
   }
 
@@ -124,6 +132,7 @@ class KeyRingService extends AbstractKeyRingService {
     status: KeyRingStatus;
   }> {
     console.log("Not implemented, deleteKeyRing");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined, status: undefined });
   }
 
@@ -144,14 +153,17 @@ class KeyRingService extends AbstractKeyRingService {
       throw new Error("Invalid data");
     }
 
-    const proxyAddress = migrateSerializedProxyAddress(data.proxyAddress);
+    const proxyAddress = data.proxyAddresses[chainId as Chain];
+    const address = proxyAddress?.address;
+
+    if (!address) throw new Error("No address found for chainId: " + chainId);
 
     return {
       // TODO:
       algo: "multisig",
       // TODO:
       pubKey: new Uint8Array(),
-      address: Bech32Address.fromBech32(proxyAddress.address, "juno").address,
+      address: Bech32Address.fromBech32(address, "juno").address,
       isNanoLedger: false,
     };
   }
@@ -176,6 +188,7 @@ class KeyRingService extends AbstractKeyRingService {
 
   getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
     console.log("Not implemented, getMultiKeyStoreInfo");
+    // @ts-expect-error
     return undefined;
   }
 
@@ -195,11 +208,13 @@ class KeyRingService extends AbstractKeyRingService {
 
   get keyRingStatus(): KeyRingStatus {
     console.log("Not implemented, keyRingStatus");
+    // @ts-expect-error
     return undefined;
   }
 
   lock(): KeyRingStatus {
     console.log("Not implemented, lock");
+    // @ts-expect-error
     return undefined;
   }
 
@@ -215,6 +230,7 @@ class KeyRingService extends AbstractKeyRingService {
     }
   ): Promise<AminoSignResponse> {
     console.log("Not implemented, requestSignAmino");
+    // @ts-expect-error
     return Promise.resolve(undefined);
   }
 
@@ -227,6 +243,7 @@ class KeyRingService extends AbstractKeyRingService {
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
     console.log("Not implemented, requestSignDirect");
+    // @ts-expect-error
     return Promise.resolve(undefined);
   }
 
@@ -235,6 +252,7 @@ class KeyRingService extends AbstractKeyRingService {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     console.log("Not implemented, restore");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined, status: undefined });
   }
 
@@ -250,11 +268,13 @@ class KeyRingService extends AbstractKeyRingService {
 
   sign(env: Env, chainId: string, message: Uint8Array): Promise<Uint8Array> {
     console.log("Not implemented, sign");
+    // @ts-expect-error
     return Promise.resolve(undefined);
   }
 
   unlock(password: string): Promise<KeyRingStatus> {
     console.log("Not implemented, unlock");
+    // @ts-expect-error
     return Promise.resolve(undefined);
   }
 
@@ -263,6 +283,7 @@ class KeyRingService extends AbstractKeyRingService {
     name: string
   ): Promise<{ multiKeyStoreInfo: MultiKeyStoreInfoWithSelected }> {
     console.log("Not implemented, updateNameKeyRing");
+    // @ts-expect-error
     return Promise.resolve({ multiKeyStoreInfo: undefined });
   }
 

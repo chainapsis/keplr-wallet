@@ -1,26 +1,20 @@
-import {
-  coins,
-  pubkeyToAddress,
-  pubkeyType,
-  Secp256k1Wallet,
-} from "@cosmjs/amino";
+import { pubkeyType } from "@cosmjs/amino";
 import { MsgInstantiateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
-import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { CURRENT_CODE_ID } from "@obi-wallet/common";
+import { Multisig } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useState } from "react";
-import { useIntl } from "react-intl";
-import { Alert, View } from "react-native";
+import { useEffect, useMemo } from "react";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import invariant from "tiny-invariant";
 
-import { getBiometricsKeyPair } from "../../../biometrics";
-import { Button, IconButton } from "../../../button";
-import { Loader } from "../../../loader";
+import { SECURITY_QUESTIONS } from "../../../../config";
+import { IconButton } from "../../../button";
+import { useStargateClient } from "../../../clients";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
@@ -31,25 +25,64 @@ import { StackParamList } from "../stack";
 
 export type MultisigOnboardingProps = NativeStackScreenProps<
   StackParamList,
-  "onboarding5"
+  "onboarding6"
 >;
 
-async function getBalances(address: string) {
-  const rcp = "https://rpc.uni.junonetwork.io/";
-  const client = await StargateClient.connect(rcp);
-  return await client.getAllBalances(address);
-}
+const demoModeMultisig: Multisig = {
+  multisig: {
+    address: "demo-multisig",
+    publicKey: {
+      type: pubkeyType.multisigThreshold,
+      value: {
+        threshold: "1",
+        pubkeys: [],
+      },
+    },
+  },
+  biometrics: {
+    address: "demo-biometrics",
+    publicKey: {
+      type: pubkeyType.secp256k1,
+      value: "demo-biometrics",
+    },
+  },
+  phoneNumber: {
+    address: "demo-phone-number",
+    phoneNumber: "demo-phone-number",
+    securityQuestion: SECURITY_QUESTIONS()[0].value,
+    publicKey: {
+      type: pubkeyType.secp256k1,
+      value: "demo-phone-number",
+    },
+  },
+  social: {
+    address: "demo-social",
+    publicKey: {
+      type: pubkeyType.secp256k1,
+      value: "demo-social",
+    },
+  },
+  cloud: null,
+  email: null,
+};
 
 export const MultisigOnboarding = observer<MultisigOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
-    const multisig = multisigStore.getNextAdmin("juno");
+    const { demoStore, multisigStore } = useStore();
+    const { currentChainInformation } = multisigStore;
+    const multisig = demoStore.demoMode
+      ? demoModeMultisig
+      : multisigStore.nextAdmin;
+
+    const client = useStargateClient();
 
     useEffect(() => {
+      if (demoStore.demoMode) return;
+
       (async () => {
-        async function hydrateBalances(address: string | null) {
-          if (address) {
-            return { address, balances: await getBalances(address) };
+        async function hydrateBalances(address?: string | null) {
+          if (address && client) {
+            return { address, balances: await client.getAllBalances(address) };
           } else {
             return null;
           }
@@ -65,7 +98,13 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
         console.log("-- BALANCE BIOMETRICS", balances.biometrics);
         console.log("-- BALANCE PHONE NUMBER", balances.phoneNumber);
       })();
-    });
+    }, [
+      client,
+      demoStore,
+      multisig.biometrics?.address,
+      multisig.multisig?.address,
+      multisig.phoneNumber?.address,
+    ]);
 
     const encodeObjects = useMemo(() => {
       if (!multisig.multisig?.address) return [];
@@ -73,12 +112,15 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
       const rawMessage = {
         admin: multisig.multisig.address,
         hot_wallets: [],
+        uusd_fee_debt: currentChainInformation.startingUsdDebt,
+        fee_lend_repay_wallet: currentChainInformation.debtRepayAddress,
+        home_network: currentChainInformation.chainId,
       };
 
       const value: MsgInstantiateContract = {
         sender: multisig.multisig.address,
         admin: multisig.multisig.address,
-        codeId: Long.fromInt(CURRENT_CODE_ID),
+        codeId: Long.fromInt(currentChainInformation.currentCodeId),
         label: "Obi Proxy",
         msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
         funds: [],
@@ -88,41 +130,60 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
         value,
       };
       return [message];
-    }, [multisig]);
+    }, [currentChainInformation, multisig]);
 
     const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
       multisig,
       encodeObjects,
       async onConfirm(response) {
-        const rawLog = JSON.parse(response.rawLog) as [
-          {
-            events: [
-              {
-                type: string;
-                attributes: { key: string; value: string }[];
-              }
-            ];
-          }
-        ];
-        const instantiateEvent = rawLog[0].events.find((e) => {
-          return e.type === "instantiate";
-        });
-        const contractAddress = instantiateEvent.attributes.find((a) => {
-          return a.key === "_contract_address";
-        });
+        if (demoStore.demoMode) {
+          demoStore.finishOnboarding();
+          return;
+        }
 
-        multisigStore.finishProxySetup({
-          address: contractAddress.value,
-          codeId: CURRENT_CODE_ID,
-        });
+        try {
+          invariant(response.rawLog, "Expected `response` to have `rawLog`.");
+          const rawLog = JSON.parse(response.rawLog) as [
+            {
+              events: [
+                {
+                  type: string;
+                  attributes: { key: string; value: string }[];
+                }
+              ];
+            }
+          ];
+          const instantiateEvent = rawLog[0].events.find((e) => {
+            return e.type === "instantiate";
+          });
+          invariant(
+            instantiateEvent,
+            "Expected `rawLog` to contain `instantiate` event."
+          );
+          const contractAddress = instantiateEvent.attributes.find((a) => {
+            return a.key === "_contract_address";
+          });
+          invariant(
+            contractAddress,
+            "Expected `instantiateEvent` to contain `_contract_address` attribute."
+          );
+          multisigStore.finishProxySetup({
+            address: contractAddress.value,
+            codeId: multisigStore.currentChainInformation.currentCodeId,
+          });
+        } catch (e) {
+          console.log(response.rawLog);
+        }
       },
     });
 
+    useEffect(() => {
+      if (encodeObjects.length > 0) {
+        openSignatureModal();
+      }
+    }, [encodeObjects.length, openSignatureModal]);
+
     if (encodeObjects.length === 0) return null;
-
-    const [loading, setLoading] = useState(false);
-
-    const intl = useIntl();
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -153,87 +214,6 @@ export const MultisigOnboarding = observer<MultisigOnboardingProps>(
                 style={{ color: "#7B87A8" }}
               />
             </IconButton>
-          </View>
-
-          {loading ? (
-            <Loader
-              loadingText={intl.formatMessage({
-                id: "onboarding6.loadingtext",
-              })}
-            />
-          ) : null}
-
-          <View>
-            <Button
-              flavor="green"
-              label={intl.formatMessage({ id: "onboarding6.preparewallet" })}
-              disabled={loading}
-              onPress={async () => {
-                setLoading(true);
-
-                try {
-                  const rcp = "https://rpc.uni.junonetwork.io/";
-
-                  const { publicKey, privateKey } =
-                    await getBiometricsKeyPair();
-
-                  const wallet = await Secp256k1Wallet.fromKey(
-                    new Uint8Array(Buffer.from(privateKey, "base64")),
-                    "juno"
-                  );
-
-                  const biometricsAddress = pubkeyToAddress(
-                    {
-                      type: pubkeyType.secp256k1,
-                      value: publicKey,
-                    },
-                    "juno"
-                  );
-
-                  const client = await SigningStargateClient.connectWithSigner(
-                    rcp,
-                    wallet,
-                    { prefix: "juno" }
-                  );
-
-                  const fee = {
-                    amount: coins(6000, "ujunox"),
-                    gas: "200000",
-                  };
-
-                  const result = await client.sendTokens(
-                    biometricsAddress,
-                    multisig.multisig.address,
-                    coins(10000, "ujunox"),
-                    fee,
-                    ""
-                  );
-                  console.log({ result });
-                  setLoading(false);
-                } catch (e) {
-                  setLoading(false);
-                  console.log(e);
-                  Alert.alert("Error PrepareWallet", e.message);
-                }
-              }}
-            />
-            <Button
-              flavor="blue"
-              label={intl.formatMessage({
-                id: "onboarding6.createmultisigwallet",
-              })}
-              style={{
-                marginVertical: 20,
-              }}
-              disabled={loading}
-              onPress={() => {
-                try {
-                  openSignatureModal();
-                } catch (e) {
-                  Alert.alert("Error Multisig", e.message);
-                }
-              }}
-            />
           </View>
         </View>
       </SafeAreaView>

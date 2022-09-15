@@ -1,23 +1,23 @@
 import {
   createMultisigThresholdPubkey,
   MultisigThresholdPubkey,
-  Pubkey,
   pubkeyToAddress,
-  pubkeyType,
   SinglePubkey,
 } from "@cosmjs/amino";
-import { KVStore } from "@keplr-wallet/common";
-import { action, makeObservable, observable, runInAction, toJS } from "mobx";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { action, computed, flow, makeObservable, observable, toJS } from "mobx";
 
+import { Chain, chains } from "../../chains";
 import {
-  migrateSerializedMultisigPayload,
-  migrateSerializedProxyAddress,
+  migrateSerializedData,
   SerializedBiometricsPayload,
   SerializedCloudPayload,
   SerializedData,
+  SerializedDataAnyVersion,
   SerializedMultisigPayload,
   SerializedPhoneNumberPayload,
   SerializedProxyAddress,
+  SerializedProxyAddressPerChain,
   SerializedSocialPayload,
 } from "./serialized-data";
 
@@ -48,50 +48,54 @@ export type MultisigKey = keyof Omit<Multisig, "multisig">;
 export enum MultisigState {
   LOADING = 0,
   EMPTY,
+  READY,
   OUTDATED,
   INITIALIZED,
 }
-
-export const CURRENT_CODE_ID = 2855;
 
 export * from "./serialized-data";
 
 export class MultisigStore {
   @observable
-  protected nextAdmin: SerializedMultisigPayload = emptyMultisig;
+  public currentChain: keyof SerializedProxyAddressPerChain;
 
   @observable
-  protected currentAdmin: SerializedMultisigPayload | null = null;
+  protected serializedNextAdmin: SerializedMultisigPayload = emptyMultisig;
 
   @observable
-  protected proxyAddress: SerializedProxyAddress | null = null;
+  protected serializedCurrentAdmin: SerializedMultisigPayload | null = null;
 
   @observable
-  protected state: MultisigState = MultisigState.LOADING;
+  protected proxyAddresses: SerializedProxyAddressPerChain = {};
 
-  constructor(protected readonly kvStore: KVStore) {
+  @observable
+  protected loading = true;
+
+  constructor(defaultChain: Chain, protected readonly kvStore: KVStore) {
+    this.currentChain = defaultChain;
     makeObservable(this);
-    void this.init();
+    this.init();
   }
 
-  @action
-  protected async init() {
-    const data = await this.kvStore.get<unknown | undefined>("multisig");
+  @flow
+  protected *init() {
+    const data = yield* toGenerator(
+      this.kvStore.get<unknown | undefined>("multisig")
+    );
 
     // Only load data from KV if it is in the right format
     // Here we'd want to have some kind of migration logic in the future if we save more data
-    if (SerializedData.is(data)) {
-      runInAction(() => {
-        this.nextAdmin = migrateSerializedMultisigPayload(data.nextAdmin);
-        this.currentAdmin = data.currentAdmin
-          ? migrateSerializedMultisigPayload(data.currentAdmin)
-          : null;
-        this.setProxyAddress(migrateSerializedProxyAddress(data.proxyAddress));
-      });
+    if (SerializedDataAnyVersion.is(data)) {
+      const { nextAdmin, currentAdmin, proxyAddresses } =
+        migrateSerializedData(data);
+      this.serializedNextAdmin = nextAdmin;
+      this.serializedCurrentAdmin = currentAdmin;
+      this.proxyAddresses = proxyAddresses;
+      void this.save();
       void this.kvStore.set("multisig-backup", null);
     } else {
-      const backupData = await this.kvStore.get<unknown | undefined>(
-        "multisig-backup"
+      const backupData = yield* toGenerator(
+        this.kvStore.get<unknown | undefined>("multisig-backup")
       );
 
       if (backupData) {
@@ -100,80 +104,124 @@ export class MultisigStore {
         );
       } else {
         // Backup invalid data so that we can recover it if necessary
-        await this.kvStore.set("multisig-backup", data);
+        yield* toGenerator(this.kvStore.set("multisig-backup", data));
       }
-      runInAction(() => {
-        this.state = MultisigState.EMPTY;
-      });
     }
+
+    this.loading = false;
+  }
+
+  @action
+  public setCurrentChain(currentChain: Chain) {
+    this.currentChain = currentChain;
+  }
+
+  @computed
+  public get currentChainInformation() {
+    return chains[this.currentChain];
+  }
+
+  @computed
+  public get proxyAddress(): SerializedProxyAddress | null {
+    return this.proxyAddresses[this.currentChain] ?? null;
+  }
+
+  @computed
+  public get state(): MultisigState {
+    if (this.loading) return MultisigState.LOADING;
+    if (this.serializedCurrentAdmin === null) return MultisigState.EMPTY;
+    if (this.proxyAddress === null) return MultisigState.READY;
+    if (this.proxyAddress.codeId < this.currentChainInformation.currentCodeId) {
+      // TODO: Should be Outdated in the future
+      // return MultisigState.OUTDATED;
+      return MultisigState.READY;
+    }
+    return MultisigState.INITIALIZED;
   }
 
   protected async save() {
     const serializedData: SerializedData = {
-      nextAdmin: this.nextAdmin,
-      currentAdmin: this.currentAdmin,
-      proxyAddress: this.proxyAddress,
+      nextAdmin: this.serializedNextAdmin,
+      currentAdmin: this.serializedCurrentAdmin,
+      proxyAddresses: this.proxyAddresses,
     };
     const data = toJS(serializedData);
     await this.kvStore.set("multisig", data);
   }
 
-  public getState() {
-    return this.state;
+  @computed
+  public get nextAdmin() {
+    return this.hydrateMultisig(
+      this.serializedNextAdmin,
+      this.currentChainInformation.prefix
+    );
   }
 
-  public getNextAdmin(prefix: string) {
-    return this.hydrateMultisig(this.nextAdmin, prefix);
-  }
-
-  public getCurrentAdmin(prefix: string) {
-    return this.currentAdmin && this.hydrateMultisig(this.currentAdmin, prefix);
-  }
-
-  public isProxyInitialized() {
-    return this.proxyAddress !== null;
-  }
-
-  public getProxyAddress() {
-    return this.proxyAddress?.address;
+  @computed
+  public get currentAdmin() {
+    return (
+      this.serializedCurrentAdmin &&
+      this.hydrateMultisig(
+        this.serializedCurrentAdmin,
+        this.currentChainInformation.prefix
+      )
+    );
   }
 
   @action
   public setPhoneNumberKey(payload: SerializedPhoneNumberPayload) {
-    this.nextAdmin.phoneNumber = payload;
+    this.serializedNextAdmin.phoneNumber = payload;
     void this.save();
   }
 
   @action
   public setBiometricsPublicKey(payload: SerializedBiometricsPayload) {
-    this.nextAdmin.biometrics = payload;
+    this.serializedNextAdmin.biometrics = payload;
     void this.save();
   }
+
   @action
   public setSocialPublicKey(payload: SerializedSocialPayload) {
-    this.nextAdmin.social = payload;
+    this.serializedNextAdmin.social = payload;
     void this.save();
   }
 
   @action
   public finishProxySetup(address: SerializedProxyAddress) {
-    this.currentAdmin = this.nextAdmin;
-    this.setProxyAddress(address);
+    this.serializedCurrentAdmin = this.nextAdmin;
+    this.proxyAddresses[this.currentChain] = address;
+    this.loading = false;
     void this.save();
   }
 
-  @action
-  protected setProxyAddress(address: SerializedProxyAddress | null) {
-    this.proxyAddress = address;
+  protected hydrateMultisig(
+    multisig: SerializedMultisigPayload,
+    prefix: string
+  ): Multisig {
+    const { biometrics, phoneNumber, social } = multisig;
+    const multisigThresholdPublicKey =
+      this.createMultisigThresholdPublicKey(multisig);
 
-    if (address) {
-      this.state =
-        address.codeId === CURRENT_CODE_ID
-          ? MultisigState.INITIALIZED
-          : MultisigState.OUTDATED;
-    } else {
-      this.state = MultisigState.EMPTY;
-    }
+    return {
+      multisig: multisigThresholdPublicKey && {
+        address: pubkeyToAddress(multisigThresholdPublicKey, prefix),
+        publicKey: multisigThresholdPublicKey,
+      },
+      biometrics: biometrics && {
+        address: pubkeyToAddress(biometrics.publicKey, prefix),
+        ...biometrics,
+      },
+      phoneNumber: phoneNumber && {
+        address: pubkeyToAddress(phoneNumber.publicKey, prefix),
+        ...phoneNumber,
+      },
+      social: social && {
+        address: pubkeyToAddress(social.publicKey, prefix),
+        ...social,
+      },
+      cloud: null,
+      email: null,
+    };
   }
 
   protected createMultisigThresholdPublicKey(
@@ -201,45 +249,8 @@ export class MultisigStore {
     return createMultisigThresholdPubkey(publicKeys, threshold);
   }
 
-  protected hydrateMultisig(
-    multisig: SerializedMultisigPayload,
-    prefix: string
-  ): Multisig {
-    const { biometrics, phoneNumber, social } = multisig;
-    const multisigThresholdPublicKey =
-      this.createMultisigThresholdPublicKey(multisig);
-
-    return {
-      multisig: multisigThresholdPublicKey && {
-        address: this.getAddressOfPublicKey(multisigThresholdPublicKey, prefix),
-        publicKey: multisigThresholdPublicKey,
-      },
-      biometrics: biometrics && {
-        address: this.getAddressOfPublicKey(biometrics.publicKey, prefix),
-        ...biometrics,
-      },
-      phoneNumber: phoneNumber && {
-        address: this.getAddressOfPublicKey(phoneNumber.publicKey, prefix),
-        ...phoneNumber,
-      },
-      social: social && {
-        address: this.getAddressOfPublicKey(social.publicKey, prefix),
-        ...social,
-      },
-      cloud: null,
-      email: null,
-    };
-  }
-
-  protected getAddressOfPublicKey(publicKey: Pubkey | string, prefix: string) {
-    return pubkeyToAddress(
-      typeof publicKey === "string"
-        ? {
-            type: pubkeyType.secp256k1,
-            value: publicKey,
-          }
-        : publicKey,
-      prefix
-    );
+  @action
+  public logout() {
+    this.serializedCurrentAdmin = null;
   }
 }
