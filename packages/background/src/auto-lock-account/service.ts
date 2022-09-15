@@ -119,8 +119,8 @@ export class AutoLockAccountService {
     }
   }
 
-  private saveDuration(duration: number) {
-    this.kvStore.set("autoLockDuration", duration);
+  private saveDuration(duration: number): Promise<void> {
+    return this.kvStore.set("autoLockDuration", duration);
   }
 
   private async loadDuration() {
@@ -128,7 +128,7 @@ export class AutoLockAccountService {
 
     if (duration == null) {
       duration = 0;
-      this.saveDuration(duration);
+      await this.saveDuration(duration);
     }
     this.autoLockDuration = duration;
   }
