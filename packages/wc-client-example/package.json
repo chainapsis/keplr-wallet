@@ -19,13 +19,13 @@
     "@walletconnect/qrcode-modal": "^1.6.5",
     "axios": "^0.27.2",
     "buffer": "^6.0.3",
-    "mobx-react-lite": "^3.2.0",
+    "mobx": "^6.6.1",
+    "mobx-react-lite": "^3.4.0",
+    "mobx-utils": "^6.0.5",
     "react": "^16.14.0",
     "react-dom": "^16.14.0"
   },
   "devDependencies": {
-    "@types/react": "^16.14.4",
-    "@types/react-dom": "^16.9.11",
     "parcel-bundler": "^1.12.5"
   }
 }
