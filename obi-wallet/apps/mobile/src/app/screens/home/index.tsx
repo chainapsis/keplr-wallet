@@ -104,19 +104,11 @@ export function TabNavigation() {
           backgroundColor: "#17162C",
           borderTopColor: "#1E1D33",
           borderTopWidth: 1,
-          paddingTop: isSmallScreenNumber(15, 15),
-          paddingBottom: isSmallScreenNumber(
-            getScreenDimensions().SCREEN_HEIGHT <= 667 ? 15 : 25,
-            27
-          ),
-          height: isSmallScreenNumber(
-            getScreenDimensions().SCREEN_HEIGHT <= 667 ? 70 : 82,
-            85
-          ),
+          paddingVertical: 20,
         },
 
         headerShown: false,
-
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: "#F6F5FF",
         tabBarInactiveTintColor: "#4D5070",
         tabBarLabelStyle: {

@@ -13,9 +13,12 @@ declare module "react-native-dotenv" {
   export const ENABLED_LANGUAGES: string;
   export const DEFAULT_LANGUAGE: string;
 
-  export const APP_CENTER_SECRET: string;
-  export const APP_CENTER_DEPLOYMENT_KEY_STAGING: string;
-  export const APP_CENTER_DEPLOYMENT_KEY_PRODUCTION: string;
+  export const IOS_APP_CENTER_SECRET: string;
+  export const IOS_APP_CENTER_DEPLOYMENT_KEY_STAGING: string;
+  export const IOS_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION: string;
+  export const ANDROID_APP_CENTER_SECRET: string;
+  export const ANDROID_APP_CENTER_DEPLOYMENT_KEY_STAGING: string;
+  export const ANDROID_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION: string;
 
   export const SENTRY_DSN: string;
 

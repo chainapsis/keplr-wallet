@@ -36,12 +36,16 @@ export const App = observer(() => {
           const timeSinceLastUpdate = new Date().getTime() - lastUpdate.current;
           if (timeSinceLastUpdate > 5 * 1000 && !__DEV__) {
             if (await codePush.checkForUpdate(deploymentKey)) {
-              await setUpdating(true);
-              await codePush.sync({
-                deploymentKey,
-                installMode: codePush.InstallMode.IMMEDIATE,
-              });
-              await setUpdating(false);
+              try {
+                await setUpdating(true);
+                await codePush.sync({
+                  deploymentKey,
+                  installMode: codePush.InstallMode.IMMEDIATE,
+                });
+              } catch (e) {
+                console.error(e);
+                await setUpdating(false);
+              }
             }
           }
 

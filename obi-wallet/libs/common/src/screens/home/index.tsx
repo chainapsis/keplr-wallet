@@ -7,9 +7,12 @@ import {
   Button,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableHighlight,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -22,7 +25,7 @@ import { Text } from "../../typography";
 
 const styles = StyleSheet.create({
   card: {
-    height: "100%",
+    flex: 1,
     justifyContent: "space-between",
   },
 });
@@ -43,27 +46,29 @@ export const Home = observer<HomeProps>(
     const proxy = multisigStore.proxyAddress;
 
     return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <SafeAreaView
+        style={{
+          flex: 1,
+        }}
       >
-        <TouchableWithoutFeedback
-          onLongPress={() => {
-            setEditMode(true);
-          }}
-        >
-          <Card style={styles.card}>
-            {editMode ? (
-              <Button
-                onPress={() => {
-                  setEditMode(false);
-                }}
-                title="Done"
-              />
-            ) : null}
+        <Card style={styles.card}>
+          {editMode ? (
+            <Button
+              onPress={() => {
+                setEditMode(false);
+              }}
+              title="Done"
+            />
+          ) : null}
+
+          <ScrollView style={{ flex: 1 }}>
             <Tiles>
               {appsStore.favorites.map((app) => {
                 return (
                   <Tile
+                    onLongPress={() => {
+                      setEditMode(true);
+                    }}
                     key={app.url}
                     img={app.icon}
                     label={app.label}
@@ -80,24 +85,15 @@ export const Home = observer<HomeProps>(
                   />
                 );
               })}
-              <Tile
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                // TODO: i18n
-                label="Fund Wallet"
-                onPress={() => {
-                  onAppPress({
-                    // TODO: i18n
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${proxy?.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
             </Tiles>
+          </ScrollView>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ paddingVertical: 10 }}
+            keyboardVerticalOffset={100}
+          >
             <View
               style={{
-                marginBottom,
-                height: 50,
                 marginHorizontal: 20,
               }}
             >
@@ -107,6 +103,7 @@ export const Home = observer<HomeProps>(
                   marginBottom: 28,
                   alignItems: "center",
                   position: "relative",
+                  paddingVertical: 2,
                 }}
               >
                 <View
@@ -232,9 +229,9 @@ export const Home = observer<HomeProps>(
                 </TouchableHighlight>
               </View>
             </View>
-          </Card>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </Card>
+      </SafeAreaView>
     );
   }
 );

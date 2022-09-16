@@ -182,6 +182,7 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
               }
             }}
             disabled={buttonDisabledDoubleclick}
+            style={{ marginBottom: 20 }}
           />
         </View>
       </SafeAreaView>
