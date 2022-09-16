@@ -34,7 +34,7 @@ export class LanguageStore {
       this.kvStore.get<string | undefined>("currentLanguage")
     );
 
-    if (currentLanguage && typeof currentLanguage === "string") {
+    if (currentLanguage && this.enabledLanguages.includes(currentLanguage)) {
       runInAction(() => {
         this.currentLanguage = currentLanguage;
       });

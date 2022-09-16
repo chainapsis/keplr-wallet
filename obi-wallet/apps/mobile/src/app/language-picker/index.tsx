@@ -55,6 +55,8 @@ export const LanguagePicker = observer(() => {
     return allLanguages.filter((lang) => enabledLanguages.includes(lang.code));
   });
 
+  if (items.length <= 1) return null;
+
   return (
     <SafeAreaView
       style={{
