@@ -70,6 +70,15 @@ export class PermissionService {
 
     const ungrantedChainIds: string[] = [];
     for (const chainId of chainIds) {
+      // Ensure the key has been loaded (may not be in the case of different Ledger apps)
+      // and if not, prompt to load the key first
+      if (!env.isInternalMsg) {
+        try {
+          await this.keyRingService.getKey(chainId, env);
+        } catch (e) {
+          // noop
+        }
+      }
       if (!this.hasPermisson(chainId, getBasicAccessPermissionType(), origin)) {
         ungrantedChainIds.push(chainId);
       }

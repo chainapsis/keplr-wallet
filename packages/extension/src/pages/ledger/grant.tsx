@@ -71,7 +71,7 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
     ledgerInitStore.isInitAborted,
   ]);
 
-  // Fetch page initializers
+  // Fetch current Ledger device for text display
   useEffect(() => {
     (async () => {
       await ledgerInitStore.fetchAppInUse();

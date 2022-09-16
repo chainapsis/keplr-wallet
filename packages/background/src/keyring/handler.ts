@@ -301,6 +301,7 @@ const handleRequestVerifyADR36AminoSignDoc: (
     );
 
     return await service.verifyADR36AminoSignDoc(
+      env,
       msg.chainId,
       msg.signer,
       msg.data,
