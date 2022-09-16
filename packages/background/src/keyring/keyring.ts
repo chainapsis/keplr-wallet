@@ -1294,13 +1294,14 @@ export class KeyRing {
   }
 
   // Load the public key for the given coinType using the appropriate Ledger app,
-  // provided the coinType is supported by Ledger.
+  // provided the coinType is supported by Ledger. If env is provided, do so using
+  // a popup.
   private async loadLedgerPublicKey(
     env: Env | undefined,
     coinType: number,
     ledgerApp: LedgerApp
   ) {
-    if (!this._ledgerPublicKeyCache || !this.ledgerPublicKeyCache) {
+    if (!this._ledgerPublicKeyCache) {
       throw new KeplrError("keyring", 150, "Ledger not initialized");
     }
 
@@ -1332,13 +1333,13 @@ export class KeyRing {
       this.loadingLedgerKeys[path] = false;
     }
 
-    // Update local cache
     this._ledgerPublicKeyCache[path] = pubkey;
 
+    // Copy to new object because of issue with closure typing
     const publicKeyCache: Record<string, Uint8Array> = {};
     Object.assign(publicKeyCache, this._ledgerPublicKeyCache);
 
-    // Update key store
+    // Convert bytes to hex string
     const keyMap: Record<string, string> = {};
     Object.keys(publicKeyCache).forEach(
       (k) => (keyMap[k] = Buffer.from(publicKeyCache[k]).toString("hex"))
@@ -1347,8 +1348,7 @@ export class KeyRing {
     const keyStoreType = this.keyStore.type ?? "mnemonic";
     const keyStoreMeta = this.keyStore.meta ?? {};
 
-    // Create a new keystore that is equivalent in all ways, except for the ciphertext,
-    // to persist the new public key.
+    // Create a new keystore with an updated ciphertext
     const newKeyStore = await Crypto.encrypt(
       this.crypto,
       this.keyStore.crypto.kdf,
@@ -1359,7 +1359,7 @@ export class KeyRing {
       this.keyStore.bip44HDPath
     );
 
-    // Replace the keystore in the MultiKeyStore
+    // Update all copies
     let index: number | undefined;
     this.multiKeyStore.forEach((k, i) => {
       if (
@@ -1374,7 +1374,6 @@ export class KeyRing {
       throw new Error("Could not find keystore in keyring");
     }
 
-    // Persist keystore changes
     this.keyStore = newKeyStore;
     this.multiKeyStore[index] = newKeyStore;
     this.save();
