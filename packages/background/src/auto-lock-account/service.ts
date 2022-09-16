@@ -1,6 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
-import { KeyRingStatus } from "../keyring";
-import { KeyRingService } from "../keyring/service";
+import { KeyRingService, KeyRingStatus } from "../keyring";
 
 export class AutoLockAccountService {
   protected keyringService!: KeyRingService;
