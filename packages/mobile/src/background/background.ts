@@ -26,7 +26,7 @@ init(
   EmbedChainInfos,
   [
     "https://app.osmosis.zone",
-    "https://app.stargaze.zone",
+    "https://www.stargaze.zone",
     "https://app.umee.cc",
     "https://junoswap.com",
     "https://frontier.osmosis.zone",

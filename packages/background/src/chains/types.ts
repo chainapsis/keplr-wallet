@@ -1,10 +1,13 @@
 import { KeplrError } from "@keplr-wallet/router";
 import {
+  AppCurrency,
   Bech32Config,
   ChainInfo,
   Currency,
   CW20Currency,
+  FeeCurrency,
   Secret20Currency,
+  WithGasPriceStep,
 } from "@keplr-wallet/types";
 
 import Joi, { ObjectSchema } from "joi";
@@ -64,6 +67,31 @@ export const Secret20CurrencySchema = (CurrencySchema as ObjectSchema<Secret20Cu
     }
   });
 
+const GasPriceStepSchema = Joi.object<{
+  readonly low: number;
+  readonly average: number;
+  readonly high: number;
+}>({
+  low: Joi.number().required(),
+  average: Joi.number().required(),
+  high: Joi.number().required(),
+}).custom((value) => {
+  if (value.low > value.average) {
+    throw new Error("Low gas price step can not be greater than average");
+  }
+  if (value.average > value.high) {
+    throw new Error("Average gas price step can not be greater than high");
+  }
+
+  return value;
+});
+
+export const FeeCurrencySchema = (CurrencySchema as Joi.ObjectSchema<
+  WithGasPriceStep<Currency>
+>).keys({
+  gasPriceStep: GasPriceStepSchema,
+});
+
 export const Bech32ConfigSchema = Joi.object<Bech32Config>({
   bech32PrefixAccAddr: Joi.string().required(),
   bech32PrefixAccPub: Joi.string().required(),
@@ -93,15 +121,37 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   currencies: Joi.array()
     .min(1)
     .items(CurrencySchema, CW20CurrencySchema, Secret20CurrencySchema)
+    .custom((values: AppCurrency[]) => {
+      const dups: { [denom: string]: boolean | undefined } = {};
+
+      for (const val of values) {
+        if (dups[val.coinMinimalDenom]) {
+          throw new Error(`${val.coinMinimalDenom} is duplicated`);
+        }
+        dups[val.coinMinimalDenom] = true;
+      }
+
+      return values;
+    })
     .required(),
-  feeCurrencies: Joi.array().min(1).items(CurrencySchema).required(),
+  feeCurrencies: Joi.array()
+    .min(1)
+    .items(FeeCurrencySchema)
+    .custom((values: FeeCurrency[]) => {
+      const dups: { [denom: string]: boolean | undefined } = {};
+
+      for (const val of values) {
+        if (dups[val.coinMinimalDenom]) {
+          throw new Error(`${val.coinMinimalDenom} is duplicated`);
+        }
+        dups[val.coinMinimalDenom] = true;
+      }
+
+      return values;
+    })
+    .required(),
   coinType: Joi.number().integer(),
   beta: Joi.boolean(),
-  gasPriceStep: Joi.object({
-    low: Joi.number().required(),
-    average: Joi.number().required(),
-    high: Joi.number().required(),
-  }),
   features: Joi.array()
     .items(
       Joi.string().valid(
@@ -116,6 +166,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         "eth-key-sign",
         "query:/cosmos/bank/v1beta1/spendable_balances",
         "axelar-evm-bridge",
+        "osmosis-txfees",
         "gno"
       )
     )
