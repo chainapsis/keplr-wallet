@@ -82,12 +82,11 @@ export const Home = observer<HomeProps>(
               })}
               <Tile
                 img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label={intl.formatMessage({
-                  id: "home.appStoreLabel",
-                  defaultMessage: "App Store",
-                })}
+                // TODO: i18n
+                label="Fund Wallet"
                 onPress={() => {
                   onAppPress({
+                    // TODO: i18n
                     label: "Fund Wallet",
                     url: `https://app.kado.money?address=${proxy?.address}`,
                     icon: "https://place-hold.it/180x180",
