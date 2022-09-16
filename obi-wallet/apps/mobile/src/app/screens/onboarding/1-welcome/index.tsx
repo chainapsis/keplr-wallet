@@ -109,7 +109,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
                 // TODO: i18n
                 Alert.alert(
                   "Demo Mode",
-                  "You have entered the app in demo mode. This allows you finish the onboarding process with any."
+                  "You have entered the app in demo mode. This allows you finish the onboarding process with any fake data."
                 );
               })}
             />
