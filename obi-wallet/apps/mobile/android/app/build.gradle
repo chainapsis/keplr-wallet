@@ -239,7 +239,6 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-        //    resValue("string", "id", System.getenv( System.getenv("APP_ENV") =="production" ? "ANDROID_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION":"ANDROID_APP_CENTER_DEPLOYMENT_KEY_STAGING"))
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -251,10 +250,6 @@ android {
 
             // Detox-specific additions to pro-guard
             proguardFile "${rootProject.projectDir}/../node_modules/detox/android/detox/proguard-rules-app.pro"
-        //     System.out.println("APP_ENV"+System.getenv("APP_ENV"));
-
-        //    resValue("string", "id", System.getenv( System.getenv("APP_ENV") =="production" ? "ANDROID_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION":"ANDROID_APP_CENTER_DEPLOYMENT_KEY_STAGING"))
-        
         }
     }
 

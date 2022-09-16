@@ -1,3 +1,0 @@
-{
-    "app_secret": "${ANDROID_APP_CENTER_SECRET}"
-}
