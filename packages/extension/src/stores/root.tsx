@@ -15,6 +15,7 @@ import {
   CosmosQueries,
   CosmwasmAccount,
   CosmwasmQueries,
+  OsmosisQueries,
   DeferInitialQueryController,
   getKeplrFromWindow,
   IBCChannelStore,
@@ -68,7 +69,13 @@ export class RootStore {
   public readonly chainSuggestStore: ChainSuggestStore;
 
   public readonly queriesStore: QueriesStore<
-    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
+    [
+      CosmosQueries,
+      CosmwasmQueries,
+      SecretQueries,
+      OsmosisQueries,
+      KeplrETCQueries
+    ]
   >;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
@@ -166,6 +173,7 @@ export class RootStore {
       SecretQueries.use({
         apiGetter: getKeplrFromWindow,
       }),
+      OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
       })

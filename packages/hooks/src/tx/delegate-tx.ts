@@ -1,9 +1,4 @@
-import {
-  ChainGetter,
-  IAccountStore,
-  IQueriesStore,
-  MsgOpt,
-} from "@keplr-wallet/stores";
+import { ChainGetter, IAccountStore, MsgOpt } from "@keplr-wallet/stores";
 
 import { AmountConfig } from "./amount";
 import { useFeeConfig } from "./fee";
@@ -13,6 +8,7 @@ import { useRecipientConfig } from "./recipient";
 import { AppCurrency } from "@keplr-wallet/types";
 import { useState } from "react";
 import { makeObservable, override } from "mobx";
+import { QueriesStore } from "./internal";
 
 export class DelegateAmountConfig extends AmountConfig {
   get sendableCurrencies(): AppCurrency[] {
@@ -51,7 +47,7 @@ export class DelegateGasConfig extends GasConfig {
 
 export const useDelegateAmountConfig = (
   chainGetter: ChainGetter,
-  queriesStore: IQueriesStore,
+  queriesStore: QueriesStore,
   chainId: string,
   sender: string
 ) => {
@@ -92,7 +88,7 @@ export const useDelegateGasConfig = (
 
 export const useDelegateTxConfig = (
   chainGetter: ChainGetter,
-  queriesStore: IQueriesStore,
+  queriesStore: QueriesStore,
   accountStore: IAccountStore<{
     cosmos: {
       readonly msgOpts: {

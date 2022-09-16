@@ -14,7 +14,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
 import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
 import { Coin, StdFee } from "@cosmjs/launchpad";
-import Axios from "axios";
+import Axios, { AxiosResponse } from "axios";
 
 type TxSimulate = Pick<MakeTxResponse, "simulate">;
 export type SimulateGasFn = () => TxSimulate;
@@ -379,11 +379,12 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
           })
           .catch((e) => {
             if (Axios.isAxiosError(e) && e.response) {
+              const response = e.response as AxiosResponse;
               if (
-                e.response.status === 400 &&
-                e.response.data?.message &&
-                typeof e.response.data.message === "string" &&
-                e.response.data.message.includes("invalid empty tx")
+                response.status === 400 &&
+                response.data?.message &&
+                typeof response.data.message === "string" &&
+                response.data.message.includes("invalid empty tx")
               ) {
                 state.setOutdatedCosmosSdk(true);
               }

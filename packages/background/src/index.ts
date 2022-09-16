@@ -10,6 +10,7 @@ import * as Updater from "./updater/internal";
 import * as Tokens from "./tokens/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
+import * as PhishingList from "./phishing-list/internal";
 
 export * from "./persistent-memory";
 export * from "./chains";
@@ -21,6 +22,7 @@ export * from "./updater";
 export * from "./tokens";
 export * from "./interaction";
 export * from "./permission";
+export * from "./phishing-list";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -99,6 +101,13 @@ export function init(
     notification
   );
 
+  const phishingListService = new PhishingList.PhishingListService({
+    blockListUrl:
+      "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
+    fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
+    retryIntervalMs: 10 * 60 * 1000, // 10 mins
+  });
+
   interactionService.init();
   persistentMemoryService.init();
   permissionService.init(interactionService, chainsService, keyRingService);
@@ -119,6 +128,7 @@ export function init(
   );
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);
+  phishingListService.init();
 
   Interaction.init(router, interactionService);
   PersistentMemory.init(router, persistentMemoryService);
@@ -130,4 +140,5 @@ export function init(
   KeyRing.init(router, keyRingService);
   SecretWasm.init(router, secretWasmService);
   BackgroundTx.init(router, backgroundTxService);
+  PhishingList.init(router, phishingListService);
 }
