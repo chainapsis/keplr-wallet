@@ -1,3 +1,17 @@
+diff --git a/node_modules/react-native-country-picker-modal/lib/CloseButton.js b/node_modules/react-native-country-picker-modal/lib/CloseButton.js
+index 4fb16f6..634a958 100644
+--- a/node_modules/react-native-country-picker-modal/lib/CloseButton.js
++++ b/node_modules/react-native-country-picker-modal/lib/CloseButton.js
+@@ -54,7 +54,7 @@ CloseButtonIOS.prototype = propTypes;
+ CloseButtonAndroid.prototype = propTypes;
+ export default Platform.select({
+     ios: CloseButtonIOS,
+-    android: CloseButtonAndroid,
++    android: CloseButtonIOS,
+     web: CloseButtonIOS
+ });
+ //# sourceMappingURL=CloseButton.js.map
+\ No newline at end of file
 diff --git a/node_modules/react-native-country-picker-modal/lib/CountryList.js b/node_modules/react-native-country-picker-modal/lib/CountryList.js
 index 8816018..27c8f1f 100644
 --- a/node_modules/react-native-country-picker-modal/lib/CountryList.js
