@@ -1,9 +1,9 @@
 import { Text, TextInput as OriginalTextInput } from "@obi-wallet/common";
 import { ComponentType, Dispatch, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { TextInputProps, View } from "react-native";
 
-import { SECURITY_QUESTIONS } from "../../../../config";
+import { useSecurityQuestions } from "../../../../config";
 import { DropDownPicker } from "../../../drop-down-picker";
 import { TextInput } from "../../../text-input";
 
@@ -37,9 +37,8 @@ export function SecurityQuestionInput({
   CustomTextInput = OriginalTextInput,
 }: SecurityQuestionInputProps) {
   const [dropdownPickerOpen, setDropdownPickerOpen] = useState(false);
-  const initialSecurityQuestion = SECURITY_QUESTIONS();
   const [securityQuestions, setSecurityQuestions] = useState(
-    initialSecurityQuestion
+    useSecurityQuestions()
   );
 
   const intl = useIntl();
@@ -92,7 +91,7 @@ export function SecurityQuestionInput({
 
 export function useSecurityQuestionInput() {
   const [securityQuestion, setSecurityQuestion] = useState(
-    SECURITY_QUESTIONS()[0].value
+    useSecurityQuestions()[0].value
   );
   const [securityAnswer, setSecurityAnswer] = useState("");
 

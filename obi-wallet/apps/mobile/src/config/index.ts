@@ -1,16 +1,18 @@
-import { IntlCache } from "../app/language-picker/react-intl-inject";
+import { useIntl } from "react-intl";
 
-export const SECURITY_QUESTIONS = () => {
-  const securityQuestions = [
+export function useSecurityQuestions() {
+  const intl = useIntl();
+
+  return [
     {
-      label: IntlCache().formatMessage({
+      label: intl.formatMessage({
         id: "onboarding2.securityquestion.birthplace",
         defaultMessage: "What city were you born in?",
       }),
       value: "birthplace",
     },
     {
-      label: IntlCache().formatMessage({
+      label: intl.formatMessage({
         id: "onboarding2.securityquestion.schoolname",
         defaultMessage:
           "What is the full name of the last elementary/primary school I attended?",
@@ -18,34 +20,32 @@ export const SECURITY_QUESTIONS = () => {
       value: "schoolname",
     },
     {
-      label: IntlCache().formatMessage({
+      label: intl.formatMessage({
         id: "onboarding2.securityquestion.mothersmaidenname",
         defaultMessage: "What is your mother's maiden name?",
       }),
       value: "mothersmaidenname",
     },
     {
-      label: IntlCache().formatMessage({
+      label: intl.formatMessage({
         id: "onboarding2.securityquestion.nickname",
         defaultMessage: "What was your childhood nickname?",
       }),
       value: "nickname",
     },
     {
-      label: IntlCache().formatMessage({
+      label: intl.formatMessage({
         id: "onboarding2.securityquestion.firstcar",
         defaultMessage: "What was the make of your first car?",
       }),
       value: "firstcar",
     },
     {
-      label: IntlCache().formatMessage({
+      label: intl.formatMessage({
         id: "onboarding2.securityquestion.firstkiss",
         defaultMessage: "What is the full name of my first kiss?",
       }),
       value: "firstkiss",
     },
   ];
-
-  return securityQuestions;
-};
+}

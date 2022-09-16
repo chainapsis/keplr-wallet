@@ -27,9 +27,15 @@ import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FormattedMessage } from "react-intl";
-import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
-import { TouchableOpacity } from "react-native";
+import { FormattedMessage, useIntl } from "react-intl";
+import {
+  Alert,
+  Modal,
+  ModalProps,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import {
   SafeAreaView,
@@ -41,7 +47,6 @@ import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
 import { useStargateClient } from "../../../clients";
 import { lendFees } from "../../../fee-lender-worker";
-import { IntlCache } from "../../../language-picker/react-intl-inject";
 import { Loader } from "../../../loader";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
@@ -75,14 +80,15 @@ enum tabs {
   data,
 }
 export const SignatureModal = observer<SignatureModalProps>(
-  ({
+  function SignatureModal({
     messages,
     rawMessages,
     multisig,
     onCancel,
     onConfirm,
     ...props
-  }: SignatureModalProps) => {
+  }: SignatureModalProps) {
+    const intl = useIntl();
     const client = useStargateClient();
     const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
     const safeArea = useSafeAreaInsets();
@@ -183,14 +189,14 @@ export const SignatureModal = observer<SignatureModalProps>(
     const data: Key[] = [
       ...getKey({
         id: "biometrics",
-        title: IntlCache().formatMessage({
+        title: intl.formatMessage({
           id: "signature.modal.biometricsignature",
           defaultMessage: "Biometrics Signature",
         }),
       }),
       ...getKey({
         id: "phoneNumber",
-        title: IntlCache().formatMessage({
+        title: intl.formatMessage({
           id: "signature.modal.phonesignature",
           defaultMessage: "Phone Number Signature",
         }),
@@ -200,8 +206,9 @@ export const SignatureModal = observer<SignatureModalProps>(
       if (msgs.length === 0) {
         return null;
       }
-      return msgs.map((msg) => (
+      return msgs.map((msg, index) => (
         <View
+          key={index}
           style={{
             height: 50,
             flexDirection: "row",
@@ -258,7 +265,7 @@ export const SignatureModal = observer<SignatureModalProps>(
             }}
           >
             <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
-              Confirm Transaction{" "}
+              Confirm Transaction
             </Text>
             <Text style={{ position: "absolute", right: 10, color: "white" }}>
               {numberOfSignatures}/2
@@ -324,7 +331,6 @@ export const SignatureModal = observer<SignatureModalProps>(
                       selectedTab === tabs.data ? "underline" : "none",
                   }}
                 >
-                  {" "}
                   DATA
                 </Text>
               </TouchableOpacity>
@@ -372,7 +378,7 @@ export const SignatureModal = observer<SignatureModalProps>(
             <View>
               <Button
                 flavor="blue"
-                label={IntlCache().formatMessage({
+                label={intl.formatMessage({
                   id: "signature.modal.cancel",
                   defaultMessage: "Cancel",
                 })}
@@ -383,7 +389,7 @@ export const SignatureModal = observer<SignatureModalProps>(
               <Button
                 disabled={!enoughSignatures}
                 flavor="green"
-                label={IntlCache().formatMessage({
+                label={intl.formatMessage({
                   id: "signature.modal.confirm",
                   defaultMessage: "Confirm",
                 })}
@@ -570,6 +576,7 @@ const PhoneNumberBottomSheetContent =
   observer<PhoneNumberBottomSheetContentProps>(
     ({ payload, getMessage, onSuccess }) => {
       const { demoStore } = useStore();
+      const intl = useIntl();
       const { securityAnswer, setSecurityAnswer } = useSecurityQuestionInput();
 
       const [sentMessage, setSentMessage] = useState(false);
@@ -633,7 +640,7 @@ const PhoneNumberBottomSheetContent =
                 />
               </Text>
               <TextInput
-                placeholder={IntlCache().formatMessage({
+                placeholder={intl.formatMessage({
                   id: "signature.smscodelabel",
                   defaultMessage: "8-Digits SMS-Code",
                 })}
@@ -661,7 +668,7 @@ const PhoneNumberBottomSheetContent =
                 </Text>
 
                 <InlineButton
-                  label={IntlCache().formatMessage({
+                  label={intl.formatMessage({
                     id: "signature.sendagain",
                     defaultMessage: "Resend",
                   })}
@@ -695,7 +702,7 @@ const PhoneNumberBottomSheetContent =
                   setVerifyButtonDisabledDoubleclick(false);
                   console.error(error);
                   Alert.alert(
-                    IntlCache().formatMessage({
+                    intl.formatMessage({
                       id: "general.error",
                       defaultMessage: "Error",
                     }) + "VerifyAndProceedButton (1)",
