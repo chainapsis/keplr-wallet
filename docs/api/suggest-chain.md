@@ -74,7 +74,7 @@ experimentalSuggestChain(chainInfo: SuggestingChainInfo): Promise<void>
 | `currencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }, ]``` | (TBD) |
 | `feeCurrencies` | ```[   {     coinDenom: "ATOM",     coinMinimalDenom: "uatom",     coinDecimals: 6,     coinGeckoId: "cosmos",   }, ]``` | List of fee tokens accepted by the chain's validator. |
 | `gasPriceStep` | ```{ low: 0.01, average: 0.025, high: 0.03, }``` | Three `gasPrice` values (low, average, high) to estimate transaction fee. |
-| `features` | [] | `secretwasm` - Secret Network WASM smart contract transaction support `ibc-transfer` - For IBC transfers (ICS 20) enabled chains. For Stargate (cosmos-sdk v0.40+) chains, Keplr will check the on-chain params and automatically enable IBC transfers if it’s available) `cosmwasm` - For CosmWasm smart contract support (currently broken, in the process of being fixed)  `ibc-go` - For chains that use the ibc-go module separated from the cosmos-sdk |
+| `features` | [] | `secretwasm` - Secret Network WASM smart contract transaction support `ibc-transfer` - For IBC transfers (ICS 20) enabled chains. For Stargate (cosmos-sdk v0.40+) chains, Keplr will check the on-chain params and automatically enable IBC transfers if it’s available) `cosmwasm` - For CosmWasm smart contract support  `ibc-go` - For chains that use the ibc-go module separated from the cosmos-sdk `gno` - For GNOLand contract support |
 :::  
 
 Copy and paste example:
