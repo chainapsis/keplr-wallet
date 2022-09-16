@@ -1,3 +1,3 @@
 {
-    "app_secret": "${APP_CENTER_SECRET}"
+    "app_secret": "${ANDROID_APP_CENTER_SECRET}"
 }

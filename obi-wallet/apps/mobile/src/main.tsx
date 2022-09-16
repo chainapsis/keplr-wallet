@@ -15,8 +15,8 @@ initBackground();
 
 AppRegistry.registerComponent("Mobile", () => {
   let Component = Sentry.wrap(App);
-
-  if (!__DEV__) {
+  console.log({ deploymentKey }, 'key')
+  if (true) {
     Component = codePush({
       checkFrequency: codePush.CheckFrequency.MANUAL,
       deploymentKey,
