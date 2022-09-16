@@ -2,11 +2,6 @@
   "name": "mobile",
   "version": "0.11.13",
   "private": true,
-  "workspaces": {
-    "nohoist": [
-      "mobx-react-lite"
-    ]
-  },
   "scripts": {
     "clean": "sh ./scripts/clean.sh",
     "android": "yarn build:provider && react-native run-android",
@@ -88,7 +83,7 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
-    "react": "^16.14.0",
+    "react": "17.0.2",
     "react-hook-form": "^7.16.1",
     "react-intl": "^5.20.4",
     "react-native": "0.63.4",
