@@ -5,7 +5,7 @@ import { MultisigKey, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { useIntl, FormattedMessage } from "react-intl";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -280,6 +280,13 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
       </View>
       <View style={{ alignItems: "center" }}>
         <TouchableOpacity
+          onPress={() => {
+            // TODO: i18n
+            Alert.alert(
+              "Coming Soon",
+              "Replacement of keys has not been implemented yet."
+            );
+          }}
           style={{
             paddingVertical: 15,
             width: "100%",
