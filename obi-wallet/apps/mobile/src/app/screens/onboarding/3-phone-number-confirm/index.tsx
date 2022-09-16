@@ -46,7 +46,9 @@ export function PhoneNumberConfirmOnboarding({
   useEffect(() => {
     if (resendCounter > 0) {
       setResendButtonDisabled(true);
-      setTimeout(() => setResendCounter(resendCounter - 1), 1000);
+      setTimeout(() => {
+        setResendCounter((counter) => counter - 1);
+      }, 1000);
     } else {
       setResendButtonDisabled(false);
     }
@@ -167,77 +169,77 @@ export function PhoneNumberConfirmOnboarding({
                 }}
                 disabled={resendButtonDisabled}
               />
-
-              {resendButtonDisabled && (
-                <Text
-                  style={{
-                    color: "rgba(246, 245, 255, 0.6)",
-                    fontSize: 12,
-                    marginVertical: 10,
-                  }}
-                >
-                  {/* TODO: i18n */}
-                  Your Magic SMS has been resent! Give it some time to arrive.
-                  You can try again in {resendCounter}{" "}
-                  {resendCounter > 0 ? "seconds" : "second"}.
-                </Text>
-              )}
-
-              {resendButtonHit && (
-                <Text
-                  style={{
-                    color: "rgba(246, 245, 255, 0.6)",
-                    fontSize: 12,
-                    marginVertical: 10,
-                  }}
-                >
-                  {/* TODO: i18n */}
-                  If you haven't received the SMS please check your phone number
-                  for typing errors: {params.phoneNumber}.
-                </Text>
-              )}
             </View>
-            <View style={{ marginVertical: 20 }}>
-              <VerifyAndProceedButton
-                onPress={async () => {
-                  try {
-                    setVerifyButtonDisabledDoubleclick(true);
-                    const publicKey = demoStore.demoMode
-                      ? "demo"
-                      : await parsePublicKeyTextMessageResponse(key);
-                    if (publicKey) {
-                      if (!demoStore.demoMode) {
-                        multisigStore.setPhoneNumberKey({
-                          publicKey: {
-                            type: pubkeyType.secp256k1,
-                            value: publicKey,
-                          },
-                          phoneNumber: params.phoneNumber,
-                          securityQuestion: params.securityQuestion,
-                        });
-                      }
-                      setVerifyButtonDisabledDoubleclick(false);
-                      navigation.navigate("onboarding4");
-                    } else {
-                      setVerifyButtonDisabledDoubleclick(false);
-                    }
-                  } catch (e) {
-                    const error = e as Error;
-                    setVerifyButtonDisabledDoubleclick(false);
-                    console.error(error);
-                    Alert.alert(
-                      "Error VerifyAndProceedButton (2)",
-                      error.message
-                    );
-                  }
+
+            {resendButtonDisabled && (
+              <Text
+                style={{
+                  color: "rgba(246, 245, 255, 0.6)",
+                  fontSize: 12,
+                  marginVertical: 10,
                 }}
-                disabled={
-                  verifyButtonDisabledDoubleclick
-                    ? verifyButtonDisabledDoubleclick
-                    : verifyButtonDisabled
+              >
+                {/* TODO: i18n */}
+                Your Magic SMS has been resent! Give it some time to arrive. You
+                can try again in {resendCounter}{" "}
+                {resendCounter > 0 ? "seconds" : "second"}.
+              </Text>
+            )}
+
+            {resendButtonHit && (
+              <Text
+                style={{
+                  color: "rgba(246, 245, 255, 0.6)",
+                  fontSize: 12,
+                  marginVertical: 10,
+                }}
+              >
+                {/* TODO: i18n */}
+                If you haven't received the SMS please check your phone number
+                for typing errors: {params.phoneNumber}.
+              </Text>
+            )}
+          </View>
+          <View style={{ marginVertical: 20 }}>
+            <VerifyAndProceedButton
+              onPress={async () => {
+                try {
+                  setVerifyButtonDisabledDoubleclick(true);
+                  const publicKey = demoStore.demoMode
+                    ? "demo"
+                    : await parsePublicKeyTextMessageResponse(key);
+                  if (publicKey) {
+                    if (!demoStore.demoMode) {
+                      multisigStore.setPhoneNumberKey({
+                        publicKey: {
+                          type: pubkeyType.secp256k1,
+                          value: publicKey,
+                        },
+                        phoneNumber: params.phoneNumber,
+                        securityQuestion: params.securityQuestion,
+                      });
+                    }
+                    setVerifyButtonDisabledDoubleclick(false);
+                    navigation.navigate("onboarding4");
+                  } else {
+                    setVerifyButtonDisabledDoubleclick(false);
+                  }
+                } catch (e) {
+                  const error = e as Error;
+                  setVerifyButtonDisabledDoubleclick(false);
+                  console.error(error);
+                  Alert.alert(
+                    "Error VerifyAndProceedButton (2)",
+                    error.message
+                  );
                 }
-              />
-            </View>
+              }}
+              disabled={
+                verifyButtonDisabledDoubleclick
+                  ? verifyButtonDisabledDoubleclick
+                  : verifyButtonDisabled
+              }
+            />
           </View>
         </View>
       </SafeAreaView>
