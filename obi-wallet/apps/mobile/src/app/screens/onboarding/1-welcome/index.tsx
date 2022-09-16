@@ -2,6 +2,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   Alert,
   Image,
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 
 import { Button } from "../../../button";
+import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
 import { DemoModeToggle } from "../../components/demo-mode-toggle";
 import { StackParamList } from "../stack";
@@ -25,6 +27,7 @@ export type WelcomeOnboardingProps = NativeStackScreenProps<
 export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
   ({ navigation }) => {
     const { demoStore } = useStore();
+    const intl = useIntl();
 
     return (
       <ImageBackground
@@ -42,6 +45,10 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
             justifyContent: "flex-end",
           }}
         >
+          <View style={{ position: "absolute", top: 20, left: 20 }}>
+            <LanguagePicker />
+          </View>
+
           <View
             style={{
               paddingHorizontal: 20,
@@ -58,7 +65,10 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
                 marginTop: 32,
               }}
             >
-              Welcome to Loop
+              <FormattedMessage
+                id="onboarding1.welcometoloop"
+                defaultMessage="Welcome to Loop"
+              />
             </Text>
             <Text
               style={{
@@ -68,11 +78,13 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
                 marginTop: 12,
               }}
             >
-              Loop, powered by Obi, is the world’s most powerful wallet for
-              Web3.
+              <FormattedMessage
+                id="onboarding1.welcomesubtext"
+                defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
+              />
             </Text>
             <Button
-              label="Get Started"
+              label={intl.formatMessage({ id: "onboarding1.getstarted" })}
               RightIcon={GetStarted}
               flavor="blue"
               style={{
@@ -84,6 +96,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
               })}
             />
             <Button
+              // TODO: i18n
               label="Enter Demo Mode"
               RightIcon={GetStarted}
               flavor="green"
@@ -93,6 +106,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
               onPress={action(() => {
                 demoStore.demoMode = true;
                 navigation.navigate("onboarding2");
+                // TODO: i18n
                 Alert.alert(
                   "Demo Mode",
                   "You have entered the app in demo mode. This allows you finish the onboarding process with any."
@@ -100,7 +114,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
               })}
             />
             {/*<Button*/}
-            {/*  label="Recover Wallet"*/}
+            {/*  label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}*/}
             {/*  LeftIcon={RecoverWallet}*/}
             {/*  flavor="purple"*/}
             {/*  style={{*/}

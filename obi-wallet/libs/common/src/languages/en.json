@@ -1,3 +1,155 @@
 {
-  "home.appStoreLabel": "App Store"
+  "home.appStoreLabel": "App Store",
+
+  "general.error": "Error",
+  "general.comingsoon": "Coming Soon",
+  "general.active": "Active",
+  "general.notactive": "Not Active",
+  "general.yes": "Yes",
+  "general.no": "No",
+
+  "assets.network": "Network",
+  "assets.walletname": "Wallet Name",
+  "assets.balance": "Balance",
+  "assets.send": "Send",
+  "assets.receive": "Receive",
+  "assets.name": "Name",
+  "assets.holdings": "Holdings",
+
+  "menu.assets": "Assets",
+  "menu.nfts": "NFTs",
+  "menu.loadingnfts": "Loading NFTs...",
+  "menu.apps": "Apps",
+  "menu.trade": "Trade",
+  "menu.trade.loading": "Loading...",
+  "menu.settings": "Settings",
+
+  "sidemenu.networks": "Networks",
+  "sidemenu.morecomingsoon": "More coming soon",
+
+  "send.to": "To",
+  "send.walletaddress": "Wallet Address",
+  "send.amount": "Amount",
+  "send.next": "Next",
+  "send.denomination": "Asset",
+  "send.selectcoin": "Select the asset you'd like to send",
+  "send.holdings": "Holdings",
+  "send.name": "Name",
+  "send.send": "Send",
+
+  "receive.receive": "Receive",
+  "receive.taptoshare": "Tap to share your address",
+
+  "onboarding1.welcometoloop": "Welcome to Loop",
+  "onboarding1.welcomesubtext": "Powered by Obi",
+  "onboarding1.getstarted": "Get Started",
+  "onboarding1.recoverwallet": "Recover My Wallet",
+
+  "onboarding2.authyourkeys": "Create a Phone Number Key",
+  "onboarding2.authyourkeyssubtext": "Please answer a security question. We do not store this information.",
+  "onboarding2.securityquestion": "Security Question",
+  "onboarding2.answer": "Answer",
+  "onboarding2.answerlabel": "Type your answer here",
+  "onboarding2.phonenr": "Phone Number",
+  "onboarding2.phonenrlabel": "Type your phone number here",
+  "onboarding2.bottominfo": "Get a magic SMS to activate your phone key.",
+  "onboarding2.sendmagicsms": "Get Magic SMS",
+
+  "onboarding2.error.phonekeyexists.title": "You already have a phone number key",
+  "onboarding2.error.phonekeyexists.text": "Do you want to reuse your existing phone number key for phone number",
+  "onboarding2.error.phonekeyexists.generatenew": "Generate a new key",
+  "onboarding2.error.phonekeyexists.yes": "Yes",
+
+  "onboarding2.error.securityanswermissing.title": "Security answer missing",
+  "onboarding2.error.securityanswermissing.text": "Please enter your security answer.",
+
+  "onboarding2.error.securityanswertooshort.title": "Security answer too short",
+  "onboarding2.error.securityanswertooshort.text": "Please enter a longer security answer.",
+
+  "onboarding2.error.securityanswerwhitespaces.title": "Security answer error",
+  "onboarding2.error.securityanswerwhitespaces.text": "Please remove the whitespaces in the beginning and end of your security answer.",
+
+  "onboarding2.error.phonenrmissing.title": "Phone number missing",
+  "onboarding2.error.phonenrmissing.text": "Please enter a valid phone number.",
+
+  "onboarding2.error.phonenrnospecialchars.title": "Phone number error",
+  "onboarding2.error.phonenrnospecialchars.text": "Please enter a valid phone number (international format).",
+
+  "onboarding2.error.sendingsmsfailed": "Sending SMS failed.",
+
+  "onboarding3.authyourkeys": "Create a Phone Number Key",
+  "onboarding3.pastereponse": "Paste in the response you received.",
+  "onboarding3.smscodelabel": "8-Digit SMS Code",
+  "onboarding3.noresponselabel": "Didn't receive a response?",
+  "onboarding3.sendagain": "Resend",
+  "onboarding3.verifyandproceed": "Verify & Proceed",
+
+  "onboarding4.authyourkeys": "Create a Biometrics Key",
+  "onboarding4.authyourkeys.subtext": "Onboarding with Obi creates a multi-key login to keep your account secure and recoverable without needing seed phrases.",
+  "onboarding4.biometrics.button": "Create My Biometrics Key",
+
+  "onboarding4.error.biometrickeyexists.title": "You already have a biometrics key",
+  "onboarding4.error.biometrickeyexists.text": "Do you want to reuse your existing biometrics key?",
+  "onboarding4.error.biometrickeyexists.newkey": "Generate a new key",
+  "onboarding4.error.biometrickeyexists.yes": "Yes",
+
+  "onboarding5.setsocialkey": "Set a Social Key",
+  "onboarding5.setsocialkey.subtext": "Enter or scan the juno address of a trusted friend who can help you recover your account. Your friend cannot access your account.",
+  "onboarding5.setsocialkey.subtext2": "…or you can use the default Obi account if you don't trust any of your friends. Obi cannot access your account.",
+  "onboarding5.useobiaccount": "Use Obi Account",
+
+  "onboarding4.error.socialkeyexists.title": "You already have a social key",
+  "onboarding4.error.socialkeyexists.text": "Do you want to reuse your existing social key for",
+  "onboarding4.error.socialkeyexists.newkey": "Generate a new key",
+  "onboarding5.error.socialkeyexists.yes": "Yes",
+  "onboarding5.error.notactiveaddress.title": "We don't see any activity for this address.",
+  "onboarding5.error.notactiveaddress.text": "Ensure your friend's address has a transaction history and that you've entered the address correctly.",
+
+  "onboarding6.preparewallet": "Prepare Multisig Wallet",
+  "onboarding6.createmultisigwallet": "Create Multisig Wallet",
+  "onboarding6.loadingtext": "Preparing wallet…",
+
+  "signature.modal.biometricsignature": "Biometrics Key",
+  "signature.modal.phonesignature": "Phone Number Key",
+  "signature.modal.cancel": "Cancel",
+  "signature.modal.confirm": "Confirm",
+  "signature.pasteresponse": "Paste in the response you receive.",
+  "signature.smscodelabel": "8-Digit SMS-Code",
+  "signature.noresponselabel": "Didn't receive a response?",
+  "signature.sendagain": "Resend",
+
+  "settings.multigsigsettings": "Key Settings",
+  "settings.multigsigsettings.subtext": "Manage your SMS, social, and other keys.",
+  "settings.more": "More",
+  "settings.helpsupport": "Help & Support",
+  "settings.helpsupport.subtext": "Contact Loop support.",
+  "settings.logout": "Log Out",
+  "settings.logout.subtext": "Save your keys before logging out",
+  "settings.fundproxywallet": "Fund Proxy Wallet",
+  "settings.fundproxywallet.subtext": "Send some funds from your biometrics wallet",
+  "settings.terms": "Terms of Service",
+  "settings.privacy": "Privacy Policy",
+
+  "settings.multisig.title": "Manage Multisig",
+  "settings.multisig.subtitle": "Add/edit keys to improve security. Tap on any of the following",
+  "settings.multisig.risk.norisk": "No Security Risk",
+  "settings.multisig.risk.low": "Low Security Risk",
+  "settings.multisig.risk.medium": "Medium Security Risk",
+  "settings.multisig.risk.high": "High Security Risk",
+  "settings.multisig.risk.stepremaining": "step remaining",
+  "settings.multisig.risk.stepsremaining": "steps remaining",
+  "settings.multisig.option.phonekey": "Phone Number Key",
+  "settings.multisig.option.biometricskey": "Biometrics Key",
+  "settings.multisig.option.socialkey": "Social Key",
+  "settings.multisig.option.emailkey": "Email",
+  "settings.multisig.option.cloudkey": "Cloud",
+
+  "appscreen.kado": "Buy Crypto",
+
+  "onboarding2.securityquestion.birthplace": "What city were you born in?",
+  "onboarding2.securityquestion.schoolname": "What is the full name of the last elementary/primary school I attended?",
+  "onboarding2.securityquestion.mothersmaidenname": "What is your mother's maiden name?",
+  "onboarding2.securityquestion.nickname": "What was your childhood nickname?",
+  "onboarding2.securityquestion.firstcar": "What was the make of your first car?",
+  "onboarding2.securityquestion.firstkiss": "What is the full name of my first kiss?"
 }

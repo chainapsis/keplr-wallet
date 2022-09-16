@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
@@ -40,7 +41,10 @@ export function Trade() {
             style={{ marginBottom: 20 }}
           />
           <Text style={{ color: "white", fontSize: 20, fontWeight: "700" }}>
-            Loading...
+            <FormattedMessage
+              id="menu.trade.loading"
+              defaultMessage="Loading..."
+            />
           </Text>
         </View>
       )}

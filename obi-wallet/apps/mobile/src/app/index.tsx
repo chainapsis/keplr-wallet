@@ -1,5 +1,6 @@
 import { messages } from "@obi-wallet/common";
 import { NavigationContainer } from "@react-navigation/native";
+import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { IntlProvider } from "react-intl";
 import { AppState, StatusBar } from "react-native";
@@ -17,7 +18,9 @@ import { WebViewScreen } from "./screens/web-view";
 import { Stack } from "./stack";
 import { StoreContext } from "./stores";
 
-export function App() {
+export const App = observer(() => {
+  const { languageStore } = rootStore;
+  const { currentLanguage } = languageStore;
   const [updating, setUpdating] = useState(false);
   const appState = useRef(AppState.currentState);
   const lastUpdate = useRef(0);
@@ -56,11 +59,28 @@ export function App() {
   return (
     <StoreContext.Provider value={rootStore}>
       <IntlProvider
-        locale="en"
-        messages={messages["en"]}
+        defaultLocale="en"
+        locale={currentLanguage}
+        messages={messages[currentLanguage]}
         formats={{
           date: {
             en: {
+              month: "short",
+              day: "2-digit",
+              hour: "2-digit",
+              hour12: false,
+              minute: "2-digit",
+              timeZoneName: "short",
+            },
+            de: {
+              month: "short",
+              day: "2-digit",
+              hour: "2-digit",
+              hour12: false,
+              minute: "2-digit",
+              timeZoneName: "short",
+            },
+            es: {
               month: "short",
               day: "2-digit",
               hour: "2-digit",
@@ -121,4 +141,4 @@ export function App() {
       </IntlProvider>
     </StoreContext.Provider>
   );
-}
+});

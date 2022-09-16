@@ -4,6 +4,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, Image, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,6 +29,7 @@ export type PhoneNumberOnboardingProps = NativeStackScreenProps<
 export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
   ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
+    const intl = useIntl();
 
     useEffect(() => {
       if (demoStore.demoMode) return;
@@ -35,15 +37,20 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
       const { phoneNumber } = multisigStore.nextAdmin;
       if (phoneNumber) {
         Alert.alert(
-          "You already have a phone number key",
-          `Do you want to reuse your existing phone number key for phone number ${phoneNumber.phoneNumber}?`,
+          intl.formatMessage({ id: "onboarding2.error.phonekeyexists.title" }),
+          intl.formatMessage({ id: "onboarding2.error.phonekeyexists.text" }) +
+            ` ${phoneNumber.phoneNumber}?`,
           [
             {
-              text: "Generate a new key",
+              text: intl.formatMessage({
+                id: "onboarding2.error.phonekeyexists.generatenew",
+              }),
               style: "cancel",
             },
             {
-              text: "Yes",
+              text: intl.formatMessage({
+                id: "onboarding2.error.phonekeyexists.yes",
+              }),
               onPress: () => {
                 navigation.navigate("onboarding4");
               },
@@ -51,7 +58,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
           ]
         );
       }
-    }, [demoStore, multisigStore, navigation]);
+    }, [demoStore, intl, multisigStore, navigation]);
 
     const {
       securityQuestion,
@@ -91,8 +98,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
     const handleSecurityAnswer = () => {
       if (!securityAnswer) {
         Alert.alert(
-          "Security answer missing",
-          `Please enter your security answer.`
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswermissing.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswermissing.text",
+          })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -103,8 +114,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
         securityAnswer.length < minInputCharsSecurityAnswer
       ) {
         Alert.alert(
-          "Security answer too short",
-          `Your security answer needs to have at least ${minInputCharsSecurityAnswer} characters.`
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswertooshort.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswertooshort.text",
+          })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -116,8 +131,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
         securityAnswer.endsWith(" ")
       ) {
         Alert.alert(
-          "Security answer error",
-          `Please remove the whitespaces in the beginning and end of your security answer.`
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswerwhitespaces.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding2.error.securityanswerwhitespaces.text",
+          })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -129,8 +148,8 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
     const handlePhoneNumber = () => {
       if (!phoneNumberWithoutCountryCode || !phoneCountryCode || !phoneNumber) {
         Alert.alert(
-          "Phone number missing",
-          `Please enter a valid phone number.`
+          intl.formatMessage({ id: "onboarding2.error.phonenrmissing.title" }),
+          intl.formatMessage({ id: "onboarding2.error.phonenrmissing.text" })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -142,8 +161,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
       );
       if (!onlyDigitsInPhoneNumber) {
         Alert.alert(
-          "Phone number error",
-          `Please enter a valid phone number (international format).`
+          intl.formatMessage({
+            id: "onboarding2.error.phonenrnospecialchars.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding2.error.phonenrnospecialchars.text",
+          })
         );
         setMagicButtonDisabledDoubleclick(false);
         return false;
@@ -203,7 +226,10 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
                       marginTop: 32,
                     }}
                   >
-                    Authenticate Your Keys
+                    <FormattedMessage
+                      id="onboarding2.authyourkeys"
+                      defaultMessage="Authenticate Your Keys"
+                    />
                   </Text>
                   <Text
                     style={{
@@ -212,7 +238,10 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
                       marginTop: 10,
                     }}
                   >
-                    Please answer a security question.
+                    <FormattedMessage
+                      id="onboarding2.authyourkeyssubtext"
+                      defaultMessage="Please answer a security question."
+                    />
                   </Text>
                 </View>
               </View>
@@ -225,10 +254,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
               />
 
               <PhoneInput
-                label="Phone number"
+                label={intl.formatMessage({ id: "onboarding2.phonenr" })}
                 keyboardType="phone-pad"
                 textContentType="telephoneNumber"
-                placeholder="Type your phone number here"
+                placeholder={intl.formatMessage({
+                  id: "onboarding2.phonenrlabel",
+                })}
                 style={{ marginTop: 25 }}
                 value={phoneNumberWithoutCountryCode}
                 onChangeText={(e) => {
@@ -242,7 +273,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
             </View>
 
             <SendMagicSmsButton
-              description="Now send your encrypted answer to activate your messaging key."
+              description={intl.formatMessage({ id: "onboarding2.bottominfo" })}
               onPress={async () => {
                 setMagicButtonDisabledDoubleclick(true);
 
@@ -269,7 +300,12 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
                     const error = e as Error;
                     setMagicButtonDisabledDoubleclick(false);
                     console.error(error);
-                    Alert.alert("Sending SMS failed.", error.message);
+                    Alert.alert(
+                      intl.formatMessage({
+                        id: "onboarding2.error.sendingsmsfailed",
+                      }),
+                      error.message
+                    );
                   }
                 } else {
                   setMagicButtonDisabledDoubleclick(false);

@@ -4,6 +4,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -37,15 +38,20 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
 
       if (social) {
         Alert.alert(
-          "You already have a social key",
-          `Do you want to reuse your existing social key for ${social.address}?`,
+          intl.formatMessage({ id: "onboarding4.error.socialkeyexists.title" }),
+          intl.formatMessage({ id: "onboarding4.error.socialkeyexists.text" }) +
+            ` ${social.address}?`,
           [
             {
-              text: "Generate a new key",
+              text: intl.formatMessage({
+                id: "onboarding4.error.socialkeyexists.newkey",
+              }),
               style: "cancel",
             },
             {
-              text: "Yes",
+              text: intl.formatMessage({
+                id: "onboarding4.error.socialkeyexists.yes",
+              }),
               onPress: () => {
                 navigation.navigate("onboarding6");
               },
@@ -54,6 +60,8 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
         );
       }
     }, [demoStore, multisigStore, navigation]);
+
+    const intl = useIntl();
 
     async function getAccountPubkey(key: string) {
       try {
@@ -113,7 +121,10 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                       marginTop: 32,
                     }}
                   >
-                    Set your Social Key
+                    <FormattedMessage
+                      id="onboarding5.setsocialkey"
+                      defaultMessage="Set your Social Key"
+                    />
                   </Text>
                   <Text
                     style={{
@@ -122,8 +133,10 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                       marginTop: 10,
                     }}
                   >
-                    Enter the juno address of a trusted friend who can help you
-                    recover your account
+                    <FormattedMessage
+                      id="onboarding5.setsocialkey.subtext"
+                      defaultMessage="Enter the juno address of a trusted friend who can help you recover your account."
+                    />
                   </Text>
                 </View>
               </View>
@@ -140,11 +153,13 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                   marginTop: 10,
                 }}
               >
-                …or you can use the default Obi account if you don't trust any
-                of your friends
+                <FormattedMessage
+                  id="onboarding5.setsocialkey.subtext2"
+                  defaultMessage="…or you can use the default Obi account if you don't trust any of your friends"
+                />
               </Text>
               <InlineButton
-                label="Use Obi Account"
+                label={intl.formatMessage({ id: "onboarding5.useobiaccount" })}
                 style={{ alignSelf: "flex-start", marginTop: 10 }}
                 onPress={() => {
                   setAddress("juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e");
