@@ -1,10 +1,11 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nrwl/nx", "unicorn"],
+  "plugins": ["@nrwl/nx", "mobx", "unicorn"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "extends": ["plugin:mobx/recommended"],
       "rules": {
         "@nrwl/nx/enforce-module-boundaries": [
           "error",
@@ -34,6 +35,8 @@
             "newlines-between": "always"
           }
         ],
+
+        "mobx/missing-observer": "off",
 
         "react/function-component-definition": [
           "error",

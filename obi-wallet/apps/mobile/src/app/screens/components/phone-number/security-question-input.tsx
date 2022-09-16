@@ -1,8 +1,9 @@
 import { Text, TextInput as OriginalTextInput } from "@obi-wallet/common";
 import { ComponentType, Dispatch, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import { TextInputProps, View } from "react-native";
 
-import { SECURITY_QUESTIONS } from "../../../../config";
+import { useSecurityQuestions } from "../../../../config";
 import { DropDownPicker } from "../../../drop-down-picker";
 import { TextInput } from "../../../text-input";
 
@@ -36,8 +37,11 @@ export function SecurityQuestionInput({
   CustomTextInput = OriginalTextInput,
 }: SecurityQuestionInputProps) {
   const [dropdownPickerOpen, setDropdownPickerOpen] = useState(false);
-  const [securityQuestions, setSecurityQuestions] =
-    useState(SECURITY_QUESTIONS);
+  const [securityQuestions, setSecurityQuestions] = useState(
+    useSecurityQuestions()
+  );
+
+  const intl = useIntl();
 
   return (
     <View style={{ zIndex: 999 }}>
@@ -50,7 +54,10 @@ export function SecurityQuestionInput({
           marginBottom: 12,
         }}
       >
-        Security Question
+        <FormattedMessage
+          id="onboarding2.securityquestion"
+          defaultMessage="Security Question"
+        />
       </Text>
 
       <DropDownPicker
@@ -65,8 +72,14 @@ export function SecurityQuestionInput({
       />
 
       <TextInput
-        label="Answer"
-        placeholder="Type your answer here"
+        label={intl.formatMessage({
+          id: "onboarding2.answer",
+          defaultMessage: "Answer",
+        })}
+        placeholder={intl.formatMessage({
+          id: "onboarding2.answerlabel",
+          defaultMessage: "Type your answer here",
+        })}
         style={{ marginTop: 25 }}
         value={securityAnswer}
         onChangeText={onSecurityAnswerChange}
@@ -78,7 +91,7 @@ export function SecurityQuestionInput({
 
 export function useSecurityQuestionInput() {
   const [securityQuestion, setSecurityQuestion] = useState(
-    SECURITY_QUESTIONS[0].value
+    useSecurityQuestions()[0].value
   );
   const [securityAnswer, setSecurityAnswer] = useState("");
 

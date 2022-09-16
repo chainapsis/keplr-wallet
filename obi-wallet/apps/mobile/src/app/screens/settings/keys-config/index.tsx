@@ -4,6 +4,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MultisigKey, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {
   SafeAreaView,
@@ -80,14 +81,31 @@ export const KeysConfigScreen = observer(() => {
     };
   }
 
+  const intl = useIntl();
+
   const data: (Key & { activated: boolean })[] = [
     getKey({
       id: "phoneNumber",
-      title: "Phone Number Key",
+      title: intl.formatMessage({
+        id: "settings.multisig.option.phonekey",
+        defaultMessage: "Phone Number Key",
+      }),
     }),
-    getKey({ id: "biometrics", title: "Biometrics Key" }),
-    getKey({ id: "social", title: "Social Key" }),
-    // getKey({ id: "cloud", title: "Cloud Key" }),
+    getKey({
+      id: "biometrics",
+      title: intl.formatMessage({
+        id: "settings.multisig.option.biometricskey",
+        defaultMessage: "Biometrics Key",
+      }),
+    }),
+    getKey({
+      id: "social",
+      title: intl.formatMessage({
+        id: "settings.multisig.option.socialkey",
+        defaultMessage: "Social Key",
+      }),
+    }),
+    // getKey({ id: "cloud", title: intl.formatMessage({ id: "settings.multisig.option.cloudkey", defaultMessage:"Cloud" }) }),
   ];
 
   const activatedKeys = data.filter((item) => item.activated).length;
@@ -98,9 +116,17 @@ export const KeysConfigScreen = observer(() => {
     >
       <View style={{ flex: 2 }}>
         <Back style={{ alignSelf: "flex-start" }} />
-        <Text style={styles.heading}>Manage Multisig</Text>
+        <Text style={styles.heading}>
+          <FormattedMessage
+            id="settings.multisig.title"
+            defaultMessage="Manage Multisig"
+          />
+        </Text>
         <Text style={styles.subHeading}>
-          Add/edit keys to improve security. Tap on any of the following
+          <FormattedMessage
+            id="settings.multisig.subtitle"
+            defaultMessage="Add/edit keys to improve security. Tap on any of the following"
+          />
         </Text>
       </View>
       <View style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>
@@ -111,7 +137,10 @@ export const KeysConfigScreen = observer(() => {
             { marginTop: 0, fontSize: 18, marginBottom: 8 },
           ]}
         >
-          High Security Risk
+          <FormattedMessage
+            id="settings.multisig.risk.high"
+            defaultMessage="High Security Risk"
+          />
         </Text>
         <Text style={[styles.subHeading, { marginBottom: 0 }]}>
           {data.length - activatedKeys} steps remaining

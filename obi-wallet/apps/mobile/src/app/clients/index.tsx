@@ -1,4 +1,4 @@
-import { OfflineSigner } from "@cosmjs/launchpad";
+import { OfflineSigner } from "@cosmjs/proto-signing";
 import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { Chain, chains } from "@obi-wallet/common";
 import { useEffect, useState } from "react";

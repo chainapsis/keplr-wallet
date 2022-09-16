@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   Linking,
   StyleSheet,
@@ -27,6 +27,7 @@ import { Stack } from "./stack";
 
 export const SettingsScreen = observer(() => {
   const { demoStore, multisigStore } = useStore();
+  const intl = useIntl();
   const navigation = useNavigation();
   const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
   useEffect(() => {
@@ -97,8 +98,14 @@ export const SettingsScreen = observer(() => {
           */}
       <Setting
         Icon={MultiSigIcon}
-        title="Multisig settings"
-        subtitle="Manage email, face-id, sms key etc."
+        title={intl.formatMessage({
+          id: "settings.multigsigsettings",
+          defaultMessage: "Key Settings",
+        })}
+        subtitle={intl.formatMessage({
+          id: "settings.multigsigsettings.subtext",
+          defaultMessage: "Manage your SMS, social, and other keys.",
+        })}
         onPress={() => navigation.navigate("MultiSigSettings")}
       />
       <View
@@ -109,20 +116,34 @@ export const SettingsScreen = observer(() => {
         ]}
       >
         <View style={[styles.separator]} />
-        <Text style={[styles.separatorText]}>MORE</Text>
+        <Text style={[styles.separatorText]}>
+          <FormattedMessage id="settings.more" defaultMessage="More" />
+        </Text>
         <View style={[styles.separator]} />
       </View>
       <Setting
         Icon={HelpAndSupport}
-        title="Help & support"
-        subtitle="Any question. We are happy to help "
+        title={intl.formatMessage({
+          id: "settings.helpsupport",
+          defaultMessage: "Help & Support",
+        })}
+        subtitle={intl.formatMessage({
+          id: "settings.helpsupport.subtext",
+          defaultMessage: "Contact Loop support.",
+        })}
         onPress={() => Linking.openURL("https://loop.markets/help")}
       />
 
       <Setting
         Icon={LogoutIcon}
-        title="Log out"
-        subtitle="Save your keys before logging out"
+        title={intl.formatMessage({
+          id: "settings.logout",
+          defaultMessage: "Log Out",
+        })}
+        subtitle={intl.formatMessage({
+          id: "settings.logout.subtext",
+          defaultMessage: "Save your keys before logging out",
+        })}
         onPress={() => {
           if (demoStore.demoMode) {
             demoStore.logout();
@@ -160,7 +181,10 @@ export const SettingsScreen = observer(() => {
               fontSize: 10,
             }}
           >
-            Terms of Service
+            <FormattedMessage
+              id="settings.terms"
+              defaultMessage="Terms of Service"
+            />
           </Text>
           <Text
             onPress={() => {
@@ -172,7 +196,10 @@ export const SettingsScreen = observer(() => {
               fontSize: 10,
             }}
           >
-            Privacy Policy
+            <FormattedMessage
+              id="settings.privacy"
+              defaultMessage="Privacy Policy"
+            />
           </Text>
         </View>
       </View>
@@ -242,6 +269,7 @@ const styles = StyleSheet.create({
   separatorText: {
     color: "#787B9C",
     marginHorizontal: 35,
+    textTransform: "uppercase",
   },
   heading: {
     color: "#F6F5FF",

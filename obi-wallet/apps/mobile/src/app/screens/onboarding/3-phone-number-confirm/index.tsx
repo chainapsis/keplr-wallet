@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -37,6 +38,7 @@ export function PhoneNumberConfirmOnboarding({
   const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
   const [verifyButtonDisabledDoubleclick, setVerifyButtonDisabledDoubleclick] =
     useState(false); // Magic Button disable on button-click
+
   const [resendButtonDisabled, setResendButtonDisabled] = useState(false);
   const [resendCounter, setResendCounter] = useState(0);
   const [resendButtonHit, setResendButtonHit] = useState(false);
@@ -60,6 +62,8 @@ export function PhoneNumberConfirmOnboarding({
       setVerifyButtonDisabledDoubleclick(false);
     }
   }, [verifyButtonDisabled, setVerifyButtonDisabled, key]);
+
+  const intl = useIntl();
 
   return (
     <KeyboardAvoidingView
@@ -104,7 +108,10 @@ export function PhoneNumberConfirmOnboarding({
                     marginTop: 32,
                   }}
                 >
-                  Authenticate Your Keys
+                  <FormattedMessage
+                    id="onboarding3.authyourkeys"
+                    defaultMessage="Authenticate Your Keys"
+                  />
                 </Text>
                 <Text
                   style={{
@@ -113,12 +120,17 @@ export function PhoneNumberConfirmOnboarding({
                     marginTop: 10,
                   }}
                 >
-                  Paste in the response you received.
+                  <FormattedMessage
+                    id="onboarding3.pastereponse"
+                    defaultMessage="Paste in the response you received."
+                  />
                 </Text>
               </View>
             </View>
             <TextInput
-              placeholder="8-Digits SMS-Code"
+              placeholder={intl.formatMessage({
+                id: "onboarding3.smscodelabel",
+              })}
               textContentType="oneTimeCode"
               keyboardType="number-pad"
               style={{ marginTop: 25 }}
@@ -133,11 +145,14 @@ export function PhoneNumberConfirmOnboarding({
               }}
             >
               <Text style={{ color: "rgba(246, 245, 255, 0.6)", fontSize: 12 }}>
-                Didn’t receive a response?
+                <FormattedMessage
+                  id="onboarding3.noresponselabel"
+                  defaultMessage="Didn’t receive a response?"
+                />
               </Text>
 
               <InlineButton
-                label="Resend"
+                label={intl.formatMessage({ id: "onboarding3.sendagain" })}
                 onPress={async () => {
                   setResendCounter(20);
                   setResendButtonHit(true);
@@ -152,75 +167,77 @@ export function PhoneNumberConfirmOnboarding({
                 }}
                 disabled={resendButtonDisabled}
               />
+
+              {resendButtonDisabled && (
+                <Text
+                  style={{
+                    color: "rgba(246, 245, 255, 0.6)",
+                    fontSize: 12,
+                    marginVertical: 10,
+                  }}
+                >
+                  {/* TODO: i18n */}
+                  Your Magic SMS has been resent! Give it some time to arrive.
+                  You can try again in {resendCounter}{" "}
+                  {resendCounter > 0 ? "seconds" : "second"}.
+                </Text>
+              )}
+
+              {resendButtonHit && (
+                <Text
+                  style={{
+                    color: "rgba(246, 245, 255, 0.6)",
+                    fontSize: 12,
+                    marginVertical: 10,
+                  }}
+                >
+                  {/* TODO: i18n */}
+                  If you haven't received the SMS please check your phone number
+                  for typing errors: {params.phoneNumber}.
+                </Text>
+              )}
             </View>
-
-            {resendButtonDisabled && (
-              <Text
-                style={{
-                  color: "rgba(246, 245, 255, 0.6)",
-                  fontSize: 12,
-                  marginVertical: 10,
-                }}
-              >
-                Your Magic SMS has been resent! Give it some time to arrive. You
-                can try again in {resendCounter}{" "}
-                {resendCounter > 0 ? "seconds" : "second"}.
-              </Text>
-            )}
-
-            {resendButtonHit && (
-              <Text
-                style={{
-                  color: "rgba(246, 245, 255, 0.6)",
-                  fontSize: 12,
-                  marginVertical: 10,
-                }}
-              >
-                If you haven't received the SMS please check your phone number
-                for typing errors: {params.phoneNumber}
-              </Text>
-            )}
-          </View>
-          <View style={{ marginVertical: 20 }}>
-            <VerifyAndProceedButton
-              onPress={async () => {
-                try {
-                  setVerifyButtonDisabledDoubleclick(true);
-                  const publicKey = demoStore.demoMode
-                    ? "demo"
-                    : await parsePublicKeyTextMessageResponse(key);
-                  if (publicKey) {
-                    if (!demoStore.demoMode) {
-                      multisigStore.setPhoneNumberKey({
-                        publicKey: {
-                          type: pubkeyType.secp256k1,
-                          value: publicKey,
-                        },
-                        phoneNumber: params.phoneNumber,
-                        securityQuestion: params.securityQuestion,
-                      });
+            <View style={{ marginVertical: 20 }}>
+              <VerifyAndProceedButton
+                onPress={async () => {
+                  try {
+                    setVerifyButtonDisabledDoubleclick(true);
+                    const publicKey = demoStore.demoMode
+                      ? "demo"
+                      : await parsePublicKeyTextMessageResponse(key);
+                    if (publicKey) {
+                      if (!demoStore.demoMode) {
+                        multisigStore.setPhoneNumberKey({
+                          publicKey: {
+                            type: pubkeyType.secp256k1,
+                            value: publicKey,
+                          },
+                          phoneNumber: params.phoneNumber,
+                          securityQuestion: params.securityQuestion,
+                        });
+                      }
+                      setVerifyButtonDisabledDoubleclick(false);
+                      navigation.navigate("onboarding4");
+                    } else {
+                      setVerifyButtonDisabledDoubleclick(false);
                     }
+                  } catch (e) {
+                    const error = e as Error;
                     setVerifyButtonDisabledDoubleclick(false);
-                    navigation.navigate("onboarding4");
-                  } else {
-                    setVerifyButtonDisabledDoubleclick(false);
+                    console.error(error);
+                    Alert.alert(
+                      "Error VerifyAndProceedButton (2)",
+                      error.message
+                    );
                   }
-                } catch (e) {
-                  const error = e as Error;
-                  setVerifyButtonDisabledDoubleclick(false);
-                  console.error(error);
-                  Alert.alert(
-                    "Error VerifyAndProceedButton (2)",
-                    error.message
-                  );
+                }}
+                disabled={
+                  verifyButtonDisabledDoubleclick
+                    ? verifyButtonDisabledDoubleclick
+                    : verifyButtonDisabled
                 }
-              }}
-              disabled={
-                verifyButtonDisabledDoubleclick
-                  ? verifyButtonDisabledDoubleclick
-                  : verifyButtonDisabled
-              }
-            />
+              />
+            </View>
           </View>
         </View>
       </SafeAreaView>

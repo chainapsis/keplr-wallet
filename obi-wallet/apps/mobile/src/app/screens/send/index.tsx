@@ -7,6 +7,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
 import { useMemo, useRef, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -101,6 +102,8 @@ export const SendScreen = observer(() => {
     },
   });
 
+  const intl = useIntl();
+
   return (
     <SafeAreaView
       style={{
@@ -123,7 +126,7 @@ export const SendScreen = observer(() => {
               fontWeight: "600",
             }}
           >
-            Send
+            <FormattedMessage id="send.send" defaultMessage="Send" />
           </Text>
         </View>
         <View
@@ -134,8 +137,11 @@ export const SendScreen = observer(() => {
           }}
         >
           <TextInput
-            label="to"
-            placeholder="Wallet Address"
+            label={intl.formatMessage({ id: "send.to", defaultMessage: "To" })}
+            placeholder={intl.formatMessage({
+              id: "send.walletaddress",
+              defaultMessage: "Wallet Address",
+            })}
             style={{ flex: 1 }}
             inputStyle={{
               borderTopRightRadius: 0,
@@ -176,8 +182,15 @@ export const SendScreen = observer(() => {
           </TouchableOpacity>
         </View>
         <View style={{ marginTop: 35 }}>
-          <Text style={{ color: "#787B9C", fontSize: 10, marginBottom: 12 }}>
-            AMOUNT
+          <Text
+            style={{
+              color: "#787B9C",
+              textTransform: "uppercase",
+              fontSize: 10,
+              marginBottom: 12,
+            }}
+          >
+            <FormattedMessage id="send.amount" defaultMessage="Amount" />
           </Text>
           <View
             style={{
@@ -263,7 +276,7 @@ export const SendScreen = observer(() => {
       </View>
       <Button
         flavor="blue"
-        label="Next"
+        label={intl.formatMessage({ id: "send.next", defaultMessage: "Next" })}
         disabled={!address || !amount || !selectedCoin}
         onPress={() => {
           openSignatureModal();
@@ -305,10 +318,16 @@ export const SendScreen = observer(() => {
               <Text
                 style={{ fontSize: 16, fontWeight: "600", color: "#f6f5ff" }}
               >
-                Denomination
+                <FormattedMessage
+                  id="send.denomination"
+                  defaultMessage="Denomination"
+                />
               </Text>
               <Text style={{ fontSize: 12, color: "#f6f5ff", opacity: 0.6 }}>
-                Select the coin you'd like to send
+                <FormattedMessage
+                  id="send.selectcoin"
+                  defaultMessage="Select the coin you'd like to send"
+                />
               </Text>
             </View>
             <TouchableOpacity onPress={() => triggerBottomSheet(false)}>
@@ -318,11 +337,25 @@ export const SendScreen = observer(() => {
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            <Text style={{ fontSize: 12, color: "#f6f5ff", opacity: 0.6 }}>
-              NAME
+            <Text
+              style={{
+                fontSize: 12,
+                color: "#f6f5ff",
+                opacity: 0.6,
+                textTransform: "uppercase",
+              }}
+            >
+              <FormattedMessage id="send.name" defaultMessage="Name" />
             </Text>
-            <Text style={{ fontSize: 12, color: "#f6f5ff", opacity: 0.6 }}>
-              HOLDINGS
+            <Text
+              style={{
+                fontSize: 12,
+                color: "#f6f5ff",
+                opacity: 0.6,
+                textTransform: "uppercase",
+              }}
+            >
+              <FormattedMessage id="send.holdings" defaultMessage="Holdings" />
             </Text>
           </View>
           <FlatList

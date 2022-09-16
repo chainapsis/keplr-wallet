@@ -13,7 +13,7 @@ import {
   createAuthzAminoConverters,
   createBankAminoConverters,
   createDistributionAminoConverters,
-  createFreegrantAminoConverters,
+  createFeegrantAminoConverters,
   createGovAminoConverters,
   createIbcAminoConverters,
   createStakingAminoConverters,
@@ -27,8 +27,15 @@ import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Modal, ModalProps, ScrollView, View } from "react-native";
-import { TouchableOpacity } from "react-native";
+import { FormattedMessage, useIntl } from "react-intl";
+import {
+  Alert,
+  Modal,
+  ModalProps,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import {
   SafeAreaView,
@@ -57,6 +64,7 @@ import {
 import { SendMagicSmsButton } from "../phone-number/send-magic-sms-button";
 import { VerifyAndProceedButton } from "../phone-number/verify-and-proceed-button";
 import ArrowUpIcon from "./assets/arrowUpIcon.svg";
+
 export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
   rawMessages: EncodeObject[];
@@ -72,14 +80,15 @@ enum tabs {
   data,
 }
 export const SignatureModal = observer<SignatureModalProps>(
-  ({
+  function SignatureModal({
     messages,
     rawMessages,
     multisig,
     onCancel,
     onConfirm,
     ...props
-  }: SignatureModalProps) => {
+  }: SignatureModalProps) {
+    const intl = useIntl();
     const client = useStargateClient();
     const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
     const safeArea = useSafeAreaInsets();
@@ -178,15 +187,28 @@ export const SignatureModal = observer<SignatureModalProps>(
     }
 
     const data: Key[] = [
-      ...getKey({ id: "biometrics", title: "Biometrics Signature" }),
-      ...getKey({ id: "phoneNumber", title: "Phone Number Signature" }),
+      ...getKey({
+        id: "biometrics",
+        title: intl.formatMessage({
+          id: "signature.modal.biometricsignature",
+          defaultMessage: "Biometrics Signature",
+        }),
+      }),
+      ...getKey({
+        id: "phoneNumber",
+        title: intl.formatMessage({
+          id: "signature.modal.phonesignature",
+          defaultMessage: "Phone Number Signature",
+        }),
+      }),
     ];
     const renderMSGs = (msgs: AminoMsg[]) => {
       if (msgs.length === 0) {
         return null;
       }
-      return msgs.map((msg) => (
+      return msgs.map((msg, index) => (
         <View
+          key={index}
           style={{
             height: 50,
             flexDirection: "row",
@@ -243,7 +265,7 @@ export const SignatureModal = observer<SignatureModalProps>(
             }}
           >
             <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
-              Confirm Transaction{" "}
+              Confirm Transaction
             </Text>
             <Text style={{ position: "absolute", right: 10, color: "white" }}>
               {numberOfSignatures}/2
@@ -309,7 +331,6 @@ export const SignatureModal = observer<SignatureModalProps>(
                       selectedTab === tabs.data ? "underline" : "none",
                   }}
                 >
-                  {" "}
                   DATA
                 </Text>
               </TouchableOpacity>
@@ -357,7 +378,10 @@ export const SignatureModal = observer<SignatureModalProps>(
             <View>
               <Button
                 flavor="blue"
-                label="Cancel"
+                label={intl.formatMessage({
+                  id: "signature.modal.cancel",
+                  defaultMessage: "Cancel",
+                })}
                 onPress={() => {
                   onCancel();
                 }}
@@ -365,7 +389,10 @@ export const SignatureModal = observer<SignatureModalProps>(
               <Button
                 disabled={!enoughSignatures}
                 flavor="green"
-                label="Confirm"
+                label={intl.formatMessage({
+                  id: "signature.modal.confirm",
+                  defaultMessage: "Confirm",
+                })}
                 style={{
                   marginVertical: 20,
                 }}
@@ -420,7 +447,7 @@ function createDefaultTypes(prefix: string): AminoConverters {
     ...createGovAminoConverters(),
     ...createStakingAminoConverters(prefix),
     ...createIbcAminoConverters(),
-    ...createFreegrantAminoConverters(),
+    ...createFeegrantAminoConverters(),
     ...createVestingAminoConverters(),
     ...createWasmAminoConverters(),
   };
@@ -549,6 +576,7 @@ const PhoneNumberBottomSheetContent =
   observer<PhoneNumberBottomSheetContentProps>(
     ({ payload, getMessage, onSuccess }) => {
       const { demoStore } = useStore();
+      const intl = useIntl();
       const { securityAnswer, setSecurityAnswer } = useSecurityQuestionInput();
 
       const [sentMessage, setSentMessage] = useState(false);
@@ -606,10 +634,16 @@ const PhoneNumberBottomSheetContent =
                   marginTop: 10,
                 }}
               >
-                Paste in the response you received.
+                <FormattedMessage
+                  id="signature.pasteresponse"
+                  defaultMessage="Paste in the response you received."
+                />
               </Text>
               <TextInput
-                placeholder="8-Digits SMS-Code"
+                placeholder={intl.formatMessage({
+                  id: "signature.smscodelabel",
+                  defaultMessage: "8-Digits SMS-Code",
+                })}
                 textContentType="oneTimeCode"
                 keyboardType="number-pad"
                 style={{ marginTop: 25 }}
@@ -627,11 +661,17 @@ const PhoneNumberBottomSheetContent =
                 <Text
                   style={{ color: "rgba(246, 245, 255, 0.6)", fontSize: 12 }}
                 >
-                  Didn’t receive a response?
+                  <FormattedMessage
+                    id="signature.noresponselabel"
+                    defaultMessage="Didn't receive a response?"
+                  />
                 </Text>
 
                 <InlineButton
-                  label="Resend"
+                  label={intl.formatMessage({
+                    id: "signature.sendagain",
+                    defaultMessage: "Resend",
+                  })}
                   onPress={async () => {
                     const message = await getMessage();
                     await sendSignatureTextMessage({
@@ -662,7 +702,10 @@ const PhoneNumberBottomSheetContent =
                   setVerifyButtonDisabledDoubleclick(false);
                   console.error(error);
                   Alert.alert(
-                    "Error VerifyAndProceedButton (1)",
+                    intl.formatMessage({
+                      id: "general.error",
+                      defaultMessage: "Error",
+                    }) + "VerifyAndProceedButton (1)",
                     error.message
                   );
                 }

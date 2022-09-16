@@ -12,7 +12,6 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
-import { SECURITY_QUESTIONS } from "../../../../config";
 import { IconButton } from "../../../button";
 import { useStargateClient } from "../../../clients";
 import { useStore } from "../../../stores";
@@ -49,7 +48,7 @@ const demoModeMultisig: Multisig = {
   phoneNumber: {
     address: "demo-phone-number",
     phoneNumber: "demo-phone-number",
-    securityQuestion: SECURITY_QUESTIONS[0].value,
+    securityQuestion: "birthplace",
     publicKey: {
       type: pubkeyType.secp256k1,
       value: "demo-phone-number",

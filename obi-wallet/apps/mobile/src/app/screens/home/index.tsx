@@ -14,6 +14,7 @@ import {
 import { ParamListBase } from "@react-navigation/native";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
+import { FormattedMessage, useIntl } from "react-intl";
 import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
@@ -49,6 +50,28 @@ export type TabNavigationProps = DrawerScreenProps<ParamListBase>;
 
 export function TabNavigation() {
   const Tab = createBottomTabNavigator();
+  const intl = useIntl();
+
+  const assets = intl.formatMessage({
+    id: "menu.assets",
+    defaultMessage: "Assets",
+  });
+  const apps = intl.formatMessage({
+    id: "menu.apps",
+    defaultMessage: "Apps",
+  });
+  const nfts = intl.formatMessage({
+    id: "menu.nfts",
+    defaultMessage: "NFTs",
+  });
+  const trade = intl.formatMessage({
+    id: "menu.trade",
+    defaultMessage: "Trade",
+  });
+  const settings = intl.formatMessage({
+    id: "menu.settings",
+    defaultMessage: "Settings",
+  });
 
   return (
     <Tab.Navigator
@@ -60,15 +83,15 @@ export function TabNavigation() {
             icon = faHome;
           }
           switch (route.name) {
-            case "Assets":
+            case assets:
               return !focused ? <AssetsIcon /> : <AssetsIconActive />;
-            case "Apps":
+            case apps:
               return !focused ? <AppsIcon /> : <AppsIconActive />;
-            case "NFTs":
+            case nfts:
               return !focused ? <NFTsIcon /> : <NFTsIconActive />;
-            case "Trade":
+            case trade:
               return !focused ? <TradeIcon /> : <TradeIconActive />;
-            case "Settings":
+            case settings:
               return !focused ? <SettingsIcon /> : <SettingsIconActive />;
             default:
               icon = faChevronLeft;
@@ -106,11 +129,11 @@ export function TabNavigation() {
         },
       })}
     >
-      <Tab.Screen name="Assets" component={Assets} />
-      <Tab.Screen name="NFTs" component={NFTs} />
-      <Tab.Screen name="Apps" component={DappExplorer} />
-      <Tab.Screen name="Trade" component={Trade} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name={assets} component={Assets} />
+      <Tab.Screen name={nfts} component={NFTs} />
+      <Tab.Screen name={apps} component={DappExplorer} />
+      <Tab.Screen name={trade} component={Trade} />
+      <Tab.Screen name={settings} component={SettingsScreen} />
     </Tab.Navigator>
   );
 }
@@ -162,7 +185,7 @@ const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
           textTransform: "uppercase",
         }}
       >
-        Networks
+        <FormattedMessage id="sidemenu.networks" defaultMessage="Networks" />
       </Text>
 
       {networks.map((network) => {
@@ -195,7 +218,10 @@ const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
           textTransform: "uppercase",
         }}
       >
-        More Coming Soon!
+        <FormattedMessage
+          id="sidemenu.morecomingsoon"
+          defaultMessage="More coming soon"
+        />
       </Text>
     </DrawerContentScrollView>
   );
