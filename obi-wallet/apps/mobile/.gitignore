@@ -5,4 +5,4 @@
 injected-provider.js
 
 # AppCenter config
-apps/mobile/android/app/src/main/assets/appcenter-config.json
+android/app/src/main/assets/appcenter-config.json
