@@ -82,8 +82,8 @@ export function PhoneInput({
   inputStyle?: StyleProp<TextStyle>;
   handlePhoneNumberCountryCode: (param: string) => void;
 }) {
-  const languageStore = useStore().languageStore;
-  const language = languageStore.currentLanguage.languagecode;
+  const { languageStore } = useStore();
+  const { currentLanguage } = languageStore;
 
   // possible Languages to add
   // "common","cym","deu","fra","hrv","ita","jpn","nld","por","rus","spa","svk","fin","zho","isr";
@@ -182,7 +182,7 @@ export function PhoneInput({
                     },
                     onClose: () => setVisible(false),
                     onOpen: () => setVisible(true),
-                    translation: dropdownLanguage(language),
+                    translation: dropdownLanguage(currentLanguage),
                   }}
                 />
               </View>

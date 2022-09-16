@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { Button } from "../../../button";
-import { LanguagePicker } from "../../../language-picker/languagepicker";
+import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
 import { DemoModeToggle } from "../../components/demo-mode-toggle";
 import { StackParamList } from "../stack";

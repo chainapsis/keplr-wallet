@@ -17,7 +17,7 @@ import { AppsStore } from "./apps";
 import { BalancesStore } from "./balances";
 import { ChainStore } from "./chain";
 import { DemoStore } from "./demo";
-import { LanguageStore } from "./languages";
+import { LanguageStore } from "./language";
 import { MultisigStore } from "./multisig";
 
 export class RootStore {
@@ -27,11 +27,21 @@ export class RootStore {
   public readonly chainSuggestStore: ChainSuggestStore;
   public readonly demoStore: DemoStore;
   public readonly interactionStore: InteractionStore;
+  public readonly languageStore: LanguageStore;
   public readonly multisigStore: MultisigStore;
   public readonly permissionStore: PermissionStore;
-  public readonly languageStore: LanguageStore;
 
-  constructor(defaultChain: Chain) {
+  constructor({
+    defaultChain,
+    deviceLanguage,
+    enabledLanguages,
+    defaultLanguage,
+  }: {
+    defaultChain: Chain;
+    deviceLanguage: string;
+    enabledLanguages: string[];
+    defaultLanguage: string;
+  }) {
     const router = new RouterUi(produceEnv);
     ObservableQueryBase.experimentalDeferInitialQueryController =
       new DeferInitialQueryController();
@@ -53,13 +63,18 @@ export class RootStore {
 
     this.appsStore = new AppsStore(new KVStore("apps-store"));
     this.demoStore = new DemoStore();
+    this.languageStore = new LanguageStore({
+      deviceLanguage,
+      enabledLanguages,
+      defaultLanguage,
+      kvStore: new KVStore("language-store"),
+    });
     this.multisigStore = new MultisigStore(
       defaultChain,
       new KVStore("multisig-store")
     );
 
     this.balancesStore = new BalancesStore(this.multisigStore);
-    this.languageStore = new LanguageStore(new KVStore("language-store"));
 
     router.listen(APP_PORT);
   }

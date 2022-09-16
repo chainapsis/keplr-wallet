@@ -4,9 +4,8 @@ import { createIntl, createIntlCache } from "react-intl";
 import { useStore } from "../../app/stores";
 
 export const GetCurrentLanguageStore = () => {
-  const languageStore = useStore().languageStore;
-  const language = languageStore.currentLanguage.languagecode;
-  return language;
+  const { languageStore } = useStore();
+  return languageStore.currentLanguage;
 };
 
 export const IntlCache = () => {

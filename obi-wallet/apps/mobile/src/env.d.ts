@@ -10,6 +10,9 @@ declare module "react-native-dotenv" {
   export const ENABLED_CHAINS: string;
   export const DEFAULT_CHAIN: Chain;
 
+  export const ENABLED_LANGUAGES: string;
+  export const DEFAULT_LANGUAGE: string;
+
   export const APP_CENTER_SECRET: string;
   export const APP_CENTER_DEPLOYMENT_KEY_STAGING: string;
   export const APP_CENTER_DEPLOYMENT_KEY_PRODUCTION: string;

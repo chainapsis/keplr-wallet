@@ -20,7 +20,7 @@ import { StoreContext } from "./stores";
 
 export const App = observer(() => {
   const { languageStore } = rootStore;
-  const language = languageStore.currentLanguage.languagecode;
+  const { currentLanguage } = languageStore;
   const [updating, setUpdating] = useState(false);
   const appState = useRef(AppState.currentState);
   const lastUpdate = useRef(0);
@@ -60,8 +60,8 @@ export const App = observer(() => {
     <StoreContext.Provider value={rootStore}>
       <IntlProvider
         defaultLocale="en"
-        locale={language}
-        messages={messages[language]}
+        locale={currentLanguage}
+        messages={messages[currentLanguage]}
         formats={{
           date: {
             en: {
