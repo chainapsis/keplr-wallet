@@ -519,12 +519,22 @@ export function useSignatureModalProps({
 
         const address = multisig.multisig.address;
 
+        const feeAmount = 6000;
         const fee = {
-          amount: coins(6000, denom),
+          amount: coins(feeAmount, denom),
           gas: "200000",
         };
 
         if (!(await client.getAccount(address))) {
+          await lendFees({ chainId, address });
+        }
+
+        async function hasEnoughForFees() {
+          const balance = await client?.getBalance(address, denom);
+          return balance && parseInt(balance.amount, 10) >= feeAmount;
+        }
+
+        while (!(await hasEnoughForFees())) {
           await lendFees({ chainId, address });
         }
 
