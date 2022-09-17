@@ -1092,9 +1092,9 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
         gasPriceStep: {
-          low: 0,
-          average: 0.025,
-          high: 0.04,
+          low: 0.05,
+          average: 0.06,
+          high: 0.1,
         },
       },
     ],
