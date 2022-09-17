@@ -7,6 +7,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getBiometricsPublicKey } from "../../../biometrics";
@@ -65,10 +66,13 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <Background />
-        <View
+        <KeyboardAwareScrollView
           style={{
             flex: 1,
             paddingHorizontal: 20,
+          }}
+          contentContainerStyle={{
+            flexGrow: 1,
             justifyContent: "space-between",
           }}
         >
@@ -182,9 +186,9 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
               }
             }}
             disabled={buttonDisabledDoubleclick}
-            style={{ marginBottom: 20 }}
+            style={{ marginBottom: 20, marginTop: 20 }}
           />
-        </View>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
     );
   }

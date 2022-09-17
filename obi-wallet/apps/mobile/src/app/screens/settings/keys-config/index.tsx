@@ -236,6 +236,34 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
 
   const intl = useIntl();
 
+  const getModalText = (string: string) => {
+    switch (string) {
+      case "phoneNumber":
+        return (
+          <FormattedMessage
+            id="settings.multisig.modal.phone.text"
+            defaultMessage="This key can authorize messages via SMS or WhatsApp messages sent directly to your phone number."
+          />
+        );
+      case "biometrics":
+        return (
+          <FormattedMessage
+            id="settings.multisig.modal.biometrics.text"
+            defaultMessage="This key is held on your device, in a secure element or secure keychain."
+          />
+        );
+      case "social":
+        return (
+          <FormattedMessage
+            id="settings.multisig.modal.social.text"
+            defaultMessage="This key belongs to a trusted contact or to Obi and can help you recover your account. It cannot access your account on its own."
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <View
       style={{
@@ -297,8 +325,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           {title}
         </Text>
         <Text style={{ color: "rgba(246, 245, 255, 0.6)" }}>
-          Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet
-          sint. Velit officia consequat duis enim velit mollit.{" "}
+          {getModalText(item.id)}
         </Text>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center" }}>

@@ -162,10 +162,13 @@
   "onboarding2.securityquestion.firstcar": "What was the make of your first car?",
   "onboarding2.securityquestion.firstkiss": "What is the full name of my first kiss?",
 
-  "settings.multisig.modal.info": "In case of stolen/lost or any other reason, you can replace this key with a new one",
+  "settings.multisig.modal.info": "In case this key is stolen/lost or any other reason, you can replace this key with a new one",
   "settings.multisig.modal.notnow": "Not now",
   "settings.multisig.modal.replacenow": "Replace now",
   "settings.multisig.modal.replacementerror": "Replacement of keys has not been implemented yet.",
+  "settings.multisig.modal.phone.text" : "This key can authorize messages via SMS or WhatsApp messages sent directly to your phone number.",
+  "settings.multisig.modal.biometrics.text" : "This key is held on your device, in a secure element or secure keychain.",
+  "settings.multisig.modal.social.text" : "This key belongs to a trusted contact or to Obi and can help you recover your account. It cannot access your account on its own.",
 
   "demo.demomode": "Demo Mode",
   "demo.enter": "Enter Demo Mode",

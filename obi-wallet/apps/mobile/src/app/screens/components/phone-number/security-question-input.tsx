@@ -6,7 +6,6 @@ import { TextInputProps, View } from "react-native";
 import { useSecurityQuestions } from "../../../../config";
 import { DropDownPicker } from "../../../drop-down-picker";
 import { TextInput } from "../../../text-input";
-
 export type SetStateCallback<S> = (prevState: S) => S;
 export type OnSecurityQuestionChange = Dispatch<SetStateCallback<string>>;
 
@@ -69,6 +68,11 @@ export function SecurityQuestionInput({
         setValue={onSecurityQuestionChange}
         setItems={setSecurityQuestions}
         listMode="SCROLLVIEW"
+        scrollViewProps={{
+          persistentScrollbar: true,
+          showsVerticalScrollIndicator: true,
+          indicatorStyle: "white",
+        }}
       />
 
       <TextInput
