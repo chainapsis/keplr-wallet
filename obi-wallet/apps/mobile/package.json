@@ -42,7 +42,7 @@
     "process": "*",
     "react": "*",
     "react-intl": "*",
-    "react-native": "*",
+    "react-native": "0.70.1",
     "react-native-asset": "*",
     "react-native-code-push": "*",
     "react-native-config": "*",
