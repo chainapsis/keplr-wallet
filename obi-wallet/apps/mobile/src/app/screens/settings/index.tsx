@@ -171,24 +171,24 @@ export const SettingsScreen = observer(() => {
             alignItems: "center",
           }}
         >
+          {/*<Text*/}
+          {/*  onPress={() => {*/}
+          {/*    navigation.navigate("AddSubAccount");*/}
+          {/*  }}*/}
+          {/*  style={{*/}
+          {/*    color: "#F6F5FF",*/}
+          {/*    paddingRight: 10,*/}
+          {/*    fontSize: 10,*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <FormattedMessage*/}
+          {/*    id="settings.terms"*/}
+          {/*    defaultMessage="Terms of Service"*/}
+          {/*  />*/}
+          {/*</Text>*/}
           <Text
             onPress={() => {
-              navigation.navigate("AddSubAccount");
-            }}
-            style={{
-              color: "#F6F5FF",
-              paddingRight: 10,
-              fontSize: 10,
-            }}
-          >
-            <FormattedMessage
-              id="settings.terms"
-              defaultMessage="Terms of Service"
-            />
-          </Text>
-          <Text
-            onPress={() => {
-              navigation.navigate("AddSubAccount");
+              Linking.openURL("https://mail.loop.onl/privacy-policy/");
             }}
             style={{
               color: "#F6F5FF",

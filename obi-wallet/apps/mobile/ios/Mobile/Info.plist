@@ -55,7 +55,7 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>We need your permission to access FaceID</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Inter-Black.otf</string>
