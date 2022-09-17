@@ -29,7 +29,7 @@ export function SendMagicSmsButton({
             flex: 1,
             flexDirection: "row",
             alignItems: "center",
-            marginTop: 15
+            marginTop: 15,
           }}
         >
           <FontAwesomeIcon
