@@ -15,12 +15,12 @@ import { ParamListBase } from "@react-navigation/native";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Platform } from "react-native";
 import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { envInvariant } from "../../../helpers/invariant";
 import { useStore } from "../../stores";
-import { differentiateOS } from "../components/platform";
 import {
   getScreenDimensions,
   isSmallScreenNumber,
@@ -106,20 +106,20 @@ export function TabNavigation() {
           borderTopColor: "#1E1D33",
           borderTopWidth: 1,
           paddingTop: 20,
-          paddingBottom: differentiateOS(
-            isSmallScreenNumber(
+          paddingBottom: Platform.select({
+            ios: isSmallScreenNumber(
               getScreenDimensions().SCREEN_HEIGHT <= 667 ? 10 : 25,
               27
             ),
-            10 // Android
-          ),
-          height: differentiateOS(
-            isSmallScreenNumber(
+            android: 10,
+          }),
+          height: Platform.select({
+            ios: isSmallScreenNumber(
               getScreenDimensions().SCREEN_HEIGHT <= 667 ? 65 : 82,
               85
             ),
-            65 // Android
-          ),
+            android: 65,
+          }),
         },
         headerShown: false,
         tabBarHideOnKeyboard: true,

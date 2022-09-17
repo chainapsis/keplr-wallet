@@ -7,8 +7,14 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
 import { useMemo, useRef, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
-import { RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import { FormattedMessage, useIntl } from "react-intl";
+import {
+  Platform,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,7 +24,6 @@ import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
-import { differentiateOS } from "../components/platform";
 import { isSmallScreenNumber } from "../components/screen-size";
 import {
   SignatureModal,
@@ -112,10 +117,10 @@ export const SendScreen = observer(() => {
         backgroundColor: "rgba(9, 8, 23, 1);",
         flex: 1,
         paddingHorizontal: 20,
-        paddingVertical: differentiateOS(
-          isSmallScreenNumber(20, 20),
-          isSmallScreenNumber(30, 30)
-        ),
+        paddingVertical: Platform.select({
+          ios: isSmallScreenNumber(20, 20),
+          android: isSmallScreenNumber(30, 30),
+        }),
         justifyContent: "space-between",
       }}
     >
