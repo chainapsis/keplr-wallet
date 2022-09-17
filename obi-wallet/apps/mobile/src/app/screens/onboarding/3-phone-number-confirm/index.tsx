@@ -4,8 +4,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../button";
@@ -75,12 +76,12 @@ export function PhoneNumberConfirmOnboarding({
     >
       <SafeAreaView style={{ flex: 1 }}>
         <Background />
-        <View
+        <KeyboardAwareScrollView
           style={{
             flex: 1,
             paddingHorizontal: 20,
-            justifyContent: "space-between",
           }}
+          contentContainerStyle={{ flex: 1, justifyContent: "space-between" }}
         >
           <View>
             <IconButton
@@ -241,7 +242,7 @@ export function PhoneNumberConfirmOnboarding({
               }
             />
           </View>
-        </View>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
