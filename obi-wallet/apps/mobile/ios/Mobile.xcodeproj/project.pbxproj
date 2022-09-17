@@ -18,6 +18,7 @@
 		3172E4EBFFF0464CAAA52A75 /* Inter-SemiBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC5C08772CB34A178E0CC060 /* Inter-SemiBoldItalic.otf */; };
 		3F0E3BF8EB397D375C2E5907 /* libPods-Mobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D9E2FECF4009533A866D0976 /* libPods-Mobile.a */; };
 		4104162E3E0A475F97CBEA80 /* Inter-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = B7770FF7980441BDB51C2467 /* Inter-Black.otf */; };
+		4C1AB3009844426F94182758 /* injected-provider.js in Resources */ = {isa = PBXBuildFile; fileRef = 157852BF58F14686AD658A8A /* injected-provider.js */; };
 		4D927966D29047D0B9666A7B /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6044A1B7873C4546AA246BA7 /* Inter-SemiBold.otf */; };
 		55A3960BB602412DB7DE19BE /* Inter-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A087BE935E3B4C24AB794FDF /* Inter-BlackItalic.otf */; };
 		59450C9CC0D0454F96FE8E7B /* Inter-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = 12C016D9ED4E48D682FA4254 /* Inter-Thin.otf */; };
@@ -33,7 +34,6 @@
 		D8A1D42C331F41B48711FE1D /* Inter-ExtraLightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 56CE9CEBEC3D4063B1D8A558 /* Inter-ExtraLightItalic.otf */; };
 		FD6F33854E6EBFA68F4BCA35 /* libPods-Mobile-MobileTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 218518BC3AD8D69E6BC1EBAF /* libPods-Mobile-MobileTests.a */; };
 		FFDC1B34D45344DA95DD7AEF /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 30EABA9A32F74A62B3AB7975 /* Inter-Bold.otf */; };
-		854C3C9199464B1C919DA486 /* injected-provider.js in Resources */ = {isa = PBXBuildFile; fileRef = 95FDBBFEE4E24371BEB9365F /* injected-provider.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +57,7 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Mobile/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Mobile/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Mobile/main.m; sourceTree = "<group>"; };
+		157852BF58F14686AD658A8A /* injected-provider.js */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "injected-provider.js"; path = "../../../libs/injected-provider/dist/injected-provider.js"; sourceTree = "<group>"; };
 		218518BC3AD8D69E6BC1EBAF /* libPods-Mobile-MobileTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Mobile-MobileTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		23BF4C395842443C9CF60A93 /* Inter-MediumItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-MediumItalic.otf"; path = "../src/assets/fonts/Inter/Inter-MediumItalic.otf"; sourceTree = "<group>"; };
 		2504730789F84B3AA9AC712C /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.otf"; path = "../src/assets/fonts/Inter/Inter-ExtraBold.otf"; sourceTree = "<group>"; };
@@ -83,7 +84,6 @@
 		E4D101D19939DA0BB4996623 /* Pods-Mobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mobile.debug.xcconfig"; path = "Target Support Files/Pods-Mobile/Pods-Mobile.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FA78CC669352C60AEDCE53BF /* Pods-Mobile.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mobile.release.xcconfig"; path = "Target Support Files/Pods-Mobile/Pods-Mobile.release.xcconfig"; sourceTree = "<group>"; };
-		95FDBBFEE4E24371BEB9365F /* injected-provider.js */ = {isa = PBXFileReference; name = "injected-provider.js"; path = "../../../libs/injected-provider/dist/injected-provider.js"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,7 +201,7 @@
 				12C016D9ED4E48D682FA4254 /* Inter-Thin.otf */,
 				2E6B03DF32BB4E399D5DBEC7 /* Inter-ThinItalic.otf */,
 				5A28D3B1B1EE40CE8A014383 /* Inter-V.ttf */,
-				95FDBBFEE4E24371BEB9365F /* injected-provider.js */,
+				157852BF58F14686AD658A8A /* injected-provider.js */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -332,7 +332,7 @@
 				59450C9CC0D0454F96FE8E7B /* Inter-Thin.otf in Resources */,
 				A04C948A9C5945D181D9717E /* Inter-ThinItalic.otf in Resources */,
 				13C45F4EF0D142F8AC3F680C /* Inter-V.ttf in Resources */,
-				854C3C9199464B1C919DA486 /* injected-provider.js in Resources */,
+				4C1AB3009844426F94182758 /* injected-provider.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -572,7 +572,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = UV3Z6BTTHA;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Mobile/Info.plist;
@@ -580,7 +580,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.2.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -600,14 +600,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = UV3Z6BTTHA;
 				INFOPLIST_FILE = Mobile/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.2.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

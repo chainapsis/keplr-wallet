@@ -275,8 +275,9 @@
   "input.amount.error.is-negative": "양수여야 합니다",
   "input.amount.error.insufficient": "자산이 부족합니다",
   "input.fee.error.insufficient": "수수료를 낼 충분한 잔고가 없습니다",
-  "input.fee.toggle.set-gas": "가스 설정",
+  "input.fee.toggle.set-gas": "고급",
   "input.fee.toggle.set-gas.close": "닫기",
+  "input.fee.selector.fee-currency": "수수료 토큰",
 
   "confirm.yes": "예",
   "confirm.no": "아니요",

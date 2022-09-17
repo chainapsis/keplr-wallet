@@ -25,6 +25,11 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
     makeObservable(this);
   }
 
+  protected canFetch(): boolean {
+    // If bech32 address is empty, it will always fail, so don't need to fetch it.
+    return this.bech32Address.length > 0;
+  }
+
   @computed
   get sequence(): string {
     if (!this.response) {

@@ -1,10 +1,4 @@
-import {
-  ChainGetter,
-  IQueriesStore,
-  CosmosQueriesImpl,
-  IAccountStore,
-  MsgOpt,
-} from "@keplr-wallet/stores";
+import { ChainGetter, IAccountStore, MsgOpt } from "@keplr-wallet/stores";
 
 import { useFeeConfig } from "./fee";
 import { GasConfig } from "./gas";
@@ -13,6 +7,7 @@ import { useRecipientConfig } from "./recipient";
 import { useStakedAmountConfig } from "./staked-amount";
 import { makeObservable, override } from "mobx";
 import { useState } from "react";
+import { QueriesStore } from "./internal";
 
 export class UndelegateGasConfig extends GasConfig {
   constructor(
@@ -64,9 +59,7 @@ export const useUndelegateGasConfig = (
 
 export const useUndelegateTxConfig = (
   chainGetter: ChainGetter,
-  queriesStore: IQueriesStore<{
-    cosmos: Pick<CosmosQueriesImpl, "queryDelegations">;
-  }>,
+  queriesStore: QueriesStore,
   accountStore: IAccountStore<{
     cosmos: {
       readonly msgOpts: {

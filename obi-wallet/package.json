@@ -1,6 +1,6 @@
 {
   "name": "obi-wallet",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -57,7 +57,7 @@
     "appcenter-analytics": "^4.4.5",
     "appcenter-crashes": "^4.4.5",
     "asyncstorage-down": "^4.2.0",
-    "axios": "^0.21.4",
+    "axios": "^0.27.2",
     "bech32": "^1.1.4",
     "bip32": "^2.0.6",
     "bip39": "^3.0.3",
