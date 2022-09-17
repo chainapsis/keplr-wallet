@@ -6,6 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useStore } from "../../stores";
 import { Back } from "../components/back";
+import { differentiateOS } from "../components/platform";
+import { isSmallScreenNumber } from "../components/screen-size";
 
 export const ReceiveScreen = observer(() => {
   const { demoStore, multisigStore } = useStore();
@@ -41,6 +43,10 @@ export const ReceiveScreen = observer(() => {
         backgroundColor: "rgba(9, 8, 23, 1);",
         flex: 1,
         paddingHorizontal: 20,
+        paddingVertical: differentiateOS(
+          isSmallScreenNumber(20, 20),
+          isSmallScreenNumber(30, 30)
+        ),
         justifyContent: "space-between",
       }}
     >

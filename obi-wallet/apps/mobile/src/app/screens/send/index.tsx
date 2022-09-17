@@ -18,6 +18,8 @@ import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
+import { differentiateOS } from "../components/platform";
+import { isSmallScreenNumber } from "../components/screen-size";
 import {
   SignatureModal,
   useSignatureModalProps,
@@ -110,6 +112,10 @@ export const SendScreen = observer(() => {
         backgroundColor: "rgba(9, 8, 23, 1);",
         flex: 1,
         paddingHorizontal: 20,
+        paddingVertical: differentiateOS(
+          isSmallScreenNumber(20, 20),
+          isSmallScreenNumber(30, 30)
+        ),
         justifyContent: "space-between",
       }}
     >

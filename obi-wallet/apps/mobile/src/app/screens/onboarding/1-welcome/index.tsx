@@ -15,6 +15,7 @@ import { Button } from "../../../button";
 import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
 import { DemoModeToggle } from "../../components/demo-mode-toggle";
+import { differentiateOS } from "../../components/platform";
 import { StackParamList } from "../stack";
 import GetStarted from "./assets/get-started.svg";
 import RecoverWallet from "./assets/recover-wallet.svg";
@@ -45,13 +46,20 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
             justifyContent: "flex-end",
           }}
         >
-          <View style={{ position: "absolute", top: 20, left: 20 }}>
+          <View
+            style={{
+              position: "absolute",
+              top: 20,
+              left: 20,
+            }}
+          >
             <LanguagePicker />
           </View>
 
           <View
             style={{
               paddingHorizontal: 20,
+              paddingBottom: 20,
             }}
           >
             <DemoModeToggle>
@@ -96,8 +104,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
               })}
             />
             <Button
-              // TODO: i18n
-              label="Enter Demo Mode"
+              label={intl.formatMessage({ id: "demo.enter" })}
               RightIcon={GetStarted}
               flavor="green"
               style={{
@@ -106,10 +113,9 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
               onPress={action(() => {
                 demoStore.demoMode = true;
                 navigation.navigate("onboarding2");
-                // TODO: i18n
                 Alert.alert(
-                  "Demo Mode",
-                  "You have entered the app in demo mode. This allows you finish the onboarding process with any fake data."
+                  intl.formatMessage({ id: "demo.demomode" }),
+                  intl.formatMessage({ id: "demo.info" })
                 );
               })}
             />

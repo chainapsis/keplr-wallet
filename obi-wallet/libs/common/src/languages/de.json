@@ -83,9 +83,11 @@
   "onboarding3.noresponselabel": "Keine Antwort erhalten?",
   "onboarding3.sendagain": "Erneut senden",
   "onboarding3.verifyandproceed": "Verifizieren & Fortfahren",
+  "onboarding3.sendagain.info.counter": "Deine Magic SMS wurde erneut versandt! Gib ihr etwas Zeit um bei dir anzukommen. Du kannst es nochmal versuchen in",
+  "onboarding3.sendagain.info.checknumber": "Wenn du die SMS nicht erhalten hast, überprüfe ob deine Telefonnummer richtig richtig ist:",
 
   "onboarding4.authyourkeys": "Erstelle einen Biometrischen Key",
-  "onboarding4.authyourkeys.subtext": "Das Onboarding mit Obi erstellt einen Multi-Key Login, damit dein Account sicher und wiederherstellbar bleibt, ohne dass du dabei Seed Phrases benötigst., iCloud und Telefonnummer als Multi-Factor-Authentifizierung.",
+  "onboarding4.authyourkeys.subtext": "Das Onboarding mit Obi erstellt einen Multi-Key Login, damit dein Account sicher und wiederherstellbar bleibt, ohne dass du dabei Seed Phrases benötigst.",
   "onboarding4.biometrics.button": "Scanne Meine Biometrie",
 
   "onboarding4.error.biometrickeyexists.title": "Du hast bereits einen Biometrie-Key",
@@ -109,6 +111,13 @@
   "onboarding6.createmultisigwallet": "Multisig Wallet Erstellen",
   "onboarding6.loadingtext": "Wallet wird vorbereitet…",
 
+  "signature.modal.confirmtx": "Transaktion Bestätigen",
+  "signature.modal.txdetails": "Tx Details",
+  "signature.modal.data": "DATEN",
+  "signature.modal.createobiwallet": "Erstelle Obi Wallet",
+  "signature.modal.value": "Wert",
+  "signature.modal.signatures": "Signaturen",
+
   "signature.modal.biometricsignature": "Biometrischer Key",
   "signature.modal.phonesignature": "Telefonnummer Key",
   "signature.modal.cancel": "Abbrechen",
@@ -131,7 +140,7 @@
   "settings.privacy": "Datenschutzbestimmungen",
 
   "settings.multisig.title": "Multisig Verwalten",
-  "settings.multisig.subtitle": "Add/edit keys to improve security. Tap on any of the following",
+  "settings.multisig.subtitle": "Erhöhe deine Sicherheit, indem du die folgenden Punkte bearbeitest",
   "settings.multisig.risk.norisk": "Kein Sicherheitsrisiko",
   "settings.multisig.risk.low": "Niedriges Sicherheitsrisiko",
   "settings.multisig.risk.medium": "Mittleres Sicherheitsrisiko",
@@ -151,5 +160,14 @@
   "onboarding2.securityquestion.mothersmaidenname": "Was ist der Mädchenname deiner Mutter?",
   "onboarding2.securityquestion.nickname": "Welchen Nicknamen hattest du in deiner Kindheit?",
   "onboarding2.securityquestion.firstcar": "Von welcher Marke war dein erstes Auto?",
-  "onboarding2.securityquestion.firstkiss": "Welchen Namen hatte das Mädchen deines ersten Kusses?"
+  "onboarding2.securityquestion.firstkiss": "Welchen Namen hatte das Mädchen deines ersten Kusses?",
+
+  "settings.multisig.modal.info": "Im Falle von Diebstahl/Verlust oder jeglichem anderen Grund kannst du diesen Key mit einem Neuen ersetzen.",
+  "settings.multisig.modal.notnow": "Nicht jetzt",
+  "settings.multisig.modal.replacenow": "Jetzt ersetzen",
+  "settings.multisig.modal.replacementerror": "Das Ersetzen von Keys ist derzeit noch nicht implementiert.",
+
+  "demo.demomode": "Demo Modus",
+  "demo.enter": "Demo Modus Starten",
+  "demo.info": "Du hast die App im Demo-Modus gestarted. Das erlaubt dir den Onboarding-Prozess mit irgendwelchen Fake-Daten abzuschließen.",
 }

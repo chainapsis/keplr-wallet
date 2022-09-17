@@ -83,6 +83,8 @@
   "onboarding3.noresponselabel": "Didn't receive a response?",
   "onboarding3.sendagain": "Resend",
   "onboarding3.verifyandproceed": "Verify & Proceed",
+  "onboarding3.sendagain.info.counter": "Your Magic SMS has been resent! Give it some time to arrive. You can try again in",
+  "onboarding3.sendagain.info.checknumber": "If you haven't received the SMS please check if your phone number is correct:",
 
   "onboarding4.authyourkeys": "Create a Biometrics Key",
   "onboarding4.authyourkeys.subtext": "Onboarding with Obi creates a multi-key login to keep your account secure and recoverable without needing seed phrases.",
@@ -108,6 +110,13 @@
   "onboarding6.preparewallet": "Prepare Multisig Wallet",
   "onboarding6.createmultisigwallet": "Create Multisig Wallet",
   "onboarding6.loadingtext": "Preparing wallet…",
+
+  "signature.modal.confirmtx": "Confirm Transaction",
+  "signature.modal.txdetails": "Tx Details",
+  "signature.modal.data": "DATA",
+  "signature.modal.createobiwallet": "Create Obi Wallet",
+  "signature.modal.value": "Value",
+  "signature.modal.signatures": "Signatures",
 
   "signature.modal.biometricsignature": "Biometrics Key",
   "signature.modal.phonesignature": "Phone Number Key",
@@ -151,5 +160,14 @@
   "onboarding2.securityquestion.mothersmaidenname": "What is your mother's maiden name?",
   "onboarding2.securityquestion.nickname": "What was your childhood nickname?",
   "onboarding2.securityquestion.firstcar": "What was the make of your first car?",
-  "onboarding2.securityquestion.firstkiss": "What is the full name of my first kiss?"
+  "onboarding2.securityquestion.firstkiss": "What is the full name of my first kiss?",
+
+  "settings.multisig.modal.info": "In case of stolen/lost or any other reason, you can replace this key with a new one",
+  "settings.multisig.modal.notnow": "Not now",
+  "settings.multisig.modal.replacenow": "Replace now",
+  "settings.multisig.modal.replacementerror": "Replacement of keys has not been implemented yet.",
+
+  "demo.demomode": "Demo Mode",
+  "demo.enter": "Enter Demo Mode",
+  "demo.info": "You have entered the app in demo mode. This allows you finish the onboarding process with any fake data.",
 }

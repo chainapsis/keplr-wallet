@@ -169,6 +169,7 @@ export const SettingsScreen = observer(() => {
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
+            paddingBottom: 15,
           }}
         >
           {/*<Text*/}
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
     color: "#3D4661",
   },
   titlesContainer: {
-    paddingLeft: 10,
+    paddingHorizontal: 10,
   },
 });
 

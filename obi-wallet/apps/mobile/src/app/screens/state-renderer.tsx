@@ -23,11 +23,13 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
         <View
           style={{
             position: "absolute",
-            top: 40,
-            zIndex: 999,
-            display: "flex",
+            top: 20,
+            left: "40%",
+            right: "40%",
+            justifyContent: "center",
             alignItems: "center",
-            width: "100%",
+            borderRadius: 5,
+            zIndex: 999,
           }}
         >
           <Text

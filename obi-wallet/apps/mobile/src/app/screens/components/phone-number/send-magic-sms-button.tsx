@@ -24,20 +24,26 @@ export function SendMagicSmsButton({
   return (
     <View>
       {description ? (
-        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: 15
+          }}
+        >
           <FontAwesomeIcon
             icon={faInfoCircle}
             style={{
               color: "#7B87A8",
-              marginHorizontal: 5,
-              position: "absolute",
               margin: 5,
             }}
           />
+
           <Text
             style={{
               color: "#F6F5FF",
-              marginLeft: 30,
+              marginLeft: 10,
               opacity: 0.7,
               fontSize: 12,
             }}

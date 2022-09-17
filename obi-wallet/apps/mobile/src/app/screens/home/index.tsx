@@ -20,6 +20,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { envInvariant } from "../../../helpers/invariant";
 import { useStore } from "../../stores";
+import { differentiateOS } from "../components/platform";
 import {
   getScreenDimensions,
   isSmallScreenNumber,
@@ -104,9 +105,22 @@ export function TabNavigation() {
           backgroundColor: "#17162C",
           borderTopColor: "#1E1D33",
           borderTopWidth: 1,
-          paddingVertical: 20,
+          paddingTop: 20,
+          paddingBottom: differentiateOS(
+            isSmallScreenNumber(
+              getScreenDimensions().SCREEN_HEIGHT <= 667 ? 10 : 25,
+              27
+            ),
+            10 // Android
+          ),
+          height: differentiateOS(
+            isSmallScreenNumber(
+              getScreenDimensions().SCREEN_HEIGHT <= 667 ? 65 : 82,
+              85
+            ),
+            65 // Android
+          ),
         },
-
         headerShown: false,
         tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: "#F6F5FF",
@@ -116,7 +130,7 @@ export function TabNavigation() {
           fontSize: 10,
           fontWeight: "500",
           textTransform: "uppercase",
-          marginTop: 10,
+          marginTop: 15,
           letterSpacing: 0.6,
         },
       })}
@@ -158,6 +172,7 @@ const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
         style={{
           alignSelf: "flex-start",
           padding: 5,
+          marginTop: 10,
           marginLeft: 16,
           marginBottom: 30,
         }}

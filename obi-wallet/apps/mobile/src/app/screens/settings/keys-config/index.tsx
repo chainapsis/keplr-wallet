@@ -112,7 +112,12 @@ export const KeysConfigScreen = observer(() => {
 
   return (
     <SafeAreaView
-      style={{ backgroundColor: "#090817", flex: 1, paddingHorizontal: 16 }}
+      style={{
+        backgroundColor: "#090817",
+        flex: 1,
+        paddingHorizontal: 16,
+        paddingTop: 20,
+      }}
     >
       <View style={{ flex: 2 }}>
         <Back style={{ alignSelf: "flex-start" }} />
@@ -143,7 +148,25 @@ export const KeysConfigScreen = observer(() => {
           />
         </Text>
         <Text style={[styles.subHeading, { marginBottom: 0 }]}>
-          {data.length - activatedKeys} steps remaining
+          {data.length - activatedKeys}&nbsp;
+          {data.length - activatedKeys === 0 && (
+            <FormattedMessage
+              id="settings.multisig.risk.stepsremaining"
+              defaultMessage="steps remaining"
+            />
+          )}
+          {data.length - activatedKeys === 1 && (
+            <FormattedMessage
+              id="settings.multisig.risk.stepsremaining"
+              defaultMessage="steps remaining"
+            />
+          )}
+          {data.length - activatedKeys >= 1 && (
+            <FormattedMessage
+              id="settings.multisig.risk.stepsremaining"
+              defaultMessage="steps remaining"
+            />
+          )}
         </Text>
       </View>
       <View style={{ flex: 6 }}>
@@ -211,6 +234,8 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
 
   const safeArea = useSafeAreaInsets();
 
+  const intl = useIntl();
+
   return (
     <View
       style={{
@@ -248,7 +273,15 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
               fontWeight: "600",
             }}
           >
-            {!activated && "Not"} Active
+            {activated && (
+              <FormattedMessage id="general.active" defaultMessage="Active" />
+            )}
+            {!activated && (
+              <FormattedMessage
+                id="general.notactive"
+                defaultMessage="Not Active"
+              />
+            )}
           </Text>
         </View>
       </View>
@@ -268,23 +301,31 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           sint. Velit officia consequat duis enim velit mollit.{" "}
         </Text>
       </View>
-      <View style={{ flexDirection: "row" }}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
         <FontAwesomeIcon
           icon={faInfoCircle}
           style={{ color: "rgba(246, 245, 255, 0.6)", marginRight: 10 }}
         />
         <Text style={{ fontSize: 12, color: "rgba(246, 245, 255, 0.6)" }}>
-          In case of stolen/lost or any other reason, you can replace this key
-          with a new one
+          <FormattedMessage
+            id="settings.multisig.modal.info"
+            defaultMessage="In case of stolen/lost or any other reason, you can replace this key with a new one"
+          />
         </Text>
       </View>
       <View style={{ alignItems: "center" }}>
         <TouchableOpacity
           onPress={() => {
-            // TODO: i18n
             Alert.alert(
-              "Coming Soon",
-              "Replacement of keys has not been implemented yet."
+              intl.formatMessage({
+                id: "general.comingsoon",
+                defaultMessage: "Coming Soon",
+              }),
+              intl.formatMessage({
+                id: "settings.multisig.modal.replacementerror",
+                defaultMessage:
+                  "Replacement of keys has not been implemented yet.",
+              })
             );
           }}
           style={{
@@ -296,14 +337,24 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           }}
         >
           <Text style={{ fontSize: 15, fontWeight: "700" }}>
-            Replace {title} now
+            {/** ToDo: i18n - Building sentences dynamically is not feasible with translations, as the word-order is different in other languages. */}
+            {/** "Replace {title} now" ...not possible */}
+            <FormattedMessage
+              id="settings.multisig.modal.replacenow"
+              defaultMessage="Replace now"
+            />
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => onClose()}
           style={{ paddingVertical: 15, paddingHorizontal: 63 }}
         >
-          <Text style={{ color: "#787B9C" }}>Not now</Text>
+          <Text style={{ color: "#787B9C" }}>
+            <FormattedMessage
+              id="settings.multisig.modal.notnow"
+              defaultMessage="Not now"
+            />
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
