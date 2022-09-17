@@ -182,9 +182,10 @@ export function PhoneNumberConfirmOnboarding({
               >
                 <FormattedMessage
                   id="onboarding3.sendagain.info.counter"
-                  defaultMessage="Your Magic SMS has been resent! Give it some time to arrive. You can try again in"
+                  defaultMessage="Your Magic SMS has been resent! Give it some time to arrive. You can try again in "
                 />
-                {resendCounter} {resendCounter > 0 ? "seconds" : "second"}.
+                &nbsp;{resendCounter} {resendCounter > 0 ? "seconds" : "second"}
+                .
               </Text>
             )}
 
@@ -200,6 +201,7 @@ export function PhoneNumberConfirmOnboarding({
                   id="onboarding3.sendagain.info.checknumber"
                   defaultMessage="If you haven't received the SMS please check if your phone number is correct:"
                 />
+                &nbsp;
                 {params.phoneNumber}.
               </Text>
             )}
