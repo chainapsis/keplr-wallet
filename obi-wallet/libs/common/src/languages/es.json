@@ -83,6 +83,8 @@
   "onboarding3.noresponselabel": "¿No recibiste una respuesta?",
   "onboarding3.sendagain": "Reenviar",
   "onboarding3.verifyandproceed": "Verificar y Continuar",
+  "onboarding3.sendagain.info.counter": "Your Magic SMS has been resent! Give it some time to arrive. You can try again in",
+  "onboarding3.sendagain.info.checknumber": "If you haven't received the SMS please check if your phone number is correct:",
 
   "onboarding4.authyourkeys": "Crear una Clave Biométrica",
   "onboarding4.authyourkeys.subtext": "La integración con Obi crea un inicio de sesión de múltiples claves para mantener tu cuenta segura y recuperable sin necesidad de frases iniciales.",
@@ -108,6 +110,13 @@
   "onboarding6.preparewallet": "Preparar Billetera Multi-firma",
   "onboarding6.createmultisigwallet": "Crear Billetera Multi-firma",
   "onboarding6.loadingtext": "Preparando billetera…",
+
+  "signature.modal.confirmtx": "Confirm Transaction",
+  "signature.modal.txdetails": "Tx Details",
+  "signature.modal.data": "DATA",
+  "signature.modal.createobiwallet": "Create Obi Wallet",
+  "signature.modal.value": "Value",
+  "signature.modal.signatures": "Signatures",
 
   "signature.modal.biometricsignature": "Clave Biométrica",
   "signature.modal.phonesignature": "Clave de número de teléfono",
@@ -146,10 +155,20 @@
 
   "appscreen.kado": "Compra Cripto",
 
-  "onboarding2.securityquestion.birthplace": "What city were you born in?",
+  "onboarding2.securityquestion.birthplace": "What city and country were you born in?",
   "onboarding2.securityquestion.schoolname": "What is the full name of the last elementary/primary school I attended?",
-  "onboarding2.securityquestion.mothersmaidenname": "What is your mother's maiden name?",
-  "onboarding2.securityquestion.nickname": "What was your childhood nickname?",
-  "onboarding2.securityquestion.firstcar": "What was the make of your first car?",
-  "onboarding2.securityquestion.firstkiss": "What is the full name of my first kiss?"
+  "onboarding2.securityquestion.firstcar": "What was the make and model of your first car?",
+  "onboarding2.securityquestion.firstkiss": "What is the full name of my first kiss?",
+
+  "settings.multisig.modal.info": "In case this key is stolen/lost or any other reason, you can replace this key with a new one",
+  "settings.multisig.modal.notnow": "Not now",
+  "settings.multisig.modal.replacenow": "Replace now",
+  "settings.multisig.modal.replacementerror": "Replacement of keys has not been implemented yet.",
+  "settings.multisig.modal.phone.text": "This key can authorize messages via SMS or WhatsApp messages sent directly to your phone number.",
+  "settings.multisig.modal.biometrics.text": "This key is held on your device, in a secure element or secure keychain.",
+  "settings.multisig.modal.social.text": "This key belongs to a trusted contact or to Obi and can help you recover your account. It cannot access your account on its own.",
+
+  "demo.demomode": "Demo Mode",
+  "demo.enter": "Enter Demo Mode",
+  "demo.info": "You have entered the app in demo mode. This allows you finish the onboarding process with any fake data."
 }

@@ -223,10 +223,18 @@ export const SignatureModal = observer<SignatureModalProps>(
             style={{ flex: 1, justifyContent: "space-around", paddingLeft: 10 }}
           >
             <Text style={{ color: "white", fontWeight: "600", fontSize: 16 }}>
-              Create Obi Wallet
+              <FormattedMessage
+                id="signature.modal.createobiwallet"
+                defaultMessage="Create Obi Wallet"
+              />
               {/* {renderDirectMessage(msg)} */}
             </Text>
-            <Text style={{ color: "white", opacity: 0.6 }}>Value</Text>
+            <Text style={{ color: "white", opacity: 0.6 }}>
+              <FormattedMessage
+                id="signature.modal.value"
+                defaultMessage="Value"
+              />
+            </Text>
           </View>
         </View>
       ));
@@ -265,7 +273,10 @@ export const SignatureModal = observer<SignatureModalProps>(
             }}
           >
             <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
-              Confirm Transaction
+              <FormattedMessage
+                id="signature.modal.confirmtx"
+                defaultMessage="Confirm Transaction"
+              />
             </Text>
             <Text style={{ position: "absolute", right: 10, color: "white" }}>
               {numberOfSignatures}/2
@@ -331,7 +342,10 @@ export const SignatureModal = observer<SignatureModalProps>(
                       selectedTab === tabs.data ? "underline" : "none",
                   }}
                 >
-                  DATA
+                  <FormattedMessage
+                    id="signature.modal.data"
+                    defaultMessage="DATA"
+                  />
                 </Text>
               </TouchableOpacity>
             </View>
@@ -363,7 +377,11 @@ export const SignatureModal = observer<SignatureModalProps>(
                 )}
               </ScrollView>
               <Text style={{ color: "#ffffff" }}>
-                Signatures: {numberOfSignatures} /{" "}
+                <FormattedMessage
+                  id="signature.modal.signatures"
+                  defaultMessage="Signatures"
+                />
+                : {numberOfSignatures} /{" "}
                 {multisig?.multisig?.publicKey.value.threshold}
               </Text>
             </View>

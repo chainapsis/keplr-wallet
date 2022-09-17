@@ -7,7 +7,7 @@ export function useSecurityQuestions() {
     {
       label: intl.formatMessage({
         id: "onboarding2.securityquestion.birthplace",
-        defaultMessage: "What city were you born in?",
+        defaultMessage: "What city and country were you born in?",
       }),
       value: "birthplace",
     },
@@ -21,22 +21,8 @@ export function useSecurityQuestions() {
     },
     {
       label: intl.formatMessage({
-        id: "onboarding2.securityquestion.mothersmaidenname",
-        defaultMessage: "What is your mother's maiden name?",
-      }),
-      value: "mothersmaidenname",
-    },
-    {
-      label: intl.formatMessage({
-        id: "onboarding2.securityquestion.nickname",
-        defaultMessage: "What was your childhood nickname?",
-      }),
-      value: "nickname",
-    },
-    {
-      label: intl.formatMessage({
         id: "onboarding2.securityquestion.firstcar",
-        defaultMessage: "What was the make of your first car?",
+        defaultMessage: "What was the make and model of your first car?",
       }),
       value: "firstcar",
     },

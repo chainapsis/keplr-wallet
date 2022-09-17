@@ -15,6 +15,7 @@ import { ParamListBase } from "@react-navigation/native";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Platform } from "react-native";
 import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
@@ -104,9 +105,22 @@ export function TabNavigation() {
           backgroundColor: "#17162C",
           borderTopColor: "#1E1D33",
           borderTopWidth: 1,
-          paddingVertical: 20,
+          paddingTop: 20,
+          paddingBottom: Platform.select({
+            ios: isSmallScreenNumber(
+              getScreenDimensions().SCREEN_HEIGHT <= 667 ? 10 : 25,
+              27
+            ),
+            android: 10,
+          }),
+          height: Platform.select({
+            ios: isSmallScreenNumber(
+              getScreenDimensions().SCREEN_HEIGHT <= 667 ? 65 : 82,
+              85
+            ),
+            android: 65,
+          }),
         },
-
         headerShown: false,
         tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: "#F6F5FF",
@@ -116,7 +130,7 @@ export function TabNavigation() {
           fontSize: 10,
           fontWeight: "500",
           textTransform: "uppercase",
-          marginTop: 10,
+          marginTop: 15,
           letterSpacing: 0.6,
         },
       })}
@@ -158,6 +172,7 @@ const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
         style={{
           alignSelf: "flex-start",
           padding: 5,
+          marginTop: 10,
           marginLeft: 16,
           marginBottom: 30,
         }}

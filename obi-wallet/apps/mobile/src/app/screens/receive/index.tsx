@@ -1,11 +1,12 @@
 import { observer } from "mobx-react-lite";
 import { FormattedMessage } from "react-intl";
-import { Share, Text, TouchableOpacity, View } from "react-native";
+import { Platform, Share, Text, TouchableOpacity, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useStore } from "../../stores";
 import { Back } from "../components/back";
+import { isSmallScreenNumber } from "../components/screen-size";
 
 export const ReceiveScreen = observer(() => {
   const { demoStore, multisigStore } = useStore();
@@ -41,6 +42,10 @@ export const ReceiveScreen = observer(() => {
         backgroundColor: "rgba(9, 8, 23, 1);",
         flex: 1,
         paddingHorizontal: 20,
+        paddingVertical: Platform.select({
+          ios: isSmallScreenNumber(20, 20),
+          android: isSmallScreenNumber(30, 30),
+        }),
         justifyContent: "space-between",
       }}
     >

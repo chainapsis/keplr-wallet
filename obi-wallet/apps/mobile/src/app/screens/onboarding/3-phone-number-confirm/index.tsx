@@ -180,10 +180,12 @@ export function PhoneNumberConfirmOnboarding({
                   marginVertical: 10,
                 }}
               >
-                {/* TODO: i18n */}
-                Your Magic SMS has been resent! Give it some time to arrive. You
-                can try again in {resendCounter}{" "}
-                {resendCounter > 0 ? "seconds" : "second"}.
+                <FormattedMessage
+                  id="onboarding3.sendagain.info.counter"
+                  defaultMessage="Your Magic SMS has been resent! Give it some time to arrive. You can try again in "
+                />
+                &nbsp;{resendCounter} {resendCounter > 0 ? "seconds" : "second"}
+                .
               </Text>
             )}
 
@@ -195,9 +197,12 @@ export function PhoneNumberConfirmOnboarding({
                   marginVertical: 10,
                 }}
               >
-                {/* TODO: i18n */}
-                If you haven't received the SMS please check your phone number
-                for typing errors: {params.phoneNumber}.
+                <FormattedMessage
+                  id="onboarding3.sendagain.info.checknumber"
+                  defaultMessage="If you haven't received the SMS please check if your phone number is correct:"
+                />
+                &nbsp;
+                {params.phoneNumber}.
               </Text>
             )}
           </View>
