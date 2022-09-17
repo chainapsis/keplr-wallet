@@ -15,7 +15,6 @@ import { Button } from "../../../button";
 import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
 import { DemoModeToggle } from "../../components/demo-mode-toggle";
-import { differentiateOS } from "../../components/platform";
 import { StackParamList } from "../stack";
 import GetStarted from "./assets/get-started.svg";
 import RecoverWallet from "./assets/recover-wallet.svg";
