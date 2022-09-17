@@ -158,7 +158,7 @@ export const KeysConfigScreen = observer(() => {
           {data.length - activatedKeys === 1 && (
             <FormattedMessage
               id="settings.multisig.risk.stepsremaining"
-              defaultMessage="steps remaining"
+              defaultMessage="step remaining"
             />
           )}
           {data.length - activatedKeys >= 1 && (

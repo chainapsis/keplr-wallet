@@ -28,7 +28,6 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
             right: "40%",
             justifyContent: "center",
             alignItems: "center",
-            borderRadius: 5,
             zIndex: 999,
           }}
         >
