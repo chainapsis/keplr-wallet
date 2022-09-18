@@ -1,8 +1,17 @@
-import { Dimensions } from "react-native";
+import { Dimensions, Platform } from "react-native";
 
 export const getScreenDimensions = () => {
-  const SMALL_DEVICE_MAX_WIDTH = 375;
-  const SMALL_DEVICE_MAX_HEIGHT = 667;
+  let SMALL_DEVICE_MAX_WIDTH;
+  let SMALL_DEVICE_MAX_HEIGHT;
+
+  if (Platform.OS === "ios") {
+    SMALL_DEVICE_MAX_WIDTH = 375;
+    SMALL_DEVICE_MAX_HEIGHT = 667;
+  } else {
+    SMALL_DEVICE_MAX_WIDTH = 375;
+    SMALL_DEVICE_MAX_HEIGHT = 685;
+  }
+
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
     Dimensions.get("window");
 
@@ -20,7 +29,9 @@ export const isSmallScreenNumber = (
 ) => {
   if (
     getScreenDimensions().SCREEN_WIDTH <=
-    getScreenDimensions().SMALL_DEVICE_MAX_WIDTH
+      getScreenDimensions().SMALL_DEVICE_MAX_WIDTH ||
+    getScreenDimensions().SCREEN_HEIGHT <=
+      getScreenDimensions().SMALL_DEVICE_MAX_HEIGHT
   ) {
     return smallScreenValue;
   } else {
