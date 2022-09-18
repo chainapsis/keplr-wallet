@@ -1,10 +1,11 @@
-import { MultisigPhoneNumberOnboarding } from "./create-multisig/1-phone-number";
-import { PhoneNumberConfirmOnboarding } from "./create-multisig/2-phone-number-confirm";
-import { BiometricsOnboarding } from "./create-multisig/3-biometrics";
-import { SocialOnboarding } from "./create-multisig/4-social";
-import { MultisigOnboarding } from "./create-multisig/5-create";
+import { MultisigPhoneNumber } from "./create-multisig/1-phone-number";
+import { MultisigPhoneNumberConfirm } from "./create-multisig/2-phone-number-confirm";
+import { MultisigBiometrics } from "./create-multisig/3-biometrics";
+import { MultisigSocial } from "./create-multisig/4-social";
+import { MultisigInit } from "./create-multisig/5-init";
 import { OnboardingStack } from "./onboarding-stack";
-import { WelcomeOnboarding } from "./welcome";
+import { RecoverSinglesig } from "./recover-singlesig";
+import { Welcome } from "./welcome";
 
 export interface OnboardingScreensProps {
   initialRouteName?: string;
@@ -18,26 +19,30 @@ export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
       }}
       initialRouteName={initialRouteName}
     >
-      <OnboardingStack.Screen name="welcome" component={WelcomeOnboarding} />
+      <OnboardingStack.Screen name="welcome" component={Welcome} />
       <OnboardingStack.Screen
         name="create-multisig-phone-number"
-        component={MultisigPhoneNumberOnboarding}
+        component={MultisigPhoneNumber}
       />
       <OnboardingStack.Screen
         name="create-multisig-phone-number-confirm"
-        component={PhoneNumberConfirmOnboarding}
+        component={MultisigPhoneNumberConfirm}
       />
       <OnboardingStack.Screen
         name="create-multisig-biometrics"
-        component={BiometricsOnboarding}
+        component={MultisigBiometrics}
       />
       <OnboardingStack.Screen
         name="create-multisig-social"
-        component={SocialOnboarding}
+        component={MultisigSocial}
       />
       <OnboardingStack.Screen
         name="create-multisig-init"
-        component={MultisigOnboarding}
+        component={MultisigInit}
+      />
+      <OnboardingStack.Screen
+        name="recover-singlesig"
+        component={RecoverSinglesig}
       />
     </OnboardingStack.Navigator>
   );

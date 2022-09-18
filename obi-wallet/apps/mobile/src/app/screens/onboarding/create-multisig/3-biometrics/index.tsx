@@ -18,12 +18,12 @@ import { OnboardingStackParamList } from "../../onboarding-stack";
 import FaceScanner from "./assets/face-scanner.svg";
 import Scan from "./assets/scan.svg";
 
-export type BiometricsOnboardingProps = NativeStackScreenProps<
+export type MultisigBiometricsProps = NativeStackScreenProps<
   OnboardingStackParamList,
   "create-multisig-biometrics"
 >;
 
-export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
+export const MultisigBiometrics = observer<MultisigBiometricsProps>(
   ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
 

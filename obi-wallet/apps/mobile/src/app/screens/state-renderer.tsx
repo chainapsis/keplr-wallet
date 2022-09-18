@@ -16,6 +16,7 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
   const { demoStore, walletStore } = useStore();
+  console.log(walletStore.type);
 
   return (
     <>

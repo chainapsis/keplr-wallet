@@ -21,13 +21,13 @@ import {
 import { SendMagicSmsButton } from "../../../components/phone-number/send-magic-sms-button";
 import { OnboardingStackParamList } from "../../onboarding-stack";
 
-export type MultisigPhoneNumberOnboardingProps = NativeStackScreenProps<
+export type MultisigPhoneNumberProps = NativeStackScreenProps<
   OnboardingStackParamList,
   "create-multisig-phone-number"
 >;
 
-export const MultisigPhoneNumberOnboarding =
-  observer<MultisigPhoneNumberOnboardingProps>(({ navigation }) => {
+export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
+  ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
     const intl = useIntl();
 
@@ -324,4 +324,5 @@ export const MultisigPhoneNumberOnboarding =
         </KeyboardAwareScrollView>
       </SafeAreaView>
     );
-  });
+  }
+);

@@ -18,12 +18,12 @@ import { VerifyAndProceedButton } from "../../../components/phone-number/verify-
 import { OnboardingStackParamList } from "../../onboarding-stack";
 import PeopleIcon from "./assets/people-alt-twotone-24px.svg";
 
-export type SocialOnboardingProps = NativeStackScreenProps<
+export type MultisigSocialProps = NativeStackScreenProps<
   OnboardingStackParamList,
   "create-multisig-social"
 >;
 
-export const SocialOnboarding = observer<SocialOnboardingProps>(
+export const MultisigSocial = observer<MultisigSocialProps>(
   ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
     const [address, setAddress] = useState("");

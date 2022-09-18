@@ -13,111 +13,121 @@ import { InitialBackground } from "../../components/initial-background";
 import { OnboardingStackParamList } from "../onboarding-stack";
 import GetStarted from "./assets/get-started.svg";
 
-export type WelcomeOnboardingProps = NativeStackScreenProps<
+export type WelcomeProps = NativeStackScreenProps<
   OnboardingStackParamList,
   "welcome"
 >;
 
-export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
-  ({ navigation }) => {
-    const { demoStore } = useStore();
-    const intl = useIntl();
+export const Welcome = observer<WelcomeProps>(({ navigation }) => {
+  const { demoStore } = useStore();
+  const intl = useIntl();
 
-    return (
-      <InitialBackground>
-        <SafeAreaView
+  return (
+    <InitialBackground>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          justifyContent: "flex-end",
+        }}
+      >
+        <View
           style={{
-            flex: 1,
-            justifyContent: "flex-end",
+            position: "absolute",
+            top: 20,
+            left: 20,
           }}
         >
-          <View
-            style={{
-              position: "absolute",
-              top: 20,
-              left: 20,
-            }}
-          >
-            <LanguagePicker />
-          </View>
+          <LanguagePicker />
+        </View>
 
-          <View
+        <View
+          style={{
+            paddingHorizontal: 20,
+            paddingBottom: 20,
+          }}
+        >
+          <DemoModeToggle>
+            <Image source={require("./assets/loop.png")} />
+          </DemoModeToggle>
+          <Text
             style={{
-              paddingHorizontal: 20,
-              paddingBottom: 20,
+              color: "#F6F5FF",
+              fontSize: 32,
+              fontWeight: "600",
+              marginTop: 32,
             }}
           >
-            <DemoModeToggle>
-              <Image source={require("./assets/loop.png")} />
-            </DemoModeToggle>
-            <Text
-              style={{
-                color: "#F6F5FF",
-                fontSize: 32,
-                fontWeight: "600",
-                marginTop: 32,
-              }}
-            >
-              <FormattedMessage
-                id="onboarding1.welcometoloop"
-                defaultMessage="Welcome to Loop"
-              />
-            </Text>
-            <Text
-              style={{
-                color: "#999CB6",
-                fontSize: 16,
-                fontWeight: "400",
-                marginTop: 12,
-              }}
-            >
-              <FormattedMessage
-                id="onboarding1.welcomesubtext"
-                defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
-              />
-            </Text>
-            <Button
-              label={intl.formatMessage({ id: "onboarding1.getstarted" })}
-              RightIcon={GetStarted}
-              flavor="blue"
-              style={{
-                marginTop: 40,
-              }}
-              onPress={action(() => {
-                demoStore.demoMode = false;
-                navigation.navigate("create-multisig-phone-number");
-              })}
+            <FormattedMessage
+              id="onboarding1.welcometoloop"
+              defaultMessage="Welcome to Loop"
             />
-            <Button
-              label={intl.formatMessage({ id: "demo.enter" })}
-              RightIcon={GetStarted}
-              flavor="green"
-              style={{
-                marginTop: 20,
-              }}
-              onPress={action(() => {
-                demoStore.demoMode = true;
-                navigation.navigate("create-multisig-phone-number");
-                Alert.alert(
-                  intl.formatMessage({ id: "demo.demomode" }),
-                  intl.formatMessage({ id: "demo.info" })
-                );
-              })}
+          </Text>
+          <Text
+            style={{
+              color: "#999CB6",
+              fontSize: 16,
+              fontWeight: "400",
+              marginTop: 12,
+            }}
+          >
+            <FormattedMessage
+              id="onboarding1.welcomesubtext"
+              defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
             />
-            {/*<Button*/}
-            {/*  label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}*/}
-            {/*  LeftIcon={RecoverWallet}*/}
-            {/*  flavor="purple"*/}
-            {/*  style={{*/}
-            {/*    marginTop: 20,*/}
-            {/*  }}*/}
-            {/*  onPress={() => {*/}
-            {/*    navigation.navigate("onboarding2");*/}
-            {/*  }}*/}
-            {/*/>*/}
-          </View>
-        </SafeAreaView>
-      </InitialBackground>
-    );
-  }
-);
+          </Text>
+          <Button
+            label={intl.formatMessage({ id: "onboarding1.getstarted" })}
+            RightIcon={GetStarted}
+            flavor="blue"
+            style={{
+              marginTop: 40,
+            }}
+            onPress={action(() => {
+              demoStore.demoMode = false;
+              navigation.navigate("create-multisig-phone-number");
+            })}
+          />
+          <Button
+            label={intl.formatMessage({ id: "demo.enter" })}
+            RightIcon={GetStarted}
+            flavor="green"
+            style={{
+              marginTop: 20,
+            }}
+            onPress={action(() => {
+              demoStore.demoMode = true;
+              navigation.navigate("create-multisig-phone-number");
+              Alert.alert(
+                intl.formatMessage({ id: "demo.demomode" }),
+                intl.formatMessage({ id: "demo.info" })
+              );
+            })}
+          />
+          <Button
+            label="Recover Singlesig"
+            RightIcon={GetStarted}
+            flavor="blue"
+            style={{
+              marginTop: 20,
+            }}
+            onPress={action(() => {
+              demoStore.demoMode = false;
+              navigation.navigate("recover-singlesig");
+            })}
+          />
+          {/*<Button*/}
+          {/*  label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}*/}
+          {/*  LeftIcon={RecoverWallet}*/}
+          {/*  flavor="purple"*/}
+          {/*  style={{*/}
+          {/*    marginTop: 20,*/}
+          {/*  }}*/}
+          {/*  onPress={() => {*/}
+          {/*    navigation.navigate("onboarding2");*/}
+          {/*  }}*/}
+          {/*/>*/}
+        </View>
+      </SafeAreaView>
+    </InitialBackground>
+  );
+});
