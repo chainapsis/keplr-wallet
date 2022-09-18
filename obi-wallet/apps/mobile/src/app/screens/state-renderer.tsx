@@ -1,4 +1,4 @@
-import { MultisigState, Text } from "@obi-wallet/common";
+import { Text, WalletState } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { View } from "react-native";
@@ -7,6 +7,7 @@ import { StackParamList } from "../stack";
 import { useStore } from "../stores";
 import { HomeScreen } from "./home";
 import { OnboardingScreen } from "./onboarding";
+import { SplashScreen } from "./splash";
 
 export type StateRendererScreenProps = NativeStackScreenProps<
   StackParamList,
@@ -14,8 +15,7 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 >;
 
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
-  const { demoStore, multisigStore } = useStore();
-  const state = demoStore.demoMode ? demoStore.demoState : multisigStore.state;
+  const { demoStore, walletStore } = useStore();
 
   return (
     <>
@@ -45,19 +45,12 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
   );
 
   function getChildren() {
-    switch (state) {
-      case MultisigState.LOADING:
-        // TODO: show splash screen
-        return null;
-      case MultisigState.EMPTY:
+    switch (walletStore.state) {
+      case WalletState.LOADING:
+        return <SplashScreen />;
+      case WalletState.EMPTY:
         return <OnboardingScreen />;
-      case MultisigState.READY:
-        return <OnboardingScreen initialRouteName="onboarding6" />;
-      case MultisigState.OUTDATED:
-        // TODO: show a migration screen
-        console.log("Outdated proxy");
-        return null;
-      case MultisigState.INITIALIZED:
+      case WalletState.INITIALIZED:
         return <HomeScreen />;
     }
   }

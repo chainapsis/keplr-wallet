@@ -46,7 +46,7 @@ export interface Multisig {
 export type MultisigKey = keyof Omit<Multisig, "multisig">;
 
 export enum MultisigState {
-  LOADING = 0,
+  LOADING,
   EMPTY,
   READY,
   OUTDATED,

@@ -3,21 +3,15 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { FormattedMessage, useIntl } from "react-intl";
-import {
-  Alert,
-  Image,
-  ImageBackground,
-  SafeAreaView,
-  View,
-} from "react-native";
+import { Alert, Image, SafeAreaView, View } from "react-native";
 
 import { Button } from "../../../button";
 import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
 import { DemoModeToggle } from "../../components/demo-mode-toggle";
+import { InitialBackground } from "../../components/initial-background";
 import { StackParamList } from "../stack";
 import GetStarted from "./assets/get-started.svg";
-import RecoverWallet from "./assets/recover-wallet.svg";
 
 export type WelcomeOnboardingProps = NativeStackScreenProps<
   StackParamList,
@@ -30,15 +24,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
     const intl = useIntl();
 
     return (
-      <ImageBackground
-        source={require("./assets/background.png")}
-        resizeMode="cover"
-        imageStyle={{ height: 609 }}
-        style={{
-          backgroundColor: "#090817",
-          flex: 1,
-        }}
-      >
+      <InitialBackground>
         <SafeAreaView
           style={{
             flex: 1,
@@ -131,7 +117,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
             {/*/>*/}
           </View>
         </SafeAreaView>
-      </ImageBackground>
+      </InitialBackground>
     );
   }
 );

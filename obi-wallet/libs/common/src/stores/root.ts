@@ -19,6 +19,8 @@ import { ChainStore } from "./chain";
 import { DemoStore } from "./demo";
 import { LanguageStore } from "./language";
 import { MultisigStore } from "./multisig";
+import { SinglesigStore } from "./singlesig";
+import { WalletStore } from "./wallet";
 
 export class RootStore {
   public readonly appsStore: AppsStore;
@@ -29,7 +31,9 @@ export class RootStore {
   public readonly interactionStore: InteractionStore;
   public readonly languageStore: LanguageStore;
   public readonly multisigStore: MultisigStore;
+  public readonly singlesigStore: SinglesigStore;
   public readonly permissionStore: PermissionStore;
+  public readonly walletStore: WalletStore;
 
   constructor({
     defaultChain,
@@ -73,8 +77,14 @@ export class RootStore {
       defaultChain,
       new KVStore("multisig-store")
     );
+    this.singlesigStore = new SinglesigStore();
 
     this.balancesStore = new BalancesStore(this.multisigStore);
+    this.walletStore = new WalletStore({
+      demoStore: this.demoStore,
+      singlesigStore: this.singlesigStore,
+      multisigStore: this.multisigStore,
+    });
 
     router.listen(APP_PORT);
   }
