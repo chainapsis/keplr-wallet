@@ -12,24 +12,24 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
-import { IconButton } from "../../../button";
-import { useStargateClient } from "../../../clients";
-import { useStore } from "../../../stores";
-import { Background } from "../../components/background";
+import { IconButton } from "../../../../button";
+import { useStargateClient } from "../../../../clients";
+import { useStore } from "../../../../stores";
+import { Background } from "../../../components/background";
 import {
   SignatureModal,
   useSignatureModalProps,
-} from "../../components/signature-modal";
-import { StackParamList } from "../stack";
+} from "../../../components/signature-modal";
+import { OnboardingStackParamList } from "../../onboarding-stack";
 
 export type MultisigOnboardingProps = NativeStackScreenProps<
-  StackParamList,
-  "onboarding6"
+  OnboardingStackParamList,
+  "create-multisig-init"
 >;
 
 const demoModeMultisig: Multisig = {
   multisig: {
-    address: "demo-multisig",
+    address: "demo-create-multisig",
     publicKey: {
       type: pubkeyType.multisigThreshold,
       value: {

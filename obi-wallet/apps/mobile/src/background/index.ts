@@ -137,7 +137,7 @@ class KeyRingService extends AbstractKeyRingService {
   }
 
   async enable(env: Env): Promise<KeyRingStatus> {
-    // TODO: do something with multisig store?
+    // TODO: do something with create-multisig store?
     return KeyRingStatus.UNLOCKED;
   }
 
@@ -200,7 +200,7 @@ class KeyRingService extends AbstractKeyRingService {
   ): void {
     this.chainsService = chainsService;
     this.permissionService = permissionService;
-    this.kvStore = new KVStore("multisig-store");
+    this.kvStore = new KVStore("create-multisig-store");
 
     // TODO: permissionService
     // TODO: key ring

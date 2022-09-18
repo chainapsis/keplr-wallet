@@ -21,7 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ExtendedCoin, formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
-import { StackParamList } from "../../../stack";
+import { RootStackParamList } from "../../../root-stack";
 import { useStore } from "../../../stores";
 import {
   isSmallScreenNumber,
@@ -187,7 +187,7 @@ const BalanceAndActions = observer(() => {
     0
   );
 
-  const navigation = useNavigation<NavigationProp<StackParamList>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   return (
     <View
       style={{

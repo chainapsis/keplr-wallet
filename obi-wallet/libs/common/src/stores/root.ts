@@ -75,7 +75,7 @@ export class RootStore {
     });
     this.multisigStore = new MultisigStore(
       defaultChain,
-      new KVStore("multisig-store")
+      new KVStore("create-multisig-store")
     );
     this.singlesigStore = new SinglesigStore();
 

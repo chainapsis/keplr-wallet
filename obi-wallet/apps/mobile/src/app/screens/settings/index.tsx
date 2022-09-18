@@ -13,22 +13,21 @@ import codePush, { LocalPackage } from "react-native-code-push";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
+import { RootStack, useRootNavigation } from "../../root-stack";
 import { useStore } from "../../stores";
 import { Account } from "../account";
 import { Create } from "../account/create";
 import { DemoModeToggle } from "../components/demo-mode-toggle";
-import { useNavigation } from "../onboarding/stack";
 import MultiSigIcon from "./assets/edit.svg";
 import HelpAndSupport from "./assets/headset.svg";
 import ObiLogo from "./assets/obi-logo.svg";
 import LogoutIcon from "./assets/power-red.svg";
 import { KeysConfigScreen } from "./keys-config";
-import { Stack } from "./stack";
 
 export const SettingsScreen = observer(() => {
   const { demoStore, multisigStore } = useStore();
   const intl = useIntl();
-  const navigation = useNavigation();
+  const navigation = useRootNavigation();
   const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
   useEffect(() => {
     void (async () => {
@@ -296,19 +295,19 @@ export const SettingsNavigator = createNativeStackNavigator();
 
 // This can't be a React component because `Stack.Navigator` doesn't want that.
 export const settingsScreens = () => [
-  <Stack.Screen
+  <RootStack.Screen
     name="AccountsSettings"
     key="AccountsSettings"
     component={Account}
     options={{ headerShown: false }}
   />,
-  <Stack.Screen
+  <RootStack.Screen
     name="AddSubAccount"
     key="AddSubAccount"
     component={Create}
     options={{ headerShown: false }}
   />,
-  <Stack.Screen
+  <RootStack.Screen
     name="MultiSigSettings"
     key="MultiSigSettings"
     component={KeysConfigScreen}

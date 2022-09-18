@@ -3,14 +3,14 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { View } from "react-native";
 
-import { StackParamList } from "../stack";
+import { RootStackParamList } from "../root-stack";
 import { useStore } from "../stores";
 import { HomeScreen } from "./home";
 import { OnboardingScreen } from "./onboarding";
 import { SplashScreen } from "./splash";
 
 export type StateRendererScreenProps = NativeStackScreenProps<
-  StackParamList,
+  RootStackParamList,
   "state-renderer"
 >;
 

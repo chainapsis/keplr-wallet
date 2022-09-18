@@ -10,12 +10,12 @@ import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
 import { DemoModeToggle } from "../../components/demo-mode-toggle";
 import { InitialBackground } from "../../components/initial-background";
-import { StackParamList } from "../stack";
+import { OnboardingStackParamList } from "../onboarding-stack";
 import GetStarted from "./assets/get-started.svg";
 
 export type WelcomeOnboardingProps = NativeStackScreenProps<
-  StackParamList,
-  "onboarding1"
+  OnboardingStackParamList,
+  "welcome"
 >;
 
 export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
@@ -85,7 +85,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
               }}
               onPress={action(() => {
                 demoStore.demoMode = false;
-                navigation.navigate("onboarding2");
+                navigation.navigate("create-multisig-phone-number");
               })}
             />
             <Button
@@ -97,7 +97,7 @@ export const WelcomeOnboarding = observer<WelcomeOnboardingProps>(
               }}
               onPress={action(() => {
                 demoStore.demoMode = true;
-                navigation.navigate("onboarding2");
+                navigation.navigate("create-multisig-phone-number");
                 Alert.alert(
                   intl.formatMessage({ id: "demo.demomode" }),
                   intl.formatMessage({ id: "demo.info" })

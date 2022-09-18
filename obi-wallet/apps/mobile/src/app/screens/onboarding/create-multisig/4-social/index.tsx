@@ -8,19 +8,19 @@ import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { IconButton, InlineButton } from "../../../button";
-import { useStargateClient } from "../../../clients";
-import { useStore } from "../../../stores";
-import { TextInput } from "../../../text-input";
-import { Background } from "../../components/background";
-import { KeyboardAvoidingView } from "../../components/keyboard-avoiding-view";
-import { VerifyAndProceedButton } from "../../components/phone-number/verify-and-proceed-button";
-import { StackParamList } from "../stack";
+import { IconButton, InlineButton } from "../../../../button";
+import { useStargateClient } from "../../../../clients";
+import { useStore } from "../../../../stores";
+import { TextInput } from "../../../../text-input";
+import { Background } from "../../../components/background";
+import { KeyboardAvoidingView } from "../../../components/keyboard-avoiding-view";
+import { VerifyAndProceedButton } from "../../../components/phone-number/verify-and-proceed-button";
+import { OnboardingStackParamList } from "../../onboarding-stack";
 import PeopleIcon from "./assets/people-alt-twotone-24px.svg";
 
 export type SocialOnboardingProps = NativeStackScreenProps<
-  StackParamList,
-  "onboarding5"
+  OnboardingStackParamList,
+  "create-multisig-social"
 >;
 
 export const SocialOnboarding = observer<SocialOnboardingProps>(
@@ -53,7 +53,7 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                 id: "onboarding4.error.socialkeyexists.yes",
               }),
               onPress: () => {
-                navigation.navigate("onboarding6");
+                navigation.navigate("create-multisig-init");
               },
             },
           ]
@@ -181,7 +181,7 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                         publicKey: publicKey,
                       });
                     }
-                    navigation.navigate("onboarding6");
+                    navigation.navigate("create-multisig-init");
                   }
                 }}
               />

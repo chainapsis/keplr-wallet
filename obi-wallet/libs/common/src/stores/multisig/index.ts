@@ -92,10 +92,10 @@ export class MultisigStore {
       this.serializedCurrentAdmin = currentAdmin;
       this.proxyAddresses = proxyAddresses;
       void this.save();
-      void this.kvStore.set("multisig-backup", null);
+      void this.kvStore.set("create-multisig-backup", null);
     } else {
       const backupData = yield* toGenerator(
-        this.kvStore.get<unknown | undefined>("multisig-backup")
+        this.kvStore.get<unknown | undefined>("create-multisig-backup")
       );
 
       if (backupData) {
@@ -104,7 +104,7 @@ export class MultisigStore {
         );
       } else {
         // Backup invalid data so that we can recover it if necessary
-        yield* toGenerator(this.kvStore.set("multisig-backup", data));
+        yield* toGenerator(this.kvStore.set("create-multisig-backup", data));
       }
     }
 

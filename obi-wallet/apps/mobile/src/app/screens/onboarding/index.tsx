@@ -1,10 +1,10 @@
-import { WelcomeOnboarding } from "./1-welcome";
-import { PhoneNumberOnboarding } from "./2-phone-number";
-import { PhoneNumberConfirmOnboarding } from "./3-phone-number-confirm";
-import { BiometricsOnboarding } from "./4-biometrics";
-import { SocialOnboarding } from "./5-social";
-import { MultisigOnboarding } from "./6-multisig";
-import { Stack } from "./stack";
+import { MultisigPhoneNumberOnboarding } from "./create-multisig/1-phone-number";
+import { PhoneNumberConfirmOnboarding } from "./create-multisig/2-phone-number-confirm";
+import { BiometricsOnboarding } from "./create-multisig/3-biometrics";
+import { SocialOnboarding } from "./create-multisig/4-social";
+import { MultisigOnboarding } from "./create-multisig/5-create";
+import { OnboardingStack } from "./onboarding-stack";
+import { WelcomeOnboarding } from "./welcome";
 
 export interface OnboardingScreensProps {
   initialRouteName?: string;
@@ -12,21 +12,33 @@ export interface OnboardingScreensProps {
 
 export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
   return (
-    <Stack.Navigator
+    <OnboardingStack.Navigator
       screenOptions={{
         headerShown: false,
       }}
       initialRouteName={initialRouteName}
     >
-      <Stack.Screen name="onboarding1" component={WelcomeOnboarding} />
-      <Stack.Screen name="onboarding2" component={PhoneNumberOnboarding} />
-      <Stack.Screen
-        name="onboarding3"
+      <OnboardingStack.Screen name="welcome" component={WelcomeOnboarding} />
+      <OnboardingStack.Screen
+        name="create-multisig-phone-number"
+        component={MultisigPhoneNumberOnboarding}
+      />
+      <OnboardingStack.Screen
+        name="create-multisig-phone-number-confirm"
         component={PhoneNumberConfirmOnboarding}
       />
-      <Stack.Screen name="onboarding4" component={BiometricsOnboarding} />
-      <Stack.Screen name="onboarding5" component={SocialOnboarding} />
-      <Stack.Screen name="onboarding6" component={MultisigOnboarding} />
-    </Stack.Navigator>
+      <OnboardingStack.Screen
+        name="create-multisig-biometrics"
+        component={BiometricsOnboarding}
+      />
+      <OnboardingStack.Screen
+        name="create-multisig-social"
+        component={SocialOnboarding}
+      />
+      <OnboardingStack.Screen
+        name="create-multisig-init"
+        component={MultisigOnboarding}
+      />
+    </OnboardingStack.Navigator>
   );
 }

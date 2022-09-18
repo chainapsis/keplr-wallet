@@ -2,12 +2,12 @@ import { Home } from "@obi-wallet/common";
 import { SafeAreaView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useNavigation } from "../stack";
+import { useRootNavigation } from "../root-stack";
 import { useStore } from "../stores";
 
 export function DappExplorer() {
   const { appsStore, multisigStore } = useStore();
-  const navigation = useNavigation();
+  const navigation = useRootNavigation();
   const safeArea = useSafeAreaInsets();
 
   return (

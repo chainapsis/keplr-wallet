@@ -6,7 +6,11 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-export interface StackParamList extends ParamListBase {
+import { SettingsStackParamList } from "./screens/settings/settings-stack";
+
+export interface RootStackParamList
+  extends ParamListBase,
+    SettingsStackParamList {
   "state-renderer": undefined;
   "web-view": {
     app: App;
@@ -15,8 +19,8 @@ export interface StackParamList extends ParamListBase {
   receive: undefined;
 }
 
-export const Stack = createNativeStackNavigator<StackParamList>();
+export const RootStack = createNativeStackNavigator<RootStackParamList>();
 
-export function useNavigation() {
-  return useNavigationOriginal<NavigationProp<StackParamList>>();
+export function useRootNavigation() {
+  return useNavigationOriginal<NavigationProp<RootStackParamList>>();
 }
