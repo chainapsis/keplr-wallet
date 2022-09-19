@@ -15,7 +15,7 @@ const deviceLanguage =
     : NativeModules.I18nManager.localeIdentifier; // Android
 
 envInvariant("DEFAULT_CHAIN", DEFAULT_CHAIN);
-envInvariant("DEFAULT_LANGUAGES", DEFAULT_LANGUAGE);
+envInvariant("DEFAULT_LANGUAGE", DEFAULT_LANGUAGE);
 envInvariant("ENABLED_LANGUAGES", ENABLED_LANGUAGES);
 
 export const rootStore = new RootStore({
