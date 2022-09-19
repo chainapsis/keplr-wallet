@@ -2,8 +2,12 @@ import React, { FunctionComponent } from "react";
 
 import styleDescriptionView from "./description-view.module.scss";
 import { FormattedMessage } from "react-intl";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
 
-export const DescriptionView: FunctionComponent = () => {
+export const DescriptionView: FunctionComponent = observer(() => {
+  const { uiConfigStore } = useStore();
+
   return (
     <div className={styleDescriptionView.innerContainer}>
       <img
@@ -12,9 +16,12 @@ export const DescriptionView: FunctionComponent = () => {
         alt="lock"
       />
 
-      <p>
-        <FormattedMessage id="setting.autolock.description" />
-      </p>
+      {/* On firefox, idle api can't detect that device go sleep */}
+      {uiConfigStore.platform !== "firefox" ? (
+        <p>
+          <FormattedMessage id="setting.autolock.description" />
+        </p>
+      ) : null}
 
       {/* <p>
         <FormattedMessage id="setting.autolock.description.title" />
@@ -29,4 +36,4 @@ export const DescriptionView: FunctionComponent = () => {
       </b> */}
     </div>
   );
-};
+});

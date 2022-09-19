@@ -2,7 +2,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { HeaderLayout } from "../../../layouts";
 
 import { useHistory } from "react-router";
-import { observer } from "mobx-react-lite";
 import { Button, Form } from "reactstrap";
 import { DescriptionView } from "./description-view";
 
@@ -23,7 +22,7 @@ interface FormData {
   duration: string;
 }
 
-export const SettingAutoLockPage: FunctionComponent = observer(() => {
+export const SettingAutoLockPage: FunctionComponent = () => {
   const history = useHistory();
   const intl = useIntl();
 
@@ -110,4 +109,4 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
       </div>
     </HeaderLayout>
   );
-});
+};
