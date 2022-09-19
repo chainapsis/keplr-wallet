@@ -6,7 +6,7 @@ import { useRootNavigation } from "../root-stack";
 import { useStore } from "../stores";
 
 export function DappExplorer() {
-  const { appsStore, multisigStore } = useStore();
+  const { appsStore, walletStore } = useStore();
   const navigation = useRootNavigation();
   const safeArea = useSafeAreaInsets();
 
@@ -14,7 +14,7 @@ export function DappExplorer() {
     <SafeAreaView style={{ backgroundColor: "#090817", flex: 1 }}>
       <Home
         appsStore={appsStore}
-        multisigStore={multisigStore}
+        walletStore={walletStore}
         onAppPress={(app) => {
           navigation.navigate("web-view", {
             app,
