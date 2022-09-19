@@ -97,6 +97,8 @@ export class AutoLockAccountService {
     }
 
     this.autoLockTimer = setTimeout(() => {
+      this.stopAppStateCheckTimer();
+      this.stopAutoLockTimer();
       this.lock();
     }, this.autoLockDuration);
   }
