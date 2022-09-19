@@ -13,11 +13,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../../button";
-import { useStargateClient } from "../../../../clients";
 import { useStore } from "../../../../stores";
 import { Background } from "../../../components/background";
 import {
-  SignatureModal,
+  SignatureModalMultisig,
   useSignatureModalProps,
 } from "../../../components/signature-modal";
 import { OnboardingStackParamList } from "../../onboarding-stack";
@@ -71,38 +70,6 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
   const multisig = demoStore.demoMode
     ? demoModeMultisig
     : multisigStore.nextAdmin;
-
-  const client = useStargateClient();
-
-  useEffect(() => {
-    if (demoStore.demoMode) return;
-
-    (async () => {
-      async function hydrateBalances(address?: string | null) {
-        if (address && client) {
-          return { address, balances: await client.getAllBalances(address) };
-        } else {
-          return null;
-        }
-      }
-
-      const balances = {
-        multisig: await hydrateBalances(multisig.multisig?.address),
-        biometrics: await hydrateBalances(multisig.biometrics?.address),
-        phoneNumber: await hydrateBalances(multisig.phoneNumber?.address),
-      };
-
-      console.log("-- BALANCE MULTISIG", balances.multisig);
-      console.log("-- BALANCE BIOMETRICS", balances.biometrics);
-      console.log("-- BALANCE PHONE NUMBER", balances.phoneNumber);
-    })();
-  }, [
-    client,
-    demoStore,
-    multisig.biometrics?.address,
-    multisig.multisig?.address,
-    multisig.phoneNumber?.address,
-  ]);
 
   const encodeObjects = useMemo(() => {
     if (!multisig.multisig?.address) return [];
@@ -185,7 +152,7 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <SignatureModal {...signatureModalProps} />
+      <SignatureModalMultisig {...signatureModalProps} />
       <Background />
 
       <View

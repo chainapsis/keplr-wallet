@@ -1,4 +1,10 @@
-import { AminoMsg, coins, serializeSignDoc, StdSignDoc } from "@cosmjs/amino";
+import {
+  AminoMsg,
+  coins,
+  Secp256k1Wallet,
+  serializeSignDoc,
+  StdSignDoc,
+} from "@cosmjs/amino";
 import { createWasmAminoConverters } from "@cosmjs/cosmwasm-stargate";
 import { wasmTypes } from "@cosmjs/cosmwasm-stargate/build/modules";
 import { Sha256 } from "@cosmjs/crypto/build/sha";
@@ -23,7 +29,7 @@ import {
 } from "@cosmjs/stargate";
 import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
-import { Multisig, MultisigKey, Text } from "@obi-wallet/common";
+import { Multisig, MultisigKey, Text, WalletType } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -45,7 +51,10 @@ import invariant from "tiny-invariant";
 
 import { createBiometricSignature } from "../../../biometrics";
 import { Button, InlineButton } from "../../../button";
-import { useStargateClient } from "../../../clients";
+import {
+  createSigningStargateClient,
+  createStargateClient,
+} from "../../../clients";
 import { lendFees } from "../../../fee-lender-worker";
 import { Loader } from "../../../loader";
 import { useStore } from "../../../stores";
@@ -74,12 +83,192 @@ export interface SignatureModalProps extends ModalProps {
 
   onConfirm(signatures: Map<string, Uint8Array>): void;
 }
+
 // const tabs = ["txDetails", "data"]
 enum tabs {
   txDetails,
   data,
 }
-export const SignatureModal = observer<SignatureModalProps>(
+
+export const SignatureModal = observer<SignatureModalProps>((props) => {
+  const { walletStore } = useStore();
+
+  if (!walletStore.type) return null;
+
+  switch (walletStore.type) {
+    case WalletType.MULTISIG:
+    case WalletType.MULTISIG_DEMO:
+      return <SignatureModalMultisig {...props} />;
+    case WalletType.SINGLESIG:
+      return <SignatureModalSinglesig {...props} />;
+  }
+});
+
+export const SignatureModalSinglesig = observer<SignatureModalProps>(
+  ({ messages, rawMessages, multisig, onCancel, onConfirm, ...props }) => {
+    const intl = useIntl();
+    const [showLoader, setShowLoader] = useState(false);
+    const safeArea = useSafeAreaInsets();
+    const [selectedTab, setSelectedTab] = useState(tabs.txDetails);
+
+    return (
+      <Modal {...props}>
+        <SafeAreaView style={{ flex: 1 }}>
+          {showLoader && (
+            <Loader
+              loadingText="Loading..."
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 999,
+                position: "absolute",
+                backgroundColor: "#100F1D",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
+            />
+          )}
+          <Background />
+          <View
+            style={{
+              height: 50,
+              flexDirection: "row",
+              marginTop: safeArea.top,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
+              <FormattedMessage
+                id="signature.modal.confirmtx"
+                defaultMessage="Confirm Transaction"
+              />
+            </Text>
+          </View>
+          <View style={{ height: 30, flexDirection: "row", paddingTop: 10 }}>
+            <View style={{ flex: 1 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedTab(tabs.txDetails);
+                }}
+                style={{
+                  flex: 1,
+                  width: "100%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: selectedTab === tabs.txDetails ? "#89F5C2" : "white",
+                    textDecorationLine:
+                      selectedTab === tabs.txDetails ? "underline" : "none",
+                  }}
+                >
+                  Tx Details
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flex: 1 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedTab(tabs.data);
+                }}
+                style={{
+                  flex: 1,
+                  width: "100%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: selectedTab === tabs.data ? "#89F5C2" : "white",
+                    textDecorationLine:
+                      selectedTab === tabs.data ? "underline" : "none",
+                  }}
+                >
+                  <FormattedMessage
+                    id="signature.modal.data"
+                    defaultMessage="DATA"
+                  />
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              paddingHorizontal: 20,
+              justifyContent: "space-between",
+            }}
+          >
+            <View
+              style={{
+                marginTop: 10,
+              }}
+            >
+              <ScrollView
+                style={{
+                  flexGrow: 1,
+                  padding: 10,
+                }}
+              >
+                {selectedTab === tabs.data ? (
+                  <Text style={{ color: "#ffffff" }}>
+                    {JSON.stringify(messages, null, 2)}
+                  </Text>
+                ) : (
+                  renderMSGs(messages)
+                )}
+              </ScrollView>
+            </View>
+
+            <View>
+              <Button
+                flavor="blue"
+                label={intl.formatMessage({
+                  id: "signature.modal.cancel",
+                  defaultMessage: "Cancel",
+                })}
+                onPress={() => {
+                  onCancel();
+                }}
+              />
+              <Button
+                flavor="green"
+                label={intl.formatMessage({
+                  id: "signature.modal.confirm",
+                  defaultMessage: "Confirm",
+                })}
+                style={{
+                  marginVertical: 20,
+                }}
+                onPress={async () => {
+                  try {
+                    setShowLoader(true);
+                    await onConfirm(new Map());
+                    setShowLoader(false);
+                  } catch (e) {
+                    const error = e as Error;
+                    setShowLoader(false);
+                    console.error(error);
+                    Alert.alert("Error confirming transaction", error.message);
+                  }
+                }}
+              />
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
+    );
+  }
+);
+
+export const SignatureModalMultisig = observer<SignatureModalProps>(
   function SignatureModal({
     messages,
     rawMessages,
@@ -89,7 +278,6 @@ export const SignatureModal = observer<SignatureModalProps>(
     ...props
   }: SignatureModalProps) {
     const intl = useIntl();
-    const client = useStargateClient();
     const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
     const safeArea = useSafeAreaInsets();
     const phoneNumberBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -124,7 +312,11 @@ export const SignatureModal = observer<SignatureModalProps>(
       }
 
       invariant(address, "Expected `address` to exist.");
-      invariant(client, "Expected `client` to be connected.");
+
+      const client = await createStargateClient(
+        currentChainInformation.chainId
+      );
+
       if (!(await client.getAccount(address))) {
         await lendFees({ chainId: currentChainInformation.chainId, address });
       }
@@ -140,8 +332,10 @@ export const SignatureModal = observer<SignatureModalProps>(
         msgs: messages,
         sequence: account.sequence.toString(),
       };
+
+      client.disconnect();
       return new Sha256(serializeSignDoc(signDoc)).digest();
-    }, [demoStore, multisig, client, currentChainInformation, messages]);
+    }, [demoStore, multisig, currentChainInformation, messages]);
 
     function getKey({ id, title }: { id: MultisigKey; title: string }): Key[] {
       const factor = multisig?.[id];
@@ -240,9 +434,10 @@ export const SignatureModal = observer<SignatureModalProps>(
       ));
     };
     const [showLoader, setShowLoader] = useState(false);
-    if (!client || !threshold) return null;
+
+    if (!threshold) return null;
+
     return (
-      // TODO: use useSafeArea thingy instead.
       <Modal {...props}>
         <SafeAreaView style={{ flex: 1 }}>
           {showLoader && (
@@ -488,10 +683,8 @@ export function useSignatureModalProps({
 } {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
   const [modalKey, setModalKey] = useState(0);
-  const { demoStore, chainStore } = useStore();
+  const { chainStore, singlesigStore, walletStore } = useStore();
   const { currentChainInformation } = chainStore;
-
-  const client = useStargateClient();
 
   const signatureModalProps = useMemo(() => {
     const aminoMessages = encodeObjects.map((encodeObject) => {
@@ -512,65 +705,108 @@ export function useSignatureModalProps({
         setModalKey((value) => value + 1);
       },
       async onConfirm(signatures: Map<string, Uint8Array>) {
-        if (demoStore.demoMode) {
-          await onConfirm({
-            code: 0,
-            gasUsed: 0,
-            gasWanted: 0,
-            height: 0,
-            transactionHash: "",
-          });
-          return;
+        invariant(walletStore.type, "Expected `walletStore.type` to exist.");
+
+        async function handleMultisig() {
+          if (!multisig?.multisig) return;
+
+          const client = await createStargateClient(
+            currentChainInformation.chainId
+          );
+
+          const { chainId, denom } = currentChainInformation;
+          const body: TxBodyEncodeObject = {
+            typeUrl: "/cosmos.tx.v1beta1.TxBody",
+            value: {
+              messages,
+              memo: "",
+            },
+          };
+          const bodyBytes = registry.encode(body);
+
+          const address = multisig.multisig.address;
+
+          const feeAmount = 6000;
+          const fee = {
+            amount: coins(feeAmount, denom),
+            gas: "200000",
+          };
+
+          if (!(await client.getAccount(address))) {
+            await lendFees({ chainId, address });
+          }
+
+          async function hasEnoughForFees() {
+            const balance = await client?.getBalance(address, denom);
+            return balance && parseInt(balance.amount, 10) >= feeAmount;
+          }
+
+          while (!(await hasEnoughForFees())) {
+            await lendFees({ chainId, address });
+          }
+
+          const account = await client.getAccount(multisig.multisig.address);
+          invariant(account, "Expected `account` to be ready.");
+
+          const tx = makeMultisignedTx(
+            multisig.multisig.publicKey,
+            account.sequence,
+            fee,
+            bodyBytes,
+            signatures
+          );
+
+          const result = await client.broadcastTx(
+            Uint8Array.from(TxRaw.encode(tx).finish())
+          );
+
+          client.disconnect();
+          await onConfirm(result);
         }
 
-        if (!client || !multisig?.multisig) return;
+        switch (walletStore.type) {
+          case WalletType.MULTISIG:
+            await handleMultisig();
+            break;
+          case WalletType.MULTISIG_DEMO:
+            await onConfirm({
+              code: 0,
+              gasUsed: 0,
+              gasWanted: 0,
+              height: 0,
+              transactionHash: "",
+            });
+            break;
+          case WalletType.SINGLESIG: {
+            invariant(
+              singlesigStore.privateKey,
+              "Expected `singlesigStore.privateKey` to exist."
+            );
 
-        const { chainId, denom } = currentChainInformation;
-        const body: TxBodyEncodeObject = {
-          typeUrl: "/cosmos.tx.v1beta1.TxBody",
-          value: {
-            messages,
-            memo: "",
-          },
-        };
-        const bodyBytes = registry.encode(body);
+            const signer = await Secp256k1Wallet.fromKey(
+              singlesigStore.privateKey,
+              currentChainInformation.prefix
+            );
+            const client = await createSigningStargateClient({
+              chainId: currentChainInformation.chainId,
+              signer,
+            });
 
-        const address = multisig.multisig.address;
+            invariant(
+              singlesigStore.address,
+              "Expected `singlesigStore.address` to exist."
+            );
 
-        const feeAmount = 6000;
-        const fee = {
-          amount: coins(feeAmount, denom),
-          gas: "200000",
-        };
+            const result = await client.signAndBroadcast(
+              singlesigStore.address,
+              messages,
+              "auto"
+            );
 
-        if (!(await client.getAccount(address))) {
-          await lendFees({ chainId, address });
+            client.disconnect();
+            await onConfirm(result);
+          }
         }
-
-        async function hasEnoughForFees() {
-          const balance = await client?.getBalance(address, denom);
-          return balance && parseInt(balance.amount, 10) >= feeAmount;
-        }
-
-        while (!(await hasEnoughForFees())) {
-          await lendFees({ chainId, address });
-        }
-
-        const account = await client.getAccount(multisig.multisig.address);
-        invariant(account, "Expected `account` to be ready.");
-
-        const tx = makeMultisignedTx(
-          multisig.multisig.publicKey,
-          account.sequence,
-          fee,
-          bodyBytes,
-          signatures
-        );
-
-        const result = await client.broadcastTx(
-          Uint8Array.from(TxRaw.encode(tx).finish())
-        );
-        await onConfirm(result);
       },
     };
   }, [
@@ -578,8 +814,8 @@ export function useSignatureModalProps({
     modalKey,
     signatureModalVisible,
     multisig,
-    demoStore,
-    client,
+    singlesigStore,
+    walletStore,
     currentChainInformation,
     onConfirm,
   ]);
@@ -590,6 +826,41 @@ export function useSignatureModalProps({
       setSignatureModalVisible(true);
     },
   };
+}
+
+function renderMSGs(msgs: AminoMsg[]) {
+  if (msgs.length === 0) {
+    return null;
+  }
+  return msgs.map((msg, index) => (
+    <View
+      key={index}
+      style={{
+        height: 50,
+        flexDirection: "row",
+        borderBottomColor: "rgba(255,255,255, 0.6)",
+        borderBottomWidth: 1,
+      }}
+    >
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <ArrowUpIcon />
+      </View>
+      <View
+        style={{ flex: 1, justifyContent: "space-around", paddingLeft: 10 }}
+      >
+        <Text style={{ color: "white", fontWeight: "600", fontSize: 16 }}>
+          <FormattedMessage
+            id="signature.modal.createobiwallet"
+            defaultMessage="Create Obi Wallet"
+          />
+          {/* {renderDirectMessage(msg)} */}
+        </Text>
+        <Text style={{ color: "white", opacity: 0.6 }}>
+          <FormattedMessage id="signature.modal.value" defaultMessage="Value" />
+        </Text>
+      </View>
+    </View>
+  ));
 }
 
 interface PhoneNumberBottomSheetContentProps {

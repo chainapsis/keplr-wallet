@@ -1,12 +1,14 @@
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
+import { MsgSendEncodeObject } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
+import { WalletType } from "@obi-wallet/common";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
   Platform,
@@ -48,58 +50,91 @@ export const SendScreen = observer(() => {
     }
   };
 
+  useEffect(() => {
+    if (selectedCoin === undefined && balances.length > 0) {
+      setSelectedCoin(balances[0]);
+    }
+  }, [balances, selectedCoin]);
+
   const hydratedSelectedCoin = selectedCoin ? formatCoin(selectedCoin) : null;
+
+  const { multisigStore, singlesigStore, walletStore } = useStore();
+  const multisig = multisigStore.currentAdmin;
 
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
 
-  const { multisigStore } = useStore();
-  const multisig = multisigStore.currentAdmin;
-
   const encodeObjects = useMemo(() => {
-    if (
-      !selectedCoin ||
-      !multisig?.multisig?.address ||
-      !multisigStore.proxyAddress
-    )
-      return [];
+    if (!selectedCoin || !walletStore.type) return [];
 
     const { digits } = formatCoin(selectedCoin);
     const normalizedAmount =
       parseFloat(amount.replace(",", ".")) * Math.pow(10, digits);
-    const rawMessage = {
-      execute: {
-        msgs: [
-          {
-            bank: {
-              send: {
-                amount: [
-                  {
-                    denom: selectedCoin.denom,
-                    amount: normalizedAmount.toFixed(0).toString(),
-                  },
-                ],
-                to_address: address,
-              },
-            },
-          },
-        ],
+    const msgAmount = [
+      {
+        denom: selectedCoin.denom,
+        amount: normalizedAmount.toFixed(0).toString(),
       },
-    };
+    ];
 
-    const value: MsgExecuteContract = {
-      sender: multisig.multisig.address,
-      contract: multisigStore.proxyAddress.address,
-      msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
-      funds: [],
-    };
+    switch (walletStore.type) {
+      case WalletType.MULTISIG: {
+        if (!multisig?.multisig?.address || !multisigStore.proxyAddress)
+          return [];
 
-    const message: MsgExecuteContractEncodeObject = {
-      typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-      value,
-    };
-    return [message];
-  }, [address, amount, multisig, multisigStore, selectedCoin]);
+        const rawMessage = {
+          execute: {
+            msgs: [
+              {
+                bank: {
+                  send: {
+                    amount: msgAmount,
+                    to_address: address,
+                  },
+                },
+              },
+            ],
+          },
+        };
+
+        const value: MsgExecuteContract = {
+          sender: multisig.multisig.address,
+          contract: multisigStore.proxyAddress.address,
+          msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
+          funds: [],
+        };
+
+        const message: MsgExecuteContractEncodeObject = {
+          typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+          value,
+        };
+        return [message];
+      }
+      case WalletType.MULTISIG_DEMO:
+        return [];
+      case WalletType.SINGLESIG: {
+        if (!singlesigStore.address) return [];
+
+        const message: MsgSendEncodeObject = {
+          typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+          value: {
+            fromAddress: singlesigStore.address,
+            toAddress: address,
+            amount: msgAmount,
+          },
+        };
+        return [message];
+      }
+    }
+  }, [
+    address,
+    amount,
+    multisig,
+    multisigStore,
+    selectedCoin,
+    singlesigStore,
+    walletStore,
+  ]);
 
   const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
     multisig,
@@ -108,6 +143,10 @@ export const SendScreen = observer(() => {
       console.log(response);
     },
   });
+
+  useEffect(() => {
+    openSignatureModal();
+  }, [openSignatureModal]);
 
   const intl = useIntl();
 

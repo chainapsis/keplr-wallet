@@ -71,7 +71,7 @@ export class RootStore {
       new MessageRequesterInternal()
     );
 
-    this.appsStore = new AppsStore(new KVStore("apps-store"));
+    this.appsStore = new AppsStore({ kvStore: new KVStore("apps-store") });
     this.chainStore = new ChainStore({ defaultChain });
     this.demoStore = new DemoStore();
     this.languageStore = new LanguageStore({

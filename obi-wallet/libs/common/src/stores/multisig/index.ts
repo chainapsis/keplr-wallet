@@ -47,18 +47,18 @@ export interface Multisig {
 export type MultisigKey = keyof Omit<Multisig, "multisig">;
 
 export enum MultisigState {
-  LOADING,
-  EMPTY,
-  READY,
-  OUTDATED,
-  INITIALIZED,
+  LOADING = "Loading",
+  EMPTY = "Empty",
+  READY = "Ready",
+  OUTDATED = "Outdated",
+  INITIALIZED = "Initialized",
 }
 
 export * from "./serialized-data";
 
 export class MultisigStore {
-  protected readonly kvStore: KVStore;
   protected readonly chainStore: ChainStore;
+  protected readonly kvStore: KVStore;
 
   @observable
   protected serializedNextAdmin: SerializedMultisigPayload = emptyMultisig;

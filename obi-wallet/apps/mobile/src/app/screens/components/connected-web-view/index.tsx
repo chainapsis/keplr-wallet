@@ -1,13 +1,6 @@
 import EventEmitter from "eventemitter3";
 import { observer } from "mobx-react-lite";
-import {
-  MutableRefObject,
-  RefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { RefObject, useCallback, useEffect, useMemo } from "react";
 import {
   WebView,
   WebViewMessageEvent,
@@ -55,7 +48,7 @@ export const ConnectedWebView = observer(
         },
         RNInjectedKeplr.parseWebviewMessage
       );
-    }, [eventEmitter, keplr]);
+    }, [eventEmitter, keplr, webViewRef]);
 
     const { permissionStore } = useStore();
 

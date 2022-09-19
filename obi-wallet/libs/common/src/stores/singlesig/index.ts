@@ -8,9 +8,9 @@ import { KVStore } from "../../kv-store";
 import { ChainStore } from "../chain";
 
 export enum SinglesigState {
-  LOADING,
-  EMPTY,
-  INITIALIZED,
+  LOADING = "Loading",
+  EMPTY = "Empty",
+  INITIALIZED = "Initialized",
 }
 
 export class SinglesigStore {
@@ -24,10 +24,10 @@ export class SinglesigStore {
   protected mnemonic: string | null = null;
 
   @observable
-  protected privateKey: Uint8Array | null = null;
+  public privateKey: Uint8Array | null = null;
 
   @observable
-  protected publicKey: SinglePubkey | null = null;
+  public publicKey: SinglePubkey | null = null;
 
   constructor({
     chainStore,

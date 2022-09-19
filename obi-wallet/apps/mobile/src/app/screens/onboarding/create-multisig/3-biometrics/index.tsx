@@ -26,6 +26,7 @@ export type MultisigBiometricsProps = NativeStackScreenProps<
 export const MultisigBiometrics = observer<MultisigBiometricsProps>(
   ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
+    const intl = useIntl();
 
     useEffect(() => {
       if (demoStore.demoMode) return;
@@ -57,9 +58,8 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
           ]
         );
       }
-    }, [demoStore, multisigStore, navigation]);
+    }, [demoStore, intl, multisigStore, navigation]);
 
-    const intl = useIntl();
     const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
       useState(false);
 

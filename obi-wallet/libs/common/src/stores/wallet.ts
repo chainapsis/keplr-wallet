@@ -5,21 +5,21 @@ import { MultisigState, MultisigStore } from "./multisig";
 import { SinglesigState, SinglesigStore } from "./singlesig";
 
 export enum WalletType {
-  MULTISIG,
-  MULTISIG_DEMO,
-  SINGLESIG,
+  MULTISIG = "Multisig",
+  MULTISIG_DEMO = "MultisigDemo",
+  SINGLESIG = "Singlesig",
 }
 
 export enum WalletState {
-  LOADING,
-  EMPTY,
-  INITIALIZED,
+  LOADING = "Loading",
+  EMPTY = "Empty",
+  INITIALIZED = "Initialized",
 }
 
 export class WalletStore {
-  protected demoStore: DemoStore;
-  protected multisigStore: MultisigStore;
-  protected singlesigStore: SinglesigStore;
+  protected readonly demoStore: DemoStore;
+  protected readonly multisigStore: MultisigStore;
+  protected readonly singlesigStore: SinglesigStore;
 
   constructor({
     demoStore,
