@@ -1782,6 +1782,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "UMEE",
         coinMinimalDenom: "uumee",
         coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.05,
+          average: 0.06,
+          high: 0.1,
+        },
       },
     ],
     features: ["ibc-transfer", "ibc-go"],
