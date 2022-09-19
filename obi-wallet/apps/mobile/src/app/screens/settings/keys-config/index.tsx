@@ -87,25 +87,25 @@ export const KeysConfigScreen = observer(() => {
     getKey({
       id: "phoneNumber",
       title: intl.formatMessage({
-        id: "settings.create-multisig.option.phonekey",
+        id: "settings.multisig.option.phonekey",
         defaultMessage: "Phone Number Key",
       }),
     }),
     getKey({
       id: "biometrics",
       title: intl.formatMessage({
-        id: "settings.create-multisig.option.biometricskey",
+        id: "settings.multisig.option.biometricskey",
         defaultMessage: "Biometrics Key",
       }),
     }),
     getKey({
       id: "social",
       title: intl.formatMessage({
-        id: "settings.create-multisig.option.socialkey",
+        id: "settings.multisig.option.socialkey",
         defaultMessage: "Social Key",
       }),
     }),
-    // getKey({ id: "cloud", title: intl.formatMessage({ id: "settings.create-multisig.option.cloudkey", defaultMessage:"Cloud" }) }),
+    // getKey({ id: "cloud", title: intl.formatMessage({ id: "settings.multisig.option.cloudkey", defaultMessage:"Cloud" }) }),
   ];
 
   const activatedKeys = data.filter((item) => item.activated).length;
@@ -349,7 +349,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
                 defaultMessage: "Coming Soon",
               }),
               intl.formatMessage({
-                id: "settings.create-multisig.modal.replacementerror",
+                id: "settings.multisig.modal.replacementerror",
                 defaultMessage:
                   "Replacement of keys has not been implemented yet.",
               })
