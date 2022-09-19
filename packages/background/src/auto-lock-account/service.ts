@@ -111,6 +111,16 @@ export class AutoLockAccountService {
   private lock() {
     if (this.keyRingIsUnlocked) {
       this.keyringService.lock();
+
+      const background = browser.extension.getBackgroundPage();
+      const views = browser.extension.getViews();
+      for (const view of views) {
+        // Possibly, keyring can be locked with UI opened. Ex) when device sleep.
+        // In this case, to simplify the UI logic, just close all UI.
+        if (!background || background.location.href !== view.location.href) {
+          view.close();
+        }
+      }
     }
   }
 
