@@ -1482,6 +1482,17 @@ export const EmbedChainInfos: ChainInfo[] = [
           high: 0.004,
         },
       },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.001 * 0.33,
+          average: 0.0025 * 0.33,
+          high: 0.004 * 0.33,
+        },
+      },
     ],
     features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
   },
