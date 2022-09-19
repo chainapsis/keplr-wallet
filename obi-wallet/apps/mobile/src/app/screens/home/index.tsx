@@ -133,6 +133,7 @@ export function TabNavigation() {
           marginTop: 15,
           letterSpacing: 0.6,
         },
+        lazy: false
       })}
     >
       <Tab.Screen name={assets} component={Assets} />
