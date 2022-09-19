@@ -3,6 +3,9 @@ import { useCallback, useEffect, useState } from "react";
 import { rootStore } from "../../background/root-store";
 import { useStore } from "../stores";
 
+const LOOP_JUNO1_ADDRESS =
+  "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup";
+
 export interface ExtendedCoin {
   denom: string;
   amount: string;
