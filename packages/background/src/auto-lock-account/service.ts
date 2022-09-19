@@ -92,6 +92,10 @@ export class AutoLockAccountService {
       throw new Error("Keyring is not unlocked");
     }
 
+    if (this.autoLockDuration <= 0) {
+      return;
+    }
+
     this.autoLockTimer = setTimeout(() => {
       this.lock();
     }, this.autoLockDuration);
@@ -124,6 +128,12 @@ export class AutoLockAccountService {
 
   public setDuration(duration: number): Promise<void> {
     this.autoLockDuration = duration;
+
+    if (duration <= 0) {
+      this.stopAppStateCheckTimer();
+      this.stopAutoLockTimer();
+    }
+
     return this.kvStore.set("autoLockDuration", duration);
   }
 
