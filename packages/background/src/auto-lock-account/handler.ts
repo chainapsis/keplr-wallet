@@ -50,7 +50,11 @@ const handleUpdateAutoLockAccountDurationMsg: (
   service: AutoLockAccountService
 ) => InternalHandler<UpdateAutoLockAccountDurationMsg> = (service) => {
   return (_, msg) => {
-    return service.updateAutoLockDuration(msg.duration);
+    if (!service.keyRingIsUnlocked) {
+      throw new Error("Keyring is not unlocked");
+    }
+
+    return service.setDuration(msg.duration);
   };
 };
 
