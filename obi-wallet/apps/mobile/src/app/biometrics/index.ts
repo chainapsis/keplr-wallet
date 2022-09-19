@@ -100,8 +100,8 @@ export async function createBiometricSignature({
 
   if (!credentials) throw new Error("No biometrics keypair found");
 
-  const { multisigStore } = rootStore;
-  const chainId = multisigStore.currentChain;
+  const { chainStore } = rootStore;
+  const chainId = chainStore.currentChain;
   const { prefix, denom } = chains[chainId];
   const client = await createStargateClient(chainId);
 
@@ -128,7 +128,7 @@ export async function createBiometricSignature({
     });
 
     const fee = {
-      amount: coins(6000, multisigStore.currentChainInformation.denom),
+      amount: coins(6000, chainStore.currentChainInformation.denom),
       gas: "200000",
     };
 

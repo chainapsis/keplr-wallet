@@ -7,7 +7,8 @@ import {
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { action, computed, flow, makeObservable, observable, toJS } from "mobx";
 
-import { Chain, chains } from "../../chains";
+import { chains } from "../../chains";
+import { ChainStore } from "../chain";
 import {
   migrateSerializedData,
   SerializedBiometricsPayload,
@@ -56,8 +57,8 @@ export enum MultisigState {
 export * from "./serialized-data";
 
 export class MultisigStore {
-  @observable
-  public currentChain: keyof SerializedProxyAddressPerChain;
+  protected readonly kvStore: KVStore;
+  protected readonly chainStore: ChainStore;
 
   @observable
   protected serializedNextAdmin: SerializedMultisigPayload = emptyMultisig;
@@ -71,8 +72,15 @@ export class MultisigStore {
   @observable
   protected loading = true;
 
-  constructor(defaultChain: Chain, protected readonly kvStore: KVStore) {
-    this.currentChain = defaultChain;
+  constructor({
+    chainStore,
+    kvStore,
+  }: {
+    chainStore: ChainStore;
+    kvStore: KVStore;
+  }) {
+    this.chainStore = chainStore;
+    this.kvStore = kvStore;
     makeObservable(this);
     this.init();
   }
@@ -111,19 +119,14 @@ export class MultisigStore {
     this.loading = false;
   }
 
-  @action
-  public setCurrentChain(currentChain: Chain) {
-    this.currentChain = currentChain;
-  }
-
   @computed
   public get currentChainInformation() {
-    return chains[this.currentChain];
+    return chains[this.chainStore.currentChain];
   }
 
   @computed
   public get proxyAddress(): SerializedProxyAddress | null {
-    return this.proxyAddresses[this.currentChain] ?? null;
+    return this.proxyAddresses[this.chainStore.currentChain] ?? null;
   }
 
   @computed
@@ -131,7 +134,10 @@ export class MultisigStore {
     if (this.loading) return MultisigState.LOADING;
     if (this.serializedCurrentAdmin === null) return MultisigState.EMPTY;
     if (this.proxyAddress === null) return MultisigState.READY;
-    if (this.proxyAddress.codeId < this.currentChainInformation.currentCodeId) {
+    if (
+      this.proxyAddress.codeId <
+      this.chainStore.currentChainInformation.currentCodeId
+    ) {
       // TODO: Should be Outdated in the future
       // return MultisigState.OUTDATED;
       return MultisigState.READY;
@@ -153,7 +159,7 @@ export class MultisigStore {
   public get nextAdmin() {
     return this.hydrateMultisig(
       this.serializedNextAdmin,
-      this.currentChainInformation.prefix
+      this.chainStore.currentChainInformation.prefix
     );
   }
 
@@ -163,7 +169,7 @@ export class MultisigStore {
       this.serializedCurrentAdmin &&
       this.hydrateMultisig(
         this.serializedCurrentAdmin,
-        this.currentChainInformation.prefix
+        this.chainStore.currentChainInformation.prefix
       )
     );
   }
@@ -189,7 +195,7 @@ export class MultisigStore {
   @action
   public finishProxySetup(address: SerializedProxyAddress) {
     this.serializedCurrentAdmin = this.nextAdmin;
-    this.proxyAddresses[this.currentChain] = address;
+    this.proxyAddresses[this.chainStore.currentChain] = address;
     this.loading = false;
     void this.save();
   }

@@ -32,8 +32,8 @@ import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
 export const Assets = observer(() => {
-  const { multisigStore } = useStore();
-  const currentNetwork = multisigStore.currentChainInformation.label;
+  const { chainStore } = useStore();
+  const currentNetwork = chainStore.currentChainInformation.label;
 
   return (
     <ImageBackground

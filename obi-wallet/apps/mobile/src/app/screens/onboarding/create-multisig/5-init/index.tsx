@@ -66,8 +66,8 @@ export type MultisigInitProps = NativeStackScreenProps<
 >;
 
 export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
-  const { demoStore, multisigStore } = useStore();
-  const { currentChainInformation } = multisigStore;
+  const { chainStore, demoStore, multisigStore } = useStore();
+  const { currentChainInformation } = chainStore;
   const multisig = demoStore.demoMode
     ? demoModeMultisig
     : multisigStore.nextAdmin;
@@ -167,7 +167,7 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
         );
         multisigStore.finishProxySetup({
           address: contractAddress.value,
-          codeId: multisigStore.currentChainInformation.currentCodeId,
+          codeId: chainStore.currentChainInformation.currentCodeId,
         });
       } catch (e) {
         console.log(response.rawLog);

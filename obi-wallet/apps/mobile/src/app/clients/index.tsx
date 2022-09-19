@@ -24,13 +24,13 @@ export async function createSigningStargateClient({
 }
 
 export function useStargateClient() {
-  const { multisigStore } = useStore();
+  const { chainStore } = useStore();
   const [client, setClient] = useState<StargateClient | null>(null);
 
   useEffect(() => {
     let client: StargateClient | null = null;
     (async () => {
-      const { rpc } = multisigStore.currentChainInformation;
+      const { rpc } = chainStore.currentChainInformation;
       client = await StargateClient.connect(rpc);
       setClient(client);
     })();
@@ -40,7 +40,7 @@ export function useStargateClient() {
         setClient(null);
       }
     };
-  }, [multisigStore.currentChainInformation]);
+  }, [chainStore.currentChainInformation]);
 
   return client;
 }

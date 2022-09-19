@@ -93,9 +93,9 @@ export const SignatureModal = observer<SignatureModalProps>(
     const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
     const safeArea = useSafeAreaInsets();
     const phoneNumberBottomSheetRef = useRef<BottomSheetRef>(null);
-    const { demoStore, multisigStore } = useStore();
+    const { chainStore, demoStore } = useStore();
     const [selectedTab, setSelectedTab] = useState(tabs.txDetails);
-    const { currentChainInformation } = multisigStore;
+    const { currentChainInformation } = chainStore;
 
     const numberOfSignatures = signatures.size;
     const threshold = multisig?.multisig?.publicKey.value.threshold;
@@ -488,8 +488,8 @@ export function useSignatureModalProps({
 } {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
   const [modalKey, setModalKey] = useState(0);
-  const { demoStore, multisigStore } = useStore();
-  const { currentChainInformation } = multisigStore;
+  const { demoStore, chainStore } = useStore();
+  const { currentChainInformation } = chainStore;
 
   const client = useStargateClient();
 

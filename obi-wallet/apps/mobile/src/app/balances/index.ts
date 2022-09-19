@@ -33,7 +33,7 @@ export function useBalances() {
 }
 
 export function formatCoin(coin: ExtendedCoin) {
-  const { denom } = rootStore.multisigStore.currentChainInformation;
+  const { denom } = rootStore.chainStore.currentChainInformation;
   switch (coin.denom) {
     case denom: {
       const digits = 6;

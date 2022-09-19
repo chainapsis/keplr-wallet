@@ -4,6 +4,7 @@ import { toGenerator } from "@keplr-wallet/common";
 import { computed, flow, makeObservable, observable } from "mobx";
 
 import { Chain } from "../../chains";
+import { ChainStore } from "../chain";
 import { MultisigStore } from "../multisig";
 
 export interface ExtendedCoin {
@@ -13,16 +14,27 @@ export interface ExtendedCoin {
 }
 
 export class BalancesStore {
+  protected readonly chainStore: ChainStore;
+  protected readonly multisigStore: MultisigStore;
+
   @observable
   public balancesPerChain: Partial<Record<Chain, ExtendedCoin[]>> = {};
 
-  constructor(protected multisigStore: MultisigStore) {
+  constructor({
+    chainStore,
+    multisigStore,
+  }: {
+    chainStore: ChainStore;
+    multisigStore: MultisigStore;
+  }) {
+    this.chainStore = chainStore;
+    this.multisigStore = multisigStore;
     makeObservable(this);
   }
 
   @computed
   public get balances() {
-    return this.balancesPerChain[this.multisigStore.currentChain] ?? [];
+    return this.balancesPerChain[this.chainStore.currentChain] ?? [];
   }
 
   @flow
@@ -30,7 +42,7 @@ export class BalancesStore {
     const { proxyAddress } = this.multisigStore;
     if (!proxyAddress) return;
 
-    const { rpc } = this.multisigStore.currentChainInformation;
+    const { rpc } = this.chainStore.currentChainInformation;
     const client = yield* toGenerator(StargateClient.connect(rpc));
     const wasmClient = yield* toGenerator(CosmWasmClient.connect(rpc));
 
@@ -42,7 +54,7 @@ export class BalancesStore {
     /// Return two contract addresses (strings) if price must be grabbed from first
     /// and then divided by second price.
     const getContractRoute = (asset: string) => {
-      switch (this.multisigStore.currentChain) {
+      switch (this.chainStore.currentChain) {
         case "uni-3":
           return [
             "juno1dmwfwqvke4hew5s93ut8h4tgu6sxv67zjw0y3hskgkfpy3utnpvseqyjs7",
@@ -145,7 +157,7 @@ export class BalancesStore {
       )
     );
 
-    this.balancesPerChain[this.multisigStore.currentChain] = extendedCoins;
+    this.balancesPerChain[this.chainStore.currentChain] = extendedCoins;
 
     client.disconnect();
     wasmClient.disconnect();
