@@ -23,6 +23,12 @@ export class SinglesigStore {
   @observable
   protected mnemonic: string | null = null;
 
+  @observable
+  protected privateKey: Uint8Array | null = null;
+
+  @observable
+  protected publicKey: SinglePubkey | null = null;
+
   constructor({
     chainStore,
     kvStore,
@@ -43,7 +49,7 @@ export class SinglesigStore {
     );
 
     if (typeof data === "string") {
-      this.mnemonic = data;
+      this.setMnemonic(data);
     }
 
     this.loading = false;
@@ -54,31 +60,6 @@ export class SinglesigStore {
     if (this.loading) return SinglesigState.LOADING;
     if (this.mnemonic === null) return SinglesigState.EMPTY;
     return SinglesigState.INITIALIZED;
-  }
-
-  @computed
-  public get privateKey(): Uint8Array | null {
-    if (!this.mnemonic) return null;
-
-    const { coinType } = this.chainStore.currentChainInformation.bip44;
-    const bip44HDPath = {
-      account: 0,
-      change: 0,
-      addressIndex: 0,
-    };
-    const path = `m/44'/${coinType}'/${bip44HDPath.account}'/${bip44HDPath.change}/${bip44HDPath.addressIndex}`;
-    const masterSeed = Mnemonic.generateMasterSeedFromMnemonic(this.mnemonic);
-    return Mnemonic.generatePrivateKeyFromMasterSeed(masterSeed, path);
-  }
-
-  @computed
-  public get publicKey(): SinglePubkey | null {
-    if (!this.privateKey) return null;
-    const publicKey = secp256k1.publicKeyCreate(this.privateKey);
-    return {
-      type: "tendermint/PubKeySecp256k1",
-      value: Buffer.from(publicKey).toString("base64"),
-    };
   }
 
   @computed
@@ -94,7 +75,25 @@ export class SinglesigStore {
   public setMnemonic(mnemonic: string) {
     this.mnemonic = mnemonic;
     this.loading = false;
-    void this.save();
+
+    const { coinType } = this.chainStore.currentChainInformation.bip44;
+    const bip44HDPath = {
+      account: 0,
+      change: 0,
+      addressIndex: 0,
+    };
+    const path = `m/44'/${coinType}'/${bip44HDPath.account}'/${bip44HDPath.change}/${bip44HDPath.addressIndex}`;
+    const masterSeed = Mnemonic.generateMasterSeedFromMnemonic(this.mnemonic);
+    this.privateKey = Mnemonic.generatePrivateKeyFromMasterSeed(
+      masterSeed,
+      path
+    );
+
+    const publicKey = secp256k1.publicKeyCreate(this.privateKey);
+    this.publicKey = {
+      type: "tendermint/PubKeySecp256k1",
+      value: Buffer.from(publicKey).toString("base64"),
+    };
   }
 
   protected async save() {
