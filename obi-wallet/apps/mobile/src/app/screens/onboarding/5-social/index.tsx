@@ -4,6 +4,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -24,26 +25,33 @@ export type SocialOnboardingProps = NativeStackScreenProps<
 
 export const SocialOnboarding = observer<SocialOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
+    const { demoStore, multisigStore } = useStore();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
 
     const client = useStargateClient();
 
     useEffect(() => {
-      const { social } = multisigStore.getNextAdmin("");
+      if (demoStore.demoMode) return;
+
+      const { social } = multisigStore.nextAdmin;
 
       if (social) {
         Alert.alert(
-          "You already have a social key",
-          `Do you want to reuse your existing social key for ${social.address}?`,
+          intl.formatMessage({ id: "onboarding4.error.socialkeyexists.title" }),
+          intl.formatMessage({ id: "onboarding4.error.socialkeyexists.text" }) +
+            ` ${social.address}?`,
           [
             {
-              text: "Generate a new key",
+              text: intl.formatMessage({
+                id: "onboarding4.error.socialkeyexists.newkey",
+              }),
               style: "cancel",
             },
             {
-              text: "Yes",
+              text: intl.formatMessage({
+                id: "onboarding4.error.socialkeyexists.yes",
+              }),
               onPress: () => {
                 navigation.navigate("onboarding6");
               },
@@ -51,18 +59,22 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
           ]
         );
       }
-    }, [multisigStore, navigation]);
+    }, [demoStore, multisigStore, navigation]);
+
+    const intl = useIntl();
 
     async function getAccountPubkey(key: string) {
       try {
-        const { pubkey } = await client.getAccount(key);
-        return pubkey;
+        if (!client) return null;
+        const account = await client.getAccount(key);
+        return account?.pubkey;
       } catch (e) {
         console.log(e);
         Alert.alert(
           "We don’t see any activity for this address.",
           "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."
         );
+        return null;
       }
     }
 
@@ -109,7 +121,10 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                       marginTop: 32,
                     }}
                   >
-                    Set your Social Key
+                    <FormattedMessage
+                      id="onboarding5.setsocialkey"
+                      defaultMessage="Set your Social Key"
+                    />
                   </Text>
                   <Text
                     style={{
@@ -118,8 +133,10 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                       marginTop: 10,
                     }}
                   >
-                    Enter the juno address of a trusted friend who can help you
-                    recover your account
+                    <FormattedMessage
+                      id="onboarding5.setsocialkey.subtext"
+                      defaultMessage="Enter the juno address of a trusted friend who can help you recover your account."
+                    />
                   </Text>
                 </View>
               </View>
@@ -136,11 +153,13 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                   marginTop: 10,
                 }}
               >
-                …or you can use the default Obi account if you don't trust any
-                of your friends
+                <FormattedMessage
+                  id="onboarding5.setsocialkey.subtext2"
+                  defaultMessage="…or you can use the default Obi account if you don't trust any of your friends"
+                />
               </Text>
               <InlineButton
-                label="Use Obi Account"
+                label={intl.formatMessage({ id: "onboarding5.useobiaccount" })}
                 style={{ alignSelf: "flex-start", marginTop: 10 }}
                 onPress={() => {
                   setAddress("juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e");
@@ -152,12 +171,16 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                 disabled={fetchingPubKey}
                 onPress={async () => {
                   setFetchingPubKey(true);
-                  const publicKey = await getAccountPubkey(address);
+                  const publicKey = demoStore.demoMode
+                    ? { type: "demo", value: "demo" }
+                    : await getAccountPubkey(address);
                   setFetchingPubKey(false);
                   if (publicKey) {
-                    multisigStore.setSocialPublicKey({
-                      publicKey: publicKey,
-                    });
+                    if (!demoStore.demoMode) {
+                      multisigStore.setSocialPublicKey({
+                        publicKey: publicKey,
+                      });
+                    }
                     navigation.navigate("onboarding6");
                   }
                 }}

@@ -4,8 +4,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useIntl, FormattedMessage } from "react-intl";
 import { Alert, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getBiometricsPublicKey } from "../../../biometrics";
@@ -23,21 +25,31 @@ export type BiometricsOnboardingProps = NativeStackScreenProps<
 
 export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
   ({ navigation }) => {
-    const { multisigStore } = useStore();
+    const { demoStore, multisigStore } = useStore();
 
     useEffect(() => {
-      const { biometrics } = multisigStore.getNextAdmin("");
+      if (demoStore.demoMode) return;
+
+      const { biometrics } = multisigStore.nextAdmin;
       if (biometrics) {
         Alert.alert(
-          "You already have a biometrics key",
-          `Do you want to reuse your existing biometrics key?`,
+          intl.formatMessage({
+            id: "onboarding4.error.biometrickeyexists.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding4.error.biometrickeyexists.text",
+          }),
           [
             {
-              text: "Generate a new key",
+              text: intl.formatMessage({
+                id: "onboarding4.error.biometrickeyexists.newkey",
+              }),
               style: "cancel",
             },
             {
-              text: "Yes",
+              text: intl.formatMessage({
+                id: "onboarding4.error.biometrickeyexists.yes",
+              }),
               onPress: () => {
                 navigation.navigate("onboarding5");
               },
@@ -45,15 +57,22 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
           ]
         );
       }
-    }, [multisigStore, navigation]);
+    }, [demoStore, multisigStore, navigation]);
+
+    const intl = useIntl();
+    const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
+      useState(false);
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <Background />
-        <View
+        <KeyboardAwareScrollView
           style={{
             flex: 1,
             paddingHorizontal: 20,
+          }}
+          contentContainerStyle={{
+            flexGrow: 1,
             justifyContent: "space-between",
           }}
         >
@@ -115,7 +134,10 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                 marginTop: 79,
               }}
             >
-              Authenticate Your Keys
+              <FormattedMessage
+                id="onboarding4.authyourkeys"
+                defaultMessage="Authenticate Your Keys"
+              />
             </Text>
             <Text
               style={{
@@ -125,32 +147,48 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                 marginTop: 10,
               }}
             >
-              With Obi, your Biometrics, iCloud, and phone number work as a
-              multi-factor authenticator.
+              <FormattedMessage
+                id="onboarding4.authyourkeys.subtext"
+                defaultMessage="With Obi, your Biometrics, iCloud, and phone number work as a multi-factor authenticator."
+              />
             </Text>
           </View>
 
           <Button
-            label="Scan My Biometrics"
+            label={intl.formatMessage({ id: "onboarding4.biometrics.button" })}
             flavor="blue"
             LeftIcon={Scan}
             onPress={async () => {
+              setButtonDisabledDoubleclick(true);
+
               try {
-                const publicKey = await getBiometricsPublicKey();
-                multisigStore.setBiometricsPublicKey({
-                  publicKey: {
-                    type: pubkeyType.secp256k1,
-                    value: publicKey,
-                  },
-                });
+                if (!demoStore.demoMode) {
+                  const publicKey = await getBiometricsPublicKey();
+                  multisigStore.setBiometricsPublicKey({
+                    publicKey: {
+                      type: pubkeyType.secp256k1,
+                      value: publicKey,
+                    },
+                  });
+                }
+
                 navigation.navigate("onboarding5");
+                setButtonDisabledDoubleclick(false);
               } catch (e) {
-                console.error(e);
-                Alert.alert("Error ScanMyBiometrics", e.message);
+                setButtonDisabledDoubleclick(false);
+                const error = e as Error;
+                console.error(error);
+                Alert.alert(
+                  intl.formatMessage({ id: "general.error" }) +
+                    " ScanMyBiometrics",
+                  error.message
+                );
               }
             }}
+            disabled={buttonDisabledDoubleclick}
+            style={{ marginBottom: 20, marginTop: 20 }}
           />
-        </View>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
     );
   }

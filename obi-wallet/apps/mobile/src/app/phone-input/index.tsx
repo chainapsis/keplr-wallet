@@ -16,6 +16,8 @@ import { DARK_THEME } from "react-native-country-picker-modal";
 import { CountryCode, Country } from "react-native-country-picker-modal";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
+import { useStore } from "../stores";
+
 const styles = StyleSheet.create({
   label: {
     color: "#787B9C",
@@ -78,8 +80,24 @@ export function PhoneInput({
   label?: string;
   style?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
-  handlePhoneNumberCountryCode?: (param: string) => void;
+  handlePhoneNumberCountryCode: (param: string) => void;
 }) {
+  const { languageStore } = useStore();
+  const { currentLanguage } = languageStore;
+
+  // possible Languages to add
+  // "common","cym","deu","fra","hrv","ita","jpn","nld","por","rus","spa","svk","fin","zho","isr";
+
+  const dropdownLanguage = (langCode: string) => {
+    if (langCode === "de") {
+      return "deu";
+    } else if (langCode === "es") {
+      return "spa";
+    } else {
+      return "common"; // English
+    }
+  };
+
   const [visible, setVisible] = useState(false);
   const switchVisible = () => setVisible(!visible);
   const onSelect = (country: Country) => {
@@ -87,7 +105,7 @@ export function PhoneInput({
     setCountry(country);
   };
   // Default Selection
-  const [countryCode, setCountryCode] = useState<CountryCode | undefined>("US");
+  const [countryCode, setCountryCode] = useState<CountryCode>("US");
   const [country, setCountry] = useState<Country>({
     callingCode: ["1"],
     cca2: "US",
@@ -164,6 +182,7 @@ export function PhoneInput({
                     },
                     onClose: () => setVisible(false),
                     onOpen: () => setVisible(true),
+                    translation: dropdownLanguage(currentLanguage),
                   }}
                 />
               </View>

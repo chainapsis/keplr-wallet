@@ -3,3 +3,6 @@
 
 # Injected provider
 injected-provider.js
+
+# AppCenter config
+android/app/src/main/assets/appcenter-config.json

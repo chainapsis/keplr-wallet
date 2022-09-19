@@ -1,9 +1,6 @@
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { Coin } from "@cosmjs/stargate";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { rootStore } from "../../background/root-store";
-import { useCosmWasmClient, useStargateClient } from "../clients";
 import { useStore } from "../stores";
 
 const LOOP_JUNO1_ADDRESS =
@@ -16,170 +13,26 @@ export interface ExtendedCoin {
 }
 
 export function useBalances() {
-  const { multisigStore } = useStore();
-  const { address } = multisigStore.proxyAddress;
+  const { demoStore, balancesStore } = useStore();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const client = useStargateClient();
-  const wasmClient = useCosmWasmClient();
-  const [balances, setBalances] = useState<ExtendedCoin[]>([]);
+  const refreshBalances = useCallback(async () => {
+    setRefreshing(true);
+    if (!demoStore.demoMode) {
+      await balancesStore.fetchBalances();
+    }
+    setRefreshing(false);
+  }, [demoStore, balancesStore]);
 
   useEffect(() => {
-    async function f() {
-      if (client && wasmClient) {
-        const balances = await client.getAllBalances(address);
-        const custom_balances = await getCustomBalances(address, wasmClient);
-        for (const balance of custom_balances) {
-          balances.push(balance);
-        }
-        setBalances(await extendCoinsWithPrices({ balances, wasmClient }));
-      }
-    }
-    const interval = setInterval(f, 5000);
-    void f();
-    return () => {
-      clearInterval(interval);
-    };
-  }, [address, client, wasmClient]);
+    void refreshBalances();
+  }, [refreshBalances]);
 
-  return balances;
-}
-
-export async function getCustomBalances(
-  user_address: string,
-  client: CosmWasmClient
-) {
-  const chainId = rootStore.multisigStore.currentChain;
-  try {
-    if (chainId === "juno-1") {
-      const token_res = await client.queryContractSmart(LOOP_JUNO1_ADDRESS, {
-        token_info: {},
-      });
-      const balance_res = await client.queryContractSmart(LOOP_JUNO1_ADDRESS, {
-        balance: { address: user_address },
-      });
-      return [{ denom: token_res.symbol, amount: balance_res.balance }]; // name not handled yet
-    }
-  } catch (e) {
-    console.log("Could not get balance for " + LOOP_JUNO1_ADDRESS + ": " + e);
-  }
-}
-
-export async function extendCoinsWithPrices({
-  balances,
-  wasmClient,
-}: {
-  balances: readonly Coin[];
-  wasmClient: CosmWasmClient;
-}) {
-  const extendedCoins = [];
-  for (const coin of balances) {
-    let price;
-    try {
-      price = await getUsdRate({ coin, wasmClient });
-      extendedCoins.push({
-        denom: coin.denom,
-        amount: coin.amount,
-        usdPrice: price,
-      });
-    } catch (e) {
-      console.warn("error with coin", JSON.stringify(coin), ":", e);
-    }
-  }
-  return extendedCoins;
-}
-
-export async function getUsdRate({
-  coin,
-  wasmClient,
-}: {
-  coin: Coin;
-  wasmClient: CosmWasmClient;
-}) {
-  const network = rootStore.multisigStore.currentChain;
-  const route = getContractRoute(coin.denom, network);
-  if (!route == null) return 0;
-  if (route.length === 0) {
-    return 1;
-  } else {
-    let dexBasePriceElements = {
-      commissionAmount: 1,
-      returnAmount: 9,
-    };
-    if (route[0] !== "") {
-      dexBasePriceElements = await wasmClient.queryContractSmart(route[0], {
-        simulation: {
-          offer_asset: {
-            amount: "10000000", // force 10 for now, but may have slippage or other issues with assets
-            info: {
-              native_token: { denom: coin.denom },
-            },
-          },
-        },
-      });
-    }
-    const dexBasePrice: number =
-      (Number(dexBasePriceElements.commissionAmount) +
-        Number(dexBasePriceElements.returnAmount)) /
-      10;
-    if (route.length === 1) {
-      // is base asset
-      return dexBasePrice;
-    }
-    try {
-      const basePriceInUsdElements = await wasmClient.queryContractSmart(
-        route[1],
-        {
-          simulation: {
-            offer_asset: {
-              amount: "1000000", //$1
-              info: {
-                native_token: {
-                  denom:
-                    "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034",
-                },
-              },
-            },
-          },
-        }
-      );
-      const basePrice: number =
-        Number(basePriceInUsdElements.commission_amount) +
-        Number(basePriceInUsdElements.return_amount);
-      return dexBasePrice / basePrice;
-    } catch (e) {
-      console.error("Price query failed");
-    }
-  }
-}
-
-/// Return nothing if asset is considered 1 USD
-/// Return one contract address (string) if only one conversion is needed (just LOOP)
-/// Return two contract addresses (strings) if price must be grabbed from first
-/// and then divided by second price.
-export function getContractRoute(asset: string, network: string) {
-  switch (network) {
-    case "uni-3":
-      return [
-        "juno1dmwfwqvke4hew5s93ut8h4tgu6sxv67zjw0y3hskgkfpy3utnpvseqyjs7",
-        "juno1dmwfwqvke4hew5s93ut8h4tgu6sxv67zjw0y3hskgkfpy3utnpvseqyjs7",
-      ];
-    case "juno-1":
-      switch (asset) {
-        case "ujuno":
-          return [
-            "juno1qc8mrs3hmxm0genzrd92akja5r0v7mfm6uuwhktvzphhz9ygkp8ssl4q07",
-            "juno1utkr0ep06rkxgsesq6uryug93daklyd6wneesmtvxjkz0xjlte9qdj2s8q",
-          ];
-        case "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034":
-          return null; //axlUSDC
-        case LOOP_JUNO1_ADDRESS:
-          return [
-            "",
-            "juno1utkr0ep06rkxgsesq6uryug93daklyd6wneesmtvxjkz0xjlte9qdj2s8q",
-          ];
-      }
-  }
-  return null;
+  return {
+    balances: demoStore.demoMode ? [] : balancesStore.balances,
+    refreshBalances,
+    refreshing,
+  };
 }
 
 export function formatCoin(coin: ExtendedCoin) {
@@ -194,7 +47,7 @@ export function formatCoin(coin: ExtendedCoin) {
         digits,
         label: denom[1].toUpperCase() + denom.slice(2),
         amount,
-        valueInUsd: amount * 0,
+        valueInUsd: 0,
       };
     }
     case "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034": {
@@ -206,7 +59,7 @@ export function formatCoin(coin: ExtendedCoin) {
         digits,
         label: "USDC (Axelar)",
         amount,
-        valueInUsd: amount * 1,
+        valueInUsd: amount,
       };
     }
     case "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup": {

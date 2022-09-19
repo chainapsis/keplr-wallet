@@ -1,7 +1,7 @@
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   Linking,
   StyleSheet,
@@ -9,12 +9,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import codePush from "react-native-code-push";
+import codePush, { LocalPackage } from "react-native-code-push";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
+import { useStore } from "../../stores";
 import { Account } from "../account";
 import { Create } from "../account/create";
+import { DemoModeToggle } from "../components/demo-mode-toggle";
 import { useNavigation } from "../onboarding/stack";
 import MultiSigIcon from "./assets/edit.svg";
 import HelpAndSupport from "./assets/headset.svg";
@@ -23,15 +25,15 @@ import LogoutIcon from "./assets/power-red.svg";
 import { KeysConfigScreen } from "./keys-config";
 import { Stack } from "./stack";
 
-export function SettingsScreen() {
+export const SettingsScreen = observer(() => {
+  const { demoStore, multisigStore } = useStore();
+  const intl = useIntl();
   const navigation = useNavigation();
-  const [appMetadata, setAppMetadata] = useState(null);
+  const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
   useEffect(() => {
-    const getCodePushMetadata = async () => {
-      const r = await codePush.getUpdateMetadata();
-      setAppMetadata(r);
-    };
-    getCodePushMetadata();
+    void (async () => {
+      setAppMetadata(await codePush.getUpdateMetadata());
+    })();
   }, []);
 
   return (
@@ -41,7 +43,7 @@ export function SettingsScreen() {
           marginTop: 61,
           flexDirection: "row",
           justifyContent: "space-between",
-          marginBottom: 10,
+          marginBottom: 40,
         }}
       >
         <View
@@ -74,7 +76,7 @@ export function SettingsScreen() {
               Profile picture, name and mail
             </Text>*/}
           </View>
-
+          {/*
           <TouchableOpacity
             style={{ flex: 1, justifyContent: "center", paddingLeft: 20 }}
           >
@@ -83,20 +85,27 @@ export function SettingsScreen() {
               style={styles.chevronRight}
             />
           </TouchableOpacity>
+          */}
         </View>
       </View>
       {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment
-      <Setting
-        Icon={AccountSettingsIcon}
-        title="Account settings"
-        subtitle="Manage accounts & sub-accounts "
-        onPress={() => navigation.navigate("AccountsSettings")}
-      />
-      */}
+          <Setting
+            Icon={AccountSettingsIcon}
+            title="Account settings"
+            subtitle="Manage accounts & sub-accounts "
+            onPress={() => navigation.navigate("AccountsSettings")}
+          />
+          */}
       <Setting
         Icon={MultiSigIcon}
-        title="Multisig settings"
-        subtitle="Manage email, face-id, sms key etc."
+        title={intl.formatMessage({
+          id: "settings.multigsigsettings",
+          defaultMessage: "Key Settings",
+        })}
+        subtitle={intl.formatMessage({
+          id: "settings.multigsigsettings.subtext",
+          defaultMessage: "Manage your SMS, social, and other keys.",
+        })}
         onPress={() => navigation.navigate("MultiSigSettings")}
       />
       <View
@@ -107,24 +116,47 @@ export function SettingsScreen() {
         ]}
       >
         <View style={[styles.separator]} />
-        <Text style={[styles.separatorText]}>MORE</Text>
+        <Text style={[styles.separatorText]}>
+          <FormattedMessage id="settings.more" defaultMessage="More" />
+        </Text>
         <View style={[styles.separator]} />
       </View>
       <Setting
         Icon={HelpAndSupport}
-        title="Help & support"
-        subtitle="Any question. We are happy to help "
+        title={intl.formatMessage({
+          id: "settings.helpsupport",
+          defaultMessage: "Help & Support",
+        })}
+        subtitle={intl.formatMessage({
+          id: "settings.helpsupport.subtext",
+          defaultMessage: "Contact Loop support.",
+        })}
         onPress={() => Linking.openURL("https://loop.markets/help")}
       />
 
       <Setting
         Icon={LogoutIcon}
-        title="Log out"
-        subtitle="Save your keys before logging out"
+        title={intl.formatMessage({
+          id: "settings.logout",
+          defaultMessage: "Log Out",
+        })}
+        subtitle={intl.formatMessage({
+          id: "settings.logout.subtext",
+          defaultMessage: "Save your keys before logging out",
+        })}
+        onPress={() => {
+          if (demoStore.demoMode) {
+            demoStore.logout();
+          } else {
+            multisigStore.logout();
+          }
+        }}
       />
-      <Text style={{ color: "white", textAlign: "center" }}>
-        Obi {appMetadata?.appVersion} {appMetadata?.label}
-      </Text>
+      <DemoModeToggle>
+        <Text style={{ color: "white", textAlign: "center" }}>
+          Obi {appMetadata?.appVersion} {appMetadata?.label}
+        </Text>
+      </DemoModeToggle>
       <View
         style={{
           flex: 1,
@@ -137,23 +169,27 @@ export function SettingsScreen() {
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
+            paddingBottom: 15,
           }}
         >
+          {/*<Text*/}
+          {/*  onPress={() => {*/}
+          {/*    navigation.navigate("AddSubAccount");*/}
+          {/*  }}*/}
+          {/*  style={{*/}
+          {/*    color: "#F6F5FF",*/}
+          {/*    paddingRight: 10,*/}
+          {/*    fontSize: 10,*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <FormattedMessage*/}
+          {/*    id="settings.terms"*/}
+          {/*    defaultMessage="Terms of Service"*/}
+          {/*  />*/}
+          {/*</Text>*/}
           <Text
             onPress={() => {
-              navigation.navigate("AddSubAccount");
-            }}
-            style={{
-              color: "#F6F5FF",
-              paddingRight: 10,
-              fontSize: 10,
-            }}
-          >
-            Terms of Service
-          </Text>
-          <Text
-            onPress={() => {
-              navigation.navigate("AddSubAccount");
+              Linking.openURL("https://mail.loop.onl/privacy-policy/");
             }}
             style={{
               color: "#F6F5FF",
@@ -161,13 +197,16 @@ export function SettingsScreen() {
               fontSize: 10,
             }}
           >
-            Privacy Policy
+            <FormattedMessage
+              id="settings.privacy"
+              defaultMessage="Privacy Policy"
+            />
           </Text>
         </View>
       </View>
     </SafeAreaView>
   );
-}
+});
 
 interface SettingProps {
   Icon: FC<SvgProps>;
@@ -213,7 +252,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   flex1: {
-    flex: 1,
+    flex: 0,
     marginBottom: 20,
   },
   text: {
@@ -231,6 +270,7 @@ const styles = StyleSheet.create({
   separatorText: {
     color: "#787B9C",
     marginHorizontal: 35,
+    textTransform: "uppercase",
   },
   heading: {
     color: "#F6F5FF",
@@ -248,7 +288,7 @@ const styles = StyleSheet.create({
     color: "#3D4661",
   },
   titlesContainer: {
-    paddingLeft: 10,
+    paddingHorizontal: 10,
   },
 });
 

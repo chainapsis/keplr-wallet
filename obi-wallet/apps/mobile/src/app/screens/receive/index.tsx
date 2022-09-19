@@ -1,16 +1,22 @@
-import { TouchableOpacity } from "@gorhom/bottom-sheet/src";
 import { observer } from "mobx-react-lite";
-import { Share, Text, View } from "react-native";
+import { FormattedMessage } from "react-intl";
+import { Platform, Share, Text, TouchableOpacity, View } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useStore } from "../../stores";
 import { Back } from "../components/back";
+import { isSmallScreenNumber } from "../components/screen-size";
 
 export const ReceiveScreen = observer(() => {
-  const { multisigStore } = useStore();
-  const { address } = multisigStore.proxyAddress;
+  const { demoStore, multisigStore } = useStore();
+  const address = demoStore.demoMode
+    ? "demo-address"
+    : multisigStore.proxyAddress?.address;
 
-  const onShare = async (text) => {
+  if (!address) return null;
+
+  const onShare = async (text: string) => {
     try {
       const result = await Share.share({
         message: text,
@@ -24,7 +30,8 @@ export const ReceiveScreen = observer(() => {
       } else if (result.action === Share.dismissedAction) {
         // dismissed
       }
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       alert(error.message);
     }
   };
@@ -35,6 +42,10 @@ export const ReceiveScreen = observer(() => {
         backgroundColor: "rgba(9, 8, 23, 1);",
         flex: 1,
         paddingHorizontal: 20,
+        paddingVertical: Platform.select({
+          ios: isSmallScreenNumber(20, 20),
+          android: isSmallScreenNumber(30, 30),
+        }),
         justifyContent: "space-between",
       }}
     >
@@ -50,12 +61,22 @@ export const ReceiveScreen = observer(() => {
               fontWeight: "600",
             }}
           >
-            Receive
+            <FormattedMessage id="receive.receive" defaultMessage="Receive" />
           </Text>
         </View>
       </View>
 
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{
+            borderRadius: 16,
+            backgroundColor: "white",
+            padding: 10,
+            marginBottom: "30%",
+          }}
+        >
+          <QRCode value={address} size={200} />
+        </View>
         <TouchableOpacity
           style={{
             backgroundColor: "#17162C",
@@ -73,7 +94,10 @@ export const ReceiveScreen = observer(() => {
               fontWeight: "500",
             }}
           >
-            Tap to share your address
+            <FormattedMessage
+              id="receive.taptoshare"
+              defaultMessage="Tap to share your address"
+            />
           </Text>
           <Text
             style={{

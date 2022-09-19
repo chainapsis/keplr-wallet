@@ -14,18 +14,34 @@ import { KVStore } from "../kv-store";
 import { MessageRequesterInternal } from "../message-requester";
 import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
+import { BalancesStore } from "./balances";
 import { ChainStore } from "./chain";
+import { DemoStore } from "./demo";
+import { LanguageStore } from "./language";
 import { MultisigStore } from "./multisig";
 
 export class RootStore {
   public readonly appsStore: AppsStore;
+  public readonly balancesStore: BalancesStore;
   public readonly chainStore: ChainStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+  public readonly demoStore: DemoStore;
   public readonly interactionStore: InteractionStore;
+  public readonly languageStore: LanguageStore;
   public readonly multisigStore: MultisigStore;
   public readonly permissionStore: PermissionStore;
 
-  constructor(defaultChain: Chain) {
+  constructor({
+    defaultChain,
+    deviceLanguage,
+    enabledLanguages,
+    defaultLanguage,
+  }: {
+    defaultChain: Chain;
+    deviceLanguage: string;
+    enabledLanguages: string[];
+    defaultLanguage: string;
+  }) {
     const router = new RouterUi(produceEnv);
     ObservableQueryBase.experimentalDeferInitialQueryController =
       new DeferInitialQueryController();
@@ -46,11 +62,19 @@ export class RootStore {
     );
 
     this.appsStore = new AppsStore(new KVStore("apps-store"));
-
+    this.demoStore = new DemoStore();
+    this.languageStore = new LanguageStore({
+      deviceLanguage,
+      enabledLanguages,
+      defaultLanguage,
+      kvStore: new KVStore("language-store"),
+    });
     this.multisigStore = new MultisigStore(
       defaultChain,
       new KVStore("multisig-store")
     );
+
+    this.balancesStore = new BalancesStore(this.multisigStore);
 
     router.listen(APP_PORT);
   }

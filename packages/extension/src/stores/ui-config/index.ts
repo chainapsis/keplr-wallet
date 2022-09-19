@@ -15,9 +15,13 @@ export class UIConfigStore {
   };
 
   protected _isBeta: boolean;
+  protected _platform: "chrome" | "firefox" = "chrome";
 
   constructor(protected readonly kvStore: KVStore) {
     this._isBeta = navigator.userAgent.includes("Firefox");
+    this._platform = navigator.userAgent.includes("Firefox")
+      ? "firefox"
+      : "chrome";
 
     makeObservable(this);
 
@@ -47,6 +51,10 @@ export class UIConfigStore {
 
   get isBeta(): boolean {
     return this._isBeta;
+  }
+
+  get platform(): "chrome" | "firefox" {
+    return this._platform;
   }
 
   @action

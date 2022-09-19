@@ -1,3 +1,5 @@
+import { useIntl } from "react-intl";
+
 import { Button } from "../../../button";
 import ShieldCheck from "./assets/shield-check.svg";
 
@@ -10,13 +12,19 @@ export function VerifyAndProceedButton({
   onPress,
   disabled,
 }: VerifyAndProceedButtonProps) {
+  const intl = useIntl();
+
   return (
     <Button
-      label="Verify & Proceed"
+      label={intl.formatMessage({
+        id: "onboarding3.verifyandproceed",
+        defaultMessage: "Verify & Proceed",
+      })}
       LeftIcon={ShieldCheck}
       flavor={disabled ? "gray" : "blue"}
       onPress={onPress}
       disabled={disabled}
+      style={{ marginBottom: 20 }}
     />
   );
 }

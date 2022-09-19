@@ -1,5 +1,4 @@
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { OfflineSigner } from "@cosmjs/launchpad";
+import { OfflineSigner } from "@cosmjs/proto-signing";
 import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { Chain, chains } from "@obi-wallet/common";
 import { useEffect, useState } from "react";
@@ -7,8 +6,8 @@ import { useEffect, useState } from "react";
 import { useStore } from "../stores";
 
 export async function createStargateClient(chainId: Chain) {
-  const { rcp } = chains[chainId];
-  return await StargateClient.connect(rcp);
+  const { rpc } = chains[chainId];
+  return await StargateClient.connect(rpc);
 }
 
 export async function createSigningStargateClient({
@@ -18,43 +17,21 @@ export async function createSigningStargateClient({
   chainId: Chain;
   signer: OfflineSigner;
 }) {
-  const { prefix, rcp } = chains[chainId];
-  return await SigningStargateClient.connectWithSigner(rcp, signer, {
+  const { prefix, rpc } = chains[chainId];
+  return await SigningStargateClient.connectWithSigner(rpc, signer, {
     prefix,
   });
 }
 
-export function useCosmWasmClient() {
-  const { multisigStore } = useStore();
-  const [client, setClient] = useState(null);
-
-  useEffect(() => {
-    let client = null;
-    (async () => {
-      const { rcp } = multisigStore.currentChainInformation;
-      client = await CosmWasmClient.connect(rcp);
-      setClient(client);
-    })();
-    return () => {
-      if (client) {
-        client.disconnect();
-        setClient(null);
-      }
-    };
-  }, [multisigStore.currentChainInformation]);
-
-  return client;
-}
-
 export function useStargateClient() {
   const { multisigStore } = useStore();
-  const [client, setClient] = useState(null);
+  const [client, setClient] = useState<StargateClient | null>(null);
 
   useEffect(() => {
-    let client = null;
+    let client: StargateClient | null = null;
     (async () => {
-      const { rcp } = multisigStore.currentChainInformation;
-      client = await StargateClient.connect(rcp);
+      const { rpc } = multisigStore.currentChainInformation;
+      client = await StargateClient.connect(rpc);
       setClient(client);
     })();
     return () => {

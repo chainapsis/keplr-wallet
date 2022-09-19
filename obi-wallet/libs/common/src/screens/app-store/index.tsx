@@ -95,26 +95,26 @@ export const AppStore: FunctionComponent<AppStoreProps> = observer(
           <Text>Add</Text>
         </TouchableOpacity>
         <Text>Suggestions</Text>
-        <Tiles>
-          {knownApps.map((app) => {
-            const included = appsStore.hasFavorite(app.url);
-            return (
-              <Tile
-                key={app.url}
-                img={app.icon}
-                label={app.label}
-                disabled={!included}
-                onPress={() => {
-                  if (included) {
-                    appsStore.removeFavoriteByUrl(app.url);
-                  } else {
-                    appsStore.addFavorite(app);
-                  }
-                }}
-              />
-            );
-          })}
-        </Tiles>
+        {/*<Tiles>*/}
+        {/*  {knownApps.map((app) => {*/}
+        {/*    const included = appsStore.hasFavorite(app.url);*/}
+        {/*    return (*/}
+        {/*      <Tile*/}
+        {/*        key={app.url}*/}
+        {/*        img={app.icon}*/}
+        {/*        label={app.label}*/}
+        {/*        disabled={!included}*/}
+        {/*        onPress={() => {*/}
+        {/*          if (included) {*/}
+        {/*            appsStore.removeFavoriteByUrl(app.url);*/}
+        {/*          } else {*/}
+        {/*            appsStore.addFavorite(app);*/}
+        {/*          }*/}
+        {/*        }}*/}
+        {/*      />*/}
+        {/*    );*/}
+        {/*  })}*/}
+        {/*</Tiles>*/}
       </View>
     );
   }

@@ -10,6 +10,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     flexWrap: "wrap",
+    flex: 1,
   },
   tile: {
     width: "33.33%",
@@ -42,14 +43,22 @@ export function Tiles({ children }: { children: ReactNode }) {
 }
 
 export interface TileProps {
-  img?: string;
+  img: string | null;
   label: string;
   disabled?: boolean;
   onRemove?: () => void;
   onPress: () => void;
+  onLongPress: () => void;
 }
 
-export function Tile({ img, label, disabled, onRemove, onPress }: TileProps) {
+export function Tile({
+  img,
+  label,
+  disabled,
+  onRemove,
+  onPress,
+  onLongPress,
+}: TileProps) {
   const children = (
     <>
       <View style={styles.iconContainer}>
@@ -79,7 +88,11 @@ export function Tile({ img, label, disabled, onRemove, onPress }: TileProps) {
   return onRemove ? (
     <View style={containerStyle}>{children}</View>
   ) : (
-    <TouchableOpacity style={containerStyle} onPress={onPress}>
+    <TouchableOpacity
+      style={containerStyle}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    >
       {children}
     </TouchableOpacity>
   );

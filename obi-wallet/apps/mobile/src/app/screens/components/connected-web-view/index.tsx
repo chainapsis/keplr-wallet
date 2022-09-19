@@ -1,6 +1,13 @@
 import EventEmitter from "eventemitter3";
 import { observer } from "mobx-react-lite";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  MutableRefObject,
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import {
   WebView,
   WebViewMessageEvent,
@@ -13,10 +20,11 @@ import { useStore } from "../../../stores";
 
 export interface ConnectedWebViewProps extends Omit<WebViewProps, "source"> {
   url: string;
+  webViewRef: RefObject<WebView>;
 }
 
 export const ConnectedWebView = observer(
-  ({ url, ...props }: ConnectedWebViewProps) => {
+  ({ url, webViewRef, ...props }: ConnectedWebViewProps) => {
     const keplr = useKeplr({ url });
     const code = useInjectedProvider();
 
@@ -35,7 +43,7 @@ export const ConnectedWebView = observer(
             eventEmitter.addListener("message", fn);
           },
           postMessage: (message) => {
-            webviewRef.current?.injectJavaScript(
+            webViewRef.current?.injectJavaScript(
               `
                 window.postMessage(${JSON.stringify(
                   message
@@ -48,8 +56,6 @@ export const ConnectedWebView = observer(
         RNInjectedKeplr.parseWebviewMessage
       );
     }, [eventEmitter, keplr]);
-
-    const webviewRef = useRef<WebView>();
 
     const { permissionStore } = useStore();
 
@@ -70,7 +76,7 @@ export const ConnectedWebView = observer(
         source={{ uri: url }}
         injectedJavaScriptBeforeContentLoaded={code}
         onMessage={onMessage}
-        ref={webviewRef}
+        ref={webViewRef}
       />
     );
   }

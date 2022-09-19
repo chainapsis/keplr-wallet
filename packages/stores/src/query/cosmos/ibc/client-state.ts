@@ -8,12 +8,14 @@ import { ClientStateResponse } from "./types";
 import { autorun, computed } from "mobx";
 
 export class ObservableChainQueryClientState extends ObservableChainQuery<ClientStateResponse> {
+  protected disposer?: () => void;
+
   constructor(
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    portId: string,
-    channelId: string
+    protected readonly portId: string,
+    protected readonly channelId: string
   ) {
     super(
       kvStore,
@@ -21,15 +23,30 @@ export class ObservableChainQueryClientState extends ObservableChainQuery<Client
       chainGetter,
       `/ibc/core/channel/v1beta1/channels/${channelId}/ports/${portId}/client_state`
     );
+  }
 
-    autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
-        this.setUrl(
-          `/ibc/core/channel/v1/channels/${channelId}/ports/${portId}/client_state`
-        );
-      }
+  protected onStart() {
+    super.onStart();
+
+    return new Promise<void>((resolve) => {
+      this.disposer = autorun(() => {
+        const chainInfo = this.chainGetter.getChain(this.chainId);
+        if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
+          this.setUrl(
+            `/ibc/core/channel/v1/channels/${this.channelId}/ports/${this.portId}/client_state`
+          );
+        }
+        resolve();
+      });
     });
+  }
+
+  protected onStop() {
+    if (this.disposer) {
+      this.disposer();
+      this.disposer = undefined;
+    }
+    super.onStop();
   }
 
   /**

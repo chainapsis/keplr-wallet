@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Switch } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "../../button";
 import { DropDownPicker } from "../../drop-down-picker";

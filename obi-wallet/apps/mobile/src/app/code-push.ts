@@ -1,0 +1,42 @@
+import { Platform } from "react-native";
+import {
+  IOS_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION,
+  IOS_APP_CENTER_DEPLOYMENT_KEY_STAGING,
+  ANDROID_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION,
+  ANDROID_APP_CENTER_DEPLOYMENT_KEY_STAGING,
+  APP_ENV,
+} from "react-native-dotenv";
+
+import { envInvariant } from "../helpers/invariant";
+
+envInvariant("APP_ENV", APP_ENV);
+envInvariant(
+  "IOS_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION",
+  IOS_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION
+);
+envInvariant(
+  "IOS_APP_CENTER_DEPLOYMENT_KEY_STAGING",
+  IOS_APP_CENTER_DEPLOYMENT_KEY_STAGING
+);
+envInvariant(
+  "ANDROID_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION",
+  ANDROID_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION
+);
+envInvariant(
+  "ANDROID_APP_CENTER_DEPLOYMENT_KEY_STAGING",
+  ANDROID_APP_CENTER_DEPLOYMENT_KEY_STAGING
+);
+
+const keys = Platform.select({
+  ios: {
+    staging: IOS_APP_CENTER_DEPLOYMENT_KEY_STAGING,
+    production: IOS_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION,
+  },
+  android: {
+    staging: ANDROID_APP_CENTER_DEPLOYMENT_KEY_STAGING,
+    production: ANDROID_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION,
+  },
+});
+
+export const deploymentKey =
+  APP_ENV === "production" ? keys?.production : keys?.staging;

@@ -275,6 +275,9 @@ export const IBCTransferPageAmount: FunctionComponent<{
 
               onSubmit();
             }}
+            style={{
+              marginTop: "12px",
+            }}
           >
             <FormattedMessage id="ibc.transfer.submit" />
           </Button>

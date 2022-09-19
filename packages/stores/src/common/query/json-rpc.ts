@@ -1,6 +1,6 @@
 import { ObservableQuery, QueryOptions, QueryResponse } from "./index";
 import { KVStore } from "@keplr-wallet/common";
-import { AxiosInstance, CancelToken } from "axios";
+import { AxiosInstance } from "axios";
 import { action, makeObservable, observable } from "mobx";
 import { Hash } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
@@ -42,7 +42,7 @@ export class ObservableJsonRPCQuery<
   }
 
   protected async fetchResponse(
-    cancelToken: CancelToken
+    abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
     const result = await this.instance.post<{
       jsonrpc: "2.0";
@@ -61,7 +61,7 @@ export class ObservableJsonRPCQuery<
         params: this.params,
       },
       {
-        cancelToken,
+        signal: abortController.signal,
       }
     );
 

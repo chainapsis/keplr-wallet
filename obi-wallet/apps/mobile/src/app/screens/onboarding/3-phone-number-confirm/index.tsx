@@ -4,7 +4,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../button";
@@ -31,12 +33,27 @@ export function PhoneNumberConfirmOnboarding({
 }: PhoneNumberConfirmOnboardingProps) {
   const { params } = route;
 
-  const { multisigStore } = useStore();
+  const { demoStore, multisigStore } = useStore();
   const [key, setKey] = useState("");
 
   const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
   const [verifyButtonDisabledDoubleclick, setVerifyButtonDisabledDoubleclick] =
     useState(false); // Magic Button disable on button-click
+
+  const [resendButtonDisabled, setResendButtonDisabled] = useState(false);
+  const [resendCounter, setResendCounter] = useState(0);
+  const [resendButtonHit, setResendButtonHit] = useState(false);
+
+  useEffect(() => {
+    if (resendCounter > 0) {
+      setResendButtonDisabled(true);
+      setTimeout(() => {
+        setResendCounter((counter) => counter - 1);
+      }, 1000);
+    } else {
+      setResendButtonDisabled(false);
+    }
+  }, [resendCounter]);
 
   const minInputCharsSMSCode = 8;
 
@@ -49,6 +66,8 @@ export function PhoneNumberConfirmOnboarding({
     }
   }, [verifyButtonDisabled, setVerifyButtonDisabled, key]);
 
+  const intl = useIntl();
+
   return (
     <KeyboardAvoidingView
       style={{
@@ -57,12 +76,12 @@ export function PhoneNumberConfirmOnboarding({
     >
       <SafeAreaView style={{ flex: 1 }}>
         <Background />
-        <View
+        <KeyboardAwareScrollView
           style={{
             flex: 1,
             paddingHorizontal: 20,
-            justifyContent: "space-between",
           }}
+          contentContainerStyle={{ flex: 1, justifyContent: "space-between" }}
         >
           <View>
             <IconButton
@@ -92,7 +111,10 @@ export function PhoneNumberConfirmOnboarding({
                     marginTop: 32,
                   }}
                 >
-                  Authenticate Your Keys
+                  <FormattedMessage
+                    id="onboarding3.authyourkeys"
+                    defaultMessage="Authenticate Your Keys"
+                  />
                 </Text>
                 <Text
                   style={{
@@ -101,12 +123,17 @@ export function PhoneNumberConfirmOnboarding({
                     marginTop: 10,
                   }}
                 >
-                  Paste in the response you received.
+                  <FormattedMessage
+                    id="onboarding3.pastereponse"
+                    defaultMessage="Paste in the response you received."
+                  />
                 </Text>
               </View>
             </View>
             <TextInput
-              placeholder="8-Digits SMS-Code"
+              placeholder={intl.formatMessage({
+                id: "onboarding3.smscodelabel",
+              })}
               textContentType="oneTimeCode"
               keyboardType="number-pad"
               style={{ marginTop: 25 }}
@@ -121,54 +148,106 @@ export function PhoneNumberConfirmOnboarding({
               }}
             >
               <Text style={{ color: "rgba(246, 245, 255, 0.6)", fontSize: 12 }}>
-                Didn’t receive a response?
+                <FormattedMessage
+                  id="onboarding3.noresponselabel"
+                  defaultMessage="Didn’t receive a response?"
+                />
               </Text>
 
               <InlineButton
-                label="Resend"
+                label={intl.formatMessage({ id: "onboarding3.sendagain" })}
                 onPress={async () => {
+                  setResendCounter(20);
+                  setResendButtonHit(true);
+
                   setKey("");
-                  await sendPublicKeyTextMessage({
-                    phoneNumber: params.phoneNumber,
-                    securityAnswer: params.securityAnswer,
-                  });
+                  if (!demoStore.demoMode) {
+                    await sendPublicKeyTextMessage({
+                      phoneNumber: params.phoneNumber,
+                      securityAnswer: params.securityAnswer,
+                    });
+                  }
                 }}
+                disabled={resendButtonDisabled}
               />
             </View>
-          </View>
 
-          <VerifyAndProceedButton
-            onPress={async () => {
-              try {
-                setVerifyButtonDisabledDoubleclick(true);
-                const publicKey = await parsePublicKeyTextMessageResponse(key);
-                if (publicKey) {
-                  multisigStore.setPhoneNumberKey({
-                    publicKey: {
-                      type: pubkeyType.secp256k1,
-                      value: publicKey,
-                    },
-                    phoneNumber: params.phoneNumber,
-                    securityQuestion: params.securityQuestion,
-                  });
+            {resendButtonDisabled && (
+              <Text
+                style={{
+                  color: "rgba(246, 245, 255, 0.6)",
+                  fontSize: 12,
+                  marginVertical: 10,
+                }}
+              >
+                <FormattedMessage
+                  id="onboarding3.sendagain.info.counter"
+                  defaultMessage="Your Magic SMS has been resent! Give it some time to arrive. You can try again in "
+                />
+                &nbsp;{resendCounter} {resendCounter > 0 ? "seconds" : "second"}
+                .
+              </Text>
+            )}
+
+            {resendButtonHit && (
+              <Text
+                style={{
+                  color: "rgba(246, 245, 255, 0.6)",
+                  fontSize: 12,
+                  marginVertical: 10,
+                }}
+              >
+                <FormattedMessage
+                  id="onboarding3.sendagain.info.checknumber"
+                  defaultMessage="If you haven't received the SMS please check if your phone number is correct:"
+                />
+                &nbsp;
+                {params.phoneNumber}.
+              </Text>
+            )}
+          </View>
+          <View style={{ marginVertical: 20 }}>
+            <VerifyAndProceedButton
+              onPress={async () => {
+                try {
+                  setVerifyButtonDisabledDoubleclick(true);
+                  const publicKey = demoStore.demoMode
+                    ? "demo"
+                    : await parsePublicKeyTextMessageResponse(key);
+                  if (publicKey) {
+                    if (!demoStore.demoMode) {
+                      multisigStore.setPhoneNumberKey({
+                        publicKey: {
+                          type: pubkeyType.secp256k1,
+                          value: publicKey,
+                        },
+                        phoneNumber: params.phoneNumber,
+                        securityQuestion: params.securityQuestion,
+                      });
+                    }
+                    setVerifyButtonDisabledDoubleclick(false);
+                    navigation.navigate("onboarding4");
+                  } else {
+                    setVerifyButtonDisabledDoubleclick(false);
+                  }
+                } catch (e) {
+                  const error = e as Error;
                   setVerifyButtonDisabledDoubleclick(false);
-                  navigation.navigate("onboarding4");
-                } else {
-                  setVerifyButtonDisabledDoubleclick(false);
+                  console.error(error);
+                  Alert.alert(
+                    "Error VerifyAndProceedButton (2)",
+                    error.message
+                  );
                 }
-              } catch (e) {
-                setVerifyButtonDisabledDoubleclick(false);
-                console.error(e);
-                Alert.alert("Error VerifyAndProceedButton (2)", e.message);
+              }}
+              disabled={
+                verifyButtonDisabledDoubleclick
+                  ? verifyButtonDisabledDoubleclick
+                  : verifyButtonDisabled
               }
-            }}
-            disabled={
-              verifyButtonDisabledDoubleclick
-                ? verifyButtonDisabledDoubleclick
-                : verifyButtonDisabled
-            }
-          />
-        </View>
+            />
+          </View>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
   );

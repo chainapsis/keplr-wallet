@@ -1,10 +1,10 @@
-import { KVStore } from "@keplr-wallet/common";
-import { action, makeObservable, observable, runInAction, toJS } from "mobx";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { action, flow, makeObservable, observable, toJS } from "mobx";
 
 export interface App {
   label: string;
   url: string;
-  icon?: string;
+  icon: string | null;
 }
 
 // TODO: this is probably something that we want to fetch dynamically from a server / GitHub.
@@ -14,19 +14,19 @@ const knownApps: App[] = [];
 
 export class AppsStore {
   @observable
-  protected favorites: App[] = [];
+  public favorites: App[] = [];
 
   constructor(protected readonly kvStore: KVStore) {
     makeObservable(this);
-    void this.init();
+    this.init();
   }
 
-  @action
-  protected async init() {
-    const favorites = await this.kvStore.get<App[] | undefined>("favorites");
-    runInAction(() => {
-      this.favorites = favorites ?? knownApps;
-    });
+  @flow
+  protected *init() {
+    const favorites = yield* toGenerator(
+      this.kvStore.get<App[] | undefined>("favorites")
+    );
+    this.favorites = favorites ?? knownApps;
   }
 
   protected async save() {
@@ -36,10 +36,6 @@ export class AppsStore {
 
   public getKnownApps() {
     return knownApps;
-  }
-
-  public getFavorites() {
-    return this.favorites;
   }
 
   public hasFavorite(url: string) {

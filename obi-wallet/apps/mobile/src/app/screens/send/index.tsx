@@ -1,15 +1,20 @@
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
+import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import BottomSheet, {
-  BottomSheetView,
-  TouchableOpacity,
-} from "@gorhom/bottom-sheet/src";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { useMemo, useRef, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import {
+  Platform,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,32 +24,29 @@ import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
+import { isSmallScreenNumber } from "../components/screen-size";
 import {
   SignatureModal,
   useSignatureModalProps,
 } from "../components/signature-modal";
 
 export const SendScreen = observer(() => {
-  const balances = useBalances();
+  const { balances, refreshing, refreshBalances } = useBalances();
   const [selectedCoin, setSelectedCoin] = useState<ExtendedCoin | undefined>(
-    balances[0]
+    () => {
+      return balances.length > 0 ? balances[0] : undefined;
+    }
   );
   const [denominationOpened, setDenominationOpened] = useState(false);
-  const refBottomSheet = useRef(null);
-  const triggerBottomSheet = (open) => {
-    if (!open) {
-      refBottomSheet.current.close();
-    } else {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const triggerBottomSheet = (open: boolean) => {
+    if (open) {
       setDenominationOpened(true);
-      refBottomSheet.current.snapToIndex(0);
+      bottomSheetRef.current?.snapToIndex(0);
+    } else {
+      bottomSheetRef.current?.close();
     }
   };
-
-  useEffect(() => {
-    if (!selectedCoin) {
-      setSelectedCoin(balances[0]);
-    }
-  }, [balances, selectedCoin]);
 
   const hydratedSelectedCoin = selectedCoin ? formatCoin(selectedCoin) : null;
 
@@ -52,11 +54,15 @@ export const SendScreen = observer(() => {
   const [amount, setAmount] = useState("");
 
   const { multisigStore } = useStore();
-  const { prefix } = multisigStore.currentChainInformation;
-  const multisig = multisigStore.getCurrentAdmin(prefix);
+  const multisig = multisigStore.currentAdmin;
 
   const encodeObjects = useMemo(() => {
-    if (!selectedCoin) return [];
+    if (
+      !selectedCoin ||
+      !multisig?.multisig?.address ||
+      !multisigStore.proxyAddress
+    )
+      return [];
 
     const { digits } = formatCoin(selectedCoin);
     const normalizedAmount =
@@ -93,7 +99,7 @@ export const SendScreen = observer(() => {
       value,
     };
     return [message];
-  }, [address, amount, multisig.multisig.address, multisigStore, selectedCoin]);
+  }, [address, amount, multisig, multisigStore, selectedCoin]);
 
   const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
     multisig,
@@ -103,12 +109,18 @@ export const SendScreen = observer(() => {
     },
   });
 
+  const intl = useIntl();
+
   return (
     <SafeAreaView
       style={{
         backgroundColor: "rgba(9, 8, 23, 1);",
         flex: 1,
         paddingHorizontal: 20,
+        paddingVertical: Platform.select({
+          ios: isSmallScreenNumber(20, 20),
+          android: isSmallScreenNumber(30, 30),
+        }),
         justifyContent: "space-between",
       }}
     >
@@ -125,7 +137,7 @@ export const SendScreen = observer(() => {
               fontWeight: "600",
             }}
           >
-            Send
+            <FormattedMessage id="send.send" defaultMessage="Send" />
           </Text>
         </View>
         <View
@@ -136,17 +148,60 @@ export const SendScreen = observer(() => {
           }}
         >
           <TextInput
-            label="to"
-            placeholder="Wallet Address"
+            label={intl.formatMessage({ id: "send.to", defaultMessage: "To" })}
+            placeholder={intl.formatMessage({
+              id: "send.walletaddress",
+              defaultMessage: "Wallet Address",
+            })}
             style={{ flex: 1 }}
+            inputStyle={{
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              borderRightWidth: 0,
+            }}
             value={address}
             onChangeText={setAddress}
           />
-          {/* <View style={{ width: 64, height: 64, backgroundColor: 'red' }} /> */}
+          <TouchableOpacity
+            style={{
+              width: 56,
+              height: 56,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 5,
+              borderTopRightRadius: 12,
+              borderBottomRightRadius: 12,
+              borderWidth: 1,
+              borderColor: "#2F2B4C",
+              borderLeftWidth: 0,
+            }}
+          >
+            <View
+              style={{
+                position: "absolute",
+                width: 1,
+                backgroundColor: "#2F2B4C",
+                height: "100%",
+                left: 0,
+              }}
+            />
+            <FontAwesomeIcon
+              icon={faQrcode}
+              style={{ color: "#887CEB" }}
+              size={32}
+            />
+          </TouchableOpacity>
         </View>
         <View style={{ marginTop: 35 }}>
-          <Text style={{ color: "#787B9C", fontSize: 10, marginBottom: 12 }}>
-            AMOUNT
+          <Text
+            style={{
+              color: "#787B9C",
+              textTransform: "uppercase",
+              fontSize: 10,
+              marginBottom: 12,
+            }}
+          >
+            <FormattedMessage id="send.amount" defaultMessage="Amount" />
           </Text>
           <View
             style={{
@@ -232,7 +287,7 @@ export const SendScreen = observer(() => {
       </View>
       <Button
         flavor="blue"
-        label="Next"
+        label={intl.formatMessage({ id: "send.next", defaultMessage: "Next" })}
         disabled={!address || !amount || !selectedCoin}
         onPress={() => {
           openSignatureModal();
@@ -248,7 +303,7 @@ export const SendScreen = observer(() => {
         handleStyle={{ backgroundColor: "transparent" }}
         snapPoints={["60"]}
         enablePanDownToClose={true}
-        ref={refBottomSheet}
+        ref={bottomSheetRef}
         index={-1}
         backdropComponent={(props) => null}
         onClose={() => {
@@ -274,10 +329,16 @@ export const SendScreen = observer(() => {
               <Text
                 style={{ fontSize: 16, fontWeight: "600", color: "#f6f5ff" }}
               >
-                Denomination
+                <FormattedMessage
+                  id="send.denomination"
+                  defaultMessage="Denomination"
+                />
               </Text>
               <Text style={{ fontSize: 12, color: "#f6f5ff", opacity: 0.6 }}>
-                Select the coin you'd like to send
+                <FormattedMessage
+                  id="send.selectcoin"
+                  defaultMessage="Select the coin you'd like to send"
+                />
               </Text>
             </View>
             <TouchableOpacity onPress={() => triggerBottomSheet(false)}>
@@ -287,11 +348,25 @@ export const SendScreen = observer(() => {
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            <Text style={{ fontSize: 12, color: "#f6f5ff", opacity: 0.6 }}>
-              NAME
+            <Text
+              style={{
+                fontSize: 12,
+                color: "#f6f5ff",
+                opacity: 0.6,
+                textTransform: "uppercase",
+              }}
+            >
+              <FormattedMessage id="send.name" defaultMessage="Name" />
             </Text>
-            <Text style={{ fontSize: 12, color: "#f6f5ff", opacity: 0.6 }}>
-              HOLDINGS
+            <Text
+              style={{
+                fontSize: 12,
+                color: "#f6f5ff",
+                opacity: 0.6,
+                textTransform: "uppercase",
+              }}
+            >
+              <FormattedMessage id="send.holdings" defaultMessage="Holdings" />
             </Text>
           </View>
           <FlatList
@@ -307,6 +382,12 @@ export const SendScreen = observer(() => {
                 }}
               />
             )}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={refreshBalances}
+              />
+            }
           />
         </BottomSheetView>
       </BottomSheet>

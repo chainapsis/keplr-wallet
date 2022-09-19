@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { WebView } from "react-native-webview";
 
 import { ConnectedWebView } from "../components/connected-web-view";
 
 export function Trade() {
   const safeArea = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
+  const webViewRef = useRef<WebView>(null);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#17162C" }}>
@@ -14,6 +17,7 @@ export function Trade() {
         url="https://juno.loop.markets/#Swap"
         onLoadEnd={() => setLoading(false)}
         style={{ flex: 1, marginTop: safeArea.top }}
+        webViewRef={webViewRef}
       />
       {loading && (
         <View
@@ -37,7 +41,10 @@ export function Trade() {
             style={{ marginBottom: 20 }}
           />
           <Text style={{ color: "white", fontSize: 20, fontWeight: "700" }}>
-            Loading...
+            <FormattedMessage
+              id="menu.trade.loading"
+              defaultMessage="Loading..."
+            />
           </Text>
         </View>
       )}
