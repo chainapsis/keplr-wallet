@@ -9,28 +9,28 @@ import { Alert, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { IconButton, InlineButton } from "../../../button";
-import { useStore } from "../../../stores";
-import { TextInput } from "../../../text-input";
+import { IconButton, InlineButton } from "../../../../button";
+import { useStore } from "../../../../stores";
+import { TextInput } from "../../../../text-input";
 import {
   parsePublicKeyTextMessageResponse,
   sendPublicKeyTextMessage,
-} from "../../../text-message";
-import { Background } from "../../components/background";
-import { KeyboardAvoidingView } from "../../components/keyboard-avoiding-view";
-import { VerifyAndProceedButton } from "../../components/phone-number/verify-and-proceed-button";
-import { StackParamList } from "../stack";
+} from "../../../../text-message";
+import { Background } from "../../../components/background";
+import { KeyboardAvoidingView } from "../../../components/keyboard-avoiding-view";
+import { VerifyAndProceedButton } from "../../../components/phone-number/verify-and-proceed-button";
+import { OnboardingStackParamList } from "../../onboarding-stack";
 import InsuranceLogo from "./assets/insurance-logo.svg";
 
-export type PhoneNumberConfirmOnboardingProps = NativeStackScreenProps<
-  StackParamList,
-  "onboarding3"
+export type MultisigPhoneNumberConfirmProps = NativeStackScreenProps<
+  OnboardingStackParamList,
+  "create-multisig-phone-number-confirm"
 >;
 
-export function PhoneNumberConfirmOnboarding({
+export function MultisigPhoneNumberConfirm({
   navigation,
   route,
-}: PhoneNumberConfirmOnboardingProps) {
+}: MultisigPhoneNumberConfirmProps) {
   const { params } = route;
 
   const { demoStore, multisigStore } = useStore();
@@ -226,7 +226,7 @@ export function PhoneNumberConfirmOnboarding({
                       });
                     }
                     setVerifyButtonDisabledDoubleclick(false);
-                    navigation.navigate("onboarding4");
+                    navigation.navigate("create-multisig-biometrics");
                   } else {
                     setVerifyButtonDisabledDoubleclick(false);
                   }

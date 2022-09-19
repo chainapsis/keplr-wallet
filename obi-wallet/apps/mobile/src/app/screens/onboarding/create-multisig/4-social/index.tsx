@@ -4,32 +4,32 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { IconButton, InlineButton } from "../../../button";
-import { useStargateClient } from "../../../clients";
-import { useStore } from "../../../stores";
-import { TextInput } from "../../../text-input";
-import { Background } from "../../components/background";
-import { KeyboardAvoidingView } from "../../components/keyboard-avoiding-view";
-import { VerifyAndProceedButton } from "../../components/phone-number/verify-and-proceed-button";
-import { StackParamList } from "../stack";
+import { IconButton, InlineButton } from "../../../../button";
+import { createStargateClient } from "../../../../clients";
+import { useStore } from "../../../../stores";
+import { TextInput } from "../../../../text-input";
+import { Background } from "../../../components/background";
+import { KeyboardAvoidingView } from "../../../components/keyboard-avoiding-view";
+import { VerifyAndProceedButton } from "../../../components/phone-number/verify-and-proceed-button";
+import { OnboardingStackParamList } from "../../onboarding-stack";
 import PeopleIcon from "./assets/people-alt-twotone-24px.svg";
 
-export type SocialOnboardingProps = NativeStackScreenProps<
-  StackParamList,
-  "onboarding5"
+export type MultisigSocialProps = NativeStackScreenProps<
+  OnboardingStackParamList,
+  "create-multisig-social"
 >;
 
-export const SocialOnboarding = observer<SocialOnboardingProps>(
+export const MultisigSocial = observer<MultisigSocialProps>(
   ({ navigation }) => {
-    const { demoStore, multisigStore } = useStore();
+    const { chainStore, demoStore, multisigStore } = useStore();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
 
-    const client = useStargateClient();
+    const intl = useIntl();
 
     useEffect(() => {
       if (demoStore.demoMode) return;
@@ -53,19 +53,18 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                 id: "onboarding4.error.socialkeyexists.yes",
               }),
               onPress: () => {
-                navigation.navigate("onboarding6");
+                navigation.navigate("create-multisig-init");
               },
             },
           ]
         );
       }
-    }, [demoStore, multisigStore, navigation]);
-
-    const intl = useIntl();
+    }, [demoStore, intl, multisigStore, navigation]);
 
     async function getAccountPubkey(key: string) {
+      const client = await createStargateClient(chainStore.currentChain);
+
       try {
-        if (!client) return null;
         const account = await client.getAccount(key);
         return account?.pubkey;
       } catch (e) {
@@ -75,6 +74,8 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
           "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."
         );
         return null;
+      } finally {
+        client.disconnect();
       }
     }
 
@@ -181,7 +182,7 @@ export const SocialOnboarding = observer<SocialOnboardingProps>(
                         publicKey: publicKey,
                       });
                     }
-                    navigation.navigate("onboarding6");
+                    navigation.navigate("create-multisig-init");
                   }
                 }}
               />

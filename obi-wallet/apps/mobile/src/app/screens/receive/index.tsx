@@ -9,10 +9,8 @@ import { Back } from "../components/back";
 import { isSmallScreenNumber } from "../components/screen-size";
 
 export const ReceiveScreen = observer(() => {
-  const { demoStore, multisigStore } = useStore();
-  const address = demoStore.demoMode
-    ? "demo-address"
-    : multisigStore.proxyAddress?.address;
+  const { demoStore, walletStore } = useStore();
+  const address = demoStore.demoMode ? "demo-address" : walletStore.address;
 
   if (!address) return null;
 

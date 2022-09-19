@@ -33,7 +33,7 @@ export function useBalances() {
 }
 
 export function formatCoin(coin: ExtendedCoin) {
-  const { denom } = rootStore.multisigStore.currentChainInformation;
+  const { denom } = rootStore.chainStore.currentChainInformation;
   switch (coin.denom) {
     case denom: {
       const digits = 6;
@@ -44,7 +44,7 @@ export function formatCoin(coin: ExtendedCoin) {
         digits,
         label: denom[1].toUpperCase() + denom.slice(2),
         amount,
-        valueInUsd: 0,
+        valueInUsd: amount * coin.usdPrice,
       };
     }
     case "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034": {
@@ -80,7 +80,7 @@ export function formatCoin(coin: ExtendedCoin) {
         digits: 6,
         label: "Unknown Token",
         amount: amount,
-        valueInUsd: 0,
+        valueInUsd: amount * coin.usdPrice,
       };
     }
   }

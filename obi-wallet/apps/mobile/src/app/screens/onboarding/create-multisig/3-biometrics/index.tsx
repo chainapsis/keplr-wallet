@@ -10,22 +10,23 @@ import { Alert, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { getBiometricsPublicKey } from "../../../biometrics";
-import { Button, IconButton } from "../../../button";
-import { useStore } from "../../../stores";
-import { Background } from "../../components/background";
-import { StackParamList } from "../stack";
+import { getBiometricsPublicKey } from "../../../../biometrics";
+import { Button, IconButton } from "../../../../button";
+import { useStore } from "../../../../stores";
+import { Background } from "../../../components/background";
+import { OnboardingStackParamList } from "../../onboarding-stack";
 import FaceScanner from "./assets/face-scanner.svg";
 import Scan from "./assets/scan.svg";
 
-export type BiometricsOnboardingProps = NativeStackScreenProps<
-  StackParamList,
-  "onboarding4"
+export type MultisigBiometricsProps = NativeStackScreenProps<
+  OnboardingStackParamList,
+  "create-multisig-biometrics"
 >;
 
-export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
+export const MultisigBiometrics = observer<MultisigBiometricsProps>(
   ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
+    const intl = useIntl();
 
     useEffect(() => {
       if (demoStore.demoMode) return;
@@ -51,15 +52,14 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                 id: "onboarding4.error.biometrickeyexists.yes",
               }),
               onPress: () => {
-                navigation.navigate("onboarding5");
+                navigation.navigate("create-multisig-social");
               },
             },
           ]
         );
       }
-    }, [demoStore, multisigStore, navigation]);
+    }, [demoStore, intl, multisigStore, navigation]);
 
-    const intl = useIntl();
     const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
       useState(false);
 
@@ -172,7 +172,7 @@ export const BiometricsOnboarding = observer<BiometricsOnboardingProps>(
                   });
                 }
 
-                navigation.navigate("onboarding5");
+                navigation.navigate("create-multisig-social");
                 setButtonDisabledDoubleclick(false);
               } catch (e) {
                 setButtonDisabledDoubleclick(false);

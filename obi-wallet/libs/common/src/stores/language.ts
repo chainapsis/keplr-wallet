@@ -2,11 +2,11 @@ import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { action, flow, makeObservable, observable, runInAction } from "mobx";
 
 export class LanguageStore {
+  protected readonly kvStore: KVStore;
+  public readonly enabledLanguages: string[];
+
   @observable
   public currentLanguage: string;
-
-  public enabledLanguages: string[];
-  protected kvStore: KVStore;
 
   constructor({
     deviceLanguage,

@@ -4,7 +4,8 @@ import { toGenerator } from "@keplr-wallet/common";
 import { computed, flow, makeObservable, observable } from "mobx";
 
 import { Chain } from "../../chains";
-import { MultisigStore } from "../multisig";
+import { ChainStore } from "../chain";
+import { WalletStore } from "../wallet";
 
 export interface ExtendedCoin {
   denom: string;
@@ -13,28 +14,38 @@ export interface ExtendedCoin {
 }
 
 export class BalancesStore {
+  protected readonly chainStore: ChainStore;
+  protected readonly walletStore: WalletStore;
+
   @observable
   public balancesPerChain: Partial<Record<Chain, ExtendedCoin[]>> = {};
 
-  constructor(protected multisigStore: MultisigStore) {
+  constructor({
+    chainStore,
+    walletStore,
+  }: {
+    chainStore: ChainStore;
+    walletStore: WalletStore;
+  }) {
+    this.chainStore = chainStore;
+    this.walletStore = walletStore;
     makeObservable(this);
   }
 
   @computed
   public get balances() {
-    return this.balancesPerChain[this.multisigStore.currentChain] ?? [];
+    return this.balancesPerChain[this.chainStore.currentChain] ?? [];
   }
 
   @flow
   public *fetchBalances() {
-    const { proxyAddress } = this.multisigStore;
-    if (!proxyAddress) return;
+    const { address } = this.walletStore;
+    if (!address) return;
 
-    const { rpc } = this.multisigStore.currentChainInformation;
+    const { rpc } = this.chainStore.currentChainInformation;
     const client = yield* toGenerator(StargateClient.connect(rpc));
     const wasmClient = yield* toGenerator(CosmWasmClient.connect(rpc));
 
-    const { address } = proxyAddress;
     const balances = yield* toGenerator(client.getAllBalances(address));
 
     /// Return nothing if asset is considered 1 USD
@@ -42,7 +53,7 @@ export class BalancesStore {
     /// Return two contract addresses (strings) if price must be grabbed from first
     /// and then divided by second price.
     const getContractRoute = (asset: string) => {
-      switch (this.multisigStore.currentChain) {
+      switch (this.chainStore.currentChain) {
         case "uni-3":
           return [
             "juno1dmwfwqvke4hew5s93ut8h4tgu6sxv67zjw0y3hskgkfpy3utnpvseqyjs7",
@@ -74,8 +85,8 @@ export class BalancesStore {
       if (route.length === 0) return 1;
 
       let dexBasePriceElements = {
-        commissionAmount: 1,
-        returnAmount: 9,
+        commission_amount: 1,
+        return_amount: 9,
       };
 
       if (route[0] !== "") {
@@ -90,9 +101,10 @@ export class BalancesStore {
           },
         });
       }
+
       const dexBasePrice =
-        (Number(dexBasePriceElements.commissionAmount) +
-          Number(dexBasePriceElements.returnAmount)) /
+        (Number(dexBasePriceElements.commission_amount) +
+          Number(dexBasePriceElements.return_amount)) /
         10;
 
       if (route.length === 1) {
@@ -145,7 +157,7 @@ export class BalancesStore {
       )
     );
 
-    this.balancesPerChain[this.multisigStore.currentChain] = extendedCoins;
+    this.balancesPerChain[this.chainStore.currentChain] = extendedCoins;
 
     client.disconnect();
     wasmClient.disconnect();

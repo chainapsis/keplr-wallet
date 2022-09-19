@@ -17,19 +17,27 @@ import { AppsStore } from "./apps";
 import { BalancesStore } from "./balances";
 import { ChainStore } from "./chain";
 import { DemoStore } from "./demo";
+import { KeplrChainStore } from "./keplr-chain";
 import { LanguageStore } from "./language";
 import { MultisigStore } from "./multisig";
+import { SinglesigStore } from "./singlesig";
+import { WalletStore } from "./wallet";
 
 export class RootStore {
   public readonly appsStore: AppsStore;
   public readonly balancesStore: BalancesStore;
   public readonly chainStore: ChainStore;
-  public readonly chainSuggestStore: ChainSuggestStore;
   public readonly demoStore: DemoStore;
-  public readonly interactionStore: InteractionStore;
   public readonly languageStore: LanguageStore;
   public readonly multisigStore: MultisigStore;
-  public readonly permissionStore: PermissionStore;
+  public readonly singlesigStore: SinglesigStore;
+  public readonly walletStore: WalletStore;
+
+  // Hide Keplr-related stores
+  protected readonly keplrChainStore: KeplrChainStore;
+  protected readonly keplrChainSuggestStore: ChainSuggestStore;
+  protected readonly keplrInteractionStore: InteractionStore;
+  protected readonly keplrPermissionStore: PermissionStore;
 
   constructor({
     defaultChain,
@@ -46,22 +54,25 @@ export class RootStore {
     ObservableQueryBase.experimentalDeferInitialQueryController =
       new DeferInitialQueryController();
 
-    this.interactionStore = new InteractionStore(
+    this.keplrInteractionStore = new InteractionStore(
       router,
       new MessageRequesterInternal()
     );
-    this.chainStore = new ChainStore(
+    this.keplrChainStore = new KeplrChainStore(
       EmbedChainInfos,
       new MessageRequesterInternal(),
       ObservableQueryBase.experimentalDeferInitialQueryController
     );
-    this.chainSuggestStore = new ChainSuggestStore(this.interactionStore);
-    this.permissionStore = new PermissionStore(
-      this.interactionStore,
+    this.keplrChainSuggestStore = new ChainSuggestStore(
+      this.keplrInteractionStore
+    );
+    this.keplrPermissionStore = new PermissionStore(
+      this.keplrInteractionStore,
       new MessageRequesterInternal()
     );
 
-    this.appsStore = new AppsStore(new KVStore("apps-store"));
+    this.appsStore = new AppsStore({ kvStore: new KVStore("apps-store") });
+    this.chainStore = new ChainStore({ defaultChain });
     this.demoStore = new DemoStore();
     this.languageStore = new LanguageStore({
       deviceLanguage,
@@ -69,13 +80,31 @@ export class RootStore {
       defaultLanguage,
       kvStore: new KVStore("language-store"),
     });
-    this.multisigStore = new MultisigStore(
-      defaultChain,
-      new KVStore("multisig-store")
-    );
 
-    this.balancesStore = new BalancesStore(this.multisigStore);
+    this.singlesigStore = new SinglesigStore({
+      chainStore: this.chainStore,
+      kvStore: new KVStore("singlesig-store"),
+    });
+    this.multisigStore = new MultisigStore({
+      chainStore: this.chainStore,
+      kvStore: new KVStore("multisig-store"),
+    });
+
+    this.walletStore = new WalletStore({
+      demoStore: this.demoStore,
+      singlesigStore: this.singlesigStore,
+      multisigStore: this.multisigStore,
+    });
+
+    this.balancesStore = new BalancesStore({
+      chainStore: this.chainStore,
+      walletStore: this.walletStore,
+    });
 
     router.listen(APP_PORT);
+  }
+
+  public get permissionStore() {
+    return this.keplrPermissionStore;
   }
 }

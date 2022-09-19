@@ -18,6 +18,7 @@
 		3172E4EBFFF0464CAAA52A75 /* Inter-SemiBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = CC5C08772CB34A178E0CC060 /* Inter-SemiBoldItalic.otf */; };
 		3F0E3BF8EB397D375C2E5907 /* libPods-Mobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D9E2FECF4009533A866D0976 /* libPods-Mobile.a */; };
 		4104162E3E0A475F97CBEA80 /* Inter-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = B7770FF7980441BDB51C2467 /* Inter-Black.otf */; };
+		483293BC28D6969D0052B2F9 /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 483293BB28D6969D0052B2F9 /* AppCenter-Config.plist */; };
 		4C1AB3009844426F94182758 /* injected-provider.js in Resources */ = {isa = PBXBuildFile; fileRef = 157852BF58F14686AD658A8A /* injected-provider.js */; };
 		4D927966D29047D0B9666A7B /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6044A1B7873C4546AA246BA7 /* Inter-SemiBold.otf */; };
 		55A3960BB602412DB7DE19BE /* Inter-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A087BE935E3B4C24AB794FDF /* Inter-BlackItalic.otf */; };
@@ -63,6 +64,7 @@
 		2504730789F84B3AA9AC712C /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBold.otf"; path = "../src/assets/fonts/Inter/Inter-ExtraBold.otf"; sourceTree = "<group>"; };
 		2E6B03DF32BB4E399D5DBEC7 /* Inter-ThinItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ThinItalic.otf"; path = "../src/assets/fonts/Inter/Inter-ThinItalic.otf"; sourceTree = "<group>"; };
 		30EABA9A32F74A62B3AB7975 /* Inter-Bold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Bold.otf"; path = "../src/assets/fonts/Inter/Inter-Bold.otf"; sourceTree = "<group>"; };
+		483293BB28D6969D0052B2F9 /* AppCenter-Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = "AppCenter-Config.plist"; path = "Mobile/AppCenter-Config.plist"; sourceTree = "<group>"; };
 		4C9D1EAA22C4426883D712E5 /* Inter-ExtraBoldItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraBoldItalic.otf"; path = "../src/assets/fonts/Inter/Inter-ExtraBoldItalic.otf"; sourceTree = "<group>"; };
 		56CE9CEBEC3D4063B1D8A558 /* Inter-ExtraLightItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-ExtraLightItalic.otf"; path = "../src/assets/fonts/Inter/Inter-ExtraLightItalic.otf"; sourceTree = "<group>"; };
 		5920A3AA794B43428A46E15A /* Inter-Italic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Italic.otf"; path = "../src/assets/fonts/Inter/Inter-Italic.otf"; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 		13B07FAE1A68108700A75B9A /* Mobile */ = {
 			isa = PBXGroup;
 			children = (
+				483293BB28D6969D0052B2F9 /* AppCenter-Config.plist */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -326,6 +329,7 @@
 				02412B1A05B64A848829B57D /* Inter-LightItalic.otf in Resources */,
 				74F69DE3A7204DA192C143D1 /* Inter-Medium.otf in Resources */,
 				BA195583D823470198964972 /* Inter-MediumItalic.otf in Resources */,
+				483293BC28D6969D0052B2F9 /* AppCenter-Config.plist in Resources */,
 				D4C478400AF74B068594E4EA /* Inter-Regular.otf in Resources */,
 				4D927966D29047D0B9666A7B /* Inter-SemiBold.otf in Resources */,
 				3172E4EBFFF0464CAAA52A75 /* Inter-SemiBoldItalic.otf in Resources */,

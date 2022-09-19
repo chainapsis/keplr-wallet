@@ -13,10 +13,13 @@ export interface App {
 const knownApps: App[] = [];
 
 export class AppsStore {
+  protected readonly kvStore: KVStore;
+
   @observable
   public favorites: App[] = [];
 
-  constructor(protected readonly kvStore: KVStore) {
+  constructor({ kvStore }: { kvStore: KVStore }) {
+    this.kvStore = kvStore;
     makeObservable(this);
     this.init();
   }

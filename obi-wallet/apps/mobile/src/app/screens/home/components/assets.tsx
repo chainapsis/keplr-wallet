@@ -21,7 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ExtendedCoin, formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
-import { StackParamList } from "../../../stack";
+import { RootStackParamList } from "../../../root-stack";
 import { useStore } from "../../../stores";
 import {
   isSmallScreenNumber,
@@ -32,8 +32,8 @@ import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
 export const Assets = observer(() => {
-  const { multisigStore } = useStore();
-  const currentNetwork = multisigStore.currentChainInformation.label;
+  const { chainStore } = useStore();
+  const currentNetwork = chainStore.currentChainInformation.label;
 
   return (
     <ImageBackground
@@ -187,7 +187,7 @@ const BalanceAndActions = observer(() => {
     0
   );
 
-  const navigation = useNavigation<NavigationProp<StackParamList>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   return (
     <View
       style={{
