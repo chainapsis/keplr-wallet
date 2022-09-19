@@ -5,7 +5,7 @@ import { computed, flow, makeObservable, observable } from "mobx";
 
 import { Chain } from "../../chains";
 import { ChainStore } from "../chain";
-import { MultisigStore } from "../multisig";
+import { WalletStore } from "../wallet";
 
 export interface ExtendedCoin {
   denom: string;
@@ -15,20 +15,20 @@ export interface ExtendedCoin {
 
 export class BalancesStore {
   protected readonly chainStore: ChainStore;
-  protected readonly multisigStore: MultisigStore;
+  protected readonly walletStore: WalletStore;
 
   @observable
   public balancesPerChain: Partial<Record<Chain, ExtendedCoin[]>> = {};
 
   constructor({
     chainStore,
-    multisigStore,
+    walletStore,
   }: {
     chainStore: ChainStore;
-    multisigStore: MultisigStore;
+    walletStore: WalletStore;
   }) {
     this.chainStore = chainStore;
-    this.multisigStore = multisigStore;
+    this.walletStore = walletStore;
     makeObservable(this);
   }
 
@@ -39,14 +39,13 @@ export class BalancesStore {
 
   @flow
   public *fetchBalances() {
-    const { proxyAddress } = this.multisigStore;
-    if (!proxyAddress) return;
+    const { address } = this.walletStore;
+    if (!address) return;
 
     const { rpc } = this.chainStore.currentChainInformation;
     const client = yield* toGenerator(StargateClient.connect(rpc));
     const wasmClient = yield* toGenerator(CosmWasmClient.connect(rpc));
 
-    const { address } = proxyAddress;
     const balances = yield* toGenerator(client.getAllBalances(address));
 
     /// Return nothing if asset is considered 1 USD
@@ -86,8 +85,8 @@ export class BalancesStore {
       if (route.length === 0) return 1;
 
       let dexBasePriceElements = {
-        commissionAmount: 1,
-        returnAmount: 9,
+        commission_amount: 1,
+        return_amount: 9,
       };
 
       if (route[0] !== "") {
@@ -102,9 +101,10 @@ export class BalancesStore {
           },
         });
       }
+
       const dexBasePrice =
-        (Number(dexBasePriceElements.commissionAmount) +
-          Number(dexBasePriceElements.returnAmount)) /
+        (Number(dexBasePriceElements.commission_amount) +
+          Number(dexBasePriceElements.return_amount)) /
         10;
 
       if (route.length === 1) {

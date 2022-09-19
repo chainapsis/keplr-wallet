@@ -71,4 +71,18 @@ export class WalletStore {
 
     return WalletType.MULTISIG_DEMO;
   }
+
+  @computed
+  public get address(): string | null {
+    if (this.type === null) return null;
+
+    switch (this.type) {
+      case WalletType.MULTISIG:
+        return this.multisigStore.proxyAddress?.address ?? null;
+      case WalletType.MULTISIG_DEMO:
+        return null;
+      case WalletType.SINGLESIG:
+        return this.singlesigStore.address;
+    }
+  }
 }

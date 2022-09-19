@@ -80,21 +80,25 @@ export class RootStore {
       defaultLanguage,
       kvStore: new KVStore("language-store"),
     });
-    this.singlesigStore = new SinglesigStore(new KVStore("singlesig-store"));
 
+    this.singlesigStore = new SinglesigStore({
+      chainStore: this.chainStore,
+      kvStore: new KVStore("singlesig-store"),
+    });
     this.multisigStore = new MultisigStore({
       chainStore: this.chainStore,
       kvStore: new KVStore("multisig-store"),
     });
 
-    this.balancesStore = new BalancesStore({
-      chainStore: this.chainStore,
-      multisigStore: this.multisigStore,
-    });
     this.walletStore = new WalletStore({
       demoStore: this.demoStore,
       singlesigStore: this.singlesigStore,
       multisigStore: this.multisigStore,
+    });
+
+    this.balancesStore = new BalancesStore({
+      chainStore: this.chainStore,
+      walletStore: this.walletStore,
     });
 
     router.listen(APP_PORT);
