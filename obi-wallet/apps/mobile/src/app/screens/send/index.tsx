@@ -144,10 +144,6 @@ export const SendScreen = observer(() => {
     },
   });
 
-  useEffect(() => {
-    openSignatureModal();
-  }, [openSignatureModal]);
-
   const intl = useIntl();
 
   return (
@@ -193,43 +189,43 @@ export const SendScreen = observer(() => {
               defaultMessage: "Wallet Address",
             })}
             style={{ flex: 1 }}
-            inputStyle={{
-              borderTopRightRadius: 0,
-              borderBottomRightRadius: 0,
-              borderRightWidth: 0,
-            }}
+            // inputStyle={{
+            //   borderTopRightRadius: 0,
+            //   borderBottomRightRadius: 0,
+            //   borderRightWidth: 0,
+            // }}
             value={address}
             onChangeText={setAddress}
           />
-          <TouchableOpacity
-            style={{
-              width: 56,
-              height: 56,
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 5,
-              borderTopRightRadius: 12,
-              borderBottomRightRadius: 12,
-              borderWidth: 1,
-              borderColor: "#2F2B4C",
-              borderLeftWidth: 0,
-            }}
-          >
-            <View
-              style={{
-                position: "absolute",
-                width: 1,
-                backgroundColor: "#2F2B4C",
-                height: "100%",
-                left: 0,
-              }}
-            />
-            <FontAwesomeIcon
-              icon={faQrcode}
-              style={{ color: "#887CEB" }}
-              size={32}
-            />
-          </TouchableOpacity>
+          {/*<TouchableOpacity*/}
+          {/*  style={{*/}
+          {/*    width: 56,*/}
+          {/*    height: 56,*/}
+          {/*    justifyContent: "center",*/}
+          {/*    alignItems: "center",*/}
+          {/*    padding: 5,*/}
+          {/*    borderTopRightRadius: 12,*/}
+          {/*    borderBottomRightRadius: 12,*/}
+          {/*    borderWidth: 1,*/}
+          {/*    borderColor: "#2F2B4C",*/}
+          {/*    borderLeftWidth: 0,*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <View*/}
+          {/*    style={{*/}
+          {/*      position: "absolute",*/}
+          {/*      width: 1,*/}
+          {/*      backgroundColor: "#2F2B4C",*/}
+          {/*      height: "100%",*/}
+          {/*      left: 0,*/}
+          {/*    }}*/}
+          {/*  />*/}
+          {/*  <FontAwesomeIcon*/}
+          {/*    icon={faQrcode}*/}
+          {/*    style={{ color: "#887CEB" }}*/}
+          {/*    size={32}*/}
+          {/*  />*/}
+          {/*</TouchableOpacity>*/}
         </View>
         <View style={{ marginTop: 35 }}>
           <Text
@@ -329,7 +325,9 @@ export const SendScreen = observer(() => {
         label={intl.formatMessage({ id: "send.next", defaultMessage: "Next" })}
         disabled={!address || !amount || !selectedCoin}
         onPress={() => {
-          openSignatureModal();
+          if (address && amount && selectedCoin) {
+            openSignatureModal();
+          }
         }}
       />
       <BottomSheetBackdrop

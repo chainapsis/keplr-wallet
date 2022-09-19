@@ -1,3 +1,4 @@
+import { WalletType } from "@obi-wallet/common";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
@@ -17,7 +18,6 @@ import { RootStack, useRootNavigation } from "../../root-stack";
 import { useStore } from "../../stores";
 import { Account } from "../account";
 import { Create } from "../account/create";
-import { DemoModeToggle } from "../components/demo-mode-toggle";
 import MultiSigIcon from "./assets/edit.svg";
 import HelpAndSupport from "./assets/headset.svg";
 import ObiLogo from "./assets/obi-logo.svg";
@@ -25,15 +25,20 @@ import LogoutIcon from "./assets/power-red.svg";
 import { KeysConfigScreen } from "./keys-config";
 
 export const SettingsScreen = observer(() => {
-  const { demoStore, multisigStore } = useStore();
+  const { demoStore, multisigStore, singlesigStore, walletStore } = useStore();
   const intl = useIntl();
   const navigation = useRootNavigation();
   const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
+
   useEffect(() => {
     void (async () => {
       setAppMetadata(await codePush.getUpdateMetadata());
     })();
   }, []);
+
+  const isMultisigWallet =
+    walletStore.type === WalletType.MULTISIG ||
+    walletStore.type === WalletType.MULTISIG_DEMO;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -70,7 +75,9 @@ export const SettingsScreen = observer(() => {
           </TouchableOpacity>
 
           <View style={{ flexDirection: "column" }}>
-            <Text style={styles.heading}>Obi Secure Multisig Account</Text>
+            <Text style={styles.heading}>
+              Obi {isMultisigWallet ? <>Secure Multisig </> : null}Account
+            </Text>
             {/*<Text style={styles.subHeading}>
               Profile picture, name and mail
             </Text>*/}
@@ -95,18 +102,20 @@ export const SettingsScreen = observer(() => {
             onPress={() => navigation.navigate("AccountsSettings")}
           />
           */}
-      <Setting
-        Icon={MultiSigIcon}
-        title={intl.formatMessage({
-          id: "settings.multigsigsettings",
-          defaultMessage: "Key Settings",
-        })}
-        subtitle={intl.formatMessage({
-          id: "settings.multigsigsettings.subtext",
-          defaultMessage: "Manage your SMS, social, and other keys.",
-        })}
-        onPress={() => navigation.navigate("MultiSigSettings")}
-      />
+      {isMultisigWallet ? (
+        <Setting
+          Icon={MultiSigIcon}
+          title={intl.formatMessage({
+            id: "settings.multigsigsettings",
+            defaultMessage: "Key Settings",
+          })}
+          subtitle={intl.formatMessage({
+            id: "settings.multigsigsettings.subtext",
+            defaultMessage: "Manage your SMS, social, and other keys.",
+          })}
+          onPress={() => navigation.navigate("MultiSigSettings")}
+        />
+      ) : null}
       <View
         style={[
           styles.flex1,
@@ -144,18 +153,21 @@ export const SettingsScreen = observer(() => {
           defaultMessage: "Save your keys before logging out",
         })}
         onPress={() => {
-          if (demoStore.demoMode) {
-            demoStore.logout();
-          } else {
-            multisigStore.logout();
+          if (!walletStore.type) return;
+
+          switch (walletStore.type) {
+            case WalletType.MULTISIG:
+              multisigStore.logout();
+              break;
+            case WalletType.MULTISIG_DEMO:
+              demoStore.logout();
+              break;
+            case WalletType.SINGLESIG:
+              singlesigStore.logout();
+              break;
           }
         }}
       />
-      <DemoModeToggle>
-        <Text style={{ color: "white", textAlign: "center" }}>
-          Obi {appMetadata?.appVersion} {appMetadata?.label}
-        </Text>
-      </DemoModeToggle>
       <View
         style={{
           flex: 1,
@@ -202,6 +214,18 @@ export const SettingsScreen = observer(() => {
             />
           </Text>
         </View>
+        {appMetadata ? (
+          <Text
+            style={{
+              color: "#F6F5FF",
+              marginLeft: 10,
+              fontSize: 10,
+              textAlign: "center",
+            }}
+          >
+            Obi {appMetadata.appVersion} {appMetadata.label}
+          </Text>
+        ) : null}
       </View>
     </SafeAreaView>
   );

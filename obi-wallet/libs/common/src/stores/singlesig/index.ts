@@ -96,6 +96,13 @@ export class SinglesigStore {
     };
   }
 
+  @action
+  public logout() {
+    this.mnemonic = null;
+    this.publicKey = null;
+    this.privateKey = null;
+  }
+
   protected async save() {
     await this.kvStore.set("singlesig", this.mnemonic);
   }
