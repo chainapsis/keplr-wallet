@@ -118,9 +118,6 @@ export const SettingPage: FunctionComponent = observer(() => {
           title={intl.formatMessage({
             id: "setting.autolock",
           })}
-          paragraph={intl.formatMessage({
-            id: "setting.autolock.paragraph",
-          })}
           onClick={() => {
             history.push({
               pathname: "/setting/autolock",

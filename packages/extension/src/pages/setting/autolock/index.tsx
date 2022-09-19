@@ -1,9 +1,4 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { HeaderLayout } from "../../../layouts";
 
 import { useHistory } from "react-router";
@@ -32,8 +27,6 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
 
-  const requester = new InExtensionMessageRequester();
-
   const minDuration = 0;
   const maxDuration = 4320;
 
@@ -43,23 +36,21 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
     },
   });
 
-  const getAutoLockDuration = useCallback(async () => {
-    const msg = new GetAutoLockAccountDurationMsg();
-    requester.sendMessage(BACKGROUND_PORT, msg).then(function (duration) {
-      setValue("duration", duration / 60000 + "");
-    });
-  }, []);
-
   useEffect(() => {
-    getAutoLockDuration();
-  }, [getAutoLockDuration]);
+    const msg = new GetAutoLockAccountDurationMsg();
+    new InExtensionMessageRequester()
+      .sendMessage(BACKGROUND_PORT, msg)
+      .then(function (duration) {
+        setValue("duration", (duration / 60000).toString());
+      });
+  }, [setValue]);
 
   function updateAutoLockDuration(input: string) {
     let duration = parseInt(input);
     if (duration >= 0) {
       duration = duration * 60000;
       const msg = new UpdateAutoLockAccountDurationMsg(duration);
-      requester.sendMessage(BACKGROUND_PORT, msg);
+      new InExtensionMessageRequester().sendMessage(BACKGROUND_PORT, msg);
     }
     history.goBack();
   }
@@ -78,46 +69,44 @@ export const SettingAutoLockPage: FunctionComponent = observer(() => {
       }}
     >
       <div className={style.container}>
-        <React.Fragment>
-          <DescriptionView />
-          <Form
-            onSubmit={handleSubmit(async (data) => {
-              setIsLoading(true);
-              updateAutoLockDuration(data.duration);
+        <DescriptionView />
+        <Form
+          onSubmit={handleSubmit(async (data) => {
+            setIsLoading(true);
+            updateAutoLockDuration(data.duration);
+          })}
+        >
+          <Input
+            label={intl.formatMessage({
+              id: "setting.autolock.duration",
             })}
-          >
-            <Input
-              label={intl.formatMessage({
-                id: "setting.autolock.duration",
-              })}
-              name="duration"
-              ref={register({
-                required: intl.formatMessage({
-                  id: "setting.autolock.error.required",
-                }),
-                validate: (input: string): string | undefined => {
-                  const duration = parseInt(input);
-                  if (duration < minDuration || duration > maxDuration) {
-                    return intl.formatMessage({
-                      id: "setting.autolock.error.out-of-range",
-                    });
-                  }
-                },
-              })}
-              type="number"
-              pattern="[0-9]*"
-              error={errors.duration && errors.duration.message}
-            />
-            <Button
-              type="submit"
-              color="primary"
-              block
-              data-loading={isLoading}
-            >
-              <FormattedMessage id="setting.endpoints.button.confirm" />
-            </Button>
-          </Form>
-        </React.Fragment>
+            name="duration"
+            ref={register({
+              required: intl.formatMessage({
+                id: "setting.autolock.error.required",
+              }),
+              validate: (input: string): string | undefined => {
+                const duration = parseInt(input);
+
+                if (Number.isNaN(duration)) {
+                  return "NaN";
+                }
+
+                if (duration < minDuration || duration > maxDuration) {
+                  return intl.formatMessage({
+                    id: "setting.autolock.error.out-of-range",
+                  });
+                }
+              },
+            })}
+            type="number"
+            pattern="[0-9]*"
+            error={errors.duration && errors.duration.message}
+          />
+          <Button type="submit" color="primary" block data-loading={isLoading}>
+            <FormattedMessage id="setting.endpoints.button.confirm" />
+          </Button>
+        </Form>
       </div>
     </HeaderLayout>
   );

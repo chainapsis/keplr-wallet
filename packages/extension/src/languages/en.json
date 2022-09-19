@@ -119,9 +119,8 @@
   "setting.endpoints.button.confirm": "Confirm",
 
   "setting.autolock": "Auto-Lock Timer",
-  "setting.autolock.paragraph": "Your can set to Auto-Lock Account time",
-  "setting.autolock.duration": "Duration (Unit : minute)",
-  "setting.autolock.description": "Note : Logging out of your device will activate Auto-Lock regardless of the set duration.",
+  "setting.autolock.duration": "Duration (Unit: minute)",
+  "setting.autolock.description": "With the Auto-Lock enabled, Keplr would be locked whenever device goes to sleep mode",
   "setting.autolock.error.required": "Duration is required",
   "setting.autolock.error.out-of-range": "It cannot be less than 0 or greater than 4320(3days)",
 
