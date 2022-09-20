@@ -21,16 +21,16 @@ export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
     >
       <OnboardingStack.Screen name="welcome" component={Welcome} />
       <OnboardingStack.Screen
+        name="create-multisig-biometrics"
+        component={MultisigBiometrics}
+      />
+      <OnboardingStack.Screen
         name="create-multisig-phone-number"
         component={MultisigPhoneNumber}
       />
       <OnboardingStack.Screen
         name="create-multisig-phone-number-confirm"
         component={MultisigPhoneNumberConfirm}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-biometrics"
-        component={MultisigBiometrics}
       />
       <OnboardingStack.Screen
         name="create-multisig-social"

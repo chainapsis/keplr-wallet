@@ -52,7 +52,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
                 id: "onboarding4.error.biometrickeyexists.yes",
               }),
               onPress: () => {
-                navigation.navigate("create-multisig-social");
+                navigation.navigate("create-multisig-phone-number");
               },
             },
           ]
@@ -172,7 +172,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
                   });
                 }
 
-                navigation.navigate("create-multisig-social");
+                navigation.navigate("create-multisig-phone-number");
                 setButtonDisabledDoubleclick(false);
               } catch (e) {
                 setButtonDisabledDoubleclick(false);
