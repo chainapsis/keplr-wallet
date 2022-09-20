@@ -256,17 +256,6 @@ export const EmbedChainInfos: ChainInfo[] = [
           high: 0.25,
         },
       },
-      {
-        coinDenom: "ATOM",
-        coinMinimalDenom:
-          "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.013,
-          average: 0.02,
-          high: 0.03,
-        },
-      },
     ],
     coinType: 529,
     features: ["secretwasm", "ibc-go", "ibc-transfer"],
