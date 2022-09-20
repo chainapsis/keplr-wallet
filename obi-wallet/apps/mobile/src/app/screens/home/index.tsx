@@ -133,6 +133,7 @@ export function TabNavigation() {
           marginTop: 15,
           letterSpacing: 0.6,
         },
+        lazy: false,
       })}
     >
       <Tab.Screen name={assets} component={Assets} />
@@ -146,12 +147,12 @@ export function TabNavigation() {
 
 export function HomeScreen() {
   const Drawer = createDrawerNavigator();
-  const { multisigStore } = useStore();
+  const { chainStore } = useStore();
 
   return (
     <Drawer.Navigator
       useLegacyImplementation={true}
-      initialRouteName={multisigStore.currentChainInformation.label}
+      initialRouteName={chainStore.currentChainInformation.label}
       screenOptions={{
         headerShown: false,
       }}
@@ -164,7 +165,7 @@ export function HomeScreen() {
 
 const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
   const { navigation } = props;
-  const { multisigStore } = useStore();
+  const { chainStore } = useStore();
 
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: "#100F1E" }}>
@@ -198,7 +199,7 @@ const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
       {networks.map((network) => {
         return (
           <DrawerItem
-            focused={multisigStore.currentChain === network.chainId}
+            focused={chainStore.currentChain === network.chainId}
             key={network.chainId}
             label={network.label}
             activeTintColor="#F6F5FF"
@@ -210,7 +211,7 @@ const CustomDrawerContent = observer((props: DrawerContentComponentProps) => {
               fontWeight: "500",
             }}
             onPress={action(() => {
-              multisigStore.currentChain = network.chainId;
+              chainStore.currentChain = network.chainId;
               navigation.closeDrawer();
             })}
           />

@@ -19,21 +19,30 @@ import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { BACKGROUND_PORT, Env } from "@keplr-wallet/router";
 import { BIP44, EthSignType, KeplrSignOptions } from "@keplr-wallet/types";
 import {
-  Chain,
   EmbedChainInfos,
   KVStore,
   MessageRequesterInternalToUi,
   PrivilegedOrigins,
   produceEnv,
+  RootStore,
   RouterBackground,
-  SerializedData,
+  WalletType,
 } from "@obi-wallet/common";
 import { Buffer } from "buffer";
 import scrypt from "scrypt-js";
+import invariant from "tiny-invariant";
+
+let rootStore: RootStore | null = null;
 
 class KeyRingService extends AbstractKeyRingService {
-  // @ts-expect-error
-  protected kvStore: KVStore;
+  get rootStore(): RootStore {
+    if (!rootStore) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      rootStore = require("./root-store").rootStore;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return rootStore!;
+  }
 
   addLedgerKey(
     env: Env,
@@ -137,7 +146,7 @@ class KeyRingService extends AbstractKeyRingService {
   }
 
   async enable(env: Env): Promise<KeyRingStatus> {
-    // TODO: do something with multisig store?
+    // TODO: do something with create-multisig store?
     return KeyRingStatus.UNLOCKED;
   }
 
@@ -147,25 +156,35 @@ class KeyRingService extends AbstractKeyRingService {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const data = await this.kvStore.get<unknown | undefined>("multisig");
+    const { address, type } = this.rootStore.walletStore;
 
-    if (!SerializedData.is(data)) {
-      throw new Error("Invalid data");
+    invariant(address, "Missing wallet address");
+    invariant(type, "Missing wallet type");
+
+    switch (type) {
+      case WalletType.MULTISIG:
+        return {
+          // TODO:
+          algo: "multisig",
+          // TODO:
+          pubKey: new Uint8Array(),
+          address: Bech32Address.fromBech32(address, "juno").address,
+          isNanoLedger: true,
+        };
+      case WalletType.SINGLESIG: {
+        const publicKey = this.rootStore.singlesigStore.publicKey;
+        invariant(publicKey, "Missing singlesig public key");
+
+        return {
+          algo: "secp256k1",
+          pubKey: new Uint8Array(Buffer.from(publicKey.value, "base64")),
+          address: Bech32Address.fromBech32(address, "juno").address,
+          isNanoLedger: true,
+        };
+      }
+      default:
+        throw new Error("Unsupported wallet type");
     }
-
-    const proxyAddress = data.proxyAddresses[chainId as Chain];
-    const address = proxyAddress?.address;
-
-    if (!address) throw new Error("No address found for chainId: " + chainId);
-
-    return {
-      // TODO:
-      algo: "multisig",
-      // TODO:
-      pubKey: new Uint8Array(),
-      address: Bech32Address.fromBech32(address, "juno").address,
-      isNanoLedger: false,
-    };
   }
 
   getKeyRingType(): string {
@@ -200,7 +219,7 @@ class KeyRingService extends AbstractKeyRingService {
   ): void {
     this.chainsService = chainsService;
     this.permissionService = permissionService;
-    this.kvStore = new KVStore("multisig-store");
+    // this.kvStore = new KVStore("create-multisig-store");
 
     // TODO: permissionService
     // TODO: key ring
@@ -218,7 +237,7 @@ class KeyRingService extends AbstractKeyRingService {
     return undefined;
   }
 
-  requestSignAmino(
+  async requestSignAmino(
     env: Env,
     msgOrigin: string,
     chainId: string,

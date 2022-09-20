@@ -2,19 +2,19 @@ import { Home } from "@obi-wallet/common";
 import { SafeAreaView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useNavigation } from "../stack";
+import { useRootNavigation } from "../root-stack";
 import { useStore } from "../stores";
 
 export function DappExplorer() {
-  const { appsStore, multisigStore } = useStore();
-  const navigation = useNavigation();
+  const { appsStore, walletStore } = useStore();
+  const navigation = useRootNavigation();
   const safeArea = useSafeAreaInsets();
 
   return (
     <SafeAreaView style={{ backgroundColor: "#090817", flex: 1 }}>
       <Home
         appsStore={appsStore}
-        multisigStore={multisigStore}
+        walletStore={walletStore}
         onAppPress={(app) => {
           navigation.navigate("web-view", {
             app,

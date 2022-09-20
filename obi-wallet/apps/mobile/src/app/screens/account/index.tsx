@@ -16,11 +16,11 @@ import LinearGradient from "react-native-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SvgProps } from "react-native-svg";
 
+import { useRootNavigation } from "../../root-stack";
 import { Back } from "../components/back";
 import { Background } from "../components/background";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
 import ObiLogo from "../settings/assets/obi-logo.svg";
-import { useNavigation } from "../settings/stack";
 import InheritanceIcon from "./assets/inheritanceIcon.svg";
 import SpendingIcon from "./assets/spendingIcon.svg";
 import { Inheritance } from "./inheritance";
@@ -28,7 +28,7 @@ import { Spending } from "./spending";
 
 export function Account() {
   const safeArea = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useRootNavigation();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedMenu, setSelectedMenu] = useState("");
 

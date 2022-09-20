@@ -1,9 +1,7 @@
+import { Decimal } from "@cosmjs/math/build/decimal";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { Chain, chains } from "@obi-wallet/common";
-import { useEffect, useState } from "react";
-
-import { useStore } from "../stores";
 
 export async function createStargateClient(chainId: Chain) {
   const { rpc } = chains[chainId];
@@ -17,30 +15,13 @@ export async function createSigningStargateClient({
   chainId: Chain;
   signer: OfflineSigner;
 }) {
-  const { prefix, rpc } = chains[chainId];
+  const { denom, prefix, rpc } = chains[chainId];
   return await SigningStargateClient.connectWithSigner(rpc, signer, {
     prefix,
+    gasPrice: {
+      // low: 10, average: 25, high: 40
+      amount: Decimal.fromAtomics("25", 4),
+      denom,
+    },
   });
-}
-
-export function useStargateClient() {
-  const { multisigStore } = useStore();
-  const [client, setClient] = useState<StargateClient | null>(null);
-
-  useEffect(() => {
-    let client: StargateClient | null = null;
-    (async () => {
-      const { rpc } = multisigStore.currentChainInformation;
-      client = await StargateClient.connect(rpc);
-      setClient(client);
-    })();
-    return () => {
-      if (client) {
-        client.disconnect();
-        setClient(null);
-      }
-    };
-  }, [multisigStore.currentChainInformation]);
-
-  return client;
 }

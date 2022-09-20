@@ -9,24 +9,24 @@ import { Alert, Image, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { IconButton } from "../../../button";
-import { PhoneInput } from "../../../phone-input";
-import { useStore } from "../../../stores";
-import { sendPublicKeyTextMessage } from "../../../text-message";
-import { Background } from "../../components/background";
+import { IconButton } from "../../../../button";
+import { PhoneInput } from "../../../../phone-input";
+import { useStore } from "../../../../stores";
+import { sendPublicKeyTextMessage } from "../../../../text-message";
+import { Background } from "../../../components/background";
 import {
   SecurityQuestionInput,
   useSecurityQuestionInput,
-} from "../../components/phone-number/security-question-input";
-import { SendMagicSmsButton } from "../../components/phone-number/send-magic-sms-button";
-import { StackParamList } from "../stack";
+} from "../../../components/phone-number/security-question-input";
+import { SendMagicSmsButton } from "../../../components/phone-number/send-magic-sms-button";
+import { OnboardingStackParamList } from "../../onboarding-stack";
 
-export type PhoneNumberOnboardingProps = NativeStackScreenProps<
-  StackParamList,
-  "onboarding2"
+export type MultisigPhoneNumberProps = NativeStackScreenProps<
+  OnboardingStackParamList,
+  "create-multisig-phone-number"
 >;
 
-export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
+export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
   ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
     const intl = useIntl();
@@ -52,7 +52,7 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
                 id: "onboarding2.error.phonekeyexists.yes",
               }),
               onPress: () => {
-                navigation.navigate("onboarding4");
+                navigation.navigate("crate-multisig-biometrics");
               },
             },
           ]
@@ -289,11 +289,14 @@ export const PhoneNumberOnboarding = observer<PhoneNumberOnboardingProps>(
                       });
                     }
 
-                    navigation.navigate("onboarding3", {
-                      phoneNumber,
-                      securityQuestion,
-                      securityAnswer,
-                    });
+                    navigation.navigate(
+                      "create-multisig-phone-number-confirm",
+                      {
+                        phoneNumber,
+                        securityQuestion,
+                        securityAnswer,
+                      }
+                    );
 
                     setMagicButtonDisabledDoubleclick(false);
                   } catch (e) {

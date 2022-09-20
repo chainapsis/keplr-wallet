@@ -1,4 +1,4 @@
-import { View, Image } from "react-native";
+import { Image, View } from "react-native";
 
 export function Background() {
   return (

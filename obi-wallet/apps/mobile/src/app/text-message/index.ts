@@ -115,7 +115,7 @@ async function encryptAndSendMessage({
   const body = await getMessageBody(message);
   const formData = new FormData();
   const { twilioPhoneNumber, twilioUrl } =
-    rootStore.multisigStore.currentChainInformation;
+    rootStore.chainStore.currentChainInformation;
   formData.append("To", twilioPhoneNumber);
   formData.append("From", phoneNumber);
   formData.append("Parameters", JSON.stringify({ trigger_body: body }));

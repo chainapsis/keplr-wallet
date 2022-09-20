@@ -5,7 +5,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { computed, flow, makeObservable, observable } from "mobx";
 
 import { Chain } from "../../chains";
-import { MultisigStore } from "../multisig";
+import { ChainStore } from "../chain";
+import { WalletStore } from "../wallet";
 
 const LOOP_JUNO1_ADDRESS =
   "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup";
@@ -17,24 +18,35 @@ export interface ExtendedCoin {
 }
 
 export class BalancesStore {
+  protected readonly chainStore: ChainStore;
+  protected readonly walletStore: WalletStore;
+
   @observable
   public balancesPerChain: Partial<Record<Chain, ExtendedCoin[]>> = {};
 
-  constructor(protected multisigStore: MultisigStore) {
+  constructor({
+    chainStore,
+    walletStore,
+  }: {
+    chainStore: ChainStore;
+    walletStore: WalletStore;
+  }) {
+    this.chainStore = chainStore;
+    this.walletStore = walletStore;
     makeObservable(this);
   }
 
   @computed
   public get balances() {
-    return this.balancesPerChain[this.multisigStore.currentChain] ?? [];
+    return this.balancesPerChain[this.chainStore.currentChain] ?? [];
   }
 
   @flow
   public *fetchBalances() {
-    const { proxyAddress } = this.multisigStore;
-    if (!proxyAddress) return;
+    const { address } = this.walletStore;
+    if (!address) return;
 
-    const { rpc } = this.multisigStore.currentChainInformation;
+    const { rpc } = this.chainStore.currentChainInformation;
     const client = yield* toGenerator(StargateClient.connect(rpc));
     const wasmClient = yield* toGenerator(CosmWasmClient.connect(rpc));
 
@@ -58,7 +70,7 @@ export class BalancesStore {
     /// Return two contract addresses (strings) if price must be grabbed from first
     /// and then divided by second price.
     const getContractRoute = (asset: string) => {
-      switch (this.multisigStore.currentChain) {
+      switch (this.chainStore.currentChain) {
         case "uni-3":
           return [
             "juno1dmwfwqvke4hew5s93ut8h4tgu6sxv67zjw0y3hskgkfpy3utnpvseqyjs7",
@@ -172,7 +184,7 @@ export class BalancesStore {
       )
     );
 
-    this.balancesPerChain[this.multisigStore.currentChain] = extendedCoins;
+    this.balancesPerChain[this.chainStore.currentChain] = extendedCoins;
 
     client.disconnect();
     wasmClient.disconnect();

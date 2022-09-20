@@ -10,12 +10,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { rootStore } from "../background/root-store";
 import { deploymentKey } from "./code-push";
 import { Loader } from "./loader";
+import { RootStack } from "./root-stack";
 import { ReceiveScreen } from "./screens/receive";
 import { SendScreen } from "./screens/send";
 import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
-import { Stack } from "./stack";
 import { StoreContext } from "./stores";
 
 export const App = observer(() => {
@@ -98,7 +98,7 @@ export const App = observer(() => {
         <SafeAreaProvider>
           <NavigationContainer>
             <StatusBar barStyle="light-content" />
-            <Stack.Navigator
+            <RootStack.Navigator
               initialRouteName="state-renderer"
               screenOptions={{
                 headerShown: false,
@@ -107,22 +107,22 @@ export const App = observer(() => {
                 },
               }}
             >
-              <Stack.Screen
+              <RootStack.Screen
                 name="state-renderer"
                 component={StateRendererScreen}
               />
-              <Stack.Screen
+              <RootStack.Screen
                 name="web-view"
                 component={WebViewScreen}
                 options={({ route }) => ({
                   title: route.params.app.label,
                 })}
               />
-              <Stack.Screen name="send" component={SendScreen} />
-              <Stack.Screen name="receive" component={ReceiveScreen} />
+              <RootStack.Screen name="send" component={SendScreen} />
+              <RootStack.Screen name="receive" component={ReceiveScreen} />
 
               {settingsScreens()}
-            </Stack.Navigator>
+            </RootStack.Navigator>
           </NavigationContainer>
           {updating ? (
             <Loader

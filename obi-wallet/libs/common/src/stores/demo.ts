@@ -5,6 +5,7 @@ import { MultisigState } from "./multisig";
 export class DemoStore {
   @observable
   public demoMode = false;
+
   @observable
   public demoState = MultisigState.EMPTY;
 
