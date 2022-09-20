@@ -3,9 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { rootStore } from "../../background/root-store";
 import { useStore } from "../stores";
 
-const LOOP_JUNO1_ADDRESS =
-  "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup";
-
 export interface ExtendedCoin {
   denom: string;
   amount: string;
@@ -62,7 +59,7 @@ export function formatCoin(coin: ExtendedCoin) {
         valueInUsd: amount,
       };
     }
-    case "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup": {
+    case "uloop": {
       const digits = 6;
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
