@@ -1,4 +1,11 @@
-import { AminoSignResponse, StdSignature, StdSignDoc } from "@cosmjs/amino";
+import {
+  AminoSignResponse,
+  encodeSecp256k1Signature,
+  Secp256k1Wallet,
+  serializeSignDoc,
+  StdSignature,
+  StdSignDoc,
+} from "@cosmjs/amino";
 import { DirectSignResponse } from "@cosmjs/proto-signing";
 import {
   AbstractKeyRingService,
@@ -14,9 +21,19 @@ import {
   PermissionService,
   ScryptParams,
 } from "@keplr-wallet/background";
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import { escapeHTML } from "@keplr-wallet/common";
+import {
+  Bech32Address,
+  checkAndValidateADR36AminoSignDoc,
+} from "@keplr-wallet/cosmos";
+import { PrivKeySecp256k1 } from "@keplr-wallet/crypto";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import { BACKGROUND_PORT, Env } from "@keplr-wallet/router";
+import {
+  APP_PORT,
+  BACKGROUND_PORT,
+  Env,
+  KeplrError,
+} from "@keplr-wallet/router";
 import { BIP44, EthSignType, KeplrSignOptions } from "@keplr-wallet/types";
 import {
   EmbedChainInfos,
@@ -29,12 +46,14 @@ import {
   WalletType,
 } from "@obi-wallet/common";
 import { Buffer } from "buffer";
+import { Alert } from "react-native";
 import scrypt from "scrypt-js";
 import invariant from "tiny-invariant";
 
 let rootStore: RootStore | null = null;
 
 class KeyRingService extends AbstractKeyRingService {
+  protected interactionService!: InteractionService;
   get rootStore(): RootStore {
     if (!rootStore) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -218,6 +237,7 @@ class KeyRingService extends AbstractKeyRingService {
     ledgerService: LedgerService
   ): void {
     this.chainsService = chainsService;
+    this.interactionService = interactionService;
     this.permissionService = permissionService;
     // this.kvStore = new KVStore("create-multisig-store");
 
@@ -248,9 +268,107 @@ class KeyRingService extends AbstractKeyRingService {
       ethSignType?: EthSignType;
     }
   ): Promise<AminoSignResponse> {
-    console.log("Not implemented, requestSignAmino");
-    // @ts-expect-error
-    return Promise.resolve(undefined);
+    const { singlesigStore, walletStore } = this.rootStore;
+
+    if (walletStore.type !== WalletType.SINGLESIG) {
+      Alert.alert(
+        "Unsupported wallet type",
+        "Only singlesig wallets are supported"
+      );
+      throw new KeplrError("keyring", 101, "Unsupported wallet type");
+    }
+
+    signDoc = {
+      ...signDoc,
+      memo: escapeHTML(signDoc.memo),
+    };
+    const key = await this.getKey(chainId);
+
+    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
+      .bech32Config.bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new KeplrError("keyring", 231, "Signer mismatched");
+    }
+
+    const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
+      signDoc,
+      bech32Prefix
+    );
+    if (isADR36SignDoc) {
+      if (signDoc.msgs[0].value.signer !== signer) {
+        throw new KeplrError("keyring", 233, "Unmatched signer in sign doc");
+      }
+    }
+
+    if (signOptions.isADR36WithString != null && !isADR36SignDoc) {
+      throw new KeplrError(
+        "keyring",
+        236,
+        'Sign doc is not for ADR-36. But, "isADR36WithString" option is defined'
+      );
+    }
+
+    if (signOptions.ethSignType && !isADR36SignDoc) {
+      throw new Error(
+        "Eth sign type can be requested with only ADR-36 amino sign doc"
+      );
+    }
+
+    let newSignDoc = (await this.interactionService.waitApprove(
+      env,
+      "/sign",
+      "request-sign",
+      {
+        msgOrigin,
+        chainId,
+        mode: "amino",
+        signDoc,
+        signer,
+        signOptions,
+        isADR36SignDoc,
+        isADR36WithString: signOptions.isADR36WithString,
+        ethSignType: signOptions.ethSignType,
+      }
+    )) as StdSignDoc;
+
+    newSignDoc = {
+      ...newSignDoc,
+      memo: escapeHTML(newSignDoc.memo),
+    };
+
+    if (isADR36SignDoc) {
+      // Validate the new sign doc, if it was for ADR-36.
+      if (checkAndValidateADR36AminoSignDoc(signDoc, bech32Prefix)) {
+        if (signDoc.msgs[0].value.signer !== signer) {
+          throw new KeplrError(
+            "keyring",
+            232,
+            "Unmatched signer in new sign doc"
+          );
+        }
+      } else {
+        throw new KeplrError(
+          "keyring",
+          237,
+          "Signing request was for ADR-36. But, accidentally, new sign doc is not for ADR-36"
+        );
+      }
+    }
+
+    try {
+      invariant(singlesigStore.address, "Expected `address` to be defined.");
+      invariant(singlesigStore.privateKey, "Expected `privateKey` to be set.");
+
+      const privateKey = new PrivKeySecp256k1(singlesigStore.privateKey);
+      const signature = privateKey.sign(serializeSignDoc(newSignDoc));
+      return {
+        signed: newSignDoc,
+        signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
+    }
   }
 
   requestSignDirect(
@@ -318,6 +436,7 @@ class KeyRingService extends AbstractKeyRingService {
 }
 
 export function initBackground() {
+  let keyRingService: KeyRingService;
   const router = new RouterBackground(produceEnv);
 
   init(
@@ -363,9 +482,116 @@ export function initBackground() {
     // TODO: experimentalOptions?,
     {},
     (store, embedChainInfos, commonCrypto) => {
-      return new KeyRingService(store, embedChainInfos, commonCrypto);
+      keyRingService = new KeyRingService(store, embedChainInfos, commonCrypto);
+      return keyRingService;
     }
   );
 
   router.listen(BACKGROUND_PORT);
+
+  const params = {
+    env: {
+      isInternalMsg: false,
+    },
+    msgOrigin: "https://juno.loop.markets",
+    chainId: "juno-1",
+    signer: "juno1299v8cn9udgt7k05jmf25lzf3sy953qevua592",
+    signDoc: {
+      chain_id: "juno-1",
+      account_number: "351365",
+      sequence: "1",
+      fee: {
+        amount: [
+          {
+            amount: "400000",
+            denom: "JUNO",
+          },
+        ],
+        gas: "1280000",
+      },
+      msgs: [
+        {
+          type: "wasm/MsgExecuteContract",
+          value: {
+            sender: "juno1299v8cn9udgt7k05jmf25lzf3sy953qevua592",
+            contract:
+              "juno1qc8mrs3hmxm0genzrd92akja5r0v7mfm6uuwhktvzphhz9ygkp8ssl4q07",
+            msg: {
+              swap: {
+                offer_asset: {
+                  amount: "516072",
+                  info: {
+                    native_token: {
+                      denom: "ujuno",
+                    },
+                  },
+                },
+                belief_price: "0.004529352253858738",
+                max_spread: "0.02",
+              },
+            },
+            funds: [
+              {
+                denom: "ujuno",
+                amount: "516072",
+              },
+            ],
+          },
+        },
+        {
+          type: "wasm/MsgExecuteContract",
+          value: {
+            sender: "juno1299v8cn9udgt7k05jmf25lzf3sy953qevua592",
+            contract:
+              "juno1ctsmp54v79x7ea970zejlyws50cj9pkrmw49x46085fn80znjmpqz2n642",
+            msg: {
+              swap: {
+                input_token: "Token1",
+                input_amount: "476375",
+                min_output: "2496486",
+              },
+            },
+            funds: [
+              {
+                denom: "ujuno",
+                amount: "476375",
+              },
+            ],
+          },
+        },
+        {
+          type: "wasm/MsgExecuteContract",
+          value: {
+            sender: "juno1299v8cn9udgt7k05jmf25lzf3sy953qevua592",
+            contract:
+              "juno1utkr0ep06rkxgsesq6uryug93daklyd6wneesmtvxjkz0xjlte9qdj2s8q",
+            msg: {
+              swap: {
+                offer_asset: {
+                  amount: "2547435",
+                  info: {
+                    native_token: {
+                      denom:
+                        "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034",
+                    },
+                  },
+                },
+                belief_price: "0.024220864551472814",
+                max_spread: "0.02",
+              },
+            },
+            funds: [
+              {
+                denom:
+                  "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034",
+                amount: "2547435",
+              },
+            ],
+          },
+        },
+      ],
+      memo: "",
+    },
+    signOptions: {},
+  };
 }

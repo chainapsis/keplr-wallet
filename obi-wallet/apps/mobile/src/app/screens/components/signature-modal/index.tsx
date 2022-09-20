@@ -34,36 +34,23 @@ import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import {
-  Alert,
-  Modal,
-  ModalProps,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, ModalProps, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { createBiometricSignature } from "../../../biometrics";
-import { Button, InlineButton } from "../../../button";
+import { InlineButton } from "../../../button";
 import {
   createSigningStargateClient,
   createStargateClient,
 } from "../../../clients";
 import { lendFees } from "../../../fee-lender-worker";
-import { Loader } from "../../../loader";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import {
   parseSignatureTextMessageResponse,
   sendSignatureTextMessage,
 } from "../../../text-message";
-import { Background } from "../background";
 import { BottomSheet, BottomSheetRef } from "../bottom-sheet";
 import { CheckIcon, Key, KeysList } from "../keys-list";
 import {
@@ -72,7 +59,7 @@ import {
 } from "../phone-number/security-question-input";
 import { SendMagicSmsButton } from "../phone-number/send-magic-sms-button";
 import { VerifyAndProceedButton } from "../phone-number/verify-and-proceed-button";
-import ArrowUpIcon from "./assets/arrowUpIcon.svg";
+import { ConfirmMessages } from "./confirm-messages";
 
 export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
@@ -82,12 +69,6 @@ export interface SignatureModalProps extends ModalProps {
   onCancel(): void;
 
   onConfirm(signatures: Map<string, Uint8Array>): void;
-}
-
-// const tabs = ["txDetails", "data"]
-enum tabs {
-  txDetails,
-  data,
 }
 
 export const SignatureModal = observer<SignatureModalProps>((props) => {
@@ -106,164 +87,27 @@ export const SignatureModal = observer<SignatureModalProps>((props) => {
 
 export const SignatureModalSinglesig = observer<SignatureModalProps>(
   ({ messages, rawMessages, multisig, onCancel, onConfirm, ...props }) => {
-    const intl = useIntl();
-    const [showLoader, setShowLoader] = useState(false);
-    const safeArea = useSafeAreaInsets();
-    const [selectedTab, setSelectedTab] = useState(tabs.txDetails);
+    const [loading, setLoading] = useState(false);
 
     return (
-      <Modal {...props}>
-        <SafeAreaView style={{ flex: 1 }}>
-          {showLoader && (
-            <Loader
-              loadingText="Loading..."
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                zIndex: 999,
-                position: "absolute",
-                backgroundColor: "#100F1D",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }}
-            />
-          )}
-          <Background />
-          <View
-            style={{
-              height: 50,
-              flexDirection: "row",
-              marginTop: safeArea.top,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
-              <FormattedMessage
-                id="signature.modal.confirmtx"
-                defaultMessage="Confirm Transaction"
-              />
-            </Text>
-          </View>
-          <View style={{ height: 30, flexDirection: "row", paddingTop: 10 }}>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedTab(tabs.txDetails);
-                }}
-                style={{
-                  flex: 1,
-                  width: "100%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: selectedTab === tabs.txDetails ? "#89F5C2" : "white",
-                    textDecorationLine:
-                      selectedTab === tabs.txDetails ? "underline" : "none",
-                  }}
-                >
-                  Tx Details
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedTab(tabs.data);
-                }}
-                style={{
-                  flex: 1,
-                  width: "100%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: selectedTab === tabs.data ? "#89F5C2" : "white",
-                    textDecorationLine:
-                      selectedTab === tabs.data ? "underline" : "none",
-                  }}
-                >
-                  <FormattedMessage
-                    id="signature.modal.data"
-                    defaultMessage="DATA"
-                  />
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View
-            style={{
-              flex: 1,
-              paddingHorizontal: 20,
-              justifyContent: "space-between",
-            }}
-          >
-            <View
-              style={{
-                marginTop: 10,
-              }}
-            >
-              <ScrollView
-                style={{
-                  flexGrow: 1,
-                  padding: 10,
-                }}
-              >
-                {selectedTab === tabs.data ? (
-                  <Text style={{ color: "#ffffff" }}>
-                    {JSON.stringify(messages, null, 2)}
-                  </Text>
-                ) : (
-                  renderMSGs(messages)
-                )}
-              </ScrollView>
-            </View>
-
-            <View>
-              <Button
-                flavor="blue"
-                label={intl.formatMessage({
-                  id: "signature.modal.cancel",
-                  defaultMessage: "Cancel",
-                })}
-                onPress={() => {
-                  onCancel();
-                }}
-              />
-              <Button
-                flavor="green"
-                label={intl.formatMessage({
-                  id: "signature.modal.confirm",
-                  defaultMessage: "Confirm",
-                })}
-                style={{
-                  marginVertical: 20,
-                }}
-                onPress={async () => {
-                  try {
-                    setShowLoader(true);
-                    await onConfirm(new Map());
-                    setShowLoader(false);
-                  } catch (e) {
-                    const error = e as Error;
-                    setShowLoader(false);
-                    console.error(error);
-                    Alert.alert("Error confirming transaction", error.message);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </SafeAreaView>
-      </Modal>
+      <ConfirmMessages
+        {...props}
+        loading={loading}
+        messages={messages}
+        onCancel={onCancel}
+        onConfirm={async () => {
+          try {
+            setLoading(true);
+            await onConfirm(new Map());
+            setLoading(false);
+          } catch (e) {
+            const error = e as Error;
+            setLoading(false);
+            console.error(error);
+            Alert.alert("Error confirming transaction", error.message);
+          }
+        }}
+      />
     );
   }
 );
@@ -279,10 +123,8 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
   }: SignatureModalProps) {
     const intl = useIntl();
     const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
-    const safeArea = useSafeAreaInsets();
     const phoneNumberBottomSheetRef = useRef<BottomSheetRef>(null);
     const { chainStore, demoStore } = useStore();
-    const [selectedTab, setSelectedTab] = useState(tabs.txDetails);
     const { currentChainInformation } = chainStore;
 
     const numberOfSignatures = signatures.size;
@@ -396,87 +238,35 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         }),
       }),
     ];
-    const renderMSGs = (msgs: AminoMsg[]) => {
-      if (msgs.length === 0) {
-        return null;
-      }
-      return msgs.map((msg, index) => (
-        <View
-          key={index}
-          style={{
-            height: 50,
-            flexDirection: "row",
-            borderBottomColor: "rgba(255,255,255, 0.6)",
-            borderBottomWidth: 1,
-          }}
-        >
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <ArrowUpIcon />
-          </View>
-          <View
-            style={{ flex: 1, justifyContent: "space-around", paddingLeft: 10 }}
-          >
-            <Text style={{ color: "white", fontWeight: "600", fontSize: 16 }}>
-              <FormattedMessage
-                id="signature.modal.createobiwallet"
-                defaultMessage="Create Obi Wallet"
-              />
-              {/* {renderDirectMessage(msg)} */}
-            </Text>
-            <Text style={{ color: "white", opacity: 0.6 }}>
-              <FormattedMessage
-                id="signature.modal.value"
-                defaultMessage="Value"
-              />
-            </Text>
-          </View>
-        </View>
-      ));
-    };
-    const [showLoader, setShowLoader] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     if (!threshold) return null;
 
     return (
-      <Modal {...props}>
-        <SafeAreaView style={{ flex: 1 }}>
-          {showLoader && (
-            <Loader
-              loadingText="Loading..."
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                zIndex: 999,
-                position: "absolute",
-                backgroundColor: "#100F1D",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }}
-            />
-          )}
-          <Background />
-          <View
-            style={{
-              height: 50,
-              flexDirection: "row",
-              marginTop: safeArea.top,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
-              <FormattedMessage
-                id="signature.modal.confirmtx"
-                defaultMessage="Confirm Transaction"
-              />
-            </Text>
-            <Text style={{ position: "absolute", right: 10, color: "white" }}>
-              {numberOfSignatures}/2
-            </Text>
-          </View>
+      <ConfirmMessages
+        {...props}
+        loading={loading}
+        disabled={!enoughSignatures}
+        messages={messages}
+        onCancel={onCancel}
+        onConfirm={async () => {
+          try {
+            setLoading(true);
+            await onConfirm(signatures);
+            setLoading(false);
+          } catch (e) {
+            const error = e as Error;
+            setLoading(false);
+            console.error(error);
+            Alert.alert("Error confirming signature", error.message);
+          }
+        }}
+        header={
+          <Text style={{ position: "absolute", right: 10, color: "white" }}>
+            {numberOfSignatures}/2
+          </Text>
+        }
+        aboveTabs={
           <View
             style={{
               height: 4,
@@ -494,137 +284,9 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
               }}
             />
           </View>
-          <View style={{ height: 30, flexDirection: "row", paddingTop: 10 }}>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedTab(tabs.txDetails);
-                }}
-                style={{
-                  flex: 1,
-                  width: "100%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: selectedTab === tabs.txDetails ? "#89F5C2" : "white",
-                    textDecorationLine:
-                      selectedTab === tabs.txDetails ? "underline" : "none",
-                  }}
-                >
-                  Tx Details
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedTab(tabs.data);
-                }}
-                style={{
-                  flex: 1,
-                  width: "100%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    color: selectedTab === tabs.data ? "#89F5C2" : "white",
-                    textDecorationLine:
-                      selectedTab === tabs.data ? "underline" : "none",
-                  }}
-                >
-                  <FormattedMessage
-                    id="signature.modal.data"
-                    defaultMessage="DATA"
-                  />
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View
-            style={{
-              flex: 1,
-              paddingHorizontal: 20,
-              justifyContent: "space-between",
-            }}
-          >
-            <View
-              style={{
-                marginTop: 10,
-              }}
-            >
-              <ScrollView
-                style={{
-                  height: 250,
-                  padding: 10,
-                }}
-              >
-                {selectedTab === tabs.data ? (
-                  <Text style={{ color: "#ffffff" }}>
-                    {JSON.stringify(messages, null, 2)}
-                  </Text>
-                ) : (
-                  renderMSGs(messages)
-                )}
-              </ScrollView>
-              <Text style={{ color: "#ffffff" }}>
-                <FormattedMessage
-                  id="signature.modal.signatures"
-                  defaultMessage="Signatures"
-                />
-                : {numberOfSignatures} /{" "}
-                {multisig?.multisig?.publicKey.value.threshold}
-              </Text>
-            </View>
-
-            <KeysList
-              data={data}
-              style={{
-                marginVertical: 10,
-              }}
-            />
-
-            <View>
-              <Button
-                flavor="blue"
-                label={intl.formatMessage({
-                  id: "signature.modal.cancel",
-                  defaultMessage: "Cancel",
-                })}
-                onPress={() => {
-                  onCancel();
-                }}
-              />
-              <Button
-                disabled={!enoughSignatures}
-                flavor="green"
-                label={intl.formatMessage({
-                  id: "signature.modal.confirm",
-                  defaultMessage: "Confirm",
-                })}
-                style={{
-                  marginVertical: 20,
-                }}
-                onPress={async () => {
-                  try {
-                    setShowLoader(true);
-                    await onConfirm(signatures);
-                    setShowLoader(false);
-                  } catch (e) {
-                    const error = e as Error;
-                    setShowLoader(false);
-                    console.error(error);
-                    Alert.alert("Error confirming signature", error.message);
-                  }
-                }}
-              />
-            </View>
-          </View>
-          {multisig?.phoneNumber ? (
+        }
+        footer={
+          multisig?.phoneNumber ? (
             <BottomSheet bottomSheetRef={phoneNumberBottomSheetRef}>
               <PhoneNumberBottomSheetContent
                 payload={multisig.phoneNumber}
@@ -645,9 +307,16 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
                 }}
               />
             </BottomSheet>
-          ) : null}
-        </SafeAreaView>
-      </Modal>
+          ) : null
+        }
+      >
+        <KeysList
+          data={data}
+          style={{
+            marginVertical: 10,
+          }}
+        />
+      </ConfirmMessages>
     );
   }
 );
@@ -826,41 +495,6 @@ export function useSignatureModalProps({
       setSignatureModalVisible(true);
     },
   };
-}
-
-function renderMSGs(msgs: AminoMsg[]) {
-  if (msgs.length === 0) {
-    return null;
-  }
-  return msgs.map((msg, index) => (
-    <View
-      key={index}
-      style={{
-        height: 50,
-        flexDirection: "row",
-        borderBottomColor: "rgba(255,255,255, 0.6)",
-        borderBottomWidth: 1,
-      }}
-    >
-      <View style={{ justifyContent: "center", alignItems: "center" }}>
-        <ArrowUpIcon />
-      </View>
-      <View
-        style={{ flex: 1, justifyContent: "space-around", paddingLeft: 10 }}
-      >
-        <Text style={{ color: "white", fontWeight: "600", fontSize: 16 }}>
-          <FormattedMessage
-            id="signature.modal.createobiwallet"
-            defaultMessage="Create Obi Wallet"
-          />
-          {/* {renderDirectMessage(msg)} */}
-        </Text>
-        <Text style={{ color: "white", opacity: 0.6 }}>
-          <FormattedMessage id="signature.modal.value" defaultMessage="Value" />
-        </Text>
-      </View>
-    </View>
-  ));
 }
 
 interface PhoneNumberBottomSheetContentProps {

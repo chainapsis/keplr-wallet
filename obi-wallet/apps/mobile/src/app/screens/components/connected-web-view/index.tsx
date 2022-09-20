@@ -10,6 +10,7 @@ import {
 import { useInjectedProvider, useKeplr } from "../../../injected-provider";
 import { RNInjectedKeplr } from "../../../injected-provider/injected-keplr";
 import { useStore } from "../../../stores";
+import { SignInteractionModal } from "./sign-interaction-modal";
 
 export interface ConnectedWebViewProps extends Omit<WebViewProps, "source"> {
   url: string;
@@ -50,7 +51,7 @@ export const ConnectedWebView = observer(
       );
     }, [eventEmitter, keplr, webViewRef]);
 
-    const { permissionStore } = useStore();
+    const { permissionStore, signInteractionStore } = useStore();
 
     useEffect(() => {
       for (const data of permissionStore.waitingDatas) {
@@ -64,13 +65,20 @@ export const ConnectedWebView = observer(
     if (!code) return null;
 
     return (
-      <WebView
-        {...props}
-        source={{ uri: url }}
-        injectedJavaScriptBeforeContentLoaded={code}
-        onMessage={onMessage}
-        ref={webViewRef}
-      />
+      <>
+        {signInteractionStore.waitingData ? (
+          <SignInteractionModal
+            onClose={() => signInteractionStore.rejectAll()}
+          />
+        ) : null}
+        <WebView
+          {...props}
+          source={{ uri: url }}
+          injectedJavaScriptBeforeContentLoaded={code}
+          onMessage={onMessage}
+          ref={webViewRef}
+        />
+      </>
     );
   }
 );
