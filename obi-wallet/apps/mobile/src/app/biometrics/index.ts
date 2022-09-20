@@ -32,6 +32,21 @@ export async function getBiometricsPublicKey() {
   if (credentials) {
     return credentials.username;
   } else {
+    // Fake-AuthPrompt (set+get) to trigger Prompt at initial App-Start
+    await Keychain.setGenericPassword("fake1", "fake2", {
+      service: "fake-prompt",
+      accessControl:
+        Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
+    });
+    await Keychain.getGenericPassword({
+      authenticationPrompt: {
+        title: "Authentication Required",
+      },
+      service: "fake-prompt",
+      accessControl:
+        Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
+    });
+
     const privateKeyBuffer = randomBytes(32);
     const publicKeyBuffer = secp256k1.publicKeyCreate(privateKeyBuffer);
 

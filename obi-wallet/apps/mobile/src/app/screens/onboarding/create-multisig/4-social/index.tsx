@@ -50,7 +50,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
             },
             {
               text: intl.formatMessage({
-                id: "onboarding4.error.socialkeyexists.yes",
+                id: "general.yes",
               }),
               onPress: () => {
                 navigation.navigate("create-multisig-init");
