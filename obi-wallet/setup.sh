@@ -30,4 +30,4 @@ yarn
 (cd ..; yarn && yarn build:libs)
 
 # Setup URI scheme
-(cd apps/mobile; uri-scheme add obi --android --ios)
+(cd apps/mobile; yarn uri-scheme add obi --android --ios)
