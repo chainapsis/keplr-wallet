@@ -1,2 +1,6 @@
 # Injected provider
-injected-provider.js
+apps/mobile/src/app/injected-provider/bundle.ts
+
+# Built app
+apps/mobile/android
+apps/mobile/ios

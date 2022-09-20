@@ -14,7 +14,7 @@
     "lint:eslint": " yarn _runAll --target=lint",
     "lint:prettier": "prettier --check .",
     "lint:tsc": "yarn _runAll --target=tsc",
-    "setup": "bash setup.sh",
+    "setup": "bash scripts/setup.sh",
     "test": " yarn _runAll --target=test"
   },
   "resolutions": {
@@ -98,7 +98,6 @@
     "react-native-device-crypto": "^0.1.7",
     "react-native-dotenv": "^3.3.1",
     "react-native-dropdown-picker": "^5.4.2",
-    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.6.1",
     "react-native-html-parser": "^0.1.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
@@ -189,7 +188,6 @@
     "uri-scheme": "^1.0.120",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.11.0",
     "write-file-webpack-plugin": "^4.5.1"
   }
 }

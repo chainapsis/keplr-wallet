@@ -7,7 +7,8 @@ import {
   WebViewProps,
 } from "react-native-webview";
 
-import { useInjectedProvider, useKeplr } from "../../../injected-provider";
+import { useKeplr } from "../../../injected-provider";
+import { bundle } from "../../../injected-provider/bundle";
 import { RNInjectedKeplr } from "../../../injected-provider/injected-keplr";
 import { useStore } from "../../../stores";
 import { SignInteractionModal } from "./sign-interaction-modal";
@@ -20,7 +21,7 @@ export interface ConnectedWebViewProps extends Omit<WebViewProps, "source"> {
 export const ConnectedWebView = observer(
   ({ url, webViewRef, ...props }: ConnectedWebViewProps) => {
     const keplr = useKeplr({ url });
-    const code = useInjectedProvider();
+    const code = bundle;
 
     const eventEmitter = useMemo(() => new EventEmitter(), []);
     const onMessage = useCallback(
