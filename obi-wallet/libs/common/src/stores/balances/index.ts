@@ -49,7 +49,6 @@ export class BalancesStore {
     const client = yield* toGenerator(StargateClient.connect(rpc));
     const wasmClient = yield* toGenerator(CosmWasmClient.connect(rpc));
 
-    const { address } = proxyAddress;
     const balances = yield* toGenerator(
       client.getAllBalances(address).then(async (coins) =>
         coins.concat(
