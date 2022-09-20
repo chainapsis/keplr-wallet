@@ -84,7 +84,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             }}
             onPress={action(() => {
               demoStore.demoMode = false;
-              navigation.navigate("create-multisig-phone-number");
+              navigation.navigate("create-multisig-biometrics");
             })}
           />
           <Button
@@ -96,7 +96,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             }}
             onPress={action(() => {
               demoStore.demoMode = true;
-              navigation.navigate("create-multisig-phone-number");
+              navigation.navigate("create-multisig-biometrics");
               Alert.alert(
                 intl.formatMessage({ id: "demo.demomode" }),
                 intl.formatMessage({ id: "demo.info" })
