@@ -1,6 +1,6 @@
 {
   "name": "mobile",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
   "dependencies": {
     "@cosmjs/amino": "*",
@@ -51,7 +51,6 @@
     "react-native-device-crypto": "*",
     "react-native-dotenv": "*",
     "react-native-dropdown-picker": "*",
-    "react-native-fs": "*",
     "react-native-gesture-handler": "*",
     "react-native-keyboard-aware-scroll-view": "*",
     "react-native-keychain": "*",

@@ -2,7 +2,7 @@
 .env
 
 # Injected provider
-injected-provider.js
+src/app/injected-provider/bundle.ts
 
 # AppCenter config
 ios/Mobile/AppCenter-Config.plist

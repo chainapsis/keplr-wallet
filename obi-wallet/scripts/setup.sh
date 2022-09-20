@@ -1,5 +1,5 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd ${SCRIPT_DIR};
+cd ${SCRIPT_DIR}/..;
 
 # Load environment variables
 export $(grep -v '^#' apps/mobile/.env | xargs)
@@ -28,6 +28,9 @@ yarn
 
 # Install Keplr dependencies and build packages
 (cd ..; yarn && yarn build:libs)
+
+# Build provider
+bash scripts/build-provider.sh
 
 # Setup URI scheme
 (cd apps/mobile; yarn uri-scheme add obi --android --ios)

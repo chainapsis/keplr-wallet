@@ -49,7 +49,7 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
   }) => {
     const intl = useIntl();
     const safeArea = useSafeAreaInsets();
-    const [selectedTab, setSelectedTab] = useState(Tab.TransactionDetails);
+    const [selectedTab, setSelectedTab] = useState(Tab.Data);
 
     return (
       <Modal {...props}>
@@ -92,13 +92,13 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
           </View>
 
           <View style={{ marginHorizontal: 20, flex: 1 }}>
-            <View style={{ flexDirection: "row", height: 50 }}>
-              {renderTabButton({
-                tab: Tab.TransactionDetails,
-                label: "Tx Details",
-              })}
-              {renderTabButton({ tab: Tab.Data, label: "Data" })}
-            </View>
+            {/*<View style={{ flexDirection: "row", height: 50 }}>*/}
+            {/*  {renderTabButton({*/}
+            {/*    tab: Tab.TransactionDetails,*/}
+            {/*    label: "Tx Details",*/}
+            {/*  })}*/}
+            {/*  {renderTabButton({ tab: Tab.Data, label: "Data" })}*/}
+            {/*</View>*/}
 
             <View
               style={{
@@ -119,9 +119,7 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
                     padding: 10,
                     backgroundColor: "#130F23",
                     marginBottom: 10,
-                    borderTopRightRadius:
-                      selectedTab === Tab.TransactionDetails ? 12 : 0,
-                    borderTopLeftRadius: selectedTab === Tab.Data ? 12 : 0,
+                    borderRadius: 12,
                   }}
                 >
                   {renderTabContent()}
