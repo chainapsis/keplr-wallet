@@ -12,6 +12,35 @@ index 4fb16f6..634a958 100644
  });
  //# sourceMappingURL=CloseButton.js.map
 \ No newline at end of file
+diff --git a/node_modules/react-native-country-picker-modal/lib/CountryFilter.js b/node_modules/react-native-country-picker-modal/lib/CountryFilter.js
+index 28b0dc4..0c4f8a5 100644
+--- a/node_modules/react-native-country-picker-modal/lib/CountryFilter.js
++++ b/node_modules/react-native-country-picker-modal/lib/CountryFilter.js
+@@ -1,6 +1,7 @@
+ import React from 'react';
+ import { TextInput, StyleSheet, Platform } from 'react-native';
+ import { useTheme } from './CountryTheme';
++import { useIntl } from 'react-intl';
+ const styles = StyleSheet.create({
+     input: {
+         height: 48,
+@@ -21,8 +22,12 @@ export const CountryFilter = (props) => {
+             { fontFamily, fontSize, color: onBackgroundTextColor }
+         ] }, props)));
+ };
+-CountryFilter.defaultProps = {
+-    autoFocus: false,
+-    placeholder: 'Enter country name'
++ const setCountryLanguage = () => {
++    const intl = useIntl();
++    CountryFilter.defaultProps = {
++        autoFocus: false,
++        placeholder: intl.formatMessage({ id: "phonecountrypicker.search.placeholder", defaultMessage: "Enter country name", })
++    };
+ };
++setCountryLanguage()
+ //# sourceMappingURL=CountryFilter.js.map
+\ No newline at end of file
 diff --git a/node_modules/react-native-country-picker-modal/lib/CountryList.js b/node_modules/react-native-country-picker-modal/lib/CountryList.js
 index 8816018..27c8f1f 100644
 --- a/node_modules/react-native-country-picker-modal/lib/CountryList.js
@@ -32,3 +61,20 @@ index 8816018..27c8f1f 100644
      },
      list: {
          flex: 1,
+diff --git a/node_modules/react-native-country-picker-modal/lib/FlagButton.js b/node_modules/react-native-country-picker-modal/lib/FlagButton.js
+index 7ad3e7b..30a3525 100644
+--- a/node_modules/react-native-country-picker-modal/lib/FlagButton.js
++++ b/node_modules/react-native-country-picker-modal/lib/FlagButton.js
+@@ -13,7 +13,11 @@ const styles = StyleSheet.create({
+         marginTop: 0,
+     },
+     containerWithoutEmoji: {
+-        marginTop: 5,
++        marginTop: 0,
++        paddingLeft: 20,
++        paddingRight: 20,
++        height: "100%",
++        justifyContent: "center"  
+     },
+     flagWithSomethingContainer: {
+         flexDirection: 'row',

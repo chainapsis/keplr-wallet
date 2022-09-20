@@ -44,8 +44,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     fontSize: 14,
     fontWeight: 500,
-    paddingLeft: 20,
-    paddingRight: 20,
   },
   inputview: {
     flex: 1,
@@ -129,6 +127,7 @@ export function PhoneInput({
   const dark = false;
   const fontScaling = true;
   const disableNativeModal = false;
+  const preferredCountries = undefined; // ["US"]
 
   useEffect(() => {
     handlePhoneNumberCountryCode("+" + country.callingCode); // Pass country.callingcode back to parent component "onboarding2"
@@ -142,50 +141,46 @@ export function PhoneInput({
 
           <View style={styles.wholeview}>
             <TouchableOpacity style={styles.buttonview} onPress={switchVisible}>
-              <View
-                style={{ backgroundColor: "none", padding: 0, marginBottom: 5 }}
-              >
-                <CountryPicker
-                  theme={
-                    dark
-                      ? DARK_THEME
-                      : {
-                          primaryColor: "blue",
-                          primaryColorVariant: "#090816",
-                          backgroundColor: "#090816",
-                          onBackgroundTextColor: "#F6F5FF",
-                          fontSize: 14,
-                          filterPlaceholderTextColor: "#4B4E6E",
-                          activeOpacity: 0.7,
-                        }
-                  }
-                  {...{
-                    allowFontScaling: fontScaling,
-                    countryCode,
-                    withFilter,
-                    excludeCountries: ["AQ", "BV", "TF", "HM", "UM"], // No Calling-Code available
-                    withFlag,
-                    withCurrencyButton,
-                    withCallingCodeButton,
-                    withCountryNameButton,
-                    withAlphaFilter,
-                    withCallingCode,
-                    withCurrency,
-                    withEmoji,
-                    withModal,
-                    withFlagButton,
-                    onSelect,
-                    disableNativeModal,
-                    preferredCountries: ["US"],
-                    modalProps: {
-                      visible,
-                    },
-                    onClose: () => setVisible(false),
-                    onOpen: () => setVisible(true),
-                    translation: dropdownLanguage(currentLanguage),
-                  }}
-                />
-              </View>
+              <CountryPicker
+                theme={
+                  dark
+                    ? DARK_THEME
+                    : {
+                        primaryColor: "blue",
+                        primaryColorVariant: "#090816",
+                        backgroundColor: "#090816",
+                        onBackgroundTextColor: "#F6F5FF",
+                        fontSize: 14,
+                        filterPlaceholderTextColor: "#4B4E6E",
+                        activeOpacity: 0.7,
+                      }
+                }
+                {...{
+                  allowFontScaling: fontScaling,
+                  countryCode,
+                  withFilter,
+                  excludeCountries: ["AQ", "BV", "TF", "HM", "UM"], // No Calling-Code available
+                  withFlag,
+                  withCurrencyButton,
+                  withCallingCodeButton,
+                  withCountryNameButton,
+                  withAlphaFilter,
+                  withCallingCode,
+                  withCurrency,
+                  withEmoji,
+                  withModal,
+                  withFlagButton,
+                  onSelect,
+                  disableNativeModal,
+                  preferredCountries,
+                  modalProps: {
+                    visible,
+                  },
+                  onClose: () => setVisible(false),
+                  onOpen: () => setVisible(true),
+                  translation: dropdownLanguage(currentLanguage),
+                }}
+              />
             </TouchableOpacity>
 
             <View style={styles.inputview}>
