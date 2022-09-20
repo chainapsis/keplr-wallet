@@ -157,7 +157,6 @@ export class BalancesStore {
       Promise.all(
         balances.map(async (coin: Coin) => {
           try {
-            console.warn("priceadd: " + JSON.stringify(coin));
             return {
               ...coin,
               usdPrice: await getUsdRate(coin),
