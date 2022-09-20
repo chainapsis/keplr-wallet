@@ -145,7 +145,7 @@ export class BalancesStore {
         );
         const basePrice =
           Number(basePriceInUsdElements.commission_amount) +
-          Number(basePriceInUsdElements.return_amount);
+          Number(basePriceInUsdElements.offer_amount);
         return (dexBasePrice * 10000000) / basePrice;
       } catch (e) {
         console.error("Price query failed");
