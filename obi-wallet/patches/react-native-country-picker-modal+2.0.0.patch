@@ -32,3 +32,20 @@ index 8816018..27c8f1f 100644
      },
      list: {
          flex: 1,
+diff --git a/node_modules/react-native-country-picker-modal/lib/FlagButton.js b/node_modules/react-native-country-picker-modal/lib/FlagButton.js
+index 7ad3e7b..30a3525 100644
+--- a/node_modules/react-native-country-picker-modal/lib/FlagButton.js
++++ b/node_modules/react-native-country-picker-modal/lib/FlagButton.js
+@@ -13,7 +13,11 @@ const styles = StyleSheet.create({
+         marginTop: 0,
+     },
+     containerWithoutEmoji: {
+-        marginTop: 5,
++        marginTop: 0,
++        paddingLeft: 20,
++        paddingRight: 20,
++        height: "100%",
++        justifyContent: "center"  
+     },
+     flagWithSomethingContainer: {
+         flexDirection: 'row',
