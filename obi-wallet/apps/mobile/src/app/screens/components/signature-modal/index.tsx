@@ -65,6 +65,7 @@ export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
   rawMessages: EncodeObject[];
   multisig?: Multisig | null;
+  cancelable?: boolean;
 
   onCancel(): void;
 
@@ -189,6 +190,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         {
           id,
           title,
+          signed: alreadySigned,
           right: alreadySigned ? <CheckIcon /> : null,
           async onPress() {
             if (alreadySigned) return;
@@ -261,30 +263,6 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
             Alert.alert("Error confirming signature", error.message);
           }
         }}
-        header={
-          <Text style={{ position: "absolute", right: 10, color: "white" }}>
-            {numberOfSignatures}/2
-          </Text>
-        }
-        aboveTabs={
-          <View
-            style={{
-              height: 4,
-              backgroundColor: "#1E1D3A",
-            }}
-          >
-            <LinearGradient
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              colors={["#FCCFF7", "#E659D6", "#8877EA", "#86E2EE", "#1E1D3A"]}
-              style={{
-                flex: 1,
-                width: `${(numberOfSignatures / 2) * 100}%`,
-                borderRadius: 4,
-              }}
-            />
-          </View>
-        }
         footer={
           multisig?.phoneNumber ? (
             <BottomSheet bottomSheetRef={phoneNumberBottomSheetRef}>
@@ -310,10 +288,46 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
           ) : null
         }
       >
+        <View
+          style={{
+            height: 10,
+            backgroundColor: "#1E1D3A",
+            borderRadius: 10,
+          }}
+        >
+          <LinearGradient
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            colors={["#FCCFF7", "#E659D6", "#8877EA", "#86E2EE", "#1E1D3A"]}
+            style={{
+              flex: 1,
+              width: `${(numberOfSignatures / parseInt(threshold, 10)) * 100}%`,
+              borderRadius: 10,
+            }}
+          />
+        </View>
+        <View>
+          <Text
+            style={{
+              textAlign: "center",
+              color: "#F6F5FF",
+              fontSize: 12,
+              fontWeight: "600",
+              opacity: 0.6,
+              marginTop: 5,
+            }}
+          >
+            Keys Required {numberOfSignatures}/
+            {multisig.multisig?.publicKey.value.threshold}{" "}
+          </Text>
+        </View>
         <KeysList
           data={data}
+          tiled
           style={{
             marginVertical: 10,
+            backgroundColor: "#130F23",
+            borderRadius: 12,
           }}
         />
       </ConfirmMessages>

@@ -25,9 +25,8 @@ enum Tab {
 export interface ConfirmMessagesProps extends ModalProps {
   loading?: boolean;
   disabled?: boolean;
+  cancelable?: boolean;
   messages: readonly AminoMsg[];
-  header?: ReactNode;
-  aboveTabs?: ReactNode;
   footer?: ReactNode;
   children?: ReactNode;
 
@@ -40,11 +39,10 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
   ({
     loading,
     disabled,
+    cancelable = true,
     messages,
     onCancel,
     onConfirm,
-    header,
-    aboveTabs,
     footer,
     children,
     ...props
@@ -79,10 +77,10 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
           <View
             style={{
               height: 50,
-              flexDirection: "row",
               marginTop: safeArea.top,
               justifyContent: "center",
               alignItems: "center",
+              marginHorizontal: 20,
             }}
           >
             <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
@@ -91,68 +89,75 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
                 defaultMessage="Confirm Transaction"
               />
             </Text>
-            {header}
           </View>
 
-          {aboveTabs}
-
-          <View style={{ height: 30, flexDirection: "row", paddingTop: 10 }}>
-            {renderTabButton({
-              tab: Tab.TransactionDetails,
-              label: "Tx Details",
-            })}
-            {renderTabButton({ tab: Tab.Data, label: "Data" })}
-          </View>
-
-          <View
-            style={{
-              flex: 1,
-              paddingHorizontal: 20,
-              justifyContent: "space-between",
-            }}
-          >
-            <View
-              style={{
-                marginTop: 10,
-              }}
-            >
-              <ScrollView
-                style={{
-                  flexGrow: 1,
-                  padding: 10,
-                }}
-              >
-                {renderTabContent()}
-              </ScrollView>
+          <View style={{ marginHorizontal: 20, flex: 1 }}>
+            <View style={{ flexDirection: "row", height: 50 }}>
+              {renderTabButton({
+                tab: Tab.TransactionDetails,
+                label: "Tx Details",
+              })}
+              {renderTabButton({ tab: Tab.Data, label: "Data" })}
             </View>
 
-            {children}
-
-            <View>
-              <Button
-                flavor="blue"
-                label={intl.formatMessage({
-                  id: "signature.modal.cancel",
-                  defaultMessage: "Cancel",
-                })}
-                onPress={() => {
-                  onCancel();
-                }}
-              />
-              <Button
-                disabled={disabled}
-                flavor="green"
-                label={intl.formatMessage({
-                  id: "signature.modal.confirm",
-                  defaultMessage: "Confirm",
-                })}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "space-between",
+              }}
+            >
+              <View
                 style={{
-                  marginVertical: 20,
+                  flex: 1,
+                  borderRadius: 12,
+                  borderTopRightRadius: 0,
                 }}
-                onPress={() => {
-                  onConfirm();
-                }}
-              />
+              >
+                <ScrollView
+                  style={{
+                    flex: 1,
+                    padding: 10,
+                    backgroundColor: "#130F23",
+                    marginBottom: 10,
+                    borderTopRightRadius:
+                      selectedTab === Tab.TransactionDetails ? 12 : 0,
+                    borderTopLeftRadius: selectedTab === Tab.Data ? 12 : 0,
+                  }}
+                >
+                  {renderTabContent()}
+                </ScrollView>
+              </View>
+
+              {children}
+
+              <View>
+                {cancelable && (
+                  <Button
+                    flavor="blue"
+                    label={intl.formatMessage({
+                      id: "signature.modal.cancel",
+                      defaultMessage: "Cancel",
+                    })}
+                    onPress={() => {
+                      onCancel();
+                    }}
+                  />
+                )}
+                <Button
+                  disabled={disabled}
+                  flavor="green"
+                  label={intl.formatMessage({
+                    id: "signature.modal.confirm",
+                    defaultMessage: "Confirm",
+                  })}
+                  style={{
+                    marginVertical: 20,
+                  }}
+                  onPress={() => {
+                    onConfirm();
+                  }}
+                />
+              </View>
             </View>
           </View>
 
@@ -173,6 +178,9 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
               width: "100%",
               justifyContent: "center",
               alignItems: "center",
+              borderTopLeftRadius: tab === Tab.TransactionDetails ? 12 : 0,
+              borderTopRightRadius: tab === Tab.Data ? 12 : 0,
+              backgroundColor: selectedTab === tab ? "#130F23" : "transparent",
             }}
           >
             <Text

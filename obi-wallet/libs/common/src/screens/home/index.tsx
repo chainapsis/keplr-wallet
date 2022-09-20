@@ -17,6 +17,10 @@ import {
   View,
 } from "react-native";
 
+import BuyIcon from "../../assets/buy_crypto.svg";
+import getTicketsIcon from "../../assets/get_tickets.svg";
+import CosmicIcon from "../../assets/icosmic_party.svg";
+import MyTicketsIcon from "../../assets/my_tickets.svg";
 import { Card } from "../../card";
 import { FontAwesomeIcon } from "../../font-awesome-icon";
 import { App, AppsStore, MultisigStore, WalletStore } from "../../stores";
@@ -68,7 +72,7 @@ export const Home = observer<HomeProps>(
                       setEditMode(true);
                     }}
                     key={app.url}
-                    img={app.icon}
+                    imgURL={app.icon}
                     label={app.label}
                     onRemove={
                       editMode
@@ -87,12 +91,54 @@ export const Home = observer<HomeProps>(
                 onLongPress={() => {
                   setEditMode(true);
                 }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
+                ImgComponent={BuyIcon}
+                label="Buy Crypto"
                 onPress={() => {
                   onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${walletStore.address}`,
+                    label: "Buy Crypto",
+                    url: `https://app.kado.money?address${walletStore.address}`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={CosmicIcon}
+                label="Cosmic 5 Party"
+                onPress={() => {
+                  onAppPress({
+                    label: "Cosmic 5 Party",
+                    url: `https://events.loop.markets`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={getTicketsIcon}
+                label="Get Tickets"
+                onPress={() => {
+                  onAppPress({
+                    label: "Get Tickets",
+                    url: `https://nft-juno-dev.loop.do/webapp/tickets`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={MyTicketsIcon}
+                label="My Tickets"
+                onPress={() => {
+                  onAppPress({
+                    label: "My Tickets",
+                    url: `https://nft-juno-dev.loop.do/webapp/mytickets`,
                     icon: "https://place-hold.it/180x180",
                   });
                 }}
