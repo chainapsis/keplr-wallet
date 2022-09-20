@@ -119,7 +119,7 @@ export class BalancesStore {
         if (route.length === 0) {
           console.error("No price route found for " + coin.denom);
         }
-        dexBasePrice = 1;
+        dexBasePrice = 1000000;
       }
 
       if (route.length === 1) {
@@ -131,8 +131,8 @@ export class BalancesStore {
           route[1],
           {
             simulation: {
-              offer_asset: {
-                amount: "1000000", //$1
+              ask_asset: {
+                amount: "10000000", //$10
                 info: {
                   native_token: {
                     denom:
@@ -146,7 +146,7 @@ export class BalancesStore {
         const basePrice =
           Number(basePriceInUsdElements.commission_amount) +
           Number(basePriceInUsdElements.return_amount);
-        return dexBasePrice / basePrice;
+        return (dexBasePrice * 10000000) / basePrice;
       } catch (e) {
         console.error("Price query failed");
         return 0;
