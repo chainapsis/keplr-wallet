@@ -14,7 +14,7 @@ export function Trade() {
   return (
     <View style={{ flex: 1, backgroundColor: "#17162C" }}>
       <ConnectedWebView
-        url="https://juno.loop.markets/#Swap"
+        url="https://juno.loop.markets/webapp/swap#Swap"
         onLoadEnd={() => setLoading(false)}
         style={{ flex: 1, marginTop: safeArea.top }}
         webViewRef={webViewRef}

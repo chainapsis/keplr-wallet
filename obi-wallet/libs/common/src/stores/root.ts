@@ -5,6 +5,7 @@ import {
   InteractionStore,
   ObservableQueryBase,
   PermissionStore,
+  SignInteractionStore,
 } from "@keplr-wallet/stores";
 
 import { Chain } from "../chains";
@@ -38,6 +39,7 @@ export class RootStore {
   protected readonly keplrChainSuggestStore: ChainSuggestStore;
   protected readonly keplrInteractionStore: InteractionStore;
   protected readonly keplrPermissionStore: PermissionStore;
+  protected readonly keplrSignInteractionStore: SignInteractionStore;
 
   constructor({
     defaultChain,
@@ -69,6 +71,9 @@ export class RootStore {
     this.keplrPermissionStore = new PermissionStore(
       this.keplrInteractionStore,
       new MessageRequesterInternal()
+    );
+    this.keplrSignInteractionStore = new SignInteractionStore(
+      this.keplrInteractionStore
     );
 
     this.appsStore = new AppsStore({ kvStore: new KVStore("apps-store") });
@@ -106,5 +111,9 @@ export class RootStore {
 
   public get permissionStore() {
     return this.keplrPermissionStore;
+  }
+
+  public get signInteractionStore() {
+    return this.keplrSignInteractionStore;
   }
 }
