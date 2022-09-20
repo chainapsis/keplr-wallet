@@ -1,8 +1,7 @@
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
-import { useIntl } from "react-intl";
+import { FC, useState } from "react";
 import {
   Button,
   KeyboardAvoidingView,
@@ -12,14 +11,13 @@ import {
   StyleSheet,
   TextInput,
   TouchableHighlight,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { SvgProps } from "react-native-svg";
 
 import { Card } from "../../card";
 import { FontAwesomeIcon } from "../../font-awesome-icon";
-import { App, AppsStore, MultisigStore, WalletStore } from "../../stores";
+import { App, AppsStore, WalletStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 
@@ -35,10 +33,13 @@ export interface HomeProps {
   walletStore: WalletStore;
   onAppPress: (app: App) => void;
   marginBottom?: number;
+  icons: FC<SvgProps>[];
 }
 
 export const Home = observer<HomeProps>(
-  ({ appsStore, onAppPress, marginBottom, walletStore }) => {
+  ({ appsStore, onAppPress, marginBottom, walletStore, icons }) => {
+    const [BuyCryptoIcon, CosmicPartyIcon, GetTicketsIcon, MyTicketsIcon] =
+      icons;
     const [editMode, setEditMode] = useState(false);
     const [url, setUrl] = useState("www.keplr_wallet.com");
 
@@ -68,7 +69,7 @@ export const Home = observer<HomeProps>(
                       setEditMode(true);
                     }}
                     key={app.url}
-                    img={app.icon}
+                    imgURL={app.icon}
                     label={app.label}
                     onRemove={
                       editMode
@@ -87,12 +88,54 @@ export const Home = observer<HomeProps>(
                 onLongPress={() => {
                   setEditMode(true);
                 }}
-                img="https://uploads-ssl.webflow.com/61b136082f7fe2121ad5766b/61b2808127b5c10c60f0cbb2_kado1%404x.png"
-                label="Fund Wallet"
+                ImgComponent={BuyCryptoIcon}
+                label="Buy Crypto"
                 onPress={() => {
                   onAppPress({
-                    label: "Fund Wallet",
-                    url: `https://app.kado.money?address=${walletStore.address}`,
+                    label: "Buy Crypto",
+                    url: `https://app.kado.money?address${walletStore.address}`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={CosmicPartyIcon}
+                label="Cosmic 5 Party"
+                onPress={() => {
+                  onAppPress({
+                    label: "Cosmic 5 Party",
+                    url: `https://events.loop.markets`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={GetTicketsIcon}
+                label="Get Tickets"
+                onPress={() => {
+                  onAppPress({
+                    label: "Get Tickets",
+                    url: `https://nft-juno-dev.loop.do/webapp/tickets`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={MyTicketsIcon}
+                label="My Tickets"
+                onPress={() => {
+                  onAppPress({
+                    label: "My Tickets",
+                    url: `https://nft-juno-dev.loop.do/webapp/mytickets`,
                     icon: "https://place-hold.it/180x180",
                   });
                 }}

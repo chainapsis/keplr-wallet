@@ -10,6 +10,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
+  Image,
   Platform,
   RefreshControl,
   Text,
@@ -275,11 +276,17 @@ export const SendScreen = observer(() => {
                     style={{
                       width: 44,
                       height: 44,
-                      backgroundColor: "orange",
                       marginRight: 12,
                       borderRadius: 44,
                     }}
-                  />
+                  >
+                    {hydratedSelectedCoin?.icon && (
+                      <Image
+                        source={hydratedSelectedCoin?.icon}
+                        style={{ flex: 1, width: "100%", height: "100%" }}
+                      />
+                    )}
+                  </View>
                   <View style={{ justifyContent: "center" }}>
                     <Text
                       style={{
@@ -450,7 +457,7 @@ interface CoinRendererProps {
 }
 
 function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
-  const { denom, label, amount, valueInUsd } = formatCoin(item);
+  const { denom, label, amount, valueInUsd, icon } = formatCoin(item);
 
   return (
     <TouchableOpacity
@@ -468,11 +475,17 @@ function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
           style={{
             width: 36,
             height: 36,
-            backgroundColor: "red",
             marginRight: 10,
             borderRadius: 12,
           }}
-        />
+        >
+          {icon && (
+            <Image
+              source={icon}
+              style={{ flex: 1, width: "100%", height: "100%" }}
+            />
+          )}
+        </View>
         <View>
           <Text style={{ color: "#f6f5ff", fontWeight: "500" }}>{label}</Text>
           <Text

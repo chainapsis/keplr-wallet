@@ -2,8 +2,14 @@ import { Home } from "@obi-wallet/common";
 import { SafeAreaView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useRootNavigation } from "../root-stack";
-import { useStore } from "../stores";
+import { useRootNavigation } from "../../root-stack";
+import { useStore } from "../../stores";
+import BuyCryptoIcon from "./assets/buy_crypto.svg";
+import CosmicPartyIcon from "./assets/cosmic_party.svg";
+import GetTicketsIcon from "./assets/get_tickets.svg";
+import MyTicketsIcon from "./assets/my_tickets.svg";
+
+const icons = [BuyCryptoIcon, CosmicPartyIcon, GetTicketsIcon, MyTicketsIcon];
 
 export function DappExplorer() {
   const { appsStore, walletStore } = useStore();
@@ -20,6 +26,7 @@ export function DappExplorer() {
             app,
           });
         }}
+        icons={icons}
         marginBottom={safeArea.bottom}
       />
     </SafeAreaView>

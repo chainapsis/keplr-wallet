@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { SvgProps } from "react-native-svg";
 import SvgUri from "react-native-svg-uri";
 
 import { createShadow } from "../styles";
@@ -43,7 +44,8 @@ export function Tiles({ children }: { children: ReactNode }) {
 }
 
 export interface TileProps {
-  img: string | null;
+  imgURL?: string | null;
+  ImgComponent?: React.FC<SvgProps>;
   label: string;
   disabled?: boolean;
   onRemove?: () => void;
@@ -52,29 +54,37 @@ export interface TileProps {
 }
 
 export function Tile({
-  img,
+  imgURL,
+  ImgComponent,
   label,
   disabled,
   onRemove,
   onPress,
   onLongPress,
 }: TileProps) {
+  const getImage = () => {
+    if (imgURL) {
+      //if img is svg, use it as is
+      imgURL?.includes(".svg") ? (
+        <SvgUri width="100%" height="100%" source={{ uri: imgURL }} />
+      ) : (
+        <Image
+          style={styles.icon}
+          source={{
+            uri: imgURL || "https://place-hold.it/180x180",
+          }}
+        />
+      );
+    }
+    if (ImgComponent) {
+      return <ImgComponent width="100%" height="100%" />;
+    }
+    return null;
+  };
   const children = (
     <>
-      <View style={styles.iconContainer}>
-        {
-          //if img is svg, use it as is
-          img?.includes(".svg") ? (
-            <SvgUri width="100%" height="100%" source={{ uri: img }} />
-          ) : (
-            <Image
-              style={styles.icon}
-              source={{
-                uri: img || "https://place-hold.it/180x180",
-              }}
-            />
-          )
-        }
+      <View style={[styles.iconContainer]}>
+        {getImage()}
         {onRemove ? <RemoveButton onPress={onRemove} /> : null}
       </View>
       <Text style={styles.label} numberOfLines={1}>

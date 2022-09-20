@@ -40,7 +40,7 @@ export function formatCoin(coin: ExtendedCoin) {
       const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
-        icon: null,
+        icon: denom.includes("ujuno") ? require("./assets/juno.png") : null,
         denom: denom.slice(1).toUpperCase(),
         digits,
         label: denom[1].toUpperCase() + denom.slice(2),
@@ -52,7 +52,7 @@ export function formatCoin(coin: ExtendedCoin) {
       const digits = 6;
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
-        icon: null,
+        icon: require("./assets/usdc.png"),
         denom: "axlUSDC",
         digits,
         label: "USDC (Axelar)",
@@ -65,7 +65,7 @@ export function formatCoin(coin: ExtendedCoin) {
       const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
-        icon: null,
+        icon: require("./assets/loop.png"),
         denom: "LOOP",
         digits,
         label: "Loop",
