@@ -1,7 +1,6 @@
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { Coin, StargateClient } from "@cosmjs/stargate";
 import { toGenerator } from "@keplr-wallet/common";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { computed, flow, makeObservable, observable } from "mobx";
 
 import { Chain } from "../../chains";
