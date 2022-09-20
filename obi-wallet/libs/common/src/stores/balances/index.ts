@@ -91,7 +91,7 @@ export class BalancesStore {
 
       let dexBasePrice: number;
       if (
-        route[0] ==
+        route[0] ===
         "juno1ctsmp54v79x7ea970zejlyws50cj9pkrmw49x46085fn80znjmpqz2n642"
       ) {
         dexBasePriceElements = await wasmClient.queryContractSmart(route[0], {
@@ -116,8 +116,10 @@ export class BalancesStore {
             Number(dexBasePriceElements.returnAmount)) /
           10;
       } else {
-        console.error("No price route found for " + coin.denom);
-        dexBasePrice = 0;
+        if (route.length === 0) {
+          console.error("No price route found for " + coin.denom);
+        }
+        dexBasePrice = 1;
       }
 
       if (route.length === 1) {
@@ -155,6 +157,7 @@ export class BalancesStore {
       Promise.all(
         balances.map(async (coin: Coin) => {
           try {
+            console.warn("priceadd: " + JSON.stringify(coin));
             return {
               ...coin,
               usdPrice: await getUsdRate(coin),
