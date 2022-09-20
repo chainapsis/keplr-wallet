@@ -130,7 +130,7 @@ export class BalancesStore {
         const basePriceInUsdElements = await wasmClient.queryContractSmart(
           route[1],
           {
-            simulation: {
+            reverse_simulation: {
               ask_asset: {
                 amount: "10000000", //$10
                 info: {
