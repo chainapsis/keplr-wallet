@@ -1,8 +1,7 @@
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight";
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
-import { useIntl } from "react-intl";
+import { FC, useState } from "react";
 import {
   Button,
   KeyboardAvoidingView,
@@ -12,18 +11,13 @@ import {
   StyleSheet,
   TextInput,
   TouchableHighlight,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { SvgProps } from "react-native-svg";
 
-import BuyIcon from "../../assets/buy_crypto.svg";
-import getTicketsIcon from "../../assets/get_tickets.svg";
-import CosmicIcon from "../../assets/icosmic_party.svg";
-import MyTicketsIcon from "../../assets/my_tickets.svg";
 import { Card } from "../../card";
 import { FontAwesomeIcon } from "../../font-awesome-icon";
-import { App, AppsStore, MultisigStore, WalletStore } from "../../stores";
+import { App, AppsStore, WalletStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 
@@ -39,10 +33,13 @@ export interface HomeProps {
   walletStore: WalletStore;
   onAppPress: (app: App) => void;
   marginBottom?: number;
+  icons: FC<SvgProps>[];
 }
 
 export const Home = observer<HomeProps>(
-  ({ appsStore, onAppPress, marginBottom, walletStore }) => {
+  ({ appsStore, onAppPress, marginBottom, walletStore, icons }) => {
+    const [BuyCryptoIcon, CosmicPartyIcon, GetTicketsIcon, MyTicketsIcon] =
+      icons;
     const [editMode, setEditMode] = useState(false);
     const [url, setUrl] = useState("www.keplr_wallet.com");
 
@@ -91,7 +88,7 @@ export const Home = observer<HomeProps>(
                 onLongPress={() => {
                   setEditMode(true);
                 }}
-                ImgComponent={BuyIcon}
+                ImgComponent={BuyCryptoIcon}
                 label="Buy Crypto"
                 onPress={() => {
                   onAppPress({
@@ -105,7 +102,7 @@ export const Home = observer<HomeProps>(
                 onLongPress={() => {
                   setEditMode(true);
                 }}
-                ImgComponent={CosmicIcon}
+                ImgComponent={CosmicPartyIcon}
                 label="Cosmic 5 Party"
                 onPress={() => {
                   onAppPress({
@@ -119,7 +116,7 @@ export const Home = observer<HomeProps>(
                 onLongPress={() => {
                   setEditMode(true);
                 }}
-                ImgComponent={getTicketsIcon}
+                ImgComponent={GetTicketsIcon}
                 label="Get Tickets"
                 onPress={() => {
                   onAppPress({
