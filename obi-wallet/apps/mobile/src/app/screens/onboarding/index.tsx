@@ -11,9 +11,13 @@ import { Welcome } from "./welcome";
 
 export interface OnboardingScreensProps {
   initialRouteName?: string;
+  keyReplace?: "phone_number" | "social" | "biometrics";
 }
 
-export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
+export function OnboardingScreen({
+  initialRouteName,
+  keyReplace,
+}: OnboardingScreensProps) {
   return (
     <OnboardingStack.Navigator
       screenOptions={{
@@ -22,30 +26,52 @@ export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
       initialRouteName={initialRouteName}
     >
       <OnboardingStack.Screen name="welcome" component={Welcome} />
-      <OnboardingStack.Screen
-        name="create-multisig-phone-number"
-        component={MultisigPhoneNumber}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-phone-number-confirm"
-        component={MultisigPhoneNumberConfirm}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-biometrics"
-        component={MultisigBiometrics}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-social"
-        component={MultisigSocial}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-init"
-        component={MultisigInit}
-      />
-      <OnboardingStack.Screen
-        name="recover-singlesig"
-        component={RecoverSinglesig}
-      />
+      {keyReplace === "phone_number" ? (
+        <OnboardingStack.Screen
+          name="create-multisig-phone-number"
+          component={MultisigPhoneNumber}
+        />
+      ) : null}
+      {keyReplace === "phone_number" ? (
+        <OnboardingStack.Screen
+          name="create-multisig-phone-number-confirm"
+          component={MultisigPhoneNumberConfirm}
+        />
+      ) : null}
+      {keyReplace === "biometrics" ? (
+        <OnboardingStack.Screen
+          name="create-multisig-biometrics"
+          component={MultisigBiometrics}
+        />
+      ) : null}
+      {keyReplace === "social" ? (
+        <OnboardingStack.Screen
+          name="create-multisig-social"
+          component={MultisigSocial}
+        />
+      ) : null}
+      {keyReplace === null ? (
+        <OnboardingStack.Screen
+          name="create-multisig-init"
+          component={MultisigInit}
+        />
+      ) : (
+        <OnboardingStack.Screen
+          name="replace-multisig-propose"
+          component={ReplaceMultisigPropose}
+        />
+      )}
+      {keyReplace === null ? (
+        <OnboardingStack.Screen
+          name="recover-singlesig"
+          component={RecoverSinglesig}
+        />
+      ) : (
+        <OnboardingStack.Screen
+          name="replace-multisig-confirm"
+          component={ReplaceMultisigConfirm}
+        />
+      )}
     </OnboardingStack.Navigator>
   );
 }

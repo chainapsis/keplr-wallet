@@ -64,117 +64,125 @@ export type ReplaceMultisigConfirmProps = NativeStackScreenProps<
   "replace-multisig-confirm"
 >;
 
-export const ReplaceMultisigConfirm = observer<ReplaceMultisigConfirmProps>(({ navigation }) => {
-  const { chainStore, demoStore, multisigStore, pendingMultisigStore, walletStore } = useStore();
-  const multisig = demoStore.demoMode
-    ? demoModeMultisig
-    : multisigStore.nextAdmin;
+export const ReplaceMultisigConfirm = observer<ReplaceMultisigConfirmProps>(
+  ({ navigation }) => {
+    const {
+      chainStore,
+      demoStore,
+      multisigStore,
+      pendingMultisigStore,
+      walletStore,
+    } = useStore();
+    const multisig = demoStore.demoMode
+      ? demoModeMultisig
+      : multisigStore.nextAdmin;
 
-  const pendingMultisig = demoStore.demoMode
-    ? demoModeMultisig
-    : pendingMultisigStore.nextAdmin;
+    const pendingMultisig = demoStore.demoMode
+      ? demoModeMultisig
+      : pendingMultisigStore.nextAdmin;
 
-  const encodeObjects = useMemo(() => {
-    if (!multisig.multisig?.address) return [];
-    if (!walletStore.address) return [];
-    if (!pendingMultisig.multisig?.address) return [];
+    const encodeObjects = useMemo(() => {
+      if (!multisig.multisig?.address) return [];
+      if (!walletStore.address) return [];
+      if (!pendingMultisig.multisig?.address) return [];
 
-    const rawMessage = {
-      new_admin: pendingMultisig.multisig.address,
-    };
+      const rawMessage = {
+        confirm_update_admin: {},
+      };
 
-    const value: MsgExecuteContract = {
-      sender: multisig.multisig.address,
-      contract: walletStore.address, 
-      msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
-      funds: [],
-    };
-    const message: MsgExecuteContractEncodeObject = {
-      typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-      value,
-    };
-    return [message];
-  }, [multisig, pendingMultisig, walletStore.address]);
+      const value: MsgExecuteContract = {
+        sender: pendingMultisig.multisig.address,
+        contract: walletStore.address,
+        msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
+        funds: [],
+      };
+      const message: MsgExecuteContractEncodeObject = {
+        typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+        value,
+      };
+      return [message];
+    }, [multisig, pendingMultisig, walletStore.address]);
 
-  const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
-    multisig,
-    encodeObjects,
-    async onConfirm(response) {
-      if (demoStore.demoMode) {
-        return;
+    const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
+      multisig,
+      encodeObjects,
+      async onConfirm(response) {
+        if (demoStore.demoMode) {
+          return;
+        }
+
+        try {
+          invariant(response.rawLog, "Expected `response` to have `rawLog`.");
+          const rawLog = JSON.parse(response.rawLog) as [
+            {
+              events: [
+                {
+                  type: string;
+                  attributes: { key: string; value: string }[];
+                }
+              ];
+            }
+          ];
+          const executeEvent = rawLog[0].events.find((e) => {
+            return e.type === "execute";
+          });
+          invariant(
+            executeEvent,
+            "Expected `rawLog` to contain `execute` event."
+          );
+          const contractAddress = executeEvent.attributes.find((a) => {
+            return a.key === "_contract_address";
+          });
+          invariant(
+            contractAddress,
+            "Expected `executeEvent` to contain `_contract_address` attribute."
+          );
+        } catch (e) {
+          console.log(response.rawLog);
+        }
+      },
+    });
+
+    useEffect(() => {
+      if (encodeObjects.length > 0) {
+        openSignatureModal();
       }
+    }, [encodeObjects.length, openSignatureModal]);
 
-      try {
-        invariant(response.rawLog, "Expected `response` to have `rawLog`.");
-        const rawLog = JSON.parse(response.rawLog) as [
-          {
-            events: [
-              {
-                type: string;
-                attributes: { key: string; value: string }[];
-              }
-            ];
-          }
-        ];
-        const executeEvent = rawLog[0].events.find((e) => {
-          return e.type === "execute";
-        });
-        invariant(
-          executeEvent,
-          "Expected `rawLog` to contain `execute` event."
-        );
-        const contractAddress = executeEvent.attributes.find((a) => {
-          return a.key === "_contract_address";
-        });
-        invariant(
-          contractAddress,
-          "Expected `executeEvent` to contain `_contract_address` attribute."
-        );
-      } catch (e) {
-        console.log(response.rawLog);
-      }
-    },
-  });
+    if (encodeObjects.length === 0) return null;
 
-  useEffect(() => {
-    if (encodeObjects.length > 0) {
-      openSignatureModal();
-    }
-  }, [encodeObjects.length, openSignatureModal]);
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <SignatureModalMultisig {...signatureModalProps} />
+        <Background />
 
-  if (encodeObjects.length === 0) return null;
-
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <SignatureModalMultisig {...signatureModalProps} />
-      <Background />
-
-      <View
-        style={{
-          flex: 1,
-          paddingHorizontal: 20,
-          justifyContent: "space-between",
-        }}
-      >
-        <View>
-          <IconButton
-            style={{
-              marginTop: 20,
-              marginLeft: -5,
-              padding: 5,
-              width: 25,
-            }}
-            onPress={() => {
-              navigation.goBack();
-            }}
-          >
-            <FontAwesomeIcon
-              icon={faChevronLeft}
-              style={{ color: "#7B87A8" }}
-            />
-          </IconButton>
+        <View
+          style={{
+            flex: 1,
+            paddingHorizontal: 20,
+            justifyContent: "space-between",
+          }}
+        >
+          <View>
+            <IconButton
+              style={{
+                marginTop: 20,
+                marginLeft: -5,
+                padding: 5,
+                width: 25,
+              }}
+              onPress={() => {
+                navigation.goBack();
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faChevronLeft}
+                style={{ color: "#7B87A8" }}
+              />
+            </IconButton>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
-  );
-});
+      </SafeAreaView>
+    );
+  }
+);

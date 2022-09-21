@@ -78,6 +78,8 @@ export const SendScreen = observer(() => {
     ];
 
     switch (walletStore.type) {
+      case WalletType.MULTISIG_PENDING:
+        return [];
       case WalletType.MULTISIG: {
         if (!multisig?.multisig?.address || !multisigStore.proxyAddress)
           return [];

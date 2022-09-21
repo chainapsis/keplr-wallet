@@ -7,7 +7,7 @@ import { SinglesigState, SinglesigStore } from "./singlesig";
 export enum WalletType {
   MULTISIG = "Multisig",
   MULTISIG_DEMO = "MultisigDemo",
-  MULTISIG_PENDING = "PendingMultisig",
+  MULTISIG_PENDING = "MultisigPending",
   SINGLESIG = "Singlesig",
 }
 
