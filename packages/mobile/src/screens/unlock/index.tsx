@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { Dimensions, Image, StatusBar, StyleSheet, View } from "react-native";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated, { EasingNode } from "react-native-reanimated";
 import { observer } from "mobx-react-lite";
 import { useStyle, useStyleThemeController } from "../../styles";
 import * as SplashScreen from "expo-splash-screen";
@@ -146,7 +146,7 @@ export const UnlockScreen: FunctionComponent = observer(() => {
         Animated.timing(animatedContinuityEffectOpacity, {
           toValue: 0,
           duration: 600,
-          easing: Easing.ease,
+          easing: EasingNode.ease,
         }).start();
       }, 700);
     }
@@ -388,7 +388,7 @@ export const SplashContinuityEffectView: FunctionComponent<{
                 backgroundClippingWidth,
                 {
                   duration: backgroundClippingAnimationDuration,
-                  easing: Easing.out(Easing.cubic),
+                  easing: EasingNode.out(EasingNode.cubic),
                   toValue: 1,
                 }
               ),
@@ -397,7 +397,7 @@ export const SplashContinuityEffectView: FunctionComponent<{
                 backgroundClippingHeight,
                 {
                   duration: backgroundClippingAnimationDuration,
-                  easing: Easing.out(Easing.cubic),
+                  easing: EasingNode.out(EasingNode.cubic),
                   toValue: 1,
                 }
               ),
@@ -406,7 +406,7 @@ export const SplashContinuityEffectView: FunctionComponent<{
                 backgroundClippingRadius,
                 {
                   duration: backgroundClippingAnimationDuration,
-                  easing: Easing.out(Easing.cubic),
+                  easing: EasingNode.out(EasingNode.cubic),
                   toValue: 1,
                 }
               ),
@@ -455,12 +455,12 @@ export const SplashContinuityEffectView: FunctionComponent<{
                 [
                   Animated.timing(animation.backgroundClock, backgroundWidth, {
                     duration: backgroundAnimationDuration,
-                    easing: Easing.out(Easing.quad),
+                    easing: EasingNode.out(EasingNode.quad),
                     toValue: 1,
                   }),
                   Animated.timing(animation.backgroundClock, backgroundHeight, {
                     duration: backgroundAnimationDuration,
-                    easing: Easing.out(Easing.quad),
+                    easing: EasingNode.out(EasingNode.quad),
                     toValue: 1,
                   }),
                   Animated.cond(
@@ -485,7 +485,7 @@ export const SplashContinuityEffectView: FunctionComponent<{
                   // it is for the delay.
                   Animated.timing(animation.backgroundClock, backgroundDelay, {
                     duration: backgroundAnimationDelay,
-                    easing: Easing.ease,
+                    easing: EasingNode.ease,
                     toValue: 1,
                   }),
                   Animated.cond(backgroundDelay.finished, [

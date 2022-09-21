@@ -15,7 +15,7 @@ import {
   Svg,
   Use,
 } from "react-native-svg";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated, { EasingNode } from "react-native-reanimated";
 import { useStyle } from "../../styles";
 
 // Convert to cartesian coordinates from polar coordinates.
@@ -25,8 +25,8 @@ const polarToCartesian = (
   radius: number,
   angleInDegree: Animated.Adaptable<number>
 ): {
-  x: Animated.Adaptable<number>;
-  y: Animated.Adaptable<number>;
+  x: Animated.Node<number>;
+  y: Animated.Node<number>;
 } => {
   const angleInRadian = Animated.divide(
     Animated.multiply(angleInDegree, Math.PI),
@@ -146,7 +146,7 @@ const useAnimated = (
     return {
       duration: new Animated.Value(0),
       toValue,
-      easing: Easing.out(Easing.cubic),
+      easing: EasingNode.out(EasingNode.cubic),
     };
   }, [toValue]);
 
@@ -421,7 +421,7 @@ export const DoubleDoughnutChart: FunctionComponent<{
 const DoubleDoughnutChartInnerSVG: FunctionComponent<{
   size: number;
 
-  backRingOpacity?: Animated.Adaptable<number>;
+  backRingOpacity?: Animated.Node<number>;
 
   firstArcStartAngleInDegree: Animated.Adaptable<number>;
   firstArcEndAngleInDegree: Animated.Adaptable<number>;

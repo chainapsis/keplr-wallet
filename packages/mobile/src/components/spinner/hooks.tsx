@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import Animated, { Clock, Easing } from "react-native-reanimated";
+import Animated, { Clock, EasingNode } from "react-native-reanimated";
 
 export const useSpinAnimated = (enabled: boolean) => {
   const [spinClock] = useState(() => new Clock());
   const [spinClockState] = useState(() => {
     return {
       finished: new Animated.Value(0),
-      position: new Animated.Value(0),
+      position: new Animated.Value<number>(0),
       time: new Animated.Value(0),
       frameTime: new Animated.Value(0),
     };
@@ -15,7 +15,7 @@ export const useSpinAnimated = (enabled: boolean) => {
     return {
       duration: 1200,
       toValue: 360,
-      easing: Easing.linear,
+      easing: EasingNode.linear,
     };
   });
 
@@ -23,7 +23,7 @@ export const useSpinAnimated = (enabled: boolean) => {
   return useMemo(() => {
     const numEnabled = enabled ? 1 : 0;
 
-    return Animated.block([
+    return Animated.block<string>([
       Animated.cond(
         numEnabled,
         [
@@ -61,7 +61,7 @@ export const useSpinAnimated = (enabled: boolean) => {
           Animated.set(spinClockState.position, 0),
         ]
       ),
-      Animated.divide(Animated.multiply(spinClockState.position, Math.PI), 180),
+      Animated.concat(spinClockState.position, "deg"),
     ]);
   }, [animConfig, enabled, spinClock, spinClockState]);
 };
