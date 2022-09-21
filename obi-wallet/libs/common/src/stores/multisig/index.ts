@@ -179,6 +179,7 @@ export class MultisigStore {
       proxyAddresses: this.proxyAddresses,
     };
     const data = toJS(serializedData);
+    this.loading = false;
     await this.kvStore.set("multisig", data);
   }
 

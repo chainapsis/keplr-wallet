@@ -64,7 +64,7 @@ export function OnboardingScreen({
       )}
       {updateProposed === true ? (
         <OnboardingStack.Screen
-          name="replace-multisig"
+          name="replace-multisig-confirm"
           component={ReplaceMultisig}
         />
       ) : null}

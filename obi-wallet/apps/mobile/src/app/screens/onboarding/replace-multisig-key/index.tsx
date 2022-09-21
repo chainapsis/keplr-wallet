@@ -61,7 +61,7 @@ const demoModeMultisig: Multisig = {
 
 export type ReplaceMultisigProps = NativeStackScreenProps<
   OnboardingStackParamList,
-  "replace-multisig"
+  "replace-multisig" | "replace-multisig-confirm"
 >;
 
 export const ReplaceMultisig = observer<ReplaceMultisigProps>(
@@ -112,7 +112,12 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
         value,
       };
       return [message];
-    }, [multisig, pendingMultisig, walletStore.address]);
+    }, [
+      multisig,
+      multisigStore.getUpdateProposed,
+      pendingMultisig,
+      walletStore.address,
+    ]);
 
     const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
       multisig,
