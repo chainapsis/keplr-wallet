@@ -59,7 +59,7 @@ new InExtensionMessageRequester()
     if (r) {
       const origin = window.location.href;
       window.location.replace(
-        `chrome-extension://${chrome.runtime.id}/blocklist.html?origin=${origin}`
+        browser.runtime.getURL(`/blocklist.html?origin=${origin}`)
       );
     }
   })
