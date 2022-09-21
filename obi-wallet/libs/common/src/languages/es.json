@@ -127,7 +127,7 @@
   "signature.noresponselabel": "¿No recibiste una respuesta?",
   "signature.sendagain": "Reenviar",
   "signature.keysrequired": "Keys Required",
-  "signature.error.confirmingtx": "Confirming Transaction",
+  "signature.error.confirmingtx": "Error Confirming Transaction",
 
   "settings.multigsigsettings": "Configuración Clave",
   "settings.multigsigsettings.subtext": "Administra tus SMS, redes sociales y otras claves",

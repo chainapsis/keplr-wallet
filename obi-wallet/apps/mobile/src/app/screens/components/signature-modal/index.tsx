@@ -108,14 +108,9 @@ export const SignatureModalSinglesig = observer<SignatureModalProps>(
             setLoading(false);
             console.error(error);
             Alert.alert(
-              intl.formatMessage({
-                id: "general.error",
-                defaultMessage: "Error",
-              }) +
-                " " +
                 intl.formatMessage({
                   id: "signature.error.confirmingtx",
-                  defaultMessage: "Confirming Transaction",
+                  defaultMessage: "Error Confirming Transaction",
                 }),
               error.message
             );
@@ -340,7 +335,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         </View>
         <KeysList
           data={data}
-          tiled={true}
+          tiled
           style={{
             marginVertical: 10,
             backgroundColor: "#130F23",
