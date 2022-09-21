@@ -287,7 +287,11 @@ export class MultisigStore {
         break;
       case "social":
         if (sourceMultisig.phoneNumber) {
-          this.setSocialPublicKey({publicKey: sourceMultisig.phoneNumber.publicKey});
+          this.setPhoneNumberKey({
+            publicKey: sourceMultisig.phoneNumber.publicKey,
+            phoneNumber: sourceMultisig.phoneNumber.phoneNumber,
+            securityQuestion: sourceMultisig.phoneNumber.securityQuestion,
+          });
         }
         break;
     }
