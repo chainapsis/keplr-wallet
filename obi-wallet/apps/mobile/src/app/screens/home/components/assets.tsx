@@ -24,6 +24,7 @@ import { ExtendedCoin, formatCoin, useBalances } from "../../../balances";
 import { IconButton } from "../../../button";
 import { RootStackParamList } from "../../../root-stack";
 import { useStore } from "../../../stores";
+import { CoinIcon } from "../../components/coin-icon";
 import {
   isSmallScreenNumber,
   isSmallScreenSubstr,
@@ -453,7 +454,8 @@ const AssetsList = observer(() => {
 
 function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
   const { icon, denom, label, amount, valueInUsd } = formatCoin(item);
-
+  const coinIconProps =
+    typeof icon === "number" ? { imageIcon: icon } : { SVGIcon: icon };
   return (
     <View
       style={{
@@ -473,12 +475,7 @@ function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
           marginRight: 12,
         }}
       >
-        {icon ? (
-          <Image
-            source={icon}
-            style={{ flex: 1, width: "100%", height: "100%" }}
-          />
-        ) : null}
+        <CoinIcon {...coinIconProps} />
       </View>
 
       <View

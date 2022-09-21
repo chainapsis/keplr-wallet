@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { rootStore } from "../../background/root-store";
 import { useStore } from "../stores";
+import LoopIcon from "./assets/loop.svg";
 
 export interface ExtendedCoin {
   denom: string;
@@ -39,6 +40,7 @@ export function formatCoin(coin: ExtendedCoin) {
       const digits = 6;
       const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
+      console.log({ denom });
       return {
         icon: denom.includes("ujuno") ? require("./assets/juno.png") : null,
         denom: denom.slice(1).toUpperCase(),
@@ -65,7 +67,7 @@ export function formatCoin(coin: ExtendedCoin) {
       const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
-        icon: require("./assets/loop.png"),
+        icon: LoopIcon,
         denom: "LOOP",
         digits,
         label: "Loop",
