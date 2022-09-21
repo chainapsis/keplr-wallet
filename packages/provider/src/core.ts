@@ -1,3 +1,4 @@
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import {
   ChainInfo,
   EthSignType,
@@ -64,7 +65,7 @@ export class Keplr implements IKeplr {
   }
 
   async experimentalSuggestChain(
-    chainInfo: ChainInfo & {
+    suggestingChainInfo: ChainInfo & {
       // Legacy
       gasPriceStep?: {
         readonly low: number;
@@ -73,6 +74,18 @@ export class Keplr implements IKeplr {
       };
     }
   ): Promise<void> {
+    const chainIdentifier = ChainIdHelper.parse(suggestingChainInfo.chainId)
+      .identifier;
+    // TODO: 테스트 끝나면 chainapsis public repo URL로 바꿔야 한다.
+    const chainInfoResponse = await fetch(
+      `https://raw.githubusercontent.com/danielkim89/cicd-test/main/cosmos/${chainIdentifier}.json`
+    );
+    let chainInfo = suggestingChainInfo;
+    if (chainInfoResponse.ok) {
+      const publicChainInfo: ChainInfo = await chainInfoResponse.json();
+      chainInfo = publicChainInfo;
+    }
+
     if (chainInfo.gasPriceStep) {
       // Gas price step in ChainInfo is legacy format.
       // Try to change the recent format for backward-compatibility.
