@@ -15,6 +15,13 @@ export type AccountStore = IAccountStore<{
       };
     };
   };
+  gno?: {
+    readonly msgOpts: {
+      readonly send: {
+        readonly native: MsgOpt;
+      };
+    };
+  };
   secret?: {
     readonly msgOpts: {
       readonly send: {

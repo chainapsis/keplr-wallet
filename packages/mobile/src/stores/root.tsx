@@ -12,6 +12,7 @@ import {
   SecretQueries,
   CosmosAccount,
   CosmwasmAccount,
+  GnoAccount,
   SecretAccount,
   LedgerInitStore,
   IBCCurrencyRegsitrar,
@@ -52,7 +53,7 @@ export class RootStore {
     [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
   >;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount]
+    [CosmosAccount, CosmwasmAccount, GnoAccount, SecretAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
@@ -204,6 +205,9 @@ export class RootStore {
         },
       }),
       CosmwasmAccount.use({
+        queriesStore: this.queriesStore,
+      }),
+      GnoAccount.use({
         queriesStore: this.queriesStore,
       }),
       SecretAccount.use({

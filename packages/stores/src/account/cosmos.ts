@@ -197,6 +197,11 @@ export class CosmosAccountImpl {
     };
 
     if (denomHelper.type === "native") {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      if (chainInfo.features?.includes("gno")) {
+        return undefined;
+      }
+
       const actualAmount = (() => {
         let dec = new Dec(amount);
         dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
@@ -296,6 +301,11 @@ export class CosmosAccountImpl {
 
     switch (denomHelper.type) {
       case "native":
+        const chainInfo = this.chainGetter.getChain(this.chainId);
+        if (chainInfo.features?.includes("gno")) {
+          return false;
+        }
+
         const actualAmount = (() => {
           let dec = new Dec(amount);
           dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));

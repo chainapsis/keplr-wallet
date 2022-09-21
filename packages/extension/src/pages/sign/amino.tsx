@@ -3,18 +3,22 @@
 import {
   CosmosMsgOpts,
   CosmwasmMsgOpts,
+  GnoMsgOpts,
   SecretMsgOpts,
 } from "@keplr-wallet/stores";
 import { Currency } from "@keplr-wallet/types";
 import { FormattedMessage, IntlShape } from "react-intl";
 import React from "react";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { parseCoins } from "@cosmjs/launchpad";
 import { Hash } from "@keplr-wallet/crypto";
 import {
+  GnoMsgSend,
   MessageObj,
   MsgBeginRedelegate,
   MsgDelegate,
   MsgExecuteContract,
+  MsgGnoCallContract,
   MsgInstantiateContract,
   MsgLink,
   MsgSend,
@@ -22,6 +26,7 @@ import {
   MsgUndelegate,
   MsgVote,
   MsgWithdrawDelegatorReward,
+  renderGnoCallContract,
   renderMsgBeginRedelegate,
   renderMsgDelegate,
   renderMsgExecuteContract,
@@ -41,6 +46,9 @@ export function renderAminoMessage(
     };
     readonly cosmwasm: {
       readonly msgOpts: CosmwasmMsgOpts;
+    };
+    readonly gno: {
+      readonly msgOpts: GnoMsgOpts;
     };
     readonly secret: {
       readonly msgOpts: SecretMsgOpts;
@@ -186,6 +194,30 @@ export function renderAminoMessage(
           />
         ),
       };
+    }
+
+    if (msg.type === msgOpts.gno.msgOpts.send.native.type) {
+      const value = msg.value as GnoMsgSend["value"];
+      return renderMsgSend(
+        currencies,
+        intl,
+        parseCoins(value.amount),
+        value.to_address
+      );
+    }
+
+    if (msg.type === "/vm.m_call") {
+      const value = msg.value as MsgGnoCallContract["value"];
+      const funds = value.send ? parseCoins(value.send) : [];
+
+      return renderGnoCallContract(
+        currencies,
+        intl,
+        funds,
+        value.pkg_path,
+        value.func,
+        value.args
+      );
     }
   } catch (e) {
     console.log(e);
