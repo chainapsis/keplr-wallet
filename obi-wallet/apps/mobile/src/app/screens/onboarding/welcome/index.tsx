@@ -22,6 +22,38 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
   const { demoStore, multisigStore } = useStore();
   const intl = useIntl();
 
+  const renderContinueButton = (keyInRecovery: string) => {
+    let navi_url: string;
+    let label_id: string;
+    switch (keyInRecovery) {
+      case "phoneNumber":
+        navi_url = "create-multisig-phone-number";
+        label_id = "recovery.continuephone";
+        break;
+      case "social":
+        navi_url = "create-multisig-social";
+        label_id = "recovery.continuesocial";
+        break;
+      default:
+        navi_url = "create-multisig-biometrics";
+        label_id = "onboarding1.getstarted";
+    }
+    return (
+      <Button
+        label={intl.formatMessage({ id: label_id })}
+        RightIcon={GetStarted}
+        flavor="blue"
+        style={{
+          marginTop: 40,
+        }}
+        onPress={action(() => {
+          demoStore.demoMode = false;
+          navigation.navigate(navi_url);
+        })}
+      />
+    );
+  };
+
   return (
     <InitialBackground>
       <SafeAreaView
@@ -57,10 +89,17 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               marginTop: 32,
             }}
           >
-            <FormattedMessage
-              id="onboarding1.welcometoloop"
-              defaultMessage="Welcome to Loop"
-            />
+            {multisigStore.getKeyInRecovery === "" ? (
+              <FormattedMessage
+                id="onboarding1.welcometoloop"
+                defaultMessage="Welcome to Loop"
+              />
+            ) : (
+              <FormattedMessage
+                id="recovery.keyupdate"
+                defaultMessage="Update Wallet Keys?"
+              />
+            )}
           </Text>
           <Text
             style={{
@@ -70,60 +109,68 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               marginTop: 12,
             }}
           >
-            <FormattedMessage
-              id="onboarding1.welcomesubtext"
-              defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
-            />
+            {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+              <FormattedMessage
+                id="recovery.phoneupdate"
+                defaultMessage="You're updating your phone number key."
+              />
+            ) : multisigStore.getKeyInRecovery === "social" ? (
+              <FormattedMessage
+                id="recovery.socialupdate"
+                defaultMessage="You're updating your social key."
+              />
+            ) : (
+              <FormattedMessage
+                id="onboarding1.welcomesubtext"
+                defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
+              />
+            )}
           </Text>
-          <Button
-            label={intl.formatMessage({ id: "onboarding1.getstarted" })}
-            RightIcon={GetStarted}
-            flavor="blue"
-            style={{
-              marginTop: 40,
-            }}
-            onPress={action(() => {
-              demoStore.demoMode = false;
-              switch (multisigStore.getKeyInRecovery) {
-                case "phoneNumber":
-                  navigation.navigate("create-multisig-phone-number");
-                  break;
-                case "social":
-                  navigation.navigate("create-multisig-social");
-                  break;
-                default:
-                  navigation.navigate("create-multisig-biometrics");
-              }
-            })}
-          />
-          <Button
-            label={intl.formatMessage({ id: "demo.enter" })}
-            RightIcon={GetStarted}
-            flavor="green"
-            style={{
-              marginTop: 20,
-            }}
-            onPress={action(() => {
-              demoStore.demoMode = true;
-              navigation.navigate("create-multisig-biometrics");
-              Alert.alert(
-                intl.formatMessage({ id: "demo.demomode" }),
-                intl.formatMessage({ id: "demo.info" })
-              );
-            })}
-          />
-          <Button
-            label="Recover Singlesig"
-            RightIcon={GetStarted}
-            flavor="blue"
-            style={{
-              marginTop: 20,
-            }}
-            onPress={action(() => {
-              demoStore.demoMode = false;
-              navigation.navigate("recover-singlesig");
-            })}
-          />
+          {renderContinueButton(multisigStore.getKeyInRecovery)}
+          {multisigStore.getKeyInRecovery === "" ? (
+            <Button
+              label={intl.formatMessage({ id: "demo.enter" })}
+              RightIcon={GetStarted}
+              flavor="green"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={action(() => {
+                demoStore.demoMode = true;
+                navigation.navigate("create-multisig-biometrics");
+                Alert.alert(
+                  intl.formatMessage({ id: "demo.demomode" }),
+                  intl.formatMessage({ id: "demo.info" })
+                );
+              })}
+            />
+          ) : null}
+          {multisigStore.getKeyInRecovery === "" ? (
+            <Button
+              label="Recover Singlesig"
+              RightIcon={GetStarted}
+              flavor="blue"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={action(() => {
+                demoStore.demoMode = false;
+                navigation.navigate("recover-singlesig");
+              })}
+            />
+          ) : (
+            <Button
+              label="Cancel"
+              RightIcon={GetStarted}
+              flavor="blue"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={action(() => {
+                multisigStore.cancelRecovery();
+              })}
+            />
+          )}
           {/*<Button*/}
           {/*  label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}*/}
           {/*  LeftIcon={RecoverWallet}*/}

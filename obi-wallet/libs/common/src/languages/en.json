@@ -40,6 +40,12 @@
   "receive.receive": "Receive",
   "receive.taptoshare": "Tap to share your address",
 
+  "recovery.keyupdate": "Update Your Obi Key?",
+  "recovery.phoneupdate": "You're updating your multisig wallet's phone number key.",
+  "recovery.socialupdate": "You're updating your multisig wallet's social key.",
+  "recovery.continuephone": "Continue Updating Phone Key",
+  "recovery.continuesocial": "Continue Updating Social Key",
+
   "onboarding1.welcometoloop": "Welcome to Loop",
   "onboarding1.welcomesubtext": "Powered by Obi",
   "onboarding1.getstarted": "Get Started",

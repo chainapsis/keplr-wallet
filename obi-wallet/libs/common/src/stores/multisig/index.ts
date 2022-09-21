@@ -228,6 +228,15 @@ export class MultisigStore {
     void this.save();
   }
 
+  @action
+  public cancelRecovery() {
+    this.serializedCurrentAdmin = this.nextAdmin;
+    this.keyInRecovery = "";
+    this.updateProposed = false;
+    this.loading = false;
+    void this.save();
+  }
+
   protected hydrateMultisig(
     multisig: SerializedMultisigPayload,
     prefix: string
