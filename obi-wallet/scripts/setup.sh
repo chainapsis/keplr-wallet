@@ -31,6 +31,3 @@ yarn
 
 # Build provider
 bash scripts/build-provider.sh
-
-# Setup URI scheme
-(cd apps/mobile; yarn uri-scheme add obi --android --ios)
