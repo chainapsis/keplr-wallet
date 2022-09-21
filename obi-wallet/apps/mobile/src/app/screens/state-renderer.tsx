@@ -15,8 +15,16 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 >;
 
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
-  const { demoStore, walletStore } = useStore();
-
+  const { demoStore, multisigStore, walletStore } = useStore();
+  let keyInRecovery = multisigStore.getKeyInRecovery;
+  switch (keyInRecovery) {
+    case "biometrics":
+    case "phoneNumber":
+    case "social":
+      break;
+    default:
+      keyInRecovery = "";
+  }
   return (
     <>
       {demoStore.demoMode ? (
@@ -49,7 +57,7 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
       case WalletState.LOADING:
         return <SplashScreen />;
       case WalletState.EMPTY:
-        return <OnboardingScreen />;
+        return <OnboardingScreen keyInRecovery={keyInRecovery} />;
       case WalletState.INITIALIZED:
         return <HomeScreen />;
     }
