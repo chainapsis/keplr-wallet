@@ -41,6 +41,7 @@ import invariant from "tiny-invariant";
 import { createBiometricSignature } from "../../../biometrics";
 import { InlineButton } from "../../../button";
 import {
+  createSigningCosmWasmClient,
   createSigningStargateClient,
   createStargateClient,
 } from "../../../clients";
@@ -470,7 +471,7 @@ export function useSignatureModalProps({
               singlesigStore.privateKey,
               currentChainInformation.prefix
             );
-            const client = await createSigningStargateClient({
+            const client = await createSigningCosmWasmClient({
               chainId: currentChainInformation.chainId,
               signer,
             });
