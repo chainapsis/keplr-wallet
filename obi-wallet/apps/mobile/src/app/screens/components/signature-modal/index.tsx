@@ -491,6 +491,8 @@ export function useSignatureModalProps({
             await onConfirm(result);
           }
         }
+
+        setSignatureModalVisible(false);
       },
     };
   }, [
