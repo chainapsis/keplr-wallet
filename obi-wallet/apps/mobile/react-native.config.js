@@ -1,8 +1,5 @@
 module.exports = {
-  assets: [
-    "./src/assets/fonts/Inter",
-    "../../libs/injected-provider/dist/injected-provider.js",
-  ],
+  assets: ["./src/assets/fonts/Inter"],
   dependencies: {
     "react-native-device-crypto": {
       platforms: {

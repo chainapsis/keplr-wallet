@@ -237,7 +237,7 @@ export function MultisigPhoneNumberConfirm({
                       }
                     }
                     setVerifyButtonDisabledDoubleclick(false);
-                    navigation.navigate("create-multisig-biometrics");
+                    navigation.navigate("create-multisig-social");
                   } else {
                     setVerifyButtonDisabledDoubleclick(false);
                   }

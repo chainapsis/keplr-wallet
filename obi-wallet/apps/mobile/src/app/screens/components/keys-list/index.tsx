@@ -37,6 +37,7 @@ export interface Key {
   title: string;
   description?: string;
   right?: React.ReactNode;
+  signed?: boolean;
   onPress?: () => void;
 }
 
@@ -45,7 +46,9 @@ export type HydratedKeyListItem = Key & KeyMetaData;
 export interface KeysListProps {
   data: Key[];
   style?: StyleProp<ViewStyle>;
+  tiled?: boolean;
 }
+
 const comingSoonKeys: HydratedKeyListItem[] = [
   {
     id: "email",
@@ -65,7 +68,7 @@ const comingSoonKeys: HydratedKeyListItem[] = [
   },
 ];
 
-export function KeysList({ data, style }: KeysListProps) {
+export function KeysList({ data, style, tiled }: KeysListProps) {
   const hydratedData = data.map((key) => {
     return {
       ...key,
@@ -74,23 +77,60 @@ export function KeysList({ data, style }: KeysListProps) {
   });
 
   return (
-    <FlatList
-      data={[...hydratedData, ...comingSoonKeys]}
-      keyExtractor={(item) => item.id}
-      renderItem={(props) => <KeyListItem {...props} />}
-      style={style}
-    />
+    <View style={[style]}>
+      <FlatList
+        data={[...hydratedData, ...comingSoonKeys]}
+        horizontal={tiled}
+        keyExtractor={(item) => item.id}
+        renderItem={(props) => <KeyListItem {...props} tiled={tiled} />}
+      />
+    </View>
   );
 }
 
 export interface KeyListItemProps {
   item: HydratedKeyListItem;
+  tiled?: boolean;
 }
 
-export function KeyListItem({ item }: KeyListItemProps) {
-  const { title, description, Icon, right, onPress } = item;
+export function KeyListItem({ item, tiled }: KeyListItemProps) {
+  const { title, description, Icon, right, onPress, id, signed } = item;
 
-  return (
+  if (item.description === "Coming Soon") return null;
+
+  return tiled ? (
+    <TouchableOpacity onPress={onPress}>
+      <View style={{ padding: 10 }}>
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
+          <View
+            style={{
+              backgroundColor: "#1D1C37",
+              width: 50,
+              height: 50,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 36,
+              borderWidth: 5,
+              borderColor: signed ? "#89F5C2" : "transparent",
+            }}
+          >
+            <Icon />
+          </View>
+        </View>
+        <Text
+          style={{
+            color: "#F6F5FF",
+            fontSize: 12,
+            fontWeight: "600",
+            opacity: 0.6,
+            marginTop: 4,
+          }}
+        >
+          {id}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  ) : (
     <TouchableOpacity
       style={{
         height: 79,

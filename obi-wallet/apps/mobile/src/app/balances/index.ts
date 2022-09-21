@@ -37,21 +37,22 @@ export function formatCoin(coin: ExtendedCoin) {
   switch (coin.denom) {
     case denom: {
       const digits = 6;
+      const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
-        icon: null,
+        icon: denom.includes("ujuno") ? require("./assets/juno.png") : null,
         denom: denom.slice(1).toUpperCase(),
         digits,
         label: denom[1].toUpperCase() + denom.slice(2),
         amount,
-        valueInUsd: amount * coin.usdPrice,
+        valueInUsd: amount * usdValue,
       };
     }
     case "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034": {
       const digits = 6;
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
-        icon: null,
+        icon: require("./assets/usdc.png"),
         denom: "axlUSDC",
         digits,
         label: "USDC (Axelar)",
@@ -59,16 +60,17 @@ export function formatCoin(coin: ExtendedCoin) {
         valueInUsd: amount,
       };
     }
-    case "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup": {
+    case "uloop": {
       const digits = 6;
+      const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
-        icon: null,
+        icon: require("./assets/loop.png"),
         denom: "LOOP",
         digits,
         label: "Loop",
         amount,
-        valueInUsd: coin.usdPrice * amount,
+        valueInUsd: usdValue * amount,
       };
     }
     default: {

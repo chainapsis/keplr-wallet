@@ -16,12 +16,12 @@
       }
     },
     "run-ios": {
-      "dependsOn": ["injected-provider-production", "react-native-asset"],
+      "dependsOn": ["injected-provider", "react-native-asset"],
       "executor": "@nrwl/react-native:run-ios",
       "options": {}
     },
     "bundle-ios": {
-      "dependsOn": ["injected-provider-production", "react-native-asset"],
+      "dependsOn": ["injected-provider", "react-native-asset"],
       "executor": "@nrwl/react-native:bundle",
       "outputs": ["apps/mobile/build"],
       "options": {
@@ -31,12 +31,12 @@
       }
     },
     "run-android": {
-      "dependsOn": ["injected-provider-production", "react-native-asset"],
+      "dependsOn": ["injected-provider", "react-native-asset"],
       "executor": "@nrwl/react-native:run-android",
       "options": {}
     },
     "build-android": {
-      "dependsOn": ["injected-provider-production", "react-native-asset"],
+      "dependsOn": ["injected-provider", "react-native-asset"],
       "executor": "@nrwl/react-native:build-android",
       "outputs": [
         "apps/mobile/android/app/build/outputs/bundle",
@@ -45,7 +45,7 @@
       "options": {}
     },
     "bundle-android": {
-      "dependsOn": ["injected-provider-production", "react-native-asset"],
+      "dependsOn": ["injected-provider", "react-native-asset"],
       "executor": "@nrwl/react-native:bundle",
       "options": {
         "entryFile": "src/main.tsx",
@@ -76,21 +76,10 @@
         "passWithNoTests": true
       }
     },
-    "injected-provider-dev": {
+    "injected-provider": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "commands": [
-          "webpack-dev-server --config libs/injected-provider/webpack.config.js"
-        ]
-      }
-    },
-    "injected-provider-production": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "commands": [
-          "webpack --config libs/injected-provider/webpack.config.js --mode production",
-          "cp libs/injected-provider/dist/injected-provider.js apps/mobile/android/app/src/main/assets/."
-        ]
+        "command": "sh scripts/build-provider.sh"
       }
     },
     "react-native-asset": {

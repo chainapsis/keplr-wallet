@@ -1,7 +1,6 @@
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { MsgSendEncodeObject } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
-import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
@@ -11,6 +10,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
+  Image,
   Platform,
   RefreshControl,
   Text,
@@ -26,6 +26,7 @@ import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
+import { KeyboardAvoidingView } from "../components/keyboard-avoiding-view";
 import { isSmallScreenNumber } from "../components/screen-size";
 import {
   SignatureModal,
@@ -149,288 +150,305 @@ export const SendScreen = observer(() => {
   const intl = useIntl();
 
   return (
-    <SafeAreaView
-      style={{
-        backgroundColor: "rgba(9, 8, 23, 1);",
-        flex: 1,
-        paddingHorizontal: 20,
-        paddingVertical: Platform.select({
-          ios: isSmallScreenNumber(20, 20),
-          android: isSmallScreenNumber(30, 30),
-        }),
-        justifyContent: "space-between",
-      }}
-    >
-      <SignatureModal {...signatureModalProps} />
-      <View>
-        <View style={{ flexDirection: "row" }}>
-          <Back style={{ alignSelf: "flex-start", zIndex: 2 }} />
-          <Text
-            style={{
-              width: "100%",
-              textAlign: "center",
-              marginLeft: -20,
-              color: "#F6F5FF",
-              fontWeight: "600",
-            }}
-          >
-            <FormattedMessage id="send.send" defaultMessage="Send" />
-          </Text>
-        </View>
-        <View
-          style={{
-            marginTop: 55,
-            flexDirection: "row",
-            alignItems: "flex-end",
-          }}
-        >
-          <TextInput
-            label={intl.formatMessage({ id: "send.to", defaultMessage: "To" })}
-            placeholder={intl.formatMessage({
-              id: "send.walletaddress",
-              defaultMessage: "Wallet Address",
-            })}
-            style={{ flex: 1 }}
-            // inputStyle={{
-            //   borderTopRightRadius: 0,
-            //   borderBottomRightRadius: 0,
-            //   borderRightWidth: 0,
-            // }}
-            value={address}
-            onChangeText={setAddress}
-          />
-          {/*<TouchableOpacity*/}
-          {/*  style={{*/}
-          {/*    width: 56,*/}
-          {/*    height: 56,*/}
-          {/*    justifyContent: "center",*/}
-          {/*    alignItems: "center",*/}
-          {/*    padding: 5,*/}
-          {/*    borderTopRightRadius: 12,*/}
-          {/*    borderBottomRightRadius: 12,*/}
-          {/*    borderWidth: 1,*/}
-          {/*    borderColor: "#2F2B4C",*/}
-          {/*    borderLeftWidth: 0,*/}
-          {/*  }}*/}
-          {/*>*/}
-          {/*  <View*/}
-          {/*    style={{*/}
-          {/*      position: "absolute",*/}
-          {/*      width: 1,*/}
-          {/*      backgroundColor: "#2F2B4C",*/}
-          {/*      height: "100%",*/}
-          {/*      left: 0,*/}
-          {/*    }}*/}
-          {/*  />*/}
-          {/*  <FontAwesomeIcon*/}
-          {/*    icon={faQrcode}*/}
-          {/*    style={{ color: "#887CEB" }}*/}
-          {/*    size={32}*/}
-          {/*  />*/}
-          {/*</TouchableOpacity>*/}
-        </View>
-        <View style={{ marginTop: 35 }}>
-          <Text
-            style={{
-              color: "#787B9C",
-              textTransform: "uppercase",
-              fontSize: 10,
-              marginBottom: 12,
-            }}
-          >
-            <FormattedMessage id="send.amount" defaultMessage="Amount" />
-          </Text>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
+      <SafeAreaView
+        style={{
+          backgroundColor: "rgba(9, 8, 23, 1);",
+          flex: 1,
+          justifyContent: "space-between",
+          paddingHorizontal: 20,
+          paddingVertical: Platform.select({
+            ios: isSmallScreenNumber(20, 20),
+            android: isSmallScreenNumber(30, 30),
+          }),
+        }}
+      >
+        <SignatureModal {...signatureModalProps} />
+        <View>
+          <View style={{ flexDirection: "row" }}>
+            <Back style={{ alignSelf: "flex-start", zIndex: 2 }} />
+            <Text
+              style={{
+                width: "100%",
+                textAlign: "center",
+                marginLeft: -20,
+                color: "#F6F5FF",
+                fontWeight: "600",
+              }}
+            >
+              <FormattedMessage id="send.send" defaultMessage="Send" />
+            </Text>
+          </View>
           <View
             style={{
-              borderWidth: 1,
-              borderRadius: 12,
-              borderColor: "#2F2B4C",
-              padding: 4,
+              marginTop: 55,
               flexDirection: "row",
+              alignItems: "flex-end",
             }}
           >
-            <TouchableOpacity
+            <TextInput
+              label={intl.formatMessage({
+                id: "send.to",
+                defaultMessage: "To",
+              })}
+              placeholder={intl.formatMessage({
+                id: "send.walletaddress",
+                defaultMessage: "Wallet Address",
+              })}
+              style={{ flex: 1 }}
+              // inputStyle={{
+              //   borderTopRightRadius: 0,
+              //   borderBottomRightRadius: 0,
+              //   borderRightWidth: 0,
+              // }}
+              value={address}
+              onChangeText={setAddress}
+            />
+            {/*<TouchableOpacity*/}
+            {/*  style={{*/}
+            {/*    width: 56,*/}
+            {/*    height: 56,*/}
+            {/*    justifyContent: "center",*/}
+            {/*    alignItems: "center",*/}
+            {/*    padding: 5,*/}
+            {/*    borderTopRightRadius: 12,*/}
+            {/*    borderBottomRightRadius: 12,*/}
+            {/*    borderWidth: 1,*/}
+            {/*    borderColor: "#2F2B4C",*/}
+            {/*    borderLeftWidth: 0,*/}
+            {/*  }}*/}
+            {/*>*/}
+            {/*  <View*/}
+            {/*    style={{*/}
+            {/*      position: "absolute",*/}
+            {/*      width: 1,*/}
+            {/*      backgroundColor: "#2F2B4C",*/}
+            {/*      height: "100%",*/}
+            {/*      left: 0,*/}
+            {/*    }}*/}
+            {/*  />*/}
+            {/*  <FontAwesomeIcon*/}
+            {/*    icon={faQrcode}*/}
+            {/*    style={{ color: "#887CEB" }}*/}
+            {/*    size={32}*/}
+            {/*  />*/}
+            {/*</TouchableOpacity>*/}
+          </View>
+          <View style={{ marginTop: 35 }}>
+            <Text
               style={{
-                borderRadius: 12,
-                flex: 2,
-                backgroundColor: "#17162C",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingVertical: 12,
-                paddingLeft: 12,
+                color: "#787B9C",
+                textTransform: "uppercase",
+                fontSize: 10,
+                marginBottom: 12,
               }}
-              onPress={() => triggerBottomSheet(true)}
             >
-              <View
+              <FormattedMessage id="send.amount" defaultMessage="Amount" />
+            </Text>
+            <View
+              style={{
+                borderWidth: 1,
+                borderRadius: 12,
+                borderColor: "#2F2B4C",
+                padding: 4,
+                flexDirection: "row",
+              }}
+            >
+              <TouchableOpacity
                 style={{
+                  borderRadius: 12,
+                  flex: 2,
+                  backgroundColor: "#17162C",
                   flexDirection: "row",
-                  justifyContent: "flex-start",
-                  flex: 3,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingVertical: 12,
+                  paddingLeft: 12,
                 }}
+                onPress={() => triggerBottomSheet(true)}
               >
                 <View
                   style={{
-                    width: 44,
-                    height: 44,
-                    backgroundColor: "orange",
-                    marginRight: 12,
-                    borderRadius: 44,
+                    flexDirection: "row",
+                    justifyContent: "flex-start",
+                    flex: 3,
                   }}
-                />
-                <View style={{ justifyContent: "center" }}>
-                  <Text
+                >
+                  <View
                     style={{
-                      color: "#F6F5FF",
-                      fontWeight: "500",
-                      fontSize: 14,
+                      width: 44,
+                      height: 44,
+                      marginRight: 12,
+                      borderRadius: 44,
                     }}
                   >
-                    {hydratedSelectedCoin?.denom}
-                  </Text>
-                  <Text style={{ color: "#999CB6" }}>
-                    {hydratedSelectedCoin?.amount}
-                  </Text>
+                    {hydratedSelectedCoin?.icon && (
+                      <Image
+                        source={hydratedSelectedCoin?.icon}
+                        style={{ flex: 1, width: "100%", height: "100%" }}
+                      />
+                    )}
+                  </View>
+                  <View style={{ justifyContent: "center" }}>
+                    <Text
+                      style={{
+                        color: "#F6F5FF",
+                        fontWeight: "500",
+                        fontSize: 14,
+                      }}
+                    >
+                      {hydratedSelectedCoin?.denom}
+                    </Text>
+                    <Text style={{ color: "#999CB6" }}>
+                      {hydratedSelectedCoin?.amount}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <View style={{ flex: 1, alignItems: "center" }}>
-                <FontAwesomeIcon
-                  icon={faAngleDown}
-                  style={{ color: "#7B87A8" }}
-                />
-              </View>
-            </TouchableOpacity>
-            <TextInput
-              keyboardType="numeric"
-              style={{
-                alignSelf: "center",
-                borderColor: "transparent",
-                flex: 1,
-                paddingLeft: 20,
-                paddingRight: 10,
-              }}
-              inputStyle={{
-                borderColor: "transparent",
-                textAlign: "right",
-                fontSize: 18,
-                fontWeight: "500",
-              }}
-              placeholder="0"
-              value={amount}
-              onChangeText={setAmount}
-            />
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <FontAwesomeIcon
+                    icon={faAngleDown}
+                    style={{ color: "#7B87A8" }}
+                  />
+                </View>
+              </TouchableOpacity>
+              <TextInput
+                keyboardType="numeric"
+                style={{
+                  alignSelf: "center",
+                  borderColor: "transparent",
+                  flex: 1,
+                  paddingLeft: 20,
+                  paddingRight: 10,
+                }}
+                inputStyle={{
+                  borderColor: "transparent",
+                  textAlign: "right",
+                  fontSize: 18,
+                  fontWeight: "500",
+                }}
+                placeholder="0"
+                value={amount}
+                onChangeText={setAmount}
+              />
+            </View>
           </View>
         </View>
-      </View>
-      <Button
-        flavor="blue"
-        label={intl.formatMessage({ id: "send.next", defaultMessage: "Next" })}
-        disabled={!address || !amount || !selectedCoin}
-        onPress={() => {
-          if (address && amount && selectedCoin) {
-            openSignatureModal();
-          }
-        }}
-      />
-      <BottomSheetBackdrop
-        onPress={() => triggerBottomSheet(false)}
-        visible={denominationOpened}
-      />
-      <BottomSheet
-        handleIndicatorStyle={{ backgroundColor: "white" }}
-        backgroundStyle={{ backgroundColor: "#100F1E" }}
-        handleStyle={{ backgroundColor: "transparent" }}
-        snapPoints={["60"]}
-        enablePanDownToClose={true}
-        ref={bottomSheetRef}
-        index={-1}
-        backdropComponent={(props) => null}
-        onClose={() => {
-          setDenominationOpened(false);
-        }}
-      >
-        <BottomSheetView
-          style={{
-            flex: 1,
-            backgroundColor: "transparent",
-            position: "relative",
-            paddingHorizontal: 20,
+        <Button
+          flavor="blue"
+          label={intl.formatMessage({
+            id: "send.next",
+            defaultMessage: "Next",
+          })}
+          disabled={!address || !amount || !selectedCoin}
+          onPress={() => {
+            if (address && amount && selectedCoin) {
+              openSignatureModal();
+            }
+          }}
+        />
+        <BottomSheetBackdrop
+          onPress={() => triggerBottomSheet(false)}
+          visible={denominationOpened}
+        />
+        <BottomSheet
+          handleIndicatorStyle={{ backgroundColor: "white" }}
+          backgroundStyle={{ backgroundColor: "#100F1E" }}
+          handleStyle={{ backgroundColor: "transparent" }}
+          snapPoints={["60"]}
+          enablePanDownToClose={true}
+          ref={bottomSheetRef}
+          index={-1}
+          backdropComponent={(props) => null}
+          onClose={() => {
+            setDenominationOpened(false);
           }}
         >
-          <View
+          <BottomSheetView
             style={{
-              marginBottom: 56,
-              flexDirection: "row",
-              justifyContent: "space-between",
+              flex: 1,
+              backgroundColor: "transparent",
+              position: "relative",
+              paddingHorizontal: 20,
             }}
           >
-            <View>
+            <View
+              style={{
+                marginBottom: 56,
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{ fontSize: 16, fontWeight: "600", color: "#f6f5ff" }}
+                >
+                  <FormattedMessage
+                    id="send.denomination"
+                    defaultMessage="Denomination"
+                  />
+                </Text>
+                <Text style={{ fontSize: 12, color: "#f6f5ff", opacity: 0.6 }}>
+                  <FormattedMessage
+                    id="send.selectcoin"
+                    defaultMessage="Select the coin you'd like to send"
+                  />
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => triggerBottomSheet(false)}>
+                <FontAwesomeIcon icon={faTimes} style={{ color: "#F6F5FF" }} />
+              </TouchableOpacity>
+            </View>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
               <Text
-                style={{ fontSize: 16, fontWeight: "600", color: "#f6f5ff" }}
+                style={{
+                  fontSize: 12,
+                  color: "#f6f5ff",
+                  opacity: 0.6,
+                  textTransform: "uppercase",
+                }}
+              >
+                <FormattedMessage id="send.name" defaultMessage="Name" />
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "#f6f5ff",
+                  opacity: 0.6,
+                  textTransform: "uppercase",
+                }}
               >
                 <FormattedMessage
-                  id="send.denomination"
-                  defaultMessage="Denomination"
-                />
-              </Text>
-              <Text style={{ fontSize: 12, color: "#f6f5ff", opacity: 0.6 }}>
-                <FormattedMessage
-                  id="send.selectcoin"
-                  defaultMessage="Select the coin you'd like to send"
+                  id="send.holdings"
+                  defaultMessage="Holdings"
                 />
               </Text>
             </View>
-            <TouchableOpacity onPress={() => triggerBottomSheet(false)}>
-              <FontAwesomeIcon icon={faTimes} style={{ color: "#F6F5FF" }} />
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <Text
-              style={{
-                fontSize: 12,
-                color: "#f6f5ff",
-                opacity: 0.6,
-                textTransform: "uppercase",
-              }}
-            >
-              <FormattedMessage id="send.name" defaultMessage="Name" />
-            </Text>
-            <Text
-              style={{
-                fontSize: 12,
-                color: "#f6f5ff",
-                opacity: 0.6,
-                textTransform: "uppercase",
-              }}
-            >
-              <FormattedMessage id="send.holdings" defaultMessage="Holdings" />
-            </Text>
-          </View>
-          <FlatList
-            data={balances}
-            keyExtractor={(item) => item.denom}
-            renderItem={(props) => (
-              <CoinRenderer
-                {...props}
-                selected={props.item.denom === selectedCoin?.denom}
-                onPress={() => {
-                  triggerBottomSheet(false);
-                  setSelectedCoin(props.item);
-                }}
-              />
-            )}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={refreshBalances}
-              />
-            }
-          />
-        </BottomSheetView>
-      </BottomSheet>
-    </SafeAreaView>
+            <FlatList
+              data={balances}
+              keyExtractor={(item) => item.denom}
+              renderItem={(props) => (
+                <CoinRenderer
+                  {...props}
+                  selected={props.item.denom === selectedCoin?.denom}
+                  onPress={() => {
+                    triggerBottomSheet(false);
+                    setSelectedCoin(props.item);
+                  }}
+                />
+              )}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={refreshBalances}
+                />
+              }
+            />
+          </BottomSheetView>
+        </BottomSheet>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 });
 
@@ -441,7 +459,7 @@ interface CoinRendererProps {
 }
 
 function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
-  const { denom, label, amount, valueInUsd } = formatCoin(item);
+  const { denom, label, amount, valueInUsd, icon } = formatCoin(item);
 
   return (
     <TouchableOpacity
@@ -459,11 +477,17 @@ function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
           style={{
             width: 36,
             height: 36,
-            backgroundColor: "red",
             marginRight: 10,
             borderRadius: 12,
           }}
-        />
+        >
+          {icon && (
+            <Image
+              source={icon}
+              style={{ flex: 1, width: "100%", height: "100%" }}
+            />
+          )}
+        </View>
         <View>
           <Text style={{ color: "#f6f5ff", fontWeight: "500" }}>{label}</Text>
           <Text

@@ -76,10 +76,6 @@
     {
       "path": "src/assets/fonts/Inter/Inter-V.ttf",
       "sha1": "03f5c0ff412bc0aac7ef2c1e19edcbdd9b06a609"
-    },
-    {
-      "path": "../../libs/injected-provider/dist/injected-provider.js",
-      "sha1": "9622d0e25d61f89ab17d664193965d52797b21c5"
     }
   ]
 }

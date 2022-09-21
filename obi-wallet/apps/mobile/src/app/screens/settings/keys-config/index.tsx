@@ -20,6 +20,7 @@ import {
   KeysList,
   WarningIcon,
 } from "../../components/keys-list";
+import { isSmallScreenNumber } from "../../components/screen-size";
 import Keys1 from "./assets/keys1.svg";
 import Keys2 from "./assets/keys2.svg";
 import Keys3 from "./assets/keys3.svg";
@@ -29,17 +30,17 @@ import Keys5 from "./assets/keys5.svg";
 const getSVG = (number: number) => {
   switch (number) {
     case 1:
-      return <Keys1 />;
+      return <Keys1 width={isSmallScreenNumber(130, 160)} />;
     case 2:
-      return <Keys2 />;
+      return <Keys2 width={isSmallScreenNumber(130, 160)} />;
     case 3:
-      return <Keys3 />;
+      return <Keys3 width={isSmallScreenNumber(130, 160)} />;
     case 4:
-      return <Keys4 />;
+      return <Keys4 width={isSmallScreenNumber(130, 160)} />;
     case 5:
-      return <Keys5 />;
+      return <Keys5 width={isSmallScreenNumber(130, 160)} />;
     default:
-      return <Keys1 />;
+      return <Keys1 width={isSmallScreenNumber(130, 160)} />;
   }
 };
 
@@ -371,10 +372,12 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           icon={faInfoCircle}
           style={{ color: "rgba(246, 245, 255, 0.6)", marginRight: 10 }}
         />
-        <Text style={{ fontSize: 12, color: "rgba(246, 245, 255, 0.6)" }}>
+        <Text
+          style={{ flex: 1, fontSize: 12, color: "rgba(246, 245, 255, 0.6)" }}
+        >
           <FormattedMessage
             id="settings.multisig.modal.info"
-            defaultMessage="In case of stolen/lost or any other reason, you can replace this key with a new one"
+            defaultMessage="In case of stolen/lost or any other reason, you can replace this key with a new one."
           />
         </Text>
       </View>

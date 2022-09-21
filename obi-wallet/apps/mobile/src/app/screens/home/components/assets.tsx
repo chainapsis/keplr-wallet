@@ -10,6 +10,7 @@ import { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import {
   FlatList,
+  Image,
   ImageBackground,
   ListRenderItemInfo,
   RefreshControl,
@@ -31,7 +32,7 @@ import ObiLogo from "../../settings/assets/obi-logo.svg";
 import Receive from "../assets/receive.svg";
 import Send from "../assets/send.svg";
 
-export const Assets = observer(() => {
+export const Assets = observer(function Assets() {
   const { chainStore } = useStore();
   const currentNetwork = chainStore.currentChainInformation.label;
 
@@ -467,12 +468,17 @@ function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
         style={{
           height: 36,
           width: 36,
-          backgroundColor: "#E9983D",
+          backgroundColor: icon ? "transparent" : "#ccc",
           borderRadius: 10,
           marginRight: 12,
         }}
       >
-        {icon}
+        {icon ? (
+          <Image
+            source={icon}
+            style={{ flex: 1, width: "100%", height: "100%" }}
+          />
+        ) : null}
       </View>
 
       <View
