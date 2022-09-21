@@ -57,8 +57,8 @@ new InExtensionMessageRequester()
   .sendMessage(BACKGROUND_PORT, new CheckURLIsPhishingMsg())
   .then((r) => {
     if (r) {
-      const origin = location.href;
-      location.replace(
+      const origin = window.location.href;
+      window.location.replace(
         `chrome-extension://${chrome.runtime.id}/blocklist.html#/?origin=${origin}`
       );
     }

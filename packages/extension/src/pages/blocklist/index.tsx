@@ -13,8 +13,7 @@ export const BlocklistPage: FunctionComponent = () => {
     new InExtensionMessageRequester()
       .sendMessage(BACKGROUND_PORT, new URLTempAllowMsg(origin))
       .then(() => {
-        console.log(origin);
-        location.replace(origin);
+        window.location.replace(origin);
       });
 
   return (
