@@ -1,5 +1,7 @@
 import { InjectedKeplr } from "@keplr-wallet/provider";
 import { KeplrMode } from "@keplr-wallet/types";
+import { EncodeObject } from "@cosmjs/proto-signing";
+import { DeliverTxResponse } from "@cosmjs/stargate";
 
 export class RNInjectedKeplr extends InjectedKeplr {
   static parseWebviewMessage(message: any): any {
@@ -12,6 +14,14 @@ export class RNInjectedKeplr extends InjectedKeplr {
     }
 
     return message;
+  }
+
+  public async obiSignAndBroadcast(
+    address: string,
+    messages: EncodeObject[]
+  ): Promise<DeliverTxResponse> {
+    // @ts-expect-error
+    return await this.requestMethod("obiSignAndBroadcast", [address, messages]);
   }
 
   constructor(version: string, mode: KeplrMode) {

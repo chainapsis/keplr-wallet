@@ -7,6 +7,7 @@ import {
   StdSignDoc,
 } from "@cosmjs/amino";
 import { DirectSignResponse } from "@cosmjs/proto-signing";
+import { DeliverTxResponse } from "@cosmjs/stargate";
 import {
   AbstractKeyRingService,
   BIP44HDPath,
@@ -34,6 +35,7 @@ import {
   Env,
   KeplrError,
 } from "@keplr-wallet/router";
+import { Message } from "@keplr-wallet/router";
 import { BIP44, EthSignType, KeplrSignOptions } from "@keplr-wallet/types";
 import {
   EmbedChainInfos,
@@ -49,6 +51,8 @@ import { Buffer } from "buffer";
 import { Alert } from "react-native";
 import scrypt from "scrypt-js";
 import invariant from "tiny-invariant";
+
+import { RequestObiSignAndBroadcastMsg } from "../app/injected-provider";
 
 let rootStore: RootStore | null = null;
 
@@ -439,7 +443,7 @@ export function initBackground() {
   let keyRingService: KeyRingService;
   const router = new RouterBackground(produceEnv);
 
-  init(
+  const { interactionService } = init(
     router,
     (prefix: string) => new KVStore(prefix),
     new MessageRequesterInternalToUi(),
@@ -487,111 +491,22 @@ export function initBackground() {
     }
   );
 
-  router.listen(BACKGROUND_PORT);
+  router.registerMessage(RequestObiSignAndBroadcastMsg);
+  router.addHandler("obi", async (env: Env, msg: Message<unknown>) => {
+    const message = msg as RequestObiSignAndBroadcastMsg;
 
-  const params = {
-    env: {
-      isInternalMsg: false,
-    },
-    msgOrigin: "https://juno.loop.markets",
-    chainId: "juno-1",
-    signer: "juno1299v8cn9udgt7k05jmf25lzf3sy953qevua592",
-    signDoc: {
-      chain_id: "juno-1",
-      account_number: "351365",
-      sequence: "1",
-      fee: {
-        amount: [
-          {
-            amount: "400000",
-            denom: "JUNO",
-          },
-        ],
-        gas: "1280000",
-      },
-      msgs: [
-        {
-          type: "wasm/MsgExecuteContract",
-          value: {
-            sender: "juno1299v8cn9udgt7k05jmf25lzf3sy953qevua592",
-            contract:
-              "juno1qc8mrs3hmxm0genzrd92akja5r0v7mfm6uuwhktvzphhz9ygkp8ssl4q07",
-            msg: {
-              swap: {
-                offer_asset: {
-                  amount: "516072",
-                  info: {
-                    native_token: {
-                      denom: "ujuno",
-                    },
-                  },
-                },
-                belief_price: "0.004529352253858738",
-                max_spread: "0.02",
-              },
-            },
-            funds: [
-              {
-                denom: "ujuno",
-                amount: "516072",
-              },
-            ],
-          },
-        },
-        {
-          type: "wasm/MsgExecuteContract",
-          value: {
-            sender: "juno1299v8cn9udgt7k05jmf25lzf3sy953qevua592",
-            contract:
-              "juno1ctsmp54v79x7ea970zejlyws50cj9pkrmw49x46085fn80znjmpqz2n642",
-            msg: {
-              swap: {
-                input_token: "Token1",
-                input_amount: "476375",
-                min_output: "2496486",
-              },
-            },
-            funds: [
-              {
-                denom: "ujuno",
-                amount: "476375",
-              },
-            ],
-          },
-        },
-        {
-          type: "wasm/MsgExecuteContract",
-          value: {
-            sender: "juno1299v8cn9udgt7k05jmf25lzf3sy953qevua592",
-            contract:
-              "juno1utkr0ep06rkxgsesq6uryug93daklyd6wneesmtvxjkz0xjlte9qdj2s8q",
-            msg: {
-              swap: {
-                offer_asset: {
-                  amount: "2547435",
-                  info: {
-                    native_token: {
-                      denom:
-                        "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034",
-                    },
-                  },
-                },
-                belief_price: "0.024220864551472814",
-                max_spread: "0.02",
-              },
-            },
-            funds: [
-              {
-                denom:
-                  "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034",
-                amount: "2547435",
-              },
-            ],
-          },
-        },
-      ],
-      memo: "",
-    },
-    signOptions: {},
-  };
+    const response = (await interactionService.waitApprove(
+      env,
+      "/sign",
+      "request-sign-and-broadcast",
+      {
+        address: message.address,
+        messages: message.messages,
+      }
+    )) as DeliverTxResponse;
+
+    return response;
+  });
+
+  router.listen(BACKGROUND_PORT);
 }

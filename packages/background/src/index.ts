@@ -141,4 +141,8 @@ export function init(
   SecretWasm.init(router, secretWasmService);
   BackgroundTx.init(router, backgroundTxService);
   PhishingList.init(router, phishingListService);
+
+  return {
+    interactionService,
+  }
 }
