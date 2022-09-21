@@ -13,7 +13,6 @@ export class CheckURLIsPhishingMsg extends Message<boolean> {
 
   validateBasic(): void {
     const url = new URL(this.origin);
-    if (url.protocol === "chrome-extension:") return;
 
     // Will throw an error if url has not second level domain.
     parseDomainUntilSecondLevel(url.origin);
