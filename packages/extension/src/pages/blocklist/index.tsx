@@ -7,7 +7,7 @@ import style from "./style.module.scss";
 
 export const BlocklistPage: FunctionComponent = () => {
   const origin =
-    new URLSearchParams(location.hash.slice(2)).get("origin") || "";
+    new URLSearchParams(window.location.search).get("origin") || "";
 
   const handleMove = () =>
     new InExtensionMessageRequester()
