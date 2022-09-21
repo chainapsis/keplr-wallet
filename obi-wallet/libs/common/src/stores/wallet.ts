@@ -7,6 +7,7 @@ import { SinglesigState, SinglesigStore } from "./singlesig";
 export enum WalletType {
   MULTISIG = "Multisig",
   MULTISIG_DEMO = "MultisigDemo",
+  MULTISIG_PENDING = "PendingMultisig",
   SINGLESIG = "Singlesig",
 }
 
@@ -19,19 +20,23 @@ export enum WalletState {
 export class WalletStore {
   protected readonly demoStore: DemoStore;
   protected readonly multisigStore: MultisigStore;
+  protected readonly pendingMultisigStore: MultisigStore;
   protected readonly singlesigStore: SinglesigStore;
 
   constructor({
     demoStore,
     multisigStore,
+    pendingMultisigStore,
     singlesigStore,
   }: {
     demoStore: DemoStore;
     multisigStore: MultisigStore;
+    pendingMultisigStore: MultisigStore;
     singlesigStore: SinglesigStore;
   }) {
     this.demoStore = demoStore;
     this.multisigStore = multisigStore;
+    this.pendingMultisigStore = pendingMultisigStore;
     this.singlesigStore = singlesigStore;
     makeObservable(this);
   }
@@ -79,6 +84,8 @@ export class WalletStore {
         return this.multisigStore.proxyAddress?.address ?? null;
       case WalletType.MULTISIG_DEMO:
         return null;
+      case WalletType.MULTISIG_PENDING:
+        return this.pendingMultisigStore.proxyAddress?.address ?? null;
       case WalletType.SINGLESIG:
         return this.singlesigStore.address;
     }
