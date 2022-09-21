@@ -231,7 +231,7 @@ interface KeyConfigProps {
 function KeyConfig({ item, onClose }: KeyConfigProps) {
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
-  const { demoStore, multisigStore, walletStore } = useStore();
+  const { demoStore, multisigStore, pendingMultisigStore, walletStore } = useStore();
 
   const safeArea = useSafeAreaInsets();
 
@@ -244,7 +244,10 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           if (!walletStore.type) return;
           switch (walletStore.type) {
             case WalletType.MULTISIG:
-              multisigStore.recover(key_id);
+              if (multisigStore.currentAdmin) {
+                pendingMultisigStore.copyGoodKeys(multisigStore.currentAdmin, key_id);
+                multisigStore.recover(key_id);
+              } // TODO: unsure if else case will ever hit here
               break;
             case WalletType.MULTISIG_DEMO:
               // demoStore.recover();
