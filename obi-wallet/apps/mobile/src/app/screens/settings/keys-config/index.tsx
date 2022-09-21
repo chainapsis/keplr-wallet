@@ -2,6 +2,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { MultisigKey, Text, WalletType } from "@obi-wallet/common";
+import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { useIntl, FormattedMessage } from "react-intl";
@@ -230,6 +231,7 @@ interface KeyConfigProps {
 }
 
 function KeyConfig({ item, onClose }: KeyConfigProps) {
+  const { goBack } = useNavigation();
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
   const { demoStore, multisigStore, pendingMultisigStore, walletStore } =
@@ -252,6 +254,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
                   key_id
                 );
                 multisigStore.recover(key_id);
+                goBack();
               } // TODO: unsure if else case will ever hit here
               break;
             case WalletType.MULTISIG_DEMO:
