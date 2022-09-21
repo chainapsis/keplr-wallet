@@ -2,6 +2,7 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { observer } from "mobx-react-lite";
 import { FC, useState } from "react";
+import { useIntl } from "react-intl";
 import {
   Button,
   KeyboardAvoidingView,
@@ -42,6 +43,7 @@ export const Home = observer<HomeProps>(
       icons;
     const [editMode, setEditMode] = useState(false);
     const [url, setUrl] = useState("www.keplr_wallet.com");
+    const intl = useIntl();
 
     return (
       <SafeAreaView
@@ -89,7 +91,10 @@ export const Home = observer<HomeProps>(
                   setEditMode(true);
                 }}
                 ImgComponent={BuyCryptoIcon}
-                label="Buy Crypto"
+                label={intl.formatMessage({
+                  id: "apps.kado",
+                  defaultMessage: "Buy Crypto",
+                })}
                 onPress={() => {
                   onAppPress({
                     label: "Buy Crypto",
@@ -117,7 +122,10 @@ export const Home = observer<HomeProps>(
                   setEditMode(true);
                 }}
                 ImgComponent={GetTicketsIcon}
-                label="Get Tickets"
+                label={intl.formatMessage({
+                  id: "apps.gettickets",
+                  defaultMessage: "Get Tickets",
+                })}
                 onPress={() => {
                   onAppPress({
                     label: "Get Tickets",
@@ -131,7 +139,10 @@ export const Home = observer<HomeProps>(
                   setEditMode(true);
                 }}
                 ImgComponent={MyTicketsIcon}
-                label="My Tickets"
+                label={intl.formatMessage({
+                  id: "apps.mytickets",
+                  defaultMessage: "My Tickets",
+                })}
                 onPress={() => {
                   onAppPress({
                     label: "My Tickets",

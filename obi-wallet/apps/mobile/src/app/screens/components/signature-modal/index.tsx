@@ -90,6 +90,7 @@ export const SignatureModal = observer<SignatureModalProps>((props) => {
 export const SignatureModalSinglesig = observer<SignatureModalProps>(
   ({ messages, rawMessages, multisig, onCancel, onConfirm, ...props }) => {
     const [loading, setLoading] = useState(false);
+    const intl = useIntl();
 
     return (
       <ConfirmMessages
@@ -106,7 +107,18 @@ export const SignatureModalSinglesig = observer<SignatureModalProps>(
             const error = e as Error;
             setLoading(false);
             console.error(error);
-            Alert.alert("Error confirming transaction", error.message);
+            Alert.alert(
+              intl.formatMessage({
+                id: "general.error",
+                defaultMessage: "Error",
+              }) +
+                " " +
+                intl.formatMessage({
+                  id: "signature.error.confirmingtx",
+                  defaultMessage: "Confirming Transaction",
+                }),
+              error.message
+            );
           }
         }}
       />
@@ -318,13 +330,17 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
               marginTop: 5,
             }}
           >
-            Keys Required {numberOfSignatures}/
+            <FormattedMessage
+              id="signature.keysrequired"
+              defaultMessage="Keys Required"
+            />
+            : {numberOfSignatures}/
             {multisig.multisig?.publicKey.value.threshold}{" "}
           </Text>
         </View>
         <KeysList
           data={data}
-          tiled
+          tiled={true}
           style={{
             marginVertical: 10,
             backgroundColor: "#130F23",
