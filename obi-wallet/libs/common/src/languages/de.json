@@ -126,6 +126,8 @@
   "signature.smscodelabel": "8-Stelliger SMS-Code",
   "signature.noresponselabel": "Keine Antwort erhalten?",
   "signature.sendagain": "Erneut senden",
+  "signature.keysrequired": "Benötigte Keys",
+  "signature.error.confirmingtx": "Fehler Transaktion Bestätigen",
 
   "settings.multigsigsettings": "Key Einstellungen",
   "settings.multigsigsettings.subtext": "Verwalte deine SMS-, Social- und andere Keys.",
@@ -153,7 +155,9 @@
   "settings.multisig.option.emailkey": "E-Mail",
   "settings.multisig.option.cloudkey": "Cloud",
 
-  "appscreen.kado": "Crypto's Kaufen",
+  "apps.kado": "Crypto's Kaufen",
+  "apps.gettickets": "Erhalte Tickets",
+  "apps.mytickets": "Meine Tickets",
 
   "onboarding2.securityquestion.birthplace": "In welcher Stadt und welchem Land wurdest du geboren?",
   "onboarding2.securityquestion.schoolname": "Welchen vollständigen Namen hat die letzte Grundschule, die du besucht hast?",
