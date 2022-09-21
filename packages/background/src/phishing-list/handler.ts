@@ -1,6 +1,6 @@
 import { Env, Handler, InternalHandler, Message } from "@keplr-wallet/router";
 import { PhishingListService } from "./service";
-import { CheckURLIsPhishingMsg } from "./messages";
+import { CheckURLIsPhishingMsg, URLTempAllowMsg } from "./messages";
 
 export const getHandler: (service: PhishingListService) => Handler = (
   service: PhishingListService
@@ -12,6 +12,8 @@ export const getHandler: (service: PhishingListService) => Handler = (
           env,
           msg as CheckURLIsPhishingMsg
         );
+      case URLTempAllowMsg:
+        return handleURLTempAllow(service)(env, msg as URLTempAllowMsg);
       default:
         throw new Error("Unknown msg type");
     }
@@ -24,4 +26,13 @@ const handleCheckURLIsPhishingMsg: (
   service: PhishingListService
 ) => (_, msg) => {
   return service.checkURLIsPhishing(msg.origin);
+};
+
+const handleURLTempAllow: (
+  service: PhishingListService
+) => InternalHandler<URLTempAllowMsg> = (service: PhishingListService) => (
+  _,
+  msg
+) => {
+  service.allowUrlTemp(msg.url);
 };

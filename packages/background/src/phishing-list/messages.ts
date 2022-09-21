@@ -31,3 +31,27 @@ export class CheckURLIsPhishingMsg extends Message<boolean> {
     return CheckURLIsPhishingMsg.type();
   }
 }
+
+export class URLTempAllowMsg extends Message<void> {
+  public static type() {
+    return "url-temp-allow";
+  }
+
+  constructor(public readonly url: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    const url = new URL(this.url);
+    // Will throw an error if url has not second level domain.
+    parseDomainUntilSecondLevel(url.origin);
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return URLTempAllowMsg.type();
+  }
+}
