@@ -89,7 +89,7 @@ export class PhishingListService {
       const allowed = this.allowed.get(parsed);
       if (
         allowed &&
-        allowed + this.opts.allowTimeoutMs <= new Date().getTime()
+        allowed + this.opts.allowTimeoutMs >= new Date().getTime()
       ) {
         return false;
       }
