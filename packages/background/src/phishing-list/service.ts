@@ -84,9 +84,15 @@ export class PhishingListService {
 
   checkURLIsPhishing(url: string): boolean {
     const parsed = parseDomainUntilSecondLevel(new URL(url).origin);
-    const now = new Date().getTime();
-    if ((this.allowed.get(parsed) || now + 60 * 60 * 1000) <= now) return false;
-    return this.map.get(parsed) === true;
+    if (this.map.get(parsed) === true) {
+      const allowed = this.allowed.get(parsed);
+      if (allowed && allowed + 60 * 60 * 1000 <= new Date().getTime()) {
+        return false;
+      }
+      return true;
+    } else {
+      return false;
+    }
   }
 
   allowUrlTemp(url: string): void {
