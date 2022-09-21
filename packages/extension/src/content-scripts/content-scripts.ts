@@ -57,8 +57,9 @@ new InExtensionMessageRequester()
   .sendMessage(BACKGROUND_PORT, new CheckURLIsPhishingMsg())
   .then((r) => {
     if (r) {
-      alert(
-        "[Scam Alert] This domain is listed on the Keplr domain warning list, meaning this is a phishing site. We recommend you to close this website right away."
+      const origin = window.location.href;
+      window.location.replace(
+        browser.runtime.getURL(`/blocklist.html?origin=${origin}`)
       );
     }
   })

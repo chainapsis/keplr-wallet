@@ -102,7 +102,8 @@ export function init(
     blockListUrl:
       "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
     fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
-    retryIntervalMs: 10 * 60 * 1000, // 10 mins
+    retryIntervalMs: 10 * 60 * 1000, // 10 mins,
+    allowTimeoutMs: 10 * 60 * 1000, // 10 mins,
   });
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account")

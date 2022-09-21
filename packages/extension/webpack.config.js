@@ -81,6 +81,7 @@ const extensionConfig = (env, args) => {
     watch: isEnvDevelopment,
     entry: {
       popup: ["./src/index.tsx"],
+      blocklist: ["./src/pages/blocklist/index.tsx"],
       background: ["./src/background/background.ts"],
       contentScripts: ["./src/content-scripts/content-scripts.ts"],
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
@@ -126,7 +127,22 @@ const extensionConfig = (env, args) => {
       new HtmlWebpackPlugin({
         template: "./src/index.html",
         filename: "popup.html",
-        excludeChunks: ["background", "contentScripts", "injectedScript"],
+        excludeChunks: [
+          "blocklist",
+          "background",
+          "contentScripts",
+          "injectedScript",
+        ],
+      }),
+      new HtmlWebpackPlugin({
+        template: "./src/index.html",
+        filename: "blocklist.html",
+        excludeChunks: [
+          "popup",
+          "background",
+          "contentScripts",
+          "injectedScript",
+        ],
       }),
       new WriteFilePlugin(),
       new webpack.EnvironmentPlugin(["NODE_ENV"]),

@@ -226,6 +226,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list1`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -241,6 +242,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list2`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -256,6 +258,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list3`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -271,6 +274,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list3`,
       fetchingIntervalMs: 200,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -307,6 +311,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/test-retry`,
       fetchingIntervalMs: 200,
       retryIntervalMs: 100,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -363,5 +368,33 @@ describe("Test phishing list service", () => {
     // See the implementation of /test-retry
     testPhishingUntil(5);
     expect(getQueryCount()).toBe(5);
+  });
+
+  test("Test addUrlTemp allow blocked url", async () => {
+    const service = new PhishingListService({
+      blockListUrl: `http://127.0.0.1:${port}/list1`,
+      fetchingIntervalMs: 200,
+      retryIntervalMs: 100,
+      allowTimeoutMs: 100,
+    });
+    eachService = service;
+
+    service.init();
+
+    await waitServiceInit(service);
+
+    // block phishings site
+    const [phishing, anotherPhishing] = phishings;
+    expect(service.checkURLIsPhishing("https://" + phishing)).toBe(true);
+
+    // allow temp Url
+    service.allowUrlTemp("https://" + phishing);
+    expect(service.checkURLIsPhishing("https://" + phishing)).toBe(false);
+    // but another url still blocked
+    expect(service.checkURLIsPhishing("https://" + anotherPhishing)).toBe(true);
+
+    // should be blocked again
+    await new Promise((resolve) => setTimeout(resolve, 110));
+    expect(service.checkURLIsPhishing("https://" + phishing)).toBe(true);
   });
 });
