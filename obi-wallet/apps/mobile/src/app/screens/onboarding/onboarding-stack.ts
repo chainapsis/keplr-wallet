@@ -16,8 +16,7 @@ export interface OnboardingStackParamList
   };
   "create-multisig-social": undefined;
   "create-multisig-create": undefined;
-  "replace-multisig-propose": undefined;
-  "replace-multisig-confirm": undefined;
+  "replace-multisig": undefined;
 }
 
 export const OnboardingStack =

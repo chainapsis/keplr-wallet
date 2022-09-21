@@ -64,6 +64,9 @@ export class MultisigStore {
   protected keyInRecovery = "";
 
   @observable
+  protected updateProposed = false;
+
+  @observable
   protected serializedNextAdmin: SerializedMultisigPayload = emptyMultisig;
 
   @observable
@@ -133,6 +136,11 @@ export class MultisigStore {
   }
 
   @computed
+  public get getUpdateProposed() {
+    return this.updateProposed;
+  }
+
+  @computed
   public get proxyAddress(): SerializedProxyAddress | null {
     return this.proxyAddresses[this.chainStore.currentChain] ?? null;
   }
@@ -157,6 +165,17 @@ export class MultisigStore {
     const serializedData: SerializedData = {
       nextAdmin: this.serializedNextAdmin,
       currentAdmin: this.serializedCurrentAdmin,
+      proxyAddresses: this.proxyAddresses,
+    };
+    const data = toJS(serializedData);
+    await this.kvStore.set("multisig", data);
+  }
+
+  @action
+  public async replace(newMultisigStore: MultisigStore) {
+    const serializedData: SerializedData = {
+      nextAdmin: newMultisigStore.serializedNextAdmin,
+      currentAdmin: newMultisigStore.serializedCurrentAdmin,
       proxyAddresses: this.proxyAddresses,
     };
     const data = toJS(serializedData);
@@ -272,6 +291,11 @@ export class MultisigStore {
   public recover(key_id: string) {
     this.keyInRecovery = key_id;
     this.serializedCurrentAdmin = null;
+  }
+
+  @action
+  public setUpdateProposed(proposed: boolean) {
+    this.updateProposed = proposed;
   }
 
   @action

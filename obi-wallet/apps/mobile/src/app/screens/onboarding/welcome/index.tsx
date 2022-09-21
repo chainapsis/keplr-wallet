@@ -19,7 +19,7 @@ export type WelcomeProps = NativeStackScreenProps<
 >;
 
 export const Welcome = observer<WelcomeProps>(({ navigation }) => {
-  const { demoStore } = useStore();
+  const { demoStore, multisigStore } = useStore();
   const intl = useIntl();
 
   return (
@@ -84,7 +84,16 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             }}
             onPress={action(() => {
               demoStore.demoMode = false;
-              navigation.navigate("create-multisig-biometrics");
+              switch (multisigStore.getKeyInRecovery) {
+                case "phoneNumber":
+                  navigation.navigate("create-multisig-phone-number");
+                  break;
+                case "social":
+                  navigation.navigate("create-multisig-social");
+                  break;
+                default:
+                  navigation.navigate("create-multisig-biometrics");
+              }
             })}
           />
           <Button

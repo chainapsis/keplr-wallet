@@ -1,4 +1,3 @@
-import { useStore } from "../../stores";
 import { MultisigPhoneNumber } from "./common/1-phone-number";
 import { MultisigPhoneNumberConfirm } from "./common/2-phone-number-confirm";
 import { MultisigBiometrics } from "./common/3-biometrics";
@@ -6,18 +5,19 @@ import { MultisigSocial } from "./common/4-social";
 import { MultisigInit } from "./create-multisig-init";
 import { OnboardingStack } from "./onboarding-stack";
 import { RecoverSinglesig } from "./recover-singlesig";
-import { ReplaceMultisigPropose } from "./replace-multisig-key/1-propose";
-import { ReplaceMultisigConfirm } from "./replace-multisig-key/2-confirm";
+import { ReplaceMultisig } from "./replace-multisig-key";
 import { Welcome } from "./welcome";
 
 export interface OnboardingScreensProps {
   initialRouteName?: string;
   keyInRecovery?: string;
+  updateProposed?: boolean;
 }
 
 export function OnboardingScreen({
   initialRouteName,
   keyInRecovery,
+  updateProposed,
 }: OnboardingScreensProps) {
   return (
     <OnboardingStack.Navigator
@@ -58,21 +58,22 @@ export function OnboardingScreen({
         />
       ) : (
         <OnboardingStack.Screen
-          name="replace-multisig-propose"
-          component={ReplaceMultisigPropose}
+          name="replace-multisig"
+          component={ReplaceMultisig}
         />
       )}
+      {updateProposed === true ? (
+        <OnboardingStack.Screen
+          name="replace-multisig"
+          component={ReplaceMultisig}
+        />
+      ) : null}
       {keyInRecovery === "" ? (
         <OnboardingStack.Screen
           name="recover-singlesig"
           component={RecoverSinglesig}
         />
-      ) : (
-        <OnboardingStack.Screen
-          name="replace-multisig-confirm"
-          component={ReplaceMultisigConfirm}
-        />
-      )}
+      ) : null}
     </OnboardingStack.Navigator>
   );
 }

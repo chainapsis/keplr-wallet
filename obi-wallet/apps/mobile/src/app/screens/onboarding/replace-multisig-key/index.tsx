@@ -12,14 +12,14 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
-import { IconButton } from "../../../../button";
-import { useStore } from "../../../../stores";
-import { Background } from "../../../components/background";
+import { IconButton } from "../../../button";
+import { useStore } from "../../../stores";
+import { Background } from "../../components/background";
 import {
   SignatureModalMultisig,
   useSignatureModalProps,
-} from "../../../components/signature-modal";
-import { OnboardingStackParamList } from "../../onboarding-stack";
+} from "../../components/signature-modal";
+import { OnboardingStackParamList } from "../onboarding-stack";
 
 const demoModeMultisig: Multisig = {
   multisig: {
@@ -59,12 +59,12 @@ const demoModeMultisig: Multisig = {
   email: null,
 };
 
-export type ReplaceMultisigConfirmProps = NativeStackScreenProps<
+export type ReplaceMultisigProps = NativeStackScreenProps<
   OnboardingStackParamList,
-  "replace-multisig-confirm"
+  "replace-multisig"
 >;
 
-export const ReplaceMultisigConfirm = observer<ReplaceMultisigConfirmProps>(
+export const ReplaceMultisig = observer<ReplaceMultisigProps>(
   ({ navigation }) => {
     const {
       chainStore,
@@ -86,12 +86,23 @@ export const ReplaceMultisigConfirm = observer<ReplaceMultisigConfirmProps>(
       if (!walletStore.address) return [];
       if (!pendingMultisig.multisig?.address) return [];
 
-      const rawMessage = {
-        confirm_update_admin: {},
-      };
+      let rawMessage;
+      if (!multisigStore.getUpdateProposed) {
+        rawMessage = {
+          propose_update_admin: {
+            new_admin: pendingMultisig.multisig.address,
+          },
+        };
+      } else {
+        rawMessage = {
+          confirm_update_admin: {},
+        };
+      }
 
       const value: MsgExecuteContract = {
-        sender: pendingMultisig.multisig.address,
+        sender: multisigStore.getUpdateProposed
+          ? pendingMultisig.multisig.address
+          : multisig.multisig.address,
         contract: walletStore.address,
         msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
         funds: [],
@@ -137,6 +148,11 @@ export const ReplaceMultisigConfirm = observer<ReplaceMultisigConfirmProps>(
             contractAddress,
             "Expected `executeEvent` to contain `_contract_address` attribute."
           );
+          if (!multisigStore.getUpdateProposed) {
+            multisigStore.setUpdateProposed(true);
+          } else {
+            multisigStore.replace(pendingMultisigStore);
+          }
         } catch (e) {
           console.log(response.rawLog);
         }

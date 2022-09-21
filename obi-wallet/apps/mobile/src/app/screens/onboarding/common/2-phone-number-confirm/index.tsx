@@ -237,7 +237,13 @@ export function MultisigPhoneNumberConfirm({
                       }
                     }
                     setVerifyButtonDisabledDoubleclick(false);
-                    navigation.navigate("create-multisig-social");
+                    switch (multisigStore.getKeyInRecovery) {
+                      case "phoneNumber":
+                        navigation.navigate("replace-multisig");
+                        break;
+                      default:
+                        navigation.navigate("create-multisig-init");
+                    }
                   } else {
                     setVerifyButtonDisabledDoubleclick(false);
                   }
