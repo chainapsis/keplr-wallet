@@ -14,6 +14,7 @@ export class PhishingListService {
       readonly blockListUrl: string;
       readonly fetchingIntervalMs: number;
       readonly retryIntervalMs: number;
+      readonly allowTimeoutMs: number;
     }
   ) {}
 
@@ -86,7 +87,10 @@ export class PhishingListService {
     const parsed = parseDomainUntilSecondLevel(new URL(url).origin);
     if (this.map.get(parsed) === true) {
       const allowed = this.allowed.get(parsed);
-      if (allowed && allowed + 60 * 60 * 1000 <= new Date().getTime()) {
+      if (
+        allowed &&
+        allowed + this.opts.allowTimeoutMs <= new Date().getTime()
+      ) {
         return false;
       }
       return true;

@@ -226,6 +226,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list1`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -241,6 +242,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list2`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -256,6 +258,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list3`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -271,6 +274,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list3`,
       fetchingIntervalMs: 200,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -307,6 +311,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/test-retry`,
       fetchingIntervalMs: 200,
       retryIntervalMs: 100,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
