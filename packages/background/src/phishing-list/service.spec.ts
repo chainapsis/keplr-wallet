@@ -369,4 +369,30 @@ describe("Test phishing list service", () => {
     testPhishingUntil(5);
     expect(getQueryCount()).toBe(5);
   });
+
+  test("Test addUrlTemp allow blocked url", async () => {
+    const service = new PhishingListService({
+      blockListUrl: `http://127.0.0.1:${port}/test-retry`,
+      fetchingIntervalMs: 200,
+      retryIntervalMs: 100,
+      allowTimeoutMs: 100,
+    });
+    eachService = service;
+
+    service.init();
+
+    await waitServiceInit(service);
+
+    // block phishings site
+    const test = phishings[0];
+    expect(service.checkURLIsPhishing("https://" + test)).toBe(true);
+
+    // allow temp Url
+    service.allowUrlTemp("https://" + test);
+    expect(service.checkURLIsPhishing("https://" + test)).toBe(false);
+
+    // should be blocked again
+    await new Promise((resolve) => setTimeout(resolve, 110));
+    expect(service.checkURLIsPhishing("https://" + test)).toBe(true);
+  });
 });
