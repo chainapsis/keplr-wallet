@@ -386,15 +386,31 @@ describe("Test phishing list service", () => {
     // block phishings site
     const [phishing, anotherPhishing] = phishings;
     expect(service.checkURLIsPhishing("https://" + phishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + phishing)).toBe(true);
+
+    expect(service.checkURLIsPhishing("https://" + anotherPhishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + anotherPhishing)).toBe(
+      true
+    );
 
     // allow temp Url
     service.allowUrlTemp("https://" + phishing);
     expect(service.checkURLIsPhishing("https://" + phishing)).toBe(false);
+    expect(service.checkURLIsPhishing("https://test." + phishing)).toBe(false);
     // but another url still blocked
     expect(service.checkURLIsPhishing("https://" + anotherPhishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + anotherPhishing)).toBe(
+      true
+    );
 
     // should be blocked again
     await new Promise((resolve) => setTimeout(resolve, 110));
     expect(service.checkURLIsPhishing("https://" + phishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + phishing)).toBe(true);
+
+    expect(service.checkURLIsPhishing("https://" + anotherPhishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + anotherPhishing)).toBe(
+      true
+    );
   });
 });
