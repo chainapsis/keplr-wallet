@@ -26,25 +26,25 @@ export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
       initialRouteName={initialRouteName}
     >
       <OnboardingStack.Screen name="welcome" component={Welcome} />
-      {keyInRecovery === "phoneNumber" ? (
-        <OnboardingStack.Screen
-          name="create-multisig-phone-number"
-          component={MultisigPhoneNumber}
-        />
-      ) : null}
-      {keyInRecovery === "phoneNumber" ? (
-        <OnboardingStack.Screen
-          name="create-multisig-phone-number-confirm"
-          component={MultisigPhoneNumberConfirm}
-        />
-      ) : null}
-      {keyInRecovery === "biometrics" ? (
+      {keyInRecovery === "biometrics" || keyInRecovery === null ? (
         <OnboardingStack.Screen
           name="create-multisig-biometrics"
           component={MultisigBiometrics}
         />
       ) : null}
-      {keyInRecovery === "social" ? (
+      {keyInRecovery === "phoneNumber" || keyInRecovery === null ? (
+        <OnboardingStack.Screen
+          name="create-multisig-phone-number"
+          component={MultisigPhoneNumber}
+        />
+      ) : null}
+      {keyInRecovery === "phoneNumber" || keyInRecovery === null ? (
+        <OnboardingStack.Screen
+          name="create-multisig-phone-number-confirm"
+          component={MultisigPhoneNumberConfirm}
+        />
+      ) : null}
+      {keyInRecovery === "social" || keyInRecovery === null ? (
         <OnboardingStack.Screen
           name="create-multisig-social"
           component={MultisigSocial}

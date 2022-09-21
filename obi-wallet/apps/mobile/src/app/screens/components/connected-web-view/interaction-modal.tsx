@@ -23,6 +23,8 @@ export const InteractionModal = observer<InteractionModalProps>(
       if (!walletStore.type) return [];
 
       switch (walletStore.type) {
+        case WalletType.MULTISIG_PENDING:
+          return [];
         case WalletType.MULTISIG: {
           if (
             !multisig?.multisig?.address ||

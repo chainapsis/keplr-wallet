@@ -277,12 +277,16 @@ export class MultisigStore {
   @action
   public copyGoodKeys(sourceMultisig: Multisig, bad_key_id: string) {
     if (sourceMultisig.biometrics) {
-      this.setBiometricsPublicKey({publicKey: sourceMultisig.biometrics.publicKey});
+      this.setBiometricsPublicKey({
+        publicKey: sourceMultisig.biometrics.publicKey,
+      });
     }
     switch (bad_key_id) {
       case "phoneNumber":
         if (sourceMultisig.social) {
-          this.setSocialPublicKey({publicKey: sourceMultisig.social.publicKey});
+          this.setSocialPublicKey({
+            publicKey: sourceMultisig.social.publicKey,
+          });
         }
         break;
       case "social":

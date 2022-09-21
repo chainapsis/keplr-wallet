@@ -3,7 +3,6 @@ import {
   useNavigation as useNavigationOriginal,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { observer } from "mobx-react-lite";
 
 export interface OnboardingStackParamList
   extends Record<string, object | undefined> {
