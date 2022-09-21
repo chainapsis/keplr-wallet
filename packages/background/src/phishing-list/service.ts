@@ -15,7 +15,7 @@ export class PhishingListService {
       readonly fetchingIntervalMs: number;
       readonly retryIntervalMs: number;
     }
-  ) { }
+  ) {}
 
   get hasInited(): boolean {
     return this._hasInited;
