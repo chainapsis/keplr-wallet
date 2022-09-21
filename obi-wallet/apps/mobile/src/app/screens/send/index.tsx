@@ -26,6 +26,7 @@ import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
+import { CoinIcon } from "../components/coin-icon";
 import { KeyboardAvoidingView } from "../components/keyboard-avoiding-view";
 import { isSmallScreenNumber } from "../components/screen-size";
 import {
@@ -146,7 +147,10 @@ export const SendScreen = observer(() => {
   });
 
   const intl = useIntl();
-
+  const coinIconProps =
+    typeof hydratedSelectedCoin?.icon === "number"
+      ? { imageIcon: hydratedSelectedCoin.icon }
+      : { SVGIcon: hydratedSelectedCoin?.icon };
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <SafeAreaView
@@ -280,12 +284,7 @@ export const SendScreen = observer(() => {
                       borderRadius: 44,
                     }}
                   >
-                    {hydratedSelectedCoin?.icon && (
-                      <Image
-                        source={hydratedSelectedCoin?.icon}
-                        style={{ flex: 1, width: "100%", height: "100%" }}
-                      />
-                    )}
+                    <CoinIcon {...coinIconProps} />
                   </View>
                   <View style={{ justifyContent: "center" }}>
                     <Text
@@ -458,7 +457,8 @@ interface CoinRendererProps {
 
 function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
   const { denom, label, amount, valueInUsd, icon } = formatCoin(item);
-
+  const coinIconProps =
+    typeof icon === "number" ? { imageIcon: icon } : { SVGIcon: icon };
   return (
     <TouchableOpacity
       style={{
@@ -479,12 +479,7 @@ function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
             borderRadius: 12,
           }}
         >
-          {icon && (
-            <Image
-              source={icon}
-              style={{ flex: 1, width: "100%", height: "100%" }}
-            />
-          )}
+          <CoinIcon {...coinIconProps} />
         </View>
         <View>
           <Text style={{ color: "#f6f5ff", fontWeight: "500" }}>{label}</Text>
