@@ -61,6 +61,9 @@ export class MultisigStore {
   protected readonly kvStore: KVStore;
 
   @observable
+  protected keyInRecovery = "";
+
+  @observable
   protected serializedNextAdmin: SerializedMultisigPayload = emptyMultisig;
 
   @observable
@@ -122,6 +125,11 @@ export class MultisigStore {
   @computed
   public get currentChainInformation() {
     return chains[this.chainStore.currentChain];
+  }
+
+  @computed
+  public get getKeyInRecovery() {
+    return this.keyInRecovery;
   }
 
   @computed
@@ -257,6 +265,12 @@ export class MultisigStore {
 
   @action
   public logout() {
+    this.serializedCurrentAdmin = null;
+  }
+
+  @action
+  public recover(key_id: string) {
+    this.keyInRecovery = key_id;
     this.serializedCurrentAdmin = null;
   }
 }

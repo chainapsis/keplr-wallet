@@ -35,7 +35,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
       if (demoStore.demoMode) return;
 
       const { phoneNumber } = multisigStore.nextAdmin;
-      if (phoneNumber) {
+      if (phoneNumber && multisigStore.getKeyInRecovery !== "phoneNumber") {
         Alert.alert(
           intl.formatMessage({ id: "onboarding2.error.phonekeyexists.title" }),
           intl.formatMessage({ id: "onboarding2.error.phonekeyexists.text" }) +
@@ -52,7 +52,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                 id: "onboarding2.error.phonekeyexists.yes",
               }),
               onPress: () => {
-                navigation.navigate("crate-multisig-biometrics");
+                navigation.navigate("create-multisig-biometrics");
               },
             },
           ]

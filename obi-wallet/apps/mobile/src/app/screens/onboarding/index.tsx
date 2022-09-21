@@ -1,3 +1,4 @@
+import { useStore } from "../../stores";
 import { MultisigPhoneNumber } from "./common/1-phone-number";
 import { MultisigPhoneNumberConfirm } from "./common/2-phone-number-confirm";
 import { MultisigBiometrics } from "./common/3-biometrics";
@@ -11,13 +12,12 @@ import { Welcome } from "./welcome";
 
 export interface OnboardingScreensProps {
   initialRouteName?: string;
-  keyReplace?: "phone_number" | "social" | "biometrics";
 }
 
-export function OnboardingScreen({
-  initialRouteName,
-  keyReplace,
-}: OnboardingScreensProps) {
+export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
+  const { multisigStore } = useStore();
+  const keyInRecovery = multisigStore.getKeyInRecovery;
+
   return (
     <OnboardingStack.Navigator
       screenOptions={{
@@ -26,31 +26,31 @@ export function OnboardingScreen({
       initialRouteName={initialRouteName}
     >
       <OnboardingStack.Screen name="welcome" component={Welcome} />
-      {keyReplace === "phone_number" ? (
+      {keyInRecovery === "phoneNumber" ? (
         <OnboardingStack.Screen
           name="create-multisig-phone-number"
           component={MultisigPhoneNumber}
         />
       ) : null}
-      {keyReplace === "phone_number" ? (
+      {keyInRecovery === "phoneNumber" ? (
         <OnboardingStack.Screen
           name="create-multisig-phone-number-confirm"
           component={MultisigPhoneNumberConfirm}
         />
       ) : null}
-      {keyReplace === "biometrics" ? (
+      {keyInRecovery === "biometrics" ? (
         <OnboardingStack.Screen
           name="create-multisig-biometrics"
           component={MultisigBiometrics}
         />
       ) : null}
-      {keyReplace === "social" ? (
+      {keyInRecovery === "social" ? (
         <OnboardingStack.Screen
           name="create-multisig-social"
           component={MultisigSocial}
         />
       ) : null}
-      {keyReplace === null ? (
+      {keyInRecovery === null ? (
         <OnboardingStack.Screen
           name="create-multisig-init"
           component={MultisigInit}
@@ -61,7 +61,7 @@ export function OnboardingScreen({
           component={ReplaceMultisigPropose}
         />
       )}
-      {keyReplace === null ? (
+      {keyInRecovery === null ? (
         <OnboardingStack.Screen
           name="recover-singlesig"
           component={RecoverSinglesig}
