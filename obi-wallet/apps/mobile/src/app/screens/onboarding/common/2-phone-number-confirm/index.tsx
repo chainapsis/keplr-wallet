@@ -33,7 +33,7 @@ export function MultisigPhoneNumberConfirm({
 }: MultisigPhoneNumberConfirmProps) {
   const { params } = route;
 
-  const { demoStore, multisigStore } = useStore();
+  const { demoStore, multisigStore, pendingMultisigStore } = useStore();
   const [key, setKey] = useState("");
 
   const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
@@ -216,14 +216,25 @@ export function MultisigPhoneNumberConfirm({
                     : await parsePublicKeyTextMessageResponse(key);
                   if (publicKey) {
                     if (!demoStore.demoMode) {
-                      multisigStore.setPhoneNumberKey({
-                        publicKey: {
-                          type: pubkeyType.secp256k1,
-                          value: publicKey,
-                        },
-                        phoneNumber: params.phoneNumber,
-                        securityQuestion: params.securityQuestion,
-                      });
+                      if (multisigStore.getKeyInRecovery === "") {
+                        multisigStore.setPhoneNumberKey({
+                          publicKey: {
+                            type: pubkeyType.secp256k1,
+                            value: publicKey,
+                          },
+                          phoneNumber: params.phoneNumber,
+                          securityQuestion: params.securityQuestion,
+                        });
+                      } else {
+                        pendingMultisigStore.setPhoneNumberKey({
+                          publicKey: {
+                            type: pubkeyType.secp256k1,
+                            value: publicKey,
+                          },
+                          phoneNumber: params.phoneNumber,
+                          securityQuestion: params.securityQuestion,
+                        });
+                      }
                     }
                     setVerifyButtonDisabledDoubleclick(false);
                     navigation.navigate("create-multisig-social");

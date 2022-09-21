@@ -1,7 +1,7 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { MultisigKey, Text } from "@obi-wallet/common";
+import { MultisigKey, Text, WalletType } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { useIntl, FormattedMessage } from "react-intl";
@@ -232,13 +232,51 @@ interface KeyConfigProps {
 function KeyConfig({ item, onClose }: KeyConfigProps) {
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
+  const { demoStore, multisigStore, pendingMultisigStore, walletStore } = useStore();
 
   const safeArea = useSafeAreaInsets();
 
   const intl = useIntl();
 
-  const getModalText = (string: string) => {
-    switch (string) {
+  const getRecoverButton = (key_id: string) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          if (!walletStore.type) return;
+          switch (walletStore.type) {
+            case WalletType.MULTISIG:
+              if (multisigStore.currentAdmin) {
+                pendingMultisigStore.copyGoodKeys(multisigStore.currentAdmin, key_id);
+                multisigStore.recover(key_id);
+              } // TODO: unsure if else case will ever hit here
+              break;
+            case WalletType.MULTISIG_DEMO:
+              // demoStore.recover();
+              break;
+          }
+        }}
+        style={{
+          paddingVertical: 15,
+          width: "100%",
+          backgroundColor: "#59D6E6",
+          borderRadius: 12,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ fontSize: 15, fontWeight: "700" }}>
+          {/** ToDo: i18n - Building sentences dynamically is not feasible with translations, as the word-order is different in other languages. */}
+          {/** "Replace {title} now" ...not possible */}
+          <FormattedMessage
+            id="settings.multisig.modal.replacenow"
+            defaultMessage="Replace now"
+          />
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const getModalText = (key_id: string) => {
+    switch (key_id) {
       case "phoneNumber":
         return (
           <FormattedMessage
@@ -344,35 +382,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
         </Text>
       </View>
       <View style={{ alignItems: "center" }}>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert(
-              intl.formatMessage({
-                id: "general.comingsoon",
-                defaultMessage: "Coming Soon",
-              }),
-              intl.formatMessage({
-                id: "settings.multisig.modal.replacementerror",
-                defaultMessage:
-                  "Replacement of keys has not been implemented yet.",
-              })
-            );
-          }}
-          style={{
-            paddingVertical: 15,
-            width: "100%",
-            backgroundColor: "#59D6E6",
-            borderRadius: 12,
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ fontSize: 15, fontWeight: "700" }}>
-            <FormattedMessage
-              id="settings.multisig.modal.replacenow"
-              defaultMessage="Replace now"
-            />
-          </Text>
-        </TouchableOpacity>
+        {getRecoverButton(item.id)}
         <TouchableOpacity
           onPress={() => onClose()}
           style={{ paddingVertical: 15, paddingHorizontal: 63 }}

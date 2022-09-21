@@ -61,6 +61,9 @@ export class MultisigStore {
   protected readonly kvStore: KVStore;
 
   @observable
+  protected keyInRecovery = "";
+
+  @observable
   protected serializedNextAdmin: SerializedMultisigPayload = emptyMultisig;
 
   @observable
@@ -122,6 +125,11 @@ export class MultisigStore {
   @computed
   public get currentChainInformation() {
     return chains[this.chainStore.currentChain];
+  }
+
+  @computed
+  public get getKeyInRecovery() {
+    return this.keyInRecovery;
   }
 
   @computed
@@ -258,5 +266,34 @@ export class MultisigStore {
   @action
   public logout() {
     this.serializedCurrentAdmin = null;
+  }
+
+  @action
+  public recover(key_id: string) {
+    this.keyInRecovery = key_id;
+    this.serializedCurrentAdmin = null;
+  }
+
+  @action
+  public copyGoodKeys(sourceMultisig: Multisig, bad_key_id: string) {
+    if (sourceMultisig.biometrics) {
+      this.setBiometricsPublicKey({publicKey: sourceMultisig.biometrics.publicKey});
+    }
+    switch (bad_key_id) {
+      case "phoneNumber":
+        if (sourceMultisig.social) {
+          this.setSocialPublicKey({publicKey: sourceMultisig.social.publicKey});
+        }
+        break;
+      case "social":
+        if (sourceMultisig.phoneNumber) {
+          this.setPhoneNumberKey({
+            publicKey: sourceMultisig.phoneNumber.publicKey,
+            phoneNumber: sourceMultisig.phoneNumber.phoneNumber,
+            securityQuestion: sourceMultisig.phoneNumber.securityQuestion,
+          });
+        }
+        break;
+    }
   }
 }

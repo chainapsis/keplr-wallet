@@ -25,7 +25,8 @@ export type MultisigSocialProps = NativeStackScreenProps<
 
 export const MultisigSocial = observer<MultisigSocialProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore, multisigStore } = useStore();
+    const { chainStore, demoStore, multisigStore, pendingMultisigStore } =
+      useStore();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
 
@@ -178,9 +179,15 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                   setFetchingPubKey(false);
                   if (publicKey) {
                     if (!demoStore.demoMode) {
-                      multisigStore.setSocialPublicKey({
-                        publicKey: publicKey,
-                      });
+                      if (multisigStore.getKeyInRecovery === "") {
+                        multisigStore.setSocialPublicKey({
+                          publicKey: publicKey,
+                        });
+                      } else {
+                        pendingMultisigStore.setSocialPublicKey({
+                          publicKey: publicKey,
+                        });
+                      }
                     }
                     navigation.navigate("create-multisig-init");
                   }

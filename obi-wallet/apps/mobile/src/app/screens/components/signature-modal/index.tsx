@@ -82,6 +82,8 @@ export const SignatureModal = observer<SignatureModalProps>((props) => {
     case WalletType.MULTISIG:
     case WalletType.MULTISIG_DEMO:
       return <SignatureModalMultisig {...props} />;
+    case WalletType.MULTISIG_PENDING:
+      return <SignatureModalMultisig {...props} />;
     case WalletType.SINGLESIG:
       return <SignatureModalSinglesig {...props} />;
   }

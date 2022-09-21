@@ -1,10 +1,13 @@
-import { MultisigPhoneNumber } from "./create-multisig/1-phone-number";
-import { MultisigPhoneNumberConfirm } from "./create-multisig/2-phone-number-confirm";
-import { MultisigBiometrics } from "./create-multisig/3-biometrics";
-import { MultisigSocial } from "./create-multisig/4-social";
-import { MultisigInit } from "./create-multisig/5-init";
+import { useStore } from "../../stores";
+import { MultisigPhoneNumber } from "./common/1-phone-number";
+import { MultisigPhoneNumberConfirm } from "./common/2-phone-number-confirm";
+import { MultisigBiometrics } from "./common/3-biometrics";
+import { MultisigSocial } from "./common/4-social";
+import { MultisigInit } from "./create-multisig-init";
 import { OnboardingStack } from "./onboarding-stack";
 import { RecoverSinglesig } from "./recover-singlesig";
+import { ReplaceMultisigPropose } from "./replace-multisig-key/1-propose";
+import { ReplaceMultisigConfirm } from "./replace-multisig-key/2-confirm";
 import { Welcome } from "./welcome";
 
 export interface OnboardingScreensProps {
@@ -12,6 +15,9 @@ export interface OnboardingScreensProps {
 }
 
 export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
+  const { multisigStore } = useStore();
+  const keyInRecovery = multisigStore.getKeyInRecovery;
+
   return (
     <OnboardingStack.Navigator
       screenOptions={{
@@ -20,30 +26,52 @@ export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
       initialRouteName={initialRouteName}
     >
       <OnboardingStack.Screen name="welcome" component={Welcome} />
-      <OnboardingStack.Screen
-        name="create-multisig-biometrics"
-        component={MultisigBiometrics}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-phone-number"
-        component={MultisigPhoneNumber}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-phone-number-confirm"
-        component={MultisigPhoneNumberConfirm}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-social"
-        component={MultisigSocial}
-      />
-      <OnboardingStack.Screen
-        name="create-multisig-init"
-        component={MultisigInit}
-      />
-      <OnboardingStack.Screen
-        name="recover-singlesig"
-        component={RecoverSinglesig}
-      />
+      {keyInRecovery === "phoneNumber" ? (
+        <OnboardingStack.Screen
+          name="create-multisig-phone-number"
+          component={MultisigPhoneNumber}
+        />
+      ) : null}
+      {keyInRecovery === "phoneNumber" ? (
+        <OnboardingStack.Screen
+          name="create-multisig-phone-number-confirm"
+          component={MultisigPhoneNumberConfirm}
+        />
+      ) : null}
+      {keyInRecovery === "biometrics" ? (
+        <OnboardingStack.Screen
+          name="create-multisig-biometrics"
+          component={MultisigBiometrics}
+        />
+      ) : null}
+      {keyInRecovery === "social" ? (
+        <OnboardingStack.Screen
+          name="create-multisig-social"
+          component={MultisigSocial}
+        />
+      ) : null}
+      {keyInRecovery === null ? (
+        <OnboardingStack.Screen
+          name="create-multisig-init"
+          component={MultisigInit}
+        />
+      ) : (
+        <OnboardingStack.Screen
+          name="replace-multisig-propose"
+          component={ReplaceMultisigPropose}
+        />
+      )}
+      {keyInRecovery === null ? (
+        <OnboardingStack.Screen
+          name="recover-singlesig"
+          component={RecoverSinglesig}
+        />
+      ) : (
+        <OnboardingStack.Screen
+          name="replace-multisig-confirm"
+          component={ReplaceMultisigConfirm}
+        />
+      )}
     </OnboardingStack.Navigator>
   );
 }

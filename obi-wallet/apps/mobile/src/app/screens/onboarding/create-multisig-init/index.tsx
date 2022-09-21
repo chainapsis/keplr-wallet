@@ -12,14 +12,14 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
-import { IconButton } from "../../../../button";
-import { useStore } from "../../../../stores";
-import { Background } from "../../../components/background";
+import { IconButton } from "../../../button";
+import { useStore } from "../../../stores";
+import { Background } from "../../components/background";
 import {
   SignatureModalMultisig,
   useSignatureModalProps,
-} from "../../../components/signature-modal";
-import { OnboardingStackParamList } from "../../onboarding-stack";
+} from "../../components/signature-modal";
+import { OnboardingStackParamList } from "../onboarding-stack";
 
 const demoModeMultisig: Multisig = {
   multisig: {
