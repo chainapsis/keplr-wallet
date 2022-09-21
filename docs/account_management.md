@@ -36,7 +36,7 @@ Using the wallet, you can create a new account and address on the Fetch ledger:
 If you have an account on the Fetch network, for example having had one already on the Fetch wallet and want to access it again, have an account on another wallet (e.g. Cosmostation, Keplr, ...) and wish to bring it to the Fetch wallet, or having created an address using one of our tools (e.g. the [AEA framework](https://docs.fetch.ai/aea)), you can import it into the Fetch wallet:
 
 1. On the [welcome page](#welcome-page), click **Import existing account**.
-2. Enter your mnemonic seed (set of words) or private key (hexidecimal).
+2. Enter your mnemonic seed (set of words) or private key (hexadecimal).
 
     !!! warning
         **KEEP IT SAFE!** Anyone with your mnemonic seed or private key can access your wallet and take your assets.
@@ -82,7 +82,7 @@ To remove an account from your Fetch wallet:
 4. Enter your wallet password.
 
     !!! warning
-        If you have not yet backed up your mnemonic seed, click on **Back-up account** and enter you password to view it.<br />
+        If you have not yet backed up your mnemonic seed, click on **Back-up account** and enter your password to view it.<br />
         Then back it up safely. If you lose your mnemonic seed you will lose access to your account.
 
 5. Click **Confirm** to remove the account from your wallet.
