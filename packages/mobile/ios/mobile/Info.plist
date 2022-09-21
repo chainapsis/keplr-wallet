@@ -82,5 +82,7 @@
 	<false/>
 	<key>XSAppIconAssets</key>
 	<string>Images.xcassets/AppIcon.appiconset</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+    <true/>
 </dict>
 </plist>
