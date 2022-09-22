@@ -5,8 +5,8 @@ import { MultisigSocial } from "./common/4-social";
 import { MultisigInit } from "./create-multisig-init";
 import { OnboardingStack } from "./onboarding-stack";
 import { RecoverSinglesig } from "./recover-singlesig";
-import { ReplaceMultisig } from "./replace-multisig-key";
 import { ReplaceMultisigConfirm } from "./replace-multisig-confirm";
+import { ReplaceMultisig } from "./replace-multisig-key";
 import { Welcome } from "./welcome";
 
 export interface OnboardingScreensProps {
