@@ -226,10 +226,17 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                       marginTop: 32,
                     }}
                   >
-                    <FormattedMessage
-                      id="onboarding2.authyourkeys"
-                      defaultMessage="Authenticate Your Keys"
-                    />
+                    {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+                      <FormattedMessage
+                        id="onboarding2.recovery.authyourkeys"
+                        defaultMessage="Create a New Phone Number Key"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="onboarding2.authyourkeys"
+                        defaultMessage="Create a Phone Number Key"
+                      />
+                    )}
                   </Text>
                   <Text
                     style={{
@@ -238,10 +245,17 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                       marginTop: 10,
                     }}
                   >
-                    <FormattedMessage
-                      id="onboarding2.authyourkeyssubtext"
-                      defaultMessage="Please answer a security question."
-                    />
+                    {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+                      <FormattedMessage
+                        id="onboarding2.recovery.authyourkeyssubtext"
+                        defaultMessage="Please answer a security question. It can be the same as your old answer, or different."
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="onboarding2.authyourkeyssubtext"
+                        defaultMessage="Please answer a security question."
+                      />
+                    )}
                   </Text>
                 </View>
               </View>

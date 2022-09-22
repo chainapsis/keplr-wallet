@@ -178,5 +178,9 @@
   "recovery.phoneupdate": "You're updating your multisig wallet's phone number key.",
   "recovery.socialupdate": "You're updating your multisig wallet's social key.",
   "recovery.continuephone": "Continue Updating Phone Key",
-  "recovery.continuesocial": "Continue Updating Social Key"
+  "recovery.continuesocial": "Continue Updating Social Key",
+
+  "onboarding2.recovery.authyourkeys": "Create a Replacement Phone Number Key",
+  "onboarding2.recovery.authyourkeyssubtext": "Please answer a security question. This can be the same as your old security answer, or different. We do not store this information.",
+  "onboarding2.recovery.phonenrlabel": "Enter your phone number here"
 }

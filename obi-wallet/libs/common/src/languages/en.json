@@ -60,6 +60,9 @@
   "onboarding2.phonenrlabel": "Type your phone number here",
   "onboarding2.bottominfo": "Get a magic SMS to activate your phone key.",
   "onboarding2.sendmagicsms": "Get Magic SMS",
+  "onboarding2.recovery.authyourkeys": "Create a Replacement Phone Number Key",
+  "onboarding2.recovery.authyourkeyssubtext": "Please answer a security question. This can be the same as your old security answer, or different. We do not store this information.",
+  "onboarding2.recovery.phonenrlabel": "Enter your phone number here",
 
   "onboarding2.error.phonekeyexists.title": "You already have a phone number key",
   "onboarding2.error.phonekeyexists.text": "Do you want to reuse your existing phone number key for phone number",
