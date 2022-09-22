@@ -38,7 +38,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
 
       const { social } = multisigStore.nextAdmin;
 
-      if (social) {
+      if (social && multisigStore.getKeyInRecovery !== "social") {
         Alert.alert(
           intl.formatMessage({ id: "onboarding4.error.socialkeyexists.title" }),
           intl.formatMessage({ id: "onboarding4.error.socialkeyexists.text" }) +
@@ -61,7 +61,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
           ]
         );
       }
-    }, [demoStore, intl, multisigStore, navigation]);
+    }, [demoStore, intl, multisigStore, navigation, pendingMultisigStore]);
 
     async function getAccountPubkey(key: string) {
       const client = await createStargateClient(chainStore.currentChain);
@@ -164,7 +164,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                 }}
               >
                 {multisigStore.getKeyInRecovery === "social" &&
-                multisigStore.currentAdmin?.social?.address === obi_address ? (
+                multisigStore.nextAdmin?.social?.address === obi_address ? (
                   <FormattedMessage
                     id="onboarding5.recovery.setsocialkey.subtext2"
                     defaultMessage="You're currently using the Obi account. This will remove the Obi account from your multisig and replace it with your friend's key."

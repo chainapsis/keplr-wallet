@@ -171,17 +171,18 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               })}
             />
           )}
-          {/*<Button*/}
-          {/*  label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}*/}
-          {/*  LeftIcon={RecoverWallet}*/}
-          {/*  flavor="purple"*/}
-          {/*  style={{*/}
-          {/*    marginTop: 20,*/}
-          {/*  }}*/}
-          {/*  onPress={() => {*/}
-          {/*    navigation.navigate("onboarding2");*/}
-          {/*  }}*/}
-          {/*/>*/}
+          {multisigStore.getKeyInRecovery === "" ? (
+            <Button
+              label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}
+              flavor="purple"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={() => {
+                navigation.navigate("onboarding2");
+              }}
+            />
+          ) : null}
         </View>
       </SafeAreaView>
     </InitialBackground>
