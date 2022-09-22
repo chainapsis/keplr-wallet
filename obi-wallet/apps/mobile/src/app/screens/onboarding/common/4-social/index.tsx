@@ -177,7 +177,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                 )}
               </Text>
               {multisigStore.getKeyInRecovery === "social" &&
-              multisigStore.currentAdmin?.social?.address ===
+              multisigStore.nextAdmin?.social?.address ===
                 obi_address ? null : (
                 <InlineButton
                   label={intl.formatMessage({
