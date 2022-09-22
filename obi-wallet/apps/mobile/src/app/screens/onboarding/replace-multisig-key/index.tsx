@@ -94,13 +94,6 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
             new_admin: pendingMultisig.multisig.address,
           },
         };
-        const address = pendingMultisigStore.proxyAddress?.address;
-        if (address !== null && address !== undefined) {
-          lendFees({
-            chainId: chainStore.currentChainInformation.chainId,
-            address: address,
-          });
-        }
       } else {
         rawMessage = {
           confirm_update_admin: {},
