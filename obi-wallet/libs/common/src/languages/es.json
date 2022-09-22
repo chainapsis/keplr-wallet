@@ -182,5 +182,8 @@
 
   "onboarding2.recovery.authyourkeys": "Create a Replacement Phone Number Key",
   "onboarding2.recovery.authyourkeyssubtext": "Please answer a security question. This can be the same as your old security answer, or different. We do not store this information.",
-  "onboarding2.recovery.phonenrlabel": "Enter your phone number here"
+  "onboarding2.recovery.phonenrlabel": "Enter your phone number here",
+
+  "onboarding5.recovery.setsocialkey": "Set a New Social Key",
+  "onboarding5.recovery.setsocialkey.subtext2": "You're currently using the Obi account. This will remove the Obi account from your multisig and replace it with your friend's key."
 }

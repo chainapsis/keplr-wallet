@@ -29,6 +29,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
       useStore();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
+    const obi_address = "juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e";
 
     const intl = useIntl();
 
@@ -123,10 +124,17 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       marginTop: 32,
                     }}
                   >
-                    <FormattedMessage
-                      id="onboarding5.setsocialkey"
-                      defaultMessage="Set your Social Key"
-                    />
+                    {multisigStore.getKeyInRecovery === "social" ? (
+                      <FormattedMessage
+                        id="onboarding5.recovery.setsocialkey"
+                        defaultMessage="Set a New Social Key"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="onboarding5.recovery.setsocialkey"
+                        defaultMessage="Set a New Social Key"
+                      />
+                    )}
                   </Text>
                   <Text
                     style={{
@@ -155,18 +163,32 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                   marginTop: 10,
                 }}
               >
-                <FormattedMessage
-                  id="onboarding5.setsocialkey.subtext2"
-                  defaultMessage="…or you can use the default Obi account if you don't trust any of your friends"
-                />
+                {multisigStore.getKeyInRecovery === "social" &&
+                multisigStore.currentAdmin?.social?.address === obi_address ? (
+                  <FormattedMessage
+                    id="onboarding5.recovery.setsocialkey.subtext2"
+                    defaultMessage="You're currently using the Obi account. This will remove the Obi account from your multisig and replace it with your friend's key."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="onboarding5.setsocialkey.subtext2"
+                    defaultMessage="…or you can use the default Obi account if you don't trust any of your friends"
+                  />
+                )}
               </Text>
-              <InlineButton
-                label={intl.formatMessage({ id: "onboarding5.useobiaccount" })}
-                style={{ alignSelf: "flex-start", marginTop: 10 }}
-                onPress={() => {
-                  setAddress("juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e");
-                }}
-              />
+              {multisigStore.getKeyInRecovery === "social" &&
+              multisigStore.currentAdmin?.social?.address ===
+                obi_address ? null : (
+                <InlineButton
+                  label={intl.formatMessage({
+                    id: "onboarding5.useobiaccount",
+                  })}
+                  style={{ alignSelf: "flex-start", marginTop: 10 }}
+                  onPress={() => {
+                    setAddress(obi_address);
+                  }}
+                />
+              )}
             </View>
             <View>
               <VerifyAndProceedButton

@@ -108,6 +108,8 @@
   "onboarding5.setsocialkey.subtext": "Enter or scan the juno address of a trusted friend who can help you recover your account. Your friend cannot access your account.",
   "onboarding5.setsocialkey.subtext2": "…or you can use the default Obi account if you don't trust any of your friends. Obi cannot access your account.",
   "onboarding5.useobiaccount": "Use Obi Account",
+  "onboarding5.recovery.setsocialkey": "Set a New Social Key",
+  "onboarding5.recovery.setsocialkey.subtext2": "You're currently using the Obi account. This will remove the Obi account from your multisig and replace it with your friend's key.",
 
   "onboarding4.error.socialkeyexists.title": "You already have a social key",
   "onboarding4.error.socialkeyexists.text": "Do you want to reuse your existing social key for",
