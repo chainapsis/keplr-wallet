@@ -6,6 +6,7 @@ import { MultisigInit } from "./create-multisig-init";
 import { OnboardingStack } from "./onboarding-stack";
 import { RecoverSinglesig } from "./recover-singlesig";
 import { ReplaceMultisig } from "./replace-multisig-key";
+import { ReplaceMultisigConfirm } from "./replace-multisig-confirm";
 import { Welcome } from "./welcome";
 
 export interface OnboardingScreensProps {
@@ -65,7 +66,7 @@ export function OnboardingScreen({
       {updateProposed === true ? (
         <OnboardingStack.Screen
           name="replace-multisig-confirm"
-          component={ReplaceMultisig}
+          component={ReplaceMultisigConfirm}
         />
       ) : null}
       {keyInRecovery === "" ? (
