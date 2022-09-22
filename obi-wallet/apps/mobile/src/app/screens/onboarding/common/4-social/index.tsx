@@ -211,7 +211,11 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                         });
                       }
                     }
-                    navigation.navigate("create-multisig-init");
+                    if (multisigStore.getKeyInRecovery !== "social") {
+                      navigation.navigate("create-multisig-init");
+                    } else {
+                      navigation.navigate("replace-multisig");
+                    }
                   }
                 }}
               />
