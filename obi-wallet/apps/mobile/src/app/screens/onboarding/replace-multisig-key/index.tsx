@@ -7,7 +7,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
@@ -74,6 +74,8 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       pendingMultisigStore,
       walletStore,
     } = useStore();
+    const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
+
     const multisig = demoStore.demoMode
       ? demoModeMultisig
       : multisigStore.nextAdmin;
@@ -94,6 +96,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
             new_admin: pendingMultisig.multisig.address,
           },
         };
+        setSignatures(new Map<string, Uint8Array>());
       } else {
         rawMessage = {
           confirm_update_admin: {},
@@ -122,6 +125,8 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       return [message];
     }, [
       multisig,
+      chainStore,
+      pendingMultisigStore,
       multisigStore.getUpdateProposed,
       pendingMultisig,
       walletStore.address,
@@ -176,7 +181,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       if (encodeObjects.length > 0) {
         openSignatureModal();
       }
-    }, [encodeObjects.length, openSignatureModal]);
+    }, [encodeObjects.length, openSignatureModal, multisigStore]);
 
     if (encodeObjects.length === 0) return null;
 

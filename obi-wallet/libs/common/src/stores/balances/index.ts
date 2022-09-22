@@ -49,18 +49,40 @@ export class BalancesStore {
     const client = yield* toGenerator(StargateClient.connect(rpc));
     const wasmClient = yield* toGenerator(CosmWasmClient.connect(rpc));
 
+    const customBalances = async () => {
+      const custom_coins: Coin[] = [];
+      const token_contract_addresses = [
+        { contract: LOOP_JUNO1_ADDRESS, denom: "uloop" },
+        {
+          contract:
+            "juno18c5uecrztn4rqakm23fskusasud7s8afujnl8yu54ule2kak5q4sdnvcz4",
+          denom: "udrink",
+        },
+        {
+          contract:
+            "juno1x5xz6wu8qlau8znmc60tmazzj3ta98quhk7qkamul3am2x8fsaqqcwy7n9",
+          denom: "ubottle",
+        },
+      ];
+      for (let i = 0; i < token_contract_addresses.length; i++) {
+        await wasmClient
+          .queryContractSmart(token_contract_addresses[i].contract, {
+            balance: { address: address },
+          })
+          .then((res) => {
+            custom_coins.push({
+              denom: token_contract_addresses[i].denom,
+              amount: res.balance,
+            });
+          });
+      }
+      return custom_coins;
+    };
+
     const balances = yield* toGenerator(
-      client.getAllBalances(address).then(async (coins) =>
-        coins.concat(
-          await wasmClient
-            .queryContractSmart(LOOP_JUNO1_ADDRESS, {
-              balance: { address: address },
-            })
-            .then((res) => {
-              return { denom: "uloop", amount: res.balance };
-            })
-        )
-      )
+      client
+        .getAllBalances(address)
+        .then(async (coins) => coins.concat(await customBalances()))
     );
 
     /// Return nothing if asset is considered 1 USD

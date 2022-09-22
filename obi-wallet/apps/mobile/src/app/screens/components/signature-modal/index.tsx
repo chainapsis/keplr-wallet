@@ -368,6 +368,7 @@ export function useSignatureModalProps({
   openSignatureModal: () => void;
 } {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
+  const [resetSignatures, setResetSignatures] = useState(false);
   const [modalKey, setModalKey] = useState(0);
   const { chainStore, singlesigStore, walletStore } = useStore();
   const { currentChainInformation } = chainStore;
@@ -510,7 +511,7 @@ export function useSignatureModalProps({
 
   return {
     signatureModalProps,
-    openSignatureModal() {
+    openSignatureModal(reset_sigs?: boolean) {
       setSignatureModalVisible(true);
     },
   };

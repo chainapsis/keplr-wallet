@@ -73,6 +73,30 @@ export function formatCoin(coin: ExtendedCoin) {
         valueInUsd: usdValue * amount,
       };
     }
+    case "udrink": {
+      const digits = 6;
+      const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
+      return {
+        icon: require("./assets/loop.png"),
+        denom: "DRINK",
+        digits,
+        label: "Drink",
+        amount,
+        valueInUsd: 0,
+      };
+    }
+    case "ubottle": {
+      const digits = 6;
+      const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
+      return {
+        icon: require("./assets/loop.png"),
+        denom: "BOTTLE",
+        digits,
+        label: "Bottle",
+        amount,
+        valueInUsd: 0,
+      };
+    }
     default: {
       const digits = 6;
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
