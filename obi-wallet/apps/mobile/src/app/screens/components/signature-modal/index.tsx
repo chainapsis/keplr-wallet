@@ -108,10 +108,10 @@ export const SignatureModalSinglesig = observer<SignatureModalProps>(
             setLoading(false);
             console.error(error);
             Alert.alert(
-                intl.formatMessage({
-                  id: "signature.error.confirmingtx",
-                  defaultMessage: "Error Confirming Transaction",
-                }),
+              intl.formatMessage({
+                id: "signature.error.confirmingtx",
+                defaultMessage: "Error Confirming Transaction",
+              }),
               error.message
             );
           }

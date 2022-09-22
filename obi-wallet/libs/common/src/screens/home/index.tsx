@@ -151,6 +151,23 @@ export const Home = observer<HomeProps>(
                   });
                 }}
               />
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={MyTicketsIcon}
+                label={intl.formatMessage({
+                  id: "apps.myhistory",
+                  defaultMessage: "My History",
+                })}
+                onPress={() => {
+                  onAppPress({
+                    label: "My History",
+                    url: `https://mintscan.io/juno/account/${walletStore.address}`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
             </Tiles>
           </ScrollView>
           {/*<KeyboardAvoidingView*/}
