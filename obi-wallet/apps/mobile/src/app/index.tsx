@@ -1,26 +1,18 @@
-import { messages } from "@obi-wallet/common";
-import { NavigationContainer } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
-import { IntlProvider } from "react-intl";
-import { AppState, StatusBar } from "react-native";
+import { AppState } from "react-native";
 import codePush from "react-native-code-push";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-
-import { rootStore } from "../background/root-store";
 import { deploymentKey } from "./code-push";
 import { Loader } from "./loader";
+import { Provider } from "./provider";
 import { RootStack } from "./root-stack";
 import { ReceiveScreen } from "./screens/receive";
 import { SendScreen } from "./screens/send";
 import { settingsScreens } from "./screens/settings";
 import { StateRendererScreen } from "./screens/state-renderer";
 import { WebViewScreen } from "./screens/web-view";
-import { StoreContext } from "./stores";
 
-export const App = observer(() => {
-  const { languageStore } = rootStore;
-  const { currentLanguage } = languageStore;
+export function App() {
   const [updating, setUpdating] = useState(false);
   const appState = useRef(AppState.currentState);
   const lastUpdate = useRef(0);
@@ -61,88 +53,49 @@ export const App = observer(() => {
   }, []);
 
   return (
-    <StoreContext.Provider value={rootStore}>
-      <IntlProvider
-        defaultLocale="en"
-        locale={currentLanguage}
-        messages={messages[currentLanguage]}
-        formats={{
-          date: {
-            en: {
-              month: "short",
-              day: "2-digit",
-              hour: "2-digit",
-              hour12: false,
-              minute: "2-digit",
-              timeZoneName: "short",
-            },
-            de: {
-              month: "short",
-              day: "2-digit",
-              hour: "2-digit",
-              hour12: false,
-              minute: "2-digit",
-              timeZoneName: "short",
-            },
-            es: {
-              month: "short",
-              day: "2-digit",
-              hour: "2-digit",
-              hour12: false,
-              minute: "2-digit",
-              timeZoneName: "short",
-            },
+    <Provider>
+      <RootStack.Navigator
+        initialRouteName="state-renderer"
+        screenOptions={{
+          headerShown: false,
+          headerTitleStyle: {
+            fontFamily: "Inter",
           },
         }}
       >
-        <SafeAreaProvider>
-          <NavigationContainer>
-            <StatusBar barStyle="light-content" />
-            <RootStack.Navigator
-              initialRouteName="state-renderer"
-              screenOptions={{
-                headerShown: false,
-                headerTitleStyle: {
-                  fontFamily: "Inter",
-                },
-              }}
-            >
-              <RootStack.Screen
-                name="state-renderer"
-                component={StateRendererScreen}
-              />
-              <RootStack.Screen
-                name="web-view"
-                component={WebViewScreen}
-                options={({ route }) => ({
-                  title: route.params.app.label,
-                })}
-              />
-              <RootStack.Screen name="send" component={SendScreen} />
-              <RootStack.Screen name="receive" component={ReceiveScreen} />
+        <RootStack.Screen
+          name="state-renderer"
+          component={StateRendererScreen}
+        />
+        <RootStack.Screen
+          name="web-view"
+          component={WebViewScreen}
+          options={({ route }) => ({
+            title: route.params.app.label,
+          })}
+        />
+        <RootStack.Screen name="send" component={SendScreen} />
+        <RootStack.Screen name="receive" component={ReceiveScreen} />
 
-              {settingsScreens()}
-            </RootStack.Navigator>
-          </NavigationContainer>
-          {updating ? (
-            <Loader
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                zIndex: 999,
-                position: "absolute",
-                backgroundColor: "#100F1D",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }}
-              loadingText="Updating app bundle…"
-            />
-          ) : null}
-        </SafeAreaProvider>
-      </IntlProvider>
-    </StoreContext.Provider>
+        {settingsScreens()}
+      </RootStack.Navigator>
+      {updating ? (
+        <Loader
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 999,
+            position: "absolute",
+            backgroundColor: "#100F1D",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+          loadingText="Updating app bundle…"
+        />
+      ) : null}
+    </Provider>
   );
-});
+}

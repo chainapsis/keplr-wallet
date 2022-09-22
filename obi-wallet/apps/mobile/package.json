@@ -2,6 +2,9 @@
   "name": "mobile",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "cosmos": "cosmos-native"
+  },
   "dependencies": {
     "@cosmjs/amino": "*",
     "@cosmjs/cosmwasm-stargate": "*",
