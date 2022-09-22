@@ -63,7 +63,11 @@ export function SendMagicSmsButton({
         style={{
           marginVertical: 20,
         }}
-        onPress={onPress}
+        onPress={(e) => {
+          if (!disabled) {
+            onPress();
+          }
+        }}
       />
     </View>
   );
