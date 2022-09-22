@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../button";
+import { lendFees } from "../../../fee-lender-worker";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
@@ -93,10 +94,24 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
             new_admin: pendingMultisig.multisig.address,
           },
         };
+        const address = pendingMultisigStore.proxyAddress?.address;
+        if (address !== null && address !== undefined) {
+          lendFees({
+            chainId: chainStore.currentChainInformation.chainId,
+            address: address,
+          });
+        }
       } else {
         rawMessage = {
           confirm_update_admin: {},
         };
+        const address = pendingMultisigStore.currentAdmin?.multisig?.address;
+        if (address !== null && address !== undefined) {
+          lendFees({
+            chainId: chainStore.currentChainInformation.chainId,
+            address: address,
+          });
+        }
       }
 
       const value: MsgExecuteContract = {
