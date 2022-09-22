@@ -1,7 +1,7 @@
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, View } from "react-native";
 import { SvgProps } from "react-native-svg";
-import SvgImage from "react-native-svg/lib/typescript/elements/Image";
+
 function DefaultView() {
   return (
     <View

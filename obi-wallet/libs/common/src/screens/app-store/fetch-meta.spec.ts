@@ -1,11 +1,5 @@
 import { fetchMeta } from "./fetch-meta";
 
-test("Cosmostation", async () => {
-  const meta = await fetchMeta("https://cosmostation.io");
-  expect(meta.title).toBe("Cosmostation");
-  expectIconToBePng(meta.icon);
-});
-
 test("Osmosis", async () => {
   const meta = await fetchMeta("https://osmosis.zone");
   expect(meta.title).toEqual("Osmosis");

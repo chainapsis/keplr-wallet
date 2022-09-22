@@ -40,7 +40,6 @@ export function formatCoin(coin: ExtendedCoin) {
       const digits = 6;
       const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
-      console.log({ denom });
       return {
         icon: denom.includes("ujuno") ? require("./assets/juno.png") : null,
         denom: denom.slice(1).toUpperCase(),
