@@ -35,8 +35,7 @@ describe("Test auto lock account service", () => {
 
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(new MemoryKVStore("test"));
-    service.init(keyRingService);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await service.init(keyRingService);
 
     expect(mockListener).toBeCalledTimes(1);
     jest.restoreAllMocks();
@@ -59,21 +58,15 @@ describe("Test auto lock account service", () => {
     const keyRingService = new MockKeyRingService();
     const memStore = new MemoryKVStore("test");
     let service = new AutoLockAccountService(memStore);
-    service.init(keyRingService);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await service.init(keyRingService);
 
     // Set duration.
     await service.setDuration(1000);
     expect(service.getAutoLockDuration()).toBe(1000);
 
     service = new AutoLockAccountService(memStore);
-    service.init(keyRingService);
-    // Not restored yet.
-    expect(service.getAutoLockDuration()).toBe(0);
+    await service.init(keyRingService);
 
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    // Restoring is async. Assume that users can not interact with app right after app launch.
     expect(service.getAutoLockDuration()).toBe(1000);
 
     jest.restoreAllMocks();
@@ -120,8 +113,7 @@ describe("Test auto lock account service", () => {
 
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(new MemoryKVStore("test"));
-    service.init(keyRingService);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await service.init(keyRingService);
 
     expect(service.checkAppIsActive()).toBe(false);
 
@@ -175,8 +167,7 @@ describe("Test auto lock account service", () => {
 
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(new MemoryKVStore("test"));
-    service.init(keyRingService);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await service.init(keyRingService);
 
     keyRingService.unlock();
     event.emit("onStateChanged", "locked");
@@ -203,8 +194,7 @@ describe("Test auto lock account service", () => {
 
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(new MemoryKVStore("test"));
-    service.init(keyRingService);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await service.init(keyRingService);
 
     await service.setDuration(1000);
 
@@ -235,8 +225,7 @@ describe("Test auto lock account service", () => {
 
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(new MemoryKVStore("test"));
-    service.init(keyRingService);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await service.init(keyRingService);
 
     await service.setDuration(1000);
 
@@ -246,8 +235,8 @@ describe("Test auto lock account service", () => {
 
     service.startAppStateCheckTimer();
 
-    // Expect setTimeout not called. But, in test code itself, setTimeout is used right after init() method.
-    expect(setTimeoutSpy).toBeCalledTimes(1);
+    // Expect setTimeout not called.
+    expect(setTimeoutSpy).toBeCalledTimes(0);
     expect(mockListener).toBeCalledTimes(1);
     jest.restoreAllMocks();
   });
@@ -291,12 +280,13 @@ describe("Test auto lock account service", () => {
       },
     } as any;
 
+    jest.useFakeTimers();
+
     const keyRingService = new MockKeyRingService();
     const service = new AutoLockAccountService(new MemoryKVStore("test"), {
       monitoringInterval: 500,
     });
-    service.init(keyRingService);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await service.init(keyRingService);
 
     await service.setDuration(1000);
 
@@ -314,7 +304,7 @@ describe("Test auto lock account service", () => {
     service.startAppStateCheckTimer();
 
     for (let i = 0; i < 3; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      jest.advanceTimersByTime(500);
       expect(service.checkAppIsActive()).toBe(true);
       expect(keyRingService.isLocked).toBe(false);
       expect(service.keyRingIsUnlocked).toBe(true);
@@ -329,13 +319,13 @@ describe("Test auto lock account service", () => {
     expect(keyRingService.isLocked).toBe(false);
     expect(service.keyRingIsUnlocked).toBe(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    jest.advanceTimersByTime(500);
 
     expect(service.checkAppIsActive()).toBe(false);
     expect(keyRingService.isLocked).toBe(false);
     expect(service.keyRingIsUnlocked).toBe(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    jest.advanceTimersByTime(1000);
 
     expect(service.checkAppIsActive()).toBe(false);
     expect(keyRingService.isLocked).toBe(true);
@@ -343,5 +333,7 @@ describe("Test auto lock account service", () => {
 
     expect(mockListener).toBeCalledTimes(1);
     jest.restoreAllMocks();
+
+    jest.useRealTimers();
   });
 });

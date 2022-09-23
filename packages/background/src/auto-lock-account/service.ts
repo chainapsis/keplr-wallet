@@ -23,17 +23,17 @@ export class AutoLockAccountService {
     }
   ) {}
 
-  init(keyringService: {
+  async init(keyringService: {
     lock: () => void;
     readonly keyRingStatus: KeyRingStatus;
   }) {
     this.keyringService = keyringService;
-    // No need to wait
-    this.loadDuration();
 
     browser.idle.onStateChanged.addListener((idle) => {
       this.stateChangedHandler(idle);
     });
+
+    await this.loadDuration();
   }
 
   private stateChangedHandler(newState: browser.idle.IdleState) {
