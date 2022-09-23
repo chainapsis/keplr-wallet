@@ -39,7 +39,13 @@ export const InteractionModal = observer<InteractionModalProps>(
               msgs: messages.map((message) => {
                 return {
                   wasm: {
-                    execute: message.value,
+                    execute: {
+                      contract_addr: message.value.contract,
+                      funds: message.value.funds,
+                      msg:
+                        message.value.msg &&
+                        new Buffer(message.value.msg.buffer).toString("base64"),
+                    },
                   },
                 };
               }),

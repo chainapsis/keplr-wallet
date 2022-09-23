@@ -5,6 +5,7 @@ import { useStore } from "../stores";
 import LoopIcon from "./assets/loop.svg";
 
 export interface ExtendedCoin {
+  contract?: string;
   denom: string;
   amount: string;
   usdPrice: number;
