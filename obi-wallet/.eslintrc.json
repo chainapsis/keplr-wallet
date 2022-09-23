@@ -94,6 +94,12 @@
       "files": ["*.js", "*.jsx"],
       "extends": ["plugin:@nrwl/nx/javascript"],
       "rules": {}
+    },
+    {
+      "files": ["__fixtures__/**/*.{ts,tsx,js,jsx}"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
     }
   ]
 }

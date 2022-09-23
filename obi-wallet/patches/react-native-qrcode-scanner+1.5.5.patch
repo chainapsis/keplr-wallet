@@ -1,0 +1,74 @@
+diff --git a/node_modules/react-native-qrcode-scanner/index.js b/node_modules/react-native-qrcode-scanner/index.js
+index b9bb661..1d1b744 100644
+--- a/node_modules/react-native-qrcode-scanner/index.js
++++ b/node_modules/react-native-qrcode-scanner/index.js
+@@ -1,7 +1,7 @@
+ 'use strict';
+ 
+ import React, { Component } from 'react';
+-import PropTypes from 'prop-types';
++// import PropTypes from 'prop-types';
+ 
+ import {
+   StyleSheet,
+@@ -28,33 +28,33 @@ const CAMERA_FLASH_MODES = [
+ ];
+ 
+ export default class QRCodeScanner extends Component {
+-  static propTypes = {
+-    onRead: PropTypes.func.isRequired,
+-    vibrate: PropTypes.bool,
+-    reactivate: PropTypes.bool,
+-    reactivateTimeout: PropTypes.number,
+-    cameraTimeout: PropTypes.number,
+-    fadeIn: PropTypes.bool,
+-    showMarker: PropTypes.bool,
+-    cameraType: PropTypes.oneOf(['front', 'back']),
+-    customMarker: PropTypes.element,
+-    containerStyle: PropTypes.any,
+-    cameraStyle: PropTypes.any,
+-    cameraContainerStyle: PropTypes.any,
+-    markerStyle: PropTypes.any,
+-    topViewStyle: PropTypes.any,
+-    bottomViewStyle: PropTypes.any,
+-    topContent: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
+-    bottomContent: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
+-    notAuthorizedView: PropTypes.element,
+-    permissionDialogTitle: PropTypes.string,
+-    permissionDialogMessage: PropTypes.string,
+-    buttonPositive: PropTypes.string,
+-    checkAndroid6Permissions: PropTypes.bool,
+-    flashMode: PropTypes.oneOf(CAMERA_FLASH_MODES),
+-    cameraProps: PropTypes.object,
+-    cameraTimeoutView: PropTypes.element,
+-  };
++  // static propTypes = {
++  //   onRead: PropTypes.func.isRequired,
++  //   vibrate: PropTypes.bool,
++  //   reactivate: PropTypes.bool,
++  //   reactivateTimeout: PropTypes.number,
++  //   cameraTimeout: PropTypes.number,
++  //   fadeIn: PropTypes.bool,
++  //   showMarker: PropTypes.bool,
++  //   cameraType: PropTypes.oneOf(['front', 'back']),
++  //   customMarker: PropTypes.element,
++  //   containerStyle: PropTypes.any,
++  //   cameraStyle: PropTypes.any,
++  //   cameraContainerStyle: PropTypes.any,
++  //   markerStyle: PropTypes.any,
++  //   topViewStyle: PropTypes.any,
++  //   bottomViewStyle: PropTypes.any,
++  //   topContent: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
++  //   bottomContent: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
++  //   notAuthorizedView: PropTypes.element,
++  //   permissionDialogTitle: PropTypes.string,
++  //   permissionDialogMessage: PropTypes.string,
++  //   buttonPositive: PropTypes.string,
++  //   checkAndroid6Permissions: PropTypes.bool,
++  //   flashMode: PropTypes.oneOf(CAMERA_FLASH_MODES),
++  //   cameraProps: PropTypes.object,
++  //   cameraTimeoutView: PropTypes.element,
++  // };
+ 
+   static defaultProps = {
+     onRead: () => null,

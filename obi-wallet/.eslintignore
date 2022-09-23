@@ -4,3 +4,4 @@ apps/mobile/src/app/injected-provider/bundle.ts
 # Built app
 apps/mobile/android
 apps/mobile/ios
+apps/mobile/cosmos.userdeps.js

@@ -1,6 +1,7 @@
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { MsgSendEncodeObject } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
+import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
@@ -10,7 +11,6 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
-  Image,
   Platform,
   RefreshControl,
   Text,
@@ -24,6 +24,7 @@ import { ExtendedCoin, formatCoin, useBalances } from "../../balances";
 import { Button } from "../../button";
 import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
+import { useAddressQrCodeScannerModal } from "../components/address-qr-code-scanner-modal";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
 import { CoinIcon } from "../components/coin-icon";
@@ -147,6 +148,10 @@ export const SendScreen = observer(() => {
   });
 
   const intl = useIntl();
+  const qrCodeScannerModal = useAddressQrCodeScannerModal((address) => {
+    setAddress(address);
+  });
+
   const coinIconProps =
     typeof hydratedSelectedCoin?.icon === "number"
       ? { imageIcon: hydratedSelectedCoin.icon }
@@ -165,6 +170,7 @@ export const SendScreen = observer(() => {
           }),
         }}
       >
+        {qrCodeScannerModal.render()}
         <SignatureModal {...signatureModalProps} />
         <View>
           <View style={{ flexDirection: "row" }}>
@@ -198,43 +204,46 @@ export const SendScreen = observer(() => {
                 defaultMessage: "Wallet Address",
               })}
               style={{ flex: 1 }}
-              // inputStyle={{
-              //   borderTopRightRadius: 0,
-              //   borderBottomRightRadius: 0,
-              //   borderRightWidth: 0,
-              // }}
+              inputStyle={{
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                borderRightWidth: 0,
+              }}
               value={address}
               onChangeText={setAddress}
             />
-            {/*<TouchableOpacity*/}
-            {/*  style={{*/}
-            {/*    width: 56,*/}
-            {/*    height: 56,*/}
-            {/*    justifyContent: "center",*/}
-            {/*    alignItems: "center",*/}
-            {/*    padding: 5,*/}
-            {/*    borderTopRightRadius: 12,*/}
-            {/*    borderBottomRightRadius: 12,*/}
-            {/*    borderWidth: 1,*/}
-            {/*    borderColor: "#2F2B4C",*/}
-            {/*    borderLeftWidth: 0,*/}
-            {/*  }}*/}
-            {/*>*/}
-            {/*  <View*/}
-            {/*    style={{*/}
-            {/*      position: "absolute",*/}
-            {/*      width: 1,*/}
-            {/*      backgroundColor: "#2F2B4C",*/}
-            {/*      height: "100%",*/}
-            {/*      left: 0,*/}
-            {/*    }}*/}
-            {/*  />*/}
-            {/*  <FontAwesomeIcon*/}
-            {/*    icon={faQrcode}*/}
-            {/*    style={{ color: "#887CEB" }}*/}
-            {/*    size={32}*/}
-            {/*  />*/}
-            {/*</TouchableOpacity>*/}
+            <TouchableOpacity
+              style={{
+                width: 56,
+                height: 56,
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 5,
+                borderTopRightRadius: 12,
+                borderBottomRightRadius: 12,
+                borderWidth: 1,
+                borderColor: "#2F2B4C",
+                borderLeftWidth: 0,
+              }}
+              onPress={() => {
+                qrCodeScannerModal.open();
+              }}
+            >
+              <View
+                style={{
+                  position: "absolute",
+                  width: 1,
+                  backgroundColor: "#2F2B4C",
+                  height: "100%",
+                  left: 0,
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faQrcode}
+                style={{ color: "#887CEB" }}
+                size={32}
+              />
+            </TouchableOpacity>
           </View>
           <View style={{ marginTop: 35 }}>
             <Text
