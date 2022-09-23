@@ -102,7 +102,8 @@ export function init(
     blockListUrl:
       "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
     fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
-    retryIntervalMs: 10 * 60 * 1000, // 10 mins
+    retryIntervalMs: 10 * 60 * 1000, // 10 mins,
+    allowTimeoutMs: 10 * 60 * 1000, // 10 mins,
   });
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account")
@@ -129,6 +130,7 @@ export function init(
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);
   phishingListService.init();
+  // No need to wait because user can't interact with app right after launch.
   autoLockAccountService.init(keyRingService);
 
   Interaction.init(router, interactionService);
