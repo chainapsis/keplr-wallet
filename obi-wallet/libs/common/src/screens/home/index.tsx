@@ -39,8 +39,13 @@ export interface HomeProps {
 
 export const Home = observer<HomeProps>(
   ({ appsStore, onAppPress, marginBottom, walletStore, icons }) => {
-    const [BuyCryptoIcon, CosmicPartyIcon, GetTicketsIcon, MyTicketsIcon] =
-      icons;
+    const [
+      BuyCryptoIcon,
+      CosmicPartyIcon,
+      GetTicketsIcon,
+      MyTicketsIcon,
+      HistoryIcon,
+    ] = icons;
     const [editMode, setEditMode] = useState(false);
     const [url, setUrl] = useState("www.keplr_wallet.com");
     const intl = useIntl();
@@ -155,7 +160,7 @@ export const Home = observer<HomeProps>(
                 onLongPress={() => {
                   setEditMode(true);
                 }}
-                ImgComponent={MyTicketsIcon}
+                ImgComponent={HistoryIcon}
                 label={intl.formatMessage({
                   id: "apps.myhistory",
                   defaultMessage: "History",
