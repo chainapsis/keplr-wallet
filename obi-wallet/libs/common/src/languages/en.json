@@ -40,16 +40,19 @@
   "receive.receive": "Receive",
   "receive.taptoshare": "Tap to share your address",
 
-  "recovery.keyupdate": "Update Your Obi Key?",
+  "recovery.keyupdate": "Update Wallet Keys?",
   "recovery.phoneupdate": "You're updating your multisig wallet's phone number key.",
   "recovery.socialupdate": "You're updating your multisig wallet's social key.",
   "recovery.continuephone": "Continue Updating Phone Key",
   "recovery.continuesocial": "Continue Updating Social Key",
+  "recovery.singlesig.title": "Recover your Singlesig Wallet",
+  "recovery.singlesig.enterphrase": "Enter your recovery phrase of your singlesig wallet.",
 
   "onboarding1.welcometoloop": "Welcome to Loop",
   "onboarding1.welcomesubtext": "Powered by Obi",
   "onboarding1.getstarted": "Get Started",
   "onboarding1.recoverwallet": "Recover My Wallet",
+  "onboarding1.recoversinglesig": "Recover Singlesig",
 
   "onboarding2.authyourkeys": "Create a Phone Number Key",
   "onboarding2.authyourkeyssubtext": "Please answer a security question. We do not store this information.",
@@ -60,9 +63,8 @@
   "onboarding2.phonenrlabel": "Type your phone number here",
   "onboarding2.bottominfo": "Get a magic SMS to activate your phone key.",
   "onboarding2.sendmagicsms": "Get Magic SMS",
-  "onboarding2.recovery.authyourkeys": "Create a Replacement Phone Number Key",
-  "onboarding2.recovery.authyourkeyssubtext": "Please answer a security question. This can be the same as your old security answer, or different. We do not store this information.",
-  "onboarding2.recovery.phonenrlabel": "Enter your phone number here",
+  "onboarding2.recovery.authyourkeys": "Create a New Phone Number Key",
+  "onboarding2.recovery.authyourkeyssubtext": "Please answer a security question. It can be the same as your old answer, or different.",
 
   "onboarding2.error.phonekeyexists.title": "You already have a phone number key",
   "onboarding2.error.phonekeyexists.text": "Do you want to reuse your existing phone number key for phone number",
@@ -137,6 +139,8 @@
   "signature.smscodelabel": "8-Digit SMS-Code",
   "signature.noresponselabel": "Didn't receive a response?",
   "signature.sendagain": "Resend",
+  "signature.keysrequired": "Keys Required",
+  "signature.error.confirmingtx": "Error: Confirming Transaction",
 
   "settings.multigsigsettings": "Key Settings",
   "settings.multigsigsettings.subtext": "Manage your SMS, social, and other keys.",
@@ -164,7 +168,10 @@
   "settings.multisig.option.emailkey": "Email",
   "settings.multisig.option.cloudkey": "Cloud",
 
-  "appscreen.kado": "Buy Crypto",
+  "apps.kado": "Buy Crypto",
+  "apps.gettickets": "Get Tickets",
+  "apps.mytickets": "My Tickets",
+  "apps.myhistory": "My History",
 
   "onboarding2.securityquestion.birthplace": "What city and country were you born in?",
   "onboarding2.securityquestion.schoolname": "What is the full name of the last elementary/primary school I attended?",

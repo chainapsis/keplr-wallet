@@ -112,12 +112,12 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             {multisigStore.getKeyInRecovery === "phoneNumber" ? (
               <FormattedMessage
                 id="recovery.phoneupdate"
-                defaultMessage="You're updating your phone number key."
+                defaultMessage="You're updating your multisig wallet's phone number key."
               />
             ) : multisigStore.getKeyInRecovery === "social" ? (
               <FormattedMessage
                 id="recovery.socialupdate"
-                defaultMessage="You're updating your social key."
+                defaultMessage="You're updating your multisig wallet's social key."
               />
             ) : (
               <FormattedMessage
@@ -147,7 +147,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
           ) : null}
           {multisigStore.getKeyInRecovery === "" ? (
             <Button
-              label="Recover Singlesig"
+              label={intl.formatMessage({ id: "onboarding1.recoversinglesig" })}
               RightIcon={GetStarted}
               flavor="blue"
               style={{
