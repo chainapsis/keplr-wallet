@@ -48,6 +48,7 @@ export class WalletStore {
 
     if (
       this.demoStore.demoState === MultisigState.INITIALIZED ||
+      this.multisigStore.state === MultisigState.OUTDATED ||
       this.multisigStore.state === MultisigState.INITIALIZED ||
       this.singlesigStore.state === SinglesigState.INITIALIZED
     ) {

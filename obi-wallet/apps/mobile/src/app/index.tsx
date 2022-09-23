@@ -1,4 +1,3 @@
-import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 import codePush from "react-native-code-push";
@@ -7,6 +6,7 @@ import { deploymentKey } from "./code-push";
 import { Loader } from "./loader";
 import { Provider } from "./provider";
 import { RootStack } from "./root-stack";
+import { MigrateScreen } from "./screens/migrate";
 import { ReceiveScreen } from "./screens/receive";
 import { SendScreen } from "./screens/send";
 import { settingsScreens } from "./screens/settings";
@@ -77,6 +77,7 @@ export function App() {
         />
         <RootStack.Screen name="send" component={SendScreen} />
         <RootStack.Screen name="receive" component={ReceiveScreen} />
+        <RootStack.Screen name="migrate" component={MigrateScreen} />
 
         {settingsScreens()}
       </RootStack.Navigator>
