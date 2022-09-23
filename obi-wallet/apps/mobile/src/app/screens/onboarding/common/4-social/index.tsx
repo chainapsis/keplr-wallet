@@ -131,8 +131,8 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       />
                     ) : (
                       <FormattedMessage
-                        id="onboarding5.recovery.setsocialkey"
-                        defaultMessage="Set a New Social Key"
+                        id="onboarding5.setsocialkey"
+                        defaultMessage="Set a Social Key"
                       />
                     )}
                   </Text>

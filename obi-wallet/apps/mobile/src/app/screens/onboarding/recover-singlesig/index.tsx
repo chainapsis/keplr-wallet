@@ -4,6 +4,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -64,7 +65,10 @@ export const RecoverSinglesig = observer<RecoverSinglesigProps>(
                       marginTop: 32,
                     }}
                   >
-                    Recover your Singlesig Wallet
+                    <FormattedMessage
+                      id="recovery.singlesig.title"
+                      defaultMessage="Recover your Singlesig Wallet"
+                    />
                   </Text>
                   <Text
                     style={{
@@ -73,7 +77,10 @@ export const RecoverSinglesig = observer<RecoverSinglesigProps>(
                       marginTop: 10,
                     }}
                   >
-                    Enter your recovery phrase of your singlesig wallet.
+                    <FormattedMessage
+                      id="recovery.singlesig.enterphrase"
+                      defaultMessage="Enter your recovery phrase of your singlesig wallet."
+                    />
                   </Text>
                 </View>
               </View>
