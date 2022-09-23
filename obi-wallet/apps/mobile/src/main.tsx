@@ -16,7 +16,7 @@ initSentry();
 initBackground();
 
 AppRegistry.registerComponent("Mobile", () => {
-  if (__DEV__ && COSMOS_ENABLED) return Cosmos;
+  if (__DEV__ && COSMOS_ENABLED === "true") return Cosmos;
 
   let Component = Sentry.wrap(App);
 

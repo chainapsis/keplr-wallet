@@ -4,6 +4,9 @@ cd ${SCRIPT_DIR}/..;
 # Load environment variables
 export $(grep -v '^#' apps/mobile/.env | xargs)
 
+# Create empty React Cosmos userdeps file
+touch apps/mobile/cosmos.userdeps.js
+
 # Create apps/mobile/ios/Mobile/AppCenter-Config.plist
 tee apps/mobile/ios/Mobile/AppCenter-Config.plist <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
