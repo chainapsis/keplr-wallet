@@ -7,9 +7,16 @@ import { useStore } from "../../stores";
 import BuyCryptoIcon from "./assets/buy_crypto.svg";
 import CosmicPartyIcon from "./assets/cosmic_party.svg";
 import GetTicketsIcon from "./assets/get_tickets.svg";
+import HistoryIcon from "./assets/history.svg";
 import MyTicketsIcon from "./assets/my_tickets.svg";
 
-const icons = [BuyCryptoIcon, CosmicPartyIcon, GetTicketsIcon, MyTicketsIcon];
+const icons = [
+  BuyCryptoIcon,
+  CosmicPartyIcon,
+  GetTicketsIcon,
+  MyTicketsIcon,
+  HistoryIcon,
+];
 
 export function DappExplorer() {
   const { appsStore, walletStore } = useStore();
