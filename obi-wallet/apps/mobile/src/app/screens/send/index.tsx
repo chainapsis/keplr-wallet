@@ -85,20 +85,50 @@ export const SendScreen = observer(() => {
         if (!multisig?.multisig?.address || !multisigStore.proxyAddress)
           return [];
 
-        const rawMessage = {
-          execute: {
-            msgs: [
-              {
-                bank: {
-                  send: {
-                    amount: msgAmount,
-                    to_address: address,
-                  },
-                },
-              },
-            ],
+        console.log({
+          transfer: {
+            amount: msgAmount[0].amount,
+            recipient: address,
           },
-        };
+        });
+
+        const rawMessage = selectedCoin.contract
+          ? {
+              execute: {
+                msgs: [
+                  {
+                    wasm: {
+                      execute: {
+                        contract_addr: selectedCoin.contract,
+                        funds: [],
+                        msg: Buffer.from(
+                          JSON.stringify({
+                            transfer: {
+                              amount: msgAmount[0].amount,
+                              recipient: address,
+                            },
+                          })
+                        ).toString("base64"),
+                      },
+                    },
+                  },
+                ],
+              },
+            }
+          : {
+              execute: {
+                msgs: [
+                  {
+                    bank: {
+                      send: {
+                        amount: msgAmount,
+                        to_address: address,
+                      },
+                    },
+                  },
+                ],
+              },
+            };
 
         const value: MsgExecuteContract = {
           sender: multisig.multisig.address,
@@ -117,6 +147,30 @@ export const SendScreen = observer(() => {
         return [];
       case WalletType.SINGLESIG: {
         if (!singlesigStore.address) return [];
+
+        if (selectedCoin.contract) {
+          const value: MsgExecuteContract = {
+            sender: singlesigStore.address,
+            contract: selectedCoin.contract,
+            msg: new Uint8Array(
+              Buffer.from(
+                JSON.stringify({
+                  transfer: {
+                    amount: msgAmount[0].amount,
+                    recipient: address,
+                  },
+                })
+              )
+            ),
+            funds: [],
+          };
+
+          const message: MsgExecuteContractEncodeObject = {
+            typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+            value,
+          };
+          return [message];
+        }
 
         const message: MsgSendEncodeObject = {
           typeUrl: "/cosmos.bank.v1beta1.MsgSend",

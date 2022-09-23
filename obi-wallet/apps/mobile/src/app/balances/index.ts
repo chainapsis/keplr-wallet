@@ -5,13 +5,14 @@ import { useStore } from "../stores";
 import LoopIcon from "./assets/loop.svg";
 
 export interface ExtendedCoin {
+  contract?: string;
   denom: string;
   amount: string;
   usdPrice: number;
 }
 
 export function useBalances() {
-  const { demoStore, balancesStore } = useStore();
+  const { demoStore, balancesStore, walletStore } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshBalances = useCallback(async () => {
@@ -24,7 +25,7 @@ export function useBalances() {
 
   useEffect(() => {
     void refreshBalances();
-  }, [refreshBalances]);
+  }, [refreshBalances, walletStore.address]);
 
   return {
     balances: demoStore.demoMode ? [] : balancesStore.balances,

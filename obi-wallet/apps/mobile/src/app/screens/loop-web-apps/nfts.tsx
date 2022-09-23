@@ -1,7 +1,6 @@
-import { useNavigationState } from "@react-navigation/native";
-import { useEffect, useRef, useState } from "react";
-import { FormattedMessage, useIntl } from "react-intl";
-import { Alert, Image, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import { FormattedMessage } from "react-intl";
+import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
@@ -11,31 +10,11 @@ export function NFTs() {
   const safeArea = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const webViewRef = useRef<WebView>(null);
-  const intl = useIntl();
-
-  const isActive = useNavigationState(
-    (state) => state.routeNames[state.index] === "NFTs"
-  );
-
-  useEffect(() => {
-    if (isActive) {
-      Alert.alert(
-        intl.formatMessage({
-          id: "general.comingsoon",
-          defaultMessage: "Coming Soon",
-        }),
-        intl.formatMessage({
-          id: "nfts.coming soon",
-          defaultMessage: "NFT webapp is coming soon.",
-        })
-      );
-    }
-  }, [intl, isActive]);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#17162C" }}>
       <ConnectedWebView
-        url="https://nft-juno.loop.markets/webapp/myNft"
+        url="https://nft-juno.loop.markets/webapp/mynfts"
         onLoadEnd={() => setLoading(false)}
         style={{ flex: 1, marginTop: safeArea.top }}
         webViewRef={webViewRef}

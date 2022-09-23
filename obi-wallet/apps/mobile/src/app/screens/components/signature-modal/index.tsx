@@ -147,7 +147,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
 
       const fee = {
         amount: coins(6000, currentChainInformation.denom),
-        gas: "200000",
+        gas: "1280000",
       };
 
       if (demoStore.demoMode) {
@@ -424,7 +424,7 @@ export function useSignatureModalProps({
           const feeAmount = 6000;
           const fee = {
             amount: coins(feeAmount, denom),
-            gas: "200000",
+            gas: "1280000",
           };
 
           if (!(await client.getAccount(address))) {
@@ -457,6 +457,7 @@ export function useSignatureModalProps({
 
           client.disconnect();
           await onConfirm(result);
+          setModalKey((value) => value + 1);
         }
 
         switch (walletStore.type) {

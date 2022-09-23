@@ -101,6 +101,7 @@ export class SinglesigStore {
     this.mnemonic = null;
     this.publicKey = null;
     this.privateKey = null;
+    void this.save();
   }
 
   protected async save() {
