@@ -16,7 +16,7 @@ import {
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ExtendedCoin, formatCoin, useBalances } from "../../balances";
+import { ExtendedCoin, formatExtendedCoin, useBalances } from "../../balances";
 import { Button } from "../../button";
 import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
@@ -56,7 +56,9 @@ export const SendScreen = observer(() => {
     }
   }, [balances, selectedCoin]);
 
-  const hydratedSelectedCoin = selectedCoin ? formatCoin(selectedCoin) : null;
+  const hydratedSelectedCoin = selectedCoin
+    ? formatExtendedCoin(selectedCoin)
+    : null;
 
   const { multisigStore, singlesigStore, walletStore } = useStore();
   const multisig = multisigStore.currentAdmin;
@@ -67,7 +69,7 @@ export const SendScreen = observer(() => {
   const encodeObjects = useWrapEncodeObjects(() => {
     if (!selectedCoin || !walletStore.type) return [];
 
-    const { digits } = formatCoin(selectedCoin);
+    const { digits } = formatExtendedCoin(selectedCoin);
     const normalizedAmount =
       parseFloat(amount.replace(",", ".")) * Math.pow(10, digits);
     const msgAmount = [
@@ -436,7 +438,7 @@ interface CoinRendererProps {
 }
 
 function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
-  const { denom, label, amount, valueInUsd, icon } = formatCoin(item);
+  const { denom, label, amount, valueInUsd, icon } = formatExtendedCoin(item);
   const coinIconProps =
     typeof icon === "number" ? { imageIcon: icon } : { SVGIcon: icon };
   return (

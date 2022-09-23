@@ -19,7 +19,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ExtendedCoin, formatCoin, useBalances } from "../../../balances";
+import {
+  ExtendedCoin,
+  formatExtendedCoin,
+  useBalances,
+} from "../../../balances";
 import { IconButton } from "../../../button";
 import { RootStackParamList } from "../../../root-stack";
 import { useStore } from "../../../stores";
@@ -178,7 +182,7 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
 const BalanceAndActions = observer(() => {
   const { balances } = useBalances();
   const balanceInUsd = balances.reduce(
-    (acc, coin) => acc + formatCoin(coin).valueInUsd,
+    (acc, coin) => acc + formatExtendedCoin(coin).valueInUsd,
     0
   );
 
@@ -343,7 +347,10 @@ const AssetsList = observer(() => {
   const balances = [...unsortedBalances];
   balances.sort((a, b) => {
     const [first, second] = sortAscending ? [b, a] : [a, b];
-    return formatCoin(first).valueInUsd - formatCoin(second).valueInUsd;
+    return (
+      formatExtendedCoin(first).valueInUsd -
+      formatExtendedCoin(second).valueInUsd
+    );
   });
 
   return (
@@ -446,7 +453,7 @@ const AssetsList = observer(() => {
 });
 
 function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
-  const { icon, denom, label, amount, valueInUsd } = formatCoin(item);
+  const { icon, denom, label, amount, valueInUsd } = formatExtendedCoin(item);
   const coinIconProps =
     typeof icon === "number" ? { imageIcon: icon } : { SVGIcon: icon };
   return (

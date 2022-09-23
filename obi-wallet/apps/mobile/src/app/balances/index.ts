@@ -1,3 +1,4 @@
+import { Coin } from "@cosmjs/amino";
 import { useCallback, useEffect, useState } from "react";
 
 import { rootStore } from "../../background/root-store";
@@ -34,12 +35,11 @@ export function useBalances() {
   };
 }
 
-export function formatCoin(coin: ExtendedCoin) {
+export function formatCoin(coin: Coin) {
   const { denom } = rootStore.chainStore.currentChainInformation;
   switch (coin.denom) {
     case denom: {
       const digits = 6;
-      const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
         icon: denom.includes("ujuno") ? require("./assets/juno.png") : null,
@@ -47,7 +47,6 @@ export function formatCoin(coin: ExtendedCoin) {
         digits,
         label: denom[1].toUpperCase() + denom.slice(2),
         amount,
-        valueInUsd: amount * usdValue,
       };
     }
     case "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034": {
@@ -59,12 +58,10 @@ export function formatCoin(coin: ExtendedCoin) {
         digits,
         label: "USDC (Axelar)",
         amount,
-        valueInUsd: amount,
       };
     }
     case "uloop": {
       const digits = 6;
-      const usdValue = coin.usdPrice / Math.pow(10, digits);
       const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
       return {
         icon: LoopIcon,
@@ -72,7 +69,6 @@ export function formatCoin(coin: ExtendedCoin) {
         digits,
         label: "Loop",
         amount,
-        valueInUsd: usdValue * amount,
       };
     }
     default: {
@@ -84,7 +80,40 @@ export function formatCoin(coin: ExtendedCoin) {
         digits: 6,
         label: "Unknown Token",
         amount: amount,
-        valueInUsd: amount * coin.usdPrice,
+      };
+    }
+  }
+}
+
+export function formatExtendedCoin(coin: ExtendedCoin) {
+  const { denom } = rootStore.chainStore.currentChainInformation;
+  const formattedCoin = formatCoin(coin);
+
+  switch (coin.denom) {
+    case denom: {
+      const usdValue = coin.usdPrice / Math.pow(10, formattedCoin.digits);
+      return {
+        ...formattedCoin,
+        valueInUsd: formattedCoin.amount * usdValue,
+      };
+    }
+    case "ibc/EAC38D55372F38F1AFD68DF7FE9EF762DCF69F26520643CF3F9D292A738D8034": {
+      return {
+        ...formattedCoin,
+        valueInUsd: formattedCoin.amount,
+      };
+    }
+    case "uloop": {
+      const usdValue = coin.usdPrice / Math.pow(10, formattedCoin.digits);
+      return {
+        ...formattedCoin,
+        valueInUsd: usdValue * formattedCoin.amount,
+      };
+    }
+    default: {
+      return {
+        ...formattedCoin,
+        valueInUsd: formattedCoin.amount * coin.usdPrice,
       };
     }
   }
