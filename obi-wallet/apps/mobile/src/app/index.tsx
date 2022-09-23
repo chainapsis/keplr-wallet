@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 import codePush from "react-native-code-push";
+
 import { deploymentKey } from "./code-push";
 import { Loader } from "./loader";
 import { Provider } from "./provider";
