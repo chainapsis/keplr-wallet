@@ -75,13 +75,6 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
   const encodeObjects = useMemo(() => {
     if (!multisig.multisig?.address) return [];
 
-    const address = multisigStore.proxyAddress?.address;
-    if (address !== null && address !== undefined) {
-      lendFees({
-        chainId: chainStore.currentChainInformation.chainId,
-        address: address,
-      });
-    }
     const rawMessage = {
       admin: multisig.multisig.address,
       hot_wallets: [],

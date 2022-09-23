@@ -20,14 +20,24 @@ export function OnboardingScreen({
   keyInRecovery,
   updateProposed,
 }: OnboardingScreensProps) {
-  const mayRenderStackPiece = (
-    keynames: string[],
-    name: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    component: any
-  ) => {
-    if (keyCheck(keynames)) {
-      return <OnboardingStack.Screen name={name} component={component} />;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const components: any = {
+    "create-multisig-biometrics": MultisigBiometrics,
+    "create-multisig-phone-number": MultisigPhoneNumber,
+    "create-multisig-phone-number-confirm": MultisigPhoneNumberConfirm,
+    "create-multisig-social": MultisigSocial,
+    "create-multisig-init": MultisigInit,
+    "replace-multisig": ReplaceMultisig,
+    "replace-multisig-confirm": ReplaceMultisigConfirm,
+    "recover-singlesig": RecoverSinglesig,
+  };
+
+  const mayRenderStackPiece = (renderWhen: string[], name: string) => {
+    if (keyCheck(renderWhen)) {
+      const SpecificComponent = components[name];
+      return (
+        <OnboardingStack.Screen name={name} component={SpecificComponent} />
+      );
     } else {
       return;
     }
@@ -51,34 +61,23 @@ export function OnboardingScreen({
       initialRouteName={initialRouteName}
     >
       <OnboardingStack.Screen name="welcome" component={Welcome} />
-      {mayRenderStackPiece(["biometrics", ""], "create-multisig-biometrics", {
-        MultisigBiometrics,
-      })}
+      {mayRenderStackPiece(["biometrics", ""], "create-multisig-biometrics")}
+      {mayRenderStackPiece(["phoneNumber", ""], "create-multisig-phone-number")}
       {mayRenderStackPiece(
         ["phoneNumber", ""],
-        "create-multisig-phone-number",
-        { MultisigPhoneNumber }
+        "create-multisig-phone-number-confirm"
       )}
-      {mayRenderStackPiece(
-        ["phoneNumber", ""],
-        "create-multisig-phone-number-confirm",
-        { MultisigPhoneNumberConfirm }
-      )}
-      {mayRenderStackPiece(["", "social"], "create-multisig-social", {
-        MultisigSocial,
-      })}
-      {mayRenderStackPiece([""], "create-multisig-init", { MultisigInit })}
+      {mayRenderStackPiece(["", "social"], "create-multisig-social")}
+      {mayRenderStackPiece([""], "create-multisig-init")}
       {mayRenderStackPiece(
         ["social", "biometrics", "phoneNumber"],
-        "replace-multisig",
-        { ReplaceMultisig }
+        "replace-multisig"
       )}
       {mayRenderStackPiece(
         ["social", "biometrics", "phoneNumber"],
-        "replace-multisig-confirm",
-        { ReplaceMultisigConfirm }
+        "replace-multisig-confirm"
       )}
-      {mayRenderStackPiece([""], "recover-singlesig", { RecoverSinglesig })}
+      {mayRenderStackPiece([""], "recover-singlesig")}
     </OnboardingStack.Navigator>
   );
 }

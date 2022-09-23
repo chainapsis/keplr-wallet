@@ -249,7 +249,7 @@ export function MultisigPhoneNumberConfirm({
                         navigation.navigate("replace-multisig");
                         break;
                       default:
-                        navigation.navigate("create-multisig-init");
+                        navigation.navigate("create-multisig-social");
                     }
                   } else {
                     setVerifyButtonDisabledDoubleclick(false);
