@@ -52,7 +52,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                 id: "onboarding2.error.phonekeyexists.yes",
               }),
               onPress: () => {
-                navigation.navigate("create-multisig-biometrics");
+                navigation.navigate("create-multisig-social");
               },
             },
           ]

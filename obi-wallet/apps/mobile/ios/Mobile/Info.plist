@@ -50,6 +50,8 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>We need your permission to access your Camera.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>We need your permission to access FaceID.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -90,7 +92,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSCameraUsageDescription</key>
-	<string>We need your permission to access your Camera.</string>
 </dict>
 </plist>
