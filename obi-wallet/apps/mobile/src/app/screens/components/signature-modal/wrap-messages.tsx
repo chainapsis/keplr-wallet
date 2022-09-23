@@ -1,9 +1,17 @@
 import {
+  isMsgClearAdminEncodeObject,
   isMsgExecuteEncodeObject,
+  isMsgInstantiateContractEncodeObject,
+  isMsgMigrateEncodeObject,
+  isMsgUpdateAdminEncodeObject,
   MsgExecuteContractEncodeObject,
 } from "@cosmjs/cosmwasm-stargate";
 import { EncodeObject } from "@cosmjs/proto-signing";
-import { isMsgSendEncodeObject } from "@cosmjs/stargate";
+import {
+  isMsgDelegateEncodeObject,
+  isMsgSendEncodeObject,
+  isMsgUndelegateEncodeObject,
+} from "@cosmjs/stargate";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 
 export function wrapMessages({
@@ -58,6 +66,93 @@ export function wrapMessage(message: EncodeObject) {
           funds,
           msg: msg ? new Buffer(msg.buffer).toString("base64") : undefined,
         },
+      },
+    };
+  }
+
+  if (isMsgInstantiateContractEncodeObject(message)) {
+    const { admin, codeId, funds, label, msg } = message.value;
+
+    return {
+      wasm: {
+        instantiate: {
+          admin,
+          code_id: codeId,
+          funds,
+          label,
+          msg: msg ? new Buffer(msg.buffer).toString("base64") : undefined,
+        },
+      },
+    };
+  }
+
+  if (isMsgMigrateEncodeObject(message)) {
+    const { contract, codeId, msg } = message.value;
+
+    return {
+      wasm: {
+        migrate: {
+          contract_addr: contract,
+          msg: msg ? new Buffer(msg.buffer).toString("base64") : undefined,
+          new_code_id: codeId,
+        },
+      },
+    };
+  }
+
+  if (isMsgUpdateAdminEncodeObject(message)) {
+    const { newAdmin, contract } = message.value;
+
+    return {
+      wasm: {
+        update_admin: {
+          admin: newAdmin,
+          contract_addr: contract,
+        },
+      },
+    };
+  }
+
+  if (isMsgClearAdminEncodeObject(message)) {
+    const { contract } = message.value;
+
+    return {
+      wasm: {
+        clear_admin: {
+          contract_addr: contract,
+        },
+      },
+    };
+  }
+
+  if (isMsgDelegateEncodeObject(message)) {
+    const { amount, delegatorAddress, validatorAddress } = message.value;
+
+    if (delegatorAddress) {
+      return {
+        redelegate: {
+          amount,
+          src_validator: delegatorAddress,
+          dst_validator: validatorAddress,
+        },
+      };
+    }
+
+    return {
+      delegate: {
+        amount,
+        validator: validatorAddress,
+      },
+    };
+  }
+
+  if (isMsgUndelegateEncodeObject(message)) {
+    const { amount, validatorAddress } = message.value;
+
+    return {
+      undelegate: {
+        amount,
+        validator: validatorAddress,
       },
     };
   }
