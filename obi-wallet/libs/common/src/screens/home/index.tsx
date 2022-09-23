@@ -158,11 +158,11 @@ export const Home = observer<HomeProps>(
                 ImgComponent={MyTicketsIcon}
                 label={intl.formatMessage({
                   id: "apps.myhistory",
-                  defaultMessage: "My History",
+                  defaultMessage: "History",
                 })}
                 onPress={() => {
                   onAppPress({
-                    label: "My History",
+                    label: "History",
                     url: `https://mintscan.io/juno/account/${walletStore.address}`,
                     icon: "https://place-hold.it/180x180",
                   });
