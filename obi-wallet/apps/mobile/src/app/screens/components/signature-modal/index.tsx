@@ -42,7 +42,6 @@ import { createBiometricSignature } from "../../../biometrics";
 import { InlineButton } from "../../../button";
 import {
   createSigningCosmWasmClient,
-  createSigningStargateClient,
   createStargateClient,
 } from "../../../clients";
 import { lendFees } from "../../../fee-lender-worker";
@@ -61,8 +60,10 @@ import {
 import { SendMagicSmsButton } from "../phone-number/send-magic-sms-button";
 import { VerifyAndProceedButton } from "../phone-number/verify-and-proceed-button";
 import { ConfirmMessages } from "./confirm-messages";
+import { wrapMessages } from "./wrap-messages";
 
 export interface SignatureModalProps extends ModalProps {
+  innerMessages: AminoMsg[];
   messages: AminoMsg[];
   rawMessages: EncodeObject[];
   multisig?: Multisig | null;
@@ -364,13 +365,59 @@ function createDefaultTypes(prefix: string): AminoConverters {
 const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
 const registry = new Registry([...defaultRegistryTypes, ...wasmTypes]);
 
+export function useWrapEncodeObjects(
+  getEncodeObjects: () => EncodeObject | EncodeObject[]
+): EncodeObjectsPayload {
+  const { multisigStore, singlesigStore, walletStore } = useStore();
+  const ret = getEncodeObjects();
+  const encodeObjects = Array.isArray(ret) ? ret : [ret];
+
+  return {
+    wrapped: getWrappedEncodeObjects(),
+    inner: encodeObjects,
+  };
+
+  function getWrappedEncodeObjects() {
+    if (!walletStore.type) return [];
+
+    switch (walletStore.type) {
+      case WalletType.MULTISIG: {
+        const multisig = multisigStore.currentAdmin;
+        if (!multisig?.multisig?.address || !multisigStore.proxyAddress) {
+          return [];
+        }
+        return [
+          wrapMessages({
+            messages: encodeObjects,
+            sender: multisig.multisig.address,
+            contract: multisigStore.proxyAddress.address,
+          }),
+        ];
+      }
+      case WalletType.MULTISIG_DEMO:
+        return [];
+      case WalletType.SINGLESIG: {
+        if (!singlesigStore.address) return [];
+        return encodeObjects;
+      }
+    }
+  }
+}
+
+export type EncodeObjectsPayload =
+  | EncodeObject[]
+  | {
+      wrapped: EncodeObject[];
+      inner: EncodeObject[];
+    };
+
 export function useSignatureModalProps({
   multisig,
   encodeObjects,
   onConfirm,
 }: {
   multisig?: Multisig | null;
-  encodeObjects: EncodeObject[];
+  encodeObjects: EncodeObjectsPayload;
   onConfirm(response: DeliverTxResponse): Promise<void>;
 }): {
   signatureModalProps: SignatureModalProps;
@@ -381,8 +428,18 @@ export function useSignatureModalProps({
   const { chainStore, singlesigStore, walletStore } = useStore();
   const { currentChainInformation } = chainStore;
 
+  const wrappedEncodeObjects = Array.isArray(encodeObjects)
+    ? encodeObjects
+    : encodeObjects.wrapped;
+  const innerEncodeObjects = Array.isArray(encodeObjects)
+    ? encodeObjects
+    : encodeObjects.inner;
+
   const signatureModalProps = useMemo(() => {
-    const aminoMessages = encodeObjects.map((encodeObject) => {
+    const innerAminoMessages = innerEncodeObjects.map((encodeObject) => {
+      return aminoTypes.toAmino(encodeObject);
+    });
+    const aminoMessages = wrappedEncodeObjects.map((encodeObject) => {
       return aminoTypes.toAmino(encodeObject);
     });
     const messages = aminoMessages.map((message) => {
@@ -392,6 +449,7 @@ export function useSignatureModalProps({
     return {
       key: modalKey.toString(),
       visible: signatureModalVisible,
+      innerMessages: innerAminoMessages,
       messages: aminoMessages,
       rawMessages: messages,
       multisig,
@@ -508,7 +566,8 @@ export function useSignatureModalProps({
       },
     };
   }, [
-    encodeObjects,
+    wrappedEncodeObjects,
+    innerEncodeObjects,
     modalKey,
     signatureModalVisible,
     multisig,

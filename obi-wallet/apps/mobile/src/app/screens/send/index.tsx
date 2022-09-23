@@ -1,14 +1,10 @@
-import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
-import { MsgSendEncodeObject } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { WalletType } from "@obi-wallet/common";
-import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
   Platform,
@@ -20,7 +16,7 @@ import {
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ExtendedCoin, formatCoin, useBalances } from "../../balances";
+import { ExtendedCoin, formatExtendedCoin, useBalances } from "../../balances";
 import { Button } from "../../button";
 import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
@@ -33,6 +29,7 @@ import { isSmallScreenNumber } from "../components/screen-size";
 import {
   SignatureModal,
   useSignatureModalProps,
+  useWrapEncodeObjects,
 } from "../components/signature-modal";
 
 export const SendScreen = observer(() => {
@@ -59,7 +56,9 @@ export const SendScreen = observer(() => {
     }
   }, [balances, selectedCoin]);
 
-  const hydratedSelectedCoin = selectedCoin ? formatCoin(selectedCoin) : null;
+  const hydratedSelectedCoin = selectedCoin
+    ? formatExtendedCoin(selectedCoin)
+    : null;
 
   const { multisigStore, singlesigStore, walletStore } = useStore();
   const multisig = multisigStore.currentAdmin;
@@ -67,10 +66,10 @@ export const SendScreen = observer(() => {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
 
-  const encodeObjects = useMemo(() => {
+  const encodeObjects = useWrapEncodeObjects(() => {
     if (!selectedCoin || !walletStore.type) return [];
 
-    const { digits } = formatCoin(selectedCoin);
+    const { digits } = formatExtendedCoin(selectedCoin);
     const normalizedAmount =
       parseFloat(amount.replace(",", ".")) * Math.pow(10, digits);
     const msgAmount = [
@@ -80,118 +79,38 @@ export const SendScreen = observer(() => {
       },
     ];
 
-    switch (walletStore.type) {
-      case WalletType.MULTISIG: {
-        if (!multisig?.multisig?.address || !multisigStore.proxyAddress)
-          return [];
+    if (!walletStore.address) return [];
 
-        console.log({
-          transfer: {
-            amount: msgAmount[0].amount,
-            recipient: address,
-          },
-        });
-
-        const rawMessage = selectedCoin.contract
-          ? {
-              execute: {
-                msgs: [
-                  {
-                    wasm: {
-                      execute: {
-                        contract_addr: selectedCoin.contract,
-                        funds: [],
-                        msg: Buffer.from(
-                          JSON.stringify({
-                            transfer: {
-                              amount: msgAmount[0].amount,
-                              recipient: address,
-                            },
-                          })
-                        ).toString("base64"),
-                      },
-                    },
-                  },
-                ],
-              },
-            }
-          : {
-              execute: {
-                msgs: [
-                  {
-                    bank: {
-                      send: {
-                        amount: msgAmount,
-                        to_address: address,
-                      },
-                    },
-                  },
-                ],
-              },
-            };
-
-        const value: MsgExecuteContract = {
-          sender: multisig.multisig.address,
-          contract: multisigStore.proxyAddress.address,
-          msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
+    if (selectedCoin.contract) {
+      return {
+        typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+        value: {
+          sender: walletStore.address,
+          contract: selectedCoin.contract,
+          msg: new Uint8Array(
+            Buffer.from(
+              JSON.stringify({
+                transfer: {
+                  amount: msgAmount[0].amount,
+                  recipient: address,
+                },
+              })
+            )
+          ),
           funds: [],
-        };
-
-        const message: MsgExecuteContractEncodeObject = {
-          typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-          value,
-        };
-        return [message];
-      }
-      case WalletType.MULTISIG_DEMO:
-        return [];
-      case WalletType.SINGLESIG: {
-        if (!singlesigStore.address) return [];
-
-        if (selectedCoin.contract) {
-          const value: MsgExecuteContract = {
-            sender: singlesigStore.address,
-            contract: selectedCoin.contract,
-            msg: new Uint8Array(
-              Buffer.from(
-                JSON.stringify({
-                  transfer: {
-                    amount: msgAmount[0].amount,
-                    recipient: address,
-                  },
-                })
-              )
-            ),
-            funds: [],
-          };
-
-          const message: MsgExecuteContractEncodeObject = {
-            typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-            value,
-          };
-          return [message];
-        }
-
-        const message: MsgSendEncodeObject = {
-          typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-          value: {
-            fromAddress: singlesigStore.address,
-            toAddress: address,
-            amount: msgAmount,
-          },
-        };
-        return [message];
-      }
+        },
+      };
     }
-  }, [
-    address,
-    amount,
-    multisig,
-    multisigStore,
-    selectedCoin,
-    singlesigStore,
-    walletStore,
-  ]);
+
+    return {
+      typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+      value: {
+        fromAddress: singlesigStore.address,
+        toAddress: address,
+        amount: msgAmount,
+      },
+    };
+  });
 
   const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
     multisig,
@@ -519,7 +438,7 @@ interface CoinRendererProps {
 }
 
 function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
-  const { denom, label, amount, valueInUsd, icon } = formatCoin(item);
+  const { denom, label, amount, valueInUsd, icon } = formatExtendedCoin(item);
   const coinIconProps =
     typeof icon === "number" ? { imageIcon: icon } : { SVGIcon: icon };
   return (
