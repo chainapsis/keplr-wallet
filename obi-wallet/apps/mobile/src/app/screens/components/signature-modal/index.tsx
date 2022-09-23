@@ -42,7 +42,6 @@ import { createBiometricSignature } from "../../../biometrics";
 import { InlineButton } from "../../../button";
 import {
   createSigningCosmWasmClient,
-  createSigningStargateClient,
   createStargateClient,
 } from "../../../clients";
 import { lendFees } from "../../../fee-lender-worker";
@@ -61,6 +60,7 @@ import {
 import { SendMagicSmsButton } from "../phone-number/send-magic-sms-button";
 import { VerifyAndProceedButton } from "../phone-number/verify-and-proceed-button";
 import { ConfirmMessages } from "./confirm-messages";
+import { wrapMessages } from "./wrap-messages";
 
 export interface SignatureModalProps extends ModalProps {
   messages: AminoMsg[];
@@ -363,6 +363,38 @@ function createDefaultTypes(prefix: string): AminoConverters {
 
 const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
 const registry = new Registry([...defaultRegistryTypes, ...wasmTypes]);
+
+export function useWrapEncodeObjects(
+  getEncodeObjects: () => EncodeObject | EncodeObject[]
+): EncodeObject[] {
+  const { multisigStore, singlesigStore, walletStore } = useStore();
+  const ret = getEncodeObjects();
+  const encodeObjects = Array.isArray(ret) ? ret : [ret];
+
+  if (!walletStore.type) return [];
+
+  switch (walletStore.type) {
+    case WalletType.MULTISIG: {
+      const multisig = multisigStore.currentAdmin;
+      if (!multisig?.multisig?.address || !multisigStore.proxyAddress) {
+        return [];
+      }
+      return [
+        wrapMessages({
+          messages: encodeObjects,
+          sender: multisig.multisig.address,
+          contract: multisigStore.proxyAddress.address,
+        }),
+      ];
+    }
+    case WalletType.MULTISIG_DEMO:
+      return [];
+    case WalletType.SINGLESIG: {
+      if (!singlesigStore.address) return [];
+      return encodeObjects;
+    }
+  }
+}
 
 export function useSignatureModalProps({
   multisig,

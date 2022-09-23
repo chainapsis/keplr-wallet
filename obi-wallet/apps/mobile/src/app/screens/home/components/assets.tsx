@@ -10,7 +10,6 @@ import { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import {
   FlatList,
-  Image,
   ImageBackground,
   ListRenderItemInfo,
   RefreshControl,
@@ -130,8 +129,8 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
           justifyContent: "center",
           alignItems: "center",
         }}
-        // Disabled navigation due to decision - account-screen should not be accessable currently
-        //onPress={() => navigation.navigate("AccountsSettings")}
+        // Disabled navigation due to decision - account-screen should not be accessible currently
+        // onPress={() => navigation.navigate("AccountsSettings")}
       >
         <View style={{ margin: 10 }}>
           <Text
@@ -171,12 +170,6 @@ export function AssetsHeader({ currentNetwork }: { currentNetwork: string }) {
             }}
           />
         </TouchableOpacity>
-        {/*
-        <Image
-          source={require("../assets/backgroundblue.png")}
-          style={{ width: 35, height: 35, borderRadius: 35 }}
-        />
-        */}
       </View>
     </View>
   );
