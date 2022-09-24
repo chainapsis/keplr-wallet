@@ -1,10 +1,11 @@
-import { MultisigPhoneNumber } from "./create-multisig/1-phone-number";
-import { MultisigPhoneNumberConfirm } from "./create-multisig/2-phone-number-confirm";
-import { MultisigBiometrics } from "./create-multisig/3-biometrics";
-import { MultisigSocial } from "./create-multisig/4-social";
-import { MultisigInit } from "./create-multisig/5-init";
+import { MultisigPhoneNumber } from "./common/1-phone-number";
+import { MultisigPhoneNumberConfirm } from "./common/2-phone-number-confirm";
+import { MultisigBiometrics } from "./common/3-biometrics";
+import { MultisigSocial } from "./common/4-social";
+import { MultisigInit } from "./create-multisig-init";
 import { OnboardingStack } from "./onboarding-stack";
 import { RecoverSinglesig } from "./recover-singlesig";
+import { ReplaceMultisig } from "./replace-multisig-key";
 import { Welcome } from "./welcome";
 
 export interface OnboardingScreensProps {
@@ -39,6 +40,10 @@ export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
       <OnboardingStack.Screen
         name="create-multisig-init"
         component={MultisigInit}
+      />
+      <OnboardingStack.Screen
+        name="replace-multisig"
+        component={ReplaceMultisig}
       />
       <OnboardingStack.Screen
         name="recover-singlesig"

@@ -1,12 +1,15 @@
 import { AminoMsg } from "@cosmjs/amino";
-import { AminoMsgInstantiateContract } from "@cosmjs/cosmwasm-stargate/build/modules";
+import {
+  AminoMsgExecuteContract,
+  AminoMsgInstantiateContract,
+} from "@cosmjs/cosmwasm-stargate/build/modules";
 import { AminoMsgSend } from "@cosmjs/stargate";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import React, { ReactNode } from "react";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useIntl } from "react-intl";
 import { Text, View } from "react-native";
 
 import { formatCoin } from "../../../balances";
@@ -19,6 +22,8 @@ export function PrettyMessage({ message }: { message: AminoMsg }) {
       return <PrettyMessageSend value={message.value} />;
     case "wasm/MsgInstantiateContract":
       return <PrettyMessageInstantiateContract value={message.value} />;
+    case "wasm/MsgExecuteContract":
+      return <PrettyMessageExecuteContract value={message.value} />;
     default:
       return <PrettyMessageUnknown />;
   }
@@ -60,46 +65,90 @@ const PrettyMessageInstantiateContract = observer(
           icon={<ArrowUpIcon />}
           title={intl.formatMessage({
             id: "signature.modal.createobiwallet",
-            defaultMessage: "Create ObiWallet",
+            defaultMessage: "Create Obi Wallet",
           })}
         />
       );
     }
 
-    return null;
+    return (
+      <MessageElement
+        icon={<ArrowUpIcon />}
+        title={intl.formatMessage({
+          id: "signature.modal.initcontract",
+          defaultMessage: "Init Contract",
+        })}
+      />
+    );
+  }
+);
+
+const PrettyMessageExecuteContract = observer(
+  ({ value }: { value: AminoMsgExecuteContract["value"] }) => {
+    const { walletStore } = useStore();
+    const intl = useIntl();
+
+    if (
+      value.contract === walletStore.address &&
+      value.msg["propose_update_admin"] !== undefined
+    ) {
+      return (
+        <MessageElement
+          icon={<ArrowUpIcon />}
+          title={intl.formatMessage({
+            id: "signature.modal.proposeupdateadmin",
+            defaultMessage: "Propose new admin for Obi Wallet",
+          })}
+        />
+      );
+    }
+
+    if (
+      value.contract === walletStore.address &&
+      value.msg["confirm_update_admin"] !== undefined
+    ) {
+      return (
+        <MessageElement
+          icon={<ArrowUpIcon />}
+          title={intl.formatMessage({
+            id: "signature.modal.confirmupdateadmin",
+            defaultMessage: "Confirm new admin for Obi Wallet",
+          })}
+        />
+      );
+    }
+
+    return (
+      <MessageElement
+        icon={<ArrowUpIcon />}
+        title={intl.formatMessage({
+          id: "signature.modal.unknownexecutecontractmessage.heading",
+          defaultMessage: "Unknown ExecuteContract message",
+        })}
+        subTitle={intl.formatMessage({
+          id: "signature.modal.unknownmessage.subheading",
+          defaultMessage: "Please check data tab",
+        })}
+      />
+    );
   }
 );
 
 function PrettyMessageUnknown() {
+  const intl = useIntl();
+
   return (
-    <View
-      style={{
-        height: 50,
-        flexDirection: "row",
-        borderBottomColor: "rgba(255,255,255, 0.6)",
-        borderBottomWidth: 1,
-      }}
-    >
-      <View style={{ justifyContent: "center", alignItems: "center" }}>
-        <ArrowUpIcon />
-      </View>
-      <View
-        style={{ flex: 1, justifyContent: "space-around", paddingLeft: 10 }}
-      >
-        <Text style={{ color: "white", fontWeight: "600", fontSize: 16 }}>
-          <FormattedMessage
-            id="signature.modal.unknownmessage.heading"
-            defaultMessage="Unknown message"
-          />
-        </Text>
-        <Text style={{ color: "white", opacity: 0.6 }}>
-          <FormattedMessage
-            id="signature.modal.unknownmessage.subheading"
-            defaultMessage="Please check data tab"
-          />
-        </Text>
-      </View>
-    </View>
+    <MessageElement
+      icon={<ArrowUpIcon />}
+      title={intl.formatMessage({
+        id: "signature.modal.unknownmessage.heading",
+        defaultMessage: "Unknown message",
+      })}
+      subTitle={intl.formatMessage({
+        id: "signature.modal.unknownmessage.subheading",
+        defaultMessage: "Please check data tab",
+      })}
+    />
   );
 }
 

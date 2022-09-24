@@ -1,7 +1,8 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { MultisigKey, Text } from "@obi-wallet/common";
+import { MultisigKey, Text, WalletType } from "@obi-wallet/common";
+import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { useIntl, FormattedMessage } from "react-intl";
@@ -11,6 +12,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
+import { useRootNavigation } from "../../../root-stack";
 import { useStore } from "../../../stores";
 import { Back } from "../../components/back";
 import {
@@ -230,15 +232,54 @@ interface KeyConfigProps {
 }
 
 function KeyConfig({ item, onClose }: KeyConfigProps) {
+  const { navigate } = useRootNavigation();
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
+  const { multisigStore, walletStore } = useStore();
 
   const safeArea = useSafeAreaInsets();
 
   const intl = useIntl();
 
-  const getModalText = (string: string) => {
-    switch (string) {
+  const getRecoverButton = (keyId: MultisigKey) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          if (!walletStore.type) return;
+          switch (walletStore.type) {
+            case WalletType.MULTISIG:
+              if (multisigStore.currentAdmin) {
+                multisigStore.recover(keyId);
+                navigate("state-renderer");
+              } // TODO: unsure if else case will ever hit here
+              break;
+            case WalletType.MULTISIG_DEMO:
+              // demoStore.recover();
+              break;
+          }
+        }}
+        style={{
+          paddingVertical: 15,
+          width: "100%",
+          backgroundColor: "#59D6E6",
+          borderRadius: 12,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ fontSize: 15, fontWeight: "700" }}>
+          {/** ToDo: i18n - Building sentences dynamically is not feasible with translations, as the word-order is different in other languages. */}
+          {/** "Replace {title} now" ...not possible */}
+          <FormattedMessage
+            id="settings.multisig.modal.replacenow"
+            defaultMessage="Replace now"
+          />
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const getModalText = (keyId: MultisigKey) => {
+    switch (keyId) {
       case "phoneNumber":
         return (
           <FormattedMessage
@@ -330,57 +371,37 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
         </Text>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <FontAwesomeIcon
-          icon={faInfoCircle}
-          style={{ color: "rgba(246, 245, 255, 0.6)", marginRight: 10 }}
-        />
-        <Text
-          style={{ flex: 1, fontSize: 12, color: "rgba(246, 245, 255, 0.6)" }}
-        >
-          <FormattedMessage
-            id="settings.multisig.modal.info"
-            defaultMessage="In case of stolen/lost or any other reason, you can replace this key with a new one."
-          />
-        </Text>
+        {item.id !== "biometrics" ? (
+          <>
+            <FontAwesomeIcon
+              icon={faInfoCircle}
+              style={{ color: "rgba(246, 245, 255, 0.6)", marginRight: 10 }}
+            />
+            <Text
+              style={{
+                flex: 1,
+                fontSize: 12,
+                color: "rgba(246, 245, 255, 0.6)",
+              }}
+            >
+              <FormattedMessage
+                id="settings.multisig.modal.info"
+                defaultMessage="In case of stolen/lost or any other reason, you can replace this key with a new one."
+              />
+            </Text>
+          </>
+        ) : null}
       </View>
       <View style={{ alignItems: "center" }}>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert(
-              intl.formatMessage({
-                id: "general.comingsoon",
-                defaultMessage: "Coming Soon",
-              }),
-              intl.formatMessage({
-                id: "settings.multisig.modal.replacementerror",
-                defaultMessage:
-                  "Replacement of keys has not been implemented yet.",
-              })
-            );
-          }}
-          style={{
-            paddingVertical: 15,
-            width: "100%",
-            backgroundColor: "#59D6E6",
-            borderRadius: 12,
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ fontSize: 15, fontWeight: "700" }}>
-            <FormattedMessage
-              id="settings.multisig.modal.replacenow"
-              defaultMessage="Replace now"
-            />
-          </Text>
-        </TouchableOpacity>
+        {item.id !== "biometrics" ? <>{getRecoverButton(item.id)}</> : null}
         <TouchableOpacity
           onPress={() => onClose()}
           style={{ paddingVertical: 15, paddingHorizontal: 63 }}
         >
           <Text style={{ color: "#787B9C" }}>
             <FormattedMessage
-              id="settings.multisig.modal.notnow"
-              defaultMessage="Not now"
+              id="settings.multisig.modal.close"
+              defaultMessage="Close"
             />
           </Text>
         </TouchableOpacity>

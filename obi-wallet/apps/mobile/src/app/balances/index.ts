@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { rootStore } from "../../background/root-store";
 import { useStore } from "../stores";
+import BottleIcon from "./assets/bottle.svg";
+import DrinkIcon from "./assets/drink.svg";
 import LoopIcon from "./assets/loop.svg";
 
 export interface ExtendedCoin {
@@ -69,6 +71,30 @@ export function formatCoin(coin: Coin) {
         digits,
         label: "Loop",
         amount,
+      };
+    }
+    case "udrink": {
+      const digits = 6;
+      const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
+      return {
+        icon: DrinkIcon,
+        denom: "DRINK",
+        digits,
+        label: "Drink",
+        amount,
+        valueInUsd: 0,
+      };
+    }
+    case "ubottle": {
+      const digits = 6;
+      const amount = parseInt(coin.amount, 10) / Math.pow(10, digits);
+      return {
+        icon: BottleIcon,
+        denom: "BOTTLE",
+        digits,
+        label: "Bottle",
+        amount,
+        valueInUsd: 0,
       };
     }
     default: {

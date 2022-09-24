@@ -14,6 +14,7 @@ import {
   TxBodyEncodeObject,
 } from "@cosmjs/proto-signing";
 import {
+  Account,
   AminoConverters,
   AminoTypes,
   createAuthzAminoConverters,
@@ -478,7 +479,6 @@ export function useSignatureModalProps({
           const bodyBytes = registry.encode(body);
 
           const address = multisig.multisig.address;
-
           const feeAmount = 6000;
           const fee = {
             amount: coins(feeAmount, denom),
@@ -488,7 +488,6 @@ export function useSignatureModalProps({
           if (!(await client.getAccount(address))) {
             await lendFees({ chainId, address });
           }
-
           async function hasEnoughForFees() {
             const balance = await client?.getBalance(address, denom);
             return balance && parseInt(balance.amount, 10) >= feeAmount;
@@ -498,7 +497,7 @@ export function useSignatureModalProps({
             await lendFees({ chainId, address });
           }
 
-          const account = await client.getAccount(multisig.multisig.address);
+          const account = await client.getAccount(address);
           invariant(account, "Expected `account` to be ready.");
 
           const tx = makeMultisignedTx(

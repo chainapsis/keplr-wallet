@@ -111,10 +111,17 @@ export function MultisigPhoneNumberConfirm({
                     marginTop: 32,
                   }}
                 >
-                  <FormattedMessage
-                    id="onboarding3.authyourkeys"
-                    defaultMessage="Authenticate Your Keys"
-                  />
+                  {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+                    <FormattedMessage
+                      id="onboarding2.recovery.authyourkeys"
+                      defaultMessage="Create a Replacement Phone Number Key"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="onboarding3.authyourkeys"
+                      defaultMessage="Authenticate Your Keys"
+                    />
+                  )}
                 </Text>
                 <Text
                   style={{
@@ -231,7 +238,13 @@ export function MultisigPhoneNumberConfirm({
                       });
                     }
                     setVerifyButtonDisabledDoubleclick(false);
-                    navigation.navigate("create-multisig-social");
+                    switch (multisigStore.getKeyInRecovery) {
+                      case "phoneNumber":
+                        navigation.navigate("replace-multisig");
+                        break;
+                      default:
+                        navigation.navigate("create-multisig-social");
+                    }
                   } else {
                     setVerifyButtonDisabledDoubleclick(false);
                   }

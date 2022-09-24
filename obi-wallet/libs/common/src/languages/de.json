@@ -40,10 +40,19 @@
   "receive.receive": "Empfangen",
   "receive.taptoshare": "Tippen um Adresse zu teilen",
 
+  "recovery.keyupdate": "Deine Wallet-Keys Updaten?",
+  "recovery.phoneupdate": "Du updatest deinen Telefonnummern-Key deines Multisig-Wallets.",
+  "recovery.socialupdate": "Du updatest deinen Social-Key deines Multisig-Wallets.",
+  "recovery.continuephone": "Fortfahren mit Telefonnummern-Key Update",
+  "recovery.continuesocial": "Fortfahren mit Social-Key Update",
+  "recovery.singlesig.title": "Dein Singlesig Wallet Wiederherstellen",
+  "recovery.singlesig.enterphrase": "Gib die Recovery-Phrase deines Singlesig-Wallets ein.",
+
   "onboarding1.welcometoloop": "Willkommen bei Loop",
   "onboarding1.welcomesubtext": "Powered by Obi",
   "onboarding1.getstarted": "Loslegen",
   "onboarding1.recoverwallet": "Wallet Wiederherstellen",
+  "onboarding1.recoversinglesig": "Singlesig Wiederherstellen",
 
   "onboarding2.authyourkeys": "Erstelle einen Telefon-Key",
   "onboarding2.authyourkeyssubtext": "Bitte beantworte eine Sicherheitsfrage.",
@@ -54,6 +63,8 @@
   "onboarding2.phonenrlabel": "Gib deine Telefonnummer hier ein",
   "onboarding2.bottominfo": "Empfange eine Magic SMS um deinen Telefon-Key zu aktivieren.",
   "onboarding2.sendmagicsms": "Magic SMS Empfangen",
+  "onboarding2.recovery.authyourkeys": "Erstelle einen neuen Telefon-Key",
+  "onboarding2.recovery.authyourkeyssubtext": "Bitte beantworte eine Sicherheitsfrage. Es kann die gleiche wie deine vorherige Antwort sein oder eine andere.",
 
   "onboarding2.error.phonekeyexists.title": "Du hast bereits einen Schlüssel für deine Telefonnummer",
   "onboarding2.error.phonekeyexists.text": "Möchtest du den Schlüssel für deine bestehende Telefonnummer wiederverwenden",
@@ -99,6 +110,8 @@
   "onboarding5.setsocialkey.subtext": "Gib die juno-Adresse eines vertrauenswüdigen Freundes ein (oder scanne sie), der dir helfen kann deinen Account wiederherzustellen. Dein Freund hat keinen Zugriff auf deinen Account.",
   "onboarding5.setsocialkey.subtext2": "…oder verwende den standard Obi-Account, wenn du keinem deiner Freunde traust.",
   "onboarding5.useobiaccount": "Verwende Obi Account",
+  "onboarding5.recovery.setsocialkey": "Lege einen neuen Social-Key fest",
+  "onboarding5.recovery.setsocialkey.subtext2": "Du verwendest derzeit den Obi-Account. Dies wird den Obi-Account von deiner Multisig entfernen und ihn mit dem Key deines Freundes ersetzen.",
 
   "onboarding4.error.socialkeyexists.title": "Du hast bereits einen Social-Key",
   "onboarding4.error.socialkeyexists.text": "Möchtest du deinen bestehenden Biometrie-Key wiederverwenden? Für:",
@@ -158,7 +171,7 @@
   "apps.kado": "Crypto's Kaufen",
   "apps.gettickets": "Erhalte Tickets",
   "apps.mytickets": "Meine Tickets",
-  "apps.myhistory": "Verlauf",
+  "apps.myhistory": "Mein Verlauf",
 
   "onboarding2.securityquestion.birthplace": "In welcher Stadt und welchem Land wurdest du geboren?",
   "onboarding2.securityquestion.schoolname": "Welchen vollständigen Namen hat die letzte Grundschule, die du besucht hast?",
@@ -167,6 +180,7 @@
 
   "settings.multisig.modal.info": "Im Falle von Diebstahl/Verlust dieses Keys, oder aus jedem anderen Grund, kannst du diesen Key mit einem Neuen ersetzen.",
   "settings.multisig.modal.notnow": "Nicht jetzt",
+  "settings.multisig.modal.close": "Schließen",
   "settings.multisig.modal.replacenow": "Jetzt ersetzen",
   "settings.multisig.modal.replacementerror": "Das Ersetzen von Keys ist derzeit noch nicht implementiert.",
   "settings.multisig.modal.phone.text": "This key can authorize messages via SMS or WhatsApp messages sent directly to your phone number.",

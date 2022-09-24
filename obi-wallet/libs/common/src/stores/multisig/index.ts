@@ -61,6 +61,12 @@ export class MultisigStore {
   protected readonly kvStore: KVStore;
 
   @observable
+  protected keyInRecovery: MultisigKey | null = null;
+
+  @observable
+  protected updateProposed = false;
+
+  @observable
   protected serializedNextAdmin: SerializedMultisigPayload = emptyMultisig;
 
   @observable
@@ -125,6 +131,16 @@ export class MultisigStore {
   }
 
   @computed
+  public get getKeyInRecovery() {
+    return this.keyInRecovery;
+  }
+
+  @computed
+  public get getUpdateProposed() {
+    return this.updateProposed;
+  }
+
+  @computed
   public get proxyAddress(): SerializedProxyAddress | null {
     return this.proxyAddresses[this.chainStore.currentChain] ?? null;
   }
@@ -132,7 +148,9 @@ export class MultisigStore {
   @computed
   public get state(): MultisigState {
     if (this.loading) return MultisigState.LOADING;
-    if (this.serializedCurrentAdmin === null) return MultisigState.EMPTY;
+    if (this.serializedCurrentAdmin === null || this.keyInRecovery !== null) {
+      return MultisigState.EMPTY;
+    }
     if (this.proxyAddress === null) return MultisigState.READY;
     if (
       this.proxyAddress.codeId <
@@ -193,7 +211,20 @@ export class MultisigStore {
   @action
   public finishProxySetup(address: SerializedProxyAddress) {
     this.serializedCurrentAdmin = this.nextAdmin;
+    this.keyInRecovery = null;
+    this.updateProposed = false;
     this.proxyAddresses[this.chainStore.currentChain] = address;
+    this.loading = false;
+    void this.save();
+  }
+
+  @action
+  public cancelRecovery() {
+    if (this.serializedCurrentAdmin) {
+      this.serializedNextAdmin = this.serializedCurrentAdmin;
+    }
+    this.keyInRecovery = null;
+    this.updateProposed = false;
     this.loading = false;
     void this.save();
   }
@@ -256,5 +287,16 @@ export class MultisigStore {
   @action
   public logout() {
     this.serializedCurrentAdmin = null;
+  }
+
+  @action
+  public recover(keyId: MultisigKey) {
+    this.keyInRecovery = keyId;
+    this.updateProposed = false;
+  }
+
+  @action
+  public setUpdateProposed(proposed: boolean) {
+    this.updateProposed = proposed;
   }
 }

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SvgProps } from "react-native-svg";
 
-import People from "../../onboarding/create-multisig/4-social/assets/people-alt-twotone-24px.svg";
+import People from "../../onboarding/common/4-social/assets/people-alt-twotone-24px.svg";
 import Biometrics from "./assets/biometrics-icon.svg";
 import Check from "./assets/check-icon.svg";
 import Cloud from "./assets/cloud-icon.svg";

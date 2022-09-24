@@ -40,10 +40,19 @@
   "receive.receive": "Receive",
   "receive.taptoshare": "Tap to share your address",
 
+  "recovery.keyupdate": "Update Wallet Keys?",
+  "recovery.phoneupdate": "You're updating your multisig wallet's phone number key.",
+  "recovery.socialupdate": "You're updating your multisig wallet's social key.",
+  "recovery.continuephone": "Continue Updating Phone Key",
+  "recovery.continuesocial": "Continue Updating Social Key",
+  "recovery.singlesig.title": "Recover your Singlesig Wallet",
+  "recovery.singlesig.enterphrase": "Enter your recovery phrase of your singlesig wallet.",
+
   "onboarding1.welcometoloop": "Welcome to Loop",
   "onboarding1.welcomesubtext": "Powered by Obi",
   "onboarding1.getstarted": "Get Started",
   "onboarding1.recoverwallet": "Recover My Wallet",
+  "onboarding1.recoversinglesig": "Recover Singlesig",
 
   "onboarding2.authyourkeys": "Create a Phone Number Key",
   "onboarding2.authyourkeyssubtext": "Please answer a security question. We do not store this information.",
@@ -54,6 +63,8 @@
   "onboarding2.phonenrlabel": "Type your phone number here",
   "onboarding2.bottominfo": "Get a magic SMS to activate your phone key.",
   "onboarding2.sendmagicsms": "Get Magic SMS",
+  "onboarding2.recovery.authyourkeys": "Create a New Phone Number Key",
+  "onboarding2.recovery.authyourkeyssubtext": "Please answer a security question. It can be the same as your old answer, or different.",
 
   "onboarding2.error.phonekeyexists.title": "You already have a phone number key",
   "onboarding2.error.phonekeyexists.text": "Do you want to reuse your existing phone number key for phone number",
@@ -99,6 +110,8 @@
   "onboarding5.setsocialkey.subtext": "Enter or scan the juno address of a trusted friend who can help you recover your account. Your friend cannot access your account.",
   "onboarding5.setsocialkey.subtext2": "…or you can use the default Obi account if you don't trust any of your friends. Obi cannot access your account.",
   "onboarding5.useobiaccount": "Use Obi Account",
+  "onboarding5.recovery.setsocialkey": "Set a New Social Key",
+  "onboarding5.recovery.setsocialkey.subtext2": "You're currently using the Obi account. This will remove the Obi account from your multisig and replace it with your friend's key.",
 
   "onboarding4.error.socialkeyexists.title": "You already have a social key",
   "onboarding4.error.socialkeyexists.text": "Do you want to reuse your existing social key for",
@@ -158,7 +171,7 @@
   "apps.kado": "Buy Crypto",
   "apps.gettickets": "Get Tickets",
   "apps.mytickets": "My Tickets",
-  "apps.myhistory": "History",
+  "apps.myhistory": "My History",
 
   "onboarding2.securityquestion.birthplace": "What city and country were you born in?",
   "onboarding2.securityquestion.schoolname": "What is the full name of the last elementary/primary school I attended?",
@@ -167,6 +180,7 @@
 
   "settings.multisig.modal.info": "In case this key is lost/stolen, or for any other reason, you can replace it with a new one.",
   "settings.multisig.modal.notnow": "Not now",
+  "settings.multisig.modal.close": "Close",
   "settings.multisig.modal.replacenow": "Replace now",
   "settings.multisig.modal.replacementerror": "Replacement of keys has not been implemented yet.",
   "settings.multisig.modal.phone.text": "This key can authorize messages via SMS or WhatsApp messages sent directly to your phone number.",

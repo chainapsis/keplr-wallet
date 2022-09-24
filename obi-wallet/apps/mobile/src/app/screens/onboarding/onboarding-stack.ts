@@ -15,7 +15,10 @@ export interface OnboardingStackParamList
     securityAnswer: string;
   };
   "create-multisig-social": undefined;
-  "create-multisig-create": undefined;
+  "create-multisig-init": undefined;
+  "replace-multisig": undefined;
+  "replace-multisig-confirm": undefined;
+  "recover-singlesig": undefined;
 }
 
 export const OnboardingStack =
