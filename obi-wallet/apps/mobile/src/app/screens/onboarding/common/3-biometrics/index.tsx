@@ -46,6 +46,9 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
                 id: "onboarding4.error.biometrickeyexists.newkey",
               }),
               style: "cancel",
+              onPress: () => {
+                scanBiometrics();
+              },
             },
             {
               text: intl.formatMessage({
@@ -57,11 +60,39 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
             },
           ]
         );
+      } else {
+        scanBiometrics();
       }
     }, [demoStore, intl, multisigStore, navigation]);
 
     const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
       useState(false);
+
+    const scanBiometrics = async () => {
+      setButtonDisabledDoubleclick(true);
+
+      try {
+        if (!demoStore.demoMode) {
+          const publicKey = await getBiometricsPublicKey();
+          multisigStore.setBiometricsPublicKey({
+            publicKey: {
+              type: pubkeyType.secp256k1,
+              value: publicKey,
+            },
+          });
+        }
+
+        setButtonDisabledDoubleclick(false);
+      } catch (e) {
+        setButtonDisabledDoubleclick(false);
+        const error = e as Error;
+        console.error(error);
+        Alert.alert(
+          intl.formatMessage({ id: "general.error" }) + " ScanMyBiometrics",
+          error.message
+        );
+      }
+    };
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -158,32 +189,8 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
             label={intl.formatMessage({ id: "onboarding4.biometrics.button" })}
             flavor="blue"
             LeftIcon={Scan}
-            onPress={async () => {
-              setButtonDisabledDoubleclick(true);
-
-              try {
-                if (!demoStore.demoMode) {
-                  const publicKey = await getBiometricsPublicKey();
-                  multisigStore.setBiometricsPublicKey({
-                    publicKey: {
-                      type: pubkeyType.secp256k1,
-                      value: publicKey,
-                    },
-                  });
-                }
-
-                navigation.navigate("create-multisig-phone-number");
-                setButtonDisabledDoubleclick(false);
-              } catch (e) {
-                setButtonDisabledDoubleclick(false);
-                const error = e as Error;
-                console.error(error);
-                Alert.alert(
-                  intl.formatMessage({ id: "general.error" }) +
-                    " ScanMyBiometrics",
-                  error.message
-                );
-              }
+            onPress={() => {
+              navigation.navigate("create-multisig-phone-number");
             }}
             disabled={buttonDisabledDoubleclick}
             style={{ marginBottom: 20, marginTop: 20 }}

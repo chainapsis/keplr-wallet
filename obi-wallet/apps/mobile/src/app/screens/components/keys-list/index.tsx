@@ -1,6 +1,6 @@
 import { MultisigKey, Text } from "@obi-wallet/common";
-import { FC } from "react";
-import { useIntl } from "react-intl";
+import { FC, useEffect } from "react";
+
 import {
   FlatList,
   StyleProp,
@@ -70,6 +70,13 @@ const comingSoonKeys: HydratedKeyListItem[] = [
 ];
 
 export function KeysList({ data, style, tiled }: KeysListProps) {
+  useEffect(() => {
+    const bioKey = data.find((key) => key.id === "biometrics");
+    if (bioKey?.signed === false && bioKey?.onPress) {
+      bioKey?.onPress();
+    }
+  }, [data]);
+
   const hydratedData = data.map((key) => {
     return {
       ...key,
