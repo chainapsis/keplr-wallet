@@ -19,7 +19,7 @@ export const chains = {
     chainId: "juno-1" as const,
     label: "Juno",
     prefix: "juno",
-    currentCodeId: 1057,
+    currentCodeId: 1060,
     rpc: "https://rpc-juno.itastakers.com/",
     denom: "ujuno",
     startingUsdDebt: "0",
