@@ -1,4 +1,4 @@
-import { pubkeyType } from "@cosmjs/amino";
+import { pubkeyToAddress, pubkeyType } from "@cosmjs/amino";
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -68,6 +68,7 @@ export type ReplaceMultisigProps = NativeStackScreenProps<
 export const ReplaceMultisig = observer<ReplaceMultisigProps>(
   ({ navigation }) => {
     const { chainStore, demoStore, multisigStore, walletStore } = useStore();
+    const { currentChainInformation } = chainStore;
 
     const multisig = demoStore.demoMode
       ? demoModeMultisig
@@ -87,7 +88,16 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
 
       const rawMessage = multisigStore.getUpdateProposed
         ? {
-            confirm_update_admin: {},
+            confirm_update_admin: {
+              signers: nextMultisig.multisig.publicKey.value.pubkeys.map(
+                (pubkey) => {
+                  return pubkeyToAddress(
+                    pubkey,
+                    currentChainInformation.prefix
+                  );
+                }
+              ),
+            },
           }
         : {
             propose_update_admin: {
@@ -111,6 +121,8 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       multisigStore.getUpdateProposed,
       nextMultisig,
       walletStore.address,
+      sender?.multisig?.address,
+      currentChainInformation,
     ]);
 
     const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
