@@ -82,7 +82,6 @@ export const SignatureModal = observer<SignatureModalProps>((props) => {
   switch (walletStore.type) {
     case WalletType.MULTISIG:
     case WalletType.MULTISIG_DEMO:
-      return <SignatureModalMultisig {...props} />;
     case WalletType.MULTISIG_PENDING:
       return <SignatureModalMultisig {...props} />;
     case WalletType.SINGLESIG:
@@ -397,6 +396,7 @@ export function useWrapEncodeObjects(
         ];
       }
       case WalletType.MULTISIG_DEMO:
+      case WalletType.MULTISIG_PENDING:
         return [];
       case WalletType.SINGLESIG: {
         if (!singlesigStore.address) return [];
@@ -582,7 +582,7 @@ export function useSignatureModalProps({
 
   return {
     signatureModalProps,
-    openSignatureModal(reset_sigs?: boolean) {
+    openSignatureModal() {
       setSignatureModalVisible(true);
     },
   };
