@@ -623,8 +623,8 @@ export const LookupProxyWallets = observer<LookupProxyWalletsProps>(
               >
                 <Text style={{ color: "#787B9C" }}>
                   <FormattedMessage
-                    id="settings.multisig.modal.notnow"
-                    defaultMessage="Not now"
+                    id="recover.choosewallet.tryagain"
+                    defaultMessage="Try different combination"
                   />
                 </Text>
               </TouchableOpacity>
