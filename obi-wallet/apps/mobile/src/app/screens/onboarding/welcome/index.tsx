@@ -179,7 +179,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 marginTop: 20,
               }}
               onPress={() => {
-                navigation.navigate("onboarding2");
+                navigation.navigate("create-multisig-biometrics");
               }}
             />
           ) : null}
