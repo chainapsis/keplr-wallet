@@ -168,7 +168,7 @@ export const Home = observer<HomeProps>(
                 onPress={() => {
                   onAppPress({
                     label: "History",
-                    url: `https://www.mintscan.io/juno/wasm/contract/${walletStore.address}`,
+                    url: `https://mintscan.io/juno/wasm/contract/${walletStore.address}`,
                     icon: "https://place-hold.it/180x180",
                   });
                 }}
