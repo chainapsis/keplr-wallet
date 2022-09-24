@@ -12,6 +12,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
+import { useRootNavigation } from "../../../root-stack";
 import { useStore } from "../../../stores";
 import { Back } from "../../components/back";
 import {
@@ -231,7 +232,7 @@ interface KeyConfigProps {
 }
 
 function KeyConfig({ item, onClose }: KeyConfigProps) {
-  const { goBack } = useNavigation();
+  const { navigate } = useRootNavigation();
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
   const { demoStore, multisigStore, pendingMultisigStore, walletStore } =
@@ -254,7 +255,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
                   keyId
                 );
                 multisigStore.recover(keyId);
-                goBack();
+                navigate("state-renderer");
               } // TODO: unsure if else case will ever hit here
               break;
             case WalletType.MULTISIG_DEMO:

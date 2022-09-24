@@ -23,24 +23,24 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
   const intl = useIntl();
 
   const renderContinueButton = (keyInRecovery: MultisigKey | null) => {
-    let navi_url: string;
-    let label_id: string;
+    let navigationUrl: string;
+    let labelId: string;
     switch (keyInRecovery) {
       case "phoneNumber":
-        navi_url = "create-multisig-phone-number";
-        label_id = "recovery.continuephone";
+        navigationUrl = "create-multisig-phone-number";
+        labelId = "recovery.continuephone";
         break;
       case "social":
-        navi_url = "create-multisig-social";
-        label_id = "recovery.continuesocial";
+        navigationUrl = "create-multisig-social";
+        labelId = "recovery.continuesocial";
         break;
       default:
-        navi_url = "create-multisig-biometrics";
-        label_id = "onboarding1.getstarted";
+        navigationUrl = "create-multisig-biometrics";
+        labelId = "onboarding1.getstarted";
     }
     return (
       <Button
-        label={intl.formatMessage({ id: label_id })}
+        label={intl.formatMessage({ id: labelId })}
         RightIcon={GetStarted}
         flavor="blue"
         style={{
@@ -48,7 +48,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
         }}
         onPress={action(() => {
           demoStore.demoMode = false;
-          navigation.navigate(navi_url);
+          navigation.navigate(navigationUrl);
         })}
       />
     );

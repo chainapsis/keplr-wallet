@@ -161,10 +161,17 @@ export const ReplaceMultisigConfirm = observer<ReplaceMultisigConfirmProps>(
             contractAddress,
             "Expected `executeEvent` to contain `_contract_address` attribute."
           );
+
           if (!multisigStore.getUpdateProposed) {
             multisigStore.setUpdateProposed(true);
           } else {
-            multisigStore.replace(pendingMultisigStore);
+            multisigStore.replace({
+              nextAdmin: pendingMultisigStore.nextAdmin,
+              proxyAddress: {
+                address: contractAddress.value,
+                codeId: chainStore.currentChainInformation.currentCodeId,
+              },
+            });
           }
         } catch (e) {
           console.log(response.rawLog);

@@ -170,15 +170,15 @@ export class MultisigStore {
   }
 
   @action
-  public async replace(newMultisigStore: MultisigStore) {
-    const serializedData: SerializedData = {
-      nextAdmin: newMultisigStore.serializedNextAdmin,
-      currentAdmin: newMultisigStore.serializedCurrentAdmin,
-      proxyAddresses: this.proxyAddresses,
-    };
-    const data = toJS(serializedData);
-    this.loading = false;
-    await this.kvStore.set("multisig", data);
+  public replace({
+    nextAdmin,
+    proxyAddress,
+  }: {
+    nextAdmin: SerializedMultisigPayload;
+    proxyAddress: SerializedProxyAddress;
+  }) {
+    this.serializedNextAdmin = nextAdmin;
+    this.finishProxySetup(proxyAddress);
   }
 
   @computed
