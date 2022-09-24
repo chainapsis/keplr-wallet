@@ -241,7 +241,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
 
   const intl = useIntl();
 
-  const getRecoverButton = (key_id: string) => {
+  const getRecoverButton = (keyId: MultisigKey) => {
     return (
       <TouchableOpacity
         onPress={() => {
@@ -251,9 +251,9 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
               if (multisigStore.currentAdmin) {
                 pendingMultisigStore.copyGoodKeys(
                   multisigStore.currentAdmin,
-                  key_id
+                  keyId
                 );
-                multisigStore.recover(key_id);
+                multisigStore.recover(keyId);
                 goBack();
               } // TODO: unsure if else case will ever hit here
               break;

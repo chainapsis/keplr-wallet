@@ -61,7 +61,7 @@ export class MultisigStore {
   protected readonly kvStore: KVStore;
 
   @observable
-  protected keyInRecovery = "";
+  protected keyInRecovery: MultisigKey | null = null;
 
   @observable
   protected updateProposed = false;
@@ -229,7 +229,7 @@ export class MultisigStore {
   @action
   public cancelRecovery() {
     this.serializedCurrentAdmin = this.nextAdmin;
-    this.keyInRecovery = "";
+    this.keyInRecovery = null;
     this.updateProposed = false;
     this.loading = false;
     void this.save();
@@ -296,8 +296,8 @@ export class MultisigStore {
   }
 
   @action
-  public recover(key_id: string) {
-    this.keyInRecovery = key_id;
+  public recover(keyId: MultisigKey) {
+    this.keyInRecovery = keyId;
     this.serializedCurrentAdmin = null;
   }
 

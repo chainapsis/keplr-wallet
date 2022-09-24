@@ -1,4 +1,4 @@
-import { Text } from "@obi-wallet/common";
+import { MultisigKey, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -22,7 +22,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
   const { demoStore, multisigStore } = useStore();
   const intl = useIntl();
 
-  const renderContinueButton = (keyInRecovery: string) => {
+  const renderContinueButton = (keyInRecovery: MultisigKey | null) => {
     let navi_url: string;
     let label_id: string;
     switch (keyInRecovery) {
@@ -89,7 +89,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               marginTop: 32,
             }}
           >
-            {multisigStore.getKeyInRecovery === "" ? (
+            {multisigStore.getKeyInRecovery === null ? (
               <FormattedMessage
                 id="onboarding1.welcometoloop"
                 defaultMessage="Welcome to Loop"
@@ -127,7 +127,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             )}
           </Text>
           {renderContinueButton(multisigStore.getKeyInRecovery)}
-          {multisigStore.getKeyInRecovery === "" ? (
+          {multisigStore.getKeyInRecovery === null ? (
             <Button
               label={intl.formatMessage({ id: "demo.enter" })}
               RightIcon={GetStarted}
@@ -145,7 +145,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               })}
             />
           ) : null}
-          {multisigStore.getKeyInRecovery === "" ? (
+          {multisigStore.getKeyInRecovery === null ? (
             <Button
               label={intl.formatMessage({ id: "onboarding1.recoversinglesig" })}
               RightIcon={GetStarted}
@@ -171,7 +171,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               })}
             />
           )}
-          {multisigStore.getKeyInRecovery === "" ? (
+          {multisigStore.getKeyInRecovery === null ? (
             <Button
               label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}
               flavor="purple"

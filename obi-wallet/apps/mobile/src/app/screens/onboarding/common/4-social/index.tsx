@@ -201,7 +201,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                   setFetchingPubKey(false);
                   if (publicKey) {
                     if (!demoStore.demoMode) {
-                      if (multisigStore.getKeyInRecovery === "") {
+                      if (multisigStore.getKeyInRecovery === null) {
                         multisigStore.setSocialPublicKey({
                           publicKey: publicKey,
                         });

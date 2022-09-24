@@ -228,7 +228,7 @@ export function MultisigPhoneNumberConfirm({
                     : await parsePublicKeyTextMessageResponse(key);
                   if (publicKey) {
                     if (!demoStore.demoMode) {
-                      if (multisigStore.getKeyInRecovery === "") {
+                      if (multisigStore.getKeyInRecovery === null) {
                         multisigStore.setPhoneNumberKey({
                           publicKey: {
                             type: pubkeyType.secp256k1,
