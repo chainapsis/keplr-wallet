@@ -180,6 +180,7 @@
 
   "settings.multisig.modal.info": "Im Falle von Diebstahl/Verlust dieses Keys, oder aus jedem anderen Grund, kannst du diesen Key mit einem Neuen ersetzen.",
   "settings.multisig.modal.notnow": "Nicht jetzt",
+  "settings.multisig.modal.close": "Schließen",
   "settings.multisig.modal.replacenow": "Jetzt ersetzen",
   "settings.multisig.modal.replacementerror": "Das Ersetzen von Keys ist derzeit noch nicht implementiert.",
   "settings.multisig.modal.phone.text": "This key can authorize messages via SMS or WhatsApp messages sent directly to your phone number.",
