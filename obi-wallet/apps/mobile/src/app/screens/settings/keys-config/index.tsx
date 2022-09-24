@@ -235,8 +235,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
   const { navigate } = useRootNavigation();
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
-  const { demoStore, multisigStore, pendingMultisigStore, walletStore } =
-    useStore();
+  const { multisigStore, walletStore } = useStore();
 
   const safeArea = useSafeAreaInsets();
 
@@ -250,10 +249,6 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           switch (walletStore.type) {
             case WalletType.MULTISIG:
               if (multisigStore.currentAdmin) {
-                pendingMultisigStore.copyGoodKeys(
-                  multisigStore.currentAdmin,
-                  keyId
-                );
                 multisigStore.recover(keyId);
                 navigate("state-renderer");
               } // TODO: unsure if else case will ever hit here
@@ -283,8 +278,8 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
     );
   };
 
-  const getModalText = (key_id: string) => {
-    switch (key_id) {
+  const getModalText = (keyId: MultisigKey) => {
+    switch (keyId) {
       case "phoneNumber":
         return (
           <FormattedMessage
@@ -376,29 +371,37 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
         </Text>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <FontAwesomeIcon
-          icon={faInfoCircle}
-          style={{ color: "rgba(246, 245, 255, 0.6)", marginRight: 10 }}
-        />
-        <Text
-          style={{ flex: 1, fontSize: 12, color: "rgba(246, 245, 255, 0.6)" }}
-        >
-          <FormattedMessage
-            id="settings.multisig.modal.info"
-            defaultMessage="In case of stolen/lost or any other reason, you can replace this key with a new one."
-          />
-        </Text>
+        {item.id !== "biometrics" ? (
+          <>
+            <FontAwesomeIcon
+              icon={faInfoCircle}
+              style={{ color: "rgba(246, 245, 255, 0.6)", marginRight: 10 }}
+            />
+            <Text
+              style={{
+                flex: 1,
+                fontSize: 12,
+                color: "rgba(246, 245, 255, 0.6)",
+              }}
+            >
+              <FormattedMessage
+                id="settings.multisig.modal.info"
+                defaultMessage="In case of stolen/lost or any other reason, you can replace this key with a new one."
+              />
+            </Text>
+          </>
+        ) : null}
       </View>
       <View style={{ alignItems: "center" }}>
-        {getRecoverButton(item.id)}
+        {item.id !== "biometrics" ? <>{getRecoverButton(item.id)}</> : null}
         <TouchableOpacity
           onPress={() => onClose()}
           style={{ paddingVertical: 15, paddingHorizontal: 63 }}
         >
           <Text style={{ color: "#787B9C" }}>
             <FormattedMessage
-              id="settings.multisig.modal.notnow"
-              defaultMessage="Not now"
+              id="settings.multisig.modal.close"
+              defaultMessage="Close"
             />
           </Text>
         </TouchableOpacity>

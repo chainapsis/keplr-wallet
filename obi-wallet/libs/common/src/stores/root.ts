@@ -33,7 +33,6 @@ export class RootStore {
   public readonly interactionStore: InteractionStore;
   public readonly languageStore: LanguageStore;
   public readonly multisigStore: MultisigStore;
-  public readonly pendingMultisigStore: MultisigStore;
   public readonly singlesigStore: SinglesigStore;
   public readonly walletStore: WalletStore;
 
@@ -98,15 +97,10 @@ export class RootStore {
       chainStore: this.chainStore,
       kvStore: new KVStore("multisig-store"),
     });
-    this.pendingMultisigStore = new MultisigStore({
-      chainStore: this.chainStore,
-      kvStore: new KVStore("pending-multisig-store"),
-    });
     this.walletStore = new WalletStore({
       demoStore: this.demoStore,
       singlesigStore: this.singlesigStore,
       multisigStore: this.multisigStore,
-      pendingMultisigStore: this.pendingMultisigStore,
     });
 
     this.balancesStore = new BalancesStore({

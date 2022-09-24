@@ -148,7 +148,9 @@ export class MultisigStore {
   @computed
   public get state(): MultisigState {
     if (this.loading) return MultisigState.LOADING;
-    if (this.serializedCurrentAdmin === null) return MultisigState.EMPTY;
+    if (this.serializedCurrentAdmin === null || this.keyInRecovery !== null) {
+      return MultisigState.EMPTY;
+    }
     if (this.proxyAddress === null) return MultisigState.READY;
     if (
       this.proxyAddress.codeId <
@@ -167,18 +169,6 @@ export class MultisigStore {
     };
     const data = toJS(serializedData);
     await this.kvStore.set("multisig", data);
-  }
-
-  @action
-  public replace({
-    nextAdmin,
-    proxyAddress,
-  }: {
-    nextAdmin: SerializedMultisigPayload;
-    proxyAddress: SerializedProxyAddress;
-  }) {
-    this.serializedNextAdmin = nextAdmin;
-    this.finishProxySetup(proxyAddress);
   }
 
   @computed
@@ -221,6 +211,8 @@ export class MultisigStore {
   @action
   public finishProxySetup(address: SerializedProxyAddress) {
     this.serializedCurrentAdmin = this.nextAdmin;
+    this.keyInRecovery = null;
+    this.updateProposed = false;
     this.proxyAddresses[this.chainStore.currentChain] = address;
     this.loading = false;
     void this.save();
@@ -228,7 +220,9 @@ export class MultisigStore {
 
   @action
   public cancelRecovery() {
-    this.serializedCurrentAdmin = this.nextAdmin;
+    if (this.serializedCurrentAdmin) {
+      this.serializedNextAdmin = this.serializedCurrentAdmin;
+    }
     this.keyInRecovery = null;
     this.updateProposed = false;
     this.loading = false;
@@ -298,38 +292,11 @@ export class MultisigStore {
   @action
   public recover(keyId: MultisigKey) {
     this.keyInRecovery = keyId;
-    this.serializedCurrentAdmin = null;
+    this.updateProposed = false;
   }
 
   @action
   public setUpdateProposed(proposed: boolean) {
     this.updateProposed = proposed;
-  }
-
-  @action
-  public copyGoodKeys(sourceMultisig: Multisig, bad_key_id: string) {
-    if (sourceMultisig.biometrics) {
-      this.setBiometricsPublicKey({
-        publicKey: sourceMultisig.biometrics.publicKey,
-      });
-    }
-    switch (bad_key_id) {
-      case "phoneNumber":
-        if (sourceMultisig.social) {
-          this.setSocialPublicKey({
-            publicKey: sourceMultisig.social.publicKey,
-          });
-        }
-        break;
-      case "social":
-        if (sourceMultisig.phoneNumber) {
-          this.setPhoneNumberKey({
-            publicKey: sourceMultisig.phoneNumber.publicKey,
-            phoneNumber: sourceMultisig.phoneNumber.phoneNumber,
-            securityQuestion: sourceMultisig.phoneNumber.securityQuestion,
-          });
-        }
-        break;
-    }
   }
 }

@@ -33,7 +33,7 @@ export function MultisigPhoneNumberConfirm({
 }: MultisigPhoneNumberConfirmProps) {
   const { params } = route;
 
-  const { demoStore, multisigStore, pendingMultisigStore } = useStore();
+  const { demoStore, multisigStore } = useStore();
   const [key, setKey] = useState("");
 
   const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
@@ -228,25 +228,14 @@ export function MultisigPhoneNumberConfirm({
                     : await parsePublicKeyTextMessageResponse(key);
                   if (publicKey) {
                     if (!demoStore.demoMode) {
-                      if (multisigStore.getKeyInRecovery === null) {
-                        multisigStore.setPhoneNumberKey({
-                          publicKey: {
-                            type: pubkeyType.secp256k1,
-                            value: publicKey,
-                          },
-                          phoneNumber: params.phoneNumber,
-                          securityQuestion: params.securityQuestion,
-                        });
-                      } else {
-                        pendingMultisigStore.setPhoneNumberKey({
-                          publicKey: {
-                            type: pubkeyType.secp256k1,
-                            value: publicKey,
-                          },
-                          phoneNumber: params.phoneNumber,
-                          securityQuestion: params.securityQuestion,
-                        });
-                      }
+                      multisigStore.setPhoneNumberKey({
+                        publicKey: {
+                          type: pubkeyType.secp256k1,
+                          value: publicKey,
+                        },
+                        phoneNumber: params.phoneNumber,
+                        securityQuestion: params.securityQuestion,
+                      });
                     }
                     setVerifyButtonDisabledDoubleclick(false);
                     switch (multisigStore.getKeyInRecovery) {

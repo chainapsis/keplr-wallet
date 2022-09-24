@@ -25,8 +25,7 @@ export type MultisigSocialProps = NativeStackScreenProps<
 
 export const MultisigSocial = observer<MultisigSocialProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore, multisigStore, pendingMultisigStore } =
-      useStore();
+    const { chainStore, demoStore, multisigStore } = useStore();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
     const obi_address = "juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e";
@@ -61,7 +60,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
           ]
         );
       }
-    }, [demoStore, intl, multisigStore, navigation, pendingMultisigStore]);
+    }, [demoStore, intl, multisigStore, navigation]);
 
     async function getAccountPubkey(key: string) {
       const client = await createStargateClient(chainStore.currentChain);
@@ -201,15 +200,9 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                   setFetchingPubKey(false);
                   if (publicKey) {
                     if (!demoStore.demoMode) {
-                      if (multisigStore.getKeyInRecovery === null) {
-                        multisigStore.setSocialPublicKey({
-                          publicKey: publicKey,
-                        });
-                      } else {
-                        pendingMultisigStore.setSocialPublicKey({
-                          publicKey: publicKey,
-                        });
-                      }
+                      multisigStore.setSocialPublicKey({
+                        publicKey: publicKey,
+                      });
                     }
                     if (multisigStore.getKeyInRecovery !== "social") {
                       navigation.navigate("create-multisig-init");

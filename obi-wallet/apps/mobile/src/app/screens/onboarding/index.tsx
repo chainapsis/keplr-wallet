@@ -5,7 +5,6 @@ import { MultisigSocial } from "./common/4-social";
 import { MultisigInit } from "./create-multisig-init";
 import { OnboardingStack } from "./onboarding-stack";
 import { RecoverSinglesig } from "./recover-singlesig";
-import { ReplaceMultisigConfirm } from "./replace-multisig-confirm";
 import { ReplaceMultisig } from "./replace-multisig-key";
 import { Welcome } from "./welcome";
 
@@ -45,10 +44,6 @@ export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
       <OnboardingStack.Screen
         name="replace-multisig"
         component={ReplaceMultisig}
-      />
-      <OnboardingStack.Screen
-        name="replace-multisig-confirm"
-        component={ReplaceMultisigConfirm}
       />
       <OnboardingStack.Screen
         name="recover-singlesig"

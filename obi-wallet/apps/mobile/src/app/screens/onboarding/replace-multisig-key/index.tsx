@@ -67,53 +67,36 @@ export type ReplaceMultisigProps = NativeStackScreenProps<
 
 export const ReplaceMultisig = observer<ReplaceMultisigProps>(
   ({ navigation }) => {
-    const {
-      chainStore,
-      demoStore,
-      multisigStore,
-      pendingMultisigStore,
-      walletStore,
-    } = useStore();
-    const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
+    const { chainStore, demoStore, multisigStore, walletStore } = useStore();
 
     const multisig = demoStore.demoMode
       ? demoModeMultisig
+      : multisigStore.currentAdmin;
+
+    const nextMultisig = demoStore.demoMode
+      ? demoModeMultisig
       : multisigStore.nextAdmin;
 
-    const pendingMultisig = demoStore.demoMode
-      ? demoModeMultisig
-      : pendingMultisigStore.nextAdmin;
+    const sender = multisigStore.getUpdateProposed ? nextMultisig : multisig;
 
     const encodeObjects = useMemo(() => {
-      if (!multisig.multisig?.address) return [];
+      if (!multisig?.multisig?.address) return [];
+      if (!nextMultisig.multisig?.address) return [];
+      if (!sender?.multisig?.address) return [];
       if (!walletStore.address) return [];
-      if (!pendingMultisig.multisig?.address) return [];
 
-      let rawMessage;
-      if (!multisigStore.getUpdateProposed) {
-        rawMessage = {
-          propose_update_admin: {
-            new_admin: pendingMultisig.multisig.address,
-          },
-        };
-        setSignatures(new Map<string, Uint8Array>());
-      } else {
-        rawMessage = {
-          confirm_update_admin: {},
-        };
-        const address = pendingMultisigStore.currentAdmin?.multisig?.address;
-        if (address !== null && address !== undefined) {
-          lendFees({
-            chainId: chainStore.currentChainInformation.chainId,
-            address: address,
-          });
-        }
-      }
+      const rawMessage = multisigStore.getUpdateProposed
+        ? {
+            confirm_update_admin: {},
+          }
+        : {
+            propose_update_admin: {
+              new_admin: nextMultisig.multisig.address,
+            },
+          };
 
       const value: MsgExecuteContract = {
-        sender: multisigStore.getUpdateProposed
-          ? pendingMultisig.multisig.address
-          : multisig.multisig.address,
+        sender: sender.multisig.address,
         contract: walletStore.address,
         msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
         funds: [],
@@ -125,15 +108,13 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       return [message];
     }, [
       multisig,
-      chainStore,
-      pendingMultisigStore,
       multisigStore.getUpdateProposed,
-      pendingMultisig,
+      nextMultisig,
       walletStore.address,
     ]);
 
     const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
-      multisig,
+      multisig: sender,
       encodeObjects,
       async onConfirm(response) {
         if (demoStore.demoMode) {
@@ -166,10 +147,13 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
             contractAddress,
             "Expected `executeEvent` to contain `_contract_address` attribute."
           );
-          if (!multisigStore.getUpdateProposed) {
-            multisigStore.setUpdateProposed(true);
+          if (multisigStore.getUpdateProposed) {
+            multisigStore.finishProxySetup({
+              address: contractAddress.value,
+              codeId: chainStore.currentChainInformation.currentCodeId,
+            });
           } else {
-            multisigStore.replace(pendingMultisigStore);
+            multisigStore.setUpdateProposed(true);
           }
         } catch (e) {
           console.log(response.rawLog);

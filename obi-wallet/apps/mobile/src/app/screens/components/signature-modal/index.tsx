@@ -14,6 +14,7 @@ import {
   TxBodyEncodeObject,
 } from "@cosmjs/proto-signing";
 import {
+  Account,
   AminoConverters,
   AminoTypes,
   createAuthzAminoConverters,
@@ -82,7 +83,6 @@ export const SignatureModal = observer<SignatureModalProps>((props) => {
   switch (walletStore.type) {
     case WalletType.MULTISIG:
     case WalletType.MULTISIG_DEMO:
-    case WalletType.MULTISIG_PENDING:
       return <SignatureModalMultisig {...props} />;
     case WalletType.SINGLESIG:
       return <SignatureModalSinglesig {...props} />;
@@ -396,7 +396,6 @@ export function useWrapEncodeObjects(
         ];
       }
       case WalletType.MULTISIG_DEMO:
-      case WalletType.MULTISIG_PENDING:
         return [];
       case WalletType.SINGLESIG: {
         if (!singlesigStore.address) return [];
@@ -426,7 +425,6 @@ export function useSignatureModalProps({
   openSignatureModal: () => void;
 } {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
-  const [resetSignatures, setResetSignatures] = useState(false);
   const [modalKey, setModalKey] = useState(0);
   const { chainStore, singlesigStore, walletStore } = useStore();
   const { currentChainInformation } = chainStore;
@@ -481,7 +479,6 @@ export function useSignatureModalProps({
           const bodyBytes = registry.encode(body);
 
           const address = multisig.multisig.address;
-
           const feeAmount = 6000;
           const fee = {
             amount: coins(feeAmount, denom),
@@ -491,7 +488,6 @@ export function useSignatureModalProps({
           if (!(await client.getAccount(address))) {
             await lendFees({ chainId, address });
           }
-
           async function hasEnoughForFees() {
             const balance = await client?.getBalance(address, denom);
             return balance && parseInt(balance.amount, 10) >= feeAmount;
@@ -501,7 +497,7 @@ export function useSignatureModalProps({
             await lendFees({ chainId, address });
           }
 
-          const account = await client.getAccount(multisig.multisig.address);
+          const account = await client.getAccount(address);
           invariant(account, "Expected `account` to be ready.");
 
           const tx = makeMultisignedTx(
