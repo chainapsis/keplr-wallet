@@ -1,12 +1,12 @@
-import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { DeliverTxResponse } from "@cosmjs/stargate";
-import { messages, WalletType } from "@obi-wallet/common";
-import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
 
 import { useStore } from "../../../stores";
-import { SignatureModal, useSignatureModalProps } from "../signature-modal";
+import {
+  SignatureModal,
+  useSignatureModalProps,
+  useWrapEncodeObjects,
+} from "../signature-modal";
 
 export interface InteractionModalProps {
   onClose: () => void;
@@ -14,61 +14,14 @@ export interface InteractionModalProps {
 
 export const InteractionModal = observer<InteractionModalProps>(
   ({ onClose }) => {
-    const { multisigStore, interactionStore, walletStore } = useStore();
+    const { multisigStore, interactionStore } = useStore();
 
     const data = interactionStore.waitingData?.data;
     const multisig = multisigStore.currentAdmin;
 
-    const encodeObjects = useMemo(() => {
-      if (!walletStore.type) return [];
-
-      switch (walletStore.type) {
-        case WalletType.MULTISIG_PENDING:
-          return [];
-        case WalletType.MULTISIG: {
-          if (
-            !multisig?.multisig?.address ||
-            !multisigStore.proxyAddress ||
-            !data?.messages
-          ) {
-            return [];
-          }
-
-          const messages = data.messages as MsgExecuteContractEncodeObject[];
-
-          const rawMessage = {
-            execute: {
-              msgs: messages.map((message) => {
-                return {
-                  wasm: {
-                    execute: message.value,
-                  },
-                };
-              }),
-            },
-          };
-
-          const value: MsgExecuteContract = {
-            sender: multisig.multisig.address,
-            contract: multisigStore.proxyAddress.address,
-            msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
-            funds: [],
-          };
-
-          const message: MsgExecuteContractEncodeObject = {
-            typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-            value,
-          };
-          return [message];
-        }
-        case WalletType.MULTISIG_DEMO:
-          return [];
-        case WalletType.SINGLESIG: {
-          return data?.messages ?? [];
-        }
-      }
-    }, [data, multisig, multisigStore.proxyAddress, walletStore.type]);
-
+    const encodeObjects = useWrapEncodeObjects(() => {
+      return data?.messages ?? [];
+    });
     const { signatureModalProps } = useSignatureModalProps({
       multisig,
       encodeObjects,

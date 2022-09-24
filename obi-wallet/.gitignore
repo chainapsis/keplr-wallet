@@ -99,3 +99,6 @@ buck-out/
 # Ruby / CocoaPods
 **/ios/Pods/
 **/vendor/bundle/
+
+# React Cosmos
+cosmos.userdeps.js

@@ -154,9 +154,7 @@ export class MultisigStore {
       this.proxyAddress.codeId <
       this.chainStore.currentChainInformation.currentCodeId
     ) {
-      // TODO: Should be Outdated in the future
-      // return MultisigState.OUTDATED;
-      return MultisigState.READY;
+      return MultisigState.INITIALIZED;
     }
     return MultisigState.INITIALIZED;
   }

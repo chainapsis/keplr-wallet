@@ -22,7 +22,9 @@ export function VerifyAndProceedButton({
       })}
       LeftIcon={ShieldCheck}
       flavor={disabled ? "gray" : "blue"}
-      onPress={onPress}
+      onPress={() => {
+        !disabled && onPress();
+      }}
       disabled={disabled}
       style={{ marginBottom: 20 }}
     />

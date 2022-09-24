@@ -1,4 +1,4 @@
-import { pubkeyType } from "@cosmjs/amino";
+import { pubkeyToAddress, pubkeyType } from "@cosmjs/amino";
 import { MsgInstantiateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -81,6 +81,9 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
       uusd_fee_debt: currentChainInformation.startingUsdDebt,
       fee_lend_repay_wallet: currentChainInformation.debtRepayAddress,
       home_network: currentChainInformation.chainId,
+      signers: multisig.multisig.publicKey.value.pubkeys.map((pubkey) => {
+        return pubkeyToAddress(pubkey, currentChainInformation.prefix);
+      }),
     };
 
     const value: MsgInstantiateContract = {

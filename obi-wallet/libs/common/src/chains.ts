@@ -6,7 +6,7 @@ export const chains = {
     currentCodeId: 3454,
     rpc: "https://rpc.uni.junonetwork.io/",
     denom: "ujunox",
-    startingUsdDebt: "500000",
+    startingUsdDebt: "0",
     debtRepayAddress: "juno1ruftad6eytmr3qzmf9k3eya9ah8hsnvkujkej8",
     twilioPhoneNumber: "+19705509509",
     twilioUrl:
@@ -19,10 +19,10 @@ export const chains = {
     chainId: "juno-1" as const,
     label: "Juno",
     prefix: "juno",
-    currentCodeId: 843,
+    currentCodeId: 1057,
     rpc: "https://rpc-juno.itastakers.com/",
     denom: "ujuno",
-    startingUsdDebt: "500000",
+    startingUsdDebt: "0",
     debtRepayAddress: "juno1ruftad6eytmr3qzmf9k3eya9ah8hsnvkujkej8",
     twilioPhoneNumber: "+19148638557",
     twilioUrl:

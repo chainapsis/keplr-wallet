@@ -126,7 +126,7 @@ export function KeyListItem({ item, tiled }: KeyListItemProps) {
             marginTop: 4,
           }}
         >
-          {id}
+          {title}
         </Text>
       </View>
     </TouchableOpacity>

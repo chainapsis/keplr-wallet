@@ -2,6 +2,7 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons/faChevronRight
 import { faPaperclip } from "@fortawesome/free-solid-svg-icons/faPaperclip";
 import { observer } from "mobx-react-lite";
 import { FC, useState } from "react";
+import { useIntl } from "react-intl";
 import {
   Button,
   KeyboardAvoidingView,
@@ -38,10 +39,16 @@ export interface HomeProps {
 
 export const Home = observer<HomeProps>(
   ({ appsStore, onAppPress, marginBottom, walletStore, icons }) => {
-    const [BuyCryptoIcon, CosmicPartyIcon, GetTicketsIcon, MyTicketsIcon] =
-      icons;
+    const [
+      BuyCryptoIcon,
+      CosmicPartyIcon,
+      GetTicketsIcon,
+      MyTicketsIcon,
+      HistoryIcon,
+    ] = icons;
     const [editMode, setEditMode] = useState(false);
     const [url, setUrl] = useState("www.keplr_wallet.com");
+    const intl = useIntl();
 
     return (
       <SafeAreaView
@@ -84,20 +91,23 @@ export const Home = observer<HomeProps>(
                   />
                 );
               })}
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                ImgComponent={BuyCryptoIcon}
-                label="Buy Crypto"
-                onPress={() => {
-                  onAppPress({
-                    label: "Buy Crypto",
-                    url: `https://app.kado.money?address${walletStore.address}`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
+              {/*<Tile*/}
+              {/*  onLongPress={() => {*/}
+              {/*    setEditMode(true);*/}
+              {/*  }}*/}
+              {/*  ImgComponent={BuyCryptoIcon}*/}
+              {/*  label={intl.formatMessage({*/}
+              {/*    id: "apps.kado",*/}
+              {/*    defaultMessage: "Get Crypto",*/}
+              {/*  })}*/}
+              {/*  onPress={() => {*/}
+              {/*    onAppPress({*/}
+              {/*      label: "Buy Crypto",*/}
+              {/*      url: `https://app.kado.money?address${walletStore.address}`,*/}
+              {/*      icon: "https://place-hold.it/180x180",*/}
+              {/*    });*/}
+              {/*  }}*/}
+              {/*/>*/}
               <Tile
                 onLongPress={() => {
                   setEditMode(true);
@@ -117,7 +127,10 @@ export const Home = observer<HomeProps>(
                   setEditMode(true);
                 }}
                 ImgComponent={GetTicketsIcon}
-                label="Get Tickets"
+                label={intl.formatMessage({
+                  id: "apps.gettickets",
+                  defaultMessage: "Get Tickets",
+                })}
                 onPress={() => {
                   onAppPress({
                     label: "Get Tickets",
@@ -131,11 +144,31 @@ export const Home = observer<HomeProps>(
                   setEditMode(true);
                 }}
                 ImgComponent={MyTicketsIcon}
-                label="My Tickets"
+                label={intl.formatMessage({
+                  id: "apps.mytickets",
+                  defaultMessage: "My Tickets",
+                })}
                 onPress={() => {
                   onAppPress({
                     label: "My Tickets",
                     url: `https://nft-juno-dev.loop.do/webapp/mytickets`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={HistoryIcon}
+                label={intl.formatMessage({
+                  id: "apps.myhistory",
+                  defaultMessage: "History",
+                })}
+                onPress={() => {
+                  onAppPress({
+                    label: "History",
+                    url: `https://mintscan.io/juno/account/${walletStore.address}`,
                     icon: "https://place-hold.it/180x180",
                   });
                 }}

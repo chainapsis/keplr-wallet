@@ -1,16 +1,12 @@
-import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
-import { MsgSendEncodeObject } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
+import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { WalletType } from "@obi-wallet/common";
-import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
-  Image,
   Platform,
   RefreshControl,
   Text,
@@ -20,17 +16,20 @@ import {
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ExtendedCoin, formatCoin, useBalances } from "../../balances";
+import { ExtendedCoin, formatExtendedCoin, useBalances } from "../../balances";
 import { Button } from "../../button";
 import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
+import { useAddressQrCodeScannerModal } from "../components/address-qr-code-scanner-modal";
 import { Back } from "../components/back";
 import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
+import { CoinIcon } from "../components/coin-icon";
 import { KeyboardAvoidingView } from "../components/keyboard-avoiding-view";
 import { isSmallScreenNumber } from "../components/screen-size";
 import {
   SignatureModal,
   useSignatureModalProps,
+  useWrapEncodeObjects,
 } from "../components/signature-modal";
 
 export const SendScreen = observer(() => {
@@ -57,7 +56,9 @@ export const SendScreen = observer(() => {
     }
   }, [balances, selectedCoin]);
 
-  const hydratedSelectedCoin = selectedCoin ? formatCoin(selectedCoin) : null;
+  const hydratedSelectedCoin = selectedCoin
+    ? formatExtendedCoin(selectedCoin)
+    : null;
 
   const { multisigStore, singlesigStore, walletStore } = useStore();
   const multisig = multisigStore.currentAdmin;
@@ -65,10 +66,10 @@ export const SendScreen = observer(() => {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
 
-  const encodeObjects = useMemo(() => {
+  const encodeObjects = useWrapEncodeObjects(() => {
     if (!selectedCoin || !walletStore.type) return [];
 
-    const { digits } = formatCoin(selectedCoin);
+    const { digits } = formatExtendedCoin(selectedCoin);
     const normalizedAmount =
       parseFloat(amount.replace(",", ".")) * Math.pow(10, digits);
     const msgAmount = [
@@ -78,66 +79,38 @@ export const SendScreen = observer(() => {
       },
     ];
 
-    switch (walletStore.type) {
-      case WalletType.MULTISIG_PENDING:
-        return [];
-      case WalletType.MULTISIG: {
-        if (!multisig?.multisig?.address || !multisigStore.proxyAddress)
-          return [];
+    if (!walletStore.address) return [];
 
-        const rawMessage = {
-          execute: {
-            msgs: [
-              {
-                bank: {
-                  send: {
-                    amount: msgAmount,
-                    to_address: address,
-                  },
+    if (selectedCoin.contract) {
+      return {
+        typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+        value: {
+          sender: walletStore.address,
+          contract: selectedCoin.contract,
+          msg: new Uint8Array(
+            Buffer.from(
+              JSON.stringify({
+                transfer: {
+                  amount: msgAmount[0].amount,
+                  recipient: address,
                 },
-              },
-            ],
-          },
-        };
-
-        const value: MsgExecuteContract = {
-          sender: multisig.multisig.address,
-          contract: multisigStore.proxyAddress.address,
-          msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
+              })
+            )
+          ),
           funds: [],
-        };
-
-        const message: MsgExecuteContractEncodeObject = {
-          typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-          value,
-        };
-        return [message];
-      }
-      case WalletType.MULTISIG_DEMO:
-        return [];
-      case WalletType.SINGLESIG: {
-        if (!singlesigStore.address) return [];
-
-        const message: MsgSendEncodeObject = {
-          typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-          value: {
-            fromAddress: singlesigStore.address,
-            toAddress: address,
-            amount: msgAmount,
-          },
-        };
-        return [message];
-      }
+        },
+      };
     }
-  }, [
-    address,
-    amount,
-    multisig,
-    multisigStore,
-    selectedCoin,
-    singlesigStore,
-    walletStore,
-  ]);
+
+    return {
+      typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+      value: {
+        fromAddress: singlesigStore.address,
+        toAddress: address,
+        amount: msgAmount,
+      },
+    };
+  });
 
   const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
     multisig,
@@ -148,7 +121,14 @@ export const SendScreen = observer(() => {
   });
 
   const intl = useIntl();
+  const qrCodeScannerModal = useAddressQrCodeScannerModal((address) => {
+    setAddress(address);
+  });
 
+  const coinIconProps =
+    typeof hydratedSelectedCoin?.icon === "number"
+      ? { imageIcon: hydratedSelectedCoin.icon }
+      : { SVGIcon: hydratedSelectedCoin?.icon };
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <SafeAreaView
@@ -163,6 +143,7 @@ export const SendScreen = observer(() => {
           }),
         }}
       >
+        {qrCodeScannerModal.render()}
         <SignatureModal {...signatureModalProps} />
         <View>
           <View style={{ flexDirection: "row" }}>
@@ -196,43 +177,46 @@ export const SendScreen = observer(() => {
                 defaultMessage: "Wallet Address",
               })}
               style={{ flex: 1 }}
-              // inputStyle={{
-              //   borderTopRightRadius: 0,
-              //   borderBottomRightRadius: 0,
-              //   borderRightWidth: 0,
-              // }}
+              inputStyle={{
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                borderRightWidth: 0,
+              }}
               value={address}
               onChangeText={setAddress}
             />
-            {/*<TouchableOpacity*/}
-            {/*  style={{*/}
-            {/*    width: 56,*/}
-            {/*    height: 56,*/}
-            {/*    justifyContent: "center",*/}
-            {/*    alignItems: "center",*/}
-            {/*    padding: 5,*/}
-            {/*    borderTopRightRadius: 12,*/}
-            {/*    borderBottomRightRadius: 12,*/}
-            {/*    borderWidth: 1,*/}
-            {/*    borderColor: "#2F2B4C",*/}
-            {/*    borderLeftWidth: 0,*/}
-            {/*  }}*/}
-            {/*>*/}
-            {/*  <View*/}
-            {/*    style={{*/}
-            {/*      position: "absolute",*/}
-            {/*      width: 1,*/}
-            {/*      backgroundColor: "#2F2B4C",*/}
-            {/*      height: "100%",*/}
-            {/*      left: 0,*/}
-            {/*    }}*/}
-            {/*  />*/}
-            {/*  <FontAwesomeIcon*/}
-            {/*    icon={faQrcode}*/}
-            {/*    style={{ color: "#887CEB" }}*/}
-            {/*    size={32}*/}
-            {/*  />*/}
-            {/*</TouchableOpacity>*/}
+            <TouchableOpacity
+              style={{
+                width: 56,
+                height: 56,
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 5,
+                borderTopRightRadius: 12,
+                borderBottomRightRadius: 12,
+                borderWidth: 1,
+                borderColor: "#2F2B4C",
+                borderLeftWidth: 0,
+              }}
+              onPress={() => {
+                qrCodeScannerModal.open();
+              }}
+            >
+              <View
+                style={{
+                  position: "absolute",
+                  width: 1,
+                  backgroundColor: "#2F2B4C",
+                  height: "100%",
+                  left: 0,
+                }}
+              />
+              <FontAwesomeIcon
+                icon={faQrcode}
+                style={{ color: "#887CEB" }}
+                size={32}
+              />
+            </TouchableOpacity>
           </View>
           <View style={{ marginTop: 35 }}>
             <Text
@@ -282,12 +266,7 @@ export const SendScreen = observer(() => {
                       borderRadius: 44,
                     }}
                   >
-                    {hydratedSelectedCoin?.icon && (
-                      <Image
-                        source={hydratedSelectedCoin?.icon}
-                        style={{ flex: 1, width: "100%", height: "100%" }}
-                      />
-                    )}
+                    <CoinIcon {...coinIconProps} />
                   </View>
                   <View style={{ justifyContent: "center" }}>
                     <Text
@@ -459,8 +438,9 @@ interface CoinRendererProps {
 }
 
 function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
-  const { denom, label, amount, valueInUsd, icon } = formatCoin(item);
-
+  const { denom, label, amount, valueInUsd, icon } = formatExtendedCoin(item);
+  const coinIconProps =
+    typeof icon === "number" ? { imageIcon: icon } : { SVGIcon: icon };
   return (
     <TouchableOpacity
       style={{
@@ -481,12 +461,7 @@ function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
             borderRadius: 12,
           }}
         >
-          {icon && (
-            <Image
-              source={icon}
-              style={{ flex: 1, width: "100%", height: "100%" }}
-            />
-          )}
+          <CoinIcon {...coinIconProps} />
         </View>
         <View>
           <Text style={{ color: "#f6f5ff", fontWeight: "500" }}>{label}</Text>

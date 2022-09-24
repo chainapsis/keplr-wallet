@@ -1,3 +1,4 @@
+/* eslint-disable */
 module.exports = {
   displayName: "common",
   preset: "react-native",

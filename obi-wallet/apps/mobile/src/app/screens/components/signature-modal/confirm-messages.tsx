@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "../../../button";
 import { Loader } from "../../../loader";
 import { Background } from "../background";
-import ArrowUpIcon from "./assets/arrowUpIcon.svg";
+import { PrettyMessage } from "./pretty-message";
 
 enum Tab {
   TransactionDetails,
@@ -26,6 +26,7 @@ export interface ConfirmMessagesProps extends ModalProps {
   loading?: boolean;
   disabled?: boolean;
   cancelable?: boolean;
+  innerMessages: readonly AminoMsg[];
   messages: readonly AminoMsg[];
   footer?: ReactNode;
   children?: ReactNode;
@@ -40,6 +41,7 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
     loading,
     disabled,
     cancelable = true,
+    innerMessages,
     messages,
     onCancel,
     onConfirm,
@@ -49,7 +51,7 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
   }) => {
     const intl = useIntl();
     const safeArea = useSafeAreaInsets();
-    const [selectedTab, setSelectedTab] = useState(Tab.Data);
+    const [selectedTab, setSelectedTab] = useState(Tab.TransactionDetails);
 
     return (
       <Modal {...props}>
@@ -92,13 +94,13 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
           </View>
 
           <View style={{ marginHorizontal: 20, flex: 1 }}>
-            {/*<View style={{ flexDirection: "row", height: 50 }}>*/}
-            {/*  {renderTabButton({*/}
-            {/*    tab: Tab.TransactionDetails,*/}
-            {/*    label: "Tx Details",*/}
-            {/*  })}*/}
-            {/*  {renderTabButton({ tab: Tab.Data, label: "Data" })}*/}
-            {/*</View>*/}
+            <View style={{ flexDirection: "row", height: 50 }}>
+              {renderTabButton({
+                tab: Tab.TransactionDetails,
+                label: "Tx Details",
+              })}
+              {renderTabButton({ tab: Tab.Data, label: "Data" })}
+            </View>
 
             <View
               style={{
@@ -197,11 +199,11 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
     function renderTabContent() {
       switch (selectedTab) {
         case Tab.TransactionDetails:
-          return <MessageView messages={messages} />;
+          return <MessageView messages={innerMessages} />;
         case Tab.Data:
           return (
             <Text style={{ color: "#ffffff" }}>
-              {JSON.stringify(messages, null, 2)}
+              {JSON.stringify(innerMessages, null, 2)}
             </Text>
           );
       }
@@ -218,39 +220,9 @@ function MessageView({ messages }: MessageViewProps) {
 
   return (
     <>
-      {messages.map((message, index) => (
-        <View
-          key={index}
-          style={{
-            height: 50,
-            flexDirection: "row",
-            borderBottomColor: "rgba(255,255,255, 0.6)",
-            borderBottomWidth: 1,
-          }}
-        >
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <ArrowUpIcon />
-          </View>
-          <View
-            style={{ flex: 1, justifyContent: "space-around", paddingLeft: 10 }}
-          >
-            <Text style={{ color: "white", fontWeight: "600", fontSize: 16 }}>
-              <FormattedMessage
-                id="signature.modal.createobiwallet"
-                defaultMessage="Create Obi Wallet"
-              />
-              {/* TODO: handle other message types */}
-              {/* {renderDirectMessage(msg)} */}
-            </Text>
-            <Text style={{ color: "white", opacity: 0.6 }}>
-              <FormattedMessage
-                id="signature.modal.value"
-                defaultMessage="Value"
-              />
-            </Text>
-          </View>
-        </View>
-      ))}
+      {messages.map((message, index) => {
+        return <PrettyMessage key={index} message={message} />;
+      })}
     </>
   );
 }

@@ -11,6 +11,7 @@ const LOOP_JUNO1_ADDRESS =
   "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup";
 
 export interface ExtendedCoin {
+  contract?: string;
   denom: string;
   amount: string;
   usdPrice: number;

@@ -1,7 +1,6 @@
 import {
   AminoSignResponse,
   encodeSecp256k1Signature,
-  Secp256k1Wallet,
   serializeSignDoc,
   StdSignature,
   StdSignDoc,
@@ -34,8 +33,8 @@ import {
   BACKGROUND_PORT,
   Env,
   KeplrError,
+  Message,
 } from "@keplr-wallet/router";
-import { Message } from "@keplr-wallet/router";
 import { BIP44, EthSignType, KeplrSignOptions } from "@keplr-wallet/types";
 import {
   EmbedChainInfos,

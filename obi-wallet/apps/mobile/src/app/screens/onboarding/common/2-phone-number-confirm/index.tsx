@@ -145,7 +145,12 @@ export function MultisigPhoneNumberConfirm({
               keyboardType="number-pad"
               style={{ marginTop: 25 }}
               value={key}
-              onChangeText={setKey}
+              onChangeText={(e) => {
+                const reg = /^\d+$/;
+                if (reg.test(e)) {
+                  setKey(e);
+                }
+              }}
             />
             <View
               style={{

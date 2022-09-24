@@ -141,13 +141,13 @@ export async function createBiometricSignature({
       chainId,
       signer,
     });
-
-    const fee = {
-      amount: coins(6000, chainStore.currentChainInformation.denom),
-      gas: "200000",
-    };
-
-    await signingClient.sendTokens(address, address, coins(1, denom), fee, "");
+    await signingClient.sendTokens(
+      address,
+      address,
+      coins(1, denom),
+      "auto",
+      ""
+    );
   }
 
   const privateKey = new Uint8Array(
