@@ -51,7 +51,7 @@ export class BalancesStore {
     const wasmClient = yield* toGenerator(CosmWasmClient.connect(rpc));
 
     const customBalances = async () => {
-      const custom_coins: Coin[] = [];
+      const custom_coins: ExtendedCoin[] = [];
       const token_contract_addresses = [
         { contract: LOOP_JUNO1_ADDRESS, denom: "uloop" },
         {
@@ -74,6 +74,8 @@ export class BalancesStore {
             custom_coins.push({
               denom: token_contract_addresses[i].denom,
               amount: res.balance,
+              contract: token_contract_addresses[i].contract,
+              usdPrice: 0,
             });
           });
       }
@@ -83,7 +85,18 @@ export class BalancesStore {
     const balances = yield* toGenerator(
       client
         .getAllBalances(address)
-        .then(async (coins) => coins.concat(await customBalances()))
+        .then((coins) => {
+          return coins.map((coin: Coin) => {
+            return {
+              denom: coin.denom,
+              amount: coin.amount,
+              usdPrice: 0,
+            };
+          });
+        })
+        .then(async (extended_coins) =>
+          extended_coins.concat(await customBalances())
+        )
     );
 
     /// Return nothing if asset is considered 1 USD
@@ -114,7 +127,7 @@ export class BalancesStore {
       return null;
     };
 
-    const getUsdRate = async (coin: Coin) => {
+    const getUsdRate = async (coin: ExtendedCoin) => {
       const route = getContractRoute(coin.denom);
 
       if (!route) return 0;
@@ -188,7 +201,7 @@ export class BalancesStore {
 
     const extendedCoins = yield* toGenerator(
       Promise.all(
-        balances.map(async (coin: Coin) => {
+        balances.map(async (coin: ExtendedCoin) => {
           try {
             return {
               ...coin,
