@@ -91,23 +91,23 @@ export const Home = observer<HomeProps>(
                   />
                 );
               })}
-              {/*<Tile*/}
-              {/*  onLongPress={() => {*/}
-              {/*    setEditMode(true);*/}
-              {/*  }}*/}
-              {/*  ImgComponent={BuyCryptoIcon}*/}
-              {/*  label={intl.formatMessage({*/}
-              {/*    id: "apps.kado",*/}
-              {/*    defaultMessage: "Get Crypto",*/}
-              {/*  })}*/}
-              {/*  onPress={() => {*/}
-              {/*    onAppPress({*/}
-              {/*      label: "Buy Crypto",*/}
-              {/*      url: `https://app.kado.money?address${walletStore.address}`,*/}
-              {/*      icon: "https://place-hold.it/180x180",*/}
-              {/*    });*/}
-              {/*  }}*/}
-              {/*/>*/}
+              <Tile
+                onLongPress={() => {
+                  setEditMode(true);
+                }}
+                ImgComponent={BuyCryptoIcon}
+                label={intl.formatMessage({
+                  id: "apps.kado",
+                  defaultMessage: "Kado",
+                })}
+                onPress={() => {
+                  onAppPress({
+                    label: "Kado",
+                    url: `https://app.kado.money?address${walletStore.address}`,
+                    icon: "https://place-hold.it/180x180",
+                  });
+                }}
+              />
               <Tile
                 onLongPress={() => {
                   setEditMode(true);
