@@ -249,7 +249,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                 securityAnswer={securityAnswer}
                 onSecurityAnswerChange={(inputText) => {
                   console.log(inputText);
-                  const reg = /([^A-Za-z.\sáéíóúñü_-])/;
+                  const reg = /([^A-Za-z0-9.\sáéíóúñü_-])/;
                   if (!reg.test(inputText)) {
                     setSecurityAnswer(inputText);
                   }
