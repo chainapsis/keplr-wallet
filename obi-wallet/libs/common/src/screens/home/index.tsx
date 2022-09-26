@@ -103,7 +103,7 @@ export const Home = observer<HomeProps>(
                 onPress={() => {
                   onAppPress({
                     label: "Kado",
-                    url: `https://app.kado.money?address${walletStore.address}`,
+                    url: `https://app.kado.money?network=JUNO&onToAddress=${walletStore.address}&apiKey=0a5fc82b-be15-4059-8edf-9ff9c54186ce`,
                     icon: "https://place-hold.it/180x180",
                   });
                 }}

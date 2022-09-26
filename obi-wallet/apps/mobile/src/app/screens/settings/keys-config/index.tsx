@@ -147,7 +147,7 @@ export const KeysConfigScreen = observer(() => {
         >
           <FormattedMessage
             id="settings.multisig.risk.high"
-            defaultMessage="High Security Risk"
+            defaultMessage="Security Tier: Basic"
           />
         </Text>
         <Text style={[styles.subHeading, { marginBottom: 0 }]}>
