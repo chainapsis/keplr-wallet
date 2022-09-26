@@ -172,7 +172,8 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 demoStore.demoMode = false;
                 navigation.navigate("recover-singlesig");
               })}
-            /> */ ? null : (
+            />
+          ) : (
             <Button
               label="Cancel"
               RightIcon={GetStarted}
