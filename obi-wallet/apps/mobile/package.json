@@ -11,6 +11,7 @@
     "@cosmjs/launchpad": "*",
     "@cosmjs/proto-signing": "*",
     "@cosmjs/stargate": "*",
+    "@fortawesome/free-regular-svg-icons": "*",
     "@fortawesome/free-solid-svg-icons": "*",
     "@fortawesome/react-fontawesome": "*",
     "@fortawesome/react-native-fontawesome": "*",
