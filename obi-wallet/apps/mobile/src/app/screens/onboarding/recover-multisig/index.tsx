@@ -60,23 +60,18 @@ const demoModeMultisig: Multisig = {
   email: null,
 };
 
-export type ReplaceMultisigProps = NativeStackScreenProps<
+export type RecoverMultisigProps = NativeStackScreenProps<
   OnboardingStackParamList,
-  "replace-multisig"
+  "recover-multisig"
 >;
 
-export const ReplaceMultisig = observer<ReplaceMultisigProps>(
+export const RecoverMultisig = observer<RecoverMultisigProps>(
   ({ navigation }) => {
     const { chainStore, demoStore, multisigStore, walletStore } = useStore();
     const { currentChainInformation } = chainStore;
 
-    const multisig = demoStore.demoMode
-      ? demoModeMultisig
-      : multisigStore.currentAdmin;
-
-    const nextMultisig = demoStore.demoMode
-      ? demoModeMultisig
-      : multisigStore.nextAdmin;
+    const multisig = multisigStore.currentAdmin;
+    const nextMultisig = multisigStore.nextAdmin;
 
     const sender = multisigStore.getUpdateProposed ? nextMultisig : multisig;
 
@@ -84,7 +79,9 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       if (!multisig?.multisig?.address) return [];
       if (!nextMultisig.multisig?.address) return [];
       if (!sender?.multisig?.address) return [];
-      if (!walletStore.address) return [];
+
+      const contract = multisigStore.getWalletInRecovery()?.contract;
+      if (!contract) return [];
 
       const rawMessage = multisigStore.getUpdateProposed
         ? {
@@ -107,7 +104,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
 
       const value: MsgExecuteContract = {
         sender: sender.multisig.address,
-        contract: walletStore.address,
+        contract,
         msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
         funds: [],
       };
@@ -183,7 +180,10 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <SignatureModalMultisig {...signatureModalProps} />
+        <SignatureModalMultisig
+          {...signatureModalProps}
+          hiddenKeyIds={multisigStore.getUpdateProposed ? [] : ["biometrics"]}
+        />
         <Background />
 
         <View

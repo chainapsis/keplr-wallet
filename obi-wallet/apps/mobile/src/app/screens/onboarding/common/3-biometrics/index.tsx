@@ -32,7 +32,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
       if (demoStore.demoMode) return;
 
       const { biometrics } = multisigStore.nextAdmin;
-      if (biometrics) {
+      if (biometrics && multisigStore.getKeyInRecovery !== "biometrics") {
         Alert.alert(
           intl.formatMessage({
             id: "onboarding4.error.biometrickeyexists.title",

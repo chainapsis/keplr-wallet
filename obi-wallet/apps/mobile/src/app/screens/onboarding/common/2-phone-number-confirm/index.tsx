@@ -116,6 +116,11 @@ export function MultisigPhoneNumberConfirm({
                       id="onboarding2.recovery.authyourkeys"
                       defaultMessage="Create a Replacement Phone Number Key"
                     />
+                  ) : multisigStore.getKeyInRecovery === "biometrics" ? (
+                    <FormattedMessage
+                      id="onboarding2.recovery.phonenumber"
+                      defaultMessage="Recover your Phone Number Key"
+                    />
                   ) : (
                     <FormattedMessage
                       id="onboarding3.authyourkeys"
@@ -239,6 +244,9 @@ export function MultisigPhoneNumberConfirm({
                     }
                     setVerifyButtonDisabledDoubleclick(false);
                     switch (multisigStore.getKeyInRecovery) {
+                      case "biometrics":
+                        navigation.navigate("lookup-proxy-wallets");
+                        break;
                       case "phoneNumber":
                         navigation.navigate("replace-multisig");
                         break;
