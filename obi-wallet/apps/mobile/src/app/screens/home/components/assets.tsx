@@ -453,6 +453,17 @@ const AssetsList = observer(() => {
 });
 
 function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
+  const [selectedCoin, setSelectedCoin] = useState(item);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const onTouchAsset = (amount: number) => {
+    if (Number(amount) > 0) {
+      navigation.navigate("send");
+    } else {
+      navigation.navigate("receive");
+    }
+  };
+
   const { icon, denom, label, amount, valueInUsd } = formatExtendedCoin(item);
   const coinIconProps =
     typeof icon === "number" ? { imageIcon: icon } : { SVGIcon: icon };
@@ -466,18 +477,19 @@ function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
         marginBottom: 28,
       }}
     >
-      <View
-        style={{
-          height: 36,
-          width: 36,
-          backgroundColor: icon ? "transparent" : "#ccc",
-          borderRadius: 10,
-          marginRight: 12,
-        }}
-      >
-        <CoinIcon {...coinIconProps} />
-      </View>
-
+      <TouchableOpacity onPress={async () => onTouchAsset(amount)}>
+        <View
+          style={{
+            height: 36,
+            width: 36,
+            backgroundColor: icon ? "transparent" : "#ccc",
+            borderRadius: 10,
+            marginRight: 12,
+          }}
+        >
+          <CoinIcon {...coinIconProps} />
+        </View>
+      </TouchableOpacity>
       <View
         style={{
           flex: 1,
@@ -487,19 +499,21 @@ function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
         }}
       >
         <View>
-          <Text style={{ color: "#F6F5FF", fontSize: 14, fontWeight: "500" }}>
-            {isSmallScreenSubstr(label, "...", 23, 30)}
-          </Text>
-          <Text
-            style={{
-              color: "rgba(246, 245, 255, 0.6)",
-              fontSize: 12,
-              fontWeight: "400",
-              marginTop: 4,
-            }}
-          >
-            {denom}
-          </Text>
+          <TouchableOpacity onPress={async () => onTouchAsset(amount)}>
+            <Text style={{ color: "#F6F5FF", fontSize: 14, fontWeight: "500" }}>
+              {isSmallScreenSubstr(label, "...", 23, 30)}
+            </Text>
+            <Text
+              style={{
+                color: "rgba(246, 245, 255, 0.6)",
+                fontSize: 12,
+                fontWeight: "400",
+                marginTop: 4,
+              }}
+            >
+              {denom}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View
