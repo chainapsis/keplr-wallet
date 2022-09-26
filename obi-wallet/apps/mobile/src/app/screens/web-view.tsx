@@ -145,6 +145,10 @@ export const WebViewScreen = observer<WebViewScreenProps>(
             setCurrentUrl(e.url);
             setTitle(e.title);
           }}
+          loading={!loaded}
+          setLoading={(loading) => {
+            setLoaded(!loading);
+          }}
         />
         <BottomSheet
           handleIndicatorStyle={{ backgroundColor: "white" }}
