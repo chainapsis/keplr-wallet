@@ -84,7 +84,10 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
 
     try {
       const ledger = await Ledger.init(
-        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter
+        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter,
+        undefined,
+        // requestedLedgerApp should be set if ledger init needed.
+        ledgerInitStore.requestedLedgerApp!
       );
       await ledger.close();
       // Unfortunately, closing ledger blocks the writing to Ledger on background process.
@@ -134,13 +137,34 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
           <Instruction
             icon={
               <img
-                src={require("../../public/assets/img/atom-o.svg")}
+                src={(() => {
+                  switch (ledgerInitStore.requestedLedgerApp) {
+                    case "ethereum":
+                      return require("../../public/assets/img/ethereum.svg");
+                    default:
+                      return require("../../public/assets/img/atom-o.svg");
+                  }
+                })()}
                 style={{ height: "34px" }}
                 alt="atom"
               />
             }
             title={intl.formatMessage({ id: "ledger.step2" })}
-            paragraph={intl.formatMessage({ id: "ledger.step2.paragraph" })}
+            paragraph={intl.formatMessage(
+              {
+                id: "ledger.step2.paragraph",
+              },
+              {
+                ledgerApp: (() => {
+                  switch (ledgerInitStore.requestedLedgerApp) {
+                    case "ethereum":
+                      return "Ethereum";
+                    default:
+                      return "Cosmos";
+                  }
+                })(),
+              }
+            )}
             pass={initTryCount > 0 && initErrorOn == null}
           />
           <div style={{ flex: 1 }} />

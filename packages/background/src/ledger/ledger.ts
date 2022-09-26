@@ -19,7 +19,6 @@ export enum LedgerApp {
 export enum LedgerInitErrorOn {
   Transport,
   App,
-  Support,
   Unknown,
 }
 
@@ -49,12 +48,18 @@ export class Ledger {
   static async init(
     transportIniter: TransportIniter,
     initArgs: any[] = [],
-    app: LedgerApp = LedgerApp.Cosmos
+    app: LedgerApp
   ): Promise<Ledger> {
     const transport = await transportIniter(...initArgs);
     try {
       if (app === LedgerApp.Ethereum) {
         const ethereumApp = new Eth(transport);
+
+        // Ensure that the keplr can connect to ethereum app on ledger.
+        // getAppConfiguration() works even if the ledger is on screen saver mode.
+        // To detect the screen saver mode, we should request the address before using.
+        await ethereumApp.getAddress("m/44'/60'/0'/0/0");
+
         return new Ledger(null, ethereumApp);
       }
 
