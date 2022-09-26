@@ -221,7 +221,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                     ) : multisigStore.getKeyInRecovery === "biometrics" ? (
                       <FormattedMessage
                         id="onboarding2.recovery.phonenumber"
-                        defaultMessage="Recover your Phone Number Key"
+                        defaultMessage="Recover Your Old Phone Number Key"
                       />
                     ) : (
                       <FormattedMessage
