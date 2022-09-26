@@ -7,7 +7,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { ProxyWallet, Text } from "@obi-wallet/common";
 import { useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { Linking, TouchableOpacity, View } from "react-native";
+import { Linking, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton } from "../../../button";
@@ -84,7 +84,7 @@ export function Lookup({ address, onSelect, onCancel }: LookupProps) {
           justifyContent: "space-between",
         }}
       >
-        <View>
+        <View style={{ flexShrink: 1 }}>
           <IconButton
             style={{
               marginTop: 20,
@@ -137,78 +137,85 @@ export function Lookup({ address, onSelect, onCancel }: LookupProps) {
               </Text>
             </View>
           </View>
-          {wallets.map((wallet) => {
-            const active = wallet === selectedWallet;
+          <ScrollView>
+            {wallets.map((wallet) => {
+              const active = wallet === selectedWallet;
 
-            return (
-              <TouchableOpacity
-                key={wallet.contract}
-                style={{
-                  height: 79,
-                  width: "100%",
-                  backgroundColor: "#111023",
-                  marginBottom: 20,
-                  flexDirection: "row",
-                  borderRadius: 12,
-                  paddingHorizontal: 10,
-                }}
-                onPress={() => {
-                  setSelectedWallet((selectedWallet) => {
-                    return selectedWallet === wallet ? null : wallet;
-                  });
-                }}
-              >
-                <View
+              return (
+                <TouchableOpacity
+                  key={wallet.contract}
                   style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingHorizontal: 10,
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={active ? faCircleCheck : faCircle}
-                    style={{ color: "#7B87A8" }}
-                  />
-                </View>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    paddingHorizontal: 10,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#F6F5FF",
-                      fontSize: 14,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {Bech32Address.shortenAddress(wallet.contract, 20)}
-                  </Text>
-                </View>
-                <IconButton
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
+                    height: 79,
+                    width: "100%",
+                    backgroundColor: "#111023",
+                    marginBottom: 20,
+                    flexDirection: "row",
+                    borderRadius: 12,
                     paddingHorizontal: 10,
                   }}
                   onPress={() => {
-                    Linking.openURL(
-                      `https://www.mintscan.io/juno/wasm/contract/${wallet.contract}`
-                    );
+                    setSelectedWallet((selectedWallet) => {
+                      return selectedWallet === wallet ? null : wallet;
+                    });
                   }}
                 >
-                  <FontAwesomeIcon
-                    icon={faShare}
-                    style={{ color: "#7B87A8" }}
-                  />
-                </IconButton>
-              </TouchableOpacity>
-            );
-          })}
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      paddingHorizontal: 10,
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={active ? faCircleCheck : faCircle}
+                      style={{ color: "#7B87A8" }}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      paddingHorizontal: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#F6F5FF",
+                        fontSize: 14,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {Bech32Address.shortenAddress(wallet.contract, 20)}
+                    </Text>
+                  </View>
+                  <IconButton
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      paddingHorizontal: 10,
+                    }}
+                    onPress={() => {
+                      Linking.openURL(
+                        `https://www.mintscan.io/juno/wasm/contract/${wallet.contract}`
+                      );
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faShare}
+                      style={{ color: "#7B87A8" }}
+                    />
+                  </IconButton>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </View>
-        <View>
+        <View
+          style={{
+            marginTop: 20,
+            flexShrink: 0,
+          }}
+        >
           <VerifyAndProceedButton
             disabled={!selectedWallet}
             onPress={() => {
