@@ -215,12 +215,8 @@ export class KeyRingService {
     return this.keyRing.status;
   }
 
-  // GetKey should have an env when the user explicitly requests a key in order
-  // to show a Ledger popup if necessary. This avoids displaying random popups on
-  // background key loads.
-  async getKey(chainId: string, env?: Env): Promise<Key> {
+  async getKey(chainId: string): Promise<Key> {
     return this.keyRing.getKey(
-      env,
       chainId,
       await this.chainsService.getChainCoinType(chainId),
       (await this.chainsService.getChainEthereumKeyFeatures(chainId)).address
@@ -258,7 +254,6 @@ export class KeyRingService {
     );
 
     const key = await this.keyRing.getKey(
-      env,
       chainId,
       coinType,
       ethereumKeyFeatures.address
@@ -397,7 +392,6 @@ export class KeyRingService {
     );
 
     const key = await this.keyRing.getKey(
-      env,
       chainId,
       coinType,
       ethereumKeyFeatures.address
@@ -453,7 +447,6 @@ export class KeyRingService {
   }
 
   async verifyADR36AminoSignDoc(
-    env: Env,
     chainId: string,
     signer: string,
     data: Uint8Array,
@@ -465,7 +458,6 @@ export class KeyRingService {
     );
 
     const key = await this.keyRing.getKey(
-      env,
       chainId,
       coinType,
       ethereumKeyFeatures.address

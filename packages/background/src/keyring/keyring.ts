@@ -68,8 +68,6 @@ export class KeyRing {
 
   private password: string = "";
 
-  private loadingLedgerKeys: Record<string, boolean> = {};
-
   constructor(
     private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
@@ -176,13 +174,11 @@ export class KeyRing {
   }
 
   public getKey(
-    env: Env | undefined,
     chainId: string,
     defaultCoinType: number,
     useEthereumAddress: boolean
   ): Key {
     return this.loadKey(
-      env,
       this.computeKeyStoreCoinType(chainId, defaultCoinType),
       useEthereumAddress
     );
@@ -215,7 +211,7 @@ export class KeyRing {
     coinType: number,
     useEthereumAddress: boolean
   ): Key {
-    return this.loadKey(undefined, coinType, useEthereumAddress);
+    return this.loadKey(coinType, useEthereumAddress);
   }
 
   public async createMnemonicKey(
@@ -638,11 +634,7 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private loadKey(
-    env: Env | undefined,
-    coinType: number,
-    useEthereumAddress: boolean = false
-  ): Key {
+  private loadKey(coinType: number, useEthereumAddress: boolean = false): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
@@ -663,7 +655,7 @@ export class KeyRing {
         // ask the Ledger object to load the appropriate public key, and throw
         // an error to indicate next steps in the UI.
         if (!Object.keys(this.ledgerPublicKeyCache).includes(path)) {
-          this.loadLedgerPublicKey(env, coinType, LedgerApp.Ethereum);
+          this.loadLedgerPublicKey(coinType, LedgerApp.Ethereum);
           throw new KeplrError(
             "keyring",
             153,
@@ -1295,11 +1287,7 @@ export class KeyRing {
 
   // Load the public key for the given coinType using the appropriate Ledger app,
   // provided the coinType is supported by Ledger.
-  private async loadLedgerPublicKey(
-    env: Env | undefined,
-    coinType: number,
-    ledgerApp: LedgerApp
-  ) {
+  private async loadLedgerPublicKey(coinType: number, ledgerApp: LedgerApp) {
     if (!this._ledgerPublicKeyCache || !this.ledgerPublicKeyCache) {
       throw new KeplrError("keyring", 150, "Ledger not initialized");
     }
@@ -1308,29 +1296,14 @@ export class KeyRing {
       throw new KeplrError("keyring", 130, "Keystore is empty");
     }
 
+    const pubkey = await this.ledgerKeeper.getPublicKey(
+      undefined,
+      ledgerApp,
+      coinType,
+      KeyRing.getKeyStoreBIP44Path(this.keyStore)
+    );
+
     const path = this.getPathForCoinType(coinType);
-
-    if (
-      (Object.keys(this.loadingLedgerKeys).includes(path),
-      this.loadingLedgerKeys[path])
-    ) {
-      return;
-    }
-
-    let pubkey: Uint8Array;
-
-    try {
-      this.loadingLedgerKeys[path] = true;
-
-      pubkey = await this.ledgerKeeper.getPublicKey(
-        env,
-        ledgerApp,
-        coinType,
-        KeyRing.getKeyStoreBIP44Path(this.keyStore)
-      );
-    } finally {
-      this.loadingLedgerKeys[path] = false;
-    }
 
     // Update local cache
     this._ledgerPublicKeyCache[path] = pubkey;

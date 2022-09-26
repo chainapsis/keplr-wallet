@@ -54,6 +54,7 @@ export class LedgerService {
   ): Promise<Uint8Array> {
     return await this.useLedger(env, app, async (ledger, retryCount) => {
       try {
+        // Cosmos App on Ledger doesn't support the coin type other than 118.
         return await ledger.getPublicKey(app, [
           44,
           coinType,
@@ -197,6 +198,7 @@ export class LedgerService {
     app: LedgerApp,
     fn: (ledger: Ledger, retryCount: number) => Promise<T>
   ): Promise<T> {
+    await this.kvStore.set<number>("ledger-app-in-use", app);
     let ledger: { ledger: Ledger; retryCount: number } | undefined;
     try {
       ledger = await this.initLedger(env, app);
@@ -265,9 +267,6 @@ export class LedgerService {
           // If no env is provided, skip interaction and throw the original error
           throw e;
         }
-
-        // Set the app in use for the interaction
-        await this.kvStore.set<number>("ledger-app-in-use", app);
 
         const timeoutAbortController = new AbortController();
 
