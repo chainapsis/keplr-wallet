@@ -17,7 +17,7 @@ import { Text, View } from "react-native";
 
 import {
   formatCoin,
-  formatedExtendedCoin,
+  FormattedExtendedCoin,
   formatExtendedCoin,
 } from "../../../balances";
 import { useStore } from "../../../stores";
@@ -96,10 +96,7 @@ const PrettyMessageExecuteContract = observer(
     const { walletStore } = useStore();
     const intl = useIntl();
 
-    if (
-      value.contract === walletStore.address &&
-      value.msg["propose_update_admin"] !== undefined
-    ) {
+    if (value.msg["propose_update_admin"] !== undefined) {
       return (
         <MessageElement
           icon={<ArrowUpIcon />}
@@ -111,10 +108,7 @@ const PrettyMessageExecuteContract = observer(
       );
     }
 
-    if (
-      value.contract === walletStore.address &&
-      value.msg["confirm_update_admin"] !== undefined
-    ) {
+    if (value.msg["confirm_update_admin"] !== undefined) {
       return (
         <MessageElement
           icon={<ArrowUpIcon />}
@@ -158,19 +152,16 @@ const PrettyMessageExecuteContract = observer(
   }
 );
 
-function PrettyMessageUnknown(msg: any) {
+function PrettyMessageUnknown() {
   const intl = useIntl();
 
   return (
     <MessageElement
       icon={<ArrowUpIcon />}
-      title={
-        //   intl.formatMessage({
-        //   id: "signature.modal.unknownmessage.heading",
-        //   defaultMessage: "Unknown message",
-        // })
-        "asas"
-      }
+      title={intl.formatMessage({
+        id: "signature.modal.unknownmessage.heading",
+        defaultMessage: "Unknown message",
+      })}
       subTitle={intl.formatMessage({
         id: "signature.modal.unknownmessage.subheading",
         defaultMessage: "Please check data tab",
@@ -228,7 +219,7 @@ function MessageElement({
   );
 }
 
-interface transferMessage {
+interface TransferMessage {
   transfer: {
     amount: string;
     recipient: string;
@@ -239,7 +230,7 @@ export interface MsgExecuteContract {
     contract: string;
     // If message is for secret-wasm, msg will be the base64 encoded and encrypted string.
     // eslint-disable-next-line @typescript-eslint/ban-types
-    msg: object | string | transferMessage;
+    msg: object | string | TransferMessage;
     sender: string;
     // The field is for wasm message.
     funds?: [
