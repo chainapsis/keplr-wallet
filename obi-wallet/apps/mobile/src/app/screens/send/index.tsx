@@ -318,7 +318,7 @@ export const SendScreen = observer(() => {
             id: "send.next",
             defaultMessage: "Next",
           })}
-          disabled={!address || !amount || !selectedCoin}
+          disabled={!address || !amount || Number(amount) < 1 || !selectedCoin}
           onPress={() => {
             if (address && amount && selectedCoin) {
               openSignatureModal();

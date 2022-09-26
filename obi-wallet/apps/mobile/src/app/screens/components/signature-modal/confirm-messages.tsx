@@ -111,7 +111,6 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
               <View
                 style={{
                   flex: 1,
-                  borderRadius: 12,
                   borderTopRightRadius: 0,
                 }}
               >
@@ -122,6 +121,9 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
                     backgroundColor: "#130F23",
                     marginBottom: 10,
                     borderRadius: 12,
+                    borderTopRightRadius: Tab.Data === selectedTab ? 0 : 12,
+                    borderTopLeftRadius:
+                      Tab.TransactionDetails === selectedTab ? 0 : 12,
                   }}
                 >
                   {renderTabContent()}

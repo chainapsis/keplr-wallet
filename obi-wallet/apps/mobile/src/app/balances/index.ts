@@ -1,5 +1,5 @@
 import { Coin } from "@cosmjs/amino";
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 
 import { rootStore } from "../../background/root-store";
 import { useStore } from "../stores";
@@ -12,6 +12,13 @@ export interface ExtendedCoin {
   denom: string;
   amount: string;
   usdPrice: number;
+}
+export interface FormattedExtendedCoin {
+  icon: ReactNode;
+  denom: string;
+  digits: number;
+  label: string;
+  amount: number;
 }
 
 export function useBalances() {

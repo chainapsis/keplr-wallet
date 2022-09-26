@@ -4,7 +4,10 @@ import {
   AminoMsgInstantiateContract,
 } from "@cosmjs/cosmwasm-stargate/build/modules";
 import { AminoMsgSend } from "@cosmjs/stargate";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
+import { faPlay } from "@fortawesome/free-solid-svg-icons/faPlay";
+import { faWallet } from "@fortawesome/free-solid-svg-icons/faWallet";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
@@ -12,7 +15,11 @@ import React, { ReactNode } from "react";
 import { useIntl } from "react-intl";
 import { Text, View } from "react-native";
 
-import { formatCoin } from "../../../balances";
+import {
+  formatCoin,
+  FormattedExtendedCoin,
+  formatExtendedCoin,
+} from "../../../balances";
 import { useStore } from "../../../stores";
 import ArrowUpIcon from "./assets/arrowUpIcon.svg";
 
@@ -20,10 +27,10 @@ export function PrettyMessage({ message }: { message: AminoMsg }) {
   switch (message.type) {
     case "cosmos-sdk/MsgSend":
       return <PrettyMessageSend value={message.value} />;
+    case "wasm/MsgExecuteContract":
+      return <PrettyMessageExecuteContract message={message} />;
     case "wasm/MsgInstantiateContract":
       return <PrettyMessageInstantiateContract value={message.value} />;
-    case "wasm/MsgExecuteContract":
-      return <PrettyMessageExecuteContract value={message.value} />;
     default:
       return <PrettyMessageUnknown />;
   }
@@ -62,7 +69,7 @@ const PrettyMessageInstantiateContract = observer(
     ) {
       return (
         <MessageElement
-          icon={<ArrowUpIcon />}
+          icon={<FontAwesomeIcon icon={faWallet} size={33} color="white" />}
           title={intl.formatMessage({
             id: "signature.modal.createobiwallet",
             defaultMessage: "Create Obi Wallet",
@@ -84,7 +91,8 @@ const PrettyMessageInstantiateContract = observer(
 );
 
 const PrettyMessageExecuteContract = observer(
-  ({ value }: { value: AminoMsgExecuteContract["value"] }) => {
+  ({ message }: { message: AminoMsg }) => {
+    const value = message.value as AminoMsgExecuteContract["value"];
     const { walletStore } = useStore();
     const intl = useIntl();
 
@@ -114,16 +122,32 @@ const PrettyMessageExecuteContract = observer(
 
     return (
       <MessageElement
-        icon={<ArrowUpIcon />}
-        title={intl.formatMessage({
-          id: "signature.modal.unknownexecutecontractmessage.heading",
-          defaultMessage: "Unknown ExecuteContract message",
-        })}
-        subTitle={intl.formatMessage({
-          id: "signature.modal.unknownmessage.subheading",
-          defaultMessage: "Please check data tab",
-        })}
-      />
+        icon={<FontAwesomeIcon icon={faPlay} size={33} color="white" />}
+        title="Execute Wasm Contract"
+      >
+        <Text style={{ color: "white" }}>
+          Execute wasm contract{" "}
+          <Text style={{ fontWeight: "700" }}>
+            {Bech32Address.shortenAddress(message.value.contract, 20)}
+          </Text>
+        </Text>
+        <Text style={{ color: "white" }}>
+          {message.value.funds.length > 0 && "by sending:"}
+          {message.value.funds.map(
+            (token: { amount: string; denom: "string" }) => {
+              const { amount, denom } = formatCoin(token);
+              return (
+                <Text style={{ color: "white" }}>
+                  {amount ? amount : token.amount} {denom ? denom : token.denom}
+                </Text>
+              );
+            }
+          )}
+        </Text>
+        <Text style={{ color: "white" }}>
+          {JSON.stringify(message.value.msg, null, 2)}
+        </Text>
+      </MessageElement>
     );
   }
 );
@@ -170,7 +194,7 @@ function MessageElement({
         paddingHorizontal: 10,
       }}
     >
-      <View style={{ justifyContent: "center", alignItems: "center" }}>
+      <View style={{ justifyContent: "flex-start", alignItems: "center" }}>
         {icon}
       </View>
       <View
@@ -193,4 +217,36 @@ function MessageElement({
       </View>
     </View>
   );
+}
+
+interface TransferMessage {
+  transfer: {
+    amount: string;
+    recipient: string;
+  };
+}
+export interface MsgExecuteContract {
+  value: {
+    contract: string;
+    // If message is for secret-wasm, msg will be the base64 encoded and encrypted string.
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    msg: object | string | TransferMessage;
+    sender: string;
+    // The field is for wasm message.
+    funds?: [
+      {
+        amount: string;
+        denom: string;
+      }
+    ];
+    // The bottom fields are for secret-wasm message.
+    sent_funds?: [
+      {
+        amount: string;
+        denom: string;
+      }
+    ];
+    callback_code_hash?: string;
+    callback_sig?: string | null;
+  };
 }
