@@ -2,6 +2,7 @@ import { pubkeyToAddress } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
+import { createStargateClient } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -11,7 +12,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton, InlineButton } from "../../../../button";
-import { createStargateClient } from "../../../../clients";
 import { useStore } from "../../../../stores";
 import { TextInput } from "../../../../text-input";
 import { Background } from "../../../components/background";

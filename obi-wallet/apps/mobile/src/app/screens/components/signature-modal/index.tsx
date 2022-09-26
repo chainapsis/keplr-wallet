@@ -30,6 +30,7 @@ import {
 import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import { Multisig, MultisigKey, Text, WalletType } from "@obi-wallet/common";
+import { createStargateClient } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -40,10 +41,7 @@ import invariant from "tiny-invariant";
 
 import { createBiometricSignature } from "../../../biometrics";
 import { InlineButton } from "../../../button";
-import {
-  createSigningCosmWasmClient,
-  createStargateClient,
-} from "../../../clients";
+import { createSigningCosmWasmClient } from "../../../clients";
 import { lendFees } from "../../../fee-lender-worker";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";

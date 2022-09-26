@@ -5,12 +5,13 @@ import {
   Secp256k1Wallet,
 } from "@cosmjs/amino";
 import { chains } from "@obi-wallet/common";
+import { createStargateClient } from "@obi-wallet/common";
 import { randomBytes } from "crypto";
 import * as Keychain from "react-native-keychain";
 import secp256k1 from "secp256k1";
 
 import { rootStore } from "../../background/root-store";
-import { createSigningStargateClient, createStargateClient } from "../clients";
+import { createSigningStargateClient } from "../clients";
 import { lendFees } from "../fee-lender-worker";
 
 const BIOMETRICS_KEY = "obi-wallet-biometrics";
