@@ -1,9 +1,9 @@
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { Coin, StargateClient } from "@cosmjs/stargate";
+import { Coin } from "@cosmjs/stargate";
 import { toGenerator } from "@keplr-wallet/common";
 import { computed, flow, makeObservable, observable } from "mobx";
 
 import { Chain } from "../../chains";
+import { createCosmWasmClient, createStargateClient } from "../../clients";
 import { ChainStore } from "../chain";
 import { WalletStore } from "../wallet";
 
@@ -46,9 +46,12 @@ export class BalancesStore {
     const { address } = this.walletStore;
     if (!address) return;
 
-    const { rpc } = this.chainStore.currentChainInformation;
-    const client = yield* toGenerator(StargateClient.connect(rpc));
-    const wasmClient = yield* toGenerator(CosmWasmClient.connect(rpc));
+    const client = yield* toGenerator(
+      createStargateClient(this.chainStore.currentChain)
+    );
+    const wasmClient = yield* toGenerator(
+      createCosmWasmClient(this.chainStore.currentChain)
+    );
 
     const customBalances = async () => {
       const custom_coins: ExtendedCoin[] = [];
