@@ -88,10 +88,7 @@ const PrettyMessageExecuteContract = observer(
     const { walletStore } = useStore();
     const intl = useIntl();
 
-    if (
-      value.contract === walletStore.address &&
-      value.msg["propose_update_admin"] !== undefined
-    ) {
+    if (value.msg["propose_update_admin"] !== undefined) {
       return (
         <MessageElement
           icon={<ArrowUpIcon />}
@@ -103,10 +100,7 @@ const PrettyMessageExecuteContract = observer(
       );
     }
 
-    if (
-      value.contract === walletStore.address &&
-      value.msg["confirm_update_admin"] !== undefined
-    ) {
+    if (value.msg["confirm_update_admin"] !== undefined) {
       return (
         <MessageElement
           icon={<ArrowUpIcon />}
