@@ -13,6 +13,13 @@ export interface ExtendedCoin {
   amount: string;
   usdPrice: number;
 }
+export interface formatedExtendedCoin {
+  icon: any;
+  denom: string;
+  digits: number;
+  label: string;
+  amount: number;
+}
 
 export function useBalances() {
   const { demoStore, balancesStore, walletStore } = useStore();
