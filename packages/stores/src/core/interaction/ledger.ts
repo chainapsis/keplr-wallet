@@ -2,6 +2,8 @@ import { InteractionStore } from "./interaction";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
+  LedgerApp,
+  LedgerGetAppInUseMsg,
   LedgerGetWebHIDFlagMsg,
   LedgerSetWebHIDFlagMsg,
 } from "@keplr-wallet/background";
@@ -30,6 +32,7 @@ export class LedgerInitStore {
 
   @observable
   protected _isWebHID: boolean = false;
+  protected _appInUse: LedgerApp = LedgerApp.Cosmos;
 
   constructor(
     protected readonly interactionStore: InteractionStore,
@@ -38,6 +41,7 @@ export class LedgerInitStore {
     makeObservable(this);
 
     this.fetchIsWebHID();
+    this.fetchAppInUse();
   }
 
   @flow
@@ -59,8 +63,19 @@ export class LedgerInitStore {
     yield this.fetchIsWebHID();
   }
 
+  @flow
+  *fetchAppInUse() {
+    this._appInUse = yield* toGenerator(
+      this.msgRequester.sendMessage(BACKGROUND_PORT, new LedgerGetAppInUseMsg())
+    );
+  }
+
   get isWebHID(): boolean {
     return this._isWebHID;
+  }
+
+  get appInUse(): LedgerApp {
+    return this._appInUse;
   }
 
   @computed

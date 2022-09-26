@@ -52,7 +52,11 @@ export const AccountView: FunctionComponent = observer(() => {
                 id: "setting.keyring.unnamed-account",
               })
             : accountInfo.walletStatus === WalletStatus.Rejected
-            ? "Unable to Load Key"
+            ? accountInfo.rejectionReason &&
+              accountInfo.rejectionReason instanceof KeplrError &&
+              accountInfo.rejectionReason.code === 153
+              ? "Connect with Ledger"
+              : "Unable to Load Key"
             : "Loading..."}
         </div>
         <div style={{ flex: 1 }} />
@@ -63,10 +67,15 @@ export const AccountView: FunctionComponent = observer(() => {
             if (
               accountInfo.rejectionReason &&
               accountInfo.rejectionReason instanceof KeplrError &&
-              accountInfo.rejectionReason.module === "keyring" &&
-              accountInfo.rejectionReason.code === 152
+              accountInfo.rejectionReason.module === "keyring"
             ) {
-              return "Ledger is not supported for this chain";
+              if (accountInfo.rejectionReason.code === 152) {
+                // Return unsupported device message
+                return "Ledger is not supported for this chain";
+              } else if (accountInfo.rejectionReason.code === 153) {
+                // Return Ledger app rejection message
+                return accountInfo.rejectionReason.message;
+              }
             }
 
             let result = "Failed to load account by unknown reason";

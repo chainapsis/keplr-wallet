@@ -1,5 +1,6 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
+import { LedgerApp } from "./ledger";
 
 export class LedgerGetWebHIDFlagMsg extends Message<boolean> {
   public static type() {
@@ -44,5 +45,27 @@ export class LedgerSetWebHIDFlagMsg extends Message<void> {
 
   type(): string {
     return LedgerSetWebHIDFlagMsg.type();
+  }
+}
+
+export class LedgerGetAppInUseMsg extends Message<LedgerApp> {
+  public static type() {
+    return "ledger-get-app-in-use";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return LedgerGetAppInUseMsg.type();
   }
 }

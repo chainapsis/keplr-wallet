@@ -4,12 +4,21 @@ import { TransportIniter } from "./options";
 const CosmosApp: any = require("ledger-cosmos-js").default;
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
-import { signatureImport } from "secp256k1";
+import { signatureImport, publicKeyConvert } from "secp256k1";
 import { KeplrError } from "@keplr-wallet/router";
+import Eth from "@ledgerhq/hw-app-eth";
+import { EthSignType } from "@keplr-wallet/types";
+import { serialize } from "@ethersproject/transactions";
+
+export enum LedgerApp {
+  Cosmos,
+  Ethereum,
+}
 
 export enum LedgerInitErrorOn {
   Transport,
   App,
+  Support,
   Unknown,
 }
 
@@ -31,16 +40,33 @@ export class LedgerInitError extends Error {
 }
 
 export class Ledger {
-  constructor(private readonly cosmosApp: any) {}
+  constructor(
+    private readonly cosmosApp: any,
+    private ethereumApp: Eth | undefined = undefined
+  ) {}
 
   static async init(
     transportIniter: TransportIniter,
-    initArgs: any[] = []
+    initArgs: any[] = [],
+    app: LedgerApp = LedgerApp.Cosmos
   ): Promise<Ledger> {
     const transport = await transportIniter(...initArgs);
     try {
+      if (app === LedgerApp.Ethereum) {
+        const ethereumApp = new Eth(transport);
+        const ledger = new Ledger(null, ethereumApp);
+
+        // Ensure device is open and responsive. Getting the address
+        // will throw if the Ethereum app is not open, as intended.
+        const defaultPath = "m/44'/60'/0/0/0";
+        await ethereumApp.getAddress(defaultPath);
+
+        return ledger;
+      }
+
       const cosmosApp = new CosmosApp(transport);
-      const ledger = new Ledger(cosmosApp);
+
+      const ledger = new Ledger(cosmosApp, undefined);
       const versionResponse = await ledger.getVersion();
 
       // In this case, device is on screen saver.
@@ -90,17 +116,35 @@ export class Ledger {
     };
   }
 
-  async getPublicKey(path: number[]): Promise<Uint8Array> {
-    if (!this.cosmosApp) {
-      throw new KeplrError("ledger", 100, "Cosmos App not initialized");
-    }
+  async getPublicKey(app: LedgerApp, path: number[]): Promise<Uint8Array> {
+    if (app === LedgerApp.Ethereum) {
+      if (!this.ethereumApp) {
+        throw new KeplrError("ledger", 100, "Ethereum App not initialized");
+      }
 
-    const result = await this.cosmosApp.publicKey(path);
-    if (result.error_message !== "No errors") {
-      throw new Error(result.error_message);
-    }
+      try {
+        const result = await this.ethereumApp.getAddress(
+          Ledger.pathToString(path)
+        );
 
-    return result.compressed_pk;
+        const pubKey = Buffer.from(result.publicKey, "hex");
+        // Compress the public key
+        return publicKeyConvert(pubKey, true);
+      } catch (e: any) {
+        throw new Error(e);
+      }
+    } else {
+      if (!this.cosmosApp) {
+        throw new KeplrError("ledger", 100, "Cosmos App not initialized");
+      }
+
+      const result = await this.cosmosApp.publicKey(path);
+      if (result.error_message !== "No errors") {
+        throw new Error(result.error_message);
+      }
+
+      return result.compressed_pk;
+    }
   }
 
   async sign(path: number[], message: Uint8Array): Promise<Uint8Array> {
@@ -117,11 +161,96 @@ export class Ledger {
     return signatureImport(result.signature);
   }
 
+  async signEthereum(
+    path: number[],
+    signType: EthSignType,
+    message: Uint8Array
+  ) {
+    if (!this.ethereumApp) {
+      throw new KeplrError("ledger", 100, "Ethereum App not initialized");
+    }
+
+    const formattedPath = Ledger.pathToString(path);
+
+    let signature;
+
+    switch (signType) {
+      case EthSignType.MESSAGE:
+        signature = await this.ethereumApp.signPersonalMessage(
+          formattedPath,
+          Buffer.from(message).toString("hex")
+        );
+        return Ledger.ethSignatureToBytes(signature);
+      case EthSignType.TRANSACTION:
+        const tx = JSON.parse(Buffer.from(message).toString());
+        const rlpArray = serialize(tx).replace("0x", "");
+
+        signature = await this.ethereumApp.signTransaction(
+          formattedPath,
+          rlpArray
+        );
+
+        const signedTx = serialize(tx, {
+          r: `0x${signature.r}`,
+          s: `0x${signature.s}`,
+          v: parseInt(signature.v, 16),
+        }).replace("0x", "");
+
+        return Buffer.from(signedTx, "hex");
+      default:
+        throw new Error(
+          "Invalid EthSignType provided to Ledger: expected message or transaction"
+        );
+    }
+  }
+
   async close(): Promise<void> {
-    return await this.cosmosApp.transport.close();
+    if (this.cosmosApp) {
+      this.cosmosApp.transport.close();
+    }
+    if (this.ethereumApp) {
+      this.ethereumApp.transport.close();
+    }
   }
 
   static async isWebHIDSupported(): Promise<boolean> {
     return await TransportWebHID.isSupported();
+  }
+
+  // Convert a path represented by number[] to the string format
+  // expected by the Ethereum Ledger app.
+  static pathToString(path: number[]): string {
+    let res = "m";
+    let c = 0;
+    path.forEach((el) => {
+      res = res.concat(`/${el}`);
+      // Harden the first three values by default
+      if (c < 3) {
+        res = res.concat("'");
+      }
+      c++;
+    });
+
+    return res;
+  }
+
+  // Convert an Ethereum signature object to bytes to be returned.
+  static ethSignatureToBytes(signature: {
+    v: number;
+    r: string;
+    s: string;
+  }): Uint8Array {
+    // 32 bytes, or equivalently 64 hex characters
+    if (signature.r.length !== 64 || signature.s.length !== 64) {
+      throw new Error("Unable to process signature: malformed fields");
+    }
+
+    let v = signature.v.toString(16);
+    // Expect v to be greater than 27, but include this check in case
+    // it's subtracted or not included for any reason.
+    if (v.length % 2 !== 0) {
+      v = `0${v}`;
+    }
+    return Buffer.from(signature.r + signature.s + v, "hex");
   }
 }

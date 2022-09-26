@@ -1,4 +1,9 @@
-import { Ledger, LedgerWebHIDIniter, LedgerWebUSBIniter } from "./ledger";
+import {
+  Ledger,
+  LedgerApp,
+  LedgerWebHIDIniter,
+  LedgerWebUSBIniter,
+} from "./ledger";
 
 import delay from "delay";
 
@@ -8,9 +13,13 @@ import { KVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
 import { LedgerOptions } from "./options";
 import { Buffer } from "buffer/";
+import { EthSignType } from "@keplr-wallet/types";
 
 export class LedgerService {
-  private previousInitAborter: ((e: Error) => void) | undefined;
+  private previousInitAborter: Record<
+    number,
+    ((e: Error) => void) | undefined
+  > = {};
 
   protected options: LedgerOptions;
 
@@ -37,13 +46,17 @@ export class LedgerService {
     this.interactionService = interactionService;
   }
 
-  async getPublicKey(env: Env, bip44HDPath: BIP44HDPath): Promise<Uint8Array> {
-    return await this.useLedger(env, async (ledger, retryCount) => {
+  async getPublicKey(
+    env: Env | undefined,
+    app: LedgerApp,
+    coinType: number,
+    bip44HDPath: BIP44HDPath
+  ): Promise<Uint8Array> {
+    return await this.useLedger(env, app, async (ledger, retryCount) => {
       try {
-        // Cosmos App on Ledger doesn't support the coin type other than 118.
-        return await ledger.getPublicKey([
+        return await ledger.getPublicKey(app, [
           44,
-          118,
+          coinType,
           bip44HDPath.account,
           bip44HDPath.change,
           bip44HDPath.addressIndex,
@@ -61,65 +74,132 @@ export class LedgerService {
   }
 
   async sign(
-    env: Env,
+    env: Env | undefined,
     bip44HDPath: BIP44HDPath,
     expectedPubKey: Uint8Array,
     message: Uint8Array
   ): Promise<Uint8Array> {
-    return await this.useLedger(env, async (ledger, retryCount: number) => {
-      try {
-        const pubKey = await ledger.getPublicKey([
-          44,
-          118,
-          bip44HDPath.account,
-          bip44HDPath.change,
-          bip44HDPath.addressIndex,
-        ]);
-        if (
-          Buffer.from(expectedPubKey).toString("hex") !==
-          Buffer.from(pubKey).toString("hex")
-        ) {
-          throw new KeplrError("ledger", 110, "Unmatched public key");
-        }
-        // Cosmos App on Ledger doesn't support the coin type other than 118.
-        const signature = await ledger.sign(
-          [
+    const app = LedgerApp.Cosmos;
+
+    return await this.useLedger(
+      env,
+      app,
+      async (ledger, retryCount: number) => {
+        try {
+          const pubKey = await ledger.getPublicKey(app, [
             44,
             118,
             bip44HDPath.account,
             bip44HDPath.change,
             bip44HDPath.addressIndex,
-          ],
-          message
-        );
-        // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
-        if (retryCount > 0) {
-          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
-            event: "sign",
-            success: true,
-          });
+          ]);
+          if (
+            Buffer.from(expectedPubKey).toString("hex") !==
+            Buffer.from(pubKey).toString("hex")
+          ) {
+            throw new KeplrError("ledger", 110, "Unmatched public key");
+          }
+          // Cosmos App on Ledger doesn't support the coin type other than 118.
+          const signature: Uint8Array = await ledger.sign(
+            [
+              44,
+              118,
+              bip44HDPath.account,
+              bip44HDPath.change,
+              bip44HDPath.addressIndex,
+            ],
+            message
+          );
+          // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
+          if (retryCount > 0) {
+            this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+              event: "sign",
+              success: true,
+            });
+          }
+          return signature;
+        } catch (e) {
+          // Notify UI Ledger signing failed only when Ledger initialization is tried again.
+          if (retryCount > 0) {
+            this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+              event: "sign",
+              success: false,
+            });
+          }
+          throw e;
         }
-        return signature;
-      } catch (e) {
-        // Notify UI Ledger signing failed only when Ledger initialization is tried again.
-        if (retryCount > 0) {
-          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
-            event: "sign",
-            success: false,
-          });
-        }
-        throw e;
       }
-    });
+    );
+  }
+
+  async signEthereum(
+    env: Env,
+    type: EthSignType,
+    bip44HDPath: BIP44HDPath,
+    expectedPubKey: Uint8Array,
+    message: Uint8Array
+  ): Promise<Uint8Array> {
+    const app = LedgerApp.Ethereum;
+
+    return await this.useLedger(
+      env,
+      app,
+      async (ledger, retryCount: number) => {
+        try {
+          const pubKey = await ledger.getPublicKey(app, [
+            44,
+            60,
+            bip44HDPath.account,
+            bip44HDPath.change,
+            bip44HDPath.addressIndex,
+          ]);
+          if (
+            Buffer.from(expectedPubKey).toString("hex") !==
+            Buffer.from(pubKey).toString("hex")
+          ) {
+            throw new KeplrError("ledger", 110, "Unmatched public key");
+          }
+          const signature = await ledger.signEthereum(
+            [
+              44,
+              60,
+              bip44HDPath.account,
+              bip44HDPath.change,
+              bip44HDPath.addressIndex,
+            ],
+            type,
+            message
+          );
+          // Notify UI Ledger signing succeeded only when Ledger initialization is tried again.
+          if (retryCount > 0) {
+            this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+              event: "sign",
+              success: true,
+            });
+          }
+          return signature;
+        } catch (e) {
+          // Notify UI Ledger signing failed only when Ledger initialization is tried again.
+          if (retryCount > 0) {
+            this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+              event: "sign",
+              success: false,
+            });
+          }
+          throw e;
+        }
+      }
+    );
   }
 
   async useLedger<T>(
-    env: Env,
+    env: Env | undefined,
+    app: LedgerApp,
     fn: (ledger: Ledger, retryCount: number) => Promise<T>
   ): Promise<T> {
     let ledger: { ledger: Ledger; retryCount: number } | undefined;
     try {
-      ledger = await this.initLedger(env);
+      ledger = await this.initLedger(env, app);
       return await fn(ledger.ledger, ledger.retryCount);
     } finally {
       if (ledger) {
@@ -128,9 +208,13 @@ export class LedgerService {
     }
   }
 
-  async initLedger(env: Env): Promise<{ ledger: Ledger; retryCount: number }> {
-    if (this.previousInitAborter) {
-      this.previousInitAborter(
+  async initLedger(
+    env: Env | undefined,
+    app: LedgerApp
+  ): Promise<{ ledger: Ledger; retryCount: number }> {
+    const initAborter = this.previousInitAborter[app];
+    if (initAborter) {
+      initAborter(
         new Error(
           "New ledger request occurred before the ledger was initialized"
         )
@@ -156,7 +240,7 @@ export class LedgerService {
 
     // This ensures that the ledger connection is not executed concurrently.
     // Without this, the prior signing request can be delivered to the ledger and possibly make a user take a mistake.
-    this.previousInitAborter = aborter.abort;
+    this.previousInitAborter[app] = aborter.abort;
 
     let retryCount = 0;
     let initArgs: any[] = [];
@@ -168,14 +252,22 @@ export class LedgerService {
           throw new KeplrError("ledger", 112, `Unknown mode: ${mode}`);
         }
 
-        const ledger = await Ledger.init(transportIniter, initArgs);
-        this.previousInitAborter = undefined;
+        const ledger = await Ledger.init(transportIniter, initArgs, app);
+        this.previousInitAborter[app] = undefined;
         return {
           ledger,
           retryCount,
         };
       } catch (e) {
         console.log(e);
+
+        if (!env) {
+          // If no env is provided, skip interaction and throw the original error
+          throw e;
+        }
+
+        // Set the app in use for the interaction
+        await this.kvStore.set<number>("ledger-app-in-use", app);
 
         const timeoutAbortController = new AbortController();
 
@@ -301,5 +393,10 @@ export class LedgerService {
 
   async setWebHIDFlag(flag: boolean): Promise<void> {
     await this.kvStore.set<boolean>("webhid", flag);
+  }
+
+  async getLedgerAppInUse(): Promise<LedgerApp> {
+    const app = await this.kvStore.get<number>("ledger-app-in-use");
+    return app || LedgerApp.Cosmos;
   }
 }
