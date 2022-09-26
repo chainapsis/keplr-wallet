@@ -129,23 +129,6 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
         return false;
       }
 
-      if (
-        // Check for whitespaces in beginning and end of string
-        securityAnswer.startsWith(" ") ||
-        securityAnswer.endsWith(" ")
-      ) {
-        Alert.alert(
-          intl.formatMessage({
-            id: "onboarding2.error.securityanswerwhitespaces.title",
-          }),
-          intl.formatMessage({
-            id: "onboarding2.error.securityanswerwhitespaces.text",
-          })
-        );
-        setMagicButtonDisabledDoubleclick(false);
-        return false;
-      }
-
       return true;
     };
 
@@ -275,7 +258,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                 securityAnswer={securityAnswer}
                 onSecurityAnswerChange={(inputText) => {
                   console.log(inputText);
-                  const reg = /([^A-Za-z.\sáéíóúñü_-])/;
+                  const reg = /([^A-Za-z0-9.\sáéíóúñü_-])/;
                   if (!reg.test(inputText)) {
                     setSecurityAnswer(inputText);
                   }

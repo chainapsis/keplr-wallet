@@ -66,12 +66,14 @@ export const KeysConfigScreen = observer(() => {
   }: {
     id: MultisigKey;
     title: string;
-  }): Key & { activated: boolean } {
+  }): Key & { activated: boolean; disabled: boolean } {
     const activated = currentAdmin?.[id] !== null;
+    const disabled = false;
     return {
       id,
       title,
       activated,
+      disabled,
       right: activated ? <CheckIcon /> : <WarningIcon />,
       onPress: () => {
         triggerBottomSheet(0);
@@ -108,7 +110,23 @@ export const KeysConfigScreen = observer(() => {
         defaultMessage: "Social Key",
       }),
     }),
-    // getKey({ id: "cloud", title: intl.formatMessage({ id: "settings.multisig.option.cloudkey", defaultMessage:"Cloud" }) }),
+    // KLUDGE for party demo, rm later
+    {
+      id: "email",
+      title: intl.formatMessage({
+        id: "settings.multisig.option.emailkey",
+        defaultMessage: "Email Key",
+      }),
+      activated: false,
+    },
+    {
+      id: "cloud",
+      title: intl.formatMessage({
+        id: "settings.multisig.option.cloudkey",
+        defaultMessage: "Cloud Key",
+      }),
+      activated: false,
+    },
   ];
 
   const activatedKeys = data.filter((item) => item.activated).length;
@@ -259,7 +277,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           }
         }}
         style={{
-          paddingVertical: 15,
+          paddingVertical: 5,
           width: "100%",
           backgroundColor: "#59D6E6",
           borderRadius: 12,
@@ -386,7 +404,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
             >
               <FormattedMessage
                 id="settings.multisig.modal.info"
-                defaultMessage="In case of stolen/lost or any other reason, you can replace this key with a new one."
+                defaultMessage="In case this key is stolen/lost or for any other reason, you can replace it with a new one."
               />
             </Text>
           </>
