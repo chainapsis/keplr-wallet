@@ -9,7 +9,6 @@ import { Button } from "reactstrap";
 
 import {
   Ledger,
-  LedgerApp,
   LedgerInitErrorOn,
   LedgerWebHIDIniter,
   LedgerWebUSBIniter,
@@ -71,23 +70,12 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
     ledgerInitStore.isInitAborted,
   ]);
 
-  // Fetch page initializers
-  useEffect(() => {
-    (async () => {
-      await ledgerInitStore.fetchAppInUse();
-      setLedgerAppInUse(
-        ledgerInitStore.appInUse === LedgerApp.Cosmos ? "Cosmos" : "Ethereum"
-      );
-    })();
-  });
-
   const [initTryCount, setInitTryCount] = useState(0);
   const [initErrorOn, setInitErrorOn] = useState<LedgerInitErrorOn | undefined>(
     undefined
   );
   const [tryInitializing, setTryInitializing] = useState(false);
   const [initSucceed, setInitSucceed] = useState(false);
-  const [ledgerAppInUse, setLedgerAppInUse] = useState<string | undefined>();
 
   const tryInit = async () => {
     setInitTryCount(initTryCount + 1);
@@ -96,9 +84,7 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
 
     try {
       const ledger = await Ledger.init(
-        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter,
-        undefined,
-        ledgerInitStore.appInUse
+        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter
       );
       await ledger.close();
       // Unfortunately, closing ledger blocks the writing to Ledger on background process.
@@ -129,8 +115,6 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
     <EmptyLayout className={style.container}>
       {ledgerInitStore.isSignCompleted ? (
         <SignCompleteDialog rejected={ledgerInitStore.isSignRejected} />
-      ) : ledgerAppInUse === undefined ? (
-        <></>
       ) : initSucceed ? (
         <ConfirmLedgerDialog />
       ) : (
@@ -149,29 +133,14 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
           />
           <Instruction
             icon={
-              ledgerInitStore.appInUse === LedgerApp.Cosmos ? (
-                <img
-                  src={require("../../public/assets/img/atom-o.svg")}
-                  style={{ height: "34px" }}
-                  alt="atom"
-                />
-              ) : (
-                <img
-                  src={require("../../public/assets/img/icons8-ethereum.svg")}
-                  style={{ height: "44px" }}
-                  alt="ethereum"
-                />
-              )
+              <img
+                src={require("../../public/assets/img/atom-o.svg")}
+                style={{ height: "34px" }}
+                alt="atom"
+              />
             }
             title={intl.formatMessage({ id: "ledger.step2" })}
-            paragraph={intl.formatMessage(
-              {
-                id: "ledger.step2.paragraph",
-              },
-              {
-                ledgerApp: ledgerAppInUse,
-              }
-            )}
+            paragraph={intl.formatMessage({ id: "ledger.step2.paragraph" })}
             pass={initTryCount > 0 && initErrorOn == null}
           />
           <div style={{ flex: 1 }} />

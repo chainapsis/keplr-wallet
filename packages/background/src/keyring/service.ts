@@ -341,7 +341,6 @@ export class KeyRingService {
 
       try {
         const signatureBytes = await this.keyRing.signEthereum(
-          env,
           chainId,
           coinType,
           signBytes,
