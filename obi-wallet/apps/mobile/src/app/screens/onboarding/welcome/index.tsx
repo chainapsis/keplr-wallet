@@ -127,24 +127,24 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             )}
           </Text>
           {renderContinueButton(multisigStore.getKeyInRecovery)}
-          {/*{multisigStore.getKeyInRecovery === null ? (*/}
-          {/*  <Button*/}
-          {/*    label={intl.formatMessage({ id: "demo.enter" })}*/}
-          {/*    RightIcon={GetStarted}*/}
-          {/*    flavor="green"*/}
-          {/*    style={{*/}
-          {/*      marginTop: 20,*/}
-          {/*    }}*/}
-          {/*    onPress={action(() => {*/}
-          {/*      demoStore.demoMode = true;*/}
-          {/*      navigation.navigate("create-multisig-biometrics");*/}
-          {/*      Alert.alert(*/}
-          {/*        intl.formatMessage({ id: "demo.demomode" }),*/}
-          {/*        intl.formatMessage({ id: "demo.info" })*/}
-          {/*      );*/}
-          {/*    })}*/}
-          {/*  />*/}
-          {/*) : null}*/}
+          {multisigStore.getKeyInRecovery === null ? (
+            <Button
+              label={intl.formatMessage({ id: "demo.enter" })}
+              RightIcon={GetStarted}
+              flavor="green"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={action(() => {
+                demoStore.demoMode = true;
+                navigation.navigate("create-multisig-biometrics");
+                Alert.alert(
+                  intl.formatMessage({ id: "demo.demomode" }),
+                  intl.formatMessage({ id: "demo.info" })
+                );
+              })}
+            />
+          ) : null}
           {multisigStore.getKeyInRecovery === null ? (
             <Button
               label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}
