@@ -253,7 +253,7 @@ const handleGetKeyMsg: (
       msg.origin
     );
 
-    const key = await service.getKey(msg.chainId);
+    const key = await service.getKey(env, msg.chainId);
 
     return {
       name: service.getKeyStoreMeta("name"),
@@ -301,6 +301,7 @@ const handleRequestVerifyADR36AminoSignDoc: (
     );
 
     return await service.verifyADR36AminoSignDoc(
+      env,
       msg.chainId,
       msg.signer,
       msg.data,
@@ -368,8 +369,8 @@ const handleChangeKeyRingMsg: (
 const handleGetIsKeyStoreCoinTypeSetMsg: (
   service: KeyRingService
 ) => InternalHandler<GetIsKeyStoreCoinTypeSetMsg> = (service) => {
-  return (_, msg) => {
-    return service.getKeyStoreBIP44Selectables(msg.chainId, msg.paths);
+  return (env, msg) => {
+    return service.getKeyStoreBIP44Selectables(env, msg.chainId, msg.paths);
   };
 };
 

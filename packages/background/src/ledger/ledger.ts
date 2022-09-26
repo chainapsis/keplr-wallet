@@ -1,19 +1,19 @@
 import { TransportIniter } from "./options";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const CosmosApp: any = require("ledger-cosmos-js").default;
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
-import { signatureImport, publicKeyConvert } from "secp256k1";
+import { publicKeyConvert, signatureImport } from "secp256k1";
 import { KeplrError } from "@keplr-wallet/router";
 import Eth from "@ledgerhq/hw-app-eth";
 import { EthSignType } from "@keplr-wallet/types";
 import { BIP44HDPath } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const CosmosApp: any = require("ledger-cosmos-js").default;
+
 export enum LedgerApp {
-  Cosmos,
-  Ethereum,
+  Cosmos = "cosmos",
+  Ethereum = "ethereum",
 }
 
 export enum LedgerInitErrorOn {
@@ -55,9 +55,7 @@ export class Ledger {
     try {
       if (app === LedgerApp.Ethereum) {
         const ethereumApp = new Eth(transport);
-        const ledger = new Ledger(null, ethereumApp);
-
-        return ledger;
+        return new Ledger(null, ethereumApp);
       }
 
       const cosmosApp = new CosmosApp(transport);
@@ -112,7 +110,7 @@ export class Ledger {
     };
   }
 
-  async getPublicKey(app: LedgerApp, path: number[]): Promise<Uint8Array> {
+  async getPublicKey(app: LedgerApp, fields: BIP44HDPath): Promise<Uint8Array> {
     if (app === LedgerApp.Ethereum) {
       if (!this.ethereumApp) {
         throw new KeplrError("ledger", 100, "Ethereum App not initialized");
@@ -120,7 +118,7 @@ export class Ledger {
 
       try {
         const result = await this.ethereumApp.getAddress(
-          Ledger.pathToString(path)
+          Ledger.pathToString(Ledger.createPath(60, fields))
         );
 
         const pubKey = Buffer.from(result.publicKey, "hex");
@@ -134,7 +132,9 @@ export class Ledger {
         throw new KeplrError("ledger", 100, "Cosmos App not initialized");
       }
 
-      const result = await this.cosmosApp.publicKey(path);
+      const result = await this.cosmosApp.publicKey(
+        Ledger.createPath(118, fields)
+      );
       if (result.error_message !== "No errors") {
         throw new Error(result.error_message);
       }
@@ -143,12 +143,15 @@ export class Ledger {
     }
   }
 
-  async sign(path: number[], message: Uint8Array): Promise<Uint8Array> {
+  async sign(fields: BIP44HDPath, message: Uint8Array): Promise<Uint8Array> {
     if (!this.cosmosApp) {
       throw new KeplrError("ledger", 100, "Cosmos App not initialized");
     }
 
-    const result = await this.cosmosApp.sign(path, message);
+    const result = await this.cosmosApp.sign(
+      Ledger.createPath(118, fields),
+      message
+    );
     if (result.error_message !== "No errors") {
       throw new Error(result.error_message);
     }
@@ -158,7 +161,7 @@ export class Ledger {
   }
 
   async signEthereum(
-    path: number[],
+    fields: BIP44HDPath,
     signType: EthSignType,
     message: Uint8Array
   ) {
@@ -166,7 +169,7 @@ export class Ledger {
       throw new KeplrError("ledger", 100, "Ethereum App not initialized");
     }
 
-    const formattedPath = Ledger.pathToString(path);
+    const formattedPath = Ledger.pathToString(Ledger.createPath(60, fields));
 
     let signature;
 
@@ -202,10 +205,10 @@ export class Ledger {
 
   async close(): Promise<void> {
     if (this.cosmosApp) {
-      this.cosmosApp.transport.close();
+      await this.cosmosApp.transport.close();
     }
     if (this.ethereumApp) {
-      this.ethereumApp.transport.close();
+      await this.ethereumApp.transport.close();
     }
   }
 
@@ -220,6 +223,10 @@ export class Ledger {
   // Convert a path represented by number[] to the string format
   // expected by the Ethereum Ledger app.
   static pathToString(path: number[]): string {
+    if (path.length !== 5) {
+      throw new Error(`Invalid path for bip44: ${path.join(",")}`);
+    }
+
     let res = "m";
     let c = 0;
     path.forEach((el) => {

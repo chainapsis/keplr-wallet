@@ -144,7 +144,7 @@ export class SecretWasmService {
   // this case can be problem if the cache doesn't exist and key type is ledger,
   // because multiple requests to ledger will make the connection unstable.
   protected async getSeed(env: Env, chainInfo: ChainInfo): Promise<Uint8Array> {
-    const key = await this.keyRingService.getKey(chainInfo.chainId);
+    const key = await this.keyRingService.getKey(env, chainInfo.chainId);
     const bech32Address = new Bech32Address(key.address).toBech32(
       chainInfo.bech32Config.bech32PrefixAccAddr
     );

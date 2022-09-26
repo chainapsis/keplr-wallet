@@ -56,7 +56,7 @@ export class TokensService {
   ) {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
 
-    const find = (await this.getTokens(chainId)).find(
+    const find = (await this.getTokens(env, chainId)).find(
       (currency) =>
         "contractAddress" in currency &&
         currency.contractAddress === contractAddress
@@ -67,7 +67,7 @@ export class TokensService {
       // just try to change the viewing key.
       if (viewingKey) {
         if ("type" in find && find.type === "secret20") {
-          await this.addToken(chainId, {
+          await this.addToken(env, chainId, {
             ...find,
             viewingKey,
           });
@@ -96,15 +96,15 @@ export class TokensService {
       params
     );
 
-    await this.addToken(chainId, appCurrency as AppCurrency);
+    await this.addToken(env, chainId, appCurrency as AppCurrency);
   }
 
-  async addToken(chainId: string, currency: AppCurrency) {
+  async addToken(env: Env, chainId: string, currency: AppCurrency) {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
 
     currency = await TokensService.validateCurrency(chainInfo, currency);
 
-    const chainCurrencies = await this.getTokens(chainId);
+    const chainCurrencies = await this.getTokens(env, chainId);
 
     const isTokenForAccount =
       "type" in currency && currency.type === "secret20";
@@ -126,28 +126,28 @@ export class TokensService {
       currencies.push(currency);
       await this.saveTokensToChain(chainId, currencies);
     } else {
-      const currencies = await this.getTokensFromChainAndAccount(chainId);
+      const currencies = await this.getTokensFromChainAndAccount(env, chainId);
       if (!isCurrencyUpdated) {
         currencies.push(currency);
-        await this.saveTokensToChainAndAccount(chainId, currencies);
+        await this.saveTokensToChainAndAccount(env, chainId, currencies);
       } else {
         const index = currencies.findIndex(
           (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
         );
         if (index >= 0) {
           currencies[index] = currency;
-          await this.saveTokensToChainAndAccount(chainId, currencies);
+          await this.saveTokensToChainAndAccount(env, chainId, currencies);
         }
       }
     }
   }
 
-  async removeToken(chainId: string, currency: AppCurrency) {
+  async removeToken(env: Env, chainId: string, currency: AppCurrency) {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
 
     currency = await TokensService.validateCurrency(chainInfo, currency);
 
-    const chainCurrencies = await this.getTokens(chainId);
+    const chainCurrencies = await this.getTokens(env, chainId);
 
     const isTokenForAccount =
       "type" in currency && currency.type === "secret20";
@@ -171,13 +171,13 @@ export class TokensService {
       await this.saveTokensToChain(chainId, currencies);
     } else {
       const currencies = (
-        await this.getTokensFromChainAndAccount(chainId)
+        await this.getTokensFromChainAndAccount(env, chainId)
       ).filter((cur) => cur.coinMinimalDenom !== currency.coinMinimalDenom);
-      await this.saveTokensToChainAndAccount(chainId, currencies);
+      await this.saveTokensToChainAndAccount(env, chainId, currencies);
     }
   }
 
-  public async getTokens(chainId: string): Promise<AppCurrency[]> {
+  public async getTokens(env: Env, chainId: string): Promise<AppCurrency[]> {
     const chainIdHelper = ChainIdHelper.parse(chainId);
 
     const chainCurrencies =
@@ -185,7 +185,7 @@ export class TokensService {
 
     let keyCurrencies: AppCurrency[] = [];
     if (this.keyRingService.keyRingStatus === KeyRingStatus.UNLOCKED) {
-      const currentKey = await this.keyRingService.getKey(chainId);
+      const currentKey = await this.keyRingService.getKey(env, chainId);
 
       keyCurrencies =
         (await this.kvStore.get<AppCurrency[]>(
@@ -225,11 +225,12 @@ export class TokensService {
   }
 
   private async getTokensFromChainAndAccount(
+    env: Env,
     chainId: string
   ): Promise<AppCurrency[]> {
     const chainIdHelper = ChainIdHelper.parse(chainId);
 
-    const currentKey = await this.keyRingService.getKey(chainId);
+    const currentKey = await this.keyRingService.getKey(env, chainId);
     return (
       (await this.kvStore.get<Promise<AppCurrency[]>>(
         `${chainIdHelper.identifier}-${Buffer.from(currentKey.address).toString(
@@ -240,12 +241,13 @@ export class TokensService {
   }
 
   private async saveTokensToChainAndAccount(
+    env: Env,
     chainId: string,
     currencies: AppCurrency[]
   ) {
     const chainIdHelper = ChainIdHelper.parse(chainId);
 
-    const currentKey = await this.keyRingService.getKey(chainId);
+    const currentKey = await this.keyRingService.getKey(env, chainId);
     const hexAddress = Buffer.from(currentKey.address).toString("hex");
     await this.kvStore.set(
       `${chainIdHelper.identifier}-${hexAddress}`,
@@ -281,10 +283,11 @@ export class TokensService {
   }
 
   async getSecret20ViewingKey(
+    env: Env,
     chainId: string,
     contractAddress: string
   ): Promise<string> {
-    const tokens = await this.getTokens(chainId);
+    const tokens = await this.getTokens(env, chainId);
 
     for (const currency of tokens) {
       if ("type" in currency && currency.type === "secret20") {
@@ -304,7 +307,7 @@ export class TokensService {
     origin: string
   ) {
     // Ensure that the secret20 was registered.
-    await this.getSecret20ViewingKey(chainId, contractAddress);
+    await this.getSecret20ViewingKey(env, chainId, contractAddress);
 
     const type = getSecret20ViewingKeyPermissionType(contractAddress);
 

@@ -215,8 +215,9 @@ export class KeyRingService {
     return this.keyRing.status;
   }
 
-  async getKey(chainId: string): Promise<Key> {
+  async getKey(env: Env, chainId: string): Promise<Key> {
     return this.keyRing.getKey(
+      env,
       chainId,
       await this.chainsService.getChainCoinType(chainId),
       (await this.chainsService.getChainEthereumKeyFeatures(chainId)).address
@@ -254,6 +255,7 @@ export class KeyRingService {
     );
 
     const key = await this.keyRing.getKey(
+      env,
       chainId,
       coinType,
       ethereumKeyFeatures.address
@@ -341,6 +343,7 @@ export class KeyRingService {
 
       try {
         const signatureBytes = await this.keyRing.signEthereum(
+          env,
           chainId,
           coinType,
           signBytes,
@@ -391,6 +394,7 @@ export class KeyRingService {
     );
 
     const key = await this.keyRing.getKey(
+      env,
       chainId,
       coinType,
       ethereumKeyFeatures.address
@@ -446,6 +450,7 @@ export class KeyRingService {
   }
 
   async verifyADR36AminoSignDoc(
+    env: Env,
     chainId: string,
     signer: string,
     data: Uint8Array,
@@ -457,6 +462,7 @@ export class KeyRingService {
     );
 
     const key = await this.keyRing.getKey(
+      env,
       chainId,
       coinType,
       ethereumKeyFeatures.address
@@ -582,6 +588,7 @@ export class KeyRingService {
   }
 
   async getKeyStoreBIP44Selectables(
+    env: Env,
     chainId: string,
     paths: BIP44[]
   ): Promise<{ readonly path: BIP44; readonly bech32Address: string }[]> {
@@ -594,6 +601,7 @@ export class KeyRingService {
 
     for (const path of paths) {
       const key = await this.keyRing.getKeyFromCoinType(
+        env,
         path.coinType,
         (await this.chainsService.getChainEthereumKeyFeatures(chainId)).address
       );

@@ -33,6 +33,9 @@ describe("ledger utils", () => {
     ];
 
     expect(Ledger.pathToString(path2)).toBe("m/44'/60'/0'/1/1");
+
+    expect(() => Ledger.pathToString([44, 60, 0, 1])).toThrow();
+    expect(() => Ledger.pathToString([44, 60, 0, 1, 1, 1])).toThrow();
   });
 
   it("converts ethereum signatures to bytes", () => {
