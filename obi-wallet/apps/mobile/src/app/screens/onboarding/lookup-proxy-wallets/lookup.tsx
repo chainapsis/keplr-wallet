@@ -131,7 +131,7 @@ export function Lookup({ address, onSelect, onCancel }: LookupProps) {
                 ) : (
                   <FormattedMessage
                     id="recover.choosewallet.subtextnone"
-                    defaultMessage="We found no Obi Wallets associated with your phone number and security answer Please try a different combination."
+                    defaultMessage="We found no Obi Wallets associated with your phone number and security answer. Please try a different combination."
                   />
                 )}
               </Text>
