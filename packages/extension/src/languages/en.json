@@ -166,7 +166,7 @@
   "register.welcome.content": "Open the extension and sign in to begin your interchain journey.",
   "register.welcome.button.done": "Done",
 
-  "chain.suggested.title": "Chain Add Request",
+  "chain.suggested.title": "Add {chainName} to Keplr",
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
   "chain.suggested.button.approve": "Approve",
   "chain.suggested.button.reject": "Reject",

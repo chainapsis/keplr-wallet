@@ -32,14 +32,39 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
   return (
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
       <div className={style.container}>
-        <img
-          src={require("../../../public/assets/logo-256.png")}
-          alt="logo"
-          style={{ width: "92px", height: "92px", margin: "0 auto" }}
-        />
+        <div className={style.logo}>
+          <div className={style.imageContainer}>
+            <img
+              className={style.logoImage}
+              src={require("../../../public/assets/logo-256.png")}
+              alt="chain logo"
+            />
+          </div>
+          <div className={style.dots}>
+            <div className={style.dot} />
+            <div className={style.dot} />
+            <div className={style.dot} />
+          </div>
+          <div className={style.imageContainer}>
+            <img
+              className={style.logoImage}
+              src={require("../../../public/assets/logo-256.png")}
+              alt="keplr logo"
+            />
+          </div>
+        </div>
         <h1 className={style.header}>
-          <FormattedMessage id="chain.suggested.title" />
+          <FormattedMessage
+            id="chain.suggested.title"
+            values={{
+              chainName:
+                chainSuggestStore.waitingSuggestedChainInfo?.data.chainName,
+            }}
+          />
         </h1>
+        <div className={style.tag}>
+          <div>Community Driven</div>
+        </div>
         <p className={style.paragraph}>
           <FormattedMessage
             id="chain.suggested.paragraph"

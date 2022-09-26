@@ -154,7 +154,7 @@
   "register.welcome.content": "확장 프로그램을 열고 로그인하여 인터체인 여행을 시작하세요.",
   "register.welcome.button.done": "완료",
 
-  "chain.suggested.title": "체인 추가 요청",
+  "chain.suggested.title": "{chainName} 체인 추가",
   "chain.suggested.paragraph": "<b>{host}</b>가 <b>{chainId}</b> 블록체인을 케플러에 추가하길 원합니다.",
   "chain.suggested.button.approve": "허락",
   "chain.suggested.button.reject": "거부",
