@@ -165,8 +165,8 @@
   "settings.multisig.option.phonekey": "Clave de número de teléfono",
   "settings.multisig.option.biometricskey": "Clave Biométrica",
   "settings.multisig.option.socialkey": "Clave Social",
-  "settings.multisig.option.emailkey": "Correo electrónico",
-  "settings.multisig.option.cloudkey": "Nube",
+  "settings.multisig.option.emailkey": "E-mail (Próximamente)",
+  "settings.multisig.option.cloudkey": "Cloud (Próximamente)",
 
   "apps.kado": "Compra Cripto",
   "apps.gettickets": "Get Tickets",
