@@ -145,8 +145,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               })}
             />
           ) : null}
-          {multisigStore.getKeyInRecovery === null ? (
-            /* <Button
+          {multisigStore.getKeyInRecovery === null /* <Button
               label={intl.formatMessage({ id: "onboarding1.recoversinglesig" })}
               RightIcon={GetStarted}
               flavor="blue"
@@ -157,9 +156,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 demoStore.demoMode = false;
                 navigation.navigate("recover-singlesig");
               })}
-            /> */
-            null
-          ) : (
+            /> */ ? null : (
             <Button
               label="Cancel"
               RightIcon={GetStarted}

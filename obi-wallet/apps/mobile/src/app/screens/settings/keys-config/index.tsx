@@ -66,7 +66,7 @@ export const KeysConfigScreen = observer(() => {
   }: {
     id: MultisigKey;
     title: string;
-  }): Key & { activated: boolean, disabled: boolean } {
+  }): Key & { activated: boolean; disabled: boolean } {
     const activated = currentAdmin?.[id] !== null;
     const disabled = false;
     return {

@@ -1,6 +1,6 @@
 import { MultisigKey, Text } from "@obi-wallet/common";
-import { useIntl } from "react-intl";
 import { FC } from "react";
+import { useIntl } from "react-intl";
 import {
   FlatList,
   StyleProp,
@@ -50,15 +50,10 @@ export interface KeysListProps {
   tiled?: boolean;
 }
 
-const intl = useIntl();
-
 const comingSoonKeys: HydratedKeyListItem[] = [
   {
     id: "email",
-    title: intl.formatMessage({
-      id: "settings.multisig.option.emailkey",
-      defaultMessage: "E-mail Key",
-    }),
+    title: "E-mail Key",
     description: "Coming Soon",
     right: <View />,
     onPress: () => null,
@@ -66,10 +61,7 @@ const comingSoonKeys: HydratedKeyListItem[] = [
   },
   {
     id: "cloud",
-    title: intl.formatMessage({
-      id: "settings.multisig.option.cloudkey",
-      defaultMessage: "Cloud Key",
-    }),
+    title: "Cloud Key",
     description: "Coming Soon",
     right: <View />,
     onPress: () => null,
