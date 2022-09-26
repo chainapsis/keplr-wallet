@@ -14,7 +14,6 @@ import {
   TxBodyEncodeObject,
 } from "@cosmjs/proto-signing";
 import {
-  Account,
   AminoConverters,
   AminoTypes,
   createAuthzAminoConverters,
@@ -69,6 +68,7 @@ export interface SignatureModalProps extends ModalProps {
   rawMessages: EncodeObject[];
   multisig?: Multisig | null;
   cancelable?: boolean;
+  hiddenKeyIds?: MultisigKey[];
 
   onCancel(): void;
 
@@ -130,6 +130,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
     multisig,
     onCancel,
     onConfirm,
+    hiddenKeyIds,
     ...props
   }: SignatureModalProps) {
     const intl = useIntl();
@@ -249,7 +250,9 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
           defaultMessage: "Phone Number Signature",
         }),
       }),
-    ];
+    ].filter((key) => {
+      return hiddenKeyIds ? !hiddenKeyIds.includes(key.id) : true;
+    });
     const [loading, setLoading] = useState(false);
 
     if (!threshold) return null;

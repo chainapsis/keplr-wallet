@@ -3,7 +3,9 @@ import { MultisigPhoneNumberConfirm } from "./common/2-phone-number-confirm";
 import { MultisigBiometrics } from "./common/3-biometrics";
 import { MultisigSocial } from "./common/4-social";
 import { MultisigInit } from "./create-multisig-init";
+import { LookupProxyWallets } from "./lookup-proxy-wallets";
 import { OnboardingStack } from "./onboarding-stack";
+import { RecoverMultisig } from "./recover-multisig";
 import { RecoverSinglesig } from "./recover-singlesig";
 import { ReplaceMultisig } from "./replace-multisig-key";
 import { Welcome } from "./welcome";
@@ -46,8 +48,16 @@ export function OnboardingScreen({ initialRouteName }: OnboardingScreensProps) {
         component={ReplaceMultisig}
       />
       <OnboardingStack.Screen
+        name="recover-multisig"
+        component={RecoverMultisig}
+      />
+      <OnboardingStack.Screen
         name="recover-singlesig"
         component={RecoverSinglesig}
+      />
+      <OnboardingStack.Screen
+        name="lookup-proxy-wallets"
+        component={LookupProxyWallets}
       />
     </OnboardingStack.Navigator>
   );

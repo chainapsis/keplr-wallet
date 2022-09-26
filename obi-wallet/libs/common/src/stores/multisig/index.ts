@@ -56,12 +56,20 @@ export enum MultisigState {
 
 export * from "./serialized-data";
 
+export interface ProxyWallet {
+  contract: string;
+  signers: string[];
+}
+
 export class MultisigStore {
   protected readonly chainStore: ChainStore;
   protected readonly kvStore: KVStore;
 
   @observable
   protected keyInRecovery: MultisigKey | null = null;
+
+  @observable
+  protected walletInRecovery: ProxyWallet | null = null;
 
   @observable
   protected updateProposed = false;
@@ -224,6 +232,7 @@ export class MultisigStore {
       this.serializedNextAdmin = this.serializedCurrentAdmin;
     }
     this.keyInRecovery = null;
+    this.walletInRecovery = null;
     this.updateProposed = false;
     this.loading = false;
     void this.save();
@@ -293,6 +302,20 @@ export class MultisigStore {
   public recover(keyId: MultisigKey) {
     this.keyInRecovery = keyId;
     this.updateProposed = false;
+  }
+
+  @action
+  public getWalletInRecovery() {
+    return this.walletInRecovery;
+  }
+
+  @action
+  public setWalletInRecovery(wallet: ProxyWallet | null) {
+    this.walletInRecovery = wallet;
+  }
+
+  @action setCurrentAdmin(payload: SerializedMultisigPayload) {
+    this.serializedCurrentAdmin = payload;
   }
 
   @action
