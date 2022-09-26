@@ -145,7 +145,23 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               })}
             />
           ) : null}
-          {multisigStore.getKeyInRecovery === null /* <Button
+          {multisigStore.getKeyInRecovery === null ? (
+            <Button
+              label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}
+              RightIcon={GetStarted}
+              flavor="blue"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={() => {
+                multisigStore.cancelRecovery();
+                multisigStore.recover("biometrics");
+                navigation.navigate("create-multisig-biometrics");
+              }}
+            />
+          ) : null}
+          {multisigStore.getKeyInRecovery === null ? (
+            <Button
               label={intl.formatMessage({ id: "onboarding1.recoversinglesig" })}
               RightIcon={GetStarted}
               flavor="blue"
@@ -169,18 +185,6 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               })}
             />
           )}
-          {multisigStore.getKeyInRecovery === null ? (
-            <Button
-              label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}
-              flavor="purple"
-              style={{
-                marginTop: 20,
-              }}
-              onPress={() => {
-                navigation.navigate("onboarding2");
-              }}
-            />
-          ) : null}
         </View>
       </SafeAreaView>
     </InitialBackground>

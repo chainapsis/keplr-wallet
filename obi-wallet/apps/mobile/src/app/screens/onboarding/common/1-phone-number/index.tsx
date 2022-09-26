@@ -35,7 +35,11 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
       if (demoStore.demoMode) return;
 
       const { phoneNumber } = multisigStore.nextAdmin;
-      if (phoneNumber && multisigStore.getKeyInRecovery !== "phoneNumber") {
+      if (
+        phoneNumber &&
+        multisigStore.getKeyInRecovery !== "biometrics" &&
+        multisigStore.getKeyInRecovery !== "phoneNumber"
+      ) {
         Alert.alert(
           intl.formatMessage({ id: "onboarding2.error.phonekeyexists.title" }),
           intl.formatMessage({ id: "onboarding2.error.phonekeyexists.text" }) +
@@ -213,6 +217,11 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                       <FormattedMessage
                         id="onboarding2.recovery.authyourkeys"
                         defaultMessage="Create a New Phone Number Key"
+                      />
+                    ) : multisigStore.getKeyInRecovery === "biometrics" ? (
+                      <FormattedMessage
+                        id="onboarding2.recovery.phonenumber"
+                        defaultMessage="Recover your Phone Number Key"
                       />
                     ) : (
                       <FormattedMessage

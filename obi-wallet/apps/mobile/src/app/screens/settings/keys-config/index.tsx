@@ -417,10 +417,17 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           style={{ paddingVertical: 15, paddingHorizontal: 63 }}
         >
           <Text style={{ color: "#787B9C" }}>
-            <FormattedMessage
-              id="settings.multisig.modal.close"
-              defaultMessage="Close"
-            />
+            {item.id !== "biometrics" ? (
+              <FormattedMessage
+                id="settings.multisig.modal.close"
+                defaultMessage="Close"
+              />
+            ) : (
+              <FormattedMessage
+                id="settings.multisig.modal.notnow"
+                defaultMessage="Not now"
+              />
+            )}
           </Text>
         </TouchableOpacity>
       </View>

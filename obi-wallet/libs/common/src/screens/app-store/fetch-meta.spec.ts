@@ -8,7 +8,7 @@ test("Osmosis", async () => {
 
 /* test("Kado", async () => {
   const meta = await fetchMeta("https://kado.money");
-  expect(meta.title).toEqual("Kado");
+  expect(meta.title).toEqual("Buy and Sell Crypto Assets Instantly with Kado");
   expectIconToBePng(meta.icon);
 }); */
 

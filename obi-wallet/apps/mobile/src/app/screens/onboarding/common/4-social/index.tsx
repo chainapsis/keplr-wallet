@@ -1,3 +1,4 @@
+import { pubkeyToAddress } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -7,6 +8,7 @@ import { useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import invariant from "tiny-invariant";
 
 import { IconButton, InlineButton } from "../../../../button";
 import { createStargateClient } from "../../../../clients";
@@ -37,7 +39,11 @@ export const MultisigSocial = observer<MultisigSocialProps>(
 
       const { social } = multisigStore.nextAdmin;
 
-      if (social && multisigStore.getKeyInRecovery !== "social") {
+      if (
+        social &&
+        multisigStore.getKeyInRecovery !== "social" &&
+        multisigStore.getKeyInRecovery !== "biometrics"
+      ) {
         Alert.alert(
           intl.formatMessage({ id: "onboarding4.error.socialkeyexists.title" }),
           intl.formatMessage({ id: "onboarding4.error.socialkeyexists.text" }) +
@@ -128,6 +134,11 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                         id="onboarding5.recovery.setsocialkey"
                         defaultMessage="Set a New Social Key"
                       />
+                    ) : multisigStore.getKeyInRecovery === "biometrics" ? (
+                      <FormattedMessage
+                        id="onboarding2.recovery.social"
+                        defaultMessage="Recover your Social Key"
+                      />
                     ) : (
                       <FormattedMessage
                         id="onboarding5.setsocialkey"
@@ -142,10 +153,17 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       marginTop: 10,
                     }}
                   >
-                    <FormattedMessage
-                      id="onboarding5.setsocialkey.subtext"
-                      defaultMessage="Enter the juno address of a trusted friend who can help you recover your account."
-                    />
+                    {multisigStore.getKeyInRecovery === "biometrics" ? (
+                      <FormattedMessage
+                        id="onboarding5.recovery.socialsubtext"
+                        defaultMessage="Enter the juno address of a trusted friend that you used when creating the wallet."
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="onboarding5.setsocialkey.subtext"
+                        defaultMessage="Enter the juno address of a trusted friend who can help you recover your account."
+                      />
+                    )}
                   </Text>
                 </View>
               </View>
@@ -168,12 +186,12 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                     id="onboarding5.recovery.setsocialkey.subtext2"
                     defaultMessage="You're currently using the Obi account. This will remove the Obi account from your multisig and replace it with your friend's key."
                   />
-                ) : (
+                ) : multisigStore.getKeyInRecovery !== "biometrics" ? (
                   <FormattedMessage
                     id="onboarding5.setsocialkey.subtext2"
                     defaultMessage="…or you can use the default Obi account if you don't trust any of your friends"
                   />
-                )}
+                ) : null}
               </Text>
               {multisigStore.getKeyInRecovery === "social" &&
               multisigStore.nextAdmin?.social?.address ===
@@ -198,16 +216,93 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                     ? { type: "demo", value: "demo" }
                     : await getAccountPubkey(address);
                   setFetchingPubKey(false);
+
                   if (publicKey) {
-                    if (!demoStore.demoMode) {
-                      multisigStore.setSocialPublicKey({
-                        publicKey: publicKey,
+                    const wallet = multisigStore.getWalletInRecovery();
+                    if (wallet) {
+                      invariant(
+                        wallet.signers.length === 3,
+                        "Expected wallet to have three signers."
+                      );
+
+                      const socialAddress = pubkeyToAddress(
+                        publicKey,
+                        chainStore.currentChainInformation.prefix
+                      );
+
+                      if (
+                        !wallet.signers.find((signer) => {
+                          return signer === socialAddress;
+                        })
+                      ) {
+                        Alert.alert(
+                          "Error",
+                          "This address was not used to create this wallet. Please try again."
+                        );
+                        return;
+                      }
+
+                      const previousBiometrics = wallet.signers.find(
+                        (signer) => {
+                          return (
+                            signer !== socialAddress &&
+                            signer !==
+                              multisigStore.nextAdmin?.phoneNumber?.address
+                          );
+                        }
+                      );
+
+                      if (!previousBiometrics) {
+                        Alert.alert(
+                          "Error",
+                          "Could not find previous biometrics public key."
+                        );
+                        return;
+                      }
+
+                      const biometricsPublicKey = await getAccountPubkey(
+                        previousBiometrics
+                      );
+
+                      if (!biometricsPublicKey) {
+                        Alert.alert(
+                          "Error",
+                          "Could not find previous biometrics public key."
+                        );
+                        return;
+                      }
+
+                      invariant(
+                        multisigStore.nextAdmin?.phoneNumber,
+                        "Expected next admin to have a phone number."
+                      );
+
+                      multisigStore.setCurrentAdmin({
+                        biometrics: {
+                          // @ts-expect-error Assuming tendermint
+                          publicKey: biometricsPublicKey,
+                        },
+                        phoneNumber: multisigStore.nextAdmin?.phoneNumber,
+                        social: {
+                          publicKey,
+                        },
                       });
-                    }
-                    if (multisigStore.getKeyInRecovery !== "social") {
-                      navigation.navigate("create-multisig-init");
+
+                      multisigStore.setSocialPublicKey({
+                        publicKey,
+                      });
+                      navigation.navigate("recover-multisig");
                     } else {
-                      navigation.navigate("replace-multisig");
+                      if (!demoStore.demoMode) {
+                        multisigStore.setSocialPublicKey({
+                          publicKey: publicKey,
+                        });
+                      }
+                      if (multisigStore.getKeyInRecovery !== "social") {
+                        navigation.navigate("create-multisig-init");
+                      } else {
+                        navigation.navigate("replace-multisig");
+                      }
                     }
                   }
                 }}

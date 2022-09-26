@@ -18,7 +18,9 @@ export interface OnboardingStackParamList
   "create-multisig-init": undefined;
   "replace-multisig": undefined;
   "replace-multisig-confirm": undefined;
+  "recover-multisig": undefined;
   "recover-singlesig": undefined;
+  "lookup-proxy-wallets": undefined;
 }
 
 export const OnboardingStack =
