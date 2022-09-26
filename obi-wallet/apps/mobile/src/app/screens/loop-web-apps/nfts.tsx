@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { Image, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
@@ -12,24 +12,14 @@ export function NFTs() {
   const webViewRef = useRef<WebView>(null);
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: "#17162C" }}
-      contentContainerStyle={{ flex: 1 }}
-      refreshControl={
-        <RefreshControl
-          refreshing={loading}
-          onRefresh={() => {
-            webViewRef.current?.reload();
-            setLoading(true);
-          }}
-        />
-      }
-    >
+    <View style={{ flex: 1, backgroundColor: "#17162C" }}>
       <ConnectedWebView
         url="https://nft-juno.loop.markets/webapp/mynfts"
         onLoadEnd={() => setLoading(false)}
         style={{ flex: 1, marginTop: safeArea.top }}
         webViewRef={webViewRef}
+        loading={loading}
+        setLoading={setLoading}
       />
       {loading && (
         <View
@@ -54,12 +44,12 @@ export function NFTs() {
           />
           <Text style={{ color: "white", fontSize: 20, fontWeight: "700" }}>
             <FormattedMessage
-              id="menu.loadingnfts"
+              id="menu.loading's"
               defaultMessage="Loading NFTs.."
             />
           </Text>
         </View>
       )}
-    </ScrollView>
+    </View>
   );
 }

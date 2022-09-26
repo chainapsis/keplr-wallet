@@ -1,6 +1,7 @@
 import EventEmitter from "eventemitter3";
 import { observer } from "mobx-react-lite";
 import { RefObject, useCallback, useEffect, useMemo } from "react";
+import { RefreshControl, ScrollView } from "react-native";
 import {
   WebView,
   WebViewMessageEvent,
@@ -17,10 +18,18 @@ import { SignInteractionModal } from "./sign-interaction-modal";
 export interface ConnectedWebViewProps extends Omit<WebViewProps, "source"> {
   url: string;
   webViewRef: RefObject<WebView>;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
 }
 
 export const ConnectedWebView = observer(
-  ({ url, webViewRef, ...props }: ConnectedWebViewProps) => {
+  ({
+    url,
+    webViewRef,
+    loading,
+    setLoading,
+    ...props
+  }: ConnectedWebViewProps) => {
     const keplr = useKeplr({ url });
     const code = bundle;
 
@@ -68,7 +77,19 @@ export const ConnectedWebView = observer(
     if (!code) return null;
 
     return (
-      <>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: "#17162C" }}
+        contentContainerStyle={{ flex: 1 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => {
+              webViewRef.current?.reload();
+              setLoading(true);
+            }}
+          />
+        }
+      >
         {signInteractionStore.waitingData ? (
           <SignInteractionModal
             onClose={() => signInteractionStore.rejectAll()}
@@ -84,7 +105,7 @@ export const ConnectedWebView = observer(
           onMessage={onMessage}
           ref={webViewRef}
         />
-      </>
+      </ScrollView>
     );
   }
 );
