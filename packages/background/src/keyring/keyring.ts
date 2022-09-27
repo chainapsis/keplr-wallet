@@ -777,7 +777,13 @@ export class KeyRing {
 
     // Sign with Evmos/Ethereum
     if (useEthereumSigning) {
-      return this.signEthereum(env, chainId, defaultCoinType, message);
+      return this.signEthereum(
+        env,
+        chainId,
+        defaultCoinType,
+        message,
+        EthSignType.BYTE64
+      );
     }
 
     if (this.keyStore.type === "ledger") {
@@ -818,7 +824,7 @@ export class KeyRing {
     chainId: string,
     defaultCoinType: number,
     message: Uint8Array,
-    type: EthSignType = EthSignType.BYTE64 // Default to Ethereum signing for Evmos/Ethermint
+    type: EthSignType
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
@@ -829,9 +835,7 @@ export class KeyRing {
     }
 
     if (this.keyStore.type === "ledger") {
-      const pubKeys = this.ledgerPublicKeyCache;
-
-      if (!pubKeys) {
+      if (!this.ledgerPublicKeyCache) {
         throw new KeplrError(
           "keyring",
           151,
@@ -854,25 +858,31 @@ export class KeyRing {
 
     const ethWallet = new Wallet(privKey.toBytes());
 
-    if (type === EthSignType.BYTE64) {
-      // ECDSA Sign Keccak256 and discard parity byte
-      const signature = await ethWallet
-        ._signingKey()
-        .signDigest(keccak256(message));
-      const splitSignature = BytesUtils.splitSignature(signature);
-      return BytesUtils.arrayify(
-        BytesUtils.concat([splitSignature.r, splitSignature.s])
-      );
-    } else if (type === EthSignType.MESSAGE) {
-      // Sign bytes with prefixed Ethereum magic
-      const signature = await ethWallet.signMessage(message);
-      return BytesUtils.arrayify(signature);
-    } else {
-      // Sign Ethereum transaction
-      const signature = await ethWallet.signTransaction(
-        JSON.parse(Buffer.from(message).toString())
-      );
-      return BytesUtils.arrayify(signature);
+    switch (type) {
+      case EthSignType.BYTE64: {
+        // ECDSA Sign Keccak256 and discard parity byte
+        const signature = await ethWallet
+          ._signingKey()
+          .signDigest(keccak256(message));
+        const splitSignature = BytesUtils.splitSignature(signature);
+        return BytesUtils.arrayify(
+          BytesUtils.concat([splitSignature.r, splitSignature.s])
+        );
+      }
+      case EthSignType.MESSAGE: {
+        // Sign bytes with prefixed Ethereum magic
+        const signature = await ethWallet.signMessage(message);
+        return BytesUtils.arrayify(signature);
+      }
+      case EthSignType.TRANSACTION: {
+        // Sign Ethereum transaction
+        const signature = await ethWallet.signTransaction(
+          JSON.parse(Buffer.from(message).toString())
+        );
+        return BytesUtils.arrayify(signature);
+      }
+      default:
+        throw new Error(`Unknown sign type: ${type}`);
     }
   }
 

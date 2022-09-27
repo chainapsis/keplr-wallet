@@ -201,10 +201,13 @@ export class Ledger {
         }).replace("0x", "");
 
         return Buffer.from(signedTx, "hex");
-      default:
+      case EthSignType.BYTE64: {
         throw new Error(
-          "Invalid EthSignType provided to Ledger: expected message or transaction"
+          "Invalid EthSignType provided to Ledger: can't sign arbitrary data by ledger"
         );
+      }
+      default:
+        throw new Error(`Unknown sign type: ${signType}`);
     }
   }
 
