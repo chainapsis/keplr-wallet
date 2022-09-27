@@ -1,8 +1,10 @@
+import { isDeliverTxSuccess } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
+import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -14,9 +16,12 @@ import {
   View,
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
+import Modal from "react-native-modal";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ExtendedCoin, formatExtendedCoin, useBalances } from "../../balances";
+import Bottle from "../../balances/assets/bottle.svg";
+import Drink from "../../balances/assets/drink.svg";
 import { Button } from "../../button";
 import { useStore } from "../../stores";
 import { TextInput } from "../../text-input";
@@ -32,7 +37,11 @@ import {
   useWrapEncodeObjects,
 } from "../components/signature-modal";
 
+const BARTENDER_ADDRESS =
+  "juno1ps9sk7fqh2f95waggk3r5un6sr7rd4gxmq4kzh73zstgkqz52wmqh2wr0s";
+
 export const SendScreen = observer(() => {
+  const { navigate } = useNavigation();
   const { balances, refreshing, refreshBalances } = useBalances();
   const [selectedCoin, setSelectedCoin] = useState<ExtendedCoin | undefined>(
     () => {
@@ -66,8 +75,18 @@ export const SendScreen = observer(() => {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
 
+  const drinkOrBottleModalFlavor =
+    selectedCoin?.denom === "ubottle"
+      ? "bottle"
+      : selectedCoin?.denom === "udrink"
+      ? "drink"
+      : null;
+
   const encodeObjects = useWrapEncodeObjects(() => {
     if (!selectedCoin || !walletStore.type) return [];
+
+    const addressToUse =
+      address || (drinkOrBottleModalFlavor ? BARTENDER_ADDRESS : "");
 
     const { digits } = formatExtendedCoin(selectedCoin);
     const normalizedAmount =
@@ -92,7 +111,7 @@ export const SendScreen = observer(() => {
               JSON.stringify({
                 transfer: {
                   amount: msgAmount[0].amount,
-                  recipient: address,
+                  recipient: addressToUse,
                 },
               })
             )
@@ -106,17 +125,32 @@ export const SendScreen = observer(() => {
       typeUrl: "/cosmos.bank.v1beta1.MsgSend",
       value: {
         fromAddress: singlesigStore.address,
-        toAddress: address,
+        toAddress: addressToUse,
         amount: msgAmount,
       },
     };
   });
 
+  const [confirmModalVisible, setConfirmModalStatus] = useState<{
+    visible?: boolean;
+    success?: boolean;
+  }>({});
+
   const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
     multisig,
     encodeObjects,
     async onConfirm(response) {
-      console.log(response);
+      if (isDeliverTxSuccess(response)) {
+        setConfirmModalStatus({
+          visible: true,
+          success: true,
+        });
+      } else {
+        setConfirmModalStatus({
+          visible: true,
+          success: false,
+        });
+      }
     },
   });
 
@@ -129,6 +163,7 @@ export const SendScreen = observer(() => {
     typeof hydratedSelectedCoin?.icon === "number"
       ? { imageIcon: hydratedSelectedCoin.icon }
       : { SVGIcon: hydratedSelectedCoin?.icon };
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <SafeAreaView
@@ -145,6 +180,43 @@ export const SendScreen = observer(() => {
       >
         {qrCodeScannerModal.render()}
         <SignatureModal {...signatureModalProps} />
+
+        {drinkOrBottleModalFlavor &&
+        (!address || address === BARTENDER_ADDRESS) &&
+        confirmModalVisible.visible &&
+        confirmModalVisible.success ? (
+          <DrinkOrBottleModal
+            flavor={drinkOrBottleModalFlavor}
+            visible={confirmModalVisible.visible && confirmModalVisible.success}
+            onDismiss={() => {
+              setConfirmModalStatus({ visible: false });
+              navigate("Assets");
+            }}
+          />
+        ) : null}
+        {((drinkOrBottleModalFlavor && address !== BARTENDER_ADDRESS) ||
+          !drinkOrBottleModalFlavor) &&
+        confirmModalVisible.visible &&
+        confirmModalVisible.success ? (
+          <SuccessModal
+            visible={confirmModalVisible.visible && confirmModalVisible.success}
+            onDismiss={() => {
+              setConfirmModalStatus({ visible: false });
+              navigate("Assets");
+            }}
+          />
+        ) : null}
+        {confirmModalVisible.visible && !confirmModalVisible.success ? (
+          <FailureModal
+            visible={
+              confirmModalVisible.visible && !confirmModalVisible.success
+            }
+            onDismiss={() => {
+              setConfirmModalStatus({ visible: false });
+            }}
+          />
+        ) : null}
+
         <View>
           <View style={{ flexDirection: "row" }}>
             <Back style={{ alignSelf: "flex-start", zIndex: 2 }} />
@@ -172,10 +244,14 @@ export const SendScreen = observer(() => {
                 id: "send.to",
                 defaultMessage: "To",
               })}
-              placeholder={intl.formatMessage({
-                id: "send.walletaddress",
-                defaultMessage: "Wallet Address",
-              })}
+              placeholder={
+                drinkOrBottleModalFlavor
+                  ? BARTENDER_ADDRESS
+                  : intl.formatMessage({
+                      id: "send.walletaddress",
+                      defaultMessage: "Wallet Address",
+                    })
+              }
               style={{ flex: 1 }}
               inputStyle={{
                 borderTopRightRadius: 0,
@@ -318,11 +394,14 @@ export const SendScreen = observer(() => {
             id: "send.next",
             defaultMessage: "Next",
           })}
-          disabled={!address || !amount || Number(amount) < 1 || !selectedCoin}
+          disabled={
+            !(address || drinkOrBottleModalFlavor) ||
+            !amount ||
+            Number(amount) < 1 ||
+            !selectedCoin
+          }
           onPress={() => {
-            if (address && amount && selectedCoin) {
-              openSignatureModal();
-            }
+            openSignatureModal();
           }}
         />
         <BottomSheetBackdrop
@@ -493,5 +572,177 @@ function CoinRenderer({ item, selected, onPress }: CoinRendererProps) {
         </Text>
       </View>
     </TouchableOpacity>
+  );
+}
+
+interface DrinkOrBottleModalProps {
+  visible?: boolean;
+  onDismiss: () => void;
+  flavor: "bottle" | "drink";
+}
+
+function DrinkOrBottleModal({
+  visible,
+  onDismiss,
+  flavor,
+}: DrinkOrBottleModalProps) {
+  const startTime = useRef(Date.now());
+  const previousVisible = useRef(visible);
+  const [remainingTime, setRemainingTime] = useState(180);
+  const remainingMinutes = Math.floor(remainingTime / 60);
+  const remainingSeconds = remainingTime % 60;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRemainingTime(
+        180 - Math.floor((Date.now() - startTime.current) / 1000)
+      );
+    });
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (remainingTime <= 0) {
+      onDismiss();
+    }
+  }, [onDismiss, remainingTime]);
+
+  if (visible !== previousVisible.current) {
+    previousVisible.current = visible;
+    startTime.current = Date.now();
+  }
+
+  return (
+    <Modal isVisible={visible}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "stretch",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "#111023",
+            borderRadius: 20,
+            alignItems: "center",
+            paddingVertical: 20,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 19 }}>
+            Please show this to your bartender
+          </Text>
+          <Text style={{ color: "#FF1010", marginTop: 10 }}>
+            {remainingTime > 0 ? (
+              <>
+                {remainingMinutes}:
+                {remainingSeconds.toString(10).length < 2 ? "0" : ""}
+                {remainingSeconds}
+              </>
+            ) : (
+              0
+            )}
+          </Text>
+          <View style={{ marginTop: 16 }}>
+            {flavor === "drink" ? (
+              <Drink />
+            ) : flavor === "bottle" ? (
+              <Bottle />
+            ) : null}
+          </View>
+          <Button
+            flavor="blue"
+            label="Dismiss"
+            style={{ marginTop: 20 }}
+            onPress={() => {
+              onDismiss();
+            }}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+interface SuccessModalProps {
+  visible?: boolean;
+  onDismiss: () => void;
+}
+
+function SuccessModal({ visible, onDismiss }: SuccessModalProps) {
+  return (
+    <Modal isVisible={visible}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "stretch",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "#111023",
+            borderRadius: 20,
+            alignItems: "center",
+            paddingVertical: 20,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 19 }}>
+            Transaction successful
+          </Text>
+          <Button
+            flavor="blue"
+            label="Dismiss"
+            style={{ marginTop: 20 }}
+            onPress={() => {
+              onDismiss();
+            }}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+interface FailureModalProps {
+  visible?: boolean;
+  onDismiss: () => void;
+}
+
+function FailureModal({ visible, onDismiss }: FailureModalProps) {
+  return (
+    <Modal isVisible={visible}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "stretch",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "#111023",
+            borderRadius: 20,
+            alignItems: "center",
+            paddingVertical: 20,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 19 }}>
+            Transaction failed
+          </Text>
+          <Button
+            flavor="blue"
+            label="Dismiss"
+            style={{ marginTop: 20 }}
+            onPress={() => {
+              onDismiss();
+            }}
+          />
+        </View>
+      </View>
+    </Modal>
   );
 }

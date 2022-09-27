@@ -63,6 +63,7 @@
     "react-native-keyboard-aware-scroll-view": "*",
     "react-native-keychain": "*",
     "react-native-linear-gradient": "*",
+    "react-native-modal": "*",
     "react-native-permissions": "*",
     "react-native-qrcode-scanner": "*",
     "react-native-qrcode-svg": "*",
