@@ -272,8 +272,12 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
           didAutosign.current = true;
           const biometrics = data.find((key) => key.id === "biometrics");
           if (biometrics && typeof biometrics.onPress === "function") {
-            setSettingBiometrics(true);
-            await biometrics.onPress();
+            try {
+              setSettingBiometrics(true);
+              await biometrics.onPress();
+            } catch (e) {
+              // noop
+            }
             setSettingBiometrics(false);
           }
         }
