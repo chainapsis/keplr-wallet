@@ -69,13 +69,6 @@ const comingSoonKeys: HydratedKeyListItem[] = [
 ];
 
 export function KeysList({ data, style, tiled }: KeysListProps) {
-  useEffect(() => {
-    const bioKey = data.find((key) => key.id === "biometrics");
-    if (bioKey?.signed === false && bioKey?.onPress) {
-      bioKey?.onPress();
-    }
-  }, [data]);
-
   const hydratedData = data.map((key) => {
     return {
       ...key,

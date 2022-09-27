@@ -211,7 +211,6 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
 
         switch (id) {
           case "biometrics": {
-            setSettingBiometrics(true);
             const message = await getMessage();
             const { signature } = demoStore.demoMode
               ? { signature: new Uint8Array() }
@@ -224,7 +223,6 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
             setSignatures((signatures) => {
               return new Map(signatures.set(biometrics.address, signature));
             });
-            setSettingBiometrics(false);
             break;
           }
           case "phoneNumber":
@@ -266,6 +264,24 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
       return hiddenKeyIds ? !hiddenKeyIds.includes(key.id) : true;
     });
     const [loading, setLoading] = useState(false);
+
+    const didAutosign = useRef(false);
+    useEffect(() => {
+      (async () => {
+        console.log(props.visible, didAutosign.current);
+        if (props.visible && !didAutosign.current) {
+          didAutosign.current = true;
+          const biometrics = data.find((key) => key.id === "biometrics");
+          if (biometrics && typeof biometrics.onPress === "function") {
+            setSettingBiometrics(true);
+            await biometrics.onPress();
+            setSettingBiometrics(false);
+          }
+        }
+      })();
+      // We really only want to do this once
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.visible]);
 
     if (!threshold) return null;
 
@@ -547,7 +563,6 @@ export function useSignatureModalProps({
 
           client.disconnect();
           await onConfirm(result);
-          setModalKey((value) => value + 1);
         }
 
         switch (walletStore.type) {
@@ -595,6 +610,7 @@ export function useSignatureModalProps({
         }
 
         setSignatureModalVisible(false);
+        setModalKey((value) => value + 1);
       },
     };
   }, [
