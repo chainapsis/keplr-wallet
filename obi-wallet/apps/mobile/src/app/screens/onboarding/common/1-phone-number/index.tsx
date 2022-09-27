@@ -251,7 +251,6 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                   </Text>
                 </View>
               </View>
-
               <SecurityQuestionInput
                 securityQuestion={securityQuestion}
                 onSecurityQuestionChange={setSecurityQuestion}
@@ -275,13 +274,12 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                 style={{ marginTop: 25 }}
                 value={phoneNumberWithoutCountryCode}
                 onChangeText={(e) => {
-                  const reg = /^\d+$/;
-                  if (reg.test(e)) {
-                    setPhoneNumberWithoutCountryCode(e);
-                    setPhoneNumber(
-                      phoneCountryCode + phoneNumberWithoutCountryCode
-                    );
-                  }
+                  console.log({ e, phoneCountryCode });
+                  const noCountryCode = e.replace(phoneCountryCode, "");
+                  const noSpecialChars = noCountryCode.replace(/[^0-9]/gi, "");
+
+                  setPhoneNumberWithoutCountryCode(noSpecialChars);
+                  setPhoneNumber(phoneCountryCode + noSpecialChars);
                 }}
                 handlePhoneNumberCountryCode={handlePhoneNumberCountryCode}
               />
