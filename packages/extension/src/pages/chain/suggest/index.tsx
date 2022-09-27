@@ -6,6 +6,7 @@ import style from "./style.module.scss";
 import { EmptyLayout } from "../../../layouts/empty-layout";
 import { FormattedMessage } from "react-intl";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
@@ -29,14 +30,31 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
     }
   }, [analyticsStore, chainSuggestStore.waitingSuggestedChainInfo]);
 
+  if (!chainSuggestStore.waitingSuggestedChainInfo) {
+    return null;
+  }
+
   return (
-    <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
+    <EmptyLayout style={{ height: "100%" }}>
       <div className={style.container}>
+        <div className={style.forDeveloperButton}>
+          <span>For Developer</span>
+          <div className={style.imageWrapper}>
+            <img
+              src={require("../../../public/assets/svg/for-developer.svg")}
+            />
+          </div>
+        </div>
         <div className={style.logo}>
           <div className={style.imageContainer}>
+            <div className={style.imageBackground} />
             <img
               className={style.logoImage}
-              src={require("../../../public/assets/logo-256.png")}
+              src={`https://raw.githubusercontent.com/danielkim89/cicd-test/main/images/${
+                ChainIdHelper.parse(
+                  chainSuggestStore.waitingSuggestedChainInfo.data.chainId
+                ).identifier
+              }.png`}
               alt="chain logo"
             />
           </div>
@@ -46,6 +64,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
             <div className={style.dot} />
           </div>
           <div className={style.imageContainer}>
+            <div className={style.imageBackground} />
             <img
               className={style.logoImage}
               src={require("../../../public/assets/logo-256.png")}

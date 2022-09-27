@@ -3,6 +3,55 @@
   flex-direction: column;
   height: 100%;
 
+  .for-developer-button {
+    align-self: flex-end;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+    height: 32px;
+    margin-bottom: 28px;
+    /* Platinum/Platinum 50 */
+    background: #eff3fa;
+    border-radius: 40px;
+
+    &:hover {
+      cursor: pointer;
+
+      > span {
+        width: fit-content;
+        margin-left: 2px;
+        margin-right: 4px;
+      }
+    }
+
+    > span {
+      width: 0;
+      height: 15px;
+      overflow: hidden;
+      transition: all ease-out 500ms;
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 15px;
+      /* Platinum/Platinum 300 */
+      color: #566172;
+    }
+
+    > .image-wrapper {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      width: 18px;
+      height: 18px;
+
+      > img {
+        width: 18px;
+        height: 13px;
+      }
+    }
+  }
+
   .logo {
     display: flex;
     flex-direction: row;
@@ -11,18 +60,32 @@
     gap: 16px;
 
     .image-container {
+      position: relative;
       display: flex;
       flex-direction: row;
       justify-content: center;
       align-items: center;
       width: 80px;
       height: 80px;
-      background: rgba(255, 255, 255, 0.3),
-        linear-gradient(315deg, #0084da 13.07%, rgba(0, 132, 218, 0.31) 85.23%);
-
       border-radius: 50%;
 
+      .image-background {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(
+          315deg,
+          #0084da 13.07%,
+          rgba(0, 132, 218, 0.31) 85.23%
+        );
+        border-radius: 50%;
+        opacity: 0.3;
+      }
+
       .logo-image {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
         width: 69px;
         height: 69px;
         border-radius: 50%;
