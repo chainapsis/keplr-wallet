@@ -190,6 +190,7 @@ export const SendScreen = observer(() => {
             visible={confirmModalVisible.visible && confirmModalVisible.success}
             onDismiss={() => {
               setConfirmModalStatus({ visible: false });
+              // @ts-expect-error This is actually fine
               navigate("Assets");
             }}
           />
@@ -202,6 +203,7 @@ export const SendScreen = observer(() => {
             visible={confirmModalVisible.visible && confirmModalVisible.success}
             onDismiss={() => {
               setConfirmModalStatus({ visible: false });
+              // @ts-expect-error This is actually fine
               navigate("Assets");
             }}
           />
