@@ -268,7 +268,6 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
     const didAutosign = useRef(false);
     useEffect(() => {
       (async () => {
-        console.log(props.visible, didAutosign.current);
         if (props.visible && !didAutosign.current) {
           didAutosign.current = true;
           const biometrics = data.find((key) => key.id === "biometrics");
