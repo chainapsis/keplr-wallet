@@ -154,9 +154,25 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 marginTop: 20,
               }}
               onPress={() => {
-                multisigStore.cancelRecovery();
-                multisigStore.recover("biometrics");
-                navigation.navigate("create-multisig-biometrics");
+                Alert.alert(
+                  "Recover Existing Wallet",
+                  "Only use this if you have made a wallet using the Loop app before.",
+                  [
+                    {
+                      text: "Cancel",
+                      // eslint-disable-next-line @typescript-eslint/no-empty-function
+                      onPress() {},
+                    },
+                    {
+                      text: "Continue",
+                      onPress() {
+                        multisigStore.cancelRecovery();
+                        multisigStore.recover("biometrics");
+                        navigation.navigate("create-multisig-biometrics");
+                      },
+                    },
+                  ]
+                );
               }}
             />
           ) : null}
