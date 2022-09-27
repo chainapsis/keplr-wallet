@@ -67,6 +67,7 @@ export interface SignatureModalProps extends ModalProps {
   multisig?: Multisig | null;
   cancelable?: boolean;
   hiddenKeyIds?: MultisigKey[];
+  isOnboarding?: boolean;
 
   onCancel(): void;
 
@@ -88,13 +89,22 @@ export const SignatureModal = observer<SignatureModalProps>((props) => {
 });
 
 export const SignatureModalSinglesig = observer<SignatureModalProps>(
-  ({ messages, rawMessages, multisig, onCancel, onConfirm, ...props }) => {
+  ({
+    messages,
+    rawMessages,
+    multisig,
+    onCancel,
+    onConfirm,
+    isOnboarding,
+    ...props
+  }) => {
     const [loading, setLoading] = useState(false);
     const intl = useIntl();
 
     return (
       <ConfirmMessages
         {...props}
+        isOnboarding={isOnboarding}
         loading={loading}
         messages={messages}
         onCancel={onCancel}
@@ -129,6 +139,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
     onCancel,
     onConfirm,
     hiddenKeyIds,
+    isOnboarding,
     ...props
   }: SignatureModalProps) {
     const intl = useIntl();
@@ -136,6 +147,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
     const phoneNumberBottomSheetRef = useRef<BottomSheetRef>(null);
     const { chainStore, demoStore } = useStore();
     const { currentChainInformation } = chainStore;
+    const [settingBiometrics, setSettingBiometrics] = useState(false);
 
     const numberOfSignatures = signatures.size;
     const threshold = multisig?.multisig?.publicKey.value.threshold;
@@ -194,6 +206,35 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
       if (!factor) return [];
 
       const alreadySigned = signatures.has(factor.address);
+      const onPress = async () => {
+        if (alreadySigned) return;
+
+        switch (id) {
+          case "biometrics": {
+            setSettingBiometrics(true);
+            const message = await getMessage();
+            const { signature } = demoStore.demoMode
+              ? { signature: new Uint8Array() }
+              : await createBiometricSignature({
+                  payload: message,
+                });
+            const biometrics = multisig?.biometrics;
+            invariant(biometrics, "Expected biometrics key to exist.");
+
+            setSignatures((signatures) => {
+              return new Map(signatures.set(biometrics.address, signature));
+            });
+            setSettingBiometrics(false);
+            break;
+          }
+          case "phoneNumber":
+            phoneNumberBottomSheetRef.current?.snapToIndex(0);
+            break;
+          case "cloud":
+            console.log("Not implemented yet");
+            break;
+        }
+      };
 
       return [
         {
@@ -201,34 +242,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
           title,
           signed: alreadySigned,
           right: alreadySigned ? <CheckIcon /> : null,
-          async onPress() {
-            if (alreadySigned) return;
-
-            switch (id) {
-              case "biometrics": {
-                const message = await getMessage();
-                const { signature } = demoStore.demoMode
-                  ? { signature: new Uint8Array() }
-                  : await createBiometricSignature({
-                      payload: message,
-                    });
-
-                const biometrics = multisig?.biometrics;
-                invariant(biometrics, "Expected biometrics key to exist.");
-
-                setSignatures((signatures) => {
-                  return new Map(signatures.set(biometrics.address, signature));
-                });
-                break;
-              }
-              case "phoneNumber":
-                phoneNumberBottomSheetRef.current?.snapToIndex(0);
-                break;
-              case "cloud":
-                console.log("Not implemented yet");
-                break;
-            }
-          },
+          onPress,
         },
       ];
     }
@@ -259,6 +273,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
       <ConfirmMessages
         {...props}
         loading={loading}
+        isOnboarding={isOnboarding}
         disabled={!enoughSignatures}
         messages={messages}
         onCancel={onCancel}
@@ -309,7 +324,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
           <LinearGradient
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            colors={["#FCCFF7", "#E659D6", "#8877EA", "#86E2EE", "#1E1D3A"]}
+            colors={["#FCCFF7", "#E659D6", "#8877EA", "#86E2EE"]}
             style={{
               flex: 1,
               width: `${(numberOfSignatures / parseInt(threshold, 10)) * 100}%`,
@@ -336,15 +351,32 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
             {multisig.multisig?.publicKey.value.threshold}{" "}
           </Text>
         </View>
-        <KeysList
-          data={data}
-          tiled
-          style={{
-            marginVertical: 10,
-            backgroundColor: "#130F23",
-            borderRadius: 12,
-          }}
-        />
+        {settingBiometrics ? (
+          <View
+            style={{
+              marginVertical: 10,
+              backgroundColor: "#130F23",
+              borderRadius: 12,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingVertical: 50,
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "700" }}>
+              Preparing…
+            </Text>
+          </View>
+        ) : (
+          <KeysList
+            data={data}
+            tiled
+            style={{
+              marginVertical: 10,
+              backgroundColor: "#130F23",
+              borderRadius: 12,
+            }}
+          />
+        )}
       </ConfirmMessages>
     );
   }

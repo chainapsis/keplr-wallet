@@ -156,7 +156,11 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <SignatureModalMultisig cancelable={false} {...signatureModalProps} />
+      <SignatureModalMultisig
+        cancelable={false}
+        isOnboarding
+        {...signatureModalProps}
+      />
       <Background />
 
       <View
