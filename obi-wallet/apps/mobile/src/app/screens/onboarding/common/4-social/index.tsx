@@ -255,7 +255,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       if (!previousBiometrics) {
                         Alert.alert(
                           "Error",
-                          "Could not find previous biometrics public key."
+                          "Could not find previous device public key."
                         );
                         return;
                       }
@@ -267,7 +267,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       if (!biometricsPublicKey) {
                         Alert.alert(
                           "Error",
-                          "Could not find previous biometrics public key."
+                          "Could not find previous device public key."
                         );
                         return;
                       }

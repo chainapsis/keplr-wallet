@@ -191,7 +191,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
             >
               <FormattedMessage
                 id="onboarding4.authyourkeys.subtext"
-                defaultMessage="With Obi, your Biometrics, iCloud, and phone number work as a multi-factor authenticator."
+                defaultMessage="With Obi, your Device, iCloud, and phone number work as a multi-factor authenticator."
               />
             </Text>
           </View>
