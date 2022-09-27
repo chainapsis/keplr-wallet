@@ -1,6 +1,5 @@
 import { MultisigKey, Text } from "@obi-wallet/common";
 import { FC, useEffect } from "react";
-
 import {
   FlatList,
   StyleProp,

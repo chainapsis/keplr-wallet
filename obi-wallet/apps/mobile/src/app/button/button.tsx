@@ -7,6 +7,7 @@ import {
   TouchableHighlight,
   TouchableWithoutFeedbackProps,
   View,
+  GestureResponderEvent,
 } from "react-native";
 import { SvgProps } from "react-native-svg";
 
@@ -103,12 +104,16 @@ export function Button({
       props.style,
     ],
   };
-
+  const onPress = (e: GestureResponderEvent) => {
+    if (!disabled) {
+      props.onPress && props.onPress(e);
+    }
+  };
   if (Platform.OS === "ios") {
-    return <TouchableHighlight {...buttonProps} />;
+    return <TouchableHighlight {...buttonProps} onPress={onPress} />;
   } else {
     return (
-      <TouchableNativeFeedback {...buttonProps}>
+      <TouchableNativeFeedback {...buttonProps} onPress={onPress}>
         <View {...buttonProps} />
       </TouchableNativeFeedback>
     );

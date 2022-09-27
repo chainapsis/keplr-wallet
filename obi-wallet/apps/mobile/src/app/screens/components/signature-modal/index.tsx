@@ -67,6 +67,7 @@ export interface SignatureModalProps extends ModalProps {
   multisig?: Multisig | null;
   cancelable?: boolean;
   hiddenKeyIds?: MultisigKey[];
+  isOnboarding?: boolean;
 
   onCancel(): void;
 
@@ -88,13 +89,22 @@ export const SignatureModal = observer<SignatureModalProps>((props) => {
 });
 
 export const SignatureModalSinglesig = observer<SignatureModalProps>(
-  ({ messages, rawMessages, multisig, onCancel, onConfirm, ...props }) => {
+  ({
+    messages,
+    rawMessages,
+    multisig,
+    onCancel,
+    onConfirm,
+    isOnboarding,
+    ...props
+  }) => {
     const [loading, setLoading] = useState(false);
     const intl = useIntl();
 
     return (
       <ConfirmMessages
         {...props}
+        isOnboarding={isOnboarding}
         loading={loading}
         messages={messages}
         onCancel={onCancel}
@@ -129,6 +139,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
     onCancel,
     onConfirm,
     hiddenKeyIds,
+    isOnboarding,
     ...props
   }: SignatureModalProps) {
     const intl = useIntl();
@@ -202,18 +213,11 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
           case "biometrics": {
             setSettingBiometrics(true);
             const message = await getMessage();
-
-            const time = setTimeout((e) => {
-              console.log(e);
-            }, 1000);
-
             const { signature } = demoStore.demoMode
               ? { signature: new Uint8Array() }
               : await createBiometricSignature({
                   payload: message,
                 });
-            clearTimeout(time);
-
             const biometrics = multisig?.biometrics;
             invariant(biometrics, "Expected biometrics key to exist.");
 
@@ -269,6 +273,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
       <ConfirmMessages
         {...props}
         loading={loading}
+        isOnboarding={isOnboarding}
         disabled={!enoughSignatures}
         messages={messages}
         onCancel={onCancel}

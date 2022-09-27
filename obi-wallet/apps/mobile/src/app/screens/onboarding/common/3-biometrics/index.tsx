@@ -26,7 +26,36 @@ export type MultisigBiometricsProps = NativeStackScreenProps<
 export const MultisigBiometrics = observer<MultisigBiometricsProps>(
   ({ navigation }) => {
     const { demoStore, multisigStore } = useStore();
+    const [scannedBiometrics, setScannedBiometrics] = useState(false);
     const intl = useIntl();
+
+    const scanBiometrics = async () => {
+      setButtonDisabledDoubleclick(true);
+
+      try {
+        if (!demoStore.demoMode) {
+          const publicKey = await getBiometricsPublicKey();
+
+          multisigStore.setBiometricsPublicKey({
+            publicKey: {
+              type: pubkeyType.secp256k1,
+              value: publicKey,
+            },
+          });
+        }
+        setScannedBiometrics(true);
+        setButtonDisabledDoubleclick(false);
+      } catch (e) {
+        setScannedBiometrics(false);
+        setButtonDisabledDoubleclick(false);
+        const error = e as Error;
+        console.error(error);
+        Alert.alert(
+          intl.formatMessage({ id: "general.error" }) + " ScanMyBiometrics",
+          error.message
+        );
+      }
+    };
 
     useEffect(() => {
       if (demoStore.demoMode) return;
@@ -68,31 +97,9 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
     const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
       useState(false);
 
-    const scanBiometrics = async () => {
-      setButtonDisabledDoubleclick(true);
-
-      try {
-        if (!demoStore.demoMode) {
-          const publicKey = await getBiometricsPublicKey();
-          multisigStore.setBiometricsPublicKey({
-            publicKey: {
-              type: pubkeyType.secp256k1,
-              value: publicKey,
-            },
-          });
-        }
-
-        setButtonDisabledDoubleclick(false);
-      } catch (e) {
-        setButtonDisabledDoubleclick(false);
-        const error = e as Error;
-        console.error(error);
-        Alert.alert(
-          intl.formatMessage({ id: "general.error" }) + " ScanMyBiometrics",
-          error.message
-        );
-      }
-    };
+    const isBiometricsKeyInMultisig = Boolean(
+      multisigStore.nextAdmin["biometrics"]
+    );
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -190,7 +197,11 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
             flavor="blue"
             LeftIcon={Scan}
             onPress={() => {
-              navigation.navigate("create-multisig-phone-number");
+              if (scannedBiometrics) {
+                navigation.navigate("create-multisig-phone-number");
+              } else {
+                scanBiometrics();
+              }
             }}
             disabled={buttonDisabledDoubleclick}
             style={{ marginBottom: 20, marginTop: 20 }}

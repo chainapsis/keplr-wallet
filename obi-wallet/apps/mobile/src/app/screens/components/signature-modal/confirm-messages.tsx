@@ -30,9 +30,8 @@ export interface ConfirmMessagesProps extends ModalProps {
   messages: readonly AminoMsg[];
   footer?: ReactNode;
   children?: ReactNode;
-
   onCancel(): void;
-
+  isOnboarding?: boolean;
   onConfirm(): void;
 }
 
@@ -47,6 +46,7 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
     onConfirm,
     footer,
     children,
+    isOnboarding,
     ...props
   }) => {
     const intl = useIntl();
@@ -85,12 +85,23 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
               marginHorizontal: 20,
             }}
           >
-            <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
-              <FormattedMessage
-                id="signature.modal.confirmtx"
-                defaultMessage="Confirm Transaction"
-              />
-            </Text>
+            {isOnboarding ? (
+              <>
+                <Text style={{ color: "white", fontWeight: "700" }}>
+                  Now sign your first Obi transaction
+                </Text>
+                <Text style={{ color: "white", opacity: 0.6 }}>
+                  Use your keys to create your wallet
+                </Text>
+              </>
+            ) : (
+              <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
+                <FormattedMessage
+                  id="signature.modal.confirmtx"
+                  defaultMessage="Confirm Transaction"
+                />
+              </Text>
+            )}
           </View>
 
           <View style={{ marginHorizontal: 20, flex: 1 }}>
