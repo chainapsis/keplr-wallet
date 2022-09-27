@@ -7,6 +7,8 @@ import Eth from "@ledgerhq/hw-app-eth";
 import { EthSignType } from "@keplr-wallet/types";
 import { BIP44HDPath } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
+import { Buffer } from "buffer/";
+import { _TypedDataEncoder } from "@ethersproject/hash";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CosmosApp: any = require("ledger-cosmos-js").default;
@@ -176,20 +178,19 @@ export class Ledger {
 
     const formattedPath = Ledger.pathToString(Ledger.createPath(60, fields));
 
-    let signature;
-
     switch (signType) {
-      case EthSignType.MESSAGE:
-        signature = await this.ethereumApp.signPersonalMessage(
+      case EthSignType.MESSAGE: {
+        const signature = await this.ethereumApp.signPersonalMessage(
           formattedPath,
           Buffer.from(message).toString("hex")
         );
         return Ledger.ethSignatureToBytes(signature);
-      case EthSignType.TRANSACTION:
+      }
+      case EthSignType.TRANSACTION: {
         const tx = JSON.parse(Buffer.from(message).toString());
         const rlpArray = serialize(tx).replace("0x", "");
 
-        signature = await this.ethereumApp.signTransaction(
+        const signature = await this.ethereumApp.signTransaction(
           formattedPath,
           rlpArray
         );
@@ -201,6 +202,28 @@ export class Ledger {
         }).replace("0x", "");
 
         return Buffer.from(signedTx, "hex");
+      }
+      case EthSignType.EIP712: {
+        const data = JSON.parse(Buffer.from(message).toString());
+        // Unfortunately, signEIP712Message not works on ledger yet.
+        return Ledger.ethSignatureToBytes(
+          await this.ethereumApp.signEIP712HashedMessage(
+            formattedPath,
+            _TypedDataEncoder.hashDomain(data.domain),
+            _TypedDataEncoder
+              .from(
+                // Seems that there is no way to set primary type and the first type becomes primary type.
+                // Anyway, for now, there is no problem if there is only one type except for EIP712Domain.
+                (() => {
+                  const types = { ...data.types };
+                  delete types["EIP712Domain"];
+                  return types;
+                })()
+              )
+              .hash(data.message)
+          )
+        );
+      }
       default:
         throw new Error(`Unknown sign type: ${signType}`);
     }

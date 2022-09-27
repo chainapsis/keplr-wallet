@@ -866,6 +866,21 @@ export class KeyRing {
         );
         return BytesUtils.arrayify(signature);
       }
+      case EthSignType.EIP712: {
+        const data = JSON.parse(Buffer.from(message).toString());
+        const signature = await ethWallet._signTypedData(
+          data.domain,
+          // Seems that there is no way to set primary type and the first type becomes primary type.
+          // Anyway, for now, there is no problem if there is only one type except for EIP712Domain.
+          (() => {
+            const types = { ...data.types };
+            delete types["EIP712Domain"];
+            return types;
+          })(),
+          data.message
+        );
+        return BytesUtils.arrayify(signature);
+      }
       default:
         throw new Error(`Unknown sign type: ${type}`);
     }
