@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
+  Alert,
   Linking,
   StyleSheet,
   Text,
@@ -177,7 +178,23 @@ export const SettingsScreen = observer(() => {
               demoStore.logout();
               break;
             case WalletType.SINGLESIG:
-              singlesigStore.logout();
+              Alert.alert(
+                "Are you sure?",
+                "Since you do not have Obi mode active, you will only be able to log back in if you have securely saved your seedphrase.",
+                [
+                  {
+                    text: "Cancel",
+                    // onPress: () => {}
+                  },
+                  {
+                    text: "Confirm",
+                    style: "destructive",
+                    onPress: () => {
+                      singlesigStore.logout();
+                    },
+                  },
+                ]
+              );
               break;
           }
         }}
