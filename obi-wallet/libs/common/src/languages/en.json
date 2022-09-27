@@ -50,8 +50,8 @@
 
   "onboarding1.welcometoloop": "Welcome to Loop",
   "onboarding1.welcomesubtext": "Powered by Obi",
-  "onboarding1.getstarted": "Get Started",
-  "onboarding1.recoverwallet": "Recover My Wallet",
+  "onboarding1.getstarted": "Create New Wallet",
+  "onboarding1.recoverwallet": "Recover Existing Wallet",
   "onboarding1.recoversinglesig": "Recover Singlesig",
 
   "onboarding2.authyourkeys": "Create a Phone Number Key",
