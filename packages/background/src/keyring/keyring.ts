@@ -1,5 +1,6 @@
 import { Crypto, KeyStore } from "./crypto";
 import {
+  Hash,
   Mnemonic,
   PrivKeySecp256k1,
   PubKeySecp256k1,
@@ -15,7 +16,6 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 import { Wallet } from "@ethersproject/wallet";
 import * as BytesUtils from "@ethersproject/bytes";
-import { keccak256 } from "@ethersproject/keccak256";
 import { computeAddress } from "@ethersproject/transactions";
 
 export enum KeyRingStatus {
@@ -775,17 +775,6 @@ export class KeyRing {
       throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
-    // Sign with Evmos/Ethereum
-    if (useEthereumSigning) {
-      return this.signEthereum(
-        env,
-        chainId,
-        defaultCoinType,
-        message,
-        EthSignType.BYTE64
-      );
-    }
-
     if (this.keyStore.type === "ledger") {
       const pubKeys = this.ledgerPublicKeyCache;
 
@@ -795,6 +784,10 @@ export class KeyRing {
           151,
           "Ledger public key is not initialized"
         );
+      }
+
+      if (useEthereumSigning) {
+        throw new Error("Can't sign cosmos sign doc by ethereum app on ledger");
       }
 
       return await this.ledgerKeeper.sign(
@@ -807,7 +800,9 @@ export class KeyRing {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
 
       const privKey = this.loadPrivKey(coinType);
-      const signature = privKey.sign(message);
+      const signature = useEthereumSigning
+        ? privKey.signDigest32(Hash.keccak256(message))
+        : privKey.sign(message);
 
       // Signing indicates an explicit use of this coin type.
       // Mainly, this logic exists to explicitly set the coin type when signing by an external request.
@@ -859,16 +854,6 @@ export class KeyRing {
     const ethWallet = new Wallet(privKey.toBytes());
 
     switch (type) {
-      case EthSignType.BYTE64: {
-        // ECDSA Sign Keccak256 and discard parity byte
-        const signature = await ethWallet
-          ._signingKey()
-          .signDigest(keccak256(message));
-        const splitSignature = BytesUtils.splitSignature(signature);
-        return BytesUtils.arrayify(
-          BytesUtils.concat([splitSignature.r, splitSignature.s])
-        );
-      }
       case EthSignType.MESSAGE: {
         // Sign bytes with prefixed Ethereum magic
         const signature = await ethWallet.signMessage(message);
