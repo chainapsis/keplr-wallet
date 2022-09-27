@@ -400,7 +400,8 @@ export const SendScreen = observer(() => {
           disabled={
             !(address || drinkOrBottleModalFlavor) ||
             !amount ||
-            Number(amount) < 1 ||
+            Number(amount) <= 0 ||
+            (drinkOrBottleModalFlavor && Number(amount) < 1) ||
             !selectedCoin
           }
           onPress={() => {
