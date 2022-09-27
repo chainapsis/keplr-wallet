@@ -1,9 +1,10 @@
 import { BlurView } from "@react-native-community/blur";
 import React from "react";
 import {
-  useWindowDimensions,
+  Platform,
   StyleProp,
   TouchableOpacity,
+  useWindowDimensions,
   ViewStyle,
 } from "react-native";
 
@@ -38,7 +39,9 @@ export function BottomSheetBackdrop({
         onPress();
       }}
     >
-      <BlurView style={{ flex: 1 }} blurAmount={0} />
+      {Platform.OS === "ios" ? (
+        <BlurView style={{ flex: 1 }} blurAmount={0} />
+      ) : null}
     </TouchableOpacity>
   );
 }
