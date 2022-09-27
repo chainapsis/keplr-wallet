@@ -97,12 +97,12 @@
   "onboarding3.sendagain.info.counter": "Your Magic SMS has been resent! Give it some time to arrive. You can try again in",
   "onboarding3.sendagain.info.checknumber": "If you haven't received the SMS please check if your phone number is correct:",
 
-  "onboarding4.authyourkeys": "Crear una Clave Biométrica",
+  "onboarding4.authyourkeys": "Crear una Clave de Dispositivo",
   "onboarding4.authyourkeys.subtext": "La integración con Obi crea un inicio de sesión de múltiples claves para mantener tu cuenta segura y recuperable sin necesidad de frases iniciales.",
-  "onboarding4.biometrics.button": "Crear Mi Clave Biométrica",
+  "onboarding4.biometrics.button": "Crear Mi Clave de Dispositivo",
 
-  "onboarding4.error.biometrickeyexists.title": "Ya tienes una clave biométrica",
-  "onboarding4.error.biometrickeyexists.text": "¿Quieres reutilizar tu clave biométrica existente?",
+  "onboarding4.error.biometrickeyexists.title": "Ya tienes una clave de dispositivo",
+  "onboarding4.error.biometrickeyexists.text": "¿Quieres reutilizar tu clave de dispositivo existente?",
   "onboarding4.error.biometrickeyexists.newkey": "Generar una nueva clave",
   "onboarding4.error.biometrickeyexists.yes": "Sí",
 
@@ -131,7 +131,7 @@
   "signature.modal.value": "Value",
   "signature.modal.signatures": "Signatures",
 
-  "signature.modal.biometricsignature": "Clave Biométrica",
+  "signature.modal.biometricsignature": "Clave de Dispositivo",
   "signature.modal.phonesignature": "Clave de número de teléfono",
   "signature.modal.cancel": "Cancelar",
   "signature.modal.confirm": "Confirmar",
@@ -163,7 +163,7 @@
   "settings.multisig.risk.stepremaining": "Paso restante",
   "settings.multisig.risk.stepsremaining": "Pasos restantes",
   "settings.multisig.option.phonekey": "Clave de número de teléfono",
-  "settings.multisig.option.biometricskey": "Clave Biométrica",
+  "settings.multisig.option.biometricskey": "Clave de Dispositivo",
   "settings.multisig.option.socialkey": "Clave Social",
   "settings.multisig.option.emailkey": "E-mail (Próximamente)",
   "settings.multisig.option.cloudkey": "Cloud (Próximamente)",

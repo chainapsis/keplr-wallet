@@ -47,7 +47,7 @@ export const Home = observer<HomeProps>(
       HistoryIcon,
     ] = icons;
     const [editMode, setEditMode] = useState(false);
-    const [url, setUrl] = useState("www.keplr_wallet.com");
+    const [url, setUrl] = useState("Enter URL (some dapps not yet supported)");
     const intl = useIntl();
 
     return (
@@ -98,11 +98,11 @@ export const Home = observer<HomeProps>(
                 ImgComponent={BuyCryptoIcon}
                 label={intl.formatMessage({
                   id: "apps.kado",
-                  defaultMessage: "Kado",
+                  defaultMessage: "Buy with Card",
                 })}
                 onPress={() => {
                   onAppPress({
-                    label: "Kado",
+                    label: "Buy with Card",
                     url: `https://app.kado.money?network=JUNO&onToAddress=${walletStore.address}&apiKey=0a5fc82b-be15-4059-8edf-9ff9c54186ce`,
                     icon: "https://place-hold.it/180x180",
                   });

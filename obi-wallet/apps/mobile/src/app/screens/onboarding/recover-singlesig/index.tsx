@@ -87,7 +87,7 @@ export const RecoverSinglesig = observer<RecoverSinglesigProps>(
                 </View>
               </View>
               <TextInput
-                placeholder="juno1234...."
+                placeholder="never gonna give you up never gonna let you down never gonna..."
                 style={{ marginTop: 25 }}
                 value={mnemonic}
                 onChangeText={setMnemonic}

@@ -81,7 +81,7 @@ export async function getBiometricsPrivateKey() {
   if (credentials) {
     return credentials.password;
   } else {
-    throw new Error("No biometrics keypair found");
+    throw new Error("No device keypair found");
   }
 }
 
@@ -101,7 +101,7 @@ export async function getBiometricsKeyPair() {
       privateKey: credentials.password,
     };
   } else {
-    throw new Error("No biometrics keypair found");
+    throw new Error("No device keypair found");
   }
 }
 
@@ -119,7 +119,7 @@ export async function createBiometricSignature({
       Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
   });
 
-  if (!credentials) throw new Error("No biometrics keypair found");
+  if (!credentials) throw new Error("No device keypair found");
 
   const { chainStore } = rootStore;
   const chainId = chainStore.currentChain;

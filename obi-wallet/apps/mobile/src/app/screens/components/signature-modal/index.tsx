@@ -219,7 +219,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
                   payload: message,
                 });
             const biometrics = multisig?.biometrics;
-            invariant(biometrics, "Expected biometrics key to exist.");
+            invariant(biometrics, "Expected device key to exist.");
 
             setSignatures((signatures) => {
               return new Map(signatures.set(biometrics.address, signature));
