@@ -140,6 +140,7 @@ export const SendScreen = observer(() => {
     multisig,
     encodeObjects,
     async onConfirm(response) {
+      console.log(response);
       if (isDeliverTxSuccess(response)) {
         setConfirmModalStatus({
           visible: true,
