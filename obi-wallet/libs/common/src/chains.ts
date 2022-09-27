@@ -8,7 +8,7 @@ export const chains = {
     denom: "ujunox",
     startingUsdDebt: "0",
     debtRepayAddress: "juno1ruftad6eytmr3qzmf9k3eya9ah8hsnvkujkej8",
-    twilioPhoneNumber: "+19705509509",
+    twilioPhoneNumbers: ["+19705509509"],
     twilioUrl:
       "https://studio.twilio.com/v2/Flows/FW2de98dc924361e35906dad1ed6125dc6/Executions",
     bip44: {
@@ -27,7 +27,7 @@ export const chains = {
     denom: "ujuno",
     startingUsdDebt: "0",
     debtRepayAddress: "juno1ruftad6eytmr3qzmf9k3eya9ah8hsnvkujkej8",
-    twilioPhoneNumber: "+19148638557",
+    twilioPhoneNumbers: ["+19148638557"],
     twilioUrl:
       "https://studio.twilio.com/v2/Flows/FW278a8ada7d869a2bbfc49915dbb534f5/Executions",
     bip44: {
