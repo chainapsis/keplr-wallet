@@ -23,6 +23,7 @@ import HelpAndSupport from "./assets/headset.svg";
 import ObiLogo from "./assets/obi-logo.svg";
 import LogoutIcon from "./assets/power-red.svg";
 import { KeysConfigScreen } from "./keys-config";
+import { Seedphrase } from "./seedphrase";
 
 export const SettingsScreen = observer(() => {
   const { demoStore, multisigStore, singlesigStore, walletStore } = useStore();
@@ -115,7 +116,20 @@ export const SettingsScreen = observer(() => {
           })}
           onPress={() => navigation.navigate("MultiSigSettings")}
         />
-      ) : null}
+      ) : (
+        <Setting
+          Icon={MultiSigIcon}
+          title={intl.formatMessage({
+            id: "settings.singlesigsettings",
+            defaultMessage: "Seedphrase",
+          })}
+          subtitle={intl.formatMessage({
+            id: "settings.singlesigsettings.subtext",
+            defaultMessage: "Export your seedphrase.",
+          })}
+          onPress={() => navigation.navigate("SingleSigSeedphrase")}
+        />
+      )}
       <View
         style={[
           styles.flex1,
@@ -150,7 +164,7 @@ export const SettingsScreen = observer(() => {
         })}
         subtitle={intl.formatMessage({
           id: "settings.logout.subtext",
-          defaultMessage: "Save your keys before logging out",
+          defaultMessage: "Save your keys before logging out.",
         })}
         onPress={() => {
           if (!walletStore.type) return;
@@ -335,6 +349,12 @@ export const settingsScreens = () => [
     name="MultiSigSettings"
     key="MultiSigSettings"
     component={KeysConfigScreen}
+    options={{ headerShown: false }}
+  />,
+  <RootStack.Screen
+    name="SingleSigSeedphrase"
+    key="SingleSigSeedphrase"
+    component={Seedphrase}
     options={{ headerShown: false }}
   />,
 ];

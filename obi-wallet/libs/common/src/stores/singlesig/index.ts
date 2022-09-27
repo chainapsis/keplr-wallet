@@ -96,6 +96,10 @@ export class SinglesigStore {
     };
   }
 
+  public getMnemonic(): string | null {
+    return this.mnemonic;
+  }
+
   @action
   public logout() {
     this.mnemonic = null;
