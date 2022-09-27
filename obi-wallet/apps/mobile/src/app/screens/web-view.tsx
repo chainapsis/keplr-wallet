@@ -101,6 +101,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
           <TouchableOpacity
             onPress={() => navigation.navigate("state-renderer")}
             style={{ paddingLeft: 10 }}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
           >
             <FontAwesomeIcon icon={faTimes} style={{ color: "white" }} />
           </TouchableOpacity>
@@ -121,7 +122,10 @@ export const WebViewScreen = observer<WebViewScreenProps>(
             </Text>
           </View>
           <View>
-            <TouchableOpacity onPress={() => triggerBottomSheet(0)}>
+            <TouchableOpacity
+              onPress={() => triggerBottomSheet(0)}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <FontAwesomeIcon
                 icon={faEllipsis}
                 style={{
