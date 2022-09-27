@@ -20,6 +20,10 @@ export async function isBiometricsAvailable() {
   return false;
 }
 
+export async function resetBiometricsKeyPair() {
+  await Keychain.resetGenericPassword({ service: BIOMETRICS_KEY });
+}
+
 export async function getBiometricsPublicKey() {
   const credentials = await Keychain.getGenericPassword({
     authenticationPrompt: {
@@ -34,6 +38,7 @@ export async function getBiometricsPublicKey() {
     return credentials.username;
   } else {
     // Fake-AuthPrompt (set+get) to trigger Prompt at initial App-Start
+    await Keychain.resetGenericPassword({ service: "fake-prompt" });
     await Keychain.setGenericPassword("fake1", "fake2", {
       service: "fake-prompt",
       accessControl:

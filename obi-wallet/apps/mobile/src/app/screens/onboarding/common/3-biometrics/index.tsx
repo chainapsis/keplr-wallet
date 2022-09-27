@@ -10,7 +10,10 @@ import { Alert, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { getBiometricsPublicKey } from "../../../../biometrics";
+import {
+  getBiometricsPublicKey,
+  resetBiometricsKeyPair,
+} from "../../../../biometrics";
 import { Button, IconButton } from "../../../../button";
 import { useStore } from "../../../../stores";
 import { Background } from "../../../components/background";
@@ -48,6 +51,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
       } catch (e) {
         setScannedBiometrics(false);
         setButtonDisabledDoubleclick(false);
+        await resetBiometricsKeyPair();
         const error = e as Error;
         console.error(error);
         Alert.alert(
