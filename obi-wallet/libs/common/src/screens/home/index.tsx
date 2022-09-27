@@ -47,7 +47,7 @@ export const Home = observer<HomeProps>(
       HistoryIcon,
     ] = icons;
     const [editMode, setEditMode] = useState(false);
-    const [url, setUrl] = useState("Enter URL (some dapps not yet supported)");
+    const [url, setUrl] = useState("https://(some apps not yet supported)");
     const intl = useIntl();
 
     return (
@@ -245,7 +245,7 @@ export const Home = observer<HomeProps>(
                 }}
               >
                 <TextInput
-                  defaultValue="Enter URL (some dapps not yet supported)"
+                  defaultValue="https://(some apps not yet supported)"
                   style={{
                     flex: 1,
                     backgroundColor: "#090817",
