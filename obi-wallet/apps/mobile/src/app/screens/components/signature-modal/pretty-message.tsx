@@ -4,7 +4,6 @@ import {
   AminoMsgInstantiateContract,
 } from "@cosmjs/cosmwasm-stargate/build/modules";
 import { AminoMsgSend } from "@cosmjs/stargate";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import { faPlay } from "@fortawesome/free-solid-svg-icons/faPlay";
 import { faWallet } from "@fortawesome/free-solid-svg-icons/faWallet";
@@ -15,11 +14,7 @@ import React, { ReactNode } from "react";
 import { useIntl } from "react-intl";
 import { Text, View } from "react-native";
 
-import {
-  formatCoin,
-  FormattedExtendedCoin,
-  formatExtendedCoin,
-} from "../../../balances";
+import { formatCoin } from "../../../balances";
 import { useStore } from "../../../stores";
 import ArrowUpIcon from "./assets/arrowUpIcon.svg";
 
@@ -49,7 +44,7 @@ function PrettyMessageSend({ value }: { value: AminoMsgSend["value"] }) {
       {value.amount.map((coin) => {
         const { amount, denom } = formatCoin(coin);
         return (
-          <Text style={{ color: "white" }}>
+          <Text style={{ color: "white" }} key={denom}>
             {amount} {denom}
           </Text>
         );
@@ -137,7 +132,10 @@ const PrettyMessageExecuteContract = observer(
             (token: { amount: string; denom: "string" }) => {
               const { amount, denom } = formatCoin(token);
               return (
-                <Text style={{ color: "white" }}>
+                <Text
+                  style={{ color: "white" }}
+                  key={denom ? denom : token.denom}
+                >
                   {amount ? amount : token.amount} {denom ? denom : token.denom}
                 </Text>
               );
@@ -217,36 +215,4 @@ function MessageElement({
       </View>
     </View>
   );
-}
-
-interface TransferMessage {
-  transfer: {
-    amount: string;
-    recipient: string;
-  };
-}
-export interface MsgExecuteContract {
-  value: {
-    contract: string;
-    // If message is for secret-wasm, msg will be the base64 encoded and encrypted string.
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    msg: object | string | TransferMessage;
-    sender: string;
-    // The field is for wasm message.
-    funds?: [
-      {
-        amount: string;
-        denom: string;
-      }
-    ];
-    // The bottom fields are for secret-wasm message.
-    sent_funds?: [
-      {
-        amount: string;
-        denom: string;
-      }
-    ];
-    callback_code_hash?: string;
-    callback_sig?: string | null;
-  };
 }

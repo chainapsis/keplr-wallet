@@ -104,11 +104,13 @@ export function Button({
       props.style,
     ],
   };
+
   const onPress = (e: GestureResponderEvent) => {
-    if (!disabled) {
-      props.onPress && props.onPress(e);
+    if (!disabled && typeof props.onPress === "function") {
+      props.onPress(e);
     }
   };
+
   if (Platform.OS === "ios") {
     return <TouchableHighlight {...buttonProps} onPress={onPress} />;
   } else {

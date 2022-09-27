@@ -145,7 +145,7 @@ export function TabNavigation() {
       })}
     >
       <Tab.Screen name={assets} component={Assets} />
-      {/* <Tab.Screen name={nfts} component={NFTs} /> */}
+      <Tab.Screen name={nfts} component={NFTs} />
       <Tab.Screen name={apps} component={DappExplorer} />
       <Tab.Screen name={trade} component={Trade} />
       <Tab.Screen name={settings} component={SettingsScreen} />
