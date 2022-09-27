@@ -82,6 +82,7 @@ export const SendScreen = observer(() => {
       ? "drink"
       : null;
 
+  const normalizedAmount = amount.replace(/,/g, ".");
   const encodeObjects = useWrapEncodeObjects(() => {
     if (!selectedCoin || !walletStore.type) return [];
 
@@ -400,8 +401,8 @@ export const SendScreen = observer(() => {
           disabled={
             !(address || drinkOrBottleModalFlavor) ||
             !amount ||
-            Number(amount) <= 0 ||
-            (drinkOrBottleModalFlavor && Number(amount) < 1) ||
+            Number(normalizedAmount) <= 0 ||
+            (drinkOrBottleModalFlavor && Number(normalizedAmount) < 1) ||
             !selectedCoin
           }
           onPress={() => {
