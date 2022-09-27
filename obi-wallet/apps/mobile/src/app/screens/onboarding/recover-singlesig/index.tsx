@@ -1,3 +1,4 @@
+import { Secp256k1HdWallet, Secp256k1Wallet } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -8,7 +9,7 @@ import { FormattedMessage } from "react-intl";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { IconButton } from "../../../button";
+import { IconButton, InlineButton } from "../../../button";
 import { useStore } from "../../../stores";
 import { TextInput } from "../../../text-input";
 import { Background } from "../../components/background";
@@ -24,6 +25,7 @@ export type RecoverSinglesigProps = NativeStackScreenProps<
 export const RecoverSinglesig = observer<RecoverSinglesigProps>(
   ({ navigation }) => {
     const [mnemonic, setMnemonic] = useState("");
+    const [generateDisabled, setGenerateDisabled] = useState(false);
     const { singlesigStore } = useStore();
 
     return (
@@ -90,6 +92,24 @@ export const RecoverSinglesig = observer<RecoverSinglesigProps>(
                 value={mnemonic}
                 onChangeText={setMnemonic}
               />
+              <Text
+                style={{
+                  color: "rgba(246, 245, 255, 0.6)",
+                  fontSize: 12,
+                  marginTop: 20,
+                }}
+              >
+                <InlineButton
+                  label="Generate seed"
+                  onPress={async () => {
+                    setGenerateDisabled(true);
+                    const wallet = await Secp256k1HdWallet.generate(12);
+                    setMnemonic(wallet.mnemonic);
+                    setGenerateDisabled(false);
+                  }}
+                  disabled={generateDisabled}
+                />
+              </Text>
             </View>
             <View>
               <VerifyAndProceedButton
