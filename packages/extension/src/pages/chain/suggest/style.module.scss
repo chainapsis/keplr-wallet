@@ -166,6 +166,61 @@
     }
   }
 
+  .info-with-link {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 16px;
+    /* Blue/Blue 200 */
+    border: 1px solid #9dacf4;
+    border-radius: 8px;
+
+    > .title {
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+      /* Blue/Blue 400 */
+      color: #314fdf;
+
+      > img {
+        width: 16px;
+        height: 16px;
+        margin-right: 10px;
+      }
+    }
+
+    > .description {
+      margin-bottom: 15px;
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 20px;
+      /* Blue/Blue 400 */
+      color: #314fdf;
+    }
+
+    > .link {
+      align-self: flex-end;
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 16px;
+      /* Blue/Blue 400 */
+      color: #314fdf;
+
+      > img {
+        width: 16px;
+        height: 16px;
+        margin-left: 4px;
+      }
+    }
+  }
+
   .warning {
     display: flex;
     flex-direction: row;

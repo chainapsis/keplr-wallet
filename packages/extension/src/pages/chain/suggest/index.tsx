@@ -9,7 +9,6 @@ import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore } = useStore();
@@ -97,7 +96,28 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
           />
         </p>
         <div style={{ flex: 1 }} />
-        <AlertExperimentalFeature />
+        <div className={style.infoWithLink}>
+          <div className={style.title}>
+            <img
+              src={require("../../../public/assets/svg/warning-primary.svg")}
+            />
+            <span>If any problem?</span>
+          </div>
+          <div className={style.description}>
+            You can suggest and solve the problem here.
+          </div>
+          <a
+            href="https://github.com/chainapsis/keplr-web"
+            rel="noreferrer"
+            target="_blank"
+            className={style.link}
+          >
+            <span>Github.Link</span>
+            <img
+              src={require("../../../public/assets/svg/arrow-right-primary.svg")}
+            />
+          </a>
+        </div>
         <div className={style.buttons}>
           <Button
             className={style.button}
