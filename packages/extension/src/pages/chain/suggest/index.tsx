@@ -33,7 +33,9 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
     return null;
   }
 
-  return (
+  return chainSuggestStore.waitingSuggestedChainInfo.data.isFromCommunity ? (
+    <EmptyLayout style={{ height: "100%" }}>hi</EmptyLayout>
+  ) : (
     <EmptyLayout style={{ height: "100%" }}>
       <div className={style.container}>
         <div className={style.forDeveloperButton}>

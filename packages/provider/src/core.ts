@@ -42,6 +42,8 @@ import deepmerge from "deepmerge";
 import Long from "long";
 import { Buffer } from "buffer/";
 
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
 export class Keplr implements IKeplr {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
 
@@ -80,10 +82,19 @@ export class Keplr implements IKeplr {
     const chainInfoResponse = await fetch(
       `https://raw.githubusercontent.com/danielkim89/cicd-test/main/cosmos/${chainIdentifier}.json`
     );
-    let chainInfo = suggestingChainInfo;
+    let chainInfo: Writeable<
+      ChainInfo & {
+        // Legacy
+        gasPriceStep?: {
+          readonly low: number;
+          readonly average: number;
+          readonly high: number;
+        };
+      }
+    > = suggestingChainInfo;
     if (chainInfoResponse.ok) {
-      const publicChainInfo: ChainInfo = await chainInfoResponse.json();
-      chainInfo = publicChainInfo;
+      chainInfo = await chainInfoResponse.json();
+      chainInfo.isFromCommunity = true;
     }
 
     if (chainInfo.gasPriceStep) {
