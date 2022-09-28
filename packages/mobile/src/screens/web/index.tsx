@@ -59,7 +59,6 @@ export const WebScreen: FunctionComponent = () => {
       <WebpageImageButton
         name="Junoswap"
         source={require("../../assets/image/webpage/junoswap.png")}
-        nameContainerStyle={style.flatten(["flex-row"])}
         onPress={() => {
           smartNavigation.pushSmart("Web.Junoswap", {});
         }}
@@ -87,6 +86,14 @@ export const WebScreen: FunctionComponent = () => {
         }}
       />
       <WebpageImageButton
+        name="Dao Dao"
+        source={require("../../assets/image/webpage/daodao.png")}
+        overlayStyle={style.flatten(["opacity-60"])}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.DaoDao", {});
+        }}
+      />
+      <WebpageImageButton
         overrideInner={
           <View style={style.flatten(["flex-1", "items-center"])}>
             <Text
@@ -111,6 +118,7 @@ export const WebpageImageButton: FunctionComponent<{
   onPress?: () => void;
 
   nameContainerStyle?: ViewStyle;
+  overlayStyle?: ViewStyle;
   nameAppend?: React.ReactElement;
   overrideInner?: React.ReactElement;
 }> = ({
@@ -118,6 +126,7 @@ export const WebpageImageButton: FunctionComponent<{
   source,
   onPress,
   nameContainerStyle,
+  overlayStyle,
   nameAppend,
   overrideInner,
 }) => {
@@ -187,10 +196,13 @@ export const WebpageImageButton: FunctionComponent<{
           />
           {imageSize ? (
             <View
-              style={style.flatten([
-                "absolute-fill",
-                "background-color-black",
-                "opacity-40",
+              style={StyleSheet.flatten([
+                style.flatten([
+                  "absolute-fill",
+                  "background-color-black",
+                  "opacity-40",
+                ]),
+                overlayStyle,
               ])}
             />
           ) : null}
