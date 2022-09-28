@@ -1550,6 +1550,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
       coinDecimals: 6,
+      coinGeckoId: "axelar",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1568,6 +1569,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
       },
       {
         coinDenom: "WETH",
@@ -1683,6 +1685,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         gasPriceStep: {
           low: 0.007,
           average: 0.007,

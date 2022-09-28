@@ -886,6 +886,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
       coinDecimals: 6,
+      coinGeckoId: "axelar",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
     },
     bip44: {
@@ -897,6 +898,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
       {
@@ -1013,6 +1015,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
         gasPriceStep: {
           low: 0.007,
