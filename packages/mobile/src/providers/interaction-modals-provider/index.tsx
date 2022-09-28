@@ -9,6 +9,7 @@ import { WCGoBackToBrowserModal } from "../../modals/wc-go-back-to-browser";
 import { BackHandler, Platform } from "react-native";
 import { LoadingScreenModal } from "../loading-screen/modal";
 import { KeyRingStatus } from "@keplr-wallet/background";
+import { AddTokenModal } from "../../modals/add-token";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
@@ -18,6 +19,7 @@ export const InteractionModalsProivder: FunctionComponent = observer(
       permissionStore,
       signInteractionStore,
       walletConnectStore,
+      tokensStore,
     } = useStore();
 
     useEffect(() => {
@@ -107,6 +109,12 @@ export const InteractionModalsProivder: FunctionComponent = observer(
           <SignModal
             isOpen={true}
             close={() => signInteractionStore.rejectAll()}
+          />
+        ) : null}
+        {tokensStore.waitingSuggestedToken ? (
+          <AddTokenModal
+            isOpen={true}
+            close={() => tokensStore.rejectAllSuggestedTokens()}
           />
         ) : null}
         {children}

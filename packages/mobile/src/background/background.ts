@@ -30,6 +30,7 @@ init(
     "https://app.umee.cc",
     "https://junoswap.com",
     "https://frontier.osmosis.zone",
+    "https://daodao.zone",
   ],
   {
     rng: getRandomBytesAsync,

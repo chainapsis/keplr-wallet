@@ -154,6 +154,11 @@ export class TokensStore<
         appCurrency
       );
 
+      // After allowing interaction, additional logic needs to be processed in the background,
+      // so if you refresh immediately, you will request a token before processing the logic.
+      // So, just wait a little.
+      yield new Promise((resolve) => setTimeout(resolve, 500));
+
       yield this.getTokensOf(data.data.chainId).refreshTokens();
     }
   }
