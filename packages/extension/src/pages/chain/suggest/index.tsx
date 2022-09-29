@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import { Button } from "reactstrap";
 
@@ -12,6 +12,7 @@ import { useStore } from "../../../stores";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore } = useStore();
+  const [isDeveloperMode, setIsDeveloperMode] = useState(false);
   const history = useHistory();
 
   const interactionInfo = useInteractionInfo(() => {
@@ -29,97 +30,139 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
     }
   }, [analyticsStore, chainSuggestStore.waitingSuggestedChainInfo]);
 
+  useEffect(() => {
+    if (chainSuggestStore.waitingSuggestedChainInfo) {
+      setIsDeveloperMode(
+        !chainSuggestStore.waitingSuggestedChainInfo.data.isFromCommunity
+      );
+    }
+  }, [chainSuggestStore.waitingSuggestedChainInfo]);
+
   if (!chainSuggestStore.waitingSuggestedChainInfo) {
     return null;
   }
 
-  return chainSuggestStore.waitingSuggestedChainInfo.data.isFromCommunity ? (
-    <EmptyLayout style={{ height: "100%" }}>hi</EmptyLayout>
-  ) : (
+  return (
     <EmptyLayout style={{ height: "100%" }}>
       <div className={style.container}>
-        <div className={style.forDeveloperButton}>
-          <span>For Developer</span>
-          <div className={style.imageWrapper}>
-            <img
-              src={require("../../../public/assets/svg/for-developer.svg")}
-            />
+        {isDeveloperMode ? (
+          <div className={style.content}>
+            <h1 className={style.header}>
+              <FormattedMessage
+                id="chain.suggested.title"
+                values={{
+                  chainName:
+                    chainSuggestStore.waitingSuggestedChainInfo?.data.chainName,
+                }}
+              />
+            </h1>
+            <p className={style.origin}>
+              {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
+            </p>
+            <div className={style.chainInfoContainer}>
+              <pre className={style.chainInfo}>
+                {JSON.stringify(
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  (({ isFromCommunity, beta, origin, ...chainInfo }) =>
+                    chainInfo)(
+                    chainSuggestStore.waitingSuggestedChainInfo.data
+                  ),
+                  undefined,
+                  2
+                )}
+              </pre>
+            </div>
           </div>
-        </div>
-        <div className={style.logo}>
-          <div className={style.imageContainer}>
-            <div className={style.imageBackground} />
-            <img
-              className={style.logoImage}
-              src={`https://raw.githubusercontent.com/danielkim89/cicd-test/main/images/${
-                ChainIdHelper.parse(
-                  chainSuggestStore.waitingSuggestedChainInfo.data.chainId
-                ).identifier
-              }.png`}
-              alt="chain logo"
-            />
+        ) : (
+          <div className={style.content}>
+            <div
+              className={style.forDeveloperButton}
+              onClick={() => setIsDeveloperMode(true)}
+            >
+              <span>For Developer</span>
+              <div className={style.imageWrapper}>
+                <img
+                  src={require("../../../public/assets/svg/for-developer.svg")}
+                />
+              </div>
+            </div>
+            <div className={style.logo}>
+              <div className={style.imageContainer}>
+                <div className={style.imageBackground} />
+                <img
+                  className={style.logoImage}
+                  src={`https://raw.githubusercontent.com/danielkim89/cicd-test/main/images/${
+                    ChainIdHelper.parse(
+                      chainSuggestStore.waitingSuggestedChainInfo.data.chainId
+                    ).identifier
+                  }.png`}
+                  alt="chain logo"
+                />
+              </div>
+              <div className={style.dots}>
+                <div className={style.dot} />
+                <div className={style.dot} />
+                <div className={style.dot} />
+              </div>
+              <div className={style.imageContainer}>
+                <div className={style.imageBackground} />
+                <img
+                  className={style.logoImage}
+                  src={require("../../../public/assets/logo-256.png")}
+                  alt="keplr logo"
+                />
+              </div>
+            </div>
+            <h1 className={style.header}>
+              <FormattedMessage
+                id="chain.suggested.title"
+                values={{
+                  chainName:
+                    chainSuggestStore.waitingSuggestedChainInfo?.data.chainName,
+                }}
+              />
+            </h1>
+            <div className={style.tag}>
+              <div>Community Driven</div>
+            </div>
+            <p className={style.paragraph}>
+              <FormattedMessage
+                id="chain.suggested.paragraph"
+                values={{
+                  host:
+                    chainSuggestStore.waitingSuggestedChainInfo?.data.origin,
+                  chainId:
+                    chainSuggestStore.waitingSuggestedChainInfo?.data.chainId,
+                  // eslint-disable-next-line react/display-name
+                  b: (...chunks: any) => <b>{chunks}</b>,
+                }}
+              />
+            </p>
+            <div style={{ flex: 1 }} />
+            <div className={style.infoWithLink}>
+              <div className={style.title}>
+                <img
+                  src={require("../../../public/assets/svg/warning-primary.svg")}
+                />
+                <span>If any problem?</span>
+              </div>
+              <div className={style.description}>
+                You can suggest and solve the problem here.
+              </div>
+              <a
+                href="https://github.com/chainapsis/keplr-web"
+                rel="noreferrer"
+                target="_blank"
+                className={style.link}
+              >
+                <span>Github.Link</span>
+                <img
+                  src={require("../../../public/assets/svg/arrow-right-primary.svg")}
+                />
+              </a>
+            </div>
           </div>
-          <div className={style.dots}>
-            <div className={style.dot} />
-            <div className={style.dot} />
-            <div className={style.dot} />
-          </div>
-          <div className={style.imageContainer}>
-            <div className={style.imageBackground} />
-            <img
-              className={style.logoImage}
-              src={require("../../../public/assets/logo-256.png")}
-              alt="keplr logo"
-            />
-          </div>
-        </div>
-        <h1 className={style.header}>
-          <FormattedMessage
-            id="chain.suggested.title"
-            values={{
-              chainName:
-                chainSuggestStore.waitingSuggestedChainInfo?.data.chainName,
-            }}
-          />
-        </h1>
-        <div className={style.tag}>
-          <div>Community Driven</div>
-        </div>
-        <p className={style.paragraph}>
-          <FormattedMessage
-            id="chain.suggested.paragraph"
-            values={{
-              host: chainSuggestStore.waitingSuggestedChainInfo?.data.origin,
-              chainId:
-                chainSuggestStore.waitingSuggestedChainInfo?.data.chainId,
-              // eslint-disable-next-line react/display-name
-              b: (...chunks: any) => <b>{chunks}</b>,
-            }}
-          />
-        </p>
-        <div style={{ flex: 1 }} />
-        <div className={style.infoWithLink}>
-          <div className={style.title}>
-            <img
-              src={require("../../../public/assets/svg/warning-primary.svg")}
-            />
-            <span>If any problem?</span>
-          </div>
-          <div className={style.description}>
-            You can suggest and solve the problem here.
-          </div>
-          <a
-            href="https://github.com/chainapsis/keplr-web"
-            rel="noreferrer"
-            target="_blank"
-            className={style.link}
-          >
-            <span>Github.Link</span>
-            <img
-              src={require("../../../public/assets/svg/arrow-right-primary.svg")}
-            />
-          </a>
-        </div>
+        )}
         <div className={style.buttons}>
           <Button
             className={style.button}
