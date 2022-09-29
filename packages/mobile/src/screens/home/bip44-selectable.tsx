@@ -91,8 +91,10 @@ export const BIP44Selectable: FunctionComponent = observer(() => {
           return false;
         });
 
-        // Check that the others have sent txs.
-        const hasSequenceOrError = others.find((other) => {
+        // Check that the account exist on chain.
+        // With stargate implementation, querying account fails with 404 status if account not exists.
+        // But, if account receives some native tokens, the account would be created and it may deserve to be chosen.
+        const hasAccountOrError = others.find((other) => {
           const account = queries.cosmos.queryAccount.getQueryBech32Address(
             other.bech32Address
           );
@@ -107,17 +109,17 @@ export const BIP44Selectable: FunctionComponent = observer(() => {
               return false;
             }
             console.error(
-              "Open bip44 selector modal due to failure of querying account sequence",
+              "Open bip44 selector modal due to failure of querying account",
               account.error
             );
             return true;
           }
-          return account.sequence !== "0";
+          return true;
         });
 
         // If there is no other accounts that have the balances or have sent txs,
         // just select the first account without requesting the users to select the account they want.
-        if (!hasBalancesOrError && !hasSequenceOrError) {
+        if (!hasBalancesOrError && !hasAccountOrError) {
           keyRingStore.setKeyStoreCoinType(
             chainStore.current.chainId,
             selectables.selectables[0].path.coinType
