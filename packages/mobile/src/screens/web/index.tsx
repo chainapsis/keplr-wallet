@@ -86,7 +86,7 @@ export const WebScreen: FunctionComponent = () => {
         }}
       />
       <WebpageImageButton
-        name="Dao Dao"
+        name="DAO DAO"
         source={require("../../assets/image/webpage/daodao.png")}
         overlayStyle={style.flatten(["opacity-60"])}
         onPress={() => {
