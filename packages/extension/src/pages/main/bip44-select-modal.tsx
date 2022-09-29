@@ -167,7 +167,7 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
             const bal = balances[i];
 
             if (bal.error) {
-              console.error(
+              console.log(
                 "Open bip44 selector modal due to failure of querying balance",
                 bal.error
               );
@@ -199,7 +199,7 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
             ) {
               return false;
             }
-            console.error(
+            console.log(
               "Open bip44 selector modal due to failure of querying account",
               account.error
             );
