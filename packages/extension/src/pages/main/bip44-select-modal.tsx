@@ -153,16 +153,26 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
         });
 
       Promise.all([...queryBalancesWaiter, ...queryAccountsWaiter]).then(() => {
+        // Remember that `waitFreshResponse()` not throw an error even if query fails.
+
         // Assume that the first one as the main account of paths.
         const others = selectables.selectables.slice(1);
 
         // Check that the others have some balances/
-        const hasBalances = others.find((other) => {
+        const hasBalancesOrError = others.find((other) => {
           const balances = queries.queryBalances.getQueryBech32Address(
             other.bech32Address
           ).balances;
           for (let i = 0; i < balances.length; i++) {
             const bal = balances[i];
+
+            if (bal.error) {
+              console.error(
+                "Open bip44 selector modal due to failure of querying balance",
+                bal.error
+              );
+              return true;
+            }
 
             if (bal.balance.toDec().gt(new Dec(0))) {
               return true;
@@ -173,16 +183,32 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
         });
 
         // Check that the others have sent txs.
-        const hasSequence = others.find((other) => {
+        const hasSequenceOrError = others.find((other) => {
           const account = queries.cosmos.queryAccount.getQueryBech32Address(
             other.bech32Address
           );
+          if (account.error && account.error.message) {
+            if (
+              // In this case, it means that the account not exist on chain, and handle it as 0 sequence.
+              account.error.status === 404 &&
+              account.error.message.includes(
+                `account ${other.bech32Address} not found`
+              )
+            ) {
+              return false;
+            }
+            console.error(
+              "Open bip44 selector modal due to failure of querying account sequence",
+              account.error
+            );
+            return true;
+          }
           return account.sequence !== "0";
         });
 
         // If there is no other accounts that have the balances or have sent txs,
         // just select the first account without requesting the users to select the account they want.
-        if (!hasBalances && !hasSequence) {
+        if (!hasBalancesOrError && !hasSequenceOrError) {
           keyRingStore.setKeyStoreCoinType(
             chainStore.current.chainId,
             selectables.selectables[0].path.coinType
