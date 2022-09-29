@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, { FunctionComponent, useEffect, useRef } from "react";
 
 import { HeaderLayout } from "../../layouts";
 
@@ -75,7 +75,7 @@ export const MainPage: FunctionComponent = observer(() => {
     .get(chainStore.current.chainId)
     .cosmos.queryAccount.getQueryBech32Address(accountInfo.bech32Address);
   // Show the spendable balances if the account is vesting account.
-  const showVestingInfo = useMemo(() => {
+  const showVestingInfo = (() => {
     // If the chain can't query /cosmos/bank/v1beta1/spendable_balances/{account},
     // no need to show the vesting info because its query always fails.
     if (
@@ -92,12 +92,7 @@ export const MainPage: FunctionComponent = observer(() => {
       queryAccount.response &&
       queryAccount.isVestingAccount
     );
-  }, [
-    current.features,
-    queryAccount.error,
-    queryAccount.isVestingAccount,
-    queryAccount.response,
-  ]);
+  })();
 
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
