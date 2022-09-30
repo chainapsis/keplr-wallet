@@ -205,11 +205,35 @@ export class Ledger {
       }
       case EthSignType.EIP712: {
         const data = JSON.parse(Buffer.from(message).toString());
+
+        const domainFieldNames: Array<string> = [
+          "name",
+          "version",
+          "chainId",
+          "verifyingContract",
+          "salt",
+        ];
+
         // Unfortunately, signEIP712Message not works on ledger yet.
         return Ledger.ethSignatureToBytes(
           await this.ethereumApp.signEIP712HashedMessage(
             formattedPath,
-            _TypedDataEncoder.hashDomain(data.domain),
+            (() => {
+              data.types.EIP712Domain = data.types.EIP712Domain.sort(
+                (a: { name: string }, b: { name: string }) => {
+                  return (
+                    domainFieldNames.indexOf(a.name) -
+                    domainFieldNames.indexOf(b.name)
+                  );
+                }
+              );
+
+              return _TypedDataEncoder.hashStruct(
+                "EIP712Domain",
+                { EIP712Domain: data.types.EIP712Domain },
+                data.domain
+              );
+            })(),
             _TypedDataEncoder
               .from(
                 // Seems that there is no way to set primary type and the first type becomes primary type.

@@ -1,5 +1,9 @@
 import { AccountSetBaseSuper, MsgOpt, WalletStatus } from "./base";
-import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  EthSignType,
+  KeplrSignOptions,
+} from "@keplr-wallet/types";
 import {
   BroadcastMode,
   makeSignDoc,
@@ -12,10 +16,10 @@ import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import {
   AuthInfo,
-  TxRaw,
-  TxBody,
   Fee,
   SignerInfo,
+  TxBody,
+  TxRaw,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
@@ -23,9 +27,9 @@ import { Coin } from "@keplr-wallet/proto-types/cosmos/base/v1beta1/coin";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import {
+  MsgBeginRedelegate,
   MsgDelegate,
   MsgUndelegate,
-  MsgBeginRedelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
 import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
@@ -37,7 +41,7 @@ import {
   TendermintTxTracer,
 } from "@keplr-wallet/cosmos";
 import { BondStatus } from "../query/cosmos/staking/types";
-import { QueriesSetBase, IQueriesStore, CosmosQueries } from "../query";
+import { CosmosQueries, IQueriesStore, QueriesSetBase } from "../query";
 import { DeepPartial, DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
 import Axios, { AxiosInstance } from "axios";
@@ -46,6 +50,7 @@ import { isAddress } from "@ethersproject/address";
 import { Buffer } from "buffer/";
 import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
 import { txEventsWithPreOnFulfill } from "./utils";
+import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -504,9 +509,18 @@ export class CosmosAccountImpl {
       true
     );
 
-    const useEthereumSign = this.chainGetter
-      .getChain(this.chainId)
-      .features?.includes("eth-key-sign");
+    const useEthereumSign =
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-key-sign") === true;
+
+    const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+
+    if (eip712Signing && !msgs.rlpTypes) {
+      throw new Error(
+        "RLP types information is needed for signing tx for ethermint chain with ledger"
+      );
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
@@ -520,18 +534,106 @@ export class CosmosAccountImpl {
       account.getSequence().toString()
     );
 
-    const signResponse = await keplr.signAmino(
-      this.chainId,
-      this.base.bech32Address,
-      signDoc,
-      signOptions
-    );
+    const signResponse = await (async () => {
+      if (!eip712Signing) {
+        return await keplr.signAmino(
+          this.chainId,
+          this.base.bech32Address,
+          signDoc,
+          signOptions
+        );
+      } else {
+        // TODO: Upgrade typing. (Update cosmjs version?)
+        const altSignDoc = {
+          ...signDoc,
+        };
+
+        (altSignDoc as any).fee["feePayer"] = this.base.bech32Address;
+
+        const signature = await keplr.signEthereum(
+          this.chainId,
+          this.base.bech32Address,
+          JSON.stringify({
+            types: {
+              EIP712Domain: [
+                { name: "name", type: "string" },
+                { name: "version", type: "string" },
+                { name: "chainId", type: "uint256" },
+                // XXX: Maybe, non-standard format?
+                { name: "verifyingContract", type: "string" },
+                // XXX: Maybe, non-standard format?
+                { name: "salt", type: "string" },
+              ],
+              Tx: [
+                { name: "account_number", type: "string" },
+                { name: "chain_id", type: "string" },
+                { name: "fee", type: "Fee" },
+                { name: "memo", type: "string" },
+                { name: "msgs", type: "Msg[]" },
+                { name: "sequence", type: "string" },
+              ],
+              Fee: [
+                { name: "feePayer", type: "string" },
+                { name: "amount", type: "Coin[]" },
+                { name: "gas", type: "string" },
+              ],
+              Coin: [
+                { name: "denom", type: "string" },
+                { name: "amount", type: "string" },
+              ],
+              Msg: [
+                { name: "type", type: "string" },
+                { name: "value", type: "MsgValue" },
+              ],
+              ...msgs.rlpTypes,
+            },
+            domain: {
+              name: "Cosmos Web3",
+              version: "1.0.0",
+              chainId: "9001",
+              verifyingContract: "cosmos",
+              salt: "0",
+            },
+            primaryType: "Tx",
+            message: altSignDoc,
+          }),
+          EthSignType.EIP712
+        );
+
+        return {
+          signed: altSignDoc,
+          signature: {
+            pub_key: {
+              value: Buffer.from(this.base.pubKey).toString("base64"),
+            },
+            signature: Buffer.from(signature).toString("base64"),
+          },
+        };
+      }
+    })();
 
     const signedTx = TxRaw.encode({
       bodyBytes: TxBody.encode(
         TxBody.fromPartial({
           messages: protoMsgs,
           memo: signResponse.signed.memo,
+          extensionOptions: eip712Signing
+            ? [
+                {
+                  typeUrl: "/ethermint.types.v1.ExtensionOptionsWeb3Tx",
+                  value: ExtensionOptionsWeb3Tx.encode(
+                    ExtensionOptionsWeb3Tx.fromPartial({
+                      typedDataChainId: "9001",
+                      feePayer: this.base.bech32Address,
+                      feePayerSig: Buffer.from(
+                        signResponse.signature.signature,
+                        "base64"
+                      ),
+                    })
+                  ).finish(),
+                },
+              ]
+            : undefined,
         })
       ).finish(),
       authInfoBytes: AuthInfo.encode({
@@ -568,9 +670,15 @@ export class CosmosAccountImpl {
         fee: Fee.fromPartial({
           amount: signResponse.signed.fee.amount as Coin[],
           gasLimit: signResponse.signed.fee.gas,
+          payer: eip712Signing
+            ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
+              (signResponse.signed as any).fee["feePayer"]
+            : undefined,
         }),
       }).finish(),
-      signatures: [Buffer.from(signResponse.signature.signature, "base64")],
+      signatures: !eip712Signing
+        ? [Buffer.from(signResponse.signature.signature, "base64")]
+        : [new Uint8Array(0)],
     }).finish();
 
     return {
@@ -1525,6 +1633,12 @@ export class CosmosAccountImpl {
             }).finish(),
           };
         }),
+        rlpTypes: {
+          MsgValue: [
+            { name: "delegator_address", type: "string" },
+            { name: "validator_address", type: "string" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
