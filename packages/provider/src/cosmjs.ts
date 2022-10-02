@@ -7,7 +7,7 @@ import {
 import { Keplr } from "@keplr-wallet/types";
 import { OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
-import { SignDoc } from "@cosmjs/proto-signing/build/codec/cosmos/tx/v1beta1/tx";
+import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 
 export class CosmJSOfflineSignerOnlyAmino implements OfflineSigner {
   constructor(

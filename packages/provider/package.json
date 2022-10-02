@@ -17,10 +17,11 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@cosmjs/proto-signing": "^0.24.0-alpha.25",
+    "@cosmjs/launchpad": "^0.27.1",
+    "@cosmjs/proto-signing": "^0.27.1",
     "@keplr-wallet/router": "0.11.6",
     "@keplr-wallet/types": "0.11.6",
+    "cosmjs-types": "^0.4.0",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "long": "^4.0.0",
