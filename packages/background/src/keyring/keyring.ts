@@ -111,7 +111,11 @@ export class KeyRing {
   }
 
   public get curve(): KeyCurve {
-    return this.keyStore!.curve;
+    const curve = this.keyStore?.curve;
+    if (curve === undefined) {
+      throw new Error("Unable to lookup curve");
+    }
+    return curve;
   }
 
   public isLocked(): boolean {

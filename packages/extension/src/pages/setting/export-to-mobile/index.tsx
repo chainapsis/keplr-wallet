@@ -303,7 +303,7 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
               const counter = new Counter(0);
               counter.setBytes(iv);
               const aesCtr = new AES.ModeOfOperation.ctr(
-                Buffer.from(qrCodeData!.sharedPassword, "hex"),
+                Buffer.from(qrCodeData?.sharedPassword ?? "", "hex"),
                 counter
               );
 

@@ -36,7 +36,7 @@ export const AccountView: FunctionComponent = observer(() => {
         });
       }
     },
-    [accountInfo.walletStatus, accountInfo.bech32Address, notification, intl]
+    [accountInfo.walletStatus, notification, intl]
   );
 
   return (

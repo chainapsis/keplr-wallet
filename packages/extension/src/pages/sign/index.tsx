@@ -154,11 +154,7 @@ export const SignPage: FunctionComponent = observer(() => {
       ChainIdHelper.parse(chainStore.current.chainId).identifier ===
       ChainIdHelper.parse(chainStore.selectedChainId).identifier
     );
-  }, [
-    signDocHelper.signDocWrapper,
-    chainStore.current.chainId,
-    chainStore.selectedChainId,
-  ]);
+  }, [chainStore, signDocHelper.signDocWrapper]);
 
   // If this is undefined, show the chain name on the header.
   // If not, show the alternative title.

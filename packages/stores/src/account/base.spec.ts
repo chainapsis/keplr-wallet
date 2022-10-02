@@ -22,8 +22,9 @@ describe("Test Account set base", () => {
 
     const accountSetBase = new AccountSetBase(
       {
-        // No need
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         addEventListener: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         removeEventListener: () => {},
       },
       chainStore,
@@ -80,8 +81,9 @@ describe("Test Account set base", () => {
 
     const accountSetBase = new AccountSetBase(
       {
-        // No need
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         addEventListener: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         removeEventListener: () => {},
       },
       chainStore,

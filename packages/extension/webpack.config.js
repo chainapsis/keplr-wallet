@@ -71,7 +71,7 @@ const fileRule = {
   ],
 };
 
-const extensionConfig = (env, args) => {
+const extensionConfig = () => {
   return {
     name: "extension",
     mode: isEnvDevelopment ? "development" : "production",

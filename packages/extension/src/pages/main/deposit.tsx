@@ -39,7 +39,7 @@ export const DepositView: FunctionComponent = observer(() => {
         });
       }
     },
-    [accountInfo.walletStatus, accountInfo.bech32Address, notification, intl]
+    [accountInfo.walletStatus, notification, intl]
   );
 
   return (
@@ -80,10 +80,10 @@ export const DepositView: FunctionComponent = observer(() => {
           className={styleDeposit.button}
           color="primary"
           size="sm"
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
+            await copyAddress(accountInfo.bech32Address);
             setIsDepositOpen(true);
-            copyAddress(accountInfo.bech32Address);
           }}
         >
           <FormattedMessage id="main.account.button.deposit" />

@@ -33,7 +33,7 @@ export const MorePage: FunctionComponent = () => {
               history.push("/setting/set-keyring");
             }}
           >
-            <i className="fa fa-user" aria-hidden="true"></i>
+            <i className="fa fa-user" aria-hidden="true" />
           </div>
         </div>
       }
