@@ -8,7 +8,7 @@
     "serve": "parcel ./src/index.html"
   },
   "dependencies": {
-    "@cosmjs/launchpad": "^0.24.0-alpha.25",
+    "@cosmjs/launchpad": "^0.27.1",
     "@keplr-wallet/common": "0.11.6",
     "@keplr-wallet/cosmos": "0.11.6",
     "@keplr-wallet/stores": "0.11.6",
