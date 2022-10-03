@@ -61,6 +61,7 @@ export function SecurityQuestionInput({
 
       <DropDownPicker
         disabled={disabled}
+        showArrowIcon={!disabled}
         open={dropdownPickerOpen}
         value={securityQuestion}
         items={securityQuestions}
