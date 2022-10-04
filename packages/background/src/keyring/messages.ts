@@ -10,6 +10,7 @@ import { BIP44HDPath, ExportKeyRingData } from "./types";
 import {
   Bech32Address,
   checkAndValidateADR36AminoSignDoc,
+  EthermintChainIdHelper,
 } from "@keplr-wallet/cosmos";
 import { BIP44, EthSignType, KeplrSignOptions, Key } from "@keplr-wallet/types";
 
@@ -18,6 +19,7 @@ import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { Buffer } from "buffer/";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
@@ -533,6 +535,26 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     } else {
       if (this.signDoc.msgs[0].value.signer !== this.signer) {
         throw new KeplrError("keyring", 233, "Unmatched signer in sign doc");
+      }
+
+      if (this.signOptions.ethSignType) {
+        switch (this.signOptions.ethSignType) {
+          // TODO: Check chain id in tx data.
+          // case EthSignType.TRANSACTION:
+          case EthSignType.EIP712: {
+            const message = JSON.parse(
+              Buffer.from(this.signDoc.msgs[0].value.data, "base64").toString()
+            );
+            const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
+            if (parseFloat(message.domain?.chainId) !== ethChainId) {
+              throw new Error(
+                `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${message.domain?.chainId})`
+              );
+            }
+          }
+          // XXX: There is no way to check chain id if type is message because eth personal sign standard doesn't define chain id field.
+          // case EthSignType.MESSAGE:
+        }
       }
     }
 

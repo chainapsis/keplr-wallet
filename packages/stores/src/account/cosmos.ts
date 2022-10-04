@@ -38,6 +38,7 @@ import {
   BaseAccount,
   Bech32Address,
   ChainIdHelper,
+  EthermintChainIdHelper,
   TendermintTxTracer,
 } from "@keplr-wallet/cosmos";
 import { BondStatus } from "../query/cosmos/staking/types";
@@ -590,7 +591,9 @@ export class CosmosAccountImpl {
             domain: {
               name: "Cosmos Web3",
               version: "1.0.0",
-              chainId: "9001",
+              chainId: EthermintChainIdHelper.parse(
+                this.chainId
+              ).ethChainId.toString(),
               verifyingContract: "cosmos",
               salt: "0",
             },
@@ -623,7 +626,9 @@ export class CosmosAccountImpl {
                   typeUrl: "/ethermint.types.v1.ExtensionOptionsWeb3Tx",
                   value: ExtensionOptionsWeb3Tx.encode(
                     ExtensionOptionsWeb3Tx.fromPartial({
-                      typedDataChainId: "9001",
+                      typedDataChainId: EthermintChainIdHelper.parse(
+                        this.chainId
+                      ).ethChainId.toString(),
                       feePayer: this.base.bech32Address,
                       feePayerSig: Buffer.from(
                         signResponse.signature.signature,
