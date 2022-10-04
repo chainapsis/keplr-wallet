@@ -103,10 +103,6 @@ export const MainPage: FunctionComponent = observer(() => {
     // TODO: Remove this part.
     const currencyType = new DenomHelper(bal.currency.coinMinimalDenom).type;
     if (currencyType === "native" || currencyType === "erc20") {
-      console.log(`Currency:`);
-      console.log(bal.currency);
-      console.log("Balance");
-      console.log(bal.balance.toDec().toString());
       return bal.balance.toDec().gt(new Dec("0"));
     }
     return true;

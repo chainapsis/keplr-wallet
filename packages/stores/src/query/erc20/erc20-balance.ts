@@ -29,10 +29,13 @@ export class ObservableQueryERC20BalanceInner extends ObservableQueryBalanceInne
     makeObservable(this);
 
     const ethereumUrl = chainGetter.getChain(chainId).ethereumJsonRpc ?? "";
-    const userAddress = Bech32Address.fromBech32(
-      this.bech32Address,
-      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
-    ).toHex(true);
+    let userAddress = "";
+    try {
+      userAddress = Bech32Address.fromBech32(
+        this.bech32Address,
+        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+      ).toHex(true);
+    } catch (e) {}
 
     this.queryErc20Balance = new ObservableQueryERC20Metadata(
       kvStore,
