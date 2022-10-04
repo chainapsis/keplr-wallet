@@ -29,6 +29,12 @@ export interface Secret20Currency extends Currency {
   readonly viewingKey: string;
 }
 
+export interface ERC20Currency extends Currency {
+  readonly type: "erc20";
+  readonly contractAddress: string;
+  readonly viewOnly: true;
+}
+
 /**
  * IBCCurrency is the currency that is sent from the other chain via IBC.
  * This will be handled as similar to the native currency.

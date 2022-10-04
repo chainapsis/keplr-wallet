@@ -1,52 +1,16 @@
-import { HasMapStore, ObservableJsonRPCQuery } from "@keplr-wallet/stores";
+import { HasMapStore, ObservableJsonRPCQuery } from "../../common";
 import { KVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import { Interface } from "@ethersproject/abi";
 import { computed, makeObservable } from "mobx";
+import {
+  ObservableQueryERC20MetadataDecimals,
+  ObservableQueryERC20MetadataName,
+  ObservableQueryERC20MetadataSymbol,
+} from "@keplr-wallet/stores-etc";
+import { BigNumber } from "@ethersproject/bignumber";
 
 const erc20MetadataInterface: Interface = new Interface([
-  {
-    constant: true,
-    inputs: [],
-    name: "name",
-    outputs: [
-      {
-        name: "",
-        type: "string",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "symbol",
-    outputs: [
-      {
-        name: "",
-        type: "string",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "decimals",
-    outputs: [
-      {
-        name: "",
-        type: "uint8",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
   {
     constant: true,
     inputs: [
@@ -67,117 +31,6 @@ const erc20MetadataInterface: Interface = new Interface([
     type: "function",
   },
 ]);
-
-export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<string> {
-  constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    const instance = Axios.create({
-      ...{
-        baseURL: ethereumURL,
-      },
-    });
-
-    super(kvStore, instance, "", "eth_call", [
-      {
-        to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("name"),
-      },
-      "latest",
-    ]);
-
-    makeObservable(this);
-  }
-
-  @computed
-  get name(): string | undefined {
-    if (!this.response) {
-      return undefined;
-    }
-
-    try {
-      return erc20MetadataInterface.decodeFunctionResult(
-        "name",
-        this.response.data
-      )[0];
-    } catch (e) {
-      console.log(e);
-    }
-    return undefined;
-  }
-}
-
-export class ObservableQueryERC20MetadataSymbol extends ObservableJsonRPCQuery<string> {
-  constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    const instance = Axios.create({
-      ...{
-        baseURL: ethereumURL,
-      },
-    });
-
-    super(kvStore, instance, "", "eth_call", [
-      {
-        to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("symbol"),
-      },
-      "latest",
-    ]);
-
-    makeObservable(this);
-  }
-
-  @computed
-  get symbol(): string | undefined {
-    if (!this.response) {
-      return undefined;
-    }
-
-    try {
-      return erc20MetadataInterface.decodeFunctionResult(
-        "symbol",
-        this.response.data
-      )[0];
-    } catch (e) {
-      console.log(e);
-    }
-    return undefined;
-  }
-}
-
-export class ObservableQueryERC20MetadataDecimals extends ObservableJsonRPCQuery<string> {
-  constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    const instance = Axios.create({
-      ...{
-        baseURL: ethereumURL,
-      },
-    });
-
-    super(kvStore, instance, "", "eth_call", [
-      {
-        to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("decimals"),
-      },
-      "latest",
-    ]);
-
-    makeObservable(this);
-  }
-
-  @computed
-  get decimals(): number | undefined {
-    if (!this.response) {
-      return undefined;
-    }
-
-    try {
-      return erc20MetadataInterface.decodeFunctionResult(
-        "decimals",
-        this.response.data
-      )[0];
-    } catch (e) {
-      console.log(e);
-    }
-    return undefined;
-  }
-}
 
 export class ObservableQueryERC20ContractBalance extends ObservableJsonRPCQuery<string> {
   constructor(
@@ -206,16 +59,17 @@ export class ObservableQueryERC20ContractBalance extends ObservableJsonRPCQuery<
   }
 
   @computed
-  get balance(): number | undefined {
+  get balance(): string | undefined {
     if (!this.response) {
       return undefined;
     }
 
     try {
-      return erc20MetadataInterface.decodeFunctionResult(
+      const balance = erc20MetadataInterface.decodeFunctionResult(
         "balanceOf",
         this.response.data
-      )[0];
+      )[0] as BigNumber;
+      return balance.toString();
     } catch (e) {
       console.log(e);
     }
@@ -281,7 +135,7 @@ export class ObservableQueryERC20MetadataInner {
     return this._queryDecimals.decimals;
   }
 
-  get balance(): number | undefined {
+  get balance(): string | undefined {
     return this._queryBalance.balance;
   }
 }

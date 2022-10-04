@@ -106,7 +106,12 @@ export const MainPage: FunctionComponent = observer(() => {
   const tokens = queryBalances.unstakables.filter((bal) => {
     // Temporary implementation for trimming the 0 balanced native tokens.
     // TODO: Remove this part.
-    if (new DenomHelper(bal.currency.coinMinimalDenom).type === "native") {
+    const currencyType = new DenomHelper(bal.currency.coinMinimalDenom).type;
+    if (currencyType === "native" || currencyType === "erc20") {
+      console.log(`Currency:`);
+      console.log(bal.currency);
+      console.log("Balance");
+      console.log(bal.balance.toDec().toString());
       return bal.balance.toDec().gt(new Dec("0"));
     }
     return true;

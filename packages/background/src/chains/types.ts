@@ -181,4 +181,5 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
 
       return value;
     }),
+  ethereumJsonRpc: Joi.string().uri(),
 });
