@@ -5,7 +5,7 @@ import { publicKeyConvert, signatureImport } from "secp256k1";
 import { KeplrError } from "@keplr-wallet/router";
 import Eth from "@ledgerhq/hw-app-eth";
 import { EthSignType } from "@keplr-wallet/types";
-import { BIP44HDPath } from "../keyring";
+import { BIP44HDPath, EIP712MessageValidator } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 import { Buffer } from "buffer/";
 import { _TypedDataEncoder } from "@ethersproject/hash";
@@ -204,44 +204,36 @@ export class Ledger {
         return Buffer.from(signedTx, "hex");
       }
       case EthSignType.EIP712: {
-        const data = JSON.parse(Buffer.from(message).toString());
-
-        const domainFieldNames: Array<string> = [
-          "name",
-          "version",
-          "chainId",
-          "verifyingContract",
-          "salt",
-        ];
+        const data = await EIP712MessageValidator.validateAsync(
+          JSON.parse(Buffer.from(message).toString())
+        );
 
         // Unfortunately, signEIP712Message not works on ledger yet.
         return Ledger.ethSignatureToBytes(
           await this.ethereumApp.signEIP712HashedMessage(
             formattedPath,
-            (() => {
-              data.types.EIP712Domain = data.types.EIP712Domain.sort(
-                (a: { name: string }, b: { name: string }) => {
-                  return (
-                    domainFieldNames.indexOf(a.name) -
-                    domainFieldNames.indexOf(b.name)
-                  );
-                }
-              );
-
-              return _TypedDataEncoder.hashStruct(
-                "EIP712Domain",
-                { EIP712Domain: data.types.EIP712Domain },
-                data.domain
-              );
-            })(),
+            _TypedDataEncoder.hashStruct(
+              "EIP712Domain",
+              { EIP712Domain: data.types.EIP712Domain },
+              data.domain
+            ),
             _TypedDataEncoder
               .from(
                 // Seems that there is no way to set primary type and the first type becomes primary type.
-                // Anyway, for now, there is no problem if there is only one type except for EIP712Domain.
                 (() => {
                   const types = { ...data.types };
                   delete types["EIP712Domain"];
-                  return types;
+                  const primary = types[data.primaryType];
+                  if (!primary) {
+                    throw new Error(
+                      `No matched primary type: ${data.primaryType}`
+                    );
+                  }
+                  delete types[data.primaryType];
+                  return {
+                    [data.primaryType]: primary,
+                    ...types,
+                  };
                 })()
               )
               .hash(data.message)

@@ -17,6 +17,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Wallet } from "@ethersproject/wallet";
 import * as BytesUtils from "@ethersproject/bytes";
 import { computeAddress } from "@ethersproject/transactions";
+import { EIP712MessageValidator } from "./eip712";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -867,15 +868,24 @@ export class KeyRing {
         return BytesUtils.arrayify(signature);
       }
       case EthSignType.EIP712: {
-        const data = JSON.parse(Buffer.from(message).toString());
+        const data = await EIP712MessageValidator.validateAsync(
+          JSON.parse(Buffer.from(message).toString())
+        );
         const signature = await ethWallet._signTypedData(
           data.domain,
           // Seems that there is no way to set primary type and the first type becomes primary type.
-          // Anyway, for now, there is no problem if there is only one type except for EIP712Domain.
           (() => {
             const types = { ...data.types };
             delete types["EIP712Domain"];
-            return types;
+            const primary = types[data.primaryType];
+            if (!primary) {
+              throw new Error(`No matched primary type: ${data.primaryType}`);
+            }
+            delete types[data.primaryType];
+            return {
+              [data.primaryType]: primary,
+              ...types,
+            };
           })(),
           data.message
         );
