@@ -45,12 +45,19 @@ export class ObservableQueryERC20ContractBalance extends ObservableJsonRPCQuery<
       },
     });
 
+    let messageData: string;
+    try {
+      messageData = erc20MetadataInterface.encodeFunctionData("balanceOf", [
+        userAddress,
+      ]);
+    } catch (e) {
+      messageData = "";
+    }
+
     super(kvStore, instance, "", "eth_call", [
       {
         to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("balanceOf", [
-          userAddress,
-        ]),
+        data: messageData,
       },
       "latest",
     ]);
