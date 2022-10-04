@@ -1967,9 +1967,87 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "evmos",
       },
       {
-        coinDenom: "wEVMOS",
+        coinDenom: "EVMOS",
         coinMinimalDenom:
-          "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:wEVMOS",
+          "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:EVMOS",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "erc20:0xC5e00D3b04563950941f7137B5AfA3a534F0D6d6:ATOM",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom:
+          "erc20:0x5db67696C3c088DfBf588d3dd849f44266ff0ffa:EEUR",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom:
+          "erc20:0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd:GRAV",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom:
+          "erc20:0x3452e23F9c4cC62c70B7ADAd699B264AF3549C19:JUNO",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "OSMO",
+        coinMinimalDenom:
+          "erc20:0xFA3C22C069B9556A4B2f7EcE1Ee3B467909f4864:OSMO",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "REGEN",
+        coinMinimalDenom:
+          "erc20:0x0CE35b0D42608Ca54Eb7bcc8044f7087C18E7717:REGEN",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom:
+          "erc20:0x5aD523d94Efb56C400941eb6F34393b84c75ba39:STARS",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "USDC.grv",
+        coinMinimalDenom:
+          "erc20:0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687:USDC.grv",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "axlUSDC",
+        coinMinimalDenom:
+          "erc20:0x15C3Eb3B621d1Bff62CbA1c9536B7c1AE9149b57:axlUSDC",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "gDAI",
+        coinMinimalDenom:
+          "erc20:0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75:gDAI",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "gUSDT",
+        coinMinimalDenom:
+          "erc20:0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265:gUSDT",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "gWBTC",
+        coinMinimalDenom:
+          "erc20:0x1D54EcB8583Ca25895c512A8308389fFD581F9c9:gWBTC",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "gWETH",
+        coinMinimalDenom:
+          "erc20:0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E:gWETH",
         coinDecimals: 18,
       },
     ],
