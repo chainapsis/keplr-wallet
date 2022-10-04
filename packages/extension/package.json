@@ -15,7 +15,9 @@
     "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" webpack.config.js && prettier --check \"src/**/*\" webpack.config.js",
     "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js",
-    "version": "zx ./scripts/lerna-lifecyle-version.mjs"
+    "version": "zx ./scripts/lerna-lifecyle-version.mjs",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
@@ -83,6 +85,15 @@
     "webextension-polyfill": "^0.7.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.19.3",
+    "@storybook/addon-actions": "^6.5.12",
+    "@storybook/addon-essentials": "^6.5.12",
+    "@storybook/addon-interactions": "^6.5.12",
+    "@storybook/addon-links": "^6.5.12",
+    "@storybook/builder-webpack5": "^6.5.12",
+    "@storybook/manager-webpack5": "^6.5.12",
+    "@storybook/react": "^6.5.12",
+    "@storybook/testing-library": "^0.0.13",
     "@types/amplitude-js": "^8.0.1",
     "@types/chart.js": "^2.9.25",
     "@types/chrome": "0.0.88",
@@ -96,6 +107,7 @@
     "@types/reactstrap": "^8.4.2",
     "@types/sha.js": "^2.4.0",
     "@types/styled-components": "^5.1.26",
+    "babel-loader": "^8.2.5",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "deepmerge": "^4.2.2",
