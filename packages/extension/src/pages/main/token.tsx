@@ -87,8 +87,9 @@ const TokenView: FunctionComponent<{
   if ("originCurrency" in amount.currency && amount.currency.originCurrency) {
     amount = amount.setCurrency(amount.currency.originCurrency);
   }
+
   if (new DenomHelper(amount.currency.coinMinimalDenom).type === "erc20") {
-    name = `ERC20/${name}`;
+    name = `${name} (ERC20)`;
   }
 
   return (
