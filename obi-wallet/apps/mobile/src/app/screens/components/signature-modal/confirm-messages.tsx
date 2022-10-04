@@ -1,9 +1,11 @@
 import { AminoMsg } from "@cosmjs/amino";
 import { Text } from "@obi-wallet/common";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { observer } from "mobx-react-lite";
 import { ReactNode, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
+  Alert,
   Modal,
   ModalProps,
   ScrollView,
@@ -215,7 +217,13 @@ export const ConfirmMessages = observer<ConfirmMessagesProps>(
           return <MessageView messages={innerMessages} />;
         case Tab.Data:
           return (
-            <Text style={{ color: "#ffffff" }}>
+            <Text
+              style={{ color: "#ffffff" }}
+              onLongPress={() => {
+                Clipboard.setString(JSON.stringify(innerMessages, null, 2));
+                Alert.alert("Data copied to the clipboard");
+              }}
+            >
               {JSON.stringify(innerMessages, null, 2)}
             </Text>
           );

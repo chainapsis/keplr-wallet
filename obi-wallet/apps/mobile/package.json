@@ -20,6 +20,7 @@
     "@keplr-wallet/common": "*",
     "@keplr-wallet/stores": "*",
     "@react-native-async-storage/async-storage": "*",
+    "@react-native-clipboard/clipboard": "*",
     "@react-native-community/blur": "*",
     "@react-navigation/bottom-tabs": "*",
     "@react-navigation/drawer": "*",

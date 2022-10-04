@@ -288,6 +288,11 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
 
     if (!threshold) return null;
 
+    const getSignaturePercentage = () => {
+      const percentage = (numberOfSignatures / parseInt(threshold, 10)) * 100;
+      if (percentage > 100) return "100%";
+      return `${percentage}%`;
+    };
     return (
       <ConfirmMessages
         {...props}
@@ -346,7 +351,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
             colors={["#FCCFF7", "#E659D6", "#8877EA", "#86E2EE"]}
             style={{
               flex: 1,
-              width: `${(numberOfSignatures / parseInt(threshold, 10)) * 100}%`,
+              width: getSignaturePercentage(),
               borderRadius: 10,
             }}
           />
