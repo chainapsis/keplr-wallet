@@ -845,8 +845,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
     },
     bip44: {
-      coinType: 750,
+      coinType: 118,
     },
+    alternativeBIP44s: [
+      {
+        coinType: 750,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("persistence"),
     currencies: [
       {
