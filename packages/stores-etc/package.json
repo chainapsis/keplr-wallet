@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@ethersproject/abi": "^5.6.0",
+    "@ethersproject/bignumber": "^5.7.0",
     "@keplr-wallet/common": "0.11.7",
     "@keplr-wallet/stores": "0.11.7",
     "@keplr-wallet/types": "0.11.7",
