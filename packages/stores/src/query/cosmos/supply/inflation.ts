@@ -150,8 +150,8 @@ export class ObservableQueryInflation {
           }
 
           if (chainInfo.chainId.startsWith("umee")) {
-            const supplyTotalRes = this._querySupplyTotal.getQueryDenom(
-              `by_denom?denom=${chainInfo.stakeCurrency.coinMinimalDenom}`
+            const supplyTotalRes = this._querySupplyTotal.getQueryDenomByQueryString(
+              chainInfo.stakeCurrency.coinMinimalDenom
             ).response;
 
             if (!supplyTotalRes) {
