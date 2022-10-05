@@ -64,12 +64,7 @@ export const StakeView: FunctionComponent = observer(() => {
 
         await tx.send(
           {
-            amount: [
-              {
-                denom: "aevmos",
-                amount: "3500000000000000",
-              },
-            ],
+            amount: [],
             gas: gas.toString(),
           },
           "",
