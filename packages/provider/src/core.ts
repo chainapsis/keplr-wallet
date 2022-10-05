@@ -30,6 +30,7 @@ import {
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
   RequestVerifyADR36AminoSignDoc,
+  RequestSignEIP712CosmosTxMsg_v0,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -307,6 +308,27 @@ export class Keplr implements IKeplr {
     const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
+  }
+
+  async experimentalSignEIP712CosmosTx_v0(
+    chainId: string,
+    signer: string,
+    eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
+  ): Promise<AminoSignResponse> {
+    const msg = new RequestSignEIP712CosmosTxMsg_v0(
+      chainId,
+      signer,
+      eip712,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    );
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   protected getDataForADR36(data: string | Uint8Array): [string, boolean] {

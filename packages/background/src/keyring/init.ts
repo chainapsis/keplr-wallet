@@ -22,6 +22,7 @@ import {
   CheckPasswordMsg,
   ExportKeyRingDatasMsg,
   RequestVerifyADR36AminoSignDoc,
+  RequestSignEIP712CosmosTxMsg_v0,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -50,6 +51,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(SetKeyStoreCoinTypeMsg);
   router.registerMessage(CheckPasswordMsg);
   router.registerMessage(ExportKeyRingDatasMsg);
+  router.registerMessage(RequestSignEIP712CosmosTxMsg_v0);
 
   router.addHandler(ROUTE, getHandler(service));
 }

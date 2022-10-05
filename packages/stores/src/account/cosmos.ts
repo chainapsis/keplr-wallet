@@ -1,9 +1,5 @@
 import { AccountSetBaseSuper, MsgOpt, WalletStatus } from "./base";
-import {
-  AppCurrency,
-  EthSignType,
-  KeplrSignOptions,
-} from "@keplr-wallet/types";
+import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import {
   BroadcastMode,
   makeSignDoc,
@@ -551,10 +547,10 @@ export class CosmosAccountImpl {
 
         (altSignDoc as any).fee["feePayer"] = this.base.bech32Address;
 
-        const signature = await keplr.signEthereum(
+        return await keplr.experimentalSignEIP712CosmosTx_v0(
           this.chainId,
           this.base.bech32Address,
-          JSON.stringify({
+          {
             types: {
               EIP712Domain: [
                 { name: "name", type: "string" },
@@ -598,20 +594,10 @@ export class CosmosAccountImpl {
               salt: "0",
             },
             primaryType: "Tx",
-            message: altSignDoc,
-          }),
-          EthSignType.EIP712
-        );
-
-        return {
-          signed: altSignDoc,
-          signature: {
-            pub_key: {
-              value: Buffer.from(this.base.pubKey).toString("base64"),
-            },
-            signature: Buffer.from(signature).toString("base64"),
           },
-        };
+          altSignDoc,
+          signOptions
+        );
       }
     })();
 

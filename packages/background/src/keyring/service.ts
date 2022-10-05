@@ -28,12 +28,12 @@ import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
 import {
+  AminoSignResponse,
+  encodeSecp256k1Pubkey,
   encodeSecp256k1Signature,
   serializeSignDoc,
-  AminoSignResponse,
-  StdSignDoc,
   StdSignature,
-  encodeSecp256k1Pubkey,
+  StdSignDoc,
 } from "@cosmjs/launchpad";
 import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
@@ -374,6 +374,96 @@ export class KeyRingService {
       return {
         signed: newSignDoc,
         signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
+    }
+  }
+
+  async requestSignEIP712CosmosTx_v0(
+    env: Env,
+    msgOrigin: string,
+    chainId: string,
+    signer: string,
+    eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions & {
+      // Hack option field to detect the sign arbitrary for string
+      isADR36WithString?: boolean;
+      ethSignType?: EthSignType;
+    }
+  ): Promise<AminoSignResponse> {
+    signDoc = {
+      ...signDoc,
+      memo: escapeHTML(signDoc.memo),
+    };
+
+    const coinType = await this.chainsService.getChainCoinType(chainId);
+    const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
+      chainId
+    );
+
+    const key = await this.keyRing.getKey(
+      env,
+      chainId,
+      coinType,
+      ethereumKeyFeatures.address
+    );
+    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
+      .bech32Config.bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new KeplrError("keyring", 231, "Signer mismatched");
+    }
+
+    let newSignDoc = (await this.interactionService.waitApprove(
+      env,
+      "/sign",
+      "request-sign",
+      {
+        msgOrigin,
+        chainId,
+        mode: "amino",
+        signDoc,
+        signer,
+        signOptions,
+        isADR36SignDoc: false,
+        ethSignType: signOptions.ethSignType,
+      }
+    )) as StdSignDoc;
+
+    newSignDoc = {
+      ...newSignDoc,
+      memo: escapeHTML(newSignDoc.memo),
+    };
+
+    try {
+      const signature = await this.keyRing.signEthereum(
+        env,
+        chainId,
+        coinType,
+        Buffer.from(
+          JSON.stringify({
+            types: eip712.types,
+            domain: eip712.domain,
+            primaryType: eip712.primaryType,
+            message: newSignDoc,
+          })
+        ),
+        EthSignType.EIP712
+      );
+
+      return {
+        signed: newSignDoc,
+        signature: {
+          pub_key: encodeSecp256k1Pubkey(key.pubKey),
+          // Return eth signature (r | s | v) 65 bytes.
+          signature: Buffer.from(signature).toString("base64"),
+        },
       };
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
