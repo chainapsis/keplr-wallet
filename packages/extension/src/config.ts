@@ -1059,7 +1059,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
       {
         coinDenom: "STKATOM",
-        coinMinimalDenom: "ustkatom",
+        coinMinimalDenom: "stk/uatom",
         coinDecimals: 6,
       },
     ],
