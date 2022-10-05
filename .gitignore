@@ -29,3 +29,5 @@ packages/proto-types/**/*.map
 !packages/proto-types/proto-types-gen/**/*.map
 
 packages/proto-types/proto-types-gen/src
+
+storybook-static
