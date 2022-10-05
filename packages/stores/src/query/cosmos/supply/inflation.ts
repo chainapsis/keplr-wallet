@@ -155,7 +155,7 @@ export class ObservableQueryInflation {
             ).response;
 
             if (!supplyTotalRes) {
-              return "1";
+              return "0";
             } else {
               return supplyTotalRes.data.amount.amount;
             }
@@ -164,7 +164,7 @@ export class ObservableQueryInflation {
           const supplyTotalRes = this._querySupplyTotal.getQueryStakeDenom()
             .response;
           if (!supplyTotalRes) {
-            return "1";
+            return "0";
           } else {
             return supplyTotalRes.data.amount.amount;
           }
