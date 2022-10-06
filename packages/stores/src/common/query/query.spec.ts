@@ -166,7 +166,7 @@ describe("Test observable query", () => {
 
   it("basic test", async () => {
     const basicTestFn = async (store: KVStore) => {
-      const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+      const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
       const { port, closeServer } = createTestServer();
 
@@ -226,9 +226,9 @@ describe("Test observable query", () => {
       await query.waitFreshResponse();
       expect(query.response?.data).toBe(1);
 
-      expect(abortSpy).toBeCalledTimes(0);
+      expect(spyAbort).toBeCalledTimes(0);
 
-      abortSpy.mockRestore();
+      spyAbort.mockRestore();
 
       closeServer();
     };
@@ -244,7 +244,7 @@ describe("Test observable query", () => {
   });
 
   it("test waitResponse() can ignore other component unobserved", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(500);
 
@@ -271,15 +271,15 @@ describe("Test observable query", () => {
     const res = await query.waitResponse();
     expect(res?.data).toBe(0);
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test waitResponse() can ignore fetch requests", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(500);
 
@@ -308,9 +308,9 @@ describe("Test observable query", () => {
     const res = await query.waitResponse();
     expect(res?.data).toBe(0);
 
-    expect(abortSpy).toBeCalledTimes(1);
+    expect(spyAbort).toBeCalledTimes(1);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     disposer();
 
@@ -318,7 +318,7 @@ describe("Test observable query", () => {
   });
 
   it("test waitFreshResponse() can ignore other component unobserved", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(500);
 
@@ -347,15 +347,15 @@ describe("Test observable query", () => {
     const res = await query.waitFreshResponse();
     expect(res?.data).toBe(1);
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test waitFreshResponse() can ignore fetch requests", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(500);
 
@@ -386,9 +386,9 @@ describe("Test observable query", () => {
     const res = await query.waitFreshResponse();
     expect(res?.data).toBe(1);
 
-    expect(abortSpy).toBeCalledTimes(1);
+    expect(spyAbort).toBeCalledTimes(1);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     disposer();
 
@@ -396,7 +396,7 @@ describe("Test observable query", () => {
   });
 
   it("test waitFreshResponse()/waitFreshResponse()", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer();
 
@@ -415,15 +415,15 @@ describe("Test observable query", () => {
     res = await query.waitFreshResponse();
     expect(res?.data).toBe(2);
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test basic cancellation", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(500);
 
@@ -477,15 +477,15 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    expect(abortSpy).toBeCalledTimes(1);
+    expect(spyAbort).toBeCalledTimes(1);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test restore from cache/query occurs at the same time if cache age not set", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(500);
 
@@ -568,15 +568,15 @@ describe("Test observable query", () => {
     expect(query.response?.data).toBe(1);
     expect(query.response?.staled).toBe(false);
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test basic cache (valid)", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(200);
 
@@ -645,7 +645,7 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
     disposer = autorun(
       () => {
@@ -681,15 +681,15 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test basic cache (invalidated)", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(200);
 
@@ -757,15 +757,15 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test cache in age not make query", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(10);
 
@@ -885,15 +885,15 @@ describe("Test observable query", () => {
       });
     }
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test cache in age not make query (via waitFreshResponse())", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(10);
 
@@ -946,15 +946,15 @@ describe("Test observable query", () => {
       });
     }
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test cache in age not make query (via waitResponse())", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(1);
 
@@ -1018,15 +1018,15 @@ describe("Test observable query", () => {
     await query.waitResponse();
     expect(query.response?.data).toBe(2);
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test basic auto refetching", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(10);
 
@@ -1095,15 +1095,15 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test auto refetching with cache", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(10);
 
@@ -1141,9 +1141,9 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
@@ -1152,7 +1152,7 @@ describe("Test observable query", () => {
     // Setting url before `start` should not make a query.
     // This permits to determine the url conditionally before starting.
 
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(10);
 
@@ -1189,9 +1189,9 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
@@ -1200,7 +1200,7 @@ describe("Test observable query", () => {
     // Setting url before `DeferInitialQueryController` is ready should not make a query.
     // This permits to determine the url conditionally before query controller is ready.
 
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer, getNum } = createTestServer(10);
 
@@ -1252,7 +1252,7 @@ describe("Test observable query", () => {
       setTimeout(resolve, 50);
     });
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
     expect(getNum()).toBe(0);
 
     expect(query.isObserved).toBe(true);
@@ -1279,9 +1279,9 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     expect(getNum()).toBe(1);
 
@@ -1294,7 +1294,7 @@ describe("Test observable query", () => {
     // Setting url before `DeferInitialQueryController` is ready should not make a query.
     // This permits to determine the url conditionally before query controller is ready.
 
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer, getNum } = createTestServer(10);
 
@@ -1353,7 +1353,7 @@ describe("Test observable query", () => {
       setTimeout(resolve, 50);
     });
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
     expect(getNum()).toBe(0);
 
     expect(query.isObserved).toBe(true);
@@ -1380,9 +1380,9 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     expect(getNum()).toBe(1);
 
@@ -1395,7 +1395,7 @@ describe("Test observable query", () => {
     // Setting url on `onStart()` method should not make a query.
     // This permits to determine the url conditionally on `onStart()`.
 
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer, getNum } = createTestServer(10);
 
@@ -1448,7 +1448,7 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
     expect(getNum()).toBe(0);
 
     await new Promise((resolve) => {
@@ -1467,9 +1467,9 @@ describe("Test observable query", () => {
 
     expect(getNum()).toBe(1);
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     disposer();
 
@@ -1480,7 +1480,7 @@ describe("Test observable query", () => {
     // Setting url on `onStart()` method should not make a query.
     // This permits to determine the url conditionally on `onStart()`.
 
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer, getNum } = createTestServer(10);
 
@@ -1536,7 +1536,7 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
     expect(getNum()).toBe(0);
 
     await new Promise((resolve) => {
@@ -1578,9 +1578,9 @@ describe("Test observable query", () => {
     });
 
     expect(getNum()).toBe(1);
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     disposer();
 
@@ -1588,7 +1588,7 @@ describe("Test observable query", () => {
   });
 
   it("test cancel not make query before onStart() complete", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer, getNum } = createTestServer(10);
 
@@ -1634,7 +1634,7 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
     expect(getNum()).toBe(0);
 
     disposer();
@@ -1650,15 +1650,15 @@ describe("Test observable query", () => {
     expect(query.response).toBeUndefined();
 
     expect(getNum()).toBe(0);
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test synchronous setUrl not make multiple queries", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer, getNum } = createTestServer(10);
 
@@ -1730,15 +1730,15 @@ describe("Test observable query", () => {
     disposer();
 
     expect(getNum()).toBe(2);
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test synchronous setUrl not make multiple queries when onStart is async", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer, getNum } = createTestServer(50);
 
@@ -1828,15 +1828,15 @@ describe("Test observable query", () => {
     disposer();
 
     expect(getNum()).toBe(2);
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
 
   it("test error message", async () => {
-    const abortSpy = jest.spyOn(AbortController.prototype, "abort");
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
 
     const { port, closeServer } = createTestServer(1);
 
@@ -1902,9 +1902,9 @@ describe("Test observable query", () => {
 
     disposer();
 
-    expect(abortSpy).toBeCalledTimes(0);
+    expect(spyAbort).toBeCalledTimes(0);
 
-    abortSpy.mockRestore();
+    spyAbort.mockRestore();
 
     closeServer();
   });
