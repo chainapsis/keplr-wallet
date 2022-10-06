@@ -107,6 +107,7 @@ import {
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
   EVMOS_REST_CONFIG,
+  EVMOS_ETHEREUM_RPC_ENDPOINT,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -1945,6 +1946,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpcConfig: EVMOS_RPC_CONFIG,
     rest: EVMOS_REST_ENDPOINT,
     restConfig: EVMOS_REST_CONFIG,
+    ethereumJsonRpc: EVMOS_ETHEREUM_RPC_ENDPOINT,
     chainId: "evmos_9001-2",
     chainName: "Evmos",
     stakeCurrency: {
@@ -1971,6 +1973,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
         coinGeckoId: "evmos",
+      },
+      {
+        coinDenom: "wEVMOS",
+        coinMinimalDenom:
+          "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:wEVMOS",
+        coinDecimals: 18,
       },
     ],
     feeCurrencies: [

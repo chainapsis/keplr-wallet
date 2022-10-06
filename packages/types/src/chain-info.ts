@@ -48,4 +48,5 @@ export interface ChainInfo {
    * If the blockchain is in an early stage, please set it as beta.
    */
   readonly beta?: boolean;
+  readonly ethereumJsonRpc?: string;
 }

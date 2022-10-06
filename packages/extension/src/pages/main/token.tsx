@@ -29,7 +29,7 @@ const TokenView: FunctionComponent<{
     "#fb6340",
   ]);
 
-  const name = balance.currency.coinDenom.toUpperCase();
+  let name = balance.currency.coinDenom.toUpperCase();
   const minimalDenom = balance.currency.coinMinimalDenom;
   let amount = balance.balance.trim(true).shrink(true);
 
@@ -86,6 +86,9 @@ const TokenView: FunctionComponent<{
   // Show the actual coin denom to the top and just show the coin denom without channel info to the bottom.
   if ("originCurrency" in amount.currency && amount.currency.originCurrency) {
     amount = amount.setCurrency(amount.currency.originCurrency);
+  }
+  if (new DenomHelper(amount.currency.coinMinimalDenom).type === "erc20") {
+    name = `ERC20/${name}`;
   }
 
   return (
@@ -206,7 +209,8 @@ export const TokensView: FunctionComponent = observer(() => {
     .unstakables.filter((bal) => {
       // Temporary implementation for trimming the 0 balanced native tokens.
       // TODO: Remove this part.
-      if (new DenomHelper(bal.currency.coinMinimalDenom).type === "native") {
+      const currencyType = new DenomHelper(bal.currency.coinMinimalDenom).type;
+      if (currencyType === "native" || currencyType === "erc20") {
         return bal.balance.toDec().gt(new Dec("0"));
       }
       return true;
@@ -236,6 +240,13 @@ export const TokensView: FunctionComponent = observer(() => {
             key={i.toString()}
             balance={token}
             onClick={() => {
+              if (
+                new DenomHelper(token.currency.coinMinimalDenom).type ===
+                "erc20"
+              ) {
+                alert("Send for ERC-20 coming soon!");
+                return;
+              }
               history.push({
                 pathname: "/send",
                 search: `?defaultDenom=${token.currency.coinMinimalDenom}`,
