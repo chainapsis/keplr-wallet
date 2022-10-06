@@ -103,33 +103,47 @@ export class DelayMemoryKVStore extends MemoryKVStore {
 }
 
 describe("Test observable query", () => {
+  let serverProcessing = 0;
+
   const createTestServer = (delay: number = 100) => {
     let num = 0;
 
     const server = Http.createServer((req, resp) => {
+      serverProcessing++;
+
       if (req.url === "/invalid") {
+        serverProcessing--;
         throw new Error();
       }
 
       if (req.url === "/error1") {
-        resp.writeHead(503);
-        resp.end();
+        setTimeout(() => {
+          resp.writeHead(503);
+          resp.end();
+          serverProcessing--;
+        }, 1);
         return;
       }
 
       if (req.url === "/error2") {
-        resp.writeHead(400, {
-          "content-type": "text/plain",
-        });
-        resp.end("message text");
+        setTimeout(() => {
+          resp.writeHead(400, {
+            "content-type": "text/plain",
+          });
+          resp.end("message text");
+          serverProcessing--;
+        }, 1);
         return;
       }
 
       if (req.url === "/error3") {
-        resp.writeHead(400, {
-          "content-type": "application/json; charset=utf-8",
-        });
-        resp.end(JSON.stringify({ message: "message text" }));
+        setTimeout(() => {
+          resp.writeHead(400, {
+            "content-type": "application/json; charset=utf-8",
+          });
+          resp.end(JSON.stringify({ message: "message text" }));
+          serverProcessing--;
+        }, 1);
         return;
       }
 
@@ -144,6 +158,8 @@ describe("Test observable query", () => {
 
           num++;
         }
+
+        serverProcessing--;
       }, delay);
     });
 
@@ -163,6 +179,48 @@ describe("Test observable query", () => {
       getNum: () => num,
     };
   };
+
+  const notMockSetTimeout = setTimeout;
+  const notMockSetInterval = setInterval;
+  const notMockClearInterval = clearInterval;
+
+  function waitServerAnyReqReceived() {
+    return new Promise<void>((resolve) => {
+      const id = notMockSetInterval(() => {
+        if (serverProcessing > 0) {
+          notMockClearInterval(id);
+          resolve();
+        }
+      }, 10);
+    });
+  }
+  function waitServerAllResSent() {
+    return new Promise<void>((resolve) => {
+      const id = notMockSetInterval(() => {
+        if (serverProcessing === 0) {
+          notMockClearInterval(id);
+          resolve();
+        }
+      }, 10);
+    });
+  }
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(async () => {
+    while (true) {
+      // Clear remaining queries manually.
+      if (serverProcessing === 0) {
+        break;
+      }
+      jest.advanceTimersByTime(30);
+      await new Promise((resolve) => notMockSetTimeout(resolve, 30));
+    }
+
+    jest.useRealTimers();
+  });
 
   it("basic test", async () => {
     const basicTestFn = async (store: KVStore) => {
@@ -200,8 +258,10 @@ describe("Test observable query", () => {
       expect(query.error).toBeUndefined();
       expect(query.response).toBeUndefined();
 
-      // Make sure that the fetching complete
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await waitServerAnyReqReceived();
+      // Make sure that query complete
+      jest.advanceTimersByTime(1000);
+      await waitServerAllResSent();
 
       // Not yet observer disposed. So the query is still in observation.
       expect(query.isObserved).toBe(true);
@@ -223,12 +283,21 @@ describe("Test observable query", () => {
       await query.waitResponse();
       expect(query.response?.data).toBe(0);
 
-      await query.waitFreshResponse();
+      await new Promise((resolve) => {
+        query.waitFreshResponse().then(resolve);
+        waitServerAnyReqReceived().then(() => {
+          // Make sure that query complete
+          jest.advanceTimersByTime(1000);
+        });
+      });
       expect(query.response?.data).toBe(1);
 
       expect(spyAbort).toBeCalledTimes(0);
 
       spyAbort.mockRestore();
+
+      // Advance timer much to release the promises for delay mem store.
+      jest.advanceTimersByTime(100000);
 
       closeServer();
     };
@@ -268,7 +337,20 @@ describe("Test observable query", () => {
       disposer();
     }, 200);
 
-    const res = await query.waitResponse();
+    const [res] = await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+        // Advance time about > 200ms to release observation.
+        jest.advanceTimersByTime(300);
+
+        // Wait real timer to make sure that the logic processed.
+        await new Promise((resolve) => notMockSetTimeout(resolve, 100));
+
+        // Complete query
+        jest.advanceTimersByTime(300);
+      })(),
+    ]);
     expect(res?.data).toBe(0);
 
     expect(spyAbort).toBeCalledTimes(0);
@@ -305,7 +387,21 @@ describe("Test observable query", () => {
       query.fetch();
     }, 10);
 
-    const res = await query.waitResponse();
+    const [res] = await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        // Make explicit query
+        jest.advanceTimersByTime(30);
+
+        // Wait real timer to make sure that the logic processed.
+        await new Promise((resolve) => notMockSetTimeout(resolve, 100));
+
+        // Complete query
+        jest.advanceTimersByTime(600);
+      })(),
+    ]);
     expect(res?.data).toBe(0);
 
     expect(spyAbort).toBeCalledTimes(1);
@@ -325,7 +421,14 @@ describe("Test observable query", () => {
     const memStore = new MemoryKVStore("test");
     const query = new MockObservableQuery(memStore, port);
 
-    await query.waitFreshResponse();
+    await Promise.all([
+      query.waitFreshResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(600);
+      })(),
+    ]);
 
     const disposer = autorun(
       () => {
@@ -344,7 +447,19 @@ describe("Test observable query", () => {
       disposer();
     }, 200);
 
-    const res = await query.waitFreshResponse();
+    const [res] = await Promise.all([
+      query.waitFreshResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(300);
+
+        // Wait real timer to make sure that the logic processed.
+        await new Promise((resolve) => notMockSetTimeout(resolve, 100));
+
+        jest.advanceTimersByTime(300);
+      })(),
+    ]);
     expect(res?.data).toBe(1);
 
     expect(spyAbort).toBeCalledTimes(0);
@@ -362,7 +477,14 @@ describe("Test observable query", () => {
     const memStore = new MemoryKVStore("test");
     const query = new MockObservableQuery(memStore, port);
 
-    await query.waitFreshResponse();
+    await Promise.all([
+      query.waitFreshResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(600);
+      })(),
+    ]);
 
     const disposer = autorun(
       () => {
@@ -383,7 +505,19 @@ describe("Test observable query", () => {
       query.fetch();
     }, 10);
 
-    const res = await query.waitFreshResponse();
+    const [res] = await Promise.all([
+      query.waitFreshResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(30);
+
+        // Wait real timer to make sure that the logic processed.
+        await new Promise((resolve) => notMockSetTimeout(resolve, 100));
+
+        jest.advanceTimersByTime(600);
+      })(),
+    ]);
     expect(res?.data).toBe(1);
 
     expect(spyAbort).toBeCalledTimes(1);
@@ -403,16 +537,53 @@ describe("Test observable query", () => {
     const memStore = new MemoryKVStore("test");
     const query = new MockObservableQuery(memStore, port);
 
-    let res = await query.waitResponse();
+    let [res] = await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(100);
+
+        await waitServerAllResSent();
+      })(),
+    ]);
     expect(res?.data).toBe(0);
 
-    res = await query.waitFreshResponse();
+    [res] = await Promise.all([
+      query.waitFreshResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(100);
+
+        await waitServerAllResSent();
+      })(),
+    ]);
     expect(res?.data).toBe(1);
 
-    res = await query.waitResponse();
+    [res] = await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        // At this time, no query should occur
+        // await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(100);
+
+        await waitServerAllResSent();
+      })(),
+    ]);
     expect(res?.data).toBe(1);
 
-    res = await query.waitFreshResponse();
+    [res] = await Promise.all([
+      query.waitFreshResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(100);
+
+        await waitServerAllResSent();
+      })(),
+    ]);
     expect(res?.data).toBe(2);
 
     expect(spyAbort).toBeCalledTimes(0);
@@ -458,16 +629,18 @@ describe("Test observable query", () => {
 
     // Dispose the observer before the fetch completes.
     await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        disposer();
-        resolve();
-      }, 100);
+      waitServerAnyReqReceived().then(() => {
+        setTimeout(() => {
+          disposer();
+          resolve();
+        }, 100);
+
+        jest.advanceTimersByTime(100);
+      });
     });
 
-    // Wait to close request.
-    await new Promise((resolve) => {
-      setTimeout(resolve, 10);
-    });
+    // Wait real timer to make sure that the logic processed.
+    await new Promise((resolve) => notMockSetTimeout(resolve, 100));
 
     // In this case, query should be canceled.
     expect(query.isObserved).toBe(false);
@@ -493,7 +666,14 @@ describe("Test observable query", () => {
     await (async () => {
       // Make cache
       const query = new MockObservableQuery(memStore, port);
-      await query.waitFreshResponse();
+      await Promise.all([
+        query.waitFreshResponse(),
+        (async () => {
+          await waitServerAnyReqReceived();
+
+          jest.advanceTimersByTime(600);
+        })(),
+      ]);
     })();
 
     const query = new MockObservableQuery(memStore, port);
@@ -524,8 +704,13 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
+    await waitServerAnyReqReceived();
+
     await new Promise((resolve) => {
-      setTimeout(resolve, 100);
+      jest.advanceTimersByTime(100);
+
+      // Wait real timer to make sure that the logic processed.
+      notMockSetTimeout(resolve, 50);
     });
 
     // Not yet cache restored due to delayed kv store.
@@ -536,7 +721,10 @@ describe("Test observable query", () => {
     expect(query.response).toBeUndefined();
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 210);
+      jest.advanceTimersByTime(210);
+
+      // Wait real timer to make sure that the logic processed.
+      notMockSetTimeout(resolve, 50);
     });
 
     // Now, the cache should be restored.
@@ -548,7 +736,10 @@ describe("Test observable query", () => {
     expect(query.response?.staled).toBe(true);
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 200);
+      jest.advanceTimersByTime(200);
+
+      // Wait real timer to make sure that the logic processed.
+      notMockSetTimeout(resolve, 50);
     });
 
     // Now, total 510ms passed. If restoring from cache and querying occurs at the same time, query should be revalidated.
@@ -584,16 +775,21 @@ describe("Test observable query", () => {
     await (async () => {
       // Make cache
       const query = new MockObservableQuery(memStore, port);
-      await query.waitFreshResponse();
+      await Promise.all([
+        query.waitFreshResponse(),
+        (async () => {
+          await waitServerAnyReqReceived();
+
+          jest.advanceTimersByTime(200);
+        })(),
+      ]);
     })();
 
     const query = new MockObservableQuery(memStore, port, {
       cacheMaxAge: 300,
     });
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 150);
-    });
+    jest.advanceTimersByTime(150);
 
     expect(query.isObserved).toBe(false);
     expect(query.isFetching).toBe(false);
@@ -621,20 +817,8 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 10);
-    });
-
-    expect(query.isObserved).toBe(true);
-    expect(query.isFetching).toBe(false);
-    expect(query.isStarted).toBe(true);
-    expect(query.error).toBeUndefined();
-    expect(query.response?.data).toBe(0);
-    expect(query.response?.staled).toBe(true);
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, 200);
-    });
+    // Wait real timer to make sure that kv store's get method complete
+    await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
     expect(query.isObserved).toBe(true);
     expect(query.isFetching).toBe(false);
@@ -646,6 +830,9 @@ describe("Test observable query", () => {
     disposer();
 
     expect(spyAbort).toBeCalledTimes(0);
+
+    // Now, cache should be invalidated.
+    jest.advanceTimersByTime(200);
 
     disposer = autorun(
       () => {
@@ -668,9 +855,11 @@ describe("Test observable query", () => {
     expect(query.response?.data).toBe(0);
     expect(query.response?.staled).toBe(true);
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 250);
-    });
+    await waitServerAnyReqReceived();
+    jest.advanceTimersByTime(250);
+
+    // Wait real timer to make sure that the logic processed.
+    await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
     expect(query.isObserved).toBe(true);
     expect(query.isFetching).toBe(false);
@@ -697,16 +886,21 @@ describe("Test observable query", () => {
     await (async () => {
       // Make cache
       const query = new MockObservableQuery(memStore, port);
-      await query.waitFreshResponse();
+      await Promise.all([
+        query.waitFreshResponse(),
+        (async () => {
+          await waitServerAnyReqReceived();
+
+          jest.advanceTimersByTime(200);
+        })(),
+      ]);
     })();
 
     const query = new MockObservableQuery(memStore, port, {
       cacheMaxAge: 300,
     });
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 350);
-    });
+    jest.advanceTimersByTime(350);
 
     expect(query.isObserved).toBe(false);
     expect(query.isFetching).toBe(false);
@@ -734,9 +928,9 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 30);
-    });
+    // Wait real timer to make sure that kv store's get method complete
+    await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+    // Cache value abandoned
 
     expect(query.isObserved).toBe(true);
     expect(query.isFetching).toBe(true);
@@ -744,9 +938,11 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 200);
-    });
+    await waitServerAnyReqReceived();
+    jest.advanceTimersByTime(250);
+
+    // Wait real timer to make sure that the logic processed.
+    await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
     expect(query.isObserved).toBe(true);
     expect(query.isFetching).toBe(false);
@@ -841,15 +1037,16 @@ describe("Test observable query", () => {
       }
       expect(query.isStarted).toBe(true);
 
-      await new Promise((resolve) => {
-        setTimeout(resolve, 1);
-      });
+      // Wait real timer to make sure that kv store's get method complete
+      await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
       const cached = query.response?.data;
 
       expect(query.isObserved).toBe(true);
       if (!test.inCache) {
         expect(query.isFetching).toBe(true);
+
+        await waitServerAnyReqReceived();
       } else {
         expect(query.isFetching).toBe(false);
       }
@@ -863,9 +1060,9 @@ describe("Test observable query", () => {
         }
       }
 
-      await new Promise((resolve) => {
-        setTimeout(resolve, 20);
-      });
+      jest.advanceTimersByTime(50);
+      // Wait real timer to make sure that the logic processed.
+      await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
       expect(query.isObserved).toBe(true);
       expect(query.isFetching).toBe(false);
@@ -880,9 +1077,9 @@ describe("Test observable query", () => {
 
       disposer();
 
-      await new Promise((resolve) => {
-        setTimeout(resolve, test.postDelay);
-      });
+      jest.advanceTimersByTime(test.postDelay);
+      // Wait real timer to make sure that the logic processed.
+      await new Promise((resolve) => notMockSetTimeout(resolve, 50));
     }
 
     expect(spyAbort).toBeCalledTimes(0);
@@ -904,46 +1101,63 @@ describe("Test observable query", () => {
 
     const tests: {
       postDelay: number;
+      inCache: boolean;
       expect: number;
     }[] = [
       {
         postDelay: 100,
+        inCache: false,
         expect: 0,
       },
       {
         postDelay: 100,
+        inCache: true,
         expect: 0,
       },
       {
         postDelay: 100,
+        inCache: true,
         expect: 0,
       },
       {
         postDelay: 100,
+        inCache: false,
         expect: 1,
       },
       {
         postDelay: 200,
+        inCache: true,
         expect: 1,
       },
       {
         postDelay: 300,
+        inCache: false,
         expect: 2,
       },
       {
         postDelay: 300,
+        inCache: false,
         expect: 3,
       },
     ];
 
     for (const test of tests) {
-      await query.waitFreshResponse();
+      await Promise.all([
+        query.waitFreshResponse(),
+        (async () => {
+          if (!test.inCache) {
+            await waitServerAnyReqReceived();
+
+            jest.advanceTimersByTime(50);
+          }
+        })(),
+      ]);
 
       expect(query.response?.data).toBe(test.expect);
 
-      await new Promise((resolve) => {
-        setTimeout(resolve, test.postDelay);
-      });
+      jest.advanceTimersByTime(test.postDelay);
+      // Wait real timer to make sure that the logic processed.
+      await new Promise((resolve) => notMockSetTimeout(resolve, 50));
     }
 
     expect(spyAbort).toBeCalledTimes(0);
@@ -963,7 +1177,14 @@ describe("Test observable query", () => {
       cacheMaxAge: 100,
     });
 
-    await query.waitResponse();
+    await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(50);
+      })(),
+    ]);
     expect(query.response?.data).toBe(0);
 
     // Create new query
@@ -972,14 +1193,25 @@ describe("Test observable query", () => {
     });
     expect(query.response).toBeUndefined();
     // Cache is still valid.
-    await query.waitResponse();
+    await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        // Wait real timer to make sure that kv store's get method complete
+        await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+      })(),
+    ]);
     expect(query.response?.data).toBe(0);
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 50);
-    });
+    jest.advanceTimersByTime(50);
+
     // Cache is still valid.
-    await query.waitResponse();
+    await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        // Wait real timer to make sure that kv store's get method complete
+        await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+      })(),
+    ]);
     expect(query.response?.data).toBe(0);
 
     // Create new query
@@ -987,23 +1219,35 @@ describe("Test observable query", () => {
       cacheMaxAge: 100,
     });
     expect(query.response).toBeUndefined();
-    await new Promise((resolve) => {
-      setTimeout(resolve, 55);
-    });
+    jest.advanceTimersByTime(50);
     // Cache is now invalidated.
-    await query.waitResponse();
+    await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(50);
+
+        // Wait real timer to make sure that the logic processed.
+        await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+      })(),
+    ]);
     expect(query.response?.data).toBe(1);
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 50);
-    });
+    jest.advanceTimersByTime(50);
 
     // Create new query
     query = new MockObservableQuery(memStore, port, {
       cacheMaxAge: 100,
     });
     // Cache is still valid.
-    await query.waitResponse();
+    await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        // Wait real timer to make sure that kv store's get method complete
+        await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+      })(),
+    ]);
     expect(query.response?.data).toBe(1);
 
     // Create new query
@@ -1011,11 +1255,19 @@ describe("Test observable query", () => {
       cacheMaxAge: 100,
     });
     expect(query.response).toBeUndefined();
-    await new Promise((resolve) => {
-      setTimeout(resolve, 55);
-    });
+    jest.advanceTimersByTime(50);
     // Cache is now invalidated. (Prior cache should not change cache's timestamp)
-    await query.waitResponse();
+    await Promise.all([
+      query.waitResponse(),
+      (async () => {
+        await waitServerAnyReqReceived();
+
+        jest.advanceTimersByTime(50);
+
+        // Wait real timer to make sure that the logic processed.
+        await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+      })(),
+    ]);
     expect(query.response?.data).toBe(2);
 
     expect(spyAbort).toBeCalledTimes(0);
@@ -1036,7 +1288,8 @@ describe("Test observable query", () => {
     });
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 150);
+      jest.advanceTimersByTime(150);
+      notMockSetTimeout(resolve, 150);
     });
     // Should not fetch until starting observed.
     expect(query.response).toBeUndefined();
@@ -1055,9 +1308,22 @@ describe("Test observable query", () => {
       }
     );
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 450);
-    });
+    for (let i = 0; i < 4; i++) {
+      // Make sure query complete
+      await waitServerAnyReqReceived();
+      jest.advanceTimersByTime(20);
+      await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+
+      // Wait interval
+      await new Promise((resolve) => {
+        jest.advanceTimersByTime(100);
+        notMockSetTimeout(resolve, 50);
+      });
+    }
+    // Make sure query complete
+    await waitServerAnyReqReceived();
+    jest.advanceTimersByTime(20);
+    await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
     expect(query.response?.data).toBe(4);
 
@@ -1065,7 +1331,8 @@ describe("Test observable query", () => {
 
     // After becoming unobserved, refetching should stop.
     await new Promise((resolve) => {
-      setTimeout(resolve, 150);
+      jest.advanceTimersByTime(150);
+      notMockSetTimeout(resolve, 150);
     });
     expect(query.response?.data).toBe(4);
 
@@ -1087,9 +1354,21 @@ describe("Test observable query", () => {
       }
     );
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 250);
-    });
+    for (let i = 0; i < 2; i++) {
+      // Make sure query complete
+      await waitServerAnyReqReceived();
+      jest.advanceTimersByTime(20);
+      await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+
+      await new Promise((resolve) => {
+        jest.advanceTimersByTime(100);
+        notMockSetTimeout(resolve, 50);
+      });
+    }
+    // Make sure query complete
+    await waitServerAnyReqReceived();
+    jest.advanceTimersByTime(20);
+    await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
     expect(query.response?.data).toBe(7);
 
@@ -1114,7 +1393,8 @@ describe("Test observable query", () => {
     });
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 150);
+      jest.advanceTimersByTime(150);
+      notMockSetTimeout(resolve, 150);
     });
     // Should not fetch until starting observed.
     expect(query.response).toBeUndefined();
@@ -1133,9 +1413,23 @@ describe("Test observable query", () => {
       }
     );
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 450);
-    });
+    for (let i = 0; i < 4; i++) {
+      if (i % 2 === 0) {
+        // Make sure query complete
+        await waitServerAnyReqReceived();
+        jest.advanceTimersByTime(10);
+        await new Promise((resolve) => notMockSetTimeout(resolve, 50));
+      }
+
+      await new Promise((resolve) => {
+        jest.advanceTimersByTime(100);
+        notMockSetTimeout(resolve, 50);
+      });
+    }
+    // Make sure query complete
+    await waitServerAnyReqReceived();
+    jest.advanceTimersByTime(20);
+    await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
     expect(query.response?.data).toBe(2);
 
@@ -1160,7 +1454,8 @@ describe("Test observable query", () => {
     const query = new MockObservableQuery(memStore, port, {}, "/invalid");
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(150);
+      notMockSetTimeout(resolve, 150);
     });
     // Should not fetch until starting observed.
     expect(query.response).toBeUndefined();
@@ -1181,9 +1476,10 @@ describe("Test observable query", () => {
       }
     );
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 50);
-    });
+    // Make sure query complete
+    await waitServerAnyReqReceived();
+    jest.advanceTimersByTime(20);
+    await new Promise((resolve) => notMockSetTimeout(resolve, 50));
 
     expect(query.response?.data).toBe(0);
 
@@ -1211,7 +1507,8 @@ describe("Test observable query", () => {
     ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(150);
+      notMockSetTimeout(resolve, 150);
     });
     expect(query.isObserved).toBe(false);
     expect(query.isStarted).toBe(false);
@@ -1241,15 +1538,18 @@ describe("Test observable query", () => {
 
     query.changeURL("/test");
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
     query.changeURL("/invalid");
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
     query.changeURL("/test");
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(spyAbort).toBeCalledTimes(0);
@@ -1263,8 +1563,11 @@ describe("Test observable query", () => {
 
     queryController.ready();
 
+    await waitServerAnyReqReceived();
+    // Make sure query complete
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(true);
@@ -1272,10 +1575,6 @@ describe("Test observable query", () => {
     expect(query.isFetching).toBe(false);
     expect(query.error).toBeUndefined();
     expect(query.response?.data).toBe(0);
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, 50);
-    });
 
     disposer();
 
@@ -1312,7 +1611,8 @@ describe("Test observable query", () => {
     ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(150);
+      notMockSetTimeout(resolve, 150);
     });
     expect(query.isObserved).toBe(false);
     expect(query.isStarted).toBe(false);
@@ -1342,15 +1642,18 @@ describe("Test observable query", () => {
 
     query.changeURL("/test");
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
     query.changeURL("/invalid");
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
     query.changeURL("/test");
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(spyAbort).toBeCalledTimes(0);
@@ -1364,8 +1667,11 @@ describe("Test observable query", () => {
 
     queryController.ready();
 
+    await waitServerAnyReqReceived();
+    // Make sure query complete
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(true);
@@ -1373,10 +1679,6 @@ describe("Test observable query", () => {
     expect(query.isFetching).toBe(false);
     expect(query.error).toBeUndefined();
     expect(query.response?.data).toBe(0);
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, 50);
-    });
 
     disposer();
 
@@ -1438,7 +1740,8 @@ describe("Test observable query", () => {
     expect(query.response).toBeUndefined();
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 10);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     // Not yet onStart() finished due to delay.
@@ -1452,7 +1755,15 @@ describe("Test observable query", () => {
     expect(getNum()).toBe(0);
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 150);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
+    });
+
+    await waitServerAnyReqReceived();
+    // Make sure query complete
+    await new Promise((resolve) => {
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(true);
@@ -1462,7 +1773,8 @@ describe("Test observable query", () => {
     expect(query.response?.data).toBe(0);
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(getNum()).toBe(1);
@@ -1522,12 +1834,17 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
+    await new Promise((resolve) => {
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
+    });
+
     // Dispose the observer before the start delay passed.
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        disposer();
-        resolve();
-      }, 50);
+    disposer();
+
+    await new Promise((resolve) => {
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(false);
@@ -1540,7 +1857,8 @@ describe("Test observable query", () => {
     expect(getNum()).toBe(0);
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     disposer = autorun(
@@ -1564,7 +1882,14 @@ describe("Test observable query", () => {
     expect(query.response).toBeUndefined();
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 300);
+      jest.advanceTimersByTime(200);
+      notMockSetTimeout(resolve, 50);
+    });
+    await waitServerAnyReqReceived();
+    // Make sure query complete
+    await new Promise((resolve) => {
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(true);
@@ -1572,10 +1897,6 @@ describe("Test observable query", () => {
     expect(query.isFetching).toBe(false);
     expect(query.error).toBeUndefined();
     expect(query.response?.data).toBe(0);
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, 500);
-    });
 
     expect(getNum()).toBe(1);
     expect(spyAbort).toBeCalledTimes(0);
@@ -1624,7 +1945,8 @@ describe("Test observable query", () => {
     expect(query.response).toBeUndefined();
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 10);
+      jest.advanceTimersByTime(10);
+      notMockSetTimeout(resolve, 10);
     });
 
     // Not yet onStart() finished due to delay.
@@ -1640,7 +1962,8 @@ describe("Test observable query", () => {
     disposer();
 
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(false);
@@ -1691,11 +2014,11 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    // Wait query starts
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 50);
+    await waitServerAnyReqReceived();
+    // Make sure query complete
+    await new Promise((resolve) => {
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(true);
@@ -1716,9 +2039,11 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response?.data).toBe(0);
 
-    // Wait before close.
+    await waitServerAnyReqReceived();
+    // Make sure query complete
     await new Promise((resolve) => {
-      setTimeout(resolve, 50);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(true);
@@ -1773,10 +2098,9 @@ describe("Test observable query", () => {
     query.changeURL("/error1");
     query.changeURL("/error2");
 
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 20);
+    await new Promise((resolve) => {
+      jest.advanceTimersByTime(20);
+      notMockSetTimeout(resolve, 20);
     });
 
     query.changeURL("/error2");
@@ -1789,11 +2113,16 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response).toBeUndefined();
 
-    // Wait query starts
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 150);
+    await new Promise((resolve) => {
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
+    });
+
+    await waitServerAnyReqReceived();
+    // Make sure query complete
+    await new Promise((resolve) => {
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(true);
@@ -1814,9 +2143,11 @@ describe("Test observable query", () => {
     expect(query.error).toBeUndefined();
     expect(query.response?.data).toBe(0);
 
-    // Wait before close.
+    await waitServerAnyReqReceived();
+    // Make sure query complete
     await new Promise((resolve) => {
-      setTimeout(resolve, 150);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isObserved).toBe(true);
@@ -1857,8 +2188,11 @@ describe("Test observable query", () => {
       }
     );
 
+    await waitServerAnyReqReceived();
+    // Make sure query complete
     await new Promise((resolve) => {
-      setTimeout(resolve, 20);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isStarted).toBe(true);
@@ -1872,8 +2206,11 @@ describe("Test observable query", () => {
 
     query.changeURL("/error2");
 
+    await waitServerAnyReqReceived();
+    // Make sure query complete
     await new Promise((resolve) => {
-      setTimeout(resolve, 20);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isStarted).toBe(true);
@@ -1887,8 +2224,11 @@ describe("Test observable query", () => {
 
     query.changeURL("/error3");
 
+    await waitServerAnyReqReceived();
+    // Make sure query complete
     await new Promise((resolve) => {
-      setTimeout(resolve, 20);
+      jest.advanceTimersByTime(50);
+      notMockSetTimeout(resolve, 50);
     });
 
     expect(query.isStarted).toBe(true);
