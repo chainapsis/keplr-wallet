@@ -3,11 +3,13 @@ import {
   ChainInfo,
   AppCurrency,
   CW20Currency,
+  ERC20Currency,
   Secret20Currency,
 } from "@keplr-wallet/types";
 import {
   CurrencySchema,
   CW20CurrencySchema,
+  Erc20CurrencySchema,
   Secret20CurrencySchema,
 } from "../chains";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -21,6 +23,7 @@ import { PermissionService } from "../permission";
 import { Buffer } from "buffer/";
 import { SuggestTokenMsg } from "./messages";
 import { getSecret20ViewingKeyPermissionType } from "./types";
+import { isAddress } from "@ethersproject/address";
 
 export class TokensService {
   protected interactionService!: InteractionService;
@@ -340,6 +343,12 @@ export class TokensService {
             currency
           );
           break;
+        case "erc20":
+          currency = await TokensService.validateERC20Currency(
+            chainInfo,
+            currency
+          );
+          break;
         default:
           throw new KeplrError("tokens", 110, "Unknown type of currency");
       }
@@ -378,6 +387,21 @@ export class TokensService {
       currency.contractAddress,
       chainInfo.bech32Config.bech32PrefixAccAddr
     );
+
+    return currency;
+  }
+
+  static async validateERC20Currency(
+    _: ChainInfo,
+    currency: ERC20Currency
+  ): Promise<ERC20Currency> {
+    // Validate the schema.
+    currency = await Erc20CurrencySchema.validateAsync(currency);
+
+    // Validate the contract address.
+    if (!isAddress(currency.contractAddress)) {
+      throw new Error("Invalid contract address");
+    }
 
     return currency;
   }

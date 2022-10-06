@@ -1,4 +1,8 @@
-import { HasMapStore, ObservableJsonRPCQuery } from "@keplr-wallet/stores";
+import {
+  HasMapStore,
+  ObservableJsonRPCQuery,
+  QueryError,
+} from "@keplr-wallet/stores";
 import { KVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import { Interface } from "@ethersproject/abi";
@@ -48,6 +52,12 @@ const erc20MetadataInterface: Interface = new Interface([
     type: "function",
   },
 ]);
+
+export type Erc20ContractTokenInfo = {
+  decimals: number | undefined;
+  name: string | undefined;
+  symbol: string | undefined;
+};
 
 export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<string> {
   constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
@@ -204,6 +214,32 @@ export class ObservableQueryERC20MetadataInner {
   get decimals(): number | undefined {
     return this._queryDecimals.decimals;
   }
+
+  // TODO: check computed
+  get tokenInfo(): Erc20ContractTokenInfo {
+    return {
+      name: this.name,
+      decimals: this.decimals,
+      symbol: this.symbol,
+    };
+  }
+
+  @computed
+  get isFetching(): boolean {
+    return (
+      this._queryDecimals.isFetching ||
+      this._queryName.isFetching ||
+      this._querySymbol.isFetching
+    );
+  }
+
+  get error(): QueryError<unknown> | undefined {
+    return (
+      this._queryDecimals.error ||
+      this._queryName.error ||
+      this._querySymbol.error
+    );
+  }
 }
 
 /**
@@ -216,16 +252,21 @@ export class ObservableQueryERC20Metadata extends HasMapStore<ObservableQueryERC
     protected readonly kvStore: KVStore,
     protected readonly ethereumURL: string
   ) {
-    super((contractAddress) => {
+    super((key) => {
+      const [contractAddress, ethereumURL] = key.split("\n");
       return new ObservableQueryERC20MetadataInner(
         this.kvStore,
-        this.ethereumURL,
+        ethereumURL,
         contractAddress
       );
     });
   }
 
-  get(contractAddress: string): ObservableQueryERC20MetadataInner {
-    return super.get(contractAddress);
+  get(
+    contractAddress: string,
+    ethereumURL: string = this.ethereumURL
+  ): ObservableQueryERC20MetadataInner {
+    const key = `${contractAddress}\n${ethereumURL}`;
+    return super.get(key);
   }
 }

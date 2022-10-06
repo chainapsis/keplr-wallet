@@ -56,7 +56,8 @@ export class TokensStoreInner {
       // Tokens service is only needed for secretwasm and cosmwasm,
       // so, there is no need to fetch the registered token if the chain doesn't support the secretwasm and cosmwasm.
       (chainInfo.features.includes("secretwasm") ||
-        chainInfo.features.includes("cosmwasm"))
+        chainInfo.features.includes("cosmwasm") ||
+        chainInfo.features.includes("erc20"))
     ) {
       const msg = new GetTokensMsg(this.chainId);
       this._tokens = yield* toGenerator(

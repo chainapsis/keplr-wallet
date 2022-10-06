@@ -40,6 +40,7 @@
     "@ledgerhq/hw-transport": "^6.20.0",
     "@ledgerhq/hw-transport-webhid": "^6.20.0",
     "@ledgerhq/hw-transport-webusb": "^6.20.0",
+    "@ethersproject/address": "^5.6.0",
     "aes-js": "^3.1.2",
     "axios": "^0.27.2",
     "big-integer": "^1.6.48",

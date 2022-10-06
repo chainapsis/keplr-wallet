@@ -8,6 +8,7 @@ import {
   FeeCurrency,
   Secret20Currency,
   WithGasPriceStep,
+  ERC20Currency,
 } from "@keplr-wallet/types";
 
 import Joi, { ObjectSchema } from "joi";
@@ -52,6 +53,27 @@ export const Secret20CurrencySchema = (CurrencySchema as ObjectSchema<Secret20Cu
     viewingKey: Joi.string().required(),
   })
   .custom((value: Secret20Currency) => {
+    if (
+      value.coinMinimalDenom.startsWith(
+        `${value.type}:${value.contractAddress}:`
+      )
+    ) {
+      return value;
+    } else {
+      return {
+        ...value,
+        coinMinimalDenom:
+          `${value.type}:${value.contractAddress}:` + value.coinMinimalDenom,
+      };
+    }
+  });
+
+export const Erc20CurrencySchema = (CurrencySchema as ObjectSchema<ERC20Currency>)
+  .keys({
+    type: Joi.string().equal("erc20").required(),
+    contractAddress: Joi.string().required(),
+  })
+  .custom((value: ERC20Currency) => {
     if (
       value.coinMinimalDenom.startsWith(
         `${value.type}:${value.contractAddress}:`
@@ -166,16 +188,22 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         "eth-key-sign",
         "query:/cosmos/bank/v1beta1/spendable_balances",
         "axelar-evm-bridge",
-        "osmosis-txfees"
+        "osmosis-txfees",
+        "erc20"
       )
     )
     .unique()
     .custom((value: string[]) => {
-      if (value.indexOf("cosmwasm") >= 0 && value.indexOf("secretwasm") >= 0) {
+      const numTokenContracts = [
+        value.indexOf("cosmwasm"),
+        value.indexOf("secretwasm"),
+        value.indexOf("erc20"),
+      ].filter((val) => val >= 0).length;
+      if (numTokenContracts > 1) {
         throw new KeplrError(
           "chains",
           430,
-          "cosmwasm and secretwasm are not compatible"
+          "cosmwasm, secretwasm, and erc20 are not compatible"
         );
       }
 
