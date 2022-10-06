@@ -845,8 +845,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
     },
     bip44: {
-      coinType: 750,
+      coinType: 118,
     },
+    alternativeBIP44s: [
+      {
+        coinType: 750,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("persistence"),
     currencies: [
       {
@@ -886,6 +891,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
       coinDecimals: 6,
+      coinGeckoId: "axelar",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
     },
     bip44: {
@@ -897,6 +903,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
       {
@@ -1013,6 +1020,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
         gasPriceStep: {
           low: 0.007,
@@ -1092,9 +1100,9 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
         gasPriceStep: {
-          low: 0,
-          average: 0.025,
-          high: 0.04,
+          low: 0.05,
+          average: 0.06,
+          high: 0.1,
         },
       },
     ],

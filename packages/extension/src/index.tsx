@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import { AppIntlProvider } from "./languages";
@@ -28,7 +28,10 @@ import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 
 import { StoreProvider, useStore } from "./stores";
-import { KeyRingStatus } from "@keplr-wallet/background";
+import {
+  KeyRingStatus,
+  StartAutoLockMonitoringMsg,
+} from "@keplr-wallet/background";
 import { SignPage } from "./pages/sign";
 import { ChainSuggestedPage } from "./pages/chain/suggest";
 import Modal from "react-modal";
@@ -49,7 +52,6 @@ import { AddTokenPage } from "./pages/setting/token/add";
 import { ManageTokenPage } from "./pages/setting/token/manage";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
-
 import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 import manifest from "./manifest.json";
@@ -58,6 +60,8 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { LogPageViewWrapper } from "./components/analytics";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
+import { SettingAutoLockPage } from "./pages/setting/autolock";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -101,6 +105,15 @@ Modal.defaultStyles = {
 
 const StateRenderer: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
+
+  useEffect(() => {
+    // Notify to auto lock service to start activation check whenever the keyring is unlocked.
+    if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
+      const msg = new StartAutoLockMonitoringMsg();
+      const requester = new InExtensionMessageRequester();
+      requester.sendMessage(BACKGROUND_PORT, msg);
+    }
+  }, [keyRingStore.status]);
 
   if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
     return <MainPage />;
@@ -233,6 +246,11 @@ ReactDOM.render(
                     exact
                     path="/setting/endpoints"
                     component={SettingEndpointsPage}
+                  />
+                  <Route
+                    exact
+                    path="/setting/autolock"
+                    component={SettingAutoLockPage}
                   />
                   <Route path="/sign" component={SignPage} />
                   <Route path="/suggest-chain" component={ChainSuggestedPage} />
