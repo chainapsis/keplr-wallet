@@ -9,10 +9,11 @@ import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import GithubIcon from "../../../components/icon/github";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore } = useStore();
-  const [isDeveloperMode, setIsDeveloperMode] = useState(false);
+  const [isRawDataMode, setIsRawDataMode] = useState(false);
   const history = useHistory();
 
   const interactionInfo = useInteractionInfo(() => {
@@ -32,7 +33,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (chainSuggestStore.waitingSuggestedChainInfo) {
-      setIsDeveloperMode(
+      setIsRawDataMode(
         !chainSuggestStore.waitingSuggestedChainInfo.data.isFromCommunity
       );
     }
@@ -45,8 +46,13 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
   return (
     <EmptyLayout style={{ height: "100%" }}>
       <div className={style.container}>
-        {isDeveloperMode ? (
+        {isRawDataMode ? (
           <div className={style.content}>
+            <img
+              className={style.backButton}
+              src={require("../../../public/assets/svg/arrow-left.svg")}
+              onClick={() => setIsRawDataMode(false)}
+            />
             <h1 className={style.header}>
               <FormattedMessage
                 id="chain.suggested.title"
@@ -76,10 +82,10 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
         ) : (
           <div className={style.content}>
             <div
-              className={style.forDeveloperButton}
-              onClick={() => setIsDeveloperMode(true)}
+              className={style.rawDataButton}
+              onClick={() => setIsRawDataMode(true)}
             >
-              <span>For Developer</span>
+              <span>Add chain as suggested</span>
               <div className={style.imageWrapper}>
                 <img
                   src={require("../../../public/assets/svg/for-developer.svg")}
@@ -140,25 +146,14 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
             </p>
             <div style={{ flex: 1 }} />
             <div className={style.infoWithLink}>
-              <div className={style.title}>
-                <img
-                  src={require("../../../public/assets/svg/warning-primary.svg")}
-                />
-                <span>If any problem?</span>
-              </div>
-              <div className={style.description}>
-                You can suggest and solve the problem here.
-              </div>
+              <div className={style.info}>Chain info being added is from</div>
               <a
-                href="https://github.com/chainapsis/keplr-web"
-                rel="noreferrer"
+                href="https://github.com/chainapsis/cicd-test"
                 target="_blank"
-                className={style.link}
+                rel="noreferrer"
+                className={style.githubLink}
               >
-                <span>Github.Link</span>
-                <img
-                  src={require("../../../public/assets/svg/arrow-right-primary.svg")}
-                />
+                <GithubIcon />
               </a>
             </div>
           </div>

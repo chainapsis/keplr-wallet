@@ -5,9 +5,22 @@
   height: 100%;
 
   .content {
+    position: relative;
     display: flex;
     flex-direction: column;
     height: 100%;
+
+    .back-button {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 24px;
+      height: 24px;
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
 
     .origin {
       margin-top: 5px;
@@ -33,7 +46,7 @@
         background: transparent;
       }
     }
-    .for-developer-button {
+    .raw-data-button {
       align-self: flex-end;
       display: flex;
       flex-direction: row;
@@ -49,17 +62,18 @@
         cursor: pointer;
 
         > span {
-          width: fit-content;
+          max-width: 180px;
           margin-left: 2px;
           margin-right: 4px;
         }
       }
 
       > span {
-        width: 0;
-        height: 15px;
+        width: fit-content;
         overflow: hidden;
-        transition: all ease-out 500ms;
+        transition: all ease-in-out 0.2s;
+        max-width: 0;
+        height: 15px;
         font-weight: 600;
         font-size: 12px;
         line-height: 15px;
@@ -199,38 +213,33 @@
     .info-with-link {
       margin-bottom: 14px;
       display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
+      justify-content: center;
+      align-items: center;
       padding: 16px;
-      /* Blue/Blue 200 */
-      border: 1px solid #9dacf4;
+      /* Platinum/Platinum 50 */
+      background: #eff3fa;
       border-radius: 8px;
+      gap: 10px;
 
-      > .title {
-        margin-bottom: 8px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
+      > .info {
         font-weight: 500;
         font-size: 14px;
         line-height: 20px;
-        /* Blue/Blue 400 */
-        color: #314fdf;
-
-        > img {
-          width: 16px;
-          height: 16px;
-          margin-right: 10px;
-        }
+        color: #566172;
       }
 
-      > .description {
-        margin-bottom: 15px;
-        font-weight: 400;
-        font-size: 13px;
-        line-height: 20px;
-        /* Blue/Blue 400 */
-        color: #314fdf;
+      .github-link {
+        display: flex;
+        align-items: center;
+
+        &:hover {
+          cursor: pointer;
+
+          > svg > path {
+            /* Platinum/Platinum 300 */
+            fill: #566172;
+          }
+        }
       }
 
       > .link {
