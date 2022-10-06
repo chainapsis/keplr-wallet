@@ -176,6 +176,9 @@
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
   "chain.suggested.button.approve": "Approve",
   "chain.suggested.button.reject": "Reject",
+  "chain.suggested.community-driven": "Community Driven",
+  "chain.suggested.add-chain-as-suggested": "Add chain as suggested",
+  "chain.suggested.chain-info-is-from": "Chain info being added is from",
 
   "chain.remove.confirm.paragraph": "Are you sure to remove the {chainName}?",
 

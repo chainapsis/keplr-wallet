@@ -48,11 +48,14 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
       <div className={style.container}>
         {isRawDataMode ? (
           <div className={style.content}>
-            <img
-              className={style.backButton}
-              src={require("../../../public/assets/svg/arrow-left.svg")}
-              onClick={() => setIsRawDataMode(false)}
-            />
+            {chainSuggestStore.waitingSuggestedChainInfo.data
+              .isFromCommunity && (
+              <img
+                className={style.backButton}
+                src={require("../../../public/assets/svg/arrow-left.svg")}
+                onClick={() => setIsRawDataMode(false)}
+              />
+            )}
             <h1 className={style.header}>
               <FormattedMessage
                 id="chain.suggested.title"
@@ -85,7 +88,9 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
               className={style.rawDataButton}
               onClick={() => setIsRawDataMode(true)}
             >
-              <span>Add chain as suggested</span>
+              <span>
+                <FormattedMessage id="chain.suggested.add-chain-as-suggested" />
+              </span>
               <div className={style.imageWrapper}>
                 <img
                   src={require("../../../public/assets/svg/for-developer.svg")}
@@ -129,7 +134,9 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
               />
             </h1>
             <div className={style.tag}>
-              <div>Community Driven</div>
+              <div>
+                <FormattedMessage id="chain.suggested.community-driven" />
+              </div>
             </div>
             <p className={style.paragraph}>
               <FormattedMessage
@@ -146,7 +153,9 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
             </p>
             <div style={{ flex: 1 }} />
             <div className={style.infoWithLink}>
-              <div className={style.info}>Chain info being added is from</div>
+              <div className={style.info}>
+                <FormattedMessage id="chain.suggested.chain-info-is-from" />
+              </div>
               <a
                 href="https://github.com/chainapsis/cicd-test"
                 target="_blank"

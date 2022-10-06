@@ -164,6 +164,9 @@
   "chain.suggested.paragraph": "<b>{host}</b>가 <b>{chainId}</b> 블록체인을 케플러에 추가하길 원합니다.",
   "chain.suggested.button.approve": "허락",
   "chain.suggested.button.reject": "거부",
+  "chain.suggested.community-driven": "커뮤니티 기반",
+  "chain.suggested.add-chain-as-suggested": "다음의 정보로 추가",
+  "chain.suggested.chain-info-is-from": "추가될 체인 정보는 여기서",
 
   "chain.remove.confirm.paragraph": "{chainName}를 삭제하시겠습니까?",
 
