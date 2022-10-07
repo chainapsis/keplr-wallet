@@ -39,9 +39,17 @@ export class SignDocHelper {
     const stdFee = this.feeConfig.toStdFee();
 
     if (this._signDocWrapper.mode === "amino") {
+      const aminoSignDoc = this._signDocWrapper.aminoSignDoc;
+
       const signDoc = {
-        ...this._signDocWrapper.aminoSignDoc,
-        fee: stdFee,
+        ...aminoSignDoc,
+        // XXX: Set fee payer if the requested sign doc has fee payer.
+        //      Currently, there is no support for fee delegation within keplr,
+        //      but this handling is essential for ethermint EIP712 tx or external services that set fee payer.
+        // TODO: Unfortunately. cosmjs does not actively update amino types. Handle the latest amino typing.
+        fee: (aminoSignDoc.fee as any).feePayer
+          ? { ...stdFee, feePayer: (aminoSignDoc.fee as any).feePayer }
+          : stdFee,
         memo: escapeHTML(this.memoConfig.memo),
       };
 
