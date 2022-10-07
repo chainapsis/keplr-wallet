@@ -845,8 +845,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
     },
     bip44: {
-      coinType: 750,
+      coinType: 118,
     },
+    alternativeBIP44s: [
+      {
+        coinType: 750,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("persistence"),
     currencies: [
       {
@@ -886,6 +891,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
       coinDecimals: 6,
+      coinGeckoId: "axelar",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
     },
     bip44: {
@@ -897,6 +903,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
       {
@@ -1013,6 +1020,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
         gasPriceStep: {
           low: 0.007,
@@ -1312,6 +1320,31 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "EEUR",
         coinMinimalDenom: "eeur",
         coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
       },
     ],
@@ -1321,6 +1354,62 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "ungm",
         coinDecimals: 6,
         coinGeckoId: "e-money",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
         gasPriceStep: {
           low: 1,

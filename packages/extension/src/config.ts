@@ -1047,8 +1047,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/chains/persistence"
         : "http://localhost:8080/chains/persistence",
     bip44: {
-      coinType: 750,
+      coinType: 118,
     },
+    alternativeBIP44s: [
+      {
+        coinType: 750,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("persistence"),
     currencies: [
       {
@@ -1317,6 +1322,57 @@ export const EmbedChainInfos: ChainInfo[] = [
           high: 1,
         },
       },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
     ],
     features: ["ibc-transfer"],
   },
@@ -1550,6 +1606,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
       coinDecimals: 6,
+      coinGeckoId: "axelar",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1568,6 +1625,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
       },
       {
         coinDenom: "WETH",
@@ -1683,6 +1741,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         gasPriceStep: {
           low: 0.007,
           average: 0.007,
@@ -1915,6 +1974,16 @@ export const EmbedChainInfos: ChainInfo[] = [
       {
         coinDenom: "stOSMO",
         coinMinimalDenom: "stuosmo",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stJUNO",
+        coinMinimalDenom: "stujuno",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stSTARS",
+        coinMinimalDenom: "stustars",
         coinDecimals: 6,
       },
     ],
