@@ -1319,7 +1319,7 @@ export class KeyRing {
   // This method can handle the case of not initialized ledger app.
   // Use this method instead of use `this.ledgerPublicKeyCache`
   private async ensureLedgerPublicKey(
-    env: Env,
+    _: Env,
     ledgerApp: LedgerApp
   ): Promise<Uint8Array> {
     if (!this.keyStore) {
@@ -1337,6 +1337,27 @@ export class KeyRing {
     const cached = this.ledgerPublicKeyCache[ledgerApp];
     if (cached) {
       return cached;
+    }
+
+    throw new KeplrError("keyring", 901, "TODO: describe something");
+  }
+
+  public async initializeNonDefaultLedgerApp(env: Env, ledgerApp: LedgerApp) {
+    if (!this.keyStore) {
+      throw new KeplrError("keyring", 130, "Keystore is empty");
+    }
+
+    if (this.keyStore.type !== "ledger") {
+      throw new Error("Keystore is not ledger");
+    }
+
+    if (!this.ledgerPublicKeyCache) {
+      throw new KeplrError("keyring", 150, "Ledger not initialized");
+    }
+
+    const cached = this.ledgerPublicKeyCache[ledgerApp];
+    if (cached) {
+      throw new Error(`Ledger app (${ledgerApp}) has been initialized`);
     }
 
     const pubKey = await this.ledgerKeeper.getPublicKey(
