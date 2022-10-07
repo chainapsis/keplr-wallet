@@ -289,17 +289,20 @@ export class Ledger {
     r: string;
     s: string;
   }): Uint8Array {
-    // 32 bytes, or equivalently 64 hex characters
-    if (signature.r.length !== 64 || signature.s.length !== 64) {
+    // Validate signature.r is hex encoded
+    const r = Buffer.from(signature.r, "hex");
+    // Validate signature.s is hex encoded
+    const s = Buffer.from(signature.s, "hex");
+
+    // Must be 32 bytes
+    if (r.length !== 32 || s.length !== 32) {
       throw new Error("Unable to process signature: malformed fields");
     }
 
-    let v = signature.v.toString(16);
-    // Expect v to be greater than 27, but include this check in case
-    // it's subtracted or not included for any reason.
-    if (v.length % 2 !== 0) {
-      v = `0${v}`;
+    if (!Number.isInteger(signature.v)) {
+      throw new Error("Unable to process signature: malformed fields");
     }
-    return Buffer.from(signature.r + signature.s + v, "hex");
+
+    return Buffer.concat([r, s, Buffer.from([signature.v])]);
   }
 }

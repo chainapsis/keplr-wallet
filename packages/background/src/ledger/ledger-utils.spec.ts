@@ -39,14 +39,70 @@ describe("ledger utils", () => {
   });
 
   it("converts ethereum signatures to bytes", () => {
-    const sig = {
+    let sig = {
       v: 27,
-      r: "01".repeat(16),
-      s: "02".repeat(16),
+      r: "01".repeat(32),
+      s: "02".repeat(32),
     };
 
-    const bytes = Ledger.ethSignatureToBytes(sig);
-    const expBytes = Buffer.from(sig.r + sig.s + "1b", "hex");
-    expect(bytes).toStrictEqual(expBytes);
+    let bytes = Ledger.ethSignatureToBytes(sig);
+    let expBytes = Buffer.from(sig.r + sig.s + "1b", "hex");
+    expect(Buffer.from(bytes).equals(expBytes)).toBe(true);
+
+    sig = {
+      v: 28,
+      r: "03".repeat(32),
+      s: "04".repeat(32),
+    };
+
+    bytes = Ledger.ethSignatureToBytes(sig);
+    expBytes = Buffer.from(sig.r + sig.s + "1c", "hex");
+    expect(Buffer.from(bytes).equals(expBytes)).toBe(true);
+  });
+
+  it("throw error if ethereum signatures is invalid", () => {
+    expect(() => {
+      Ledger.ethSignatureToBytes({
+        v: 27,
+        r: "01".repeat(32),
+        // Not 32 bytes
+        s: "02".repeat(32) + "00",
+      });
+    }).toThrow();
+
+    expect(() => {
+      Ledger.ethSignatureToBytes({
+        v: 27,
+        // Not 32 bytes
+        r: "01".repeat(32) + "00",
+        s: "02".repeat(32),
+      });
+    }).toThrow();
+
+    expect(() => {
+      Ledger.ethSignatureToBytes({
+        v: 27,
+        r: "",
+        s: "",
+      });
+    }).toThrow();
+
+    expect(() => {
+      Ledger.ethSignatureToBytes({
+        v: 27,
+        // invalid hex encoded
+        r: "01".repeat(30) + "xx",
+        s: "02".repeat(32),
+      });
+    }).toThrow();
+
+    expect(() => {
+      Ledger.ethSignatureToBytes({
+        // Not integer
+        v: 27.5,
+        r: "01".repeat(32),
+        s: "02".repeat(32),
+      });
+    }).toThrow();
   });
 });
