@@ -1981,6 +1981,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "stujuno",
         coinDecimals: 6,
       },
+      {
+        coinDenom: "stSTARS",
+        coinMinimalDenom: "stustars",
+        coinDecimals: 6,
+      },
     ],
     feeCurrencies: [
       {
