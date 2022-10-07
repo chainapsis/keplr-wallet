@@ -20,6 +20,7 @@ import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
 const bip39 = require("bip39");
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { Buffer } from "buffer/";
+import { LedgerApp } from "../ledger";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
@@ -931,5 +932,29 @@ export class ExportKeyRingDatasMsg extends Message<ExportKeyRingData[]> {
 
   type(): string {
     return ExportKeyRingDatasMsg.type();
+  }
+}
+
+export class InitNonDefaultLedgerAppMsg extends Message<void> {
+  public static type() {
+    return "init-non-default-ledger-app";
+  }
+
+  constructor(public readonly ledgerApp: LedgerApp) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.ledgerApp) {
+      throw new Error("ledger app not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return InitNonDefaultLedgerAppMsg.type();
   }
 }

@@ -16,7 +16,7 @@ import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 import { escapeHTML, KVStore } from "@keplr-wallet/common";
 
 import { ChainsService } from "../chains";
-import { LedgerService } from "../ledger";
+import { LedgerApp, LedgerService } from "../ledger";
 import {
   BIP44,
   ChainInfo,
@@ -710,5 +710,9 @@ export class KeyRingService {
 
   async exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
     return await this.keyRing.exportKeyRingDatas(password);
+  }
+
+  async initializeNonDefaultLedgerApp(env: Env, ledgerApp: LedgerApp) {
+    return await this.keyRing.initializeNonDefaultLedgerApp(env, ledgerApp);
   }
 }
