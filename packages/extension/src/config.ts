@@ -1322,6 +1322,57 @@ export const EmbedChainInfos: ChainInfo[] = [
           high: 1,
         },
       },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
     ],
     features: ["ibc-transfer"],
   },
@@ -1923,6 +1974,16 @@ export const EmbedChainInfos: ChainInfo[] = [
       {
         coinDenom: "stOSMO",
         coinMinimalDenom: "stuosmo",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stJUNO",
+        coinMinimalDenom: "stujuno",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stSTARS",
+        coinMinimalDenom: "stustars",
         coinDecimals: 6,
       },
     ],
