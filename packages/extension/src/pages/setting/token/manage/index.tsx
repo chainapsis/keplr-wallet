@@ -9,7 +9,11 @@ import { useStore } from "../../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useNotification } from "../../../../components/notification";
 import { useConfirm } from "../../../../components/confirm";
-import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
+import {
+  CW20Currency,
+  ERC20Currency,
+  Secret20Currency,
+} from "@keplr-wallet/types";
 import { useIntl } from "react-intl";
 
 export const ManageTokenPage: FunctionComponent = observer(() => {
@@ -20,15 +24,28 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
   const { chainStore, tokensStore } = useStore();
 
-  const isSecretWasm =
-    chainStore.current.features &&
-    chainStore.current.features.includes("secretwasm");
+  const tokenType = (() => {
+    const tokenTypes = ["secretwasm", "cosmwasm", "erc20"];
+    for (let i = 0; i < tokenTypes.length; i++) {
+      const type = tokenTypes[i];
+      if (
+        chainStore.getChain(chainStore.current.chainId).features?.includes(type)
+      ) {
+        return type;
+      }
+    }
+  })() as "secretwasm" | "cosmwasm" | "erc20";
+
+  console.log(chainStore.current.currencies);
 
   const appCurrencies = chainStore.current.currencies.filter((currency) => {
-    if (isSecretWasm) {
-      return "type" in currency && currency.type === "secret20";
-    } else {
-      return "type" in currency && currency.type === "cw20";
+    switch (tokenType) {
+      case "secretwasm":
+        return "type" in currency && currency.type === "secret20";
+      case "cosmwasm":
+        return "type" in currency && currency.type === "cw20";
+      case "erc20":
+        return "type" in currency && currency.type === "erc20";
     }
   });
 
@@ -45,11 +62,24 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     >
       <div className={style.container}>
         {appCurrencies.map((currency) => {
-          const cosmwasmToken = currency as CW20Currency | Secret20Currency;
+          const customToken = currency as
+            | CW20Currency
+            | Secret20Currency
+            | ERC20Currency;
+
+          const customTokenAddress =
+            tokenType === "erc20"
+              ? customToken.contractAddress.length === 42
+                ? `${customToken.contractAddress.slice(
+                    0,
+                    10
+                  )}...${customToken.contractAddress.slice(-8)}`
+                : customToken.contractAddress
+              : Bech32Address.shortenAddress(customToken.contractAddress, 30);
 
           const icons: React.ReactElement[] = [];
 
-          if ("viewingKey" in cosmwasmToken) {
+          if ("viewingKey" in customToken) {
             icons.push(
               <i
                 key="copy"
@@ -60,7 +90,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                 onClick={async (e) => {
                   e.preventDefault();
 
-                  await navigator.clipboard.writeText(cosmwasmToken.viewingKey);
+                  await navigator.clipboard.writeText(customToken.viewingKey);
                   // TODO: Show success tooltip.
                   notification.push({
                     placement: "top-center",
@@ -117,7 +147,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                 ) {
                   await tokensStore
                     .getTokensOf(chainStore.current.chainId)
-                    .removeToken(cosmwasmToken);
+                    .removeToken(customToken);
                 }
               }}
             />
@@ -125,15 +155,12 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
           return (
             <PageButton
-              key={cosmwasmToken.contractAddress}
+              key={customToken.contractAddress}
               style={{
                 cursor: "auto",
               }}
-              title={cosmwasmToken.coinDenom}
-              paragraph={Bech32Address.shortenAddress(
-                cosmwasmToken.contractAddress,
-                30
-              )}
+              title={customToken.coinDenom}
+              paragraph={customTokenAddress}
               icons={icons}
             />
           );

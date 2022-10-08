@@ -92,8 +92,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
           contractAddress
         );
       case "erc20":
-        // TODO: use chain config ethereumUrl
-        const ethereumUrl = "";
+        const ethereumUrl = chainStore.current.ethereumJsonRpc;
         return queries.keplrETC.queryERC20Metadata.get(
           contractAddress,
           ethereumUrl
