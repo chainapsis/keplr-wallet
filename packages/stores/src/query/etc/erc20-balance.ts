@@ -3,11 +3,11 @@ import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
-import { ObservableQueryERC20Metadata } from "@keplr-wallet/stores-etc";
+import { ObservableQueryERC20ContractData } from "./erc20/query";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export class ObservableQueryERC20BalanceInner extends ObservableQueryBalanceInner {
-  protected readonly queryErc20Balance: ObservableQueryERC20Metadata;
+  protected readonly queryErc20Balance: ObservableQueryERC20ContractData;
 
   constructor(
     kvStore: KVStore,
@@ -37,7 +37,7 @@ export class ObservableQueryERC20BalanceInner extends ObservableQueryBalanceInne
       ).toHex(true);
     } catch (e) {}
 
-    this.queryErc20Balance = new ObservableQueryERC20Metadata(
+    this.queryErc20Balance = new ObservableQueryERC20ContractData(
       kvStore,
       ethereumUrl,
       userAddress

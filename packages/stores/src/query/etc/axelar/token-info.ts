@@ -1,8 +1,8 @@
 import {
   ObservableChainQuery,
-  ChainGetter,
   ObservableChainQueryMap,
-} from "@keplr-wallet/stores";
+} from "../../../query/chain-query";
+import { ChainGetter } from "../../../common";
 import { KVStore } from "@keplr-wallet/common";
 import { TokenInfo } from "./types";
 

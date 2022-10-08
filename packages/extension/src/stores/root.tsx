@@ -34,7 +34,7 @@ import {
   KeplrETCQueries,
   GravityBridgeCurrencyRegsitrar,
   AxelarEVMBridgeCurrencyRegistrar,
-} from "@keplr-wallet/stores-etc";
+} from "@keplr-wallet/stores";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   ContentScriptEnv,

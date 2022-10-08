@@ -1,10 +1,7 @@
 import { observable, runInAction } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import {
-  ChainInfoInner,
-  ChainStore,
-  IQueriesStore,
-} from "@keplr-wallet/stores";
+import { ChainInfoInner, ChainStore } from "../../../chain";
+import { IQueriesStore } from "../../../query";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { KeplrETCQueries } from "../queries";
 

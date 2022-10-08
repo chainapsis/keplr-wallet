@@ -39,7 +39,7 @@ import {
 import { ObservableQueryDistributionParams } from "./distribution";
 import { ObservableQueryRPCStatus } from "./status";
 import { ObservableQueryJunoAnnualProvisions } from "./supply/juno";
-import { ObservableQueryERC20BalanceRegistry } from "../erc20/erc20-balance";
+import { ObservableQueryERC20BalanceRegistry } from "../etc/erc20-balance";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;

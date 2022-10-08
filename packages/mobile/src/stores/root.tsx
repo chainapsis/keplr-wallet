@@ -36,7 +36,7 @@ import {
   AxelarEVMBridgeCurrencyRegistrar,
   GravityBridgeCurrencyRegsitrar,
   KeplrETCQueries,
-} from "@keplr-wallet/stores-etc";
+} from "@keplr-wallet/stores";
 
 export class RootStore {
   public readonly chainStore: ChainStore;

@@ -2,7 +2,7 @@ import {
   HasMapStore,
   ObservableJsonRPCQuery,
   QueryError,
-} from "@keplr-wallet/stores";
+} from "../../../../common";
 import { KVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import { Interface } from "@ethersproject/abi";
