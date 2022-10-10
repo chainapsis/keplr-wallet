@@ -102,6 +102,7 @@ export const MainPage: FunctionComponent = observer(() => {
     // Temporary implementation for trimming the 0 balanced native tokens.
     // TODO: Remove this part.
     const currencyType = new DenomHelper(bal.currency.coinMinimalDenom).type;
+    // Strip default ERC-20 tokens if there is no balance
     if (currencyType === "native" || currencyType === "erc20") {
       return bal.balance.toDec().gt(new Dec("0"));
     }
