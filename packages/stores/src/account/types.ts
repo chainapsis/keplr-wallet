@@ -11,7 +11,6 @@ export type ProtoMsgsOrWithAminoMsgs = {
 
   // Add rlp types data if you need to support ethermint with ledger.
   // Must include `MsgValue`.
-  // `Coin` is included, so you don't need to write it.
   rlpTypes?: Record<
     string,
     Array<{
