@@ -37,7 +37,7 @@ export class AccountSetBase {
   protected _walletStatus: WalletStatus = WalletStatus.NotInit;
 
   @observable.ref
-  protected _rejectionReason: Error | undefined;
+  protected _rejectionReason: Error | undefined = undefined;
 
   @observable
   protected _name: string = "";
@@ -226,6 +226,7 @@ export class AccountSetBase {
     this._isNanoLedger = false;
     this._name = "";
     this._pubKey = new Uint8Array(0);
+    this._rejectionReason = undefined;
   }
 
   get walletVersion(): string | undefined {
