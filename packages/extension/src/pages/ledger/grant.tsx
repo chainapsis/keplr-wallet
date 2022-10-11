@@ -3,6 +3,7 @@ import React, {
   ChangeEvent,
   useEffect,
   useState,
+  useLayoutEffect,
 } from "react";
 
 import { Button } from "reactstrap";
@@ -21,13 +22,21 @@ import classnames from "classnames";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNotification } from "../../components/notification";
 import delay from "delay";
-import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 export const LedgerGrantPage: FunctionComponent = observer(() => {
-  // Force to fit the screen size.
-  useInteractionInfo();
+  useLayoutEffect(() => {
+    // XXX: Temporal solution for fitting the popup window.
+    //      Even though this is noy proper way to adjust style,
+    //      it is safe because this page only can be open on popup.
+    document.documentElement.style.height = "100%";
+    document.body.style.height = "100%";
+    const app = document.getElementById("app");
+    if (app) {
+      app.style.height = "100%";
+    }
+  }, []);
 
   const { ledgerInitStore } = useStore();
 
