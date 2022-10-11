@@ -63,6 +63,7 @@
   "onboarding2.phonenrlabel": "Escribe tu número de teléfono aquí",
   "onboarding2.bottominfo": "Obtén un SMS mágico para activar la clave de tu teléfono",
   "onboarding2.sendmagicsms": "Obtén SMS Mágico",
+  "onboarding2.recovery.phonenumber": "Recupera tu clave de teléfono antigua",
   "onboarding2.recovery.authyourkeys": "Create a New Phone Number Key",
   "onboarding2.recovery.authyourkeyssubtext": "Please answer a security question. It can be the same as your old answer, or different.",
 
