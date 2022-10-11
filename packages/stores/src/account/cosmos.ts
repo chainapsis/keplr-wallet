@@ -239,6 +239,17 @@ export class CosmosAccountImpl {
               }).finish(),
             },
           ],
+          rlpTypes: {
+            MsgValue: [
+              { name: "from_address", type: "string" },
+              { name: "to_address", type: "string" },
+              { name: "amount", type: "TypeAmount[]" },
+            ],
+            TypeAmount: [
+              { name: "denom", type: "string" },
+              { name: "amount", type: "string" },
+            ],
+          },
         },
         (tx) => {
           if (tx.code == null || tx.code === 0) {
@@ -1019,6 +1030,25 @@ export class CosmosAccountImpl {
               ).finish(),
             },
           ],
+          rlpTypes: {
+            MsgValue: [
+              { name: "source_port", type: "string" },
+              { name: "source_channel", type: "string" },
+              { name: "token", type: "TypeToken" },
+              { name: "sender", type: "string" },
+              { name: "receiver", type: "string" },
+              { name: "timeout_height", type: "TypeTimeoutHeight" },
+              { name: "timeout_timestamp", type: "uint64" },
+            ],
+            TypeToken: [
+              { name: "denom", type: "string" },
+              { name: "amount", type: "string" },
+            ],
+            TypeTimeoutHeight: [
+              { name: "revision_number", type: "uint64" },
+              { name: "revision_height", type: "uint64" },
+            ],
+          },
         };
       },
       (tx) => {
@@ -1215,6 +1245,17 @@ export class CosmosAccountImpl {
             }).finish(),
           },
         ],
+        rlpTypes: {
+          MsgValue: [
+            { name: "delegator_address", type: "string" },
+            { name: "validator_address", type: "string" },
+            { name: "amount", type: "TypeAmount" },
+          ],
+          TypeAmount: [
+            { name: "denom", type: "string" },
+            { name: "amount", type: "string" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1346,6 +1387,17 @@ export class CosmosAccountImpl {
             }).finish(),
           },
         ],
+        rlpTypes: {
+          MsgValue: [
+            { name: "delegator_address", type: "string" },
+            { name: "validator_address", type: "string" },
+            { name: "amount", type: "TypeAmount" },
+          ],
+          TypeAmount: [
+            { name: "denom", type: "string" },
+            { name: "amount", type: "string" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1494,6 +1546,18 @@ export class CosmosAccountImpl {
             }).finish(),
           },
         ],
+        rlpTypes: {
+          MsgValue: [
+            { name: "delegator_address", type: "string" },
+            { name: "validator_src_address", type: "string" },
+            { name: "validator_dst_address", type: "string" },
+            { name: "amount", type: "TypeAmount" },
+          ],
+          TypeAmount: [
+            { name: "denom", type: "string" },
+            { name: "amount", type: "string" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1755,6 +1819,13 @@ export class CosmosAccountImpl {
             }).finish(),
           },
         ],
+        rlpTypes: {
+          MsgValue: [
+            { name: "proposal_id", type: "uint64" },
+            { name: "voter", type: "string" },
+            { name: "option", type: "int32" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
