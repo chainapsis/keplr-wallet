@@ -31,6 +31,8 @@ export const DetailsTab: FunctionComponent<{
 
   preferNoSetFee: boolean;
   preferNoSetMemo: boolean;
+
+  isNeedLedgerEthBlindSigning: boolean;
 }> = observer(
   ({
     signDocHelper,
@@ -40,6 +42,7 @@ export const DetailsTab: FunctionComponent<{
     isInternal,
     preferNoSetFee,
     preferNoSetMemo,
+    isNeedLedgerEthBlindSigning,
   }) => {
     const { chainStore, priceStore, accountStore } = useStore();
     const intl = useIntl();
@@ -213,6 +216,18 @@ export const DetailsTab: FunctionComponent<{
             }
           </React.Fragment>
         )}
+        {isNeedLedgerEthBlindSigning ? (
+          <div className={styleDetailsTab.ethLedgerBlindSigningWarning}>
+            <div className={styleDetailsTab.title}>Before click Approve</div>
+            <ul className={styleDetailsTab.list}>
+              <li>Plug in your Ledger device and select the Ethereum app</li>
+              <li>
+                Enable “smart contract data” or “blind signing” on your Ledger
+                device
+              </li>
+            </ul>
+          </div>
+        ) : null}
       </div>
     );
   }
