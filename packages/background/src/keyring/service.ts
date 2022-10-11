@@ -391,11 +391,7 @@ export class KeyRingService {
       primaryType: string;
     },
     signDoc: StdSignDoc,
-    signOptions: KeplrSignOptions & {
-      // Hack option field to detect the sign arbitrary for string
-      isADR36WithString?: boolean;
-      ethSignType?: EthSignType;
-    }
+    signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     signDoc = {
       ...signDoc,
@@ -432,7 +428,7 @@ export class KeyRingService {
         signer,
         signOptions,
         isADR36SignDoc: false,
-        ethSignType: signOptions.ethSignType,
+        ethSignType: EthSignType.EIP712,
       }
     )) as StdSignDoc;
 
