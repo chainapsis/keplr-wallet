@@ -181,7 +181,7 @@ export class KeyRing {
     chainId: string,
     defaultCoinType: number,
     useEthereumAddress: boolean
-  ): Promise<Key> {
+  ): Key {
     return this.loadKey(
       this.computeKeyStoreCoinType(chainId, defaultCoinType),
       useEthereumAddress
@@ -214,7 +214,7 @@ export class KeyRing {
   public getKeyFromCoinType(
     coinType: number,
     useEthereumAddress: boolean
-  ): Promise<Key> {
+  ): Key {
     return this.loadKey(coinType, useEthereumAddress);
   }
 
@@ -639,10 +639,7 @@ export class KeyRing {
     return this.getMultiKeyStoreInfo();
   }
 
-  private async loadKey(
-    coinType: number,
-    useEthereumAddress: boolean = false
-  ): Promise<Key> {
+  private loadKey(coinType: number, useEthereumAddress: boolean = false): Key {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
     }
@@ -657,7 +654,7 @@ export class KeyRing {
       }
 
       if (useEthereumAddress) {
-        const pubKey = await this.ensureLedgerPublicKey(LedgerApp.Ethereum);
+        const pubKey = this.ensureLedgerPublicKey(LedgerApp.Ethereum);
         // Generate the Ethereum address for this public key
         const address = computeAddress(pubKey);
 
@@ -670,7 +667,7 @@ export class KeyRing {
       }
 
       const pubKey = new PubKeySecp256k1(
-        await this.ensureLedgerPublicKey(LedgerApp.Cosmos)
+        this.ensureLedgerPublicKey(LedgerApp.Cosmos)
       );
 
       return {
@@ -1328,9 +1325,7 @@ export class KeyRing {
   // There is no guarantee that the ledger has been initialized except for cosmos.
   // This method can handle the case of not initialized ledger app.
   // Use this method instead of use `this.ledgerPublicKeyCache`
-  private async ensureLedgerPublicKey(
-    ledgerApp: LedgerApp
-  ): Promise<Uint8Array> {
+  private ensureLedgerPublicKey(ledgerApp: LedgerApp): Uint8Array {
     if (!this.keyStore) {
       throw new KeplrError("keyring", 130, "Keystore is empty");
     }
