@@ -63,15 +63,11 @@ export const AccountView: FunctionComponent = observer(() => {
             if (
               accountInfo.rejectionReason &&
               accountInfo.rejectionReason instanceof KeplrError &&
-              accountInfo.rejectionReason.module === "keyring"
+              accountInfo.rejectionReason.module === "keyring" &&
+              accountInfo.rejectionReason.code === 152
             ) {
-              if (accountInfo.rejectionReason.code === 152) {
-                // Return unsupported device message
-                return "Ledger is not supported for this chain";
-              } else if (accountInfo.rejectionReason.code === 153) {
-                // Return Ledger app rejection message
-                return accountInfo.rejectionReason.message;
-              }
+              // Return unsupported device message
+              return "Ledger is not supported for this chain";
             }
 
             let result = "Failed to load account by unknown reason";

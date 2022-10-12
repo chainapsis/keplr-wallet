@@ -1306,6 +1306,23 @@ export class KeyRing {
     return num;
   }
 
+  // XXX: There are other way to handle tx with ethermint on ledger.
+  //      However, some chains have probably competitive spirit with evmos.
+  //      They make unnecessary and silly minor changes to ethermint spec.
+  //      Thus, there is a probability that it will potentially not work on other chains and they blame us.
+  //      So, block them explicitly for now.
+  public throwErrorIfEthermintWithLedgerButNotEvmos(chainId: string) {
+    if (this.keyStore && this.keyStore.type === "ledger") {
+      if (!chainId.startsWith("evmos_")) {
+        throw new KeplrError(
+          "keyring",
+          152,
+          "Ledger is unsupported for this chain"
+        );
+      }
+    }
+  }
+
   // Return public key if it has been initialized.
   // Else, try to initialize and return the public key.
   // There is no guarantee that the ledger has been initialized except for cosmos.

@@ -216,10 +216,18 @@ export class KeyRingService {
   }
 
   async getKey(chainId: string): Promise<Key> {
+    const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
+      chainId
+    );
+    if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
+      // Check the comment on the method itself.
+      this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
+    }
+
     return this.keyRing.getKey(
       chainId,
       await this.chainsService.getChainCoinType(chainId),
-      (await this.chainsService.getChainEthereumKeyFeatures(chainId)).address
+      ethereumKeyFeatures.address
     );
   }
 
@@ -252,6 +260,11 @@ export class KeyRingService {
     const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
       chainId
     );
+
+    if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
+      // Check the comment on the method itself.
+      this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
+    }
 
     const key = await this.keyRing.getKey(
       chainId,
@@ -401,6 +414,11 @@ export class KeyRingService {
       chainId
     );
 
+    if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
+      // Check the comment on the method itself.
+      this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
+    }
+
     const key = await this.keyRing.getKey(
       chainId,
       coinType,
@@ -475,6 +493,11 @@ export class KeyRingService {
     const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
       chainId
     );
+
+    if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
+      // Check the comment on the method itself.
+      this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
+    }
 
     const key = await this.keyRing.getKey(
       chainId,
