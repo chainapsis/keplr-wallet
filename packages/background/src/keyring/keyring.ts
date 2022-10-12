@@ -178,13 +178,11 @@ export class KeyRing {
   }
 
   public getKey(
-    env: Env,
     chainId: string,
     defaultCoinType: number,
     useEthereumAddress: boolean
   ): Promise<Key> {
     return this.loadKey(
-      env,
       this.computeKeyStoreCoinType(chainId, defaultCoinType),
       useEthereumAddress
     );
@@ -214,11 +212,10 @@ export class KeyRing {
   }
 
   public getKeyFromCoinType(
-    env: Env,
     coinType: number,
     useEthereumAddress: boolean
   ): Promise<Key> {
-    return this.loadKey(env, coinType, useEthereumAddress);
+    return this.loadKey(coinType, useEthereumAddress);
   }
 
   public async createMnemonicKey(
@@ -643,7 +640,6 @@ export class KeyRing {
   }
 
   private async loadKey(
-    env: Env,
     coinType: number,
     useEthereumAddress: boolean = false
   ): Promise<Key> {
@@ -661,10 +657,7 @@ export class KeyRing {
       }
 
       if (useEthereumAddress) {
-        const pubKey = await this.ensureLedgerPublicKey(
-          env,
-          LedgerApp.Ethereum
-        );
+        const pubKey = await this.ensureLedgerPublicKey(LedgerApp.Ethereum);
         // Generate the Ethereum address for this public key
         const address = computeAddress(pubKey);
 
@@ -677,7 +670,7 @@ export class KeyRing {
       }
 
       const pubKey = new PubKeySecp256k1(
-        await this.ensureLedgerPublicKey(env, LedgerApp.Cosmos)
+        await this.ensureLedgerPublicKey(LedgerApp.Cosmos)
       );
 
       return {
@@ -795,7 +788,7 @@ export class KeyRing {
       return await this.ledgerKeeper.sign(
         env,
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
-        await this.ensureLedgerPublicKey(env, LedgerApp.Cosmos),
+        await this.ensureLedgerPublicKey(LedgerApp.Cosmos),
         message
       );
     } else {
@@ -844,7 +837,7 @@ export class KeyRing {
         env,
         type,
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
-        await this.ensureLedgerPublicKey(env, LedgerApp.Ethereum),
+        await this.ensureLedgerPublicKey(LedgerApp.Ethereum),
         message
       );
     }
@@ -1319,7 +1312,6 @@ export class KeyRing {
   // This method can handle the case of not initialized ledger app.
   // Use this method instead of use `this.ledgerPublicKeyCache`
   private async ensureLedgerPublicKey(
-    _: Env,
     ledgerApp: LedgerApp
   ): Promise<Uint8Array> {
     if (!this.keyStore) {
