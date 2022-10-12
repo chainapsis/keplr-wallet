@@ -20,6 +20,7 @@ module.exports = {
     "prettier/prettier": "error",
     "react/prop-types": "off",
     "react/self-closing-comp": "error",
+    "react/jsx-fragments": ["error", "element"],
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-inferrable-types": "off",

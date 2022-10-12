@@ -126,7 +126,7 @@
     "regenerator-runtime": "^0.13.9",
     "rooks": "^6.4.3",
     "secp256k1": "^4.0.2",
-    "secretjs": "^0.17.8",
+    "secretjs": "0.17.7",
     "sha.js": "^2.4.11",
     "stream-browserify": "^3.0.0",
     "tslib": "^2.3.0",

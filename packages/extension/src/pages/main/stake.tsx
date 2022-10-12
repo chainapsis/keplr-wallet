@@ -101,7 +101,7 @@ export const StakeView: FunctionComponent = observer(() => {
   return (
     <div>
       {isRewardExist ? (
-        <>
+        <React.Fragment>
           <div
             className={classnames(styleStake.containerInner, styleStake.reward)}
           >
@@ -150,7 +150,7 @@ export const StakeView: FunctionComponent = observer(() => {
             }
           </div>
           <hr className={styleStake.hr} />
-        </>
+        </React.Fragment>
       ) : null}
 
       <div className={classnames(styleStake.containerInner, styleStake.stake)}>
