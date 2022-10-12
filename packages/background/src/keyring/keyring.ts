@@ -1348,7 +1348,11 @@ export class KeyRing {
       return cached;
     }
 
-    throw new KeplrError("keyring", 901, "TODO: describe something");
+    throw new KeplrError(
+      "keyring",
+      901,
+      "Please initialize ethereum app on ledger first"
+    );
   }
 
   public async initializeNonDefaultLedgerApp(env: Env, ledgerApp: LedgerApp) {
