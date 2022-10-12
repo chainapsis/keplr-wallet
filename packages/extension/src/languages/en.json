@@ -124,6 +124,8 @@
   "setting.autolock.error.required": "Duration is required",
   "setting.autolock.error.out-of-range": "It cannot be less than 0 or greater than 4320(3days)",
 
+  "setting.developer-mode": "Developer Mode",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",

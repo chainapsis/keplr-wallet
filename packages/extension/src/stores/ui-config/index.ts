@@ -6,12 +6,14 @@ import { KVStore } from "@keplr-wallet/common";
 
 export interface UIConfigOptions {
   showAdvancedIBCTransfer: boolean;
+  showRawSuggestedChainInfo: boolean;
 }
 
 export class UIConfigStore {
   @observable.deep
   protected options: UIConfigOptions = {
     showAdvancedIBCTransfer: false,
+    showRawSuggestedChainInfo: false,
   };
 
   protected _isBeta: boolean;
@@ -33,6 +35,7 @@ export class UIConfigStore {
     const data = await this.kvStore.get<Partial<UIConfigOptions>>("options");
 
     runInAction(() => {
+      console.log("here", this.options);
       this.options = {
         ...this.options,
         ...data,
@@ -49,6 +52,10 @@ export class UIConfigStore {
     return this.options.showAdvancedIBCTransfer;
   }
 
+  get showRawSuggestedChainInfo(): boolean {
+    return this.options.showRawSuggestedChainInfo;
+  }
+
   get isBeta(): boolean {
     return this._isBeta;
   }
@@ -58,8 +65,9 @@ export class UIConfigStore {
   }
 
   @action
-  setShowAdvancedIBCTransfer(value: boolean) {
+  setDeveloperMode(value: boolean) {
     this.options.showAdvancedIBCTransfer = value;
+    this.options.showRawSuggestedChainInfo = value;
 
     // No need to await
     this.save();

@@ -12,7 +12,7 @@ import { useStore } from "../../../stores";
 import GithubIcon from "../../../components/icon/github";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
-  const { chainSuggestStore, analyticsStore } = useStore();
+  const { chainSuggestStore, analyticsStore, uiConfigStore } = useStore();
   const [isRawDataMode, setIsRawDataMode] = useState(false);
   const history = useHistory();
 
@@ -84,19 +84,23 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
           </div>
         ) : (
           <div className={style.content}>
-            <div
-              className={style.rawDataButton}
-              onClick={() => setIsRawDataMode(true)}
-            >
-              <span>
-                <FormattedMessage id="chain.suggested.add-chain-as-suggested" />
-              </span>
-              <div className={style.imageWrapper}>
-                <img
-                  src={require("../../../public/assets/svg/for-developer.svg")}
-                />
+            {uiConfigStore.showRawSuggestedChainInfo ? (
+              <div
+                className={style.rawDataButton}
+                onClick={() => setIsRawDataMode(true)}
+              >
+                <span>
+                  <FormattedMessage id="chain.suggested.add-chain-as-suggested" />
+                </span>
+                <div className={style.imageWrapper}>
+                  <img
+                    src={require("../../../public/assets/svg/for-developer.svg")}
+                  />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div style={{ display: "flex", height: "60px" }} />
+            )}
             <div className={style.logo}>
               <div className={style.imageContainer}>
                 <div className={style.imageBackground} />

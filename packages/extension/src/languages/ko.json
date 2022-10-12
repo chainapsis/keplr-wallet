@@ -116,6 +116,8 @@
   "setting.autolock.error.required": "잠금 주기를 입력해주세요",
   "setting.autolock.error.out-of-range": "잠금 주기는 0분 보다 작거나 4320분(3일)보다 클 수 없습니다",
 
+  "setting.developer-mode": "개발자 모드",
+
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
   "register.button.back": "뒤로",
