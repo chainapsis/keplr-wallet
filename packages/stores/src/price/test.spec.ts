@@ -4,7 +4,7 @@ import { autorun } from "mobx";
 import Http from "http";
 
 describe("Test coin gecko price store", () => {
-  const createMockCoingeckoServer = (delay: number = 50) => {
+  const createMockCoingeckoServer = () => {
     const testPrices: Record<string, Record<string, number> | undefined> = {
       "e-money-eur": { usd: 0.94995, krw: 1287.2 },
       "crypto-com-chain": { usd: 0.119683, krw: 162.14 },
@@ -51,34 +51,26 @@ describe("Test coin gecko price store", () => {
         return result;
       })();
 
-      let closed = false;
-      req.once("close", () => {
-        closed = true;
+      resp.writeHead(200, {
+        "content-type": "application/json; charset=utf-8",
       });
-      setTimeout(() => {
-        if (!closed) {
-          resp.writeHead(200, {
-            "content-type": "application/json; charset=utf-8",
-          });
-          const res: any = {};
-          const vsCurrencies = query["vs_currencies"].split(",");
-          const ids = query["ids"].split(",");
-          for (const id of ids) {
-            const prices: any = {};
-            for (const vsCurrency of vsCurrencies) {
-              const p = testPrices[id];
-              if (p && p[vsCurrency]) {
-                prices[vsCurrency] = p[vsCurrency];
-              }
-            }
-            res[id] = prices;
+      const res: any = {};
+      const vsCurrencies = query["vs_currencies"].split(",");
+      const ids = query["ids"].split(",");
+      for (const id of ids) {
+        const prices: any = {};
+        for (const vsCurrency of vsCurrencies) {
+          const p = testPrices[id];
+          if (p && p[vsCurrency]) {
+            prices[vsCurrency] = p[vsCurrency];
           }
-
-          resp.end(JSON.stringify(res));
-
-          count++;
         }
-      }, delay);
+        res[id] = prices;
+      }
+
+      resp.end(JSON.stringify(res));
+
+      count++;
     });
 
     server.listen();

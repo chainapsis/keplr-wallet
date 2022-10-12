@@ -23,7 +23,7 @@
     "scripts": ["browser-polyfill.js", "background.bundle.js"],
     "persistent": true
   },
-  "permissions": ["storage", "notifications", "identity"],
+  "permissions": ["storage", "notifications", "identity", "idle"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -34,6 +34,7 @@
   ],
   "web_accessible_resources": [
     "injectedScript.bundle.js",
-    "assets/logo-256.png"
+    "assets/logo-256.png",
+    "blocklist.html"
   ]
 }

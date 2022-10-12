@@ -294,11 +294,11 @@ export class RootStore {
             return {
               send: {
                 secret20: {
-                  gas: 50000,
+                  gas: 175000,
                 },
               },
               createSecret20ViewingKey: {
-                gas: 50000,
+                gas: 175000,
               },
             };
           }
