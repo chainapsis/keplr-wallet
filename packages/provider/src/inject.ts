@@ -467,4 +467,24 @@ export class InjectedKeplr implements IKeplr {
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
   }
+
+  async experimentalSignEIP712CosmosTx_v0(
+    chainId: string,
+    signer: string,
+    eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
+  ): Promise<AminoSignResponse> {
+    return await this.requestMethod("experimentalSignEIP712CosmosTx_v0", [
+      chainId,
+      signer,
+      eip712,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+    ]);
+  }
 }

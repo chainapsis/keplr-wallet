@@ -2,6 +2,7 @@ import { InteractionStore } from "./interaction";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
+  LedgerApp,
   LedgerGetWebHIDFlagMsg,
   LedgerSetWebHIDFlagMsg,
 } from "@keplr-wallet/background";
@@ -19,6 +20,7 @@ export type LedgerInitDataType =
   | {
       // Should interact to resume the ledger initing on the background.
       event: "init-failed";
+      ledgerApp: LedgerApp;
     }
   | {
       event: "init-aborted";
@@ -141,6 +143,26 @@ export class LedgerInitStore {
     }
 
     return false;
+  }
+
+  // Return the requested ledger app if init needed
+  @computed
+  get requestedLedgerApp(): LedgerApp | undefined {
+    if (!this.isInitNeeded) {
+      return;
+    }
+
+    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+      "ledger-init"
+    );
+
+    for (const data of datas) {
+      if (data.data.event === "init-failed") {
+        return data.data.ledgerApp;
+      }
+    }
+
+    return;
   }
 
   @flow
