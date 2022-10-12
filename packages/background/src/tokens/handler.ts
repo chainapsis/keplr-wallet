@@ -39,8 +39,8 @@ export const getHandler: (service: TokensService) => Handler = (service) => {
 const handleGetTokensMsg: (
   service: TokensService
 ) => InternalHandler<GetTokensMsg> = (service) => {
-  return async (env, msg) => {
-    return await service.getTokens(env, msg.chainId);
+  return async (_, msg) => {
+    return await service.getTokens(msg.chainId);
   };
 };
 
@@ -66,16 +66,16 @@ const handleSuggestTokenMsg: (
 const handleAddTokenMsg: (
   service: TokensService
 ) => InternalHandler<AddTokenMsg> = (service) => {
-  return async (env, msg) => {
-    await service.addToken(env, msg.chainId, msg.currency);
+  return async (_, msg) => {
+    await service.addToken(msg.chainId, msg.currency);
   };
 };
 
 const handleRemoveTokenMsg: (
   service: TokensService
 ) => InternalHandler<RemoveTokenMsg> = (service) => {
-  return async (env, msg) => {
-    await service.removeToken(env, msg.chainId, msg.currency);
+  return async (_, msg) => {
+    await service.removeToken(msg.chainId, msg.currency);
   };
 };
 
@@ -99,7 +99,6 @@ const handleGetSecret20ViewingKey: (
      */
 
     return await service.getSecret20ViewingKey(
-      env,
       msg.chainId,
       msg.contractAddress
     );
