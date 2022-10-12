@@ -10,7 +10,7 @@
       }
     },
     "serve": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "nx start mobile"
       }
@@ -77,20 +77,20 @@
       }
     },
     "injected-provider": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "sh scripts/build-provider.sh"
       }
     },
     "react-native-asset": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "react-native-asset",
         "cwd": "apps/mobile"
       }
     },
     "tsc": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "nx:run-commands",
       "options": {
         "command": "tsc -b apps/mobile/tsconfig.app.json"
       }
