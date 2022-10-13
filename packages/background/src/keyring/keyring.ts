@@ -1053,8 +1053,6 @@ export class KeyRing {
       bip44HDPath
     );
 
-    this.ledgerPublicKeyCache = pubKeys;
-
     this.multiKeyStore.push(keyStore);
 
     await this.save();
