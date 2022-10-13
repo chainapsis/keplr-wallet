@@ -25,37 +25,8 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
   const multisigWallet = isMultisigWallet(wallet) ? wallet : null;
   const intl = useIntl();
 
-  const renderContinueButton = (keyInRecovery?: MultisigKey | null) => {
-    let navigationUrl: string;
-    let labelId: string;
-    switch (keyInRecovery) {
-      case "phoneNumber":
-        navigationUrl = "create-multisig-phone-number";
-        labelId = "recovery.continuephone";
-        break;
-      case "social":
-        navigationUrl = "create-multisig-social";
-        labelId = "recovery.continuesocial";
-        break;
-      default:
-        navigationUrl = "create-multisig-biometrics";
-        labelId = "onboarding1.getstarted";
-    }
-    return (
-      <Button
-        label={intl.formatMessage({ id: labelId })}
-        RightIcon={GetStarted}
-        flavor="green"
-        style={{
-          marginTop: 40,
-        }}
-        onPress={action(() => {
-          demoStore.demoMode = false;
-          navigation.navigate(navigationUrl);
-        })}
-      />
-    );
-  };
+  const isInRecovery =
+    isMultisigWallet(wallet) && wallet.keyInRecovery !== null;
 
   return (
     <InitialBackground>
@@ -93,17 +64,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               marginTop: 32,
             }}
           >
-            {multisigWallet?.keyInRecovery === null ? (
-              <FormattedMessage
-                id="onboarding1.welcometoloop"
-                defaultMessage="Welcome to Loop"
-              />
-            ) : (
-              <FormattedMessage
-                id="recovery.keyupdate"
-                defaultMessage="Update Wallet Keys?"
-              />
-            )}
+            {renderTitle()}
           </Text>
           <Text
             style={{
@@ -113,43 +74,10 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               marginTop: 12,
             }}
           >
-            {multisigWallet?.keyInRecovery === "phoneNumber" ? (
-              <FormattedMessage
-                id="recovery.phoneupdate"
-                defaultMessage="You're updating your multisig wallet's phone number key."
-              />
-            ) : multisigWallet?.keyInRecovery === "social" ? (
-              <FormattedMessage
-                id="recovery.socialupdate"
-                defaultMessage="You're updating your multisig wallet's social key."
-              />
-            ) : (
-              <FormattedMessage
-                id="onboarding1.welcomesubtext"
-                defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
-              />
-            )}
+            {renderSubTitle()}
           </Text>
           {renderContinueButton(multisigWallet?.keyInRecovery)}
-          {/*{multisigStore.getKeyInRecovery === null ? (*/}
-          {/*  <Button*/}
-          {/*    label={intl.formatMessage({ id: "demo.enter" })}*/}
-          {/*    RightIcon={GetStarted}*/}
-          {/*    flavor="green"*/}
-          {/*    style={{*/}
-          {/*      marginTop: 20,*/}
-          {/*    }}*/}
-          {/*    onPress={action(() => {*/}
-          {/*      demoStore.demoMode = true;*/}
-          {/*      navigation.navigate("create-multisig-biometrics");*/}
-          {/*      Alert.alert(*/}
-          {/*        intl.formatMessage({ id: "demo.demomode" }),*/}
-          {/*        intl.formatMessage({ id: "demo.info" })*/}
-          {/*      );*/}
-          {/*    })}*/}
-          {/*  />*/}
-          {/*) : null}*/}
-          {multisigWallet?.keyInRecovery === null ? (
+          {isInRecovery ? null : (
             <Button
               label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}
               RightIcon={GetStarted}
@@ -179,8 +107,20 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 );
               }}
             />
-          ) : null}
-          {multisigWallet?.keyInRecovery === null ? (
+          )}
+          {isInRecovery ? (
+            <Button
+              label="Cancel"
+              RightIcon={GetStarted}
+              flavor="blue"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={action(() => {
+                multisigWallet?.cancelRecovery();
+              })}
+            />
+          ) : (
             <Button
               label={intl.formatMessage({ id: "onboarding1.recoversinglesig" })}
               RightIcon={GetStarted}
@@ -193,21 +133,85 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 navigation.navigate("recover-singlesig");
               })}
             />
-          ) : (
-            <Button
-              label="Cancel"
-              RightIcon={GetStarted}
-              flavor="blue"
-              style={{
-                marginTop: 20,
-              }}
-              onPress={action(() => {
-                multisigWallet?.cancelRecovery();
-              })}
-            />
           )}
         </View>
       </SafeAreaView>
     </InitialBackground>
   );
+
+  function renderTitle() {
+    if (isInRecovery) {
+      return (
+        <FormattedMessage
+          id="recovery.keyupdate"
+          defaultMessage="Update Wallet Keys?"
+        />
+      );
+    } else {
+      return (
+        <FormattedMessage
+          id="onboarding1.welcometoloop"
+          defaultMessage="Welcome to Loop"
+        />
+      );
+    }
+  }
+
+  function renderSubTitle() {
+    switch (multisigWallet?.keyInRecovery) {
+      case "phoneNumber":
+        return (
+          <FormattedMessage
+            id="recovery.phoneupdate"
+            defaultMessage="You're updating your multisig wallet's phone number key."
+          />
+        );
+      case "social":
+        return (
+          <FormattedMessage
+            id="recovery.socialupdate"
+            defaultMessage="You're updating your multisig wallet's social key."
+          />
+        );
+      default:
+        return (
+          <FormattedMessage
+            id="onboarding1.welcomesubtext"
+            defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
+          />
+        );
+    }
+  }
+
+  function renderContinueButton(keyInRecovery?: MultisigKey | null) {
+    let navigationUrl: string;
+    let labelId: string;
+    switch (keyInRecovery) {
+      case "phoneNumber":
+        navigationUrl = "create-multisig-phone-number";
+        labelId = "recovery.continuephone";
+        break;
+      case "social":
+        navigationUrl = "create-multisig-social";
+        labelId = "recovery.continuesocial";
+        break;
+      default:
+        navigationUrl = "create-multisig-biometrics";
+        labelId = "onboarding1.getstarted";
+    }
+    return (
+      <Button
+        label={intl.formatMessage({ id: labelId })}
+        RightIcon={GetStarted}
+        flavor="green"
+        style={{
+          marginTop: 40,
+        }}
+        onPress={action(() => {
+          demoStore.demoMode = false;
+          navigation.navigate(navigationUrl);
+        })}
+      />
+    );
+  }
 });
