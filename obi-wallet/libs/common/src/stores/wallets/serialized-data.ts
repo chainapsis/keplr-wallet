@@ -1,5 +1,6 @@
 import * as t from "io-ts";
 
+import { nullable } from "../helpers";
 import * as Multisig from "../multisig/serialized-data";
 
 export const SerializedMultisigWalletAnyVersion = t.type({
@@ -11,12 +12,18 @@ export const SerializedMultisigWallet = t.type({
   type: t.literal("multisig"),
   data: Multisig.SerializedData,
 });
+export type SerializedMultisigWallet = t.TypeOf<
+  typeof SerializedMultisigWallet
+>;
 
 export const SerializedSinglesigWalletAnyVersion = t.type({
   type: t.literal("singlesig"),
   data: t.string,
 });
 export const SerializedSinglesigWallet = SerializedSinglesigWalletAnyVersion;
+export type SerializedSinglesigWallet = t.TypeOf<
+  typeof SerializedSinglesigWallet
+>;
 
 export const SerializedWalletAnyVersion = t.union([
   SerializedMultisigWalletAnyVersion,
@@ -32,10 +39,12 @@ export const SerializedWallet = t.union([
 export type SerializedWallet = t.TypeOf<typeof SerializedWallet>;
 
 export const SerializedDataV0 = t.type({
+  currentWalletIndex: nullable(t.number),
   wallets: t.array(SerializedWalletAnyVersion),
 });
 
 export const SerializedData = t.type({
+  currentWalletIndex: nullable(t.number),
   wallets: t.array(SerializedWallet),
 });
 export type SerializedData = t.TypeOf<typeof SerializedData>;
@@ -50,6 +59,7 @@ export function migrateSerializedData(
 ): SerializedData {
   if (SerializedDataV0.is(serializedData)) {
     return {
+      ...serializedData,
       wallets: serializedData.wallets.map((wallet) => {
         if (SerializedMultisigWalletAnyVersion.is(wallet)) {
           return {

@@ -1,7 +1,9 @@
 import { KVStore } from "@keplr-wallet/common";
-import { makeObservable, observable, toJS } from "mobx";
+import { computed, makeObservable, observable, toJS } from "mobx";
 import invariant from "tiny-invariant";
 
+import { ChainStore } from "../chain";
+import { MultisigWallet } from "./multisig-wallet";
 import {
   migrateSerializedData,
   SerializedData,
@@ -11,15 +13,19 @@ import {
   SerializedWallet,
   SerializedWalletAnyVersion,
 } from "./serialized-data";
+import { SinglesigWallet } from "./singlesig-wallet";
 
 export enum WalletState {
+  /** We are still loading the data from the KV stores. */
   LOADING = "LOADING",
+  /** The data in the KV store was invalid. */
   INVALID = "INVALID",
-  EMPTY = "EMPTY",
-  INITIALIZED = "INITIALIZED",
+  /** We successfully loaded the data from the KV stores. */
+  READY = "READY",
 }
 
 export class WalletsStore {
+  protected readonly chainStore: ChainStore;
   protected readonly kvStore: KVStore;
   protected readonly legacyKVStores: {
     multisig: KVStore;
@@ -27,7 +33,11 @@ export class WalletsStore {
   };
 
   @observable
-  protected wallets: SerializedWallet[] = [];
+  protected wallets: (SinglesigWallet | MultisigWallet)[] = [];
+  @observable
+  protected serializedWallets: SerializedWallet[] = [];
+  @observable
+  protected currentWalletIndex: number | null = null;
 
   @observable
   public state: WalletState = WalletState.LOADING;
@@ -35,16 +45,25 @@ export class WalletsStore {
   public __initPromise: Promise<void>;
 
   constructor({
+    chainStore,
     kvStore,
     legacyKVStores,
   }: {
+    chainStore: ChainStore;
     kvStore: KVStore;
     legacyKVStores: { multisig: KVStore; singlesig: KVStore };
   }) {
+    this.chainStore = chainStore;
     this.kvStore = kvStore;
     this.legacyKVStores = legacyKVStores;
     makeObservable(this);
     this.__initPromise = this.init();
+  }
+
+  @computed
+  public get currentWallet() {
+    if (this.currentWalletIndex === null) return null;
+    return this.wallets[this.currentWalletIndex];
   }
 
   protected async init() {
@@ -59,9 +78,18 @@ export class WalletsStore {
         if (legacyData) serializedData.wallets.push(legacyData);
       });
 
-      this.wallets = migrateSerializedData(serializedData).wallets;
-      this.state =
-        this.wallets.length === 0 ? WalletState.EMPTY : WalletState.INITIALIZED;
+      const { currentWalletIndex, wallets } =
+        migrateSerializedData(serializedData);
+
+      this.serializedWallets = wallets;
+      this.wallets = wallets.map(this.createWallet);
+      this.state = WalletState.READY;
+      if (wallets.length === 0) {
+        this.currentWalletIndex = null;
+      } else {
+        this.currentWalletIndex = currentWalletIndex ?? 0;
+      }
+
       await this.save();
     } catch (e) {
       const error = e as Error;
@@ -74,6 +102,7 @@ export class WalletsStore {
     const data = await this.kvStore.get("wallets");
     if (!data) {
       return {
+        currentWalletIndex: null,
         wallets: [],
       };
     }
@@ -117,9 +146,22 @@ export class WalletsStore {
     return wallet;
   }
 
+  protected createWallet = (serializedData: SerializedWallet) => {
+    switch (serializedData.type) {
+      case "multisig":
+        return new MultisigWallet({ serializedData });
+      case "singlesig":
+        return new SinglesigWallet({
+          chainStore: this.chainStore,
+          serializedData,
+        });
+    }
+  };
+
   protected async save() {
     const serializedData: SerializedData = {
-      wallets: this.wallets,
+      currentWalletIndex: this.currentWalletIndex,
+      wallets: this.serializedWallets,
     };
     const data = toJS(serializedData);
     await this.kvStore.set("wallets", data);
