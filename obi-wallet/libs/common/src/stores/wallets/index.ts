@@ -24,6 +24,8 @@ export enum WalletState {
   READY = "READY",
 }
 
+export { MultisigWallet, SinglesigWallet };
+
 export function isSinglesigWallet(
   wallet: MultisigWallet | SinglesigWallet | null
 ): wallet is SinglesigWallet {
@@ -194,7 +196,10 @@ export class WalletsStore {
   protected createWallet = (serializedData: SerializedWallet) => {
     switch (serializedData.type) {
       case "multisig":
-        return new MultisigWallet({ serializedData });
+        return new MultisigWallet({
+          chainStore: this.chainStore,
+          serializedData,
+        });
       case "singlesig":
         return new SinglesigWallet({
           chainStore: this.chainStore,

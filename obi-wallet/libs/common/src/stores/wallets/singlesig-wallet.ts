@@ -51,10 +51,6 @@ export class SinglesigWallet extends AbstractWallet {
     };
   }
 
-  public get mnemonic() {
-    return this.serializedData.data;
-  }
-
   @computed
   public get address() {
     if (!this.publicKey) return null;
@@ -66,5 +62,9 @@ export class SinglesigWallet extends AbstractWallet {
 
   public get type() {
     return "singlesig" as const;
+  }
+
+  public get mnemonic() {
+    return this.serializedData.data;
   }
 }

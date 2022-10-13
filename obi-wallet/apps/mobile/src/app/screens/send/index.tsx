@@ -4,6 +4,7 @@ import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
+import { isMultisigWallet } from "@obi-wallet/common";
 import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
@@ -69,8 +70,9 @@ export const SendScreen = observer(() => {
     ? formatExtendedCoin(selectedCoin)
     : null;
 
-  const { multisigStore, walletsStore } = useStore();
-  const multisig = multisigStore.currentAdmin;
+  const { walletsStore } = useStore();
+  const wallet = walletsStore.currentWallet;
+  const multisig = isMultisigWallet(wallet) ? wallet.currentAdmin : null;
 
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -421,7 +423,7 @@ export const SendScreen = observer(() => {
           enablePanDownToClose={true}
           ref={bottomSheetRef}
           index={-1}
-          backdropComponent={(props) => null}
+          backdropComponent={() => null}
           onClose={() => {
             setDenominationOpened(false);
           }}

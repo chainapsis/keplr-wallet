@@ -31,6 +31,7 @@ import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import {
   createStargateClient,
+  isMultisigWallet,
   isSinglesigWallet,
   Multisig,
   MultisigKey,
@@ -430,7 +431,7 @@ const registry = new Registry([...defaultRegistryTypes, ...wasmTypes]);
 export function useWrapEncodeObjects(
   getEncodeObjects: () => EncodeObject | EncodeObject[]
 ): EncodeObjectsPayload {
-  const { multisigStore, walletsStore } = useStore();
+  const { walletsStore } = useStore();
   const ret = getEncodeObjects();
   const encodeObjects = Array.isArray(ret) ? ret : [ret];
 
@@ -442,24 +443,23 @@ export function useWrapEncodeObjects(
   function getWrappedEncodeObjects() {
     if (!walletsStore.type) return [];
 
-    switch (walletsStore.type) {
-      case "multisig": {
-        const multisig = multisigStore.currentAdmin;
-        if (!multisig?.multisig?.address || !multisigStore.proxyAddress) {
-          return [];
-        }
-        return [
-          wrapMessages({
-            messages: encodeObjects,
-            sender: multisig.multisig.address,
-            contract: multisigStore.proxyAddress.address,
-          }),
-        ];
+    const wallet = walletsStore.currentWallet;
+
+    if (isMultisigWallet(wallet)) {
+      const multisig = wallet.currentAdmin;
+      if (!multisig?.multisig?.address || !wallet.proxyAddress) {
+        return [];
       }
-      case "singlesig": {
-        if (!walletsStore.address) return [];
-        return encodeObjects;
-      }
+      return [
+        wrapMessages({
+          messages: encodeObjects,
+          sender: multisig.multisig.address,
+          contract: wallet.proxyAddress.address,
+        }),
+      ];
+    } else {
+      if (!walletsStore.address) return [];
+      return encodeObjects;
     }
   }
 }

@@ -1,13 +1,13 @@
 import { observer } from "mobx-react-lite";
 
-import { useStore } from "../../../stores";
+import { useMultisigWallet } from "../../../stores";
 import { useOnboardingNavigation } from "../onboarding-stack";
 import { Lookup } from "./lookup";
 
 export const LookupProxyWallets = observer(() => {
-  const { multisigStore } = useStore();
+  const wallet = useMultisigWallet();
   const { navigate } = useOnboardingNavigation();
-  const address = multisigStore.nextAdmin.phoneNumber?.address;
+  const address = wallet.nextAdmin.phoneNumber?.address;
 
   if (!address) return null;
 
@@ -17,8 +17,8 @@ export const LookupProxyWallets = observer(() => {
       onCancel={() => {
         navigate("create-multisig-phone-number");
       }}
-      onSelect={(wallet) => {
-        multisigStore.setWalletInRecovery(wallet);
+      onSelect={(recoveryWallet) => {
+        wallet.walletInRecovery = recoveryWallet;
         navigate("create-multisig-social");
       }}
     />

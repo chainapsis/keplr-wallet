@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../button";
-import { useStore } from "../../../stores";
+import { useMultisigWallet, useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
   SignatureModalMultisig,
@@ -65,11 +65,10 @@ export type MultisigInitProps = NativeStackScreenProps<
 >;
 
 export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
-  const { chainStore, demoStore, multisigStore } = useStore();
+  const { chainStore, demoStore } = useStore();
+  const wallet = useMultisigWallet();
   const { currentChainInformation } = chainStore;
-  const multisig = demoStore.demoMode
-    ? demoModeMultisig
-    : multisigStore.nextAdmin;
+  const multisig = demoStore.demoMode ? demoModeMultisig : wallet.nextAdmin;
 
   const encodeObjects = useMemo(() => {
     if (!multisig.multisig?.address) return [];
@@ -135,7 +134,7 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
           contractAddress,
           "Expected `instantiateEvent` to contain `_contract_address` attribute."
         );
-        multisigStore.finishProxySetup({
+        wallet.finishProxySetup({
           address: contractAddress.value,
           codeId: chainStore.currentChainInformation.currentCodeId,
         });

@@ -15,7 +15,7 @@ import {
   resetBiometricsKeyPair,
 } from "../../../../biometrics";
 import { Button, IconButton } from "../../../../button";
-import { useStore } from "../../../../stores";
+import { useMultisigWallet, useStore } from "../../../../stores";
 import { Background } from "../../../components/background";
 import { OnboardingStackParamList } from "../../onboarding-stack";
 import FaceScanner from "./assets/face-scanner.svg";
@@ -28,7 +28,9 @@ export type MultisigBiometricsProps = NativeStackScreenProps<
 
 export const MultisigBiometrics = observer<MultisigBiometricsProps>(
   ({ navigation }) => {
-    const { demoStore, multisigStore } = useStore();
+    const { demoStore } = useStore();
+    const wallet = useMultisigWallet();
+
     const [scannedBiometrics, setScannedBiometrics] = useState(false);
     const intl = useIntl();
 
@@ -39,7 +41,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
         if (!demoStore.demoMode) {
           const publicKey = await getBiometricsPublicKey();
 
-          multisigStore.setBiometricsPublicKey({
+          wallet.setBiometricsPublicKey({
             publicKey: {
               type: pubkeyType.secp256k1,
               value: publicKey,
@@ -64,8 +66,8 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
     useEffect(() => {
       if (demoStore.demoMode) return;
 
-      const { biometrics } = multisigStore.nextAdmin;
-      if (biometrics && multisigStore.getKeyInRecovery !== "biometrics") {
+      const { biometrics } = wallet.nextAdmin;
+      if (biometrics && wallet.keyInRecovery !== "biometrics") {
         Alert.alert(
           intl.formatMessage({
             id: "onboarding4.error.biometrickeyexists.title",
@@ -96,14 +98,10 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
       } else {
         scanBiometrics();
       }
-    }, [demoStore, intl, multisigStore, navigation]);
+    }, [demoStore, intl, wallet, navigation]);
 
     const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
       useState(false);
-
-    const isBiometricsKeyInMultisig = Boolean(
-      multisigStore.nextAdmin["biometrics"]
-    );
 
     return (
       <SafeAreaView style={{ flex: 1 }}>

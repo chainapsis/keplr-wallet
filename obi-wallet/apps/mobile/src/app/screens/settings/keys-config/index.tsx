@@ -1,7 +1,7 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { MultisigKey, Text } from "@obi-wallet/common";
+import { isMultisigWallet, MultisigKey, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -46,8 +46,9 @@ const getSVG = (number: number) => {
 };
 
 export const KeysConfigScreen = observer(() => {
-  const { multisigStore } = useStore();
-  const currentAdmin = multisigStore.currentAdmin;
+  const { walletsStore } = useStore();
+  const wallet = walletsStore.currentWallet;
+  const currentAdmin = isMultisigWallet(wallet) ? wallet.currentAdmin : null;
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
 
@@ -252,7 +253,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
   const { navigate } = useRootNavigation();
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
-  const { multisigStore, walletsStore } = useStore();
+  const { walletsStore } = useStore();
 
   const safeArea = useSafeAreaInsets();
 
@@ -260,14 +261,10 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
     return (
       <TouchableOpacity
         onPress={() => {
-          if (!walletsStore.type) return;
-          switch (walletsStore.type) {
-            case "multisig":
-              if (multisigStore.currentAdmin) {
-                multisigStore.recover(keyId);
-                navigate("state-renderer");
-              } // TODO: unsure if else case will ever hit here
-              break;
+          const wallet = walletsStore.currentWallet;
+          if (isMultisigWallet(wallet)) {
+            wallet.recover(keyId);
+            navigate("state-renderer");
           }
         }}
         style={{

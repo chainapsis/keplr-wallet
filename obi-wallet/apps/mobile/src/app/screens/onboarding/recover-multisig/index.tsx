@@ -1,8 +1,7 @@
-import { pubkeyToAddress, pubkeyType } from "@cosmjs/amino";
+import { pubkeyToAddress } from "@cosmjs/amino";
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Multisig } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
@@ -12,51 +11,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../button";
-import { useStore } from "../../../stores";
+import { useMultisigWallet, useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
   SignatureModalMultisig,
   useSignatureModalProps,
 } from "../../components/signature-modal";
 import { OnboardingStackParamList } from "../onboarding-stack";
-
-const demoModeMultisig: Multisig = {
-  multisig: {
-    address: "demo-create-multisig",
-    publicKey: {
-      type: pubkeyType.multisigThreshold,
-      value: {
-        threshold: "1",
-        pubkeys: [],
-      },
-    },
-  },
-  biometrics: {
-    address: "demo-biometrics",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-biometrics",
-    },
-  },
-  phoneNumber: {
-    address: "demo-phone-number",
-    phoneNumber: "demo-phone-number",
-    securityQuestion: "birthplace",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-phone-number",
-    },
-  },
-  social: {
-    address: "demo-social",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-social",
-    },
-  },
-  cloud: null,
-  email: null,
-};
 
 export type RecoverMultisigProps = NativeStackScreenProps<
   OnboardingStackParamList,
@@ -65,23 +26,24 @@ export type RecoverMultisigProps = NativeStackScreenProps<
 
 export const RecoverMultisig = observer<RecoverMultisigProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore, multisigStore } = useStore();
+    const { chainStore, demoStore } = useStore();
+    const wallet = useMultisigWallet();
     const { currentChainInformation } = chainStore;
 
-    const multisig = multisigStore.currentAdmin;
-    const nextMultisig = multisigStore.nextAdmin;
+    const multisig = wallet.currentAdmin;
+    const nextMultisig = wallet.nextAdmin;
 
-    const sender = multisigStore.getUpdateProposed ? nextMultisig : multisig;
+    const sender = wallet.updateProposed ? nextMultisig : multisig;
 
     const encodeObjects = useMemo(() => {
       if (!multisig?.multisig?.address) return [];
       if (!nextMultisig.multisig?.address) return [];
       if (!sender?.multisig?.address) return [];
 
-      const contract = multisigStore.getWalletInRecovery()?.contract;
+      const contract = wallet.walletInRecovery?.contract;
       if (!contract) return [];
 
-      const rawMessage = multisigStore.getUpdateProposed
+      const rawMessage = wallet.updateProposed
         ? {
             confirm_update_admin: {
               signers: nextMultisig.multisig.publicKey.value.pubkeys.map(
@@ -113,7 +75,7 @@ export const RecoverMultisig = observer<RecoverMultisigProps>(
       return [message];
     }, [
       multisig,
-      multisigStore,
+      wallet,
       nextMultisig,
       sender?.multisig?.address,
       currentChainInformation,
@@ -153,13 +115,13 @@ export const RecoverMultisig = observer<RecoverMultisigProps>(
             contractAddress,
             "Expected `executeEvent` to contain `_contract_address` attribute."
           );
-          if (multisigStore.getUpdateProposed) {
-            multisigStore.finishProxySetup({
+          if (wallet.updateProposed) {
+            wallet.finishProxySetup({
               address: contractAddress.value,
               codeId: chainStore.currentChainInformation.currentCodeId,
             });
           } else {
-            multisigStore.setUpdateProposed(true);
+            wallet.updateProposed = true;
           }
         } catch (e) {
           console.log(response.rawLog);
@@ -171,7 +133,7 @@ export const RecoverMultisig = observer<RecoverMultisigProps>(
       if (encodeObjects.length > 0) {
         openSignatureModal();
       }
-    }, [encodeObjects.length, openSignatureModal, multisigStore]);
+    }, [encodeObjects.length, openSignatureModal, wallet]);
 
     if (encodeObjects.length === 0) return null;
 
@@ -179,7 +141,7 @@ export const RecoverMultisig = observer<RecoverMultisigProps>(
       <SafeAreaView style={{ flex: 1 }}>
         <SignatureModalMultisig
           {...signatureModalProps}
-          hiddenKeyIds={multisigStore.getUpdateProposed ? [] : ["biometrics"]}
+          hiddenKeyIds={wallet.updateProposed ? [] : ["biometrics"]}
         />
         <Background />
 

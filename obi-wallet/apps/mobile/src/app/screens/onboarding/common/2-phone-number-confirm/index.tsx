@@ -10,7 +10,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../../button";
-import { useStore } from "../../../../stores";
+import { useMultisigWallet, useStore } from "../../../../stores";
 import { TextInput } from "../../../../text-input";
 import {
   parsePublicKeyTextMessageResponse,
@@ -33,7 +33,8 @@ export function MultisigPhoneNumberConfirm({
 }: MultisigPhoneNumberConfirmProps) {
   const { params } = route;
 
-  const { demoStore, multisigStore } = useStore();
+  const { demoStore } = useStore();
+  const wallet = useMultisigWallet();
   const [key, setKey] = useState("");
 
   const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
@@ -111,12 +112,12 @@ export function MultisigPhoneNumberConfirm({
                     marginTop: 32,
                   }}
                 >
-                  {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+                  {wallet.keyInRecovery === "phoneNumber" ? (
                     <FormattedMessage
                       id="onboarding2.recovery.authyourkeys"
                       defaultMessage="Create a Replacement Phone Number Key"
                     />
-                  ) : multisigStore.getKeyInRecovery === "biometrics" ? (
+                  ) : wallet.keyInRecovery === "biometrics" ? (
                     <FormattedMessage
                       id="onboarding2.recovery.phonenumber"
                       defaultMessage="Recover your Phone Number Key"
@@ -233,7 +234,7 @@ export function MultisigPhoneNumberConfirm({
                     : await parsePublicKeyTextMessageResponse(key);
                   if (publicKey) {
                     if (!demoStore.demoMode) {
-                      multisigStore.setPhoneNumberKey({
+                      wallet.setPhoneNumberKey({
                         publicKey: {
                           type: pubkeyType.secp256k1,
                           value: publicKey,
@@ -243,7 +244,7 @@ export function MultisigPhoneNumberConfirm({
                       });
                     }
                     setVerifyButtonDisabledDoubleclick(false);
-                    switch (multisigStore.getKeyInRecovery) {
+                    switch (wallet.keyInRecovery) {
                       case "biometrics":
                         navigation.navigate("lookup-proxy-wallets");
                         break;

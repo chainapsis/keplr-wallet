@@ -6,7 +6,7 @@ import { useEffect, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
-import { useStore } from "../stores";
+import { useMultisigWallet, useStore } from "../stores";
 import { Background } from "./components/background";
 import {
   SignatureModalMultisig,
@@ -14,12 +14,13 @@ import {
 } from "./components/signature-modal";
 
 export const MigrateScreen = observer(() => {
-  const { chainStore, multisigStore } = useStore();
+  const { chainStore } = useStore();
+  const wallet = useMultisigWallet();
   const { currentChainInformation } = chainStore;
-  const multisig = multisigStore.currentAdmin;
+  const multisig = wallet.currentAdmin;
 
   const encodeObjects = useMemo(() => {
-    if (!multisig?.multisig?.address || !multisigStore.proxyAddress?.address)
+    if (!multisig?.multisig?.address || !wallet.proxyAddress?.address)
       return [];
 
     const rawMessage = {};
@@ -27,7 +28,7 @@ export const MigrateScreen = observer(() => {
     const value: MsgMigrateContract = {
       sender: multisig.multisig.address,
       codeId: Long.fromInt(currentChainInformation.currentCodeId),
-      contract: multisigStore.proxyAddress.address,
+      contract: wallet.proxyAddress.address,
       msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
     };
     const message: MsgMigrateContractEncodeObject = {
@@ -35,7 +36,7 @@ export const MigrateScreen = observer(() => {
       value,
     };
     return [message];
-  }, [currentChainInformation, multisig, multisigStore]);
+  }, [currentChainInformation, multisig, wallet]);
 
   const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
     multisig,
@@ -43,12 +44,12 @@ export const MigrateScreen = observer(() => {
     async onConfirm(response) {
       try {
         invariant(
-          multisigStore.proxyAddress?.address,
+          wallet.proxyAddress?.address,
           "Expected proxy address to exist."
         );
         console.log(response);
-        multisigStore.finishProxySetup({
-          address: multisigStore.proxyAddress.address,
+        wallet.finishProxySetup({
+          address: wallet.proxyAddress.address,
           codeId: chainStore.currentChainInformation.currentCodeId,
         });
       } catch (e) {

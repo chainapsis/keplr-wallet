@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../button";
-import { useStore } from "../../../stores";
+import { useMultisigWallet, useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
   SignatureModalMultisig,
@@ -65,18 +65,19 @@ export type ReplaceMultisigProps = NativeStackScreenProps<
 
 export const ReplaceMultisig = observer<ReplaceMultisigProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore, multisigStore, walletsStore } = useStore();
+    const { chainStore, demoStore, walletsStore } = useStore();
+    const wallet = useMultisigWallet();
     const { currentChainInformation } = chainStore;
 
     const multisig = demoStore.demoMode
       ? demoModeMultisig
-      : multisigStore.currentAdmin;
+      : wallet.currentAdmin;
 
     const nextMultisig = demoStore.demoMode
       ? demoModeMultisig
-      : multisigStore.nextAdmin;
+      : wallet.nextAdmin;
 
-    const sender = multisigStore.getUpdateProposed ? nextMultisig : multisig;
+    const sender = wallet.updateProposed ? nextMultisig : multisig;
 
     const encodeObjects = useMemo(() => {
       if (!multisig?.multisig?.address) return [];
@@ -84,7 +85,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       if (!sender?.multisig?.address) return [];
       if (!walletsStore.address) return [];
 
-      const rawMessage = multisigStore.getUpdateProposed
+      const rawMessage = wallet.updateProposed
         ? {
             confirm_update_admin: {
               signers: nextMultisig.multisig.publicKey.value.pubkeys.map(
@@ -116,7 +117,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       return [message];
     }, [
       multisig,
-      multisigStore.getUpdateProposed,
+      wallet.updateProposed,
       nextMultisig,
       walletsStore.address,
       sender?.multisig?.address,
@@ -157,13 +158,13 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
             contractAddress,
             "Expected `executeEvent` to contain `_contract_address` attribute."
           );
-          if (multisigStore.getUpdateProposed) {
-            multisigStore.finishProxySetup({
+          if (wallet.updateProposed) {
+            wallet.finishProxySetup({
               address: contractAddress.value,
               codeId: chainStore.currentChainInformation.currentCodeId,
             });
           } else {
-            multisigStore.setUpdateProposed(true);
+            wallet.updateProposed = true;
           }
         } catch (e) {
           console.log(response.rawLog);
@@ -175,7 +176,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       if (encodeObjects.length > 0) {
         openSignatureModal();
       }
-    }, [encodeObjects.length, openSignatureModal, multisigStore]);
+    }, [encodeObjects.length, openSignatureModal, wallet]);
 
     if (encodeObjects.length === 0) return null;
 

@@ -1,4 +1,4 @@
-import { MultisigKey, Text } from "@obi-wallet/common";
+import { isMultisigWallet, MultisigKey, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -20,10 +20,12 @@ export type WelcomeProps = NativeStackScreenProps<
 >;
 
 export const Welcome = observer<WelcomeProps>(({ navigation }) => {
-  const { demoStore, multisigStore } = useStore();
+  const { demoStore, walletsStore } = useStore();
+  const wallet = walletsStore.currentWallet;
+  const multisigWallet = isMultisigWallet(wallet) ? wallet : null;
   const intl = useIntl();
 
-  const renderContinueButton = (keyInRecovery: MultisigKey | null) => {
+  const renderContinueButton = (keyInRecovery?: MultisigKey | null) => {
     let navigationUrl: string;
     let labelId: string;
     switch (keyInRecovery) {
@@ -91,7 +93,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               marginTop: 32,
             }}
           >
-            {multisigStore.getKeyInRecovery === null ? (
+            {multisigWallet?.keyInRecovery === null ? (
               <FormattedMessage
                 id="onboarding1.welcometoloop"
                 defaultMessage="Welcome to Loop"
@@ -111,12 +113,12 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               marginTop: 12,
             }}
           >
-            {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+            {multisigWallet?.keyInRecovery === "phoneNumber" ? (
               <FormattedMessage
                 id="recovery.phoneupdate"
                 defaultMessage="You're updating your multisig wallet's phone number key."
               />
-            ) : multisigStore.getKeyInRecovery === "social" ? (
+            ) : multisigWallet?.keyInRecovery === "social" ? (
               <FormattedMessage
                 id="recovery.socialupdate"
                 defaultMessage="You're updating your multisig wallet's social key."
@@ -128,7 +130,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               />
             )}
           </Text>
-          {renderContinueButton(multisigStore.getKeyInRecovery)}
+          {renderContinueButton(multisigWallet?.keyInRecovery)}
           {/*{multisigStore.getKeyInRecovery === null ? (*/}
           {/*  <Button*/}
           {/*    label={intl.formatMessage({ id: "demo.enter" })}*/}
@@ -147,7 +149,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
           {/*    })}*/}
           {/*  />*/}
           {/*) : null}*/}
-          {multisigStore.getKeyInRecovery === null ? (
+          {multisigWallet?.keyInRecovery === null ? (
             <Button
               label={intl.formatMessage({ id: "onboarding1.recoverwallet" })}
               RightIcon={GetStarted}
@@ -168,8 +170,8 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                     {
                       text: "Continue",
                       onPress() {
-                        multisigStore.cancelRecovery();
-                        multisigStore.recover("biometrics");
+                        multisigWallet?.cancelRecovery();
+                        multisigWallet?.recover("biometrics");
                         navigation.navigate("create-multisig-biometrics");
                       },
                     },
@@ -178,7 +180,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               }}
             />
           ) : null}
-          {multisigStore.getKeyInRecovery === null ? (
+          {multisigWallet?.keyInRecovery === null ? (
             <Button
               label={intl.formatMessage({ id: "onboarding1.recoversinglesig" })}
               RightIcon={GetStarted}
@@ -200,7 +202,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 marginTop: 20,
               }}
               onPress={action(() => {
-                multisigStore.cancelRecovery();
+                multisigWallet?.cancelRecovery();
               })}
             />
           )}

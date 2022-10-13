@@ -1,4 +1,5 @@
 import { DeliverTxResponse } from "@cosmjs/stargate";
+import { isMultisigWallet } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 
 import { useStore } from "../../../stores";
@@ -14,10 +15,11 @@ export interface InteractionModalProps {
 
 export const InteractionModal = observer<InteractionModalProps>(
   ({ onClose }) => {
-    const { multisigStore, interactionStore } = useStore();
+    const { interactionStore, walletsStore } = useStore();
 
     const data = interactionStore.waitingData?.data;
-    const multisig = multisigStore.currentAdmin;
+    const wallet = walletsStore.currentWallet;
+    const multisig = isMultisigWallet(wallet) ? wallet.currentAdmin : null;
 
     const encodeObjects = useWrapEncodeObjects(() => {
       return data?.messages ?? [];
