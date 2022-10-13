@@ -24,6 +24,18 @@ export enum WalletState {
   READY = "READY",
 }
 
+export function isSinglesigWallet(
+  wallet: MultisigWallet | SinglesigWallet | null
+): wallet is SinglesigWallet {
+  return wallet?.type === "singlesig";
+}
+
+export function isMultisigWallet(
+  wallet: MultisigWallet | SinglesigWallet | null
+): wallet is MultisigWallet {
+  return wallet?.type === "multisig";
+}
+
 export class WalletsStore {
   protected readonly chainStore: ChainStore;
   protected readonly kvStore: KVStore;
@@ -64,6 +76,14 @@ export class WalletsStore {
   public get currentWallet() {
     if (this.currentWalletIndex === null) return null;
     return this.wallets[this.currentWalletIndex];
+  }
+
+  public get type(): "multisig" | "singlesig" | null {
+    return this.currentWallet?.type ?? null;
+  }
+
+  public get address(): string | null {
+    return this.currentWallet?.address ?? null;
   }
 
   @action

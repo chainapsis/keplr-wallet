@@ -115,7 +115,7 @@ export class RootStore {
 
     this.balancesStore = new BalancesStore({
       chainStore: this.chainStore,
-      walletStore: this.walletStore,
+      walletsStore: this.walletsStore,
     });
 
     router.listen(APP_PORT);

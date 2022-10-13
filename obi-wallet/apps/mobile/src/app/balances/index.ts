@@ -22,7 +22,7 @@ export interface FormattedExtendedCoin {
 }
 
 export function useBalances() {
-  const { demoStore, balancesStore, walletStore } = useStore();
+  const { demoStore, balancesStore, walletsStore } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshBalances = useCallback(async () => {
@@ -35,7 +35,7 @@ export function useBalances() {
 
   useEffect(() => {
     void refreshBalances();
-  }, [refreshBalances, walletStore.address]);
+  }, [refreshBalances, walletsStore.address]);
 
   return {
     balances: demoStore.demoMode ? [] : balancesStore.balances,

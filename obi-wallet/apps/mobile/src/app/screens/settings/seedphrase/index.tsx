@@ -1,7 +1,7 @@
+import { isSinglesigWallet } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { FormattedMessage } from "react-intl";
 import { Platform, Share, Text, TouchableOpacity, View } from "react-native";
-import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useStore } from "../../../stores";
@@ -9,25 +9,16 @@ import { Back } from "../../components/back";
 import { isSmallScreenNumber } from "../../components/screen-size";
 
 export const Seedphrase = observer(() => {
-  const { singlesigStore } = useStore();
-  const mnemonic = singlesigStore?.getMnemonic();
+  const { currentWallet } = useStore().walletsStore;
 
-  if (!mnemonic) return null;
+  if (!isSinglesigWallet(currentWallet)) return null;
+  const mnemonic = currentWallet.mnemonic;
 
   const onShare = async (text: string) => {
     try {
-      const result = await Share.share({
+      await Share.share({
         message: text,
       });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-        } else {
-          // shared
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-      }
     } catch (e) {
       const error = e as Error;
       alert(error.message);

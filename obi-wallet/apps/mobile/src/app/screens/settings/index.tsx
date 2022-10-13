@@ -26,7 +26,7 @@ import { KeysConfigScreen } from "./keys-config";
 import { Seedphrase } from "./seedphrase";
 
 export const SettingsScreen = observer(() => {
-  const { walletStore, walletsStore } = useStore();
+  const { walletsStore } = useStore();
   const intl = useIntl();
   const navigation = useRootNavigation();
   const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
@@ -37,9 +37,7 @@ export const SettingsScreen = observer(() => {
     })();
   }, []);
 
-  const isMultisigWallet =
-    walletStore.type === WalletType.MULTISIG ||
-    walletStore.type === WalletType.MULTISIG_DEMO;
+  const isMultisigWallet = walletsStore.type === "multisig";
 
   return (
     <SafeAreaView style={styles.container}>

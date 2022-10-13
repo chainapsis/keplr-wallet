@@ -253,7 +253,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
   const { navigate } = useRootNavigation();
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
-  const { multisigStore, walletStore } = useStore();
+  const { multisigStore, walletsStore } = useStore();
 
   const safeArea = useSafeAreaInsets();
 
@@ -263,16 +263,13 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
     return (
       <TouchableOpacity
         onPress={() => {
-          if (!walletStore.type) return;
-          switch (walletStore.type) {
-            case WalletType.MULTISIG:
+          if (!walletsStore.type) return;
+          switch (walletsStore.type) {
+            case "multisig":
               if (multisigStore.currentAdmin) {
                 multisigStore.recover(keyId);
                 navigate("state-renderer");
               } // TODO: unsure if else case will ever hit here
-              break;
-            case WalletType.MULTISIG_DEMO:
-              // demoStore.recover();
               break;
           }
         }}

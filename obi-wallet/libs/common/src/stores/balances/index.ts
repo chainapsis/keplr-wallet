@@ -6,6 +6,7 @@ import { Chain } from "../../chains";
 import { createCosmWasmClient, createStargateClient } from "../../clients";
 import { ChainStore } from "../chain";
 import { WalletStore } from "../wallet";
+import { WalletsStore } from "../wallets";
 
 const LOOP_JUNO1_ADDRESS =
   "juno1qsrercqegvs4ye0yqg93knv73ye5dc3prqwd6jcdcuj8ggp6w0us66deup";
@@ -19,20 +20,20 @@ export interface ExtendedCoin {
 
 export class BalancesStore {
   protected readonly chainStore: ChainStore;
-  protected readonly walletStore: WalletStore;
+  protected readonly walletsStore: WalletsStore;
 
   @observable
   public balancesPerChain: Partial<Record<Chain, ExtendedCoin[]>> = {};
 
   constructor({
     chainStore,
-    walletStore,
+    walletsStore,
   }: {
     chainStore: ChainStore;
-    walletStore: WalletStore;
+    walletsStore: WalletsStore;
   }) {
     this.chainStore = chainStore;
-    this.walletStore = walletStore;
+    this.walletsStore = walletsStore;
     makeObservable(this);
   }
 
@@ -43,7 +44,7 @@ export class BalancesStore {
 
   @flow
   public *fetchBalances() {
-    const { address } = this.walletStore;
+    const { address } = this.walletsStore;
     if (!address) return;
 
     const client = yield* toGenerator(

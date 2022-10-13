@@ -69,7 +69,7 @@ export const SendScreen = observer(() => {
     ? formatExtendedCoin(selectedCoin)
     : null;
 
-  const { multisigStore, singlesigStore, walletStore } = useStore();
+  const { multisigStore, walletsStore } = useStore();
   const multisig = multisigStore.currentAdmin;
 
   const [address, setAddress] = useState("");
@@ -84,7 +84,7 @@ export const SendScreen = observer(() => {
 
   const normalizedAmount = amount.replace(/,/g, ".");
   const encodeObjects = useWrapEncodeObjects(() => {
-    if (!selectedCoin || !walletStore.type) return [];
+    if (!selectedCoin || !walletsStore.type) return [];
 
     const addressToUse =
       address || (drinkOrBottleModalFlavor ? BARTENDER_ADDRESS : "");
@@ -99,13 +99,13 @@ export const SendScreen = observer(() => {
       },
     ];
 
-    if (!walletStore.address) return [];
+    if (!walletsStore.address) return [];
 
     if (selectedCoin.contract) {
       return {
         typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
         value: {
-          sender: walletStore.address,
+          sender: walletsStore.address,
           contract: selectedCoin.contract,
           msg: new Uint8Array(
             Buffer.from(
@@ -125,7 +125,7 @@ export const SendScreen = observer(() => {
     return {
       typeUrl: "/cosmos.bank.v1beta1.MsgSend",
       value: {
-        fromAddress: singlesigStore.address,
+        fromAddress: walletsStore.address,
         toAddress: addressToUse,
         amount: msgAmount,
       },

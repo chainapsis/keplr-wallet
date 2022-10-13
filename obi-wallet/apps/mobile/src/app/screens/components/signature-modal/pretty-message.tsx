@@ -88,7 +88,6 @@ const PrettyMessageInstantiateContract = observer(
 const PrettyMessageExecuteContract = observer(
   ({ message }: { message: AminoMsg }) => {
     const value = message.value as AminoMsgExecuteContract["value"];
-    const { walletStore } = useStore();
     const intl = useIntl();
 
     if (value.msg["propose_update_admin"] !== undefined) {

@@ -29,7 +29,13 @@ import {
 } from "@cosmjs/stargate";
 import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
-import { Multisig, MultisigKey, Text, WalletType } from "@obi-wallet/common";
+import {
+  isSinglesigWallet,
+  Multisig,
+  MultisigKey,
+  Text,
+  WalletType,
+} from "@obi-wallet/common";
 import { createStargateClient } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { observer } from "mobx-react-lite";
@@ -75,15 +81,14 @@ export interface SignatureModalProps extends ModalProps {
 }
 
 export const SignatureModal = observer<SignatureModalProps>((props) => {
-  const { walletStore } = useStore();
+  const { walletsStore } = useStore();
 
-  if (!walletStore.type) return null;
+  if (!walletsStore.type) return null;
 
-  switch (walletStore.type) {
-    case WalletType.MULTISIG:
-    case WalletType.MULTISIG_DEMO:
+  switch (walletsStore.type) {
+    case "multisig":
       return <SignatureModalMultisig {...props} />;
-    case WalletType.SINGLESIG:
+    case "singlesig":
       return <SignatureModalSinglesig {...props} />;
   }
 });
@@ -426,7 +431,7 @@ const registry = new Registry([...defaultRegistryTypes, ...wasmTypes]);
 export function useWrapEncodeObjects(
   getEncodeObjects: () => EncodeObject | EncodeObject[]
 ): EncodeObjectsPayload {
-  const { multisigStore, singlesigStore, walletStore } = useStore();
+  const { multisigStore, walletsStore } = useStore();
   const ret = getEncodeObjects();
   const encodeObjects = Array.isArray(ret) ? ret : [ret];
 
@@ -436,10 +441,10 @@ export function useWrapEncodeObjects(
   };
 
   function getWrappedEncodeObjects() {
-    if (!walletStore.type) return [];
+    if (!walletsStore.type) return [];
 
-    switch (walletStore.type) {
-      case WalletType.MULTISIG: {
+    switch (walletsStore.type) {
+      case "multisig": {
         const multisig = multisigStore.currentAdmin;
         if (!multisig?.multisig?.address || !multisigStore.proxyAddress) {
           return [];
@@ -452,10 +457,8 @@ export function useWrapEncodeObjects(
           }),
         ];
       }
-      case WalletType.MULTISIG_DEMO:
-        return [];
-      case WalletType.SINGLESIG: {
-        if (!singlesigStore.address) return [];
+      case "singlesig": {
+        if (!walletsStore.address) return [];
         return encodeObjects;
       }
     }
@@ -483,7 +486,7 @@ export function useSignatureModalProps({
 } {
   const [signatureModalVisible, setSignatureModalVisible] = useState(false);
   const [modalKey, setModalKey] = useState(0);
-  const { chainStore, singlesigStore, walletStore } = useStore();
+  const { chainStore, walletsStore } = useStore();
   const { currentChainInformation } = chainStore;
 
   const wrappedEncodeObjects = Array.isArray(encodeObjects)
@@ -516,7 +519,7 @@ export function useSignatureModalProps({
         setModalKey((value) => value + 1);
       },
       async onConfirm(signatures: Map<string, Uint8Array>) {
-        invariant(walletStore.type, "Expected `walletStore.type` to exist.");
+        invariant(walletsStore.type, "Expected `walletStore.type` to exist.");
 
         async function handleMultisig() {
           if (!multisig?.multisig) return;
@@ -573,27 +576,24 @@ export function useSignatureModalProps({
           await onConfirm(result);
         }
 
-        switch (walletStore.type) {
-          case WalletType.MULTISIG:
+        switch (walletsStore.type) {
+          case "multisig":
             await handleMultisig();
             break;
-          case WalletType.MULTISIG_DEMO:
-            await onConfirm({
-              code: 0,
-              gasUsed: 0,
-              gasWanted: 0,
-              height: 0,
-              transactionHash: "",
-            });
-            break;
-          case WalletType.SINGLESIG: {
+          case "singlesig": {
+            const wallet = walletsStore.currentWallet;
             invariant(
-              singlesigStore.privateKey,
-              "Expected `singlesigStore.privateKey` to exist."
+              isSinglesigWallet(wallet),
+              "Expected `wallet` to be singlesig wallet."
+            );
+
+            invariant(
+              wallet.privateKey,
+              "Expected `wallet.privateKey` to exist."
             );
 
             const signer = await Secp256k1Wallet.fromKey(
-              singlesigStore.privateKey,
+              wallet.privateKey,
               currentChainInformation.prefix
             );
             const client = await createSigningCosmWasmClient({
@@ -601,13 +601,10 @@ export function useSignatureModalProps({
               signer,
             });
 
-            invariant(
-              singlesigStore.address,
-              "Expected `singlesigStore.address` to exist."
-            );
+            invariant(wallet.address, "Expected `wallet.address` to exist.");
 
             const result = await client.signAndBroadcast(
-              singlesigStore.address,
+              wallet.address,
               messages,
               "auto"
             );
@@ -627,8 +624,7 @@ export function useSignatureModalProps({
     modalKey,
     signatureModalVisible,
     multisig,
-    singlesigStore,
-    walletStore,
+    walletsStore,
     currentChainInformation,
     onConfirm,
   ]);
