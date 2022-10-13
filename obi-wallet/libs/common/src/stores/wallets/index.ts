@@ -33,11 +33,11 @@ export class WalletsStore {
   };
 
   @observable
-  protected wallets: (MultisigWallet | SinglesigWallet)[] = [];
+  public wallets: (MultisigWallet | SinglesigWallet)[] = [];
   @observable
   protected serializedWallets: SerializedWallet[] = [];
   @observable
-  protected currentWalletIndex: number | null = null;
+  public currentWalletIndex: number | null = null;
 
   @observable
   public state: WalletState = WalletState.LOADING;
@@ -71,6 +71,12 @@ export class WalletsStore {
     this.serializedWallets.push(wallet);
     this.wallets.push(this.createWallet(wallet));
     this.currentWalletIndex = this.wallets.length - 1;
+    await this.save();
+  }
+
+  @action
+  public async setCurrentWallet(currentWalletIndex: number | null) {
+    this.currentWalletIndex = currentWalletIndex;
     await this.save();
   }
 

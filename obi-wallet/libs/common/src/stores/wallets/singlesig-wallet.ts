@@ -4,9 +4,10 @@ import { computed, makeObservable, observable } from "mobx";
 import secp256k1 from "secp256k1";
 
 import { ChainStore } from "../chain";
+import { AbstractWallet } from "./abstract-wallet";
 import { SerializedSinglesigWallet } from "./serialized-data";
 
-export class SinglesigWallet {
+export class SinglesigWallet extends AbstractWallet {
   protected readonly chainStore: ChainStore;
 
   @observable
@@ -25,6 +26,7 @@ export class SinglesigWallet {
     chainStore: ChainStore;
     serializedData: SerializedSinglesigWallet;
   }) {
+    super();
     this.chainStore = chainStore;
     this.serializedData = serializedData;
     makeObservable(this);
@@ -49,16 +51,20 @@ export class SinglesigWallet {
     };
   }
 
-  public get mnemonic(): string {
+  public get mnemonic() {
     return this.serializedData.data;
   }
 
   @computed
-  public get address(): string | null {
+  public get address() {
     if (!this.publicKey) return null;
     return pubkeyToAddress(
       this.publicKey,
       this.chainStore.currentChainInformation.prefix
     );
+  }
+
+  public get type() {
+    return "singlesig" as const;
   }
 }

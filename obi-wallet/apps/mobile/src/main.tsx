@@ -19,6 +19,7 @@ LogBox.ignoreLogs([
   // See https://github.com/software-mansion/react-native-reanimated/issues/2911
   "Warning: Using UNSAFE_componentWillMount in strict mode is not recommended and may indicate bugs in your code. See https://reactjs.org/link/unsafe-component-lifecycles for details.\n\n* Move code with side effects to componentDidMount, and set initial state in the constructor.\n\nPlease update the following components: AnimatedComponent",
   "Warning: Using UNSAFE_componentWillReceiveProps in strict mode is not recommended and may indicate bugs in your code. See https://reactjs.org/link/unsafe-component-lifecycles for details.\n\n* Move data fetching code or side effects to componentDidUpdate.\n* If you're updating state whenever props change, refactor your code to use memoization techniques or move it to static getDerivedStateFromProps. Learn more at: https://reactjs.org/link/derived-state\n\nPlease update the following components: AnimatedComponent",
+  "Warning: findNodeHandle is deprecated in StrictMode. findNodeHandle was passed an instance of AnimatedComponent(View) which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node",
 ]);
 
 AppRegistry.registerComponent("Mobile", () => {

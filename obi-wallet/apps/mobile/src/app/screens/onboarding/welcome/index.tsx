@@ -10,6 +10,7 @@ import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
 import { DemoModeToggle } from "../../components/demo-mode-toggle";
 import { InitialBackground } from "../../components/initial-background";
+import { WalletsPicker } from "../../components/wallets-picker";
 import { OnboardingStackParamList } from "../onboarding-stack";
 import GetStarted from "./assets/get-started.svg";
 
@@ -65,11 +66,12 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
         <View
           style={{
             position: "absolute",
-            top: 20,
+            top: 65,
             left: 20,
           }}
         >
           <LanguagePicker />
+          <WalletsPicker />
         </View>
 
         <View
