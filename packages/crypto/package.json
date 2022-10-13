@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/crypto",
-  "version": "0.11.9",
+  "version": "0.11.10-rc.3",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -22,6 +22,7 @@
     "@types/sha.js": "^2.4.0"
   },
   "dependencies": {
+    "@ethersproject/keccak256": "^5.5.0",
     "bip32": "^2.0.6",
     "bip39": "^3.0.3",
     "bs58check": "^2.1.2",
