@@ -22,7 +22,6 @@ import { InteractionStore } from "./interaction";
 import { KeplrChainStore } from "./keplr-chain";
 import { LanguageStore } from "./language";
 import { MultisigStore } from "./multisig";
-import { SinglesigStore } from "./singlesig";
 import { WalletsStore } from "./wallets";
 
 export class RootStore {
@@ -33,7 +32,6 @@ export class RootStore {
   public readonly interactionStore: InteractionStore;
   public readonly languageStore: LanguageStore;
   public readonly multisigStore: MultisigStore;
-  public readonly singlesigStore: SinglesigStore;
   public readonly walletsStore: WalletsStore;
 
   // Hide Keplr-related stores
@@ -89,10 +87,6 @@ export class RootStore {
       kvStore: new KVStore("language-store"),
     });
 
-    this.singlesigStore = new SinglesigStore({
-      chainStore: this.chainStore,
-      kvStore: new KVStore("singlesig-store"),
-    });
     this.multisigStore = new MultisigStore({
       chainStore: this.chainStore,
       kvStore: new KVStore("multisig-store"),
