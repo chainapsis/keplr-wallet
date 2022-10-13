@@ -218,13 +218,12 @@ export const DetailsTab: FunctionComponent<{
         )}
         {isNeedLedgerEthBlindSigning ? (
           <div className={styleDetailsTab.ethLedgerBlindSigningWarning}>
-            <div className={styleDetailsTab.title}>Before click Approve</div>
+            <div className={styleDetailsTab.title}>
+              Before you click ‘Approve’
+            </div>
             <ul className={styleDetailsTab.list}>
-              <li>Plug in your Ledger device and select the Ethereum app</li>
-              <li>
-                Enable “smart contract data” or “blind signing” on your Ledger
-                device
-              </li>
+              <li>Connect your Ledger device and select the Ethereum app</li>
+              <li>Enable ‘blind signing’ on your Ledger device</li>
             </ul>
           </div>
         ) : null}
