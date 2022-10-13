@@ -18,7 +18,7 @@ import { SvgProps } from "react-native-svg";
 
 import { Card } from "../../card";
 import { FontAwesomeIcon } from "../../font-awesome-icon";
-import { App, AppsStore, WalletStore, WalletType } from "../../stores";
+import { App, AppsStore, WalletsStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 
@@ -31,14 +31,14 @@ const styles = StyleSheet.create({
 
 export interface HomeProps {
   appsStore: AppsStore;
-  walletStore: WalletStore;
+  walletsStore: WalletsStore;
   onAppPress: (app: App) => void;
   marginBottom?: number;
   icons: FC<SvgProps>[];
 }
 
 export const Home = observer<HomeProps>(
-  ({ appsStore, onAppPress, marginBottom, walletStore, icons }) => {
+  ({ appsStore, onAppPress, marginBottom, walletsStore, icons }) => {
     const [
       BuyCryptoIcon,
       CosmicPartyIcon,
@@ -103,7 +103,7 @@ export const Home = observer<HomeProps>(
                 onPress={() => {
                   onAppPress({
                     label: "Buy with Card",
-                    url: `https://app.kado.money?network=JUNO&onToAddress=${walletStore.address}&apiKey=0a5fc82b-be15-4059-8edf-9ff9c54186ce`,
+                    url: `https://app.kado.money?network=JUNO&onToAddress=${walletsStore.address}&apiKey=0a5fc82b-be15-4059-8edf-9ff9c54186ce`,
                     icon: "https://place-hold.it/180x180",
                   });
                 }}
@@ -169,9 +169,9 @@ export const Home = observer<HomeProps>(
                   onAppPress({
                     label: "History",
                     url:
-                      walletStore.type === WalletType.SINGLESIG
-                        ? `https://mintscan.io/juno/account/${walletStore.address}`
-                        : `https://mintscan.io/juno/wasm/contract/${walletStore.address}`,
+                      walletsStore.currentWallet?.type === "singlesig"
+                        ? `https://mintscan.io/juno/account/${walletsStore.address}`
+                        : `https://mintscan.io/juno/wasm/contract/${walletsStore.address}`,
                     icon: "https://place-hold.it/180x180",
                   });
                 }}
@@ -281,6 +281,7 @@ export const Home = observer<HomeProps>(
                         validURL.toString().includes(" ") ||
                         !validURL.toString().includes(".")
                       ) {
+                        // noinspection ExceptionCaughtLocallyJS
                         throw new Error("Invalid URL");
                       }
 

@@ -65,7 +65,7 @@ export type ReplaceMultisigProps = NativeStackScreenProps<
 
 export const ReplaceMultisig = observer<ReplaceMultisigProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore, multisigStore, walletStore } = useStore();
+    const { chainStore, demoStore, multisigStore, walletsStore } = useStore();
     const { currentChainInformation } = chainStore;
 
     const multisig = demoStore.demoMode
@@ -82,7 +82,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       if (!multisig?.multisig?.address) return [];
       if (!nextMultisig.multisig?.address) return [];
       if (!sender?.multisig?.address) return [];
-      if (!walletStore.address) return [];
+      if (!walletsStore.address) return [];
 
       const rawMessage = multisigStore.getUpdateProposed
         ? {
@@ -105,7 +105,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
 
       const value: MsgExecuteContract = {
         sender: sender.multisig.address,
-        contract: walletStore.address,
+        contract: walletsStore.address,
         msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
         funds: [],
       };
@@ -118,7 +118,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       multisig,
       multisigStore.getUpdateProposed,
       nextMultisig,
-      walletStore.address,
+      walletsStore.address,
       sender?.multisig?.address,
       currentChainInformation,
     ]);
