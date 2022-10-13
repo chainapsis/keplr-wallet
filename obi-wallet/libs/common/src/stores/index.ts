@@ -5,3 +5,4 @@ export * from "./root";
 export * from "./singlesig";
 export * from "./language";
 export * from "./wallet";
+export * from "./wallets";

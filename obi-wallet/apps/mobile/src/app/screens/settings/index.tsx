@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
-  Alert,
   Linking,
   StyleSheet,
   Text,
@@ -27,7 +26,7 @@ import { KeysConfigScreen } from "./keys-config";
 import { Seedphrase } from "./seedphrase";
 
 export const SettingsScreen = observer(() => {
-  const { demoStore, multisigStore, singlesigStore, walletStore } = useStore();
+  const { walletStore, walletsStore } = useStore();
   const intl = useIntl();
   const navigation = useRootNavigation();
   const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
@@ -167,36 +166,8 @@ export const SettingsScreen = observer(() => {
           id: "settings.logout.subtext",
           defaultMessage: "Save your keys before logging out.",
         })}
-        onPress={() => {
-          if (!walletStore.type) return;
-
-          switch (walletStore.type) {
-            case WalletType.MULTISIG:
-              multisigStore.logout();
-              break;
-            case WalletType.MULTISIG_DEMO:
-              demoStore.logout();
-              break;
-            case WalletType.SINGLESIG:
-              Alert.alert(
-                "Are you sure?",
-                "Since you do not have Obi mode active, you will only be able to log back in if you have securely saved your seedphrase.",
-                [
-                  {
-                    text: "Cancel",
-                    // onPress: () => {}
-                  },
-                  {
-                    text: "Confirm",
-                    style: "destructive",
-                    onPress: () => {
-                      singlesigStore.logout();
-                    },
-                  },
-                ]
-              );
-              break;
-          }
+        onPress={async () => {
+          await walletsStore.logout();
         }}
       />
       <View

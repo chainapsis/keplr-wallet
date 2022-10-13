@@ -10,7 +10,7 @@ export enum WalletType {
   SINGLESIG = "Singlesig",
 }
 
-export enum WalletState {
+export enum LegacyWalletState {
   LOADING = "Loading",
   EMPTY = "Empty",
   INITIALIZED = "Initialized",
@@ -37,13 +37,13 @@ export class WalletStore {
   }
 
   @computed
-  public get state(): WalletState {
+  public get state(): LegacyWalletState {
     if (
       !this.demoStore.demoMode &&
       this.multisigStore.state === MultisigState.LOADING &&
       this.singlesigStore.state === SinglesigState.LOADING
     ) {
-      return WalletState.LOADING;
+      return LegacyWalletState.LOADING;
     }
 
     if (
@@ -52,15 +52,15 @@ export class WalletStore {
       this.multisigStore.state === MultisigState.INITIALIZED ||
       this.singlesigStore.state === SinglesigState.INITIALIZED
     ) {
-      return WalletState.INITIALIZED;
+      return LegacyWalletState.INITIALIZED;
     }
 
-    return WalletState.EMPTY;
+    return LegacyWalletState.EMPTY;
   }
 
   @computed
   public get type(): WalletType | null {
-    if (this.state === WalletState.LOADING) return null;
+    if (this.state === LegacyWalletState.LOADING) return null;
 
     if (this.singlesigStore.state === SinglesigState.INITIALIZED) {
       return WalletType.SINGLESIG;

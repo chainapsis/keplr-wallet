@@ -15,7 +15,10 @@ export type StateRendererScreenProps = NativeStackScreenProps<
 >;
 
 export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
-  const { demoStore, walletStore } = useStore();
+  const { demoStore, walletsStore } = useStore();
+
+  // TODO: remove
+  console.log(walletsStore.wallets.length);
 
   return (
     <>
@@ -45,13 +48,18 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
   );
 
   function getChildren() {
-    switch (walletStore.state) {
+    switch (walletsStore.state) {
       case WalletState.LOADING:
         return <SplashScreen />;
-      case WalletState.EMPTY:
-        return <OnboardingScreen />;
-      case WalletState.INITIALIZED:
-        return <HomeScreen />;
+      case WalletState.INVALID:
+        // TODO: Here we want to show some kind of error screen.
+        return null;
+      case WalletState.READY:
+        if (walletsStore.currentWallet) {
+          return <HomeScreen />;
+        } else {
+          return <OnboardingScreen />;
+        }
     }
   }
 });

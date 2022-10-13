@@ -1,5 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
-import { computed, makeObservable, observable, toJS } from "mobx";
+import { action, computed, makeObservable, observable, toJS } from "mobx";
 import invariant from "tiny-invariant";
 
 import { ChainStore } from "../chain";
@@ -33,7 +33,7 @@ export class WalletsStore {
   };
 
   @observable
-  protected wallets: (SinglesigWallet | MultisigWallet)[] = [];
+  protected wallets: (MultisigWallet | SinglesigWallet)[] = [];
   @observable
   protected serializedWallets: SerializedWallet[] = [];
   @observable
@@ -66,6 +66,20 @@ export class WalletsStore {
     return this.wallets[this.currentWalletIndex];
   }
 
+  @action
+  public async addWallet(wallet: SerializedWallet) {
+    this.serializedWallets.push(wallet);
+    this.wallets.push(this.createWallet(wallet));
+    this.currentWalletIndex = this.wallets.length - 1;
+    await this.save();
+  }
+
+  @action
+  public async logout() {
+    this.currentWalletIndex = null;
+    await this.save();
+  }
+
   protected async init() {
     try {
       const [serializedData, ...legacyWallets] = await Promise.all([
@@ -74,8 +88,12 @@ export class WalletsStore {
         this.getSerializedLegacySinglesigData(),
       ]);
 
+      let addedLegacyWallets = false;
       legacyWallets.forEach((legacyData) => {
-        if (legacyData) serializedData.wallets.push(legacyData);
+        if (legacyData) {
+          serializedData.wallets.push(legacyData);
+          addedLegacyWallets = true;
+        }
       });
 
       const { currentWalletIndex, wallets } =
@@ -83,11 +101,12 @@ export class WalletsStore {
 
       this.serializedWallets = wallets;
       this.wallets = wallets.map(this.createWallet);
+      this.currentWalletIndex = currentWalletIndex;
       this.state = WalletState.READY;
-      if (wallets.length === 0) {
-        this.currentWalletIndex = null;
-      } else {
-        this.currentWalletIndex = currentWalletIndex ?? 0;
+
+      // If legacy wallets were added, fall back to first wallet
+      if (addedLegacyWallets) {
+        this.currentWalletIndex ??= 0;
       }
 
       await this.save();
