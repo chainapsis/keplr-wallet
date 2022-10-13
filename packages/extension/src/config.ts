@@ -1047,8 +1047,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         ? "https://wallet.keplr.app/chains/persistence"
         : "http://localhost:8080/chains/persistence",
     bip44: {
-      coinType: 750,
+      coinType: 118,
     },
+    alternativeBIP44s: [
+      {
+        coinType: 750,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("persistence"),
     currencies: [
       {
@@ -1317,6 +1322,57 @@ export const EmbedChainInfos: ChainInfo[] = [
           high: 1,
         },
       },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
     ],
     features: ["ibc-transfer"],
   },
@@ -1482,6 +1538,17 @@ export const EmbedChainInfos: ChainInfo[] = [
           high: 0.004,
         },
       },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.001 * 0.33,
+          average: 0.0025 * 0.33,
+          high: 0.004 * 0.33,
+        },
+      },
     ],
     features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
   },
@@ -1539,6 +1606,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
       coinDecimals: 6,
+      coinGeckoId: "axelar",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1557,6 +1625,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
       },
       {
         coinDenom: "WETH",
@@ -1672,6 +1741,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         gasPriceStep: {
           low: 0.007,
           average: 0.007,
@@ -1760,6 +1830,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "UMEE",
         coinMinimalDenom: "uumee",
         coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.05,
+          average: 0.06,
+          high: 0.1,
+        },
       },
     ],
     features: ["ibc-transfer", "ibc-go"],
@@ -1899,6 +1974,16 @@ export const EmbedChainInfos: ChainInfo[] = [
       {
         coinDenom: "stOSMO",
         coinMinimalDenom: "stuosmo",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stJUNO",
+        coinMinimalDenom: "stujuno",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stSTARS",
+        coinMinimalDenom: "stustars",
         coinDecimals: 6,
       },
     ],

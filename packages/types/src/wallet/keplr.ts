@@ -134,4 +134,29 @@ export interface Keplr {
     ciphertext: Uint8Array,
     nonce: Uint8Array
   ): Promise<Uint8Array>;
+
+  /**
+   * Sign the sign doc with ethermint's EIP-712 format.
+   * The difference from signEthereum(..., EthSignType.EIP712) is that this api returns a new sign doc changed by the user's fee setting and the signature for that sign doc.
+   * Encoding tx to EIP-712 format should be done on the side using this api.
+   * Not compatible with cosmjs.
+   * The returned signature is (r | s | v) format which used in ethereum.
+   * v should be 27 or 28 which is used in the ethereum mainnet regardless of chain.
+   * @param chainId
+   * @param signer
+   * @param eip712
+   * @param signDoc
+   * @param signOptions
+   */
+  experimentalSignEIP712CosmosTx_v0(
+    chainId: string,
+    signer: string,
+    eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    signDoc: StdSignDoc,
+    signOptions?: KeplrSignOptions
+  ): Promise<AminoSignResponse>;
 }

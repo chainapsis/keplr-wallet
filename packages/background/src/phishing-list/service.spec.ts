@@ -151,7 +151,12 @@ describe("Test phishing list service", () => {
   let closeServer: (() => void) | undefined;
   let getQueryCount: () => number;
 
+  const notMockSetInterval = setInterval;
+  const notMockClearInterval = clearInterval;
+
   beforeEach(() => {
+    jest.useFakeTimers();
+
     const server = createMockServer();
     port = server.port;
     closeServer = server.closeServer;
@@ -168,6 +173,8 @@ describe("Test phishing list service", () => {
       closeServer();
       closeServer = undefined;
     }
+
+    jest.useRealTimers();
   });
 
   const waitServiceInit = (service: PhishingListService) => {
@@ -177,10 +184,10 @@ describe("Test phishing list service", () => {
         return;
       }
 
-      const intervalId = setInterval(() => {
+      const intervalId = notMockSetInterval(() => {
         if (service.hasInited) {
           resolve();
-          clearInterval(intervalId);
+          notMockClearInterval(intervalId);
         }
       }, 10);
     });
@@ -226,6 +233,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list1`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -241,6 +249,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list2`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -256,6 +265,7 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list3`,
       fetchingIntervalMs: 3600,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
     eachService = service;
 
@@ -271,30 +281,37 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/list3`,
       fetchingIntervalMs: 200,
       retryIntervalMs: 3600,
+      allowTimeoutMs: 100,
     });
+    const spyFetch = jest.spyOn(service, "startFetchPhishingList");
     eachService = service;
 
     service.init();
 
     await waitServiceInit(service);
 
+    expect(spyFetch).toBeCalledTimes(1);
     testCheckURLIsPhishing(service);
     expect(service.checkURLIsPhishing("https://added.domain")).toBe(false);
 
     expect(getQueryCount()).toBe(1);
 
-    // Wait re-fetching
-    await new Promise((resolve) => setTimeout(resolve, 210));
+    // Proceed re-fetching
+    jest.advanceTimersByTime(210);
 
+    expect(spyFetch).toBeCalledTimes(2);
+    await spyFetch.mock.results[spyFetch.mock.results.length - 1].value;
     testCheckURLIsPhishing(service);
     // See the implementation of /list3
     expect(service.checkURLIsPhishing("https://added.domain")).toBe(true);
 
     expect(getQueryCount()).toBe(2);
 
-    // Wait re-fetching
-    await new Promise((resolve) => setTimeout(resolve, 210));
+    // Proceed re-fetching
+    jest.advanceTimersByTime(210);
 
+    expect(spyFetch).toBeCalledTimes(3);
+    await spyFetch.mock.results[spyFetch.mock.results.length - 1].value;
     testCheckURLIsPhishing(service);
     // See the implementation of /list3
     expect(service.checkURLIsPhishing("https://added.domain")).toBe(false);
@@ -307,7 +324,9 @@ describe("Test phishing list service", () => {
       blockListUrl: `http://127.0.0.1:${port}/test-retry`,
       fetchingIntervalMs: 200,
       retryIntervalMs: 100,
+      allowTimeoutMs: 100,
     });
+    const spyFetch = jest.spyOn(service, "startFetchPhishingList");
     eachService = service;
 
     service.init();
@@ -325,19 +344,24 @@ describe("Test phishing list service", () => {
 
     await waitServiceInit(service);
 
+    expect(spyFetch).toBeCalledTimes(1);
     testPhishingUntil(1);
     expect(getQueryCount()).toBe(1);
 
-    // Wait re-fetching
-    await new Promise((resolve) => setTimeout(resolve, 210));
+    // Proceed re-fetching
+    jest.advanceTimersByTime(210);
 
+    expect(spyFetch).toBeCalledTimes(2);
+    await spyFetch.mock.results[spyFetch.mock.results.length - 1].value;
     // See the implementation of /test-retry
     testPhishingUntil(2);
     expect(getQueryCount()).toBe(2);
 
-    // Wait re-fetching
-    await new Promise((resolve) => setTimeout(resolve, 210));
+    // Proceed re-fetching
+    jest.advanceTimersByTime(210);
 
+    expect(spyFetch).toBeCalledTimes(3);
+    await spyFetch.mock.results[spyFetch.mock.results.length - 1].value;
     // See the implementation of /test-retry
     // In this case, the fetching should be failed.
     // So, there is no update on phishing list.
@@ -345,23 +369,73 @@ describe("Test phishing list service", () => {
     expect(getQueryCount()).toBe(3);
 
     // Wait retry for failed query
-    await new Promise((resolve) => setTimeout(resolve, 110));
+    jest.advanceTimersByTime(110);
 
+    expect(spyFetch).toBeCalledTimes(4);
+    await spyFetch.mock.results[spyFetch.mock.results.length - 1].value;
     // See the implementation of /test-retry
     testPhishingUntil(4);
     expect(getQueryCount()).toBe(4);
 
     // Not yet re-fetching
-    await new Promise((resolve) => setTimeout(resolve, 110));
+    jest.advanceTimersByTime(110);
 
+    expect(spyFetch).toBeCalledTimes(4);
     // See the implementation of /test-retry
     testPhishingUntil(4);
     expect(getQueryCount()).toBe(4);
 
     // Now re-fetching
-    await new Promise((resolve) => setTimeout(resolve, 110));
+    jest.advanceTimersByTime(110);
+
+    expect(spyFetch).toBeCalledTimes(5);
+    await spyFetch.mock.results[spyFetch.mock.results.length - 1].value;
     // See the implementation of /test-retry
     testPhishingUntil(5);
     expect(getQueryCount()).toBe(5);
+  });
+
+  test("Test addUrlTemp allow blocked url", async () => {
+    const service = new PhishingListService({
+      blockListUrl: `http://127.0.0.1:${port}/list1`,
+      fetchingIntervalMs: 200,
+      retryIntervalMs: 100,
+      allowTimeoutMs: 100,
+    });
+    eachService = service;
+
+    service.init();
+
+    await waitServiceInit(service);
+
+    // block phishings site
+    const [phishing, anotherPhishing] = phishings;
+    expect(service.checkURLIsPhishing("https://" + phishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + phishing)).toBe(true);
+
+    expect(service.checkURLIsPhishing("https://" + anotherPhishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + anotherPhishing)).toBe(
+      true
+    );
+
+    // allow temp Url
+    service.allowUrlTemp("https://" + phishing);
+    expect(service.checkURLIsPhishing("https://" + phishing)).toBe(false);
+    expect(service.checkURLIsPhishing("https://test." + phishing)).toBe(false);
+    // but another url still blocked
+    expect(service.checkURLIsPhishing("https://" + anotherPhishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + anotherPhishing)).toBe(
+      true
+    );
+
+    // should be blocked again
+    jest.advanceTimersByTime(110);
+    expect(service.checkURLIsPhishing("https://" + phishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + phishing)).toBe(true);
+
+    expect(service.checkURLIsPhishing("https://" + anotherPhishing)).toBe(true);
+    expect(service.checkURLIsPhishing("https://test." + anotherPhishing)).toBe(
+      true
+    );
   });
 });

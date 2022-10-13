@@ -28,6 +28,10 @@ export class PrivKeySecp256k1 {
     );
   }
 
+  /**
+   * @deprecated Use `signDigest32(Hash.sha256(data))` instead.
+   * @param msg
+   */
   sign(msg: Uint8Array): Uint8Array {
     const secp256k1 = new ec("secp256k1");
     const key = secp256k1.keyFromPrivate(this.privKey);
@@ -37,6 +41,23 @@ export class PrivKeySecp256k1 {
     ).toString();
 
     const signature = key.sign(Buffer.from(hash, "hex"), {
+      canonical: true,
+    });
+
+    return new Uint8Array(
+      signature.r.toArray("be", 32).concat(signature.s.toArray("be", 32))
+    );
+  }
+
+  signDigest32(digest: Uint8Array): Uint8Array {
+    if (digest.length !== 32) {
+      throw new Error(`Invalid length of digest to sign: ${digest.length}`);
+    }
+
+    const secp256k1 = new ec("secp256k1");
+    const key = secp256k1.keyFromPrivate(this.privKey);
+
+    const signature = key.sign(digest, {
       canonical: true,
     });
 

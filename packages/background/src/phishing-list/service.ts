@@ -3,6 +3,7 @@ import { parseDomainUntilSecondLevel } from "./utils";
 
 export class PhishingListService {
   protected map: Map<string, boolean> = new Map();
+  protected allowed: Map<string, number> = new Map();
 
   protected _hasInited: boolean = false;
   protected _hasStopped: boolean = false;
@@ -13,6 +14,7 @@ export class PhishingListService {
       readonly blockListUrl: string;
       readonly fetchingIntervalMs: number;
       readonly retryIntervalMs: number;
+      readonly allowTimeoutMs: number;
     }
   ) {}
 
@@ -82,7 +84,26 @@ export class PhishingListService {
   }
 
   checkURLIsPhishing(url: string): boolean {
+    const parsed = parseDomainUntilSecondLevel(new URL(url).origin);
+    if (this.map.get(parsed) === true) {
+      const allowed = this.allowed.get(parsed);
+      if (
+        allowed &&
+        allowed + this.opts.allowTimeoutMs >= new Date().getTime()
+      ) {
+        return false;
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  allowUrlTemp(url: string): void {
     const parsed = new URL(url);
-    return this.map.get(parseDomainUntilSecondLevel(parsed.origin)) === true;
+    this.allowed.set(
+      parseDomainUntilSecondLevel(parsed.origin),
+      new Date().getTime()
+    );
   }
 }

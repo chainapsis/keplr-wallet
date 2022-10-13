@@ -253,6 +253,58 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
   }
 }
 
+export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> {
+  public static type() {
+    return "request-sign-eip-712-cosmos-tx-v0";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    public readonly signDoc: StdSignDoc,
+    public readonly signOptions: KeplrSignOptions
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    if (this.signDoc.chain_id !== this.chainId) {
+      throw new Error(
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestSignEIP712CosmosTxMsg_v0.type();
+  }
+}
+
 export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
   public static type() {
     return "request-verify-adr-36-amino-doc";

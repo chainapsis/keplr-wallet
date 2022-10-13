@@ -8,6 +8,16 @@ export type ProtoMsgsOrWithAminoMsgs = {
   //       And, make proto sign doc if `aminoMsgs` is null
   aminoMsgs: Msg[];
   protoMsgs: Any[];
+
+  // Add rlp types data if you need to support ethermint with ledger.
+  // Must include `MsgValue`.
+  rlpTypes?: Record<
+    string,
+    Array<{
+      name: string;
+      type: string;
+    }>
+  >;
 };
 
 export interface MakeTxResponse {
