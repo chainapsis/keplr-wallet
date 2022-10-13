@@ -5,15 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Multisig } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
-import Long from "long";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../button";
-import { lendFees } from "../../../fee-lender-worker";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
@@ -67,7 +65,7 @@ export type RecoverMultisigProps = NativeStackScreenProps<
 
 export const RecoverMultisig = observer<RecoverMultisigProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore, multisigStore, walletStore } = useStore();
+    const { chainStore, demoStore, multisigStore } = useStore();
     const { currentChainInformation } = chainStore;
 
     const multisig = multisigStore.currentAdmin;
@@ -115,9 +113,8 @@ export const RecoverMultisig = observer<RecoverMultisigProps>(
       return [message];
     }, [
       multisig,
-      multisigStore.getUpdateProposed,
+      multisigStore,
       nextMultisig,
-      walletStore.address,
       sender?.multisig?.address,
       currentChainInformation,
     ]);

@@ -1,4 +1,4 @@
-import { Secp256k1HdWallet, Secp256k1Wallet } from "@cosmjs/amino";
+import { Secp256k1HdWallet } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";

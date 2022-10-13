@@ -45,7 +45,6 @@ import {
   produceEnv,
   RootStore,
   RouterBackground,
-  WalletType,
 } from "@obi-wallet/common";
 import { Buffer } from "buffer";
 import { Alert } from "react-native";

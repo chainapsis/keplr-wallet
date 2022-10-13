@@ -5,7 +5,7 @@ import { Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";

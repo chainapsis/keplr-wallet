@@ -30,13 +30,12 @@ import {
 import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import {
+  createStargateClient,
   isSinglesigWallet,
   Multisig,
   MultisigKey,
   Text,
-  WalletType,
 } from "@obi-wallet/common";
-import { createStargateClient } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

@@ -7,6 +7,6 @@ export default () => {
   const { demoStore } = useStore();
   useEffect(() => {
     demoStore.demoMode = true;
-  }, []);
+  }, [demoStore]);
   return <HomeScreen />;
 };

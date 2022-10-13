@@ -1,12 +1,11 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { MultisigKey, Text, WalletType } from "@obi-wallet/common";
-import { useNavigation } from "@react-navigation/native";
+import { MultisigKey, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import { FormattedMessage, useIntl } from "react-intl";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -256,8 +255,6 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
   const { multisigStore, walletsStore } = useStore();
 
   const safeArea = useSafeAreaInsets();
-
-  const intl = useIntl();
 
   const getRecoverButton = (keyId: MultisigKey) => {
     return (

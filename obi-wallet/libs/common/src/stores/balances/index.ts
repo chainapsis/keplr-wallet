@@ -5,7 +5,6 @@ import { computed, flow, makeObservable, observable } from "mobx";
 import { Chain } from "../../chains";
 import { createCosmWasmClient, createStargateClient } from "../../clients";
 import { ChainStore } from "../chain";
-import { WalletStore } from "../wallet";
 import { WalletsStore } from "../wallets";
 
 const LOOP_JUNO1_ADDRESS =

@@ -13,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../button";
-import { lendFees } from "../../../fee-lender-worker";
 import { useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import {
