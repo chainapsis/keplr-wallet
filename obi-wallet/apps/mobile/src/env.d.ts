@@ -20,4 +20,5 @@ declare module "react-native-dotenv" {
   export const ANDROID_APP_CENTER_DEPLOYMENT_KEY_PRODUCTION: string;
 
   export const SENTRY_DSN: string;
+  export const NFT_TAB_ENABLED: boolean;
 }
