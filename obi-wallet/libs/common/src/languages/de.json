@@ -48,7 +48,8 @@
   "recovery.singlesig.title": "Dein Singlesig Wallet Wiederherstellen",
   "recovery.singlesig.enterphrase": "Gib die Recovery-Phrase deines Singlesig-Wallets ein.",
 
-  "onboarding1.welcometoloop": "Willkommen bei Loop",
+  "onboarding1.welcometo.loop": "Willkommen bei Loop",
+  "onboarding1.welcometo.obi": "Willkommen bei Obi",
   "onboarding1.welcomesubtext": "Powered by Obi",
   "onboarding1.getstarted": "Loslegen",
   "onboarding1.recoverwallet": "Wallet Wiederherstellen",
@@ -147,6 +148,7 @@
   "settings.more": "Mehr",
   "settings.helpsupport": "Hilfe & Support",
   "settings.helpsupport.subtext": "Kontaktiere den Support von Loop",
+  "settings.helpsupport.subtext.obi": "Kontaktiere den Support von Obi",
   "settings.logout": "Ausloggen",
   "settings.logout.subtext": "Speichere deine Keys bevor du ausloggst",
   "settings.fundproxywallet": "Geld auf Proxy Wallet schicken",

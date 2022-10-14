@@ -1,5 +1,4 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
-import { NFT_TAB_ENABLED } from "react-native-dotenv";
 import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -24,6 +23,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, Platform } from "react-native";
+import { NFT_TAB_ENABLED } from "react-native-dotenv";
 import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
@@ -82,7 +82,7 @@ export function TabNavigation() {
     id: "menu.settings",
     defaultMessage: "Settings",
   });
-  console.log(NFT_TAB_ENABLED)
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -146,7 +146,9 @@ export function TabNavigation() {
       })}
     >
       <Tab.Screen name={assets} component={Assets} />
-      {!NFT_TAB_ENABLED || String(NFT_TAB_ENABLED) !== "false" && <Tab.Screen name={nfts} component={NFTs} />}
+      {NFT_TAB_ENABLED === "true" && (
+        <Tab.Screen name={nfts} component={NFTs} />
+      )}
       <Tab.Screen name={apps} component={DappExplorer} />
       <Tab.Screen name={trade} component={Trade} />
       <Tab.Screen name={settings} component={SettingsScreen} />

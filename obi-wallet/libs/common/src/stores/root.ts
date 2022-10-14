@@ -22,10 +22,12 @@ import { InteractionStore } from "./interaction";
 import { KeplrChainStore } from "./keplr-chain";
 import { LanguageStore } from "./language";
 import { MultisigStore } from "./multisig";
+import { SettingsStore } from "./settings";
 import { SinglesigStore } from "./singlesig";
 import { WalletStore } from "./wallet";
 
 export class RootStore {
+  public readonly settingsStore: SettingsStore;
   public readonly appsStore: AppsStore;
   public readonly balancesStore: BalancesStore;
   public readonly chainStore: ChainStore;
@@ -77,10 +79,10 @@ export class RootStore {
     this.keplrSignInteractionStore = new SignInteractionStore(
       this.keplrInteractionStore
     );
-
     this.appsStore = new AppsStore({ kvStore: new KVStore("apps-store") });
     this.chainStore = new ChainStore({ defaultChain });
     this.demoStore = new DemoStore();
+    this.settingsStore = new SettingsStore();
     this.interactionStore = new InteractionStore(this.keplrInteractionStore);
     this.languageStore = new LanguageStore({
       deviceLanguage,

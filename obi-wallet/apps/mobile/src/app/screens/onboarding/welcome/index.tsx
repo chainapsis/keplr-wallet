@@ -8,8 +8,9 @@ import { Alert, Image, SafeAreaView, View } from "react-native";
 import { Button } from "../../../button";
 import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
-import { DemoModeToggle } from "../../components/demo-mode-toggle";
 import { InitialBackground } from "../../components/initial-background";
+import { ObiModeToggle } from "../../components/obi-mode-toggle";
+import ObiLogo from "../../settings/assets/obi-logo.svg";
 import { OnboardingStackParamList } from "../onboarding-stack";
 import GetStarted from "./assets/get-started.svg";
 
@@ -19,7 +20,11 @@ export type WelcomeProps = NativeStackScreenProps<
 >;
 
 export const Welcome = observer<WelcomeProps>(({ navigation }) => {
-  const { demoStore, multisigStore } = useStore();
+  const {
+    demoStore,
+    multisigStore,
+    settingsStore: { isObi },
+  } = useStore();
   const intl = useIntl();
 
   const renderContinueButton = (keyInRecovery: MultisigKey | null) => {
@@ -55,7 +60,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
   };
 
   return (
-    <InitialBackground>
+    <InitialBackground disabled={isObi}>
       <SafeAreaView
         style={{
           flex: 1,
@@ -78,9 +83,24 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             paddingBottom: 20,
           }}
         >
-          <DemoModeToggle>
-            <Image source={require("./assets/loop.png")} />
-          </DemoModeToggle>
+          <ObiModeToggle>
+            {isObi ? (
+              <View
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: 40,
+                  width: 40,
+                  height: 40,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ObiLogo width={40} height={40} />
+              </View>
+            ) : (
+              <Image source={require("./assets/loop.png")} />
+            )}
+          </ObiModeToggle>
           <Text
             style={{
               color: "#F6F5FF",
@@ -91,7 +111,11 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
           >
             {multisigStore.getKeyInRecovery === null ? (
               <FormattedMessage
-                id="onboarding1.welcometoloop"
+                id={
+                  isObi
+                    ? "onboarding1.welcometo.obi"
+                    : "onboarding1.welcometo.loop"
+                }
                 defaultMessage="Welcome to Loop"
               />
             ) : (
@@ -119,11 +143,13 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 id="recovery.socialupdate"
                 defaultMessage="You're updating your multisig wallet's social key."
               />
-            ) : (
+            ) : !isObi ? (
               <FormattedMessage
                 id="onboarding1.welcomesubtext"
                 defaultMessage="Loop, powered by Obi, is the world's most powerful wallet for Web3."
               />
+            ) : (
+              <></>
             )}
           </Text>
           {renderContinueButton(multisigStore.getKeyInRecovery)}
