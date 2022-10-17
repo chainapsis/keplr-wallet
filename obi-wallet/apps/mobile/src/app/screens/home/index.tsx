@@ -23,6 +23,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, Platform } from "react-native";
+import { NFT_TAB_ENABLED } from "react-native-dotenv";
 import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
@@ -145,7 +146,9 @@ export function TabNavigation() {
       })}
     >
       <Tab.Screen name={assets} component={Assets} />
-      <Tab.Screen name={nfts} component={NFTs} />
+      {NFT_TAB_ENABLED === "true" && (
+        <Tab.Screen name={nfts} component={NFTs} />
+      )}
       <Tab.Screen name={apps} component={DappExplorer} />
       <Tab.Screen name={trade} component={Trade} />
       <Tab.Screen name={settings} component={SettingsScreen} />

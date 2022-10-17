@@ -20,6 +20,7 @@ import { RootStack, useRootNavigation } from "../../root-stack";
 import { useStore } from "../../stores";
 import { Account } from "../account";
 import { Create } from "../account/create";
+import { isSmallScreenNumber } from "../components/screen-size";
 import MultiSigIcon from "./assets/edit.svg";
 import HelpAndSupport from "./assets/headset.svg";
 import ObiLogo from "./assets/obi-logo.svg";
@@ -28,10 +29,18 @@ import { KeysConfigScreen } from "./keys-config";
 import { Seedphrase } from "./seedphrase";
 
 export const SettingsScreen = observer(() => {
-  const { demoStore, multisigStore, singlesigStore, walletStore } = useStore();
+  const {
+    demoStore,
+    multisigStore,
+    singlesigStore,
+    walletStore,
+    settingsStore,
+  } = useStore();
+  const { isObi } = settingsStore;
   const intl = useIntl();
   const navigation = useRootNavigation();
   const [appMetadata, setAppMetadata] = useState<LocalPackage | null>(null);
+  const [timesPressed, setTimesPressed] = useState<number>(0);
 
   useEffect(() => {
     void (async () => {
@@ -42,15 +51,14 @@ export const SettingsScreen = observer(() => {
   const isMultisigWallet =
     walletStore.type === WalletType.MULTISIG ||
     walletStore.type === WalletType.MULTISIG_DEMO;
-
   return (
     <SafeAreaView style={styles.container}>
       <View
         style={{
-          marginTop: 61,
+          marginTop: isSmallScreenNumber(20, 61),
           flexDirection: "row",
           justifyContent: "space-between",
-          marginBottom: 40,
+          marginBottom: isSmallScreenNumber(10, 40),
         }}
       >
         <View
@@ -67,6 +75,15 @@ export const SettingsScreen = observer(() => {
               borderRadius: 32,
               backgroundColor: "white",
               marginRight: 17,
+            }}
+            onPress={() => {
+              // console.log({ timesPressed, isObi })
+              if (timesPressed === 4) {
+                settingsStore.toggleObiMode();
+                setTimesPressed(0);
+                return;
+              }
+              setTimesPressed((st) => st + 1);
             }}
           >
             <ObiLogo
@@ -153,10 +170,16 @@ export const SettingsScreen = observer(() => {
             defaultMessage: "Help & Support",
           })}
           subtitle={intl.formatMessage({
-            id: "settings.helpsupport.subtext",
+            id: isObi
+              ? "settings.helpsupport.subtext.obi"
+              : "settings.helpsupport.subtext",
             defaultMessage: "Contact Loop support.",
           })}
-          onPress={() => Linking.openURL("https://loop.markets/help")}
+          onPress={() =>
+            Linking.openURL(
+              isObi ? "https://obi.money/contact" : "https://loop.markets/help"
+            )
+          }
         />
 
         <Setting
@@ -331,7 +354,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: "#F6F5FF",
-    fontSize: 18,
+    fontSize: isSmallScreenNumber(14, 18),
     fontWeight: "700",
     fontFamily: "Inter",
     paddingBottom: 4,
