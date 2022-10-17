@@ -77,7 +77,7 @@ export const AccountPickerModal = observer<AccountPickerModalProps>(
                     close();
                     setTimeout(() => {
                       void walletsStore.setCurrentWallet(wallet.id);
-                    }, MODAL_TIMING / 2);
+                    }, MODAL_TIMING);
                   }}
                 >
                   <View
