@@ -18,7 +18,7 @@ import { SvgProps } from "react-native-svg";
 
 import { Card } from "../../card";
 import { FontAwesomeIcon } from "../../font-awesome-icon";
-import { App, AppsStore, WalletsStore } from "../../stores";
+import { App, AppsStore, isSinglesigWallet, WalletsStore } from "../../stores";
 import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 
@@ -168,10 +168,9 @@ export const Home = observer<HomeProps>(
                 onPress={() => {
                   onAppPress({
                     label: "History",
-                    url:
-                      walletsStore.currentWallet?.type === "singlesig"
-                        ? `https://mintscan.io/juno/account/${walletsStore.address}`
-                        : `https://mintscan.io/juno/wasm/contract/${walletsStore.address}`,
+                    url: isSinglesigWallet(walletsStore.currentWallet)
+                      ? `https://mintscan.io/juno/account/${walletsStore.address}`
+                      : `https://mintscan.io/juno/wasm/contract/${walletsStore.address}`,
                     icon: "https://place-hold.it/180x180",
                   });
                 }}

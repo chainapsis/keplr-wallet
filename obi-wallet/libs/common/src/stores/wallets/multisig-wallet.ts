@@ -19,7 +19,7 @@ import {
   SerializedMultisigPayload,
   SerializedProxyAddress,
 } from "../multisig/serialized-data";
-import { AbstractWallet } from "./abstract-wallet";
+import { AbstractWallet, WalletType } from "./abstract-wallet";
 import { SerializedMultisigWallet } from "./serialized-data";
 
 export class MultisigWallet extends AbstractWallet {
@@ -68,7 +68,7 @@ export class MultisigWallet extends AbstractWallet {
   }
 
   public get type() {
-    return "multisig" as const;
+    return WalletType.Multisig;
   }
 
   public get isReady() {

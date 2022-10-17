@@ -36,6 +36,7 @@ import {
   Multisig,
   MultisigKey,
   Text,
+  WalletType,
 } from "@obi-wallet/common";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { observer } from "mobx-react-lite";
@@ -86,9 +87,9 @@ export const SignatureModal = observer<SignatureModalProps>((props) => {
   if (!walletsStore.type) return null;
 
   switch (walletsStore.type) {
-    case "multisig":
+    case WalletType.Multisig:
       return <SignatureModalMultisig {...props} />;
-    case "singlesig":
+    case WalletType.Singlesig:
       return <SignatureModalSinglesig {...props} />;
   }
 });
@@ -576,10 +577,10 @@ export function useSignatureModalProps({
         }
 
         switch (walletsStore.type) {
-          case "multisig":
+          case WalletType.Multisig:
             await handleMultisig();
             break;
-          case "singlesig": {
+          case WalletType.Singlesig: {
             const wallet = walletsStore.currentWallet;
             invariant(
               isSinglesigWallet(wallet),

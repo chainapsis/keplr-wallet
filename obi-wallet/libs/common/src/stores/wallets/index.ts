@@ -4,6 +4,7 @@ import { nanoid } from "nanoid/non-secure";
 import invariant from "tiny-invariant";
 
 import { ChainStore } from "../chain";
+import { WalletType } from "./abstract-wallet";
 import { MultisigWallet } from "./multisig-wallet";
 import {
   migrateSerializedData,
@@ -26,18 +27,18 @@ export enum WalletState {
   READY = "READY",
 }
 
-export { MultisigWallet, SinglesigWallet };
+export { MultisigWallet, SinglesigWallet, WalletType };
 
 export function isSinglesigWallet(
   wallet: MultisigWallet | SinglesigWallet | null
 ): wallet is SinglesigWallet {
-  return wallet?.type === "singlesig";
+  return wallet?.type === WalletType.Singlesig;
 }
 
 export function isMultisigWallet(
   wallet: MultisigWallet | SinglesigWallet | null
 ): wallet is MultisigWallet {
-  return wallet?.type === "multisig";
+  return wallet?.type === WalletType.Multisig;
 }
 
 export class WalletsStore {
@@ -91,7 +92,7 @@ export class WalletsStore {
     return this._wallets.entities[this.currentWalletId].wallet;
   }
 
-  public get type(): "multisig" | "singlesig" | null {
+  public get type(): WalletType | null {
     return this.currentWallet?.type ?? null;
   }
 

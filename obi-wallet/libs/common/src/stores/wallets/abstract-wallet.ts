@@ -1,8 +1,13 @@
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
+export enum WalletType {
+  Multisig = "Multisig",
+  Singlesig = "Singlesig",
+}
+
 export abstract class AbstractWallet {
   public abstract get id(): string;
-  public abstract get type(): "multisig" | "singlesig";
+  public abstract get type(): WalletType;
   public abstract get address(): string | null;
   public abstract get isReady(): boolean;
 

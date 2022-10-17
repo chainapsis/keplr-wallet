@@ -4,7 +4,7 @@ import { computed, makeObservable, observable } from "mobx";
 import secp256k1 from "secp256k1";
 
 import { ChainStore } from "../chain";
-import { AbstractWallet } from "./abstract-wallet";
+import { AbstractWallet, WalletType } from "./abstract-wallet";
 import { SerializedSinglesigWallet } from "./serialized-data";
 
 export class SinglesigWallet extends AbstractWallet {
@@ -71,7 +71,7 @@ export class SinglesigWallet extends AbstractWallet {
   }
 
   public get type() {
-    return "singlesig" as const;
+    return WalletType.Singlesig;
   }
 
   public get mnemonic() {

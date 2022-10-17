@@ -45,6 +45,7 @@ import {
   produceEnv,
   RootStore,
   RouterBackground,
+  WalletType,
 } from "@obi-wallet/common";
 import { Buffer } from "buffer";
 import { Alert } from "react-native";
@@ -184,7 +185,7 @@ class KeyRingService extends AbstractKeyRingService {
     invariant(type, "Missing wallet type");
 
     switch (type) {
-      case "multisig":
+      case WalletType.Multisig:
         return {
           // TODO:
           algo: "multisig",
@@ -193,7 +194,7 @@ class KeyRingService extends AbstractKeyRingService {
           address: Bech32Address.fromBech32(address, "juno").address,
           isNanoLedger: true,
         };
-      case "singlesig": {
+      case WalletType.Singlesig: {
         const wallet = this.rootStore.walletsStore.currentWallet;
         invariant(
           isSinglesigWallet(wallet),
