@@ -317,29 +317,33 @@ const styles = StyleSheet.create({
 export const SettingsNavigator = createNativeStackNavigator();
 
 // This can't be a React component because `Stack.Navigator` doesn't want that.
-export const settingsScreens = () => [
-  <RootStack.Screen
-    name="AccountsSettings"
-    key="AccountsSettings"
-    component={Account}
-    options={{ headerShown: false }}
-  />,
-  <RootStack.Screen
-    name="AddSubAccount"
-    key="AddSubAccount"
-    component={Create}
-    options={{ headerShown: false }}
-  />,
-  <RootStack.Screen
-    name="MultiSigSettings"
-    key="MultiSigSettings"
-    component={KeysConfigScreen}
-    options={{ headerShown: false }}
-  />,
-  <RootStack.Screen
-    name="SingleSigSeedphrase"
-    key="SingleSigSeedphrase"
-    component={Seedphrase}
-    options={{ headerShown: false }}
-  />,
-];
+export const settingsScreens = () => {
+  return (
+    <RootStack.Group>
+      <RootStack.Screen
+        name="AccountsSettings"
+        key="AccountsSettings"
+        component={Account}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="AddSubAccount"
+        key="AddSubAccount"
+        component={Create}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="MultiSigSettings"
+        key="MultiSigSettings"
+        component={KeysConfigScreen}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="SingleSigSeedphrase"
+        key="SingleSigSeedphrase"
+        component={Seedphrase}
+        options={{ headerShown: false }}
+      />
+    </RootStack.Group>
+  );
+};

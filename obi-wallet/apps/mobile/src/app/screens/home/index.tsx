@@ -175,7 +175,7 @@ export function HomeScreen() {
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name="home" component={TabNavigation} />
+      <Drawer.Screen name="home-tabs" component={TabNavigation} />
     </Drawer.Navigator>
   );
 }

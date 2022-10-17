@@ -1,12 +1,12 @@
 import { observer } from "mobx-react-lite";
 
+import { useRootNavigation } from "../../../root-stack";
 import { useMultisigWallet } from "../../../stores";
-import { useOnboardingNavigation } from "../onboarding-stack";
 import { Lookup } from "./lookup";
 
 export const LookupProxyWallets = observer(() => {
   const wallet = useMultisigWallet();
-  const { navigate } = useOnboardingNavigation();
+  const { navigate } = useRootNavigation();
   const address = wallet.nextAdmin.phoneNumber?.address;
 
   if (!address) return null;

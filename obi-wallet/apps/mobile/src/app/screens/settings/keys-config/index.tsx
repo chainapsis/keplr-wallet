@@ -264,7 +264,6 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           const wallet = walletsStore.currentWallet;
           if (isMultisigWallet(wallet)) {
             wallet.recover(keyId);
-            navigate("state-renderer");
           }
         }}
         style={{

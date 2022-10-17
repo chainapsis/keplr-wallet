@@ -63,7 +63,11 @@ export class MultisigWallet extends AbstractWallet {
   }
 
   public get isReady() {
-    return this.currentAdmin !== null;
+    return (
+      this.currentAdmin !== null &&
+      this.keyInRecovery === null &&
+      this.walletInRecovery === null
+    );
   }
 
   public get proxyAddress(): SerializedProxyAddress | null {
