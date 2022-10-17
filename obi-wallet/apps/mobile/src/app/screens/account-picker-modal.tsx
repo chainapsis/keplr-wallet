@@ -124,7 +124,7 @@ export const AccountPickerModal = observer<AccountPickerModalProps>(
                           {
                             text: "Confirm",
                             onPress: async () => {
-                              await walletsStore.removeWallet(index);
+                              await walletsStore.removeWallet(wallet.id);
                             },
                           },
                         ]

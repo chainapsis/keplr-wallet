@@ -162,8 +162,8 @@ export class WalletsStore {
   }
 
   @action
-  public async removeWallet(walletIndex: number) {
-    const [id] = this._wallets.ids.splice(walletIndex, 1);
+  public async removeWallet(id: string) {
+    this._wallets.ids.splice(this._wallets.ids.indexOf(id), 1);
     delete this._wallets.entities[id];
     if (this.currentWalletId === id) {
       this.currentWalletId = null;
