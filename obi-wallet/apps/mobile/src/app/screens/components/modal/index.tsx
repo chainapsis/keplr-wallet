@@ -6,17 +6,17 @@ export interface ModalProps extends Partial<RNModalProps> {
   onClose: () => void;
 }
 
+export const MODAL_TIMING = 500;
+
 export function Modal({ children, isVisible, onClose, ...props }: ModalProps) {
   return (
     <RNModal
       isVisible={isVisible}
       onBackdropPress={onClose}
-      animationIn="fadeIn"
-      animationOut="fadeOut"
-      animationInTiming={500}
-      animationOutTiming={500}
-      backdropTransitionInTiming={500}
-      backdropTransitionOutTiming={500}
+      animationInTiming={MODAL_TIMING}
+      animationOutTiming={MODAL_TIMING}
+      backdropTransitionInTiming={MODAL_TIMING}
+      backdropTransitionOutTiming={MODAL_TIMING}
       backdropOpacity={0.6}
       {...props}
     >

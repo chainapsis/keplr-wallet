@@ -8,7 +8,7 @@ import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 
 import { Button, IconButton } from "../button";
 import { useStore } from "../stores";
-import { Modal } from "./components/modal";
+import { Modal, MODAL_TIMING } from "./components/modal";
 
 export const AccountPickerModal = observer(() => {
   const { walletsStore } = useStore();
@@ -62,7 +62,10 @@ export const AccountPickerModal = observer(() => {
                   paddingHorizontal: 10,
                 }}
                 onPress={async () => {
-                  await walletsStore.setCurrentWallet(index);
+                  setIsVisible(false);
+                  setTimeout(() => {
+                    void walletsStore.setCurrentWallet(index);
+                  }, MODAL_TIMING / 2);
                 }}
               >
                 <View

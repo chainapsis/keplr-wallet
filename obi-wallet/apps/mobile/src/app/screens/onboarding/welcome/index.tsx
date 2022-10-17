@@ -45,7 +45,6 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
         >
           <LanguagePicker />
         </View>
-        {/* TODO: make sure this is reopened when reentering this */}
         {isInRecovery ? null : <AccountPickerModal />}
 
         <View
