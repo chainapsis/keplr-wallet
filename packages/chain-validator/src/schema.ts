@@ -1,6 +1,7 @@
 import {
   AppCurrency,
   Bech32Config,
+  BIP44,
   ChainInfo,
   Currency,
   CW20Currency,
@@ -10,6 +11,21 @@ import {
 } from "@keplr-wallet/types";
 
 import Joi, { ObjectSchema } from "joi";
+
+export const SupportedChainFeatures = [
+  "stargate",
+  "cosmwasm",
+  "wasmd_0.24+",
+  "secretwasm",
+  "ibc-transfer",
+  "no-legacy-stdTx",
+  "ibc-go",
+  "eth-address-gen",
+  "eth-key-sign",
+  "query:/cosmos/bank/v1beta1/spendable_balances",
+  "axelar-evm-bridge",
+  "osmosis-txfees",
+];
 
 export const CurrencySchema = Joi.object<Currency>({
   coinDenom: Joi.string().required(),
@@ -104,21 +120,25 @@ export const SuggestingBIP44Schema = Joi.object<{ coinType: number }>({
 export const ChainInfoSchema = Joi.object<ChainInfo>({
   rpc: Joi.string()
     .uri()
-    .required()
     .custom((value: string) => {
       if (value.includes("?")) {
         throw new Error("rpc should not have query string");
       }
-    }),
+
+      return value;
+    })
+    .required(),
   // TODO: Handle rpc config.
   rest: Joi.string()
     .uri()
-    .required()
     .custom((value: string) => {
       if (value.includes("?")) {
         throw new Error("rest should not have query string");
       }
-    }),
+
+      return value;
+    })
+    .required(),
   // TODO: Handle rest config.
   chainId: Joi.string().required().min(1).max(30),
   chainName: Joi.string().required().min(1).max(30),
@@ -126,6 +146,20 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   walletUrl: Joi.string().uri(),
   walletUrlForStaking: Joi.string().uri(),
   bip44: SuggestingBIP44Schema.required(),
+  alternativeBIP44s: Joi.array()
+    .items(SuggestingBIP44Schema)
+    .custom((values: BIP44[]) => {
+      const dups: { [coinType: number]: boolean | undefined } = {};
+
+      for (const val of values) {
+        if (dups[val.coinType]) {
+          throw new Error(`coin type ${val.coinType} is duplicated`);
+        }
+        dups[val.coinType] = true;
+      }
+
+      return values;
+    }),
   bech32Config: Bech32ConfigSchema.required(),
   currencies: Joi.array()
     .min(1)
@@ -162,22 +196,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   coinType: Joi.number().integer(),
   beta: Joi.boolean(),
   features: Joi.array()
-    .items(
-      Joi.string().valid(
-        "stargate",
-        "cosmwasm",
-        "wasmd_0.24+",
-        "secretwasm",
-        "ibc-transfer",
-        "no-legacy-stdTx",
-        "ibc-go",
-        "eth-address-gen",
-        "eth-key-sign",
-        "query:/cosmos/bank/v1beta1/spendable_balances",
-        "axelar-evm-bridge",
-        "osmosis-txfees"
-      )
-    )
+    .items(Joi.string().valid(...SupportedChainFeatures))
     .unique()
     .custom((value: string[]) => {
       if (value.indexOf("cosmwasm") >= 0 && value.indexOf("secretwasm") >= 0) {
@@ -186,4 +205,14 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
 
       return value;
     }),
+}).custom((value: ChainInfo) => {
+  if (
+    value.alternativeBIP44s?.find(
+      (bip44) => bip44.coinType === value.bip44.coinType
+    )
+  ) {
+    throw new Error(`coin type ${value.bip44.coinType} is duplicated`);
+  }
+
+  return value;
 });

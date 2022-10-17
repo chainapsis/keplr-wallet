@@ -87,7 +87,7 @@ export class ChainsService {
     // Set the updated property of the chain.
     result = await Promise.all(
       result.map(async (chainInfo) => {
-        const updated: ChainInfo = await this.chainUpdaterKeeper.putUpdatedPropertyToChainInfo(
+        const updated: ChainInfo = await this.chainUpdaterKeeper.replaceChainInfo(
           chainInfo
         );
 

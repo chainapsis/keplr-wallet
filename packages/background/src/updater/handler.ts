@@ -39,7 +39,7 @@ const handleTryUpdateChainMsg: (
   service: ChainUpdaterService
 ) => InternalHandler<TryUpdateChainMsg> = (service) => {
   return async (_, msg) => {
-    await service.tryUpdateChain(msg.chainId);
+    await service.tryUpdateChainInfo(msg.chainId);
   };
 };
 

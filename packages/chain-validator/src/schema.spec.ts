@@ -708,6 +708,69 @@ describe("Test chain info schema", () => {
 
     await assert.doesNotReject(async () => {
       const chainInfo = generatePlainChainInfo();
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [],
+      });
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [
+          {
+            coinType: 119,
+          },
+        ],
+      });
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [
+          {
+            coinType: 119,
+          },
+          {
+            coinType: 120,
+          },
+        ],
+      });
+    });
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [
+          {
+            // Duplicated with chainInfo.bip44.coinType
+            coinType: 118,
+          },
+          {
+            coinType: 120,
+          },
+        ],
+      });
+    }, "should reject if duplication exists in bip44");
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [
+          {
+            coinType: 119,
+          },
+          {
+            coinType: 119,
+          },
+        ],
+      });
+    }, "should reject if duplication exists in bip44");
+
+    await assert.doesNotReject(async () => {
+      const chainInfo = generatePlainChainInfo();
       chainInfo.currencies = [
         {
           coinDenom: "TEST",
