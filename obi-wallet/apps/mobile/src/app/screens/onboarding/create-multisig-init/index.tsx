@@ -2,7 +2,7 @@ import { pubkeyToAddress, pubkeyType } from "@cosmjs/amino";
 import { MsgInstantiateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Multisig } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Multisig } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
@@ -65,10 +65,12 @@ export type MultisigInitProps = NativeStackScreenProps<
 >;
 
 export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
-  const { chainStore, demoStore } = useStore();
+  const { chainStore } = useStore();
   const wallet = useMultisigWallet();
   const { currentChainInformation } = chainStore;
-  const multisig = demoStore.demoMode ? demoModeMultisig : wallet.nextAdmin;
+  const multisig = isMultisigDemoWallet(wallet)
+    ? demoModeMultisig
+    : wallet.nextAdmin;
 
   const encodeObjects = useMemo(() => {
     if (!multisig.multisig?.address) return [];
@@ -103,8 +105,11 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
     multisig,
     encodeObjects,
     async onConfirm(response) {
-      if (demoStore.demoMode) {
-        demoStore.finishOnboarding();
+      if (isMultisigDemoWallet(wallet)) {
+        wallet.finishProxySetup({
+          address: "demo",
+          codeId: chainStore.currentChainInformation.currentCodeId,
+        });
         return;
       }
 

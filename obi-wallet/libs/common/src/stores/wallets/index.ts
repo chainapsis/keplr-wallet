@@ -10,6 +10,7 @@ import {
   migrateSerializedData,
   SerializedData,
   SerializedDataAnyVersion,
+  SerializedMultisigDemoWallet,
   SerializedMultisigWallet,
   SerializedMultisigWalletAnyVersion,
   SerializedSinglesigWalletAnyVersion,
@@ -35,10 +36,22 @@ export function isSinglesigWallet(
   return wallet?.type === WalletType.Singlesig;
 }
 
-export function isMultisigWallet(
+export function isAnyMultisigWallet(
   wallet: MultisigWallet | SinglesigWallet | null
 ): wallet is MultisigWallet {
   return wallet?.type === WalletType.Multisig;
+}
+
+export function isMultisigWallet(
+  wallet: MultisigWallet | SinglesigWallet | null
+): wallet is MultisigWallet & { isDemo: false } {
+  return isAnyMultisigWallet(wallet) && !wallet.isDemo;
+}
+
+export function isMultisigDemoWallet(
+  wallet: MultisigWallet | SinglesigWallet | null
+): wallet is MultisigWallet & { isDemo: true } {
+  return isAnyMultisigWallet(wallet) && wallet.isDemo;
 }
 
 export class WalletsStore {
@@ -148,6 +161,24 @@ export class WalletsStore {
   public async addMultisigWallet() {
     const wallet: SerializedMultisigWallet = {
       type: "multisig",
+      data: {
+        currentAdmin: null,
+        nextAdmin: {
+          biometrics: null,
+          phoneNumber: null,
+          social: null,
+          cloud: null,
+        },
+        proxyAddresses: {},
+      },
+    };
+    return (await this.addWallet(wallet)) as MultisigWallet;
+  }
+
+  @action
+  public async addMultisigDemoWallet() {
+    const wallet: SerializedMultisigDemoWallet = {
+      type: "multisig-demo",
       data: {
         currentAdmin: null,
         nextAdmin: {
@@ -286,6 +317,7 @@ export class WalletsStore {
 
     switch (serializedWallet.type) {
       case "multisig":
+      case "multisig-demo":
         return new MultisigWallet({
           chainStore: this.chainStore,
           id,

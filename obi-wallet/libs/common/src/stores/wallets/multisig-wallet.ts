@@ -20,7 +20,10 @@ import {
   SerializedProxyAddress,
 } from "../multisig/serialized-data";
 import { AbstractWallet, WalletType } from "./abstract-wallet";
-import { SerializedMultisigWallet } from "./serialized-data";
+import {
+  SerializedMultisigDemoWallet,
+  SerializedMultisigWallet,
+} from "./serialized-data";
 
 export class MultisigWallet extends AbstractWallet {
   protected readonly chainStore: ChainStore;
@@ -28,9 +31,11 @@ export class MultisigWallet extends AbstractWallet {
   protected readonly _id: string;
 
   @observable
-  protected serializedWallet: SerializedMultisigWallet;
+  protected serializedWallet:
+    | SerializedMultisigWallet
+    | SerializedMultisigDemoWallet;
   protected onChange: (
-    serializedWallet: SerializedMultisigWallet
+    serializedWallet: SerializedMultisigWallet | SerializedMultisigDemoWallet
   ) => Promise<void>;
 
   @observable
@@ -48,8 +53,10 @@ export class MultisigWallet extends AbstractWallet {
   }: {
     chainStore: ChainStore;
     id: string;
-    serializedWallet: SerializedMultisigWallet;
-    onChange: (serializedWallet: SerializedMultisigWallet) => Promise<void>;
+    serializedWallet: SerializedMultisigWallet | SerializedMultisigDemoWallet;
+    onChange: (
+      serializedWallet: SerializedMultisigWallet | SerializedMultisigDemoWallet
+    ) => Promise<void>;
   }) {
     super();
     this.chainStore = chainStore;
@@ -81,6 +88,11 @@ export class MultisigWallet extends AbstractWallet {
 
   public get proxyAddress(): SerializedProxyAddress | null {
     return this.proxyAddresses[this.chainStore.currentChain] ?? null;
+  }
+
+  @computed
+  public get isDemo() {
+    return this.serializedWallet.type === "multisig-demo";
   }
 
   @computed

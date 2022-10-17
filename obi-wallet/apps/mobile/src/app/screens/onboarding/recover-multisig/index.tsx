@@ -2,6 +2,7 @@ import { pubkeyToAddress } from "@cosmjs/amino";
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { isMultisigDemoWallet } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
@@ -26,7 +27,7 @@ export type RecoverMultisigProps = NativeStackScreenProps<
 
 export const RecoverMultisig = observer<RecoverMultisigProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore } = useStore();
+    const { chainStore } = useStore();
     const wallet = useMultisigWallet();
     const { currentChainInformation } = chainStore;
 
@@ -85,7 +86,7 @@ export const RecoverMultisig = observer<RecoverMultisigProps>(
       multisig: sender,
       encodeObjects,
       async onConfirm(response) {
-        if (demoStore.demoMode) {
+        if (isMultisigDemoWallet(wallet)) {
           return;
         }
 

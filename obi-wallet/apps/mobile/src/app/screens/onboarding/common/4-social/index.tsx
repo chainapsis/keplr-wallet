@@ -1,7 +1,7 @@
 import { pubkeyToAddress } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { createStargateClient } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
@@ -27,7 +27,7 @@ export type MultisigSocialProps = NativeStackScreenProps<
 
 export const MultisigSocial = observer<MultisigSocialProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore } = useStore();
+    const { chainStore } = useStore();
     const wallet = useMultisigWallet();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
@@ -36,7 +36,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
     const intl = useIntl();
 
     useEffect(() => {
-      if (demoStore.demoMode) return;
+      if (isMultisigDemoWallet(wallet)) return;
 
       const { social } = wallet.nextAdmin;
 
@@ -67,7 +67,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
           ]
         );
       }
-    }, [demoStore, intl, wallet, navigation]);
+    }, [intl, wallet, navigation]);
 
     async function getAccountPubkey(key: string) {
       const client = await createStargateClient(chainStore.currentChain);
@@ -212,7 +212,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                 disabled={fetchingPubKey}
                 onPress={async () => {
                   setFetchingPubKey(true);
-                  const publicKey = demoStore.demoMode
+                  const publicKey = isMultisigDemoWallet(wallet)
                     ? { type: "demo", value: "demo" }
                     : await getAccountPubkey(address);
                   setFetchingPubKey(false);
@@ -291,7 +291,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       });
                       navigation.navigate("recover-multisig");
                     } else {
-                      if (!demoStore.demoMode) {
+                      if (!isMultisigDemoWallet(wallet)) {
                         wallet.setSocialPublicKey({
                           publicKey: publicKey,
                         });

@@ -2,7 +2,7 @@ import { pubkeyToAddress, pubkeyType } from "@cosmjs/amino";
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Multisig } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Multisig } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
@@ -65,17 +65,13 @@ export type ReplaceMultisigProps = NativeStackScreenProps<
 
 export const ReplaceMultisig = observer<ReplaceMultisigProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore, walletsStore } = useStore();
+    const { chainStore, walletsStore } = useStore();
     const wallet = useMultisigWallet();
     const { currentChainInformation } = chainStore;
 
-    const multisig = demoStore.demoMode
-      ? demoModeMultisig
-      : wallet.currentAdmin;
+    const multisig = wallet.currentAdmin;
 
-    const nextMultisig = demoStore.demoMode
-      ? demoModeMultisig
-      : wallet.nextAdmin;
+    const nextMultisig = wallet.nextAdmin;
 
     const sender = wallet.updateProposed ? nextMultisig : multisig;
 
@@ -128,7 +124,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       multisig: sender,
       encodeObjects,
       async onConfirm(response) {
-        if (demoStore.demoMode) {
+        if (isMultisigDemoWallet(wallet)) {
           return;
         }
 

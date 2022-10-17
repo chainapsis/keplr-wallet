@@ -1,4 +1,9 @@
-import { isMultisigWallet, MultisigKey, Text } from "@obi-wallet/common";
+import {
+  isMultisigDemoWallet,
+  isMultisigWallet,
+  MultisigKey,
+  Text,
+} from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -12,7 +17,6 @@ import {
   AccountPickerModal,
   useAccountPickerModalProps,
 } from "../../account-picker-modal";
-import { DemoModeToggle } from "../../components/demo-mode-toggle";
 import { InitialBackground } from "../../components/initial-background";
 import { OnboardingStackParamList } from "../onboarding-stack";
 import GetStarted from "./assets/get-started.svg";
@@ -23,7 +27,7 @@ export type WelcomeProps = NativeStackScreenProps<
 >;
 
 export const Welcome = observer<WelcomeProps>(({ navigation }) => {
-  const { demoStore, walletsStore } = useStore();
+  const { walletsStore } = useStore();
   const wallet = walletsStore.currentWallet;
   const multisigWallet = isMultisigWallet(wallet) ? wallet : null;
   const intl = useIntl();
@@ -58,9 +62,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             paddingBottom: 20,
           }}
         >
-          <DemoModeToggle>
-            <Image source={require("./assets/loop.png")} />
-          </DemoModeToggle>
+          <Image source={require("./assets/loop.png")} />
           <Text
             style={{
               color: "#F6F5FF",
@@ -137,8 +139,26 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                 marginTop: 20,
               }}
               onPress={action(() => {
-                demoStore.demoMode = false;
                 navigation.navigate("recover-singlesig");
+              })}
+            />
+          )}
+          {isInRecovery ? null : (
+            <Button
+              label={intl.formatMessage({
+                id: "onboarding1.demo",
+                defaultMessage: "Enter Demo Mode",
+              })}
+              RightIcon={GetStarted}
+              flavor="blue"
+              style={{
+                marginTop: 20,
+              }}
+              onPress={action(async () => {
+                if (!isMultisigDemoWallet(walletsStore.currentWallet)) {
+                  await walletsStore.addMultisigDemoWallet();
+                }
+                navigation.navigate("create-multisig-biometrics");
               })}
             />
           )}
@@ -233,7 +253,6 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             if (!multisigWallet) {
               await walletsStore.addMultisigWallet();
             }
-            demoStore.demoMode = false;
             navigation.navigate(navigationUrl);
           })}
         />

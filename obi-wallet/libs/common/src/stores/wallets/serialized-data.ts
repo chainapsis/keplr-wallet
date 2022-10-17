@@ -16,6 +16,19 @@ export type SerializedMultisigWallet = t.TypeOf<
   typeof SerializedMultisigWallet
 >;
 
+export const SerializedMultisigDemoWalletAnyVersion = t.type({
+  type: t.literal("multisig-demo"),
+  data: Multisig.SerializedDataAnyVersion,
+});
+
+export const SerializedMultisigDemoWallet = t.type({
+  type: t.literal("multisig-demo"),
+  data: Multisig.SerializedData,
+});
+export type SerializedMultisigDemoWallet = t.TypeOf<
+  typeof SerializedMultisigDemoWallet
+>;
+
 export const SerializedSinglesigWalletAnyVersion = t.type({
   type: t.literal("singlesig"),
   data: t.string,
@@ -27,6 +40,7 @@ export type SerializedSinglesigWallet = t.TypeOf<
 
 export const SerializedWalletAnyVersion = t.union([
   SerializedMultisigWalletAnyVersion,
+  SerializedMultisigDemoWalletAnyVersion,
   SerializedSinglesigWalletAnyVersion,
 ]);
 export type SerializedWalletAnyVersion = t.TypeOf<
@@ -34,6 +48,7 @@ export type SerializedWalletAnyVersion = t.TypeOf<
 >;
 export const SerializedWallet = t.union([
   SerializedMultisigWallet,
+  SerializedMultisigDemoWallet,
   SerializedSinglesigWallet,
 ]);
 export type SerializedWallet = t.TypeOf<typeof SerializedWallet>;
@@ -61,7 +76,10 @@ export function migrateSerializedData(
     return {
       ...serializedData,
       wallets: serializedData.wallets.map((wallet) => {
-        if (SerializedMultisigWalletAnyVersion.is(wallet)) {
+        if (
+          SerializedMultisigWalletAnyVersion.is(wallet) ||
+          SerializedMultisigDemoWalletAnyVersion.is(wallet)
+        ) {
           return {
             type: wallet.type,
             data: Multisig.migrateSerializedData(wallet.data),

@@ -1,4 +1,5 @@
 import { Coin } from "@cosmjs/amino";
+import { isMultisigDemoWallet } from "@obi-wallet/common";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 
 import { rootStore } from "../../background/root-store";
@@ -22,23 +23,25 @@ export interface FormattedExtendedCoin {
 }
 
 export function useBalances() {
-  const { demoStore, balancesStore, walletsStore } = useStore();
+  const { balancesStore, walletsStore } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshBalances = useCallback(async () => {
     setRefreshing(true);
-    if (!demoStore.demoMode) {
+    if (isMultisigDemoWallet(walletsStore.currentWallet)) {
       await balancesStore.fetchBalances();
     }
     setRefreshing(false);
-  }, [demoStore, balancesStore]);
+  }, [balancesStore, walletsStore]);
 
   useEffect(() => {
     void refreshBalances();
   }, [refreshBalances, walletsStore.address]);
 
   return {
-    balances: demoStore.demoMode ? [] : balancesStore.balances,
+    balances: isMultisigDemoWallet(walletsStore.currentWallet)
+      ? []
+      : balancesStore.balances,
     refreshBalances,
     refreshing,
   };

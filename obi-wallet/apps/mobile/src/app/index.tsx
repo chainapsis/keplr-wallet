@@ -1,4 +1,4 @@
-import { Text, WalletState } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text, WalletState } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { AppState, View } from "react-native";
@@ -93,9 +93,9 @@ export function App() {
 }
 
 export const DemoModeHeader = observer(() => {
-  const { demoStore } = useStore();
+  const { walletsStore } = useStore();
 
-  if (!demoStore.demoMode) return null;
+  if (!isMultisigDemoWallet(walletsStore.currentWallet)) return null;
 
   return (
     <View

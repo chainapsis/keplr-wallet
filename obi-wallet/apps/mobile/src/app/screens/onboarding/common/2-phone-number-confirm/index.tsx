@@ -1,7 +1,7 @@
 import { pubkeyType } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -33,7 +33,6 @@ export function MultisigPhoneNumberConfirm({
 }: MultisigPhoneNumberConfirmProps) {
   const { params } = route;
 
-  const { demoStore } = useStore();
   const wallet = useMultisigWallet();
   const [key, setKey] = useState("");
 
@@ -179,7 +178,7 @@ export function MultisigPhoneNumberConfirm({
                   setResendButtonHit(true);
 
                   setKey("");
-                  if (!demoStore.demoMode) {
+                  if (!isMultisigDemoWallet(wallet)) {
                     await sendPublicKeyTextMessage({
                       phoneNumber: params.phoneNumber,
                       securityAnswer: params.securityAnswer,
@@ -229,11 +228,11 @@ export function MultisigPhoneNumberConfirm({
               onPress={async () => {
                 try {
                   setVerifyButtonDisabledDoubleclick(true);
-                  const publicKey = demoStore.demoMode
+                  const publicKey = isMultisigDemoWallet(wallet)
                     ? "demo"
                     : await parsePublicKeyTextMessageResponse(key);
                   if (publicKey) {
-                    if (!demoStore.demoMode) {
+                    if (!isMultisigDemoWallet(wallet)) {
                       wallet.setPhoneNumberKey({
                         publicKey: {
                           type: pubkeyType.secp256k1,

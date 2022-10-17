@@ -17,7 +17,6 @@ import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
 import { BalancesStore } from "./balances";
 import { ChainStore } from "./chain";
-import { DemoStore } from "./demo";
 import { InteractionStore } from "./interaction";
 import { KeplrChainStore } from "./keplr-chain";
 import { LanguageStore } from "./language";
@@ -27,7 +26,6 @@ export class RootStore {
   public readonly appsStore: AppsStore;
   public readonly balancesStore: BalancesStore;
   public readonly chainStore: ChainStore;
-  public readonly demoStore: DemoStore;
   public readonly interactionStore: InteractionStore;
   public readonly languageStore: LanguageStore;
   public readonly walletsStore: WalletsStore;
@@ -76,7 +74,6 @@ export class RootStore {
 
     this.appsStore = new AppsStore({ kvStore: new KVStore("apps-store") });
     this.chainStore = new ChainStore({ defaultChain });
-    this.demoStore = new DemoStore();
     this.interactionStore = new InteractionStore(this.keplrInteractionStore);
     this.languageStore = new LanguageStore({
       deviceLanguage,

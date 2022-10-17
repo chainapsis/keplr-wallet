@@ -28,12 +28,11 @@ export type MultisigPhoneNumberProps = NativeStackScreenProps<
 
 export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
   ({ navigation }) => {
-    const { demoStore } = useStore();
     const wallet = useMultisigWallet();
     const intl = useIntl();
 
     useEffect(() => {
-      if (demoStore.demoMode) return;
+      if (wallet.isDemo) return;
 
       const { phoneNumber } = wallet.nextAdmin;
       if (
@@ -63,7 +62,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
           ]
         );
       }
-    }, [demoStore, intl, wallet, navigation]);
+    }, [intl, wallet, navigation]);
 
     const {
       securityQuestion,
@@ -296,7 +295,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
 
                 if (checkSecurityAnswer && checkPhoneNumber) {
                   try {
-                    if (!demoStore.demoMode) {
+                    if (!wallet.isDemo) {
                       await sendPublicKeyTextMessage({
                         phoneNumber,
                         securityAnswer,

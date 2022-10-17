@@ -31,6 +31,7 @@ import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import {
   createStargateClient,
+  isMultisigDemoWallet,
   isMultisigWallet,
   isSinglesigWallet,
   Multisig,
@@ -151,7 +152,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
     const intl = useIntl();
     const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
     const phoneNumberBottomSheetRef = useRef<BottomSheetRef>(null);
-    const { chainStore, demoStore } = useStore();
+    const { chainStore, walletsStore } = useStore();
     const { currentChainInformation } = chainStore;
     const [settingBiometrics, setSettingBiometrics] = useState(false);
 
@@ -169,7 +170,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         gas: "1280000",
       };
 
-      if (demoStore.demoMode) {
+      if (isMultisigDemoWallet(walletsStore.currentWallet)) {
         const signDoc: StdSignDoc = {
           memo: "",
           account_number: "0",
@@ -205,7 +206,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
 
       client.disconnect();
       return new Sha256(serializeSignDoc(signDoc)).digest();
-    }, [demoStore, multisig, currentChainInformation, messages]);
+    }, [multisig, currentChainInformation, messages, walletsStore]);
 
     function getKey({ id, title }: { id: MultisigKey; title: string }): Key[] {
       const factor = multisig?.[id];
@@ -218,7 +219,9 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         switch (id) {
           case "biometrics": {
             const message = await getMessage();
-            const { signature } = demoStore.demoMode
+            const { signature } = isMultisigDemoWallet(
+              walletsStore.currentWallet
+            )
               ? { signature: new Uint8Array() }
               : await createBiometricSignature({
                   payload: message,
@@ -648,7 +651,7 @@ interface PhoneNumberBottomSheetContentProps {
 const PhoneNumberBottomSheetContent =
   observer<PhoneNumberBottomSheetContentProps>(
     ({ payload, getMessage, onSuccess }) => {
-      const { demoStore } = useStore();
+      const { walletsStore } = useStore();
       const intl = useIntl();
       const { securityAnswer, setSecurityAnswer } = useSecurityQuestionInput();
 
@@ -761,7 +764,7 @@ const PhoneNumberBottomSheetContent =
               onPress={async () => {
                 try {
                   setVerifyButtonDisabledDoubleclick(true);
-                  if (demoStore.demoMode) {
+                  if (isMultisigDemoWallet(walletsStore.currentWallet)) {
                     onSuccess(new Uint8Array());
                   } else {
                     const response = await parseSignatureTextMessageResponse(
@@ -815,7 +818,7 @@ const PhoneNumberBottomSheetContent =
               setMagicButtonDisabledDoubleclick(true);
 
               try {
-                if (!demoStore.demoMode) {
+                if (!isMultisigDemoWallet(walletsStore.currentWallet)) {
                   const message = await getMessage();
                   await sendSignatureTextMessage({
                     phoneNumber: payload.phoneNumber,

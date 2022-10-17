@@ -1,5 +1,5 @@
 import {
-  isMultisigWallet,
+  isAnyMultisigWallet,
   MultisigWallet,
   RootStore,
 } from "@obi-wallet/common";
@@ -16,7 +16,7 @@ export function useStore() {
 export function useMultisigWallet(): MultisigWallet {
   const { currentWallet } = useStore().walletsStore;
   invariant(
-    isMultisigWallet(currentWallet),
+    isAnyMultisigWallet(currentWallet),
     "Expected current wallet to be multisig."
   );
   return currentWallet;

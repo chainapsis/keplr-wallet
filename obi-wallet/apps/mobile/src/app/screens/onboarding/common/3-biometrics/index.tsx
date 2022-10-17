@@ -1,7 +1,7 @@
 import { pubkeyType } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -28,7 +28,6 @@ export type MultisigBiometricsProps = NativeStackScreenProps<
 
 export const MultisigBiometrics = observer<MultisigBiometricsProps>(
   ({ navigation }) => {
-    const { demoStore } = useStore();
     const wallet = useMultisigWallet();
 
     const [scannedBiometrics, setScannedBiometrics] = useState(false);
@@ -38,7 +37,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
       setButtonDisabledDoubleclick(true);
 
       try {
-        if (!demoStore.demoMode) {
+        if (!isMultisigDemoWallet(wallet)) {
           const publicKey = await getBiometricsPublicKey();
 
           wallet.setBiometricsPublicKey({
@@ -64,7 +63,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
     };
 
     useEffect(() => {
-      if (demoStore.demoMode) return;
+      if (isMultisigDemoWallet(wallet)) return;
 
       const { biometrics } = wallet.nextAdmin;
       if (biometrics && wallet.keyInRecovery !== "biometrics") {
@@ -98,7 +97,7 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
       } else {
         scanBiometrics();
       }
-    }, [demoStore, intl, wallet, navigation]);
+    }, [intl, wallet, navigation]);
 
     const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
       useState(false);
