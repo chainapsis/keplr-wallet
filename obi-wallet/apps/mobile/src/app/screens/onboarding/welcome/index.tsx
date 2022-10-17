@@ -209,7 +209,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
     }
     return (
       <View style={{ marginTop: 40 }}>
-        {!keyInRecovery && walletsStore.wallets.length > 0 ? (
+        {!keyInRecovery && walletsStore.readyWallets.length > 0 ? (
           <Button
             label={intl.formatMessage({
               id: "onboarding1.login",

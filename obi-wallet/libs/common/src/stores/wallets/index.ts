@@ -112,6 +112,11 @@ export class WalletsStore {
   }
 
   @computed
+  public get readyWallets() {
+    return this.wallets.filter((wallet) => wallet.isReady);
+  }
+
+  @computed
   protected get serializedWallets() {
     return this._wallets.ids.map(
       (id) => this._wallets.entities[id].serializedWallet

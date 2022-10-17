@@ -60,7 +60,7 @@ export const AccountPickerModal = observer<AccountPickerModalProps>(
             </Text>
           </View>
           <ScrollView>
-            {walletsStore.wallets.map((wallet, index) => {
+            {walletsStore.readyWallets.map((wallet, index) => {
               return (
                 <TouchableOpacity
                   key={index}
