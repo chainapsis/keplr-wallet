@@ -1,10 +1,9 @@
 import { ChainInfo } from "@keplr-wallet/types";
-import Axios, { AxiosResponse } from "axios";
+import Axios from "axios";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainInfoWithEmbed, ChainsService } from "../chains";
 import { Mutable } from "utility-types";
-import { KeplrError } from "@keplr-wallet/router";
 
 export class ChainUpdaterService {
   protected chainsService!: ChainsService;
@@ -349,130 +348,5 @@ export class ChainUpdaterService {
     });
 
     return await this.chainsService.getChainInfos();
-  }
-
-  public static async checkEndpointsConnectivity(
-    chainId: string,
-    rpc: string,
-    rest: string,
-    wsObject?: new (url: string, protocols?: string | string[]) => WebSocket
-  ): Promise<void> {
-    const rpcInstance = Axios.create({
-      baseURL: rpc,
-    });
-
-    let resultStatus: AxiosResponse<{
-      result: {
-        node_info: {
-          network: string;
-        };
-      };
-    }>;
-
-    try {
-      // Get the status to get the chain id.
-      resultStatus = await rpcInstance.get<{
-        result: {
-          node_info: {
-            network: string;
-          };
-        };
-      }>("/status");
-    } catch (e) {
-      console.log(e);
-      throw new Error("Failed to get response /status from rpc endpoint");
-    }
-
-    const version = ChainIdHelper.parse(chainId);
-
-    const versionFromRPCStatus = ChainIdHelper.parse(
-      resultStatus.data.result.node_info.network
-    );
-
-    if (versionFromRPCStatus.identifier !== version.identifier) {
-      throw new KeplrError(
-        "updater",
-        8001,
-        `RPC endpoint has different chain id (expected: ${chainId}, actual: ${resultStatus.data.result.node_info.network})`
-      );
-    } else if (versionFromRPCStatus.version !== version.version) {
-      // In the form of {chain_identifier}-{chain_version}, if the identifier is the same but the version is different, it is strictly an error,
-      // but it is actually the same chain but the chain version of the node is different.
-      // In this case, it is possible to treat as a warning and proceed as it is, so this is separated with above error.
-      throw new KeplrError(
-        "updater",
-        8002,
-        `RPC endpoint has different chain id (expected: ${chainId}, actual: ${resultStatus.data.result.node_info.network})`
-      );
-    }
-
-    let wsURL = rpc;
-    if (wsURL.startsWith("http")) {
-      wsURL = wsURL.replace("http", "ws");
-    }
-    wsURL = wsURL.endsWith("/") ? wsURL + "websocket" : wsURL + "/websocket";
-
-    const wsInstance = wsObject ? new wsObject(wsURL) : new WebSocket(wsURL);
-
-    // Try 15 times at 1 second intervals to test websocket connectivity.
-    for (let i = 0; i < 15; i++) {
-      // If ws state is not "connecting"
-      if (wsInstance.readyState !== 0) {
-        // If ws state is "open", it means that app can connect ws to /websocket rpc
-        if (wsInstance.readyState === 1) {
-          break;
-        } else {
-          // else, handle that as error.
-          throw new Error("Failed to connect websocket to /websocket rpc");
-        }
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-
-    const restInstance = Axios.create({
-      baseURL: rest,
-    });
-
-    let resultLCDNodeInfo: AxiosResponse<{
-      default_node_info: {
-        network: string;
-      };
-    }>;
-
-    try {
-      // Get the node info to get the chain id.
-      resultLCDNodeInfo = await restInstance.get<{
-        default_node_info: {
-          network: string;
-        };
-      }>("/cosmos/base/tendermint/v1beta1/node_info");
-    } catch (e) {
-      console.log(e);
-      throw new Error(
-        "Failed to get response /cosmos/base/tendermint/v1beta1/node_info from lcd endpoint"
-      );
-    }
-
-    const versionFromLCDNodeInfo = ChainIdHelper.parse(
-      resultLCDNodeInfo.data.default_node_info.network
-    );
-
-    if (versionFromLCDNodeInfo.identifier !== version.identifier) {
-      throw new KeplrError(
-        "updater",
-        8101,
-        `LCD endpoint has different chain id (expected: ${chainId}, actual: ${resultStatus.data.result.node_info.network})`
-      );
-    } else if (versionFromLCDNodeInfo.version !== version.version) {
-      // In the form of {chain_identifier}-{chain_version}, if the identifier is the same but the version is different, it is strictly an error,
-      // but it is actually the same chain but the chain version of the node is different.
-      // In this case, it is possible to treat as a warning and proceed as it is, so this is separated with above error.
-      throw new KeplrError(
-        "updater",
-        8102,
-        `LCD endpoint has different chain id (expected: ${chainId}, actual: ${resultStatus.data.result.node_info.network})`
-      );
-    }
   }
 }

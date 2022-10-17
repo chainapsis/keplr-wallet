@@ -1,4 +1,4 @@
-import { ChainInfoSchema, ChainInfoWithEmbed } from "./types";
+import { ChainInfoWithEmbed } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
 import { KVStore, Debouncer, MemoryKVStore } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
@@ -6,6 +6,7 @@ import { InteractionService } from "../interaction";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { validateBasicChainInfoType } from "@keplr-wallet/chain-validator";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 
@@ -154,9 +155,7 @@ export class ChainsService {
     chainInfo: ChainInfo,
     origin: string
   ): Promise<void> {
-    chainInfo = await ChainInfoSchema.validateAsync(chainInfo, {
-      stripUnknown: true,
-    });
+    chainInfo = await validateBasicChainInfoType(chainInfo);
 
     await this.interactionKeeper.waitApprove(
       env,

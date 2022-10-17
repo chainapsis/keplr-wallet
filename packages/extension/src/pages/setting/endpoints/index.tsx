@@ -16,11 +16,14 @@ import { Input } from "../../../components/form";
 import style from "./style.module.scss";
 import useForm from "react-hook-form";
 import { useNotification } from "../../../components/notification";
-import { ChainUpdaterService } from "@keplr-wallet/background";
 import { KeplrError } from "@keplr-wallet/router";
 import { useConfirm } from "../../../components/confirm";
 import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
 import { FormattedMessage, useIntl } from "react-intl";
+import {
+  checkRestConnectivity,
+  checkRPCConnectivity,
+} from "@keplr-wallet/chain-validator";
 
 interface FormData {
   rpc: string;
@@ -134,11 +137,8 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
 
             try {
               try {
-                await ChainUpdaterService.checkEndpointsConnectivity(
-                  selectedChainId,
-                  data.rpc,
-                  data.lcd
-                );
+                await checkRPCConnectivity(selectedChainId, data.rpc);
+                await checkRestConnectivity(selectedChainId, data.lcd);
               } catch (e) {
                 if (
                   // Note the implementation of `ChainUpdaterService.checkEndpointsConnectivity`.

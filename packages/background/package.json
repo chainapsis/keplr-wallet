@@ -29,6 +29,7 @@
     "@ethersproject/bytes": "^5.5.0",
     "@ethersproject/keccak256": "^5.5.0",
     "@ethersproject/wallet": "^5.5.0",
+    "@keplr-wallet/chain-validator": "0.11.8",
     "@keplr-wallet/common": "0.11.8",
     "@keplr-wallet/cosmos": "0.11.8",
     "@keplr-wallet/crypto": "0.11.8",
