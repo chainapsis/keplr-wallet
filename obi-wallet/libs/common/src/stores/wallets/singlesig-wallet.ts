@@ -10,6 +10,8 @@ import { SerializedSinglesigWallet } from "./serialized-data";
 export class SinglesigWallet extends AbstractWallet {
   protected readonly chainStore: ChainStore;
 
+  public readonly _id: string;
+
   @observable
   protected serializedWallet: SerializedSinglesigWallet;
 
@@ -21,14 +23,17 @@ export class SinglesigWallet extends AbstractWallet {
 
   constructor({
     chainStore,
+    id,
     serializedWallet,
   }: {
     chainStore: ChainStore;
+    id: string;
     serializedWallet: SerializedSinglesigWallet;
     onChange: (serializedWallet: SerializedSinglesigWallet) => Promise<void>;
   }) {
     super();
     this.chainStore = chainStore;
+    this._id = id;
     this.serializedWallet = serializedWallet;
     makeObservable(this);
 
@@ -59,6 +64,10 @@ export class SinglesigWallet extends AbstractWallet {
       this.publicKey,
       this.chainStore.currentChainInformation.prefix
     );
+  }
+
+  public get id() {
+    return this._id;
   }
 
   public get type() {

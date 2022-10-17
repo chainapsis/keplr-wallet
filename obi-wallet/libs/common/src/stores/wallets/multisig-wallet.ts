@@ -25,6 +25,8 @@ import { SerializedMultisigWallet } from "./serialized-data";
 export class MultisigWallet extends AbstractWallet {
   protected readonly chainStore: ChainStore;
 
+  protected readonly _id: string;
+
   @observable
   protected serializedWallet: SerializedMultisigWallet;
   protected onChange: (
@@ -40,18 +42,25 @@ export class MultisigWallet extends AbstractWallet {
 
   constructor({
     chainStore,
+    id,
     serializedWallet,
     onChange,
   }: {
     chainStore: ChainStore;
+    id: string;
     serializedWallet: SerializedMultisigWallet;
     onChange: (serializedWallet: SerializedMultisigWallet) => Promise<void>;
   }) {
     super();
     this.chainStore = chainStore;
+    this._id = id;
     this.serializedWallet = serializedWallet;
     this.onChange = onChange;
     makeObservable(this);
+  }
+
+  public get id() {
+    return this._id;
   }
 
   public get address() {

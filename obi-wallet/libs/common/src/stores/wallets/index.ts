@@ -172,8 +172,8 @@ export class WalletsStore {
   }
 
   @action
-  public async setCurrentWallet(index: number) {
-    this.currentWalletId = this._wallets.ids[index];
+  public async setCurrentWallet(id: string) {
+    this.currentWalletId = id;
     await this.save();
   }
 
@@ -287,12 +287,14 @@ export class WalletsStore {
       case "multisig":
         return new MultisigWallet({
           chainStore: this.chainStore,
+          id,
           serializedWallet,
           onChange,
         });
       case "singlesig":
         return new SinglesigWallet({
           chainStore: this.chainStore,
+          id,
           serializedWallet,
           onChange,
         });

@@ -60,10 +60,10 @@ export const AccountPickerModal = observer<AccountPickerModalProps>(
             </Text>
           </View>
           <ScrollView>
-            {walletsStore.readyWallets.map((wallet, index) => {
+            {walletsStore.readyWallets.map((wallet) => {
               return (
                 <TouchableOpacity
-                  key={index}
+                  key={wallet.id}
                   style={{
                     height: 79,
                     width: "100%",
@@ -76,7 +76,7 @@ export const AccountPickerModal = observer<AccountPickerModalProps>(
                   onPress={() => {
                     close();
                     setTimeout(() => {
-                      void walletsStore.setCurrentWallet(index);
+                      void walletsStore.setCurrentWallet(wallet.id);
                     }, MODAL_TIMING / 2);
                   }}
                 >
@@ -95,6 +95,15 @@ export const AccountPickerModal = observer<AccountPickerModalProps>(
                       }}
                     >
                       {wallet.shortenedAddress}
+                    </Text>
+                    <Text
+                      style={{
+                        color: "#787B9C",
+                        fontSize: 14,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {wallet.type}
                     </Text>
                   </View>
                   <IconButton
