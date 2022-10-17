@@ -97,6 +97,14 @@ export class WalletsStore {
   }
 
   @action
+  public async removeWallet(walletIndex: number) {
+    this.serializedWallets.splice(walletIndex, 1);
+    this.wallets.splice(walletIndex, 1);
+    this.currentWalletIndex = null;
+    await this.save();
+  }
+
+  @action
   public async setCurrentWallet(currentWalletIndex: number | null) {
     this.currentWalletIndex = currentWalletIndex;
     await this.save();
@@ -135,6 +143,13 @@ export class WalletsStore {
       // If legacy wallets were added, fall back to first wallet
       if (addedLegacyWallets) {
         this.currentWalletIndex ??= 0;
+      }
+
+      if (
+        typeof this.currentWalletIndex === "number" &&
+        this.currentWalletIndex >= this.wallets.length
+      ) {
+        this.currentWalletIndex = null;
       }
 
       await this.save();
