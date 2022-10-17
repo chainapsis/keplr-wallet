@@ -26,7 +26,10 @@ export class MultisigWallet extends AbstractWallet {
   protected readonly chainStore: ChainStore;
 
   @observable
-  protected serializedData: SerializedMultisigWallet;
+  protected serializedWallet: SerializedMultisigWallet;
+  protected onChange: (
+    serializedWallet: SerializedMultisigWallet
+  ) => Promise<void>;
 
   @observable
   public keyInRecovery: MultisigKey | null = null;
@@ -37,23 +40,30 @@ export class MultisigWallet extends AbstractWallet {
 
   constructor({
     chainStore,
-    serializedData,
+    serializedWallet,
+    onChange,
   }: {
     chainStore: ChainStore;
-    serializedData: SerializedMultisigWallet;
+    serializedWallet: SerializedMultisigWallet;
+    onChange: (serializedWallet: SerializedMultisigWallet) => Promise<void>;
   }) {
     super();
     this.chainStore = chainStore;
-    this.serializedData = serializedData;
+    this.serializedWallet = serializedWallet;
+    this.onChange = onChange;
     makeObservable(this);
   }
 
   public get address() {
-    return null;
+    return this.proxyAddress?.address ?? null;
   }
 
   public get type() {
     return "multisig" as const;
+  }
+
+  public get isReady() {
+    return this.currentAdmin !== null;
   }
 
   public get proxyAddress(): SerializedProxyAddress | null {
@@ -69,9 +79,9 @@ export class MultisigWallet extends AbstractWallet {
   }
 
   @action
-  public setNextAdmin(payload: SerializedMultisigPayload) {
-    // TODO: save to WalletsStore
-    this.serializedData.data.nextAdmin = payload;
+  public async setNextAdmin(payload: SerializedMultisigPayload) {
+    this.serializedWallet.data.nextAdmin = payload;
+    await this.onChange(this.serializedWallet);
   }
 
   @computed
@@ -86,9 +96,9 @@ export class MultisigWallet extends AbstractWallet {
   }
 
   @action
-  public setCurrentAdmin(payload: SerializedMultisigPayload | null) {
-    // TODO: save to WalletsStore
-    this.serializedData.data.currentAdmin = payload;
+  public async setCurrentAdmin(payload: SerializedMultisigPayload | null) {
+    this.serializedWallet.data.currentAdmin = payload;
+    await this.onChange(this.serializedWallet);
   }
 
   @action
@@ -195,14 +205,14 @@ export class MultisigWallet extends AbstractWallet {
   }
 
   protected get proxyAddresses() {
-    return this.serializedData.data.proxyAddresses;
+    return this.serializedWallet.data.proxyAddresses;
   }
 
   protected get serializedCurrentAdmin() {
-    return this.serializedData.data.currentAdmin;
+    return this.serializedWallet.data.currentAdmin;
   }
 
   protected get serializedNextAdmin() {
-    return this.serializedData.data.nextAdmin;
+    return this.serializedWallet.data.nextAdmin;
   }
 }

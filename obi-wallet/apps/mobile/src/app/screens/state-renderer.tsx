@@ -55,8 +55,7 @@ export const StateRendererScreen = observer<StateRendererScreenProps>(() => {
         // TODO: Here we want to show some kind of error screen.
         return null;
       case WalletState.READY:
-        // TODO: this probably needs to be handled differently
-        if (walletsStore.currentWallet) {
+        if (walletsStore.currentWallet?.isReady) {
           return <HomeScreen />;
         } else {
           return <OnboardingScreen />;

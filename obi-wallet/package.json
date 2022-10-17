@@ -82,6 +82,7 @@
     "mobx": "^6.6.2",
     "mobx-react-lite": "^3.2.0",
     "mobx-utils": "^6.0.3",
+    "nanoid": "^3.3.4",
     "node-html-parser": "^5.4.2",
     "os-browserify": "^0.3.0",
     "otplib": "^12.0.1",

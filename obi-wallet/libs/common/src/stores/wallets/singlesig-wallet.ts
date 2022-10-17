@@ -11,7 +11,7 @@ export class SinglesigWallet extends AbstractWallet {
   protected readonly chainStore: ChainStore;
 
   @observable
-  protected serializedData: SerializedSinglesigWallet;
+  protected serializedWallet: SerializedSinglesigWallet;
 
   @observable
   public privateKey: Uint8Array | null = null;
@@ -21,14 +21,15 @@ export class SinglesigWallet extends AbstractWallet {
 
   constructor({
     chainStore,
-    serializedData,
+    serializedWallet,
   }: {
     chainStore: ChainStore;
-    serializedData: SerializedSinglesigWallet;
+    serializedWallet: SerializedSinglesigWallet;
+    onChange: (serializedWallet: SerializedSinglesigWallet) => Promise<void>;
   }) {
     super();
     this.chainStore = chainStore;
-    this.serializedData = serializedData;
+    this.serializedWallet = serializedWallet;
     makeObservable(this);
 
     const { coinType } = this.chainStore.currentChainInformation.bip44;
@@ -65,6 +66,10 @@ export class SinglesigWallet extends AbstractWallet {
   }
 
   public get mnemonic() {
-    return this.serializedData.data;
+    return this.serializedWallet.data;
+  }
+
+  public get isReady() {
+    return true;
   }
 }

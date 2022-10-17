@@ -45,6 +45,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
         >
           <LanguagePicker />
         </View>
+        {/* TODO: make sure this is reopened when reentering this */}
         {isInRecovery ? null : <AccountPickerModal />}
 
         <View
@@ -97,9 +98,12 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                     },
                     {
                       text: "Continue",
-                      onPress() {
-                        multisigWallet?.cancelRecovery();
-                        multisigWallet?.recover("biometrics");
+                      async onPress() {
+                        const wallet =
+                          multisigWallet ??
+                          (await walletsStore.addMultisigWallet());
+                        wallet.cancelRecovery();
+                        wallet.recover("biometrics");
                         navigation.navigate("create-multisig-biometrics");
                       },
                     },
@@ -207,7 +211,10 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
         style={{
           marginTop: 40,
         }}
-        onPress={action(() => {
+        onPress={action(async () => {
+          if (!multisigWallet) {
+            await walletsStore.addMultisigWallet();
+          }
           demoStore.demoMode = false;
           navigation.navigate(navigationUrl);
         })}

@@ -1,5 +1,6 @@
 import { KVStore } from "@keplr-wallet/common";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
+import { nanoid } from "nanoid/non-secure";
 import invariant from "tiny-invariant";
 
 import { ChainStore } from "../chain";
@@ -8,6 +9,7 @@ import {
   migrateSerializedData,
   SerializedData,
   SerializedDataAnyVersion,
+  SerializedMultisigWallet,
   SerializedMultisigWalletAnyVersion,
   SerializedSinglesigWalletAnyVersion,
   SerializedWallet,
@@ -47,12 +49,21 @@ export class WalletsStore {
   };
 
   @observable
-  public wallets: (MultisigWallet | SinglesigWallet)[] = [];
+  protected _wallets: {
+    ids: string[];
+    entities: Record<
+      string,
+      {
+        wallet: SinglesigWallet | MultisigWallet;
+        serializedWallet: SerializedWallet;
+      }
+    >;
+  } = {
+    ids: [],
+    entities: {},
+  };
   @observable
-  protected serializedWallets: SerializedWallet[] = [];
-  @observable
-  public currentWalletIndex: number | null = null;
-
+  public currentWalletId: string | null = null;
   @observable
   public state: WalletState = WalletState.LOADING;
 
@@ -76,8 +87,8 @@ export class WalletsStore {
 
   @computed
   public get currentWallet() {
-    if (this.currentWalletIndex === null) return null;
-    return this.wallets[this.currentWalletIndex];
+    if (this.currentWalletId === null) return null;
+    return this._wallets.entities[this.currentWalletId].wallet;
   }
 
   public get type(): "multisig" | "singlesig" | null {
@@ -88,31 +99,82 @@ export class WalletsStore {
     return this.currentWallet?.address ?? null;
   }
 
+  @computed
+  public get currentWalletIndex() {
+    if (!this.currentWalletId) return null;
+    const index = this._wallets.ids.indexOf(this.currentWalletId);
+    return index === -1 ? null : index;
+  }
+
+  @computed
+  public get wallets() {
+    return this._wallets.ids.map((id) => this._wallets.entities[id].wallet);
+  }
+
+  @computed
+  protected get serializedWallets() {
+    return this._wallets.ids.map(
+      (id) => this._wallets.entities[id].serializedWallet
+    );
+  }
+
   @action
-  public async addWallet(wallet: SerializedWallet) {
-    this.serializedWallets.push(wallet);
-    this.wallets.push(this.createWallet(wallet));
-    this.currentWalletIndex = this.wallets.length - 1;
+  public async addWallet(serializedWallet: SerializedWallet) {
+    const wallet = this.addWalletWithoutSave(serializedWallet);
     await this.save();
+    return wallet;
+  }
+
+  @action
+  protected addWalletWithoutSave = (serializedWallet: SerializedWallet) => {
+    const id = nanoid();
+    const wallet = this.createWallet({ id, serializedWallet });
+    this._wallets.ids.push(id);
+    this._wallets.entities[id] = {
+      wallet,
+      serializedWallet,
+    };
+    this.currentWalletId = id;
+    return wallet;
+  };
+
+  @action
+  public async addMultisigWallet() {
+    const wallet: SerializedMultisigWallet = {
+      type: "multisig",
+      data: {
+        currentAdmin: null,
+        nextAdmin: {
+          biometrics: null,
+          phoneNumber: null,
+          social: null,
+          cloud: null,
+        },
+        proxyAddresses: {},
+      },
+    };
+    return (await this.addWallet(wallet)) as MultisigWallet;
   }
 
   @action
   public async removeWallet(walletIndex: number) {
-    this.serializedWallets.splice(walletIndex, 1);
-    this.wallets.splice(walletIndex, 1);
-    this.currentWalletIndex = null;
+    const [id] = this._wallets.ids.splice(walletIndex, 1);
+    delete this._wallets.entities[id];
+    if (this.currentWalletId === id) {
+      this.currentWalletId = null;
+    }
     await this.save();
   }
 
   @action
-  public async setCurrentWallet(currentWalletIndex: number | null) {
-    this.currentWalletIndex = currentWalletIndex;
+  public async setCurrentWallet(index: number) {
+    this.currentWalletId = this._wallets.ids[index];
     await this.save();
   }
 
   @action
   public async logout() {
-    this.currentWalletIndex = null;
+    this.currentWalletId = null;
     await this.save();
   }
 
@@ -135,22 +197,18 @@ export class WalletsStore {
       const { currentWalletIndex, wallets } =
         migrateSerializedData(serializedData);
 
-      this.serializedWallets = wallets;
-      this.wallets = wallets.map(this.createWallet);
-      this.currentWalletIndex = currentWalletIndex;
-      this.state = WalletState.READY;
+      wallets.forEach(this.addWalletWithoutSave);
 
       // If legacy wallets were added, fall back to first wallet
-      if (addedLegacyWallets) {
-        this.currentWalletIndex ??= 0;
-      }
+      let walletIndexToUse = currentWalletIndex;
+      if (addedLegacyWallets) walletIndexToUse ??= 0;
 
-      if (
-        typeof this.currentWalletIndex === "number" &&
-        this.currentWalletIndex >= this.wallets.length
-      ) {
-        this.currentWalletIndex = null;
-      }
+      this.currentWalletId =
+        typeof walletIndexToUse === "number"
+          ? this._wallets.ids[walletIndexToUse]
+          : null;
+
+      this.state = WalletState.READY;
 
       await this.save();
     } catch (e) {
@@ -208,17 +266,30 @@ export class WalletsStore {
     return wallet;
   }
 
-  protected createWallet = (serializedData: SerializedWallet) => {
-    switch (serializedData.type) {
+  protected createWallet = ({
+    id,
+    serializedWallet,
+  }: {
+    id: string;
+    serializedWallet: SerializedWallet;
+  }) => {
+    const onChange = async (serializedWallet: SerializedWallet) => {
+      this._wallets.entities[id].serializedWallet = serializedWallet;
+      await this.save();
+    };
+
+    switch (serializedWallet.type) {
       case "multisig":
         return new MultisigWallet({
           chainStore: this.chainStore,
-          serializedData,
+          serializedWallet,
+          onChange,
         });
       case "singlesig":
         return new SinglesigWallet({
           chainStore: this.chainStore,
-          serializedData,
+          serializedWallet,
+          onChange,
         });
     }
   };
