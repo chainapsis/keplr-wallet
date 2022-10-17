@@ -8,7 +8,10 @@ import { Alert, Image, SafeAreaView, View } from "react-native";
 import { Button } from "../../../button";
 import { LanguagePicker } from "../../../language-picker";
 import { useStore } from "../../../stores";
-import { AccountPickerModal } from "../../account-picker-modal";
+import {
+  AccountPickerModal,
+  useAccountPickerModalProps,
+} from "../../account-picker-modal";
 import { DemoModeToggle } from "../../components/demo-mode-toggle";
 import { InitialBackground } from "../../components/initial-background";
 import { OnboardingStackParamList } from "../onboarding-stack";
@@ -28,6 +31,8 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
   const isInRecovery =
     isMultisigWallet(wallet) && wallet.keyInRecovery !== null;
 
+  const accountPickerModalProps = useAccountPickerModalProps();
+
   return (
     <InitialBackground>
       <SafeAreaView
@@ -45,7 +50,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
         >
           <LanguagePicker />
         </View>
-        {isInRecovery ? null : <AccountPickerModal />}
+        <AccountPickerModal {...accountPickerModalProps} />
 
         <View
           style={{
@@ -203,21 +208,36 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
         labelId = "onboarding1.getstarted";
     }
     return (
-      <Button
-        label={intl.formatMessage({ id: labelId })}
-        RightIcon={GetStarted}
-        flavor="green"
-        style={{
-          marginTop: 40,
-        }}
-        onPress={action(async () => {
-          if (!multisigWallet) {
-            await walletsStore.addMultisigWallet();
-          }
-          demoStore.demoMode = false;
-          navigation.navigate(navigationUrl);
-        })}
-      />
+      <View style={{ marginTop: 40 }}>
+        {!keyInRecovery && walletsStore.wallets.length > 0 ? (
+          <Button
+            label={intl.formatMessage({
+              id: "onboarding1.login",
+              defaultMessage: "Login",
+            })}
+            RightIcon={GetStarted}
+            flavor="green"
+            onPress={() => {
+              accountPickerModalProps.open();
+            }}
+          />
+        ) : null}
+        <Button
+          label={intl.formatMessage({ id: labelId })}
+          RightIcon={GetStarted}
+          flavor="green"
+          style={{
+            marginTop: 20,
+          }}
+          onPress={action(async () => {
+            if (!multisigWallet) {
+              await walletsStore.addMultisigWallet();
+            }
+            demoStore.demoMode = false;
+            navigation.navigate(navigationUrl);
+          })}
+        />
+      </View>
     );
   }
 });
