@@ -127,35 +127,35 @@ export class MultisigWallet extends AbstractWallet {
   }
 
   @action
-  public setPhoneNumberKey(payload: SerializedPhoneNumberPayload) {
-    this.setNextAdmin({
+  public async setPhoneNumberKey(payload: SerializedPhoneNumberPayload) {
+    await this.setNextAdmin({
       ...this.nextAdmin,
       phoneNumber: payload,
     });
   }
 
   @action
-  public setBiometricsPublicKey(payload: SerializedBiometricsPayload) {
-    this.setNextAdmin({
+  public async setBiometricsPublicKey(payload: SerializedBiometricsPayload) {
+    await this.setNextAdmin({
       ...this.nextAdmin,
       biometrics: payload,
     });
   }
 
   @action
-  public setSocialPublicKey(payload: SerializedSocialPayload) {
-    this.setNextAdmin({
+  public async setSocialPublicKey(payload: SerializedSocialPayload) {
+    await this.setNextAdmin({
       ...this.nextAdmin,
       social: payload,
     });
   }
 
   @action
-  public finishProxySetup(address: SerializedProxyAddress) {
+  public async finishProxySetup(address: SerializedProxyAddress) {
     this.keyInRecovery = null;
     this.updateProposed = false;
     this.proxyAddresses[this.chainStore.currentChain] = address;
-    this.setCurrentAdmin(this.serializedNextAdmin);
+    await this.setCurrentAdmin(this.serializedNextAdmin);
   }
 
   @action
@@ -165,9 +165,9 @@ export class MultisigWallet extends AbstractWallet {
   }
 
   @action
-  public cancelRecovery() {
+  public async cancelRecovery() {
     if (this.serializedCurrentAdmin) {
-      this.setNextAdmin(this.serializedCurrentAdmin);
+      await this.setNextAdmin(this.serializedCurrentAdmin);
     }
     this.keyInRecovery = null;
     this.walletInRecovery = null;

@@ -15,7 +15,7 @@ import {
   resetBiometricsKeyPair,
 } from "../../../../biometrics";
 import { Button, IconButton } from "../../../../button";
-import { useMultisigWallet, useStore } from "../../../../stores";
+import { useMultisigWallet } from "../../../../stores";
 import { Background } from "../../../components/background";
 import { OnboardingStackParamList } from "../../onboarding-stack";
 import FaceScanner from "./assets/face-scanner.svg";
@@ -37,16 +37,16 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
       setButtonDisabledDoubleclick(true);
 
       try {
-        if (!isMultisigDemoWallet(wallet)) {
-          const publicKey = await getBiometricsPublicKey();
+        const publicKey = await getBiometricsPublicKey({
+          demoMode: isMultisigDemoWallet(wallet),
+        });
 
-          wallet.setBiometricsPublicKey({
-            publicKey: {
-              type: pubkeyType.secp256k1,
-              value: publicKey,
-            },
-          });
-        }
+        wallet.setBiometricsPublicKey({
+          publicKey: {
+            type: pubkeyType.secp256k1,
+            value: publicKey,
+          },
+        });
         setScannedBiometrics(true);
         setButtonDisabledDoubleclick(false);
       } catch (e) {
@@ -63,8 +63,6 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
     };
 
     useEffect(() => {
-      if (isMultisigDemoWallet(wallet)) return;
-
       const { biometrics } = wallet.nextAdmin;
       if (biometrics && wallet.keyInRecovery !== "biometrics") {
         Alert.alert(

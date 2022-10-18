@@ -176,18 +176,6 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         gas: "1280000",
       };
 
-      if (isMultisigDemoWallet(wallet)) {
-        const signDoc: StdSignDoc = {
-          memo: "",
-          account_number: "0",
-          chain_id: currentChainInformation.chainId,
-          fee: fee,
-          msgs: messages,
-          sequence: "0",
-        };
-        return new Sha256(serializeSignDoc(signDoc)).digest();
-      }
-
       invariant(address, "Expected `address` to exist.");
 
       const client = await createStargateClient(
@@ -216,7 +204,6 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
       multisig,
       currentChainInformation.denom,
       currentChainInformation.chainId,
-      wallet,
       messages,
     ]);
 
@@ -231,11 +218,10 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         switch (id) {
           case "biometrics": {
             const message = await getMessage();
-            const { signature } = isMultisigDemoWallet(wallet)
-              ? { signature: new Uint8Array() }
-              : await createBiometricSignature({
-                  payload: message,
-                });
+            const { signature } = await createBiometricSignature({
+              payload: message,
+              demoMode: isMultisigDemoWallet(wallet),
+            });
             const biometrics = multisig?.biometrics;
             invariant(biometrics, "Expected device key to exist.");
 
@@ -739,6 +725,7 @@ const PhoneNumberBottomSheetContent =
                       phoneNumber: payload.phoneNumber,
                       securityAnswer,
                       message,
+                      demoMode: isMultisigDemoWallet(wallet),
                     });
                   }}
                 />
@@ -749,14 +736,11 @@ const PhoneNumberBottomSheetContent =
               onPress={async () => {
                 try {
                   setVerifyButtonDisabledDoubleclick(true);
-                  if (isMultisigDemoWallet(wallet)) {
-                    onSuccess(new Uint8Array());
-                  } else {
-                    const response = await parseSignatureTextMessageResponse(
-                      key
-                    );
-                    if (response) onSuccess(response);
-                  }
+                  const response = await parseSignatureTextMessageResponse({
+                    key,
+                    demoMode: isMultisigDemoWallet(wallet),
+                  });
+                  if (response) onSuccess(response);
                   setVerifyButtonDisabledDoubleclick(false);
                 } catch (e) {
                   const error = e as Error;
@@ -803,17 +787,14 @@ const PhoneNumberBottomSheetContent =
               setMagicButtonDisabledDoubleclick(true);
 
               try {
-                if (!isMultisigDemoWallet(wallet)) {
-                  const message = await getMessage();
-                  await sendSignatureTextMessage({
-                    phoneNumber: payload.phoneNumber,
-                    securityAnswer,
-                    message,
-                  });
-                }
-
+                const message = await getMessage();
+                await sendSignatureTextMessage({
+                  phoneNumber: payload.phoneNumber,
+                  securityAnswer,
+                  message,
+                  demoMode: isMultisigDemoWallet(wallet),
+                });
                 setSentMessage(true);
-
                 setMagicButtonDisabledDoubleclick(false);
               } catch (e) {
                 const error = e as Error;

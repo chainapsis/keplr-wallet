@@ -1,6 +1,6 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton } from "../../../../button";
 import { PhoneInput } from "../../../../phone-input";
-import { useMultisigWallet, useStore } from "../../../../stores";
+import { useMultisigWallet } from "../../../../stores";
 import { sendPublicKeyTextMessage } from "../../../../text-message";
 import { Background } from "../../../components/background";
 import {
@@ -295,13 +295,11 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
 
                 if (checkSecurityAnswer && checkPhoneNumber) {
                   try {
-                    if (!wallet.isDemo) {
-                      await sendPublicKeyTextMessage({
-                        phoneNumber,
-                        securityAnswer,
-                      });
-                    }
-
+                    await sendPublicKeyTextMessage({
+                      phoneNumber,
+                      securityAnswer,
+                      demoMode: isMultisigDemoWallet(wallet),
+                    });
                     navigation.navigate(
                       "create-multisig-phone-number-confirm",
                       {
@@ -310,7 +308,6 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                         securityAnswer,
                       }
                     );
-
                     setMagicButtonDisabledDoubleclick(false);
                   } catch (e) {
                     const error = e as Error;

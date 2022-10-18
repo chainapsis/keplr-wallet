@@ -1,12 +1,8 @@
-import { pubkeyToAddress, pubkeyType } from "@cosmjs/amino";
+import { pubkeyToAddress } from "@cosmjs/amino";
 import { MsgInstantiateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  isMultisigDemoWallet,
-  Multisig,
-  RequestObiSignAndBroadcastMsg,
-} from "@obi-wallet/common";
+import { RequestObiSignAndBroadcastMsg } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
@@ -21,44 +17,6 @@ import { useMultisigWallet, useStore } from "../../../stores";
 import { Background } from "../../components/background";
 import { OnboardingStackParamList } from "../onboarding-stack";
 
-const demoModeMultisig: Multisig = {
-  multisig: {
-    address: "demo-create-multisig",
-    publicKey: {
-      type: pubkeyType.multisigThreshold,
-      value: {
-        threshold: "1",
-        pubkeys: [],
-      },
-    },
-  },
-  biometrics: {
-    address: "demo-biometrics",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-biometrics",
-    },
-  },
-  phoneNumber: {
-    address: "demo-phone-number",
-    phoneNumber: "demo-phone-number",
-    securityQuestion: "birthplace",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-phone-number",
-    },
-  },
-  social: {
-    address: "demo-social",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-social",
-    },
-  },
-  cloud: null,
-  email: null,
-};
-
 export type MultisigInitProps = NativeStackScreenProps<
   OnboardingStackParamList,
   "create-multisig-init"
@@ -68,9 +26,7 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
   const { chainStore } = useStore();
   const wallet = useMultisigWallet();
   const { currentChainInformation } = chainStore;
-  const multisig = isMultisigDemoWallet(wallet)
-    ? demoModeMultisig
-    : wallet.nextAdmin;
+  const multisig = wallet.nextAdmin;
 
   const encodeObjects = useMemo(() => {
     if (!multisig.multisig?.address) return [];
@@ -111,14 +67,6 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
           cancelable: false,
           isOnboarding: true,
         });
-
-        if (isMultisigDemoWallet(wallet)) {
-          wallet.finishProxySetup({
-            address: "demo",
-            codeId: chainStore.currentChainInformation.currentCodeId,
-          });
-          return;
-        }
 
         try {
           invariant(response.rawLog, "Expected `response` to have `rawLog`.");

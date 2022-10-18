@@ -10,7 +10,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../../button";
-import { useMultisigWallet, useStore } from "../../../../stores";
+import { useMultisigWallet } from "../../../../stores";
 import { TextInput } from "../../../../text-input";
 import {
   parsePublicKeyTextMessageResponse,
@@ -178,12 +178,11 @@ export function MultisigPhoneNumberConfirm({
                   setResendButtonHit(true);
 
                   setKey("");
-                  if (!isMultisigDemoWallet(wallet)) {
-                    await sendPublicKeyTextMessage({
-                      phoneNumber: params.phoneNumber,
-                      securityAnswer: params.securityAnswer,
-                    });
-                  }
+                  await sendPublicKeyTextMessage({
+                    phoneNumber: params.phoneNumber,
+                    securityAnswer: params.securityAnswer,
+                    demoMode: isMultisigDemoWallet(wallet),
+                  });
                 }}
                 disabled={resendButtonDisabled}
               />
@@ -228,9 +227,10 @@ export function MultisigPhoneNumberConfirm({
               onPress={async () => {
                 try {
                   setVerifyButtonDisabledDoubleclick(true);
-                  const publicKey = isMultisigDemoWallet(wallet)
-                    ? "demo"
-                    : await parsePublicKeyTextMessageResponse(key);
+                  const publicKey = await parsePublicKeyTextMessageResponse({
+                    key,
+                    demoMode: isMultisigDemoWallet(wallet),
+                  });
                   if (publicKey) {
                     if (!isMultisigDemoWallet(wallet)) {
                       wallet.setPhoneNumberKey({

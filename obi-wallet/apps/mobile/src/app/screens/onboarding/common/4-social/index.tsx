@@ -1,8 +1,7 @@
 import { pubkeyToAddress } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
-import { createStargateClient } from "@obi-wallet/common";
+import { createStargateClient, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -36,8 +35,6 @@ export const MultisigSocial = observer<MultisigSocialProps>(
     const intl = useIntl();
 
     useEffect(() => {
-      if (isMultisigDemoWallet(wallet)) return;
-
       const { social } = wallet.nextAdmin;
 
       if (
@@ -212,9 +209,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                 disabled={fetchingPubKey}
                 onPress={async () => {
                   setFetchingPubKey(true);
-                  const publicKey = isMultisigDemoWallet(wallet)
-                    ? { type: "demo", value: "demo" }
-                    : await getAccountPubkey(address);
+                  const publicKey = await getAccountPubkey(address);
                   setFetchingPubKey(false);
 
                   if (publicKey) {
@@ -291,11 +286,9 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       });
                       navigation.navigate("recover-multisig");
                     } else {
-                      if (!isMultisigDemoWallet(wallet)) {
-                        wallet.setSocialPublicKey({
-                          publicKey: publicKey,
-                        });
-                      }
+                      wallet.setSocialPublicKey({
+                        publicKey,
+                      });
                       if (wallet.keyInRecovery !== "social") {
                         navigation.navigate("create-multisig-init");
                       } else {

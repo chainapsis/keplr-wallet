@@ -9,6 +9,7 @@ import {
 
 import { rootStore } from "../../background/root-store";
 import { envInvariant } from "../../helpers/invariant";
+import { prepareWalletAndSign } from "../secp256k1";
 
 envInvariant("PHONE_NUMBER_KEY_SECRET", PHONE_NUMBER_KEY_SECRET);
 envInvariant(
@@ -25,13 +26,21 @@ const TWILIO_BASIC_AUTH = `Basic ${Buffer.from(
   `${PHONE_NUMBER_TWILIO_BASIC_AUTH_USER}:${PHONE_NUMBER_TWILIO_BASIC_AUTH_PASSWORD}`
 ).toString("base64")}`;
 
+const DEMO_PUBLIC_KEY = "A6J4MMAkdwzopAESgMqCAqy33l873BIbWy/nzdyoXkoe";
+const DEMO_PRIVATE_KEY = "eZWdYnw59qFVTHLPIVyUN1xgNXKMuURUCp2wsWF29Aw=";
+let DEMO_PAYLOAD: Uint8Array = new Uint8Array();
+
 export async function sendPublicKeyTextMessage({
   phoneNumber,
   securityAnswer,
+  demoMode,
 }: {
   phoneNumber: string;
   securityAnswer: string;
+  demoMode: boolean;
 }) {
+  if (demoMode) return;
+
   try {
     await encryptAndSendMessage({
       message: `pub:${securityAnswer}`,
@@ -44,7 +53,15 @@ export async function sendPublicKeyTextMessage({
   }
 }
 
-export async function parsePublicKeyTextMessageResponse(key: string) {
+export async function parsePublicKeyTextMessageResponse({
+  key,
+  demoMode,
+}: {
+  key: string;
+  demoMode: boolean;
+}) {
+  if (demoMode) return DEMO_PUBLIC_KEY;
+
   try {
     const decrypted = await fetchAndDecryptResponse(key);
 
@@ -67,11 +84,18 @@ export async function sendSignatureTextMessage({
   phoneNumber,
   securityAnswer,
   message,
+  demoMode,
 }: {
   phoneNumber: string;
   securityAnswer: string;
   message: Uint8Array;
+  demoMode: boolean;
 }) {
+  if (demoMode) {
+    DEMO_PAYLOAD = message;
+    return;
+  }
+
   try {
     await encryptAndSendMessage({
       message: `sign:${securityAnswer},${Buffer.from(message.buffer).toString(
@@ -86,7 +110,22 @@ export async function sendSignatureTextMessage({
   }
 }
 
-export async function parseSignatureTextMessageResponse(key: string) {
+export async function parseSignatureTextMessageResponse({
+  key,
+  demoMode,
+}: {
+  key: string;
+  demoMode: boolean;
+}): Promise<Uint8Array | null> {
+  if (demoMode) {
+    const { signature } = await prepareWalletAndSign({
+      publicKey: DEMO_PUBLIC_KEY,
+      privateKey: DEMO_PRIVATE_KEY,
+      payload: DEMO_PAYLOAD,
+    });
+    return signature;
+  }
+
   try {
     const decrypted = await fetchAndDecryptResponse(key);
 

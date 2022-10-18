@@ -1,30 +1,48 @@
-import {
-  coins,
-  pubkeyToAddress,
-  pubkeyType,
-  Secp256k1Wallet,
-} from "@cosmjs/amino";
-import { chains } from "@obi-wallet/common";
-import { createStargateClient } from "@obi-wallet/common";
 import { randomBytes } from "crypto";
 import * as Keychain from "react-native-keychain";
 import secp256k1 from "secp256k1";
 
-import { rootStore } from "../../background/root-store";
-import { createSigningStargateClient } from "../clients";
-import { lendFees } from "../fee-lender-worker";
+import { prepareWalletAndSign } from "../secp256k1";
 
 const BIOMETRICS_KEY = "obi-wallet-biometrics";
 
-export async function isBiometricsAvailable() {
-  return false;
-}
+const DEMO_PUBLIC_KEY = "A4TlI8UUTtpSI+oZ9q0dnXJoK9GiE/iMoy5cdMO2HNTI";
+const DEMO_PRIVATE_KEY = "jrfHogEDo91xaC0Kym/BMheAhlm5z93fVwMT8mKTGy4=";
 
 export async function resetBiometricsKeyPair() {
   await Keychain.resetGenericPassword({ service: BIOMETRICS_KEY });
 }
 
-export async function getBiometricsPublicKey() {
+export async function getBiometricsPublicKey({
+  demoMode,
+}: {
+  demoMode: boolean;
+}) {
+  const { publicKey } = await getBiometricsKeyPair({ demoMode });
+  return publicKey;
+}
+
+export async function getBiometricsPrivateKey({
+  demoMode,
+}: {
+  demoMode: boolean;
+}) {
+  const { privateKey } = await getBiometricsKeyPair({ demoMode });
+  return privateKey;
+}
+
+export async function getBiometricsKeyPair({
+  demoMode,
+}: {
+  demoMode: boolean;
+}) {
+  if (demoMode) {
+    return {
+      privateKey: DEMO_PRIVATE_KEY,
+      publicKey: DEMO_PUBLIC_KEY,
+    };
+  }
+
   const credentials = await Keychain.getGenericPassword({
     authenticationPrompt: {
       title: "Authentication Required",
@@ -35,7 +53,10 @@ export async function getBiometricsPublicKey() {
   });
 
   if (credentials) {
-    return credentials.username;
+    return {
+      publicKey: credentials.username,
+      privateKey: credentials.password,
+    };
   } else {
     // Fake-AuthPrompt (set+get) to trigger Prompt at initial App-Start
     await Keychain.resetGenericPassword({ service: "fake-prompt" });
@@ -64,100 +85,24 @@ export async function getBiometricsPublicKey() {
       accessControl:
         Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
     });
-    return publicKey;
-  }
-}
-
-export async function getBiometricsPrivateKey() {
-  const credentials = await Keychain.getGenericPassword({
-    authenticationPrompt: {
-      title: "Authentication Required",
-    },
-    service: BIOMETRICS_KEY,
-    accessControl:
-      Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
-  });
-
-  if (credentials) {
-    return credentials.password;
-  } else {
-    throw new Error("No device keypair found");
-  }
-}
-
-export async function getBiometricsKeyPair() {
-  const credentials = await Keychain.getGenericPassword({
-    authenticationPrompt: {
-      title: "Authentication Required",
-    },
-    service: BIOMETRICS_KEY,
-    accessControl:
-      Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
-  });
-
-  if (credentials) {
     return {
-      publicKey: credentials.username,
-      privateKey: credentials.password,
+      publicKey,
+      privateKey,
     };
-  } else {
-    throw new Error("No device keypair found");
   }
 }
 
 export async function createBiometricSignature({
   payload,
+  demoMode,
 }: {
   payload: Uint8Array;
+  demoMode: boolean;
 }) {
-  const credentials = await Keychain.getGenericPassword({
-    authenticationPrompt: {
-      title: "Authentication Required",
-    },
-    service: BIOMETRICS_KEY,
-    accessControl:
-      Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
+  const { publicKey, privateKey } = await getBiometricsKeyPair({ demoMode });
+  return await prepareWalletAndSign({
+    publicKey,
+    privateKey,
+    payload,
   });
-
-  if (!credentials) throw new Error("No device keypair found");
-
-  const { chainStore } = rootStore;
-  const chainId = chainStore.currentChain;
-  const { prefix, denom } = chains[chainId];
-  const client = await createStargateClient(chainId);
-
-  const address = pubkeyToAddress(
-    {
-      type: pubkeyType.secp256k1,
-      value: credentials.username,
-    },
-    prefix
-  );
-
-  if (!(await client.getAccount(address))) {
-    await lendFees({ chainId, address });
-  }
-
-  if (!(await client.getAccount(address))?.pubkey) {
-    const signer = await Secp256k1Wallet.fromKey(
-      new Uint8Array(Buffer.from(credentials.password, "base64")),
-      prefix
-    );
-    const signingClient = await createSigningStargateClient({
-      chainId,
-      signer,
-    });
-    await signingClient.sendTokens(
-      address,
-      address,
-      coins(1, denom),
-      "auto",
-      ""
-    );
-  }
-
-  const privateKey = new Uint8Array(
-    Buffer.from(credentials.password, "base64")
-  );
-  return secp256k1.ecdsaSign(payload, privateKey);
 }

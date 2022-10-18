@@ -108,7 +108,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
                         const wallet =
                           multisigWallet ??
                           (await walletsStore.addMultisigWallet());
-                        wallet.cancelRecovery();
+                        await wallet.cancelRecovery();
                         wallet.recover("biometrics");
                         navigation.navigate("create-multisig-biometrics");
                       },
@@ -126,9 +126,9 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
               style={{
                 marginTop: 20,
               }}
-              onPress={action(() => {
-                multisigWallet?.cancelRecovery();
-              })}
+              onPress={async () => {
+                await multisigWallet?.cancelRecovery();
+              }}
             />
           ) : (
             <Button
