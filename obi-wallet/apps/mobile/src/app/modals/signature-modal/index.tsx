@@ -31,11 +31,14 @@ import { createVestingAminoConverters } from "@cosmjs/stargate/build/modules";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet/src";
 import {
   createStargateClient,
+  isAnyMultisigWallet,
   isMultisigDemoWallet,
-  isMultisigWallet,
   isSinglesigWallet,
   Multisig,
   MultisigKey,
+  MultisigWallet,
+  RequestObiSignAndBroadcastPayload,
+  SinglesigWallet,
   Text,
   WalletType,
 } from "@obi-wallet/common";
@@ -47,28 +50,32 @@ import { Alert, ModalProps, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import invariant from "tiny-invariant";
 
-import { createBiometricSignature } from "../../../biometrics";
-import { InlineButton } from "../../../button";
-import { createSigningCosmWasmClient } from "../../../clients";
-import { lendFees } from "../../../fee-lender-worker";
-import { useStore } from "../../../stores";
-import { TextInput } from "../../../text-input";
+import { createBiometricSignature } from "../../biometrics";
+import { InlineButton } from "../../button";
+import { createSigningCosmWasmClient } from "../../clients";
+import { lendFees } from "../../fee-lender-worker";
 import {
-  parseSignatureTextMessageResponse,
-  sendSignatureTextMessage,
-} from "../../../text-message";
-import { BottomSheet, BottomSheetRef } from "../bottom-sheet";
-import { CheckIcon, Key, KeysList } from "../keys-list";
+  BottomSheet,
+  BottomSheetRef,
+} from "../../screens/components/bottom-sheet";
+import { CheckIcon, Key, KeysList } from "../../screens/components/keys-list";
 import {
   SecurityQuestionInput,
   useSecurityQuestionInput,
-} from "../phone-number/security-question-input";
-import { SendMagicSmsButton } from "../phone-number/send-magic-sms-button";
-import { VerifyAndProceedButton } from "../phone-number/verify-and-proceed-button";
+} from "../../screens/components/phone-number/security-question-input";
+import { SendMagicSmsButton } from "../../screens/components/phone-number/send-magic-sms-button";
+import { VerifyAndProceedButton } from "../../screens/components/phone-number/verify-and-proceed-button";
+import { useStore } from "../../stores";
+import { TextInput } from "../../text-input";
+import {
+  parseSignatureTextMessageResponse,
+  sendSignatureTextMessage,
+} from "../../text-message";
 import { ConfirmMessages } from "./confirm-messages";
 import { wrapMessages } from "./wrap-messages";
 
 export interface SignatureModalProps extends ModalProps {
+  wallet: MultisigWallet | SinglesigWallet;
   innerMessages: AminoMsg[];
   messages: AminoMsg[];
   rawMessages: EncodeObject[];
@@ -83,11 +90,9 @@ export interface SignatureModalProps extends ModalProps {
 }
 
 export const SignatureModal = observer<SignatureModalProps>((props) => {
-  const { walletsStore } = useStore();
+  if (!props.wallet.type) return null;
 
-  if (!walletsStore.type) return null;
-
-  switch (walletsStore.type) {
+  switch (props.wallet.type) {
     case WalletType.Multisig:
       return <SignatureModalMultisig {...props} />;
     case WalletType.Singlesig:
@@ -140,6 +145,7 @@ export const SignatureModalSinglesig = observer<SignatureModalProps>(
 
 export const SignatureModalMultisig = observer<SignatureModalProps>(
   function SignatureModal({
+    wallet,
     messages,
     rawMessages,
     multisig,
@@ -152,7 +158,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
     const intl = useIntl();
     const [signatures, setSignatures] = useState(new Map<string, Uint8Array>());
     const phoneNumberBottomSheetRef = useRef<BottomSheetRef>(null);
-    const { chainStore, walletsStore } = useStore();
+    const { chainStore } = useStore();
     const { currentChainInformation } = chainStore;
     const [settingBiometrics, setSettingBiometrics] = useState(false);
 
@@ -170,7 +176,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         gas: "1280000",
       };
 
-      if (isMultisigDemoWallet(walletsStore.currentWallet)) {
+      if (isMultisigDemoWallet(wallet)) {
         const signDoc: StdSignDoc = {
           memo: "",
           account_number: "0",
@@ -206,7 +212,13 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
 
       client.disconnect();
       return new Sha256(serializeSignDoc(signDoc)).digest();
-    }, [multisig, currentChainInformation, messages, walletsStore]);
+    }, [
+      multisig,
+      currentChainInformation.denom,
+      currentChainInformation.chainId,
+      wallet,
+      messages,
+    ]);
 
     function getKey({ id, title }: { id: MultisigKey; title: string }): Key[] {
       const factor = multisig?.[id];
@@ -219,9 +231,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
         switch (id) {
           case "biometrics": {
             const message = await getMessage();
-            const { signature } = isMultisigDemoWallet(
-              walletsStore.currentWallet
-            )
+            const { signature } = isMultisigDemoWallet(wallet)
               ? { signature: new Uint8Array() }
               : await createBiometricSignature({
                   payload: message,
@@ -327,6 +337,7 @@ export const SignatureModalMultisig = observer<SignatureModalProps>(
             <BottomSheet bottomSheetRef={phoneNumberBottomSheetRef}>
               <PhoneNumberBottomSheetContent
                 payload={multisig.phoneNumber}
+                wallet={wallet}
                 getMessage={getMessage}
                 onSuccess={(signature) => {
                   setSignatures((signatures) => {
@@ -432,56 +443,11 @@ function createDefaultTypes(prefix: string): AminoConverters {
 const aminoTypes = new AminoTypes(createDefaultTypes("juno"));
 const registry = new Registry([...defaultRegistryTypes, ...wasmTypes]);
 
-export function useWrapEncodeObjects(
-  getEncodeObjects: () => EncodeObject | EncodeObject[]
-): EncodeObjectsPayload {
-  const { walletsStore } = useStore();
-  const ret = getEncodeObjects();
-  const encodeObjects = Array.isArray(ret) ? ret : [ret];
-
-  return {
-    wrapped: getWrappedEncodeObjects(),
-    inner: encodeObjects,
-  };
-
-  function getWrappedEncodeObjects() {
-    if (!walletsStore.type) return [];
-
-    const wallet = walletsStore.currentWallet;
-
-    if (isMultisigWallet(wallet)) {
-      const multisig = wallet.currentAdmin;
-      if (!multisig?.multisig?.address || !wallet.proxyAddress) {
-        return [];
-      }
-      return [
-        wrapMessages({
-          messages: encodeObjects,
-          sender: multisig.multisig.address,
-          contract: wallet.proxyAddress.address,
-        }),
-      ];
-    } else {
-      if (!walletsStore.address) return [];
-      return encodeObjects;
-    }
-  }
-}
-
-export type EncodeObjectsPayload =
-  | EncodeObject[]
-  | {
-      wrapped: EncodeObject[];
-      inner: EncodeObject[];
-    };
-
 export function useSignatureModalProps({
-  multisig,
-  encodeObjects,
+  data,
   onConfirm,
 }: {
-  multisig?: Multisig | null;
-  encodeObjects: EncodeObjectsPayload;
+  data: RequestObiSignAndBroadcastPayload;
   onConfirm(response: DeliverTxResponse): Promise<void>;
 }): {
   signatureModalProps: SignatureModalProps;
@@ -492,12 +458,11 @@ export function useSignatureModalProps({
   const { chainStore, walletsStore } = useStore();
   const { currentChainInformation } = chainStore;
 
-  const wrappedEncodeObjects = Array.isArray(encodeObjects)
-    ? encodeObjects
-    : encodeObjects.wrapped;
-  const innerEncodeObjects = Array.isArray(encodeObjects)
-    ? encodeObjects
-    : encodeObjects.inner;
+  const { id, multisig } = data;
+  const wallet = walletsStore.getWallet(id);
+
+  const wrappedEncodeObjects = getWrappedEncodeObjects();
+  const innerEncodeObjects = data.encodeObjects;
 
   const signatureModalProps = useMemo(() => {
     const innerAminoMessages = innerEncodeObjects.map((encodeObject) => {
@@ -512,18 +477,20 @@ export function useSignatureModalProps({
 
     return {
       key: modalKey.toString(),
+      wallet,
       visible: signatureModalVisible,
       innerMessages: innerAminoMessages,
       messages: aminoMessages,
       rawMessages: messages,
       multisig,
+      cancelable: data.cancelable,
+      hiddenKeyIds: data.hiddenKeyIds,
+      isOnboarding: data.isOnboarding,
       onCancel() {
         setSignatureModalVisible(false);
         setModalKey((value) => value + 1);
       },
       async onConfirm(signatures: Map<string, Uint8Array>) {
-        invariant(walletsStore.type, "Expected `walletStore.type` to exist.");
-
         async function handleMultisig() {
           if (!multisig?.multisig) return;
 
@@ -579,12 +546,11 @@ export function useSignatureModalProps({
           await onConfirm(result);
         }
 
-        switch (walletsStore.type) {
+        switch (wallet.type) {
           case WalletType.Multisig:
             await handleMultisig();
             break;
           case WalletType.Singlesig: {
-            const wallet = walletsStore.currentWallet;
             invariant(
               isSinglesigWallet(wallet),
               "Expected `wallet` to be singlesig wallet."
@@ -622,12 +588,12 @@ export function useSignatureModalProps({
       },
     };
   }, [
-    wrappedEncodeObjects,
     innerEncodeObjects,
+    wrappedEncodeObjects,
     modalKey,
     signatureModalVisible,
     multisig,
-    walletsStore,
+    wallet,
     currentChainInformation,
     onConfirm,
   ]);
@@ -638,10 +604,30 @@ export function useSignatureModalProps({
       setSignatureModalVisible(true);
     },
   };
+
+  function getWrappedEncodeObjects(): EncodeObject[] {
+    if (isAnyMultisigWallet(wallet) && data.wrap) {
+      const multisig = data.multisig;
+      if (!multisig?.multisig?.address || !wallet.proxyAddress) {
+        return [];
+      }
+      return [
+        wrapMessages({
+          messages: data.encodeObjects,
+          sender: multisig.multisig.address,
+          contract: wallet.proxyAddress.address,
+        }),
+      ];
+    } else {
+      if (!wallet?.address) return [];
+      return data.encodeObjects;
+    }
+  }
 }
 
 interface PhoneNumberBottomSheetContentProps {
   payload: Multisig["phoneNumber"];
+  wallet: MultisigWallet | SinglesigWallet;
 
   getMessage(): Promise<Uint8Array>;
 
@@ -650,8 +636,7 @@ interface PhoneNumberBottomSheetContentProps {
 
 const PhoneNumberBottomSheetContent =
   observer<PhoneNumberBottomSheetContentProps>(
-    ({ payload, getMessage, onSuccess }) => {
-      const { walletsStore } = useStore();
+    ({ payload, wallet, getMessage, onSuccess }) => {
       const intl = useIntl();
       const { securityAnswer, setSecurityAnswer } = useSecurityQuestionInput();
 
@@ -764,7 +749,7 @@ const PhoneNumberBottomSheetContent =
               onPress={async () => {
                 try {
                   setVerifyButtonDisabledDoubleclick(true);
-                  if (isMultisigDemoWallet(walletsStore.currentWallet)) {
+                  if (isMultisigDemoWallet(wallet)) {
                     onSuccess(new Uint8Array());
                   } else {
                     const response = await parseSignatureTextMessageResponse(
@@ -818,7 +803,7 @@ const PhoneNumberBottomSheetContent =
               setMagicButtonDisabledDoubleclick(true);
 
               try {
-                if (!isMultisigDemoWallet(walletsStore.currentWallet)) {
+                if (!isMultisigDemoWallet(wallet)) {
                   const message = await getMessage();
                   await sendSignatureTextMessage({
                     phoneNumber: payload.phoneNumber,

@@ -194,6 +194,11 @@ export class WalletsStore {
   }
 
   @action
+  public getWallet(id: string) {
+    return this._wallets.entities[id].wallet;
+  }
+
+  @action
   public async removeWallet(id: string) {
     this._wallets.ids.splice(this._wallets.ids.indexOf(id), 1);
     delete this._wallets.entities[id];

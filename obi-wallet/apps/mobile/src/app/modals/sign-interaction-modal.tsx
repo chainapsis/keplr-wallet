@@ -2,15 +2,12 @@ import { coins } from "@cosmjs/amino";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 
-import { useStore } from "../../../stores";
-import { ConfirmMessages } from "../signature-modal/confirm-messages";
+import { useStore } from "../stores";
+import { ConfirmMessages } from "./signature-modal/confirm-messages";
 
-export interface SignModalProps {
-  onClose: () => void;
-}
-
-export const SignInteractionModal = observer<SignModalProps>(({ onClose }) => {
+export const SignInteractionModal = observer(() => {
   const { chainStore, signInteractionStore } = useStore();
+
   const signDocWrapper = signInteractionStore.waitingData?.data.signDocWrapper;
 
   if (!signDocWrapper) return null;
@@ -37,7 +34,9 @@ export const SignInteractionModal = observer<SignModalProps>(({ onClose }) => {
           console.log(error);
         }
       }}
-      onCancel={onClose}
+      onCancel={() => {
+        signInteractionStore.rejectAll();
+      }}
     />
   );
 });

@@ -6,6 +6,7 @@ import codePush from "react-native-code-push";
 
 import { deploymentKey } from "./code-push";
 import { Loader } from "./loader";
+import { Modals } from "./modals";
 import { Provider } from "./provider";
 import { RootStack } from "./root-stack";
 import { HomeScreen } from "./screens/home";
@@ -71,6 +72,7 @@ export function App() {
     <Provider>
       <DemoModeHeader />
       <StateRenderer />
+      <Modals />
       {updating ? (
         <Loader
           style={{

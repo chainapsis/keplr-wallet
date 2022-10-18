@@ -1,4 +1,5 @@
 import { MsgMigrateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
+import { RequestObiSignAndBroadcastMsg } from "@obi-wallet/common";
 import { MsgMigrateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
 import { observer } from "mobx-react-lite";
@@ -8,10 +9,6 @@ import invariant from "tiny-invariant";
 
 import { useMultisigWallet, useStore } from "../stores";
 import { Background } from "./components/background";
-import {
-  SignatureModalMultisig,
-  useSignatureModalProps,
-} from "./components/signature-modal";
 
 export const MigrateScreen = observer(() => {
   const { chainStore } = useStore();
@@ -38,37 +35,35 @@ export const MigrateScreen = observer(() => {
     return [message];
   }, [currentChainInformation, multisig, wallet]);
 
-  const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
-    multisig,
-    encodeObjects,
-    async onConfirm(response) {
-      try {
-        invariant(
-          wallet.proxyAddress?.address,
-          "Expected proxy address to exist."
-        );
-        console.log(response);
-        wallet.finishProxySetup({
-          address: wallet.proxyAddress.address,
-          codeId: chainStore.currentChainInformation.currentCodeId,
-        });
-      } catch (e) {
-        console.log(response.rawLog);
-      }
-    },
-  });
-
   useEffect(() => {
     if (encodeObjects.length > 0) {
-      openSignatureModal();
-    }
-  }, [encodeObjects.length, openSignatureModal]);
+      (async () => {
+        const response = await RequestObiSignAndBroadcastMsg.send({
+          id: wallet.id,
+          encodeObjects,
+          multisig,
+          cancelable: false,
+        });
 
-  if (encodeObjects.length === 0) return null;
+        try {
+          invariant(
+            wallet.proxyAddress?.address,
+            "Expected proxy address to exist."
+          );
+          console.log(response);
+          wallet.finishProxySetup({
+            address: wallet.proxyAddress.address,
+            codeId: chainStore.currentChainInformation.currentCodeId,
+          });
+        } catch (e) {
+          console.log(response.rawLog);
+        }
+      })();
+    }
+  }, [chainStore, encodeObjects, multisig, wallet]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <SignatureModalMultisig cancelable={false} {...signatureModalProps} />
       <Background />
     </SafeAreaView>
   );

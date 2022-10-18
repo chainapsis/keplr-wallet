@@ -14,8 +14,8 @@ import React, { ReactNode } from "react";
 import { useIntl } from "react-intl";
 import { Text, View } from "react-native";
 
-import { formatCoin } from "../../../balances";
-import { useStore } from "../../../stores";
+import { formatCoin } from "../../balances";
+import { useStore } from "../../stores";
 import ArrowUpIcon from "./assets/arrowUpIcon.svg";
 
 export function PrettyMessage({ message }: { message: AminoMsg }) {

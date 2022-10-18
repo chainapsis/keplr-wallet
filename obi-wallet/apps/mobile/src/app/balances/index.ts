@@ -28,11 +28,11 @@ export function useBalances() {
 
   const refreshBalances = useCallback(async () => {
     setRefreshing(true);
-    if (isMultisigDemoWallet(walletsStore.currentWallet)) {
+    if (!isMultisigDemoWallet(walletsStore.currentWallet)) {
       await balancesStore.fetchBalances();
     }
     setRefreshing(false);
-  }, [balancesStore, walletsStore]);
+  }, [balancesStore, walletsStore.currentWallet]);
 
   useEffect(() => {
     void refreshBalances();

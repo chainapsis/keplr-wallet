@@ -43,6 +43,7 @@ import {
   MessageRequesterInternalToUi,
   PrivilegedOrigins,
   produceEnv,
+  RequestObiSignAndBroadcastMsg,
   RootStore,
   RouterBackground,
   WalletType,
@@ -51,8 +52,6 @@ import { Buffer } from "buffer";
 import { Alert } from "react-native";
 import scrypt from "scrypt-js";
 import invariant from "tiny-invariant";
-
-import { RequestObiSignAndBroadcastMsg } from "../app/injected-provider";
 
 let rootStore: RootStore | null = null;
 
@@ -505,10 +504,7 @@ export function initBackground() {
       env,
       "/sign",
       "request-sign-and-broadcast",
-      {
-        address: message.address,
-        messages: message.messages,
-      }
+      message.payload
     )) as DeliverTxResponse;
 
     return response;

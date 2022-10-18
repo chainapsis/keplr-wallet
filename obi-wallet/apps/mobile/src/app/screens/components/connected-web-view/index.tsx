@@ -12,8 +12,6 @@ import { useKeplr } from "../../../injected-provider";
 import { bundle } from "../../../injected-provider/bundle";
 import { RNInjectedKeplr } from "../../../injected-provider/injected-keplr";
 import { useStore } from "../../../stores";
-import { InteractionModal } from "./interaction-modal";
-import { SignInteractionModal } from "./sign-interaction-modal";
 
 export interface ConnectedWebViewProps extends Omit<WebViewProps, "source"> {
   url: string;
@@ -62,8 +60,7 @@ export const ConnectedWebView = observer(
       );
     }, [eventEmitter, keplr, webViewRef]);
 
-    const { permissionStore, signInteractionStore, interactionStore } =
-      useStore();
+    const { permissionStore } = useStore();
 
     useEffect(() => {
       for (const data of permissionStore.waitingDatas) {
@@ -90,14 +87,6 @@ export const ConnectedWebView = observer(
           />
         }
       >
-        {signInteractionStore.waitingData ? (
-          <SignInteractionModal
-            onClose={() => signInteractionStore.rejectAll()}
-          />
-        ) : null}
-        {interactionStore.waitingData ? (
-          <InteractionModal onClose={() => interactionStore.rejectAll()} />
-        ) : null}
         <WebView
           {...props}
           source={{ uri: url }}

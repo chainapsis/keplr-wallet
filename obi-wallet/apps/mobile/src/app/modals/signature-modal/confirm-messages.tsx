@@ -14,9 +14,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Button } from "../../../button";
-import { Loader } from "../../../loader";
-import { Background } from "../background";
+import { Button } from "../../button";
+import { Loader } from "../../loader";
+import { Background } from "../../screens/components/background";
 import { PrettyMessage } from "./pretty-message";
 
 enum Tab {

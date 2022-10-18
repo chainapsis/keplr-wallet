@@ -2,7 +2,11 @@ import { pubkeyToAddress, pubkeyType } from "@cosmjs/amino";
 import { MsgExecuteContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { isMultisigDemoWallet, Multisig } from "@obi-wallet/common";
+import {
+  isMultisigDemoWallet,
+  Multisig,
+  RequestObiSignAndBroadcastMsg,
+} from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { observer } from "mobx-react-lite";
@@ -14,49 +18,7 @@ import invariant from "tiny-invariant";
 import { IconButton } from "../../../button";
 import { useMultisigWallet, useStore } from "../../../stores";
 import { Background } from "../../components/background";
-import {
-  SignatureModalMultisig,
-  useSignatureModalProps,
-} from "../../components/signature-modal";
 import { OnboardingStackParamList } from "../onboarding-stack";
-
-const demoModeMultisig: Multisig = {
-  multisig: {
-    address: "demo-create-multisig",
-    publicKey: {
-      type: pubkeyType.multisigThreshold,
-      value: {
-        threshold: "1",
-        pubkeys: [],
-      },
-    },
-  },
-  biometrics: {
-    address: "demo-biometrics",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-biometrics",
-    },
-  },
-  phoneNumber: {
-    address: "demo-phone-number",
-    phoneNumber: "demo-phone-number",
-    securityQuestion: "birthplace",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-phone-number",
-    },
-  },
-  social: {
-    address: "demo-social",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-social",
-    },
-  },
-  cloud: null,
-  email: null,
-};
 
 export type ReplaceMultisigProps = NativeStackScreenProps<
   OnboardingStackParamList,
@@ -70,9 +32,7 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
     const { currentChainInformation } = chainStore;
 
     const multisig = wallet.currentAdmin;
-
     const nextMultisig = wallet.nextAdmin;
-
     const sender = wallet.updateProposed ? nextMultisig : multisig;
 
     const encodeObjects = useMemo(() => {
@@ -120,65 +80,64 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
       currentChainInformation,
     ]);
 
-    const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
-      multisig: sender,
-      encodeObjects,
-      async onConfirm(response) {
-        if (isMultisigDemoWallet(wallet)) {
-          return;
-        }
-
-        try {
-          invariant(response.rawLog, "Expected `response` to have `rawLog`.");
-          const rawLog = JSON.parse(response.rawLog) as [
-            {
-              events: [
-                {
-                  type: string;
-                  attributes: { key: string; value: string }[];
-                }
-              ];
-            }
-          ];
-          const executeEvent = rawLog[0].events.find((e) => {
-            return e.type === "execute";
-          });
-          invariant(
-            executeEvent,
-            "Expected `rawLog` to contain `execute` event."
-          );
-          const contractAddress = executeEvent.attributes.find((a) => {
-            return a.key === "_contract_address";
-          });
-          invariant(
-            contractAddress,
-            "Expected `executeEvent` to contain `_contract_address` attribute."
-          );
-          if (wallet.updateProposed) {
-            wallet.finishProxySetup({
-              address: contractAddress.value,
-              codeId: chainStore.currentChainInformation.currentCodeId,
-            });
-          } else {
-            wallet.updateProposed = true;
-          }
-        } catch (e) {
-          console.log(response.rawLog);
-        }
-      },
-    });
-
     useEffect(() => {
       if (encodeObjects.length > 0) {
-        openSignatureModal();
+        (async () => {
+          const response = await RequestObiSignAndBroadcastMsg.send({
+            id: wallet.id,
+            encodeObjects,
+            multisig: sender,
+          });
+
+          if (isMultisigDemoWallet(wallet)) {
+            return;
+          }
+
+          try {
+            invariant(response.rawLog, "Expected `response` to have `rawLog`.");
+            const rawLog = JSON.parse(response.rawLog) as [
+              {
+                events: [
+                  {
+                    type: string;
+                    attributes: { key: string; value: string }[];
+                  }
+                ];
+              }
+            ];
+            const executeEvent = rawLog[0].events.find((e) => {
+              return e.type === "execute";
+            });
+            invariant(
+              executeEvent,
+              "Expected `rawLog` to contain `execute` event."
+            );
+            const contractAddress = executeEvent.attributes.find((a) => {
+              return a.key === "_contract_address";
+            });
+            invariant(
+              contractAddress,
+              "Expected `executeEvent` to contain `_contract_address` attribute."
+            );
+            if (wallet.updateProposed) {
+              wallet.finishProxySetup({
+                address: contractAddress.value,
+                codeId: chainStore.currentChainInformation.currentCodeId,
+              });
+            } else {
+              wallet.updateProposed = true;
+            }
+          } catch (e) {
+            console.log(response.rawLog);
+          }
+        })();
       }
-    }, [encodeObjects.length, openSignatureModal, wallet]);
+    }, [chainStore, encodeObjects, sender, wallet]);
 
     if (encodeObjects.length === 0) return null;
 
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <SignatureModalMultisig {...signatureModalProps} />
         <Background />
 
         <View
