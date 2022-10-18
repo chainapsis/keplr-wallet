@@ -36,6 +36,7 @@ export const useIBCTransferConfig = (
   sender: string,
   options: {
     ensEndpoint?: string;
+    allowHexAddressOnEthermint?: boolean;
   } = {}
 ) => {
   const amountConfig = useIBCAmountConfig(

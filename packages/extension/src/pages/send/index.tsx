@@ -73,6 +73,7 @@ export const SendPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     {
       ensEndpoint: EthereumEndpoint,
+      allowHexAddressOnEthermint: true,
     }
   );
 

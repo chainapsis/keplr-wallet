@@ -50,6 +50,7 @@ export const AddressBookPage: FunctionComponent<{
 
     const recipientConfig = useRecipientConfig(chainStore, selectedChainId, {
       ensEndpoint: EthereumEndpoint,
+      allowHexAddressOnEthermint: true,
     });
     const memoConfig = useMemoConfig(chainStore, selectedChainId);
 

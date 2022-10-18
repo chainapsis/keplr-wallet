@@ -43,6 +43,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
   const [name, setName] = useState("");
   const recipientConfig = useRecipientConfig(chainStore, route.params.chainId, {
     ensEndpoint: EthereumEndpoint,
+    allowHexAddressOnEthermint: true,
   });
   const memoConfig = useMemoConfig(chainStore, route.params.chainId);
 

@@ -53,6 +53,7 @@ export const SendScreen: FunctionComponent = observer(() => {
     account.bech32Address,
     {
       ensEndpoint: EthereumEndpoint,
+      allowHexAddressOnEthermint: true,
     }
   );
 

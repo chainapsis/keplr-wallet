@@ -13,6 +13,7 @@ export const useSendTxConfig = (
   sender: string,
   options: {
     ensEndpoint?: string;
+    allowHexAddressOnEthermint?: boolean;
   } = {}
 ) => {
   const amountConfig = useAmountConfig(

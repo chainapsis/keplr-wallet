@@ -47,6 +47,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     {
       ensEndpoint: EthereumEndpoint,
+      allowHexAddressOnEthermint: true,
     }
   );
   const gasSimulator = useGasSimulator(
