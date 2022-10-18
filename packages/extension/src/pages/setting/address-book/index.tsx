@@ -34,15 +34,8 @@ export const AddressBookPage: FunctionComponent<{
   hideChainDropdown?: boolean;
   selectHandler?: AddressBookSelectHandler;
   ibcChannelConfig?: IIBCChannelConfig;
-  isInTransaction?: boolean;
 }> = observer(
-  ({
-    onBackButton,
-    hideChainDropdown,
-    selectHandler,
-    ibcChannelConfig,
-    //isInTransaction,
-  }) => {
+  ({ onBackButton, hideChainDropdown, selectHandler, ibcChannelConfig }) => {
     const intl = useIntl();
     const history = useHistory();
 
