@@ -41,11 +41,9 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   const [name, setName] = useState("");
-  const recipientConfig = useRecipientConfig(
-    chainStore,
-    route.params.chainId,
-    EthereumEndpoint
-  );
+  const recipientConfig = useRecipientConfig(chainStore, route.params.chainId, {
+    ensEndpoint: EthereumEndpoint,
+  });
   const memoConfig = useMemoConfig(chainStore, route.params.chainId);
 
   return (
