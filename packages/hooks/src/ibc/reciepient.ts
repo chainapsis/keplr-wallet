@@ -29,13 +29,15 @@ export const useIBCRecipientConfig = (
   chainGetter: ChainGetter,
   chainId: string,
   channelConfig: IIBCChannelConfig,
-  ensEndpoint?: string
+  options: {
+    ensEndpoint?: string;
+  } = {}
 ) => {
   const [config] = useState(
     () => new IBCRecipientConfig(chainGetter, chainId, channelConfig)
   );
   config.setChain(chainId);
-  config.setENSEndpoint(ensEndpoint);
+  config.setENSEndpoint(options.ensEndpoint);
 
   return config;
 };

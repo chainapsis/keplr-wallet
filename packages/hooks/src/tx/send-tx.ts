@@ -11,7 +11,9 @@ export const useSendTxConfig = (
   accountStore: AccountStore,
   chainId: string,
   sender: string,
-  ensEndpoint?: string
+  options: {
+    ensEndpoint?: string;
+  } = {}
 ) => {
   const amountConfig = useAmountConfig(
     chainGetter,
@@ -39,7 +41,7 @@ export const useSendTxConfig = (
   // set the fee config of the amount config after initing the gas/fee configs.
   amountConfig.setFeeConfig(feeConfig);
 
-  const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
+  const recipientConfig = useRecipientConfig(chainGetter, chainId, options);
 
   return {
     amountConfig,

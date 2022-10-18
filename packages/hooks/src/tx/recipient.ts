@@ -27,6 +27,8 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
 
   @observable
   protected _ensEndpoint: string | undefined = undefined;
+  @observable
+  protected _allowHexAddressOnEthermint: boolean | undefined = undefined;
 
   @observable
   protected _bech32Prefix: string | undefined = undefined;
@@ -175,11 +177,13 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
 export const useRecipientConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  ensEndpoint?: string
+  options: {
+    ensEndpoint?: string;
+  } = {}
 ) => {
   const [config] = useState(() => new RecipientConfig(chainGetter, chainId));
   config.setChain(chainId);
-  config.setENSEndpoint(ensEndpoint);
+  config.setENSEndpoint(options.ensEndpoint);
 
   return config;
 };
