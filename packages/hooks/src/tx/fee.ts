@@ -311,7 +311,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    const gasPriceStep = this.feeCurrency?.gasPriceStep ?? DefaultGasPriceStep;
+    // For legacy support
+    // Fallback gas price step to legacy chain info which includes gas price step field in root,
+    // if there is no gas price step in fee currency.
+    const chainInfoWithGasPriceStep = (this.chainInfo.raw ?? {}) as {
+      gasPriceStep?: {
+        low: number;
+        average: number;
+        high: number;
+      };
+    };
+    const gasPriceStep =
+      this.feeCurrency?.gasPriceStep ??
+      chainInfoWithGasPriceStep.gasPriceStep ??
+      DefaultGasPriceStep;
 
     const gasPrice = new Dec(gasPriceStep[feeType].toString());
     const feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));
