@@ -13,7 +13,7 @@ import {
 } from "@keplr-wallet/cosmos";
 import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 
-import { escapeHTML, KVStore } from "@keplr-wallet/common";
+import { escapeHTML, KVStore, sortObjectByKey } from "@keplr-wallet/common";
 
 import { ChainsService } from "../chains";
 import { LedgerApp, LedgerService } from "../ledger";
@@ -258,6 +258,7 @@ export class KeyRingService {
     };
 
     signDoc = trimAminoSignDoc(signDoc);
+    signDoc = sortObjectByKey(signDoc);
 
     const coinType = await this.chainsService.getChainCoinType(chainId);
     const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
@@ -413,6 +414,7 @@ export class KeyRingService {
     };
 
     signDoc = trimAminoSignDoc(signDoc);
+    signDoc = sortObjectByKey(signDoc);
 
     const coinType = await this.chainsService.getChainCoinType(chainId);
     const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
