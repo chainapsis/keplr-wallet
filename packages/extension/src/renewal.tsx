@@ -5,19 +5,23 @@ require("setimmediate");
 import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
 import { Normalize } from "styled-normalize";
-
 import { HashRouter, Route } from "react-router-dom";
 
 import { RegisterPage } from "./renewal/pages/register";
+import { StoreProvider } from "./stores";
+import { GlobalStyles } from "./renewal/styles/global";
 
 const App: FunctionComponent = () => {
   return (
-    <React.Fragment>
-      <Normalize />
-      <HashRouter>
-        <Route exact path="/register" component={RegisterPage} />
-      </HashRouter>
-    </React.Fragment>
+    <StoreProvider>
+      <React.Fragment>
+        <GlobalStyles />
+        <Normalize />
+        <HashRouter>
+          <Route exact path="/register" component={RegisterPage} />
+        </HashRouter>
+      </React.Fragment>
+    </StoreProvider>
   );
 };
 
