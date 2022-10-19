@@ -841,7 +841,7 @@ export class CosmosAccountImpl {
             throw new Error("Gas estimated is zero or negative");
           }
 
-          const gasAdjusted = feeOptions.gasAdjustment * gasUsed;
+          const gasAdjusted = Math.floor(feeOptions.gasAdjustment * gasUsed);
 
           return sendWithGasPrice(
             {
