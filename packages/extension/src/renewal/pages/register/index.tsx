@@ -38,6 +38,13 @@ const Intro = styled.span`
   letter-spacing: 1.17557px;
 `;
 
+// TODO: color 추가되어야 함
+const Notice = styled.span`
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+`;
+
 export const RegisterPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
 
@@ -78,6 +85,12 @@ export const RegisterPage: FunctionComponent = observer(() => {
           <Button color="transparent">Import Ledger Nano X</Button>
         </Stack>
       </Card>
+      <Gutter size="2.5rem" />
+      <Notice>
+        All sensitive information is stored only on your device.
+        <br />
+        This process does not require an internet conenction.
+      </Notice>
     </Container>
   );
 });
