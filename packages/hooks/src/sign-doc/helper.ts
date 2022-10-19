@@ -53,11 +53,11 @@ export class SignDocHelper {
             // XXX: This part is not standard. This is only used for ethermint EIP-712 signing.
             fee.feePayer = aminoSignDocAny.fee.feePayer;
           }
-          if (aminoSignDocAny.fee.payer) {
-            fee.payer = aminoSignDocAny.fee.payer;
-          }
           if (aminoSignDocAny.fee.granter) {
             fee.granter = aminoSignDocAny.fee.granter;
+          }
+          if (aminoSignDocAny.fee.payer) {
+            fee.payer = aminoSignDocAny.fee.payer;
           }
 
           return fee;
