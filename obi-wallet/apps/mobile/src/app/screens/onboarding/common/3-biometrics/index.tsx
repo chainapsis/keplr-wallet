@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -33,15 +33,14 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
     const [scannedBiometrics, setScannedBiometrics] = useState(false);
     const intl = useIntl();
 
-    const scanBiometrics = async () => {
+    const scanBiometrics = useCallback(async () => {
       setButtonDisabledDoubleclick(true);
 
       try {
         const publicKey = await getBiometricsPublicKey({
           demoMode: isMultisigDemoWallet(wallet),
         });
-
-        wallet.setBiometricsPublicKey({
+        await wallet.setBiometricsPublicKey({
           publicKey: {
             type: pubkeyType.secp256k1,
             value: publicKey,
@@ -60,42 +59,44 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
           error.message
         );
       }
-    };
+    }, [intl, wallet]);
 
     useEffect(() => {
-      const { biometrics } = wallet.nextAdmin;
-      if (biometrics && wallet.keyInRecovery !== "biometrics") {
-        Alert.alert(
-          intl.formatMessage({
-            id: "onboarding4.error.biometrickeyexists.title",
-          }),
-          intl.formatMessage({
-            id: "onboarding4.error.biometrickeyexists.text",
-          }),
-          [
-            {
-              text: intl.formatMessage({
-                id: "onboarding4.error.biometrickeyexists.newkey",
-              }),
-              style: "cancel",
-              onPress: () => {
-                scanBiometrics();
+      (async () => {
+        const { biometrics } = wallet.nextAdmin;
+        if (biometrics && wallet.keyInRecovery !== "biometrics") {
+          Alert.alert(
+            intl.formatMessage({
+              id: "onboarding4.error.biometrickeyexists.title",
+            }),
+            intl.formatMessage({
+              id: "onboarding4.error.biometrickeyexists.text",
+            }),
+            [
+              {
+                text: intl.formatMessage({
+                  id: "onboarding4.error.biometrickeyexists.newkey",
+                }),
+                style: "cancel",
+                onPress: async () => {
+                  await scanBiometrics();
+                },
               },
-            },
-            {
-              text: intl.formatMessage({
-                id: "onboarding4.error.biometrickeyexists.yes",
-              }),
-              onPress: () => {
-                navigation.navigate("create-multisig-phone-number");
+              {
+                text: intl.formatMessage({
+                  id: "onboarding4.error.biometrickeyexists.yes",
+                }),
+                onPress: () => {
+                  navigation.navigate("create-multisig-phone-number");
+                },
               },
-            },
-          ]
-        );
-      } else {
-        scanBiometrics();
-      }
-    }, [intl, wallet, navigation]);
+            ]
+          );
+        } else {
+          await scanBiometrics();
+        }
+      })();
+    }, [intl, wallet, navigation, scanBiometrics]);
 
     const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
       useState(false);

@@ -64,7 +64,6 @@ export const ConnectedWebView = observer(
 
     useEffect(() => {
       for (const data of permissionStore.waitingDatas) {
-        // TODO: show modal or something
         console.log("trying to approve");
         permissionStore.approve(data.id);
         console.log("approved");

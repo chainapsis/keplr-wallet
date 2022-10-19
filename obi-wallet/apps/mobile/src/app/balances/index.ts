@@ -29,7 +29,7 @@ export function useBalances() {
     setRefreshing(true);
     await balancesStore.fetchBalances();
     setRefreshing(false);
-  }, [balancesStore, walletsStore.currentWallet]);
+  }, [balancesStore]);
 
   useEffect(() => {
     void refreshBalances();

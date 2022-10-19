@@ -1,4 +1,4 @@
-import { isAnyMultisigWallet, WalletType } from "@obi-wallet/common";
+import { isAnyMultisigWallet } from "@obi-wallet/common";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 
-import { Button, IconButton } from "../button";
+import { IconButton } from "../button";
 import { useStore } from "../stores";
 import { Modal, MODAL_TIMING } from "./components/modal";
 

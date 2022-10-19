@@ -11,7 +11,6 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-import { useRootNavigation } from "../../../root-stack";
 import { useStore } from "../../../stores";
 import { Back } from "../../components/back";
 import {
@@ -250,7 +249,6 @@ interface KeyConfigProps {
 }
 
 function KeyConfig({ item, onClose }: KeyConfigProps) {
-  const { navigate } = useRootNavigation();
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
   const { walletsStore } = useStore();

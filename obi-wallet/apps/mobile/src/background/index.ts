@@ -168,7 +168,6 @@ class KeyRingService extends AbstractKeyRingService {
   }
 
   async enable(env: Env): Promise<KeyRingStatus> {
-    // TODO: do something with create-multisig store?
     return KeyRingStatus.UNLOCKED;
   }
 
@@ -186,9 +185,7 @@ class KeyRingService extends AbstractKeyRingService {
     switch (type) {
       case WalletType.Multisig:
         return {
-          // TODO:
           algo: "multisig",
-          // TODO:
           pubKey: new Uint8Array(),
           address: Bech32Address.fromBech32(address, "juno").address,
           isNanoLedger: true,
@@ -247,10 +244,6 @@ class KeyRingService extends AbstractKeyRingService {
     this.chainsService = chainsService;
     this.interactionService = interactionService;
     this.permissionService = permissionService;
-    // this.kvStore = new KVStore("create-multisig-store");
-
-    // TODO: permissionService
-    // TODO: key ring
   }
 
   get keyRingStatus(): KeyRingStatus {
@@ -486,9 +479,7 @@ export function initBackground() {
         // });
       },
     },
-    // TODO: ledgerOptions?
     {},
-    // TODO: experimentalOptions?,
     {},
     (store, embedChainInfos, commonCrypto) => {
       keyRingService = new KeyRingService(store, embedChainInfos, commonCrypto);

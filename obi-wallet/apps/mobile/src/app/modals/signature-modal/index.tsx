@@ -580,9 +580,10 @@ export function useSignatureModalProps({
     innerEncodeObjects,
     wrappedEncodeObjects,
     modalKey,
+    wallet,
     signatureModalVisible,
     multisig,
-    wallet,
+    data,
     currentChainInformation,
     onConfirm,
   ]);
