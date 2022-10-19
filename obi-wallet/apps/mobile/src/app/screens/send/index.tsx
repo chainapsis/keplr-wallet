@@ -6,7 +6,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import {
-  isMultisigWallet,
+  isAnyMultisigWallet,
   RequestObiSignAndBroadcastMsg,
 } from "@obi-wallet/common";
 import { useNavigation } from "@react-navigation/native";
@@ -72,7 +72,7 @@ export const SendScreen = observer(() => {
 
   const { walletsStore } = useStore();
   const wallet = walletsStore.currentWallet;
-  const multisig = isMultisigWallet(wallet) ? wallet.currentAdmin : null;
+  const multisig = isAnyMultisigWallet(wallet) ? wallet.currentAdmin : null;
 
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");

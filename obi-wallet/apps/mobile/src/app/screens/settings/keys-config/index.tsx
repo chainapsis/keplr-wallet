@@ -1,7 +1,7 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { isMultisigWallet, MultisigKey, Text } from "@obi-wallet/common";
+import { isAnyMultisigWallet, MultisigKey, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -48,7 +48,7 @@ const getSVG = (number: number) => {
 export const KeysConfigScreen = observer(() => {
   const { walletsStore } = useStore();
   const wallet = walletsStore.currentWallet;
-  const currentAdmin = isMultisigWallet(wallet) ? wallet.currentAdmin : null;
+  const currentAdmin = isAnyMultisigWallet(wallet) ? wallet.currentAdmin : null;
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
 
@@ -262,7 +262,7 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
       <TouchableOpacity
         onPress={() => {
           const wallet = walletsStore.currentWallet;
-          if (isMultisigWallet(wallet)) {
+          if (isAnyMultisigWallet(wallet)) {
             wallet.recover(keyId);
           }
         }}

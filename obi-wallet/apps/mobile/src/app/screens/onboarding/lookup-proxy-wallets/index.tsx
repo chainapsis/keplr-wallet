@@ -18,7 +18,7 @@ export const LookupProxyWallets = observer(() => {
         navigate("create-multisig-phone-number");
       }}
       onSelect={(recoveryWallet) => {
-        wallet.walletInRecovery = recoveryWallet;
+        wallet.setWalletInRecovery(recoveryWallet);
         navigate("create-multisig-social");
       }}
     />

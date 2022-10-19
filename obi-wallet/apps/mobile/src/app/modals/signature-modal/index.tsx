@@ -485,6 +485,9 @@ export function useSignatureModalProps({
           );
 
           const { chainId, denom } = currentChainInformation;
+
+          console.log(messages);
+
           const body: TxBodyEncodeObject = {
             typeUrl: "/cosmos.tx.v1beta1.TxBody",
             value: {
@@ -592,22 +595,19 @@ export function useSignatureModalProps({
   };
 
   function getWrappedEncodeObjects(): EncodeObject[] {
-    if (isAnyMultisigWallet(wallet) && data.wrap) {
-      const multisig = data.multisig;
-      if (!multisig?.multisig?.address || !wallet.proxyAddress) {
-        return [];
-      }
-      return [
-        wrapMessages({
-          messages: data.encodeObjects,
-          sender: multisig.multisig.address,
-          contract: wallet.proxyAddress.address,
-        }),
-      ];
-    } else {
-      if (!wallet?.address) return [];
-      return data.encodeObjects;
+    if (!isAnyMultisigWallet(wallet) || !data.wrap) return data.encodeObjects;
+
+    const multisig = data.multisig;
+    if (!multisig?.multisig?.address || !wallet.proxyAddress) {
+      return [];
     }
+    return [
+      wrapMessages({
+        messages: data.encodeObjects,
+        sender: multisig.multisig.address,
+        contract: wallet.proxyAddress.address,
+      }),
+    ];
   }
 }
 

@@ -7,7 +7,7 @@ export class MockKVStore implements AbstractKVStore {
     MockKVStore.storage.clear();
   }
 
-  constructor(private readonly _prefix: string) {}
+  constructor(protected readonly _prefix: string) {}
 
   public async get<T = unknown>(key: string): Promise<T | undefined> {
     const data = MockKVStore.storage.get(this.getKey(key));

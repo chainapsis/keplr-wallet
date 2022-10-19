@@ -41,9 +41,9 @@ export class MultisigWallet extends AbstractWallet {
   @observable
   public keyInRecovery: MultisigKey | null = null;
   @observable
-  public walletInRecovery: ProxyWallet | null = null;
+  protected _walletInRecovery: ProxyWallet | null = null;
   @observable
-  public updateProposed = false;
+  protected _updateProposed = false;
 
   constructor({
     chainStore,
@@ -88,6 +88,27 @@ export class MultisigWallet extends AbstractWallet {
 
   public get proxyAddress(): SerializedProxyAddress | null {
     return this.proxyAddresses[this.chainStore.currentChain] ?? null;
+  }
+
+  public get walletInRecovery() {
+    return this._walletInRecovery;
+  }
+
+  @action
+  public setWalletInRecovery(wallet: ProxyWallet) {
+    this._walletInRecovery = wallet;
+  }
+
+  public get updateProposed() {
+    return this._updateProposed;
+  }
+
+  public set updateProposed(updateProposed: boolean) {
+    this.setUpdateProposed(updateProposed);
+  }
+
+  public setUpdateProposed(updateProposed: boolean) {
+    this._updateProposed = updateProposed;
   }
 
   @computed
@@ -153,7 +174,7 @@ export class MultisigWallet extends AbstractWallet {
   @action
   public async finishProxySetup(address: SerializedProxyAddress) {
     this.keyInRecovery = null;
-    this.updateProposed = false;
+    this._updateProposed = false;
     this.proxyAddresses[this.chainStore.currentChain] = address;
     await this.setCurrentAdmin(this.serializedNextAdmin);
   }
@@ -161,7 +182,7 @@ export class MultisigWallet extends AbstractWallet {
   @action
   public recover(keyId: MultisigKey) {
     this.keyInRecovery = keyId;
-    this.updateProposed = false;
+    this._updateProposed = false;
   }
 
   @action
@@ -170,8 +191,8 @@ export class MultisigWallet extends AbstractWallet {
       await this.setNextAdmin(this.serializedCurrentAdmin);
     }
     this.keyInRecovery = null;
-    this.walletInRecovery = null;
-    this.updateProposed = false;
+    this._walletInRecovery = null;
+    this._updateProposed = false;
   }
 
   protected hydrateMultisig(

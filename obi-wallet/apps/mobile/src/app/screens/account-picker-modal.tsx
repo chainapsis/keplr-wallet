@@ -1,6 +1,6 @@
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FormattedMessage } from "react-intl";
@@ -104,6 +104,7 @@ export const AccountPickerModal = observer<AccountPickerModalProps>(
                       }}
                     >
                       {wallet.type}
+                      {isMultisigDemoWallet(wallet) ? " (Demo Mode)" : ""}
                     </Text>
                   </View>
                   <IconButton

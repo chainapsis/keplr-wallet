@@ -24,7 +24,8 @@ export const MigrateScreen = observer(() => {
 
     const value: MsgMigrateContract = {
       sender: multisig.multisig.address,
-      codeId: Long.fromInt(currentChainInformation.currentCodeId),
+      // @ts-expect-error
+      codeId: Long.fromInt(currentChainInformation.currentCodeId).toString(),
       contract: wallet.proxyAddress.address,
       msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
     };
@@ -50,8 +51,7 @@ export const MigrateScreen = observer(() => {
             wallet.proxyAddress?.address,
             "Expected proxy address to exist."
           );
-          console.log(response);
-          wallet.finishProxySetup({
+          await wallet.finishProxySetup({
             address: wallet.proxyAddress.address,
             codeId: chainStore.currentChainInformation.currentCodeId,
           });

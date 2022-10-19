@@ -32,8 +32,6 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
     const intl = useIntl();
 
     useEffect(() => {
-      if (wallet.isDemo) return;
-
       const { phoneNumber } = wallet.nextAdmin;
       if (
         phoneNumber &&

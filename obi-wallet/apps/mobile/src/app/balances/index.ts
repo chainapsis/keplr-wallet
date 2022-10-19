@@ -1,5 +1,4 @@
 import { Coin } from "@cosmjs/amino";
-import { isMultisigDemoWallet } from "@obi-wallet/common";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 
 import { rootStore } from "../../background/root-store";
@@ -28,9 +27,7 @@ export function useBalances() {
 
   const refreshBalances = useCallback(async () => {
     setRefreshing(true);
-    if (!isMultisigDemoWallet(walletsStore.currentWallet)) {
-      await balancesStore.fetchBalances();
-    }
+    await balancesStore.fetchBalances();
     setRefreshing(false);
   }, [balancesStore, walletsStore.currentWallet]);
 
@@ -39,9 +36,7 @@ export function useBalances() {
   }, [refreshBalances, walletsStore.address]);
 
   return {
-    balances: isMultisigDemoWallet(walletsStore.currentWallet)
-      ? []
-      : balancesStore.balances,
+    balances: balancesStore.balances,
     refreshBalances,
     refreshing,
   };

@@ -1,4 +1,4 @@
-import { WalletType } from "@obi-wallet/common";
+import { isAnyMultisigWallet, WalletType } from "@obi-wallet/common";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
@@ -37,7 +37,7 @@ export const SettingsScreen = observer(() => {
     })();
   }, []);
 
-  const isMultisigWallet = walletsStore.type === WalletType.Multisig;
+  const isMultisigWallet = isAnyMultisigWallet(walletsStore.currentWallet);
 
   return (
     <SafeAreaView style={styles.container}>

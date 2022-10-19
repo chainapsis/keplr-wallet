@@ -1,5 +1,5 @@
 import {
-  isMultisigWallet,
+  isAnyMultisigWallet,
   RequestObiSignAndBroadcastMsg,
 } from "@obi-wallet/common";
 import { useEffect } from "react";
@@ -16,7 +16,7 @@ export default () => {
       if (!walletsStore.currentWalletId) return;
       await RequestObiSignAndBroadcastMsg.send({
         id: walletsStore.currentWalletId,
-        multisig: isMultisigWallet(walletsStore.currentWallet)
+        multisig: isAnyMultisigWallet(walletsStore.currentWallet)
           ? walletsStore.currentWallet.nextAdmin
           : null,
         encodeObjects: [],

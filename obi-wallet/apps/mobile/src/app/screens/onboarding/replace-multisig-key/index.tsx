@@ -89,10 +89,6 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
             multisig: sender,
           });
 
-          if (isMultisigDemoWallet(wallet)) {
-            return;
-          }
-
           try {
             invariant(response.rawLog, "Expected `response` to have `rawLog`.");
             const rawLog = JSON.parse(response.rawLog) as [
@@ -120,12 +116,12 @@ export const ReplaceMultisig = observer<ReplaceMultisigProps>(
               "Expected `executeEvent` to contain `_contract_address` attribute."
             );
             if (wallet.updateProposed) {
-              wallet.finishProxySetup({
+              await wallet.finishProxySetup({
                 address: contractAddress.value,
                 codeId: chainStore.currentChainInformation.currentCodeId,
               });
             } else {
-              wallet.updateProposed = true;
+              wallet.setUpdateProposed(true);
             }
           } catch (e) {
             console.log(response.rawLog);

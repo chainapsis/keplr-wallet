@@ -1,6 +1,6 @@
 import {
+  isAnyMultisigWallet,
   isMultisigDemoWallet,
-  isMultisigWallet,
   MultisigKey,
   Text,
 } from "@obi-wallet/common";
@@ -29,11 +29,11 @@ export type WelcomeProps = NativeStackScreenProps<
 export const Welcome = observer<WelcomeProps>(({ navigation }) => {
   const { walletsStore } = useStore();
   const wallet = walletsStore.currentWallet;
-  const multisigWallet = isMultisigWallet(wallet) ? wallet : null;
+  const multisigWallet = isAnyMultisigWallet(wallet) ? wallet : null;
   const intl = useIntl();
 
   const isInRecovery =
-    isMultisigWallet(wallet) && wallet.keyInRecovery !== null;
+    isAnyMultisigWallet(wallet) && wallet.keyInRecovery !== null;
 
   const accountPickerModalProps = useAccountPickerModalProps();
 

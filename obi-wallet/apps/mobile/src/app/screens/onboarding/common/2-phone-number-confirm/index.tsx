@@ -232,16 +232,14 @@ export function MultisigPhoneNumberConfirm({
                     demoMode: isMultisigDemoWallet(wallet),
                   });
                   if (publicKey) {
-                    if (!isMultisigDemoWallet(wallet)) {
-                      wallet.setPhoneNumberKey({
-                        publicKey: {
-                          type: pubkeyType.secp256k1,
-                          value: publicKey,
-                        },
-                        phoneNumber: params.phoneNumber,
-                        securityQuestion: params.securityQuestion,
-                      });
-                    }
+                    await wallet.setPhoneNumberKey({
+                      publicKey: {
+                        type: pubkeyType.secp256k1,
+                        value: publicKey,
+                      },
+                      phoneNumber: params.phoneNumber,
+                      securityQuestion: params.securityQuestion,
+                    });
                     setVerifyButtonDisabledDoubleclick(false);
                     switch (wallet.keyInRecovery) {
                       case "biometrics":

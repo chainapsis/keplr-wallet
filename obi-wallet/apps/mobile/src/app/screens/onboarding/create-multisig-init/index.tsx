@@ -45,7 +45,8 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
     const value: MsgInstantiateContract = {
       sender: multisig.multisig.address,
       admin: multisig.multisig.address,
-      codeId: Long.fromInt(currentChainInformation.currentCodeId),
+      // @ts-expect-error
+      codeId: Long.fromInt(currentChainInformation.currentCodeId).toString(),
       label: "Obi Proxy",
       msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
       funds: [],
@@ -94,7 +95,7 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
             contractAddress,
             "Expected `instantiateEvent` to contain `_contract_address` attribute."
           );
-          wallet.finishProxySetup({
+          await wallet.finishProxySetup({
             address: contractAddress.value,
             codeId: chainStore.currentChainInformation.currentCodeId,
           });
