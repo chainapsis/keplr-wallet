@@ -19,6 +19,7 @@ import { SvgProps } from "react-native-svg";
 import { Card } from "../../card";
 import { FontAwesomeIcon } from "../../font-awesome-icon";
 import { App, AppsStore, isSinglesigWallet, WalletsStore } from "../../stores";
+import { SettingsStore } from "../../stores/settings";
 import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 
@@ -32,13 +33,21 @@ const styles = StyleSheet.create({
 export interface HomeProps {
   appsStore: AppsStore;
   walletsStore: WalletsStore;
+  settingsStore: SettingsStore;
   onAppPress: (app: App) => void;
   marginBottom?: number;
   icons: FC<SvgProps>[];
 }
 
 export const Home = observer<HomeProps>(
-  ({ appsStore, onAppPress, marginBottom, walletsStore, icons }) => {
+  ({
+    appsStore,
+    onAppPress,
+    settingsStore,
+    marginBottom,
+    walletsStore,
+    icons,
+  }) => {
     const [
       BuyCryptoIcon,
       CosmicPartyIcon,
@@ -46,8 +55,9 @@ export const Home = observer<HomeProps>(
       MyTicketsIcon,
       HistoryIcon,
     ] = icons;
+    const { isObi } = settingsStore;
     const [editMode, setEditMode] = useState(false);
-    const [url, setUrl] = useState("https://(some apps not yet supported)");
+    const [url, setUrl] = useState("");
     const intl = useIntl();
 
     return (
@@ -108,20 +118,22 @@ export const Home = observer<HomeProps>(
                   });
                 }}
               />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                ImgComponent={CosmicPartyIcon}
-                label="Cosmic 5 Party"
-                onPress={() => {
-                  onAppPress({
-                    label: "Cosmic 5 Party",
-                    url: `https://events.loop.markets`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
+              {!isObi && (
+                <Tile
+                  onLongPress={() => {
+                    setEditMode(true);
+                  }}
+                  ImgComponent={CosmicPartyIcon}
+                  label="Cosmic 5 Party"
+                  onPress={() => {
+                    onAppPress({
+                      label: "Cosmic 5 Party",
+                      url: `https://events.loop.markets`,
+                      icon: "https://place-hold.it/180x180",
+                    });
+                  }}
+                />
+              )}
               <Tile
                 onLongPress={() => {
                   setEditMode(true);
@@ -190,7 +202,7 @@ export const Home = observer<HomeProps>(
               <View
                 style={{
                   flexDirection: "row",
-                  marginBottom: 28,
+                  marginBottom: 20,
                   alignItems: "center",
                   position: "relative",
                   paddingVertical: 2,
@@ -221,9 +233,21 @@ export const Home = observer<HomeProps>(
                       size={Platform.OS === "web" ? "1x" : 24}
                       style={{ color: "#393853", marginRight: 6 }}
                     />
-                    <Text style={{ color: "#787B9C" }}>
-                      GO TO SPECIFIC LINK
-                    </Text>
+                    <View>
+                      <Text style={{ color: "#787B9C" }}>
+                        GO TO SPECIFIC LINK
+                      </Text>
+                      <Text
+                        style={{
+                          color: "white",
+                          textAlign: "center",
+                          fontSize: 10,
+                          marginBottom: 5,
+                        }}
+                      >
+                        Some apps not yet supported
+                      </Text>
+                    </View>
                   </View>
                 </View>
                 <View
@@ -235,6 +259,7 @@ export const Home = observer<HomeProps>(
                   }}
                 />
               </View>
+
               <View
                 style={{
                   backgroundColor: "#6959E6",
@@ -244,7 +269,7 @@ export const Home = observer<HomeProps>(
                 }}
               >
                 <TextInput
-                  defaultValue="https://(some apps not yet supported)"
+                  defaultValue=""
                   style={{
                     flex: 1,
                     backgroundColor: "#090817",
@@ -254,7 +279,7 @@ export const Home = observer<HomeProps>(
                     paddingLeft: 20,
                     color: "#F6F5FF",
                   }}
-                  placeholder="Search"
+                  placeholder="Go to URL"
                   onChangeText={(text) => {
                     const newText = text.includes("https://")
                       ? text
@@ -275,7 +300,6 @@ export const Home = observer<HomeProps>(
                     try {
                       const validURL = new URL(url.trim());
                       //if validURL text has space
-                      console.log(validURL, "validURL");
                       if (
                         validURL.toString().includes(" ") ||
                         !validURL.toString().includes(".")
@@ -300,7 +324,6 @@ export const Home = observer<HomeProps>(
 
                       const searchParam = newUrl.split(" ").join("+");
                       const newSearchUrl = `https://www.google.com/search?q=${searchParam}`;
-                      console.log({ newUrl });
                       onAppPress({
                         url: newSearchUrl,
                         label: newUrl,

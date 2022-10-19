@@ -48,7 +48,8 @@
   "recovery.singlesig.title": "Recover your Singlesig Wallet",
   "recovery.singlesig.enterphrase": "Enter your recovery phrase of your singlesig wallet.",
 
-  "onboarding1.welcometoloop": "Bienvenidos a Loop",
+  "onboarding1.welcometo.loop": "Bienvenido a Loop",
+  "onboarding1.welcometo.obi": "Bienvenido a Obi",
   "onboarding1.welcomesubtext": "Desarrollado por Obi",
   "onboarding1.getstarted": "Empecemos",
   "onboarding1.recoverwallet": "Recuperar mi billetera",
@@ -148,6 +149,7 @@
   "settings.more": "Más",
   "settings.helpsupport": "Ayuda",
   "settings.helpsupport.subtext": "Contacta el equipo de soporte de Loop",
+  "settings.helpsupport.subtext.obi": "Contacta el equipo de soporte de Obi",
   "settings.logout": "Cerrar sesión",
   "settings.logout.subtext": "Guarda tus claves antes de cerrar sesión",
   "settings.fundproxywallet": "Billetera Proxy de Fondos",

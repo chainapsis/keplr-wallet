@@ -192,7 +192,7 @@ const BalanceAndActions = observer(() => {
       style={{
         justifyContent: "center",
         alignItems: "center",
-        marginTop: isSmallScreenNumber(30, 58),
+        marginTop: isSmallScreenNumber(5, 15),
       }}
     >
       <Text
@@ -250,7 +250,7 @@ const BalanceAndActions = observer(() => {
           justifyContent: "space-around",
           alignItems: "center",
           width: 200,
-          marginTop: 36,
+          marginTop: isSmallScreenNumber(10, 36),
         }}
       >
         <View style={{ alignItems: "center" }}>
@@ -359,7 +359,7 @@ const AssetsList = observer(() => {
         flexGrow: 1,
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: isSmallScreenNumber(30, 40),
+        marginTop: isSmallScreenNumber(20, 40),
         backgroundColor: "#100F1E",
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,

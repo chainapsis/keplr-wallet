@@ -20,6 +20,7 @@ import { ChainStore } from "./chain";
 import { InteractionStore } from "./interaction";
 import { KeplrChainStore } from "./keplr-chain";
 import { LanguageStore } from "./language";
+import { SettingsStore } from "./settings";
 import { WalletsStore } from "./wallets";
 
 export class RootStore {
@@ -28,6 +29,7 @@ export class RootStore {
   public readonly chainStore: ChainStore;
   public readonly interactionStore: InteractionStore;
   public readonly languageStore: LanguageStore;
+  public readonly settingsStore: SettingsStore;
   public readonly walletsStore: WalletsStore;
 
   // Hide Keplr-related stores by default
@@ -81,6 +83,7 @@ export class RootStore {
       defaultLanguage,
       kvStore: new KVStore("language-store"),
     });
+    this.settingsStore = new SettingsStore();
 
     this.walletsStore = new WalletsStore({
       chainStore: this.chainStore,

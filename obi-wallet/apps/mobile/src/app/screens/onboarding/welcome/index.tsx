@@ -18,6 +18,8 @@ import {
   useAccountPickerModalProps,
 } from "../../account-picker-modal";
 import { InitialBackground } from "../../components/initial-background";
+import { ObiModeToggle } from "../../components/obi-mode-toggle";
+import ObiLogo from "../../settings/assets/obi-logo.svg";
 import { OnboardingStackParamList } from "../onboarding-stack";
 import GetStarted from "./assets/get-started.svg";
 
@@ -27,7 +29,10 @@ export type WelcomeProps = NativeStackScreenProps<
 >;
 
 export const Welcome = observer<WelcomeProps>(({ navigation }) => {
-  const { walletsStore } = useStore();
+  const {
+    walletsStore,
+    settingsStore: { isObi },
+  } = useStore();
   const wallet = walletsStore.currentWallet;
   const multisigWallet = isAnyMultisigWallet(wallet) ? wallet : null;
   const intl = useIntl();
@@ -38,7 +43,7 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
   const accountPickerModalProps = useAccountPickerModalProps();
 
   return (
-    <InitialBackground>
+    <InitialBackground disabled={isObi}>
       <SafeAreaView
         style={{
           flex: 1,
@@ -62,7 +67,24 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
             paddingBottom: 20,
           }}
         >
-          <Image source={require("./assets/loop.png")} />
+          <ObiModeToggle>
+            {isObi ? (
+              <View
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: 40,
+                  width: 40,
+                  height: 40,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ObiLogo width={40} height={40} />
+              </View>
+            ) : (
+              <Image source={require("./assets/loop.png")} />
+            )}
+          </ObiModeToggle>
           <Text
             style={{
               color: "#F6F5FF",
@@ -176,6 +198,14 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
         />
       );
     } else {
+      if (isObi) {
+        return (
+          <FormattedMessage
+            id="onboarding1.welcometoobi"
+            defaultMessage="Welcome to Obi"
+          />
+        );
+      }
       return (
         <FormattedMessage
           id="onboarding1.welcometoloop"
@@ -202,6 +232,8 @@ export const Welcome = observer<WelcomeProps>(({ navigation }) => {
           />
         );
       default:
+        if (isObi) return null;
+
         return (
           <FormattedMessage
             id="onboarding1.welcomesubtext"
