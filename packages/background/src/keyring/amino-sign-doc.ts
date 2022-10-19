@@ -15,6 +15,10 @@ const TrimAminoSignDocScheme = Joi.object({
     gas: Joi.string().allow(""),
     payer: Joi.string().allow(""),
     granter: Joi.string().allow(""),
+
+    // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
+    //      That means this part is not standard.
+    feePayer: Joi.string().allow(""),
   }),
   msgs: Joi.array().items(Joi.any()),
   memo: Joi.string().allow(""),

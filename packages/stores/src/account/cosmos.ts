@@ -515,11 +515,12 @@ export class CosmosAccountImpl {
           signOptions
         );
       } else {
-        // TODO: Upgrade typing. (Update cosmjs version?)
         const altSignDoc = {
           ...signDoc,
         };
 
+        // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
+        //      That means this part is not standard.
         (altSignDoc as any).fee["feePayer"] = this.base.bech32Address;
 
         return await keplr.experimentalSignEIP712CosmosTx_v0(

@@ -41,13 +41,27 @@ export class SignDocHelper {
 
       const signDoc = {
         ...aminoSignDoc,
-        // XXX: Set fee payer if the requested sign doc has fee payer.
+        // XXX: Set fee payer/granter if the requested sign doc has fee payer/granter.
         //      Currently, there is no support for fee delegation within keplr,
-        //      but this handling is essential for ethermint EIP712 tx or external services that set fee payer.
+        //      but this handling is essential for external services that set fee payer/granter.
         // TODO: Unfortunately. cosmjs does not actively update amino types. Handle the latest amino typing.
-        fee: (aminoSignDoc.fee as any).feePayer
-          ? { ...stdFee, feePayer: (aminoSignDoc.fee as any).feePayer }
-          : stdFee,
+        fee: (() => {
+          const fee = { ...stdFee } as any;
+
+          const aminoSignDocAny = aminoSignDoc as any;
+          if (aminoSignDocAny.fee.feePayer) {
+            // XXX: This part is not standard. This is only used for ethermint EIP-712 signing.
+            fee.feePayer = aminoSignDocAny.fee.feePayer;
+          }
+          if (aminoSignDocAny.fee.payer) {
+            fee.payer = aminoSignDocAny.fee.payer;
+          }
+          if (aminoSignDocAny.fee.granter) {
+            fee.granter = aminoSignDocAny.fee.granter;
+          }
+
+          return fee;
+        })(),
         memo: escapeHTML(this.memoConfig.memo),
       };
 
