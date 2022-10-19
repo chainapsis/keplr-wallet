@@ -62,6 +62,7 @@ import { LogPageViewWrapper } from "./components/analytics";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
 import { SettingAutoLockPage } from "./pages/setting/autolock";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { KeystoneImportPubkeyPage } from "./pages/keystone";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -176,6 +177,11 @@ ReactDOM.render(
                     component={IBCTransferPage}
                   />
                   <Route exact path="/setting" component={SettingPage} />
+                  <Route
+                    exact
+                    path="/keystone/import-pubkey"
+                    component={KeystoneImportPubkeyPage}
+                  />
                   <Route
                     exact
                     path="/ledger-grant"

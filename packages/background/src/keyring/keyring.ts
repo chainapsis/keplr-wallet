@@ -19,6 +19,7 @@ import * as BytesUtils from "@ethersproject/bytes";
 import { computeAddress } from "@ethersproject/transactions";
 import { EIP712MessageValidator } from "./eip712";
 import { _TypedDataEncoder } from "@ethersproject/hash";
+import { KeystoneService } from "../keystone";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -74,6 +75,7 @@ export class KeyRing {
     private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
     private readonly ledgerKeeper: LedgerService,
+    private readonly keystoneService: KeystoneService,
     private readonly crypto: CommonCrypto
   ) {
     this.loaded = false;
@@ -283,6 +285,54 @@ export class KeyRing {
     );
     this.password = password;
     this.multiKeyStore.push(this.keyStore);
+
+    await this.save();
+
+    return {
+      status: this.status,
+      multiKeyStoreInfo: this.getMultiKeyStoreInfo(),
+    };
+  }
+
+  public async createKeystoneKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    if (this.status !== KeyRingStatus.EMPTY) {
+      throw new KeplrError(
+        "keyring",
+        142,
+        "Key ring is not loaded or not empty"
+      );
+    }
+
+    // Get public key first
+    const publicKey = await this.keystoneService.getPublicKey(env, bip44HDPath);
+
+    const pubKeys = {
+      [LedgerApp.Cosmos]: publicKey,
+    };
+
+    const keyStore = await KeyRing.CreateKeystoneKeyStore(
+      this.crypto,
+      kdf,
+      pubKeys,
+      password,
+      await this.assignKeyStoreIdMeta(meta),
+      bip44HDPath
+    );
+
+    this.password = password;
+    this.keyStore = keyStore;
+    this.multiKeyStore.push(this.keyStore);
+
+    this.ledgerPublicKeyCache = pubKeys;
 
     await this.save();
 
@@ -1209,6 +1259,35 @@ export class KeyRing {
       Buffer.from(privateKey).toString("hex"),
       password,
       meta
+    );
+  }
+
+  private static async CreateKeystoneKeyStore(
+    crypto: CommonCrypto,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    publicKeys: Record<string, Uint8Array | undefined>,
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<KeyStore> {
+    const publicKeyMap: Record<string, string> = {};
+    Object.keys(publicKeys)
+      .filter((k) => publicKeys[k] != null)
+      .forEach(
+        (k) =>
+          (publicKeyMap[k] = Buffer.from(publicKeys[k] as Uint8Array).toString(
+            "hex"
+          ))
+      );
+
+    return await Crypto.encrypt(
+      crypto,
+      kdf,
+      "keystone",
+      JSON.stringify(publicKeyMap),
+      password,
+      meta,
+      bip44HDPath
     );
   }
 

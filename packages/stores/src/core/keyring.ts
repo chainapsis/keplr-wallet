@@ -23,6 +23,7 @@ import {
   CheckPasswordMsg,
   ExportKeyRingData,
   ExportKeyRingDatasMsg,
+  CreateKeystoneKeyMsg,
 } from "@keplr-wallet/background";
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -191,6 +192,21 @@ export class KeyRingStore {
     kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
     const msg = new CreatePrivateKeyMsg(kdf, privateKey, password, meta);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this.status = result.status;
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+  }
+
+  @flow
+  *createKeystoneKey(
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
+  ) {
+    const msg = new CreateKeystoneKeyMsg(kdf, password, meta, bip44HDPath);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );

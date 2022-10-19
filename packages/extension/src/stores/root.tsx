@@ -89,15 +89,15 @@ export class RootStore {
       chainName?: string;
       toChainId?: string;
       toChainName?: string;
-      registerType?: "seed" | "google" | "ledger" | "qr";
+      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
       feeType?: FeeType | undefined;
       isIbc?: boolean;
       rpc?: string;
       rest?: string;
     },
     {
-      registerType?: "seed" | "google" | "ledger" | "qr";
-      accountType?: "mnemonic" | "privateKey" | "ledger";
+      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
+      accountType?: "mnemonic" | "privateKey" | "ledger" | "keystone";
       currency?: string;
       language?: string;
     }

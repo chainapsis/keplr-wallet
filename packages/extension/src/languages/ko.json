@@ -152,6 +152,8 @@
   "register.import.textarea.private-key.error.invalid-length": "잘못된 길이의 개인키 입니다",
   "register.create.button.next": "다음",
 
+  "register.keystone.title": "Keystone 가져오기",
+
   "register.ledger.title": "렛저 계정 불러오기",
 
   "register.verify.button.register": "등록",

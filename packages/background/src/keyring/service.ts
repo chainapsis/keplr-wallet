@@ -38,6 +38,7 @@ import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
+import { KeystoneService } from "../keystone";
 
 export class KeyRingService {
   private keyRing!: KeyRing;
@@ -56,7 +57,8 @@ export class KeyRingService {
     interactionService: InteractionService,
     chainsService: ChainsService,
     permissionService: PermissionService,
-    ledgerService: LedgerService
+    ledgerService: LedgerService,
+    keystoneService: KeystoneService
   ) {
     this.interactionService = interactionService;
     this.chainsService = chainsService;
@@ -66,6 +68,7 @@ export class KeyRingService {
       this.embedChainInfos,
       this.kvStore,
       ledgerService,
+      keystoneService,
       this.crypto
     );
 
@@ -181,6 +184,25 @@ export class KeyRingService {
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     return await this.keyRing.createPrivateKey(kdf, privateKey, password, meta);
+  }
+
+  async createKeystoneKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    return await this.keyRing.createKeystoneKey(
+      env,
+      kdf,
+      password,
+      meta,
+      bip44HDPath
+    );
   }
 
   async createLedgerKey(
