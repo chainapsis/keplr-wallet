@@ -109,23 +109,6 @@ export const KeysConfigScreen = observer(() => {
         defaultMessage: "Social Key",
       }),
     }),
-    // KLUDGE for party demo, rm later
-    {
-      id: "email",
-      title: intl.formatMessage({
-        id: "settings.multisig.option.emailkey",
-        defaultMessage: "Email Key",
-      }),
-      activated: false,
-    },
-    {
-      id: "cloud",
-      title: intl.formatMessage({
-        id: "settings.multisig.option.cloudkey",
-        defaultMessage: "Cloud Key",
-      }),
-      activated: false,
-    },
   ];
 
   const activatedKeys = data.filter((item) => item.activated).length;
