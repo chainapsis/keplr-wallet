@@ -99,7 +99,7 @@ export const WebViewScreen = observer<WebViewScreenProps>(
           }}
         >
           <TouchableOpacity
-            onPress={() => navigation.navigate("state-renderer")}
+            onPress={() => navigation.goBack()}
             style={{ paddingLeft: 10 }}
             hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
           >

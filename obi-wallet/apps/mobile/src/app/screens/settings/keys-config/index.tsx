@@ -1,18 +1,16 @@
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons/faInfoCircle";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
-import { MultisigKey, Text, WalletType } from "@obi-wallet/common";
-import { useNavigation } from "@react-navigation/native";
+import { isAnyMultisigWallet, MultisigKey, Text } from "@obi-wallet/common";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import { FormattedMessage, useIntl } from "react-intl";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-import { useRootNavigation } from "../../../root-stack";
 import { useStore } from "../../../stores";
 import { Back } from "../../components/back";
 import {
@@ -47,8 +45,9 @@ const getSVG = (number: number) => {
 };
 
 export const KeysConfigScreen = observer(() => {
-  const { multisigStore } = useStore();
-  const currentAdmin = multisigStore.currentAdmin;
+  const { walletsStore } = useStore();
+  const wallet = walletsStore.currentWallet;
+  const currentAdmin = isAnyMultisigWallet(wallet) ? wallet.currentAdmin : null;
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [selectedItem, setSelectedItem] = useState<KeyListItem | null>(null);
 
@@ -110,23 +109,6 @@ export const KeysConfigScreen = observer(() => {
         defaultMessage: "Social Key",
       }),
     }),
-    // KLUDGE for party demo, rm later
-    {
-      id: "email",
-      title: intl.formatMessage({
-        id: "settings.multisig.option.emailkey",
-        defaultMessage: "Email Key",
-      }),
-      activated: false,
-    },
-    {
-      id: "cloud",
-      title: intl.formatMessage({
-        id: "settings.multisig.option.cloudkey",
-        defaultMessage: "Cloud Key",
-      }),
-      activated: false,
-    },
   ];
 
   const activatedKeys = data.filter((item) => item.activated).length;
@@ -250,30 +232,19 @@ interface KeyConfigProps {
 }
 
 function KeyConfig({ item, onClose }: KeyConfigProps) {
-  const { navigate } = useRootNavigation();
   const { id, title, activated } = item;
   const { Icon } = keyMetaData[id];
-  const { multisigStore, walletStore } = useStore();
+  const { walletsStore } = useStore();
 
   const safeArea = useSafeAreaInsets();
-
-  const intl = useIntl();
 
   const getRecoverButton = (keyId: MultisigKey) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          if (!walletStore.type) return;
-          switch (walletStore.type) {
-            case WalletType.MULTISIG:
-              if (multisigStore.currentAdmin) {
-                multisigStore.recover(keyId);
-                navigate("state-renderer");
-              } // TODO: unsure if else case will ever hit here
-              break;
-            case WalletType.MULTISIG_DEMO:
-              // demoStore.recover();
-              break;
+          const wallet = walletsStore.currentWallet;
+          if (isAnyMultisigWallet(wallet)) {
+            wallet.recover(keyId);
           }
         }}
         style={{
@@ -417,17 +388,10 @@ function KeyConfig({ item, onClose }: KeyConfigProps) {
           style={{ paddingVertical: 15, paddingHorizontal: 63 }}
         >
           <Text style={{ color: "#787B9C" }}>
-            {item.id !== "biometrics" ? (
-              <FormattedMessage
-                id="settings.multisig.modal.close"
-                defaultMessage="Close"
-              />
-            ) : (
-              <FormattedMessage
-                id="settings.multisig.modal.notnow"
-                defaultMessage="Not now"
-              />
-            )}
+            <FormattedMessage
+              id="settings.multisig.modal.close"
+              defaultMessage="Close"
+            />
           </Text>
         </TouchableOpacity>
       </View>

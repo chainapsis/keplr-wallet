@@ -10,7 +10,6 @@ import {
 import { useDebounce } from "rooks";
 
 import { AppsStore } from "../../stores";
-import { Tile, Tiles } from "../../tiles";
 import { Text } from "../../typography";
 import { fetchMeta } from "./fetch-meta";
 
@@ -30,8 +29,6 @@ export interface AppStoreProps {
 
 export const AppStore: FunctionComponent<AppStoreProps> = observer(
   ({ appsStore, onAfterAppAdded }) => {
-    const knownApps = appsStore.getKnownApps();
-
     const [url, setUrl] = useState("");
 
     function setUrlWithProtocol(url: string) {

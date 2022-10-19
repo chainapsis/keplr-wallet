@@ -1,8 +1,9 @@
-import { EncodeObject } from "@cosmjs/proto-signing";
 import { DeliverTxResponse } from "@cosmjs/stargate";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { InteractionStore as KeplrInteractionStore } from "@keplr-wallet/stores";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
+
+import { RequestObiSignAndBroadcastPayload } from "../background";
 
 export class InteractionStore {
   @observable
@@ -24,18 +25,14 @@ export class InteractionStore {
   }
 
   protected get waitingDatas() {
-    return this.interactionStore.getDatas<{
-      address: string;
-      messages: EncodeObject[];
-    }>("request-sign-and-broadcast");
+    return this.interactionStore.getDatas<RequestObiSignAndBroadcastPayload>(
+      "request-sign-and-broadcast"
+    );
   }
 
   @computed
   get waitingData():
-    | InteractionWaitingData<{
-        address: string;
-        messages: EncodeObject[];
-      }>
+    | InteractionWaitingData<RequestObiSignAndBroadcastPayload>
     | undefined {
     const datas = this.waitingDatas;
 

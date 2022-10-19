@@ -1,4 +1,4 @@
-import { Secp256k1HdWallet, Secp256k1Wallet } from "@cosmjs/amino";
+import { Secp256k1HdWallet } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Text } from "@obi-wallet/common";
@@ -26,7 +26,7 @@ export const RecoverSinglesig = observer<RecoverSinglesigProps>(
   ({ navigation }) => {
     const [mnemonic, setMnemonic] = useState("");
     const [generateDisabled, setGenerateDisabled] = useState(false);
-    const { singlesigStore } = useStore();
+    const { walletsStore } = useStore();
 
     return (
       <KeyboardAvoidingView style={{ flex: 1 }}>
@@ -114,7 +114,10 @@ export const RecoverSinglesig = observer<RecoverSinglesigProps>(
             <View>
               <VerifyAndProceedButton
                 onPress={async () => {
-                  singlesigStore.setMnemonic(mnemonic);
+                  await walletsStore.addWallet({
+                    type: "singlesig",
+                    data: mnemonic,
+                  });
                 }}
               />
             </View>

@@ -38,10 +38,12 @@ import {
 import { BIP44, EthSignType, KeplrSignOptions } from "@keplr-wallet/types";
 import {
   EmbedChainInfos,
+  isSinglesigWallet,
   KVStore,
   MessageRequesterInternalToUi,
   PrivilegedOrigins,
   produceEnv,
+  RequestObiSignAndBroadcastMsg,
   RootStore,
   RouterBackground,
   WalletType,
@@ -50,8 +52,6 @@ import { Buffer } from "buffer";
 import { Alert } from "react-native";
 import scrypt from "scrypt-js";
 import invariant from "tiny-invariant";
-
-import { RequestObiSignAndBroadcastMsg } from "../app/injected-provider";
 
 let rootStore: RootStore | null = null;
 
@@ -168,7 +168,6 @@ class KeyRingService extends AbstractKeyRingService {
   }
 
   async enable(env: Env): Promise<KeyRingStatus> {
-    // TODO: do something with create-multisig store?
     return KeyRingStatus.UNLOCKED;
   }
 
@@ -178,23 +177,26 @@ class KeyRingService extends AbstractKeyRingService {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const { address, type } = this.rootStore.walletStore;
+    const { address, type } = this.rootStore.walletsStore;
 
     invariant(address, "Missing wallet address");
     invariant(type, "Missing wallet type");
 
     switch (type) {
-      case WalletType.MULTISIG:
+      case WalletType.Multisig:
         return {
-          // TODO:
           algo: "multisig",
-          // TODO:
           pubKey: new Uint8Array(),
           address: Bech32Address.fromBech32(address, "juno").address,
           isNanoLedger: true,
         };
-      case WalletType.SINGLESIG: {
-        const publicKey = this.rootStore.singlesigStore.publicKey;
+      case WalletType.Singlesig: {
+        const wallet = this.rootStore.walletsStore.currentWallet;
+        invariant(
+          isSinglesigWallet(wallet),
+          "Expected `wallet` to be singlesig wallet."
+        );
+        const publicKey = wallet.publicKey;
         invariant(publicKey, "Missing singlesig public key");
 
         return {
@@ -242,10 +244,6 @@ class KeyRingService extends AbstractKeyRingService {
     this.chainsService = chainsService;
     this.interactionService = interactionService;
     this.permissionService = permissionService;
-    // this.kvStore = new KVStore("create-multisig-store");
-
-    // TODO: permissionService
-    // TODO: key ring
   }
 
   get keyRingStatus(): KeyRingStatus {
@@ -271,9 +269,10 @@ class KeyRingService extends AbstractKeyRingService {
       ethSignType?: EthSignType;
     }
   ): Promise<AminoSignResponse> {
-    const { singlesigStore, walletStore } = this.rootStore;
+    const { walletsStore } = this.rootStore;
+    const wallet = walletsStore.currentWallet;
 
-    if (walletStore.type !== WalletType.SINGLESIG) {
+    if (!isSinglesigWallet(wallet)) {
       Alert.alert(
         "Unsupported wallet type",
         "Only singlesig wallets are supported"
@@ -360,10 +359,10 @@ class KeyRingService extends AbstractKeyRingService {
     }
 
     try {
-      invariant(singlesigStore.address, "Expected `address` to be defined.");
-      invariant(singlesigStore.privateKey, "Expected `privateKey` to be set.");
+      invariant(wallet.address, "Expected `address` to be defined.");
+      invariant(wallet.privateKey, "Expected `privateKey` to be set.");
 
-      const privateKey = new PrivKeySecp256k1(singlesigStore.privateKey);
+      const privateKey = new PrivKeySecp256k1(wallet.privateKey);
       const signature = privateKey.sign(serializeSignDoc(newSignDoc));
       return {
         signed: newSignDoc,
@@ -480,9 +479,7 @@ export function initBackground() {
         // });
       },
     },
-    // TODO: ledgerOptions?
     {},
-    // TODO: experimentalOptions?,
     {},
     (store, embedChainInfos, commonCrypto) => {
       keyRingService = new KeyRingService(store, embedChainInfos, commonCrypto);
@@ -498,10 +495,7 @@ export function initBackground() {
       env,
       "/sign",
       "request-sign-and-broadcast",
-      {
-        address: message.address,
-        messages: message.messages,
-      }
+      message.payload
     )) as DeliverTxResponse;
 
     return response;

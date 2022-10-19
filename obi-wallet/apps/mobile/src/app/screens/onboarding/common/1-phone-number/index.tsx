@@ -1,17 +1,17 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, Image, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton } from "../../../../button";
 import { PhoneInput } from "../../../../phone-input";
-import { useStore } from "../../../../stores";
+import { useMultisigWallet } from "../../../../stores";
 import { sendPublicKeyTextMessage } from "../../../../text-message";
 import { Background } from "../../../components/background";
 import {
@@ -28,17 +28,15 @@ export type MultisigPhoneNumberProps = NativeStackScreenProps<
 
 export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
   ({ navigation }) => {
-    const { demoStore, multisigStore } = useStore();
+    const wallet = useMultisigWallet();
     const intl = useIntl();
 
     useEffect(() => {
-      if (demoStore.demoMode) return;
-
-      const { phoneNumber } = multisigStore.nextAdmin;
+      const { phoneNumber } = wallet.nextAdmin;
       if (
         phoneNumber &&
-        multisigStore.getKeyInRecovery !== "biometrics" &&
-        multisigStore.getKeyInRecovery !== "phoneNumber"
+        wallet.keyInRecovery !== "biometrics" &&
+        wallet.keyInRecovery !== "phoneNumber"
       ) {
         Alert.alert(
           intl.formatMessage({ id: "onboarding2.error.phonekeyexists.title" }),
@@ -62,7 +60,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
           ]
         );
       }
-    }, [demoStore, intl, multisigStore, navigation]);
+    }, [intl, wallet, navigation]);
 
     const {
       securityQuestion,
@@ -213,12 +211,12 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                       marginTop: 32,
                     }}
                   >
-                    {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+                    {wallet.keyInRecovery === "phoneNumber" ? (
                       <FormattedMessage
                         id="onboarding2.recovery.authyourkeys"
                         defaultMessage="Create a New Phone Number Key"
                       />
-                    ) : multisigStore.getKeyInRecovery === "biometrics" ? (
+                    ) : wallet.keyInRecovery === "biometrics" ? (
                       <FormattedMessage
                         id="onboarding2.recovery.phonenumber"
                         defaultMessage="Recover Your Old Phone Number Key"
@@ -237,7 +235,7 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                       marginTop: 10,
                     }}
                   >
-                    {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+                    {wallet.keyInRecovery === "phoneNumber" ? (
                       <FormattedMessage
                         id="onboarding2.recovery.authyourkeyssubtext"
                         defaultMessage="Please answer a security question. It can be the same as your old answer, or different."
@@ -295,13 +293,11 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
 
                 if (checkSecurityAnswer && checkPhoneNumber) {
                   try {
-                    if (!demoStore.demoMode) {
-                      await sendPublicKeyTextMessage({
-                        phoneNumber,
-                        securityAnswer,
-                      });
-                    }
-
+                    await sendPublicKeyTextMessage({
+                      phoneNumber,
+                      securityAnswer,
+                      demoMode: isMultisigDemoWallet(wallet),
+                    });
                     navigation.navigate(
                       "create-multisig-phone-number-confirm",
                       {
@@ -310,7 +306,6 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                         securityAnswer,
                       }
                     );
-
                     setMagicButtonDisabledDoubleclick(false);
                   } catch (e) {
                     const error = e as Error;

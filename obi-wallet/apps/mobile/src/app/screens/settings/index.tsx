@@ -1,10 +1,9 @@
-import { WalletType } from "@obi-wallet/common";
+import { isAnyMultisigWallet } from "@obi-wallet/common";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { FC, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
-  Alert,
   Linking,
   StyleSheet,
   Text,
@@ -29,13 +28,7 @@ import { KeysConfigScreen } from "./keys-config";
 import { Seedphrase } from "./seedphrase";
 
 export const SettingsScreen = observer(() => {
-  const {
-    demoStore,
-    multisigStore,
-    singlesigStore,
-    walletStore,
-    settingsStore,
-  } = useStore();
+  const { walletsStore, settingsStore } = useStore();
   const { isObi } = settingsStore;
   const intl = useIntl();
   const navigation = useRootNavigation();
@@ -48,9 +41,8 @@ export const SettingsScreen = observer(() => {
     })();
   }, []);
 
-  const isMultisigWallet =
-    walletStore.type === WalletType.MULTISIG ||
-    walletStore.type === WalletType.MULTISIG_DEMO;
+  const isMultisigWallet = isAnyMultisigWallet(walletsStore.currentWallet);
+
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -169,12 +161,17 @@ export const SettingsScreen = observer(() => {
             id: "settings.helpsupport",
             defaultMessage: "Help & Support",
           })}
-          subtitle={intl.formatMessage({
-            id: isObi
-              ? "settings.helpsupport.subtext.obi"
-              : "settings.helpsupport.subtext",
-            defaultMessage: "Contact Loop support.",
-          })}
+          subtitle={intl.formatMessage(
+            isObi
+              ? {
+                  id: "settings.helpsupport.subtext.obi",
+                  defaultMessage: "Contact Obi support.",
+                }
+              : {
+                  id: "settings.helpsupport.subtext",
+                  defaultMessage: "Contact Loop support.",
+                }
+          )}
           onPress={() =>
             Linking.openURL(
               isObi ? "https://obi.money/contact" : "https://loop.markets/help"
@@ -192,38 +189,11 @@ export const SettingsScreen = observer(() => {
             id: "settings.logout.subtext",
             defaultMessage: "Save your keys before logging out.",
           })}
-          onPress={() => {
-            if (!walletStore.type) return;
-
-            switch (walletStore.type) {
-              case WalletType.MULTISIG:
-                multisigStore.logout();
-                break;
-              case WalletType.MULTISIG_DEMO:
-                demoStore.logout();
-                break;
-              case WalletType.SINGLESIG:
-                Alert.alert(
-                  "Are you sure?",
-                  "Since you do not have Obi mode active, you will only be able to log back in if you have securely saved your seedphrase.",
-                  [
-                    {
-                      text: "Cancel",
-                      // onPress: () => {}
-                    },
-                    {
-                      text: "Confirm",
-                      style: "destructive",
-                      onPress: () => {
-                        singlesigStore.logout();
-                      },
-                    },
-                  ]
-                );
-                break;
-            }
+          onPress={async () => {
+            await walletsStore.logout();
           }}
         />
+
         <View
           style={{
             flex: 1,
@@ -233,55 +203,63 @@ export const SettingsScreen = observer(() => {
         >
           <View
             style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              paddingBottom: 15,
+              flex: 1,
+              flexDirection: "column",
+              justifyContent: "flex-end",
             }}
           >
-            {/*<Text*/}
-            {/*  onPress={() => {*/}
-            {/*    navigation.navigate("AddSubAccount");*/}
-            {/*  }}*/}
-            {/*  style={{*/}
-            {/*    color: "#F6F5FF",*/}
-            {/*    paddingRight: 10,*/}
-            {/*    fontSize: 10,*/}
-            {/*  }}*/}
-            {/*>*/}
-            {/*  <FormattedMessage*/}
-            {/*    id="settings.terms"*/}
-            {/*    defaultMessage="Terms of Service"*/}
-            {/*  />*/}
-            {/*</Text>*/}
-            <Text
-              onPress={() => {
-                Linking.openURL("https://mail.loop.onl/privacy-policy/");
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                paddingBottom: 15,
               }}
+            >
+              {/*<Text*/}
+              {/*  onPress={() => {*/}
+              {/*    navigation.navigate("AddSubAccount");*/}
+              {/*  }}*/}
+              {/*  style={{*/}
+              {/*    color: "#F6F5FF",*/}
+              {/*    paddingRight: 10,*/}
+              {/*    fontSize: 10,*/}
+              {/*  }}*/}
+              {/*>*/}
+              {/*  <FormattedMessage*/}
+              {/*    id="settings.terms"*/}
+              {/*    defaultMessage="Terms of Service"*/}
+              {/*  />*/}
+              {/*</Text>*/}
+              <Text
+                onPress={() => {
+                  Linking.openURL("https://mail.loop.onl/privacy-policy/");
+                }}
+                style={{
+                  color: "#F6F5FF",
+                  marginLeft: 10,
+                  fontSize: 10,
+                }}
+              >
+                <FormattedMessage
+                  id="settings.privacy"
+                  defaultMessage="Privacy Policy"
+                />
+              </Text>
+            </View>
+
+            <Text
               style={{
                 color: "#F6F5FF",
                 marginLeft: 10,
+                marginBottom: 20,
                 fontSize: 10,
+                textAlign: "center",
               }}
             >
-              <FormattedMessage
-                id="settings.privacy"
-                defaultMessage="Privacy Policy"
-              />
+              Obi {appMetadata?.appVersion} {appMetadata?.label}
             </Text>
           </View>
-
-          <Text
-            style={{
-              color: "#F6F5FF",
-              marginLeft: 10,
-              marginBottom: 20,
-              fontSize: 10,
-              textAlign: "center",
-            }}
-          >
-            Obi {appMetadata?.appVersion} {appMetadata?.label}
-          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -375,29 +353,33 @@ const styles = StyleSheet.create({
 export const SettingsNavigator = createNativeStackNavigator();
 
 // This can't be a React component because `Stack.Navigator` doesn't want that.
-export const settingsScreens = () => [
-  <RootStack.Screen
-    name="AccountsSettings"
-    key="AccountsSettings"
-    component={Account}
-    options={{ headerShown: false }}
-  />,
-  <RootStack.Screen
-    name="AddSubAccount"
-    key="AddSubAccount"
-    component={Create}
-    options={{ headerShown: false }}
-  />,
-  <RootStack.Screen
-    name="MultiSigSettings"
-    key="MultiSigSettings"
-    component={KeysConfigScreen}
-    options={{ headerShown: false }}
-  />,
-  <RootStack.Screen
-    name="SingleSigSeedphrase"
-    key="SingleSigSeedphrase"
-    component={Seedphrase}
-    options={{ headerShown: false }}
-  />,
-];
+export const settingsScreens = () => {
+  return (
+    <RootStack.Group>
+      <RootStack.Screen
+        name="AccountsSettings"
+        key="AccountsSettings"
+        component={Account}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="AddSubAccount"
+        key="AddSubAccount"
+        component={Create}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="MultiSigSettings"
+        key="MultiSigSettings"
+        component={KeysConfigScreen}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="SingleSigSeedphrase"
+        key="SingleSigSeedphrase"
+        component={Seedphrase}
+        options={{ headerShown: false }}
+      />
+    </RootStack.Group>
+  );
+};

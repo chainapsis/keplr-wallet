@@ -1,8 +1,7 @@
 import { pubkeyToAddress } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
-import { createStargateClient } from "@obi-wallet/common";
+import { createStargateClient, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -12,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton, InlineButton } from "../../../../button";
-import { useStore } from "../../../../stores";
+import { useMultisigWallet, useStore } from "../../../../stores";
 import { TextInput } from "../../../../text-input";
 import { Background } from "../../../components/background";
 import { KeyboardAvoidingView } from "../../../components/keyboard-avoiding-view";
@@ -27,7 +26,8 @@ export type MultisigSocialProps = NativeStackScreenProps<
 
 export const MultisigSocial = observer<MultisigSocialProps>(
   ({ navigation }) => {
-    const { chainStore, demoStore, multisigStore } = useStore();
+    const { chainStore } = useStore();
+    const wallet = useMultisigWallet();
     const [address, setAddress] = useState("");
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
     const obi_address = "juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e";
@@ -35,14 +35,12 @@ export const MultisigSocial = observer<MultisigSocialProps>(
     const intl = useIntl();
 
     useEffect(() => {
-      if (demoStore.demoMode) return;
-
-      const { social } = multisigStore.nextAdmin;
+      const { social } = wallet.nextAdmin;
 
       if (
         social &&
-        multisigStore.getKeyInRecovery !== "social" &&
-        multisigStore.getKeyInRecovery !== "biometrics"
+        wallet.keyInRecovery !== "social" &&
+        wallet.keyInRecovery !== "biometrics"
       ) {
         Alert.alert(
           intl.formatMessage({ id: "onboarding4.error.socialkeyexists.title" }),
@@ -66,7 +64,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
           ]
         );
       }
-    }, [demoStore, intl, multisigStore, navigation]);
+    }, [intl, wallet, navigation]);
 
     async function getAccountPubkey(key: string) {
       const client = await createStargateClient(chainStore.currentChain);
@@ -129,12 +127,12 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       marginTop: 32,
                     }}
                   >
-                    {multisigStore.getKeyInRecovery === "social" ? (
+                    {wallet.keyInRecovery === "social" ? (
                       <FormattedMessage
                         id="onboarding5.recovery.setsocialkey"
                         defaultMessage="Set a New Social Key"
                       />
-                    ) : multisigStore.getKeyInRecovery === "biometrics" ? (
+                    ) : wallet.keyInRecovery === "biometrics" ? (
                       <FormattedMessage
                         id="onboarding2.recovery.social"
                         defaultMessage="Recover your Social Key"
@@ -153,7 +151,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       marginTop: 10,
                     }}
                   >
-                    {multisigStore.getKeyInRecovery === "biometrics" ? (
+                    {wallet.keyInRecovery === "biometrics" ? (
                       <FormattedMessage
                         id="onboarding5.recovery.socialsubtext"
                         defaultMessage="Enter the juno address of a trusted friend that you used when creating the wallet."
@@ -180,22 +178,21 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                   marginTop: 10,
                 }}
               >
-                {multisigStore.getKeyInRecovery === "social" &&
-                multisigStore.nextAdmin?.social?.address === obi_address ? (
+                {wallet.keyInRecovery === "social" &&
+                wallet.nextAdmin?.social?.address === obi_address ? (
                   <FormattedMessage
                     id="onboarding5.recovery.setsocialkey.subtext2"
                     defaultMessage="You're currently using the Obi account. This will remove the Obi account from your multisig and replace it with your friend's key."
                   />
-                ) : multisigStore.getKeyInRecovery !== "biometrics" ? (
+                ) : wallet.keyInRecovery !== "biometrics" ? (
                   <FormattedMessage
                     id="onboarding5.setsocialkey.subtext2"
                     defaultMessage="…or you can use the default Obi account if you don't trust any of your friends"
                   />
                 ) : null}
               </Text>
-              {multisigStore.getKeyInRecovery === "social" &&
-              multisigStore.nextAdmin?.social?.address ===
-                obi_address ? null : (
+              {wallet.keyInRecovery === "social" &&
+              wallet.nextAdmin?.social?.address === obi_address ? null : (
                 <InlineButton
                   label={intl.formatMessage({
                     id: "onboarding5.useobiaccount",
@@ -212,16 +209,14 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                 disabled={fetchingPubKey}
                 onPress={async () => {
                   setFetchingPubKey(true);
-                  const publicKey = demoStore.demoMode
-                    ? { type: "demo", value: "demo" }
-                    : await getAccountPubkey(address);
+                  const publicKey = await getAccountPubkey(address);
                   setFetchingPubKey(false);
 
                   if (publicKey) {
-                    const wallet = multisigStore.getWalletInRecovery();
-                    if (wallet) {
+                    const walletInRecovery = wallet.walletInRecovery;
+                    if (walletInRecovery) {
                       invariant(
-                        wallet.signers.length === 3,
+                        walletInRecovery.signers.length === 3,
                         "Expected wallet to have three signers."
                       );
 
@@ -231,7 +226,7 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       );
 
                       if (
-                        !wallet.signers.find((signer) => {
+                        !walletInRecovery.signers.find((signer) => {
                           return signer === socialAddress;
                         })
                       ) {
@@ -242,12 +237,11 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                         return;
                       }
 
-                      const previousBiometrics = wallet.signers.find(
+                      const previousBiometrics = walletInRecovery.signers.find(
                         (signer) => {
                           return (
                             signer !== socialAddress &&
-                            signer !==
-                              multisigStore.nextAdmin?.phoneNumber?.address
+                            signer !== wallet.nextAdmin?.phoneNumber?.address
                           );
                         }
                       );
@@ -273,32 +267,29 @@ export const MultisigSocial = observer<MultisigSocialProps>(
                       }
 
                       invariant(
-                        multisigStore.nextAdmin?.phoneNumber,
+                        wallet.nextAdmin?.phoneNumber,
                         "Expected next admin to have a phone number."
                       );
 
-                      multisigStore.setCurrentAdmin({
+                      wallet.setCurrentAdmin({
                         biometrics: {
                           // @ts-expect-error Assuming tendermint
                           publicKey: biometricsPublicKey,
                         },
-                        phoneNumber: multisigStore.nextAdmin?.phoneNumber,
+                        phoneNumber: wallet.nextAdmin?.phoneNumber,
                         social: {
                           publicKey,
                         },
                       });
-
-                      multisigStore.setSocialPublicKey({
+                      wallet.setSocialPublicKey({
                         publicKey,
                       });
                       navigation.navigate("recover-multisig");
                     } else {
-                      if (!demoStore.demoMode) {
-                        multisigStore.setSocialPublicKey({
-                          publicKey: publicKey,
-                        });
-                      }
-                      if (multisigStore.getKeyInRecovery !== "social") {
+                      wallet.setSocialPublicKey({
+                        publicKey,
+                      });
+                      if (wallet.keyInRecovery !== "social") {
                         navigation.navigate("create-multisig-init");
                       } else {
                         navigation.navigate("replace-multisig");

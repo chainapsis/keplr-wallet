@@ -1,5 +1,5 @@
 import { MultisigKey, Text } from "@obi-wallet/common";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import {
   FlatList,
   StyleProp,
@@ -94,9 +94,9 @@ export interface KeyListItemProps {
 }
 
 export function KeyListItem({ item, tiled }: KeyListItemProps) {
-  const { title, description, Icon, right, onPress, id, signed } = item;
+  const { title, description, Icon, right, onPress, signed } = item;
 
-  if (item.description === "Coming Soon") return null;
+  if (tiled && item.description === "Coming Soon") return null;
 
   return tiled ? (
     <TouchableOpacity onPress={onPress}>

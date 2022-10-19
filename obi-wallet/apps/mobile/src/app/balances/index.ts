@@ -22,23 +22,21 @@ export interface FormattedExtendedCoin {
 }
 
 export function useBalances() {
-  const { demoStore, balancesStore, walletStore } = useStore();
+  const { balancesStore, walletsStore } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshBalances = useCallback(async () => {
     setRefreshing(true);
-    if (!demoStore.demoMode) {
-      await balancesStore.fetchBalances();
-    }
+    await balancesStore.fetchBalances();
     setRefreshing(false);
-  }, [demoStore, balancesStore]);
+  }, [balancesStore]);
 
   useEffect(() => {
     void refreshBalances();
-  }, [refreshBalances, walletStore.address]);
+  }, [refreshBalances, walletsStore.address]);
 
   return {
-    balances: demoStore.demoMode ? [] : balancesStore.balances,
+    balances: balancesStore.balances,
     refreshBalances,
     refreshing,
   };

@@ -17,28 +17,22 @@ import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
 import { BalancesStore } from "./balances";
 import { ChainStore } from "./chain";
-import { DemoStore } from "./demo";
 import { InteractionStore } from "./interaction";
 import { KeplrChainStore } from "./keplr-chain";
 import { LanguageStore } from "./language";
-import { MultisigStore } from "./multisig";
 import { SettingsStore } from "./settings";
-import { SinglesigStore } from "./singlesig";
-import { WalletStore } from "./wallet";
+import { WalletsStore } from "./wallets";
 
 export class RootStore {
-  public readonly settingsStore: SettingsStore;
   public readonly appsStore: AppsStore;
   public readonly balancesStore: BalancesStore;
   public readonly chainStore: ChainStore;
-  public readonly demoStore: DemoStore;
   public readonly interactionStore: InteractionStore;
   public readonly languageStore: LanguageStore;
-  public readonly multisigStore: MultisigStore;
-  public readonly singlesigStore: SinglesigStore;
-  public readonly walletStore: WalletStore;
+  public readonly settingsStore: SettingsStore;
+  public readonly walletsStore: WalletsStore;
 
-  // Hide Keplr-related stores
+  // Hide Keplr-related stores by default
   protected readonly keplrChainStore: KeplrChainStore;
   protected readonly keplrChainSuggestStore: ChainSuggestStore;
   protected readonly keplrInteractionStore: KeplrInteractionStore;
@@ -79,10 +73,9 @@ export class RootStore {
     this.keplrSignInteractionStore = new SignInteractionStore(
       this.keplrInteractionStore
     );
+
     this.appsStore = new AppsStore({ kvStore: new KVStore("apps-store") });
     this.chainStore = new ChainStore({ defaultChain });
-    this.demoStore = new DemoStore();
-    this.settingsStore = new SettingsStore();
     this.interactionStore = new InteractionStore(this.keplrInteractionStore);
     this.languageStore = new LanguageStore({
       deviceLanguage,
@@ -90,24 +83,20 @@ export class RootStore {
       defaultLanguage,
       kvStore: new KVStore("language-store"),
     });
+    this.settingsStore = new SettingsStore();
 
-    this.singlesigStore = new SinglesigStore({
+    this.walletsStore = new WalletsStore({
       chainStore: this.chainStore,
-      kvStore: new KVStore("singlesig-store"),
-    });
-    this.multisigStore = new MultisigStore({
-      chainStore: this.chainStore,
-      kvStore: new KVStore("multisig-store"),
-    });
-    this.walletStore = new WalletStore({
-      demoStore: this.demoStore,
-      singlesigStore: this.singlesigStore,
-      multisigStore: this.multisigStore,
+      kvStore: new KVStore("wallets-store"),
+      legacyKVStores: {
+        multisig: new KVStore("multisig-store"),
+        singlesig: new KVStore("singlesig-store"),
+      },
     });
 
     this.balancesStore = new BalancesStore({
       chainStore: this.chainStore,
-      walletStore: this.walletStore,
+      walletsStore: this.walletsStore,
     });
 
     router.listen(APP_PORT);

@@ -1,8 +1,8 @@
-import { pubkeyToAddress, pubkeyType } from "@cosmjs/amino";
+import { pubkeyToAddress } from "@cosmjs/amino";
 import { MsgInstantiateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Multisig } from "@obi-wallet/common";
+import { RequestObiSignAndBroadcastMsg } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
@@ -13,52 +13,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
 import { IconButton } from "../../../button";
-import { lendFees } from "../../../fee-lender-worker";
-import { useStore } from "../../../stores";
+import { useMultisigWallet, useStore } from "../../../stores";
 import { Background } from "../../components/background";
-import {
-  SignatureModalMultisig,
-  useSignatureModalProps,
-} from "../../components/signature-modal";
 import { OnboardingStackParamList } from "../onboarding-stack";
-
-const demoModeMultisig: Multisig = {
-  multisig: {
-    address: "demo-create-multisig",
-    publicKey: {
-      type: pubkeyType.multisigThreshold,
-      value: {
-        threshold: "1",
-        pubkeys: [],
-      },
-    },
-  },
-  biometrics: {
-    address: "demo-biometrics",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-biometrics",
-    },
-  },
-  phoneNumber: {
-    address: "demo-phone-number",
-    phoneNumber: "demo-phone-number",
-    securityQuestion: "birthplace",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-phone-number",
-    },
-  },
-  social: {
-    address: "demo-social",
-    publicKey: {
-      type: pubkeyType.secp256k1,
-      value: "demo-social",
-    },
-  },
-  cloud: null,
-  email: null,
-};
 
 export type MultisigInitProps = NativeStackScreenProps<
   OnboardingStackParamList,
@@ -66,11 +23,10 @@ export type MultisigInitProps = NativeStackScreenProps<
 >;
 
 export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
-  const { chainStore, demoStore, multisigStore } = useStore();
+  const { chainStore } = useStore();
+  const wallet = useMultisigWallet();
   const { currentChainInformation } = chainStore;
-  const multisig = demoStore.demoMode
-    ? demoModeMultisig
-    : multisigStore.nextAdmin;
+  const multisig = wallet.nextAdmin;
 
   const encodeObjects = useMemo(() => {
     if (!multisig.multisig?.address) return [];
@@ -89,7 +45,8 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
     const value: MsgInstantiateContract = {
       sender: multisig.multisig.address,
       admin: multisig.multisig.address,
-      codeId: Long.fromInt(currentChainInformation.currentCodeId),
+      // @ts-expect-error
+      codeId: Long.fromInt(currentChainInformation.currentCodeId).toString(),
       label: "Obi Proxy",
       msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
       funds: [],
@@ -101,66 +58,56 @@ export const MultisigInit = observer<MultisigInitProps>(({ navigation }) => {
     return [message];
   }, [currentChainInformation, multisig]);
 
-  const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
-    multisig,
-    encodeObjects,
-    async onConfirm(response) {
-      if (demoStore.demoMode) {
-        demoStore.finishOnboarding();
-        return;
-      }
-
-      try {
-        invariant(response.rawLog, "Expected `response` to have `rawLog`.");
-        const rawLog = JSON.parse(response.rawLog) as [
-          {
-            events: [
-              {
-                type: string;
-                attributes: { key: string; value: string }[];
-              }
-            ];
-          }
-        ];
-        const instantiateEvent = rawLog[0].events.find((e) => {
-          return e.type === "instantiate";
-        });
-        invariant(
-          instantiateEvent,
-          "Expected `rawLog` to contain `instantiate` event."
-        );
-        const contractAddress = instantiateEvent.attributes.find((a) => {
-          return a.key === "_contract_address";
-        });
-        invariant(
-          contractAddress,
-          "Expected `instantiateEvent` to contain `_contract_address` attribute."
-        );
-        multisigStore.finishProxySetup({
-          address: contractAddress.value,
-          codeId: chainStore.currentChainInformation.currentCodeId,
-        });
-      } catch (e) {
-        console.log(response.rawLog);
-      }
-    },
-  });
-
   useEffect(() => {
     if (encodeObjects.length > 0) {
-      openSignatureModal();
-    }
-  }, [encodeObjects.length, openSignatureModal]);
+      (async () => {
+        const response = await RequestObiSignAndBroadcastMsg.send({
+          id: wallet.id,
+          encodeObjects,
+          multisig,
+          cancelable: false,
+          isOnboarding: true,
+        });
 
-  if (encodeObjects.length === 0) return null;
+        try {
+          invariant(response.rawLog, "Expected `response` to have `rawLog`.");
+          const rawLog = JSON.parse(response.rawLog) as [
+            {
+              events: [
+                {
+                  type: string;
+                  attributes: { key: string; value: string }[];
+                }
+              ];
+            }
+          ];
+          const instantiateEvent = rawLog[0].events.find((e) => {
+            return e.type === "instantiate";
+          });
+          invariant(
+            instantiateEvent,
+            "Expected `rawLog` to contain `instantiate` event."
+          );
+          const contractAddress = instantiateEvent.attributes.find((a) => {
+            return a.key === "_contract_address";
+          });
+          invariant(
+            contractAddress,
+            "Expected `instantiateEvent` to contain `_contract_address` attribute."
+          );
+          await wallet.finishProxySetup({
+            address: contractAddress.value,
+            codeId: chainStore.currentChainInformation.currentCodeId,
+          });
+        } catch (e) {
+          console.log(response.rawLog);
+        }
+      })();
+    }
+  }, [chainStore, encodeObjects, multisig, wallet]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <SignatureModalMultisig
-        cancelable={false}
-        isOnboarding
-        {...signatureModalProps}
-      />
       <Background />
 
       <View

@@ -1,7 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Image } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useStore } from "../stores";
 import { DropDownPicker } from "./drop-down-picker";
@@ -58,50 +57,40 @@ export const LanguagePicker = observer(() => {
   if (items.length <= 1) return null;
 
   return (
-    <SafeAreaView
-      style={{
-        flexDirection: "column",
-        alignItems: "flex-end",
-        position: "absolute",
-        top: 0,
-        left: 0,
+    <DropDownPicker
+      open={open}
+      value={value}
+      items={items}
+      setOpen={setOpen}
+      setValue={setValue}
+      setItems={setItems}
+      schema={{
+        label: "language",
+        value: "code",
+        icon: "icon",
       }}
-    >
-      <DropDownPicker
-        open={open}
-        value={value}
-        items={items}
-        setOpen={setOpen}
-        setValue={setValue}
-        setItems={setItems}
-        schema={{
-          label: "language",
-          value: "code",
-          icon: "icon",
-        }}
-        itemKey="code"
-        itemSeparator={false}
-        closeAfterSelecting={true}
-        style={{
-          backgroundColor: "transparent",
-          borderWidth: 0,
-        }}
-        textStyle={{
-          fontSize: 16,
-          color: "#F6F5FF",
-          textAlign: "left",
-          backgroundColor: "transparent",
-        }}
-        maxHeight={300}
-        disableBorderRadius={true}
-        stickyHeader={true}
-        showArrowIcon={true}
-        showTickIcon={false}
-        hideSelectedItemIcon={false}
-        onChangeValue={(value) => {
-          handleLanguageChoice(value);
-        }}
-      />
-    </SafeAreaView>
+      itemKey="code"
+      itemSeparator={false}
+      closeAfterSelecting={true}
+      style={{
+        backgroundColor: "transparent",
+        borderWidth: 0,
+      }}
+      textStyle={{
+        fontSize: 16,
+        color: "#F6F5FF",
+        textAlign: "left",
+        backgroundColor: "transparent",
+      }}
+      maxHeight={300}
+      disableBorderRadius={true}
+      stickyHeader={true}
+      showArrowIcon={true}
+      showTickIcon={false}
+      hideSelectedItemIcon={false}
+      onChangeValue={(value) => {
+        handleLanguageChoice(value);
+      }}
+    />
   );
 });

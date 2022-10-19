@@ -136,8 +136,6 @@ const removeButtonStyles = StyleSheet.create({
 function RemoveButton({ onPress }: { onPress: () => void }) {
   return (
     <TouchableOpacity style={removeButtonStyles.button} onPress={onPress}>
-      {/* TODO: cross is not black (probably because font does not support that character.
-          Maybe add icon or do something with svg */}
       <Text style={removeButtonStyles.text}>✖</Text>
     </TouchableOpacity>
   );

@@ -1,4 +1,5 @@
 import { MsgMigrateContractEncodeObject } from "@cosmjs/cosmwasm-stargate";
+import { RequestObiSignAndBroadcastMsg } from "@obi-wallet/common";
 import { MsgMigrateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import Long from "long";
 import { observer } from "mobx-react-lite";
@@ -6,28 +7,26 @@ import { useEffect, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import invariant from "tiny-invariant";
 
-import { useStore } from "../stores";
+import { useMultisigWallet, useStore } from "../stores";
 import { Background } from "./components/background";
-import {
-  SignatureModalMultisig,
-  useSignatureModalProps,
-} from "./components/signature-modal";
 
 export const MigrateScreen = observer(() => {
-  const { chainStore, multisigStore } = useStore();
+  const { chainStore } = useStore();
+  const wallet = useMultisigWallet();
   const { currentChainInformation } = chainStore;
-  const multisig = multisigStore.currentAdmin;
+  const multisig = wallet.currentAdmin;
 
   const encodeObjects = useMemo(() => {
-    if (!multisig?.multisig?.address || !multisigStore.proxyAddress?.address)
+    if (!multisig?.multisig?.address || !wallet.proxyAddress?.address)
       return [];
 
     const rawMessage = {};
 
     const value: MsgMigrateContract = {
       sender: multisig.multisig.address,
-      codeId: Long.fromInt(currentChainInformation.currentCodeId),
-      contract: multisigStore.proxyAddress.address,
+      // @ts-expect-error
+      codeId: Long.fromInt(currentChainInformation.currentCodeId).toString(),
+      contract: wallet.proxyAddress.address,
       msg: new Uint8Array(Buffer.from(JSON.stringify(rawMessage))),
     };
     const message: MsgMigrateContractEncodeObject = {
@@ -35,39 +34,36 @@ export const MigrateScreen = observer(() => {
       value,
     };
     return [message];
-  }, [currentChainInformation, multisig, multisigStore]);
-
-  const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
-    multisig,
-    encodeObjects,
-    async onConfirm(response) {
-      try {
-        invariant(
-          multisigStore.proxyAddress?.address,
-          "Expected proxy address to exist."
-        );
-        console.log(response);
-        multisigStore.finishProxySetup({
-          address: multisigStore.proxyAddress.address,
-          codeId: chainStore.currentChainInformation.currentCodeId,
-        });
-      } catch (e) {
-        console.log(response.rawLog);
-      }
-    },
-  });
+  }, [currentChainInformation, multisig, wallet]);
 
   useEffect(() => {
     if (encodeObjects.length > 0) {
-      openSignatureModal();
-    }
-  }, [encodeObjects.length, openSignatureModal]);
+      (async () => {
+        const response = await RequestObiSignAndBroadcastMsg.send({
+          id: wallet.id,
+          encodeObjects,
+          multisig,
+          cancelable: false,
+        });
 
-  if (encodeObjects.length === 0) return null;
+        try {
+          invariant(
+            wallet.proxyAddress?.address,
+            "Expected proxy address to exist."
+          );
+          await wallet.finishProxySetup({
+            address: wallet.proxyAddress.address,
+            codeId: chainStore.currentChainInformation.currentCodeId,
+          });
+        } catch (e) {
+          console.log(response.rawLog);
+        }
+      })();
+    }
+  }, [chainStore, encodeObjects, multisig, wallet]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <SignatureModalMultisig cancelable={false} {...signatureModalProps} />
       <Background />
     </SafeAreaView>
   );

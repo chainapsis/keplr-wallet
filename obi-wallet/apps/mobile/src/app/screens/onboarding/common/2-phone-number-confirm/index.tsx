@@ -1,7 +1,7 @@
 import { pubkeyType } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -10,7 +10,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconButton, InlineButton } from "../../../../button";
-import { useStore } from "../../../../stores";
+import { useMultisigWallet } from "../../../../stores";
 import { TextInput } from "../../../../text-input";
 import {
   parsePublicKeyTextMessageResponse,
@@ -33,7 +33,7 @@ export function MultisigPhoneNumberConfirm({
 }: MultisigPhoneNumberConfirmProps) {
   const { params } = route;
 
-  const { demoStore, multisigStore } = useStore();
+  const wallet = useMultisigWallet();
   const [key, setKey] = useState("");
 
   const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Magic Button disabled by default
@@ -111,12 +111,12 @@ export function MultisigPhoneNumberConfirm({
                     marginTop: 32,
                   }}
                 >
-                  {multisigStore.getKeyInRecovery === "phoneNumber" ? (
+                  {wallet.keyInRecovery === "phoneNumber" ? (
                     <FormattedMessage
                       id="onboarding2.recovery.authyourkeys"
                       defaultMessage="Create a Replacement Phone Number Key"
                     />
-                  ) : multisigStore.getKeyInRecovery === "biometrics" ? (
+                  ) : wallet.keyInRecovery === "biometrics" ? (
                     <FormattedMessage
                       id="onboarding2.recovery.phonenumber"
                       defaultMessage="Recover your Phone Number Key"
@@ -178,12 +178,11 @@ export function MultisigPhoneNumberConfirm({
                   setResendButtonHit(true);
 
                   setKey("");
-                  if (!demoStore.demoMode) {
-                    await sendPublicKeyTextMessage({
-                      phoneNumber: params.phoneNumber,
-                      securityAnswer: params.securityAnswer,
-                    });
-                  }
+                  await sendPublicKeyTextMessage({
+                    phoneNumber: params.phoneNumber,
+                    securityAnswer: params.securityAnswer,
+                    demoMode: isMultisigDemoWallet(wallet),
+                  });
                 }}
                 disabled={resendButtonDisabled}
               />
@@ -228,22 +227,21 @@ export function MultisigPhoneNumberConfirm({
               onPress={async () => {
                 try {
                   setVerifyButtonDisabledDoubleclick(true);
-                  const publicKey = demoStore.demoMode
-                    ? "demo"
-                    : await parsePublicKeyTextMessageResponse(key);
+                  const publicKey = await parsePublicKeyTextMessageResponse({
+                    key,
+                    demoMode: isMultisigDemoWallet(wallet),
+                  });
                   if (publicKey) {
-                    if (!demoStore.demoMode) {
-                      multisigStore.setPhoneNumberKey({
-                        publicKey: {
-                          type: pubkeyType.secp256k1,
-                          value: publicKey,
-                        },
-                        phoneNumber: params.phoneNumber,
-                        securityQuestion: params.securityQuestion,
-                      });
-                    }
+                    await wallet.setPhoneNumberKey({
+                      publicKey: {
+                        type: pubkeyType.secp256k1,
+                        value: publicKey,
+                      },
+                      phoneNumber: params.phoneNumber,
+                      securityQuestion: params.securityQuestion,
+                    });
                     setVerifyButtonDisabledDoubleclick(false);
-                    switch (multisigStore.getKeyInRecovery) {
+                    switch (wallet.keyInRecovery) {
                       case "biometrics":
                         navigation.navigate("lookup-proxy-wallets");
                         break;

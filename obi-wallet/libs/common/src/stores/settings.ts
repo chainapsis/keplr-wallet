@@ -1,5 +1,4 @@
-import { KVStore, toGenerator } from "@keplr-wallet/common";
-import { action, flow, makeObservable, observable, runInAction } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 
 export class SettingsStore {
   @observable

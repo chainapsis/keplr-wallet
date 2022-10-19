@@ -7,9 +7,6 @@ export interface App {
   icon: string | null;
 }
 
-// TODO: this is probably something that we want to fetch dynamically from a server / GitHub.
-// This way, we won't need to bundle the images with the mobile app and can update the list
-// without having to update the mobile app.
 const knownApps: App[] = [];
 
 export class AppsStore {

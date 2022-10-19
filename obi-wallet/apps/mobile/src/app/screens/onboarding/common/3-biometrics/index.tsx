@@ -1,11 +1,11 @@
 import { pubkeyType } from "@cosmjs/amino";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Text } from "@obi-wallet/common";
+import { isMultisigDemoWallet, Text } from "@obi-wallet/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
-import { useIntl, FormattedMessage } from "react-intl";
+import { useCallback, useEffect, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Alert, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,7 +15,7 @@ import {
   resetBiometricsKeyPair,
 } from "../../../../biometrics";
 import { Button, IconButton } from "../../../../button";
-import { useStore } from "../../../../stores";
+import { useMultisigWallet } from "../../../../stores";
 import { Background } from "../../../components/background";
 import { OnboardingStackParamList } from "../../onboarding-stack";
 import FaceScanner from "./assets/face-scanner.svg";
@@ -28,24 +28,24 @@ export type MultisigBiometricsProps = NativeStackScreenProps<
 
 export const MultisigBiometrics = observer<MultisigBiometricsProps>(
   ({ navigation }) => {
-    const { demoStore, multisigStore } = useStore();
+    const wallet = useMultisigWallet();
+
     const [scannedBiometrics, setScannedBiometrics] = useState(false);
     const intl = useIntl();
 
-    const scanBiometrics = async () => {
+    const scanBiometrics = useCallback(async () => {
       setButtonDisabledDoubleclick(true);
 
       try {
-        if (!demoStore.demoMode) {
-          const publicKey = await getBiometricsPublicKey();
-
-          multisigStore.setBiometricsPublicKey({
-            publicKey: {
-              type: pubkeyType.secp256k1,
-              value: publicKey,
-            },
-          });
-        }
+        const publicKey = await getBiometricsPublicKey({
+          demoMode: isMultisigDemoWallet(wallet),
+        });
+        await wallet.setBiometricsPublicKey({
+          publicKey: {
+            type: pubkeyType.secp256k1,
+            value: publicKey,
+          },
+        });
         setScannedBiometrics(true);
         setButtonDisabledDoubleclick(false);
       } catch (e) {
@@ -59,51 +59,47 @@ export const MultisigBiometrics = observer<MultisigBiometricsProps>(
           error.message
         );
       }
-    };
+    }, [intl, wallet]);
 
     useEffect(() => {
-      if (demoStore.demoMode) return;
-
-      const { biometrics } = multisigStore.nextAdmin;
-      if (biometrics && multisigStore.getKeyInRecovery !== "biometrics") {
-        Alert.alert(
-          intl.formatMessage({
-            id: "onboarding4.error.biometrickeyexists.title",
-          }),
-          intl.formatMessage({
-            id: "onboarding4.error.biometrickeyexists.text",
-          }),
-          [
-            {
-              text: intl.formatMessage({
-                id: "onboarding4.error.biometrickeyexists.newkey",
-              }),
-              style: "cancel",
-              onPress: () => {
-                scanBiometrics();
+      (async () => {
+        const { biometrics } = wallet.nextAdmin;
+        if (biometrics && wallet.keyInRecovery !== "biometrics") {
+          Alert.alert(
+            intl.formatMessage({
+              id: "onboarding4.error.biometrickeyexists.title",
+            }),
+            intl.formatMessage({
+              id: "onboarding4.error.biometrickeyexists.text",
+            }),
+            [
+              {
+                text: intl.formatMessage({
+                  id: "onboarding4.error.biometrickeyexists.newkey",
+                }),
+                style: "cancel",
+                onPress: async () => {
+                  await scanBiometrics();
+                },
               },
-            },
-            {
-              text: intl.formatMessage({
-                id: "onboarding4.error.biometrickeyexists.yes",
-              }),
-              onPress: () => {
-                navigation.navigate("create-multisig-phone-number");
+              {
+                text: intl.formatMessage({
+                  id: "onboarding4.error.biometrickeyexists.yes",
+                }),
+                onPress: () => {
+                  navigation.navigate("create-multisig-phone-number");
+                },
               },
-            },
-          ]
-        );
-      } else {
-        scanBiometrics();
-      }
-    }, [demoStore, intl, multisigStore, navigation]);
+            ]
+          );
+        } else {
+          await scanBiometrics();
+        }
+      })();
+    }, [intl, wallet, navigation, scanBiometrics]);
 
     const [buttonDisabledDoubleclick, setButtonDisabledDoubleclick] =
       useState(false);
-
-    const isBiometricsKeyInMultisig = Boolean(
-      multisigStore.nextAdmin["biometrics"]
-    );
 
     return (
       <SafeAreaView style={{ flex: 1 }}>

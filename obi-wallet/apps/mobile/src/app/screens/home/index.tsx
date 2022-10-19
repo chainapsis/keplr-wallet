@@ -2,13 +2,7 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { faHome } from "@fortawesome/free-solid-svg-icons/faHome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  Chain,
-  chains,
-  MultisigState,
-  Text,
-  WalletType,
-} from "@obi-wallet/common";
+import { Chain, chains, Text } from "@obi-wallet/common";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createDrawerNavigator,
@@ -20,15 +14,13 @@ import {
 import { ParamListBase } from "@react-navigation/native";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import { NFT_TAB_ENABLED } from "react-native-dotenv";
 import { ENABLED_CHAINS } from "react-native-dotenv";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { envInvariant } from "../../../helpers/invariant";
-import { useRootNavigation } from "../../root-stack";
 import { useStore } from "../../stores";
 import {
   getScreenDimensions,
@@ -86,7 +78,7 @@ export function TabNavigation() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused }) => {
           let icon;
 
           if (route.name === "Home") {
@@ -158,24 +150,24 @@ export function TabNavigation() {
 
 export function HomeScreen() {
   const Drawer = createDrawerNavigator();
-  const { chainStore, multisigStore, walletStore } = useStore();
-  const { navigate } = useRootNavigation();
+  const { chainStore } = useStore();
 
-  useEffect(() => {
-    if (
-      walletStore.type === WalletType.MULTISIG &&
-      multisigStore.state === MultisigState.OUTDATED
-    ) {
-      Alert.alert("New wallet version available", "", [
-        {
-          text: "Update",
-          onPress: () => {
-            navigate("migrate");
-          },
-        },
-      ]);
-    }
-  }, [walletStore.type, multisigStore.state, navigate]);
+  // TODO: migrate
+  // useEffect(() => {
+  //   if (
+  //     walletStore.type === WalletType.MULTISIG &&
+  //     multisigStore.state === MultisigState.OUTDATED
+  //   ) {
+  //     Alert.alert("New wallet version available", "", [
+  //       {
+  //         text: "Update",
+  //         onPress: () => {
+  //           navigate("migrate");
+  //         },
+  //       },
+  //     ]);
+  //   }
+  // }, [walletStore.type, multisigStore.state, navigate]);
 
   return (
     <Drawer.Navigator
@@ -186,7 +178,7 @@ export function HomeScreen() {
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name="home" component={TabNavigation} />
+      <Drawer.Screen name="home-tabs" component={TabNavigation} />
     </Drawer.Navigator>
   );
 }

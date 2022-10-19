@@ -1,9 +1,14 @@
+import { EncodeObject } from "@cosmjs/proto-signing";
 import { isDeliverTxSuccess } from "@cosmjs/stargate";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faQrcode } from "@fortawesome/free-solid-svg-icons/faQrcode";
 import { faTimes } from "@fortawesome/free-solid-svg-icons/faTimes";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
+import {
+  isAnyMultisigWallet,
+  RequestObiSignAndBroadcastMsg,
+} from "@obi-wallet/common";
 import { useNavigation } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
@@ -18,6 +23,7 @@ import {
 import { FlatList } from "react-native-gesture-handler";
 import Modal from "react-native-modal";
 import { SafeAreaView } from "react-native-safe-area-context";
+import invariant from "tiny-invariant";
 
 import { ExtendedCoin, formatExtendedCoin, useBalances } from "../../balances";
 import Bottle from "../../balances/assets/bottle.svg";
@@ -31,11 +37,6 @@ import { BottomSheetBackdrop } from "../components/bottomSheetBackdrop";
 import { CoinIcon } from "../components/coin-icon";
 import { KeyboardAvoidingView } from "../components/keyboard-avoiding-view";
 import { isSmallScreenNumber } from "../components/screen-size";
-import {
-  SignatureModal,
-  useSignatureModalProps,
-  useWrapEncodeObjects,
-} from "../components/signature-modal";
 
 const BARTENDER_ADDRESS =
   "juno1ps9sk7fqh2f95waggk3r5un6sr7rd4gxmq4kzh73zstgkqz52wmqh2wr0s";
@@ -69,8 +70,9 @@ export const SendScreen = observer(() => {
     ? formatExtendedCoin(selectedCoin)
     : null;
 
-  const { multisigStore, singlesigStore, walletStore } = useStore();
-  const multisig = multisigStore.currentAdmin;
+  const { walletsStore } = useStore();
+  const wallet = walletsStore.currentWallet;
+  const multisig = isAnyMultisigWallet(wallet) ? wallet.currentAdmin : null;
 
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -83,8 +85,9 @@ export const SendScreen = observer(() => {
       : null;
 
   const normalizedAmount = amount.replace(/,/g, ".");
-  const encodeObjects = useWrapEncodeObjects(() => {
-    if (!selectedCoin || !walletStore.type) return [];
+
+  function getEncodeObjects(): EncodeObject[] {
+    if (!selectedCoin || !walletsStore.type) return [];
 
     const addressToUse =
       address || (drinkOrBottleModalFlavor ? BARTENDER_ADDRESS : "");
@@ -99,62 +102,47 @@ export const SendScreen = observer(() => {
       },
     ];
 
-    if (!walletStore.address) return [];
+    if (!walletsStore.address) return [];
 
     if (selectedCoin.contract) {
-      return {
-        typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-        value: {
-          sender: walletStore.address,
-          contract: selectedCoin.contract,
-          msg: new Uint8Array(
-            Buffer.from(
-              JSON.stringify({
-                transfer: {
-                  amount: msgAmount[0].amount,
-                  recipient: addressToUse,
-                },
-              })
-            )
-          ),
-          funds: [],
+      return [
+        {
+          typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
+          value: {
+            sender: walletsStore.address,
+            contract: selectedCoin.contract,
+            msg: new Uint8Array(
+              Buffer.from(
+                JSON.stringify({
+                  transfer: {
+                    amount: msgAmount[0].amount,
+                    recipient: addressToUse,
+                  },
+                })
+              )
+            ),
+            funds: [],
+          },
         },
-      };
+      ];
     }
 
-    return {
-      typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-      value: {
-        fromAddress: singlesigStore.address,
-        toAddress: addressToUse,
-        amount: msgAmount,
+    return [
+      {
+        typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+        value: {
+          fromAddress: walletsStore.address,
+          toAddress: addressToUse,
+          amount: msgAmount,
+        },
       },
-    };
-  });
+    ];
+  }
 
   const [confirmModalVisible, setConfirmModalStatus] = useState<{
     visible?: boolean;
     success?: boolean;
   }>({});
-
-  const { signatureModalProps, openSignatureModal } = useSignatureModalProps({
-    multisig,
-    encodeObjects,
-    async onConfirm(response) {
-      console.log(response);
-      if (isDeliverTxSuccess(response)) {
-        setConfirmModalStatus({
-          visible: true,
-          success: true,
-        });
-      } else {
-        setConfirmModalStatus({
-          visible: true,
-          success: false,
-        });
-      }
-    },
-  });
 
   const intl = useIntl();
   const qrCodeScannerModal = useAddressQrCodeScannerModal((address) => {
@@ -181,8 +169,6 @@ export const SendScreen = observer(() => {
         }}
       >
         {qrCodeScannerModal.render()}
-        <SignatureModal {...signatureModalProps} />
-
         {drinkOrBottleModalFlavor &&
         (!address || address === BARTENDER_ADDRESS) &&
         confirmModalVisible.visible &&
@@ -405,8 +391,27 @@ export const SendScreen = observer(() => {
             (drinkOrBottleModalFlavor && Number(normalizedAmount) < 1) ||
             !selectedCoin
           }
-          onPress={() => {
-            openSignatureModal();
+          onPress={async () => {
+            invariant(wallet, "Expected wallet to be defined.");
+
+            const response = await RequestObiSignAndBroadcastMsg.send({
+              id: wallet.id,
+              encodeObjects: getEncodeObjects(),
+              multisig,
+              wrap: true,
+            });
+
+            if (isDeliverTxSuccess(response)) {
+              setConfirmModalStatus({
+                visible: true,
+                success: true,
+              });
+            } else {
+              setConfirmModalStatus({
+                visible: true,
+                success: false,
+              });
+            }
           }}
         />
         <BottomSheetBackdrop
@@ -421,7 +426,7 @@ export const SendScreen = observer(() => {
           enablePanDownToClose={true}
           ref={bottomSheetRef}
           index={-1}
-          backdropComponent={(props) => null}
+          backdropComponent={() => null}
           onClose={() => {
             setDenominationOpened(false);
           }}

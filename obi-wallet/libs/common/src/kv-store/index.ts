@@ -2,7 +2,7 @@ import { KVStore as AbstractKVStore } from "@keplr-wallet/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export class KVStore implements AbstractKVStore {
-  constructor(private readonly _prefix: string) {}
+  constructor(protected readonly _prefix: string) {}
 
   public async get<T = unknown>(key: string): Promise<T | undefined> {
     const data = await AsyncStorage.getItem(this.getKey(key));

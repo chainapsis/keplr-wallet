@@ -14,8 +14,8 @@ import React, { ReactNode } from "react";
 import { useIntl } from "react-intl";
 import { Text, View } from "react-native";
 
-import { formatCoin } from "../../../balances";
-import { useStore } from "../../../stores";
+import { formatCoin } from "../../balances";
+import { useStore } from "../../stores";
 import ArrowUpIcon from "./assets/arrowUpIcon.svg";
 
 export function PrettyMessage({ message }: { message: AminoMsg }) {
@@ -88,7 +88,6 @@ const PrettyMessageInstantiateContract = observer(
 const PrettyMessageExecuteContract = observer(
   ({ message }: { message: AminoMsg }) => {
     const value = message.value as AminoMsgExecuteContract["value"];
-    const { walletStore } = useStore();
     const intl = useIntl();
 
     if (value.msg["propose_update_admin"] !== undefined) {
