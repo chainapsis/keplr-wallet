@@ -26,6 +26,11 @@ import {
 import { WelcomePage } from "./welcome";
 import { AdditionalSignInPrepend } from "../../config.ui";
 import classnames from "classnames";
+import {
+  ImportKeystoneIntro,
+  ImportKeystonePage,
+  TypeImportKeystone,
+} from "./keystone";
 
 export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
   onClick,
@@ -62,6 +67,11 @@ export const RegisterPage: FunctionComponent = observer(() => {
       type: TypeRecoverMnemonic,
       intro: RecoverMnemonicIntro,
       page: RecoverMnemonicPage,
+    },
+    {
+      type: TypeImportKeystone,
+      intro: ImportKeystoneIntro,
+      page: ImportKeystonePage,
     },
     // Currently, there is no way to use ledger with keplr on firefox.
     // Temporarily, hide the ledger usage.
