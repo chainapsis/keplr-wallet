@@ -44,6 +44,7 @@
     "metro-react-native-babel-transformer": "*",
     "mobx": "*",
     "mobx-react-lite": "*",
+    "nanoid": "*",
     "node-html-parser": "*",
     "otplib": "*",
     "process": "*",
@@ -79,7 +80,6 @@
     "react-router": "*",
     "rooks": "*",
     "secp256k1": "*",
-    "tiny-invariant": "*",
-    "nanoid": "*"
+    "tiny-invariant": "*"
   }
 }
