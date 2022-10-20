@@ -42,11 +42,20 @@ module.exports = {
           "**/*.spec.ts",
           "**/*.spec.js",
           "**/webpack.config.js",
+          "**/*.stories.tsx",
         ],
       },
     ],
     "import/no-default-export": "error",
   },
+  overrides: [
+    {
+      files: ["**/*.stories.tsx"],
+      rules: {
+        "import/no-default-export": "off",
+      },
+    },
+  ],
   settings: {
     react: {
       version: "detect",

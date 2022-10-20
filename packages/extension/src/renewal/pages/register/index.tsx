@@ -7,6 +7,7 @@ import { Button } from "../../components/button";
 import { Card } from "../../components/card";
 import { Gutter } from "../../components/gutter";
 import { Stack } from "../../components/stack";
+import { ColorPalette } from "../../styles";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -38,11 +39,11 @@ const Intro = styled.span`
   letter-spacing: 1.17557px;
 `;
 
-// TODO: color 추가되어야 함
 const Notice = styled.span`
   font-weight: 400;
   font-size: 16px;
   line-height: 22px;
+  color: ${ColorPalette["platinum-200"]};
 `;
 
 export const RegisterPage: FunctionComponent = observer(() => {
