@@ -1,13 +1,16 @@
+import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import styled from "styled-components";
 import { useStore } from "../../../stores";
 import { Box } from "../../components/box";
-import { Button } from "../../components/button";
 import { Card } from "../../components/card";
 import { Gutter } from "../../components/gutter";
 import { Stack } from "../../components/stack";
 import { ColorPalette } from "../../styles";
+import { CreateAccountIntro, CreateAccountType } from "./create-account";
+import { ImportAccountIntro, ImportAccountType } from "./import-account";
+import { ImportLedgerIntro, ImportLedgerType } from "./import-ledger";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -47,7 +50,31 @@ const Notice = styled.span`
 `;
 
 export const RegisterPage: FunctionComponent = observer(() => {
-  const { uiConfigStore } = useStore();
+  const { keyRingStore, uiConfigStore } = useStore();
+
+  const registerConfig = useRegisterConfig(keyRingStore, [
+    {
+      type: CreateAccountType,
+      intro: CreateAccountIntro,
+      page: CreateAccountIntro,
+    },
+    {
+      type: ImportAccountType,
+      intro: ImportAccountIntro,
+      page: ImportAccountIntro,
+    },
+    // Currently, there is no way to use ledger with keplr on firefox.
+    // Temporarily, hide the ledger usage.
+    ...(uiConfigStore.platform !== "firefox"
+      ? [
+          {
+            type: ImportLedgerType,
+            intro: ImportLedgerIntro,
+            page: ImportLedgerIntro,
+          },
+        ]
+      : []),
+  ]);
 
   return (
     <Container>
@@ -77,13 +104,11 @@ export const RegisterPage: FunctionComponent = observer(() => {
               alt="logo"
             />
           </Box>
+
           <Gutter size="1.25rem" />
           <Intro>Wallet for the Interchain</Intro>
           <Gutter size="4.875rem" />
-          <Button color="primary">Create new seed</Button>
-          <Gutter size="1.25rem" />
-          <Button color="secondary">Import Existing Account</Button>
-          <Button color="transparent">Import Ledger Nano X</Button>
+          <Stack gutter="1.25rem">{registerConfig.render()}</Stack>
         </Stack>
       </Card>
       <Gutter size="2.5rem" />

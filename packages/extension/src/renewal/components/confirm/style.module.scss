@@ -1,0 +1,60 @@
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/functions";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/mixins";
+@import "../../../../../node_modules/argon-dashboard-react/src/assets/scss/argon-dashboard/custom/variables";
+
+.modal {
+  padding: 12px;
+}
+
+.modal-dialog {
+  @include media-breakpoint-down(xs) {
+    margin: 32px;
+
+    &:global(.modal-dialog-centered) {
+      height: calc(100% - (32px * 2));
+      min-height: unset;
+    }
+  }
+}
+
+.dialog {
+  .body-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    margin: 0 32px 12px;
+
+    h1 {
+      text-align: center;
+      font-size: 1.15rem;
+      color: black;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    p {
+      margin-bottom: 0;
+      text-align: center;
+      font-size: 0.85rem;
+      color: $gray-700;
+      font-weight: normal;
+      line-height: 1.4;
+    }
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+
+    button {
+      width: 80px;
+
+      &:global(.btn-outline-default):not(:hover) {
+        color: $gray-600;
+        border-color: $gray-600;
+      }
+    }
+  }
+}

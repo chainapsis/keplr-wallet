@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { Fragment, FunctionComponent, useState } from "react";
 import { KeyRingStore } from "@keplr-wallet/stores";
 import { action, computed, flow, makeObservable, observable } from "mobx";
 import { Mnemonic, RNG } from "@keplr-wallet/crypto";
@@ -189,7 +189,7 @@ export class RegisterConfig {
 
   render() {
     return (
-      <div>
+      <Fragment>
         {this.isIntro
           ? this.options.map((option) => {
               return (
@@ -209,7 +209,7 @@ export class RegisterConfig {
               }
             })
           : null}
-      </div>
+      </Fragment>
     );
   }
 }

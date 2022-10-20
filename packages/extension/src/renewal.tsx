@@ -10,17 +10,24 @@ import { HashRouter, Route } from "react-router-dom";
 import { RegisterPage } from "./renewal/pages/register";
 import { StoreProvider } from "./stores";
 import { GlobalStyles } from "./renewal/styles";
+import { AppIntlProvider } from "./languages";
+import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
-      <React.Fragment>
-        <GlobalStyles />
-        <Normalize />
-        <HashRouter>
-          <Route exact path="/register" component={RegisterPage} />
-        </HashRouter>
-      </React.Fragment>
+      <AppIntlProvider
+        additionalMessages={AdditonalIntlMessages}
+        languageToFiatCurrency={LanguageToFiatCurrency}
+      >
+        <React.Fragment>
+          <GlobalStyles />
+          <Normalize />
+          <HashRouter>
+            <Route exact path="/register" component={RegisterPage} />
+          </HashRouter>
+        </React.Fragment>
+      </AppIntlProvider>
     </StoreProvider>
   );
 };

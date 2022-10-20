@@ -1,11 +1,14 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, MouseEventHandler } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
 
 type ButtonColor = "primary" | "secondary" | "danger" | "transparent";
+type ButtonSize = "md";
 
 export interface ButtonProps {
   color?: ButtonColor;
+  size?: ButtonSize;
+  onClick: MouseEventHandler<HTMLButtonElement>;
 }
 
 const makeStylesFromColor = (color?: ButtonColor) => {
@@ -22,9 +25,18 @@ const makeStylesFromColor = (color?: ButtonColor) => {
   }
 };
 
+const makeStyleFromSize = (size?: ButtonSize) => {
+  switch (size) {
+    case "md":
+      return `width: 10rem;`;
+    default:
+      return `width: 100%;`;
+  }
+};
+
 const Container = styled.button<ButtonProps>`
   height: 3.25rem;
-  min-width: 10rem;
+  ${({ size }) => makeStyleFromSize(size)}
   ${({ color }) => makeStylesFromColor(color)}
   display: flex;
   justify-content: center;
@@ -36,6 +48,9 @@ const Container = styled.button<ButtonProps>`
   line-height: 19px;
 `;
 
-export const Button: FunctionComponent<ButtonProps> = ({ color, children }) => {
-  return <Container color={color}>{children}</Container>;
+export const Button: FunctionComponent<ButtonProps> = ({
+  children,
+  ...props
+}) => {
+  return <Container {...props}>{children}</Container>;
 };
