@@ -4,6 +4,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useRootNavigation } from "../../root-stack";
 import { useStore } from "../../stores";
+import AmazonIcon from "./assets/Amazon_icon.svg";
+import OpenseaIcon from "./assets/OpenSea_icon.svg";
+import UniSwapIcon from "./assets/Uniswap_Logo.svg";
 import BuyCryptoIcon from "./assets/buy_crypto.svg";
 import CosmicPartyIcon from "./assets/cosmic_party.svg";
 import GetTicketsIcon from "./assets/get_tickets.svg";
@@ -16,6 +19,9 @@ const icons = [
   GetTicketsIcon,
   MyTicketsIcon,
   HistoryIcon,
+  UniSwapIcon,
+  OpenseaIcon,
+  AmazonIcon,
 ];
 
 export function DappExplorer() {

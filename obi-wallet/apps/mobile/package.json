@@ -44,6 +44,7 @@
     "metro-react-native-babel-transformer": "*",
     "mobx": "*",
     "mobx-react-lite": "*",
+    "nanoid": "*",
     "node-html-parser": "*",
     "otplib": "*",
     "process": "*",
