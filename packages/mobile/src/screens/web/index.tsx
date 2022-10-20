@@ -94,6 +94,22 @@ export const WebScreen: FunctionComponent = () => {
         }}
       />
       <WebpageImageButton
+        name="Umee"
+        source={require("../../assets/image/webpage/umee.png")}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.Umee", {});
+        }}
+      />
+      {/*
+            <WebpageImageButton
+                name="Regen"
+                source={require("../../assets/image/webpage/regen.png")}
+                onPress={() => {
+                    smartNavigation.pushSmart("Web.Regen", {});
+                }}
+            />
+      */}
+      <WebpageImageButton
         overrideInner={
           <View style={style.flatten(["flex-1", "items-center"])}>
             <Text

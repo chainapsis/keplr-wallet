@@ -3,3 +3,4 @@ export * from "./stargaze";
 export * from "./umee";
 export * from "./junoswap";
 export * from "./daodao";
+export * from "./regen";
