@@ -8,7 +8,11 @@ target 'mobile' do
   use_unimodules!
   config = use_native_modules!
 
-  use_react_native!(:path => config["reactNativePath"])
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # to enable hermes on iOS, change `false` to `true` and then install pods
+    :hermes_enabled => false
+  )
 
   target 'mobileTests' do
     inherit! :complete
@@ -19,17 +23,9 @@ target 'mobile' do
   #
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable these next few lines.
-  # use_flipper!({ 'Flipper-Folly' => '2.3.0' })
-  # post_install do |installer|
-  #   flipper_post_install(installer)
-  # end
-end
+  # use_flipper!()
 
-target 'mobile-tvOS' do
-  # Pods for mobile-tvOS
-
-  target 'mobile-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
+  post_install do |installer|
+    react_native_post_install(installer)
   end
 end
