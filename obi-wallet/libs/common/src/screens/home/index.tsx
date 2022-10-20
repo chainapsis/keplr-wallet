@@ -54,6 +54,9 @@ export const Home = observer<HomeProps>(
       GetTicketsIcon,
       MyTicketsIcon,
       HistoryIcon,
+      UniSwapIcon,
+      OpenseaIcon,
+      AmazonIcon,
     ] = icons;
     const { isObi } = settingsStore;
     const [editMode, setEditMode] = useState(false);
@@ -187,6 +190,53 @@ export const Home = observer<HomeProps>(
                   });
                 }}
               />
+              {isObi && [
+                <Tile
+                  key="uniswap"
+                  onLongPress={() => {
+                    setEditMode(true);
+                  }}
+                  ImgComponent={UniSwapIcon}
+                  label="Uniswap"
+                  onPress={() => {
+                    onAppPress({
+                      label: "Uniswap",
+                      url: `https://uniswap.org`,
+                      icon: "https://place-hold.it/180x180",
+                    });
+                  }}
+                />,
+                <Tile
+                  onLongPress={() => {
+                    setEditMode(true);
+                  }}
+                  key="amazon"
+                  ImgComponent={AmazonIcon}
+                  label="Amazon"
+                  onPress={() => {
+                    onAppPress({
+                      label: "Amazon",
+                      url: "https://amazon.com",
+                      icon: "https://place-hold.it/180x180",
+                    });
+                  }}
+                />,
+                <Tile
+                  onLongPress={() => {
+                    setEditMode(true);
+                  }}
+                  key="opensea"
+                  ImgComponent={OpenseaIcon}
+                  label="OpenSea"
+                  onPress={() => {
+                    onAppPress({
+                      label: "History",
+                      url: "https://opensea.io",
+                      icon: "https://place-hold.it/180x180",
+                    });
+                  }}
+                />,
+              ]}
             </Tiles>
           </ScrollView>
           <KeyboardAvoidingView
