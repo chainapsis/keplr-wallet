@@ -2,7 +2,7 @@ import Joi from "joi";
 import { StdSignDoc } from "@cosmjs/launchpad";
 
 const TrimAminoSignDocScheme = Joi.object({
-  chain_id: Joi.string().required(),
+  chain_id: Joi.string().allow(""),
   account_number: Joi.string().allow(""),
   sequence: Joi.string().allow(""),
   fee: Joi.object({
