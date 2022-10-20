@@ -31,6 +31,7 @@
 
   "main.menu.settings": "설정",
   "main.menu.address-book": "주소록",
+  "main.menu.guide": "가이드",
   "main.menu.token-list": "토큰 목록",
   "main.menu.sign-out": "로그아웃",
   "main.menu.footer.github": "깃허브를 확인하세요",

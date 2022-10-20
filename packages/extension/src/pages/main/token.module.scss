@@ -1,71 +1,39 @@
-.token-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  cursor: pointer;
-
-  margin: 0 0 12px 0;
-
-  &:last-of-type {
-    margin-bottom: 0;
-  }
-
-  .icon {
-    width: 36px;
-    height: 36px;
-
-    margin-right: 8px;
-  }
-
-  .inner-container {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .content {
-      display: flex;
-      flex-direction: column;
-
-      .name {
-        font-size: 14px;
-        color: #525f7f;
-
-        max-width: 216px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-      }
-
-      .amount {
-        font-size: 16px;
-        line-height: 1.13;
-        letter-spacing: -0.3px;
-        color: #32325d;
-
-        max-width: 216px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-      }
-    }
-
-    .right-icon {
-      i {
-        font-size: 18px;
-        color: #999999;
-      }
-    }
-  }
+.tokenTitle {
+  font-weight: 600;
+  font-size: 20px;
+  color: #525f7f;
+  margin-bottom: 18px;
 }
 
-.tokens-container {
-  .title {
-    font-size: 14px;
-    font-weight: bold;
-    color: #525f7f;
+.tokenContainnerInner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 
-    margin-bottom: 12px;
+  .tokenContainer {
+    display: flex;
+    align-items: center;
+    .tokenImg {
+      width: 24px;
+      height: 24px;
+      margin-right: 15px;
+    }
+    .tokenName {
+      font-size: 15px;
+      font-weight: 400;
+      margin-right: 6px;
+      color: #808da0;
+    }
+    .tokenBalance {
+      font-size: 15px;
+      flex: 1;
+      color: #808da0;
+      text-align: right;
+      margin-right: 20px;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 }

@@ -40,3 +40,37 @@
     padding: $main-card-padding;
   }
 }
+
+.tokenTitle {
+  font-weight: 600;
+  font-size: 20px;
+  color: #525f7f;
+  margin-bottom: 18px;
+}
+
+.tokenContainnerInner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .tokenContainer {
+    display: flex;
+    align-items: center;
+    .tokenImg {
+      width: 24px;
+      height: 24px;
+      margin-right: 4px;
+    }
+    .tokenName {
+      font-size: 15px;
+      font-weight: 400;
+      margin-right: 6px;
+      color: #808da0;
+    }
+    .tokenBalance {
+      font-size: 15px;
+      flex: 1;
+      color: #808da0;
+    }
+  }
+}

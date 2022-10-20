@@ -250,7 +250,7 @@ export const AssetView: FunctionComponent = observer(() => {
         </div>
         <div className={styleAsset.legendContainer}>
           <div className={styleAsset.legend}>
-            <div className={styleAsset.label} style={{ color: "#5e72e4" }}>
+            <div className={styleAsset.label} style={{ color: "#3B82F6" }}>
               <FormattedMessage id="main.account.chart.available-balance" />
             </div>
             <div style={{ minWidth: "16px" }} />

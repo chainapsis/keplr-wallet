@@ -52,7 +52,9 @@ export const IBCTransferView: FunctionComponent = observer(() => {
         className={styleTransfer.button}
         color="primary"
         size="sm"
-        disabled={!hasAssets}
+        disabled={
+          !hasAssets || !chainStore.current.features?.includes("ibc-transfer")
+        }
         data-loading={accountInfo.isSendingMsg === "ibcTransfer"}
         onClick={(e) => {
           e.preventDefault();
