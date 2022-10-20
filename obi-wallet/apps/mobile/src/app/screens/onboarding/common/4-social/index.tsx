@@ -29,10 +29,24 @@ export const MultisigSocial = observer<MultisigSocialProps>(
     const { chainStore } = useStore();
     const wallet = useMultisigWallet();
     const [address, setAddress] = useState("");
+    const [verifyButtonDisabled, setVerifyButtonDisabled] = useState(true); // Verify&Proceed Button disabled by default
     const [fetchingPubKey, setFetchingPubKey] = useState(false);
     const obi_address = "juno17w77rnps59cnallfskg42s3ntnlhrzu2mjkr3e";
 
     const intl = useIntl();
+
+    const minAddressInputChars = 43;
+
+    useEffect(() => {
+      if (
+        address.length >= minAddressInputChars &&
+        address.startsWith("juno1")
+      ) {
+        setVerifyButtonDisabled(false); // Enable Verify&Proceed Button if checks are okay
+      } else {
+        setVerifyButtonDisabled(true);
+      }
+    }, [verifyButtonDisabled, address]);
 
     useEffect(() => {
       const { social } = wallet.nextAdmin;
@@ -75,8 +89,12 @@ export const MultisigSocial = observer<MultisigSocialProps>(
       } catch (e) {
         console.log(e);
         Alert.alert(
-          "We don’t see any activity for this address.",
-          "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address."
+          intl.formatMessage({
+            id: "onboarding5.error.noactivity.title",
+          }),
+          intl.formatMessage({
+            id: "onboarding5.error.noactivity.subtext",
+          })
         );
         return null;
       } finally {
@@ -206,7 +224,9 @@ export const MultisigSocial = observer<MultisigSocialProps>(
             </View>
             <View>
               <VerifyAndProceedButton
-                disabled={fetchingPubKey}
+                disabled={
+                  verifyButtonDisabled ? verifyButtonDisabled : fetchingPubKey
+                }
                 onPress={async () => {
                   setFetchingPubKey(true);
                   const publicKey = await getAccountPubkey(address);
