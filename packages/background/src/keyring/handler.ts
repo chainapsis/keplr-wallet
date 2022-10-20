@@ -31,6 +31,7 @@ import {
   RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
   CreateKeystoneKeyMsg,
+  AddKeystoneKeyMsg,
   RequestICNSAdr36SignaturesMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
@@ -77,6 +78,8 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as CreateLedgerKeyMsg
         );
+      case AddKeystoneKeyMsg:
+        return handleAddKeystoneKeyMsg(service)(env, msg as AddKeystoneKeyMsg);
       case AddLedgerKeyMsg:
         return handleAddLedgerKeyMsg(service)(env, msg as AddLedgerKeyMsg);
       case LockKeyRingMsg:
@@ -247,6 +250,19 @@ const handleCreateLedgerKeyMsg: (
       env,
       msg.kdf,
       msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
+  };
+};
+
+const handleAddKeystoneKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<AddKeystoneKeyMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.addKeystoneKey(
+      env,
+      msg.kdf,
       msg.meta,
       msg.bip44HDPath
     );

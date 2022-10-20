@@ -142,7 +142,7 @@ export class RegisterConfig {
           bip44HDPath
         );
       } else {
-        yield this.keyRingStore.addLedgerKey(
+        yield this.keyRingStore.addKeystoneKey(
           {
             name,
           },

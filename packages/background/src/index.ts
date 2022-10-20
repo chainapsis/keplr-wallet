@@ -18,6 +18,7 @@ import * as Analytics from "./analytics/internal";
 export * from "./persistent-memory";
 export * from "./chains";
 export * from "./ledger";
+export * from "./keystone";
 export * from "./keyring";
 export * from "./secret-wasm";
 export * from "./tx";

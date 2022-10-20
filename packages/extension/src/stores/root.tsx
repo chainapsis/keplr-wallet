@@ -23,6 +23,7 @@ import {
   InteractionStore,
   KeyRingStore,
   LedgerInitStore,
+  KeystoneStore,
   ObservableQueryBase,
   PermissionStore,
   QueriesStore,
@@ -68,6 +69,7 @@ export class RootStore {
   public readonly generalPermissionStore: GeneralPermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly ledgerInitStore: LedgerInitStore;
+  public readonly keystoneStore: KeystoneStore;
   public readonly chainSuggestStore: ChainSuggestStore;
   public readonly icnsInteractionStore: ICNSInteractionStore;
 
@@ -170,6 +172,7 @@ export class RootStore {
       this.interactionStore,
       new InExtensionMessageRequester()
     );
+    this.keystoneStore = new KeystoneStore(this.interactionStore);
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo
