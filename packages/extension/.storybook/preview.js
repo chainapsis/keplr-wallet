@@ -1,3 +1,14 @@
+import { GlobalStyles } from "../src/renewal/styles";
+
+export const decorators = [
+  (Story) => (
+    <>
+      <GlobalStyles />
+      <Story />
+    </>
+  ),
+];
+
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
   controls: {
@@ -6,4 +17,4 @@ export const parameters = {
       date: /Date$/,
     },
   },
-}
+};

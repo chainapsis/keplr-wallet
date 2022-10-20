@@ -9,7 +9,7 @@ import { HashRouter, Route } from "react-router-dom";
 
 import { RegisterPage } from "./renewal/pages/register";
 import { StoreProvider } from "./stores";
-import { GlobalStyles } from "./renewal/styles/global";
+import { GlobalStyles } from "./renewal/styles";
 
 const App: FunctionComponent = () => {
   return (

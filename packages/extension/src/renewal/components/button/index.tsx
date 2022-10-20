@@ -24,6 +24,7 @@ const makeStylesFromColor = (color?: ButtonColor) => {
 
 const Container = styled.button<ButtonProps>`
   height: 3.25rem;
+  min-width: 10rem;
   ${({ color }) => makeStylesFromColor(color)}
   display: flex;
   justify-content: center;
