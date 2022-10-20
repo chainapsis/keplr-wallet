@@ -25,6 +25,7 @@ import {
   RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
   CreateKeystoneKeyMsg,
+  AddKeystoneKeyMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -41,6 +42,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(AddPrivateKeyMsg);
   router.registerMessage(CreateKeystoneKeyMsg);
   router.registerMessage(CreateLedgerKeyMsg);
+  router.registerMessage(AddKeystoneKeyMsg);
   router.registerMessage(AddLedgerKeyMsg);
   router.registerMessage(LockKeyRingMsg);
   router.registerMessage(UnlockKeyRingMsg);

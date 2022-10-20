@@ -655,6 +655,17 @@ export class KeyRingService {
     return this.keyRing.addPrivateKey(kdf, privateKey, meta);
   }
 
+  async addKeystoneKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    return this.keyRing.addKeystoneKey(env, kdf, meta, bip44HDPath);
+  }
+
   async addLedgerKey(
     env: Env,
     kdf: "scrypt" | "sha256" | "pbkdf2",

@@ -313,10 +313,10 @@ export class KeyRing {
     }
 
     // Get public key first
-    const publicKey = await this.keystoneService.getPublicKey(env, bip44HDPath);
+    const publicKey = await this.keystoneService.getPubkey(env, bip44HDPath);
 
     const pubKeys = {
-      [LedgerApp.Cosmos]: publicKey,
+      cosmos: publicKey,
     };
 
     const keyStore = await KeyRing.CreateKeystoneKeyStore(
@@ -331,8 +331,6 @@ export class KeyRing {
     this.password = password;
     this.keyStore = keyStore;
     this.multiKeyStore.push(this.keyStore);
-
-    this.ledgerPublicKeyCache = pubKeys;
 
     await this.save();
 
@@ -1059,6 +1057,46 @@ export class KeyRing {
       this.password,
       await this.assignKeyStoreIdMeta(meta)
     );
+    this.multiKeyStore.push(keyStore);
+
+    await this.save();
+    return {
+      multiKeyStoreInfo: this.getMultiKeyStoreInfo(),
+    };
+  }
+
+  public async addKeystoneKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new KeplrError(
+        "keyring",
+        141,
+        "Key ring is locked or not initialized"
+      );
+    }
+
+    // Get public key first
+    const publicKey = await this.keystoneService.getPubkey(env, bip44HDPath);
+
+    const pubKeys = {
+      cosmos: publicKey,
+    };
+
+    const keyStore = await KeyRing.CreateKeystoneKeyStore(
+      this.crypto,
+      kdf,
+      pubKeys,
+      this.password,
+      await this.assignKeyStoreIdMeta(meta),
+      bip44HDPath
+    );
+
     this.multiKeyStore.push(keyStore);
 
     await this.save();
