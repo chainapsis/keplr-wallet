@@ -34,15 +34,8 @@ export const AddressBookPage: FunctionComponent<{
   hideChainDropdown?: boolean;
   selectHandler?: AddressBookSelectHandler;
   ibcChannelConfig?: IIBCChannelConfig;
-  isInTransaction?: boolean;
 }> = observer(
-  ({
-    onBackButton,
-    hideChainDropdown,
-    selectHandler,
-    ibcChannelConfig,
-    //isInTransaction,
-  }) => {
+  ({ onBackButton, hideChainDropdown, selectHandler, ibcChannelConfig }) => {
     const intl = useIntl();
     const history = useHistory();
 
@@ -55,11 +48,10 @@ export const AddressBookPage: FunctionComponent<{
         : current.chainId
     );
 
-    const recipientConfig = useRecipientConfig(
-      chainStore,
-      selectedChainId,
-      EthereumEndpoint
-    );
+    const recipientConfig = useRecipientConfig(chainStore, selectedChainId, {
+      ensEndpoint: EthereumEndpoint,
+      allowHexAddressOnEthermint: true,
+    });
     const memoConfig = useMemoConfig(chainStore, selectedChainId);
 
     const addressBookConfig = useAddressBookConfig(

@@ -7,7 +7,7 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { DenomHelper, escapeHTML } from "@keplr-wallet/common";
+import { DenomHelper, escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import {
@@ -43,7 +43,6 @@ import { DeepPartial, DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
 import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
-import { isAddress } from "@ethersproject/address";
 import { Buffer } from "buffer/";
 import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
 import { txEventsWithPreOnFulfill } from "./utils";
@@ -181,23 +180,6 @@ export class CosmosAccountImpl {
   ) {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
-    const hexAdjustedRecipient = (recipient: string) => {
-      const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
-        .bech32PrefixAccAddr;
-      if (this.hasEthereumAddress && recipient.startsWith("0x")) {
-        // Validate hex address
-        if (!isAddress(recipient)) {
-          throw new Error("Invalid hex address");
-        }
-        const buf = Buffer.from(
-          recipient.replace("0x", "").toLowerCase(),
-          "hex"
-        );
-        return new Bech32Address(buf).toBech32(bech32prefix);
-      }
-      return recipient;
-    };
-
     if (denomHelper.type === "native") {
       const actualAmount = (() => {
         let dec = new Dec(amount);
@@ -205,7 +187,6 @@ export class CosmosAccountImpl {
         return dec.truncate().toString();
       })();
 
-      recipient = hexAdjustedRecipient(recipient);
       Bech32Address.validate(
         recipient,
         this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
@@ -290,23 +271,6 @@ export class CosmosAccountImpl {
   ): Promise<boolean> {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
-    const hexAdjustedRecipient = (recipient: string) => {
-      const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
-        .bech32PrefixAccAddr;
-      if (this.hasEthereumAddress && recipient.startsWith("0x")) {
-        // Validate hex address
-        if (!isAddress(recipient)) {
-          throw new Error("Invalid hex address");
-        }
-        const buf = Buffer.from(
-          recipient.replace("0x", "").toLowerCase(),
-          "hex"
-        );
-        return new Bech32Address(buf).toBech32(bech32prefix);
-      }
-      return recipient;
-    };
-
     switch (denomHelper.type) {
       case "native":
         const actualAmount = (() => {
@@ -319,7 +283,7 @@ export class CosmosAccountImpl {
           type: this.msgOpts.send.native.type,
           value: {
             from_address: this.base.bech32Address,
-            to_address: hexAdjustedRecipient(recipient),
+            to_address: recipient,
             amount: [
               {
                 denom: currency.coinMinimalDenom,
@@ -533,13 +497,15 @@ export class CosmosAccountImpl {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
-    const signDoc = makeSignDoc(
-      aminoMsgs,
-      fee,
-      this.chainId,
-      escapeHTML(memo),
-      account.getAccountNumber().toString(),
-      account.getSequence().toString()
+    const signDoc = sortObjectByKey(
+      makeSignDoc(
+        aminoMsgs,
+        fee,
+        this.chainId,
+        escapeHTML(memo),
+        account.getAccountNumber().toString(),
+        account.getSequence().toString()
+      )
     );
 
     const signResponse = await (async () => {
@@ -551,11 +517,12 @@ export class CosmosAccountImpl {
           signOptions
         );
       } else {
-        // TODO: Upgrade typing. (Update cosmjs version?)
         const altSignDoc = {
           ...signDoc,
         };
 
+        // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
+        //      That means this part is not standard.
         (altSignDoc as any).fee["feePayer"] = this.base.bech32Address;
 
         return await keplr.experimentalSignEIP712CosmosTx_v0(
@@ -877,7 +844,7 @@ export class CosmosAccountImpl {
             throw new Error("Gas estimated is zero or negative");
           }
 
-          const gasAdjusted = feeOptions.gasAdjustment * gasUsed;
+          const gasAdjusted = Math.floor(feeOptions.gasAdjustment * gasUsed);
 
           return sendWithGasPrice(
             {
@@ -1941,13 +1908,5 @@ export class CosmosAccountImpl {
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
-  }
-
-  protected get hasEthereumAddress(): boolean {
-    return (
-      this.chainGetter
-        .getChain(this.chainId)
-        .features?.includes("eth-address-gen") ?? false
-    );
   }
 }

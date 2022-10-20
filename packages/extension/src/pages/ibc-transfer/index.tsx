@@ -45,7 +45,10 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     accountStore,
     chainStore.current.chainId,
     accountInfo.bech32Address,
-    EthereumEndpoint
+    {
+      ensEndpoint: EthereumEndpoint,
+      allowHexAddressOnEthermint: true,
+    }
   );
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.ibc.transfer"),
