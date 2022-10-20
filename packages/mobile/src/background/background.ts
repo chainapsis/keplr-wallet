@@ -31,6 +31,7 @@ init(
     "https://junoswap.com",
     "https://frontier.osmosis.zone",
     "https://daodao.zone",
+    "https://app.regen.network",
   ],
   {
     rng: getRandomBytesAsync,
