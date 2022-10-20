@@ -5,6 +5,7 @@ import { faShare } from "@fortawesome/free-solid-svg-icons/faShare";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { ProxyWallet, Text } from "@obi-wallet/common";
+import * as R from "ramda";
 import { useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { Linking, ScrollView, TouchableOpacity, View } from "react-native";
@@ -61,11 +62,11 @@ export function Lookup({ address, onSelect, onCancel }: LookupProps) {
           };
         });
 
-        setWallets(
-          wallets.filter((wallet) => {
-            return wallet !== null;
-          }) as ProxyWallet[]
-        );
+        let proxyWallets = wallets.filter((wallet) => {
+          return wallet !== null;
+        }) as ProxyWallet[];
+        proxyWallets = R.uniqBy(R.prop("contract"), proxyWallets);
+        setWallets(proxyWallets);
       } catch (e) {
         console.log(e);
       }

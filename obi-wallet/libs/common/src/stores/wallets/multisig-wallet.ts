@@ -103,10 +103,7 @@ export class MultisigWallet extends AbstractWallet {
     return this._updateProposed;
   }
 
-  public set updateProposed(updateProposed: boolean) {
-    this.setUpdateProposed(updateProposed);
-  }
-
+  @action
   public setUpdateProposed(updateProposed: boolean) {
     this._updateProposed = updateProposed;
   }
@@ -174,6 +171,7 @@ export class MultisigWallet extends AbstractWallet {
   @action
   public async finishProxySetup(address: SerializedProxyAddress) {
     this.keyInRecovery = null;
+    this._walletInRecovery = null;
     this._updateProposed = false;
     this.proxyAddresses[this.chainStore.currentChain] = address;
     await this.setCurrentAdmin(this.serializedNextAdmin);

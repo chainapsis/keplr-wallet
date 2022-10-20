@@ -254,7 +254,6 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                 onSecurityQuestionChange={setSecurityQuestion}
                 securityAnswer={securityAnswer}
                 onSecurityAnswerChange={(inputText) => {
-                  console.log(inputText);
                   const reg = /([^A-Za-z0-9.\sáéíóúñü_-])/;
                   if (!reg.test(inputText)) {
                     setSecurityAnswer(inputText);
@@ -272,7 +271,6 @@ export const MultisigPhoneNumber = observer<MultisigPhoneNumberProps>(
                 style={{ marginTop: 25 }}
                 value={phoneNumberWithoutCountryCode}
                 onChangeText={(e) => {
-                  console.log({ e, phoneCountryCode });
                   const noCountryCode = e.replace(phoneCountryCode, "");
                   const noSpecialChars = noCountryCode.replace(/[^0-9]/gi, "");
 
