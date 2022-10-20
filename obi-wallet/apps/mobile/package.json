@@ -79,6 +79,7 @@
     "react-router": "*",
     "rooks": "*",
     "secp256k1": "*",
-    "tiny-invariant": "*"
+    "tiny-invariant": "*",
+    "nanoid": "*"
   }
 }

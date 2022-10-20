@@ -113,6 +113,8 @@
   "onboarding5.useobiaccount": "Verwende Obi Account",
   "onboarding5.recovery.setsocialkey": "Lege einen neuen Social-Key fest",
   "onboarding5.recovery.setsocialkey.subtext2": "Du verwendest derzeit den Obi-Account. Dies wird den Obi-Account von deiner Multisig entfernen und ihn mit dem Key deines Freundes ersetzen.",
+  "onboarding5.error.noactivity.title": "Wir konnten keine Aktivität unter diese Adresse finden.",
+  "onboarding5.error.noactivity.subtext": "Bitte überprüfe die Adresse, sag deinem Freund er soll sie zumindest einmal verwenden (zum Beispiel indem er Coins an sich selbst schickt), oder versuche eine andere Adresse.",
 
   "onboarding4.error.socialkeyexists.title": "Du hast bereits einen Social-Key",
   "onboarding4.error.socialkeyexists.text": "Möchtest du deinen bestehenden Biometrie-Key wiederverwenden? Für:",

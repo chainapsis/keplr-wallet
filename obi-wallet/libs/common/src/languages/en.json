@@ -113,6 +113,8 @@
   "onboarding5.useobiaccount": "Use Obi Account",
   "onboarding5.recovery.setsocialkey": "Set a New Social Key",
   "onboarding5.recovery.setsocialkey.subtext2": "You're currently using the Obi account. This will remove the Obi account from your multisig and replace it with your friend's key.",
+  "onboarding5.error.noactivity.title": "We don't see any activity for this address.",
+  "onboarding5.error.noactivity.subtext": "Please check the address, tell your friend to use it once (such as sending coins to themselves), or try another address.",
 
   "onboarding4.error.socialkeyexists.title": "You already have a social key",
   "onboarding4.error.socialkeyexists.text": "Do you want to reuse your existing social key for",
