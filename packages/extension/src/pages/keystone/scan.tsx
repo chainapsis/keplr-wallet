@@ -25,7 +25,8 @@ export function Scan({ onChange }: Props) {
           e.preventDefault();
           onChange({
             type: "A",
-            cbor: "0102030405060708090001020304050607080900",
+            cbor:
+              "02bda203ca44c955f1db94bb0d34ef072cebeb27f5bc7b13656bb2881301d017a6",
           });
         }}
       >

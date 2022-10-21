@@ -1,11 +1,11 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Button, Form } from "reactstrap";
 import useForm from "react-hook-form";
 import style from "../style.module.scss";
 import { Input, PasswordInput } from "../../../components/form";
-import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
+import { useBIP44Option } from "../advanced-bip44";
 import { BackButton } from "../index";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
@@ -58,13 +58,6 @@ export const ImportKeystonePage: FunctionComponent<{
   });
 
   const { analyticsStore } = useStore();
-
-  // debug
-  useEffect(() => {
-    Array.from(document.querySelectorAll("input"))
-      .slice(0, 3)
-      .forEach((dom) => (dom.value = "12345678"));
-  }, []);
 
   return (
     <div>
@@ -148,7 +141,7 @@ export const ImportKeystonePage: FunctionComponent<{
             />
           </React.Fragment>
         ) : null}
-        <AdvancedBIP44Option bip44Option={bip44Option} />
+        {/* <AdvancedBIP44Option bip44Option={bip44Option} /> */}
         <Button
           color="primary"
           type="submit"
