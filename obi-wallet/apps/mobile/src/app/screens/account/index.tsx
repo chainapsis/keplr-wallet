@@ -1,7 +1,7 @@
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet/src";
 import { Text } from "@obi-wallet/common";
 import { ComponentType, FC, useRef, useState } from "react";
 import {
@@ -189,7 +189,7 @@ export function Account() {
         </ImageBackground>
       </View>
 
-      {/*
+
       <View
         style={{
           backgroundColor: "#16152D",
@@ -203,7 +203,7 @@ export function Account() {
             source={require("./assets/avatars/avatars-3.png")}
             style={{ height: 42, width: 42, borderRadius: 42 }}
           />
-          <View style={{ paddingLeft: 15, flex: 1, justifyContent: "space-around"}}>
+          <View style={{ paddingLeft: 15, flex: 1, justifyContent: "space-around" }}>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
@@ -241,7 +241,7 @@ export function Account() {
             <LinearGradient
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              colors={["#FCCFF7", "#E659D6", "#8877EA", "#86E2EE", "#1E1D3A"]}
+              colors={["#FCCFF7", "#E659D6", "#8877EA", "#86E2EE"]}
               style={{ flex: 1, width: "60%", borderRadius: 4 }}
             />
           </View>
@@ -290,7 +290,7 @@ export function Account() {
           </View>
         </View>
       </View>
-        */}
+
       <View
         style={{
           flex: 3,
@@ -300,7 +300,7 @@ export function Account() {
           marginTop: 10,
         }}
       >
-        {/* <FlatList
+        <FlatList
           data={[
             { key: "1", amount: 231, name: "My_personal_wallet" },
             { key: "2", amount: 8293, name: "Hot_wallet" },
@@ -364,7 +364,7 @@ export function Account() {
               </View>
             );
           }}
-        /> */}
+        />
       </View>
       <BottomSheetBackdrop
         onPress={() => triggerBottomSheet()}
@@ -402,16 +402,16 @@ interface Option {
 }
 
 const options: Option[] = [
-  // {
-  //  key: 0,
-  //  name: "spending",
-  //  Icon: SpendingIcon,
-  // },
-  // {
-  //   key: 1,
-  //   name: "inheritance",
-  //   Icon: InheritanceIcon,
-  // },
+  {
+    key: 0,
+    name: "spending",
+    Icon: SpendingIcon,
+  },
+  {
+    key: 1,
+    name: "inheritance",
+    Icon: InheritanceIcon,
+  },
 ];
 
 interface OptionProps {

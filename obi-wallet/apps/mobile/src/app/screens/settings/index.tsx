@@ -107,14 +107,13 @@ export const SettingsScreen = observer(() => {
         </View>
       </View>
       <ScrollView>
-        {/** Needs to be hidden currently, as the account-screen doesnt make sense at the moment
-          <Setting
-            Icon={AccountSettingsIcon}
-            title="Account settings"
-            subtitle="Manage accounts & sub-accounts "
-            onPress={() => navigation.navigate("AccountsSettings")}
-          />
-          */}
+        <Setting
+          Icon={MultiSigIcon}
+          title="Account settings"
+          subtitle="Manage accounts & sub-accounts "
+          onPress={() => navigation.navigate("AccountsSettings")}
+        />
+
         {isMultisigWallet ? (
           <Setting
             Icon={MultiSigIcon}
@@ -164,13 +163,13 @@ export const SettingsScreen = observer(() => {
           subtitle={intl.formatMessage(
             isObi
               ? {
-                  id: "settings.helpsupport.subtext.obi",
-                  defaultMessage: "Contact Obi support.",
-                }
+                id: "settings.helpsupport.subtext.obi",
+                defaultMessage: "Contact Obi support.",
+              }
               : {
-                  id: "settings.helpsupport.subtext",
-                  defaultMessage: "Contact Loop support.",
-                }
+                id: "settings.helpsupport.subtext",
+                defaultMessage: "Contact Loop support.",
+              }
           )}
           onPress={() =>
             Linking.openURL(
