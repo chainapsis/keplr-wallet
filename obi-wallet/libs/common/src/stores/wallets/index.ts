@@ -243,7 +243,7 @@ export class WalletsStore {
 
       // If legacy wallets were added, fall back to first wallet
       let walletIndexToUse = currentWalletIndex;
-      if (addedLegacyWallets) walletIndexToUse ??= 0;
+      if (addedLegacyWallets) walletIndexToUse = walletIndexToUse ?? 0;
 
       this.currentWalletId =
         typeof walletIndexToUse === "number"
