@@ -104,7 +104,7 @@
     "react-native-keychain": "^7.0.0",
     "react-native-localize": "^2.1.1",
     "react-native-qrcode-svg": "^6.1.1",
-    "react-native-reanimated": "^1.13.3",
+    "react-native-reanimated": "^2.10.0",
     "react-native-safe-area-context": "^3.1.9",
     "react-native-screens": "^2.18.1",
     "react-native-scrypt": "^1.2.1",
