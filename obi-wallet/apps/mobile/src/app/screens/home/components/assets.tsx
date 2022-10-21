@@ -444,6 +444,7 @@ const AssetsList = observer(() => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={refreshBalances}
+              tintColor="white"
             />
           }
         />
