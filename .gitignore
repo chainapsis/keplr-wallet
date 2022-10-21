@@ -17,6 +17,8 @@ packages/extension/src/config.ui.var.tsx
 
 coverage
 
+.watchman-cookie-*
+
 packages/proto-types/**/*.ts
 packages/proto-types/**/*.js
 packages/proto-types/**/*.mjs

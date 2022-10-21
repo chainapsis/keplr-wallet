@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { StyleSheet, Text, ViewStyle, View } from "react-native";
 import { useStyle } from "../../styles";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import Clipboard from "expo-clipboard";
+import * as Clipboard from "expo-clipboard";
 import { RectButton } from "../rect-button";
 import { CopyIcon } from "../icon";
 import { useSimpleTimer } from "../../hooks";

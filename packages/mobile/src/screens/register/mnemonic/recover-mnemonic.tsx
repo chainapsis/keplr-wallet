@@ -9,7 +9,7 @@ import { Controller, useForm } from "react-hook-form";
 import { TextInput } from "../../../components/input";
 import { StyleSheet, View } from "react-native";
 import { Button } from "../../../components/button";
-import Clipboard from "expo-clipboard";
+import * as Clipboard from "expo-clipboard";
 import { useStore } from "../../../stores";
 import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
 import { Buffer } from "buffer/";
