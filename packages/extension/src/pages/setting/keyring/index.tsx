@@ -108,7 +108,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                         analyticsStore.logEvent("Account changed");
                         loadingIndicator.setIsLoading("keyring", false);
                         history.push("/");
-                      } catch (e) {
+                      } catch (e: any) {
                         console.log(`Failed to change keyring: ${e.message}`);
                         loadingIndicator.setIsLoading("keyring", false);
                       }

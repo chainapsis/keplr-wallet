@@ -2,7 +2,6 @@ import {
   // APP_PORT,
   Env,
   KeplrError,
-  // KeplrError
 } from "@keplr-wallet/router";
 import { BIP44HDPath } from "../keyring";
 import { KVStore } from "@keplr-wallet/common";
@@ -28,28 +27,23 @@ export class KeystoneService {
   }
 
   async getPubkey(env: Env, bip44HDPath: BIP44HDPath): Promise<Uint8Array> {
-    const res = (await this.interactionService
-      .waitApprove(
-        env,
-        "/keystone/import-pubkey",
-        TYPE_KEYSTONE_GET_PUBKEY,
-        {
-          bip44HDPath,
-          a: 123,
-        },
-        {
-          forceOpenWindow: true,
-          channel: "keystone",
-        }
-      )
-      .catch(() => {
-        throw new KeplrError("keystone", 301, "get pubkey error");
-      })) as StdPublicKeyDoc;
+    const res = (await this.interactionService.waitApprove(
+      env,
+      "/keystone/import-pubkey",
+      TYPE_KEYSTONE_GET_PUBKEY,
+      {
+        bip44HDPath,
+      },
+      {
+        forceOpenWindow: true,
+        channel: "keystone",
+      }
+    )) as StdPublicKeyDoc;
     if (res.abort) {
-      throw new KeplrError("keystone", 302, "get pubkey canceled");
+      throw new KeplrError("keystone", 301, "The process has been canceled.");
     }
     if (!res.publicKey) {
-      throw new KeplrError("keystone", 303, "public key error");
+      throw new KeplrError("keystone", 302, "Public key is empty.");
     }
     return publicKeyConvert(Buffer.from(res.publicKey, "hex"), true);
   }

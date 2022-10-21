@@ -32,6 +32,7 @@ export interface Key {
   algo: string;
   pubKey: Uint8Array;
   address: Uint8Array;
+  isKeystone: boolean;
   isNanoLedger: boolean;
 }
 
@@ -64,6 +65,7 @@ export class KeyRing {
   private _privateKey?: Uint8Array;
   private _mnemonicMasterSeed?: Uint8Array;
   private _ledgerPublicKeyCache?: Record<string, Uint8Array | undefined>;
+  private _keystonePublicKeys?: Record<string, Uint8Array>;
 
   private keyStore: KeyStore | null;
 
@@ -85,20 +87,30 @@ export class KeyRing {
 
   public static getTypeOfKeyStore(
     keyStore: Omit<KeyStore, "crypto">
-  ): "mnemonic" | "privateKey" | "ledger" {
+  ): "mnemonic" | "privateKey" | "ledger" | "keystone" {
     const type = keyStore.type;
     if (type == null) {
       return "mnemonic";
     }
 
-    if (type !== "mnemonic" && type !== "privateKey" && type !== "ledger") {
+    if (
+      type !== "mnemonic" &&
+      type !== "privateKey" &&
+      type !== "ledger" &&
+      type !== "keystone"
+    ) {
       throw new KeplrError("keyring", 132, "Invalid type of key store");
     }
 
     return type;
   }
 
-  public get type(): "mnemonic" | "privateKey" | "ledger" | "none" {
+  public get type():
+    | "mnemonic"
+    | "privateKey"
+    | "ledger"
+    | "keystone"
+    | "none" {
     if (!this.keyStore) {
       return "none";
     } else {
@@ -110,7 +122,8 @@ export class KeyRing {
     return (
       this.privateKey == null &&
       this.mnemonicMasterSeed == null &&
-      this.ledgerPublicKeyCache == null
+      this.ledgerPublicKeyCache == null &&
+      this.keystonePublicKeys == null
     );
   }
 
@@ -122,6 +135,7 @@ export class KeyRing {
     this._privateKey = privateKey;
     this._mnemonicMasterSeed = undefined;
     this._ledgerPublicKeyCache = undefined;
+    this._keystonePublicKeys = undefined;
     this.cached = new Map();
   }
 
@@ -131,6 +145,21 @@ export class KeyRing {
 
   private set mnemonicMasterSeed(masterSeed: Uint8Array | undefined) {
     this._mnemonicMasterSeed = masterSeed;
+    this._privateKey = undefined;
+    this._ledgerPublicKeyCache = undefined;
+    this._keystonePublicKeys = undefined;
+    this.cached = new Map();
+  }
+
+  private get keystonePublicKeys(): Record<string, Uint8Array> | undefined {
+    return this._keystonePublicKeys;
+  }
+
+  private set keystonePublicKeys(
+    publicKeys: Record<string, Uint8Array> | undefined
+  ) {
+    this._keystonePublicKeys = publicKeys;
+    this._mnemonicMasterSeed = undefined;
     this._privateKey = undefined;
     this._ledgerPublicKeyCache = undefined;
     this.cached = new Map();
@@ -447,6 +476,25 @@ export class KeyRing {
       }
 
       this.ledgerPublicKeyCache = pubKeys;
+    } else if (this.type === "keystone") {
+      const cipherText = await Crypto.decrypt(
+        this.crypto,
+        this.keyStore,
+        password
+      );
+      try {
+        const keys = JSON.parse(Buffer.from(cipherText).toString());
+        for (const k in keys) {
+          keys[k] = Buffer.from(keys[k], "hex");
+        }
+        this.keystonePublicKeys = keys;
+      } catch (e: any) {
+        throw new KeplrError(
+          "keyring",
+          146,
+          "Unexpected content of Keystone public keys"
+        );
+      }
     } else {
       throw new KeplrError("keyring", 145, "Unexpected type of keyring");
     }
@@ -710,6 +758,7 @@ export class KeyRing {
           algo: "ethsecp256k1",
           pubKey: pubKey,
           address: Buffer.from(address.replace("0x", ""), "hex"),
+          isKeystone: false,
           isNanoLedger: true,
         };
       }
@@ -722,7 +771,23 @@ export class KeyRing {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
         address: pubKey.getAddress(),
+        isKeystone: false,
         isNanoLedger: true,
+      };
+    } else if (this.keyStore.type === "keystone") {
+      if (!this.keystonePublicKeys) {
+        throw new KeplrError("keyring", 160, "Keystone public key not set");
+      }
+      if (!this.keystonePublicKeys[coinType]) {
+        throw new KeplrError("keyring", 161, "CoinType is not available");
+      }
+      const pubKey = new PubKeySecp256k1(this.keystonePublicKeys[coinType]);
+      return {
+        algo: "secp256k1",
+        pubKey: pubKey.toBytes(),
+        address: pubKey.getAddress(),
+        isKeystone: true,
+        isNanoLedger: false,
       };
     } else {
       const privKey = this.loadPrivKey(coinType);
@@ -736,6 +801,7 @@ export class KeyRing {
           algo: "ethsecp256k1",
           pubKey: pubKey.toBytes(),
           address: Buffer.from(wallet.address.replace("0x", ""), "hex"),
+          isKeystone: false,
           isNanoLedger: false,
         };
       }
@@ -745,6 +811,7 @@ export class KeyRing {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
         address: pubKey.getAddress(),
+        isKeystone: false,
         isNanoLedger: false,
       };
     }

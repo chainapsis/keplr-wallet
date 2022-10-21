@@ -2,6 +2,11 @@ import { flow, makeObservable } from "mobx";
 import { InteractionStore } from "./interaction";
 import { TYPE_KEYSTONE_GET_PUBKEY } from "@keplr-wallet/background";
 
+export interface UR {
+  type: string;
+  cbor: string;
+}
+
 export class KeystoneStore {
   constructor(protected readonly interactionStore: InteractionStore) {
     makeObservable(this);
