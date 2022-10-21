@@ -48,6 +48,7 @@
     "node-html-parser": "*",
     "otplib": "*",
     "process": "*",
+    "ramda": "*",
     "react": "*",
     "react-cosmos": "*",
     "react-intl": "*",
