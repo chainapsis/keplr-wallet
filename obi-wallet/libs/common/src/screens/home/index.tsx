@@ -104,73 +104,73 @@ export const Home = observer<HomeProps>(
                   />
                 );
               })}
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                ImgComponent={BuyCryptoIcon}
-                label={intl.formatMessage({
-                  id: "apps.kado",
-                  defaultMessage: "Buy with Card",
-                })}
-                onPress={() => {
-                  onAppPress({
-                    label: "Buy with Card",
-                    url: `https://app.kado.money?network=JUNO&onToAddress=${walletsStore.address}&apiKey=0a5fc82b-be15-4059-8edf-9ff9c54186ce`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              {!isObi && (
-                <Tile
-                  onLongPress={() => {
-                    setEditMode(true);
-                  }}
-                  ImgComponent={CosmicPartyIcon}
-                  label="Cosmic 5 Party"
-                  onPress={() => {
-                    onAppPress({
-                      label: "Cosmic 5 Party",
-                      url: `https://events.loop.markets`,
-                      icon: "https://place-hold.it/180x180",
-                    });
-                  }}
-                />
-              )}
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                ImgComponent={GetTicketsIcon}
-                label={intl.formatMessage({
-                  id: "apps.gettickets",
-                  defaultMessage: "Get Tickets",
-                })}
-                onPress={() => {
-                  onAppPress({
-                    label: "Get Tickets",
-                    url: `https://nft-juno-dev.loop.do/webapp/tickets`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
-              <Tile
-                onLongPress={() => {
-                  setEditMode(true);
-                }}
-                ImgComponent={MyTicketsIcon}
-                label={intl.formatMessage({
-                  id: "apps.mytickets",
-                  defaultMessage: "My Tickets",
-                })}
-                onPress={() => {
-                  onAppPress({
-                    label: "My Tickets",
-                    url: `https://nft-juno-dev.loop.do/webapp/mytickets`,
-                    icon: "https://place-hold.it/180x180",
-                  });
-                }}
-              />
+              {/*<Tile*/}
+              {/*  onLongPress={() => {*/}
+              {/*    setEditMode(true);*/}
+              {/*  }}*/}
+              {/*  ImgComponent={BuyCryptoIcon}*/}
+              {/*  label={intl.formatMessage({*/}
+              {/*    id: "apps.kado",*/}
+              {/*    defaultMessage: "Buy with Card",*/}
+              {/*  })}*/}
+              {/*  onPress={() => {*/}
+              {/*    onAppPress({*/}
+              {/*      label: "Buy with Card",*/}
+              {/*      url: `https://app.kado.money?network=JUNO&onToAddress=${walletsStore.address}&apiKey=0a5fc82b-be15-4059-8edf-9ff9c54186ce`,*/}
+              {/*      icon: "https://place-hold.it/180x180",*/}
+              {/*    });*/}
+              {/*  }}*/}
+              {/*/>*/}
+              {/*{!isObi && (*/}
+              {/*  <Tile*/}
+              {/*    onLongPress={() => {*/}
+              {/*      setEditMode(true);*/}
+              {/*    }}*/}
+              {/*    ImgComponent={CosmicPartyIcon}*/}
+              {/*    label="Cosmic 5 Party"*/}
+              {/*    onPress={() => {*/}
+              {/*      onAppPress({*/}
+              {/*        label: "Cosmic 5 Party",*/}
+              {/*        url: `https://events.loop.markets`,*/}
+              {/*        icon: "https://place-hold.it/180x180",*/}
+              {/*      });*/}
+              {/*    }}*/}
+              {/*  />*/}
+              {/*)}*/}
+              {/*<Tile*/}
+              {/*  onLongPress={() => {*/}
+              {/*    setEditMode(true);*/}
+              {/*  }}*/}
+              {/*  ImgComponent={GetTicketsIcon}*/}
+              {/*  label={intl.formatMessage({*/}
+              {/*    id: "apps.gettickets",*/}
+              {/*    defaultMessage: "Get Tickets",*/}
+              {/*  })}*/}
+              {/*  onPress={() => {*/}
+              {/*    onAppPress({*/}
+              {/*      label: "Get Tickets",*/}
+              {/*      url: `https://nft-juno-dev.loop.do/webapp/tickets`,*/}
+              {/*      icon: "https://place-hold.it/180x180",*/}
+              {/*    });*/}
+              {/*  }}*/}
+              {/*/>*/}
+              {/*<Tile*/}
+              {/*  onLongPress={() => {*/}
+              {/*    setEditMode(true);*/}
+              {/*  }}*/}
+              {/*  ImgComponent={MyTicketsIcon}*/}
+              {/*  label={intl.formatMessage({*/}
+              {/*    id: "apps.mytickets",*/}
+              {/*    defaultMessage: "My Tickets",*/}
+              {/*  })}*/}
+              {/*  onPress={() => {*/}
+              {/*    onAppPress({*/}
+              {/*      label: "My Tickets",*/}
+              {/*      url: `https://nft-juno-dev.loop.do/webapp/mytickets`,*/}
+              {/*      icon: "https://place-hold.it/180x180",*/}
+              {/*    });*/}
+              {/*  }}*/}
+              {/*/>*/}
               <Tile
                 onLongPress={() => {
                   setEditMode(true);
