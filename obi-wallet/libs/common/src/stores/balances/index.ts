@@ -57,16 +57,17 @@ export class BalancesStore {
       const custom_coins: ExtendedCoin[] = [];
       const token_contract_addresses = [
         { contract: LOOP_JUNO1_ADDRESS, denom: "uloop" },
-        {
-          contract:
-            "juno18c5uecrztn4rqakm23fskusasud7s8afujnl8yu54ule2kak5q4sdnvcz4",
-          denom: "udrink",
-        },
-        {
-          contract:
-            "juno1x5xz6wu8qlau8znmc60tmazzj3ta98quhk7qkamul3am2x8fsaqqcwy7n9",
-          denom: "ubottle",
-        },
+        // hide bottles and drinks for the moment.
+        // {
+        //   contract:
+        //     "juno18c5uecrztn4rqakm23fskusasud7s8afujnl8yu54ule2kak5q4sdnvcz4",
+        //   denom: "udrink",
+        // },
+        // {
+        //   contract:
+        //     "juno1x5xz6wu8qlau8znmc60tmazzj3ta98quhk7qkamul3am2x8fsaqqcwy7n9",
+        //   denom: "ubottle",
+        // },
       ];
       for (let i = 0; i < token_contract_addresses.length; i++) {
         await wasmClient
