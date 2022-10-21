@@ -4,7 +4,7 @@ import { useStyle } from "../../../../styles";
 import { CheckIcon } from "../../../../components/icon";
 import { Button } from "../../../../components/button";
 import { WordChip } from "../../../../components/mnemonic";
-import Clipboard from "expo-clipboard";
+import * as Clipboard from "expo-clipboard";
 import { PageWithScrollViewInBottomTabView } from "../../../../components/page";
 import { useSimpleTimer } from "../../../../hooks";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";

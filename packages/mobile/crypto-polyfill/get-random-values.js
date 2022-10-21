@@ -38,10 +38,8 @@ export default function getRandomValues(values) {
     randomBytes = getRandomBytes(values.byteLength);
   } catch (e) {
     // TODO: rethrow the error if it's not due to a lack of synchronous methods
-    console.warn(
-      `Random.getRandomBytes is not supported; falling back to insecure Math.random`
-    );
-    return getRandomValuesInsecure(values);
+    console.warn(`Random.getRandomBytes is not supported`);
+    throw e;
   }
   // Create a new TypedArray that is of the same type as the given TypedArray but is backed with the
   // array buffer containing random bytes. This is cheap and copies no data.
@@ -53,19 +51,6 @@ export default function getRandomValues(values) {
   );
   // Copy the data into the given TypedArray, letting the VM optimize the copy if possible
   values.set(randomValues);
-  return values;
-}
-export function getRandomValuesInsecure(values) {
-  // Write random bytes to the given TypedArray's underlying ArrayBuffer
-  const byteView = new Uint8Array(
-    values.buffer,
-    values.byteOffset,
-    values.byteLength
-  );
-  for (let i = 0; i < byteView.length; i++) {
-    // The range of Math.random() is [0, 1) and the ToUint8 abstract operation rounds down
-    byteView[i] = Math.random() * 256;
-  }
   return values;
 }
 class QuotaExceededError extends Error {
