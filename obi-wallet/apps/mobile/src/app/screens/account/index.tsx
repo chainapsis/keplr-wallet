@@ -189,7 +189,6 @@ export function Account() {
         </ImageBackground>
       </View>
 
-
       <View
         style={{
           backgroundColor: "#16152D",
@@ -203,7 +202,9 @@ export function Account() {
             source={require("./assets/avatars/avatars-3.png")}
             style={{ height: 42, width: 42, borderRadius: 42 }}
           />
-          <View style={{ paddingLeft: 15, flex: 1, justifyContent: "space-around" }}>
+          <View
+            style={{ paddingLeft: 15, flex: 1, justifyContent: "space-around" }}
+          >
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
