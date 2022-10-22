@@ -5,6 +5,7 @@
     "types": ["node"]
   },
   "exclude": [
+    "__tests__/**/*.ts",
     "**/*.spec.ts",
     "**/*.spec.tsx",
     "test-setup.ts",

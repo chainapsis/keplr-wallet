@@ -1,4 +1,4 @@
-import { KVStore as AbstractKVStore } from "@keplr-wallet/common";
+import { AbstractKVStore } from ".";
 
 export class MockKVStore implements AbstractKVStore {
   static storage = new Map<string, string>();

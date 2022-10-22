@@ -11,7 +11,7 @@ import {
 import { Chain } from "../chains";
 import { EmbedChainInfos } from "../config";
 import { produceEnv } from "../env";
-import { KVStore } from "../kv-store";
+import { AbstractKVStore, KVStore as DefaultKVStore } from "../kv-store";
 import { MessageRequesterInternal } from "../message-requester";
 import { RouterUi } from "../router";
 import { AppsStore } from "./apps";
@@ -44,11 +44,13 @@ export class RootStore {
     deviceLanguage,
     enabledLanguages,
     defaultLanguage,
+    KVStore = DefaultKVStore,
   }: {
     defaultChain: Chain;
     deviceLanguage: string;
     enabledLanguages: string[];
     defaultLanguage: string;
+    KVStore?: new (prefix: string) => AbstractKVStore;
   }) {
     const router = new RouterUi(produceEnv);
     ObservableQueryBase.experimentalDeferInitialQueryController =

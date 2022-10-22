@@ -1,36 +1,31 @@
-import { KVStore } from "@keplr-wallet/common";
+import { MockKVStore } from "../../src/kv-store/mock";
+import { SerializedData as MultisigSerializedData } from "../../src/stores/multisig/serialized-data";
+import { RootStore } from "../../src/stores/root";
+import { WalletState } from "../../src/stores/wallets";
+import { MultisigWallet } from "../../src/stores/wallets/multisig-wallet";
+import { SerializedData } from "../../src/stores/wallets/serialized-data";
 
-import { WalletsStore, WalletState } from ".";
-import { MockKVStore } from "../../kv-store/mock";
-import { ChainStore } from "../chain";
-import { SerializedData as MultisigSerializedData } from "../multisig/serialized-data";
-import { MultisigWallet } from "./multisig-wallet";
-import { SerializedData } from "./serialized-data";
+const kvStore = new MockKVStore("wallets-store");
+const multisigKVStore = new MockKVStore("multisig-store");
+const singlesigKVStore = new MockKVStore("singlesig-store");
 
-let chainStore: ChainStore;
-let kvStore: KVStore;
-let multisigKVStore: KVStore;
-let singlesigKVStore: KVStore;
-let walletsStoreParams: ConstructorParameters<typeof WalletsStore>[0];
+function createWalletsStore() {
+  const rootStore = new RootStore({
+    defaultChain: "juno-1",
+    deviceLanguage: "en",
+    enabledLanguages: ["en"],
+    defaultLanguage: "en",
+    KVStore: MockKVStore,
+  });
+  return rootStore.walletsStore;
+}
 
 beforeEach(() => {
-  chainStore = new ChainStore({ defaultChain: "uni-3" });
   MockKVStore.reset();
-  kvStore = new MockKVStore("wallets-store");
-  multisigKVStore = new MockKVStore("multisig-store");
-  singlesigKVStore = new MockKVStore("singlesig-store");
-  walletsStoreParams = {
-    chainStore,
-    kvStore,
-    legacyKVStores: {
-      multisig: multisigKVStore,
-      singlesig: singlesigKVStore,
-    },
-  };
 });
 
 test("Empty KVStore", async () => {
-  const walletsStore = new WalletsStore(walletsStoreParams);
+  const walletsStore = createWalletsStore();
   expect(walletsStore.state).toEqual(WalletState.LOADING);
   await walletsStore.__initPromise;
   expect(walletsStore.currentWallet).toEqual(null);
@@ -46,7 +41,7 @@ test("KVStore with no wallets", async () => {
     currentWalletIndex: null,
     wallets: [],
   });
-  const walletsStore = new WalletsStore(walletsStoreParams);
+  const walletsStore = createWalletsStore();
   expect(walletsStore.state).toEqual(WalletState.LOADING);
   await walletsStore.__initPromise;
   expect(walletsStore.currentWallet).toEqual(null);
@@ -70,7 +65,7 @@ test("Legacy KVStores", async () => {
     multisigSerializedData
   );
   await singlesigKVStore.set<string>("singlesig", singlesigSerializedData);
-  const walletsStore = new WalletsStore(walletsStoreParams);
+  const walletsStore = createWalletsStore();
   expect(walletsStore.state).toEqual(WalletState.LOADING);
   await walletsStore.__initPromise;
   expect(walletsStore.currentWallet).toBeInstanceOf(MultisigWallet);
@@ -97,7 +92,7 @@ test("Fail on invalid data", async () => {
   jest.spyOn(console, "error").mockImplementation(() => {});
   const invalidData = { invalid: [] };
   await kvStore.set("wallets", invalidData);
-  const walletsStore = new WalletsStore(walletsStoreParams);
+  const walletsStore = createWalletsStore();
   await walletsStore.__initPromise;
   expect(walletsStore.currentWallet).toEqual(null);
   expect(walletsStore.state).toEqual(WalletState.INVALID);
