@@ -98,3 +98,14 @@ test("Fail on invalid data", async () => {
   expect(walletsStore.state).toEqual(WalletState.INVALID);
   expect(await kvStore.get("wallets")).toEqual(invalidData);
 });
+
+describe("MultisigWallet", () => {
+  test("Empty multisig wallet", async () => {
+    const walletsStore = createWalletsStore();
+    await walletsStore.__initPromise;
+    const wallet = await walletsStore.addMultisigWallet();
+    expect(walletsStore.currentWallet).toEqual(wallet);
+    expect(wallet.isDemo).toEqual(false);
+    expect(wallet.isReady).toEqual(false);
+  });
+});
