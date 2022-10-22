@@ -26,12 +26,14 @@ import { SendScreen } from "./screens/send";
 import { settingsScreens } from "./screens/settings";
 import { SplashScreen } from "./screens/splash";
 import { WebViewScreen } from "./screens/web-view";
+import { WithSplashScreen } from "./splash-screen";
 import { useStore } from "./stores";
 
 export function App() {
   const [updating, setUpdating] = useState(false);
   const appState = useRef(AppState.currentState);
   const lastUpdate = useRef(0);
+  const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
     const listener = AppState.addEventListener(
@@ -68,29 +70,36 @@ export function App() {
     };
   }, []);
 
+  // Trigger Splash-Screen when App is ready
+  useEffect(() => {
+    setIsAppReady(true);
+  }, []);
+
   return (
-    <Provider>
-      <DemoModeHeader />
-      <StateRenderer />
-      <Modals />
-      {updating ? (
-        <Loader
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 999,
-            position: "absolute",
-            backgroundColor: "#100F1D",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-          loadingText="Updating app bundle…"
-        />
-      ) : null}
-    </Provider>
+    <WithSplashScreen isAppReady={isAppReady}>
+      <Provider>
+        <DemoModeHeader />
+        <StateRenderer />
+        <Modals />
+        {updating ? (
+          <Loader
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 999,
+              position: "absolute",
+              backgroundColor: "#100F1D",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+            loadingText="Updating app bundle…"
+          />
+        ) : null}
+      </Provider>
+    </WithSplashScreen>
   );
 }
 
