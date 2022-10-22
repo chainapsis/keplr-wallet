@@ -5,6 +5,9 @@ apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
 import com.android.build.OutputFile
 import org.apache.tools.ant.taskdefs.condition.Os
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
  * and bundleReleaseJsAndAssets).
@@ -79,7 +82,6 @@ import org.apache.tools.ant.taskdefs.condition.Os
  *   extraPackagerArgs: []
  * ]
  */
-
 project.ext.react = [
     // the entry file for bundle generation
     entryFile: "src/main.tsx",
@@ -228,11 +230,11 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('LOOP_OBI_UPLOAD_STORE_FILE')) {
-                storeFile file(LOOP_OBI_UPLOAD_STORE_FILE)
-                storePassword LOOP_OBI_UPLOAD_STORE_PASSWORD
-                keyAlias LOOP_OBI_UPLOAD_KEY_ALIAS
-                keyPassword LOOP_OBI_UPLOAD_KEY_PASSWORD
+            if (properties.getProperty('LOOP_OBI_UPLOAD_STORE_FILE')) {
+                storeFile file(properties.getProperty('LOOP_OBI_UPLOAD_STORE_FILE'))
+                storePassword properties.getProperty('LOOP_OBI_UPLOAD_STORE_PASSWORD')
+                keyAlias properties.getProperty('LOOP_OBI_UPLOAD_KEY_ALIAS')
+                keyPassword properties.getProperty('LOOP_OBI_UPLOAD_KEY_PASSWORD')
             } else {
                 storeFile file('debug.keystore')
                 storePassword 'android'
