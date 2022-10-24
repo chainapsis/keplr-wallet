@@ -10,9 +10,44 @@ export const KeystoneImportPubkeyPage = observer(() => {
 
   const { keystoneStore } = useStore();
 
+  const parseHDPath = (hdPath: string) => {
+    const parts = hdPath.split("/");
+    return {
+      coinType: +parts[2].replace("'", ""),
+      bip44HDPath: {
+        account: +parts[3].replace("'", ""),
+        change: +parts[4],
+        addressIndex: +parts[5],
+      },
+    };
+  };
+
+  const decodeUR = (ur: UR) => {
+    return {
+      device: "",
+      xfp: "",
+      name: "",
+      keys: [
+        {
+          ...parseHDPath("m/44'/118'/0'/0/0"),
+          pubKey:
+            "02bda203ca44c955f1db94bb0d34ef072cebeb27f5bc7b13656bb2881301d017a6",
+          index: 0,
+        },
+        {
+          ...parseHDPath("m/44'/234'/0'/0/0"),
+          pubKey:
+            "02bda203ca44c955f1db94bb0d34ef072cebeb27f5bc7b13656bb2881301d017a6",
+          index: 1,
+        },
+      ],
+    };
+  };
+
   const onScanFinish = (ur: UR) => {
+    const data = decodeUR(ur);
     keystoneStore.resolveGetPubkey({
-      publicKey: ur.cbor,
+      publicKey: data.keys,
     });
     window.removeEventListener("unload", onUnload);
     window.close();
