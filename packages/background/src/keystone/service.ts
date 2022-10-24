@@ -12,8 +12,14 @@ import { publicKeyConvert } from "secp256k1";
 
 export const TYPE_KEYSTONE_GET_PUBKEY = "keystone-get-pubkey";
 
+export interface KeystonePublicKey {
+  coinType: number;
+  bip44HDPath: BIP44HDPath;
+  pubKey: string;
+}
+
 export interface StdPublicKeyDoc {
-  publicKey?: string;
+  publicKey?: KeystonePublicKey[];
   abort?: boolean;
 }
 
@@ -26,7 +32,10 @@ export class KeystoneService {
     this.interactionService = interactionService;
   }
 
-  async getPubkey(env: Env, bip44HDPath: BIP44HDPath): Promise<Uint8Array> {
+  async getPubkey(
+    env: Env,
+    bip44HDPath: BIP44HDPath
+  ): Promise<KeystonePublicKey[]> {
     const res = (await this.interactionService.waitApprove(
       env,
       "/keystone/import-pubkey",
@@ -42,10 +51,17 @@ export class KeystoneService {
     if (res.abort) {
       throw new KeplrError("keystone", 301, "The process has been canceled.");
     }
-    if (!res.publicKey) {
+    if (!(res.publicKey instanceof Array) || res.publicKey.length === 0) {
       throw new KeplrError("keystone", 302, "Public key is empty.");
     }
-    return publicKeyConvert(Buffer.from(res.publicKey, "hex"), true);
+    return res.publicKey.map((k) => {
+      return {
+        ...k,
+        pubKey: Buffer.from(
+          publicKeyConvert(Buffer.from(k.pubKey, "hex"), true)
+        ).toString("hex"),
+      };
+    });
   }
 
   // async sign(

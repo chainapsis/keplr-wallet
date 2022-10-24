@@ -19,7 +19,7 @@ import * as BytesUtils from "@ethersproject/bytes";
 import { computeAddress } from "@ethersproject/transactions";
 import { EIP712MessageValidator } from "./eip712";
 import { _TypedDataEncoder } from "@ethersproject/hash";
-import { KeystoneService } from "../keystone";
+import { KeystoneService, KeystonePublicKey } from "../keystone";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -65,7 +65,7 @@ export class KeyRing {
   private _privateKey?: Uint8Array;
   private _mnemonicMasterSeed?: Uint8Array;
   private _ledgerPublicKeyCache?: Record<string, Uint8Array | undefined>;
-  private _keystonePublicKeys?: Record<string, Uint8Array>;
+  private _keystonePublicKeys?: KeystonePublicKey[];
 
   private keyStore: KeyStore | null;
 
@@ -151,13 +151,11 @@ export class KeyRing {
     this.cached = new Map();
   }
 
-  private get keystonePublicKeys(): Record<string, Uint8Array> | undefined {
+  private get keystonePublicKeys(): KeystonePublicKey[] | undefined {
     return this._keystonePublicKeys;
   }
 
-  private set keystonePublicKeys(
-    publicKeys: Record<string, Uint8Array> | undefined
-  ) {
+  private set keystonePublicKeys(publicKeys: KeystonePublicKey[] | undefined) {
     this._keystonePublicKeys = publicKeys;
     this._mnemonicMasterSeed = undefined;
     this._privateKey = undefined;
@@ -344,14 +342,10 @@ export class KeyRing {
     // Get public key first
     const publicKey = await this.keystoneService.getPubkey(env, bip44HDPath);
 
-    const pubKeys = {
-      cosmos: publicKey,
-    };
-
     const keyStore = await KeyRing.CreateKeystoneKeyStore(
       this.crypto,
       kdf,
-      pubKeys,
+      publicKey,
       password,
       await this.assignKeyStoreIdMeta(meta),
       bip44HDPath
@@ -484,9 +478,6 @@ export class KeyRing {
       );
       try {
         const keys = JSON.parse(Buffer.from(cipherText).toString());
-        for (const k in keys) {
-          keys[k] = Buffer.from(keys[k], "hex");
-        }
         this.keystonePublicKeys = keys;
       } catch (e: any) {
         throw new KeplrError(
@@ -775,13 +766,17 @@ export class KeyRing {
         isNanoLedger: true,
       };
     } else if (this.keyStore.type === "keystone") {
-      if (!this.keystonePublicKeys) {
+      if (
+        !(this.keystonePublicKeys instanceof Array) ||
+        this.keystonePublicKeys.length === 0
+      ) {
         throw new KeplrError("keyring", 160, "Keystone public key not set");
       }
-      if (!this.keystonePublicKeys[coinType]) {
+      const key = this.keystonePublicKeys.find((e) => e.coinType === coinType);
+      if (!key) {
         throw new KeplrError("keyring", 161, "CoinType is not available");
       }
-      const pubKey = new PubKeySecp256k1(this.keystonePublicKeys[coinType]);
+      const pubKey = new PubKeySecp256k1(Buffer.from(key.pubKey, "hex"));
       return {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
@@ -1151,14 +1146,10 @@ export class KeyRing {
     // Get public key first
     const publicKey = await this.keystoneService.getPubkey(env, bip44HDPath);
 
-    const pubKeys = {
-      cosmos: publicKey,
-    };
-
     const keyStore = await KeyRing.CreateKeystoneKeyStore(
       this.crypto,
       kdf,
-      pubKeys,
+      publicKey,
       this.password,
       await this.assignKeyStoreIdMeta(meta),
       bip44HDPath
@@ -1370,26 +1361,16 @@ export class KeyRing {
   private static async CreateKeystoneKeyStore(
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
-    publicKeys: Record<string, Uint8Array | undefined>,
+    publicKeys: KeystonePublicKey[],
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
   ): Promise<KeyStore> {
-    const publicKeyMap: Record<string, string> = {};
-    Object.keys(publicKeys)
-      .filter((k) => publicKeys[k] != null)
-      .forEach(
-        (k) =>
-          (publicKeyMap[k] = Buffer.from(publicKeys[k] as Uint8Array).toString(
-            "hex"
-          ))
-      );
-
     return await Crypto.encrypt(
       crypto,
       kdf,
       "keystone",
-      JSON.stringify(publicKeyMap),
+      JSON.stringify(publicKeys),
       password,
       meta,
       bip44HDPath
