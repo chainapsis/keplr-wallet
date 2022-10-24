@@ -86,15 +86,18 @@ export class ChainUpdaterService {
           // Reduce the confusion from different coin type on ecosystem.
           // Unite coin type for all chain with allowing alternatives.
           return {
-            bip44: {
-              coinType: 118,
-            },
             alternativeBIP44s: (() => {
               let res = chainInfo.alternativeBIP44s ?? [];
 
-              if (chainInfo.bip44.coinType !== 118) {
-                res = [{ coinType: chainInfo.bip44.coinType }, ...res];
+              if (chainInfo.bip44.coinType === 118) {
+                return res;
               }
+
+              if (res.find((c) => c.coinType === 118)) {
+                return res;
+              }
+
+              res = [...res, { coinType: 118 }];
 
               return res;
             })(),
