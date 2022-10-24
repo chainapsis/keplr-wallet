@@ -510,6 +510,7 @@ export const SendScreen = observer(() => {
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={refreshBalances}
+                  tintColor="rgba(246, 245, 255, 0.6)"
                 />
               }
             />

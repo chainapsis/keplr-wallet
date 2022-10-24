@@ -444,6 +444,7 @@ const AssetsList = observer(() => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={refreshBalances}
+              tintColor="rgba(246, 245, 255, 0.6)"
             />
           }
         />
@@ -561,7 +562,7 @@ function AssetsListItem({ item }: ListRenderItemInfo<ExtendedCoin>) {
 
           <Text
             style={{
-              color: "rgba(246, 245, 255, 0.6);",
+              color: "rgba(246, 245, 255, 0.6)",
               fontSize: 12,
               fontWeight: "400",
               textAlign: "right",
