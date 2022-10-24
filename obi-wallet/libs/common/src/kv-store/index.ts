@@ -1,6 +1,8 @@
 import { KVStore as AbstractKVStore } from "@keplr-wallet/common";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+export { AbstractKVStore };
+
 export class KVStore implements AbstractKVStore {
   constructor(protected readonly _prefix: string) {}
 
