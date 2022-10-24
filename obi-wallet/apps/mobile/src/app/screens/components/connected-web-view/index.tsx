@@ -83,6 +83,7 @@ export const ConnectedWebView = observer(
               webViewRef.current?.reload();
               setLoading(true);
             }}
+            tintColor="rgba(246, 245, 255, 0.6)"
           />
         }
       >
