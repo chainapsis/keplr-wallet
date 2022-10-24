@@ -28,35 +28,31 @@ export class ChainUpdaterService {
 
     if (updatedChainInfo) {
       chainInfo = updatedChainInfo;
-    } else {
-      // There is a possibility that app has legacy updated chain info.
-      const legacy = await this.kvStore.get<Partial<ChainInfo>>(
-        chainIdentifier
-      );
-      if (legacy) {
-        chainInfo = {
-          ...chainInfo,
-          ...{
-            chainId: legacy.chainId || chainInfo.chainId,
-            rpc: legacy.rpc || chainInfo.rpc,
-            rest: legacy.rest || chainInfo.rest,
-            features: (() => {
-              if (!legacy.features) {
-                return chainInfo.features;
-              }
+    }
 
-              const features = chainInfo.features ?? [];
-              for (const add of legacy.features) {
-                if (!features.find((f) => f !== add)) {
-                  features.push(add);
-                }
-              }
+    // There is a possibility that app has legacy updated chain info.
+    const legacy = await this.kvStore.get<Partial<ChainInfo>>(chainIdentifier);
+    if (legacy) {
+      chainInfo = {
+        ...chainInfo,
+        ...{
+          chainId: legacy.chainId || chainInfo.chainId,
+          features: (() => {
+            if (!legacy.features) {
+              return chainInfo.features;
+            }
 
-              return features;
-            })(),
-          },
-        };
-      }
+            const features = chainInfo.features ?? [];
+            for (const add of legacy.features) {
+              if (!features.find((f) => f !== add)) {
+                features.push(add);
+              }
+            }
+
+            return features;
+          })(),
+        },
+      };
     }
 
     const endpoints = await this.getChainEndpoints(origin.chainId);
@@ -77,10 +73,6 @@ export class ChainUpdaterService {
       );
 
       let chainInfo: ChainInfo = res.data;
-
-      // At this time, the chain info is managed on github repo.
-      // So, we can delete a legacy updated chain info.
-      await this.kvStore.set(ChainIdHelper.parse(chainId).identifier, null);
 
       chainInfo = {
         ...chainInfo,
