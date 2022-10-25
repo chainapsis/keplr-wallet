@@ -35,12 +35,13 @@ export const KeystoneImportPubkeyPage = observer(() => {
           index: 0,
         },
         {
-          ...parseHDPath("m/44'/234'/0'/0/0"),
+          ...parseHDPath("m/44'/60'/0'/0/0"),
           pubKey:
-            "02bda203ca44c955f1db94bb0d34ef072cebeb27f5bc7b13656bb2881301d017a6",
+            "029e9fea62fb6dd737250b20fc1441c0fcb4f163402bae1ac6f2f0726116c88024",
           index: 1,
         },
       ],
+      ur,
     };
   };
 
