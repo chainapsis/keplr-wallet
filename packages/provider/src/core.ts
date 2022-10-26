@@ -30,6 +30,7 @@ import {
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
   RequestVerifyADR36AminoSignDoc,
+  RequestSignEIP712CosmosTxMsg_v0,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -63,7 +64,38 @@ export class Keplr implements IKeplr {
     );
   }
 
-  async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+  async experimentalSuggestChain(
+    chainInfo: ChainInfo & {
+      // Legacy
+      gasPriceStep?: {
+        readonly low: number;
+        readonly average: number;
+        readonly high: number;
+      };
+    }
+  ): Promise<void> {
+    if (chainInfo.gasPriceStep) {
+      // Gas price step in ChainInfo is legacy format.
+      // Try to change the recent format for backward-compatibility.
+      const gasPriceStep = { ...chainInfo.gasPriceStep };
+      for (const feeCurrency of chainInfo.feeCurrencies) {
+        if (!feeCurrency.gasPriceStep) {
+          (feeCurrency as {
+            gasPriceStep?: {
+              readonly low: number;
+              readonly average: number;
+              readonly high: number;
+            };
+          }).gasPriceStep = gasPriceStep;
+        }
+      }
+      delete chainInfo.gasPriceStep;
+
+      console.warn(
+        "The `gasPriceStep` field of the `ChainInfo` has been moved under `feeCurrencies`. This is automatically handled as of right now, but the upcoming update would potentially cause errors."
+      );
+    }
+
     const msg = new SuggestChainInfoMsg(chainInfo);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
@@ -171,12 +203,6 @@ export class Keplr implements IKeplr {
     data: string | Uint8Array,
     type: EthSignType
   ): Promise<Uint8Array> {
-    if (type !== EthSignType.MESSAGE && type !== EthSignType.TRANSACTION) {
-      throw new Error(
-        "Unsupported Ethereum signing type: expected 'message' or 'transaction.'"
-      );
-    }
-
     let isADR36WithString: boolean;
     [data, isADR36WithString] = this.getDataForADR36(data);
     const signDoc = this.getADR36SignDoc(signer, data);
@@ -282,6 +308,27 @@ export class Keplr implements IKeplr {
     const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
+  }
+
+  async experimentalSignEIP712CosmosTx_v0(
+    chainId: string,
+    signer: string,
+    eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
+  ): Promise<AminoSignResponse> {
+    const msg = new RequestSignEIP712CosmosTxMsg_v0(
+      chainId,
+      signer,
+      eip712,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    );
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   protected getDataForADR36(data: string | Uint8Array): [string, boolean] {

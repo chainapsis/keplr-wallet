@@ -13,6 +13,7 @@ import {
   CosmosQueries,
   CosmwasmAccount,
   CosmwasmQueries,
+  OsmosisQueries,
   DeferInitialQueryController,
   getKeplrFromWindow,
   IBCChannelStore,
@@ -32,6 +33,7 @@ import {
 import {
   KeplrETCQueries,
   GravityBridgeCurrencyRegsitrar,
+  AxelarEVMBridgeCurrencyRegistrar,
 } from "@keplr-wallet/stores-etc";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
@@ -63,7 +65,13 @@ export class RootStore {
   public readonly chainSuggestStore: ChainSuggestStore;
 
   public readonly queriesStore: QueriesStore<
-    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
+    [
+      CosmosQueries,
+      CosmwasmQueries,
+      SecretQueries,
+      OsmosisQueries,
+      KeplrETCQueries
+    ]
   >;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
@@ -73,6 +81,7 @@ export class RootStore {
 
   protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
   protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -157,6 +166,7 @@ export class RootStore {
       SecretQueries.use({
         apiGetter: getKeplrFromWindow,
       }),
+      OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
       })
@@ -277,11 +287,11 @@ export class RootStore {
             return {
               send: {
                 secret20: {
-                  gas: 50000,
+                  gas: 175000,
                 },
               },
               createSecret20ViewingKey: {
-                gas: 50000,
+                gas: 175000,
               },
             };
           }
@@ -340,6 +350,12 @@ export class RootStore {
       new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore
+    );
+    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>(
+      new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
+      this.chainStore,
+      this.queriesStore,
+      "ethereum"
     );
 
     this.analyticsStore = new AnalyticsStore(

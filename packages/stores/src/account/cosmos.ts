@@ -7,15 +7,15 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { DenomHelper, escapeHTML } from "@keplr-wallet/common";
+import { DenomHelper, escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import {
   AuthInfo,
-  TxRaw,
-  TxBody,
   Fee,
   SignerInfo,
+  TxBody,
+  TxRaw,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
@@ -23,9 +23,9 @@ import { Coin } from "@keplr-wallet/proto-types/cosmos/base/v1beta1/coin";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import {
+  MsgBeginRedelegate,
   MsgDelegate,
   MsgUndelegate,
-  MsgBeginRedelegate,
 } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/distribution/v1beta1/tx";
 import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
@@ -34,18 +34,19 @@ import {
   BaseAccount,
   Bech32Address,
   ChainIdHelper,
+  EthermintChainIdHelper,
   TendermintTxTracer,
 } from "@keplr-wallet/cosmos";
 import { BondStatus } from "../query/cosmos/staking/types";
-import { QueriesSetBase, IQueriesStore, CosmosQueries } from "../query";
+import { CosmosQueries, IQueriesStore, QueriesSetBase } from "../query";
 import { DeepPartial, DeepReadonly } from "utility-types";
 import { ChainGetter } from "../common";
 import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
-import { isAddress } from "@ethersproject/address";
 import { Buffer } from "buffer/";
 import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
 import { txEventsWithPreOnFulfill } from "./utils";
+import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -179,23 +180,6 @@ export class CosmosAccountImpl {
   ) {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
-    const hexAdjustedRecipient = (recipient: string) => {
-      const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
-        .bech32PrefixAccAddr;
-      if (this.hasEthereumAddress && recipient.startsWith("0x")) {
-        // Validate hex address
-        if (!isAddress(recipient)) {
-          throw new Error("Invalid hex address");
-        }
-        const buf = Buffer.from(
-          recipient.replace("0x", "").toLowerCase(),
-          "hex"
-        );
-        return new Bech32Address(buf).toBech32(bech32prefix);
-      }
-      return recipient;
-    };
-
     if (denomHelper.type === "native") {
       const actualAmount = (() => {
         let dec = new Dec(amount);
@@ -203,7 +187,6 @@ export class CosmosAccountImpl {
         return dec.truncate().toString();
       })();
 
-      recipient = hexAdjustedRecipient(recipient);
       Bech32Address.validate(
         recipient,
         this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
@@ -237,6 +220,17 @@ export class CosmosAccountImpl {
               }).finish(),
             },
           ],
+          rlpTypes: {
+            MsgValue: [
+              { name: "from_address", type: "string" },
+              { name: "to_address", type: "string" },
+              { name: "amount", type: "TypeAmount[]" },
+            ],
+            TypeAmount: [
+              { name: "denom", type: "string" },
+              { name: "amount", type: "string" },
+            ],
+          },
         },
         (tx) => {
           if (tx.code == null || tx.code === 0) {
@@ -277,23 +271,6 @@ export class CosmosAccountImpl {
   ): Promise<boolean> {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
-    const hexAdjustedRecipient = (recipient: string) => {
-      const bech32prefix = this.chainGetter.getChain(this.chainId).bech32Config
-        .bech32PrefixAccAddr;
-      if (this.hasEthereumAddress && recipient.startsWith("0x")) {
-        // Validate hex address
-        if (!isAddress(recipient)) {
-          throw new Error("Invalid hex address");
-        }
-        const buf = Buffer.from(
-          recipient.replace("0x", "").toLowerCase(),
-          "hex"
-        );
-        return new Bech32Address(buf).toBech32(bech32prefix);
-      }
-      return recipient;
-    };
-
     switch (denomHelper.type) {
       case "native":
         const actualAmount = (() => {
@@ -306,7 +283,7 @@ export class CosmosAccountImpl {
           type: this.msgOpts.send.native.type,
           value: {
             from_address: this.base.bech32Address,
-            to_address: hexAdjustedRecipient(recipient),
+            to_address: recipient,
             amount: [
               {
                 denom: currency.coinMinimalDenom,
@@ -504,43 +481,145 @@ export class CosmosAccountImpl {
       true
     );
 
-    const useEthereumSign = this.chainGetter
-      .getChain(this.chainId)
-      .features?.includes("eth-key-sign");
+    const useEthereumSign =
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-key-sign") === true;
+
+    const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+
+    if (eip712Signing && !msgs.rlpTypes) {
+      throw new Error(
+        "RLP types information is needed for signing tx for ethermint chain with ledger"
+      );
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
-    const signDoc = makeSignDoc(
-      aminoMsgs,
-      fee,
-      this.chainId,
-      escapeHTML(memo),
-      account.getAccountNumber().toString(),
-      account.getSequence().toString()
+    const signDoc = sortObjectByKey(
+      makeSignDoc(
+        aminoMsgs,
+        fee,
+        this.chainId,
+        escapeHTML(memo),
+        account.getAccountNumber().toString(),
+        account.getSequence().toString()
+      )
     );
 
-    const signResponse = await keplr.signAmino(
-      this.chainId,
-      this.base.bech32Address,
-      signDoc,
-      signOptions
-    );
+    const signResponse = await (async () => {
+      if (!eip712Signing) {
+        return await keplr.signAmino(
+          this.chainId,
+          this.base.bech32Address,
+          signDoc,
+          signOptions
+        );
+      } else {
+        const altSignDoc = {
+          ...signDoc,
+        };
+
+        // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
+        //      That means this part is not standard.
+        (altSignDoc as any).fee["feePayer"] = this.base.bech32Address;
+
+        return await keplr.experimentalSignEIP712CosmosTx_v0(
+          this.chainId,
+          this.base.bech32Address,
+          {
+            types: {
+              EIP712Domain: [
+                { name: "name", type: "string" },
+                { name: "version", type: "string" },
+                { name: "chainId", type: "uint256" },
+                // XXX: Maybe, non-standard format?
+                { name: "verifyingContract", type: "string" },
+                // XXX: Maybe, non-standard format?
+                { name: "salt", type: "string" },
+              ],
+              Tx: [
+                { name: "account_number", type: "string" },
+                { name: "chain_id", type: "string" },
+                { name: "fee", type: "Fee" },
+                { name: "memo", type: "string" },
+                { name: "msgs", type: "Msg[]" },
+                { name: "sequence", type: "string" },
+              ],
+              Fee: [
+                { name: "feePayer", type: "string" },
+                { name: "amount", type: "Coin[]" },
+                { name: "gas", type: "string" },
+              ],
+              Coin: [
+                { name: "denom", type: "string" },
+                { name: "amount", type: "string" },
+              ],
+              Msg: [
+                { name: "type", type: "string" },
+                { name: "value", type: "MsgValue" },
+              ],
+              ...msgs.rlpTypes,
+            },
+            domain: {
+              name: "Cosmos Web3",
+              version: "1.0.0",
+              chainId: EthermintChainIdHelper.parse(
+                this.chainId
+              ).ethChainId.toString(),
+              verifyingContract: "cosmos",
+              salt: "0",
+            },
+            primaryType: "Tx",
+          },
+          altSignDoc,
+          signOptions
+        );
+      }
+    })();
 
     const signedTx = TxRaw.encode({
       bodyBytes: TxBody.encode(
         TxBody.fromPartial({
           messages: protoMsgs,
           memo: signResponse.signed.memo,
+          extensionOptions: eip712Signing
+            ? [
+                {
+                  typeUrl: "/ethermint.types.v1.ExtensionOptionsWeb3Tx",
+                  value: ExtensionOptionsWeb3Tx.encode(
+                    ExtensionOptionsWeb3Tx.fromPartial({
+                      typedDataChainId: EthermintChainIdHelper.parse(
+                        this.chainId
+                      ).ethChainId.toString(),
+                      feePayer: this.base.bech32Address,
+                      feePayerSig: Buffer.from(
+                        signResponse.signature.signature,
+                        "base64"
+                      ),
+                    })
+                  ).finish(),
+                },
+              ]
+            : undefined,
         })
       ).finish(),
       authInfoBytes: AuthInfo.encode({
         signerInfos: [
           {
             publicKey: {
-              typeUrl: useEthereumSign
-                ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
-                : "/cosmos.crypto.secp256k1.PubKey",
+              typeUrl: (() => {
+                if (!useEthereumSign) {
+                  return "/cosmos.crypto.secp256k1.PubKey";
+                }
+
+                if (this.chainId.startsWith("injective")) {
+                  return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+                }
+
+                return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+              })(),
               value: PubKey.encode({
                 key: Buffer.from(
                   signResponse.signature.pub_key.value,
@@ -560,9 +639,15 @@ export class CosmosAccountImpl {
         fee: Fee.fromPartial({
           amount: signResponse.signed.fee.amount as Coin[],
           gasLimit: signResponse.signed.fee.gas,
+          payer: eip712Signing
+            ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
+              (signResponse.signed as any).fee["feePayer"]
+            : undefined,
         }),
       }).finish(),
-      signatures: [Buffer.from(signResponse.signature.signature, "base64")],
+      signatures: !eip712Signing
+        ? [Buffer.from(signResponse.signature.signature, "base64")]
+        : [new Uint8Array(0)],
     }).finish();
 
     return {
@@ -759,7 +844,7 @@ export class CosmosAccountImpl {
             throw new Error("Gas estimated is zero or negative");
           }
 
-          const gasAdjusted = feeOptions.gasAdjustment * gasUsed;
+          const gasAdjusted = Math.floor(feeOptions.gasAdjustment * gasUsed);
 
           return sendWithGasPrice(
             {
@@ -912,6 +997,25 @@ export class CosmosAccountImpl {
               ).finish(),
             },
           ],
+          rlpTypes: {
+            MsgValue: [
+              { name: "source_port", type: "string" },
+              { name: "source_channel", type: "string" },
+              { name: "token", type: "TypeToken" },
+              { name: "sender", type: "string" },
+              { name: "receiver", type: "string" },
+              { name: "timeout_height", type: "TypeTimeoutHeight" },
+              { name: "timeout_timestamp", type: "uint64" },
+            ],
+            TypeToken: [
+              { name: "denom", type: "string" },
+              { name: "amount", type: "string" },
+            ],
+            TypeTimeoutHeight: [
+              { name: "revision_number", type: "uint64" },
+              { name: "revision_height", type: "uint64" },
+            ],
+          },
         };
       },
       (tx) => {
@@ -1108,6 +1212,17 @@ export class CosmosAccountImpl {
             }).finish(),
           },
         ],
+        rlpTypes: {
+          MsgValue: [
+            { name: "delegator_address", type: "string" },
+            { name: "validator_address", type: "string" },
+            { name: "amount", type: "TypeAmount" },
+          ],
+          TypeAmount: [
+            { name: "denom", type: "string" },
+            { name: "amount", type: "string" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1239,6 +1354,17 @@ export class CosmosAccountImpl {
             }).finish(),
           },
         ],
+        rlpTypes: {
+          MsgValue: [
+            { name: "delegator_address", type: "string" },
+            { name: "validator_address", type: "string" },
+            { name: "amount", type: "TypeAmount" },
+          ],
+          TypeAmount: [
+            { name: "denom", type: "string" },
+            { name: "amount", type: "string" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1387,6 +1513,18 @@ export class CosmosAccountImpl {
             }).finish(),
           },
         ],
+        rlpTypes: {
+          MsgValue: [
+            { name: "delegator_address", type: "string" },
+            { name: "validator_src_address", type: "string" },
+            { name: "validator_dst_address", type: "string" },
+            { name: "amount", type: "TypeAmount" },
+          ],
+          TypeAmount: [
+            { name: "denom", type: "string" },
+            { name: "amount", type: "string" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1517,6 +1655,12 @@ export class CosmosAccountImpl {
             }).finish(),
           };
         }),
+        rlpTypes: {
+          MsgValue: [
+            { name: "delegator_address", type: "string" },
+            { name: "validator_address", type: "string" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1642,6 +1786,13 @@ export class CosmosAccountImpl {
             }).finish(),
           },
         ],
+        rlpTypes: {
+          MsgValue: [
+            { name: "proposal_id", type: "uint64" },
+            { name: "voter", type: "string" },
+            { name: "option", type: "int32" },
+          ],
+        },
       },
       (tx) => {
         if (tx.code == null || tx.code === 0) {
@@ -1757,13 +1908,5 @@ export class CosmosAccountImpl {
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
-  }
-
-  protected get hasEthereumAddress(): boolean {
-    return (
-      this.chainGetter
-        .getChain(this.chainId)
-        .features?.includes("eth-address-gen") ?? false
-    );
   }
 }

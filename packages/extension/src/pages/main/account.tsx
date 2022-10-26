@@ -66,6 +66,7 @@ export const AccountView: FunctionComponent = observer(() => {
               accountInfo.rejectionReason.module === "keyring" &&
               accountInfo.rejectionReason.code === 152
             ) {
+              // Return unsupported device message
               return "Ledger is not supported for this chain";
             }
 

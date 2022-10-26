@@ -118,6 +118,12 @@
   "setting.endpoints.button.reset": "Reset",
   "setting.endpoints.button.confirm": "Confirm",
 
+  "setting.autolock": "Auto-Lock Timer",
+  "setting.autolock.duration": "Set the duration (unit: minutes)",
+  "setting.autolock.description": "With Auto-Lock enabled, Keplr will lock when the device is in sleep mode",
+  "setting.autolock.error.required": "Duration is required",
+  "setting.autolock.error.out-of-range": "It cannot be less than 0 or greater than 4320(3days)",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",
@@ -271,7 +277,7 @@
   "ledger.step1": "Step 1",
   "ledger.step1.paragraph": "Connect and unlock your Ledger.",
   "ledger.step2": "Step 2",
-  "ledger.step2.paragraph": "Open the Cosmos app on your Ledger device.",
+  "ledger.step2.paragraph": "Open the {ledgerApp} app on your Ledger device.",
   "ledger.option.webhid.checkbox": "Use alternative USB connection method(HID)",
   "ledger.option.webhid.warning": "Please copy and paste the following link {link} on your browser and enable ‘experimental web platform features’",
   "ledger.option.webhid.link.copied": "Link copied!",
@@ -295,8 +301,9 @@
   "input.amount.error.is-negative": "Amount should be positive",
   "input.amount.error.insufficient": "Insufficient asset",
   "input.fee.error.insufficient": "Insufficient available balance for transaction fee",
-  "input.fee.toggle.set-gas": "Set Gas",
+  "input.fee.toggle.set-gas": "Advanced",
   "input.fee.toggle.set-gas.close": "Close",
+  "input.fee.selector.fee-currency": "Fee Token",
 
   "confirm.yes": "Yes",
   "confirm.no": "No",

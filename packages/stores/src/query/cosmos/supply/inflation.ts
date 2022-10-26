@@ -138,10 +138,7 @@ export class ObservableQueryInflation {
         return new IntPretty(new Int(0)).ready(false);
       }
 
-      if (
-        this._queryPool.response &&
-        this._querySupplyTotal.getQueryStakeDenom().response
-      ) {
+      if (this._queryPool.response) {
         const bondedToken = new Dec(
           this._queryPool.response.data.pool.bonded_tokens
         );
@@ -152,8 +149,25 @@ export class ObservableQueryInflation {
             return DecUtils.getPrecisionDec(8 + 6).toString();
           }
 
-          return this._querySupplyTotal.getQueryStakeDenom().response!.data
-            .amount.amount;
+          if (chainInfo.chainId.startsWith("umee")) {
+            const supplyTotalRes = this._querySupplyTotal.getQueryDenomByQueryString(
+              chainInfo.stakeCurrency.coinMinimalDenom
+            ).response;
+
+            if (!supplyTotalRes) {
+              return "0";
+            } else {
+              return supplyTotalRes.data.amount.amount;
+            }
+          }
+
+          const supplyTotalRes = this._querySupplyTotal.getQueryStakeDenom()
+            .response;
+          if (!supplyTotalRes) {
+            return "0";
+          } else {
+            return supplyTotalRes.data.amount.amount;
+          }
         })();
         const total = new Dec(totalStr);
         if (total.gt(new Dec(0))) {

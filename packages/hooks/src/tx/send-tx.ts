@@ -1,16 +1,20 @@
-import { ChainGetter, IQueriesStore } from "@keplr-wallet/stores";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { useFeeConfig, useMemoConfig, useRecipientConfig } from "./index";
 import { useSendGasConfig } from "./send-gas";
 import { useAmountConfig } from "./amount";
 import { AccountStore } from "./send-types";
+import { QueriesStore } from "./internal";
 
 export const useSendTxConfig = (
   chainGetter: ChainGetter,
-  queriesStore: IQueriesStore,
+  queriesStore: QueriesStore,
   accountStore: AccountStore,
   chainId: string,
   sender: string,
-  ensEndpoint?: string
+  options: {
+    ensEndpoint?: string;
+    allowHexAddressOnEthermint?: boolean;
+  } = {}
 ) => {
   const amountConfig = useAmountConfig(
     chainGetter,
@@ -38,7 +42,7 @@ export const useSendTxConfig = (
   // set the fee config of the amount config after initing the gas/fee configs.
   amountConfig.setFeeConfig(feeConfig);
 
-  const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
+  const recipientConfig = useRecipientConfig(chainGetter, chainId, options);
 
   return {
     amountConfig,

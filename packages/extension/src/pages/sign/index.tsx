@@ -15,11 +15,11 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useHistory } from "react-router";
 import { observer } from "mobx-react-lite";
 import {
-  useInteractionInfo,
-  useSignDocHelper,
   useFeeConfig,
+  useInteractionInfo,
   useMemoConfig,
   useSignDocAmountConfig,
+  useSignDocHelper,
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { ADR36SignDocDetailsTab } from "./adr-36";
@@ -148,13 +148,18 @@ export const SignPage: FunctionComponent = observer(() => {
     signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo ===
       true || isProcessing;
 
-  const interactionInfo = useInteractionInfo(() => {
-    if (needSetIsProcessing) {
-      setIsProcessing(true);
-    }
+  const interactionInfo = useInteractionInfo(
+    () => {
+      if (needSetIsProcessing) {
+        setIsProcessing(true);
+      }
 
-    signInteractionStore.rejectAll();
-  });
+      signInteractionStore.rejectAll();
+    },
+    {
+      enableScroll: true,
+    }
+  );
 
   const currentChainId = chainStore.current.chainId;
   const currentChainIdentifier = useMemo(
@@ -227,7 +232,8 @@ export const SignPage: FunctionComponent = observer(() => {
             }
           : undefined
       }
-      style={{ background: "white" }}
+      style={{ background: "white", height: "auto", minHeight: "100%" }}
+      innerStyle={{ display: "flex", flexDirection: "column" }}
     >
       {
         /*
@@ -292,11 +298,13 @@ export const SignPage: FunctionComponent = observer(() => {
                     }
                     preferNoSetFee={preferNoSetFee}
                     preferNoSetMemo={preferNoSetMemo}
+                    isNeedLedgerEthBlindSigning={
+                      ethSignType === EthSignType.EIP712
+                    }
                   />
                 )
               ) : null}
             </div>
-            <div style={{ flex: 1 }} />
             <div className={style.buttons}>
               {keyRingStore.keyRingType === "ledger" &&
               signInteractionStore.isLoading ? (

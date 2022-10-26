@@ -5,12 +5,14 @@
 }
 
 .container {
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .msg-container {
+  max-height: 140px;
+
   overflow: auto;
   flex: 1;
 
@@ -50,5 +52,28 @@
         color: gray;
       }
     }
+  }
+}
+
+.eth-ledger-blind-signing-warning {
+  padding: 20px 0;
+  background: #f7f9fc;
+  border-radius: 6px;
+
+  .title {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #323c4a;
+    margin-bottom: 10px;
+    margin-left: 28px;
+  }
+
+  .list {
+    font-size: 14px;
+    line-height: 20px;
+    color: #566172;
+    padding-inline-start: 36px;
+    margin-bottom: 0;
   }
 }

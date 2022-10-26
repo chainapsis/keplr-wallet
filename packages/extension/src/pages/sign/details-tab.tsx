@@ -31,6 +31,8 @@ export const DetailsTab: FunctionComponent<{
 
   preferNoSetFee: boolean;
   preferNoSetMemo: boolean;
+
+  isNeedLedgerEthBlindSigning: boolean;
 }> = observer(
   ({
     signDocHelper,
@@ -40,6 +42,7 @@ export const DetailsTab: FunctionComponent<{
     isInternal,
     preferNoSetFee,
     preferNoSetMemo,
+    isNeedLedgerEthBlindSigning,
   }) => {
     const { chainStore, priceStore, accountStore } = useStore();
     const intl = useIntl();
@@ -108,6 +111,7 @@ export const DetailsTab: FunctionComponent<{
         <div id="signing-messages" className={styleDetailsTab.msgContainer}>
           {renderedMsgs}
         </div>
+        <div style={{ flex: 1 }} />
         {!preferNoSetMemo ? (
           <MemoInput
             memoConfig={memoConfig}
@@ -135,6 +139,7 @@ export const DetailsTab: FunctionComponent<{
             priceStore={priceStore}
             label={intl.formatMessage({ id: "sign.info.fee" })}
             gasLabel={intl.formatMessage({ id: "sign.info.gas" })}
+            showFeeCurrencySelectorUnderSetGas={true}
           />
         ) : (
           <React.Fragment>
@@ -211,6 +216,17 @@ export const DetailsTab: FunctionComponent<{
             }
           </React.Fragment>
         )}
+        {isNeedLedgerEthBlindSigning ? (
+          <div className={styleDetailsTab.ethLedgerBlindSigningWarning}>
+            <div className={styleDetailsTab.title}>
+              Before you click ‘Approve’
+            </div>
+            <ul className={styleDetailsTab.list}>
+              <li>Connect your Ledger device and select the Ethereum app</li>
+              <li>Enable ‘blind signing’ on your Ledger device</li>
+            </ul>
+          </div>
+        ) : null}
       </div>
     );
   }

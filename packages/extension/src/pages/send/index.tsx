@@ -71,7 +71,10 @@ export const SendPage: FunctionComponent = observer(() => {
     accountStore,
     current.chainId,
     accountInfo.bech32Address,
-    EthereumEndpoint
+    {
+      ensEndpoint: EthereumEndpoint,
+      allowHexAddressOnEthermint: true,
+    }
   );
 
   const gasSimulatorKey = useMemo(() => {
@@ -202,6 +205,7 @@ export const SendPage: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName
       canChangeChainInfo={false}
+      style={{ height: "auto", minHeight: "100%" }}
       onBackButton={
         isDetachedPage
           ? undefined
@@ -364,6 +368,9 @@ export const SendPage: FunctionComponent = observer(() => {
             block
             data-loading={accountInfo.isSendingMsg === "send"}
             disabled={!accountInfo.isReadyToSendMsgs || !txStateIsValid}
+            style={{
+              marginTop: "12px",
+            }}
           >
             {intl.formatMessage({
               id: "send.button.send",

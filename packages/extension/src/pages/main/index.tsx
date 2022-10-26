@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, { FunctionComponent, useEffect, useRef } from "react";
 
 import { HeaderLayout } from "../../layouts";
 
@@ -25,6 +25,7 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { VestingInfo } from "./vesting-info";
+import { LedgerAppModal } from "./ledger-app-modal";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -75,7 +76,7 @@ export const MainPage: FunctionComponent = observer(() => {
     .get(chainStore.current.chainId)
     .cosmos.queryAccount.getQueryBech32Address(accountInfo.bech32Address);
   // Show the spendable balances if the account is vesting account.
-  const showVestingInfo = useMemo(() => {
+  const showVestingInfo = (() => {
     // If the chain can't query /cosmos/bank/v1beta1/spendable_balances/{account},
     // no need to show the vesting info because its query always fails.
     if (
@@ -92,12 +93,7 @@ export const MainPage: FunctionComponent = observer(() => {
       queryAccount.response &&
       queryAccount.isVestingAccount
     );
-  }, [
-    current.features,
-    queryAccount.error,
-    queryAccount.isVestingAccount,
-    queryAccount.response,
-  ]);
+  })();
 
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
@@ -145,6 +141,7 @@ export const MainPage: FunctionComponent = observer(() => {
       }
     >
       <BIP44SelectModal />
+      <LedgerAppModal />
       <Card className={classnames(style.card, "shadow")}>
         <CardBody>
           <div className={style.containerAccountInner}>

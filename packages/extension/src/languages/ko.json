@@ -110,6 +110,12 @@
   "setting.endpoints.button.reset": "초기화",
   "setting.endpoints.button.confirm": "확인",
 
+  "setting.autolock": "자동 잠금 타이머",
+  "setting.autolock.duration": "잠금 주기 (단위: 분)",
+  "setting.autolock.description": "자동 잠금 기능이 활성화 된 경우 기기가 잠금 상태가 되면 설정된 시간과 관계없이 자동으로 지갑을 잠급니다",
+  "setting.autolock.error.required": "잠금 주기를 입력해주세요",
+  "setting.autolock.error.out-of-range": "잠금 주기는 0분 보다 작거나 4320분(3일)보다 클 수 없습니다",
+
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
   "register.button.back": "뒤로",
@@ -252,7 +258,7 @@
   "ledger.step1": "1 단계",
   "ledger.step1.paragraph": "렛저를 연결하고 잠금을 해제하세요",
   "ledger.step2": "2 단계",
-  "ledger.step2.paragraph": "렛저에서 Cosmos 앱을 실행하세요",
+  "ledger.step2.paragraph": "렛저에서 {ledgerApp} 앱을 실행하세요",
   "ledger.option.webhid.checkbox": "WebUSB 대신 WebHID를 사용합니다",
   "ledger.option.webhid.warning": "이 링크 {link}를 복사하고 브라우저 주소 줄에 붙여넣으세요. 그리고 ‘experimental web platform features’ 플래그를 활성화하세요.",
   "ledger.option.webhid.link.copied": "링크가 복사되었습니다",
@@ -275,8 +281,9 @@
   "input.amount.error.is-negative": "양수여야 합니다",
   "input.amount.error.insufficient": "자산이 부족합니다",
   "input.fee.error.insufficient": "수수료를 낼 충분한 잔고가 없습니다",
-  "input.fee.toggle.set-gas": "가스 설정",
+  "input.fee.toggle.set-gas": "고급",
   "input.fee.toggle.set-gas.close": "닫기",
+  "input.fee.selector.fee-currency": "수수료 토큰",
 
   "confirm.yes": "예",
   "confirm.no": "아니요",

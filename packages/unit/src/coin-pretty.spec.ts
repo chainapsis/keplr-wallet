@@ -515,4 +515,80 @@ describe("Test CoinPretty", () => {
       expect(test.pre(test.base).toString()).toBe(test.res);
     }
   });
+
+  it("Test CoinPretty's toString() with hideIBCMetadata", () => {
+    const tests: {
+      base: CoinPretty;
+      pre: (pretty: CoinPretty) => CoinPretty;
+      res: string;
+    }[] = [
+      {
+        base: new CoinPretty(
+          {
+            coinDenom: "ATOM",
+            coinMinimalDenom: "uatom",
+            coinDecimals: 6,
+          },
+          new Int("12345600")
+        ),
+        pre: (pretty) => pretty.hideIBCMetadata(true),
+        res: "12.345600 ATOM",
+      },
+      {
+        base: new CoinPretty(
+          {
+            originCurrency: {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            coinDenom: "ATOM (Cosmos Hun/channel-0)",
+            coinMinimalDenom: "ibc/aaaa",
+            coinDecimals: 6,
+          },
+          new Int("12345600")
+        ),
+        pre: (pretty) => pretty,
+        res: "12.345600 ATOM (Cosmos Hun/channel-0)",
+      },
+      {
+        base: new CoinPretty(
+          {
+            originCurrency: {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            coinDenom: "ATOM (Cosmos Hun/channel-0)",
+            coinMinimalDenom: "ibc/aaaa",
+            coinDecimals: 6,
+          },
+          new Int("12345600")
+        ),
+        pre: (pretty) => pretty.hideIBCMetadata(true),
+        res: "12.345600 ATOM",
+      },
+      {
+        base: new CoinPretty(
+          {
+            originCurrency: {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            coinDenom: "ATOM (Cosmos Hun/channel-0)",
+            coinMinimalDenom: "ibc/aaaa",
+            coinDecimals: 6,
+          },
+          new Int("12345600")
+        ),
+        pre: (pretty) => pretty.hideIBCMetadata(true).hideDenom(true),
+        res: "12.345600",
+      },
+    ];
+
+    for (const test of tests) {
+      expect(test.pre(test.base).toString()).toBe(test.res);
+    }
+  });
 });

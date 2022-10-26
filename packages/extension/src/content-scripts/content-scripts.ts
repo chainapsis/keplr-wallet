@@ -1,4 +1,4 @@
-import { WEBPAGE_PORT } from "@keplr-wallet/router";
+import { WEBPAGE_PORT, Message, BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   ContentScriptEnv,
   ContentScriptGuards,
@@ -26,3 +26,43 @@ scriptElement.src = browser.runtime.getURL("injectedScript.bundle.js");
 scriptElement.type = "text/javascript";
 container.insertBefore(scriptElement, container.children[0]);
 scriptElement.remove();
+
+export class CheckURLIsPhishingMsg extends Message<boolean> {
+  public static type() {
+    return "check-url-is-phishing";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // Will be checked in background process
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "phishing-list";
+  }
+
+  type(): string {
+    return CheckURLIsPhishingMsg.type();
+  }
+}
+
+new InExtensionMessageRequester()
+  .sendMessage(BACKGROUND_PORT, new CheckURLIsPhishingMsg())
+  .then((r) => {
+    if (r) {
+      const origin = window.location.href;
+      window.location.replace(
+        browser.runtime.getURL(`/blocklist.html?origin=${origin}`)
+      );
+    }
+  })
+  .catch((e) => {
+    console.log("Failed to check domain's reliability", e);
+  });

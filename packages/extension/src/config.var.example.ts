@@ -143,6 +143,11 @@ export const TGRADE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const TGRADE_REST_ENDPOINT = "";
 export const TGRADE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
 
+export const STRIDE_RPC_ENDPOINT = "";
+export const STRIDE_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
+export const STRIDE_REST_ENDPOINT = "";
+export const STRIDE_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
+
 export const EVMOS_RPC_ENDPOINT = "";
 export const EVMOS_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const EVMOS_REST_ENDPOINT = "";
