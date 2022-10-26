@@ -69,28 +69,28 @@ export function App() {
   }, []);
 
   return (
-      <Provider>
-        <DemoModeHeader />
-        <StateRenderer />
-        <Modals />
-        {updating ? (
-          <Loader
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 999,
-              position: "absolute",
-              backgroundColor: "#100F1D",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
-            loadingText="Updating app bundle…"
-          />
-        ) : null}
-      </Provider>
+    <Provider>
+      <DemoModeHeader />
+      <StateRenderer />
+      <Modals />
+      {updating ? (
+        <Loader
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 999,
+            position: "absolute",
+            backgroundColor: "#100F1D",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+          loadingText="Updating app bundle…"
+        />
+      ) : null}
+    </Provider>
   );
 }
 
