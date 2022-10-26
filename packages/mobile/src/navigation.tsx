@@ -119,6 +119,7 @@ import {
   JunoswapWebpageScreen,
   DaoDaoWebpageScreen,
   RegenWebpageScreen,
+  StrideWebpageScreen,
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
@@ -264,6 +265,9 @@ const {
       upperScreenName: "Web",
     },
     "Web.Regen": {
+      upperScreenName: "Web",
+    },
+    "Web.Stride": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -873,6 +877,7 @@ export const WebNavigation: FunctionComponent = () => {
       <Stack.Screen name="Web.Junoswap" component={JunoswapWebpageScreen} />
       <Stack.Screen name="Web.DaoDao" component={DaoDaoWebpageScreen} />
       <Stack.Screen name="Web.Regen" component={RegenWebpageScreen} />
+      <Stack.Screen name="Web.Stride" component={StrideWebpageScreen} />
     </Stack.Navigator>
   );
 };

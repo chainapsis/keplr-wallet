@@ -110,6 +110,14 @@ export const WebScreen: FunctionComponent = () => {
             />
       */}
       <WebpageImageButton
+        name="Stride"
+        source={require("../../assets/image/webpage/stride.png")}
+        overlayStyle={style.flatten(["opacity-60"])}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.Stride", {});
+        }}
+      />
+      <WebpageImageButton
         overrideInner={
           <View style={style.flatten(["flex-1", "items-center"])}>
             <Text

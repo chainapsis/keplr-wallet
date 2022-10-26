@@ -202,59 +202,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     hideInUI: true,
   },
   {
-    rpc: "https://rpc-crypto-org.keplr.app",
-    rest: "https://lcd-crypto-org.keplr.app",
-    chainId: "crypto-org-chain-mainnet-1",
-    chainName: "Crypto.org",
-    stakeCurrency: {
-      coinDenom: "CRO",
-      coinMinimalDenom: "basecro",
-      coinDecimals: 8,
-      coinGeckoId: "crypto-com-chain",
-      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
-    },
-    bip44: {
-      coinType: 394,
-    },
-    bech32Config: {
-      bech32PrefixAccAddr: "cro",
-      bech32PrefixAccPub: "cropub",
-      bech32PrefixValAddr: "crocncl",
-      bech32PrefixValPub: "crocnclpub",
-      bech32PrefixConsAddr: "crocnclcons",
-      bech32PrefixConsPub: "crocnclconspub",
-    },
-    currencies: [
-      {
-        coinDenom: "CRO",
-        coinMinimalDenom: "basecro",
-        coinDecimals: 8,
-        coinGeckoId: "crypto-com-chain",
-        coinImageUrl:
-          "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "CRO",
-        coinMinimalDenom: "basecro",
-        coinDecimals: 8,
-        coinGeckoId: "crypto-com-chain",
-        coinImageUrl:
-          "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
-      },
-    ],
-    gasPriceStep: {
-      low: 0.025,
-      average: 0.03,
-      high: 0.04,
-    },
-    chainSymbolImageUrl:
-      "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
-    features: ["ibc-transfer"],
-    hideInUI: true,
-  },
-  {
     rpc: "https://rpc-iov.keplr.app",
     rest: "https://lcd-iov.keplr.app",
     chainId: "iov-mainnet-ibc",
@@ -1861,6 +1808,121 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
     hideInUI: true,
+  },
+  {
+    rpc: "https://rpc-crypto-org.keplr.app",
+    rest: "https://lcd-crypto-org.keplr.app",
+    chainId: "crypto-org-chain-mainnet-1",
+    chainName: "Crypto.org",
+    stakeCurrency: {
+      coinDenom: "CRO",
+      coinMinimalDenom: "basecro",
+      coinDecimals: 8,
+      coinGeckoId: "crypto-com-chain",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
+    },
+    bip44: {
+      coinType: 394,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "cro",
+      bech32PrefixAccPub: "cropub",
+      bech32PrefixValAddr: "crocncl",
+      bech32PrefixValPub: "crocnclpub",
+      bech32PrefixConsAddr: "crocnclcons",
+      bech32PrefixConsPub: "crocnclconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "CRO",
+        coinMinimalDenom: "basecro",
+        coinDecimals: 8,
+        coinGeckoId: "crypto-com-chain",
+        coinImageUrl:
+          "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "CRO",
+        coinMinimalDenom: "basecro",
+        coinDecimals: 8,
+        coinGeckoId: "crypto-com-chain",
+        coinImageUrl:
+          "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
+      },
+    ],
+    gasPriceStep: {
+      low: 0.025,
+      average: 0.03,
+      high: 0.04,
+    },
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
+    features: ["ibc-transfer"],
+  },
+  {
+    rpc: "https://rpc-stride.keplr.app",
+    rest: "https://lcd-stride.keplr.app",
+    chainId: "stride-1",
+    chainName: "Stride",
+    stakeCurrency: {
+      coinDenom: "STRD",
+      coinMinimalDenom: "ustrd",
+      coinDecimals: 6,
+      coinGeckoId: "stride",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stride.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("stride"),
+    currencies: [
+      {
+        coinDenom: "STRD",
+        coinMinimalDenom: "ustrd",
+        coinDecimals: 6,
+        coinGeckoId: "stride",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stride.png",
+      },
+      {
+        coinDenom: "stATOM",
+        coinMinimalDenom: "stuatom",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stOSMO",
+        coinMinimalDenom: "stuosmo",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stJUNO",
+        coinMinimalDenom: "stujuno",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stSTARS",
+        coinMinimalDenom: "stustars",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STRD",
+        coinMinimalDenom: "ustrd",
+        coinDecimals: 6,
+        coinGeckoId: "stride",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/stride.png",
+      },
+    ],
+    gasPriceStep: {
+      low: 0,
+      average: 0,
+      high: 0.04,
+    },
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/stride.png",
+    features: ["ibc-transfer", "ibc-go"],
   },
 ];
 

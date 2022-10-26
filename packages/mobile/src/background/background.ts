@@ -32,6 +32,7 @@ init(
     "https://frontier.osmosis.zone",
     "https://daodao.zone",
     "https://app.regen.network",
+    "https://app.stride.zone",
   ],
   {
     rng: getRandomBytesAsync,
