@@ -81,6 +81,15 @@
     "react-router": "*",
     "rooks": "*",
     "secp256k1": "*",
-    "tiny-invariant": "*"
+    "tiny-invariant": "*",
+    "@babel/core": "*",
+    "@babel/generator": "*",
+    "@jest/create-cache-key-function": "*",
+    "metro-config": "*",
+    "@cosmjs/math": "*",
+    "@cosmjs/crypto": "*",
+    "cosmjs-types": "*",
+    "scrypt-js": "*",
+    "invariant": "*"
   }
 }

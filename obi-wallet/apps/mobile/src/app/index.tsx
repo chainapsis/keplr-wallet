@@ -26,14 +26,12 @@ import { SendScreen } from "./screens/send";
 import { settingsScreens } from "./screens/settings";
 import { SplashScreen } from "./screens/splash";
 import { WebViewScreen } from "./screens/web-view";
-import { WithSplashScreen } from "./splash-screen";
 import { useStore } from "./stores";
 
 export function App() {
   const [updating, setUpdating] = useState(false);
   const appState = useRef(AppState.currentState);
   const lastUpdate = useRef(0);
-  const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
     const listener = AppState.addEventListener(
@@ -70,13 +68,7 @@ export function App() {
     };
   }, []);
 
-  // Trigger Splash-Screen when App is ready
-  useEffect(() => {
-    setIsAppReady(true);
-  }, []);
-
   return (
-    <WithSplashScreen isAppReady={isAppReady}>
       <Provider>
         <DemoModeHeader />
         <StateRenderer />
@@ -99,7 +91,6 @@ export function App() {
           />
         ) : null}
       </Provider>
-    </WithSplashScreen>
   );
 }
 
