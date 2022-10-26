@@ -3,6 +3,7 @@ import { action, makeObservable, observable } from "mobx";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { TxChainSetter } from "./chain";
 import { useState } from "react";
+import { validateMnemonic } from "bip39";
 
 export class MemoConfig extends TxChainSetter implements IMemoConfig {
   @observable
@@ -23,6 +24,10 @@ export class MemoConfig extends TxChainSetter implements IMemoConfig {
   }
 
   get error(): Error | undefined {
+    // prevent simple inclusion of a valid mnemonic in the memo field
+    if (validateMnemonic(this._memo.trim().toLowerCase())) {
+      return Error("cannot use a valid mnemonic as a memo");
+    }
     return undefined;
   }
 }
