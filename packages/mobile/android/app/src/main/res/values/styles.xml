@@ -10,5 +10,6 @@
     <item name="android:windowBackground">@drawable/splashscreen</item>
     <item name="android:statusBarColor">@color/splashscreen_statusbar_color</item>
     <!-- Customize your splash screen theme here -->
+    <item name="android:windowBackground">#100F1E</item>
   </style>
 </resources>
