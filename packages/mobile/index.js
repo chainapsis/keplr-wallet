@@ -29,7 +29,5 @@ import "./init";
 // To prevent this, "require" is used.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const App = require("./src/app").App;
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const appName = require("./app.json").name;
 
-AppRegistry.registerComponent(appName, () => App);
+AppRegistry.registerComponent("main", () => App);
