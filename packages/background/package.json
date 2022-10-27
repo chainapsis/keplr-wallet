@@ -25,8 +25,11 @@
     "@fetchai/blst-ts": "^0.3.1"
   },
   "dependencies": {
-    "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@cosmjs/proto-signing": "^0.24.0-alpha.25",
+    "@apollo/client": "^3.6.9",
+    "eciesjs": "^0.3.15",
+    "@cosmjs/launchpad": "^0.27.1",
+    "@cosmjs/encoding": "^0.28.13",
+    "@cosmjs/proto-signing": "^0.28.13",
     "@ethersproject/bytes": "^5.5.0",
     "@ethersproject/keccak256": "^5.5.0",
     "@ethersproject/wallet": "^5.5.0",

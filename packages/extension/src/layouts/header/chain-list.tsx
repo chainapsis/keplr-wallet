@@ -1,19 +1,21 @@
-import React, { FunctionComponent } from "react";
-import classnames from "classnames";
-
-import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-
-import style from "./chain-list.module.scss";
 import { ChainInfoWithEmbed } from "@keplr-wallet/background";
-import { useConfirm } from "../../components/confirm";
+import classnames from "classnames";
+import { observer } from "mobx-react-lite";
+import React, { FunctionComponent } from "react";
 import { useIntl } from "react-intl";
+import { useHistory } from "react-router";
+import { store } from "../../chatStore";
+import { addMessageList } from "../../chatStore/messages-slice";
+import { resetUser } from "../../chatStore/user-slice";
+import { useConfirm } from "../../components/confirm";
+import { useStore } from "../../stores";
+import style from "./chain-list.module.scss";
 
 const ChainElement: FunctionComponent<{
   chainInfo: ChainInfoWithEmbed;
 }> = observer(({ chainInfo }) => {
   const { chainStore, analyticsStore } = useStore();
-
+  const history = useHistory();
   const intl = useIntl();
 
   const confirm = useConfirm();
@@ -34,6 +36,9 @@ const ChainElement: FunctionComponent<{
           });
           chainStore.selectChain(chainInfo.chainId);
           chainStore.saveLastViewChainId();
+          store.dispatch(resetUser({}));
+          store.dispatch(addMessageList({}));
+          history.push("/");
         }
       }}
     >

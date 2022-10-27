@@ -1,42 +1,19 @@
-import React, { FunctionComponent } from "react";
-import { useHistory } from "react-router";
-import { HeaderLayout } from "../../layouts";
-import { Card, CardBody } from "reactstrap";
-import { IBCTransferView } from "../main/ibc-transfer";
 import classnames from "classnames";
-import style from "./style.module.scss";
+import React, { FunctionComponent } from "react";
+import { Card, CardBody } from "reactstrap";
+import { SwitchUser } from "../../components/switch-user";
+import { HeaderLayout } from "../../layouts";
+import { IBCTransferView } from "../main/ibc-transfer";
 import { Menu } from "../main/menu";
+import style from "./style.module.scss";
 
 export const MorePage: FunctionComponent = () => {
-  const history = useHistory();
-
   return (
     <HeaderLayout
       showChainName={true}
       canChangeChainInfo={true}
       menuRenderer={<Menu />}
-      rightRenderer={
-        <div
-          style={{
-            height: "64px",
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            paddingRight: "20px",
-          }}
-        >
-          <div
-            style={{ width: "16px", cursor: "pointer" }}
-            onClick={(e) => {
-              e.preventDefault();
-
-              history.push("/setting/set-keyring");
-            }}
-          >
-            <i className="fa fa-user" aria-hidden="true" />
-          </div>
-        </div>
-      }
+      rightRenderer={<SwitchUser />}
     >
       <Card className={classnames(style.card, "shadow")}>
         <CardBody>

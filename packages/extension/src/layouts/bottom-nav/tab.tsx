@@ -11,6 +11,7 @@ interface TabProps {
   activeTabIcon: string;
   path: string;
   disabled: boolean;
+  tooltip?: string;
 }
 
 export const Tab = ({
@@ -19,11 +20,14 @@ export const Tab = ({
   activeTabIcon,
   path,
   disabled,
+  tooltip,
 }: TabProps) => {
   const history = useHistory();
   const location = useLocation();
-
-  const isActive = path === location.pathname;
+  const isChatActive =
+    title == "Chat" &&
+    (location.pathname == "/newChat" || location.pathname.startsWith("/chat/"));
+  const isActive = path === location.pathname || isChatActive;
 
   return (
     <div
@@ -39,7 +43,7 @@ export const Tab = ({
       <div className={style.title}>{title}</div>
       {disabled && (
         <UncontrolledTooltip placement="top" target={title}>
-          Coming Soon
+          {tooltip}
         </UncontrolledTooltip>
       )}
     </div>

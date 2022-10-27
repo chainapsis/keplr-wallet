@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { clearDecimals } from "./messages";
+import { clearDecimals } from "./decimals";
 
 describe("Test methods in messages", () => {
   test("Test clearDecimals", () => {

@@ -4,11 +4,11 @@ import { Address } from "../../components/address";
 
 import styleAccount from "./account.module.scss";
 
-import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores";
-import { useNotification } from "../../components/notification";
-import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { observer } from "mobx-react-lite";
+import { useIntl } from "react-intl";
+import { useNotification } from "../../components/notification";
+import { useStore } from "../../stores";
 
 export const AccountView: FunctionComponent = observer(() => {
   const { accountStore, chainStore } = useStore();

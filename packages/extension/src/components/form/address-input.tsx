@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import {
   FormGroup,
   Label,
@@ -39,6 +39,7 @@ export interface AddressInputProps {
   disableAddressBook?: boolean;
 
   disabled?: boolean;
+  value: string;
 }
 
 export const AddressInput: FunctionComponent<AddressInputProps> = observer(
@@ -50,21 +51,24 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     label,
     disableAddressBook,
     disabled = false,
+    value,
   }) => {
     const intl = useIntl();
-
     const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
-
     const [inputId] = useState(() => {
       const bytes = new Uint8Array(4);
       crypto.getRandomValues(bytes);
       return `input-${Buffer.from(bytes).toString("hex")}`;
     });
 
-    const isENSAddress = ObservableEnsFetcher.isValidENS(
+    const isENSAddress = ObservableEnsFetcher?.isValidENS(
       recipientConfig.rawRecipient
     );
-
+    useEffect(() => {
+      if (value) {
+        recipientConfig.setRawRecipient(value);
+      }
+    }, [recipientConfig, value]);
     const error = recipientConfig.getError();
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -105,6 +109,10 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       },
     };
 
+    const handleSearchInputChange = (e: any) => {
+      e.preventDefault();
+      recipientConfig.setRawRecipient(e?.target?.value);
+    };
     return (
       <React.Fragment>
         <Modal
@@ -139,8 +147,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               )}
               value={recipientConfig.rawRecipient}
               onChange={(e) => {
-                recipientConfig.setRawRecipient(e.target.value);
-                e.preventDefault();
+                handleSearchInputChange(e);
               }}
               autoComplete="off"
               disabled={disabled}

@@ -1,0 +1,300 @@
+.username {
+  margin-left: -12px;
+  margin-right: -12px;
+  padding: 10px;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border-radius: 6px;
+  flex-direction: row;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  height: 531px;
+  width: 100%;
+  background: black;
+  opacity: 0.5;
+}
+
+.rightBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .more {
+    float: right;
+    transform: rotate(90deg);
+  }
+}
+.leftBox {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  .user {
+    word-wrap: break-word;
+    max-width: 300px;
+    text-align: left;
+    padding: 2px 10px;
+  }
+  .userText {
+    display: inline-block;
+  }
+  .copyIcon {
+    color: #525f7f;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+}
+.messageRef {
+  min-height: 10px;
+}
+.backBtn {
+  flex-basis: 25px;
+  width: 24px;
+  height: 24px;
+}
+
+.send-message-inputArea {
+  // height: 32px;
+  outline: none !important;
+}
+
+.recieverName {
+  text-align: center;
+  font-size: 16px;
+  color: #525f7f;
+  line-height: 16px;
+  font-weight: 400;
+  position: relative;
+  margin-left: 5px;
+}
+
+.send-message-icon {
+  margin-right: 5px;
+  cursor: pointer;
+}
+.chatArea.showButton {
+  height: 57vh;
+}
+.chatArea.hideButton {
+  height: 70vh;
+}
+.chatArea {
+  display: flex;
+  flex-direction: column;
+
+  .messages {
+    height: 63vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    overflow-x: clip;
+    margin-right: -12px;
+    margin-bottom: 10px;
+    scroll-behavior: smooth;
+
+    p {
+      width: 320px;
+      text-align: center;
+      font-size: 14px;
+      margin: auto;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      color: #525f7f;
+    }
+  }
+}
+
+.inputText {
+  // margin-left: -12px;
+  border: #525f7f 1px solid;
+  background: white;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: center;
+
+  .inputArea {
+    width: 343px;
+    padding: 4.5px 10px;
+    border-radius: 5px;
+    height: 33px;
+    resize: none;
+    border: 0px;
+  }
+
+  .inputArea:focus {
+    outline: solid #11b4ff 0.5px;
+  }
+}
+
+.enterMessageIcon {
+  // border: 1px solid #cad1d7;
+  // border-radius: 0.375rem;
+  padding-left: 10px;
+  // padding-top: 4px;
+  // width: 20px;
+  // height: 20px;
+  // transform: scale(1.25);
+}
+
+.newUserText {
+  margin-bottom: 5px;
+  // position: absolute;
+  // background-color: #F2F3F6;
+  width: inherit;
+
+  p {
+    font-size: 14px;
+    color: #808da0;
+    text-align: center;
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    button {
+      padding: 15px 20px;
+      margin-right: 5px;
+      border: solid #11b4ff 1px;
+      border-radius: 5px;
+      color: #11b4ff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  }
+}
+
+.dropdown {
+  position: absolute;
+  border: solid #dee2e6 1px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  width: 180px;
+  padding: 5px;
+  margin-left: 160px;
+  top: 105px;
+  z-index: 2;
+  cursor: pointer;
+
+  button {
+    border: none;
+    padding: 5px;
+    color: #343a40;
+    font-size: 14px;
+    background-color: #ffffff;
+    cursor: pointer;
+  }
+
+  div {
+    padding: 5px;
+  }
+
+  div:hover {
+    background-color: #c9d4e4;
+  }
+}
+
+.popup {
+  width: 310px;
+  position: absolute;
+  border: solid #dee2e6 1px;
+  background-color: #ffffff;
+  margin: 20px 15px;
+  border-radius: 15px;
+  padding-bottom: 10px;
+  cursor: pointer;
+  top: 30%;
+  z-index: 2;
+  // display: flex;
+  // flex-direction: column;
+  // padding: 0px 20px;
+  h4 {
+    // border-bottom: solid #DEE2E6 2px;
+    padding: 0 20px 10px 20px;
+    color: #525f7f;
+    margin: 10px 0 0 0;
+    font-size: 18px;
+  }
+
+  .textContainer {
+    text-align: left;
+    padding: 0 15px;
+    font-size: 14px;
+    color: #808da0;
+    width: 280px;
+
+    label {
+      margin-left: 10px;
+    }
+  }
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom: solid #dee2e6 2px;
+    align-items: center;
+
+    img {
+      width: 8px;
+      height: 8px;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+  }
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 10px;
+  border-top: solid #dee2e6 2px;
+
+  button {
+    margin-left: 8px;
+    padding: 5px 10px;
+    border: solid #3b82f6 1px;
+    border-radius: 5px;
+    color: #3b82f6;
+    background-color: #ffffff;
+    cursor: pointer;
+  }
+
+  .btn {
+    color: #ffffff;
+    background-color: #3b82f6;
+  }
+}
+.contactsContainer {
+  .displayText {
+    text-align: center;
+    font-size: 14px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: #525f7f;
+  }
+  .buttons {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin: 0 auto;
+  }
+  button {
+    border: 1px solid #3b82f6;
+    padding: 4px 15px;
+    background-color: #fff;
+    border-radius: 4px;
+    color: #3b82f6;
+    cursor: pointer;
+    font-weight: 600;
+  }
+}

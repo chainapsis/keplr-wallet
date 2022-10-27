@@ -76,6 +76,7 @@ export const Menu: FunctionComponent = observer(() => {
         className={styleMenu.item}
         onClick={() => {
           keyRingStore.lock();
+          history.push("/");
         }}
       >
         <FormattedMessage id="main.menu.sign-out" />

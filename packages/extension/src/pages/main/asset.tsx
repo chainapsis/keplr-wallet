@@ -18,6 +18,7 @@ import { DepositModal } from "./qr-code";
 import { useNotification } from "../../components/notification";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
+// import { fetchPublicKey } from "../../utils/fetch-public-key";
 
 export const ProgressBar = ({
   width,
@@ -55,16 +56,34 @@ const EmptyState = ({
   chainName,
   denom,
   chainId,
-  bech32Address,
-  walletStatus,
 }: {
   chainName: string;
   denom: string;
   chainId: string;
-  bech32Address: string;
-  walletStatus: WalletStatus;
 }) => {
+  const { chainStore, accountStore } = useStore();
+  // const [pubKey, setPubKey] = useState("");
   const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [bech32Address, setBech32Address] = useState("");
+  const [walletStatus, setWalletStatus] = useState<WalletStatus>();
+  // const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const accountInfo = accountStore.getAccount(chainId);
+    setWalletStatus(accountInfo.walletStatus);
+    setBech32Address(accountInfo.bech32Address);
+  }, [chainId, accountStore, chainStore]);
+
+  // TODO(!!!): Commented out this code, seems like the handling here needs a bit
+  //            of work
+  // useEffect(() => {
+  //   const getPubKey = async () => {
+  //     setLoading(true);
+  //     const value = await fetchPublicKey(bech32Address);
+  //     setPubKey(value || "");
+  //     setLoading(false);
+  //   };
+  //   getPubKey();
+  // }, [bech32Address]);
 
   const intl = useIntl();
 
@@ -90,7 +109,6 @@ const EmptyState = ({
     },
     [walletStatus, notification, intl]
   );
-
   return (
     <div className={styleAsset.emptyState}>
       <DepositModal
@@ -200,8 +218,6 @@ export const AssetView: FunctionComponent = observer(() => {
         chainName={current.chainName}
         denom={chainStore.current.stakeCurrency.coinDenom}
         chainId={chainStore.current.chainId}
-        bech32Address={accountInfo.bech32Address}
-        walletStatus={accountInfo.walletStatus}
       />
     );
   }

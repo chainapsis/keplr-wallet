@@ -15,12 +15,12 @@ import { useHistory } from "react-router";
 
 import { Dec } from "@keplr-wallet/unit";
 
-import send from "../../public/assets/icon/send.png";
 import reward from "../../public/assets/icon/reward.png";
+import send from "../../public/assets/icon/send.png";
 import stake from "../../public/assets/icon/stake.png";
 
-import activeSend from "../../public/assets/icon/activeSend.png";
 import activeReward from "../../public/assets/icon/activeReward.png";
+import activeSend from "../../public/assets/icon/activeSend.png";
 import activeStake from "../../public/assets/icon/activeStake.png";
 
 export const TxButtonView: FunctionComponent = observer(() => {

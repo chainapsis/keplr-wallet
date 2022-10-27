@@ -153,6 +153,7 @@ export const IBCTransferPageChannel: FunctionComponent<{
           memoConfig={memoConfig}
           ibcChannelConfig={channelConfig}
           disabled={!isChannelSet}
+          value={""}
         />
         <MemoInput
           label={intl.formatMessage({

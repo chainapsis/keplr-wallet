@@ -126,7 +126,7 @@ export const SendPage: FunctionComponent = observer(() => {
             }
       }
       rightRenderer={
-        isDetachedPage ? undefined : (
+        isDetachedPage || true ? undefined : (
           <div
             style={{
               height: "64px",
@@ -241,6 +241,7 @@ export const SendPage: FunctionComponent = observer(() => {
               recipientConfig={sendConfigs.recipientConfig}
               memoConfig={sendConfigs.memoConfig}
               label={intl.formatMessage({ id: "send.input.recipient" })}
+              value={""}
             />
             <CoinInput
               amountConfig={sendConfigs.amountConfig}

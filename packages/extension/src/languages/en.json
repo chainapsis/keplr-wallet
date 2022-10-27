@@ -72,6 +72,18 @@
   "setting.export-to-mobile.input.password.error.invalid": "Invalid password",
   "setting.export-to-mobile.button.confirm": "Confirm",
 
+  "setting.chat": "Chat",
+
+  "setting.block": "Block List",
+
+  "setting.privacy": "Privacy",
+  "setting.privacy.paragraph.everybody": "Everybody can message",
+  "setting.privacy.paragraph.contact": "Only contacts in address book can message",
+  "setting.privacy.paragraph.nobody": "Chat deactivated, nobody can message",
+
+  "setting.receipts": "Read Receipts",
+  "setting.receipts.paragraph": "Off - You won't send or receive Read Receipts",
+
   "setting.credit": "Special thanks",
 
   "setting.keyring": "Select Account",

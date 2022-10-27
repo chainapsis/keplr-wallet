@@ -3,6 +3,8 @@
 .vscode
 node_modules
 dist
+dev-user1
+dev-user2
 releases
 prod
 .gitsecret/keys/random_seed

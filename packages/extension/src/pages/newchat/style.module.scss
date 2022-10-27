@@ -1,0 +1,128 @@
+.searchContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  .searchBox {
+    display: flex;
+    padding: 5px;
+    flex: 1;
+    background-color: #f2f3f6;
+    border-radius: 4px;
+    align-items: center;
+    gap: 10px;
+    margin-right: 10px;
+    img {
+      width: 16px;
+      height: 16px;
+    }
+    input {
+      border: none;
+      outline: none;
+      background: transparent;
+      flex-grow: 1;
+      &::placeholder {
+        color: #525f7f;
+      }
+    }
+  }
+}
+.messagesContainer {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  .messageContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 12px;
+    cursor: pointer;
+    .initials {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: #d0def5;
+      color: #525f7f;
+      margin-right: 8px;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      .unread {
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        width: 12px;
+        height: 12px;
+        background: #d43bf6;
+        border-radius: 50%;
+      }
+    }
+    .messageInner {
+      width: 80%;
+      .name {
+        font-weight: 400;
+        font-size: 15px;
+        color: #525f7f;
+        height: 20px;
+      }
+      .messageText {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        width: 100%;
+        white-space: nowrap;
+        font-weight: 400;
+        font-size: 15px;
+        color: #808da0;
+        height: 20px;
+      }
+    }
+  }
+}
+.newChatContainer {
+  margin-left: -12px;
+  margin-right: -12px;
+  padding: 10px;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border-radius: 6px;
+  flex-direction: row;
+  .backBtn {
+    flex-basis: 25px;
+    width: 24px;
+    height: 24px;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+  .title {
+    text-align: center;
+    font-size: 20px;
+    color: #525f7f;
+    line-height: 16px;
+    font-weight: 500;
+    position: relative;
+    margin-left: 5px;
+  }
+}
+.resultText {
+  color: #808da0;
+  font-weight: 400;
+  font-size: 15px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.searchHelp {
+  font-size: 13px;
+  color: #808da0;
+  margin-top: 5px;
+}
+
+.contacts {
+  display: flex;
+}
