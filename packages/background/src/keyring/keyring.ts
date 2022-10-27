@@ -1308,7 +1308,7 @@ export class KeyRing {
   //      So, block them explicitly for now.
   public throwErrorIfEthermintWithLedgerButNotEvmos(chainId: string) {
     if (this.keyStore && this.keyStore.type === "ledger") {
-      if (!chainId.startsWith("evmos_")) {
+      if (!chainId.startsWith("evmos_") || !chainId.startsWith("injective")) {
         throw new KeplrError(
           "keyring",
           152,
