@@ -11,7 +11,7 @@ import {
   Animated as NativeAnimated,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated, { EasingNode } from "react-native-reanimated";
 import { stableSort } from "../../utils/stable-sort";
 import { useStyle } from "../../styles";
 
@@ -527,7 +527,7 @@ const FixedHeightSortableListItem: FunctionComponent<{
               Animated.multiply(itemHeight, virtualIndex),
               gapTop
             ),
-            easing: Easing.out(Easing.cubic),
+            easing: EasingNode.out(EasingNode.cubic),
           }),
 
           Animated.cond(animatedState.finished, [

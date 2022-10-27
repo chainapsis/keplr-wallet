@@ -59,6 +59,7 @@ export const Toggle: FunctionComponent<{
 
   useEffect(() => {
     if (on) {
+      // TODO: Use "react-native-reanimated"
       Animated.timing(animatedOnValue, {
         toValue: 1,
         duration: 200,

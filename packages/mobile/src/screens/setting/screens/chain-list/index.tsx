@@ -9,7 +9,7 @@ import { VectorCharacter } from "../../../../components/vector-character";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Svg, { Path } from "react-native-svg";
 import { PageWithFixedHeightSortableList } from "../../../../components/page/fixed-height-sortable-list";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated, { EasingNode } from "react-native-reanimated";
 
 export const SettingChainListScreen: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
@@ -127,7 +127,7 @@ export const SettingChainListScreenElement: FunctionComponent<{
         Animated.timing(animatedState.clock, animatedState, {
           duration: 140,
           toValue: isDragging,
-          easing: Easing.out(Easing.cubic),
+          easing: EasingNode.out(EasingNode.cubic),
         }),
 
         Animated.cond(animatedState.finished, [
@@ -168,7 +168,8 @@ export const SettingChainListScreenElement: FunctionComponent<{
                   style.flatten(["color-gray-50", "dark:color-platinum-400"])
                     .color,
                 ],
-              }) as Animated.Node<string>,
+                // XXX: Any is used due to an unresolved typing error.
+              }) as any,
             },
           ])}
         />

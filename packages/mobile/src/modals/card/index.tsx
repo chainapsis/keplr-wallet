@@ -12,7 +12,7 @@ import { useStyle } from "../../styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { useModalState, useModalTransision } from "../base";
-import Animated, { Easing } from "react-native-reanimated";
+import Animated, { EasingNode } from "react-native-reanimated";
 import {
   DefaultAcceleration,
   DefaultCloseVelocity,
@@ -113,7 +113,7 @@ export const CardModal: FunctionComponent<{
         {
           toValue: softwareKeyboardBottomPadding,
           duration: 175,
-          easing: Easing.linear,
+          easing: EasingNode.linear,
         }
       ),
       Animated.cond(
