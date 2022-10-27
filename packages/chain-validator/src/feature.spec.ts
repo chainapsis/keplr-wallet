@@ -10,7 +10,7 @@ const createMockServer = (
   const server = Http.createServer((req, resp) => {
     if (req.url === "/ibc/apps/transfer/v1/params") {
       resp.writeHead(ibcGoSuccess ? 200 : 400, {
-        "content-type": "text/plain",
+        "content-type": "text/json",
       });
       resp.end(
         JSON.stringify({
@@ -21,7 +21,7 @@ const createMockServer = (
 
     if (req.url === "/ibc/applications/transfer/v1beta1/params") {
       resp.writeHead(200, {
-        "content-type": "text/plain",
+        "content-type": "text/json",
       });
       resp.end(
         JSON.stringify({
@@ -65,8 +65,6 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
   let closeServer: (() => void) | undefined;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-
     const server = createMockServer(true, true, true, true);
     port = server.port;
     closeServer = server.closeServer;
@@ -77,8 +75,6 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
       closeServer();
       closeServer = undefined;
     }
-
-    jest.useRealTimers();
   });
 
   /**
@@ -221,8 +217,6 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
   let closeServer: (() => void) | undefined;
 
   beforeEach(() => {
-    jest.useFakeTimers();
-
     const server = createMockServer(false, false, false, false);
     port = server.port;
     closeServer = server.closeServer;
@@ -233,8 +227,6 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
       closeServer();
       closeServer = undefined;
     }
-
-    jest.useRealTimers();
   });
 
   /**
