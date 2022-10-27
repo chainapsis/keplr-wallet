@@ -4,6 +4,10 @@
     "baseUrl": ".",
     "outDir": "build",
     "declaration": true,
-    "rootDir": "src"
-  }
+    "rootDir": "src",
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types", "./@types"]
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

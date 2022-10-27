@@ -363,27 +363,19 @@ export class KeyRing {
     if (this.type === "mnemonic") {
       // If password is invalid, error will be thrown.
       this.mnemonicMasterSeed = Mnemonic.generateMasterSeedFromMnemonic(
-        Buffer.from(
-          await Crypto.decrypt(this.crypto, this.keyStore, password)
-        ).toString()
+        Buffer.from(await Crypto.decrypt(this.keyStore, password)).toString()
       );
     } else if (this.type === "privateKey") {
       // If password is invalid, error will be thrown.
       this.privateKey = Buffer.from(
-        Buffer.from(
-          await Crypto.decrypt(this.crypto, this.keyStore, password)
-        ).toString(),
+        Buffer.from(await Crypto.decrypt(this.keyStore, password)).toString(),
         "hex"
       );
     } else if (this.type === "ledger") {
       // Attempt to decode the ciphertext as a JSON public key map. If that fails,
       // try decoding as a single public key hex.
       const pubKeys: Record<string, Uint8Array> = {};
-      const cipherText = await Crypto.decrypt(
-        this.crypto,
-        this.keyStore,
-        password
-      );
+      const cipherText = await Crypto.decrypt(this.keyStore, password);
 
       try {
         const encodedPubkeys = JSON.parse(Buffer.from(cipherText).toString());
@@ -576,7 +568,7 @@ export class KeyRing {
       .concat(this.multiKeyStore.slice(index + 1));
 
     // Make sure that password is valid.
-    await Crypto.decrypt(this.crypto, keyStore, password);
+    await Crypto.decrypt(keyStore, password);
 
     let keyStoreChanged = false;
     if (this.keyStore) {
@@ -940,14 +932,10 @@ export class KeyRing {
 
     if (keyStore.type === "mnemonic") {
       // If password is invalid, error will be thrown.
-      return Buffer.from(
-        await Crypto.decrypt(this.crypto, keyStore, password)
-      ).toString();
+      return Buffer.from(await Crypto.decrypt(keyStore, password)).toString();
     } else {
       // If password is invalid, error will be thrown.
-      return Buffer.from(
-        await Crypto.decrypt(this.crypto, keyStore, password)
-      ).toString();
+      return Buffer.from(await Crypto.decrypt(keyStore, password)).toString();
     }
   }
 
@@ -1134,7 +1122,7 @@ export class KeyRing {
       switch (type) {
         case "mnemonic": {
           const mnemonic = Buffer.from(
-            await Crypto.decrypt(this.crypto, keyStore, password)
+            await Crypto.decrypt(keyStore, password)
           ).toString();
 
           result.push({
@@ -1153,7 +1141,7 @@ export class KeyRing {
         }
         case "privateKey": {
           const privateKey = Buffer.from(
-            await Crypto.decrypt(this.crypto, keyStore, password)
+            await Crypto.decrypt(keyStore, password)
           ).toString();
 
           result.push({

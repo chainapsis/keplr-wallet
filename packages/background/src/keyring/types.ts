@@ -12,7 +12,6 @@ export type BIP44HDPath = {
 
 export interface CommonCrypto {
   rng: RNG;
-  scrypt: (text: string, params: ScryptParams) => Promise<Uint8Array>;
 }
 
 export interface ScryptParams {

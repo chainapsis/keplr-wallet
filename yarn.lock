@@ -7427,11 +7427,6 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.45.tgz#e6676bcca092bae5751d015f074a234d5a82eb63"
   integrity sha512-703YTEp8AwQeapI0PTXDOj+Bs/mtdV/k9VcTP7z/de+lx6XjFMKdB+JhKnK+6PZ5za7omgZ3V6qm/dNkMj/Zow==
 
-"@types/node@^14.14.35":
-  version "14.17.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.0.tgz#3ba770047723b3eeb8dc9fca02cce8a7fb6378da"
-  integrity sha512-w8VZUN/f7SSbvVReb9SWp6cJFevxb4/nkG65yLAya//98WgocKm5PLDAtSs5CtJJJM+kHmJjO/6mmYW4MHShZA==
-
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
@@ -10080,7 +10075,7 @@ buffer@^4.3.0:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
-buffer@^5.4.3, buffer@^5.5.0, buffer@^5.6.0:
+buffer@^5.4.3, buffer@^5.5.0:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/buffer/-/buffer-5.7.1.tgz#ba62e7c13133053582197160851a8f648e99eed0"
   integrity sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==
@@ -22252,14 +22247,6 @@ react-native-screens@^3.4.0:
   dependencies:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
-
-react-native-scrypt@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/react-native-scrypt/-/react-native-scrypt-1.2.1.tgz#22323d56fec370a9fb6ece143a5104e32af39195"
-  integrity sha512-y03UtSmpY6RtdNB4Ne3yxe7xFNl2BYQMB59p+/iJGch+9eJ05Lw8DObX9dOA/bldlCljtP3KsCiZmf/rwrzeSA==
-  dependencies:
-    "@types/node" "^14.14.35"
-    buffer "^5.6.0"
 
 react-native-svg-transformer@^0.14.3:
   version "0.14.3"

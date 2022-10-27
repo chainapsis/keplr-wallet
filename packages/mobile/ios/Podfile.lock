@@ -400,8 +400,6 @@ PODS:
     - Yoga
   - RNScreens (2.18.1):
     - React-Core
-  - RNScrypt (1.2.1):
-    - React
   - RNSVG (12.1.1):
     - React
   - SDWebImage (5.11.1):
@@ -478,7 +476,6 @@ DEPENDENCIES:
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
-  - RNScrypt (from `../node_modules/react-native-scrypt`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -621,8 +618,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
-  RNScrypt:
-    :path: "../node_modules/react-native-scrypt"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   Yoga:
@@ -699,7 +694,6 @@ SPEC CHECKSUMS:
   RNLocalize: 82a569022724d35461e2dc5b5d015a13c3ca995b
   RNReanimated: 7338a9a385dac045c9ee575a502a86d61ae8ba5d
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
-  RNScrypt: 95fdef077b482e9fdf8a761120cb69d129ef4016
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21

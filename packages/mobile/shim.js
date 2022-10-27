@@ -1,3 +1,4 @@
+import "setimmediate";
 import { polyfillWebCrypto } from "react-native-crypto-polyfill";
 
 polyfillWebCrypto();

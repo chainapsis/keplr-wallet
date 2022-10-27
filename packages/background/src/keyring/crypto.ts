@@ -1,3 +1,4 @@
+import scrypt from "scrypt-js";
 import AES, { Counter } from "aes-js";
 import {
   BIP44HDPath,
@@ -63,7 +64,7 @@ export class Crypto {
     const derivedKey = await (async () => {
       switch (kdf) {
         case "scrypt":
-          return await crypto.scrypt(password, scryptParams);
+          return await Crypto.scrypt(password, scryptParams);
         case "sha256":
           return Hash.sha256(Buffer.from(`${salt}/${password}`));
         case "pbkdf2":
@@ -123,14 +124,13 @@ export class Crypto {
   }
 
   public static async decrypt(
-    crypto: CommonCrypto,
     keyStore: KeyStore,
     password: string
   ): Promise<Uint8Array> {
     const derivedKey = await (async () => {
       switch (keyStore.crypto.kdf) {
         case "scrypt":
-          return await crypto.scrypt(password, keyStore.crypto.kdfparams);
+          return await Crypto.scrypt(password, keyStore.crypto.kdfparams);
         case "sha256":
           return Hash.sha256(
             Buffer.from(`${keyStore.crypto.kdfparams.salt}/${password}`)
@@ -173,6 +173,22 @@ export class Crypto {
 
     return Buffer.from(
       aesCtr.decrypt(Buffer.from(keyStore.crypto.ciphertext, "hex"))
+    );
+  }
+
+  protected static async scrypt(
+    text: string,
+    params: ScryptParams
+  ): Promise<Uint8Array> {
+    const buf = Buffer.from(text);
+
+    return await scrypt.scrypt(
+      buf,
+      Buffer.from(params.salt, "hex"),
+      params.n,
+      params.r,
+      params.p,
+      params.dklen
     );
   }
 }
