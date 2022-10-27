@@ -55,6 +55,8 @@
     "@octokit/core": "^3.5.1",
     "@types/jest": "^27.5.1",
     "@types/node": "^16.6.2",
+    "@types/react": "^16.14.4",
+    "@types/react-dom": "^16.9.11",
     "@types/webpack": "^4.39.1",
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
@@ -80,7 +82,10 @@
     "zx": "^4.2.0"
   },
   "resolutions": {
-    "@types/react": "^16.14.4",
+    "react": "^16.14.0",
+    "mobx": "^6.6.1",
+    "mobx-react-lite": "^3.4.0",
+    "mobx-utils": "^6.0.5",
     "@cosmjs/crypto": "^0.24.0-alpha.25",
     "@iov/crypto": "2.1.0",
     "axios": "^0.27.2",
