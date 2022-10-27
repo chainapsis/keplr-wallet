@@ -91,7 +91,7 @@
     "react": "17.0.2",
     "react-hook-form": "^7.16.1",
     "react-intl": "^5.20.4",
-    "react-native": "0.63.4",
+    "react-native": "0.64.3",
     "react-native-ble-plx": "^2.0.3",
     "react-native-camera": "^4.0.1",
     "react-native-code-push": "^7.0.4",
@@ -135,7 +135,7 @@
     "metro-react-native-babel-preset": "^0.59.0",
     "pod-install": "^0.1.27",
     "react-native-svg-transformer": "^0.14.3",
-    "react-test-renderer": "16.13.1",
+    "react-test-renderer": "17.0.2",
     "tinyify": "^3.0.0"
   },
   "jest": {

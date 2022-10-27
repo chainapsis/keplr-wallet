@@ -9,7 +9,7 @@
 
 const { getDefaultConfig } = require("metro-config");
 
-const blacklist = require("metro-config/src/defaults/blacklist");
+const blocklist = require("metro-config/src/defaults/exclusionList");
 const getWorkspaces = require("get-yarn-workspaces");
 const path = require("path");
 
@@ -37,9 +37,9 @@ module.exports = (async () => {
       assetExts: assetExts.filter((ext) => ext !== "svg"),
       sourceExts: [...sourceExts, "svg"],
       // To prevent that multiple react instances exist,
-      // add the react in this package to the blacklist,
+      // add the react in this package to the blocklist,
       // and use the only react in the root project.
-      blacklistRE: blacklist([/packages\/mobile\/node_modules\/react\/.*/]),
+      blacklistRE: blocklist([/packages\/mobile\/node_modules\/react\/.*/]),
       extraNodeModules: {
         crypto: path.resolve(
           __dirname,
