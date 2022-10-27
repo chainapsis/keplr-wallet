@@ -13,7 +13,10 @@ export async function checkChainFeatures(
 ): Promise<string[]> {
   // deep copy
   const copiedChainInfo: chainInfoForCheck = JSON.parse(
-    JSON.stringify(chainInfo)
+    JSON.stringify({
+      rest: chainInfo.rest,
+      features: chainInfo.features ?? [],
+    })
   );
 
   const features = [
@@ -29,7 +32,7 @@ export async function checkChainFeatures(
       const featureString = await hasFeature(copiedChainInfo, feature);
 
       if (featureString) {
-        (copiedChainInfo.features ?? []).push(featureString);
+        copiedChainInfo.features?.push(featureString);
       }
     }
   }

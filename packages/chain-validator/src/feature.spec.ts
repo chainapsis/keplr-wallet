@@ -192,6 +192,26 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
 
   /**
    * @Given The server support all features
+   * @When When you input undefined in supported features
+   * @Then return "ibc-go", "ibc-transfer", "query:/cosmos/bank/v1beta1/spendable_balances", features
+   */
+  test("When you input undefined in supported features", async () => {
+    const mockChainInfoForCheck: chainInfoForCheck = {
+      rest: `http://127.0.0.1:${port}`,
+      features: undefined,
+    };
+
+    const features = await checkChainFeatures(mockChainInfoForCheck);
+
+    expect(features).toEqual([
+      "ibc-go",
+      "ibc-transfer",
+      "query:/cosmos/bank/v1beta1/spendable_balances",
+    ]);
+  });
+
+  /**
+   * @Given The server support all features
    * @When When you input that there is 'cosmwasm' feature
    * @Then return all features
    */
