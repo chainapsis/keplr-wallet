@@ -4,12 +4,12 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 cd "$DIR/../ios"
-xcodebuild clean
+xcodebuild clean | true
 
 rm -rf "$DIR/../ios/Pods"
 
 cd "$DIR/../android"
-./gradlew clean
+./gradlew clean | true
 
 rm -rf "$DIR/../android/.gradle"
 rm -rf "$DIR/../android/build"
