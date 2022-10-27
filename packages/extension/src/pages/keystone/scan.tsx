@@ -12,7 +12,7 @@ export function Scan({ onChange }: Props) {
     <div className={style.page}>
       <div>Scan the QR code displayed on your Keystone Device</div>
       <AnimatedQRScanner
-        purpose={Purpose.SYNC}
+        purpose={Purpose.COSMOS_SYNC}
         handleScan={onChange}
         handleError={console.error}
         options={{
