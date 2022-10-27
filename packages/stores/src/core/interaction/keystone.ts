@@ -20,8 +20,12 @@ export class KeystoneStore {
   @flow
   *resolveGetPubkey(data: unknown) {
     const datas = this.interactionStore.getDatas(TYPE_KEYSTONE_GET_PUBKEY);
-    for (const d of datas) {
-      yield this.interactionStore.approve(TYPE_KEYSTONE_GET_PUBKEY, d.id, data);
+    if (datas.length !== 0) {
+      yield this.interactionStore.approve(
+        TYPE_KEYSTONE_GET_PUBKEY,
+        datas[0].id,
+        data
+      );
     }
   }
 }

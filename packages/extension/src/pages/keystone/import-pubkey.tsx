@@ -4,46 +4,12 @@ import { useStore } from "../../stores";
 import { Guide } from "./guide";
 import { Scan } from "./scan";
 import { UR } from "@keplr-wallet/stores";
+import { decodeUR } from "./utils";
 
 export const KeystoneImportPubkeyPage = observer(() => {
   const [isScan, setIsScan] = useState(false);
 
   const { keystoneStore } = useStore();
-
-  const parseHDPath = (hdPath: string) => {
-    const parts = hdPath.split("/");
-    return {
-      coinType: +parts[2].replace("'", ""),
-      bip44HDPath: {
-        account: +parts[3].replace("'", ""),
-        change: +parts[4],
-        addressIndex: +parts[5],
-      },
-    };
-  };
-
-  const decodeUR = (ur: UR) => {
-    return {
-      device: "",
-      xfp: "",
-      name: "",
-      keys: [
-        {
-          ...parseHDPath("m/44'/118'/0'/0/0"),
-          pubKey:
-            "02bda203ca44c955f1db94bb0d34ef072cebeb27f5bc7b13656bb2881301d017a6",
-          index: 0,
-        },
-        {
-          ...parseHDPath("m/44'/60'/0'/0/0"),
-          pubKey:
-            "029e9fea62fb6dd737250b20fc1441c0fcb4f163402bae1ac6f2f0726116c88024",
-          index: 1,
-        },
-      ],
-      ur,
-    };
-  };
 
   const onScanFinish = (ur: UR) => {
     const data = decodeUR(ur);
