@@ -2,22 +2,20 @@ import { ChainInfo } from "@keplr-wallet/types";
 import Axios from "axios";
 
 // CheckInfo for checking
-export type chainInfoForCheck = Pick<ChainInfo, "rest" | "features">;
+export type ChainInfoForCheck = Pick<ChainInfo, "rest" | "features">;
 
 /**
  * Returns features that chain will have to update
  * @param chainInfo
  */
 export async function checkChainFeatures(
-  chainInfo: chainInfoForCheck
+  chainInfo: ChainInfoForCheck
 ): Promise<string[]> {
   // deep copy
-  const copiedChainInfo: chainInfoForCheck = JSON.parse(
-    JSON.stringify({
-      rest: chainInfo.rest,
-      features: chainInfo.features ?? [],
-    })
-  );
+  const copiedChainInfo: ChainInfoForCheck & { features: string[] } = {
+    rest: chainInfo.rest,
+    features: chainInfo.features?.slice() ?? [],
+  };
 
   const features = [
     "ibc-go",
@@ -28,23 +26,23 @@ export async function checkChainFeatures(
 
   for (const feature of features) {
     // Skip if it's already supported
-    if (!copiedChainInfo.features?.includes(feature)) {
+    if (!copiedChainInfo.features.includes(feature)) {
       const featureString = await hasFeature(copiedChainInfo, feature);
 
       if (featureString) {
-        copiedChainInfo.features?.push(featureString);
+        copiedChainInfo.features.push(featureString);
       }
     }
   }
 
   // different between raw features and copiedFeature
-  return (copiedChainInfo.features ?? []).filter(
+  return copiedChainInfo.features.filter(
     (item) => !chainInfo.features?.includes(item)
   );
 }
 
 export async function hasFeature(
-  chainInfo: Readonly<chainInfoForCheck>,
+  chainInfo: Readonly<ChainInfoForCheck>,
   featureString: string
 ): Promise<string | undefined> {
   let requestUrl: string = "";

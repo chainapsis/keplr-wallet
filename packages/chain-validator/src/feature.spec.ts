@@ -1,5 +1,5 @@
 import Http from "http";
-import { chainInfoForCheck, checkChainFeatures, hasFeature } from "./feature";
+import { ChainInfoForCheck, checkChainFeatures, hasFeature } from "./feature";
 
 const createMockServer = (
   ibcGoSuccess: boolean,
@@ -83,7 +83,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return "ibc-go" string
    */
   test("When you input 'ibc-go' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -98,7 +98,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return "ibc-transfer" string
    */
   test("When you input 'ibc-transfer' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -113,7 +113,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return "ibc-transfer" string
    */
   test("When you input 'ibc-transfer' feature in 'hasFeature' function(Input 'ibc-go' in JSON feature)", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: ["ibc-go"],
     };
@@ -128,7 +128,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return undefined
    */
   test("When you input 'wasmd_0.24+' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -143,7 +143,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return "wasmd_0.24+" string
    */
   test("When you input 'wasmd_0.24+' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: ["cosmwasm"],
     };
@@ -158,7 +158,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return "query:/cosmos/bank/v1beta1/spendable_balances" string
    */
   test("When you input 'query:/cosmos/bank/v1beta1/spendable_balances' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -176,7 +176,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return "ibc-go", "ibc-transfer", "query:/cosmos/bank/v1beta1/spendable_balances", features
    */
   test("When you input that there are no supported features(지원하는 기능이 없다고 입력했을 때)", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -196,7 +196,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return "ibc-go", "ibc-transfer", "query:/cosmos/bank/v1beta1/spendable_balances", features
    */
   test("When you input undefined in supported features", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: undefined,
     };
@@ -216,7 +216,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @Then return all features
    */
   test("When you input that there is 'cosmwasm' feature", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: ["cosmwasm"],
     };
@@ -255,7 +255,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    * @Then return "Failed to get response /ibc/apps/transfer/v1/params from lcd endpoint" error string
    */
   test("When you input 'ibc-go' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -276,7 +276,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    * @Then return undefined
    */
   test("When you input 'ibc-transfer' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -291,7 +291,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    * @Then return "Failed to get response /ibc/apps/transfer/v1/params from lcd endpoint" error string
    */
   test("When you input 'ibc-transfer' feature in 'hasFeature' function(Input 'ibc-go' in JSON feature)", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: ["ibc-go"],
     };
@@ -312,7 +312,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    * @Then return undefined
    */
   test("When you input 'wasmd_0.24+' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -327,7 +327,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    * @Then return undefined
    */
   test("When you input 'wasmd_0.24+' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: ["cosmwasm"],
     };
@@ -342,7 +342,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    * @Then return undefined
    */
   test("When you input 'query:/cosmos/bank/v1beta1/spendable_balances' feature in 'hasFeature' function", async () => {
-    const mockChainInfoForCheck: chainInfoForCheck = {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
