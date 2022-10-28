@@ -28,6 +28,9 @@ jobs:
       - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
       - run: yarn ci-lint
       - run: yarn ci
+        env:
+          KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
+          KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
       - run: sudo apt-get install gh
       - run: npx zx ./scripts/publish.mjs
         env:
@@ -52,8 +55,11 @@ jobs:
     - run: cp ./build/firefox-archive.tar.gz ../firefox-archive.tar.gz
     - run: mkdir temp && tar xvzf firefox-archive.tar.gz -C temp
       working-directory: ..
-    - run: docker build -f ./docker/Dockerfile -t builder .
+    - run: docker build -f ./docker/Dockerfile -e KEPLR_EXT_ETHEREUM_ENDPOINT=$KEPLR_EXT_ETHEREUM_ENDPOINT -e KEPLR_EXT_AMPLITUDE_API_KEY=$KEPLR_EXT_AMPLITUDE_API_KEY -t builder .
       working-directory: ../temp
+      env:
+        KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
+        KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
     - run: docker run -v $(pwd):/data builder
       working-directory: ../temp
     - run: sudo apt-get install gh awscli

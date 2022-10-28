@@ -165,7 +165,11 @@ const extensionConfig = (env, args) => {
         ],
       }),
       new WriteFilePlugin(),
-      new webpack.EnvironmentPlugin(["NODE_ENV"]),
+      new webpack.EnvironmentPlugin([
+        "NODE_ENV",
+        "KEPLR_EXT_ETHEREUM_ENDPOINT",
+        "KEPLR_EXT_AMPLITUDE_API_KEY",
+      ]),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
       }),

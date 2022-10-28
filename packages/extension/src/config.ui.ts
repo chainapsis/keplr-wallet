@@ -20,7 +20,8 @@ export const DefaultGasMsgWithdrawRewards = 240000; // Gas per messages.
 
 // Endpoint for Ethereum node.
 // This is used for ENS.
-export const EthereumEndpoint = process.env["ETHEREUM_ENDPOINT"] || "";
+export const EthereumEndpoint =
+  process.env["KEPLR_EXT_ETHEREUM_ENDPOINT"] || "";
 
 export const FiatCurrencies: FiatCurrency[] = [
   {
@@ -102,4 +103,4 @@ export const AdditionalSignInPrepend:
 
 export const AdditionalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
 
-export const AmplitudeApiKey = process.env["AMPLITUDE_API_KEY"] || "";
+export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
