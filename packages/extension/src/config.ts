@@ -1947,6 +1947,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDenom: "STRD",
       coinMinimalDenom: "ustrd",
       coinDecimals: 6,
+      coinGeckoId: "stride",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1965,6 +1966,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "STRD",
         coinMinimalDenom: "ustrd",
         coinDecimals: 6,
+        coinGeckoId: "stride",
       },
       {
         coinDenom: "stATOM",
@@ -1992,6 +1994,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "STRD",
         coinMinimalDenom: "ustrd",
         coinDecimals: 6,
+        coinGeckoId: "stride",
         gasPriceStep: {
           low: 0,
           average: 0,
