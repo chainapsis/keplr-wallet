@@ -1,8 +1,9 @@
 import React, { FunctionComponent } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 export type BoxProps = {
   className?: string;
+  isAbsoluteCenter?: boolean;
 
   width?: string;
   minWidth?: string;
@@ -41,6 +42,7 @@ export type BoxProps = {
   overflow?: "visible" | "hidden" | "scroll" | "auto";
   borderWidth?: string;
   borderColor?: string;
+  transition?: string;
 };
 
 const Container = styled.div<BoxProps>`
@@ -56,7 +58,8 @@ const Container = styled.div<BoxProps>`
   flex-shrink: ${({ flexShrink }) => flexShrink};
   background: ${({ background }) => background};
   display: ${({ display }) => display};
-  position: ${({ position }) => position};
+  position: ${({ position, isAbsoluteCenter }) =>
+    isAbsoluteCenter ? "absolute" : position};
   align-items: ${({ alignItems }) => {
     switch (alignItems) {
       case "left":
@@ -117,79 +120,16 @@ const Container = styled.div<BoxProps>`
       return "solid";
     }
   }};
+  transition: ${({ transition }) => transition};
+  ${({ isAbsoluteCenter }) =>
+    isAbsoluteCenter &&
+    css`
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    `};
 `;
 
-export const Box: FunctionComponent<BoxProps> = ({
-  children,
-  className,
-  width,
-  minWidth,
-  maxWidth,
-  height,
-  minHeight,
-  maxHeight,
-  flex,
-  flexGrow,
-  flexShrink,
-  background,
-  display,
-  position,
-  alignItems,
-  justifyContent,
-  flexDirection,
-  borderRadius,
-  padding,
-  paddingTop,
-  paddingBottom,
-  paddingLeft,
-  paddingRight,
-  margin,
-  marginTop,
-  marginBottom,
-  marginLeft,
-  marginRight,
-  zIndex,
-  textAlign,
-  overflow,
-  borderWidth,
-  borderColor,
-}) => {
-  return (
-    <Container
-      className={className}
-      width={width}
-      minWidth={minWidth}
-      maxWidth={maxWidth}
-      height={height}
-      minHeight={minHeight}
-      maxHeight={maxHeight}
-      flex={flex}
-      flexGrow={flexGrow}
-      flexShrink={flexShrink}
-      background={background}
-      display={display}
-      position={position}
-      alignItems={alignItems}
-      justifyContent={justifyContent}
-      flexDirection={flexDirection}
-      borderRadius={borderRadius}
-      padding={padding}
-      paddingTop={paddingTop}
-      paddingBottom={paddingBottom}
-      paddingLeft={paddingLeft}
-      paddingRight={paddingRight}
-      margin={margin}
-      marginTop={marginTop}
-      marginBottom={marginBottom}
-      marginLeft={marginLeft}
-      marginRight={marginRight}
-      zIndex={zIndex}
-      textAlign={textAlign}
-      overflow={overflow}
-      borderWidth={borderWidth}
-      borderColor={borderColor}
-    >
-      {children}
-    </Container>
-  );
+export const Box: FunctionComponent<BoxProps> = ({ children, ...props }) => {
+  return <Container {...props}>{children}</Container>;
 };
