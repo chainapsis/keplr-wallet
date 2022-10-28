@@ -1,16 +1,13 @@
-import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import styled from "styled-components";
 import { useStore } from "../../../stores";
 import { Box } from "../../components/box";
+import { Button } from "../../components/button";
 import { Card } from "../../components/card";
 import { Gutter } from "../../components/gutter";
 import { Stack } from "../../components/stack";
 import { ColorPalette } from "../../styles";
-import { CreateAccountIntro, CreateAccountType } from "./create-account";
-import { ImportAccountIntro, ImportAccountType } from "./import-account";
-import { ImportLedgerIntro, ImportLedgerType } from "./import-ledger";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -49,32 +46,21 @@ const Notice = styled.span`
   color: ${ColorPalette["platinum-200"]};
 `;
 
-export const RegisterPage: FunctionComponent = observer(() => {
-  const { keyRingStore, uiConfigStore } = useStore();
+const TorusText = styled.span`
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: ${ColorPalette["platinum-200"]};
+  text-align: center;
+`;
 
-  const registerConfig = useRegisterConfig(keyRingStore, [
-    {
-      type: CreateAccountType,
-      intro: CreateAccountIntro,
-      page: CreateAccountIntro,
-    },
-    {
-      type: ImportAccountType,
-      intro: ImportAccountIntro,
-      page: ImportAccountIntro,
-    },
-    // Currently, there is no way to use ledger with keplr on firefox.
-    // Temporarily, hide the ledger usage.
-    ...(uiConfigStore.platform !== "firefox"
-      ? [
-          {
-            type: ImportLedgerType,
-            intro: ImportLedgerIntro,
-            page: ImportLedgerIntro,
-          },
-        ]
-      : []),
-  ]);
+type RegisterIntroType = "create-account" | "import-account";
+
+export const RegisterPage: FunctionComponent = observer(() => {
+  const { uiConfigStore } = useStore();
+  const [registerIntroType, setRegisterIntroType] = useState<
+    RegisterIntroType | undefined
+  >();
 
   return (
     <Container>
@@ -88,7 +74,6 @@ export const RegisterPage: FunctionComponent = observer(() => {
         padding="4.625rem"
       >
         <Stack gutter="1rem" flex={2}>
-          <Gutter size="1rem" />
           <Box display="flex" flexDirection="row" justifyContent="center">
             <KeplrLogo
               src={
@@ -104,11 +89,64 @@ export const RegisterPage: FunctionComponent = observer(() => {
               alt="logo"
             />
           </Box>
-
           <Gutter size="1.25rem" />
           <Intro>Wallet for the Interchain</Intro>
           <Gutter size="4.875rem" />
-          <Stack gutter="1.25rem">{registerConfig.render()}</Stack>
+          {registerIntroType === undefined ? (
+            <Stack gutter="1rem">
+              <Button
+                color="primary"
+                onClick={() => setRegisterIntroType("create-account")}
+              >
+                Create new account
+              </Button>
+              <Gutter size="1.25rem" />
+              <Button
+                color="secondary"
+                onClick={() => setRegisterIntroType("import-account")}
+              >
+                Import existing account
+              </Button>
+              {
+                // Currently, there is no way to use ledger with keplr on firefox.
+                // Temporarily, hide the ledger usage.
+                uiConfigStore.platform !== "firefox" && (
+                  <Button
+                    color="transparent"
+                    onClick={(e) => {
+                      e.preventDefault();
+                    }}
+                  >
+                    Import ledger
+                  </Button>
+                )
+              }
+            </Stack>
+          ) : registerIntroType === "create-account" ? (
+            <Stack gutter="2rem">
+              <Stack gutter="0.5rem">
+                <Button color="secondary" onClick={() => {}}>
+                  Sign up with google
+                </Button>
+                <TorusText>Powered by Torus</TorusText>
+              </Stack>
+              <Button color="primary" onClick={() => {}}>
+                Create new mnemonic
+              </Button>
+            </Stack>
+          ) : (
+            <Stack gutter="2rem">
+              <Stack gutter="0.5rem">
+                <Button color="secondary" onClick={() => {}}>
+                  Sign up with google
+                </Button>
+                <TorusText>Powered by Torus</TorusText>
+              </Stack>
+              <Button color="primary" onClick={() => {}}>
+                Import existing account
+              </Button>
+            </Stack>
+          )}
         </Stack>
       </Card>
       <Gutter size="2.5rem" />

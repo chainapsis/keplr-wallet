@@ -6,7 +6,7 @@ import { Button } from "../../../components/button";
 
 export const ImportLedgerType = "new-mnemonic";
 
-export const ImportLedgerIntro: FunctionComponent<{
+export const ImportLedgerButton: FunctionComponent<{
   registerConfig: RegisterConfig;
 }> = observer(({ registerConfig }) => {
   const { analyticsStore } = useStore();
@@ -18,12 +18,12 @@ export const ImportLedgerIntro: FunctionComponent<{
         e.preventDefault();
 
         registerConfig.setType(ImportLedgerType);
-        analyticsStore.logEvent("Create account started", {
-          registerType: "seed",
+        analyticsStore.logEvent("Import account started", {
+          registerType: "ledger",
         });
       }}
     >
-      Create new seed{" "}
+      Import ledger
     </Button>
   );
 });
