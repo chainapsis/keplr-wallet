@@ -1062,6 +1062,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "persistence",
       },
+      {
+        coinDenom: "STKATOM",
+        coinMinimalDenom: "stk/uatom",
+        coinDecimals: 6,
+      },
     ],
     feeCurrencies: [
       {
