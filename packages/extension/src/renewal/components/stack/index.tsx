@@ -1,6 +1,7 @@
 import React, { FunctionComponent, Children, isValidElement } from "react";
 import { Gutter } from "../gutter";
 import { Box } from "../box";
+import { isFragment } from "react-is";
 
 export type StackProps = {
   gutter?: string;
@@ -26,7 +27,9 @@ export const Stack: FunctionComponent<StackProps> = ({
   alignItems,
   justifyContent,
 }) => {
-  const array = Children.toArray(children);
+  const array = Children.toArray(
+    isFragment(children) ? children.props.children : children
+  );
 
   return (
     <Box

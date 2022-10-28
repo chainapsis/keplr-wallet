@@ -8148,6 +8148,13 @@
   dependencies:
     "@types/react" "^16"
 
+"@types/react-is@^16.7.2":
+  version "16.7.2"
+  resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-16.7.2.tgz#8c2862013d00d741be189ceb71da8e8d21e8fa7d"
+  integrity sha512-rdQUu9J+RUz4Vcr768UyTzv+fZGzKBy1/PPhaxTfzAfaHSW4+b0olA6czXLZv7PO7/ktbHu41kcpAG7Z46kvDQ==
+  dependencies:
+    "@types/react" "^16"
+
 "@types/react-modal@^3.10.0":
   version "3.10.6"
   resolved "https://registry.yarnpkg.com/@types/react-modal/-/react-modal-3.10.6.tgz#76717220f32bc72769190692147814a540053c7e"
