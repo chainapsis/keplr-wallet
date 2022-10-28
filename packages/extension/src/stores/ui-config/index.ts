@@ -7,6 +7,7 @@ import { KVStore } from "@keplr-wallet/common";
 export interface UIConfigOptions {
   showAdvancedIBCTransfer: boolean;
   showRawSuggestedChainInfo: boolean;
+  isDeveloperMode: boolean;
 }
 
 export class UIConfigStore {
@@ -14,6 +15,7 @@ export class UIConfigStore {
   protected options: UIConfigOptions = {
     showAdvancedIBCTransfer: false,
     showRawSuggestedChainInfo: false,
+    isDeveloperMode: false,
   };
 
   protected _isBeta: boolean;
@@ -64,10 +66,15 @@ export class UIConfigStore {
     return this._platform;
   }
 
+  get isDeveloper(): boolean {
+    return this.options.isDeveloperMode;
+  }
+
   @action
   setDeveloperMode(value: boolean) {
     this.options.showAdvancedIBCTransfer = value;
     this.options.showRawSuggestedChainInfo = value;
+    this.options.isDeveloperMode = value;
 
     // No need to await
     this.save();
