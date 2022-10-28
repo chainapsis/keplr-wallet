@@ -33,7 +33,6 @@
     "@keplr-wallet/types": "0.11.13",
     "@keplr-wallet/unit": "0.11.13",
     "axios": "^0.27.2",
-    "bip39": "^3.0.3",
     "buffer": "^6.0.3",
     "long": "^4.0.0",
     "mobx": "^6.1.7",
