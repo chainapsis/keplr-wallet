@@ -25,20 +25,12 @@ jobs:
       - run: sudo apt-get install curl
       - run: curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-x86_64.zip
       - run: unzip protoc-21.3-linux-x86_64.zip -d $HOME/protoc && echo $HOME/protoc/bin >> $GITHUB_PATH
-      - run: sudo apt-get install apt-transport-https ca-certificates
-      - run: sudo sh -c "echo 'deb https://gitsecret.jfrog.io/artifactory/git-secret-deb git-secret main' >> /etc/apt/sources.list"
-      - run: wget -qO - 'https://gitsecret.jfrog.io/artifactory/api/gpg/key/public' | sudo apt-key add -
-      - run: sudo apt-get install git-secret
-      - run: printf $GPG_KEY | base64 --decode > private.key
-        env:
-          GPG_KEY: ${{ secrets.GPG_KEY }}
-      - run: gpg --import --no-tty --batch --yes ./private.key && rm ./private.key
-      - run: git-secret reveal -f -p $GPG_PASSPHRASE
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
       - run: yarn ci-lint
       - run: yarn ci
+        env:
+          KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
+          KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
       - run: sudo apt-get install gh
       - run: npx zx ./scripts/publish.mjs
         env:
@@ -58,24 +50,16 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '16'
-    - run: sudo apt-get update && sudo apt-get install apt-transport-https ca-certificates
-    - run: sudo sh -c "echo 'deb https://gitsecret.jfrog.io/artifactory/git-secret-deb git-secret main' >> /etc/apt/sources.list"
-    - run: wget -qO - 'https://gitsecret.jfrog.io/artifactory/api/gpg/key/public' | sudo apt-key add -
-    - run: sudo apt-get install git-secret
-    - run: printf $GPG_KEY | base64 --decode > private.key
-      env:
-        GPG_KEY: ${{ secrets.GPG_KEY }}
-    - run: gpg --import --no-tty --batch --yes ./private.key && rm ./private.key
-    - run: git-secret reveal -f -p $GPG_PASSPHRASE
-      env:
-        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - run: docker build -f ./docker/create-firefox-archive/Dockerfile -t archiver .
     - run: docker run -v $(pwd):/data archiver
     - run: cp ./build/firefox-archive.tar.gz ../firefox-archive.tar.gz
     - run: mkdir temp && tar xvzf firefox-archive.tar.gz -C temp
       working-directory: ..
-    - run: docker build -f ./docker/Dockerfile -t builder .
+    - run: docker build -f ./docker/Dockerfile -e KEPLR_EXT_ETHEREUM_ENDPOINT=$KEPLR_EXT_ETHEREUM_ENDPOINT -e KEPLR_EXT_AMPLITUDE_API_KEY=$KEPLR_EXT_AMPLITUDE_API_KEY -t builder .
       working-directory: ../temp
+      env:
+        KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
+        KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
     - run: docker run -v $(pwd):/data builder
       working-directory: ../temp
     - run: sudo apt-get install gh awscli
