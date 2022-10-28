@@ -52,7 +52,7 @@ import { AddTokenPage } from "./pages/setting/token/add";
 import { ManageTokenPage } from "./pages/setting/token/manage";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
-import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
+import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";
@@ -151,7 +151,7 @@ const StateRenderer: FunctionComponent = observer(() => {
 ReactDOM.render(
   <StoreProvider>
     <AppIntlProvider
-      additionalMessages={AdditonalIntlMessages}
+      additionalMessages={AdditionalIntlMessages}
       languageToFiatCurrency={LanguageToFiatCurrency}
     >
       <LoadingIndicatorProvider>

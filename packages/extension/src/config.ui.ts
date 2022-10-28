@@ -100,6 +100,6 @@ export const AdditionalSignInPrepend:
   | RegisterOption[]
   | undefined = ADDITIONAL_SIGN_IN_PREPEND;
 
-export const AdditonalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
+export const AdditionalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
 
 export const AmplitudeApiKey = process.env["AMPLITUDE_API_KEY"] || "";
