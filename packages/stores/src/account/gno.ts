@@ -438,6 +438,51 @@ export class GnoAccountImpl {
     };
   }
 
+
+  async simulateTx(
+    msgs: Any[],
+    fee: Omit<StdFee, "gas">,
+    memo: string = ""
+  ): Promise<{
+    gasUsed: number;
+  }> {
+    const unsignedTx = Tx.encode({
+      messages: msgs,
+      fee: Fee.fromPartial({
+        gasWanted: "0",
+        gasFee: fee.amount.map((val) => `${val.amount}${val.denom}`).join(","),
+      }),
+      signatures: [
+        Signature.fromPartial({
+          pubKey: Any.fromPartial({
+            typeUrl: "/tm.PubKeySecp256k1",
+            value: PubKeySecp256k1.encode({
+              key: new Uint8Array(33),
+            }).finish(),
+          }),
+          signature: new Uint8Array(64),
+        }),
+      ],
+      memo: memo,
+    }).finish();
+
+    const result = await this.base.cosmos.instance.post(
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        tx_bytes: Buffer.from(unsignedTx).toString("base64"),
+      }
+    );
+
+    const gasUsed = parseInt(result.data.gas_info.gas_used);
+    if (Number.isNaN(gasUsed)) {
+      throw new Error(`Invalid integer gas: ${result.data.gas_info.gas_used}`);
+    }
+
+    return {
+      gasUsed,
+    };
+  }
+
   makeTx(
     type: string | "unknown",
     msgs: ProtoMsgsOrWithAminoMsgs | (() => Promise<ProtoMsgsOrWithAminoMsgs>),
@@ -449,14 +494,22 @@ export class GnoAccountImpl {
         }
   ): MakeTxResponse {
     const simulate = async (
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _fee: Partial<Omit<StdFee, "gas">> = {},
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _memo: string = ""
+      fee: Partial<Omit<StdFee, "gas">> = {},
+      memo: string = ""
     ): Promise<{
       gasUsed: number;
     }> => {
-      return Promise.resolve({ gasUsed: 0 });
+      if (typeof msgs === "function") {
+        msgs = await msgs();
+      }
+
+      return this.simulateTx(
+        msgs.protoMsgs,
+        {
+          amount: fee.amount ?? [],
+        },
+        memo
+      );
     };
 
     const sendWithGasPrice = async (
@@ -541,7 +594,7 @@ export class GnoAccountImpl {
             throw new Error("Gas estimated is zero or negative");
           }
 
-          const gasAdjusted = feeOptions.gasAdjustment * gasUsed;
+          const gasAdjusted = Math.floor(feeOptions.gasAdjustment * gasUsed);
 
           return sendWithGasPrice(
             {
