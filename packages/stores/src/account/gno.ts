@@ -8,7 +8,7 @@ import {
   StdFee,
   StdSignDoc,
 } from "@cosmjs/launchpad";
-import { DenomHelper, escapeHTML } from "@keplr-wallet/common";
+import { DenomHelper, escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly } from "utility-types";
@@ -394,13 +394,15 @@ export class GnoAccountImpl {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
-    const signDoc = makeSignDoc(
-      aminoMsgs,
-      fee,
-      this.chainId,
-      escapeHTML(memo),
-      account.getAccountNumber().toString(),
-      account.getSequence().toString()
+    const signDoc = sortObjectByKey(
+      makeSignDoc(
+        aminoMsgs,
+        fee,
+        this.chainId,
+        escapeHTML(memo),
+        account.getAccountNumber().toString(),
+        account.getSequence().toString()
+      )
     );
 
     const signResponse = await keplr.signAmino(
@@ -437,7 +439,6 @@ export class GnoAccountImpl {
       signDoc: signResponse.signed,
     };
   }
-
 
   async simulateTx(
     msgs: Any[],
