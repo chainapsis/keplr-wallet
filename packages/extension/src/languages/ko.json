@@ -163,7 +163,13 @@
   "register.welcome.button.done": "완료",
 
   "chain.suggested.title": "{chainName} 체인 추가",
+  "chain.suggested.tooltip": "이 체인정보는 커뮤니티로부터 제공되었습니다.",
+  "chain.suggested.developer.checkbox": "커뮤니티 레포와 관계없이 이 웹에서 제공한 코드를\n사용하는 것을 유지합니다.",
   "chain.suggested.paragraph": "<b>{host}</b>가 <b>{chainId}</b> 블록체인을 케플러에 추가하길 원합니다.",
+  "chain.suggested.approve-info.title": "승인하기 전에",
+  "chain.suggested.approve-info.content": "케플러는 등록되는 체인정보가 커뮤니티에서 관리되는 것을 추천합니다. 이 체인정보는 커뮤니티에서 관리하는 깃허브에 등록되어 있지 않습니다.",
+  "chain.suggested.approve-info.link": "Github에 체인정보 등록하러가기 ->",
+  "chain.suggested.approve-alert.content": "이 체인은 케플러가 아닌 웹에서 제공한 체인정보를 통해 추가하는 것입니다. ",
   "chain.suggested.button.approve": "허락",
   "chain.suggested.button.reject": "거부",
   "chain.suggested.community-driven": "커뮤니티 기반",
