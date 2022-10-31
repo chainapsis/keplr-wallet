@@ -3176,7 +3176,17 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@cosmjs/crypto@^0.24.0-alpha.25", "@cosmjs/crypto@^0.24.1":
+"@cosmjs/amino@^0.29.3":
+  version "0.29.3"
+  resolved "https://registry.yarnpkg.com/@cosmjs/amino/-/amino-0.29.3.tgz#5aa338a301ea970a93e15522706615efea507c10"
+  integrity sha512-BFz1++ERerIggiFc7iGHhGe1CeV3rCv8BvkoBQTBN/ZwzHOaKvqQj8smDlRGlQxX3HWlTwgiLN2A+OB5yX4ZRw==
+  dependencies:
+    "@cosmjs/crypto" "^0.29.3"
+    "@cosmjs/encoding" "^0.29.3"
+    "@cosmjs/math" "^0.29.3"
+    "@cosmjs/utils" "^0.29.3"
+
+"@cosmjs/crypto@^0.24.0-alpha.25", "@cosmjs/crypto@^0.24.1", "@cosmjs/crypto@^0.29.3":
   version "0.24.0-alpha.25"
   resolved "https://registry.yarnpkg.com/@cosmjs/crypto/-/crypto-0.24.0-alpha.25.tgz#014d454ddf91ea0a323ccbd258fc5f297b843c38"
   integrity sha512-0+nAi2+Sdy300vPZFzCB0tPcF/T4fGZ3VgPTdR997uPm0xz4aBiAncuJGhkw/CR0VjLgTSk1IXVNnG7+xRtjsQ==
@@ -3216,6 +3226,15 @@
   version "0.24.1"
   resolved "https://registry.yarnpkg.com/@cosmjs/encoding/-/encoding-0.24.1.tgz#b30e92cdb70fc200a163b8c7aa5254606c8a09ab"
   integrity sha512-PMr+gaXAuM0XgjeXwB1zdX1QI0t+PgVhbmjgI/RSgswDzdExNH97qUopecL0/HG3p64vhIT/6ZjXYYTljZL7WA==
+  dependencies:
+    base64-js "^1.3.0"
+    bech32 "^1.1.4"
+    readonly-date "^1.0.0"
+
+"@cosmjs/encoding@^0.29.3":
+  version "0.29.3"
+  resolved "https://registry.yarnpkg.com/@cosmjs/encoding/-/encoding-0.29.3.tgz#191fe1192d78ac0f9eb01b6e0aa4ba976cfb2c7a"
+  integrity sha512-K6CTcDGovwzF3QOmLm9mWwjcu4Md64zCOBYgVK3boGbsaExP/6YAjT22e+yDsReXWlEUtSVCjqCC/9EEcwmYmg==
   dependencies:
     base64-js "^1.3.0"
     bech32 "^1.1.4"
@@ -3261,6 +3280,13 @@
   integrity sha512-eBQk8twgzmpHFCVkoNjTZhsZwWRbR+JXt0FhjXJoD85SBm4K8b2OnOyTg68uPHVKOJjLRwzyRVYgMrg5TBVgwQ==
   dependencies:
     bn.js "^4.11.8"
+
+"@cosmjs/math@^0.29.3":
+  version "0.29.3"
+  resolved "https://registry.yarnpkg.com/@cosmjs/math/-/math-0.29.3.tgz#29f98f6529f3d7654f1af85b329b48482eabbecb"
+  integrity sha512-4HGHqS+Yn81dZLOAYcDSQbROBD1a7ETW3ur5hziCTXMjZFILRJ3w71PlFUVppVb2u3kRDBBXuYHvZ6/V0M0nrg==
+  dependencies:
+    bn.js "^5.2.0"
 
 "@cosmjs/proto-signing@^0.24.0-alpha.25":
   version "0.24.0-alpha.25"
@@ -3312,6 +3338,11 @@
   version "0.24.0-alpha.25"
   resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.24.0-alpha.25.tgz#25871033bb61dd21ec13a9fe042e80a64c165195"
   integrity sha512-3vhd1iur5kNLa+mtZfJd/A21Dvy11BuFgjvvmgoJ0djknzyJcnnp/AOk3EheN/mq+u9whUW9SfXcvVoT0gC7cA==
+
+"@cosmjs/utils@^0.29.3":
+  version "0.29.3"
+  resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.29.3.tgz#d7e1f381267e61b7d3219ebd75d46defc397cd43"
+  integrity sha512-UuKoBN2xiRXcBpz7jzCwagKhOnLOsRmR8mu3IzY+Yx38i8rW52FSXMbxC/yE83X0vLea+zgMQFPwv0gy4QWUJw==
 
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"

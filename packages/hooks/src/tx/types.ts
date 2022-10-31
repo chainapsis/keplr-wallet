@@ -1,5 +1,9 @@
-import { AppCurrency, Currency, FeeCurrency } from "@keplr-wallet/types";
-import { StdFee } from "@cosmjs/launchpad";
+import {
+  AppCurrency,
+  Currency,
+  FeeCurrency,
+  StdFee,
+} from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { CoinPrimitive } from "@keplr-wallet/stores";
 

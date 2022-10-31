@@ -16,9 +16,6 @@
     "version": "zx ./scripts/lerna-lifecyle-version.mjs"
   },
   "dependencies": {
-    "@cosmjs/encoding": "^0.24.0-alpha.25",
-    "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@keplr-wallet/analytics": "0.11.15-rc.0",
     "@keplr-wallet/background": "0.11.15-rc.0",

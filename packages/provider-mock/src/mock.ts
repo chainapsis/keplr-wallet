@@ -5,21 +5,18 @@ import {
   KeplrMode,
   KeplrSignOptions,
   Key,
-} from "@keplr-wallet/types";
-import {
   AminoSignResponse,
   BroadcastMode,
-  makeCosmoshubPath,
-  OfflineSigner,
-  Secp256k1HdWallet,
   StdSignature,
   StdSignDoc,
-} from "@cosmjs/launchpad";
+  OfflineAminoSigner,
+  OfflineDirectSigner,
+  DirectSignResponse,
+} from "@keplr-wallet/types";
+import { makeCosmoshubPath, Secp256k1HdWallet } from "@cosmjs/amino";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { CosmJSOfflineSigner } from "@keplr-wallet/provider";
-import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
 
 export class MockKeplr implements Keplr {
   readonly version: string = "0.0.1";
@@ -43,8 +40,10 @@ export class MockKeplr implements Keplr {
 
       this.walletMap[chainId] = await Secp256k1HdWallet.fromMnemonic(
         this.mnemonic,
-        makeCosmoshubPath(0),
-        chainInfo.bech32Config.bech32PrefixAccAddr
+        {
+          hdPaths: [makeCosmoshubPath(0)],
+          prefix: chainInfo.bech32Config.bech32PrefixAccAddr,
+        }
       );
     }
 
@@ -131,7 +130,7 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
-  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
+  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
@@ -180,11 +179,11 @@ export class MockKeplr implements Keplr {
 
   getOfflineSignerAuto(
     _chainId: string
-  ): Promise<OfflineSigner | OfflineDirectSigner> {
+  ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
     throw new Error("Not implemented");
   }
 
-  getOfflineSignerOnlyAmino(_chainId: string): OfflineSigner {
+  getOfflineSignerOnlyAmino(_chainId: string): OfflineAminoSigner {
     throw new Error("Not implemented");
   }
 

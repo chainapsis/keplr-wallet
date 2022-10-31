@@ -4,10 +4,11 @@ import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
-  OfflineSigner,
+  OfflineAminoSigner,
   StdSignature,
-} from "@cosmjs/launchpad";
-import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
+  DirectSignResponse,
+  OfflineDirectSigner,
+} from "../cosmjs";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import Long from "long";
 
@@ -99,11 +100,11 @@ export interface Keplr {
     type: EthSignType
   ): Promise<Uint8Array>;
 
-  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
-  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner;
+  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner;
+  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner;
   getOfflineSignerAuto(
     chainId: string
-  ): Promise<OfflineSigner | OfflineDirectSigner>;
+  ): Promise<OfflineAminoSigner | OfflineDirectSigner>;
 
   suggestToken(
     chainId: string,

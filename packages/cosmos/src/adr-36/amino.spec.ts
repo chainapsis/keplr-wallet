@@ -4,7 +4,7 @@ import {
   verifyADR36Amino,
   verifyADR36AminoSignDoc,
 } from "./amino";
-import { serializeSignDoc } from "@cosmjs/launchpad";
+import { serializeSignDoc } from "../signing";
 import { PrivKeySecp256k1 } from "@keplr-wallet/crypto";
 import { Bech32Address } from "../bech32";
 

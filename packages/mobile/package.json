@@ -25,8 +25,6 @@
     "@amplitude/react-native": "^2.7.0",
     "@bugsnag/plugin-react-navigation": "^7.16.1",
     "@bugsnag/react-native": "^7.16.1",
-    "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@cosmjs/proto-signing": "^0.24.0-alpha.25",
     "@formatjs/intl-datetimeformat": "^4.1.6",
     "@formatjs/intl-displaynames": "^5.1.6",
     "@formatjs/intl-getcanonicallocales": "^1.7.1",

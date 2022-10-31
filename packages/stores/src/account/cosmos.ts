@@ -1,12 +1,12 @@
 import { AccountSetBaseSuper, MsgOpt, WalletStatus } from "./base";
-import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import {
+  AppCurrency,
+  KeplrSignOptions,
   BroadcastMode,
-  makeSignDoc,
   Msg,
   StdFee,
   StdSignDoc,
-} from "@cosmjs/launchpad";
+} from "@keplr-wallet/types";
 import { DenomHelper, escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
@@ -497,16 +497,16 @@ export class CosmosAccountImpl {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
-    const signDoc = sortObjectByKey(
-      makeSignDoc(
-        aminoMsgs,
-        fee,
-        this.chainId,
-        escapeHTML(memo),
-        account.getAccountNumber().toString(),
-        account.getSequence().toString()
-      )
-    );
+    const signDocRaw: StdSignDoc = {
+      chain_id: this.chainId,
+      account_number: account.getAccountNumber().toString(),
+      sequence: account.getSequence().toString(),
+      fee: fee,
+      msgs: aminoMsgs,
+      memo: escapeHTML(memo),
+    };
+
+    const signDoc = sortObjectByKey(signDocRaw);
 
     const signResponse = await (async () => {
       if (!eip712Signing) {
