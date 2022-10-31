@@ -17,7 +17,7 @@ PODS:
     - AppCenter/Core (= 4.1.1)
   - Base64 (1.1.2)
   - boost-for-react-native (1.63.0)
-  - BugsnagReactNative (7.16.1):
+  - BugsnagReactNative (7.17.4):
     - React-Core
   - CodePush (7.0.4):
     - Base64 (~> 1.1)
@@ -632,7 +632,7 @@ SPEC CHECKSUMS:
   AppCenterReactNativeShared: 2d5a53b6cbd2fe7f63f0033e9f0a40757a4eacf5
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
-  BugsnagReactNative: bd1c905fb868fae8448a913b87356dbf2b02dc80
+  BugsnagReactNative: ae943adb18227043d6ca0589bc3fedef8fd32288
   CodePush: b51b7ac64c07d4eacfc8cc5750a1dd28adbf2528
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   EXAppleAuthentication: 27a4f7dc44a1b510f5af945b58643165ee486d89
