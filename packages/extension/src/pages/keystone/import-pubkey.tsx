@@ -4,26 +4,31 @@ import { useStore } from "../../stores";
 import { Guide } from "./guide";
 import { Scan } from "./scan";
 import { UR } from "@keplr-wallet/stores";
-import { decodeUR } from "./utils";
+import { useKeystoneKeyring } from "@keplr-wallet/hooks";
 
 export const KeystoneImportPubkeyPage = observer(() => {
   const [isScan, setIsScan] = useState(false);
 
   const { keystoneStore } = useStore();
-
-  const onScanFinish = (ur: UR) => {
-    const data = decodeUR(ur);
-    keystoneStore.resolveGetPubkey({
-      publicKey: data.keys,
-    });
-    window.removeEventListener("unload", onUnload);
-    window.close();
-  };
+  const keystoneKeyring = useKeystoneKeyring();
 
   const onUnload = () => {
     keystoneStore.resolveGetPubkey({
       abort: true,
     });
+  };
+
+  const onScanFinish = async (ur: UR) => {
+    keystoneKeyring.getInteraction().onReadUR(async () => {
+      return ur;
+    });
+    await keystoneKeyring.readKeyring();
+    const publicKey = await keystoneKeyring.getPubKeys();
+    keystoneStore.resolveGetPubkey({
+      publicKey,
+    });
+    window.removeEventListener("unload", onUnload);
+    window.close();
   };
 
   useEffect(() => {
