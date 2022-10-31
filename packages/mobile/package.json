@@ -102,7 +102,7 @@
     "react-native-fs": "^2.18.0",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
-    "react-native-keychain": "^7.0.0",
+    "react-native-keychain": "^8.1.1",
     "react-native-localize": "^2.1.1",
     "react-native-qrcode-svg": "^6.1.1",
     "react-native-reanimated": "=2.4.0",

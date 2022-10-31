@@ -366,7 +366,7 @@ PODS:
     - React
   - RNGestureHandler (1.10.3):
     - React-Core
-  - RNKeychain (7.0.0):
+  - RNKeychain (8.1.1):
     - React-Core
   - RNLocalize (2.1.1):
     - React-Core
@@ -690,7 +690,7 @@ SPEC CHECKSUMS:
   RNFastImage: a7384db75df352500261e8e8f1ac2026def26102
   RNFS: 3ab21fa6c56d65566d1fb26c2228e2b6132e5e32
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
-  RNKeychain: f75b8c8b2f17d3b2aa1f25b4a0ac5b83d947ff8f
+  RNKeychain: ff836453cba46938e0e9e4c22e43d43fa2c90333
   RNLocalize: 82a569022724d35461e2dc5b5d015a13c3ca995b
   RNReanimated: 7338a9a385dac045c9ee575a502a86d61ae8ba5d
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d

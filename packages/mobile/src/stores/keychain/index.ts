@@ -1,5 +1,6 @@
 import { flow, makeObservable, observable } from "mobx";
 import * as Keychain from "react-native-keychain";
+import { SECURITY_RULES } from "react-native-keychain";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { KeyRingStore } from "@keplr-wallet/stores";
 
@@ -16,6 +17,7 @@ export class KeychainStore {
     },
     accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
     accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+    rules: SECURITY_RULES.AUTOMATIC_UPGRADE,
   };
 
   constructor(
