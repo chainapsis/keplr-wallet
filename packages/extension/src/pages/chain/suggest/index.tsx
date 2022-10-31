@@ -10,6 +10,9 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import GithubIcon from "../../../components/icon/github";
+import InformationCircleOutline from "../../../components/icon/information-circle-outline";
+import { ToolTip } from "../../../components/tooltip";
+import classNames from "classnames";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore, uiConfigStore } = useStore();
@@ -65,42 +68,100 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                 }}
               />
             </h1>
-            <p className={style.origin}>
-              {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
-            </p>
-            <div className={style.chainInfoContainer}>
-              <pre className={style.chainInfo}>
-                {JSON.stringify(
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  (({ isFromCommunity, beta, origin, ...chainInfo }) =>
-                    chainInfo)(
-                    chainSuggestStore.waitingSuggestedChainInfo.data
-                  ),
-                  undefined,
-                  2
+            <div className={style.origin}>
+              <ToolTip
+                tooltip={
+                  <div className={style.tooltip}>
+                    <FormattedMessage id="chain.suggested.tooltip" />
+                  </div>
+                }
+                trigger="hover"
+              >
+                <div className={style.text}>
+                  {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
+                </div>
+              </ToolTip>
+            </div>
+            <div className={style.chainContainer}>
+              <div className={style.chainInfoContainer}>
+                <pre className={style.chainInfo}>
+                  {JSON.stringify(
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    (({ isFromCommunity, beta, origin, ...chainInfo }) =>
+                      chainInfo)(
+                      chainSuggestStore.waitingSuggestedChainInfo.data
+                    ),
+                    undefined,
+                    2
+                  )}
+                </pre>
+              </div>
+
+              {uiConfigStore.isDeveloper &&
+                !chainSuggestStore.waitingSuggestedChainInfo.data
+                  .isFromCommunity && (
+                  <div
+                    className={classNames(
+                      style.developerInfo,
+                      "custom-control custom-checkbox"
+                    )}
+                  >
+                    <input
+                      className="custom-control-input"
+                      id="viewing-key-checkbox"
+                      type="checkbox"
+                    />
+                    <label
+                      className="custom-control-label"
+                      htmlFor="viewing-key-checkbox"
+                      style={{ color: "#323C4A", paddingTop: "1px" }}
+                    >
+                      <FormattedMessage id="chain.suggested.developer.checkbox" />
+                    </label>
+                  </div>
                 )}
-              </pre>
+
+              <div
+                className={classNames(
+                  style.approveInfoContainer,
+                  !chainSuggestStore.waitingSuggestedChainInfo.data
+                    .isFromCommunity
+                    ? style.info
+                    : style.alert
+                )}
+              >
+                <div className={style.titleContainer}>
+                  <InformationCircleOutline
+                    fill={
+                      !chainSuggestStore.waitingSuggestedChainInfo.data
+                        .isFromCommunity
+                        ? "#566172"
+                        : "#F0224B"
+                    }
+                  />
+                  <div className={style.text}>
+                    <FormattedMessage id="chain.suggested.approve-info.title" />
+                  </div>
+                </div>
+                <div className={style.content}>
+                  {!chainSuggestStore.waitingSuggestedChainInfo.data
+                    .isFromCommunity ? (
+                    <FormattedMessage id="chain.suggested.approve-info.content" />
+                  ) : (
+                    <FormattedMessage id="chain.suggested.approve-alert.content" />
+                  )}
+                </div>
+                {!chainSuggestStore.waitingSuggestedChainInfo.data
+                  .isFromCommunity && (
+                  <div className={style.link}>
+                    <FormattedMessage id="chain.suggested.approve-info.link" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ) : (
           <div className={style.content}>
-            {uiConfigStore.showRawSuggestedChainInfo ? (
-              <div
-                className={style.rawDataButton}
-                onClick={() => setIsRawDataMode(true)}
-              >
-                <span>
-                  <FormattedMessage id="chain.suggested.add-chain-as-suggested" />
-                </span>
-                <div className={style.imageWrapper}>
-                  <img
-                    src={require("../../../public/assets/svg/for-developer.svg")}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: "flex", height: "60px" }} />
-            )}
             <div className={style.logo}>
               <div className={style.imageContainer}>
                 <div className={style.imageBackground} />
@@ -137,11 +198,23 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                 }}
               />
             </h1>
-            <div className={style.tag}>
-              <div>
-                <FormattedMessage id="chain.suggested.community-driven" />
+
+            <ToolTip
+              tooltip={
+                <div className={style.tooltip}>
+                  <FormattedMessage id="chain.suggested.tooltip" />
+                </div>
+              }
+              trigger="hover"
+            >
+              <div className={style.tag}>
+                <div>
+                  <FormattedMessage id="chain.suggested.community-driven" />
+                  <GithubIcon />
+                </div>
               </div>
-            </div>
+            </ToolTip>
+
             <p className={style.paragraph}>
               <FormattedMessage
                 id="chain.suggested.paragraph"
@@ -155,20 +228,18 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                 }}
               />
             </p>
-            <div style={{ flex: 1 }} />
-            <div className={style.infoWithLink}>
-              <div className={style.info}>
-                <FormattedMessage id="chain.suggested.chain-info-is-from" />
-              </div>
-              <a
-                href="https://github.com/chainapsis/cicd-test"
-                target="_blank"
-                rel="noreferrer"
-                className={style.githubLink}
+
+            {uiConfigStore.isDeveloper && (
+              <div
+                className={style.chainDetailContainer}
+                onClick={() => setIsRawDataMode(true)}
               >
-                <GithubIcon />
-              </a>
-            </div>
+                Add chain as suggested
+                <img
+                  src={require("../../../public/assets/svg/arrow-right-outline.svg")}
+                />
+              </div>
+            )}
           </div>
         )}
         <div className={style.buttons}>
