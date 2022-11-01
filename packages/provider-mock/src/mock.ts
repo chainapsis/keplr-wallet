@@ -13,10 +13,19 @@ import {
   OfflineDirectSigner,
   DirectSignResponse,
 } from "@keplr-wallet/types";
-import { makeCosmoshubPath, Secp256k1HdWallet } from "@cosmjs/amino";
 import { SecretUtils } from "secretjs/types/enigmautils";
-import { Bech32Address } from "@keplr-wallet/cosmos";
-import { CosmJSOfflineSigner } from "@keplr-wallet/provider";
+import {
+  Bech32Address,
+  encodeSecp256k1Signature,
+  serializeSignDoc,
+} from "@keplr-wallet/cosmos";
+import {
+  CosmJSOfflineSigner,
+  CosmJSOfflineSignerOnlyAmino,
+} from "@keplr-wallet/provider";
+import { Mnemonic, PrivKeySecp256k1 } from "@keplr-wallet/crypto";
+import Long from "long";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export class MockKeplr implements Keplr {
   readonly version: string = "0.0.1";
@@ -25,10 +34,10 @@ export class MockKeplr implements Keplr {
   public defaultOptions: KeplrIntereactionOptions = {};
 
   public readonly walletMap: {
-    [chainId: string]: Secp256k1HdWallet | undefined;
+    [chainId: string]: PrivKeySecp256k1 | undefined;
   } = {};
 
-  async getHdWallet(chainId: string): Promise<Secp256k1HdWallet> {
+  getWallet(chainId: string): PrivKeySecp256k1 {
     if (!this.walletMap[chainId]) {
       const chainInfo = this.chainInfos.find(
         (info) => info.chainId === chainId
@@ -38,12 +47,8 @@ export class MockKeplr implements Keplr {
         throw new Error("Unknown chain");
       }
 
-      this.walletMap[chainId] = await Secp256k1HdWallet.fromMnemonic(
-        this.mnemonic,
-        {
-          hdPaths: [makeCosmoshubPath(0)],
-          prefix: chainInfo.bech32Config.bech32PrefixAccAddr,
-        }
+      this.walletMap[chainId] = new PrivKeySecp256k1(
+        Mnemonic.generateWalletFromMnemonic(this.mnemonic)
       );
     }
 
@@ -92,14 +97,19 @@ export class MockKeplr implements Keplr {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const cosmJsKeys = await (await this.getHdWallet(chainId)).getAccounts();
+    const wallet = this.getWallet(chainId);
 
     return {
-      name: "",
+      name: "mock",
       algo: "secp256k1",
-      pubKey: cosmJsKeys[0].pubkey,
-      address: Bech32Address.fromBech32(cosmJsKeys[0].address).address,
-      bech32Address: cosmJsKeys[0].address,
+      pubKey: wallet.getPubKey().toBytes(),
+      address: wallet.getPubKey().getAddress(),
+      bech32Address: new Bech32Address(
+        wallet.getPubKey().getAddress()
+      ).toBech32(
+        this.chainInfos.find((c) => c.chainId === chainId)!.bech32Config
+          .bech32PrefixAccAddr
+      ),
       isNanoLedger: false,
     };
   }
@@ -152,18 +162,72 @@ export class MockKeplr implements Keplr {
     signDoc: StdSignDoc,
     _?: KeplrSignOptions
   ): Promise<AminoSignResponse> {
-    const hdWallet = await this.getHdWallet(chainId);
+    const wallet = await this.getWallet(chainId);
 
-    const keys = await hdWallet.getAccounts();
-    if (keys[0].address !== signer) {
+    const key = await this.getKey(chainId);
+    if (signer !== key.bech32Address) {
       throw new Error("Unmatched signer");
     }
 
-    return hdWallet.signAmino(signer, signDoc);
+    const signature = wallet.sign(serializeSignDoc(signDoc));
+
+    return {
+      signed: signDoc,
+      signature: encodeSecp256k1Signature(
+        wallet.getPubKey().toBytes(),
+        signature
+      ),
+    };
   }
 
-  signDirect(): Promise<DirectSignResponse> {
-    throw new Error("Not implemented");
+  async signDirect(
+    chainId: string,
+    signer: string,
+    signDoc: {
+      /** SignDoc bodyBytes */
+      bodyBytes?: Uint8Array | null;
+
+      /** SignDoc authInfoBytes */
+      authInfoBytes?: Uint8Array | null;
+
+      /** SignDoc chainId */
+      chainId?: string | null;
+
+      /** SignDoc accountNumber */
+      accountNumber?: Long | null;
+    },
+    _?: KeplrSignOptions
+  ): Promise<DirectSignResponse> {
+    const wallet = await this.getWallet(chainId);
+
+    const key = await this.getKey(chainId);
+    if (signer !== key.bech32Address) {
+      throw new Error("Unmatched signer");
+    }
+
+    const signature = wallet.sign(
+      SignDoc.encode(
+        SignDoc.fromPartial({
+          bodyBytes: signDoc.bodyBytes!,
+          authInfoBytes: signDoc.authInfoBytes!,
+          chainId: signDoc.chainId!,
+          accountNumber: signDoc.accountNumber!.toString(),
+        })
+      ).finish()
+    );
+
+    return {
+      signed: {
+        bodyBytes: signDoc.bodyBytes!,
+        authInfoBytes: signDoc.authInfoBytes!,
+        chainId: signDoc.chainId!,
+        accountNumber: signDoc.accountNumber!,
+      },
+      signature: encodeSecp256k1Signature(
+        wallet.getPubKey().toBytes(),
+        signature
+      ),
+    };
   }
 
   suggestToken(): Promise<void> {
@@ -183,8 +247,8 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
-  getOfflineSignerOnlyAmino(_chainId: string): OfflineAminoSigner {
-    throw new Error("Not implemented");
+  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
+    return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
   experimentalSignEIP712CosmosTx_v0(
