@@ -18,6 +18,8 @@ import { DepositModal } from "./qr-code";
 import { useNotification } from "../../components/notification";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { store } from "../../chatStore";
+import { setIsChatActive } from "../../chatStore/user-slice";
 // import { fetchPublicKey } from "../../utils/fetch-public-key";
 
 export const ProgressBar = ({
@@ -212,6 +214,7 @@ export const AssetView: FunctionComponent = observer(() => {
     ? !totalPrice.toDec().isZero()
     : !total.toDec().isZero();
 
+  store.dispatch(setIsChatActive(hasBalance));
   if (!hasBalance) {
     return (
       <EmptyState

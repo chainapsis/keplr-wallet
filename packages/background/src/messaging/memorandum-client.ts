@@ -18,7 +18,7 @@ const defaultOptions: DefaultOptions = {
 };
 
 const client = new ApolloClient({
-  uri: "https://messaging-server.sandbox-london-b.fetch-ai.com/graphql",
+  uri: "https://messaging.fetch-ai.network/graphql",
   cache: new InMemoryCache(),
   defaultOptions,
 });

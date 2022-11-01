@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { userChatActive } from "../../chatStore/user-slice";
 import { CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 import chatTabBlueIcon from "../../public/assets/icon/chat-blue.png";
 import chatTabGreyIcon from "../../public/assets/icon/chat-grey.png";
@@ -52,42 +54,22 @@ export const BottomNav = () => {
 const HomeTab = () => <Tab {...bottomNav[0]} />;
 const ActivityTab = () => <Tab {...bottomNav[1]} />;
 const ChatTab = () => {
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { chainStore } = useStore();
+  const isChatActive = useSelector(userChatActive);
   const [chatTooltip, setChatTooltip] = useState("");
   const [chatDisabled, setChatDisabled] = useState(false);
   const current = chainStore.current;
-  const queries = queriesStore.get(current.chainId);
-  const accountInfo = accountStore.getAccount(current.chainId);
-  const balanceStakableQuery = queries.queryBalances.getQueryBech32Address(
-    accountInfo.bech32Address
-  ).stakable;
-
-  const stakable = balanceStakableQuery.balance;
-  const delegated = queries.cosmos.queryDelegations
-    .getQueryBech32Address(accountInfo.bech32Address)
-    .total.upperCase(true);
-  const unbonding = queries.cosmos.queryUnbondingDelegations
-    .getQueryBech32Address(accountInfo.bech32Address)
-    .total.upperCase(true);
-  const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
-    accountInfo.bech32Address
-  );
-
-  const stakableReward = rewards.stakableReward;
-  const stakedSum = delegated.add(unbonding);
-  const total = stakable.add(stakedSum).add(stakableReward);
-  const hasBalance = total && !total.toDec().isZero();
 
   useEffect(() => {
-    if (!hasBalance)
+    if (!isChatActive)
       setChatTooltip("You need to have FET balance to use this feature");
 
     if (current?.chainId !== CHAIN_ID_FETCHHUB)
       setChatTooltip("Feature not available on this network");
 
     if (process.env.NODE_ENV === "production")
-      setChatDisabled(current?.chainId !== CHAIN_ID_FETCHHUB || !hasBalance);
-  }, [current.chainId, hasBalance]);
+      setChatDisabled(current?.chainId !== CHAIN_ID_FETCHHUB || !isChatActive);
+  }, [current.chainId, isChatActive]);
   return (
     <Tab
       title={"Chat"}
