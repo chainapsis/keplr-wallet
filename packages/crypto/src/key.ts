@@ -99,29 +99,15 @@ export class PubKeySecp256k1 {
 
     const secp256k1 = new ec("secp256k1");
 
-    let r = signature.slice(0, 32);
-    let s = signature.slice(32);
-    const rIsNegative = r[0] >= 0x80;
-    const sIsNegative = s[0] >= 0x80;
-    if (rIsNegative) {
-      r = new Uint8Array([0, ...r]);
-    }
-    if (sIsNegative) {
-      s = new Uint8Array([0, ...s]);
-    }
+    const r = signature.slice(0, 32);
+    const s = signature.slice(32);
 
-    // Der encoding
-    const derData = new Uint8Array([
-      0x02,
-      r.length,
-      ...r,
-      0x02,
-      s.length,
-      ...s,
-    ]);
     return secp256k1.verify(
       Buffer.from(hash, "hex"),
-      new Uint8Array([0x30, derData.length, ...derData]),
+      {
+        r: Buffer.from(r).toString("hex"),
+        s: Buffer.from(s).toString("hex"),
+      },
       this.toKeyPair()
     );
   }
