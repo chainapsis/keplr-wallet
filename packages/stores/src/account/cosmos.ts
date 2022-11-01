@@ -523,7 +523,7 @@ export class CosmosAccountImpl {
 
         // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
         //      That means this part is not standard.
-        (altSignDoc as any).fee["feePayer"] = this.base.bech32Address;
+        altSignDoc.fee["feePayer"] = this.base.bech32Address;
 
         return await keplr.experimentalSignEIP712CosmosTx_v0(
           this.chainId,
@@ -641,7 +641,7 @@ export class CosmosAccountImpl {
           gasLimit: signResponse.signed.fee.gas,
           payer: eip712Signing
             ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-              (signResponse.signed as any).fee["feePayer"]
+              signResponse.signed.fee["feePayer"]
             : undefined,
         }),
       }).finish(),

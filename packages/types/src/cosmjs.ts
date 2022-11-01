@@ -17,6 +17,12 @@ export interface Coin {
 export interface StdFee {
   readonly amount: readonly Coin[];
   readonly gas: string;
+  readonly payer?: string;
+  readonly granter?: string;
+
+  // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
+  //      That means this part is not standard.
+  readonly feePayer?: string;
 }
 
 export interface Msg {
@@ -133,5 +139,3 @@ export interface OfflineAminoSigner {
     signDoc: StdSignDoc
   ) => Promise<AminoSignResponse>;
 }
-
-export declare type OfflineSigner = OfflineAminoSigner | OfflineDirectSigner;
