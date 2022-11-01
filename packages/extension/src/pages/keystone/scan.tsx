@@ -3,27 +3,37 @@ import style from "./style.module.scss";
 import { AnimatedQRScanner, Purpose } from "@keystonehq/animated-qr";
 import { UR } from "@keplr-wallet/stores";
 import { Loading } from "./loading";
+import { Message } from "./message";
 
 export interface Props {
-  onChange(ur: UR): void;
+  onChange(ur: UR): Promise<void>;
 }
 
 export function Scan({ onChange }: Props) {
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isPermitted, setIsPermitted] = useState(true);
+  const [isMsgShow, setIsMsgShow] = useState(false);
 
-  let timer: NodeJS.Timeout | undefined;
   const onVideoLoaded = (isLoaded: boolean) => {
-    // the first trigger is too early
-    if (!timer) {
-      timer = setTimeout(() => {
-        setIsVideoLoaded(isLoaded);
-      }, 2000);
-    } else {
-      clearTimeout(timer);
-      setIsVideoLoaded(isLoaded);
+    setIsPermitted(isLoaded);
+  };
+
+  const onError = () => {
+    setIsMsgShow(true);
+  };
+
+  const handleScan = async (ur: UR) => {
+    setIsConnecting(true);
+    try {
+      await onChange(ur);
+    } catch (err) {
+      console.error(err);
+      onError();
+    } finally {
+      setIsConnecting(false);
     }
   };
+
   return (
     <div className={`${style.page} ${style.center}`}>
       <div>
@@ -32,14 +42,11 @@ export function Scan({ onChange }: Props) {
           Scan the QR code displayed on your Keystone Device
         </div>
         <div className={style.scanner}>
-          {/* {!isVideoLoaded && (
-            <img src={require("../../public/assets/svg/scanner.svg")} />
-          )} */}
           <img src={require("../../public/assets/svg/scanner.svg")} />
           <AnimatedQRScanner
             purpose={Purpose.COSMOS_SYNC}
-            handleScan={onChange}
-            handleError={console.error}
+            handleScan={handleScan}
+            handleError={onError}
             videoLoaded={onVideoLoaded}
             options={{
               width: 248,
@@ -47,16 +54,22 @@ export function Scan({ onChange }: Props) {
             }}
           />
         </div>
-        <p className={style["help-text"]}>
-          Position the QR code in front of your camera. The screen is blurred
-          but this will not affect the scan.
-        </p>
+        {isPermitted ? (
+          <p className={style["help-text"]}>
+            Position the QR code in front of your camera. The screen is blurred
+            but this will not affect the scan.
+          </p>
+        ) : (
+          <p className={style["error-text"]}>
+            Please enable your camera permission via [Settings]
+          </p>
+        )}
         <a
           href="#done"
           style={{ position: "absolute" }}
           onClick={(e) => {
             e.preventDefault();
-            onChange({
+            handleScan({
               type: "A",
               cbor:
                 "02bda203ca44c955f1db94bb0d34ef072cebeb27f5bc7b13656bb2881301d017a6",
@@ -67,6 +80,13 @@ export function Scan({ onChange }: Props) {
         </a>
       </div>
       {isConnecting && <Loading title="Connecting" />}
+      {isMsgShow && (
+        <Message onClose={() => setIsMsgShow(false)} type="error">
+          Invalid QR code. Please ensure you have selected a valid QR code from
+          your Keystone device.
+          <a href="/">Tutorial</a>
+        </Message>
+      )}
     </div>
   );
 }
