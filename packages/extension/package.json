@@ -34,7 +34,7 @@
     "@keplr-wallet/stores-etc": "0.11.16",
     "@keplr-wallet/types": "0.11.16",
     "@keplr-wallet/unit": "0.11.16",
-    "@keystonehq/animated-qr": "link:.yalc/@keystonehq/animated-qr",
+    "@keystonehq/animated-qr": "^0.3.1-alpha.0",
     "@walletconnect/client": "^1.6.4",
     "aes-js": "^3.1.2",
     "alt-sign-in": "file:./noop-alt-sign-in",

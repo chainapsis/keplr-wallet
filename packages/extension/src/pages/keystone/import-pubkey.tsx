@@ -4,13 +4,13 @@ import { useStore } from "../../stores";
 import { Guide } from "./guide";
 import { Scan } from "./scan";
 import { UR } from "@keplr-wallet/stores";
-import { useKeystoneKeyring } from "@keplr-wallet/hooks";
+import { useKeystoneCosmosKeyring } from "@keplr-wallet/hooks";
 
 export const KeystoneImportPubkeyPage = observer(() => {
   const [isScan, setIsScan] = useState(false);
 
   const { keystoneStore } = useStore();
-  const keystoneKeyring = useKeystoneKeyring();
+  const keystoneKeyring = useKeystoneCosmosKeyring();
 
   const onUnload = () => {
     keystoneStore.resolveGetPubkey({

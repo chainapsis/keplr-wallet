@@ -29,6 +29,11 @@
     line-height: 22px;
     color: var(--gray);
   }
+  .error-text {
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--danger);
+  }
   :global(.btn-secondary),
   :global(.btn-secondary:hover) {
     background-color: var(--gray);
@@ -100,7 +105,6 @@
   .more {
     margin-top: 16px;
     a {
-      color: var(--primary);
       text-decoration: underline;
     }
   }
@@ -132,7 +136,7 @@
   align-items: center;
   .modal-content {
     width: 316px;
-    padding: 20px 0;
+    padding: 20px;
     border-radius: 8px;
     background-color: var(--white);
   }
@@ -151,6 +155,23 @@
     font-size: 20px;
     font-weight: bold;
     line-height: 27px;
+    margin-top: 16px;
+  }
+  .message-icon {
+    margin-bottom: 24px;
+  }
+  .message-content {
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--gray-dark);
+    a {
+      display: block;
+      line-height: 22px;
+      margin-top: 16px;
+      text-decoration: underline;
+    }
+  }
+  .message-button {
     margin-top: 16px;
   }
 }

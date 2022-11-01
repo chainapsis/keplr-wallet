@@ -1,8 +1,8 @@
 import {
-  AptosSignature,
-  AptosSignRequest,
-} from "@keystonehq/bc-ur-registry-aptos";
-import { BaseKeyring, InteractionProvider } from "@keystonehq/aptos-keyring";
+  CosmosSignature,
+  CosmosSignRequest,
+} from "@keystonehq/bc-ur-registry-cosmos";
+import { BaseKeyring, InteractionProvider } from "@keystonehq/cosmos-keyring";
 import { CryptoMultiAccounts } from "@keystonehq/bc-ur-registry";
 import { UR } from "@keplr-wallet/stores";
 
@@ -14,7 +14,7 @@ interface PlayUR {
   (ur: UR, options?: any): Promise<null>;
 }
 
-export class KeystoneInteractionProvider implements InteractionProvider {
+export class KeystoneCosmosInteractionProvider implements InteractionProvider {
   private readUR: ReadUR = async () => {
     throw new Error("KeystoneError#readUR function is not set.");
   };
@@ -37,7 +37,7 @@ export class KeystoneInteractionProvider implements InteractionProvider {
   };
 
   public requestSignature = async (
-    aptosSignRequest: AptosSignRequest,
+    aptosSignRequest: CosmosSignRequest,
     requestTitle?: string,
     requestDescription?: string
   ) => {
@@ -53,22 +53,22 @@ export class KeystoneInteractionProvider implements InteractionProvider {
       }
     );
     const result = await this.readUR();
-    return AptosSignature.fromCBOR(Buffer.from(result.cbor, "hex"));
+    return CosmosSignature.fromCBOR(Buffer.from(result.cbor, "hex"));
   };
 }
 
-export class KeystoneKeyring extends BaseKeyring {
+export class KeystoneCosmosKeyring extends BaseKeyring {
   static type = BaseKeyring.type;
 
-  static getEmptyKeyring(): KeystoneKeyring {
-    return new KeystoneKeyring();
+  static getEmptyKeyring(): KeystoneCosmosKeyring {
+    return new KeystoneCosmosKeyring();
   }
 
-  private interaction: KeystoneInteractionProvider;
+  private interaction: KeystoneCosmosInteractionProvider;
 
   constructor() {
     super();
-    this.interaction = new KeystoneInteractionProvider();
+    this.interaction = new KeystoneCosmosInteractionProvider();
   }
 
   getInteraction = () => {
@@ -76,6 +76,6 @@ export class KeystoneKeyring extends BaseKeyring {
   };
 }
 
-export function useKeystoneKeyring() {
-  return KeystoneKeyring.getEmptyKeyring();
+export function useKeystoneCosmosKeyring() {
+  return KeystoneCosmosKeyring.getEmptyKeyring();
 }

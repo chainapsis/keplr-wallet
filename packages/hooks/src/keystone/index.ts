@@ -1,1 +1,2 @@
-export * from "./keyring";
+export * from "./cosmos-keyring";
+export * from "./eth-keyring";
