@@ -13,7 +13,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "@keplr-wallet/provider-mock": "0.11.15-rc.0",
+    "@keplr-wallet/provider-mock": "0.11.15",
     "@cosmjs/stargate": "^0.29.3"
   }
 }
