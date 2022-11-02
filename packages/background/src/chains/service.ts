@@ -157,7 +157,7 @@ export class ChainsService {
   ): Promise<void> {
     chainInfo = await validateBasicChainInfoType(chainInfo);
 
-    await this.interactionKeeper.waitApprove(
+    const receivedChainInfo = (await this.interactionKeeper.waitApprove(
       env,
       "/suggest-chain",
       SuggestChainInfoMsg.type(),
@@ -165,9 +165,9 @@ export class ChainsService {
         ...chainInfo,
         origin,
       }
-    );
+    )) as ChainInfo;
 
-    await this.addChainInfo(chainInfo);
+    await this.addChainInfo(receivedChainInfo);
   }
 
   async getSuggestedChainInfos(): Promise<ChainInfo[]> {
