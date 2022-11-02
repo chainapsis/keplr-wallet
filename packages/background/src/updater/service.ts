@@ -3,6 +3,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainInfoWithEmbed, ChainsService } from "../chains";
 import {
+  checkChainFeatures,
   SupportedChainFeatures,
   validateBasicChainInfoType,
 } from "@keplr-wallet/chain-validator";
@@ -117,6 +118,24 @@ export class ChainUpdaterService {
         "updated-chain-info/" + chainIdentifier,
         chainInfo
       );
+
+      this.chainsService.clearCachedChainInfos();
+
+      const updatedChainInfo = await this.chainsService.getChainInfo(chainId);
+      const toUpdateFeatures = await checkChainFeatures(updatedChainInfo);
+
+      if (toUpdateFeatures.length !== 0) {
+        const legacy = await this.kvStore.get<Partial<ChainInfo>>(
+          chainIdentifier
+        );
+
+        await this.kvStore.set<Partial<ChainInfo>>(chainIdentifier, {
+          ...legacy,
+          features: [
+            ...new Set([...toUpdateFeatures, ...(legacy?.features ?? [])]),
+          ],
+        });
+      }
 
       this.chainsService.clearCachedChainInfos();
     } catch (e) {
@@ -240,120 +259,7 @@ export class ChainUpdaterService {
       };
     }
 
-    const restInstance = Axios.create({
-      baseURL: chainInfo.rest,
-    });
-
-    let ibcGoUpdates = false;
-    try {
-      if (!chainInfo.features || !chainInfo.features.includes("ibc-go")) {
-        // If the chain uses the ibc-go module separated from the cosmos-sdk,
-        // we need to check it because the REST API is different.
-        const result = await restInstance.get<{
-          params: {
-            receive_enabled: boolean;
-            send_enabled: boolean;
-          };
-        }>("/ibc/apps/transfer/v1/params");
-
-        if (result.status === 200) {
-          ibcGoUpdates = true;
-        }
-      }
-    } catch {}
-
-    let ibcTransferUpdate = false;
-    try {
-      if (!chainInfo.features || !chainInfo.features.includes("ibc-transfer")) {
-        const isIBCGo =
-          ibcGoUpdates ||
-          (chainInfo.features && chainInfo.features.includes("ibc-go"));
-
-        // If the chain doesn't have the ibc transfer feature,
-        // try to fetch the params of ibc transfer module.
-        // assume that it can support the ibc transfer if the params return true, and try to update the features.
-        const result = await restInstance.get<{
-          params: {
-            receive_enabled: boolean;
-            send_enabled: boolean;
-          };
-        }>(
-          isIBCGo
-            ? "/ibc/apps/transfer/v1/params"
-            : "/ibc/applications/transfer/v1beta1/params"
-        );
-        if (
-          result.data.params.receive_enabled &&
-          result.data.params.send_enabled
-        ) {
-          ibcTransferUpdate = true;
-        }
-      }
-    } catch {}
-
-    let wasmd24Update = false;
-    try {
-      if (
-        chainInfo.features?.includes("cosmwasm") &&
-        !chainInfo.features.includes("wasmd_0.24+")
-      ) {
-        // It is difficult to decide which contract address to test on each chain.
-        // So it simply sends a query that fails unconditionally.
-        // However, if 400 bad request instead of 501 occurs, the url itself exists.
-        // In this case, it is assumed that wasmd 0.24+ version.
-        const result = await restInstance.get(
-          "/cosmwasm/wasm/v1/contract/test/smart/test",
-          {
-            validateStatus: (status) => {
-              return status === 400 || status === 501;
-            },
-          }
-        );
-        if (result.status === 400) {
-          wasmd24Update = true;
-        }
-      }
-    } catch {}
-
-    let querySpendableBalances = false;
-    try {
-      if (
-        !chainInfo.features ||
-        !chainInfo.features.includes(
-          "query:/cosmos/bank/v1beta1/spendable_balances"
-        )
-      ) {
-        // It is difficult to decide which account to test on each chain.
-        // So it simply sends a query that fails unconditionally.
-        // However, if 400 bad request instead of 501 occurs, the url itself exists.
-        // In this case, it is assumed that we can query /cosmos/bank/v1beta1/spendable_balances/{account}
-        const result = await restInstance.get(
-          "/cosmos/bank/v1beta1/spendable_balances/test",
-          {
-            validateStatus: (status) => {
-              return status === 400 || status === 501;
-            },
-          }
-        );
-        if (result.status === 400) {
-          querySpendableBalances = true;
-        }
-      }
-    } catch {}
-
-    const features: string[] = [];
-    if (ibcGoUpdates) {
-      features.push("ibc-go");
-    }
-    if (ibcTransferUpdate) {
-      features.push("ibc-transfer");
-    }
-    if (wasmd24Update) {
-      features.push("wasmd_0.24+");
-    }
-    if (querySpendableBalances) {
-      features.push("query:/cosmos/bank/v1beta1/spendable_balances");
-    }
+    const features = await checkChainFeatures(chainInfo);
 
     return {
       explicit: version.version < fetchedVersion.version,
