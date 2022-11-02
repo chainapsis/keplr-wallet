@@ -567,7 +567,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         "osmo",
         signDoc,
         pubKey.toBytes(),
-        signature.slice().filter((b) => (Math.random() > 0.5 ? 0 : b))
+        signature.slice().map((b) => (Math.random() > 0.5 ? 0 : b))
       )
     ).toBe(false);
 

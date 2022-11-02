@@ -948,6 +948,17 @@ export class CosmosAccountImpl {
           );
         }
 
+        const useEthereumSign =
+          this.chainGetter
+            .getChain(this.chainId)
+            .features?.includes("eth-key-sign") === true;
+
+        const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+
+        // On ledger with ethermint, eip712 types are required and we can't omit `timeoutTimestamp`.
+        // Although we are not using `timeoutTimestamp` at present, just set it as mas uint64 only for eip712 cosmos tx.
+        const timeoutTimestamp = eip712Signing ? "18446744073709551615" : "0";
+
         const msg = {
           type: this.msgOpts.ibcTransfer.type,
           value: {
@@ -968,11 +979,16 @@ export class CosmosAccountImpl {
                 .add(new Int("150"))
                 .toString(),
             },
+            timeout_timestamp: timeoutTimestamp as string | undefined,
           },
         };
 
         if (msg.value.timeout_height.revision_number === "0") {
           delete msg.value.timeout_height.revision_number;
+        }
+
+        if (msg.value.timeout_timestamp === "0") {
+          delete msg.value.timeout_timestamp;
         }
 
         return {
@@ -993,6 +1009,7 @@ export class CosmosAccountImpl {
                       : "0",
                     revisionHeight: msg.value.timeout_height.revision_height,
                   },
+                  timeoutTimestamp: msg.value.timeout_timestamp,
                 })
               ).finish(),
             },
