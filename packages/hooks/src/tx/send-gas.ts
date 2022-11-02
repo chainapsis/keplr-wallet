@@ -36,6 +36,11 @@ export class SendGasConfig extends GasConfig {
         case "cw20":
           return account.cosmwasm?.msgOpts.send.cw20.gas ?? 0;
         default:
+          const chainInfo = this.chainGetter.getChain(this.chainId);
+          if (chainInfo.features?.includes("gno")) {
+            return account.gno?.msgOpts.send.native.gas ?? 0;
+          }
+
           return account.cosmos?.msgOpts.send.native.gas ?? 0;
       }
     }
@@ -66,6 +71,14 @@ export class SendGasConfig extends GasConfig {
           break;
         }
         default: {
+          const chainInfo = this.chainGetter.getChain(this.chainId);
+          if (chainInfo.features?.includes("gno")) {
+            if (!account.gno?.msgOpts.send.native.gas) {
+              return new UnknownCurrencyError("Unknown currency");
+            }
+            break;
+          }
+
           if (!account.cosmos?.msgOpts.send.native.gas) {
             return new UnknownCurrencyError("Unknown currency");
           }

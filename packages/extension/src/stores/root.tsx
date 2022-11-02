@@ -14,6 +14,7 @@ import {
   CosmwasmAccount,
   CosmwasmQueries,
   OsmosisQueries,
+  GnoAccount,
   DeferInitialQueryController,
   getKeplrFromWindow,
   IBCChannelStore,
@@ -74,7 +75,7 @@ export class RootStore {
     ]
   >;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount]
+    [CosmosAccount, CosmwasmAccount, GnoAccount, SecretAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
@@ -278,6 +279,9 @@ export class RootStore {
         },
       }),
       CosmwasmAccount.use({
+        queriesStore: this.queriesStore,
+      }),
+      GnoAccount.use({
         queriesStore: this.queriesStore,
       }),
       SecretAccount.use({

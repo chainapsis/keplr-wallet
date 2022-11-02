@@ -4,6 +4,7 @@ import {
   CoinPrimitive,
   CosmosMsgOpts,
   IAccountStore,
+  GnoMsgOpts,
 } from "@keplr-wallet/stores";
 import { AppCurrency } from "@keplr-wallet/types";
 import { action, computed, makeObservable, observable } from "mobx";
@@ -11,7 +12,7 @@ import { Coin, CoinPretty, Int } from "@keplr-wallet/unit";
 import { SignDocHelper } from "./index";
 import { useState } from "react";
 import { computedFn } from "mobx-utils";
-import { Msg } from "@cosmjs/launchpad";
+import { Msg, parseCoins } from "@cosmjs/launchpad";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { MsgDelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
@@ -19,6 +20,9 @@ import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 export type AccountStore = IAccountStore<{
   cosmos: {
     readonly msgOpts: CosmosMsgOpts;
+  };
+  gno: {
+    readonly msgOpts: GnoMsgOpts;
   };
 }>;
 
@@ -154,6 +158,26 @@ export class SignDocAmountConfig
               amount.amount = amount.amount.add(
                 new Int(msg.value.amount.amount)
               );
+            }
+            break;
+          case account.gno.msgOpts.send.native.type:
+            if (
+              msg.value.from_address &&
+              msg.value.from_address !== this.sender
+            ) {
+              return {
+                amount: "0",
+                denom: this.sendCurrency.coinMinimalDenom,
+              };
+            }
+            if (msg.value.amount) {
+              for (const amountInMsg of parseCoins(msg.value.amount)) {
+                if (amountInMsg.denom === amount.denom) {
+                  amount.amount = amount.amount.add(
+                    new Int(amountInMsg.amount)
+                  );
+                }
+              }
             }
             break;
         }

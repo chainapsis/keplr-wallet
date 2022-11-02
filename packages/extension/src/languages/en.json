@@ -271,6 +271,9 @@
   "sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm": "Encrypted",
   "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "Failed to decrypt Secret message. This may be due to Keplr viewing key not matching the transaction viewing key.",
 
+  "sign.list.message.gno/VmCall.title": "Execute Gno Contract",
+  "sign.list.message.gno/VmCall.content": "Execute <b>{func}</b> in realm <b>{realm}</b><only-sent-exist> by sending <b>{sent}</b></only-sent-exist> with args:",
+
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{neuron}</b> create link {br}<b>{link}</b>",
 

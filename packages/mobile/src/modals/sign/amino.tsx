@@ -2,6 +2,7 @@ import React from "react";
 import {
   CosmosMsgOpts,
   CosmwasmMsgOpts,
+  GnoMsgOpts,
   SecretMsgOpts,
 } from "@keplr-wallet/stores";
 import {
@@ -23,8 +24,10 @@ import {
   renderMsgWithdrawDelegatorReward,
   renderMsgVote,
   renderMsgExecuteContract,
+  GnoMsgSend,
 } from "./messages";
 import { AppCurrency } from "@keplr-wallet/types";
+import { parseCoins } from "@cosmjs/launchpad";
 
 export function renderAminoMessage(
   msgOpts: {
@@ -33,6 +36,9 @@ export function renderAminoMessage(
     };
     readonly cosmwasm: {
       readonly msgOpts: CosmwasmMsgOpts;
+    };
+    readonly gno: {
+      readonly msgOpts: GnoMsgOpts;
     };
     readonly secret: {
       readonly msgOpts: SecretMsgOpts;
@@ -116,6 +122,10 @@ export function renderAminoMessage(
     );
   }
 
+  if (msg.type === msgOpts.gno.msgOpts.send.native.type) {
+    const value = msg.value as GnoMsgSend["value"];
+    return renderMsgSend(currencies, parseCoins(value.amount), value.to_address);
+  }
   /*
   if (msg.type === "wasm/MsgInstantiateContract") {
     const value = msg.value as MsgInstantiateContract["value"];

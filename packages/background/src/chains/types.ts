@@ -166,7 +166,8 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
         "eth-key-sign",
         "query:/cosmos/bank/v1beta1/spendable_balances",
         "axelar-evm-bridge",
-        "osmosis-txfees"
+        "osmosis-txfees",
+        "gno"
       )
     )
     .unique()

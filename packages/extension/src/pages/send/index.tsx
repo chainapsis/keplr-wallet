@@ -158,6 +158,7 @@ export const SendPage: FunctionComponent = observer(() => {
     gasSimulator,
     sendConfigs.amountConfig.sendCurrency,
     sendConfigs.gasConfig,
+    current.features,
   ]);
 
   useEffect(() => {
