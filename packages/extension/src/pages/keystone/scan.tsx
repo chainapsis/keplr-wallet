@@ -64,20 +64,6 @@ export function Scan({ onChange }: Props) {
             Please enable your camera permission via [Settings]
           </p>
         )}
-        <a
-          href="#done"
-          style={{ position: "absolute" }}
-          onClick={(e) => {
-            e.preventDefault();
-            handleScan({
-              type: "A",
-              cbor:
-                "02bda203ca44c955f1db94bb0d34ef072cebeb27f5bc7b13656bb2881301d017a6",
-            });
-          }}
-        >
-          Done for debug
-        </a>
       </div>
       {isConnecting && <Loading title="Connecting" />}
       {isMsgShow && (

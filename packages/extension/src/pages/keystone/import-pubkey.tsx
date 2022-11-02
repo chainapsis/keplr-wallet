@@ -5,6 +5,7 @@ import { Guide } from "./guide";
 import { Scan } from "./scan";
 import { UR } from "@keplr-wallet/stores";
 import { useKeystoneCosmosKeyring } from "@keplr-wallet/hooks";
+import { parseHDPath } from "./utils";
 
 export const KeystoneImportPubkeyPage = observer(() => {
   const [isScan, setIsScan] = useState(false);
@@ -23,9 +24,16 @@ export const KeystoneImportPubkeyPage = observer(() => {
       return ur;
     });
     await keystoneKeyring.readKeyring();
-    const publicKey = await keystoneKeyring.getPubKeys();
+    const keys = await keystoneKeyring.getPubKeys();
     keystoneStore.resolveGetPubkey({
-      publicKey,
+      publicKey: keys.map((k) => {
+        const hdPath = `m/${k.hdPath}`;
+        return {
+          ...k,
+          hdPath,
+          ...parseHDPath(hdPath),
+        };
+      }),
     });
     window.removeEventListener("unload", onUnload);
     window.close();
