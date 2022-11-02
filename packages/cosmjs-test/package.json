@@ -1,6 +1,6 @@
 {
   "name": "cosmjs-test",
-  "version": "0.11.15-rc.0",
+  "version": "0.11.15",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "private": true,
