@@ -130,8 +130,11 @@ export function init(
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);
   phishingListService.init();
-  // No need to wait because user can't interact with app right after launch.
-  autoLockAccountService.init(keyRingService);
+  // Auto lock account module only work on web browser at present
+  if (typeof browser !== "undefined") {
+    // No need to wait because user can't interact with app right after launch.
+    autoLockAccountService.init(keyRingService);
+  }
 
   Interaction.init(router, interactionService);
   PersistentMemory.init(router, persistentMemoryService);
