@@ -105,7 +105,6 @@
             font-weight: 600;
             font-size: 14px;
             line-height: 20px;
-            /* identical to box height, or 143% */
 
             text-align: center;
 
@@ -129,6 +128,10 @@
           line-height: 17px;
 
           text-decoration-line: underline;
+
+          a {
+            color: #566172;
+          }
         }
       }
     }
@@ -228,7 +231,7 @@
       justify-content: center;
       padding: 4px 12px;
 
-      > * {
+      .item {
         display: flex;
         gap: 4px;
 
@@ -382,5 +385,83 @@
 
   .button {
     flex: 1;
+  }
+
+  .skeleton {
+    opacity: 0.5 !important;
+    background-image: linear-gradient(
+        0.25turn,
+        transparent,
+        #95a1b4,
+        transparent
+      ),
+      linear-gradient(#cbd3df, #cbd3df),
+      radial-gradient(38px circle at 19px 19px, #cbd3df 50%, transparent 51%),
+      linear-gradient(#cbd3df, #cbd3df);
+    background-repeat: no-repeat;
+    background-size: 315px 250px, 315px 180px, 100px 100px, 225px 30px;
+    background-position: -315px 0, 0 0, 0px 190px, 50px 195px;
+    animation: loading 2s infinite;
+  }
+
+  @keyframes loading {
+    to {
+      background-position: 315px 0, 0 0, 0 190px, 50px 195px;
+    }
+  }
+
+  .skeleton-image-background {
+    width: 80px;
+    height: 80px;
+    background-color: #cbd3df;
+    border-radius: 50%;
+  }
+
+  .skeleton-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #cbd3df;
+  }
+
+  .skeleton-tag {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    .skeleton-github-link {
+      width: 108px;
+      height: 25px;
+      border-radius: 40px;
+
+      background-color: #cbd3df;
+    }
+  }
+
+  .skeletonParagraph {
+    flex: 1;
+    margin-top: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+
+    .skeleton-title {
+      width: 215px;
+      height: 15px;
+    }
+
+    .skeleton-content {
+      width: 170px;
+      height: 15px;
+    }
+  }
+
+  .skeleton-button {
+    height: 44px;
+    margin: 6px;
+    border-radius: 6px;
   }
 }
