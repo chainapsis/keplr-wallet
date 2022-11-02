@@ -101,6 +101,8 @@ export function init(
   const phishingListService = new PhishingList.PhishingListService({
     blockListUrl:
       "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
+    twitterListUrl:
+      "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/twitter_scammer_list.txt",
     fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
     retryIntervalMs: 10 * 60 * 1000, // 10 mins,
     allowTimeoutMs: 10 * 60 * 1000, // 10 mins,

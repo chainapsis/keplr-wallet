@@ -54,3 +54,29 @@ export class URLTempAllowMsg extends Message<void> {
     return URLTempAllowMsg.type();
   }
 }
+
+export class CheckBadTwitterIdMsg extends Message<boolean> {
+  public static type() {
+    return "check-bad-twitter-id";
+  }
+
+  constructor(public readonly id: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckBadTwitterIdMsg.type();
+  }
+}
