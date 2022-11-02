@@ -1,9 +1,13 @@
 import { action, computed, flow, makeObservable, observable } from "mobx";
-import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  Keplr,
+  KeplrSignOptions,
+  StdFee,
+} from "@keplr-wallet/types";
 import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { StdFee } from "@cosmjs/launchpad";
 import { MakeTxResponse } from "./types";
 
 export enum WalletStatus {

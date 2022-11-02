@@ -4,8 +4,10 @@ import {
   EthSignType,
   KeplrSignOptions,
   Key,
+  AminoSignResponse,
+  StdSignature,
+  StdSignDoc,
 } from "@keplr-wallet/types";
-import { AminoSignResponse, StdSignature, StdSignDoc } from "@cosmjs/launchpad";
 
 export class EnableAccessMsg extends Message<void> {
   public static type() {

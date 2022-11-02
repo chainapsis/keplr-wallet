@@ -11,15 +11,14 @@ import {
   KeplrMode,
   KeplrSignOptions,
   Key,
-} from "@keplr-wallet/types";
-import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
-import {
+  DirectSignResponse,
+  OfflineDirectSigner,
   AminoSignResponse,
   BroadcastMode,
-  OfflineSigner,
+  OfflineAminoSigner,
   StdSignature,
   StdSignDoc,
-} from "@cosmjs/launchpad";
+} from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
@@ -395,13 +394,13 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
+  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
   async getOfflineSignerAuto(
     chainId: string
-  ): Promise<OfflineSigner | OfflineDirectSigner> {
+  ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
     const key = await this.getKey(chainId);
     if (key.isNanoLedger) {
       return new CosmJSOfflineSignerOnlyAmino(chainId, this);
@@ -409,7 +408,7 @@ export class KeplrWalletConnectV1 implements Keplr {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
