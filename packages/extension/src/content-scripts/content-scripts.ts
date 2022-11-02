@@ -53,16 +53,19 @@ export class CheckURLIsPhishingMsg extends Message<boolean> {
   }
 }
 
-new InExtensionMessageRequester()
-  .sendMessage(BACKGROUND_PORT, new CheckURLIsPhishingMsg())
-  .then((r) => {
-    if (r) {
-      const origin = window.location.href;
-      window.location.replace(
-        browser.runtime.getURL(`/blocklist.html?origin=${origin}`)
-      );
-    }
-  })
-  .catch((e) => {
-    console.log("Failed to check domain's reliability", e);
-  });
+// If host is localhost, no need to check validity of domain.
+if (new URL(window.location.origin).hostname !== "localhost") {
+  new InExtensionMessageRequester()
+    .sendMessage(BACKGROUND_PORT, new CheckURLIsPhishingMsg())
+    .then((r) => {
+      if (r) {
+        const origin = window.location.href;
+        window.location.replace(
+          browser.runtime.getURL(`/blocklist.html?origin=${origin}`)
+        );
+      }
+    })
+    .catch((e) => {
+      console.log("Failed to check domain's reliability", e);
+    });
+}
