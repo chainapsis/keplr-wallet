@@ -88,7 +88,7 @@ export function Guide({ onScan }: { onScan(): void }) {
           </div>
         )}
         <div className={style.more}>
-          <a href="/" target="_blank">
+          <a href="https://keyst.one/keplr" target="_blank" rel="noreferrer">
             More Details
           </a>
         </div>

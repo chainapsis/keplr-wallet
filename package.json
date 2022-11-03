@@ -95,6 +95,7 @@
     "@types/react": "^16.14.4",
     "@iov/crypto": "2.1.0",
     "axios": "^0.27.2",
+    "@keystonehq/bc-ur-registry": "^0.5.1",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
     "node-sass": "file:./etc/noop"

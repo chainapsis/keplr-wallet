@@ -69,6 +69,18 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                 change: 0,
                 addressIndex: 0,
               };
+          let paragraph = keyStore.meta?.email
+            ? keyStore.meta.email
+            : undefined;
+          if (keyStore.type === "keystone") {
+            paragraph = "Keystone";
+          } else if (keyStore.type === "ledger") {
+            paragraph = `Ledger - m/44'/118'/${bip44HDPath.account}'${
+              bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
+                ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
+                : ""
+            }`;
+          }
 
           return (
             <PageButton
@@ -86,17 +98,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                     })
                   : ""
               }`}
-              paragraph={
-                keyStore.type === "ledger"
-                  ? `Ledger - m/44'/118'/${bip44HDPath.account}'${
-                      bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
-                        ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
-                        : ""
-                    }`
-                  : keyStore.meta?.email
-                  ? keyStore.meta.email
-                  : undefined
-              }
+              paragraph={paragraph}
               onClick={
                 keyStore.selected
                   ? undefined

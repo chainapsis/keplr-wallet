@@ -4974,19 +4974,10 @@
     hdkey "^2.0.1"
     uuid "^8.3.2"
 
-"@keystonehq/bc-ur-registry@^0.4.4":
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry/-/bc-ur-registry-0.4.4.tgz#3073fdd4b33cdcbd04526a313a7685891a4b4583"
-  integrity sha512-SBdKdAZfp3y14GTGrKjfJJHf4iXObjcm4/qKUZ92lj8HVR8mxHHGmHksjE328bJPTAsJPloLix4rTnWg+qgS2w==
-  dependencies:
-    "@ngraveio/bc-ur" "^1.1.5"
-    base58check "^2.0.0"
-    tslib "^2.3.0"
-
-"@keystonehq/bc-ur-registry@^0.5.0", "@keystonehq/bc-ur-registry@^0.5.0-alpha.5":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry/-/bc-ur-registry-0.5.0.tgz#758948c515951607a6c8147766b8de32c4a29758"
-  integrity sha512-Y7Ho9ZCP3rWvQpAAHbJ3tPloYov3wRzfzxuY5tfEGltLX7YmSt4LiJtiSkrgWSc/qITZQL95lSM9p1lIb/XHhQ==
+"@keystonehq/bc-ur-registry@^0.4.4", "@keystonehq/bc-ur-registry@^0.5.0", "@keystonehq/bc-ur-registry@^0.5.0-alpha.5", "@keystonehq/bc-ur-registry@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry/-/bc-ur-registry-0.5.1.tgz#30be92a6148758bc690bbe50fe928d7ffbb8f3f1"
+  integrity sha512-PR7vOhuPBTfCJb5vVoLtTk/JGIFh3U2RbtyArkF3gQmCUYoKCwIo2LARgwJzL+eSPKofqGRQGEGN7yBkQlWIGw==
   dependencies:
     "@ngraveio/bc-ur" "^1.1.5"
     base58check "^2.0.0"
