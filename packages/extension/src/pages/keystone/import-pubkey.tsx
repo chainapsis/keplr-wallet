@@ -40,9 +40,11 @@ export const KeystoneImportPubkeyPage = observer(() => {
   };
 
   useEffect(() => {
+    document.documentElement.setAttribute("data-keystone-import-page", "true");
     window.addEventListener("unload", onUnload);
     return () => {
       window.removeEventListener("unload", onUnload);
+      document.documentElement.removeAttribute("data-keystone-import-page");
     };
   }, []);
 
