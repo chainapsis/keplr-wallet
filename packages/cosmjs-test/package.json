@@ -1,0 +1,17 @@
+{
+  "name": "cosmjs-test",
+  "version": "0.11.16-rc.1",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf node_modules",
+    "test": "tsc && jest --passWithNoTests",
+    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+  },
+  "devDependencies": {
+    "@cosmjs/stargate": "^0.29.3",
+    "@keplr-wallet/provider-mock": "0.11.16-rc.1"
+  }
+}

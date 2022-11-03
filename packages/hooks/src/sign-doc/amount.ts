@@ -5,13 +5,12 @@ import {
   CosmosMsgOpts,
   IAccountStore,
 } from "@keplr-wallet/stores";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, Msg } from "@keplr-wallet/types";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Coin, CoinPretty, Int } from "@keplr-wallet/unit";
 import { SignDocHelper } from "./index";
 import { useState } from "react";
 import { computedFn } from "mobx-utils";
-import { Msg } from "@cosmjs/launchpad";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { MsgDelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";

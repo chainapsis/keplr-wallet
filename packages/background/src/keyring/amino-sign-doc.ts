@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { StdSignDoc } from "@cosmjs/launchpad";
+import { StdSignDoc } from "@keplr-wallet/types";
 
 const TrimAminoSignDocScheme = Joi.object({
   chain_id: Joi.string().allow(""),

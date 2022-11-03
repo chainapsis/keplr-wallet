@@ -9,6 +9,8 @@ import {
   Fee,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { escapeHTML } from "@keplr-wallet/common";
+import { StdFee } from "@keplr-wallet/types";
+import { Mutable } from "utility-types";
 
 export class SignDocHelper {
   @observable.ref
@@ -44,20 +46,18 @@ export class SignDocHelper {
         // XXX: Set fee payer/granter if the requested sign doc has fee payer/granter.
         //      Currently, there is no support for fee delegation within keplr,
         //      but this handling is essential for external services that set fee payer/granter.
-        // TODO: Unfortunately. cosmjs does not actively update amino types. Handle the latest amino typing.
         fee: (() => {
-          const fee = { ...stdFee } as any;
+          const fee = { ...stdFee } as Mutable<StdFee>;
 
-          const aminoSignDocAny = aminoSignDoc as any;
-          if (aminoSignDocAny.fee.feePayer) {
+          if (aminoSignDoc.fee.feePayer) {
             // XXX: This part is not standard. This is only used for ethermint EIP-712 signing.
-            fee.feePayer = aminoSignDocAny.fee.feePayer;
+            fee.feePayer = aminoSignDoc.fee.feePayer;
           }
-          if (aminoSignDocAny.fee.granter) {
-            fee.granter = aminoSignDocAny.fee.granter;
+          if (aminoSignDoc.fee.granter) {
+            fee.granter = aminoSignDoc.fee.granter;
           }
-          if (aminoSignDocAny.fee.payer) {
-            fee.payer = aminoSignDocAny.fee.payer;
+          if (aminoSignDoc.fee.payer) {
+            fee.payer = aminoSignDoc.fee.payer;
           }
 
           return fee;

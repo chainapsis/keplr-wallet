@@ -1,12 +1,12 @@
 import { AccountSetBaseSuper, MsgOpt, WalletStatus } from "./base";
-import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import {
+  AppCurrency,
+  KeplrSignOptions,
   BroadcastMode,
-  makeSignDoc,
   Msg,
   StdFee,
   StdSignDoc,
-} from "@cosmjs/launchpad";
+} from "@keplr-wallet/types";
 import { DenomHelper, escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
@@ -497,16 +497,16 @@ export class CosmosAccountImpl {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
-    const signDoc = sortObjectByKey(
-      makeSignDoc(
-        aminoMsgs,
-        fee,
-        this.chainId,
-        escapeHTML(memo),
-        account.getAccountNumber().toString(),
-        account.getSequence().toString()
-      )
-    );
+    const signDocRaw: StdSignDoc = {
+      chain_id: this.chainId,
+      account_number: account.getAccountNumber().toString(),
+      sequence: account.getSequence().toString(),
+      fee: fee,
+      msgs: aminoMsgs,
+      memo: escapeHTML(memo),
+    };
+
+    const signDoc = sortObjectByKey(signDocRaw);
 
     const signResponse = await (async () => {
       if (!eip712Signing) {
@@ -523,7 +523,7 @@ export class CosmosAccountImpl {
 
         // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
         //      That means this part is not standard.
-        (altSignDoc as any).fee["feePayer"] = this.base.bech32Address;
+        altSignDoc.fee["feePayer"] = this.base.bech32Address;
 
         return await keplr.experimentalSignEIP712CosmosTx_v0(
           this.chainId,
@@ -641,7 +641,7 @@ export class CosmosAccountImpl {
           gasLimit: signResponse.signed.fee.gas,
           payer: eip712Signing
             ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-              (signResponse.signed as any).fee["feePayer"]
+              signResponse.signed.fee["feePayer"]
             : undefined,
         }),
       }).finish(),

@@ -6,7 +6,7 @@ import { useStore } from "../../stores";
 import styleDetailsTab from "./details-tab.module.scss";
 
 import { renderAminoMessage } from "./amino";
-import { Msg } from "@cosmjs/launchpad";
+import { Msg } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
 import { FeeButtons, MemoInput } from "../../components/form";
 import {
