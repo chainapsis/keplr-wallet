@@ -43,7 +43,19 @@
     "pre-commit"
   ],
   "lint-staged": {
-    "*": [
+    "*.{js,ts,jsx,tsx}": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.mjs": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.json": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.{css,scss,sass}": [
       "eslint",
       "prettier --check"
     ]
