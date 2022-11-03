@@ -30,7 +30,7 @@
     "clean:watchman": "watchman watch-del-all",
     "build": "lerna run build",
     "build:libs": "lerna run build --ignore @keplr-wallet/extension",
-    "test": "lerna run test --parallel",
+    "test": "zx ./scripts/monorepo-deps-version-check.mjs && lerna run test --parallel",
     "build:clean": "yarn clean && yarn install --frozen-lockfile && lerna run build",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
