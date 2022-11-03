@@ -916,6 +916,14 @@ export class KeyRing {
         await this.ensureLedgerPublicKey(LedgerApp.Cosmos),
         message
       );
+    } else if (this.keyStore.type === "keystone") {
+      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+      return await this.keystoneService.sign(
+        env,
+        coinType,
+        KeyRing.getKeyStoreBIP44Path(this.keyStore),
+        message
+      );
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
 

@@ -9,10 +9,18 @@ import {
 } from "./cosmos-keyring";
 
 export const TYPE_KEYSTONE_GET_PUBKEY = "keystone-get-pubkey";
+export const TYPE_KEYSTONE_SIGN = "keystone-sign";
 
-export interface StdPublicKeyDoc {
-  publicKey?: KeystoneUR;
+export interface StdDoc {
   abort?: boolean;
+}
+
+export interface StdPublicKeyDoc extends StdDoc {
+  publicKey?: KeystoneUR;
+}
+
+export interface StdSignDoc extends StdDoc {
+  signature?: string;
 }
 
 export class KeystoneService {
@@ -57,5 +65,30 @@ export class KeystoneService {
     });
     await keyring.readKeyring();
     return keyring.getKeyringData();
+  }
+
+  async sign(
+    env: Env,
+    coinType: number,
+    bip44HDPath: BIP44HDPath,
+    message: Uint8Array
+  ): Promise<Uint8Array> {
+    const res = (await this.interactionService.waitApprove(
+      env,
+      "/keystone/sign",
+      TYPE_KEYSTONE_SIGN,
+      {
+        coinType,
+        bip44HDPath,
+        message,
+      }
+    )) as StdSignDoc;
+    if (res.abort) {
+      throw new KeplrError("keystone", 301, "The process has been canceled.");
+    }
+    if (!res.signature) {
+      throw new KeplrError("keystone", 303, "Signature is empty.");
+    }
+    return Buffer.from(res.signature, "hex");
   }
 }

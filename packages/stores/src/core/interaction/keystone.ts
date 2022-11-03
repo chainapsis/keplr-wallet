@@ -1,10 +1,20 @@
-import { flow, makeObservable } from "mobx";
+import { computed, flow, makeObservable } from "mobx";
 import { InteractionStore } from "./interaction";
-import { TYPE_KEYSTONE_GET_PUBKEY } from "@keplr-wallet/background";
+import {
+  BIP44HDPath,
+  TYPE_KEYSTONE_GET_PUBKEY,
+  TYPE_KEYSTONE_SIGN,
+} from "@keplr-wallet/background";
 
 export interface UR {
   type: string;
   cbor: string;
+}
+
+export interface SignData {
+  bip44HDPath: BIP44HDPath;
+  coinType: number;
+  message: Uint8Array;
 }
 
 export class KeystoneStore {
@@ -27,5 +37,31 @@ export class KeystoneStore {
         data
       );
     }
+  }
+
+  @flow
+  *rejectSign() {
+    yield this.interactionStore.rejectAll(TYPE_KEYSTONE_SIGN);
+  }
+
+  @flow
+  *resolveSign(data: unknown) {
+    const datas = this.interactionStore.getDatas(TYPE_KEYSTONE_SIGN);
+    if (datas.length !== 0) {
+      yield this.interactionStore.approve(
+        TYPE_KEYSTONE_SIGN,
+        datas[0].id,
+        data
+      );
+    }
+  }
+
+  @computed
+  get signData() {
+    const datas = this.interactionStore.getDatas<SignData>(TYPE_KEYSTONE_SIGN);
+    if (datas.length === 0) {
+      return undefined;
+    }
+    return datas[0];
   }
 }
