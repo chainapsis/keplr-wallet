@@ -121,7 +121,11 @@ export function init(
     chainsService,
     keyRingService
   );
-  chainsService.init(chainUpdaterService, interactionService);
+  chainsService.init(
+    chainUpdaterService,
+    interactionService,
+    permissionService
+  );
   ledgerService.init(interactionService);
   keyRingService.init(
     interactionService,
