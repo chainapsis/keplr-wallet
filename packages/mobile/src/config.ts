@@ -160,7 +160,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     coinType: 529,
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/secret.png",
-    features: ["secretwasm"],
+    features: ["secretwasm", "ibc-go", "ibc-transfer"],
   },
   {
     rpc: "https://rpc-akash.keplr.app",
@@ -1734,6 +1734,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: "aevmos",
       coinDecimals: 18,
       coinGeckoId: "evmos",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/evmos.png",
     },
     bip44: {
       coinType: 60,
@@ -1745,6 +1746,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
         coinGeckoId: "evmos",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/evmos.png",
       },
     ],
     feeCurrencies: [
@@ -1753,6 +1755,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "aevmos",
         coinDecimals: 18,
         coinGeckoId: "evmos",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/evmos.png",
         gasPriceStep: {
           low: 25000000000,
           average: 25000000000,
@@ -1760,6 +1763,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         },
       },
     ],
+    chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/evmos.png",
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
   },
   {
