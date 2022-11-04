@@ -1,7 +1,7 @@
 import * as React from "react";
 import { SVGProps } from "react";
 
-const InformationCircleOutline = (props: SVGProps<SVGSVGElement>) => (
+export const InformationCircleOutline = (props: SVGProps<SVGSVGElement>) => (
   <svg
     width="20"
     height="20"
@@ -35,6 +35,3 @@ const InformationCircleOutline = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
-
-// eslint-disable-next-line import/no-default-export
-export default InformationCircleOutline;
