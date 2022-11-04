@@ -5,7 +5,13 @@ import {
 } from "../fixed-height-sortable-list";
 import { useStyle } from "../../styles";
 import { usePageRegisterScrollYValue, useSetFocusedScreen } from "./utils";
-import { Animated, SafeAreaView, StyleSheet, View } from "react-native";
+import {
+  Animated,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { BackgroundMode, ScreenBackground } from "./background";
 
 export function PageWithFixedHeightSortableList<Item extends { key: string }>(
@@ -35,7 +41,15 @@ export function PageWithFixedHeightSortableList<Item extends { key: string }>(
       <ContainerElement style={style.get("flex-1")}>
         <FixedHeightSortableList
           style={StyleSheet.flatten([
-            style.flatten(["flex-1", "padding-0", "overflow-visible"]),
+            style.flatten(
+              ["flex-1", "padding-0"],
+              /*
+               XXX: After react-native@0.64, this makes layout changes by unknown reason on android.
+                    Unfortunately, the reason can't be found on changelog.
+                    However, "overflow-visible" is necessary only in IOS to show the UI under top/bottom bar with blur.
+               */
+              [Platform.OS === "ios" && "overflow-visible"]
+            ),
             propStyle,
           ])}
           onScroll={Animated.event(
