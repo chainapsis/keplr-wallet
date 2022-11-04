@@ -37,7 +37,7 @@ export class AccountSetBase {
   protected _walletStatus: WalletStatus = WalletStatus.NotInit;
 
   @observable
-  protected _rejectionReason: Error | undefined;
+  protected _rejectionReason: Error | undefined = undefined;
 
   @observable
   protected _name: string = "";
