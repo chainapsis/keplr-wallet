@@ -20,6 +20,7 @@ import { computeAddress } from "@ethersproject/transactions";
 import { EIP712MessageValidator } from "./eip712";
 import { _TypedDataEncoder } from "@ethersproject/hash";
 import { KeystoneService, KeystonePublicKey } from "../keystone";
+import { publicKeyConvert } from "secp256k1";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -775,6 +776,17 @@ export class KeyRing {
       const key = this.keystonePublicKeys.find((e) => e.coinType === coinType);
       if (!key) {
         throw new KeplrError("keyring", 161, "CoinType is not available");
+      }
+      if (useEthereumAddress) {
+        const pubKey = publicKeyConvert(Buffer.from(key.pubKey, "hex"), false);
+        const address = computeAddress(pubKey);
+        return {
+          algo: "ethsecp256k1",
+          pubKey,
+          address: Buffer.from(address.replace("0x", ""), "hex"),
+          isKeystone: false,
+          isNanoLedger: true,
+        };
       }
       const pubKey = new PubKeySecp256k1(Buffer.from(key.pubKey, "hex"));
       return {
