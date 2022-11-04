@@ -330,7 +330,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   className={style.chainDetailContainer}
                   onClick={() => setIsRawDataMode(true)}
                 >
-                  Add chain as suggested
+                  <FormattedMessage id="chain.suggested.add-chain-as-suggested" />
                   <img
                     src={require("../../../public/assets/svg/arrow-right-outline.svg")}
                   />
