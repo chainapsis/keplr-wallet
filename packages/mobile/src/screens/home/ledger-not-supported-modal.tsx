@@ -40,7 +40,7 @@ export const LedgerNotSupportedModal: FunctionComponent<{
         disableGesture={true}
       >
         <Text style={style.flatten(["h3", "color-text-middle"])}>
-          Ledger is not supported
+          Ledger is not supported on this chain.
         </Text>
         <Text
           style={style.flatten(["margin-y-16", "body3", "color-text-label"])}
@@ -52,7 +52,7 @@ export const LedgerNotSupportedModal: FunctionComponent<{
             style={style.flatten(["padding-left-8", "padding-right-16"])}
             color="primary"
             mode="text"
-            text="Go to back"
+            text="Go back"
             leftIcon={(color) => (
               <View style={style.flatten(["margin-right-12"])}>
                 <LeftArrowIcon color={color} size={24} />
