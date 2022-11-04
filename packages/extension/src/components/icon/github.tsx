@@ -1,7 +1,7 @@
 import * as React from "react";
 import { SVGProps } from "react";
 
-const GithubIcon = (props: SVGProps<SVGSVGElement>) => (
+export const GithubIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     width="14"
     height="13.65"
@@ -16,6 +16,3 @@ const GithubIcon = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
-
-// eslint-disable-next-line import/no-default-export
-export default GithubIcon;
