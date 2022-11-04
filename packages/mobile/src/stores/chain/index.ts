@@ -75,6 +75,8 @@ export class ChainStore extends BaseChainStore<
 > {
   @observable
   protected selectedChainId: string;
+  @observable
+  protected _previousSelectedChainId: string | undefined = undefined;
 
   @observable
   protected _isInitializing: boolean = false;
@@ -371,6 +373,10 @@ export class ChainStore extends BaseChainStore<
 
   @action
   selectChain(chainId: string) {
+    if (this.selectedChainId !== chainId) {
+      this._previousSelectedChainId = this.selectedChainId;
+    }
+
     if (this._isInitializing) {
       this.deferChainIdSelect = chainId;
     }
@@ -384,6 +390,10 @@ export class ChainStore extends BaseChainStore<
     }
 
     return this.chainInfos[0].raw;
+  }
+
+  get previousSelectedChainId(): string | undefined {
+    return this._previousSelectedChainId;
   }
 
   async saveLastViewChainId() {

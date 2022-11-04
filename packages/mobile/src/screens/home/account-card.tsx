@@ -12,6 +12,8 @@ import { StakedTokenSymbol, TokenSymbol } from "../../components/token-symbol";
 import { useSmartNavigation } from "../../navigation";
 import { NetworkErrorView } from "./network-error-view";
 import { Dec } from "@keplr-wallet/unit";
+import { LedgerNotSupportedModal } from "./ledger-not-supported-modal";
+import { KeplrError } from "@keplr-wallet/router";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -61,6 +63,26 @@ export const AccountCard: FunctionComponent<{
 
   return (
     <Card style={containerStyle}>
+      <LedgerNotSupportedModal
+        isOpen={(() => {
+          if (
+            account.rejectionReason &&
+            account.rejectionReason instanceof KeplrError
+          ) {
+            if (
+              account.rejectionReason.module === "keyring" &&
+              account.rejectionReason.code === 152
+            ) {
+              return true;
+            }
+          }
+
+          return false;
+        })()}
+        close={() => {
+          // Prevent closing with gesture
+        }}
+      />
       <CardBody style={style.flatten(["padding-bottom-0"])}>
         <View style={style.flatten(["flex", "items-center"])}>
           <Text

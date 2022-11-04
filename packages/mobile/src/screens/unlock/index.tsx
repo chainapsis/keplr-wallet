@@ -32,6 +32,9 @@ async function hideSplashScreen() {
   }
 }
 
+/*
+ Wait account loaded regardless of success or failure.
+ */
 async function waitAccountLoad(
   accountStore: IAccountStore,
   chainId: string
@@ -42,7 +45,10 @@ async function waitAccountLoad(
 
   return new Promise((resolve) => {
     const disposer = autorun(() => {
-      if (accountStore.getAccount(chainId).bech32Address) {
+      if (
+        accountStore.getAccount(chainId).bech32Address ||
+        accountStore.getAccount(chainId).rejectionReason != null
+      ) {
         resolve();
         if (disposer) {
           disposer();
