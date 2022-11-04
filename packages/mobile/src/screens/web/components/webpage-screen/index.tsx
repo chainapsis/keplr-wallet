@@ -112,7 +112,7 @@ export const WebpageScreen: FunctionComponent<
   useEffect(() => {
     if (waitingSuggestedChainInfo) {
       if (enableSuggestChain) {
-        chainSuggestStore.approve();
+        chainSuggestStore.approve(waitingSuggestedChainInfo.data);
       } else {
         chainSuggestStore.reject();
       }
