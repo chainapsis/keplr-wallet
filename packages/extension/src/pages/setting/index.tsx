@@ -41,14 +41,8 @@ export const SettingPage: FunctionComponent = observer(() => {
         }
       );
 
-  const isDeveloperMode =
-    uiConfigStore.showAdvancedIBCTransfer ||
-    uiConfigStore.showRawSuggestedChainInfo;
+  const isDeveloperMode = uiConfigStore.isDeveloper;
 
-  console.log(
-    uiConfigStore.showAdvancedIBCTransfer,
-    uiConfigStore.showRawSuggestedChainInfo
-  );
   return (
     <HeaderLayout
       showChainName={false}
