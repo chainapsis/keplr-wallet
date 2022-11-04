@@ -17,10 +17,6 @@ export const KeystoneSignPage = observer(() => {
 
   const onScanFinish = async (ur: UR) => {
     readResolve(ur);
-    await cosmosKeyring.readKeyring();
-    keystoneStore.resolveSign({
-      signature: ur.cbor,
-    });
   };
 
   const onReject = () => {
@@ -47,19 +43,20 @@ export const KeystoneSignPage = observer(() => {
     });
   });
 
-  const init = async (type: string, signData: SignData) => {
-    const signature = cosmosKeyring.signAminoTransaction(
+  const sign = async (type: string, signData: SignData) => {
+    const signature = await cosmosKeyring.signAminoTransaction(
       Buffer.from(
         accountStore.getAccount(chainStore.current.chainId).pubKey
       ).toString("hex"),
       signData.message
     );
+    keystoneStore.resolveSign({ signature });
   };
 
   useEffect(() => {
     if (keystoneStore.signData) {
       console.log(keystoneStore.signData);
-      init(keystoneStore.signData.type, keystoneStore.signData.data);
+      sign(keystoneStore.signData.type, keystoneStore.signData.data);
     }
   }, [keystoneStore.signData]);
 
