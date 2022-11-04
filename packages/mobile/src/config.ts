@@ -161,7 +161,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/secret.png",
     features: ["secretwasm"],
-    hideInUI: true,
   },
   {
     rpc: "https://rpc-akash.keplr.app",
@@ -1762,7 +1761,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
-    hideInUI: true,
   },
   {
     rpc: "https://public.api.injective.network",
