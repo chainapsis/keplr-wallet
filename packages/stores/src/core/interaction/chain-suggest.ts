@@ -14,7 +14,7 @@ export class ChainSuggestStore {
 
   constructor(
     protected readonly interactionStore: InteractionStore,
-    protected readonly communityChainInfoUrl?: string
+    protected readonly communityChainInfoUrl: string
   ) {
     makeObservable(this);
   }
