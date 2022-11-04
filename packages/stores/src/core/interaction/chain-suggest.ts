@@ -10,9 +10,12 @@ export class ChainSuggestStore {
   protected _isLoading: boolean = false;
 
   @observable
-  communityChainInfo: ChainInfo | undefined;
+  communityChainInfo: ChainInfo | undefined = undefined;
 
-  constructor(protected readonly interactionStore: InteractionStore) {
+  constructor(
+    protected readonly interactionStore: InteractionStore,
+    protected readonly communityChainInfoUrl?: string
+  ) {
     makeObservable(this);
   }
 
@@ -27,7 +30,7 @@ export class ChainSuggestStore {
   }
 
   @flow
-  *getCommunityChainInfo() {
+  *fetchCommunityChainInfo() {
     this._isLoading = true;
 
     if (this.waitingSuggestedChainInfo) {
@@ -36,7 +39,7 @@ export class ChainSuggestStore {
           this.waitingSuggestedChainInfo.data.chainId
         ).identifier;
         const chainInfoResponse = yield Axios.get<ChainInfo>(
-          `https://raw.githubusercontent.com/danielkim89/cicd-test/main/cosmos/${chainIdentifier}.json`
+          `${this.communityChainInfoUrl}/cosmos/${chainIdentifier}.json`
         );
 
         const chainInfo: ChainInfo = chainInfoResponse.data;
@@ -48,18 +51,14 @@ export class ChainSuggestStore {
   }
 
   @flow
-  *approve() {
+  *approve(chainInfo: ChainInfo) {
     this._isLoading = true;
 
     try {
       const data = this.waitingSuggestedChainInfo;
 
       if (data) {
-        yield this.interactionStore.approve(
-          data.type,
-          data.id,
-          this.communityChainInfo ?? data.data
-        );
+        yield this.interactionStore.approve(data.type, data.id, chainInfo);
       }
     } finally {
       this._isLoading = false;

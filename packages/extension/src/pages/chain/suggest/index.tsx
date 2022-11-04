@@ -9,10 +9,10 @@ import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import GithubIcon from "../../../components/icon/github";
-import InformationCircleOutline from "../../../components/icon/information-circle-outline";
 import { ToolTip } from "../../../components/tooltip";
 import classNames from "classnames";
+import { GithubIcon, InformationCircleOutline } from "../../../components/icon";
+import { CommunityChainInfoUrl } from "../../../config";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore, uiConfigStore } = useStore();
@@ -34,7 +34,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
       });
 
       // Get community chain information
-      chainSuggestStore.getCommunityChainInfo();
+      chainSuggestStore.fetchCommunityChainInfo();
     }
   }, [
     analyticsStore,
@@ -171,8 +171,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   <pre className={style.chainInfo}>
                     {JSON.stringify(
                       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      (({ isFromCommunity, beta, origin, ...chainInfo }) =>
-                        chainInfo)(
+                      (({ beta, origin, ...chainInfo }) => chainInfo)(
                         chainSuggestStore.waitingSuggestedChainInfo.data
                       ),
                       undefined,
@@ -252,7 +251,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   <div className={style.imageBackground} />
                   <img
                     className={style.logoImage}
-                    src={`https://raw.githubusercontent.com/danielkim89/cicd-test/main/images/${
+                    src={`${CommunityChainInfoUrl}/images/${
                       ChainIdHelper.parse(
                         chainSuggestStore.waitingSuggestedChainInfo.data.chainId
                       ).identifier
@@ -371,7 +370,13 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
               onClick={async (e) => {
                 e.preventDefault();
 
-                await chainSuggestStore.approve();
+                const chainInfo = isRawDataMode
+                  ? chainSuggestStore.waitingSuggestedChainInfo?.data
+                  : chainSuggestStore.communityChainInfo;
+
+                if (chainInfo) {
+                  await chainSuggestStore.approve(chainInfo);
+                }
 
                 if (
                   interactionInfo.interaction &&
