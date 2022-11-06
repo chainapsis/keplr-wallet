@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from "react";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
+import { motion } from "framer-motion";
 
 export type BoxProps = {
   className?: string;
-  isAbsoluteCenter?: boolean;
 
   width?: string;
   minWidth?: string;
@@ -42,10 +42,9 @@ export type BoxProps = {
   overflow?: "visible" | "hidden" | "scroll" | "auto";
   borderWidth?: string;
   borderColor?: string;
-  transition?: string;
 };
 
-const Container = styled.div<BoxProps>`
+const Container = styled(motion.div)<BoxProps>`
   box-sizing: border-box;
   width: ${({ width }) => width};
   min-width: ${({ minWidth }) => minWidth};
@@ -58,8 +57,6 @@ const Container = styled.div<BoxProps>`
   flex-shrink: ${({ flexShrink }) => flexShrink};
   background: ${({ background }) => background};
   display: ${({ display }) => display};
-  position: ${({ position, isAbsoluteCenter }) =>
-    isAbsoluteCenter ? "absolute" : position};
   align-items: ${({ alignItems }) => {
     switch (alignItems) {
       case "left":
@@ -120,16 +117,12 @@ const Container = styled.div<BoxProps>`
       return "solid";
     }
   }};
-  transition: ${({ transition }) => transition};
-  ${({ isAbsoluteCenter }) =>
-    isAbsoluteCenter &&
-    css`
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    `};
 `;
 
 export const Box: FunctionComponent<BoxProps> = ({ children, ...props }) => {
-  return <Container {...props}>{children}</Container>;
+  return (
+    <Container layout {...props}>
+      {children}
+    </Container>
+  );
 };

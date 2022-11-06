@@ -36,7 +36,6 @@ export const RegisterPage: FunctionComponent = observer(() => {
   return (
     <Container>
       <Card
-        isAbsoluteCenter
         width="100%"
         maxWidth={registerConfig.isIntro ? "34.25rem" : "35rem"}
         height="100%"
@@ -45,7 +44,6 @@ export const RegisterPage: FunctionComponent = observer(() => {
         flexDirection="vertical"
         background="white"
         padding="4.625rem"
-        transition="all 1s ease-in-out"
       >
         {registerConfig.isIntro && (
           <RegisterIntro registerConfig={registerConfig} />

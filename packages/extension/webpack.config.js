@@ -111,7 +111,17 @@ module.exports = {
     },
   },
   module: {
-    rules: [sassRule, tsRule, fileRule],
+    rules: [
+      sassRule,
+      tsRule,
+      fileRule,
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+    ],
   },
   plugins: [
     new webpack.ProvidePlugin({
