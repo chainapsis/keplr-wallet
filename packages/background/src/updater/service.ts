@@ -68,6 +68,18 @@ export class ChainUpdaterService {
     };
   }
 
+  async checkChainId(rpcUrl: string): Promise<string> {
+    const statusResponse = await Axios.get<{
+      result: {
+        node_info: {
+          network: string;
+        };
+      };
+    }>(`${rpcUrl}/status`);
+
+    return statusResponse.data.result.node_info.network;
+  }
+
   async tryUpdateChainInfo(chainId: string): Promise<void> {
     try {
       const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
@@ -75,8 +87,15 @@ export class ChainUpdaterService {
       const res = await Axios.get<ChainInfo>(
         `${this.communityChainInfoUrl}/cosmos/${chainIdentifier}.json`
       );
-
       let chainInfo: ChainInfo = res.data;
+
+      const rpcChainId = await this.checkChainId(chainInfo.rpc);
+      const rpcChainIdentifier = ChainIdHelper.parse(rpcChainId).identifier;
+
+      if (chainIdentifier !== rpcChainIdentifier) {
+        console.log(`The chainId is not valid.(${chainId} -> ${rpcChainId})`);
+        return;
+      }
 
       chainInfo = {
         ...chainInfo,
