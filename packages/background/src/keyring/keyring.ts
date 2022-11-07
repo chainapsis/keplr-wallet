@@ -922,6 +922,8 @@ export class KeyRing {
         env,
         coinType,
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
+        this.loadKey(coinType, useEthereumSigning),
+        this.keystonePublicKey as KeystoneKeyringData,
         message
       );
     } else {

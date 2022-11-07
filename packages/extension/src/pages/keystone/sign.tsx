@@ -1,5 +1,4 @@
-import { useKeystoneCosmosKeyring } from "@keplr-wallet/hooks";
-import { SignData, UR } from "@keplr-wallet/stores";
+import { UR } from "@keplr-wallet/stores";
 import { AnimatedQRCode } from "@keystonehq/animated-qr";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
@@ -10,71 +9,58 @@ import style from "./style.module.scss";
 
 export const KeystoneSignPage = observer(() => {
   const [isScan, setIsScan] = useState(false);
-  const [qrcodeContent, setQrcodeContent] = useState("");
+  const [ur, setUR] = useState({} as UR);
 
-  const { keystoneStore, accountStore, chainStore } = useStore();
-  const cosmosKeyring = useKeystoneCosmosKeyring();
+  const { keystoneStore } = useStore();
 
   const onScanFinish = async (ur: UR) => {
-    readResolve(ur);
+    keystoneStore.resolveSign({ ur });
   };
 
   const onReject = () => {
-    playResolve("cancel");
     keystoneStore.rejectSign();
   };
 
   const onGetSignature = () => {
-    playResolve("success");
-  };
-
-  let playResolve: (value: string) => void;
-  cosmosKeyring.getInteraction().onPlayUR(async (ur) => {
-    setQrcodeContent(ur.cbor);
-    await new Promise((resolve) => {
-      playResolve = resolve;
-    });
-  });
-  let readResolve: (value: UR) => void;
-  cosmosKeyring.getInteraction().onReadUR(async () => {
     setIsScan(true);
-    return await new Promise((resolve) => {
-      readResolve = resolve;
-    });
-  });
-
-  const sign = async (type: string, signData: SignData) => {
-    const signature = await cosmosKeyring.signAminoTransaction(
-      Buffer.from(
-        accountStore.getAccount(chainStore.current.chainId).pubKey
-      ).toString("hex"),
-      signData.message
-    );
-    keystoneStore.resolveSign({ signature });
   };
 
   useEffect(() => {
     if (keystoneStore.signData) {
       console.log(keystoneStore.signData);
-      sign(keystoneStore.signData.type, keystoneStore.signData.data);
+      setUR(keystoneStore.signData.data.ur);
     }
   }, [keystoneStore.signData]);
 
   return isScan ? (
-    <Scan onChange={onScanFinish} />
+    <Scan type="signCosmos" onChange={onScanFinish} />
   ) : (
-    <div className={style.page}>
-      <h1>Keystone</h1>
-      <div className="display">
-        <h2>Scan the QR code via your Keystone device.</h2>
-        {qrcodeContent && (
-          <AnimatedQRCode
-            cbor={qrcodeContent}
-            type="bytes"
-            options={{ size: 300 }}
-          />
-        )}
+    <div className={`${style.page}`}>
+      <div>
+        <div className={style.title}>Request Signature</div>
+        <div className={style.subtitle}>
+          Scan the QR code via your Keystone device.
+        </div>
+        <div className={style.display}>
+          {ur.cbor && (
+            <AnimatedQRCode
+              cbor={ur.cbor}
+              type={ur.type}
+              options={{ size: 210 }}
+            />
+          )}
+        </div>
+        <p className={style["help-text"]}>
+          Click on the &#39;<em>Get Signature</em>&#39; button after signing the
+          transaction with your Keystone device.
+        </p>
+        <p>
+          <a href="https://keyst.one/keplr" target="_blank" rel="noreferrer">
+            Tutorial
+          </a>
+        </p>
       </div>
+
       <div>
         <Button onClick={onReject}>Reject</Button>
         <Button color="primary" onClick={onGetSignature}>

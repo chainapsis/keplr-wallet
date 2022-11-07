@@ -56,6 +56,14 @@ html[data-keystone-import-page] {
     border-color: var(--gray);
     color: var(--white);
   }
+  em {
+    font-style: normal;
+    font-weight: bold;
+    color: #182c4c;
+  }
+  a {
+    text-decoration: underline;
+  }
 }
 
 .steps {
@@ -113,18 +121,15 @@ html[data-keystone-import-page] {
   }
   .swiper-title {
     color: var(--gray);
-    em {
-      font-style: normal;
-      font-weight: bold;
-      color: #182c4c;
-    }
   }
   .more {
     margin-top: 16px;
-    a {
-      text-decoration: underline;
-    }
   }
+}
+
+.display {
+  display: inline-block;
+  margin: 30px auto;
 }
 
 .scanner {
@@ -185,7 +190,6 @@ html[data-keystone-import-page] {
       display: block;
       line-height: 22px;
       margin-top: 16px;
-      text-decoration: underline;
     }
   }
   .message-button {

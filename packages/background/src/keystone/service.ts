@@ -1,5 +1,5 @@
 import { Env, KeplrError } from "@keplr-wallet/router";
-import { BIP44HDPath } from "../keyring";
+import { BIP44HDPath, Key } from "../keyring";
 import { KVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
 import {
@@ -20,7 +20,7 @@ export interface StdPublicKeyDoc extends StdDoc {
 }
 
 export interface StdSignDoc extends StdDoc {
-  signature?: string;
+  signature?: KeystoneUR;
 }
 
 export class KeystoneService {
@@ -71,24 +71,47 @@ export class KeystoneService {
     env: Env,
     coinType: number,
     bip44HDPath: BIP44HDPath,
+    key: Key,
+    keyringData: KeystoneKeyringData,
     message: Uint8Array
   ): Promise<Uint8Array> {
-    const res = (await this.interactionService.waitApprove(
-      env,
-      "/keystone/sign",
-      TYPE_KEYSTONE_SIGN,
-      {
-        coinType,
-        bip44HDPath,
-        message,
-      }
-    )) as StdSignDoc;
-    if (res.abort) {
-      throw new KeplrError("keystone", 301, "The process has been canceled.");
-    }
-    if (!res.signature) {
-      throw new KeplrError("keystone", 303, "Signature is empty.");
-    }
-    return Buffer.from(res.signature, "hex");
+    let signResolve: { (arg0: KeystoneUR): void };
+    const keyring = useKeystoneCosmosKeyring({
+      keyringData,
+      playUR: async (ur) => {
+        const res = (await this.interactionService.waitApprove(
+          env,
+          "/keystone/sign",
+          TYPE_KEYSTONE_SIGN,
+          {
+            coinType,
+            bip44HDPath,
+            ur,
+            message,
+          }
+        )) as StdSignDoc;
+        if (res.abort) {
+          throw new KeplrError(
+            "keystone",
+            301,
+            "The process has been canceled."
+          );
+        }
+        if (!res.signature) {
+          throw new KeplrError("keystone", 303, "Signature is empty.");
+        }
+        signResolve(res.signature);
+      },
+      readUR: () =>
+        new Promise<KeystoneUR>((resolve) => {
+          signResolve = resolve;
+        }),
+    });
+    const res = await keyring.signDirectTransaction(
+      Buffer.from(key.pubKey).toString("hex"),
+      message,
+      [Buffer.from(key.address).toString("hex")]
+    );
+    return res.signature;
   }
 }

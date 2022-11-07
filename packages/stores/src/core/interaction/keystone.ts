@@ -15,6 +15,7 @@ export interface SignData {
   bip44HDPath: BIP44HDPath;
   coinType: number;
   message: Uint8Array;
+  ur: UR;
 }
 
 export class KeystoneStore {
