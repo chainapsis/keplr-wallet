@@ -678,6 +678,7 @@ describe("Test chain info schema", () => {
             },
           },
         ],
+        chainSymbolImageUrl: "https://test.com/image.png",
       };
     };
 
@@ -733,6 +734,15 @@ describe("Test chain info schema", () => {
             coinType: 120,
           },
         ],
+      });
+    });
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        chainSymbolImageUrl: "not url",
       });
     });
 
