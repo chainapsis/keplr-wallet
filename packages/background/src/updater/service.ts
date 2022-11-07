@@ -12,7 +12,10 @@ import Axios from "axios";
 export class ChainUpdaterService {
   protected chainsService!: ChainsService;
 
-  constructor(protected readonly kvStore: KVStore) {}
+  constructor(
+    protected readonly kvStore: KVStore,
+    protected readonly communityChainInfoUrl: string
+  ) {}
 
   init(chainsService: ChainsService) {
     this.chainsService = chainsService;
@@ -80,10 +83,11 @@ export class ChainUpdaterService {
   async tryUpdateChainInfo(chainId: string): Promise<void> {
     try {
       const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
-      const chainInfoResponse = await Axios.get<ChainInfo>(
-        `https://raw.githubusercontent.com/danielkim89/cicd-test/main/cosmos/${chainIdentifier}.json`
+
+      const res = await Axios.get<ChainInfo>(
+        `${this.communityChainInfoUrl}/cosmos/${chainIdentifier}.json`
       );
-      let chainInfo: ChainInfo = chainInfoResponse.data;
+      let chainInfo: ChainInfo = res.data;
 
       const rpcChainId = await this.checkChainId(chainInfo.rpc);
       const rpcChainIdentifier = ChainIdHelper.parse(rpcChainId).identifier;

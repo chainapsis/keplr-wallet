@@ -175,7 +175,13 @@
   "register.welcome.button.done": "Done",
 
   "chain.suggested.title": "Add {chainName} to Keplr",
+  "chain.suggested.tooltip": "Chain info being added is from this web",
+  "chain.suggested.developer.checkbox": "Use this as the preferred code string and override info registered on the community repo",
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
+  "chain.suggested.approve-info.title": "Before You Approve",
+  "chain.suggested.approve-info.content": "Keplr recommends that ‘suggest chain’ info be managed by the community. At this time, this chain’s info has not been registered.",
+  "chain.suggested.approve-info.link": "Click here to update chain info on Github ->",
+  "chain.suggested.approve-alert.content": "Adding this chain requires information from a web page not managed by Keplr.",
   "chain.suggested.button.approve": "Approve",
   "chain.suggested.button.reject": "Reject",
   "chain.suggested.community-driven": "Community Driven",

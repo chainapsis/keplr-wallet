@@ -9,11 +9,15 @@ import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import GithubIcon from "../../../components/icon/github";
+import { ToolTip } from "../../../components/tooltip";
+import classNames from "classnames";
+import { GithubIcon, InformationCircleOutline } from "../../../components/icon";
+import { CommunityChainInfoUrl } from "../../../config";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore, uiConfigStore } = useStore();
   const [isRawDataMode, setIsRawDataMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const history = useHistory();
 
   const interactionInfo = useInteractionInfo(() => {
@@ -28,16 +32,30 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
         rpc: chainSuggestStore.waitingSuggestedChainInfo.data.rpc,
         rest: chainSuggestStore.waitingSuggestedChainInfo.data.rest,
       });
+
+      // Get community chain information
+      chainSuggestStore.fetchCommunityChainInfo();
     }
-  }, [analyticsStore, chainSuggestStore.waitingSuggestedChainInfo]);
+  }, [
+    analyticsStore,
+    chainSuggestStore,
+    chainSuggestStore.waitingSuggestedChainInfo,
+  ]);
 
   useEffect(() => {
-    if (chainSuggestStore.waitingSuggestedChainInfo) {
-      setIsRawDataMode(
-        !chainSuggestStore.waitingSuggestedChainInfo.data.isFromCommunity
-      );
+    setIsRawDataMode(!chainSuggestStore.communityChainInfo);
+  }, [chainSuggestStore.communityChainInfo]);
+
+  // Set loading page
+  useEffect(() => {
+    if (!chainSuggestStore.isLoading) {
+      setTimeout(() => {
+        setIsLoading(chainSuggestStore.isLoading);
+      }, 1000);
+    } else {
+      setIsLoading(chainSuggestStore.isLoading);
     }
-  }, [chainSuggestStore.waitingSuggestedChainInfo]);
+  }, [chainSuggestStore.isLoading]);
 
   if (!chainSuggestStore.waitingSuggestedChainInfo) {
     return null;
@@ -45,180 +63,336 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
 
   return (
     <EmptyLayout style={{ height: "100%" }}>
-      <div className={style.container}>
-        {isRawDataMode ? (
+      {isLoading ? (
+        <div className={style.container}>
           <div className={style.content}>
-            {chainSuggestStore.waitingSuggestedChainInfo.data
-              .isFromCommunity && (
-              <img
-                className={style.backButton}
-                src={require("../../../public/assets/svg/arrow-left.svg")}
-                onClick={() => setIsRawDataMode(false)}
-              />
-            )}
-            <h1 className={style.header}>
-              <FormattedMessage
-                id="chain.suggested.title"
-                values={{
-                  chainName:
-                    chainSuggestStore.waitingSuggestedChainInfo?.data.chainName,
-                }}
-              />
-            </h1>
-            <p className={style.origin}>
-              {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
-            </p>
-            <div className={style.chainInfoContainer}>
-              <pre className={style.chainInfo}>
-                {JSON.stringify(
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  (({ isFromCommunity, beta, origin, ...chainInfo }) =>
-                    chainInfo)(
-                    chainSuggestStore.waitingSuggestedChainInfo.data
-                  ),
-                  undefined,
-                  2
-                )}
-              </pre>
-            </div>
-          </div>
-        ) : (
-          <div className={style.content}>
-            {uiConfigStore.showRawSuggestedChainInfo ? (
-              <div
-                className={style.rawDataButton}
-                onClick={() => setIsRawDataMode(true)}
-              >
-                <span>
-                  <FormattedMessage id="chain.suggested.add-chain-as-suggested" />
-                </span>
-                <div className={style.imageWrapper}>
-                  <img
-                    src={require("../../../public/assets/svg/for-developer.svg")}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: "flex", height: "60px" }} />
-            )}
             <div className={style.logo}>
               <div className={style.imageContainer}>
-                <div className={style.imageBackground} />
-                <img
-                  className={style.logoImage}
-                  src={`https://raw.githubusercontent.com/danielkim89/cicd-test/main/images/${
-                    ChainIdHelper.parse(
-                      chainSuggestStore.waitingSuggestedChainInfo.data.chainId
-                    ).identifier
-                  }.png`}
-                  alt="chain logo"
+                <div
+                  className={classNames(
+                    style.skeleton,
+                    style.skeletonImageBackground
+                  )}
                 />
               </div>
               <div className={style.dots}>
-                <div className={style.dot} />
-                <div className={style.dot} />
-                <div className={style.dot} />
+                <div
+                  className={classNames(style.skeletonDot, style.skeleton)}
+                />
+                <div
+                  className={classNames(style.skeletonDot, style.skeleton)}
+                />
+                <div
+                  className={classNames(style.skeletonDot, style.skeleton)}
+                />
               </div>
               <div className={style.imageContainer}>
-                <div className={style.imageBackground} />
-                <img
-                  className={style.logoImage}
-                  src={require("../../../public/assets/logo-256.png")}
-                  alt="keplr logo"
+                <div
+                  className={classNames(
+                    style.skeleton,
+                    style.skeletonImageBackground
+                  )}
                 />
               </div>
             </div>
-            <h1 className={style.header}>
-              <FormattedMessage
-                id="chain.suggested.title"
-                values={{
-                  chainName:
-                    chainSuggestStore.waitingSuggestedChainInfo?.data.chainName,
-                }}
+
+            <h1 className={style.header}>Connecting...</h1>
+
+            <div className={style.skeletonTag}>
+              <div
+                className={classNames(style.skeleton, style.skeletonGithubLink)}
               />
-            </h1>
-            <div className={style.tag}>
-              <div>
-                <FormattedMessage id="chain.suggested.community-driven" />
-              </div>
             </div>
-            <p className={style.paragraph}>
-              <FormattedMessage
-                id="chain.suggested.paragraph"
-                values={{
-                  host:
-                    chainSuggestStore.waitingSuggestedChainInfo?.data.origin,
-                  chainId:
-                    chainSuggestStore.waitingSuggestedChainInfo?.data.chainId,
-                  // eslint-disable-next-line react/display-name
-                  b: (...chunks: any) => <b>{chunks}</b>,
-                }}
+
+            <div className={classNames(style.skeletonParagraph)}>
+              <div
+                className={classNames(style.skeleton, style.skeletonTitle)}
               />
-            </p>
-            <div style={{ flex: 1 }} />
-            <div className={style.infoWithLink}>
-              <div className={style.info}>
-                <FormattedMessage id="chain.suggested.chain-info-is-from" />
-              </div>
-              <a
-                href="https://github.com/chainapsis/cicd-test"
-                target="_blank"
-                rel="noreferrer"
-                className={style.githubLink}
-              >
-                <GithubIcon />
-              </a>
+              <div
+                className={classNames(style.skeleton, style.skeletonContent)}
+              />
+            </div>
+
+            <div className={style.buttons}>
+              <div
+                className={classNames(
+                  style.button,
+                  style.skeleton,
+                  style.skeletonButton
+                )}
+              />
+              <div
+                className={classNames(
+                  style.button,
+                  style.skeleton,
+                  style.skeletonButton
+                )}
+              />
             </div>
           </div>
-        )}
-        <div className={style.buttons}>
-          <Button
-            className={style.button}
-            color="danger"
-            outline
-            disabled={!chainSuggestStore.waitingSuggestedChainInfo}
-            data-loading={chainSuggestStore.isLoading}
-            onClick={async (e) => {
-              e.preventDefault();
-
-              await chainSuggestStore.reject();
-
-              if (
-                interactionInfo.interaction &&
-                !interactionInfo.interactionInternal
-              ) {
-                window.close();
-              } else {
-                history.push("/");
-              }
-            }}
-          >
-            <FormattedMessage id="chain.suggested.button.reject" />
-          </Button>
-          <Button
-            className={style.button}
-            color="primary"
-            disabled={!chainSuggestStore.waitingSuggestedChainInfo}
-            data-loading={chainSuggestStore.isLoading}
-            onClick={async (e) => {
-              e.preventDefault();
-
-              await chainSuggestStore.approve();
-
-              if (
-                interactionInfo.interaction &&
-                !interactionInfo.interactionInternal
-              ) {
-                window.close();
-              } else {
-                history.push("/");
-              }
-            }}
-          >
-            <FormattedMessage id="chain.suggested.button.approve" />
-          </Button>
         </div>
-      </div>
+      ) : (
+        <div className={style.container}>
+          {isRawDataMode ? (
+            <div className={style.content}>
+              {chainSuggestStore.communityChainInfo && (
+                <img
+                  className={style.backButton}
+                  src={require("../../../public/assets/svg/arrow-left.svg")}
+                  onClick={() => setIsRawDataMode(false)}
+                />
+              )}
+              <h1 className={style.header}>
+                <FormattedMessage
+                  id="chain.suggested.title"
+                  values={{
+                    chainName:
+                      chainSuggestStore.waitingSuggestedChainInfo?.data
+                        .chainName,
+                  }}
+                />
+              </h1>
+              <div className={style.origin}>
+                <ToolTip
+                  tooltip={
+                    <div className={style.tooltip}>
+                      <FormattedMessage id="chain.suggested.tooltip" />
+                    </div>
+                  }
+                  trigger="hover"
+                >
+                  <div className={style.text}>
+                    {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
+                  </div>
+                </ToolTip>
+              </div>
+              <div className={style.chainContainer}>
+                <div className={style.chainInfoContainer}>
+                  <pre className={style.chainInfo}>
+                    {JSON.stringify(
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      (({ beta, origin, ...chainInfo }) => chainInfo)(
+                        chainSuggestStore.waitingSuggestedChainInfo.data
+                      ),
+                      undefined,
+                      2
+                    )}
+                  </pre>
+                </div>
+
+                {uiConfigStore.isDeveloper &&
+                  !chainSuggestStore.communityChainInfo && (
+                    <div
+                      className={classNames(
+                        style.developerInfo,
+                        "custom-control custom-checkbox"
+                      )}
+                    >
+                      <input
+                        className="custom-control-input"
+                        id="use-community-checkbox"
+                        type="checkbox"
+                      />
+                      <label
+                        className="custom-control-label"
+                        htmlFor="use-community-checkbox"
+                        style={{ color: "#323C4A", paddingTop: "1px" }}
+                      >
+                        <FormattedMessage id="chain.suggested.developer.checkbox" />
+                      </label>
+                    </div>
+                  )}
+
+                <div
+                  className={classNames(
+                    style.approveInfoContainer,
+                    !chainSuggestStore.communityChainInfo
+                      ? style.info
+                      : style.alert
+                  )}
+                >
+                  <div className={style.titleContainer}>
+                    <InformationCircleOutline
+                      fill={
+                        !chainSuggestStore.communityChainInfo
+                          ? "#566172"
+                          : "#F0224B"
+                      }
+                    />
+                    <div className={style.text}>
+                      <FormattedMessage id="chain.suggested.approve-info.title" />
+                    </div>
+                  </div>
+                  <div className={style.content}>
+                    {!chainSuggestStore.communityChainInfo ? (
+                      <FormattedMessage id="chain.suggested.approve-info.content" />
+                    ) : (
+                      <FormattedMessage id="chain.suggested.approve-alert.content" />
+                    )}
+                  </div>
+                  {!chainSuggestStore.communityChainInfo && (
+                    <div className={style.link}>
+                      <a
+                        href="https://github.com/chainapsis/cicd-test"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <FormattedMessage id="chain.suggested.approve-info.link" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className={style.content}>
+              <div className={style.logo}>
+                <div className={style.imageContainer}>
+                  <div className={style.imageBackground} />
+                  <img
+                    className={style.logoImage}
+                    src={`${CommunityChainInfoUrl}/images/${
+                      ChainIdHelper.parse(
+                        chainSuggestStore.waitingSuggestedChainInfo.data.chainId
+                      ).identifier
+                    }.png`}
+                    alt="chain logo"
+                  />
+                </div>
+                <div className={style.dots}>
+                  <div className={style.dot} />
+                  <div className={style.dot} />
+                  <div className={style.dot} />
+                </div>
+                <div className={style.imageContainer}>
+                  <div className={style.imageBackground} />
+                  <img
+                    className={style.logoImage}
+                    src={require("../../../public/assets/logo-256.png")}
+                    alt="keplr logo"
+                  />
+                </div>
+              </div>
+              <h1 className={style.header}>
+                <FormattedMessage
+                  id="chain.suggested.title"
+                  values={{
+                    chainName:
+                      chainSuggestStore.waitingSuggestedChainInfo?.data
+                        .chainName,
+                  }}
+                />
+              </h1>
+
+              <ToolTip
+                tooltip={
+                  <div className={style.tooltip}>
+                    <FormattedMessage id="chain.suggested.tooltip" />
+                  </div>
+                }
+                trigger="hover"
+              >
+                <div className={style.tag}>
+                  <a
+                    href={`https://github.com/chainapsis/cicd-test/blob/main/cosmos/${
+                      ChainIdHelper.parse(
+                        chainSuggestStore.waitingSuggestedChainInfo?.data
+                          .chainId
+                      ).identifier
+                    }.json`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <div className={style.item}>
+                      <FormattedMessage id="chain.suggested.community-driven" />
+                      <GithubIcon />
+                    </div>
+                  </a>
+                </div>
+              </ToolTip>
+
+              <div className={style.paragraph}>
+                <FormattedMessage
+                  id="chain.suggested.paragraph"
+                  values={{
+                    host:
+                      chainSuggestStore.waitingSuggestedChainInfo?.data.origin,
+                    chainId:
+                      chainSuggestStore.waitingSuggestedChainInfo?.data.chainId,
+                    // eslint-disable-next-line react/display-name
+                    b: (...chunks: any) => <b>{chunks}</b>,
+                  }}
+                />
+              </div>
+
+              {uiConfigStore.isDeveloper && (
+                <div
+                  className={style.chainDetailContainer}
+                  onClick={() => setIsRawDataMode(true)}
+                >
+                  <FormattedMessage id="chain.suggested.add-chain-as-suggested" />
+                  <img
+                    src={require("../../../public/assets/svg/arrow-right-outline.svg")}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          <div className={style.buttons}>
+            <Button
+              className={style.button}
+              color="danger"
+              outline
+              disabled={!chainSuggestStore.waitingSuggestedChainInfo}
+              data-loading={chainSuggestStore.isLoading}
+              onClick={async (e) => {
+                e.preventDefault();
+
+                await chainSuggestStore.reject();
+
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  window.close();
+                } else {
+                  history.push("/");
+                }
+              }}
+            >
+              <FormattedMessage id="chain.suggested.button.reject" />
+            </Button>
+            <Button
+              className={style.button}
+              color="primary"
+              disabled={!chainSuggestStore.waitingSuggestedChainInfo}
+              data-loading={chainSuggestStore.isLoading}
+              onClick={async (e) => {
+                e.preventDefault();
+
+                const chainInfo = isRawDataMode
+                  ? chainSuggestStore.waitingSuggestedChainInfo?.data
+                  : chainSuggestStore.communityChainInfo;
+
+                if (chainInfo) {
+                  await chainSuggestStore.approve(chainInfo);
+                }
+
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  window.close();
+                } else {
+                  history.push("/");
+                }
+              }}
+            >
+              <FormattedMessage id="chain.suggested.button.approve" />
+            </Button>
+          </div>
+        </div>
+      )}
     </EmptyLayout>
   );
 });

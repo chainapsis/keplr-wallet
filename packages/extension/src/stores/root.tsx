@@ -1,5 +1,5 @@
 import { ChainStore } from "./chain";
-import { EmbedChainInfos } from "../config";
+import { CommunityChainInfoUrl, EmbedChainInfos } from "../config";
 import {
   AmplitudeApiKey,
   EthereumEndpoint,
@@ -156,7 +156,10 @@ export class RootStore {
       this.interactionStore,
       new InExtensionMessageRequester()
     );
-    this.chainSuggestStore = new ChainSuggestStore(this.interactionStore);
+    this.chainSuggestStore = new ChainSuggestStore(
+      this.interactionStore,
+      CommunityChainInfoUrl
+    );
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),

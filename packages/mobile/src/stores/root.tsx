@@ -1,4 +1,8 @@
-import { EmbedChainInfos, EthereumEndpoint } from "../config";
+import {
+  CommunityChainInfoUrl,
+  EmbedChainInfos,
+  EthereumEndpoint,
+} from "../config";
 import {
   KeyRingStore,
   InteractionStore,
@@ -105,7 +109,10 @@ export class RootStore {
       new RNMessageRequesterInternal()
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
-    this.chainSuggestStore = new ChainSuggestStore(this.interactionStore);
+    this.chainSuggestStore = new ChainSuggestStore(
+      this.interactionStore,
+      CommunityChainInfoUrl
+    );
 
     this.chainStore = new ChainStore(
       EmbedChainInfos,
