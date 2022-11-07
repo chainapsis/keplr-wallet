@@ -4,6 +4,7 @@ import React, { FunctionComponent } from "react";
 import { useIntl } from "react-intl";
 import styled from "styled-components";
 import { ButtonSelect } from "../../../components/button-select";
+import { Input } from "../../../components/input";
 import { Stack } from "../../../components/stack";
 import { ColorPalette } from "../../../styles";
 import { NumWords, useNewMnemonicConfig } from "./hook";
@@ -52,6 +53,15 @@ export const CreateAccount: FunctionComponent<{
           newMnemonicConfig.setNumWords(itemId)
         }
       />
+      {newMnemonicConfig.mnemonic.split(" ").map((mnemonicWord, index) => (
+        <Input
+          key={index}
+          label={`${index + 1}.`}
+          value={mnemonicWord}
+          isInline
+          isUneditable
+        />
+      ))}
     </Stack>
   );
 });
