@@ -19,8 +19,9 @@ import * as BytesUtils from "@ethersproject/bytes";
 import { computeAddress } from "@ethersproject/transactions";
 import { EIP712MessageValidator } from "./eip712";
 import { _TypedDataEncoder } from "@ethersproject/hash";
-import { KeystoneService, KeystonePublicKey } from "../keystone";
+import { KeystoneService } from "../keystone";
 import { publicKeyConvert } from "secp256k1";
+import { KeystoneKeyringData } from "../keystone/cosmos-keyring";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -66,7 +67,7 @@ export class KeyRing {
   private _privateKey?: Uint8Array;
   private _mnemonicMasterSeed?: Uint8Array;
   private _ledgerPublicKeyCache?: Record<string, Uint8Array | undefined>;
-  private _keystonePublicKeys?: KeystonePublicKey[];
+  private _keystonePublicKeyCache?: KeystoneKeyringData;
 
   private keyStore: KeyStore | null;
 
@@ -124,7 +125,7 @@ export class KeyRing {
       this.privateKey == null &&
       this.mnemonicMasterSeed == null &&
       this.ledgerPublicKeyCache == null &&
-      this.keystonePublicKeys == null
+      this.keystonePublicKey == null
     );
   }
 
@@ -136,7 +137,7 @@ export class KeyRing {
     this._privateKey = privateKey;
     this._mnemonicMasterSeed = undefined;
     this._ledgerPublicKeyCache = undefined;
-    this._keystonePublicKeys = undefined;
+    this._keystonePublicKeyCache = undefined;
     this.cached = new Map();
   }
 
@@ -148,16 +149,16 @@ export class KeyRing {
     this._mnemonicMasterSeed = masterSeed;
     this._privateKey = undefined;
     this._ledgerPublicKeyCache = undefined;
-    this._keystonePublicKeys = undefined;
+    this._keystonePublicKeyCache = undefined;
     this.cached = new Map();
   }
 
-  private get keystonePublicKeys(): KeystonePublicKey[] | undefined {
-    return this._keystonePublicKeys;
+  private get keystonePublicKey(): KeystoneKeyringData | undefined {
+    return this._keystonePublicKeyCache;
   }
 
-  private set keystonePublicKeys(publicKeys: KeystonePublicKey[] | undefined) {
-    this._keystonePublicKeys = publicKeys;
+  private set keystonePublicKey(publicKey: KeystoneKeyringData | undefined) {
+    this._keystonePublicKeyCache = publicKey;
     this._mnemonicMasterSeed = undefined;
     this._privateKey = undefined;
     this._ledgerPublicKeyCache = undefined;
@@ -478,8 +479,7 @@ export class KeyRing {
         password
       );
       try {
-        const keys = JSON.parse(Buffer.from(cipherText).toString());
-        this.keystonePublicKeys = keys;
+        this.keystonePublicKey = JSON.parse(Buffer.from(cipherText).toString());
       } catch (e: any) {
         throw new KeplrError(
           "keyring",
@@ -767,13 +767,12 @@ export class KeyRing {
         isNanoLedger: true,
       };
     } else if (this.keyStore.type === "keystone") {
-      if (
-        !(this.keystonePublicKeys instanceof Array) ||
-        this.keystonePublicKeys.length === 0
-      ) {
+      if (!this.keystonePublicKey || this.keystonePublicKey.keys.length === 0) {
         throw new KeplrError("keyring", 160, "Keystone public key not set");
       }
-      const key = this.keystonePublicKeys.find((e) => e.coinType === coinType);
+      const key = this.keystonePublicKey.keys.find(
+        (e) => e.coinType === coinType
+      );
       if (!key) {
         throw new KeplrError("keyring", 161, "CoinType is not available");
       }
@@ -1373,7 +1372,7 @@ export class KeyRing {
   private static async CreateKeystoneKeyStore(
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
-    publicKeys: KeystonePublicKey[],
+    publicKey: KeystoneKeyringData,
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath
@@ -1382,7 +1381,7 @@ export class KeyRing {
       crypto,
       kdf,
       "keystone",
-      JSON.stringify(publicKeys),
+      JSON.stringify(publicKey),
       password,
       meta,
       bip44HDPath

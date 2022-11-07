@@ -6,13 +6,20 @@ import { Loading } from "./loading";
 import { Message } from "./message";
 
 export interface Props {
+  type: "sync" | "signEth" | "signCosmos";
   onChange(ur: UR): Promise<void>;
 }
 
-export function Scan({ onChange }: Props) {
+export function Scan({ type, onChange }: Props) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isPermitted, setIsPermitted] = useState(true);
   const [isMsgShow, setIsMsgShow] = useState(false);
+
+  const purposeMap = {
+    sync: Purpose.COSMOS_SYNC,
+    signEth: Purpose.SIGN,
+    signCosmos: Purpose.COSMOS_SIGN,
+  };
 
   const onVideoLoaded = (isLoaded: boolean) => {
     setIsPermitted(isLoaded);
@@ -44,7 +51,7 @@ export function Scan({ onChange }: Props) {
         <div className={style.scanner}>
           <img src={require("../../public/assets/svg/scanner.svg")} />
           <AnimatedQRScanner
-            purpose={Purpose.COSMOS_SYNC}
+            purpose={purposeMap[type]}
             handleScan={handleScan}
             handleError={onError}
             videoLoaded={onVideoLoaded}

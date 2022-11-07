@@ -1,5 +1,4 @@
 export * from "./interaction";
-export * from "./keystone";
 export * from "./tx";
 export * from "./register";
 export * from "./address-book";
