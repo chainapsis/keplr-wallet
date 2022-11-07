@@ -4,14 +4,34 @@ import {
 } from "@keystonehq/bc-ur-registry-cosmos";
 import { BaseKeyring, InteractionProvider } from "@keystonehq/cosmos-keyring";
 import { CryptoMultiAccounts } from "@keystonehq/bc-ur-registry";
-import { UR } from "@keplr-wallet/stores";
+import { BIP44HDPath } from "../keyring";
+import { parseHDPath } from "./utils";
+
+export interface KeystoneUR {
+  type: string;
+  cbor: string;
+}
 
 interface ReadUR {
-  (): Promise<UR>;
+  (): Promise<KeystoneUR>;
 }
 
 interface PlayUR {
-  (ur: UR, options?: any): Promise<null>;
+  (ur: KeystoneUR, options?: any): Promise<void>;
+}
+
+export interface KeystonePublicKey {
+  coinType: number;
+  bip44HDPath: BIP44HDPath;
+  pubKey: string;
+  index: number;
+}
+
+export interface KeystoneKeyringData {
+  xfp: string;
+  keys: KeystonePublicKey[];
+  name?: string;
+  device?: string;
 }
 
 export class KeystoneCosmosInteractionProvider implements InteractionProvider {
@@ -37,11 +57,11 @@ export class KeystoneCosmosInteractionProvider implements InteractionProvider {
   };
 
   public requestSignature = async (
-    aptosSignRequest: CosmosSignRequest,
+    cosmosSignRequest: CosmosSignRequest,
     requestTitle?: string,
     requestDescription?: string
   ) => {
-    const ur = aptosSignRequest.toUR();
+    const ur = cosmosSignRequest.toUR();
     await this.playUR(
       {
         type: ur.type,
@@ -74,8 +94,53 @@ export class KeystoneCosmosKeyring extends BaseKeyring {
   getInteraction = () => {
     return this.interaction;
   };
+
+  getKeyringData(): KeystoneKeyringData {
+    return {
+      xfp: this.xfp,
+      device: this.device,
+      name: this.name,
+      keys: this.getPubKeys().map((e) => {
+        const path = parseHDPath(`m/${e.hdPath}`);
+        return {
+          coinType: path.coinType,
+          bip44HDPath: path.bip44HDPath,
+          pubKey: e.pubKey,
+          index: e.index,
+        };
+      }),
+    };
+  }
 }
 
-export function useKeystoneCosmosKeyring() {
-  return KeystoneCosmosKeyring.getEmptyKeyring();
+interface Props {
+  readUR?: ReadUR;
+  playUR?: PlayUR;
+  keyringData?: KeystoneKeyringData;
+}
+
+export function useKeystoneCosmosKeyring({
+  readUR,
+  playUR,
+  keyringData,
+}: Props) {
+  const keyring = KeystoneCosmosKeyring.getEmptyKeyring();
+  if (keyringData) {
+    const data = {
+      ...keyringData,
+      keys: keyringData.keys.map((e) => ({
+        hdPath: `44'/${e.coinType}'/${e.bip44HDPath.account}'/${e.bip44HDPath.change}/${e.bip44HDPath.addressIndex}`,
+        index: e.index,
+        pubKey: e.pubKey,
+      })),
+    };
+    keyring.syncKeyringData(data);
+  }
+  if (readUR) {
+    keyring.getInteraction().onReadUR(readUR);
+  }
+  if (playUR) {
+    keyring.getInteraction().onPlayUR(playUR);
+  }
+  return keyring;
 }

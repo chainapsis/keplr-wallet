@@ -4,14 +4,11 @@ import { useStore } from "../../stores";
 import { Guide } from "./guide";
 import { Scan } from "./scan";
 import { UR } from "@keplr-wallet/stores";
-import { useKeystoneCosmosKeyring } from "@keplr-wallet/hooks";
-import { parseHDPath } from "./utils";
 
 export const KeystoneImportPubkeyPage = observer(() => {
   const [isScan, setIsScan] = useState(false);
 
   const { keystoneStore } = useStore();
-  const keystoneKeyring = useKeystoneCosmosKeyring();
 
   const onUnload = () => {
     keystoneStore.resolveGetPubkey({
@@ -20,20 +17,8 @@ export const KeystoneImportPubkeyPage = observer(() => {
   };
 
   const onScanFinish = async (ur: UR) => {
-    keystoneKeyring.getInteraction().onReadUR(async () => {
-      return ur;
-    });
-    await keystoneKeyring.readKeyring();
-    const keys = await keystoneKeyring.getPubKeys();
     keystoneStore.resolveGetPubkey({
-      publicKey: keys.map((k) => {
-        const hdPath = `m/${k.hdPath}`;
-        return {
-          ...k,
-          hdPath,
-          ...parseHDPath(hdPath),
-        };
-      }),
+      publicKey: ur,
     });
     window.removeEventListener("unload", onUnload);
     window.close();
@@ -49,7 +34,7 @@ export const KeystoneImportPubkeyPage = observer(() => {
   }, []);
 
   return isScan ? (
-    <Scan onChange={onScanFinish} />
+    <Scan type="sync" onChange={onScanFinish} />
   ) : (
     <Guide onScan={() => setIsScan(true)} />
   );
