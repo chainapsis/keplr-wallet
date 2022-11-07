@@ -85,8 +85,12 @@ export class ChainUpdaterService {
       const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
       const res = await Axios.get<ChainInfo>(
-        `${this.communityChainInfoUrl}/cosmos/${chainIdentifier}.json`
+        `/cosmos/${chainIdentifier}.json`,
+        {
+          baseURL: this.communityChainInfoUrl,
+        }
       );
+
       let chainInfo: ChainInfo = res.data;
 
       const rpcChainId = await this.checkChainId(chainInfo.rpc);

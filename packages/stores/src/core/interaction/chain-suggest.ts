@@ -39,11 +39,13 @@ export class ChainSuggestStore {
           this.waitingSuggestedChainInfo.data.chainId
         ).identifier;
         const chainInfoResponse = yield Axios.get<ChainInfo>(
-          `${this.communityChainInfoUrl}/cosmos/${chainIdentifier}.json`
+          `/cosmos/${chainIdentifier}.json`,
+          {
+            baseURL: this.communityChainInfoUrl,
+          }
         );
 
-        const chainInfo: ChainInfo = chainInfoResponse.data;
-        this.communityChainInfo = chainInfo;
+        this.communityChainInfo = chainInfoResponse.data;
       } finally {
         this._isLoading = false;
       }
