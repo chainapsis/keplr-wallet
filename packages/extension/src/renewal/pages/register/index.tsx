@@ -38,8 +38,6 @@ export const RegisterPage: FunctionComponent = observer(() => {
       <Card
         width="100%"
         maxWidth={registerConfig.isIntro ? "34.25rem" : "35rem"}
-        height="100%"
-        maxHeight={registerConfig.isIntro ? "38.75rem" : "100vh"}
         display="flex"
         flexDirection="vertical"
         background="white"
@@ -58,6 +56,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
         <br />
         This process does not require an internet conenction.
       </Notice>
+      <Gutter size="2.5rem" />
     </Container>
   );
 });

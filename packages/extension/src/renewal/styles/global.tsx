@@ -55,6 +55,10 @@ export const GlobalStyles = createGlobalStyle`
     border-spacing: 0;
   }
 
+  input {
+    width: 100%;
+  }
+
   button:hover {
     cursor: pointer;
   }

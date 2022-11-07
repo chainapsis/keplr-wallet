@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { ButtonSelect } from "../../../components/button-select";
 import { Input } from "../../../components/input";
 import { Stack } from "../../../components/stack";
+import { Tiles } from "../../../components/tiles";
 import { ColorPalette } from "../../../styles";
 import { NumWords, useNewMnemonicConfig } from "./hook";
 
@@ -53,15 +54,17 @@ export const CreateAccount: FunctionComponent<{
           newMnemonicConfig.setNumWords(itemId)
         }
       />
-      {newMnemonicConfig.mnemonic.split(" ").map((mnemonicWord, index) => (
-        <Input
-          key={index}
-          label={`${index + 1}.`}
-          value={mnemonicWord}
-          isInline
-          isUneditable
-        />
-      ))}
+      <Tiles columns={3} space="16px">
+        {newMnemonicConfig.mnemonic.split(" ").map((mnemonicWord, index) => (
+          <Input
+            key={index}
+            label={`${index + 1}.`}
+            value={mnemonicWord}
+            isInline
+            isUneditable
+          />
+        ))}
+      </Tiles>
     </Stack>
   );
 });
