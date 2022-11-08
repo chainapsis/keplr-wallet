@@ -4,13 +4,15 @@ import { AnimatedQRScanner, Purpose } from "@keystonehq/animated-qr";
 import { UR } from "@keplr-wallet/stores";
 import { Loading } from "./loading";
 import { Message } from "./message";
+import { Button } from "reactstrap";
 
 export interface Props {
   type: "sync" | "signEth" | "signCosmos";
   onChange(ur: UR): Promise<void>;
+  onCancel?(): void;
 }
 
-export function Scan({ type, onChange }: Props) {
+export function Scan({ type, onChange, onCancel }: Props) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isPermitted, setIsPermitted] = useState(true);
   const [isMsgShow, setIsMsgShow] = useState(false);
@@ -70,6 +72,11 @@ export function Scan({ type, onChange }: Props) {
           <p className={style["error-text"]}>
             Please enable your camera permission via [Settings]
           </p>
+        )}
+        {onCancel && (
+          <Button block onClick={onCancel}>
+            Cancel
+          </Button>
         )}
       </div>
       {isConnecting && <Loading title="Connecting" />}

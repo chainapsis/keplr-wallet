@@ -79,7 +79,7 @@ export class KeystoneService {
     const keyring = useKeystoneCosmosKeyring({
       keyringData,
       playUR: async (ur) => {
-        const res = (await this.interactionService.waitApprove(
+        (this.interactionService.waitApprove(
           env,
           "/keystone/sign",
           TYPE_KEYSTONE_SIGN,
@@ -89,18 +89,19 @@ export class KeystoneService {
             ur,
             message,
           }
-        )) as StdSignDoc;
-        if (res.abort) {
-          throw new KeplrError(
-            "keystone",
-            301,
-            "The process has been canceled."
-          );
-        }
-        if (!res.signature) {
-          throw new KeplrError("keystone", 303, "Signature is empty.");
-        }
-        signResolve(res.signature);
+        ) as Promise<StdSignDoc>).then((res) => {
+          if (res.abort) {
+            throw new KeplrError(
+              "keystone",
+              301,
+              "The process has been canceled."
+            );
+          }
+          if (!res.signature) {
+            throw new KeplrError("keystone", 303, "Signature is empty.");
+          }
+          signResolve(res.signature);
+        });
       },
       readUR: () =>
         new Promise<KeystoneUR>((resolve) => {
@@ -110,7 +111,8 @@ export class KeystoneService {
     const res = await keyring.signDirectTransaction(
       Buffer.from(key.pubKey).toString("hex"),
       message,
-      [Buffer.from(key.address).toString("hex")]
+      [Buffer.from(key.address).toString("hex")],
+      "Keplr"
     );
     return res.signature;
   }

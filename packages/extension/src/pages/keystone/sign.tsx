@@ -14,7 +14,7 @@ export const KeystoneSignPage = observer(() => {
   const { keystoneStore } = useStore();
 
   const onScanFinish = async (ur: UR) => {
-    keystoneStore.resolveSign({ ur });
+    keystoneStore.resolveSign({ signature: ur });
   };
 
   const onReject = () => {
@@ -27,15 +27,21 @@ export const KeystoneSignPage = observer(() => {
 
   useEffect(() => {
     if (keystoneStore.signData) {
-      console.log(keystoneStore.signData);
       setUR(keystoneStore.signData.data.ur);
     }
   }, [keystoneStore.signData]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-keystone-import-page", "true");
+    return () => {
+      document.documentElement.removeAttribute("data-keystone-import-page");
+    };
+  }, []);
+
   return isScan ? (
-    <Scan type="signCosmos" onChange={onScanFinish} />
+    <Scan type="signCosmos" onChange={onScanFinish} onCancel={onReject} />
   ) : (
-    <div className={`${style.page}`}>
+    <div className={`${style.page} ${style.sign}`}>
       <div>
         <div className={style.title}>Request Signature</div>
         <div className={style.subtitle}>
@@ -61,7 +67,7 @@ export const KeystoneSignPage = observer(() => {
         </p>
       </div>
 
-      <div>
+      <div className={style.btns}>
         <Button onClick={onReject}>Reject</Button>
         <Button color="primary" onClick={onGetSignature}>
           Get Signature

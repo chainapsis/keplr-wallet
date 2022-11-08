@@ -127,9 +127,19 @@ html[data-keystone-import-page] {
   }
 }
 
-.display {
-  display: inline-block;
-  margin: 30px auto;
+.sign {
+  .display {
+    display: inline-block;
+    margin: 30px auto;
+  }
+  .btns {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    button {
+      width: 50%;
+    }
+  }
 }
 
 .scanner {
