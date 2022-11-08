@@ -26,7 +26,7 @@ export const Input: FunctionComponent<InputProps> = ({
 const Container = styled.div<Pick<InputProps, "isInline">>`
   display: flex;
   flex-direction: ${({ isInline }) => (isInline ? "row" : "column")};
-  align-items: center;
+  align-items: ${({ isInline }) => (isInline ? "center" : "flex-start")};
   gap: 4px;
 `;
 
@@ -45,6 +45,7 @@ const StyledInput = styled.input`
   background: ${ColorPalette["white"]};
   border: 1px solid ${ColorPalette["gray-100"]};
   border-radius: 8px;
+  max-width: 400px;
 
   font-weight: 600;
   font-size: 16px;
