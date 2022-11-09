@@ -198,6 +198,10 @@ export class KeyRing {
       throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
+    if (defaultCoinType === 60) {
+      return 60;
+    }
+
     return this.keyStore.coinTypeForChain
       ? this.keyStore.coinTypeForChain[
           ChainIdHelper.parse(chainId).identifier
