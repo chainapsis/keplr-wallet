@@ -37,6 +37,7 @@ const useAnimatedValueSet = () => {
 export const CardModal: FunctionComponent<{
   title?: string;
   right?: React.ReactElement;
+  parentContainerStyle?: ViewStyle;
   childrenContainerStyle?: ViewStyle;
 
   disableGesture?: boolean;
@@ -44,6 +45,7 @@ export const CardModal: FunctionComponent<{
   title,
   right,
   children,
+  parentContainerStyle,
   childrenContainerStyle,
   disableGesture = false,
 }) => {
@@ -391,6 +393,7 @@ export const CardModal: FunctionComponent<{
             animatedKeyboardPaddingBottom
           ),
         },
+        parentContainerStyle,
       ])}
     >
       <PanGestureHandler
