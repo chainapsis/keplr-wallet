@@ -6,6 +6,7 @@
 **/*.ttf
 **/*.secret
 **/*.md
+**/*.log
 .DS_Store
 
 .gitignore
