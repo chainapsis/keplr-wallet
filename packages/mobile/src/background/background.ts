@@ -11,7 +11,7 @@ import TransportBLE from "@ledgerhq/react-native-hw-transport-ble";
 import { getRandomBytesAsync } from "../common";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
-import { CommunityChainInfoUrl, EmbedChainInfos } from "../config";
+import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
 import {
   getLastUsedLedgerDeviceId,
   setLastUsedLedgerDeviceId,
@@ -31,7 +31,7 @@ init(
     "https://junoswap.com",
     "https://frontier.osmosis.zone",
   ],
-  CommunityChainInfoUrl,
+  CommunityChainInfoRepo,
   {
     rng: getRandomBytesAsync,
     scrypt: async (text: string, params: ScryptParams) => {

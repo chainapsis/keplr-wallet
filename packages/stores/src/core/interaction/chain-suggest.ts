@@ -14,7 +14,10 @@ export class ChainSuggestStore {
 
   constructor(
     protected readonly interactionStore: InteractionStore,
-    protected readonly communityChainInfoUrl: string
+    protected readonly communityChainInfoRepo: {
+      readonly organizationName: string;
+      readonly repoName: string;
+    }
   ) {
     makeObservable(this);
   }
@@ -29,6 +32,15 @@ export class ChainSuggestStore {
     }
   }
 
+  get communityChainInfoRepoUrl(): string {
+    return `https://github.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}`;
+  }
+
+  getCommunityChainInfoUrl(chainId: string): string {
+    const chainIdHelper = ChainIdHelper.parse(chainId);
+    return `${this.communityChainInfoRepoUrl}/blob/main/cosmos/${chainIdHelper.identifier}.json`;
+  }
+
   @flow
   *fetchCommunityChainInfo() {
     this._isLoading = true;
@@ -41,7 +53,7 @@ export class ChainSuggestStore {
         const chainInfoResponse = yield Axios.get<ChainInfo>(
           `/cosmos/${chainIdentifier}.json`,
           {
-            baseURL: this.communityChainInfoUrl,
+            baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/main`,
           }
         );
 

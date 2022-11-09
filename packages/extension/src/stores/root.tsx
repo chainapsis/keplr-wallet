@@ -1,5 +1,5 @@
 import { ChainStore } from "./chain";
-import { CommunityChainInfoUrl, EmbedChainInfos } from "../config";
+import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
 import {
   AmplitudeApiKey,
   EthereumEndpoint,
@@ -158,7 +158,7 @@ export class RootStore {
     );
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
-      CommunityChainInfoUrl
+      CommunityChainInfoRepo
     );
 
     this.queriesStore = new QueriesStore(

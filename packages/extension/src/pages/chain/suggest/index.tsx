@@ -6,7 +6,6 @@ import style from "./style.module.scss";
 import { EmptyLayout } from "../../../layouts/empty-layout";
 import { FormattedMessage } from "react-intl";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { ToolTip } from "../../../components/tooltip";
@@ -232,7 +231,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   {!chainSuggestStore.communityChainInfo && (
                     <div className={style.link}>
                       <a
-                        href="https://github.com/chainapsis/cicd-test"
+                        href={chainSuggestStore.communityChainInfoRepoUrl}
                         target="_blank"
                         rel="noreferrer"
                       >
@@ -293,12 +292,9 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
               >
                 <div className={style.tag}>
                   <a
-                    href={`https://github.com/chainapsis/cicd-test/blob/main/cosmos/${
-                      ChainIdHelper.parse(
-                        chainSuggestStore.waitingSuggestedChainInfo?.data
-                          .chainId
-                      ).identifier
-                    }.json`}
+                    href={chainSuggestStore.getCommunityChainInfoUrl(
+                      chainSuggestStore.waitingSuggestedChainInfo?.data.chainId
+                    )}
                     target="_blank"
                     rel="noreferrer"
                   >

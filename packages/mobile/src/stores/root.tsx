@@ -1,5 +1,5 @@
 import {
-  CommunityChainInfoUrl,
+  CommunityChainInfoRepo,
   EmbedChainInfos,
   EthereumEndpoint,
 } from "../config";
@@ -111,7 +111,7 @@ export class RootStore {
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
-      CommunityChainInfoUrl
+      CommunityChainInfoRepo
     );
 
     this.chainStore = new ChainStore(

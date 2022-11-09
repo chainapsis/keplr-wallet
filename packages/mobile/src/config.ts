@@ -1953,5 +1953,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
 
 export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";
 
-export const CommunityChainInfoUrl =
-  "https://raw.githubusercontent.com/danielkim89/cicd-test/main";
+export const CommunityChainInfoRepo = {
+  organizationName: "danielkim89",
+  repoName: "cicd-test",
+};

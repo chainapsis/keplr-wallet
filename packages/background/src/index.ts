@@ -40,7 +40,10 @@ export function init(
   embedChainInfos: ChainInfo[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
-  communityChainInfoUrl: string,
+  communityChainInfoRepo: {
+    readonly organizationName: string;
+    readonly repoName: string;
+  },
   commonCrypto: CommonCrypto,
   notification: Notification,
   ledgerOptions: Partial<LedgerOptions> = {},
@@ -67,7 +70,7 @@ export function init(
 
   const chainUpdaterService = new Updater.ChainUpdaterService(
     storeCreator("updator"),
-    communityChainInfoUrl
+    communityChainInfoRepo
   );
 
   const tokensService = new Tokens.TokensService(storeCreator("tokens"));

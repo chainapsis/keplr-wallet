@@ -14,7 +14,10 @@ export class ChainUpdaterService {
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly communityChainInfoUrl: string
+    protected readonly communityChainInfoRepo: {
+      readonly organizationName: string;
+      readonly repoName: string;
+    }
   ) {}
 
   init(chainsService: ChainsService) {
@@ -87,7 +90,7 @@ export class ChainUpdaterService {
       const res = await Axios.get<ChainInfo>(
         `/cosmos/${chainIdentifier}.json`,
         {
-          baseURL: this.communityChainInfoUrl,
+          baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/main`,
         }
       );
 

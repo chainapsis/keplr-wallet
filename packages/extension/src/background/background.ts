@@ -11,7 +11,7 @@ import scrypt from "scrypt-js";
 import { Buffer } from "buffer/";
 
 import {
-  CommunityChainInfoUrl,
+  CommunityChainInfoRepo,
   EmbedChainInfos,
   PrivilegedOrigins,
 } from "../config";
@@ -26,7 +26,7 @@ init(
   new ContentScriptMessageRequester(),
   EmbedChainInfos,
   PrivilegedOrigins,
-  CommunityChainInfoUrl,
+  CommunityChainInfoRepo,
   {
     rng: (array) => {
       return Promise.resolve(crypto.getRandomValues(array));

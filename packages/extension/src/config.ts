@@ -1994,5 +1994,7 @@ export const EmbedChainInfos: ChainInfo[] = [
 // The origins that are able to pass any permission that external webpages can have.
 export const PrivilegedOrigins: string[] = PRIVILEGED_ORIGINS;
 
-export const CommunityChainInfoUrl =
-  "https://raw.githubusercontent.com/danielkim89/cicd-test/main";
+export const CommunityChainInfoRepo = {
+  organizationName: "danielkim89",
+  repoName: "cicd-test",
+};
