@@ -1,7 +1,9 @@
 {
   "name": "@keplr-wallet/extension",
   "version": "0.10.23",
-  "author": "chainapsis",
+  "author": {
+    "name": "chainapsis"
+  },
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
@@ -17,7 +19,8 @@
     "lint-fix": "eslint --fix \"src/**/*\" webpack.config.js && prettier --write \"src/**/*\" webpack.config.js",
     "version": "zx ./scripts/lerna-lifecyle-version.mjs",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "chromatic": "npx chromatic --project-token=c3711418713b"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.24.0-alpha.25",
@@ -110,6 +113,7 @@
     "@types/sha.js": "^2.4.0",
     "@types/styled-components": "^5.1.26",
     "babel-loader": "^8.2.5",
+    "chromatic": "^6.11.4",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "deepmerge": "^4.2.2",

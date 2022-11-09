@@ -5,20 +5,20 @@ import { ColorPalette } from "../../styles";
 export interface InputProps {
   label: string;
   value: string;
-  isUneditable?: boolean;
+  readOnly?: boolean;
   isInline?: boolean;
 }
 
 export const Input: FunctionComponent<InputProps> = ({
   label,
   value,
-  isUneditable,
+  readOnly,
   isInline,
 }) => {
   return (
     <Container isInline={isInline}>
       <StyledLabel>{label}</StyledLabel>
-      <StyledInput value={value} readOnly={isUneditable} />
+      <StyledInput value={value} readOnly={readOnly} />
     </Container>
   );
 };

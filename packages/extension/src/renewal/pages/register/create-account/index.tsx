@@ -60,8 +60,8 @@ export const CreateAccount: FunctionComponent<{
             key={index}
             label={`${index + 1}.`}
             value={mnemonicWord}
+            readOnly
             isInline
-            isUneditable
           />
         ))}
       </Tiles>
