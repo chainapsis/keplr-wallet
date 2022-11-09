@@ -12,7 +12,6 @@ import { useStore } from "../../../stores";
 import { ToolTip } from "../../../components/tooltip";
 import classNames from "classnames";
 import { GithubIcon, InformationCircleOutline } from "../../../components/icon";
-import { CommunityChainInfoUrl } from "../../../config";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore, uiConfigStore } = useStore();
@@ -251,11 +250,11 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   <div className={style.imageBackground} />
                   <img
                     className={style.logoImage}
-                    src={`${CommunityChainInfoUrl}/images/${
-                      ChainIdHelper.parse(
-                        chainSuggestStore.waitingSuggestedChainInfo.data.chainId
-                      ).identifier
-                    }.png`}
+                    src={
+                      chainSuggestStore.communityChainInfo
+                        ?.chainSymbolImageUrl ||
+                      require("../../../public/assets/logo-256.png")
+                    }
                     alt="chain logo"
                   />
                 </div>
