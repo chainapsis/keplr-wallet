@@ -4,7 +4,7 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
 import { Staking } from "@keplr-wallet/stores";
-import { useRedelegateTxConfig } from "@keplr-wallet/hooks";
+import { useGasSimulator, useRedelegateTxConfig } from "@keplr-wallet/hooks";
 import { PageWithScrollView } from "../../../components/page";
 import { Card, CardBody, CardDivider } from "../../../components/card";
 import { Text, View } from "react-native";
@@ -17,6 +17,7 @@ import {
 } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
+import { AsyncKVStore } from "../../../common";
 
 export const RedelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -103,6 +104,22 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
+  const gasSimulator = useGasSimulator(
+    new AsyncKVStore("gas-simulator.screen.stake.redelegate/redelegate"),
+    chainStore,
+    chainStore.current.chainId,
+    sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
+    "native",
+    () => {
+      return account.cosmos.makeBeginRedelegateTx(
+        sendConfigs.amountConfig.amount,
+        sendConfigs.srcValidatorAddress,
+        sendConfigs.dstValidatorAddress
+      );
+    }
+  );
+
   return (
     <PageWithScrollView
       backgroundMode="tertiary"
@@ -187,6 +204,7 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
         gasLabel="gas"
         feeConfig={sendConfigs.feeConfig}
         gasConfig={sendConfigs.gasConfig}
+        gasSimulator={gasSimulator}
       />
       <View style={style.flatten(["flex-1"])} />
       <Button
