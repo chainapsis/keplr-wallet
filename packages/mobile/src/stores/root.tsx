@@ -167,38 +167,26 @@ export class RootStore {
       },
       CosmosAccount.use({
         queriesStore: this.queriesStore,
-        msgOptsCreator: (chainId) => {
-          if (chainId.startsWith("osmosis")) {
-            return {
-              send: {
-                native: {
-                  gas: 100000,
-                },
+        msgOptsCreator: () => {
+          return {
+            send: {
+              native: {
+                gas: 120000,
               },
-              undelegate: {
-                gas: 350000,
-              },
-              redelegate: {
-                gas: 550000,
-              },
-              withdrawRewards: {
-                gas: 300000,
-              },
-            };
-          }
-
-          if (chainId.startsWith("stargaze-")) {
-            return {
-              send: {
-                native: {
-                  gas: 100000,
-                },
-              },
-              withdrawRewards: {
-                gas: 200000,
-              },
-            };
-          }
+            },
+            delegate: {
+              gas: 350000,
+            },
+            undelegate: {
+              gas: 350000,
+            },
+            redelegate: {
+              gas: 550000,
+            },
+            withdrawRewards: {
+              gas: 240000,
+            },
+          };
         },
       }),
       CosmwasmAccount.use({
