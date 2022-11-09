@@ -6,6 +6,7 @@ import { action, makeObservable, observable } from "mobx";
 import {
   IFeeConfig,
   IGasConfig,
+  IGasSimulator,
   InsufficientFeeError,
   NotLoadedFeeError,
 } from "@keplr-wallet/hooks";
@@ -14,6 +15,8 @@ import { useStore } from "../../stores";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 import { LoadingSpinner } from "../spinner";
 import { RectButton } from "../rect-button";
+import { Button } from "../button";
+import { AutoGasModal } from "../../modals/auto-gas";
 
 export interface FeeButtonsProps {
   labelStyle?: TextStyle;
@@ -26,6 +29,8 @@ export interface FeeButtonsProps {
 
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+
+  gasSimulator: IGasSimulator;
 }
 
 class FeeButtonState {
@@ -82,10 +87,14 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
     errorLabelStyle,
     label,
     feeConfig,
+    gasConfig,
+    gasSimulator,
   }) => {
     const { priceStore } = useStore();
 
     const style = useStyle();
+
+    const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
 
     useEffect(() => {
       if (feeConfig.feeCurrency && !feeConfig.fee) {
@@ -309,6 +318,26 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
             </Text>
           </View>
         ) : null}
+        <View
+          style={StyleSheet.flatten([
+            style.flatten(["flex-row", "justify-center", "margin-top-20"]),
+          ])}
+        >
+          <Button
+            text="Advanced"
+            mode="text"
+            style={StyleSheet.flatten([
+              style.flatten(["width-122", "items-center"]),
+            ])}
+            onPress={() => setIsOpenModal(!isOpenModal)}
+          />
+        </View>
+        <AutoGasModal
+          isOpen={isOpenModal}
+          close={() => setIsOpenModal(false)}
+          gasConfig={gasConfig}
+          gasSimulator={gasSimulator}
+        />
       </View>
     );
   }
