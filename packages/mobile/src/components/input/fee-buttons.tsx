@@ -30,7 +30,7 @@ export interface FeeButtonsProps {
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
 
-  gasSimulator: IGasSimulator;
+  gasSimulator?: IGasSimulator;
 }
 
 class FeeButtonState {
@@ -318,26 +318,32 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
             </Text>
           </View>
         ) : null}
-        <View
-          style={StyleSheet.flatten([
-            style.flatten(["flex-row", "justify-center", "margin-top-20"]),
-          ])}
-        >
-          <Button
-            text="Advanced"
-            mode="text"
-            style={StyleSheet.flatten([
-              style.flatten(["width-122", "items-center"]),
-            ])}
-            onPress={() => setIsOpenModal(!isOpenModal)}
-          />
-        </View>
-        <AutoGasModal
-          isOpen={isOpenModal}
-          close={() => setIsOpenModal(false)}
-          gasConfig={gasConfig}
-          gasSimulator={gasSimulator}
-        />
+        {gasSimulator && (
+          <View>
+            <View
+              style={StyleSheet.flatten([
+                style.flatten(["flex-row", "justify-center", "margin-top-20"]),
+              ])}
+            >
+              <Button
+                text="Advanced"
+                mode="text"
+                style={StyleSheet.flatten([
+                  style.flatten(["width-122", "items-center"]),
+                ])}
+                onPress={() => setIsOpenModal(!isOpenModal)}
+              />
+            </View>
+            (
+            <AutoGasModal
+              isOpen={isOpenModal}
+              close={() => setIsOpenModal(false)}
+              gasConfig={gasConfig}
+              gasSimulator={gasSimulator}
+            />
+            )
+          </View>
+        )}
       </View>
     );
   }
