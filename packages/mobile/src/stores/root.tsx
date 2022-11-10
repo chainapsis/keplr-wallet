@@ -171,7 +171,7 @@ export class RootStore {
           return {
             send: {
               native: {
-                gas: 120000,
+                gas: 200000,
               },
             },
             delegate: {
