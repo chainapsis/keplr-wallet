@@ -3,7 +3,10 @@ import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import { useIntl } from "react-intl";
 import styled from "styled-components";
+import { Button } from "../../../components/button";
 import { ButtonSelect } from "../../../components/button-select";
+import { Gutter } from "../../../components/gutter";
+import { CheckIcon } from "../../../components/icon";
 import { Input } from "../../../components/input";
 import { Stack } from "../../../components/stack";
 import { Tiles } from "../../../components/tiles";
@@ -50,9 +53,11 @@ export const CreateAccount: FunctionComponent<{
           },
         ]}
         activeItemId={newMnemonicConfig.numWords}
-        onClickItem={(itemId: NumWords) =>
-          newMnemonicConfig.setNumWords(itemId)
-        }
+        onClickItem={(itemId: NumWords) => {
+          if (newMnemonicConfig.numWords !== itemId) {
+            newMnemonicConfig.setNumWords(itemId);
+          }
+        }}
       />
       <Tiles columns={3} space="16px">
         {newMnemonicConfig.mnemonic.split(" ").map((mnemonicWord, index) => (
@@ -65,6 +70,10 @@ export const CreateAccount: FunctionComponent<{
           />
         ))}
       </Tiles>
+      <Gutter size="1rem" />
+      <Button color="transparent" onClick={() => {}} rightIcon={<CheckIcon />}>
+        Copy to clipboard
+      </Button>
     </Stack>
   );
 });

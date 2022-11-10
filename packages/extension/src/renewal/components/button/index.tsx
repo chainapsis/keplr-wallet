@@ -1,6 +1,12 @@
-import React, { FunctionComponent, MouseEventHandler } from "react";
+import React, {
+  FunctionComponent,
+  MouseEventHandler,
+  ReactElement,
+} from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
+import { Box } from "../box";
+import { IconProps } from "../icon/types";
 
 type ButtonColor = "primary" | "secondary" | "danger" | "transparent";
 type ButtonSize = "md" | "block";
@@ -8,14 +14,21 @@ type ButtonSize = "md" | "block";
 export interface ButtonProps {
   color?: ButtonColor;
   size?: ButtonSize;
+  rightIcon?: ReactElement<IconProps>;
   onClick: MouseEventHandler<HTMLButtonElement>;
 }
 
 export const Button: FunctionComponent<ButtonProps> = ({
   children,
+  rightIcon,
   ...props
 }) => {
-  return <Container {...props}>{children}</Container>;
+  return (
+    <Container {...props}>
+      {children}
+      {rightIcon && <Box paddingLeft="8px">{rightIcon}</Box>}
+    </Container>
+  );
 };
 
 const makeStylesFromColor = (color?: ButtonColor) => {
