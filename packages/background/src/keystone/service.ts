@@ -76,6 +76,7 @@ export class KeystoneService {
     message: Uint8Array
   ): Promise<Uint8Array> {
     let signResolve: { (arg0: KeystoneUR): void };
+    console.log("keyringData", keyringData);
     const keyring = useKeystoneCosmosKeyring({
       keyringData,
       playUR: async (ur) => {
@@ -108,11 +109,22 @@ export class KeystoneService {
           signResolve = resolve;
         }),
     });
-    const res = await keyring.signDirectTransaction(
+    console.log(
+      "keyring.signAminoTransaction",
+      Buffer.from(key.pubKey).toString("hex"),
+      Buffer.from(key.address).toString("hex"),
+      Buffer.from(message).toString("hex")
+    );
+    console.log(Buffer.from(message).toString());
+    const res = await keyring.signAminoTransaction(
       Buffer.from(key.pubKey).toString("hex"),
       message,
       [Buffer.from(key.address).toString("hex")],
       "Keplr"
+    );
+    console.log(
+      "keyring.signAminoTransaction signature",
+      res.signature.toString("hex")
     );
     return res.signature;
   }
