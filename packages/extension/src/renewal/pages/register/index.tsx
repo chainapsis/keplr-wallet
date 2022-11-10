@@ -35,13 +35,12 @@ export const RegisterPage: FunctionComponent = observer(() => {
 
   return (
     <Container>
+      <Gutter size="2.5rem" />
       <Card
         width="100%"
         maxWidth={registerConfig.isIntro ? "34.25rem" : "35rem"}
-        display="flex"
-        flexDirection="vertical"
-        background="white"
         padding="4.625rem"
+        isAnimated
       >
         {registerConfig.isIntro && (
           <RegisterIntro registerConfig={registerConfig} />

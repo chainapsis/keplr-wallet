@@ -2,8 +2,9 @@ import React, { FunctionComponent } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 
-export type BoxProps = {
+export interface BoxProps {
   className?: string;
+  isAnimated?: boolean;
 
   width?: string;
   minWidth?: string;
@@ -42,7 +43,7 @@ export type BoxProps = {
   overflow?: "visible" | "hidden" | "scroll" | "auto";
   borderWidth?: string;
   borderColor?: string;
-};
+}
 
 const Container = styled(motion.div)<BoxProps>`
   box-sizing: border-box;
@@ -119,9 +120,13 @@ const Container = styled(motion.div)<BoxProps>`
   }};
 `;
 
-export const Box: FunctionComponent<BoxProps> = ({ children, ...props }) => {
+export const Box: FunctionComponent<BoxProps> = ({
+  children,
+  isAnimated,
+  ...props
+}) => {
   return (
-    <Container layout {...props}>
+    <Container layout={isAnimated} {...props}>
       {children}
     </Container>
   );

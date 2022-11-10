@@ -1,9 +1,9 @@
 import React, { FunctionComponent, ReactChild } from "react";
 import { flattenChildren } from "../../utils/react";
-import { Box } from "../box";
+import { Box, BoxProps } from "../box";
 import { Column, Columns } from "../columns";
 
-export interface TilesProps {
+export interface TilesProps extends BoxProps {
   columns: number;
   space: string;
 }
@@ -12,6 +12,7 @@ export const Tiles: FunctionComponent<TilesProps> = ({
   columns,
   space,
   children,
+  ...props
 }) => {
   const flattenedChilren = flattenChildren(children);
   const tiledChilren = flattenedChilren.reduce<ReactChild[][]>(
@@ -28,7 +29,7 @@ export const Tiles: FunctionComponent<TilesProps> = ({
   );
 
   return (
-    <Box marginTop={`-${space}`}>
+    <Box {...props} marginTop={`-${space}`}>
       {tiledChilren.map((columnsChildren, rowIndex) => (
         <Columns key={rowIndex} space={space} paddingTop={space}>
           {columnsChildren.map((columnChild, columnIndex) => (

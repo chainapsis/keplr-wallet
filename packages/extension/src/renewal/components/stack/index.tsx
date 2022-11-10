@@ -1,49 +1,23 @@
 import React, { FunctionComponent, Children, isValidElement } from "react";
 import { Gutter } from "../gutter";
-import { Box } from "../box";
+import { Box, BoxProps } from "../box";
 import { isFragment } from "react-is";
 
-export type StackProps = {
+export interface StackProps extends BoxProps {
   gutter?: string;
-  height?: string;
-  minHeight?: string;
-  maxHeight?: string;
-  flex?: number;
-  flexGrow?: number;
-  flexShrink?: number;
-  alignItems?: "left" | "center" | "right";
-  justifyContent?: "start" | "center" | "end";
-};
+}
 
 export const Stack: FunctionComponent<StackProps> = ({
   children,
   gutter,
-  height,
-  minHeight,
-  maxHeight,
-  flex,
-  flexGrow,
-  flexShrink,
-  alignItems,
-  justifyContent,
+  ...props
 }) => {
   const array = Children.toArray(
     isFragment(children) ? children.props.children : children
   );
 
   return (
-    <Box
-      display="flex"
-      flexDirection="vertical"
-      height={height}
-      minHeight={minHeight}
-      maxHeight={maxHeight}
-      flex={flex}
-      flexGrow={flexGrow}
-      flexShrink={flexShrink}
-      alignItems={alignItems}
-      justifyContent={justifyContent}
-    >
+    <Box {...props} display="flex" flexDirection="vertical">
       {array.map((child, i) => {
         if (isValidElement(child) && child.type === Gutter) {
           return child;

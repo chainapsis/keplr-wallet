@@ -10,34 +10,6 @@ import { Stack } from "../../components/stack";
 import { ColorPalette } from "../../styles";
 import { CreateAccountType } from "./create-account";
 
-const KeplrLogo = styled.img`
-  width: 106px;
-  height: 106px;
-`;
-
-const KeplrLogoText = styled.img`
-  width: 185px;
-  height: 106px;
-`;
-
-const KeplrDescription = styled.span`
-  font-weight: 400;
-  font-size: 24px;
-  line-height: 36px;
-  /* identical to box height */
-
-  text-align: center;
-  letter-spacing: 1.17557px;
-`;
-
-const TorusText = styled.span`
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 20px;
-  color: ${ColorPalette["platinum-200"]};
-  text-align: center;
-`;
-
 type RegisterIntroType = "create-account" | "import-account";
 
 export const RegisterIntro: FunctionComponent<{
@@ -49,7 +21,7 @@ export const RegisterIntro: FunctionComponent<{
   >();
 
   return (
-    <Stack gutter="1rem" flex={2}>
+    <Stack gutter="1rem" flex={2} isAnimated>
       <Box display="flex" flexDirection="row" justifyContent="center">
         <KeplrLogo
           src={
@@ -132,3 +104,31 @@ export const RegisterIntro: FunctionComponent<{
     </Stack>
   );
 });
+
+const KeplrLogo = styled.img`
+  width: 106px;
+  height: 106px;
+`;
+
+const KeplrLogoText = styled.img`
+  width: 185px;
+  height: 106px;
+`;
+
+const KeplrDescription = styled.span`
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 36px;
+  /* identical to box height */
+
+  text-align: center;
+  letter-spacing: 1.17557px;
+`;
+
+const TorusText = styled.span`
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: ${ColorPalette["platinum-200"]};
+  text-align: center;
+`;

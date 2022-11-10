@@ -1,25 +1,19 @@
 import React, { FunctionComponent, ReactElement, useContext } from "react";
-import { Box } from "../box";
+import { Box, BoxProps } from "../box";
 import { ColumnsContext } from "./context";
 
-export interface ColumnsProps {
+export interface ColumnsProps extends BoxProps {
   children: ReactElement<ColumnProps>[];
   space: string;
-  paddingTop?: string;
 }
 
 export const Columns: FunctionComponent<ColumnsProps> = ({
   children,
   space,
-  paddingTop,
+  ...props
 }) => {
   return (
-    <Box
-      display="flex"
-      flexDirection="row"
-      marginLeft={`-${space}`}
-      paddingTop={paddingTop}
-    >
+    <Box {...props} display="flex" flexDirection="row" marginLeft={`-${space}`}>
       <ColumnsContext.Provider value={{ space }}>
         {children}
       </ColumnsContext.Provider>
@@ -27,15 +21,19 @@ export const Columns: FunctionComponent<ColumnsProps> = ({
   );
 };
 
-export interface ColumnProps {
+export interface ColumnProps extends BoxProps {
   width?: string;
 }
 
-export const Column: FunctionComponent<ColumnProps> = ({ children, width }) => {
+export const Column: FunctionComponent<ColumnProps> = ({
+  children,
+  width,
+  ...props
+}) => {
   const { space } = useContext(ColumnsContext);
 
   return (
-    <Box width={width} paddingLeft={space}>
+    <Box {...props} width={width} paddingLeft={space}>
       {children}
     </Box>
   );
