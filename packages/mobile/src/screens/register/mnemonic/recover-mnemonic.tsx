@@ -184,7 +184,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                     mode="text"
                     text="Paste"
                     onPress={async () => {
-                      const text = await Clipboard.getStringAsync();
+                      const text = await Clipboard.getString();
                       if (text) {
                         setValue("mnemonic", text, {
                           shouldValidate: true,
