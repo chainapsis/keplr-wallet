@@ -20,6 +20,7 @@
                android:value="f07be1dce2391227e818fbe3e4235bf4"/>
     <activity
       android:name=".MainActivity"
+      android:exported="true"
       android:label="@string/app_name"
       android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
       android:screenOrientation="portrait"
