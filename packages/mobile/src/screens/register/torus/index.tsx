@@ -14,7 +14,7 @@ import { Buffer } from "buffer/";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import Torus from "@toruslabs/torus.js";
 import { useLoadingScreen } from "../../../providers/loading-screen";
-import * as AppleAuthentication from "expo-apple-authentication";
+import { appleAuth as AppleAuthentication } from "@invertase/react-native-apple-authentication";
 import { useStore } from "../../../stores";
 
 interface FormData {
@@ -186,8 +186,8 @@ const useTorusAppleSignIn = (): {
 
     (async () => {
       try {
-        const credential = await AppleAuthentication.signInAsync({
-          requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
+        const credential = await AppleAuthentication.performRequest({
+          requestedScopes: [AppleAuthentication.Scope.EMAIL],
         });
 
         if (!credential.identityToken) {
