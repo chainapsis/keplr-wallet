@@ -11,7 +11,7 @@ import { useStore } from "../../stores";
 import Long from "long";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { Hash, PrivKeySecp256k1, PubKeySecp256k1 } from "@keplr-wallet/crypto";
-import { BroadcastMode } from "@keplr-wallet/types";
+import { BroadcastMode, StdSignature } from "@keplr-wallet/types";
 
 export function KeystoneExamplePage() {
   const { chainStore, accountStore } = useStore();
@@ -122,6 +122,44 @@ export function KeystoneExamplePage() {
     }
   }, [accountStore, chainStore]);
 
+  const signArbitrary = async (data: string | Uint8Array) => {
+    const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+    console.log(chainStore.current.chainId, accountInfo.bech32Address);
+    if (!chainStore.current.chainId || !accountInfo.bech32Address) {
+      console.log("Try again!");
+      return;
+    }
+    try {
+      const params: [string, string, string | Uint8Array, StdSignature] = [
+        chainStore.current.chainId,
+        accountInfo.bech32Address,
+        data,
+        {} as StdSignature,
+      ];
+      const signRes = await window.keplr?.signArbitrary(
+        params[0],
+        params[1],
+        params[2]
+      );
+      console.log("signRes", signRes);
+      if (signRes) {
+        params[3] = signRes;
+        const verifyRes = await window.keplr?.verifyArbitrary(...params);
+        console.log("verifyRes", verifyRes);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      window.location.hash = "#/keystone/example";
+    }
+  };
+  const signArbitraryString = useCallback(async () => {
+    signArbitrary("123");
+  }, []);
+  const signArbitraryBuffer = useCallback(async () => {
+    signArbitrary(Buffer.from("ABC"));
+  }, []);
+
   const verify = () => {
     const data = Buffer.from(
       "0a8d010a85010a1c2f636f736d6f732e62616e6b2e763162657461312e4d736753656e6412650a2b6f736d6f3139726c34636d32686d7238616679346b6c6470787a33666b61346a6775713061356d37646638122b6f736d6f317074713766677830636767686c706a7376617272356b7a6e6c6b6a336837746d6772307034641a090a044f534d4f12013112034142431294010a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a21024f4e2ad99c34d60b9ba6283c9431a8418af8673212961f97a77b6377fcd05b6212040a020801180212400a0d0a05756f736d6f12043235303010a08d061a2b6f736d6f3139726c34636d32686d7238616679346b6c6470787a33666b61346a6775713061356d376466381a0b6f736d6f2d746573742d3420e8fc10",
@@ -160,19 +198,31 @@ export function KeystoneExamplePage() {
     console.log("verify", res);
   };
 
-  verify();
-
   return (
     <div
       style={{
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        flexDirection: "column",
         height: "100%",
       }}
     >
-      <Button onClick={signDirect}>Sign Direct</Button>
-      <Button>Sign Eth</Button>
+      <p>
+        <Button onClick={verify}>Verify Signature</Button>
+      </p>
+      <p>
+        <Button onClick={signDirect}>Sign Direct</Button>
+      </p>
+      <p>
+        <Button onClick={signArbitraryString}>Sign Arbitrary String</Button>
+      </p>
+      <p>
+        <Button onClick={signArbitraryBuffer}>Sign Arbitrary Buffer</Button>
+      </p>
+      <p>
+        <Button>Sign Eth</Button>
+      </p>
     </div>
   );
 }
