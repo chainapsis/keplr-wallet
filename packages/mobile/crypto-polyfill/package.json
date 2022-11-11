@@ -5,7 +5,7 @@
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "expo-random": "12.1.2",
+    "react-native-get-random-values": "1.8.0",
     "create-hash": "^1.2.0",
     "create-hmac": "^1.1.7",
     "browserify-cipher": "^1.0.1"

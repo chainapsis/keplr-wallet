@@ -6,7 +6,6 @@ import {
 } from "../router";
 import { AsyncKVStore } from "../common";
 import TransportBLE from "@ledgerhq/react-native-hw-transport-ble";
-import { getRandomBytesAsync } from "../common";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { EmbedChainInfos } from "../config";
@@ -14,6 +13,9 @@ import {
   getLastUsedLedgerDeviceId,
   setLastUsedLedgerDeviceId,
 } from "../utils/ledger";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import {getRandomValues} from "react-native-crypto-polyfill";
 
 const router = new RNRouterBackground(RNEnv.produceEnv);
 
@@ -33,7 +35,7 @@ init(
     "https://app.stride.zone",
   ],
   {
-    rng: getRandomBytesAsync,
+    rng: getRandomValues,
   },
   {
     create: (params: {
