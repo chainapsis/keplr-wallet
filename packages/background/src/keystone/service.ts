@@ -1,5 +1,5 @@
 import { Env, KeplrError } from "@keplr-wallet/router";
-import { BIP44HDPath, Key } from "../keyring";
+import { BIP44HDPath, Key, SignMode } from "../keyring";
 import { KVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
 import {
@@ -21,6 +21,11 @@ export interface StdPublicKeyDoc extends StdDoc {
 
 export interface StdSignDoc extends StdDoc {
   signature?: KeystoneUR;
+}
+
+enum SignFunction {
+  Amino = "signAminoTransaction",
+  Direct = "signDirectTransaction",
 }
 
 export class KeystoneService {
@@ -73,10 +78,10 @@ export class KeystoneService {
     bip44HDPath: BIP44HDPath,
     key: Key,
     keyringData: KeystoneKeyringData,
-    message: Uint8Array
+    message: Uint8Array,
+    mode: SignMode
   ): Promise<Uint8Array> {
     let signResolve: { (arg0: KeystoneUR): void };
-    console.log("keyringData", keyringData);
     const keyring = useKeystoneCosmosKeyring({
       keyringData,
       playUR: async (ur) => {
@@ -109,22 +114,15 @@ export class KeystoneService {
           signResolve = resolve;
         }),
     });
-    console.log(
-      "keyring.signAminoTransaction",
-      Buffer.from(key.pubKey).toString("hex"),
-      Buffer.from(key.address).toString("hex"),
-      Buffer.from(message).toString("hex")
-    );
-    console.log(Buffer.from(message).toString());
-    const res = await keyring.signAminoTransaction(
+    const signFn: SignFunction = {
+      [SignMode.Amino]: SignFunction.Amino,
+      [SignMode.Direct]: SignFunction.Direct,
+    }[mode];
+    const res = await keyring[signFn](
       Buffer.from(key.pubKey).toString("hex"),
       message,
       [Buffer.from(key.address).toString("hex")],
       "Keplr"
-    );
-    console.log(
-      "keyring.signAminoTransaction signature",
-      res.signature.toString("hex")
     );
     return res.signature;
   }

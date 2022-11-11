@@ -7,7 +7,12 @@ import {
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
 import { LedgerApp, LedgerService } from "../ledger";
-import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
+import {
+  BIP44HDPath,
+  CommonCrypto,
+  ExportKeyRingData,
+  SignMode,
+} from "./types";
 import { ChainInfo, EthSignType } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 
@@ -885,7 +890,8 @@ export class KeyRing {
     chainId: string,
     defaultCoinType: number,
     message: Uint8Array,
-    useEthereumSigning: boolean
+    useEthereumSigning: boolean,
+    mode: SignMode = SignMode.Amino
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
@@ -924,7 +930,8 @@ export class KeyRing {
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
         this.loadKey(coinType, useEthereumSigning),
         this.keystonePublicKey as KeystoneKeyringData,
-        message
+        message,
+        mode
       );
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);

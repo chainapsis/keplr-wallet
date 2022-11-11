@@ -10,7 +10,8 @@ import { Button } from "reactstrap";
 import { useStore } from "../../stores";
 import Long from "long";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
-import { PrivKeySecp256k1, PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { Hash, PrivKeySecp256k1, PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { BroadcastMode } from "@keplr-wallet/types";
 
 export function KeystoneExamplePage() {
   const { chainStore, accountStore } = useStore();
@@ -54,8 +55,8 @@ export function KeystoneExamplePage() {
                 toAddress: toAddr,
                 amount: [
                   {
-                    denom: currency.coinDenom,
-                    amount: "1",
+                    denom: currency.coinMinimalDenom,
+                    amount: "10000",
                   },
                 ],
               }).finish(),
@@ -101,22 +102,29 @@ export function KeystoneExamplePage() {
       }
     );
     if (signRes) {
-      const sendRes = await window.keplr?.sendTx(
-        current.chainId,
-        TxRaw.encode({
-          bodyBytes: signRes.signed.bodyBytes,
-          authInfoBytes: signRes.signed.authInfoBytes,
-          signatures: [Buffer.from(signRes.signature.signature, "hex")],
-        }).finish(),
-        "block"
-      );
-      console.log(sendRes);
+      console.log("signRes", signRes);
+      try {
+        const sendRes = await window.keplr?.sendTx(
+          current.chainId,
+          TxRaw.encode({
+            bodyBytes: signRes.signed.bodyBytes,
+            authInfoBytes: signRes.signed.authInfoBytes,
+            signatures: [Buffer.from(signRes.signature.signature, "base64")],
+          }).finish(),
+          "block" as BroadcastMode
+        );
+        console.log("sendRes", sendRes);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        window.location.hash = "#/keystone/example";
+      }
     }
   }, [accountStore, chainStore]);
 
   const verify = () => {
     const data = Buffer.from(
-      "7b226163636f756e745f6e756d626572223a223735343933222c22636861696e5f6964223a2270756c7361722d32222c22666565223a7b22616d6f756e74223a5b7b22616d6f756e74223a2233383932222c2264656e6f6d223a227573637274227d5d2c22676173223a223135353636227d2c226d656d6f223a22222c226d736773223a5b7b2274797065223a22636f736d6f732d73646b2f4d736753656e64222c2276616c7565223a7b22616d6f756e74223a5b7b22616d6f756e74223a223132303030303030222c2264656e6f6d223a227573637274227d5d2c2266726f6d5f61646472657373223a2273656372657431796d723272706e34396167637436733439756476673668723667783673386d7a6c65306c3463222c22746f5f61646472657373223a2273656372657431726873753336716335746e7a6a67703978723765756d7665687a783666677537347274637275227d7d5d2c2273657175656e6365223a2230227d",
+      "0a8d010a85010a1c2f636f736d6f732e62616e6b2e763162657461312e4d736753656e6412650a2b6f736d6f3139726c34636d32686d7238616679346b6c6470787a33666b61346a6775713061356d37646638122b6f736d6f317074713766677830636767686c706a7376617272356b7a6e6c6b6a336837746d6772307034641a090a044f534d4f12013112034142431294010a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a21024f4e2ad99c34d60b9ba6283c9431a8418af8673212961f97a77b6377fcd05b6212040a020801180212400a0d0a05756f736d6f12043235303010a08d061a2b6f736d6f3139726c34636d32686d7238616679346b6c6470787a33666b61346a6775713061356d376466381a0b6f736d6f2d746573742d3420e8fc10",
       "hex"
     );
 
@@ -127,25 +135,25 @@ export function KeystoneExamplePage() {
       )
     );
 
-    const signature = priv.sign(data);
+    const signature = priv.signDigest32(Hash.sha256(data));
 
     const pub = new PubKeySecp256k1(
       Buffer.from(
-        "0217fead3b69ef9460a38635f342d9714c2e183965a5a6f250de20f4f0178db587",
+        "024f4e2ad99c34d60b9ba6283c9431a8418af8673212961f97a77b6377fcd05b62",
         "hex"
       )
     );
 
     console.log(
       "verify priv sign",
-      pub.verify(data, signature),
+      pub.verifyDigest32(Hash.sha256(data), signature),
       Buffer.from(signature).toString("hex")
     );
 
-    const res = pub.verify(
-      data,
+    const res = pub.verifyDigest32(
+      Hash.sha256(data),
       Buffer.from(
-        "5754e273543abb72aba940ebb33bf28deab2bd6da1c474afa6a09f9b20e622c16b072380c39cd5c129407a92f616a057f0e1ca7932b144844b2d2b32af8323fb",
+        "c3b6cda9269605a54c4626665bddfd1521192c6287d2a12654a662ad141d8c110095b5093e1d4709a930a6ee42948a18a511566c1a472dc855f833733b300818",
         "hex"
       )
     );

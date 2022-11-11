@@ -14,7 +14,12 @@ import {
   encodeSecp256k1Signature,
   serializeSignDoc,
 } from "@keplr-wallet/cosmos";
-import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
+import {
+  BIP44HDPath,
+  CommonCrypto,
+  ExportKeyRingData,
+  SignMode,
+} from "./types";
 
 import { escapeHTML, KVStore, sortObjectByKey } from "@keplr-wallet/common";
 
@@ -405,7 +410,8 @@ export class KeyRingService {
         chainId,
         coinType,
         serializeSignDoc(newSignDoc),
-        ethereumKeyFeatures.signing
+        ethereumKeyFeatures.signing,
+        SignMode.Amino
       );
 
       return {
@@ -563,7 +569,8 @@ export class KeyRingService {
         chainId,
         coinType,
         newSignDocBytes,
-        ethereumKeyFeatures.signing
+        ethereumKeyFeatures.signing,
+        SignMode.Direct
       );
 
       return {
