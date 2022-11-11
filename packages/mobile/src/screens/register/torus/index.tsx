@@ -9,7 +9,7 @@ import { PageWithScrollView } from "../../../components/page";
 import { TextInput } from "../../../components/input";
 import { View } from "react-native";
 import { Button } from "../../../components/button";
-import * as WebBrowser from "expo-web-browser";
+import { InAppBrowser } from "react-native-inappbrowser-reborn";
 import { Buffer } from "buffer/";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import Torus from "@toruslabs/torus.js";
@@ -65,7 +65,7 @@ const useTorusGoogleSignIn = (): {
           "https://oauth.keplr.app/google.html"
         );
 
-        const result = await WebBrowser.openAuthSessionAsync(
+        const result = await InAppBrowser.openAuth(
           finalUrl.href,
           "app.keplr.oauth://"
         );
