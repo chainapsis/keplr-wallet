@@ -135,6 +135,8 @@ platform :ios do
       in_house: false
     )
 
+    ENV["ITMSTRANSPORTER_FORCE_ITMS_PACKAGE_UPLOAD"] = "true"
+
     upload_to_testflight(
       apple_id: apple_id,
       team_id: team_id,
