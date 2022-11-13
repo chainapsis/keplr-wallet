@@ -54,7 +54,7 @@ import semver from "semver";
         if (isCodepush) {
           await $`cd ${directory} && bundle exec fastlane deploy_codepush version:${semantic.raw}`;
         } else {
-          await $`cd ${directory} && bundle exec fastlane deploy version:${semantic.raw} --verbose`;
+          await $`cd ${directory} && bundle exec fastlane deploy version:${semantic.raw}`;
         }
       }
     }
