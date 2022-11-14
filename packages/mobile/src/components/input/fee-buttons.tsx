@@ -334,14 +334,12 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
                 onPress={() => setIsOpenModal(!isOpenModal)}
               />
             </View>
-            (
             <AutoGasModal
               isOpen={isOpenModal}
               close={() => setIsOpenModal(false)}
               gasConfig={gasConfig}
               gasSimulator={gasSimulator}
             />
-            )
           </View>
         )}
       </View>

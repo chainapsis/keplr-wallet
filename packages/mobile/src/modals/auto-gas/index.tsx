@@ -102,7 +102,7 @@ export const AutoGasModal: FunctionComponent<{
           </View>
         </View>
 
-        {isAuto && (
+        {isAuto ? (
           <View
             style={style.flatten(["width-full", "flex-row", "items-center"])}
           >
@@ -135,7 +135,7 @@ export const AutoGasModal: FunctionComponent<{
               editable={false}
             />
           </View>
-        )}
+        ) : null}
         <TextInput
           label="Gas Amount"
           value={gasConfig.gas.toString()}
