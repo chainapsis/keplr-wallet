@@ -26,6 +26,25 @@ const MultiplyIcon: FunctionComponent<{
   );
 };
 
+const AlertView: FunctionComponent<{
+  text: string;
+}> = ({ text }) => {
+  const style = useStyle();
+
+  return (
+    <View
+      style={style.flatten([
+        "border-radius-8",
+        "background-color-red-50",
+        "padding-20",
+        "margin-bottom-10",
+      ])}
+    >
+      <Text style={style.flatten(["body3", "color-red-400"])}>{text}</Text>
+    </View>
+  );
+};
+
 export const AutoGasModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
@@ -45,33 +64,13 @@ export const AutoGasModal: FunctionComponent<{
         parentContainerStyle={style.flatten(["background-color-white"])}
       >
         {gasSimulator.outdatedCosmosSdk ? (
-          <View
-            style={style.flatten([
-              "border-radius-8",
-              "background-color-red-50",
-              "padding-20",
-              "margin-bottom-10",
-            ])}
-          >
-            <Text style={style.flatten(["body3", "color-red-400"])}>
-              Gas estimation is not supported, because this chain uses outdated
-              cosmos-sdk
-            </Text>
-          </View>
+          <AlertView
+            text="Gas estimation is not supported, because this chain uses outdated
+              cosmos-sdk"
+          />
         ) : null}
         {gasSimulator.forceDisabled && gasSimulator.forceDisableReason ? (
-          <View
-            style={style.flatten([
-              "border-radius-8",
-              "background-color-red-50",
-              "padding-20",
-              "margin-bottom-10",
-            ])}
-          >
-            <Text style={style.flatten(["body3", "color-red-400"])}>
-              {gasSimulator.forceDisableReason.message}
-            </Text>
-          </View>
+          <AlertView text={gasSimulator.forceDisableReason.message} />
         ) : null}
 
         <View
@@ -116,7 +115,7 @@ export const AutoGasModal: FunctionComponent<{
               inputContainerStyle={style.flatten(["border-color-gray-100"])}
             />
 
-            <View style={style.flatten(["margin-left-8", "margin-right-8"])}>
+            <View style={style.flatten(["margin-left-12", "margin-right-12"])}>
               <MultiplyIcon size={16} color="#C6C6CD" />
             </View>
 
