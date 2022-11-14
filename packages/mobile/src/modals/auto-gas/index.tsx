@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { TextInput } from "../../components/input";
@@ -38,8 +38,6 @@ export const AutoGasModal: FunctionComponent<{
 }> = registerModal(
   observer(({ gasSimulator, gasConfig }) => {
     const style = useStyle();
-
-    const [isAuto, setIsAuto] = useState<boolean>(true);
 
     return (
       <CardModal
@@ -90,15 +88,15 @@ export const AutoGasModal: FunctionComponent<{
               Auto
             </Text>
             <Toggle
-              on={isAuto}
+              on={gasSimulator.enabled}
               onChange={(value) => {
-                setIsAuto(value);
+                gasSimulator.setEnabled(value);
               }}
             />
           </View>
         </View>
 
-        {isAuto ? (
+        {gasSimulator.enabled ? (
           <View
             style={style.flatten(["width-full", "flex-row", "items-center"])}
           >
@@ -139,7 +137,7 @@ export const AutoGasModal: FunctionComponent<{
             gasConfig.setGas(text);
           }}
           returnKeyType="done"
-          editable={!isAuto}
+          editable={!gasSimulator.enabled}
           inputContainerStyle={style.flatten(["border-color-gray-100"])}
         />
       </CardModal>
