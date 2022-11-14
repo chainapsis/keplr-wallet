@@ -2,12 +2,13 @@ import React, { FunctionComponent } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { TextInput } from "../../components/input";
-import { Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { Toggle } from "../../components/toggle";
 import Svg, { Path } from "react-native-svg";
 import { IGasConfig, IGasSimulator } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
+import * as RNLocalize from "react-native-localize";
 
 const MultiplyIcon: FunctionComponent<{
   size: number;
@@ -113,6 +114,25 @@ export const AutoGasModal: FunctionComponent<{
               returnKeyType="done"
               containerStyle={style.flatten(["flex-1"])}
               inputContainerStyle={style.flatten(["border-color-gray-100"])}
+              keyboardType={(() => {
+                if (Platform.OS === "ios") {
+                  // In IOS, the numeric type keyboard has a decimal separator "." or "," depending on the language and region of the user device.
+                  // However, asset input in keplr unconditionally follows the US standard, so it must be ".".
+                  // However, if only "," appears on the keyboard, "." cannot be entered.
+                  // In this case, it is inevitable to use a different type of keyboard.
+                  if (
+                    RNLocalize.getNumberFormatSettings().decimalSeparator !==
+                    "."
+                  ) {
+                    return "numbers-and-punctuation";
+                  }
+                  return "numeric";
+                } else {
+                  // In Android, the numeric type keyboard has both "." and ",".
+                  // So, there is no need to use other keyboard type on any case.
+                  return "numeric";
+                }
+              })()}
             />
 
             <View style={style.flatten(["margin-left-12", "margin-right-12"])}>
@@ -122,7 +142,6 @@ export const AutoGasModal: FunctionComponent<{
             <TextInput
               label="Predicted gas"
               value={gasSimulator.gasEstimated?.toString() ?? "-"}
-              returnKeyType="done"
               containerStyle={style.flatten(["flex-1"])}
               inputContainerStyle={style.flatten(["border-color-gray-100"])}
               editable={false}
