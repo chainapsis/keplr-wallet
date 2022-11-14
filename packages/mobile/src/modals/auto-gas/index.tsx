@@ -60,10 +60,7 @@ export const AutoGasModal: FunctionComponent<{
     const style = useStyle();
 
     return (
-      <CardModal
-        title="Set Gas"
-        parentContainerStyle={style.flatten(["background-color-white"])}
-      >
+      <CardModal title="Set Gas">
         {gasSimulator.outdatedCosmosSdk ? (
           <AlertView
             text="Gas estimation is not supported, because this chain uses outdated
@@ -79,27 +76,24 @@ export const AutoGasModal: FunctionComponent<{
             "flex-row",
             "justify-between",
             "items-center",
-            "margin-bottom-8",
+            "margin-bottom-16",
           ])}
         >
           <Text style={style.flatten(["subtitle3"])}>Gas</Text>
-          <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text style={style.flatten(["subtitle3", "margin-right-8"])}>
-              Auto
-            </Text>
-            <Toggle
-              on={gasSimulator.enabled}
-              onChange={(value) => {
-                gasSimulator.setEnabled(value);
-              }}
-            />
-          </View>
+          <View style={style.get("flex-1")} />
+          <Text style={style.flatten(["subtitle3", "margin-right-10"])}>
+            Auto
+          </Text>
+          <Toggle
+            on={gasSimulator.enabled}
+            onChange={(value) => {
+              gasSimulator.setEnabled(value);
+            }}
+          />
         </View>
 
         {gasSimulator.enabled ? (
-          <View
-            style={style.flatten(["width-full", "flex-row", "items-center"])}
-          >
+          <View style={style.flatten(["flex-row", "items-center"])}>
             <TextInput
               label="Gas Adjustment"
               value={
@@ -113,7 +107,6 @@ export const AutoGasModal: FunctionComponent<{
               editable={gasSimulator.gasEstimated != null}
               returnKeyType="done"
               containerStyle={style.flatten(["flex-1"])}
-              inputContainerStyle={style.flatten(["border-color-gray-100"])}
               keyboardType={(() => {
                 if (Platform.OS === "ios") {
                   // In IOS, the numeric type keyboard has a decimal separator "." or "," depending on the language and region of the user device.
@@ -143,7 +136,6 @@ export const AutoGasModal: FunctionComponent<{
               label="Predicted gas"
               value={gasSimulator.gasEstimated?.toString() ?? "-"}
               containerStyle={style.flatten(["flex-1"])}
-              inputContainerStyle={style.flatten(["border-color-gray-100"])}
               editable={false}
             />
           </View>
@@ -156,7 +148,7 @@ export const AutoGasModal: FunctionComponent<{
           }}
           returnKeyType="done"
           editable={!gasSimulator.enabled}
-          inputContainerStyle={style.flatten(["border-color-gray-100"])}
+          keyboardType="numeric"
         />
       </CardModal>
     );
