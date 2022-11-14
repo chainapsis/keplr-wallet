@@ -23,6 +23,7 @@ export interface Key {
   // Because current cosmos app in the nano ledger doesn't support the direct (proto) format msgs,
   // this can be used to select the amino or direct signer.
   readonly isNanoLedger: boolean;
+  readonly isKeystone: boolean;
 }
 
 export type ICNSAdr36Signatures = {

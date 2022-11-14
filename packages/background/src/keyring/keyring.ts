@@ -795,8 +795,8 @@ export class KeyRing {
           algo: "ethsecp256k1",
           pubKey,
           address: Buffer.from(address.replace("0x", ""), "hex"),
-          isKeystone: false,
-          isNanoLedger: true,
+          isKeystone: true,
+          isNanoLedger: false,
         };
       }
       const pubKey = new PubKeySecp256k1(Buffer.from(key.pubKey, "hex"));
@@ -981,6 +981,19 @@ export class KeyRing {
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
         await this.ensureLedgerPublicKey(LedgerApp.Ethereum),
         message
+      );
+    }
+
+    if (this.keyStore.type === "keystone") {
+      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+      return this.keystoneService.signEthereum(
+        env,
+        coinType,
+        KeyRing.getKeyStoreBIP44Path(this.keyStore),
+        this.loadKey(coinType, true),
+        this.keystonePublicKey as KeystoneKeyringData,
+        message,
+        type
       );
     }
 

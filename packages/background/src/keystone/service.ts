@@ -7,6 +7,8 @@ import {
   KeystoneUR,
   useKeystoneCosmosKeyring,
 } from "./cosmos-keyring";
+import { EthSignType } from "@keplr-wallet/types";
+import { useKeystoneEthereumKeyring } from "./ethereum-keyring";
 
 export const TYPE_KEYSTONE_GET_PUBKEY = "keystone-get-pubkey";
 export const TYPE_KEYSTONE_SIGN = "keystone-sign";
@@ -26,6 +28,12 @@ export interface StdSignDoc extends StdDoc {
 enum SignFunction {
   Amino = "signAminoTransaction",
   Direct = "signDirectTransaction",
+}
+
+enum EthSignFunction {
+  Transaction = "signTransaction",
+  Message = "signMessage",
+  Data = "signTypedData",
 }
 
 export class KeystoneService {
@@ -125,5 +133,59 @@ export class KeystoneService {
       "Keplr"
     );
     return res.signature;
+  }
+
+  async signEthereum(
+    env: Env,
+    coinType: number,
+    bip44HDPath: BIP44HDPath,
+    key: Key,
+    keyringData: KeystoneKeyringData,
+    message: Uint8Array,
+    mode: EthSignType
+  ): Promise<Uint8Array> {
+    let signResolve: { (arg0: KeystoneUR): void };
+    const keyring = useKeystoneEthereumKeyring({
+      keyringData,
+      playUR: async (ur) => {
+        (this.interactionService.waitApprove(
+          env,
+          "/keystone/sign",
+          TYPE_KEYSTONE_SIGN,
+          {
+            coinType,
+            bip44HDPath,
+            ur,
+            message,
+          }
+        ) as Promise<StdSignDoc>).then((res) => {
+          if (res.abort) {
+            throw new KeplrError(
+              "keystone",
+              301,
+              "The process has been canceled."
+            );
+          }
+          if (!res.signature) {
+            throw new KeplrError("keystone", 303, "Signature is empty.");
+          }
+          signResolve(res.signature);
+        });
+      },
+      readUR: () =>
+        new Promise<KeystoneUR>((resolve) => {
+          signResolve = resolve;
+        }),
+    });
+    const signFn: EthSignFunction = {
+      [EthSignType.TRANSACTION]: EthSignFunction.Transaction,
+      [EthSignType.MESSAGE]: EthSignFunction.Message,
+      [EthSignType.EIP712]: EthSignFunction.Data,
+    }[mode];
+    const res = await keyring[signFn](
+      Buffer.from(key.pubKey).toString("hex"),
+      message
+    );
+    return Buffer.from(res as string, "utf-8");
   }
 }
