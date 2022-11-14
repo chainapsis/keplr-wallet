@@ -38,7 +38,7 @@ const AlertView: FunctionComponent<{
         "border-radius-8",
         "background-color-red-50",
         "padding-20",
-        "margin-bottom-10",
+        "margin-bottom-16",
       ])}
     >
       <Text style={style.flatten(["body3", "color-red-400"])}>{text}</Text>
