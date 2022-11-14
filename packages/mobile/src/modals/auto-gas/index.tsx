@@ -45,10 +45,6 @@ export const AutoGasModal: FunctionComponent<{
       <CardModal
         title="Set Gas"
         parentContainerStyle={style.flatten(["background-color-white"])}
-        childrenContainerStyle={style.flatten([
-          "min-height-285",
-          "background-color-white",
-        ])}
       >
         {gasSimulator.outdatedCosmosSdk ? (
           <View
