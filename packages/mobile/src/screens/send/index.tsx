@@ -118,6 +118,29 @@ export const SendScreen: FunctionComponent = observer(() => {
   );
 
   useEffect(() => {
+    // To simulate secretwasm, we need to include the signature in the tx.
+    // With the current structure, this approach is not possible.
+    if (
+      sendConfigs.amountConfig.sendCurrency &&
+      new DenomHelper(sendConfigs.amountConfig.sendCurrency.coinMinimalDenom)
+        .type === "secret20"
+    ) {
+      gasSimulator.forceDisable(
+        new Error("Simulating secret20 is not supported")
+      );
+      sendConfigs.gasConfig.setGas(account.secret.msgOpts.send.secret20.gas);
+    } else {
+      gasSimulator.forceDisable(false);
+      gasSimulator.setEnabled(true);
+    }
+  }, [
+    account.secret.msgOpts.send.secret20.gas,
+    gasSimulator,
+    sendConfigs.amountConfig.sendCurrency,
+    sendConfigs.gasConfig,
+  ]);
+
+  useEffect(() => {
     if (route.params.currency) {
       const currency = sendConfigs.amountConfig.sendableCurrencies.find(
         (cur) => cur.coinMinimalDenom === route.params.currency
