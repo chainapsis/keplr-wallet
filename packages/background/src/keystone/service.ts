@@ -9,6 +9,9 @@ import {
 } from "./cosmos-keyring";
 import { EthSignType } from "@keplr-wallet/types";
 import { useKeystoneEthereumKeyring } from "./ethereum-keyring";
+import { Transaction } from "@ethereumjs/tx";
+import { computeAddress } from "@ethersproject/transactions";
+import { publicKeyConvert } from "secp256k1";
 
 export const TYPE_KEYSTONE_GET_PUBKEY = "keystone-get-pubkey";
 export const TYPE_KEYSTONE_SIGN = "keystone-sign";
@@ -182,10 +185,15 @@ export class KeystoneService {
       [EthSignType.MESSAGE]: EthSignFunction.Message,
       [EthSignType.EIP712]: EthSignFunction.Data,
     }[mode];
-    const res = await keyring[signFn](
-      Buffer.from(key.pubKey).toString("hex"),
-      message
+    const msg = JSON.parse(Buffer.from(message).toString());
+    console.log("message", msg);
+    const tx = new Transaction(msg);
+    console.log("tx", Buffer.from(key.address).toString("hex"), tx);
+    const signRes = await keyring[signFn](
+      computeAddress(publicKeyConvert(key.pubKey, false)),
+      tx
     );
-    return Buffer.from(res as string, "utf-8");
+    console.log("signRes", signRes);
+    return Buffer.from(signRes as string, "utf-8");
   }
 }

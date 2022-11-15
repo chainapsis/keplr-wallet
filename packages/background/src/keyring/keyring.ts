@@ -794,7 +794,7 @@ export class KeyRing {
         return {
           algo: "ethsecp256k1",
           pubKey,
-          address: Buffer.from(address.replace("0x", ""), "hex"),
+          address: Buffer.from(address.replace(/^0x/, ""), "hex"),
           isKeystone: true,
           isNanoLedger: false,
         };

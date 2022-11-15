@@ -1,7 +1,14 @@
 import { ETHSignature, EthSignRequest } from "@keystonehq/bc-ur-registry-eth";
 import { BaseKeyring, InteractionProvider } from "@keystonehq/base-eth-keyring";
-import { CryptoAccount, CryptoHDKey } from "@keystonehq/bc-ur-registry";
+import {
+  CryptoAccount,
+  CryptoHDKey,
+  CryptoKeypath,
+  PathComponent,
+} from "@keystonehq/bc-ur-registry";
 import { KeystoneKeyringData, KeystoneUR } from "./cosmos-keyring";
+import { publicKeyConvert } from "secp256k1";
+import { computeAddress } from "@ethersproject/transactions";
 
 interface ReadUR {
   (): Promise<KeystoneUR>;
@@ -78,7 +85,27 @@ export class KeystoneEthereumKeyring extends BaseKeyring {
   };
 
   syncKeyringData(data: KeystoneKeyringData) {
+    const key = data.keys.find((e) => e.coinType === 60);
     this.xfp = data.xfp;
+    if (key) {
+      const pubKeyBuf = Buffer.from(
+        publicKeyConvert(Buffer.from(key.pubKey, "hex"), false)
+      );
+      const cryptoHDKey = new CryptoHDKey({
+        isMaster: false,
+        isPrivateKey: false,
+        key: pubKeyBuf,
+        origin: new CryptoKeypath([
+          new PathComponent({ index: 44, hardened: true }),
+          new PathComponent({ index: 60, hardened: true }),
+          new PathComponent({ index: key.bip44HDPath.account, hardened: true }),
+        ]),
+        chainCode: Buffer.alloc(0),
+      });
+      this.xpub = cryptoHDKey.getBip32Key();
+      this.hdPath = `m/${cryptoHDKey.getOrigin().getPath()}`;
+      this.indexes[computeAddress(pubKeyBuf)] = key.bip44HDPath.addressIndex;
+    }
   }
 }
 
@@ -95,7 +122,11 @@ export function useKeystoneEthereumKeyring({
 }: Props) {
   const keyring = KeystoneEthereumKeyring.getEmptyKeyring();
   if (keyringData) {
-    keyring.syncKeyringData(keyringData);
+    try {
+      keyring.syncKeyringData(keyringData);
+    } catch (err) {
+      console.error(err);
+    }
   }
   if (readUR) {
     keyring.getInteraction().onReadUR(readUR);

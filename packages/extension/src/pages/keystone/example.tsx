@@ -11,7 +11,7 @@ import { useStore } from "../../stores";
 import Long from "long";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { Hash, PrivKeySecp256k1, PubKeySecp256k1 } from "@keplr-wallet/crypto";
-import { BroadcastMode, StdSignature } from "@keplr-wallet/types";
+import { BroadcastMode, EthSignType, StdSignature } from "@keplr-wallet/types";
 
 export function KeystoneExamplePage() {
   const { chainStore, accountStore } = useStore();
@@ -160,6 +160,42 @@ export function KeystoneExamplePage() {
     signArbitrary(Buffer.from("ABC"));
   }, []);
 
+  const signEthereum = useCallback(async () => {
+    const current = chainStore.current;
+    const accountInfo = accountStore.getAccount(current.chainId);
+    console.log(current.chainId, accountInfo.bech32Address);
+    if (!current.chainId || !accountInfo.bech32Address) {
+      console.log("Try again!");
+      return;
+    }
+    const signRes = await window.keplr?.signEthereum(
+      current.chainId,
+      accountInfo.bech32Address,
+      JSON.stringify({
+        from: "0xEA3a45668A16E343c2fEfeD7463e62463bd40297",
+        to: "0x3Cd30F57cB5A9DeaD668a655139F3D7a41cA3765",
+        gasLimit: `0x${Buffer.from("21000").toString("hex")}`,
+        nonce: `0x${Buffer.from("0").toString("hex")}`,
+        value: `0x${Buffer.from("1000").toString("hex")}`,
+      }),
+      EthSignType.TRANSACTION
+    );
+    if (signRes) {
+      try {
+        const sendRes = await window.keplr?.sendTx(
+          current.chainId,
+          signRes,
+          "block" as BroadcastMode
+        );
+        console.log("sendRes", sendRes);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        window.location.hash = "#/keystone/example";
+      }
+    }
+  }, [chainStore, accountStore]);
+
   const verify = () => {
     const data = Buffer.from(
       "0a8d010a85010a1c2f636f736d6f732e62616e6b2e763162657461312e4d736753656e6412650a2b6f736d6f3139726c34636d32686d7238616679346b6c6470787a33666b61346a6775713061356d37646638122b6f736d6f317074713766677830636767686c706a7376617272356b7a6e6c6b6a336837746d6772307034641a090a044f534d4f12013112034142431294010a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a21024f4e2ad99c34d60b9ba6283c9431a8418af8673212961f97a77b6377fcd05b6212040a020801180212400a0d0a05756f736d6f12043235303010a08d061a2b6f736d6f3139726c34636d32686d7238616679346b6c6470787a33666b61346a6775713061356d376466381a0b6f736d6f2d746573742d3420e8fc10",
@@ -221,7 +257,7 @@ export function KeystoneExamplePage() {
         <Button onClick={signArbitraryBuffer}>Sign Arbitrary Buffer</Button>
       </p>
       <p>
-        <Button>Sign Eth</Button>
+        <Button onClick={signEthereum}>Sign Eth</Button>
       </p>
     </div>
   );
