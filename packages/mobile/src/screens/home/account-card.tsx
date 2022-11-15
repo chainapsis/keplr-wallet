@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { Card, CardBody } from "../../components/card";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
@@ -19,13 +19,7 @@ import { LedgerSupportedModal } from "./leger-supported-modal";
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
-  const {
-    chainStore,
-    accountStore,
-    queriesStore,
-    priceStore,
-    ledgerInitStore,
-  } = useStore();
+  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
   const style = useStyle();
 
@@ -67,31 +61,6 @@ export const AccountCard: FunctionComponent<{
         parseFloat(stakedSum.toDec().toString()),
       ]
     : undefined;
-
-  useEffect(() => {
-    if (ledgerInitStore.isSignCompleted) {
-      console.log("===============isSignCompleted===============");
-    }
-
-    if (ledgerInitStore.isGetPubKeySucceeded) {
-      console.log("===============isGetPubKeySucceeded===============");
-    }
-
-    if (ledgerInitStore.isInitAborted) {
-      console.log("===============isInitAborted===============");
-    }
-
-    if (ledgerInitStore.requestedLedgerApp) {
-      console.log(
-        `===============${ledgerInitStore.requestedLedgerApp}===============`
-      );
-    }
-  }, [
-    ledgerInitStore.isGetPubKeySucceeded,
-    ledgerInitStore.isSignCompleted,
-    ledgerInitStore.isInitAborted,
-    ledgerInitStore.requestedLedgerApp,
-  ]);
 
   return (
     <Card style={containerStyle}>
