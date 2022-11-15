@@ -1,6 +1,6 @@
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { URLTempAllowMsg } from "@keplr-wallet/background";
 import ReactDOM from "react-dom";
 import style from "./style.module.scss";
@@ -16,24 +16,35 @@ export const BlocklistPage: FunctionComponent = () => {
         window.location.replace(origin);
       });
 
+  const [isAdvancedClicked, setIsAdvancedClicked] = useState(false);
+
   return (
     <div className={style.container}>
       <div className={style.inner}>
-        <img
-          className={style.image}
-          src={require("../../public/assets/img/blocklist.svg")}
-          alt=""
-        />
         <div>
+          <img
+            className={style.image}
+            src={require("../../public/assets/img/blocklist-warning.svg")}
+            alt=""
+          />
           <h1 className={style.title}>SECURITY ALERT</h1>
           <p className={style.description}>
             Keplr has detected that this domain has been flagged as a phishing
             site. To protect the safety of your assets, we recommend you exit
             this website immediately.
           </p>
-          <button className={style.link} onClick={handleMove}>
-            Continue to {origin} (unsafe)
-          </button>
+          {isAdvancedClicked ? (
+            <button className={style.link} onClick={handleMove}>
+              Continue to {origin} (unsafe)
+            </button>
+          ) : (
+            <button
+              className={style.advanced}
+              onClick={() => setIsAdvancedClicked(true)}
+            >
+              ADVANCED
+            </button>
+          )}
         </div>
       </div>
     </div>
