@@ -160,7 +160,7 @@ export const AutoGasModal: FunctionComponent<{
         ) : null}
         <TextInput
           label="Gas Amount"
-          value={gasConfig.gas.toString()}
+          value={gasConfig.gasRaw}
           onChangeText={(text) => {
             gasConfig.setGas(text);
           }}
