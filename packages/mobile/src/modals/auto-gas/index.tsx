@@ -92,6 +92,10 @@ export const AutoGasModal: FunctionComponent<{
                   gasSimulator.setEnabled(value);
                 }
               }}
+              // Because this component exists on card's header which has swipe gesture.
+              // To prevent the conflict with this and card's header gesture,
+              // "disallowInterruption" prop is required.
+              disallowInterruption={true}
             />
           </View>
         }

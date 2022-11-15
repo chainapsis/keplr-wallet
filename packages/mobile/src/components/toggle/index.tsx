@@ -7,7 +7,8 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 export const Toggle: FunctionComponent<{
   on: boolean;
   onChange(onOrOff: boolean): void;
-}> = ({ on, onChange }) => {
+  disallowInterruption?: boolean;
+}> = ({ on, onChange, disallowInterruption }) => {
   const style = useStyle();
 
   const offColor = style.flatten(["color-white", "dark:color-platinum-50"])
@@ -74,6 +75,7 @@ export const Toggle: FunctionComponent<{
   if (Platform.OS === "android") {
     return (
       <TouchableWithoutFeedback
+        disallowInterruption={disallowInterruption}
         onPress={() => {
           onChange(!on);
         }}
@@ -118,6 +120,7 @@ export const Toggle: FunctionComponent<{
   } else {
     return (
       <TouchableWithoutFeedback
+        disallowInterruption={disallowInterruption}
         onPress={() => {
           onChange(!on);
         }}
