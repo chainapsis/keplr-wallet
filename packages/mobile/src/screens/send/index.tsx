@@ -1,6 +1,6 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
-import { useSendTxConfig } from "@keplr-wallet/hooks";
+import { useGasSimulator, useSendTxConfig } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
 import { EthereumEndpoint } from "../../config";
 import { PageWithScrollView } from "../../components/page";
@@ -17,6 +17,8 @@ import { Button } from "../../components/button";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useSmartNavigation } from "../../navigation";
 import { Buffer } from "buffer/";
+import { DenomHelper } from "@keplr-wallet/common";
+import { AsyncKVStore } from "../../common";
 
 export const SendScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
@@ -56,6 +58,87 @@ export const SendScreen: FunctionComponent = observer(() => {
       allowHexAddressOnEthermint: true,
     }
   );
+
+  const gasSimulatorKey = useMemo(() => {
+    if (sendConfigs.amountConfig.sendCurrency) {
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+
+      if (denomHelper.type !== "native") {
+        if (denomHelper.type === "cw20") {
+          // Probably, the gas can be different per cw20 according to how the contract implemented.
+          return `${denomHelper.type}/${denomHelper.contractAddress}`;
+        }
+
+        return denomHelper.type;
+      }
+    }
+
+    return "native";
+  }, [sendConfigs.amountConfig.sendCurrency]);
+
+  const gasSimulator = useGasSimulator(
+    new AsyncKVStore("gas-simulator.screen.send/send"),
+    chainStore,
+    chainId,
+    sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
+    gasSimulatorKey,
+    () => {
+      if (!sendConfigs.amountConfig.sendCurrency) {
+        throw new Error("Send currency not set");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        sendConfigs.amountConfig.error != null ||
+        sendConfigs.recipientConfig.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+      // I don't know why, but simulation does not work for secret20
+      if (denomHelper.type === "secret20") {
+        throw new Error("Simulating secret wasm not supported");
+      }
+
+      return account.makeSendTokenTx(
+        sendConfigs.amountConfig.amount,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        sendConfigs.amountConfig.sendCurrency!,
+        sendConfigs.recipientConfig.recipient
+      );
+    }
+  );
+
+  useEffect(() => {
+    // To simulate secretwasm, we need to include the signature in the tx.
+    // With the current structure, this approach is not possible.
+    if (
+      sendConfigs.amountConfig.sendCurrency &&
+      new DenomHelper(sendConfigs.amountConfig.sendCurrency.coinMinimalDenom)
+        .type === "secret20"
+    ) {
+      gasSimulator.forceDisable(
+        new Error("Simulating secret20 is not supported")
+      );
+      sendConfigs.gasConfig.setGas(account.secret.msgOpts.send.secret20.gas);
+    } else {
+      gasSimulator.forceDisable(false);
+      gasSimulator.setEnabled(true);
+    }
+  }, [
+    account.secret.msgOpts.send.secret20.gas,
+    gasSimulator,
+    sendConfigs.amountConfig.sendCurrency,
+    sendConfigs.gasConfig,
+  ]);
 
   useEffect(() => {
     if (route.params.currency) {
@@ -106,6 +189,7 @@ export const SendScreen: FunctionComponent = observer(() => {
         gasLabel="gas"
         feeConfig={sendConfigs.feeConfig}
         gasConfig={sendConfigs.gasConfig}
+        gasSimulator={gasSimulator}
       />
       <View style={style.flatten(["flex-1"])} />
       <Button

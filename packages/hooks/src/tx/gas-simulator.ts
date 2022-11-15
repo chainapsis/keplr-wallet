@@ -257,6 +257,8 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
       return;
     }
 
+    gasAdjustment = gasAdjustment.trim();
+
     if (gasAdjustment === "") {
       this._gasAdjustmentRaw = "";
       return;
@@ -266,6 +268,13 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
       this._gasAdjustmentRaw = "0" + gasAdjustment;
     }
 
+    if (!/^[0-9.]+$/.test(gasAdjustment)) {
+      // `parseFloat` accepts alphabetical characters such as ("1.4as" -> 1.4).
+      // However, this behavior can make users confusing.
+      // So, explicitly, permit only numbers and period.
+      // (Non US-style rational number not supported.)
+      return;
+    }
     const num = parseFloat(gasAdjustment);
     if (Number.isNaN(num) || num < 0 || num > 2) {
       return;

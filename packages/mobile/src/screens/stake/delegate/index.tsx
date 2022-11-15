@@ -5,11 +5,12 @@ import { useStyle } from "../../../styles";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { View } from "react-native";
 import { useStore } from "../../../stores";
-import { useDelegateTxConfig } from "@keplr-wallet/hooks";
+import { useDelegateTxConfig, useGasSimulator } from "@keplr-wallet/hooks";
 import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
 import { Staking } from "@keplr-wallet/stores";
+import { AsyncKVStore } from "../../../common";
 
 export const DelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -60,6 +61,21 @@ export const DelegateScreen: FunctionComponent = observer(() => {
 
   const validator = bondedValidators.getValidator(validatorAddress);
 
+  const gasSimulator = useGasSimulator(
+    new AsyncKVStore("gas-simulator.screen.stake.delegate/delegate"),
+    chainStore,
+    chainStore.current.chainId,
+    sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
+    "native",
+    () => {
+      return account.cosmos.makeDelegateTx(
+        sendConfigs.amountConfig.amount,
+        validatorAddress
+      );
+    }
+  );
+
   return (
     <PageWithScrollView
       backgroundMode="tertiary"
@@ -89,6 +105,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
         gasLabel="gas"
         feeConfig={sendConfigs.feeConfig}
         gasConfig={sendConfigs.gasConfig}
+        gasSimulator={gasSimulator}
       />
       <View style={style.flatten(["flex-1"])} />
       <Button

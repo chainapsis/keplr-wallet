@@ -70,6 +70,11 @@ export class GasConfig extends TxChainSetter implements IGasConfig {
 
     // Gas must not be floated.
     if (!gas.includes(".")) {
+      if (!/^[0-9]+$/.test(gas)) {
+        // Explicitly, permit only numbers.
+        return;
+      }
+
       if (!Number.isNaN(Number.parseInt(gas))) {
         this._gasRaw = gas;
         return;

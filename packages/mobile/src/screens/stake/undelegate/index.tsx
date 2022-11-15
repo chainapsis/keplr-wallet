@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
-import { useUndelegateTxConfig } from "@keplr-wallet/hooks";
+import { useGasSimulator, useUndelegateTxConfig } from "@keplr-wallet/hooks";
 import { PageWithScrollView } from "../../../components/page";
 import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Text, View } from "react-native";
@@ -13,6 +13,7 @@ import { Staking } from "@keplr-wallet/stores";
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { Buffer } from "buffer/";
 import { useSmartNavigation } from "../../../navigation";
+import { AsyncKVStore } from "../../../common";
 
 export const UndelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -85,6 +86,21 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
+  const gasSimulator = useGasSimulator(
+    new AsyncKVStore("gas-simulator.screen.stake.undelegate/undelegate"),
+    chainStore,
+    chainStore.current.chainId,
+    sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
+    "native",
+    () => {
+      return account.cosmos.makeUndelegateTx(
+        sendConfigs.amountConfig.amount,
+        validatorAddress
+      );
+    }
+  );
+
   return (
     <PageWithScrollView
       backgroundMode="tertiary"
@@ -150,6 +166,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
         gasLabel="gas"
         feeConfig={sendConfigs.feeConfig}
         gasConfig={sendConfigs.gasConfig}
+        gasSimulator={gasSimulator}
       />
       <View style={style.flatten(["flex-1"])} />
       <Button
