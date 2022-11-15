@@ -2,7 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { StyleSheet, Text, TextStyle, View, ViewProps } from "react-native";
 import { useStyle } from "../../styles";
 import { observer } from "mobx-react-lite";
-import { action, makeObservable, observable } from "mobx";
+import { action, autorun, makeObservable, observable } from "mobx";
 import {
   IFeeConfig,
   IGasConfig,
@@ -17,6 +17,7 @@ import { LoadingSpinner } from "../spinner";
 import { RectButton } from "../rect-button";
 import { Button } from "../button";
 import { AutoGasModal } from "../../modals/auto-gas";
+import { FeeSelector } from "./fee-selector";
 
 export interface FeeButtonsProps {
   labelStyle?: TextStyle;
@@ -31,6 +32,8 @@ export interface FeeButtonsProps {
   gasConfig: IGasConfig;
 
   gasSimulator?: IGasSimulator;
+
+  showFeeCurrencySelectorUnderSetGas?: boolean;
 }
 
 class FeeButtonState {
@@ -57,11 +60,95 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     // But, rather than using the context API with boilerplate code, just use the mobx state to simplify the logic.
     const [feeButtonState] = useState(() => new FeeButtonState());
 
+    const { queriesStore } = useStore();
+
+    useEffect(() => {
+      // Try to find other fee currency if the account doesn't have enough fee to pay.
+      // This logic can be slightly complex, so use mobx's `autorun`.
+      // This part fairly different with the approach of react's hook.
+      let skip = false;
+      // Try until 500ms to avoid the confusion to user.
+      const timeoutId = setTimeout(() => {
+        skip = true;
+      }, 500);
+
+      const disposer = autorun(() => {
+        if (
+          !skip &&
+          !props.feeConfig.isManual &&
+          props.feeConfig.feeCurrencies.length > 1 &&
+          props.feeConfig.feeCurrency &&
+          props.feeConfig.feeCurrencies[0].coinMinimalDenom ===
+            props.feeConfig.feeCurrency.coinMinimalDenom
+        ) {
+          const queryBalances = queriesStore
+            .get(props.feeConfig.chainId)
+            .queryBalances.getQueryBech32Address(props.feeConfig.sender);
+
+          // Basically, `FeeConfig` implementation select the first fee currency as default.
+          // So, let's put the priority to first fee currency.
+          const firstFeeCurrency = props.feeConfig.feeCurrencies[0];
+          const firstFeeCurrencyBal = queryBalances.getBalanceFromCurrency(
+            firstFeeCurrency
+          );
+
+          if (props.feeConfig.feeType) {
+            const fee = props.feeConfig.getFeeTypePrettyForFeeCurrency(
+              firstFeeCurrency,
+              props.feeConfig.feeType
+            );
+            if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
+              // Not enough balances for fee.
+              // Try to find other fee currency to send.
+              for (const feeCurrency of props.feeConfig.feeCurrencies) {
+                const feeCurrencyBal = queryBalances.getBalanceFromCurrency(
+                  feeCurrency
+                );
+                const fee = props.feeConfig.getFeeTypePrettyForFeeCurrency(
+                  feeCurrency,
+                  props.feeConfig.feeType
+                );
+
+                if (feeCurrencyBal.toDec().gte(fee.toDec())) {
+                  props.feeConfig.setAutoFeeCoinMinimalDenom(
+                    feeCurrency.coinMinimalDenom
+                  );
+                  skip = true;
+                  return;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return () => {
+        clearTimeout(timeoutId);
+        disposer();
+      };
+    }, [props.feeConfig, queriesStore]);
+
     return (
       <React.Fragment>
+        {props.feeConfig.feeCurrencies.length > 1 &&
+        !props.showFeeCurrencySelectorUnderSetGas ? (
+          <FeeSelector label="Fee Token" feeConfig={props.feeConfig} />
+        ) : null}
         {props.feeConfig.feeCurrency ? <FeeButtonsInner {...props} /> : null}
         {feeButtonState.isGasInputOpen || !props.feeConfig.feeCurrency ? (
-          <GasInput label={props.gasLabel} gasConfig={props.gasConfig} />
+          props.gasSimulator ? (
+            props.feeConfig.feeCurrencies.length > 1 &&
+            props.showFeeCurrencySelectorUnderSetGas ? (
+              <React.Fragment>
+                <FeeSelector label="Fee Token" feeConfig={props.feeConfig} />
+                <GasInput label={props.gasLabel} gasConfig={props.gasConfig} />
+              </React.Fragment>
+            ) : (
+              <GasInput label={props.gasLabel} gasConfig={props.gasConfig} />
+            )
+          ) : (
+            <GasInput label={props.gasLabel} gasConfig={props.gasConfig} />
+          )
         ) : null}
       </React.Fragment>
     );
