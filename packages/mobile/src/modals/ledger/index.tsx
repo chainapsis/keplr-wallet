@@ -276,7 +276,8 @@ export const LedgerGranterModal: FunctionComponent<{
             ) : (
               <React.Fragment>
                 <Text style={style.flatten(["subtitle3", "color-text-high"])}>
-                  1. Open the Cosmos app on your Ledger device
+                  1. Open the {ledgerInitStore.requestedLedgerApp} app on your
+                  Ledger device
                 </Text>
                 <Text style={style.flatten(["subtitle3", "color-text-high"])}>
                   2. Select the hardware wallet you’d like to pair
@@ -288,6 +289,7 @@ export const LedgerGranterModal: FunctionComponent<{
               return (
                 <LedgerNanoBLESelector
                   key={device.id}
+                  chain={ledgerInitStore.requestedLedgerApp}
                   deviceId={device.id}
                   name={device.name}
                   onCanResume={async () => {
@@ -349,10 +351,10 @@ const LedgerErrorView: FunctionComponent<{
 
 const LedgerNanoBLESelector: FunctionComponent<{
   deviceId: string;
+  chain: LedgerApp | undefined;
   name: string;
-
   onCanResume: () => void;
-}> = ({ deviceId, name, onCanResume }) => {
+}> = ({ deviceId, chain, name, onCanResume }) => {
   const style = useStyle();
 
   const [isConnecting, setIsConnecting] = useState(false);
@@ -368,7 +370,7 @@ const LedgerNanoBLESelector: FunctionComponent<{
       const ledger = await Ledger.init(
         () => TransportBLE.open(deviceId),
         undefined,
-        LedgerApp.Cosmos
+        chain ?? LedgerApp.Cosmos
       );
       await ledger.close();
 
@@ -413,7 +415,7 @@ const LedgerNanoBLESelector: FunctionComponent<{
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.App ? (
           <Text style={style.flatten(["subtitle3", "color-text-low"])}>
-            Please open Cosmos App
+            Please open {chain} App
           </Text>
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.Unknown ? (
