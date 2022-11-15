@@ -1284,6 +1284,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "BLD",
         coinMinimalDenom: "ubld",
         coinDecimals: 6,
+        coinGeckoId: "agoric",
         gasPriceStep: {
           low: 0.012,
           average: 0.024,
