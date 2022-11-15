@@ -60,7 +60,42 @@ export const AutoGasModal: FunctionComponent<{
     const style = useStyle();
 
     return (
-      <CardModal title="Set Gas">
+      <CardModal
+        title="Set Gas"
+        right={
+          /*
+           The purpose of below structure is to let component not occupy position to prevent that to increase the card modal's header height.
+           */
+          <View
+            style={style.flatten([
+              "flex-1",
+              "flex-row",
+              "justify-end",
+              "items-center",
+              "height-1",
+            ])}
+          >
+            <View style={style.flatten(["height-24", "justify-center"])}>
+              <Text
+                style={style.flatten(
+                  ["subtitle3", "color-text-middle", "margin-right-10"],
+                  [!gasSimulator.enabled && "color-text-low"]
+                )}
+              >
+                {gasSimulator.enabled ? "Auto" : "Manual"}
+              </Text>
+            </View>
+            <Toggle
+              on={gasSimulator.enabled}
+              onChange={(value) => {
+                if (!gasSimulator.forceDisabled) {
+                  gasSimulator.setEnabled(value);
+                }
+              }}
+            />
+          </View>
+        }
+      >
         {gasSimulator.outdatedCosmosSdk ? (
           <AlertView
             text="Gas estimation is not supported, because this chain uses outdated
@@ -70,27 +105,6 @@ export const AutoGasModal: FunctionComponent<{
         {gasSimulator.forceDisabled && gasSimulator.forceDisableReason ? (
           <AlertView text={gasSimulator.forceDisableReason.message} />
         ) : null}
-
-        <View
-          style={style.flatten([
-            "flex-row",
-            "justify-between",
-            "items-center",
-            "margin-bottom-16",
-          ])}
-        >
-          <Text style={style.flatten(["subtitle3"])}>Gas</Text>
-          <View style={style.get("flex-1")} />
-          <Text style={style.flatten(["subtitle3", "margin-right-10"])}>
-            Auto
-          </Text>
-          <Toggle
-            on={gasSimulator.enabled}
-            onChange={(value) => {
-              gasSimulator.setEnabled(value);
-            }}
-          />
-        </View>
 
         {gasSimulator.enabled ? (
           <View style={style.flatten(["flex-row", "items-center"])}>
