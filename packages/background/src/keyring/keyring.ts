@@ -204,6 +204,13 @@ export class KeyRing {
       throw new KeplrError("keyring", 130, "Key store is empty");
     }
 
+    // Fix a coin type if it is 60 (metamask compatibility).
+    // XXX: Actually, this is required because there are users who the coin type was set as not 60 for evmos on mobile.
+    //      The reason of this problem is unknown, maybe the reason is from the difference of handling suggesting chain on extension and mobile.
+    if (defaultCoinType === 60) {
+      return 60;
+    }
+
     return this.keyStore.coinTypeForChain
       ? this.keyStore.coinTypeForChain[
           ChainIdHelper.parse(chainId).identifier
