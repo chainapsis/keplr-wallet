@@ -208,21 +208,26 @@ export const CardModal: FunctionComponent<{
                 // or "velocityY" from gesture is greater or equal than 100, try to close the modal.
                 // Else, just return to the open status.
                 Animated.cond(
-                  Animated.not(
-                    Animated.or(
-                      Animated.and(
-                        Animated.lessOrEq(
-                          Animated.abs(
-                            Animated.sub(
-                              modalTransition.translateY,
-                              modalTransition.startY
-                            )
+                  Animated.or(
+                    // If state is CANCELED, ignore gesture with setting `isOpen` to "true"(1).
+                    // This make the component above card which requires gesture able to cancel card's gesture.
+                    Animated.eq(state, 3),
+                    Animated.not(
+                      Animated.or(
+                        Animated.and(
+                          Animated.lessOrEq(
+                            Animated.abs(
+                              Animated.sub(
+                                modalTransition.translateY,
+                                modalTransition.startY
+                              )
+                            ),
+                            250
                           ),
-                          250
+                          Animated.greaterOrEq(velocityY, -30)
                         ),
-                        Animated.greaterOrEq(velocityY, -30)
-                      ),
-                      Animated.greaterOrEq(velocityY, 100)
+                        Animated.greaterOrEq(velocityY, 100)
+                      )
                     )
                   ),
                   [
