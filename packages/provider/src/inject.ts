@@ -7,21 +7,18 @@ import {
   KeplrMode,
   KeplrSignOptions,
   Key,
-} from "@keplr-wallet/types";
-import { Result, JSONUint8Array } from "@keplr-wallet/router";
-import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
-  StdTx,
-  OfflineSigner,
+  OfflineAminoSigner,
   StdSignature,
-} from "@cosmjs/launchpad";
+  StdTx,
+  DirectSignResponse,
+  OfflineDirectSigner,
+} from "@keplr-wallet/types";
+import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { SecretUtils } from "secretjs/types/enigmautils";
-
 import { KeplrEnigmaUtils } from "./enigma";
-import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
-
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
@@ -457,17 +454,17 @@ export class InjectedKeplr implements IKeplr {
     ]);
   }
 
-  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
+  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
   async getOfflineSignerAuto(
     chainId: string
-  ): Promise<OfflineSigner | OfflineDirectSigner> {
+  ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
     const key = await this.getKey(chainId);
     if (key.isNanoLedger) {
       return new CosmJSOfflineSignerOnlyAmino(chainId, this);

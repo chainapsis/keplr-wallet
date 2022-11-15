@@ -1,12 +1,12 @@
 import { AccountSetBaseSuper, MsgOpt, WalletStatus } from "./base";
-import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
 import {
+  AppCurrency,
+  KeplrSignOptions,
   BroadcastMode,
-  makeSignDoc,
   Msg,
   StdFee,
   StdSignDoc,
-} from "@cosmjs/launchpad";
+} from "@keplr-wallet/types";
 import { DenomHelper, escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
@@ -497,16 +497,16 @@ export class CosmosAccountImpl {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
-    const signDoc = sortObjectByKey(
-      makeSignDoc(
-        aminoMsgs,
-        fee,
-        this.chainId,
-        escapeHTML(memo),
-        account.getAccountNumber().toString(),
-        account.getSequence().toString()
-      )
-    );
+    const signDocRaw: StdSignDoc = {
+      chain_id: this.chainId,
+      account_number: account.getAccountNumber().toString(),
+      sequence: account.getSequence().toString(),
+      fee: fee,
+      msgs: aminoMsgs,
+      memo: escapeHTML(memo),
+    };
+
+    const signDoc = sortObjectByKey(signDocRaw);
 
     const signResponse = await (async () => {
       if (!eip712Signing) {
@@ -523,7 +523,7 @@ export class CosmosAccountImpl {
 
         // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
         //      That means this part is not standard.
-        (altSignDoc as any).fee["feePayer"] = this.base.bech32Address;
+        altSignDoc.fee["feePayer"] = this.base.bech32Address;
 
         return await keplr.experimentalSignEIP712CosmosTx_v0(
           this.chainId,
@@ -641,7 +641,7 @@ export class CosmosAccountImpl {
           gasLimit: signResponse.signed.fee.gas,
           payer: eip712Signing
             ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-              (signResponse.signed as any).fee["feePayer"]
+              signResponse.signed.fee["feePayer"]
             : undefined,
         }),
       }).finish(),
@@ -948,6 +948,17 @@ export class CosmosAccountImpl {
           );
         }
 
+        const useEthereumSign =
+          this.chainGetter
+            .getChain(this.chainId)
+            .features?.includes("eth-key-sign") === true;
+
+        const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+
+        // On ledger with ethermint, eip712 types are required and we can't omit `timeoutTimestamp`.
+        // Although we are not using `timeoutTimestamp` at present, just set it as mas uint64 only for eip712 cosmos tx.
+        const timeoutTimestamp = eip712Signing ? "18446744073709551615" : "0";
+
         const msg = {
           type: this.msgOpts.ibcTransfer.type,
           value: {
@@ -968,11 +979,16 @@ export class CosmosAccountImpl {
                 .add(new Int("150"))
                 .toString(),
             },
+            timeout_timestamp: timeoutTimestamp as string | undefined,
           },
         };
 
         if (msg.value.timeout_height.revision_number === "0") {
           delete msg.value.timeout_height.revision_number;
+        }
+
+        if (msg.value.timeout_timestamp === "0") {
+          delete msg.value.timeout_timestamp;
         }
 
         return {
@@ -993,6 +1009,7 @@ export class CosmosAccountImpl {
                       : "0",
                     revisionHeight: msg.value.timeout_height.revision_height,
                   },
+                  timeoutTimestamp: msg.value.timeout_timestamp,
                 })
               ).finish(),
             },

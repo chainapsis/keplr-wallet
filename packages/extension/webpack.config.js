@@ -8,6 +8,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WriteFilePlugin = require("write-file-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
+const fs = require("fs");
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
@@ -17,6 +18,22 @@ const commonResolve = (dir) => ({
     assets: path.resolve(__dirname, dir),
   },
 });
+const altResolve = () => {
+  const p = path.resolve(__dirname, "./src/keplr-torus-signin/index.ts");
+
+  if (fs.existsSync(p)) {
+    return {
+      alias: {
+        "alt-sign-in": path.resolve(
+          __dirname,
+          "./src/keplr-torus-signin/index.ts"
+        ),
+      },
+    };
+  }
+
+  return {};
+};
 const sassRule = {
   test: /(\.s?css)|(\.sass)$/,
   oneOf: [
@@ -102,7 +119,10 @@ const extensionConfig = (env, args) => {
         },
       },
     },
-    resolve: commonResolve("src/public/assets"),
+    resolve: {
+      ...commonResolve("src/public/assets"),
+      ...altResolve(),
+    },
     module: {
       rules: [sassRule, tsRule, fileRule],
     },
@@ -145,7 +165,11 @@ const extensionConfig = (env, args) => {
         ],
       }),
       new WriteFilePlugin(),
-      new webpack.EnvironmentPlugin(["NODE_ENV"]),
+      new webpack.EnvironmentPlugin([
+        "NODE_ENV",
+        "KEPLR_EXT_ETHEREUM_ENDPOINT",
+        "KEPLR_EXT_AMPLITUDE_API_KEY",
+      ]),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
       }),

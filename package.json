@@ -31,7 +31,7 @@
     "clean:watchman": "watchman watch-del-all",
     "build": "lerna run build",
     "build:libs": "lerna run build --ignore @keplr-wallet/extension",
-    "test": "lerna run test --parallel",
+    "test": "zx ./scripts/monorepo-deps-version-check.mjs && lerna run test --parallel",
     "build:clean": "yarn clean && yarn install --frozen-lockfile && lerna run build",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
@@ -44,7 +44,19 @@
     "pre-commit"
   ],
   "lint-staged": {
-    "*": [
+    "*.{js,ts,jsx,tsx}": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.mjs": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.json": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.{css,scss,sass}": [
       "eslint",
       "prettier --check"
     ]
@@ -90,7 +102,6 @@
     "mobx": "^6.6.1",
     "mobx-react-lite": "^3.4.0",
     "mobx-utils": "^6.0.5",
-    "@cosmjs/crypto": "^0.24.0-alpha.25",
     "@iov/crypto": "2.1.0",
     "axios": "^0.27.2",
     "libsodium": "file:./etc/noop",

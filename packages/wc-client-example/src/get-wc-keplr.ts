@@ -1,8 +1,7 @@
-import { Keplr } from "@keplr-wallet/types";
+import { Keplr, BroadcastMode } from "@keplr-wallet/types";
 import WalletConnect from "@walletconnect/client";
 import { KeplrQRCodeModalV1 } from "@keplr-wallet/wc-qrcode-modal";
 import { KeplrWalletConnectV1 } from "@keplr-wallet/wc-client";
-import { BroadcastMode } from "@cosmjs/launchpad";
 import Axios from "axios";
 import { EmbedChainInfos } from "./config";
 import { Buffer } from "buffer/";

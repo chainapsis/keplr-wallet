@@ -16,8 +16,6 @@ You can find the latest versions of the official managed releases on these links
 For help using Keplr Wallet, Visit our [User Support Site](https://keplr.crunch.help).
 
 ## Building browser extension locally
-This repo uses git-secret to encrypt the endpoints and the api keys. **So, you can't build this without creating your own config file.** You should create your own `config.var.ts`, `config.ui.var.ts` files inside the `packages/extension/src` folder. Refer to the `config.var.example.ts`, ``config.ui.var.example.ts`` sample files to create your own configuration.
-
 This repo requires `protoc` to be installed. Check [Install protobuf](https://grpc.io/docs/protoc-installation/) for details.  
 
 Clone this repo and run:

@@ -1,5 +1,5 @@
 import { ProtoSignDocDecoder } from "../decoder";
-import { Coin, StdSignDoc } from "@cosmjs/launchpad";
+import { Coin, StdSignDoc } from "@keplr-wallet/types";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { checkAndValidateADR36AminoSignDoc } from "../../adr-36";
 

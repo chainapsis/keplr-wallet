@@ -5,3 +5,4 @@ export * from "./chain-info";
 export * from "./wallet";
 export * from "./window";
 export * from "./ethereum";
+export * from "./cosmjs";

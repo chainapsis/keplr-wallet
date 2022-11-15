@@ -1,7 +1,6 @@
-import { Msg, StdFee } from "@cosmjs/launchpad";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import { Dec } from "@keplr-wallet/unit";
-import { KeplrSignOptions } from "@keplr-wallet/types";
+import { KeplrSignOptions, Msg, StdFee } from "@keplr-wallet/types";
 
 export type ProtoMsgsOrWithAminoMsgs = {
   // TODO: Make `aminoMsgs` nullable

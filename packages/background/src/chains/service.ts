@@ -6,6 +6,7 @@ import { InteractionService } from "../interaction";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { getBasicAccessPermissionType, PermissionService } from "../permission";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 
@@ -14,8 +15,9 @@ export class ChainsService {
 
   protected cachedChainInfos: ChainInfoWithEmbed[] | undefined;
 
-  protected chainUpdaterKeeper!: ChainUpdaterService;
-  protected interactionKeeper!: InteractionService;
+  protected chainUpdaterService!: ChainUpdaterService;
+  protected interactionService!: InteractionService;
+  protected permissionService!: PermissionService;
 
   protected readonly kvStoreForSuggestChain: KVStore;
 
@@ -34,11 +36,13 @@ export class ChainsService {
   }
 
   init(
-    chainUpdaterKeeper: ChainUpdaterService,
-    interactionKeeper: InteractionService
+    chainUpdaterService: ChainUpdaterService,
+    interactionService: InteractionService,
+    permissionService: PermissionService
   ) {
-    this.chainUpdaterKeeper = chainUpdaterKeeper;
-    this.interactionKeeper = interactionKeeper;
+    this.chainUpdaterService = chainUpdaterService;
+    this.interactionService = interactionService;
+    this.permissionService = permissionService;
   }
 
   readonly getChainInfos: () => Promise<
@@ -86,7 +90,7 @@ export class ChainsService {
     // Set the updated property of the chain.
     result = await Promise.all(
       result.map(async (chainInfo) => {
-        const updated: ChainInfo = await this.chainUpdaterKeeper.putUpdatedPropertyToChainInfo(
+        const updated: ChainInfo = await this.chainUpdaterService.putUpdatedPropertyToChainInfo(
           chainInfo
         );
 
@@ -158,7 +162,7 @@ export class ChainsService {
       stripUnknown: true,
     });
 
-    await this.interactionKeeper.waitApprove(
+    await this.interactionService.waitApprove(
       env,
       "/suggest-chain",
       SuggestChainInfoMsg.type(),
@@ -166,6 +170,12 @@ export class ChainsService {
         ...chainInfo,
         origin,
       }
+    );
+
+    await this.permissionService.addPermission(
+      [chainInfo.chainId],
+      getBasicAccessPermissionType(),
+      [origin]
     );
 
     await this.addChainInfo(chainInfo);
@@ -220,7 +230,7 @@ export class ChainsService {
     );
 
     // Clear the updated chain info.
-    await this.chainUpdaterKeeper.clearUpdatedProperty(chainId);
+    await this.chainUpdaterService.clearUpdatedProperty(chainId);
 
     for (const chainRemovedHandler of this.onChainRemovedHandlers) {
       chainRemovedHandler(chainId, ChainIdHelper.parse(chainId).identifier);

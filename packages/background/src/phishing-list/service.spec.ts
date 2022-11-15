@@ -283,7 +283,7 @@ describe("Test phishing list service", () => {
       retryIntervalMs: 3600,
       allowTimeoutMs: 100,
     });
-    const spyFetch = jest.spyOn(service, "startFetchPhishingList");
+    const spyFetch = jest.spyOn(service.urlFetcher, "fetch");
     eachService = service;
 
     service.init();
@@ -326,7 +326,7 @@ describe("Test phishing list service", () => {
       retryIntervalMs: 100,
       allowTimeoutMs: 100,
     });
-    const spyFetch = jest.spyOn(service, "startFetchPhishingList");
+    const spyFetch = jest.spyOn(service.urlFetcher, "fetch");
     eachService = service;
 
     service.init();
