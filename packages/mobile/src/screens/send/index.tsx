@@ -11,6 +11,7 @@ import {
   MemoInput,
   CurrencySelector,
   FeeButtons,
+  FeeSelector,
 } from "../../components/input";
 import { useStyle } from "../../styles";
 import { Button } from "../../components/button";
@@ -19,6 +20,7 @@ import { useSmartNavigation } from "../../navigation";
 import { Buffer } from "buffer/";
 import { DenomHelper } from "@keplr-wallet/common";
 import { AsyncKVStore } from "../../common";
+import { autorun } from "mobx";
 
 export const SendScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
@@ -165,6 +167,72 @@ export const SendScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
+  useEffect(() => {
+    // Try to find other fee currency if the account doesn't have enough fee to pay.
+    // This logic can be slightly complex, so use mobx's `autorun`.
+    // This part fairly different with the approach of react's hook.
+    let skip = false;
+    // Try until 500ms to avoid the confusion to user.
+    const timeoutId = setTimeout(() => {
+      skip = true;
+    }, 500);
+
+    const disposer = autorun(() => {
+      if (
+        !skip &&
+        !sendConfigs.feeConfig.isManual &&
+        sendConfigs.feeConfig.feeCurrencies.length > 1 &&
+        sendConfigs.feeConfig.feeCurrency &&
+        sendConfigs.feeConfig.feeCurrencies[0].coinMinimalDenom ===
+          sendConfigs.feeConfig.feeCurrency.coinMinimalDenom
+      ) {
+        const queryBalances = queriesStore
+          .get(sendConfigs.feeConfig.chainId)
+          .queryBalances.getQueryBech32Address(sendConfigs.feeConfig.sender);
+
+        // Basically, `sendConfig.feeConfig` implementation select the first fee currency as default.
+        // So, let's put the priority to first fee currency.
+        const firstFeeCurrency = sendConfigs.feeConfig.feeCurrencies[0];
+        const firstFeeCurrencyBal = queryBalances.getBalanceFromCurrency(
+          firstFeeCurrency
+        );
+
+        if (sendConfigs.feeConfig.feeType) {
+          const fee = sendConfigs.feeConfig.getFeeTypePrettyForFeeCurrency(
+            firstFeeCurrency,
+            sendConfigs.feeConfig.feeType
+          );
+          if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
+            // Not enough balances for fee.
+            // Try to find other fee currency to send.
+            for (const feeCurrency of sendConfigs.feeConfig.feeCurrencies) {
+              const feeCurrencyBal = queryBalances.getBalanceFromCurrency(
+                feeCurrency
+              );
+              const fee = sendConfigs.feeConfig.getFeeTypePrettyForFeeCurrency(
+                feeCurrency,
+                sendConfigs.feeConfig.feeType
+              );
+
+              if (feeCurrencyBal.toDec().gte(fee.toDec())) {
+                sendConfigs.feeConfig.setAutoFeeCoinMinimalDenom(
+                  feeCurrency.coinMinimalDenom
+                );
+                skip = true;
+                return;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+      disposer();
+    };
+  }, [sendConfigs.feeConfig, queriesStore]);
+
   return (
     <PageWithScrollView
       backgroundMode="tertiary"
@@ -184,6 +252,9 @@ export const SendScreen: FunctionComponent = observer(() => {
       />
       <AmountInput label="Amount" amountConfig={sendConfigs.amountConfig} />
       <MemoInput label="Memo (Optional)" memoConfig={sendConfigs.memoConfig} />
+      {sendConfigs.feeConfig.feeCurrencies.length > 1 ? (
+        <FeeSelector label="Fee Token" feeConfig={sendConfigs.feeConfig} />
+      ) : null}
       <FeeButtons
         label="Fee"
         gasLabel="gas"

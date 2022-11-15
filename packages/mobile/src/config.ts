@@ -106,7 +106,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       },
     ],
     coinType: 118,
-    features: ["ibc-transfer", "ibc-go", "cosmwasm"],
+    features: ["ibc-transfer", "ibc-go", "cosmwasm", "osmosis-txfees"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/osmo.png",
     txExplorer: {
       name: "Mintscan",
