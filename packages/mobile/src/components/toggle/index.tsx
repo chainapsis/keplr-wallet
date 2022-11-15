@@ -1,13 +1,8 @@
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
-import {
-  Animated,
-  Easing,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  Platform,
-  View,
-} from "react-native";
+import { StyleSheet, Platform, View } from "react-native";
 import { useStyle } from "../../styles";
+import Animated, { EasingNode } from "react-native-reanimated";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 export const Toggle: FunctionComponent<{
   on: boolean;
@@ -37,41 +32,41 @@ export const Toggle: FunctionComponent<{
   }, [animatedOnValue]);
 
   const color = useMemo(() => {
-    return animatedOnValue.interpolate({
+    // TODO: Remove `any` usage.
+    return Animated.interpolateColors(animatedOnValue, {
       inputRange: [0, 1],
-      outputRange: [offColor, onColor],
-    });
+      outputColorRange: [offColor, onColor],
+    }) as any;
   }, [animatedOnValue, offColor, onColor]);
 
   const backgroundColor = useMemo(() => {
-    return animatedOnValue.interpolate({
+    // TODO: Remove `any` usage.
+    return Animated.interpolateColors(animatedOnValue, {
       inputRange: [0, 1],
-      outputRange: [offBackgroundColor, onBackgroundColor],
-    });
+      outputColorRange: [offBackgroundColor, onBackgroundColor],
+    }) as any;
   }, [animatedOnValue, offBackgroundColor, onBackgroundColor]);
 
   const borderColorForAndroid = useMemo(() => {
-    return animatedOnValue.interpolate({
+    // TODO: Remove `any` usage.
+    return Animated.interpolateColors(animatedOnValue, {
       inputRange: [0, 1],
-      outputRange: [offBackgroundColor, onColor],
-    });
+      outputColorRange: [offBackgroundColor, onColor],
+    }) as any;
   }, [animatedOnValue, offBackgroundColor, onColor]);
 
   useEffect(() => {
     if (on) {
-      // TODO: Use "react-native-reanimated"
       Animated.timing(animatedOnValue, {
         toValue: 1,
         duration: 200,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
+        easing: EasingNode.out(EasingNode.cubic),
       }).start();
     } else {
       Animated.timing(animatedOnValue, {
         toValue: 0,
         duration: 200,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
+        easing: EasingNode.out(EasingNode.cubic),
       }).start();
     }
   }, [animatedOnValue, on]);
