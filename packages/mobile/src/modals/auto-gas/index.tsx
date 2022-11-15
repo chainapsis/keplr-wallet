@@ -168,6 +168,27 @@ export const AutoGasModal: FunctionComponent<{
           editable={!gasSimulator.enabled}
           keyboardType="numeric"
         />
+        {/*
+          Mock text input component.
+          The purpose is to maintain modal's height without considering `gasSimulator.enabled`.
+          */}
+        {!gasSimulator.enabled ? (
+          <View
+            style={{
+              opacity: 0,
+            }}
+            pointerEvents="none"
+          >
+            <TextInput
+              label="Null"
+              value="Null"
+              onChangeText={() => {
+                // noop
+              }}
+              editable={false}
+            />
+          </View>
+        ) : null}
       </CardModal>
     );
   }),
