@@ -160,11 +160,16 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
         onPress={async () => {
           if (account.isReadyToSendMsgs && txStateIsValid) {
             try {
-              await account.cosmos.sendUndelegateMsg(
+              const stdFee = sendConfigs.feeConfig.toStdFee();
+
+              const tx = account.cosmos.makeUndelegateTx(
                 sendConfigs.amountConfig.amount,
-                sendConfigs.recipientConfig.recipient,
+                sendConfigs.recipientConfig.recipient
+              );
+
+              await tx.send(
+                stdFee,
                 sendConfigs.memoConfig.memo,
-                sendConfigs.feeConfig.toStdFee(),
                 {
                   preferNoSetMemo: true,
                   preferNoSetFee: true,

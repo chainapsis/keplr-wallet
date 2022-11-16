@@ -99,11 +99,16 @@ export const DelegateScreen: FunctionComponent = observer(() => {
         onPress={async () => {
           if (account.isReadyToSendMsgs && txStateIsValid) {
             try {
-              await account.cosmos.sendDelegateMsg(
+              const stdFee = sendConfigs.feeConfig.toStdFee();
+
+              const tx = account.cosmos.makeDelegateTx(
                 sendConfigs.amountConfig.amount,
-                sendConfigs.recipientConfig.recipient,
+                sendConfigs.recipientConfig.recipient
+              );
+
+              await tx.send(
+                stdFee,
                 sendConfigs.memoConfig.memo,
-                sendConfigs.feeConfig.toStdFee(),
                 {
                   preferNoSetMemo: true,
                   preferNoSetFee: true,
