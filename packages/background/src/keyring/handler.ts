@@ -319,6 +319,7 @@ const handleGetKeyMsg: (
           .bech32PrefixAccAddr
       ),
       isNanoLedger: key.isNanoLedger,
+      isKeystone: key.isKeystone,
     };
   };
 };
