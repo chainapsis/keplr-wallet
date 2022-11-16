@@ -114,10 +114,14 @@ platform :ios do
       build_number: build_number,
     )
 
+    app_identifier = CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
+    mapping = Actions.lane_context[
+      SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING
+    ]
     update_code_signing_settings(
       use_automatic_signing: false,
-      profile_name: "match AppStore " + CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
-      code_sign_identity: "Apple Distribution"
+      profile_name: mapping[app_identifier],
+      code_sign_identity: "Apple Distribution",
     )
 
     build_app(workspace: "mobile.xcworkspace", scheme: "mobile")
