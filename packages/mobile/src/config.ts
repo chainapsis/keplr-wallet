@@ -1075,14 +1075,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinGeckoId: "sentinel",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/sentinel.png",
     },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/sentinel"
-        : "http://localhost:8081/chains/sentinel",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/sentinel"
-        : "http://localhost:8081/chains/sentinel",
     bip44: {
       coinType: 118,
     },
@@ -1126,14 +1118,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDecimals: 6,
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ixo.png",
     },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/ixo"
-        : "http://localhost:8081/chains/ixo",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/ixo"
-        : "http://localhost:8081/chains/ixo",
     bip44: {
       coinType: 118,
     },
@@ -1170,14 +1154,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinGeckoId: "e-money",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
     },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/e-money"
-        : "http://localhost:8080/chains/e-money",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/e-money"
-        : "http://localhost:8080/chains/e-money",
     bip44: {
       coinType: 118,
     },
