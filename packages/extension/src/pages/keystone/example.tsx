@@ -160,40 +160,147 @@ export function KeystoneExamplePage() {
     signArbitrary(Buffer.from("ABC"));
   }, []);
 
-  const signEthereum = useCallback(async () => {
+  const signEthereum = useCallback(
+    async (signType: EthSignType) => {
+      const current = chainStore.current;
+      const accountInfo = accountStore.getAccount(current.chainId);
+      console.log(current.chainId, accountInfo.ethereumHexAddress);
+      if (!current.chainId || !accountInfo.ethereumHexAddress) {
+        console.log("Try again!");
+        return;
+      }
+      let data: any;
+      if (signType === EthSignType.TRANSACTION) {
+        data = JSON.stringify({
+          from: accountInfo.ethereumHexAddress,
+          to: "0x3Cd30F57cB5A9DeaD668a655139F3D7a41cA3765",
+          gasPrice: `0x${Buffer.from("20").toString("hex")}`,
+          gasLimit: `0x${Buffer.from("21000").toString("hex")}`,
+          nonce: `0x${Buffer.from("0").toString("hex")}`,
+          value: `0x${Buffer.from("1000000").toString("hex")}`,
+        });
+      } else if (signType === EthSignType.EIP712) {
+        data = JSON.stringify({
+          amount: 100,
+          token: "0x0000000000000000",
+        });
+      } else if (signType === EthSignType.MESSAGE) {
+        data = "123456";
+      }
+      console.log("data", data);
+      const signRes = await window.keplr?.signEthereum(
+        current.chainId,
+        accountInfo.bech32Address,
+        data,
+        signType
+      );
+      if (signRes) {
+        console.log("signRes", Buffer.from(signRes).toString());
+        try {
+          const sendRes = await window.keplr?.sendTx(
+            current.chainId,
+            signRes,
+            "block" as BroadcastMode
+          );
+          console.log("sendRes", sendRes);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          window.location.hash = "#/keystone/example";
+        }
+      }
+    },
+    [chainStore, accountStore]
+  );
+
+  const signEthereumTransaction = useCallback(async () => {
+    signEthereum(EthSignType.TRANSACTION);
+  }, [signEthereum]);
+
+  const signEthereumEIP712 = useCallback(async () => {
+    signEthereum(EthSignType.EIP712);
+  }, [signEthereum]);
+
+  const signEthereumMessage = useCallback(async () => {
+    signEthereum(EthSignType.MESSAGE);
+  }, [signEthereum]);
+
+  const experimentalSignEIP712CosmosTx_v0 = useCallback(async () => {
     const current = chainStore.current;
     const accountInfo = accountStore.getAccount(current.chainId);
-    console.log(current.chainId, accountInfo.bech32Address);
-    if (!current.chainId || !accountInfo.bech32Address) {
+    console.log(current.chainId, accountInfo.ethereumHexAddress);
+    if (!current.chainId || !accountInfo.ethereumHexAddress) {
       console.log("Try again!");
       return;
     }
-    const signRes = await window.keplr?.signEthereum(
+    const account = await fetch(
+      `${current.rest}/cosmos/auth/v1beta1/accounts/${accountInfo.bech32Address}`
+    )
+      .then((e) => e.json())
+      .then((e) => e.account);
+    console.log(account);
+    const signRes = await window.keplr?.experimentalSignEIP712CosmosTx_v0(
       current.chainId,
       accountInfo.bech32Address,
-      JSON.stringify({
-        from: "0xEA3a45668A16E343c2fEfeD7463e62463bd40297",
-        to: "0x3Cd30F57cB5A9DeaD668a655139F3D7a41cA3765",
-        gasLimit: `0x${Buffer.from("21000").toString("hex")}`,
-        nonce: `0x${Buffer.from("0").toString("hex")}`,
-        value: `0x${Buffer.from("1000").toString("hex")}`,
-      }),
-      EthSignType.TRANSACTION
-    );
-    if (signRes) {
-      try {
-        const sendRes = await window.keplr?.sendTx(
-          current.chainId,
-          signRes,
-          "block" as BroadcastMode
-        );
-        console.log("sendRes", sendRes);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        window.location.hash = "#/keystone/example";
+      {
+        types: {
+          EIP712Domain: [
+            { name: "name", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
+            { name: "verifyingContract", type: "address" },
+            { name: "salt", type: "bytes32" },
+          ],
+          Bid: [
+            { name: "amount", type: "uint256" },
+            { name: "bidder", type: "Identity" },
+          ],
+          Identity: [
+            { name: "userId", type: "uint256" },
+            { name: "wallet", type: "address" },
+          ],
+        },
+        domain: {
+          name: "Auction dApp",
+          version: "2",
+          chainId: 9000,
+          verifyingContract: "0x1C56346CD2A2Bf3202F771f50d3D14a367B48070",
+          salt:
+            "0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558",
+        },
+        primaryType: "Bid",
+      },
+      {
+        chain_id: current.chainId,
+        account_number: account.account_number,
+        sequence: account.sequence,
+        fee: {
+          amount: [
+            {
+              denom: current.feeCurrencies[0].coinDenom,
+              amount: "1000",
+            },
+          ],
+          gas: "100000",
+          payer: accountInfo.bech32Address,
+          granter: "",
+        },
+        msgs: [
+          {
+            type: "AAA",
+            value: {
+              amount: 100,
+              bidder: {
+                userId: 323,
+                wallet: "0x3333333333333333333333333333333333333333",
+              },
+            },
+          },
+        ],
+        memo: "123",
       }
-    }
+    );
+    console.log("signRes", signRes);
   }, [chainStore, accountStore]);
 
   const verify = () => {
@@ -257,7 +364,18 @@ export function KeystoneExamplePage() {
         <Button onClick={signArbitraryBuffer}>Sign Arbitrary Buffer</Button>
       </p>
       <p>
-        <Button onClick={signEthereum}>Sign Eth</Button>
+        <Button onClick={signEthereumTransaction}>Sign Eth Transaction</Button>
+      </p>
+      <p>
+        <Button onClick={signEthereumEIP712}>Sign Eth EIP712</Button>
+      </p>
+      <p>
+        <Button onClick={signEthereumMessage}>Sign Eth Message</Button>
+      </p>
+      <p>
+        <Button onClick={experimentalSignEIP712CosmosTx_v0}>
+          Sign EIP712CosmosTx_v0
+        </Button>
       </p>
     </div>
   );

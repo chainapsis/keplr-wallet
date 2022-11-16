@@ -4,8 +4,16 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { Button } from "reactstrap";
 import { useStore } from "../../stores";
-import { Scan } from "./scan";
+import { Scan, ScanType } from "./scan";
 import style from "./style.module.scss";
+
+const getScanType = (urType: string | undefined): ScanType =>
+  (urType &&
+    {
+      "eth-sign-request": ScanType.SignEth,
+      "cosmos-sign-request": ScanType.SignCosmos,
+    }[urType]) ||
+  ScanType.SignCosmos;
 
 export const KeystoneSignPage = observer(() => {
   const [isScan, setIsScan] = useState(false);
@@ -39,7 +47,11 @@ export const KeystoneSignPage = observer(() => {
   }, []);
 
   return isScan ? (
-    <Scan type="signCosmos" onChange={onScanFinish} onCancel={onReject} />
+    <Scan
+      type={getScanType(keystoneStore.signData?.data.ur.type)}
+      onChange={onScanFinish}
+      onCancel={onReject}
+    />
   ) : (
     <div className={`${style.page} ${style.sign}`}>
       <div>

@@ -6,8 +6,14 @@ import { Loading } from "./loading";
 import { Message } from "./message";
 import { Button } from "reactstrap";
 
+export enum ScanType {
+  Sync = "sync",
+  SignEth = "signEth",
+  SignCosmos = "signCosmos",
+}
+
 export interface Props {
-  type: "sync" | "signEth" | "signCosmos";
+  type: ScanType;
   onChange(ur: UR): Promise<void>;
   onCancel?(): void;
 }

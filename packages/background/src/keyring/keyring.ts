@@ -789,7 +789,7 @@ export class KeyRing {
         throw new KeplrError("keyring", 161, "CoinType is not available");
       }
       if (useEthereumAddress) {
-        const pubKey = publicKeyConvert(Buffer.from(key.pubKey, "hex"), false);
+        const pubKey = publicKeyConvert(Buffer.from(key.pubKey, "hex"), true);
         const address = computeAddress(pubKey);
         return {
           algo: "ethsecp256k1",

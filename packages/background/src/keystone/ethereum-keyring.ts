@@ -89,7 +89,7 @@ export class KeystoneEthereumKeyring extends BaseKeyring {
     this.xfp = data.xfp;
     if (key) {
       const pubKeyBuf = Buffer.from(
-        publicKeyConvert(Buffer.from(key.pubKey, "hex"), false)
+        publicKeyConvert(Buffer.from(key.pubKey, "hex"), true)
       );
       const cryptoHDKey = new CryptoHDKey({
         isMaster: false,

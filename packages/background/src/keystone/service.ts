@@ -185,15 +185,30 @@ export class KeystoneService {
       [EthSignType.MESSAGE]: EthSignFunction.Message,
       [EthSignType.EIP712]: EthSignFunction.Data,
     }[mode];
-    const msg = JSON.parse(Buffer.from(message).toString());
-    console.log("message", msg);
-    const tx = new Transaction(msg);
-    console.log("tx", Buffer.from(key.address).toString("hex"), tx);
-    const signRes = await keyring[signFn](
-      computeAddress(publicKeyConvert(key.pubKey, false)),
-      tx
-    );
-    console.log("signRes", signRes);
-    return Buffer.from(signRes as string, "utf-8");
+    let data: any;
+    console.log("message", Buffer.from(message).toString());
+    if (mode === EthSignType.TRANSACTION) {
+      const msg = JSON.parse(Buffer.from(message).toString());
+      data = new Transaction(msg);
+    } else if (mode === EthSignType.MESSAGE) {
+      data = Buffer.from(message).toString("hex");
+    } else if (mode === EthSignType.EIP712) {
+      data = Buffer.from(message).toString();
+    }
+    console.log("data", Buffer.from(key.address).toString("hex"), data);
+    try {
+      const signRes = await keyring[signFn](
+        computeAddress(publicKeyConvert(key.pubKey, false)),
+        data
+      );
+      console.log("signRes", signRes);
+      if (mode === EthSignType.TRANSACTION) {
+        return ((signRes as any) as Transaction).serialize();
+      }
+      return Buffer.from(signRes as string, "utf-8");
+    } catch (err) {
+      console.error(err);
+      throw new KeplrError("keystone", 304, "Keystone sign error.");
+    }
   }
 }
