@@ -16,17 +16,22 @@ import { RNMessageRequesterInternal } from "../../router";
 import { RectButton } from "../../components/rect-button";
 
 const RightArrowIcon: FunctionComponent<{
-  size: number;
+  height: number;
   color: string;
-}> = ({ size, color }) => {
+}> = ({ height, color }) => {
   return (
-    <Svg width={size} height={size} fill="none" viewBox="0 0 24 25">
+    <Svg
+      width={(25 / 24) * height}
+      height={height}
+      fill="none"
+      viewBox="0 0 25 24"
+    >
       <Path
-        d="M13.0625 5.25L19.8125 12L13.0625 18.75M18.875 12L5.1875 12"
         stroke={color}
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M13.063 5.25l6.75 6.75-6.75 6.75M18.875 12H5.187"
       />
     </Svg>
   );
@@ -47,18 +52,25 @@ export const LedgerSupportedModal: FunctionComponent<{
         childrenContainerStyle={style.flatten(["padding-x-32", "padding-y-22"])}
         disableGesture={true}
       >
-        <Text style={style.flatten(["h3", "color-text-middle"])}>
+        <Text style={style.flatten(["h3", "color-text-high"])}>
           Ledger is supported{"\n"}
           for this chain now
         </Text>
         <Text
-          style={style.flatten(["margin-y-16", "body3", "color-text-label"])}
+          style={style.flatten([
+            "margin-top-16",
+            "margin-bottom-36",
+            "body2",
+            "color-text-middle",
+          ])}
         >
           Ledger users can connect with Ledger now.
         </Text>
-        <View style={style.flatten(["flex-row"])}>
+        <View
+          style={style.flatten(["flex-row", "items-center", "justify-between"])}
+        >
           <RectButton
-            style={style.flatten(["items-start", "padding-y-11", "flex-1"])}
+            style={style.flatten(["padding-8", "border-radius-8"])}
             onPress={() => {
               // Select the previous chain id with giving priority to the chain info which can be shown on UI.
               if (
@@ -82,25 +94,21 @@ export const LedgerSupportedModal: FunctionComponent<{
               }
             }}
           >
-            <Text
-              style={style.flatten([
-                "text-button3",
-                "color-text-low",
-                "normal-case",
-              ])}
-            >
+            <Text style={style.flatten(["text-button2", "color-text-low"])}>
               Go to back
             </Text>
           </RectButton>
+
+          <View style={style.get("flex-1")} />
 
           <Button
             color="primary"
             mode="fill"
             text="Connect"
-            containerStyle={style.flatten(["flex-1"])}
+            style={style.flatten(["padding-x-36"])}
             rightIcon={(color) => (
               <View style={style.flatten(["margin-left-10"])}>
-                <RightArrowIcon color={color} size={24} />
+                <RightArrowIcon color={color} height={24} />
               </View>
             )}
             onPress={async () => {
