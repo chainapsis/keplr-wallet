@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { Text, View } from "react-native";
 import { useStyle } from "../../styles";
 import { registerModal } from "../../modals/base";
@@ -47,6 +47,8 @@ export const LedgerSupportedModal: FunctionComponent<{
 
     const style = useStyle();
 
+    const [isLoading, setIsLoading] = useState(false);
+
     return (
       <CardModal
         childrenContainerStyle={style.flatten(["padding-x-32", "padding-y-22"])}
@@ -93,6 +95,7 @@ export const LedgerSupportedModal: FunctionComponent<{
                 chainStore.selectChain(other.chainId);
               }
             }}
+            enabled={!isLoading}
           >
             <Text style={style.flatten(["text-button2", "color-text-low"])}>
               Go to back
@@ -111,7 +114,10 @@ export const LedgerSupportedModal: FunctionComponent<{
                 <RightArrowIcon color={color} height={24} />
               </View>
             )}
+            loading={isLoading}
             onPress={async () => {
+              setIsLoading(true);
+
               try {
                 await new RNMessageRequesterInternal().sendMessage(
                   BACKGROUND_PORT,
@@ -122,6 +128,11 @@ export const LedgerSupportedModal: FunctionComponent<{
 
                 await account.init();
               } catch (e) {
+                // Do not set "isLoading" to false in "finally" block.
+                // After succeeding initialization, modal should disappear with showing this as loading even though it is not actually in loading.
+                // This is the decision for UI.
+                setIsLoading(false);
+
                 console.log(e);
               }
             }}
