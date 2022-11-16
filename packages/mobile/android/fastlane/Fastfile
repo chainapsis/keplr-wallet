@@ -115,6 +115,7 @@ platform :android do
         "android.injected.signing.key.alias" => ENV["ANDROID_APP_SIGNING_KEY_ALIAS"],
         "android.injected.signing.key.password" => ENV["ANDROID_APP_SIGNING_KEY_PASSWORD"],
       },
+      flags: "--stacktrace"
     )
     upload_to_play_store(
       track: "beta",
