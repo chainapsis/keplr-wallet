@@ -84,6 +84,12 @@ export class ChainUpdaterService {
   }
 
   async tryUpdateChainInfo(chainId: string): Promise<void> {
+    if (
+      (await this.chainsService.getChainInfo(chainId)).updateFromRepoDisabled
+    ) {
+      return;
+    }
+
     try {
       const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
