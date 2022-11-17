@@ -1,7 +1,7 @@
 import { ChainInfo } from "@keplr-wallet/types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainInfoWithEmbed, ChainsService } from "../chains";
+import { ChainInfoWithCoreTypes, ChainsService } from "../chains";
 import {
   checkChainFeatures,
   SupportedChainFeatures,
@@ -189,7 +189,7 @@ export class ChainUpdaterService {
     chainId: string,
     rpc: string | undefined,
     rest: string | undefined
-  ): Promise<ChainInfoWithEmbed[]> {
+  ): Promise<ChainInfoWithCoreTypes[]> {
     await this.kvStore.set(
       "chain-info-endpoints/" + ChainIdHelper.parse(chainId).identifier,
       {
@@ -226,7 +226,7 @@ export class ChainUpdaterService {
 
   public async resetChainEndpoints(
     chainId: string
-  ): Promise<ChainInfoWithEmbed[]> {
+  ): Promise<ChainInfoWithCoreTypes[]> {
     await this.kvStore.set(
       "chain-info-endpoints/" + ChainIdHelper.parse(chainId).identifier,
       null

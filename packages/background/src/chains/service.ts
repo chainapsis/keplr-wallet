@@ -1,4 +1,7 @@
-import { ChainInfoWithEmbed } from "./types";
+import {
+  ChainInfoWithCoreTypes,
+  ChainInfoWithRepoUpdateOptions,
+} from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
 import { KVStore, Debouncer, MemoryKVStore } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
@@ -13,7 +16,7 @@ type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 export class ChainsService {
   protected onChainRemovedHandlers: ChainRemovedHandler[] = [];
 
-  protected cachedChainInfos: ChainInfoWithEmbed[] | undefined;
+  protected cachedChainInfos: ChainInfoWithCoreTypes[] | undefined;
 
   protected chainUpdaterKeeper!: ChainUpdaterService;
   protected interactionKeeper!: InteractionService;
@@ -43,7 +46,7 @@ export class ChainsService {
   }
 
   readonly getChainInfos: () => Promise<
-    ChainInfoWithEmbed[]
+    ChainInfoWithCoreTypes[]
   > = Debouncer.promise(async () => {
     if (this.cachedChainInfos) {
       return this.cachedChainInfos;
@@ -66,7 +69,7 @@ export class ChainsService {
       );
     }
 
-    const suggestedChainInfos: ChainInfoWithEmbed[] = (
+    const suggestedChainInfos: ChainInfoWithCoreTypes[] = (
       await this.getSuggestedChainInfos()
     )
       .filter((chainInfo) => {
@@ -82,7 +85,9 @@ export class ChainsService {
         };
       });
 
-    let result: ChainInfoWithEmbed[] = chainInfos.concat(suggestedChainInfos);
+    let result: ChainInfoWithCoreTypes[] = chainInfos.concat(
+      suggestedChainInfos
+    );
 
     // Set the updated property of the chain.
     result = await Promise.all(
@@ -107,7 +112,7 @@ export class ChainsService {
     this.cachedChainInfos = undefined;
   }
 
-  async getChainInfo(chainId: string): Promise<ChainInfoWithEmbed> {
+  async getChainInfo(chainId: string): Promise<ChainInfoWithCoreTypes> {
     const chainInfo = (await this.getChainInfos()).find((chainInfo) => {
       return (
         ChainIdHelper.parse(chainInfo.chainId).identifier ===
@@ -165,28 +170,32 @@ export class ChainsService {
         ...chainInfo,
         origin,
       }
-    )) as ChainInfo;
+    )) as ChainInfoWithRepoUpdateOptions;
 
     await this.addChainInfo(receivedChainInfo);
   }
 
-  async getSuggestedChainInfos(): Promise<ChainInfo[]> {
+  async getSuggestedChainInfos(): Promise<ChainInfoWithRepoUpdateOptions[]> {
     return (
-      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? []
+      (await this.kvStoreForSuggestChain.get<ChainInfoWithRepoUpdateOptions[]>(
+        "chain-infos"
+      )) ?? []
     );
   }
 
-  async addChainInfo(chainInfo: ChainInfo): Promise<void> {
+  async addChainInfo(chainInfo: ChainInfoWithRepoUpdateOptions): Promise<void> {
     if (await this.hasChainInfo(chainInfo.chainId)) {
       throw new KeplrError("chains", 121, "Same chain is already registered");
     }
 
     const savedChainInfos =
-      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? [];
+      (await this.kvStoreForSuggestChain.get<ChainInfoWithRepoUpdateOptions[]>(
+        "chain-infos"
+      )) ?? [];
 
     savedChainInfos.push(chainInfo);
 
-    await this.kvStoreForSuggestChain.set<ChainInfo[]>(
+    await this.kvStoreForSuggestChain.set<ChainInfoWithRepoUpdateOptions[]>(
       "chain-infos",
       savedChainInfos
     );
@@ -204,7 +213,9 @@ export class ChainsService {
     }
 
     const savedChainInfos =
-      (await this.kvStoreForSuggestChain.get<ChainInfo[]>("chain-infos")) ?? [];
+      (await this.kvStoreForSuggestChain.get<ChainInfoWithRepoUpdateOptions[]>(
+        "chain-infos"
+      )) ?? [];
 
     const resultChainInfo = savedChainInfos.filter((chainInfo) => {
       return (
@@ -213,7 +224,7 @@ export class ChainsService {
       );
     });
 
-    await this.kvStoreForSuggestChain.set<ChainInfo[]>(
+    await this.kvStoreForSuggestChain.set<ChainInfoWithRepoUpdateOptions[]>(
       "chain-infos",
       resultChainInfo
     );

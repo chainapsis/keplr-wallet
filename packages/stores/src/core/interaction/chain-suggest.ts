@@ -1,6 +1,9 @@
 import { InteractionStore } from "./interaction";
 import { ChainInfo } from "@keplr-wallet/types";
-import { SuggestChainInfoMsg } from "@keplr-wallet/background";
+import {
+  ChainInfoWithRepoUpdateOptions,
+  SuggestChainInfoMsg,
+} from "@keplr-wallet/background";
 import { flow, makeObservable, observable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import Axios from "axios";
@@ -65,7 +68,7 @@ export class ChainSuggestStore {
   }
 
   @flow
-  *approve(chainInfo: ChainInfo) {
+  *approve(chainInfo: ChainInfoWithRepoUpdateOptions) {
     this._isLoading = true;
 
     try {

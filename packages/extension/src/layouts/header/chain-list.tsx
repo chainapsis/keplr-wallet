@@ -5,12 +5,12 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import style from "./chain-list.module.scss";
-import { ChainInfoWithEmbed } from "@keplr-wallet/background";
+import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 import { useConfirm } from "../../components/confirm";
 import { useIntl } from "react-intl";
 
 const ChainElement: FunctionComponent<{
-  chainInfo: ChainInfoWithEmbed;
+  chainInfo: ChainInfoWithCoreTypes;
 }> = observer(({ chainInfo }) => {
   const { chainStore, analyticsStore } = useStore();
 
