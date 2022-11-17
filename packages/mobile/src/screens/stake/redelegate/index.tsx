@@ -215,12 +215,17 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
         onPress={async () => {
           if (account.isReadyToSendMsgs && txStateIsValid) {
             try {
-              await account.cosmos.sendBeginRedelegateMsg(
+              const stdFee = sendConfigs.feeConfig.toStdFee();
+
+              const tx = account.cosmos.makeBeginRedelegateTx(
                 sendConfigs.amountConfig.amount,
                 sendConfigs.srcValidatorAddress,
-                sendConfigs.dstValidatorAddress,
+                sendConfigs.dstValidatorAddress
+              );
+
+              await tx.send(
+                stdFee,
                 sendConfigs.memoConfig.memo,
-                sendConfigs.feeConfig.toStdFee(),
                 {
                   preferNoSetMemo: true,
                   preferNoSetFee: true,

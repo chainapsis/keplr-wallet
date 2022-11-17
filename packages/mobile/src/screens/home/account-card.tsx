@@ -14,6 +14,7 @@ import { NetworkErrorView } from "./network-error-view";
 import { Dec } from "@keplr-wallet/unit";
 import { LedgerNotSupportedModal } from "./ledger-not-supported-modal";
 import { KeplrError } from "@keplr-wallet/router";
+import { LedgerSupportedModal } from "./leger-supported-modal";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -72,6 +73,26 @@ export const AccountCard: FunctionComponent<{
             if (
               account.rejectionReason.module === "keyring" &&
               account.rejectionReason.code === 152
+            ) {
+              return true;
+            }
+          }
+
+          return false;
+        })()}
+        close={() => {
+          // Prevent closing with gesture
+        }}
+      />
+      <LedgerSupportedModal
+        isOpen={(() => {
+          if (
+            account.rejectionReason &&
+            account.rejectionReason instanceof KeplrError
+          ) {
+            if (
+              account.rejectionReason.module === "keyring" &&
+              account.rejectionReason.code === 901
             ) {
               return true;
             }
