@@ -1,120 +1,10 @@
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { ChainInfo } from "@keplr-wallet/types";
 
-import {
-  PRIVILEGED_ORIGINS,
-  COSMOS_REST_CONFIG,
-  COSMOS_REST_ENDPOINT,
-  COSMOS_RPC_CONFIG,
-  COSMOS_RPC_ENDPOINT,
-  OSMOSIS_REST_CONFIG,
-  OSMOSIS_REST_ENDPOINT,
-  OSMOSIS_RPC_CONFIG,
-  OSMOSIS_RPC_ENDPOINT,
-  KAVA_REST_CONFIG,
-  KAVA_REST_ENDPOINT,
-  KAVA_RPC_CONFIG,
-  KAVA_RPC_ENDPOINT,
-  SECRET_NETWORK_REST_CONFIG,
-  SECRET_NETWORK_REST_ENDPOINT,
-  SECRET_NETWORK_RPC_CONFIG,
-  SECRET_NETWORK_RPC_ENDPOINT,
-  BETA_CYBER_NETWORK_REST_ENDPOINT,
-  BETA_CYBER_NETWORK_REST_CONFIG,
-  BETA_CYBER_NETWORK_RPC_ENDPOINT,
-  BETA_CYBER_NETWORK_RPC_CONFIG,
-  AKASH_RPC_ENDPOINT,
-  AKASH_RPC_CONFIG,
-  AKASH_REST_ENDPOINT,
-  AKASH_REST_CONFIG,
-  CRYPTO_ORG_RPC_ENDPOINT,
-  CRYPTO_ORG_RPC_CONFIG,
-  CRYPTO_ORG_REST_ENDPOINT,
-  CRYPTO_ORG_REST_CONFIG,
-  IOV_RPC_ENDPOINT,
-  IOV_RPC_CONFIG,
-  IOV_REST_ENDPOINT,
-  IOV_REST_CONFIG,
-  CERTIK_RPC_ENDPOINT,
-  CERTIK_RPC_CONFIG,
-  CERTIK_REST_ENDPOINT,
-  CERTIK_REST_CONFIG,
-  SIFCHAIN_RPC_ENDPOINT,
-  SIFCHAIN_RPC_CONFIG,
-  SIFCHAIN_REST_ENDPOINT,
-  SIFCHAIN_REST_CONFIG,
-  IRIS_RPC_ENDPOINT,
-  IRIS_RPC_CONFIG,
-  IRIS_REST_ENDPOINT,
-  IRIS_REST_CONFIG,
-  REGEN_RPC_ENDPOINT,
-  REGEN_RPC_CONFIG,
-  REGEN_REST_ENDPOINT,
-  REGEN_REST_CONFIG,
-  SENTINEL_RPC_ENDPOINT,
-  SENTINEL_RPC_CONFIG,
-  SENTINEL_REST_ENDPOINT,
-  SENTINEL_REST_CONFIG,
-  PERSISTENCE_RPC_ENDPOINT,
-  PERSISTENCE_RPC_CONFIG,
-  PERSISTENCE_REST_ENDPOINT,
-  PERSISTENCE_REST_CONFIG,
-  IXO_RPC_ENDPOINT,
-  IXO_RPC_CONFIG,
-  IXO_REST_ENDPOINT,
-  IXO_REST_CONFIG,
-  EMONEY_RPC_ENDPOINT,
-  EMONEY_RPC_CONFIG,
-  EMONEY_REST_ENDPOINT,
-  EMONEY_REST_CONFIG,
-  AGORIC_RPC_ENDPOINT,
-  AGORIC_RPC_CONFIG,
-  AGORIC_REST_ENDPOINT,
-  AGORIC_REST_CONFIG,
-  AXELAR_RPC_ENDPOINT,
-  AXELAR_RPC_CONFIG,
-  AXELAR_REST_ENDPOINT,
-  AXELAR_REST_CONFIG,
-  JUNO_RPC_ENDPOINT,
-  JUNO_RPC_CONFIG,
-  JUNO_REST_ENDPOINT,
-  JUNO_REST_CONFIG,
-  STARGAZE_RPC_ENDPOINT,
-  STARGAZE_RPC_CONFIG,
-  STARGAZE_REST_ENDPOINT,
-  STARGAZE_REST_CONFIG,
-  SOMMELIER_RPC_ENDPOINT,
-  SOMMELIER_RPC_CONFIG,
-  SOMMELIER_REST_ENDPOINT,
-  SOMMELIER_REST_CONFIG,
-  UMEE_RPC_ENDPOINT,
-  UMEE_RPC_CONFIG,
-  UMEE_REST_ENDPOINT,
-  UMEE_REST_CONFIG,
-  GRAVITY_BRIDGE_RPC_ENDPOINT,
-  GRAVITY_BRIDGE_RPC_CONFIG,
-  GRAVITY_BRIDGE_REST_ENDPOINT,
-  GRAVITY_BRIDGE_REST_CONFIG,
-  TGRADE_RPC_ENDPOINT,
-  TGRADE_RPC_CONFIG,
-  TGRADE_REST_ENDPOINT,
-  TGRADE_REST_CONFIG,
-  STRIDE_RPC_ENDPOINT,
-  STRIDE_RPC_CONFIG,
-  STRIDE_REST_ENDPOINT,
-  STRIDE_REST_CONFIG,
-  EVMOS_RPC_ENDPOINT,
-  EVMOS_RPC_CONFIG,
-  EVMOS_REST_ENDPOINT,
-  EVMOS_REST_CONFIG,
-} from "./config.var";
-
 export const EmbedChainInfos: ChainInfo[] = [
   {
-    rpc: COSMOS_RPC_ENDPOINT,
-    rpcConfig: COSMOS_RPC_CONFIG,
-    rest: COSMOS_REST_ENDPOINT,
-    restConfig: COSMOS_REST_CONFIG,
+    rpc: "https://rpc-cosmoshub.keplr.app",
+    rest: "https://lcd-cosmoshub.keplr.app",
     chainId: "cosmoshub-4",
     chainName: "Cosmos Hub",
     stakeCurrency: {
@@ -155,10 +45,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: OSMOSIS_RPC_ENDPOINT,
-    rpcConfig: OSMOSIS_RPC_CONFIG,
-    rest: OSMOSIS_REST_ENDPOINT,
-    restConfig: OSMOSIS_REST_CONFIG,
+    rpc: "https://rpc-osmosis.keplr.app",
+    rest: "https://lcd-osmosis.keplr.app",
     chainId: "osmosis-1",
     chainName: "Osmosis",
     stakeCurrency: {
@@ -207,10 +95,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go", "cosmwasm", "osmosis-txfees"],
   },
   {
-    rpc: SECRET_NETWORK_RPC_ENDPOINT,
-    rpcConfig: SECRET_NETWORK_RPC_CONFIG,
-    rest: SECRET_NETWORK_REST_ENDPOINT,
-    restConfig: SECRET_NETWORK_REST_CONFIG,
+    rpc: "https://rpc-secret.keplr.app",
+    rest: "https://lcd-secret.keplr.app",
     chainId: "secret-4",
     chainName: "Secret Network",
     stakeCurrency: {
@@ -261,10 +147,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["secretwasm", "ibc-go", "ibc-transfer"],
   },
   {
-    rpc: AKASH_RPC_ENDPOINT,
-    rpcConfig: AKASH_RPC_CONFIG,
-    rest: AKASH_REST_ENDPOINT,
-    restConfig: AKASH_REST_CONFIG,
+    rpc: "https://rpc-akash.keplr.app",
+    rest: "https://lcd-akash.keplr.app",
     chainId: "akashnet-2",
     chainName: "Akash",
     stakeCurrency: {
@@ -304,10 +188,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: CRYPTO_ORG_RPC_ENDPOINT,
-    rpcConfig: CRYPTO_ORG_RPC_CONFIG,
-    rest: CRYPTO_ORG_REST_ENDPOINT,
-    restConfig: CRYPTO_ORG_REST_CONFIG,
+    rpc: "https://rpc-crypto-org.keplr.app",
+    rest: "https://lcd-crypto-org.keplr.app",
     chainId: "crypto-org-chain-mainnet-1",
     chainName: "Crypto.org",
     stakeCurrency: {
@@ -359,10 +241,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: IOV_RPC_ENDPOINT,
-    rpcConfig: IOV_RPC_CONFIG,
-    rest: IOV_REST_ENDPOINT,
-    restConfig: IOV_REST_CONFIG,
+    rpc: "https://rpc-iov.keplr.app",
+    rest: "https://lcd-iov.keplr.app",
     chainId: "iov-mainnet-ibc",
     chainName: "Starname",
     stakeCurrency: {
@@ -407,10 +287,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: SIFCHAIN_RPC_ENDPOINT,
-    rpcConfig: SIFCHAIN_RPC_CONFIG,
-    rest: SIFCHAIN_REST_ENDPOINT,
-    restConfig: SIFCHAIN_REST_CONFIG,
+    rpc: "https://rpc-sifchain.keplr.app",
+    rest: "https://lcd-sifchain.keplr.app",
     chainId: "sifchain-1",
     chainName: "Sifchain",
     stakeCurrency: {
@@ -875,10 +753,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: [],
   },
   {
-    rpc: CERTIK_RPC_ENDPOINT,
-    rpcConfig: CERTIK_RPC_CONFIG,
-    rest: CERTIK_REST_ENDPOINT,
-    restConfig: CERTIK_REST_CONFIG,
+    rpc: "https://rpc-certik.keplr.app",
+    rest: "https://lcd-certik.keplr.app",
     chainId: "shentu-2.2",
     chainName: "Certik",
     stakeCurrency: {
@@ -918,10 +794,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: IRIS_RPC_ENDPOINT,
-    rpcConfig: IRIS_RPC_CONFIG,
-    rest: IRIS_REST_ENDPOINT,
-    restConfig: IRIS_REST_CONFIG,
+    rpc: "https://rpc-iris.keplr.app",
+    rest: "https://lcd-iris.keplr.app",
     chainId: "irishub-1",
     chainName: "IRISnet",
     stakeCurrency: {
@@ -978,10 +852,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: REGEN_RPC_ENDPOINT,
-    rpcConfig: REGEN_RPC_CONFIG,
-    rest: REGEN_REST_ENDPOINT,
-    restConfig: REGEN_REST_CONFIG,
+    rpc: "https://rpc-regen.keplr.app",
+    rest: "https://lcd-regen.keplr.app",
     chainId: "regen-1",
     chainName: "Regen",
     stakeCurrency: {
@@ -1026,10 +898,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-go", "ibc-transfer"],
   },
   {
-    rpc: PERSISTENCE_RPC_ENDPOINT,
-    rpcConfig: PERSISTENCE_RPC_CONFIG,
-    rest: PERSISTENCE_REST_ENDPOINT,
-    restConfig: PERSISTENCE_REST_CONFIG,
+    rpc: "https://rpc-persistence.keplr.app",
+    rest: "https://lcd-persistence.keplr.app",
     chainId: "core-1",
     chainName: "Persistence",
     stakeCurrency: {
@@ -1062,6 +932,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "persistence",
       },
+      {
+        coinDenom: "STKATOM",
+        coinMinimalDenom: "stk/uatom",
+        coinDecimals: 6,
+      },
     ],
     feeCurrencies: [
       {
@@ -1079,10 +954,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: SENTINEL_RPC_ENDPOINT,
-    rpcConfig: SENTINEL_RPC_CONFIG,
-    rest: SENTINEL_REST_ENDPOINT,
-    restConfig: SENTINEL_REST_CONFIG,
+    rpc: "https://rpc-sentinel.keplr.app",
+    rest: "https://lcd-sentinel.keplr.app",
     chainId: "sentinelhub-2",
     chainName: "Sentinel",
     stakeCurrency: {
@@ -1127,10 +1000,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: KAVA_RPC_ENDPOINT,
-    rpcConfig: KAVA_RPC_CONFIG,
-    rest: KAVA_REST_ENDPOINT,
-    restConfig: KAVA_REST_CONFIG,
+    rpc: "https://rpc-kava.keplr.app",
+    rest: "https://lcd-kava.keplr.app",
     chainId: "kava_2222-10",
     chainName: "Kava",
     stakeCurrency: {
@@ -1212,10 +1083,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     beta: true,
   },
   {
-    rpc: IXO_RPC_ENDPOINT,
-    rpcConfig: IXO_RPC_CONFIG,
-    rest: IXO_REST_ENDPOINT,
-    restConfig: IXO_REST_CONFIG,
+    rpc: "https://rpc-impacthub.keplr.app",
+    rest: "https://lcd-impacthub.keplr.app",
     chainId: "impacthub-3",
     chainName: "ixo",
     stakeCurrency: {
@@ -1252,10 +1121,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: EMONEY_RPC_ENDPOINT,
-    rpcConfig: EMONEY_RPC_CONFIG,
-    rest: EMONEY_REST_ENDPOINT,
-    restConfig: EMONEY_REST_CONFIG,
+    rpc: "https://rpc-emoney.keplr.app",
+    rest: "https://lcd-emoney.keplr.app",
     chainId: "emoney-3",
     chainName: "e-Money",
     stakeCurrency: {
@@ -1322,14 +1189,63 @@ export const EmbedChainInfos: ChainInfo[] = [
           high: 1,
         },
       },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
     ],
     features: ["ibc-transfer"],
   },
   {
-    rpc: AGORIC_RPC_ENDPOINT,
-    rpcConfig: AGORIC_RPC_CONFIG,
-    rest: AGORIC_REST_ENDPOINT,
-    restConfig: AGORIC_REST_CONFIG,
+    rpc: "https://rpc-agoric.keplr.app",
+    rest: "https://lcd-agoric.keplr.app",
     chainId: "agoric-3",
     chainName: "Agoric",
     stakeCurrency: {
@@ -1365,23 +1281,32 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     feeCurrencies: [
       {
+        coinDenom: "BLD",
+        coinMinimalDenom: "ubld",
+        coinDecimals: 6,
+        coinGeckoId: "agoric",
+        gasPriceStep: {
+          low: 0.012,
+          average: 0.024,
+          high: 0.071,
+        },
+      },
+      {
         coinDenom: "IST",
         coinMinimalDenom: "uist",
         coinDecimals: 6,
         gasPriceStep: {
-          low: 0,
-          average: 0,
-          high: 0,
+          low: 0.0034,
+          average: 0.007,
+          high: 0.02,
         },
       },
     ],
     features: ["ibc-go"],
   },
   {
-    rpc: BETA_CYBER_NETWORK_RPC_ENDPOINT,
-    rpcConfig: BETA_CYBER_NETWORK_RPC_CONFIG,
-    rest: BETA_CYBER_NETWORK_REST_ENDPOINT,
-    restConfig: BETA_CYBER_NETWORK_REST_CONFIG,
+    rpc: "https://rpc-cyber.keplr.app",
+    rest: "https://lcd-cyber.keplr.app",
     chainId: "bostrom",
     chainName: "Bostrom",
     stakeCurrency: {
@@ -1443,10 +1368,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "cosmwasm", "ibc-go"],
   },
   {
-    rpc: JUNO_RPC_ENDPOINT,
-    rpcConfig: JUNO_RPC_CONFIG,
-    rest: JUNO_REST_ENDPOINT,
-    restConfig: JUNO_REST_CONFIG,
+    rpc: "https://rpc-juno.keplr.app",
+    rest: "https://lcd-juno.keplr.app",
     chainId: "juno-1",
     chainName: "Juno",
     stakeCurrency: {
@@ -1502,10 +1425,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
   },
   {
-    rpc: STARGAZE_RPC_ENDPOINT,
-    rpcConfig: STARGAZE_RPC_CONFIG,
-    rest: STARGAZE_REST_ENDPOINT,
-    restConfig: STARGAZE_REST_CONFIG,
+    rpc: "https://rpc-stargaze.keplr.app",
+    rest: "https://lcd-stargaze.keplr.app",
     chainId: "stargaze-1",
     chainName: "Stargaze",
     stakeCurrency: {
@@ -1545,10 +1466,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: AXELAR_RPC_ENDPOINT,
-    rpcConfig: AXELAR_RPC_CONFIG,
-    rest: AXELAR_REST_ENDPOINT,
-    restConfig: AXELAR_REST_CONFIG,
+    rpc: "https://rpc-axelar.keplr.app",
+    rest: "https://lcd-axelar.keplr.app",
     chainId: "axelar-dojo-1",
     chainName: "Axelar",
     stakeCurrency: {
@@ -1701,10 +1620,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go", "axelar-evm-bridge"],
   },
   {
-    rpc: SOMMELIER_RPC_ENDPOINT,
-    rpcConfig: SOMMELIER_RPC_CONFIG,
-    rest: SOMMELIER_REST_ENDPOINT,
-    restConfig: SOMMELIER_REST_CONFIG,
+    rpc: "https://rpc-sommelier.keplr.app",
+    rest: "https://lcd-sommelier.keplr.app",
     chainId: "sommelier-3",
     chainName: "Sommelier",
     stakeCurrency: {
@@ -1744,10 +1661,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: UMEE_RPC_ENDPOINT,
-    rpcConfig: UMEE_RPC_CONFIG,
-    rest: UMEE_REST_ENDPOINT,
-    restConfig: UMEE_REST_CONFIG,
+    rpc: "https://rpc-umee.keplr.app",
+    rest: "https://lcd-umee.keplr.app",
     chainId: "umee-1",
     chainName: "Umee",
     stakeCurrency: {
@@ -1789,10 +1704,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: GRAVITY_BRIDGE_RPC_ENDPOINT,
-    rpcConfig: GRAVITY_BRIDGE_RPC_CONFIG,
-    rest: GRAVITY_BRIDGE_REST_ENDPOINT,
-    restConfig: GRAVITY_BRIDGE_REST_CONFIG,
+    rpc: "https://rpc-gravity-bridge.keplr.app",
+    rest: "https://lcd-gravity-bridge.keplr.app",
     chainId: "gravity-bridge-3",
     chainName: "Gravity Bridge",
     stakeCurrency: {
@@ -1849,10 +1762,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: TGRADE_RPC_ENDPOINT,
-    rpcConfig: TGRADE_RPC_CONFIG,
-    rest: TGRADE_REST_ENDPOINT,
-    restConfig: TGRADE_REST_CONFIG,
+    rpc: "https://rpc-tgrade.keplr.app",
+    rest: "https://lcd-tgrade.keplr.app",
     chainId: "tgrade-mainnet-1",
     chainName: "Tgrade",
     stakeCurrency: {
@@ -1886,16 +1797,15 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
   },
   {
-    rpc: STRIDE_RPC_ENDPOINT,
-    rpcConfig: STRIDE_RPC_CONFIG,
-    rest: STRIDE_REST_ENDPOINT,
-    restConfig: STRIDE_REST_CONFIG,
+    rpc: "https://rpc-stride.keplr.app",
+    rest: "https://lcd-stride.keplr.app",
     chainId: "stride-1",
     chainName: "Stride",
     stakeCurrency: {
       coinDenom: "STRD",
       coinMinimalDenom: "ustrd",
       coinDecimals: 6,
+      coinGeckoId: "stride",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -1914,6 +1824,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "STRD",
         coinMinimalDenom: "ustrd",
         coinDecimals: 6,
+        coinGeckoId: "stride",
       },
       {
         coinDenom: "stATOM",
@@ -1925,12 +1836,23 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "stuosmo",
         coinDecimals: 6,
       },
+      {
+        coinDenom: "stJUNO",
+        coinMinimalDenom: "stujuno",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stSTARS",
+        coinMinimalDenom: "stustars",
+        coinDecimals: 6,
+      },
     ],
     feeCurrencies: [
       {
         coinDenom: "STRD",
         coinMinimalDenom: "ustrd",
         coinDecimals: 6,
+        coinGeckoId: "stride",
         gasPriceStep: {
           low: 0,
           average: 0,
@@ -1941,10 +1863,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
-    rpc: EVMOS_RPC_ENDPOINT,
-    rpcConfig: EVMOS_RPC_CONFIG,
-    rest: EVMOS_REST_ENDPOINT,
-    restConfig: EVMOS_REST_CONFIG,
+    rpc: "https://rpc-evmos.keplr.app",
+    rest: "https://lcd-evmos.keplr.app",
     chainId: "evmos_9001-2",
     chainName: "Evmos",
     stakeCurrency: {
@@ -1992,7 +1912,7 @@ export const EmbedChainInfos: ChainInfo[] = [
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
-export const PrivilegedOrigins: string[] = PRIVILEGED_ORIGINS;
+export const PrivilegedOrigins: string[] = ["https://wallet.keplr.app"];
 
 export const CommunityChainInfoRepo = {
   organizationName: "danielkim89",

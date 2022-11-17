@@ -16,8 +16,6 @@ You can find the latest versions of the official managed releases on these links
 For help using Keplr Wallet, Visit our [User Support Site](https://keplr.crunch.help).
 
 ## Building browser extension locally
-This repo uses git-secret to encrypt the endpoints and the api keys. **So, you can't build this without creating your own config file.** You should create your own `config.var.ts`, `config.ui.var.ts` files inside the `packages/extension/src` folder. Refer to the `config.var.example.ts`, ``config.ui.var.example.ts`` sample files to create your own configuration.
-
 This repo requires `protoc` to be installed. Check [Install protobuf](https://grpc.io/docs/protoc-installation/) for details.  
 
 Clone this repo and run:
@@ -30,7 +28,7 @@ Browser extension's build output is placed in `packages/extension/build/chrome`,
 
 This repo contains submodules that are not open sourced and are only available through the Chainapsis’ official Keplr Browser Extension release. However, all primary features of the extension will work without the closed sourced submodules.
 
-Source code for moblie app is also placed in `packages/mobile`.
+Source code for mobile app is also placed in `packages/mobile`.
 
 ### Example
 Refer to the [Keplr Example repository](https://github.com/chainapsis/keplr-example) for examples of how to integrate Keplr signing support for your web interface/application.

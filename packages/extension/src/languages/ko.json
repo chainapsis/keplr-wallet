@@ -269,7 +269,7 @@
   "ledger.step1": "1 단계",
   "ledger.step1.paragraph": "렛저를 연결하고 잠금을 해제하세요",
   "ledger.step2": "2 단계",
-  "ledger.step2.paragraph": "렛저에서 Cosmos 앱을 실행하세요",
+  "ledger.step2.paragraph": "렛저에서 {ledgerApp} 앱을 실행하세요",
   "ledger.option.webhid.checkbox": "WebUSB 대신 WebHID를 사용합니다",
   "ledger.option.webhid.warning": "이 링크 {link}를 복사하고 브라우저 주소 줄에 붙여넣으세요. 그리고 ‘experimental web platform features’ 플래그를 활성화하세요.",
   "ledger.option.webhid.link.copied": "링크가 복사되었습니다",

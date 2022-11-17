@@ -1,13 +1,22 @@
-import { Msg, StdFee } from "@cosmjs/launchpad";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import { Dec } from "@keplr-wallet/unit";
-import { KeplrSignOptions } from "@keplr-wallet/types";
+import { KeplrSignOptions, Msg, StdFee } from "@keplr-wallet/types";
 
 export type ProtoMsgsOrWithAminoMsgs = {
   // TODO: Make `aminoMsgs` nullable
   //       And, make proto sign doc if `aminoMsgs` is null
   aminoMsgs: Msg[];
   protoMsgs: Any[];
+
+  // Add rlp types data if you need to support ethermint with ledger.
+  // Must include `MsgValue`.
+  rlpTypes?: Record<
+    string,
+    Array<{
+      name: string;
+      type: string;
+    }>
+  >;
 };
 
 export interface MakeTxResponse {

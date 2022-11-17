@@ -1,4 +1,5 @@
-import { serializeSignDoc, StdSignDoc } from "@cosmjs/launchpad";
+import { StdSignDoc } from "@keplr-wallet/types";
+import { serializeSignDoc } from "../signing";
 import { Bech32Address } from "../bech32";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";

@@ -6,16 +6,16 @@ import {
   KeplrMode,
   KeplrSignOptions,
   Key,
-} from "@keplr-wallet/types";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
   StdTx,
-  OfflineSigner,
+  OfflineAminoSigner,
   StdSignature,
-} from "@cosmjs/launchpad";
+  DirectSignResponse,
+  OfflineDirectSigner,
+} from "@keplr-wallet/types";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   EnableAccessMsg,
   SuggestChainInfoMsg,
@@ -30,11 +30,11 @@ import {
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
   RequestVerifyADR36AminoSignDoc,
+  RequestSignEIP712CosmosTxMsg_v0,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
-import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
@@ -202,12 +202,6 @@ export class Keplr implements IKeplr {
     data: string | Uint8Array,
     type: EthSignType
   ): Promise<Uint8Array> {
-    if (type !== EthSignType.MESSAGE && type !== EthSignType.TRANSACTION) {
-      throw new Error(
-        "Unsupported Ethereum signing type: expected 'message' or 'transaction.'"
-      );
-    }
-
     let isADR36WithString: boolean;
     [data, isADR36WithString] = this.getDataForADR36(data);
     const signDoc = this.getADR36SignDoc(signer, data);
@@ -225,17 +219,17 @@ export class Keplr implements IKeplr {
     return Buffer.from(signature.signature, "base64");
   }
 
-  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
+  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
   async getOfflineSignerAuto(
     chainId: string
-  ): Promise<OfflineSigner | OfflineDirectSigner> {
+  ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
     const key = await this.getKey(chainId);
     if (key.isNanoLedger) {
       return new CosmJSOfflineSignerOnlyAmino(chainId, this);
@@ -313,6 +307,27 @@ export class Keplr implements IKeplr {
     const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
+  }
+
+  async experimentalSignEIP712CosmosTx_v0(
+    chainId: string,
+    signer: string,
+    eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
+  ): Promise<AminoSignResponse> {
+    const msg = new RequestSignEIP712CosmosTxMsg_v0(
+      chainId,
+      signer,
+      eip712,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    );
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   protected getDataForADR36(data: string | Uint8Array): [string, boolean] {

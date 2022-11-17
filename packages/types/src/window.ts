@@ -1,14 +1,15 @@
 import { Keplr } from "./wallet";
-import { OfflineSigner } from "@cosmjs/launchpad";
+import { OfflineAminoSigner, OfflineDirectSigner } from "./cosmjs";
 import { SecretUtils } from "secretjs/types/enigmautils";
-import { OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 export interface Window {
   keplr?: Keplr;
-  getOfflineSigner?: (chainId: string) => OfflineSigner & OfflineDirectSigner;
-  getOfflineSignerOnlyAmino?: (chainId: string) => OfflineSigner;
+  getOfflineSigner?: (
+    chainId: string
+  ) => OfflineAminoSigner & OfflineDirectSigner;
+  getOfflineSignerOnlyAmino?: (chainId: string) => OfflineAminoSigner;
   getOfflineSignerAuto?: (
     chainId: string
-  ) => Promise<OfflineSigner | OfflineDirectSigner>;
+  ) => Promise<OfflineAminoSigner | OfflineDirectSigner>;
   getEnigmaUtils?: (chainId: string) => SecretUtils;
 }
