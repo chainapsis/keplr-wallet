@@ -94,7 +94,7 @@
     "react-native": "0.64.4",
     "react-native-ble-plx": "^2.0.3",
     "react-native-camera": "^4.2.1",
-    "react-native-code-push": "^7.0.4",
+    "react-native-code-push": "^7.0.5",
     "react-native-crypto-polyfill": "file:./crypto-polyfill",
     "react-native-device-info": "^8.3.1",
     "react-native-fast-image": "^8.3.7",
