@@ -3,7 +3,6 @@ import { PageWithScrollView } from "../../components/page";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { StyleSheet, Text, View, ViewStyle } from "react-native";
-import { CoinPretty } from "@keplr-wallet/unit";
 import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/icon";
@@ -13,9 +12,13 @@ import { Currency, Secret20Currency } from "@keplr-wallet/types";
 import { TokenSymbol } from "../../components/token-symbol";
 import { HeaderRightButton } from "../../components/header";
 import { HeaderAddIcon } from "../../components/header/icon";
-import { QueryError, WrongViewingKeyError } from "@keplr-wallet/stores";
+import {
+  ObservableQueryBalanceInner,
+  WrongViewingKeyError,
+} from "@keplr-wallet/stores";
 import Svg, { Path } from "react-native-svg";
 import { useLoadingScreen } from "../../providers/loading-screen";
+import { LoadingSpinner } from "../../components/spinner";
 
 export const ToolIcon: FunctionComponent<{ height: number }> = ({ height }) => {
   return (
@@ -104,8 +107,7 @@ export const TokensScreen: FunctionComponent = observer(() => {
               <TokenItem
                 key={token.currency.coinMinimalDenom}
                 chainInfo={chainStore.current}
-                balance={token.balance}
-                error={token.error}
+                balance={token}
               />
             );
           })}
@@ -121,9 +123,8 @@ export const TokenItem: FunctionComponent<{
   chainInfo: {
     stakeCurrency: Currency;
   };
-  balance: CoinPretty;
-  error: Readonly<QueryError<unknown>> | undefined;
-}> = observer(({ containerStyle, chainInfo, balance, error }) => {
+  balance: ObservableQueryBalanceInner;
+}> = observer(({ containerStyle, chainInfo, balance }) => {
   const style = useStyle();
 
   const { chainStore, accountStore, tokensStore } = useStore();
@@ -131,22 +132,22 @@ export const TokenItem: FunctionComponent<{
   const loadingScreen = useLoadingScreen();
   const smartNavigation = useSmartNavigation();
 
+  const error = balance.error;
+  const currency = balance.currency;
+
   // The IBC currency could have long denom (with the origin chain/channel information).
   // Because it is shown in the title, there is no need to show such long denom twice in the actual balance.
   const balanceCoinDenom = (() => {
-    if (
-      "originCurrency" in balance.currency &&
-      balance.currency.originCurrency
-    ) {
-      return balance.currency.originCurrency.coinDenom;
+    if ("originCurrency" in currency && currency.originCurrency) {
+      return currency.originCurrency.coinDenom;
     }
-    return balance.currency.coinDenom;
+    return currency.coinDenom;
   })();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const createViewingKey = async (): Promise<string | undefined> => {
-    if ("type" in balance.currency && balance.currency.type === "secret20") {
-      const contractAddress = balance.currency.contractAddress;
+    if ("type" in currency && currency.type === "secret20") {
+      const contractAddress = currency.contractAddress;
       return new Promise((resolve) => {
         account.secret
           .createSecret20ViewingKey(
@@ -184,13 +185,13 @@ export const TokenItem: FunctionComponent<{
             const tokenOf = tokensStore.getTokensOf(chainStore.current.chainId);
 
             tokenOf.addToken({
-              ...balance.currency,
+              ...currency,
               viewingKey,
             } as Secret20Currency);
           }
         } else {
           smartNavigation.navigateSmart("Send", {
-            currency: balance.currency.coinMinimalDenom,
+            currency: currency.coinMinimalDenom,
           });
         }
       }}
@@ -199,7 +200,7 @@ export const TokenItem: FunctionComponent<{
         style={style.flatten(["margin-right-12"])}
         size={44}
         chainInfo={chainInfo}
-        currency={balance.currency}
+        currency={currency}
       />
       <View>
         <Text
@@ -210,21 +211,37 @@ export const TokenItem: FunctionComponent<{
             "uppercase",
           ])}
         >
-          {balance.currency.coinDenom}
+          {currency.coinDenom}
         </Text>
-        <Text
-          style={style.flatten(["h5", "color-text-high", "max-width-240"])}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {`${balance
-            .trim(true)
-            .shrink(true)
-            .maxDecimals(6)
-            .upperCase(true)
-            .hideDenom(true)
-            .toString()} ${balanceCoinDenom}`}
-        </Text>
+        <View style={style.flatten(["flex-row", "items-center"])}>
+          <Text
+            style={style.flatten(["h5", "color-text-high", "max-width-240"])}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {`${balance.balance
+              .trim(true)
+              .shrink(true)
+              .maxDecimals(6)
+              .upperCase(true)
+              .hideDenom(true)
+              .toString()} ${balanceCoinDenom}`}
+          </Text>
+          {balance.isFetching ? (
+            <View
+              style={style.flatten([
+                "height-16",
+                "justify-center",
+                "margin-left-8",
+              ])}
+            >
+              <LoadingSpinner
+                size={14}
+                color={style.get("color-loading-spinner").color}
+              />
+            </View>
+          ) : null}
+        </View>
       </View>
       <View style={style.get("flex-1")} />
       {error?.data && error.data instanceof WrongViewingKeyError ? (

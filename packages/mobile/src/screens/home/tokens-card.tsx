@@ -41,8 +41,7 @@ export const TokensCard: FunctionComponent<{
               <TokenItem
                 key={token.currency.coinMinimalDenom}
                 chainInfo={chainStore.current}
-                balance={token.balance}
-                error={token.error}
+                balance={token}
               />
             );
           })}
