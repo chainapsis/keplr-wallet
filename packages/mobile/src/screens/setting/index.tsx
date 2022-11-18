@@ -26,7 +26,10 @@ export const SettingScreen: FunctionComponent = observer(() => {
       return false;
     }
 
-    if (chainStore.current.features.includes("cosmwasm")) {
+    if (
+      chainStore.current.features.includes("cosmwasm") ||
+      chainStore.current.features.includes("secretwasm")
+    ) {
       return true;
     }
   })();

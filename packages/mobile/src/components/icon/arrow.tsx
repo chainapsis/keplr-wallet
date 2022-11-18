@@ -58,3 +58,37 @@ export const DoubleRightArrowIcon: FunctionComponent<{
     </Svg>
   );
 };
+
+export const UpArrowIcon: FunctionComponent<{
+  color: string;
+  size: number;
+}> = ({ color, size }) => {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <Path
+        d="M3.5 10.25L8 5.75L12.5 10.25"
+        stroke={color}
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </Svg>
+  );
+};
+
+export const DownArrowIcon: FunctionComponent<{
+  color: string;
+  size: number;
+}> = ({ color, size }) => {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <Path
+        d="M12.5 6.4165L8 10.9165L3.5 6.4165"
+        stroke={color}
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </Svg>
+  );
+};
