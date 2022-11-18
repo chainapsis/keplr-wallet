@@ -54,6 +54,8 @@ if (Platform.OS === "android") {
   // Disable the timezone until finding the solution.
 }
 
+// XXX: Make sure to remember that splash screen should be hided by unlock screen.
+
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();
 

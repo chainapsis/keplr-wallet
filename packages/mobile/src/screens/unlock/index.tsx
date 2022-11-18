@@ -20,11 +20,14 @@ import { KeychainStore } from "../../stores/keychain";
 import { IAccountStore } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import { SimpleGradient } from "../../components/svg";
+import RNBootSplash from "react-native-bootsplash";
 
 let splashScreenHided = false;
 async function hideSplashScreen() {
   if (!splashScreenHided) {
     console.log("Hide Splash screen");
+    // No need to wait.
+    RNBootSplash.hide();
     splashScreenHided = true;
   }
 }

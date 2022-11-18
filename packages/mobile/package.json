@@ -89,6 +89,7 @@
     "react-intl": "^5.20.4",
     "react-native": "0.66.5",
     "react-native-ble-plx": "^2.0.3",
+    "react-native-bootsplash": "=4.3.3",
     "react-native-camera": "^4.2.1",
     "react-native-code-push": "^7.0.5",
     "react-native-crypto-polyfill": "file:./crypto-polyfill",
