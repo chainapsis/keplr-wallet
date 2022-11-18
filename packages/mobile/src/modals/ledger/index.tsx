@@ -112,8 +112,12 @@ export const LedgerGranterModal: FunctionComponent<{
     }, []);
 
     useEffect(() => {
-      if (Platform.OS === "android" && !isBLEAvailable) {
-        // If the platform is android and can't use the bluetooth,
+      if (
+        Platform.OS === "android" &&
+        parseFloat(DeviceInfo.getSystemVersion()) < 12 &&
+        !isBLEAvailable
+      ) {
+        // If the platform is android(<12) and can't use the bluetooth,
         // try to turn on the bluetooth.
         // Below API can be called only in android.
         bleManager.enable();
@@ -297,56 +301,72 @@ export const LedgerGranterModal: FunctionComponent<{
           ) : undefined
         }
       >
-        {isBLEAvailable &&
-        permissionStatus === BLEPermissionGrantStatus.Granted ? (
-          <React.Fragment>
-            {errorOnListen ? (
-              <LedgerErrorView text={errorOnListen} />
-            ) : (
-              <React.Fragment>
-                <Text style={style.flatten(["subtitle3", "color-text-high"])}>
-                  1. Open the {ledgerInitStore.requestedLedgerApp} app on your
-                  Ledger device
-                </Text>
-                <Text style={style.flatten(["subtitle3", "color-text-high"])}>
-                  2. Select the hardware wallet you’d like to pair
-                </Text>
-              </React.Fragment>
-            )}
-
-            {devices.map((device) => {
+        {(() => {
+          if (isBLEAvailable) {
+            if (permissionStatus === BLEPermissionGrantStatus.Granted) {
               return (
-                <LedgerNanoBLESelector
-                  key={device.id}
-                  chain={ledgerInitStore.requestedLedgerApp}
-                  deviceId={device.id}
-                  name={device.name}
-                  onCanResume={async () => {
-                    resumed.current = true;
-                    await ledgerInitStore.resumeAll(device.id);
-                  }}
-                />
+                <React.Fragment>
+                  {errorOnListen ? (
+                    <LedgerErrorView text={errorOnListen} />
+                  ) : (
+                    <React.Fragment>
+                      <Text
+                        style={style.flatten(["subtitle3", "color-text-high"])}
+                      >
+                        1. Open the {ledgerInitStore.requestedLedgerApp} app on
+                        your Ledger device
+                      </Text>
+                      <Text
+                        style={style.flatten(["subtitle3", "color-text-high"])}
+                      >
+                        2. Select the hardware wallet you’d like to pair
+                      </Text>
+                    </React.Fragment>
+                  )}
+
+                  {devices.map((device) => {
+                    return (
+                      <LedgerNanoBLESelector
+                        key={device.id}
+                        chain={ledgerInitStore.requestedLedgerApp}
+                        deviceId={device.id}
+                        name={device.name}
+                        onCanResume={async () => {
+                          resumed.current = true;
+                          await ledgerInitStore.resumeAll(device.id);
+                        }}
+                      />
+                    );
+                  })}
+                </React.Fragment>
               );
-            })}
-          </React.Fragment>
-        ) : permissionStatus === BLEPermissionGrantStatus.Failed ||
-          BLEPermissionGrantStatus.FailedAndRetry ? (
-          <LedgerErrorView text="Keplr doesn't have permission to use bluetooth">
-            <Button
-              containerStyle={style.flatten(["margin-top-16"])}
-              textStyle={style.flatten(["margin-x-8", "normal-case"])}
-              text="Open app setting"
-              size="small"
-              onPress={() => {
-                Linking.openSettings();
-              }}
-            />
-          </LedgerErrorView>
-        ) : (
-          <Text style={style.flatten(["subtitle3", "color-text-high"])}>
-            Please turn on Bluetooth
-          </Text>
-        )}
+            }
+            if (
+              permissionStatus === BLEPermissionGrantStatus.Failed ||
+              permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
+            ) {
+              return (
+                <LedgerErrorView text="Keplr doesn't have permission to use bluetooth">
+                  <Button
+                    containerStyle={style.flatten(["margin-top-16"])}
+                    textStyle={style.flatten(["margin-x-8", "normal-case"])}
+                    text="Open app setting"
+                    size="small"
+                    onPress={() => {
+                      Linking.openSettings();
+                    }}
+                  />
+                </LedgerErrorView>
+              );
+            }
+          }
+
+          return (
+            <Text style={style.flatten(["subtitle3", "color-text-high"])}>
+              Please turn on Bluetooth
+            </Text>
+          );
+        })()}
       </CardModal>
     );
   }),
