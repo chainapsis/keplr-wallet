@@ -164,14 +164,13 @@ export const LedgerGranterModal: FunctionComponent<{
         permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
       ) {
         if (Platform.OS === "android") {
-          PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-          ).then((granted) => {
-            if (granted == PermissionsAndroid.RESULTS.GRANTED) {
-              setPermissionStatus(BLEPermissionGrantStatus.Granted);
-            } else {
-              setPermissionStatus(BLEPermissionGrantStatus.Failed);
-            }
+          PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+            PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+          ]).then((granted) => {
+            console.log(granted);
+            setPermissionStatus(BLEPermissionGrantStatus.Granted);
           });
         }
       }
