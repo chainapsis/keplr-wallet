@@ -1,7 +1,6 @@
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import {
   AuthInfo,
-  Fee,
   TxBody,
   TxRaw,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
@@ -12,24 +11,21 @@ import { useStore } from "../../stores";
 import Long from "long";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { Hash, PrivKeySecp256k1, PubKeySecp256k1 } from "@keplr-wallet/crypto";
-import {
-  AminoSignResponse,
-  BroadcastMode,
-  EthSignType,
-  StdSignature,
-} from "@keplr-wallet/types";
-import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
-import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
-import { RequestSignAminoMsg } from "@keplr-wallet/background";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { BroadcastMode, EthSignType, StdSignature } from "@keplr-wallet/types";
 
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { evmosToEth } from "@tharsis/address-converter";
 
-// EIP-1559
+enum TransactionType {
+  EIP1559 = 2,
+  EIP2930 = 1,
+  Legacy = 0,
+}
+
 async function signAndBroadcastEthereumTx(
   chainId: string,
-  signerAddressBech32: string
+  signerAddressBech32: string,
+  transactionType: TransactionType
 ) {
   const provider = new JsonRpcProvider("https://eth.bd.evmos.dev:8545");
 
@@ -38,16 +34,14 @@ async function signAndBroadcastEthereumTx(
   console.log("signerAddressEth", signerAddressEth);
 
   // Define Ethereum Tx
-  const ethSendTx = {
+  const ethSendTx: any = {
     chainId: 9000,
     from: signerAddressEth,
     to: "0xee7b8F17E041AE5126A403Ec4cD5FE344b51d7EB",
-    maxFeePerGas: `0x${Buffer.from("2000").toString("hex")}`,
-    gasLimit: `0x${Buffer.from("21000").toString("hex")}`,
-    value: `0x${Buffer.from("100000").toString("hex")}`,
-    data: "0x0406080a",
+    gasLimit: `0x${Buffer.from("50000").toString("hex")}`,
+    value: `0x${Buffer.from("300000").toString("hex")}`,
     accessList: [],
-    type: 2,
+    type: transactionType,
   };
 
   // Calculate and set nonce
@@ -63,10 +57,24 @@ async function signAndBroadcastEthereumTx(
     // Handle error
     return;
   }
-  ethSendTx["maxPriorityFeePerGas"] = gasFee.maxPriorityFeePerGas.toHexString();
-  ethSendTx["maxFeePerGas"] = gasFee.maxFeePerGas.toHexString();
+  if (transactionType === TransactionType.EIP1559) {
+    ethSendTx[
+      "maxPriorityFeePerGas"
+    ] = gasFee.maxPriorityFeePerGas.toHexString();
+    ethSendTx["maxFeePerGas"] = gasFee.maxFeePerGas.toHexString();
+  } else {
+    ethSendTx["gasPrice"] = gasFee.maxFeePerGas.toHexString();
+  }
+  if (transactionType === TransactionType.EIP2930) {
+    ethSendTx.accessList.push({
+      address: "0xee7b8F17E041AE5126A403Ec4cD5FE344b51d7EB",
+      storageKeys: [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ],
+    });
+  }
 
-  const rlpEncodedTx = await window.keplr?.signEthereum(
+  const rlpEncodedTx: any = await window.keplr?.signEthereum(
     chainId,
     signerAddressBech32,
     JSON.stringify(ethSendTx),
@@ -75,48 +83,7 @@ async function signAndBroadcastEthereumTx(
 
   const res = await provider.sendTransaction(rlpEncodedTx);
   console.log("signAndBroadcastEthereumTx", res);
-
-  window.location.hash = "#/keystone/example";
-
-  // Result:
-  // {
-  //   chainId: 1337,
-  //   confirmations: 0,
-  //   data: '0x',
-  //   from: '0x8577181F3D8A38a532Ef8F3D6Fd9a31baE73b1EA',
-  //   gasLimit: { BigNumber: "21000" },
-  //   gasPrice: { BigNumber: "1" },
-  //   hash: '0x200818a533113c00057ceccd3277249871c4a1ac09514214f03c3b96099b6c92',
-  //   nonce: 4,
-  //   r: '0x1727bd07080a5d3586422edad86805918e9772adda231d51c32870a1f1cabffb',
-  //   s: '0x7afc6be528befb79b9ed250356f6eacd63e853685091e9a3987a3d266c6cb26a',
-  //   to: '0x5555763613a12D8F3e73be831DFf8598089d3dCa',
-  //   type: null,
-  //   v: 2709,
-  //   value: { BigNumber: "3141590000000000000" },
-  //   wait: [Function]
-  // }
-}
-
-async function keplrSignEthereum(
-  chainId: string,
-  signer: string,
-  data: string | Uint8Array,
-  type: EthSignType
-): Promise<AminoSignResponse> {
-  let isADR36WithString: boolean;
-  [data, isADR36WithString] = window.keplr?.getDataForADR36(data);
-  const signDoc = window.keplr?.getADR36SignDoc(signer, data);
-
-  if (data === "") {
-    throw new Error("Signing empty data is not supported.");
-  }
-
-  const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
-    isADR36WithString,
-    ethSignType: type,
-  });
-  return await window.keplr?.requester.sendMessage(BACKGROUND_PORT, msg);
+  return res;
 }
 
 export function KeystoneExamplePage() {
@@ -264,116 +231,8 @@ export function KeystoneExamplePage() {
     signArbitrary(Buffer.from("ABC"));
   }, []);
 
-  const sendEthSignTx = async (
-    chain: any,
-    bech32Address: string,
-    signResponse: AminoSignResponse,
-    mode: BroadcastMode
-  ) => {
-    const chainId = chain.chainId;
-    const useEthereumSign = true;
-    const eip712Signing = true;
-    const signedTx = TxRaw.encode({
-      bodyBytes: TxBody.encode(
-        TxBody.fromPartial({
-          messages: [
-            {
-              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
-              value: MsgSend.encode({
-                fromAddress: bech32Address,
-                toAddress: "evmos1aeac79lqgxh9zf4yq0kye407x394r4lt4yswj4",
-                amount: [
-                  {
-                    denom: chain.currencies[0].coinMinimalDenom,
-                    amount: "1000000",
-                  },
-                ],
-              }).finish(),
-            },
-          ],
-          memo: signResponse.signed.memo,
-          extensionOptions: eip712Signing
-            ? [
-                {
-                  typeUrl: "/ethermint.types.v1.ExtensionOptionsWeb3Tx",
-                  value: ExtensionOptionsWeb3Tx.encode(
-                    ExtensionOptionsWeb3Tx.fromPartial({
-                      typedDataChainId: EthermintChainIdHelper.parse(
-                        chainId
-                      ).ethChainId.toString(),
-                      feePayer: bech32Address,
-                      feePayerSig: Buffer.from(
-                        signResponse.signature.signature,
-                        "base64"
-                      ),
-                    })
-                  ).finish(),
-                },
-              ]
-            : undefined,
-        })
-      ).finish(),
-      authInfoBytes: AuthInfo.encode({
-        signerInfos: [
-          {
-            publicKey: {
-              typeUrl: (() => {
-                if (!useEthereumSign) {
-                  return "/cosmos.crypto.secp256k1.PubKey";
-                }
-
-                if (chainId.startsWith("injective")) {
-                  return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
-                }
-
-                return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
-              })(),
-              value: PubKey.encode({
-                key: Buffer.from(
-                  signResponse.signature.pub_key.value,
-                  "base64"
-                ),
-              }).finish(),
-            },
-            modeInfo: {
-              single: {
-                mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
-              },
-              multi: undefined,
-            },
-            sequence: signResponse.signed.sequence,
-          },
-        ],
-        fee: Fee.fromPartial({
-          amount: [
-            {
-              denom: chain.feeCurrencies[0].coinMinimalDenom,
-              amount: "9223372036854775807",
-            },
-          ],
-          gasLimit: "9223372036854775807",
-          payer: eip712Signing
-            ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-              bech32Address
-            : undefined,
-        }),
-      }).finish(),
-      signatures: !eip712Signing
-        ? [Buffer.from(signResponse.signature.signature, "base64")]
-        : [new Uint8Array(0)],
-    }).finish();
-    return {
-      txHash: await window.keplr?.sendTx(
-        chainId,
-        signedTx,
-        mode as BroadcastMode
-      ),
-      signDoc: signResponse.signed,
-    };
-  };
-
   const signEthereum = useCallback(
-    async (signType: EthSignType) => {
+    async (signType: EthSignType, transactionType?: TransactionType) => {
       const current = chainStore.current;
       const accountInfo = accountStore.getAccount(current.chainId);
       console.log(current.chainId, accountInfo.ethereumHexAddress);
@@ -383,127 +242,56 @@ export function KeystoneExamplePage() {
       }
       if (!current.chainId || !accountInfo.ethereumHexAddress) {
         setTimeout(() => {
-          signEthereum(signType);
+          signEthereum(signType, transactionType);
         }, 100);
         return;
       }
 
-      signAndBroadcastEthereumTx(current.chainId, accountInfo.bech32Address);
-      return;
-
       let data: any;
       if (signType === EthSignType.TRANSACTION) {
-        data = JSON.stringify({
-          from: accountInfo.ethereumHexAddress,
-          to: "0xee7b8F17E041AE5126A403Ec4cD5FE344b51d7EB",
-          gasPrice: `0x${Buffer.from("2000").toString("hex")}`,
-          gasLimit: `0x${Buffer.from("21000").toString("hex")}`,
-          nonce: `0x${Buffer.from("0").toString("hex")}`,
-          value: `0x${Buffer.from("1000000").toString("hex")}`,
-        });
+        await signAndBroadcastEthereumTx(
+          current.chainId,
+          accountInfo.bech32Address,
+          transactionType as TransactionType
+        );
       } else if (signType === EthSignType.EIP712) {
+        // https://github.com/apurbapokharel/EIP712Example/blob/master/client/src/App.js
         data = JSON.stringify({
-          amount: 100,
-          token: "0x0000000000000000",
+          types: {
+            EIP712Domain: [
+              { name: "name", type: "string" },
+              { name: "version", type: "string" },
+              { name: "chainId", type: "uint256" },
+              { name: "verifyingContract", type: "address" },
+            ],
+            set: [
+              { name: "sender", type: "address" },
+              { name: "x", type: "uint" },
+              { name: "deadline", type: "uint" },
+            ],
+          },
+          //make sure to replace verifyingContract with address of deployed contract
+          primaryType: "set",
+          domain: {
+            name: "SetTest",
+            version: "1",
+            chainId: 9000,
+            verifyingContract: "0x803B558Fd23967F9d37BaFe2764329327f45e89E",
+          },
+          message: {
+            sender: accountInfo.ethereumHexAddress,
+            x: 157,
+            deadline: deadline,
+          },
         });
       } else if (signType === EthSignType.MESSAGE) {
         data = "123456";
       }
       console.log("data", data);
-      let signRes;
-      if (signType === EthSignType.TRANSACTION) {
-        signRes = {
-          signed: {
-            account_number: "0",
-            chain_id: "",
-            fee: {
-              amount: [],
-              gas: "0",
-            },
-            memo: "",
-            msgs: [
-              {
-                type: "sign/MsgSignData",
-                value: {
-                  data:
-                    "eyJmcm9tIjoiMHg5ODU4RWZGRDIzMkI0MDMzRTQ3ZDkwMDAzRDQxRUMzNEVjYUVkYTk0IiwidG8iOiIweGVlN2I4RjE3RTA0MUFFNTEyNkE0MDNFYzRjRDVGRTM0NGI1MWQ3RUIiLCJnYXNQcmljZSI6IjB4MzIzMDMwMzAiLCJnYXNMaW1pdCI6IjB4MzIzMTMwMzAzMCIsIm5vbmNlIjoiMHgzMCIsInZhbHVlIjoiMHgzMTMwMzAzMDMwMzAzMCJ9",
-                  signer: "evmos1npvwllfr9dqr8erajqqr6s0vxnk2ak55t3r99j",
-                },
-              },
-            ],
-            sequence: "0",
-          },
-          signature: {
-            pub_key: {
-              type: "tendermint/PubKeySecp256k1",
-              value: "Ajewu3qCiNOO1JpSS13JjP8+tcqCTJ+dwN/bPZzWAPKZ",
-            },
-            signature:
-              "+G0whDIwMDCFMjEwMDCU7nuPF+BBrlEmpAPsTNX+NEtR1+uHMTAwMDAwMIAloPEjjGO69PrlnTaCvEJ77tD0e2o17uqx/nPWDkjZHiwKoBHrC2ybusEVVqB5H8IXCAHHvmEsst0RodT/IKf0L59N",
-          },
-        };
-      } else if (signType === EthSignType.MESSAGE) {
-        signRes = {
-          signed: {
-            account_number: "0",
-            chain_id: "",
-            fee: {
-              amount: [],
-              gas: "0",
-            },
-            memo: "",
-            msgs: [
-              {
-                type: "sign/MsgSignData",
-                value: {
-                  data: "MTIzNDU2",
-                  signer: "evmos1npvwllfr9dqr8erajqqr6s0vxnk2ak55t3r99j",
-                },
-              },
-            ],
-            sequence: "0",
-          },
-          signature: {
-            pub_key: {
-              type: "tendermint/PubKeySecp256k1",
-              value: "Ajewu3qCiNOO1JpSS13JjP8+tcqCTJ+dwN/bPZzWAPKZ",
-            },
-            signature:
-              "MHg4YmZkMGYwOWVlYjhhYzI4MzIxOGMwMDJlMWY2MzIwNjEwOTRlN2NmMmU1NzA3MDQ1ZjczYTAxNTgxYmJlYjdhMmMxYzA1MjJjYjRhZmI2MDJkNjQ5YzcyNTMzYzdmYjYyNjBlNWEyYWQ4ZjFkMWY5NmIwOTA3N2Q4YzVmMmI1NDFj",
-          },
-        };
-      }
-      if (!signRes) {
-        signRes = await keplrSignEthereum(
-          current.chainId,
-          accountInfo.bech32Address,
-          data,
-          signType
-        );
-      }
-      if (signRes) {
-        console.log("signRes", signRes);
-        try {
-          const sendRes = await sendEthSignTx(
-            current,
-            accountInfo.bech32Address,
-            signRes,
-            "block" as BroadcastMode
-          );
-          console.log("sendRes", sendRes);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          window.location.hash = "#/keystone/example";
-        }
-      }
+      window.location.hash = "#/keystone/example";
     },
     [chainStore, accountStore]
   );
-
-  const signEthereumTransaction = useCallback(async () => {
-    signEthereum(EthSignType.TRANSACTION);
-  }, [signEthereum]);
 
   const signEthereumEIP712 = useCallback(async () => {
     signEthereum(EthSignType.EIP712);
@@ -654,7 +442,31 @@ export function KeystoneExamplePage() {
       </p>
       <p>Chain: Evmos</p>
       <p>
-        <Button onClick={signEthereumTransaction}>Sign Eth Transaction</Button>
+        <Button
+          onClick={() =>
+            signEthereum(EthSignType.TRANSACTION, TransactionType.EIP1559)
+          }
+        >
+          Sign Eth Transaction EIP-1559
+        </Button>
+      </p>
+      <p>
+        <Button
+          onClick={() =>
+            signEthereum(EthSignType.TRANSACTION, TransactionType.EIP2930)
+          }
+        >
+          Sign Eth Transaction EIP-2930 (Not Support)
+        </Button>
+      </p>
+      <p>
+        <Button
+          onClick={() =>
+            signEthereum(EthSignType.TRANSACTION, TransactionType.Legacy)
+          }
+        >
+          Sign Eth Transaction Legacy
+        </Button>
       </p>
       <p>
         <Button onClick={signEthereumEIP712}>Sign Eth EIP712</Button>

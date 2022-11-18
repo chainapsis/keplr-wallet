@@ -9,9 +9,15 @@ import {
 } from "./cosmos-keyring";
 import { EthSignType } from "@keplr-wallet/types";
 import { useKeystoneEthereumKeyring } from "./ethereum-keyring";
-import { Transaction } from "@ethereumjs/tx";
+import {
+  AccessListEIP2930Transaction,
+  FeeMarketEIP1559Transaction,
+  Transaction,
+  TypedTransaction,
+} from "@ethereumjs/tx";
 import { computeAddress } from "@ethersproject/transactions";
 import { publicKeyConvert } from "secp256k1";
+import Common from "@ethereumjs/common";
 
 export const TYPE_KEYSTONE_GET_PUBKEY = "keystone-get-pubkey";
 export const TYPE_KEYSTONE_SIGN = "keystone-sign";
@@ -186,24 +192,37 @@ export class KeystoneService {
       [EthSignType.EIP712]: EthSignFunction.Data,
     }[mode];
     let data: any;
-    console.log("message", Buffer.from(message).toString());
     if (mode === EthSignType.TRANSACTION) {
       const msg = JSON.parse(Buffer.from(message).toString());
-      data = new Transaction(msg);
+      if (msg.type === 2) {
+        // [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559)
+        data = new FeeMarketEIP1559Transaction(msg);
+      } else if (msg.type === 1) {
+        // [EIP-2930](https://eips.ethereum.org/EIPS/eip-2930)
+        data = new AccessListEIP2930Transaction(msg);
+      } else {
+        if (!msg.chainId) {
+          throw new KeplrError("keystone", 305, "ChainId is required.");
+        }
+        data = new Transaction(msg, {
+          // TODO: Other properties is need or not, such as "hardfork".
+          common: Common.custom({ chainId: msg.chainId }),
+        });
+      }
     } else if (mode === EthSignType.MESSAGE) {
       data = Buffer.from(message).toString("hex");
     } else if (mode === EthSignType.EIP712) {
       data = Buffer.from(message).toString();
     }
-    console.log("data", Buffer.from(key.address).toString("hex"), data);
     try {
+      console.log("signEthereum", signFn, data);
       const signRes = await keyring[signFn](
         computeAddress(publicKeyConvert(key.pubKey, false)),
         data
       );
-      console.log("signRes", signRes);
       if (mode === EthSignType.TRANSACTION) {
-        return ((signRes as any) as Transaction).serialize();
+        const rlpData = ((signRes as any) as TypedTransaction).serialize();
+        return rlpData;
       }
       return Buffer.from(signRes as string, "utf-8");
     } catch (err) {
