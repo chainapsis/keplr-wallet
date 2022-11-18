@@ -370,7 +370,10 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   : chainSuggestStore.communityChainInfo;
 
                 if (chainInfo) {
-                  await chainSuggestStore.approve(chainInfo);
+                  await chainSuggestStore.approve({
+                    ...chainInfo,
+                    updateFromRepoDisabled: isRawDataMode,
+                  });
                 }
 
                 if (
