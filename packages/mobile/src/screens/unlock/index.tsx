@@ -26,8 +26,7 @@ let splashScreenHided = false;
 async function hideSplashScreen() {
   if (!splashScreenHided) {
     console.log("Hide Splash screen");
-    // No need to wait.
-    RNBootSplash.hide();
+    await RNBootSplash.hide();
     splashScreenHided = true;
   }
 }
