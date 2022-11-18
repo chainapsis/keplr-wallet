@@ -100,21 +100,19 @@ export const WebScreen: FunctionComponent = () => {
           smartNavigation.pushSmart("Web.Umee", {});
         }}
       />
-      {/*
-            <WebpageImageButton
-                name="Regen"
-                source={require("../../assets/image/webpage/regen.png")}
-                onPress={() => {
-                    smartNavigation.pushSmart("Web.Regen", {});
-                }}
-            />
-      */}
       <WebpageImageButton
         name="Stride"
         source={require("../../assets/image/webpage/stride.png")}
         overlayStyle={style.flatten(["opacity-60"])}
         onPress={() => {
           smartNavigation.pushSmart("Web.Stride", {});
+        }}
+      />
+      <WebpageImageButton
+        name="Regen"
+        source={require("../../assets/image/webpage/regen.png")}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.Regen", {});
         }}
       />
       <WebpageImageButton
