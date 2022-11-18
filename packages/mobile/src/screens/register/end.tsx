@@ -41,7 +41,12 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (password && keychainStore.isBiometrySupported) {
-      setIsBiometricOn(true);
+      // XXX: Due to bug on toggle with animated, animation not happen even though actual state is "true".
+      //      For hot-fix, use dump solution (just wait small time).
+      // TODO: Fix animation bug on Toggle component.
+      setTimeout(() => {
+        setIsBiometricOn(true);
+      }, 100);
     }
   }, [keychainStore.isBiometrySupported, password]);
 
