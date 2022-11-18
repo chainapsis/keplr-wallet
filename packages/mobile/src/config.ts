@@ -1752,6 +1752,10 @@ export const EmbedChainInfos: AppChainInfo[] = [
     ],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/evmos.png",
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/evmos/txs/{txHash}",
+    },
   },
   {
     rpc: "https://public.api.injective.network",
@@ -1906,6 +1910,10 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/stride.png",
     features: ["ibc-transfer", "ibc-go"],
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/stride/txs/{txHash}",
+    },
   },
 ];
 
