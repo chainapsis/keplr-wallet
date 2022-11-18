@@ -2,6 +2,4 @@
     <string name="app_name">Keplr</string>
     <string moduleConfig="true" name="CodePushDeploymentKey">KIjCGsvIA6HTRxeR5BN0gsemSrsNJfOICquOP</string>
     <string name="appCenterAnalytics_whenToEnableAnalytics" moduleConfig="true" translatable="false">ALWAYS_SEND</string>
-    <string name="expo_splash_screen_resize_mode">contain</string>
-    <string name="expo_splash_screen_status_bar_translucent">true</string>
 </resources>

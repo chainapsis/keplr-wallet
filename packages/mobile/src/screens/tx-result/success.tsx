@@ -9,7 +9,7 @@ import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
 import { RightArrowIcon } from "../../components/icon";
 import LottieView from "lottie-react-native";
-import * as WebBrowser from "expo-web-browser";
+import { InAppBrowser } from "react-native-inappbrowser-reborn";
 import { SimpleGradient } from "../../components/svg";
 
 export const TxSuccessResultScreen: FunctionComponent = observer(() => {
@@ -178,7 +178,7 @@ export const TxSuccessResultScreen: FunctionComponent = observer(() => {
             )}
             onPress={() => {
               if (chainInfo.raw.txExplorer) {
-                WebBrowser.openBrowserAsync(
+                InAppBrowser.open(
                   chainInfo.raw.txExplorer.txUrl.replace(
                     "{txHash}",
                     txHash.toUpperCase()

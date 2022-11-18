@@ -1,9 +1,5 @@
 package com.chainapsis.keplr;
 
-import android.content.res.Configuration;
-import expo.modules.ApplicationLifecycleDispatcher;
-import expo.modules.ReactNativeHostWrapper;
-
 import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
@@ -15,36 +11,43 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import com.facebook.react.bridge.JSIModulePackage;
+import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 import com.microsoft.codepush.react.CodePush;
 import com.bugsnag.android.Bugsnag;
 
 public class MainApplication extends Application implements ReactApplication {
   private final ReactNativeHost mReactNativeHost =
-      new ReactNativeHostWrapper(this, new ReactNativeHost(this) {
-        @Override
-        public boolean getUseDeveloperSupport() {
-          return BuildConfig.DEBUG;
-        }
+        new ReactNativeHost(this) {
+          @Override
+          public boolean getUseDeveloperSupport() {
+            return BuildConfig.DEBUG;
+          }
 
-        @Override
-        protected List<ReactPackage> getPackages() {
-          @SuppressWarnings("UnnecessaryLocalVariable")
-          List<ReactPackage> packages = new PackageList(this).getPackages();
-          // Packages that cannot be autolinked yet can be added manually here, for example:
-          // packages.add(new MyReactNativePackage());
-          return packages;
-        }
+          @Override
+          protected List<ReactPackage> getPackages() {
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            List<ReactPackage> packages = new PackageList(this).getPackages();
+            // Packages that cannot be autolinked yet can be added manually here, for example:
+            // packages.add(new MyReactNativePackage());
+            return packages;
+          }
 
-        @Override
-        protected String getJSMainModuleName() {
-          return "index";
-        }
+          @Override
+          protected String getJSMainModuleName() {
+            return "index";
+          }
 
-        @Override
-        protected String getJSBundleFile() {
+          @Override
+          protected JSIModulePackage getJSIModulePackage() {
+            return new ReanimatedJSIModulePackage(); // <- add
+          }
+
+          @Override
+          protected String getJSBundleFile() {
             return CodePush.getJSBundleFile();
-        }
-      });
+          }
+        };
 
   @Override
   public ReactNativeHost getReactNativeHost() {
@@ -57,7 +60,6 @@ public class MainApplication extends Application implements ReactApplication {
     Bugsnag.start(this);
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
-    ApplicationLifecycleDispatcher.onApplicationCreate(this);
   }
 
   /**
@@ -89,11 +91,5 @@ public class MainApplication extends Application implements ReactApplication {
         e.printStackTrace();
       }
     }
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig);
   }
 }

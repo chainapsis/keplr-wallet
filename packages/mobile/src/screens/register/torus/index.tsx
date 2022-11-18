@@ -9,12 +9,12 @@ import { PageWithScrollView } from "../../../components/page";
 import { TextInput } from "../../../components/input";
 import { View } from "react-native";
 import { Button } from "../../../components/button";
-import * as WebBrowser from "expo-web-browser";
+import { InAppBrowser } from "react-native-inappbrowser-reborn";
 import { Buffer } from "buffer/";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import Torus from "@toruslabs/torus.js";
 import { useLoadingScreen } from "../../../providers/loading-screen";
-import * as AppleAuthentication from "expo-apple-authentication";
+import { appleAuth as AppleAuthentication } from "@invertase/react-native-apple-authentication";
 import { useStore } from "../../../stores";
 
 interface FormData {
@@ -65,7 +65,7 @@ const useTorusGoogleSignIn = (): {
           "https://oauth.keplr.app/google.html"
         );
 
-        const result = await WebBrowser.openAuthSessionAsync(
+        const result = await InAppBrowser.openAuth(
           finalUrl.href,
           "app.keplr.oauth://"
         );
@@ -186,8 +186,8 @@ const useTorusAppleSignIn = (): {
 
     (async () => {
       try {
-        const credential = await AppleAuthentication.signInAsync({
-          requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
+        const credential = await AppleAuthentication.performRequest({
+          requestedScopes: [AppleAuthentication.Scope.EMAIL],
         });
 
         if (!credential.identityToken) {

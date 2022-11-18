@@ -9,7 +9,7 @@ import { Controller, useForm } from "react-hook-form";
 import { TextInput } from "../../../components/input";
 import { StyleSheet, View } from "react-native";
 import { Button } from "../../../components/button";
-import * as Clipboard from "expo-clipboard";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { useStore } from "../../../stores";
 import { BIP44AdvancedButton, useBIP44Option } from "../bip44";
 import { Buffer } from "buffer/";
@@ -184,7 +184,7 @@ export const RecoverMnemonicScreen: FunctionComponent = observer(() => {
                     mode="text"
                     text="Paste"
                     onPress={async () => {
-                      const text = await Clipboard.getStringAsync();
+                      const text = await Clipboard.getString();
                       if (text) {
                         setValue("mnemonic", text, {
                           shouldValidate: true,

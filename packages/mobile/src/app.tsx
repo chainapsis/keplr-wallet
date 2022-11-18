@@ -10,7 +10,6 @@ import codePush from "react-native-code-push";
 import { InteractionModalsProivder } from "./providers/interaction-modals-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LoadingScreenProvider } from "./providers/loading-screen";
-import * as SplashScreen from "expo-splash-screen";
 import { ConfirmModalProvider } from "./providers/confirm-modal";
 import Bugsnag from "@bugsnag/react-native";
 
@@ -54,14 +53,6 @@ if (Platform.OS === "android") {
   // On android, setting the timezone makes that the hour in date looks weird if the hour exceeds 24. Ex) 00:10 AM -> 24:10 AM.
   // Disable the timezone until finding the solution.
 }
-
-// Prevent native splash screen from autohiding.
-// UnlockScreen will hide the splash screen
-SplashScreen.preventAutoHideAsync()
-  .then((result) =>
-    console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`)
-  )
-  .catch(console.warn);
 
 const ThemeStatusBar: FunctionComponent = () => {
   const style = useStyle();

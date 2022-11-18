@@ -6,6 +6,10 @@
 
 #import <React/RCTLinkingManager.h>
 
+#if RCT_DEV
+#import <React/RCTDevLoadingView.h>
+#endif
+
 #import <CodePush/CodePush.h>
 
 #import <AppCenterReactNative.h>
@@ -44,8 +48,13 @@ static void InitializeFlipper(UIApplication *application) {
   InitializeFlipper(application);
 #endif
 
-  RCTBridge *bridge = [self.reactDelegate createBridgeWithDelegate:self launchOptions:launchOptions];
-  UIView *rootView = [self.reactDelegate createRootViewWithBridge:bridge moduleName:@"main" initialProperties:nil];
+  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
+  #if RCT_DEV
+    [bridge moduleForClass:[RCTDevLoadingView class]];
+  #endif
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
+                                                 moduleName:@"main"
+                                          initialProperties:nil];
 
   if (@available(iOS 13.0, *)) {
     rootView.backgroundColor = [UIColor systemBackgroundColor];
@@ -54,11 +63,10 @@ static void InitializeFlipper(UIApplication *application) {
   }
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-  UIViewController *rootViewController = [self.reactDelegate createRootViewController];
+  UIViewController *rootViewController = [UIViewController new];
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
-  [super application:application didFinishLaunchingWithOptions:launchOptions];
   return YES;
 }
 

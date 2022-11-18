@@ -44,6 +44,8 @@ module.exports = {
         enumerable: true,
         get: () => webCrypto,
       });
+    } else {
+      throw new Error("Crypto already defined");
     }
   },
 };
