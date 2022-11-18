@@ -1,11 +1,6 @@
 import { ETHSignature, EthSignRequest } from "@keystonehq/bc-ur-registry-eth";
 import { BaseKeyring, InteractionProvider } from "@keystonehq/base-eth-keyring";
-import {
-  CryptoAccount,
-  CryptoHDKey,
-  CryptoKeypath,
-  PathComponent,
-} from "@keystonehq/bc-ur-registry";
+import { CryptoAccount, CryptoHDKey } from "@keystonehq/bc-ur-registry";
 import { KeystoneKeyringData, KeystoneUR } from "./cosmos-keyring";
 import { publicKeyConvert } from "secp256k1";
 import { computeAddress } from "@ethersproject/transactions";
@@ -91,20 +86,16 @@ export class KeystoneEthereumKeyring extends BaseKeyring {
       const pubKeyBuf = Buffer.from(
         publicKeyConvert(Buffer.from(key.pubKey, "hex"), true)
       );
-      const cryptoHDKey = new CryptoHDKey({
-        isMaster: false,
-        isPrivateKey: false,
-        key: pubKeyBuf,
-        origin: new CryptoKeypath([
-          new PathComponent({ index: 44, hardened: true }),
-          new PathComponent({ index: 60, hardened: true }),
-          new PathComponent({ index: key.bip44HDPath.account, hardened: true }),
-        ]),
-        chainCode: Buffer.alloc(0),
-      });
-      this.xpub = cryptoHDKey.getBip32Key();
-      this.hdPath = `m/${cryptoHDKey.getOrigin().getPath()}`;
+      this.hdPath = `m/44'/${key.coinType}'/${key.bip44HDPath.account}'`;
       this.indexes[computeAddress(pubKeyBuf)] = key.bip44HDPath.addressIndex;
+    }
+  }
+
+  checkKeyring() {
+    if (!this.xfp || !this.hdPath) {
+      throw new Error(
+        "KeystoneError#invalid_keyring: keyring not fulfilled, please call function `readKeyring` firstly"
+      );
     }
   }
 }
