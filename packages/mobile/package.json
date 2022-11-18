@@ -103,6 +103,7 @@
     "react-native-keyboard-aware-scroll-view": "^0.9.4",
     "react-native-keychain": "^8.1.1",
     "react-native-localize": "^2.1.1",
+    "react-native-permissions": "^3.6.1",
     "react-native-qrcode-svg": "^6.1.1",
     "react-native-reanimated": "=2.4.0",
     "react-native-safe-area-context": "^3.1.9",

@@ -5,7 +5,6 @@ import {
   AppState,
   AppStateStatus,
   Linking,
-  PermissionsAndroid,
   Platform,
   Text,
   View,
@@ -24,6 +23,12 @@ import { RectButton } from "../../components/rect-button";
 import { useUnmount } from "../../hooks";
 import Svg, { Path } from "react-native-svg";
 import { Button } from "../../components/button";
+import {
+  requestMultiple,
+  PERMISSIONS,
+  RESULTS,
+} from "react-native-permissions";
+import DeviceInfo from "react-native-device-info";
 
 const AlertIcon: FunctionComponent<{
   size: number;
@@ -164,15 +169,39 @@ export const LedgerGranterModal: FunctionComponent<{
         permissionStatus === BLEPermissionGrantStatus.FailedAndRetry
       ) {
         if (Platform.OS === "android") {
-          PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-          ).then((granted) => {
-            if (granted == PermissionsAndroid.RESULTS.GRANTED) {
-              setPermissionStatus(BLEPermissionGrantStatus.Granted);
-            } else {
-              setPermissionStatus(BLEPermissionGrantStatus.Failed);
-            }
-          });
+          if (parseFloat(DeviceInfo.getSystemVersion()) >= 12) {
+            requestMultiple([
+              PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+              PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
+              PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+            ]).then((granted) => {
+              if (
+                granted[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] ===
+                  RESULTS.GRANTED &&
+                granted[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] ===
+                  RESULTS.GRANTED &&
+                granted[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] ===
+                  RESULTS.GRANTED
+              ) {
+                setPermissionStatus(BLEPermissionGrantStatus.Granted);
+              } else {
+                setPermissionStatus(BLEPermissionGrantStatus.Failed);
+              }
+            });
+          } else {
+            requestMultiple([PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION]).then(
+              (granted) => {
+                if (
+                  granted[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] ===
+                  RESULTS.GRANTED
+                ) {
+                  setPermissionStatus(BLEPermissionGrantStatus.Granted);
+                } else {
+                  setPermissionStatus(BLEPermissionGrantStatus.Failed);
+                }
+              }
+            );
+          }
         }
       }
     }, [permissionStatus]);

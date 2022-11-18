@@ -5,6 +5,9 @@ require File.join(File.dirname(`node --print "require.resolve('@react-native-com
 platform :ios, '13.0'
 
 target 'mobile' do
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  pod 'Permission-BluetoothPeripheral', :path => "#{permissions_path}/BluetoothPeripheral"
+
   use_expo_modules!
   post_integrate do |installer|
     begin
