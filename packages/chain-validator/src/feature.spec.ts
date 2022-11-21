@@ -16,7 +16,7 @@ const createMockServer = (
 ) => {
   const server = Http.createServer((req, resp) => {
     if (req.url === "/ibc/apps/transfer/v1/params") {
-      resp.writeHead(ibcGoSuccess ? 200 : 400, {
+      resp.writeHead(ibcGoSuccess ? 200 : 501, {
         "content-type": "text/json",
       });
       resp.end(
@@ -145,61 +145,65 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
   /**
    * @Given The server support all features, No input JSON feature
    * @When When you input 'ibc-go' feature in 'hasFeature' function
-   * @Then return "ibc-go" string
+   * @Then return true
    */
   test("When you input 'ibc-go' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
 
     const feature = await hasFeature(mockChainInfoForCheck, "ibc-go");
-    expect(feature).toEqual("ibc-go");
+    expect(feature).toEqual(true);
   });
 
   /**
    * @Given The server support all features, No input JSON feature
    * @When When you input 'ibc-transfer' feature in 'hasFeature' function
-   * @Then return "ibc-transfer" string
+   * @Then return true
    */
   test("When you input 'ibc-transfer' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
 
     const feature = await hasFeature(mockChainInfoForCheck, "ibc-transfer");
-    expect(feature).toEqual("ibc-transfer");
+    expect(feature).toEqual(true);
   });
 
   /**
    * @Given The server support all features, Input 'ibc-go' in JSON feature
    * @When When you input 'ibc-transfer' feature in 'hasFeature' function
-   * @Then return "ibc-transfer" string
+   * @Then return true
    */
   test("When you input 'ibc-transfer' feature in 'hasFeature' function(Input 'ibc-go' in JSON feature)", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: ["ibc-go"],
     };
 
     const feature = await hasFeature(mockChainInfoForCheck, "ibc-transfer");
-    expect(feature).toEqual("ibc-transfer");
+    expect(feature).toEqual(true);
   });
 
   /**
    * @Given The server support all features, No input JSON feature
    * @When When you input 'wasmd_0.24+' feature in 'hasFeature' function
-   * @Then return undefined
+   * @Then return false
    */
   test("When you input 'wasmd_0.24+' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
 
     const feature = await hasFeature(mockChainInfoForCheck, "wasmd_0.24+");
-    expect(feature).toEqual(undefined);
+    expect(feature).toEqual(false);
   });
 
   /**
@@ -207,23 +211,25 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    * @When When you input 'wasmd_0.24+' feature in 'hasFeature' function
    * @Then return "wasmd_0.24+" string
    */
-  test("When you input 'wasmd_0.24+' feature in 'hasFeature' function", async () => {
+  test("When you input 'wasmd_0.24+' feature in 'hasFeature' function with 'cosmwasm' feature", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: ["cosmwasm"],
     };
 
     const feature = await hasFeature(mockChainInfoForCheck, "wasmd_0.24+");
-    expect(feature).toEqual("wasmd_0.24+");
+    expect(feature).toEqual(true);
   });
 
   /**
    * @Given The server support all features, No input JSON feature
    * @When When you input 'query:/cosmos/bank/v1beta1/spendable_balances' feature in 'hasFeature' function
-   * @Then return "query:/cosmos/bank/v1beta1/spendable_balances" string
+   * @Then return true
    */
   test("When you input 'query:/cosmos/bank/v1beta1/spendable_balances' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -232,7 +238,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
       mockChainInfoForCheck,
       "query:/cosmos/bank/v1beta1/spendable_balances"
     );
-    expect(feature).toEqual("query:/cosmos/bank/v1beta1/spendable_balances");
+    expect(feature).toEqual(true);
   });
 
   /**
@@ -242,6 +248,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    */
   test("When you input that there are no supported features(지원하는 기능이 없다고 입력했을 때)", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -262,6 +269,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    */
   test("When you input undefined in supported features", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: undefined,
     };
@@ -282,6 +290,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
    */
   test("When you input that there is 'cosmwasm' feature", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: ["cosmwasm"],
     };
@@ -321,6 +330,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    */
   test("When you input 'ibc-go' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -342,12 +352,13 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    */
   test("When you input 'ibc-transfer' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
 
     const feature = await hasFeature(mockChainInfoForCheck, "ibc-transfer");
-    expect(feature).toEqual(undefined);
+    expect(feature).toEqual(false);
   });
 
   /**
@@ -357,18 +368,12 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    */
   test("When you input 'ibc-transfer' feature in 'hasFeature' function(Input 'ibc-go' in JSON feature)", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: ["ibc-go"],
     };
 
-    try {
-      await hasFeature(mockChainInfoForCheck, "ibc-transfer");
-    } catch (error) {
-      expect(error).toHaveProperty(
-        "message",
-        "Failed to get response /ibc/apps/transfer/v1/params from lcd endpoint"
-      );
-    }
+    expect(await hasFeature(mockChainInfoForCheck, "ibc-transfer")).toBe(false);
   });
 
   /**
@@ -378,12 +383,13 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    */
   test("When you input 'wasmd_0.24+' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
 
     const feature = await hasFeature(mockChainInfoForCheck, "wasmd_0.24+");
-    expect(feature).toEqual(undefined);
+    expect(feature).toEqual(false);
   });
 
   /**
@@ -393,12 +399,13 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    */
   test("When you input 'wasmd_0.24+' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: ["cosmwasm"],
     };
 
     const feature = await hasFeature(mockChainInfoForCheck, "wasmd_0.24+");
-    expect(feature).toEqual(undefined);
+    expect(feature).toEqual(false);
   });
 
   /**
@@ -408,6 +415,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
    */
   test("When you input 'query:/cosmos/bank/v1beta1/spendable_balances' feature in 'hasFeature' function", async () => {
     const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
       rest: `http://127.0.0.1:${port}`,
       features: [],
     };
@@ -416,6 +424,6 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
       mockChainInfoForCheck,
       "query:/cosmos/bank/v1beta1/spendable_balances"
     );
-    expect(feature).toEqual(undefined);
+    expect(feature).toEqual(false);
   });
 });

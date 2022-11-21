@@ -1,6 +1,9 @@
 import { ChainInfo } from "@keplr-wallet/types";
-import Axios from "axios";
+import Axios, { AxiosInstance } from "axios";
 
+/**
+ * Indicate the features which keplr supports.
+ */
 export const SupportedChainFeatures = [
   "stargate",
   "cosmwasm",
@@ -16,11 +19,102 @@ export const SupportedChainFeatures = [
   "osmosis-txfees",
 ];
 
+/**
+ * Describe the way to know whether that feature is needed.
+ * This is used in `checkChainFeatures` function.
+ * `checkChainFeatures` function iterate this constant
+ * and execute method in sequence
+ * and if it returns "true", it pushes that feature and deliver it to next method.
+ * So, the order is important.
+ */
 export const RecognizableChainFeaturesMethod: {
   feature: string;
-  fetch: (chainInfo: ChainInfo) => boolean;
-}[] = [];
+  fetch: (
+    features: ReadonlyArray<string>,
+    rpcInstance: AxiosInstance,
+    restInstance: AxiosInstance
+  ) => Promise<boolean>;
+}[] = [
+  {
+    feature: "ibc-go",
+    fetch: async (_features, _rpcInstance, restInstance) => {
+      const response = await restInstance.get<{
+        params: {
+          receive_enabled: boolean;
+          send_enabled: boolean;
+        };
+      }>("/ibc/apps/transfer/v1/params", {
+        validateStatus: (status) => {
+          return status === 200 || status === 501;
+        },
+      });
 
+      return response.status === 200;
+    },
+  },
+  {
+    feature: "ibc-transfer",
+    fetch: async (features, _rpcInstance, restInstance) => {
+      const requestUrl = features.includes("ibc-go")
+        ? "/ibc/apps/transfer/v1/params"
+        : "/ibc/applications/transfer/v1beta1/params";
+
+      const result = await restInstance.get<{
+        params: {
+          receive_enabled: boolean;
+          send_enabled: boolean;
+        };
+      }>(requestUrl, {
+        validateStatus: (status) => {
+          return status === 200 || status === 501;
+        },
+      });
+
+      return (
+        result.status === 200 &&
+        result.data.params.receive_enabled &&
+        result.data.params.send_enabled
+      );
+    },
+  },
+  {
+    feature: "wasmd_0.24+",
+    fetch: async (features, _rpcInstance, restInstance) => {
+      if (features.includes("cosmwasm")) {
+        const result = await restInstance.get(
+          "/cosmwasm/wasm/v1/contract/test/smart/test",
+          {
+            validateStatus: (status) => {
+              return status === 400 || status === 501;
+            },
+          }
+        );
+        if (result.status === 400) {
+          return true;
+        }
+      }
+      return false;
+    },
+  },
+  {
+    feature: "query:/cosmos/bank/v1beta1/spendable_balances",
+    fetch: async (_features, _rpcInstance, restInstance) => {
+      const result = await restInstance.get(
+        "/cosmos/bank/v1beta1/spendable_balances/test",
+        {
+          validateStatus: (status) => {
+            return status === 400 || status === 501;
+          },
+        }
+      );
+      return result.status === 400;
+    },
+  },
+];
+
+/**
+ * Indicate the features which keplr can know whether that feature is needed.
+ */
 export const RecognizableChainFeatures = RecognizableChainFeaturesMethod.map(
   (method) => method.feature
 );
@@ -44,7 +138,7 @@ export const NonRecognizableChainFeatures: string[] = (() => {
 })();
 
 // CheckInfo for checking
-export type ChainInfoForCheck = Pick<ChainInfo, "rest" | "features">;
+export type ChainInfoForCheck = Pick<ChainInfo, "rpc" | "rest" | "features">;
 
 /**
  * Returns features that chain will have to update
@@ -53,123 +147,52 @@ export type ChainInfoForCheck = Pick<ChainInfo, "rest" | "features">;
 export async function checkChainFeatures(
   chainInfo: ChainInfoForCheck
 ): Promise<string[]> {
-  // deep copy
-  const copiedChainInfo: ChainInfoForCheck & { features: string[] } = {
-    rest: chainInfo.rest,
-    features: chainInfo.features?.slice() ?? [],
-  };
+  const newFeatures: string[] = [];
+  const features = chainInfo.features?.slice() ?? [];
+  const rpcInstance = Axios.create({
+    baseURL: chainInfo.rpc,
+  });
+  const restInstance = Axios.create({
+    baseURL: chainInfo.rest,
+  });
 
-  const features = [
-    "ibc-go",
-    "ibc-transfer",
-    "wasmd_0.24+",
-    "query:/cosmos/bank/v1beta1/spendable_balances",
-  ];
-
-  for (const feature of features) {
-    // Skip if it's already supported
-    if (!copiedChainInfo.features.includes(feature)) {
-      const featureString = await hasFeature(copiedChainInfo, feature);
-
-      if (featureString) {
-        copiedChainInfo.features.push(featureString);
+  for (const method of RecognizableChainFeaturesMethod) {
+    try {
+      if (await method.fetch(features, rpcInstance, restInstance)) {
+        newFeatures.push(method.feature);
+        features.push(method.feature);
       }
+    } catch (e) {
+      console.log(
+        `Failed to try to fetch feature (${method.feature}): ${e.message || e}`
+      );
     }
   }
 
-  // different between raw features and copiedFeature
-  return copiedChainInfo.features.filter(
-    (item) => !chainInfo.features?.includes(item)
-  );
+  return newFeatures;
 }
 
 export async function hasFeature(
   chainInfo: Readonly<ChainInfoForCheck>,
-  featureString: string
-): Promise<string | undefined> {
-  let requestUrl: string = "";
-
-  try {
-    // If there isn't features in chainInfo
-    // Or there isn't featureString in features
-    if (!chainInfo.features || !chainInfo.features.includes(featureString)) {
-      // initialize rest api instance
-      const restInstance = Axios.create({
-        baseURL: chainInfo.rest,
-      });
-
-      switch (featureString) {
-        case "ibc-go": {
-          requestUrl = "/ibc/apps/transfer/v1/params";
-          const response = await restInstance.get<{
-            params: {
-              receive_enabled: boolean;
-              send_enabled: boolean;
-            };
-          }>(requestUrl);
-
-          if (response.status === 200) {
-            return featureString;
-          }
-
-          return undefined;
-        }
-        case "ibc-transfer": {
-          requestUrl = chainInfo.features?.includes("ibc-go")
-            ? "/ibc/apps/transfer/v1/params"
-            : "/ibc/applications/transfer/v1beta1/params";
-
-          const result = await restInstance.get<{
-            params: {
-              receive_enabled: boolean;
-              send_enabled: boolean;
-            };
-          }>(requestUrl);
-
-          if (
-            result.data.params.receive_enabled &&
-            result.data.params.send_enabled
-          ) {
-            return featureString;
-          }
-
-          return undefined;
-        }
-        case "wasmd_0.24+": {
-          if (chainInfo.features?.includes("cosmwasm")) {
-            requestUrl = "/cosmwasm/wasm/v1/contract/test/smart/test";
-
-            const result = await restInstance.get(requestUrl, {
-              validateStatus: (status) => {
-                return status === 400 || status === 501;
-              },
-            });
-            if (result.status === 400) {
-              return featureString;
-            }
-          }
-
-          return undefined;
-        }
-        case "query:/cosmos/bank/v1beta1/spendable_balances": {
-          requestUrl = "/cosmos/bank/v1beta1/spendable_balances/test";
-
-          const result = await restInstance.get(requestUrl, {
-            validateStatus: (status) => {
-              return status === 400 || status === 501;
-            },
-          });
-          if (result.status === 400) {
-            return featureString;
-          }
-
-          return undefined;
-        }
-      }
-    }
-  } catch {
-    throw new Error(`Failed to get response ${requestUrl} from lcd endpoint`);
+  feature: string
+): Promise<boolean> {
+  const method = RecognizableChainFeaturesMethod.find(
+    (m) => m.feature === feature
+  );
+  if (!method) {
+    throw new Error(`${feature} not exist on RecognizableChainFeaturesMethod`);
   }
 
-  return undefined;
+  const rpcInstance = Axios.create({
+    baseURL: chainInfo.rpc,
+  });
+  const restInstance = Axios.create({
+    baseURL: chainInfo.rest,
+  });
+
+  return method.fetch(
+    chainInfo.features?.slice() ?? [],
+    rpcInstance,
+    restInstance
+  );
 }
