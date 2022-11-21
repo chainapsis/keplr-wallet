@@ -68,9 +68,9 @@ export const UpArrowIcon: FunctionComponent<{
       <Path
         d="M3.5 10.25L8 5.75L12.5 10.25"
         stroke={color}
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </Svg>
   );
@@ -85,9 +85,9 @@ export const DownArrowIcon: FunctionComponent<{
       <Path
         d="M12.5 6.4165L8 10.9165L3.5 6.4165"
         stroke={color}
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </Svg>
   );
