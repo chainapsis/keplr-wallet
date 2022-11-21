@@ -6,7 +6,11 @@ export const RegenWebpageScreen: FunctionComponent = () => {
     <WebpageScreen
       name="Regen"
       source={{ uri: "https://app.regen.network" }}
-      originWhitelist={["https://app.regen.network"]}
+      originWhitelist={[
+        "https://app.regen.network",
+        "https://js.stripe.com",
+        "https://m.stripe.network",
+      ]}
     />
   );
 };
