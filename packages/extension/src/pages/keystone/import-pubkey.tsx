@@ -1,8 +1,8 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useStore } from "../../stores";
 import { Guide } from "./guide";
-import { Scan } from "./scan";
+import { Scan, ScanType } from "./scan";
 import { UR } from "@keplr-wallet/stores";
 
 export const KeystoneImportPubkeyPage = observer(() => {
@@ -10,11 +10,11 @@ export const KeystoneImportPubkeyPage = observer(() => {
 
   const { keystoneStore } = useStore();
 
-  const onUnload = () => {
+  const onUnload = useCallback(() => {
     keystoneStore.resolveGetPubkey({
       abort: true,
     });
-  };
+  }, [keystoneStore]);
 
   const onScanFinish = async (ur: UR) => {
     keystoneStore.resolveGetPubkey({
@@ -25,16 +25,16 @@ export const KeystoneImportPubkeyPage = observer(() => {
   };
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-keystone-import-page", "true");
+    document.documentElement.setAttribute("data-keystone-page", "true");
     window.addEventListener("unload", onUnload);
     return () => {
       window.removeEventListener("unload", onUnload);
-      document.documentElement.removeAttribute("data-keystone-import-page");
+      document.documentElement.removeAttribute("data-keystone-page");
     };
-  }, []);
+  }, [onUnload]);
 
   return isScan ? (
-    <Scan type="sync" onChange={onScanFinish} />
+    <Scan type={ScanType.Sync} onChange={onScanFinish} />
   ) : (
     <Guide onScan={() => setIsScan(true)} />
   );

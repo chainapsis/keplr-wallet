@@ -99,36 +99,43 @@ export class KeystoneService {
     mode: SignMode
   ): Promise<Uint8Array> {
     let signResolve: { (arg0: KeystoneUR): void };
+    let signReject: { (arg0: unknown): void };
     const keyring = useKeystoneCosmosKeyring({
       keyringData,
       playUR: async (ur) => {
-        (this.interactionService.waitApprove(
-          env,
-          "/keystone/sign",
-          TYPE_KEYSTONE_SIGN,
-          {
-            coinType,
-            bip44HDPath,
-            ur,
-            message,
+        (async () => {
+          try {
+            const res = (await this.interactionService.waitApprove(
+              env,
+              "/keystone/sign",
+              TYPE_KEYSTONE_SIGN,
+              {
+                coinType,
+                bip44HDPath,
+                ur,
+                message,
+              }
+            )) as StdSignDoc;
+            if (res.abort) {
+              throw new KeplrError(
+                "keystone",
+                301,
+                "The process has been canceled."
+              );
+            }
+            if (!res.signature) {
+              throw new KeplrError("keystone", 303, "Signature is empty.");
+            }
+            signResolve(res.signature);
+          } catch (err) {
+            signReject(err);
           }
-        ) as Promise<StdSignDoc>).then((res) => {
-          if (res.abort) {
-            throw new KeplrError(
-              "keystone",
-              301,
-              "The process has been canceled."
-            );
-          }
-          if (!res.signature) {
-            throw new KeplrError("keystone", 303, "Signature is empty.");
-          }
-          signResolve(res.signature);
-        });
+        })();
       },
       readUR: () =>
-        new Promise<KeystoneUR>((resolve) => {
+        new Promise<KeystoneUR>((resolve, reject) => {
           signResolve = resolve;
+          signReject = reject;
         }),
     });
     const signFn: SignFunction = {
@@ -154,36 +161,43 @@ export class KeystoneService {
     mode: EthSignType
   ): Promise<Uint8Array> {
     let signResolve: { (arg0: KeystoneUR): void };
+    let signReject: { (arg0: unknown): void };
     const keyring = useKeystoneEthereumKeyring({
       keyringData,
       playUR: async (ur) => {
-        (this.interactionService.waitApprove(
-          env,
-          "/keystone/sign",
-          TYPE_KEYSTONE_SIGN,
-          {
-            coinType,
-            bip44HDPath,
-            ur,
-            message,
+        (async () => {
+          try {
+            const res = (await this.interactionService.waitApprove(
+              env,
+              "/keystone/sign",
+              TYPE_KEYSTONE_SIGN,
+              {
+                coinType,
+                bip44HDPath,
+                ur,
+                message,
+              }
+            )) as StdSignDoc;
+            if (res.abort) {
+              throw new KeplrError(
+                "keystone",
+                301,
+                "The process has been canceled."
+              );
+            }
+            if (!res.signature) {
+              throw new KeplrError("keystone", 303, "Signature is empty.");
+            }
+            signResolve(res.signature);
+          } catch (err) {
+            signReject(err);
           }
-        ) as Promise<StdSignDoc>).then((res) => {
-          if (res.abort) {
-            throw new KeplrError(
-              "keystone",
-              301,
-              "The process has been canceled."
-            );
-          }
-          if (!res.signature) {
-            throw new KeplrError("keystone", 303, "Signature is empty.");
-          }
-          signResolve(res.signature);
-        });
+        })();
       },
       readUR: () =>
-        new Promise<KeystoneUR>((resolve) => {
+        new Promise<KeystoneUR>((resolve, reject) => {
           signResolve = resolve;
+          signReject = reject;
         }),
     });
     const signFn: EthSignFunction = {
@@ -191,7 +205,7 @@ export class KeystoneService {
       [EthSignType.MESSAGE]: EthSignFunction.Message,
       [EthSignType.EIP712]: EthSignFunction.Data,
     }[mode];
-    let data: any;
+    let data: TypedTransaction | string = "";
     if (mode === EthSignType.TRANSACTION) {
       const msg = JSON.parse(Buffer.from(message).toString());
       if (msg.type === 2) {
@@ -212,22 +226,17 @@ export class KeystoneService {
     } else if (mode === EthSignType.MESSAGE) {
       data = Buffer.from(message).toString("hex");
     } else if (mode === EthSignType.EIP712) {
-      data = Buffer.from(message).toString();
+      data = JSON.parse(Buffer.from(message).toString());
     }
-    try {
-      console.log("signEthereum", signFn, data);
-      const signRes = await keyring[signFn](
-        computeAddress(publicKeyConvert(key.pubKey, false)),
-        data
-      );
-      if (mode === EthSignType.TRANSACTION) {
-        const rlpData = ((signRes as any) as TypedTransaction).serialize();
-        return rlpData;
-      }
-      return Buffer.from(signRes as string, "utf-8");
-    } catch (err) {
-      console.error(err);
-      throw new KeplrError("keystone", 304, "Keystone sign error.");
+    console.log("signEthereum", signFn, data);
+    const signRes = await keyring[signFn](
+      computeAddress(publicKeyConvert(key.pubKey, false)),
+      data
+    );
+    if (mode === EthSignType.TRANSACTION) {
+      const rlpData = ((signRes as any) as TypedTransaction).serialize();
+      return rlpData;
     }
+    return Buffer.from(signRes as string, "utf-8");
   }
 }

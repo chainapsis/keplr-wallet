@@ -22,13 +22,13 @@ enum TransactionType {
   Legacy = 0,
 }
 
+const ethProvider = new JsonRpcProvider("https://eth.bd.evmos.dev:8545");
+
 async function signAndBroadcastEthereumTx(
   chainId: string,
   signerAddressBech32: string,
   transactionType: TransactionType
 ) {
-  const provider = new JsonRpcProvider("https://eth.bd.evmos.dev:8545");
-
   // Get Keplr signer address in hex
   const signerAddressEth = evmosToEth(signerAddressBech32);
   console.log("signerAddressEth", signerAddressEth);
@@ -45,12 +45,12 @@ async function signAndBroadcastEthereumTx(
   };
 
   // Calculate and set nonce
-  const nonce = await provider.getTransactionCount(signerAddressEth);
+  const nonce = await ethProvider.getTransactionCount(signerAddressEth);
   ethSendTx["nonce"] = nonce;
 
   // Calculate and set gas fees
-  const gasLimit = await provider.estimateGas(ethSendTx);
-  const gasFee = await provider.getFeeData();
+  const gasLimit = await ethProvider.estimateGas(ethSendTx);
+  const gasFee = await ethProvider.getFeeData();
 
   ethSendTx["gasLimit"] = gasLimit.toHexString();
   if (!gasFee.maxPriorityFeePerGas || !gasFee.maxFeePerGas) {
@@ -78,12 +78,98 @@ async function signAndBroadcastEthereumTx(
     chainId,
     signerAddressBech32,
     JSON.stringify(ethSendTx),
-    "transaction" as EthSignType
+    EthSignType.TRANSACTION
   );
 
-  const res = await provider.sendTransaction(rlpEncodedTx);
+  const res = await ethProvider.sendTransaction(rlpEncodedTx);
   console.log("signAndBroadcastEthereumTx", res);
   return res;
+}
+
+async function signAndBroadcastEthereumTypedData(
+  chainId: string,
+  signerAddressBech32: string
+) {
+  // Get Keplr signer address in hex
+  const signerAddressEth = evmosToEth(signerAddressBech32);
+  console.log("signerAddressEth", signerAddressEth);
+
+  // https://github.com/apurbapokharel/EIP712Example/blob/master/client/src/App.js
+  const data = {
+    types: {
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ],
+      set: [
+        { name: "sender", type: "address" },
+        { name: "x", type: "uint" },
+        { name: "deadline", type: "uint" },
+      ],
+    },
+    //make sure to replace verifyingContract with address of deployed contract
+    primaryType: "set",
+    domain: {
+      name: "SetTest",
+      version: "1",
+      chainId: 9000,
+      verifyingContract: "0x803B558Fd23967F9d37BaFe2764329327f45e89E",
+    },
+    message: {
+      sender: signerAddressEth,
+      x: 157,
+      deadline: parseInt(String(Date.now() / 1000 + 100).slice(0, 10)),
+    },
+  };
+
+  console.log(
+    chainId,
+    signerAddressBech32,
+    JSON.stringify(data),
+    EthSignType.EIP712
+  );
+  const signRes: any = await window.keplr?.signEthereum(
+    chainId,
+    signerAddressBech32,
+    JSON.stringify(data),
+    EthSignType.EIP712
+  );
+
+  const res = await ethProvider.sendTransaction(signRes);
+  console.log("signAndBroadcastEthereumTypedData", res);
+  return res;
+}
+
+async function signAndVerifyMessage(
+  chainId: string,
+  signerAddressBech32: string
+) {
+  const data = "123456";
+  console.log(chainId, signerAddressBech32, data, EthSignType.MESSAGE);
+  const signRes: any = await window.keplr?.signEthereum(
+    chainId,
+    signerAddressBech32,
+    data,
+    EthSignType.MESSAGE
+  );
+  console.log("signRes", signRes);
+  console.log(
+    "verifyMessage",
+    verifyMessage(
+      "024f4e2ad99c34d60b9ba6283c9431a8418af8673212961f97a77b6377fcd05b62",
+      Hash.keccak256(
+        Buffer.from(`\x19Ethereum Signed Message:\n${data.length}${data}`)
+      ),
+      signRes
+    )
+  );
+}
+
+function verifyMessage(pubKey: string, message: Uint8Array, signature: string) {
+  const pub = new PubKeySecp256k1(Buffer.from(pubKey, "hex"));
+  return pub.verifyDigest32(message, Buffer.from(signature, "hex"));
 }
 
 export function KeystoneExamplePage() {
@@ -193,43 +279,46 @@ export function KeystoneExamplePage() {
     }
   }, [accountStore, chainStore]);
 
-  const signArbitrary = async (data: string | Uint8Array) => {
-    const accountInfo = accountStore.getAccount(chainStore.current.chainId);
-    console.log(chainStore.current.chainId, accountInfo.bech32Address);
-    if (!chainStore.current.chainId || !accountInfo.bech32Address) {
-      console.log("Try again!");
-      return;
-    }
-    try {
-      const params: [string, string, string | Uint8Array, StdSignature] = [
-        chainStore.current.chainId,
-        accountInfo.bech32Address,
-        data,
-        {} as StdSignature,
-      ];
-      const signRes = await window.keplr?.signArbitrary(
-        params[0],
-        params[1],
-        params[2]
-      );
-      console.log("signRes", signRes);
-      if (signRes) {
-        params[3] = signRes;
-        const verifyRes = await window.keplr?.verifyArbitrary(...params);
-        console.log("verifyRes", verifyRes);
+  const signArbitrary = useCallback(
+    async (data: string | Uint8Array) => {
+      const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+      console.log(chainStore.current.chainId, accountInfo.bech32Address);
+      if (!chainStore.current.chainId || !accountInfo.bech32Address) {
+        console.log("Try again!");
+        return;
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      window.location.hash = "#/keystone/example";
-    }
-  };
+      try {
+        const params: [string, string, string | Uint8Array, StdSignature] = [
+          chainStore.current.chainId,
+          accountInfo.bech32Address,
+          data,
+          {} as StdSignature,
+        ];
+        const signRes = await window.keplr?.signArbitrary(
+          params[0],
+          params[1],
+          params[2]
+        );
+        console.log("signRes", signRes);
+        if (signRes) {
+          params[3] = signRes;
+          const verifyRes = await window.keplr?.verifyArbitrary(...params);
+          console.log("verifyRes", verifyRes);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        window.location.hash = "#/keystone/example";
+      }
+    },
+    [accountStore, chainStore]
+  );
   const signArbitraryString = useCallback(async () => {
     signArbitrary("123");
-  }, []);
+  }, [signArbitrary]);
   const signArbitraryBuffer = useCallback(async () => {
     signArbitrary(Buffer.from("ABC"));
-  }, []);
+  }, [signArbitrary]);
 
   const signEthereum = useCallback(
     async (signType: EthSignType, transactionType?: TransactionType) => {
@@ -247,48 +336,31 @@ export function KeystoneExamplePage() {
         return;
       }
 
-      let data: any;
-      if (signType === EthSignType.TRANSACTION) {
-        await signAndBroadcastEthereumTx(
-          current.chainId,
-          accountInfo.bech32Address,
-          transactionType as TransactionType
-        );
-      } else if (signType === EthSignType.EIP712) {
-        // https://github.com/apurbapokharel/EIP712Example/blob/master/client/src/App.js
-        data = JSON.stringify({
-          types: {
-            EIP712Domain: [
-              { name: "name", type: "string" },
-              { name: "version", type: "string" },
-              { name: "chainId", type: "uint256" },
-              { name: "verifyingContract", type: "address" },
-            ],
-            set: [
-              { name: "sender", type: "address" },
-              { name: "x", type: "uint" },
-              { name: "deadline", type: "uint" },
-            ],
-          },
-          //make sure to replace verifyingContract with address of deployed contract
-          primaryType: "set",
-          domain: {
-            name: "SetTest",
-            version: "1",
-            chainId: 9000,
-            verifyingContract: "0x803B558Fd23967F9d37BaFe2764329327f45e89E",
-          },
-          message: {
-            sender: accountInfo.ethereumHexAddress,
-            x: 157,
-            deadline: deadline,
-          },
-        });
-      } else if (signType === EthSignType.MESSAGE) {
-        data = "123456";
+      try {
+        let data: any;
+        if (signType === EthSignType.TRANSACTION) {
+          await signAndBroadcastEthereumTx(
+            current.chainId,
+            accountInfo.bech32Address,
+            transactionType as TransactionType
+          );
+        } else if (signType === EthSignType.EIP712) {
+          await signAndBroadcastEthereumTypedData(
+            current.chainId,
+            accountInfo.bech32Address
+          );
+        } else if (signType === EthSignType.MESSAGE) {
+          await signAndVerifyMessage(
+            current.chainId,
+            accountInfo.bech32Address
+          );
+        }
+        console.log("data", data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        window.location.hash = "#/keystone/example";
       }
-      console.log("data", data);
-      window.location.hash = "#/keystone/example";
     },
     [chainStore, accountStore]
   );
@@ -314,69 +386,74 @@ export function KeystoneExamplePage() {
     )
       .then((e) => e.json())
       .then((e) => e.account);
-    console.log(account);
-    const signRes = await window.keplr?.experimentalSignEIP712CosmosTx_v0(
-      current.chainId,
-      accountInfo.bech32Address,
-      {
-        types: {
-          EIP712Domain: [
-            { name: "name", type: "string" },
-            { name: "version", type: "string" },
-            { name: "chainId", type: "uint256" },
-            { name: "verifyingContract", type: "address" },
-            { name: "salt", type: "bytes32" },
-          ],
-          Bid: [
-            { name: "amount", type: "uint256" },
-            { name: "bidder", type: "Identity" },
-          ],
-          Identity: [
-            { name: "userId", type: "uint256" },
-            { name: "wallet", type: "address" },
-          ],
+    try {
+      const signRes = await window.keplr?.experimentalSignEIP712CosmosTx_v0(
+        current.chainId,
+        accountInfo.bech32Address,
+        {
+          types: {
+            EIP712Domain: [
+              { name: "name", type: "string" },
+              { name: "version", type: "string" },
+              { name: "chainId", type: "uint256" },
+              { name: "verifyingContract", type: "address" },
+              { name: "salt", type: "bytes32" },
+            ],
+            Bid: [
+              { name: "amount", type: "uint256" },
+              { name: "bidder", type: "Identity" },
+            ],
+            Identity: [
+              { name: "userId", type: "uint256" },
+              { name: "wallet", type: "address" },
+            ],
+          },
+          domain: {
+            name: "Auction dApp",
+            version: "2",
+            chainId: 9000,
+            verifyingContract: "0x1C56346CD2A2Bf3202F771f50d3D14a367B48070",
+            salt:
+              "0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558",
+          },
+          primaryType: "Bid",
         },
-        domain: {
-          name: "Auction dApp",
-          version: "2",
-          chainId: 9000,
-          verifyingContract: "0x1C56346CD2A2Bf3202F771f50d3D14a367B48070",
-          salt:
-            "0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558",
-        },
-        primaryType: "Bid",
-      },
-      {
-        chain_id: current.chainId,
-        account_number: account.account_number,
-        sequence: account.sequence,
-        fee: {
-          amount: [
+        {
+          chain_id: current.chainId,
+          account_number: account.account_number,
+          sequence: account.sequence,
+          fee: {
+            amount: [
+              {
+                denom: current.feeCurrencies[0].coinDenom,
+                amount: "1000",
+              },
+            ],
+            gas: "100000",
+            payer: accountInfo.bech32Address,
+            granter: "",
+          },
+          msgs: [
             {
-              denom: current.feeCurrencies[0].coinDenom,
-              amount: "1000",
-            },
-          ],
-          gas: "100000",
-          payer: accountInfo.bech32Address,
-          granter: "",
-        },
-        msgs: [
-          {
-            type: "AAA",
-            value: {
-              amount: 100,
-              bidder: {
-                userId: 323,
-                wallet: "0x3333333333333333333333333333333333333333",
+              type: "AAA",
+              value: {
+                amount: 100,
+                bidder: {
+                  userId: 323,
+                  wallet: "0x3333333333333333333333333333333333333333",
+                },
               },
             },
-          },
-        ],
-        memo: "123",
-      }
-    );
-    console.log("signRes", signRes);
+          ],
+          memo: "123",
+        }
+      );
+      console.log("signRes", signRes, signRes?.signature);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      window.location.hash = "#/keystone/example";
+    }
   }, [chainStore, accountStore]);
 
   const verify = () => {
@@ -421,10 +498,9 @@ export function KeystoneExamplePage() {
     <div
       style={{
         display: "flex",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
         flexDirection: "column",
-        height: "100%",
       }}
     >
       <p>

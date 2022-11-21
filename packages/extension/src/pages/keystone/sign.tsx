@@ -1,31 +1,40 @@
 import { UR } from "@keplr-wallet/stores";
 import { AnimatedQRCode } from "@keystonehq/animated-qr";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "reactstrap";
 import { useStore } from "../../stores";
 import { Scan, ScanType } from "./scan";
 import style from "./style.module.scss";
 
-const getScanType = (urType: string | undefined): ScanType =>
-  (urType &&
-    {
-      "eth-sign-request": ScanType.SignEth,
-      "cosmos-sign-request": ScanType.SignCosmos,
-    }[urType]) ||
-  ScanType.SignCosmos;
+const getScanType = (urType: string | undefined): ScanType => {
+  if (urType === "eth-sign-request") {
+    return ScanType.SignEth;
+  }
+  return ScanType.SignCosmos;
+};
 
 export const KeystoneSignPage = observer(() => {
   const [isScan, setIsScan] = useState(false);
   const [ur, setUR] = useState({} as UR);
+  const isPromiseDone = useRef(false);
 
   const { keystoneStore } = useStore();
 
   const onScanFinish = async (ur: UR) => {
+    isPromiseDone.current = true;
     keystoneStore.resolveSign({ signature: ur });
   };
 
+  const onCancel = () => {
+    isPromiseDone.current = true;
+    keystoneStore.resolveSign({
+      abort: true,
+    });
+  };
+
   const onReject = () => {
+    isPromiseDone.current = true;
     keystoneStore.rejectSign();
   };
 
@@ -40,17 +49,22 @@ export const KeystoneSignPage = observer(() => {
   }, [keystoneStore.signData]);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-keystone-import-page", "true");
+    document.documentElement.setAttribute("data-keystone-page", "true");
     return () => {
-      document.documentElement.removeAttribute("data-keystone-import-page");
+      if (!isPromiseDone.current) {
+        keystoneStore.resolveSign({
+          abort: true,
+        });
+      }
+      document.documentElement.removeAttribute("data-keystone-page");
     };
-  }, []);
+  }, [isPromiseDone, keystoneStore]);
 
   return isScan ? (
     <Scan
       type={getScanType(keystoneStore.signData?.data.ur.type)}
       onChange={onScanFinish}
-      onCancel={onReject}
+      onCancel={onCancel}
     />
   ) : (
     <div className={`${style.page} ${style.sign}`}>

@@ -1,6 +1,6 @@
 @import "../../styles/var";
 
-html[data-keystone-import-page] {
+html[data-keystone-page] {
   body {
     background-color: var(--white);
     @media (min-height: ($popup-size-height + 1)) {
