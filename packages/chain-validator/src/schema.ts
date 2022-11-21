@@ -9,23 +9,9 @@ import {
   Secret20Currency,
   WithGasPriceStep,
 } from "@keplr-wallet/types";
+import { SupportedChainFeatures } from "./feature";
 
 import Joi, { ObjectSchema } from "joi";
-
-export const SupportedChainFeatures = [
-  "stargate",
-  "cosmwasm",
-  "wasmd_0.24+",
-  "secretwasm",
-  "ibc-transfer",
-  "no-legacy-stdTx",
-  "ibc-go",
-  "eth-address-gen",
-  "eth-key-sign",
-  "query:/cosmos/bank/v1beta1/spendable_balances",
-  "axelar-evm-bridge",
-  "osmosis-txfees",
-];
 
 export const CurrencySchema = Joi.object<Currency>({
   coinDenom: Joi.string().required(),

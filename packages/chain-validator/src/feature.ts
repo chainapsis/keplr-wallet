@@ -1,6 +1,48 @@
 import { ChainInfo } from "@keplr-wallet/types";
 import Axios from "axios";
 
+export const SupportedChainFeatures = [
+  "stargate",
+  "cosmwasm",
+  "wasmd_0.24+",
+  "secretwasm",
+  "ibc-transfer",
+  "no-legacy-stdTx",
+  "ibc-go",
+  "eth-address-gen",
+  "eth-key-sign",
+  "query:/cosmos/bank/v1beta1/spendable_balances",
+  "axelar-evm-bridge",
+  "osmosis-txfees",
+];
+
+export const RecognizableChainFeaturesMethod: {
+  feature: string;
+  fetch: (chainInfo: ChainInfo) => boolean;
+}[] = [];
+
+export const RecognizableChainFeatures = RecognizableChainFeaturesMethod.map(
+  (method) => method.feature
+);
+
+export const NonRecognizableChainFeatures: string[] = (() => {
+  const m: Record<string, boolean | undefined> = {};
+
+  for (const feature of RecognizableChainFeatures) {
+    m[feature] = true;
+  }
+
+  const r: string[] = [];
+
+  for (const feature of SupportedChainFeatures) {
+    if (!m[feature]) {
+      r.push(feature);
+    }
+  }
+
+  return r;
+})();
+
 // CheckInfo for checking
 export type ChainInfoForCheck = Pick<ChainInfo, "rest" | "features">;
 

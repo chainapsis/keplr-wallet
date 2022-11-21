@@ -1,5 +1,12 @@
 import Http from "http";
-import { ChainInfoForCheck, checkChainFeatures, hasFeature } from "./feature";
+import {
+  ChainInfoForCheck,
+  checkChainFeatures,
+  hasFeature,
+  NonRecognizableChainFeatures,
+  RecognizableChainFeatures,
+  SupportedChainFeatures,
+} from "./feature";
 
 const createMockServer = (
   ibcGoSuccess: boolean,
@@ -75,6 +82,64 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
       closeServer();
       closeServer = undefined;
     }
+  });
+
+  test("test features has no duplication", () => {
+    let f: Record<string, boolean | undefined> = {};
+    for (const feature of SupportedChainFeatures) {
+      if (f[feature]) {
+        throw new Error(`${feature} is duplicated on SupportedChainFeatures`);
+      }
+
+      f[feature] = true;
+    }
+
+    f = {};
+    for (const feature of RecognizableChainFeatures) {
+      if (f[feature]) {
+        throw new Error(
+          `${feature} is duplicated on RecognizableChainFeatures`
+        );
+      }
+
+      f[feature] = true;
+    }
+
+    f = {};
+    for (const feature of NonRecognizableChainFeatures) {
+      if (f[feature]) {
+        throw new Error(
+          `${feature} is duplicated on NonRecognizableChainFeatures`
+        );
+      }
+
+      f[feature] = true;
+    }
+  });
+
+  test("test SupportedChainFeatures contains RecognizableChainFeatures/NonRecognizableChainFeatures", () => {
+    const f: Record<string, boolean | undefined> = {};
+    for (const feature of RecognizableChainFeatures) {
+      if (f[feature]) {
+        throw new Error(
+          `${feature} is duplicated on RecognizableChainFeatures`
+        );
+      }
+
+      f[feature] = true;
+    }
+
+    for (const feature of NonRecognizableChainFeatures) {
+      if (f[feature]) {
+        throw new Error(
+          `${feature} is duplicated on RecognizableChainFeatures/NonRecognizableChainFeatures`
+        );
+      }
+
+      f[feature] = true;
+    }
+
+    expect(Object.keys(f).sort()).toStrictEqual(SupportedChainFeatures.sort());
   });
 
   /**
