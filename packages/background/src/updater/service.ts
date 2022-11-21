@@ -4,7 +4,6 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainInfoWithCoreTypes, ChainsService } from "../chains";
 import {
   checkChainFeatures,
-  SupportedChainFeatures,
   validateBasicChainInfoType,
 } from "@keplr-wallet/chain-validator";
 import Axios from "axios";
@@ -37,20 +36,19 @@ export class ChainUpdaterService {
       chainInfo = updatedChainInfo;
     }
 
-    // There is a possibility that app has legacy updated chain info.
-    const legacy = await this.kvStore.get<Partial<ChainInfo>>(chainIdentifier);
-    if (legacy) {
+    const local = await this.kvStore.get<Partial<ChainInfo>>(chainIdentifier);
+    if (local) {
       chainInfo = {
         ...chainInfo,
         ...{
-          chainId: legacy.chainId || chainInfo.chainId,
+          chainId: local.chainId || chainInfo.chainId,
           features: (() => {
-            if (!legacy.features) {
+            if (!local.features) {
               return chainInfo.features;
             }
 
             const features = chainInfo.features ?? [];
-            for (const add of legacy.features) {
+            for (const add of local.features) {
               if (!features.find((f) => f !== add)) {
                 features.push(add);
               }
@@ -69,18 +67,6 @@ export class ChainUpdaterService {
       rpc: endpoints.rpc || chainInfo.rpc,
       rest: endpoints.rest || chainInfo.rest,
     };
-  }
-
-  async checkChainId(rpcUrl: string): Promise<string> {
-    const statusResponse = await Axios.get<{
-      result: {
-        node_info: {
-          network: string;
-        };
-      };
-    }>(`${rpcUrl}/status`);
-
-    return statusResponse.data.result.node_info.network;
   }
 
   async tryUpdateChainInfo(chainId: string): Promise<void> {
@@ -102,11 +88,12 @@ export class ChainUpdaterService {
 
       let chainInfo: ChainInfo = res.data;
 
-      const rpcChainId = await this.checkChainId(chainInfo.rpc);
-      const rpcChainIdentifier = ChainIdHelper.parse(rpcChainId).identifier;
-
-      if (chainIdentifier !== rpcChainIdentifier) {
-        console.log(`The chainId is not valid.(${chainId} -> ${rpcChainId})`);
+      const fetchedChainIdentifier = ChainIdHelper.parse(chainInfo.chainId)
+        .identifier;
+      if (chainIdentifier !== fetchedChainIdentifier) {
+        console.log(
+          `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
+        );
         return;
       }
 
@@ -139,12 +126,6 @@ export class ChainUpdaterService {
             })(),
           };
         })(),
-        // Pick supported features for current app version.
-        // Because the chain info to be updated is fetched from the outside, the actual version can be different.
-        // In this case, only pick supported features rather than rejecting.
-        features: chainInfo.features?.filter(
-          (f) => SupportedChainFeatures.indexOf(f) >= 0
-        ),
       };
 
       chainInfo = await validateBasicChainInfoType(chainInfo);
@@ -160,14 +141,14 @@ export class ChainUpdaterService {
       const toUpdateFeatures = await checkChainFeatures(updatedChainInfo);
 
       if (toUpdateFeatures.length !== 0) {
-        const legacy = await this.kvStore.get<Partial<ChainInfo>>(
+        const local = await this.kvStore.get<Partial<ChainInfo>>(
           chainIdentifier
         );
 
         await this.kvStore.set<Partial<ChainInfo>>(chainIdentifier, {
-          ...legacy,
+          ...local,
           features: [
-            ...new Set([...toUpdateFeatures, ...(legacy?.features ?? [])]),
+            ...new Set([...toUpdateFeatures, ...(local?.features ?? [])]),
           ],
         });
       }
@@ -178,6 +159,8 @@ export class ChainUpdaterService {
     }
   }
 
+  // This method is called on `ChainsService`.
+  // TODO: Refactor
   async clearUpdatedProperty(chainId: string) {
     await this.kvStore.set(ChainIdHelper.parse(chainId).identifier, null);
     await this.kvStore.set<ChainInfo>(
@@ -241,67 +224,5 @@ export class ChainUpdaterService {
     this.chainsService.clearCachedChainInfos();
 
     return await this.chainsService.getChainInfos();
-  }
-
-  /**
-   * Returns wether the chain has been changed.
-   * Currently, only check the chain id has been changed.
-   * @param chainInfo Chain information.
-   */
-  public static async checkChainUpdate(
-    chainInfo: Readonly<ChainInfo>
-  ): Promise<{
-    explicit: boolean;
-    slient: boolean;
-
-    chainId?: string;
-    features?: string[];
-  }> {
-    const chainId = chainInfo.chainId;
-
-    // If chain id is not fomatted as {chainID}-{version},
-    // there is no way to deal with the updated chain id.
-    if (!ChainIdHelper.hasChainVersion(chainId)) {
-      return {
-        explicit: false,
-        slient: false,
-      };
-    }
-
-    const instance = Axios.create({
-      baseURL: chainInfo.rpc,
-    });
-
-    // Get the status to get the chain id.
-    const result = await instance.get<{
-      result: {
-        node_info: {
-          network: string;
-        };
-      };
-    }>("/status");
-
-    const resultChainId = result.data.result.node_info.network;
-
-    const version = ChainIdHelper.parse(chainId);
-    const fetchedVersion = ChainIdHelper.parse(resultChainId);
-
-    // TODO: Should throw an error?
-    if (version.identifier !== fetchedVersion.identifier) {
-      return {
-        explicit: false,
-        slient: false,
-      };
-    }
-
-    const features = await checkChainFeatures(chainInfo);
-
-    return {
-      explicit: version.version < fetchedVersion.version,
-      slient: features.length > 0,
-
-      chainId: resultChainId,
-      features,
-    };
   }
 }
