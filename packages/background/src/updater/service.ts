@@ -1,5 +1,5 @@
 import { ChainInfo } from "@keplr-wallet/types";
-import { KVStore } from "@keplr-wallet/common";
+import { KVStore, sortedJsonByKeyStringify } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainInfoWithCoreTypes, ChainsService } from "../chains";
 import {
@@ -9,7 +9,7 @@ import {
 import Axios from "axios";
 
 export class ChainUpdaterService {
-  protected chainsService!: ChainsService;
+  public chainsService!: ChainsService;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -60,6 +60,26 @@ export class ChainUpdaterService {
       };
     }
 
+    // Reduce the confusion from different coin type on ecosystem.
+    // Unite coin type for all chain to 118 with allowing alternatives.
+    // (If coin type is 60, it is probably to be compatible with metamask. So, in this case, do nothing.)
+    if (chainInfo.bip44.coinType !== 118 && chainInfo.bip44.coinType !== 60) {
+      chainInfo = {
+        ...chainInfo,
+        alternativeBIP44s: (() => {
+          let res = chainInfo.alternativeBIP44s ?? [];
+
+          if (res.find((c) => c.coinType === 118)) {
+            return res;
+          }
+
+          res = [...res, { coinType: 118 }];
+
+          return res;
+        })(),
+      };
+    }
+
     const endpoints = await this.getChainEndpoints(origin.chainId);
 
     return {
@@ -69,11 +89,11 @@ export class ChainUpdaterService {
     };
   }
 
-  async tryUpdateChainInfo(chainId: string): Promise<void> {
+  async tryUpdateChainInfo(chainId: string): Promise<boolean> {
     if (
       (await this.chainsService.getChainInfo(chainId)).updateFromRepoDisabled
     ) {
-      return;
+      return false;
     }
 
     try {
@@ -94,53 +114,39 @@ export class ChainUpdaterService {
         console.log(
           `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
         );
-        return;
+        return false;
       }
 
-      chainInfo = {
-        ...chainInfo,
-        ...(() => {
-          // If coin type is 60, it is probably to be compatible with metamask.
-          // So, in this case, do nothing.
-          if (chainInfo.bip44.coinType === 60) {
-            return;
-          }
+      let updated = false;
 
-          // Reduce the confusion from different coin type on ecosystem.
-          // Unite coin type for all chain with allowing alternatives.
-          return {
-            alternativeBIP44s: (() => {
-              let res = chainInfo.alternativeBIP44s ?? [];
-
-              if (chainInfo.bip44.coinType === 118) {
-                return res;
-              }
-
-              if (res.find((c) => c.coinType === 118)) {
-                return res;
-              }
-
-              res = [...res, { coinType: 118 }];
-
-              return res;
-            })(),
-          };
-        })(),
-      };
-
-      chainInfo = await validateBasicChainInfoType(chainInfo);
-
-      await this.kvStore.set<ChainInfo>(
-        "updated-chain-info/" + chainIdentifier,
-        chainInfo
+      const prevFetchedChainInfo = await this.kvStore.get<ChainInfo>(
+        "updated-chain-info/" + chainIdentifier
       );
+      if (
+        !prevFetchedChainInfo ||
+        sortedJsonByKeyStringify(prevFetchedChainInfo) !==
+          sortedJsonByKeyStringify(chainInfo)
+      ) {
+        updated = true;
+      }
 
-      this.chainsService.clearCachedChainInfos();
+      if (updated) {
+        chainInfo = await validateBasicChainInfoType(chainInfo);
+
+        await this.kvStore.set<ChainInfo>(
+          "updated-chain-info/" + chainIdentifier,
+          chainInfo
+        );
+
+        this.chainsService.clearCachedChainInfos();
+      }
 
       const updatedChainInfo = await this.chainsService.getChainInfo(chainId);
       const toUpdateFeatures = await checkChainFeatures(updatedChainInfo);
 
-      if (toUpdateFeatures.length !== 0) {
+      updated = toUpdateFeatures.length !== 0;
+
+      if (updated) {
         const local = await this.kvStore.get<Partial<ChainInfo>>(
           chainIdentifier
         );
@@ -151,12 +157,16 @@ export class ChainUpdaterService {
             ...new Set([...toUpdateFeatures, ...(local?.features ?? [])]),
           ],
         });
+
+        this.chainsService.clearCachedChainInfos();
       }
 
-      this.chainsService.clearCachedChainInfos();
+      return updated;
     } catch (e) {
       console.log(`Failed to try to update chain info for ${chainId}`, e);
     }
+
+    return false;
   }
 
   // This method is called on `ChainsService`.

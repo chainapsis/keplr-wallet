@@ -2,7 +2,10 @@ import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { ChainInfoWithCoreTypes } from "../chains";
 
-export class TryUpdateChainMsg extends Message<void> {
+export class TryUpdateChainMsg extends Message<{
+  updated: boolean;
+  afterChainInfos: ChainInfoWithCoreTypes[];
+}> {
   public static type() {
     return "try-update-chain";
   }
