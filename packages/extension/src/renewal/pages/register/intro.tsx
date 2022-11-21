@@ -60,7 +60,7 @@ export const RegisterIntro: FunctionComponent<{
             // Temporarily, hide the ledger usage.
             uiConfigStore.platform !== "firefox" && (
               <Button
-                color="transparent"
+                variant="transparent"
                 onClick={(e) => {
                   e.preventDefault();
                 }}

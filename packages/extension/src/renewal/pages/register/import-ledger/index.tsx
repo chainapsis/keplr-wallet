@@ -13,7 +13,7 @@ export const ImportLedgerButton: FunctionComponent<{
 
   return (
     <Button
-      color="transparent"
+      variant="transparent"
       onClick={(e) => {
         e.preventDefault();
 

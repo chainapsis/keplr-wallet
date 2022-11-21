@@ -10,6 +10,7 @@ import { CheckIcon } from "../../../components/icon";
 import { Input } from "../../../components/input";
 import { Stack } from "../../../components/stack";
 import { Tiles } from "../../../components/tiles";
+import { useSimpleTimer } from "../../../hooks/use-simple-timer";
 import { ColorPalette } from "../../../styles";
 import { NumWords, useNewMnemonicConfig } from "./hook";
 
@@ -20,6 +21,8 @@ export const CreateAccount: FunctionComponent<{
 }> = observer(({ registerConfig }) => {
   const intl = useIntl();
   const newMnemonicConfig = useNewMnemonicConfig(registerConfig);
+
+  const { isTimedOut, setTimer } = useSimpleTimer();
 
   return (
     <Stack gutter="2rem" alignItems="center">
@@ -71,8 +74,15 @@ export const CreateAccount: FunctionComponent<{
         ))}
       </Tiles>
       <Gutter size="1rem" />
-      <Button color="transparent" onClick={() => {}} rightIcon={<CheckIcon />}>
-        Copy to clipboard
+      <Button
+        variant="transparent"
+        color={!isTimedOut ? "primary" : "success"}
+        onClick={() => {
+          setTimer(3000);
+        }}
+        rightIcon={isTimedOut ? <CheckIcon /> : undefined}
+      >
+        <SemiboldText>Copy to clipboard</SemiboldText>
       </Button>
     </Stack>
   );
@@ -104,4 +114,8 @@ const Title = styled.h1`
   line-height: 44px;
   text-align: center;
   color: ${ColorPalette["platinum-500"]};
+`;
+
+const SemiboldText = styled.span`
+  font-weight: 600;
 `;
