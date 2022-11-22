@@ -39,7 +39,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
       <Card
         width="100%"
         maxWidth={registerConfig.isIntro ? "34.25rem" : "35rem"}
-        padding="4.625rem"
+        padding="50px 80px"
         isAnimated
       >
         {registerConfig.isIntro && (

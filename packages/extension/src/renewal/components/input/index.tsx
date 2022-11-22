@@ -1,24 +1,48 @@
-import React, { FunctionComponent } from "react";
+import React, { ChangeEvent, FunctionComponent, RefObject } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
 
 export interface InputProps {
-  label: string;
-  value: string;
+  label?: string;
+  value?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   readOnly?: boolean;
   isInline?: boolean;
+  name?: string;
+  disabled?: boolean;
+  required?: boolean;
+  type?: "text" | "number" | "search" | "tel" | "url" | "email" | "password";
+  placeholder?: string;
+  ref?: (
+    instance: HTMLInputElement | null
+  ) => void | RefObject<HTMLInputElement>;
 }
 
 export const Input: FunctionComponent<InputProps> = ({
   label,
   value,
+  onChange,
   readOnly,
   isInline,
+  disabled,
+  required,
+  type = "text",
+  placeholder,
+  ref,
 }) => {
   return (
     <Container isInline={isInline}>
       <StyledLabel>{label}</StyledLabel>
-      <StyledInput value={value} readOnly={readOnly} />
+      <StyledInput
+        type={type}
+        value={value}
+        readOnly={readOnly}
+        onChange={onChange}
+        disabled={disabled}
+        required={required}
+        placeholder={placeholder}
+        ref={ref}
+      />
     </Container>
   );
 };

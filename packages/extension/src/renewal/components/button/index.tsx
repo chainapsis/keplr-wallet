@@ -57,17 +57,17 @@ const styleFromColorAndVariant = {
 
 const styleFromSizeAndVariant = {
   block: {
-    solid: "width: 100%; height: 3.25rem;",
-    transparent: "width: 100%; height: 2rem;",
+    solid: "font-size: 16px; width: 100%; height: 3.25rem;",
+    transparent: "font-size: 16px; width: 100%; height: 2rem;",
   },
   md: {
-    solid: "width: 10rem; height: 3.25rem;",
-    transparent: "width: 10rem; height: 2rem;",
+    solid: "font-size: 14px; width: 8.875rem; height: 2.25rem;",
+    transparent: "font-size: 14px; width: 8.875rem; height: 2.25rem;",
   },
 };
 
 const Container = styled.button<ButtonProps>`
-  height: 3.25rem;
+  padding: 10px 12px;
   ${({ size, variant }) =>
     size && variant && styleFromSizeAndVariant[size][variant]}
   ${({ color, variant }) =>
@@ -79,6 +79,4 @@ const Container = styled.button<ButtonProps>`
   max-width: 400px;
 
   font-weight: 600;
-  font-size: 16px;
-  line-height: 19px;
 `;
