@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/stores-etc",
-  "version": "0.11.18-alpha.2",
+  "version": "0.11.18-alpha.3",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -18,9 +18,9 @@
   },
   "dependencies": {
     "@ethersproject/abi": "^5.6.0",
-    "@keplr-wallet/common": "0.11.18-alpha.2",
-    "@keplr-wallet/stores": "0.11.18-alpha.2",
-    "@keplr-wallet/types": "0.11.18-alpha.2",
+    "@keplr-wallet/common": "0.11.18-alpha.3",
+    "@keplr-wallet/stores": "0.11.18-alpha.3",
+    "@keplr-wallet/types": "0.11.18-alpha.3",
     "axios": "^0.27.2",
     "mobx": "^6.1.7",
     "utility-types": "^3.10.0"
