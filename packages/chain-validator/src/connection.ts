@@ -4,7 +4,9 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 export async function checkRPCConnectivity(
   chainId: string,
   rpc: string,
-  wsObject?: new (url: string, protocols?: string | string[]) => WebSocket
+  wsObject?: new (url: string, protocols?: string | string[]) => {
+    readyState: number;
+  }
 ): Promise<void> {
   const rpcInstance = Axios.create({
     baseURL: rpc,
