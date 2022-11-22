@@ -237,6 +237,6 @@ export class KeystoneService {
       const rlpData = ((signRes as any) as TypedTransaction).serialize();
       return rlpData;
     }
-    return Buffer.from(signRes as string, "utf-8");
+    return Buffer.from((signRes as string).replace(/^0x/, ""), "hex");
   }
 }

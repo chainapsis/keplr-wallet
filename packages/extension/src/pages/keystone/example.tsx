@@ -10,11 +10,12 @@ import { Button } from "reactstrap";
 import { useStore } from "../../stores";
 import Long from "long";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
-import { Hash, PrivKeySecp256k1, PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { Hash, PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { BroadcastMode, EthSignType, StdSignature } from "@keplr-wallet/types";
 
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { evmosToEth } from "@tharsis/address-converter";
+import { recoverPersonalSignature, recoverTypedSignature } from "eth-sig-util";
 
 enum TransactionType {
   EIP1559 = 2,
@@ -86,94 +87,116 @@ async function signAndBroadcastEthereumTx(
   return res;
 }
 
-async function signAndBroadcastEthereumTypedData(
-  chainId: string,
-  signerAddressBech32: string
-) {
-  // Get Keplr signer address in hex
-  const signerAddressEth = evmosToEth(signerAddressBech32);
-  console.log("signerAddressEth", signerAddressEth);
-
-  // https://github.com/apurbapokharel/EIP712Example/blob/master/client/src/App.js
-  const data = {
-    types: {
-      EIP712Domain: [
-        { name: "name", type: "string" },
-        { name: "version", type: "string" },
-        { name: "chainId", type: "uint256" },
-        { name: "verifyingContract", type: "address" },
-      ],
-      set: [
-        { name: "sender", type: "address" },
-        { name: "x", type: "uint" },
-        { name: "deadline", type: "uint" },
-      ],
-    },
-    //make sure to replace verifyingContract with address of deployed contract
-    primaryType: "set",
-    domain: {
-      name: "SetTest",
-      version: "1",
-      chainId: 9000,
-      verifyingContract: "0x803B558Fd23967F9d37BaFe2764329327f45e89E",
-    },
-    message: {
-      sender: signerAddressEth,
-      x: 157,
-      deadline: parseInt(String(Date.now() / 1000 + 100).slice(0, 10)),
-    },
-  };
-
-  console.log(
-    chainId,
-    signerAddressBech32,
-    JSON.stringify(data),
-    EthSignType.EIP712
-  );
-  const signRes: any = await window.keplr?.signEthereum(
-    chainId,
-    signerAddressBech32,
-    JSON.stringify(data),
-    EthSignType.EIP712
-  );
-
-  const res = await ethProvider.sendTransaction(signRes);
-  console.log("signAndBroadcastEthereumTypedData", res);
-  return res;
-}
-
-async function signAndVerifyMessage(
-  chainId: string,
-  signerAddressBech32: string
-) {
-  const data = "123456";
-  console.log(chainId, signerAddressBech32, data, EthSignType.MESSAGE);
-  const signRes: any = await window.keplr?.signEthereum(
-    chainId,
-    signerAddressBech32,
-    data,
-    EthSignType.MESSAGE
-  );
-  console.log("signRes", signRes);
-  console.log(
-    "verifyMessage",
-    verifyMessage(
-      "024f4e2ad99c34d60b9ba6283c9431a8418af8673212961f97a77b6377fcd05b62",
-      Hash.keccak256(
-        Buffer.from(`\x19Ethereum Signed Message:\n${data.length}${data}`)
-      ),
-      signRes
-    )
-  );
-}
-
-function verifyMessage(pubKey: string, message: Uint8Array, signature: string) {
-  const pub = new PubKeySecp256k1(Buffer.from(pubKey, "hex"));
-  return pub.verifyDigest32(message, Buffer.from(signature, "hex"));
-}
-
 export function KeystoneExamplePage() {
   const { chainStore, accountStore } = useStore();
+
+  const verify = (
+    dataHexString: string,
+    signatureHexString: string,
+    isEth: boolean = false
+  ) => {
+    const data = Buffer.from(dataHexString, "hex");
+    const current = chainStore.current;
+    const accountInfo = accountStore.getAccount(current.chainId);
+    const pubKey = new PubKeySecp256k1(accountInfo.pubKey);
+    const res = pubKey.verifyDigest32(
+      isEth ? Hash.keccak256(data) : Hash.sha256(data),
+      Buffer.from(signatureHexString, "hex")
+    );
+    return res;
+  };
+
+  async function signAndBroadcastEthereumTypedData(
+    chainId: string,
+    signerAddressBech32: string
+  ) {
+    // Get Keplr signer address in hex
+    const signerAddressEth = evmosToEth(signerAddressBech32);
+    console.log("signerAddressEth", signerAddressEth);
+
+    // https://github.com/apurbapokharel/EIP712Example/blob/master/client/src/App.js
+    const data = {
+      types: {
+        EIP712Domain: [
+          { name: "name", type: "string" },
+          { name: "version", type: "string" },
+          { name: "chainId", type: "uint256" },
+          { name: "verifyingContract", type: "address" },
+        ],
+        set: [
+          { name: "sender", type: "address" },
+          { name: "x", type: "uint" },
+          { name: "deadline", type: "uint" },
+        ],
+      },
+      //make sure to replace verifyingContract with address of deployed contract
+      primaryType: "set",
+      domain: {
+        name: "SetTest",
+        version: "1",
+        chainId: 9000,
+        verifyingContract: "0x803B558Fd23967F9d37BaFe2764329327f45e89E",
+      },
+      message: {
+        sender: signerAddressEth,
+        x: 157,
+        deadline: parseInt(String(Date.now() / 1000 + 100).slice(0, 10)),
+      },
+    };
+
+    console.log(
+      chainId,
+      signerAddressBech32,
+      JSON.stringify(data),
+      EthSignType.EIP712
+    );
+    console.log(evmosToEth(signerAddressBech32));
+    const signRes: any = await window.keplr?.signEthereum(
+      chainId,
+      signerAddressBech32,
+      JSON.stringify(data),
+      EthSignType.EIP712
+    );
+
+    const recoveredAddr = recoverTypedSignature({
+      data,
+      sig: `0x${Buffer.from(signRes).toString("hex")}`,
+    });
+    console.log("recoveredAddr", recoveredAddr);
+    alert(
+      `Verify: ${
+        recoveredAddr.toLowerCase() ===
+        evmosToEth(signerAddressBech32).toLowerCase()
+      }`
+    );
+  }
+
+  async function signAndVerifyMessage(
+    chainId: string,
+    signerAddressBech32: string
+  ) {
+    const data = "123456";
+    console.log(chainId, signerAddressBech32, data, EthSignType.MESSAGE);
+    const signRes: any = await window.keplr?.signEthereum(
+      chainId,
+      signerAddressBech32,
+      data,
+      EthSignType.MESSAGE
+    );
+    const signature = Buffer.from(signRes).toString("hex");
+    console.log("signRes", signature);
+    const recoveredAddr = recoverPersonalSignature({
+      data: `0x${Buffer.from(data).toString("hex")}`,
+      sig: `0x${Buffer.from(signRes).toString("hex")}`,
+    });
+    console.log("recoveredAddr", recoveredAddr);
+    alert(
+      `Verify: ${
+        recoveredAddr.toLowerCase() ===
+        evmosToEth(signerAddressBech32).toLowerCase()
+      }`
+    );
+  }
 
   const signDirect = useCallback(async () => {
     const toAddr = "osmo1ptq7fgx0cgghlpjsvarr5kznlkj3h7tmgr0p4d";
@@ -387,37 +410,38 @@ export function KeystoneExamplePage() {
       .then((e) => e.json())
       .then((e) => e.account);
     try {
+      const msg = {
+        types: {
+          EIP712Domain: [
+            { name: "name", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
+            { name: "verifyingContract", type: "address" },
+            { name: "salt", type: "bytes32" },
+          ],
+          Bid: [
+            { name: "amount", type: "uint256" },
+            { name: "bidder", type: "Identity" },
+          ],
+          Identity: [
+            { name: "userId", type: "uint256" },
+            { name: "wallet", type: "address" },
+          ],
+        },
+        domain: {
+          name: "Auction dApp",
+          version: "2",
+          chainId: 9000,
+          verifyingContract: "0x1C56346CD2A2Bf3202F771f50d3D14a367B48070",
+          salt:
+            "0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558",
+        },
+        primaryType: "Bid",
+      };
       const signRes = await window.keplr?.experimentalSignEIP712CosmosTx_v0(
         current.chainId,
         accountInfo.bech32Address,
-        {
-          types: {
-            EIP712Domain: [
-              { name: "name", type: "string" },
-              { name: "version", type: "string" },
-              { name: "chainId", type: "uint256" },
-              { name: "verifyingContract", type: "address" },
-              { name: "salt", type: "bytes32" },
-            ],
-            Bid: [
-              { name: "amount", type: "uint256" },
-              { name: "bidder", type: "Identity" },
-            ],
-            Identity: [
-              { name: "userId", type: "uint256" },
-              { name: "wallet", type: "address" },
-            ],
-          },
-          domain: {
-            name: "Auction dApp",
-            version: "2",
-            chainId: 9000,
-            verifyingContract: "0x1C56346CD2A2Bf3202F771f50d3D14a367B48070",
-            salt:
-              "0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558",
-          },
-          primaryType: "Bid",
-        },
+        msg,
         {
           chain_id: current.chainId,
           account_number: account.account_number,
@@ -449,6 +473,17 @@ export function KeystoneExamplePage() {
         }
       );
       console.log("signRes", signRes, signRes?.signature);
+      const recoveredAddr = recoverTypedSignature({
+        data: msg,
+        sig: `0x${Buffer.from(signRes?.signature).toString("hex")}`,
+      });
+      console.log("recoveredAddr", recoveredAddr);
+      alert(
+        `Verify: ${
+          recoveredAddr.toLowerCase() ===
+          accountInfo.ethereumHexAddress.toLowerCase()
+        }`
+      );
     } catch (err) {
       console.error(err);
     } finally {
@@ -456,42 +491,8 @@ export function KeystoneExamplePage() {
     }
   }, [chainStore, accountStore]);
 
-  const verify = () => {
-    const data = Buffer.from(
-      "0a8d010a85010a1c2f636f736d6f732e62616e6b2e763162657461312e4d736753656e6412650a2b6f736d6f3139726c34636d32686d7238616679346b6c6470787a33666b61346a6775713061356d37646638122b6f736d6f317074713766677830636767686c706a7376617272356b7a6e6c6b6a336837746d6772307034641a090a044f534d4f12013112034142431294010a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a21024f4e2ad99c34d60b9ba6283c9431a8418af8673212961f97a77b6377fcd05b6212040a020801180212400a0d0a05756f736d6f12043235303010a08d061a2b6f736d6f3139726c34636d32686d7238616679346b6c6470787a33666b61346a6775713061356d376466381a0b6f736d6f2d746573742d3420e8fc10",
-      "hex"
-    );
-
-    const priv = new PrivKeySecp256k1(
-      Buffer.from(
-        "797157ef0e02fda15b73e68e267d349fdf52ea3a248bdcc98883a63a2057f080",
-        "hex"
-      )
-    );
-
-    const signature = priv.signDigest32(Hash.sha256(data));
-
-    const pub = new PubKeySecp256k1(
-      Buffer.from(
-        "024f4e2ad99c34d60b9ba6283c9431a8418af8673212961f97a77b6377fcd05b62",
-        "hex"
-      )
-    );
-
-    console.log(
-      "verify priv sign",
-      pub.verifyDigest32(Hash.sha256(data), signature),
-      Buffer.from(signature).toString("hex")
-    );
-
-    const res = pub.verifyDigest32(
-      Hash.sha256(data),
-      Buffer.from(
-        "c3b6cda9269605a54c4626665bddfd1521192c6287d2a12654a662ad141d8c110095b5093e1d4709a930a6ee42948a18a511566c1a472dc855f833733b300818",
-        "hex"
-      )
-    );
-    console.log("verify", res);
+  const verifySignature = () => {
+    console.log("verifySignature", verify("", "", false));
   };
 
   return (
@@ -504,9 +505,9 @@ export function KeystoneExamplePage() {
       }}
     >
       <p>
-        <Button onClick={verify}>Verify Signature</Button>
+        <Button onClick={verifySignature}>Verify Signature</Button>
       </p>
-      <p>Chain: Somosis</p>
+      <p>Chain: Osmosis</p>
       <p>
         <Button onClick={signDirect}>Sign Direct</Button>
       </p>

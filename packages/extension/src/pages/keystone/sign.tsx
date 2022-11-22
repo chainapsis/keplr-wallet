@@ -1,7 +1,7 @@
 import { UR } from "@keplr-wallet/stores";
 import { AnimatedQRCode } from "@keystonehq/animated-qr";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "reactstrap";
 import { useStore } from "../../stores";
 import { Scan, ScanType } from "./scan";
@@ -33,10 +33,10 @@ export const KeystoneSignPage = observer(() => {
     });
   };
 
-  const onReject = () => {
+  const onReject = useCallback(() => {
     isPromiseDone.current = true;
     keystoneStore.rejectSign();
-  };
+  }, [isPromiseDone, keystoneStore]);
 
   const onGetSignature = () => {
     setIsScan(true);
@@ -50,7 +50,9 @@ export const KeystoneSignPage = observer(() => {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-keystone-page", "true");
+    window.addEventListener("unload", onReject);
     return () => {
+      window.removeEventListener("unload", onReject);
       if (!isPromiseDone.current) {
         keystoneStore.resolveSign({
           abort: true,
@@ -58,7 +60,7 @@ export const KeystoneSignPage = observer(() => {
       }
       document.documentElement.removeAttribute("data-keystone-page");
     };
-  }, [isPromiseDone, keystoneStore]);
+  }, [isPromiseDone, keystoneStore, onReject]);
 
   return isScan ? (
     <Scan
