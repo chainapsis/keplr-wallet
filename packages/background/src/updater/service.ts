@@ -49,7 +49,7 @@ export class ChainUpdaterService {
 
             const features = chainInfo.features ?? [];
             for (const add of local.features) {
-              if (!features.find((f) => f !== add)) {
+              if (!features.includes(add)) {
                 features.push(add);
               }
             }
@@ -117,7 +117,7 @@ export class ChainUpdaterService {
         return false;
       }
 
-      let updated = false;
+      let repoUpdated = false;
 
       const prevFetchedChainInfo = await this.kvStore.get<ChainInfo>(
         "updated-chain-info/" + chainIdentifier
@@ -127,10 +127,8 @@ export class ChainUpdaterService {
         sortedJsonByKeyStringify(prevFetchedChainInfo) !==
           sortedJsonByKeyStringify(chainInfo)
       ) {
-        updated = true;
-      }
+        repoUpdated = true;
 
-      if (updated) {
         chainInfo = await validateBasicChainInfoType(chainInfo);
 
         await this.kvStore.set<ChainInfo>(
@@ -142,11 +140,34 @@ export class ChainUpdaterService {
       }
 
       const updatedChainInfo = await this.chainsService.getChainInfo(chainId);
+
+      let chainIdUpdated = false;
+      const chainIdFromRPC = await this.checkChainIdFromRPC(
+        updatedChainInfo.rpc
+      );
+      if (ChainIdHelper.parse(chainIdFromRPC).identifier !== chainIdentifier) {
+        throw new Error(
+          `Chain id is different from rpc: (expected: ${chainId}, actual: ${chainIdFromRPC})`
+        );
+      }
+      if (updatedChainInfo.chainId !== chainIdFromRPC) {
+        chainIdUpdated = true;
+
+        const local = await this.kvStore.get<Partial<ChainInfo>>(
+          chainIdentifier
+        );
+
+        await this.kvStore.set<Partial<ChainInfo>>(chainIdentifier, {
+          ...local,
+          chainId: chainIdFromRPC,
+        });
+      }
+
       const toUpdateFeatures = await checkChainFeatures(updatedChainInfo);
 
-      updated = toUpdateFeatures.length !== 0;
+      const featuresUpdated = toUpdateFeatures.length !== 0;
 
-      if (updated) {
+      if (featuresUpdated) {
         const local = await this.kvStore.get<Partial<ChainInfo>>(
           chainIdentifier
         );
@@ -157,11 +178,13 @@ export class ChainUpdaterService {
             ...new Set([...toUpdateFeatures, ...(local?.features ?? [])]),
           ],
         });
+      }
 
+      if (chainIdUpdated || featuresUpdated) {
         this.chainsService.clearCachedChainInfos();
       }
 
-      return updated;
+      return repoUpdated || chainIdUpdated || featuresUpdated;
     } catch (e) {
       console.log(`Failed to try to update chain info for ${chainId}`, e);
     }
@@ -234,5 +257,19 @@ export class ChainUpdaterService {
     this.chainsService.clearCachedChainInfos();
 
     return await this.chainsService.getChainInfos();
+  }
+
+  protected async checkChainIdFromRPC(rpc: string): Promise<string> {
+    const statusResponse = await Axios.get<{
+      result: {
+        node_info: {
+          network: string;
+        };
+      };
+    }>("/status", {
+      baseURL: rpc,
+    });
+
+    return statusResponse.data.result.node_info.network;
   }
 }
