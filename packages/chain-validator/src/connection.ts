@@ -4,8 +4,11 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 export async function checkRPCConnectivity(
   chainId: string,
   rpc: string,
-  wsObject?: new (url: string, protocols?: string | string[]) => {
-    readyState: number;
+  wsObject?: (
+    url: string
+  ) => {
+    readonly readyState: number;
+    onerror: ((event: any) => void) | null;
     close(): void;
   }
 ): Promise<void> {
@@ -60,7 +63,11 @@ export async function checkRPCConnectivity(
   }
   wsURL = wsURL.endsWith("/") ? wsURL + "websocket" : wsURL + "/websocket";
 
-  const wsInstance = wsObject ? new wsObject(wsURL) : new WebSocket(wsURL);
+  const wsInstance = wsObject ? wsObject(wsURL) : new WebSocket(wsURL);
+  wsInstance.onerror = () => {
+    // To prevent not catchable error,
+    // provide noop handler.
+  };
 
   let wsConnected = false;
   // Try 15 times at 1 second intervals to test websocket connectivity.
