@@ -5,8 +5,14 @@ import { Bech32Config } from "./bech32";
 
 export interface ChainInfo {
   readonly rpc: string;
+  /**
+   * @deprecated
+   */
   readonly rpcConfig?: AxiosRequestConfig;
   readonly rest: string;
+  /**
+   * @deprecated
+   */
   readonly restConfig?: AxiosRequestConfig;
   readonly chainId: string;
   readonly chainName: string;
