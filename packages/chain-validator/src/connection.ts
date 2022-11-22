@@ -6,6 +6,7 @@ export async function checkRPCConnectivity(
   rpc: string,
   wsObject?: new (url: string, protocols?: string | string[]) => {
     readyState: number;
+    close(): void;
   }
 ): Promise<void> {
   const rpcInstance = Axios.create({
@@ -61,12 +62,14 @@ export async function checkRPCConnectivity(
 
   const wsInstance = wsObject ? new wsObject(wsURL) : new WebSocket(wsURL);
 
+  let wsConnected = false;
   // Try 15 times at 1 second intervals to test websocket connectivity.
   for (let i = 0; i < 15; i++) {
     // If ws state is not "connecting"
     if (wsInstance.readyState !== 0) {
       // If ws state is "open", it means that app can connect ws to /websocket rpc
       if (wsInstance.readyState === 1) {
+        wsConnected = true;
         break;
       } else {
         // else, handle that as error.
@@ -75,6 +78,13 @@ export async function checkRPCConnectivity(
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  // Close web socket
+  wsInstance.close();
+
+  if (!wsConnected) {
+    throw new Error("Failed to connect websocket to /websocket rpc");
   }
 }
 
