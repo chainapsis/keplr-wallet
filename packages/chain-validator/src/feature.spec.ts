@@ -14,7 +14,11 @@ const createMockServer = (
   WasmSuccess: boolean,
   SpendableBalancesSuccess: boolean
 ) => {
+  let i = 0;
+
   const server = Http.createServer((req, resp) => {
+    i++;
+
     if (req.url === "/ibc/apps/transfer/v1/params") {
       resp.writeHead(ibcGoSuccess ? 200 : 501, {
         "content-type": "text/json",
@@ -64,17 +68,20 @@ const createMockServer = (
     closeServer: () => {
       server.close();
     },
+    getQueryCount: () => i,
   };
 };
 
 describe("The chain server supports all features(체인 서버가 모든 기능을 지원할 때)", () => {
   let port: number = -1;
   let closeServer: (() => void) | undefined;
+  let getQueryCount: (() => number) | undefined;
 
   beforeEach(() => {
     const server = createMockServer(true, true, true, true);
     port = server.port;
     closeServer = server.closeServer;
+    getQueryCount = server.getQueryCount;
   });
 
   afterEach(() => {
@@ -82,6 +89,7 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
       closeServer();
       closeServer = undefined;
     }
+    getQueryCount = undefined;
   });
 
   test("test features has no duplication", () => {
@@ -140,6 +148,33 @@ describe("The chain server supports all features(체인 서버가 모든 기능�
     }
 
     expect(Object.keys(f).sort()).toStrictEqual(SupportedChainFeatures.sort());
+  });
+
+  test("hasFeature should not make query if chain info already include feature", async () => {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
+      rest: `http://127.0.0.1:${port}`,
+      features: ["ibc-go"],
+    };
+
+    expect(await hasFeature(mockChainInfoForCheck, "ibc-go")).toEqual(true);
+
+    expect(getQueryCount!()).toEqual(0);
+  });
+
+  test("checkChainFeatures should not make query if chain info already include feature", async () => {
+    const mockChainInfoForCheck: ChainInfoForCheck = {
+      rpc: "noop",
+      rest: `http://127.0.0.1:${port}`,
+      features: ["ibc-go"],
+    };
+
+    expect(await checkChainFeatures(mockChainInfoForCheck)).toEqual([
+      "ibc-transfer",
+      "query:/cosmos/bank/v1beta1/spendable_balances",
+    ]);
+
+    expect(getQueryCount!()).toEqual(2);
   });
 
   /**
@@ -335,14 +370,7 @@ describe("The chain server doesn't support all features(체인 서버가 모든 
       features: [],
     };
 
-    try {
-      await hasFeature(mockChainInfoForCheck, "ibc-go");
-    } catch (error) {
-      expect(error).toHaveProperty(
-        "message",
-        "Failed to get response /ibc/apps/transfer/v1/params from lcd endpoint"
-      );
-    }
+    expect(await hasFeature(mockChainInfoForCheck, "ibc-go")).toEqual(false);
   });
 
   /**

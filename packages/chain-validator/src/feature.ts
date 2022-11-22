@@ -157,6 +157,10 @@ export async function checkChainFeatures(
   });
 
   for (const method of RecognizableChainFeaturesMethod) {
+    if (features.includes(method.feature)) {
+      continue;
+    }
+
     try {
       if (await method.fetch(features, rpcInstance, restInstance)) {
         newFeatures.push(method.feature);
@@ -176,6 +180,10 @@ export async function hasFeature(
   chainInfo: Readonly<ChainInfoForCheck>,
   feature: string
 ): Promise<boolean> {
+  if (chainInfo.features?.includes(feature)) {
+    return true;
+  }
+
   const method = RecognizableChainFeaturesMethod.find(
     (m) => m.feature === feature
   );
