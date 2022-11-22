@@ -1742,21 +1742,231 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "USDC",
         coinMinimalDenom: "gravity0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
         coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.01 * 0.02,
-          average: 0.025 * 0.02,
-          high: 0.04 * 0.02,
-        },
       },
       {
         coinDenom: "USDT",
         coinMinimalDenom: "gravity0xdAC17F958D2ee523a2206206994597C13D831ec7",
         coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.01 * 0.02,
-          average: 0.025 * 0.02,
-          high: 0.04 * 0.02,
-        },
+      },
+      {
+        coinDenom: "FUND",
+        coinMinimalDenom: "ibc/D157AD8A50DAB0FC4EB95BBE1D9407A590FA2CDEE04C90A76C005089BF76E519",
+        coinDecimals: 9,
+      },
+      {
+        coinDenom: "MNTL",
+        coinMinimalDenom: "ibc/00F2B62EB069321A454B708876476AFCD9C23C8C9C4A5A206DDF1CD96B645057",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "CHEQ",
+        coinMinimalDenom: "ibc/5012B1C96F286E8A6604A87037CE51241C6F1CA195B71D1E261FCACB69FB6BC2",
+        coinDecimals: 9,
+      },
+      {
+        coinDenom: "HUAHUA",
+        coinMinimalDenom: "ibc/048BE20AE2E6BFD4142C547E04F17E5F94363003A12B7B6C084E08101BFCF7D1",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "STARS",
+        coinMinimalDenom: "ibc/4F393C3FCA4190C0A6756CE7F6D897D5D1BE57D6CCB80D0BC87393566A7B6602",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "CMDX",
+        coinMinimalDenom: "ibc/29A7122D024B5B8FA8A2EFBB4FA47272C25C8926AA005A96807127208082DAB3",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "ibc/2E5D0AC026AC1AFA65A23023BA4F24BB8DDF94F118EDC0BAD6F625BFC557CDED",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "NYM",
+        coinMinimalDenom: "ibc/0C273962C274B2C05B22D9474BFE5B84D6A6FCAD198CB9B0ACD35EA521A36606",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "GTON",
+        coinMinimalDenom: "gravity0x01e0E2e61f554eCAaeC0cC933E739Ad90f24a86d",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "EROWAN",
+        coinMinimalDenom: "gravity0x07baC35846e5eD502aA91AdF6A9e7aA210F2DcbE",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "GEO",
+        coinMinimalDenom: "gravity0x147faF8De9d8D8DAAE129B187F0D02D819126750",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "UNI",
+        coinMinimalDenom: "gravity0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "WBTC",
+        coinMinimalDenom: "gravity0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "WSCRT",
+        coinMinimalDenom: "gravity0x2B89bF8ba858cd2FCee1faDa378D5cd6936968Be",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stkETH",
+        coinMinimalDenom: "gravity0x2C5Bcad9Ade17428874855913Def0A02D8bE2324",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "SD",
+        coinMinimalDenom: "gravity0x30D20208d987713f46DFD34EF128Bb16C404D10f",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "WDOGE",
+        coinMinimalDenom: "gravity0x35a532d376FFd9a705d0Bb319532837337A398E7",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "PAXG",
+        coinMinimalDenom: "gravity0x45804880De22913dAFE09f4980848ECE6EcbAf78",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "AXL",
+        coinMinimalDenom: "gravity0x467719aD09025FcC6cF6F8311755809d45a5E5f3",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "XKI",
+        coinMinimalDenom: "gravity0x4f6103BAd230295baCF30f914FDa7D4273B7F585",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "LINK",
+        coinMinimalDenom: "gravity0x514910771AF9Ca656af840dff83E8264EcF986CA",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "PAGE",
+        coinMinimalDenom: "gravity0x60e683C6514Edd5F758A55b6f393BeBBAfaA8d5e",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "DAI",
+        coinMinimalDenom: "gravity0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "MATIC",
+        coinMinimalDenom: "gravity0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "CUDOS",
+        coinMinimalDenom: "gravity0x817bbDbC3e8A1204f3691d14bB44992841e3dB35",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "FRAX",
+        coinMinimalDenom: "gravity0x853d955aCEf822Db058eb8505911ED77F175b99e",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "xFUND",
+        coinMinimalDenom: "gravity0x892A6f9dF0147e5f079b0993F486F9acA3c87881",
+        coinDecimals: 9,
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "gravity0x8D983cb9388EaC77af0474fA441C4815500Cb7BB",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "GET",
+        coinMinimalDenom: "gravity0x8a854288a5976036A725879164Ca3e91d30c6A1B",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "WEVMOS",
+        coinMinimalDenom: "gravity0x93581991f68DBaE1eA105233b67f7FA0D6BDeE7b",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "SHIB",
+        coinMinimalDenom: "gravity0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "CRO",
+        coinMinimalDenom: "gravity0xA0b73E1Ff0B80914AB6fe0444E65848C4C34450b",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "STORJ",
+        coinMinimalDenom: "gravity0xB64ef51C888972c908CFacf59B47C1AfBC0Ab8aC",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "BAND",
+        coinMinimalDenom: "gravity0xBA11D00c5f74255f56a5E366F4F77f5A186d7f55",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "WETH",
+        coinMinimalDenom: "gravity0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "USTC",
+        coinMinimalDenom: "gravity0xa47c8bf37f92aBed4A126BDA807A7b7498661acD",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "somm",
+        coinMinimalDenom: "gravity0xa670d7237398238DE01267472C6f13e5B8010FD1",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "UST",
+        coinMinimalDenom: "gravity0xa693B19d2931d498c5B318dF961919BB4aee87a5",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "stETH",
+        coinMinimalDenom: "gravity0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "FET",
+        coinMinimalDenom: "gravity0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "UMEE",
+        coinMinimalDenom: "gravity0xc0a4Df35568F116C370E6a6A6022Ceb908eedDaC",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ERC20",
+        coinMinimalDenom: "gravity0xc3761EB917CD790B30dAD99f6Cc5b4Ff93C4F9eA",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom: "gravity0xd8e2F184EedC79A9bdE9Eb7E34B0fF34e98692B7",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "PSTAKE",
+        coinMinimalDenom: "gravity0xfB5c6815cA3AC72Ce9F5006869AE67f18bF77006",
+        coinDecimals: 18,
       },
     ],
     features: ["ibc-transfer", "ibc-go"],
