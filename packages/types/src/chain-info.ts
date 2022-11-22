@@ -6,14 +6,19 @@ import { Bech32Config } from "./bech32";
 export interface ChainInfo {
   readonly rpc: string;
   /**
-   * @deprecated
+   * @deprecated Do not use
    */
   readonly rpcConfig?: AxiosRequestConfig;
   readonly rest: string;
   /**
-   * @deprecated
+   * @deprecated Do not use
    */
   readonly restConfig?: AxiosRequestConfig;
+  readonly nodeProvider?: {
+    readonly name: string;
+    readonly email: string;
+    readonly website?: string;
+  };
   readonly chainId: string;
   readonly chainName: string;
   /**

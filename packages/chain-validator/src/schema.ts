@@ -114,7 +114,6 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       return value;
     })
     .required(),
-  // TODO: Handle rpc config.
   rest: Joi.string()
     .uri()
     .custom((value: string) => {
@@ -125,7 +124,11 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       return value;
     })
     .required(),
-  // TODO: Handle rest config.
+  nodeProvider: Joi.object({
+    name: Joi.string().min(1).max(30).required(),
+    email: Joi.string().email().required(),
+    website: Joi.string().uri(),
+  }),
   chainId: Joi.string().required().min(1).max(30),
   chainName: Joi.string().required().min(1).max(30),
   stakeCurrency: CurrencySchema.required(),
