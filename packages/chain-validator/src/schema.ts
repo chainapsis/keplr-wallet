@@ -126,7 +126,13 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     .required(),
   nodeProvider: Joi.object({
     name: Joi.string().min(1).max(30).required(),
-    email: Joi.string().email().required(),
+    email: Joi.string()
+      .email({
+        tlds: {
+          allow: false,
+        },
+      })
+      .required(),
     website: Joi.string().uri(),
   }),
   chainId: Joi.string().required().min(1).max(30),
