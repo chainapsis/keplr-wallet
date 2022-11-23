@@ -10,8 +10,6 @@ type PathnameToPageName = {
 const pathnameToPageName: PathnameToPageName = {
   "/": "Home dashboard",
   "/register": "Register",
-  "/setting/address-book": "Address book",
-  "/setting/set-keyring": "Select account",
 };
 
 export const LogPageViewWrapper: FunctionComponent = ({ children }) => {
