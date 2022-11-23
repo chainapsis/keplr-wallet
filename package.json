@@ -1,6 +1,6 @@
 {
   "name": "fetch-wallet",
-  "description": "Fetch Wallet is a browser extension wallet for the Inter blockchain ecosystem.",
+  "description": "Fetch Wallet is a generic wallet for interacting with the Fetch blockchain network, and other cosmos-based ledgers, and performing Inter-Blockchain Communication (IBC) transactions.",
   "private": true,
   "workspaces": {
     "packages": [
