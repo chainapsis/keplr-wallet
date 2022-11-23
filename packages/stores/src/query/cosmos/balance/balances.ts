@@ -56,6 +56,8 @@ export class ObservableQueryBalanceNative extends ObservableQueryBalanceInner {
       return new CoinPretty(currency, new Int(0)).ready(false);
     }
 
+    console.log("response bal", this.nativeBalances.response);
+
     return StoreUtils.getBalanceFromCurrency(
       currency,
       this.nativeBalances.response.data.balances
