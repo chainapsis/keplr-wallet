@@ -12,7 +12,7 @@ import { useIntl } from "react-intl";
 const ChainElement: FunctionComponent<{
   chainInfo: ChainInfoWithCoreTypes;
 }> = observer(({ chainInfo }) => {
-  const { chainStore, analyticsStore } = useStore();
+  const { chainStore } = useStore();
 
   const intl = useIntl();
 
@@ -26,12 +26,6 @@ const ChainElement: FunctionComponent<{
       })}
       onClick={() => {
         if (chainInfo.chainId !== chainStore.current.chainId) {
-          analyticsStore.logEvent("Chain changed", {
-            chainId: chainStore.current.chainId,
-            chainName: chainStore.current.chainName,
-            toChainId: chainInfo.chainId,
-            toChainName: chainInfo.chainName,
-          });
           chainStore.selectChain(chainInfo.chainId);
           chainStore.saveLastViewChainId();
         }
