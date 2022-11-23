@@ -24,7 +24,7 @@ export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOption
 
 export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
   (props) => {
-    const { chainStore, analyticsStore } = useStore();
+    const { chainStore } = useStore();
     const navigation = useNavigation();
 
     const safeAreaInsets = useSafeAreaInsets();
