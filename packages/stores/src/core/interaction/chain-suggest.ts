@@ -1,13 +1,27 @@
 import { InteractionStore } from "./interaction";
 import { ChainInfo } from "@keplr-wallet/types";
-import { SuggestChainInfoMsg } from "@keplr-wallet/background";
+import {
+  ChainInfoWithRepoUpdateOptions,
+  SuggestChainInfoMsg,
+} from "@keplr-wallet/background";
 import { flow, makeObservable, observable } from "mobx";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import Axios from "axios";
 
 export class ChainSuggestStore {
   @observable
   protected _isLoading: boolean = false;
 
-  constructor(protected readonly interactionStore: InteractionStore) {
+  @observable
+  communityChainInfo: ChainInfo | undefined = undefined;
+
+  constructor(
+    protected readonly interactionStore: InteractionStore,
+    protected readonly communityChainInfoRepo: {
+      readonly organizationName: string;
+      readonly repoName: string;
+    }
+  ) {
     makeObservable(this);
   }
 
@@ -21,14 +35,47 @@ export class ChainSuggestStore {
     }
   }
 
+  get communityChainInfoRepoUrl(): string {
+    return `https://github.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}`;
+  }
+
+  getCommunityChainInfoUrl(chainId: string): string {
+    const chainIdHelper = ChainIdHelper.parse(chainId);
+    return `${this.communityChainInfoRepoUrl}/blob/main/cosmos/${chainIdHelper.identifier}.json`;
+  }
+
   @flow
-  *approve() {
+  *fetchCommunityChainInfo() {
+    this._isLoading = true;
+
+    if (this.waitingSuggestedChainInfo) {
+      try {
+        const chainIdentifier = ChainIdHelper.parse(
+          this.waitingSuggestedChainInfo.data.chainId
+        ).identifier;
+        const chainInfoResponse = yield Axios.get<ChainInfo>(
+          `/cosmos/${chainIdentifier}.json`,
+          {
+            baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/main`,
+          }
+        );
+
+        this.communityChainInfo = chainInfoResponse.data;
+      } finally {
+        this._isLoading = false;
+      }
+    }
+  }
+
+  @flow
+  *approve(chainInfo: ChainInfoWithRepoUpdateOptions) {
     this._isLoading = true;
 
     try {
       const data = this.waitingSuggestedChainInfo;
+
       if (data) {
-        yield this.interactionStore.approve(data.type, data.id, {});
+        yield this.interactionStore.approve(data.type, data.id, chainInfo);
       }
     } finally {
       this._isLoading = false;

@@ -1,0 +1,26 @@
+{
+  "name": "@keplr-wallet/chain-validator",
+  "version": "0.11.18-alpha.7",
+  "main": "build/index.js",
+  "author": "chainapsis",
+  "license": "Apache-2.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules; rm -rf build",
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "jest --passWithNoTests",
+    "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
+    "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
+  },
+  "dependencies": {
+    "@keplr-wallet/cosmos": "0.11.18-alpha.7",
+    "@keplr-wallet/types": "0.11.18-alpha.7",
+    "axios": "^0.27.2",
+    "joi": "^17.5.0",
+    "utility-types": "^3.10.0"
+  }
+}

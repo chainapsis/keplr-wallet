@@ -7,7 +7,6 @@ export const EthereumEndpoint =
   "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";
 
 export interface AppChainInfo extends ChainInfo {
-  readonly chainSymbolImageUrl?: string;
   readonly hideInUI?: boolean;
   readonly txExplorer?: {
     readonly name: string;
@@ -2045,3 +2044,8 @@ export const EmbedChainInfos: AppChainInfo[] = [
 ];
 
 export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";
+
+export const CommunityChainInfoRepo = {
+  organizationName: "danielkim89",
+  repoName: "cicd-test",
+};

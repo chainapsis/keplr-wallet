@@ -19,7 +19,6 @@ import { TokensView } from "./token";
 import { BIP44SelectModal } from "./bip44-select-modal";
 import { useIntl } from "react-intl";
 import { useConfirm } from "../../components/confirm";
-import { ChainUpdaterService } from "@keplr-wallet/background";
 import { IBCTransferView } from "./ibc-transfer";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
@@ -41,28 +40,10 @@ export const MainPage: FunctionComponent = observer(() => {
   useEffect(() => {
     if (!chainStore.isInitializing && prevChainId.current !== currentChainId) {
       (async () => {
-        const result = await ChainUpdaterService.checkChainUpdate(
-          chainStore.current
-        );
-        if (result.explicit) {
-          // If chain info has been changed, warning the user wether update the chain or not.
-          if (
-            await confirm.confirm({
-              paragraph: intl.formatMessage({
-                id: "main.update-chain.confirm.paragraph",
-              }),
-              yes: intl.formatMessage({
-                id: "main.update-chain.confirm.yes",
-              }),
-              no: intl.formatMessage({
-                id: "main.update-chain.confirm.no",
-              }),
-            })
-          ) {
-            await chainStore.tryUpdateChain(chainStore.current.chainId);
-          }
-        } else if (result.slient) {
+        try {
           await chainStore.tryUpdateChain(chainStore.current.chainId);
+        } catch (e) {
+          console.log(e);
         }
       })();
 
@@ -166,7 +147,7 @@ export const MainPage: FunctionComponent = observer(() => {
           <CardBody>{<TokensView />}</CardBody>
         </Card>
       ) : null}
-      {uiConfigStore.showAdvancedIBCTransfer &&
+      {uiConfigStore.isDeveloper &&
       chainStore.current.features?.includes("ibc-transfer") ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>
