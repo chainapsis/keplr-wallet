@@ -51,7 +51,6 @@ import { LedgerGrantPage } from "./pages/ledger";
 import { AddTokenPage } from "./pages/setting/token/add";
 import { ManageTokenPage } from "./pages/setting/token/manage";
 import { KeystoneSignPage } from "./pages/keystone/sign";
-import { KeystoneExamplePage } from "./pages/keystone/example";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
 import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
@@ -186,11 +185,6 @@ ReactDOM.render(
                   exact
                   path="/keystone/sign"
                   component={KeystoneSignPage}
-                />
-                <Route
-                  exact
-                  path="/keystone/example"
-                  component={KeystoneExamplePage}
                 />
                 <Route exact path="/ledger-grant" component={LedgerGrantPage} />
                 <Route
