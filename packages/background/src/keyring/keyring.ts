@@ -989,6 +989,7 @@ export class KeyRing {
       return this.keystoneService.signEthereum(
         env,
         coinType,
+        chainId,
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
         this.loadKey(coinType, true),
         this.keystonePublicKey as KeystoneKeyringData,

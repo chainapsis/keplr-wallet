@@ -18,6 +18,7 @@ import {
 import { computeAddress } from "@ethersproject/transactions";
 import { publicKeyConvert } from "secp256k1";
 import Common from "@ethereumjs/common";
+import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const TYPE_KEYSTONE_GET_PUBKEY = "keystone-get-pubkey";
 export const TYPE_KEYSTONE_SIGN = "keystone-sign";
@@ -154,6 +155,7 @@ export class KeystoneService {
   async signEthereum(
     env: Env,
     coinType: number,
+    chainId: string,
     bip44HDPath: BIP44HDPath,
     key: Key,
     keyringData: KeystoneKeyringData,
@@ -208,19 +210,18 @@ export class KeystoneService {
     let data: TypedTransaction | string = "";
     if (mode === EthSignType.TRANSACTION) {
       const msg = JSON.parse(Buffer.from(message).toString());
-      if (msg.type === 2) {
+      const transactionType = +msg.type;
+      if (transactionType === 2) {
         // [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559)
         data = new FeeMarketEIP1559Transaction(msg);
-      } else if (msg.type === 1) {
+      } else if (transactionType === 1) {
         // [EIP-2930](https://eips.ethereum.org/EIPS/eip-2930)
         data = new AccessListEIP2930Transaction(msg);
       } else {
-        if (!msg.chainId) {
-          throw new KeplrError("keystone", 305, "ChainId is required.");
-        }
+        const ethChainId = EthermintChainIdHelper.parse(chainId);
         data = new Transaction(msg, {
           // TODO: Other properties is need or not, such as "hardfork".
-          common: Common.custom({ chainId: msg.chainId }),
+          common: Common.custom({ chainId: ethChainId.ethChainId }),
         });
       }
     } else if (mode === EthSignType.MESSAGE) {
