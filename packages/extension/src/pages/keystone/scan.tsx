@@ -22,6 +22,7 @@ export function Scan({ type, onChange, onCancel }: Props) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isPermitted, setIsPermitted] = useState(true);
   const [isMsgShow, setIsMsgShow] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   const purposeMap = {
     sync: Purpose.COSMOS_SYNC,
@@ -29,8 +30,18 @@ export function Scan({ type, onChange, onCancel }: Props) {
     signCosmos: Purpose.COSMOS_SIGN,
   };
 
+  let timer: NodeJS.Timeout | undefined;
   const onVideoLoaded = (isLoaded: boolean) => {
     setIsPermitted(isLoaded);
+    // the first trigger is too early
+    if (!timer) {
+      timer = setTimeout(() => {
+        setIsVideoLoaded(isLoaded);
+      }, 2000);
+    } else {
+      clearTimeout(timer);
+      setIsVideoLoaded(isLoaded);
+    }
   };
 
   const onError = () => {
@@ -57,7 +68,9 @@ export function Scan({ type, onChange, onCancel }: Props) {
           Scan the QR code displayed on your Keystone Device
         </div>
         <div className={style.scanner}>
-          <img src={require("../../public/assets/svg/scanner.svg")} />
+          {!isVideoLoaded && (
+            <img src={require("../../public/assets/svg/scanner.svg")} />
+          )}
           <AnimatedQRScanner
             purpose={purposeMap[type]}
             handleScan={handleScan}

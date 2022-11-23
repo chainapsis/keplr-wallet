@@ -229,7 +229,6 @@ export class KeystoneService {
     } else if (mode === EthSignType.EIP712) {
       data = JSON.parse(Buffer.from(message).toString());
     }
-    console.log("signEthereum", signFn, data);
     const signRes = await keyring[signFn](
       computeAddress(publicKeyConvert(key.pubKey, false)),
       data

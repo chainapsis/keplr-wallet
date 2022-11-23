@@ -113,11 +113,7 @@ export function useKeystoneEthereumKeyring({
 }: Props) {
   const keyring = KeystoneEthereumKeyring.getEmptyKeyring();
   if (keyringData) {
-    try {
-      keyring.syncKeyringData(keyringData);
-    } catch (err) {
-      console.error(err);
-    }
+    keyring.syncKeyringData(keyringData);
   }
   if (readUR) {
     keyring.getInteraction().onReadUR(readUR);
