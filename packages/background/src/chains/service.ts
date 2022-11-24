@@ -166,7 +166,7 @@ export class ChainsService {
   ): Promise<void> {
     chainInfo = await validateBasicChainInfoType(chainInfo);
 
-    const receivedChainInfo = (await this.interactionService.waitApprove(
+    let receivedChainInfo = (await this.interactionService.waitApprove(
       env,
       "/suggest-chain",
       SuggestChainInfoMsg.type(),
@@ -175,6 +175,11 @@ export class ChainsService {
         origin,
       }
     )) as ChainInfoWithRepoUpdateOptions;
+
+    receivedChainInfo = {
+      ...receivedChainInfo,
+      beta: chainInfo.beta,
+    };
 
     await this.permissionService.addPermission(
       [chainInfo.chainId],
