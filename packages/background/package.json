@@ -48,6 +48,8 @@
     "bip39": "^3.0.2",
     "buffer": "^6.0.3",
     "delay": "^4.4.0",
+    "eth-sig-util": "^3.0.1",
+    "ethereumjs-util": "^7.1.0",
     "joi": "^17.5.0",
     "ledger-cosmos-js": "^2.1.8",
     "long": "^4.0.0",

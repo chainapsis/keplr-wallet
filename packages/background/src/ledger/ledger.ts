@@ -9,6 +9,8 @@ import { BIP44HDPath, EIP712MessageValidator } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 import { Buffer } from "buffer/";
 import { _TypedDataEncoder } from "@ethersproject/hash";
+import { bufferToHex } from "ethereumjs-util";
+import { domainHash, messageHash } from "./utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CosmosApp: any = require("ledger-cosmos-js").default;
@@ -103,6 +105,7 @@ export class Ledger {
     }
 
     const result = await this.cosmosApp.getVersion();
+
     if (result.error_message !== "No errors") {
       throw new Error(result.error_message);
     }
@@ -208,37 +211,15 @@ export class Ledger {
           JSON.parse(Buffer.from(message).toString())
         );
 
-        // Unfortunately, signEIP712Message not works on ledger yet.
-        return Ledger.ethSignatureToBytes(
+        const signature = Ledger.ethSignatureToBytes(
           await this.ethereumApp.signEIP712HashedMessage(
             formattedPath,
-            _TypedDataEncoder.hashStruct(
-              "EIP712Domain",
-              { EIP712Domain: data.types.EIP712Domain },
-              data.domain
-            ),
-            _TypedDataEncoder
-              .from(
-                // Seems that there is no way to set primary type and the first type becomes primary type.
-                (() => {
-                  const types = { ...data.types };
-                  delete types["EIP712Domain"];
-                  const primary = types[data.primaryType];
-                  if (!primary) {
-                    throw new Error(
-                      `No matched primary type: ${data.primaryType}`
-                    );
-                  }
-                  delete types[data.primaryType];
-                  return {
-                    [data.primaryType]: primary,
-                    ...types,
-                  };
-                })()
-              )
-              .hash(data.message)
+            bufferToHex(domainHash(data)),
+            bufferToHex(messageHash(data))
           )
         );
+
+        return signature;
       }
       default:
         throw new Error(`Unknown sign type: ${signType}`);

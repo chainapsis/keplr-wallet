@@ -620,7 +620,11 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
       }
 
       const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
-      if (parseFloat(this.eip712.domain.chainId) !== ethChainId) {
+
+      if (
+        this.eip712.domain.chainId !== ethChainId.toString() &&
+        this.eip712.domain.chainId !== "0x" + ethChainId.toString(16)
+      ) {
         throw new Error(
           `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${this.eip712.domain.chainId})`
         );

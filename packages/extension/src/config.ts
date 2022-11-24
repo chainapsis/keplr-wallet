@@ -107,6 +107,10 @@ import {
   EVMOS_RPC_CONFIG,
   EVMOS_REST_ENDPOINT,
   EVMOS_REST_CONFIG,
+  INJECTIVE_RPC_ENDPOINT,
+  INJECTIVE_RPC_CONFIG,
+  INJECTIVE_REST_ENDPOINT,
+  INJECTIVE_REST_CONFIG,
 } from "./config.var";
 
 export const EmbedChainInfos: ChainInfo[] = [
@@ -2044,6 +2048,55 @@ export const EmbedChainInfos: ChainInfo[] = [
           low: 25000000000,
           average: 25000000000,
           high: 40000000000,
+        },
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    beta: true,
+  },
+  {
+    rpc: INJECTIVE_RPC_ENDPOINT,
+    rpcConfig: INJECTIVE_RPC_CONFIG,
+    rest: INJECTIVE_REST_ENDPOINT,
+    restConfig: INJECTIVE_REST_CONFIG,
+    chainId: "injective-1",
+    chainName: "Injective",
+    stakeCurrency: {
+      coinDenom: "INJ",
+      coinMinimalDenom: "inj",
+      coinDecimals: 18,
+      coinGeckoId: "injective-protocol",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/injective"
+        : "http://localhost:8080/chains/injective",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/injective"
+        : "http://localhost:8080/chains/injective",
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("inj"),
+    currencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+        gasPriceStep: {
+          low: 5000000000,
+          average: 25000000000,
+          high: 50000000000,
         },
       },
     ],

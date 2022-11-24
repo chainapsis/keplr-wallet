@@ -233,6 +233,7 @@ export class ChainsService {
     chainId: string
   ): Promise<{ address: boolean; signing: boolean }> {
     const chainInfo = await this.getChainInfo(chainId);
+
     return {
       address: chainInfo.features?.includes("eth-address-gen") ?? false,
       signing: chainInfo.features?.includes("eth-key-sign") ?? false,
