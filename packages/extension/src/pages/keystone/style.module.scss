@@ -7,6 +7,12 @@ html[data-keystone-page] {
       margin-top: calc((100vh - 580px) / 2);
     }
   }
+  &,
+  body,
+  :global(#app) {
+    height: 100vh;
+    max-height: $popup-size-height;
+  }
 }
 
 .page {
@@ -14,13 +20,15 @@ html[data-keystone-page] {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  height: 100%;
-  padding: 16px;
+  height: 100vh;
+  max-height: 100%;
+  padding: 20px 12px 12px;
   box-sizing: border-box;
   text-align: center;
   font-size: 14px;
   color: var(--default);
   background-color: #fafbfd;
+  position: relative;
   @media (min-width: ($popup-size-width + 1)) {
     border: var(--lighter) 1px solid;
     border-radius: 0.375rem;
@@ -28,27 +36,48 @@ html[data-keystone-page] {
   &.center {
     justify-content: center;
   }
+  .back {
+    position: absolute;
+    top: 22px;
+    left: 20px;
+    transform: rotate(90deg);
+    cursor: pointer;
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  .logo {
+    width: 175px;
+    height: 42px;
+  }
   .title {
     font-size: 24px;
-    font-weight: bold;
     margin-bottom: 24px;
     line-height: 28px;
   }
   .subtitle {
-    font-size: 20px;
-    font-weight: bold;
-    margin-top: 36px;
-    line-height: 27px;
+    font-size: 16px;
+    margin-top: 32px;
+    line-height: 22px;
+    padding: 0 4px;
   }
   .help-text {
     font-size: 14px;
     line-height: 22px;
     color: var(--gray);
+    margin-bottom: 10px;
+    padding: 0 4px;
   }
   .error-text {
     font-size: 16px;
     line-height: 24px;
     color: var(--danger);
+    margin-bottom: 10px;
+  }
+  .btns {
+    width: 100%;
+    margin-top: 24px;
   }
   :global(.btn-secondary),
   :global(.btn-secondary:hover) {
@@ -63,6 +92,23 @@ html[data-keystone-page] {
   }
   a {
     text-decoration: underline;
+  }
+  &.guide {
+    .title {
+      padding-top: 12px;
+    }
+    .btns {
+      margin-top: 14px;
+      button:hover {
+        background-color: var(--primary);
+        border-color: var(--primary);
+      }
+    }
+  }
+  &.sign {
+    .subtitle {
+      margin-top: 24px;
+    }
   }
 }
 
@@ -115,27 +161,33 @@ html[data-keystone-page] {
   }
   .prev {
     left: 12px;
+    svg {
+      margin-right: 1px;
+    }
   }
   .next {
     right: 12px;
+    svg {
+      margin-left: 2px;
+    }
   }
   .swiper-title {
     color: var(--gray);
   }
   .more {
-    margin-top: 16px;
+    line-height: 1;
+    margin-top: 8px;
   }
 }
 
 .sign {
   .display {
     display: inline-block;
-    margin: 30px auto;
+    margin: 22px auto;
   }
   .btns {
     display: flex;
     justify-content: space-between;
-    width: 100%;
     button {
       width: 50%;
     }
@@ -146,7 +198,7 @@ html[data-keystone-page] {
   position: relative;
   width: 248px;
   height: 248px;
-  margin: 32px auto;
+  margin: 20px auto 30px;
   img {
     position: absolute;
     width: 100%;

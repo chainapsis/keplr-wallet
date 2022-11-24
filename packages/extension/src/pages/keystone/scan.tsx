@@ -4,7 +4,6 @@ import { AnimatedQRScanner, Purpose } from "@keystonehq/animated-qr";
 import { UR } from "@keplr-wallet/stores";
 import { Loading } from "./loading";
 import { Message } from "./message";
-import { Button } from "reactstrap";
 
 export enum ScanType {
   Sync = "sync",
@@ -15,10 +14,10 @@ export enum ScanType {
 export interface Props {
   type: ScanType;
   onChange(ur: UR): Promise<void>;
-  onCancel?(): void;
+  onBack?(): void;
 }
 
-export function Scan({ type, onChange, onCancel }: Props) {
+export function Scan({ type, onChange, onBack }: Props) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isPermitted, setIsPermitted] = useState(true);
   const [isMsgShow, setIsMsgShow] = useState(false);
@@ -61,11 +60,23 @@ export function Scan({ type, onChange, onCancel }: Props) {
   };
 
   return (
-    <div className={`${style.page} ${style.center}`}>
+    <div className={`${style.page}`}>
+      {onBack && (
+        <div className={style.back} onClick={onBack}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <path d="M256 294.1L383 167c9.4-9.4 24.6-9.4 33.9 0s9.3 24.6 0 34L273 345c-9.1 9.1-23.7 9.3-33.1.7L95 201.1c-4.7-4.7-7-10.9-7-17s2.3-12.3 7-17c9.4-9.4 24.6-9.4 33.9 0l127.1 127z" />
+          </svg>
+        </div>
+      )}
       <div>
         <div className={style.title}>Scan the QR Code</div>
+        <img
+          className={style.logo}
+          src={require("../../public/assets/img/keystone/logo.svg")}
+          alt="Keystone"
+        />
         <div className={style.subtitle}>
-          Scan the QR code displayed on your Keystone Device
+          Scan the QR code displayed on your Keystone device
         </div>
         <div className={style.scanner}>
           {!isVideoLoaded && (
@@ -92,12 +103,8 @@ export function Scan({ type, onChange, onCancel }: Props) {
             Please enable your camera permission via [Settings]
           </p>
         )}
-        {onCancel && (
-          <Button block onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
       </div>
+
       {isConnecting && <Loading title="Connecting" />}
       {isMsgShow && (
         <Message onClose={() => setIsMsgShow(false)} type="error">

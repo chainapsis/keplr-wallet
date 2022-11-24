@@ -34,7 +34,11 @@ export const KeystoneImportPubkeyPage = observer(() => {
   }, [onUnload]);
 
   return isScan ? (
-    <Scan type={ScanType.Sync} onChange={onScanFinish} />
+    <Scan
+      type={ScanType.Sync}
+      onChange={onScanFinish}
+      onBack={() => setIsScan(false)}
+    />
   ) : (
     <Guide onScan={() => setIsScan(true)} />
   );

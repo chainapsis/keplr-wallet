@@ -12,7 +12,7 @@ export function Guide({ onScan }: { onScan(): void }) {
   };
 
   return (
-    <div className={style.page}>
+    <div className={`${style.page} ${style.guide}`}>
       <div className={style.steps}>
         <div className={style.title}>Tutorial</div>
         <Swiper
@@ -93,13 +93,15 @@ export function Guide({ onScan }: { onScan(): void }) {
           </a>
         </div>
       </div>
-      <Button
-        color={stepIndex === 3 ? "primary" : "secondary"}
-        block
-        onClick={onScan}
-      >
-        {stepIndex === 3 ? "Scan the QR code" : "Skip to scan"}
-      </Button>
+      <div className={style.btns}>
+        <Button
+          color={stepIndex === 3 ? "primary" : "secondary"}
+          block
+          onClick={onScan}
+        >
+          Scan the QR code
+        </Button>
+      </div>
     </div>
   );
 }

@@ -26,13 +26,6 @@ export const KeystoneSignPage = observer(() => {
     keystoneStore.resolveSign({ signature: ur });
   };
 
-  const onCancel = () => {
-    isPromiseDone.current = true;
-    keystoneStore.resolveSign({
-      abort: true,
-    });
-  };
-
   const onReject = useCallback(() => {
     isPromiseDone.current = true;
     keystoneStore.rejectSign();
@@ -66,14 +59,19 @@ export const KeystoneSignPage = observer(() => {
     <Scan
       type={getScanType(keystoneStore.signData?.data.ur.type)}
       onChange={onScanFinish}
-      onCancel={onCancel}
+      onBack={() => setIsScan(false)}
     />
   ) : (
     <div className={`${style.page} ${style.sign}`}>
       <div>
         <div className={style.title}>Request Signature</div>
+        <img
+          className={style.logo}
+          src={require("../../public/assets/img/keystone/logo.svg")}
+          alt="Keystone"
+        />
         <div className={style.subtitle}>
-          Scan the QR code via your Keystone device.
+          Scan the QR code via your Keystone device
         </div>
         <div className={style.display}>
           {ur.cbor && (
@@ -84,19 +82,21 @@ export const KeystoneSignPage = observer(() => {
             />
           )}
         </div>
-        <p className={style["help-text"]}>
+        <div className={style["help-text"]}>
           Click on the &#39;<em>Get Signature</em>&#39; button after signing the
           transaction with your Keystone device.
-        </p>
-        <p>
+        </div>
+        <div>
           <a href="https://keyst.one/keplr" target="_blank" rel="noreferrer">
             Tutorial
           </a>
-        </p>
+        </div>
       </div>
 
       <div className={style.btns}>
-        <Button onClick={onReject}>Reject</Button>
+        <Button color="danger" outline onClick={onReject}>
+          Reject
+        </Button>
         <Button color="primary" onClick={onGetSignature}>
           Get Signature
         </Button>
