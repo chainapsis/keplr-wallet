@@ -1141,13 +1141,24 @@ export const EmbedChainInfos: AppChainInfo[] = [
     ],
     feeCurrencies: [
       {
+        coinDenom: "BLD",
+        coinMinimalDenom: "ubld",
+        coinDecimals: 6,
+        coinGeckoId: "agoric",
+        gasPriceStep: {
+          low: 0.012,
+          average: 0.024,
+          high: 0.071,
+        },
+      },
+      {
         coinDenom: "IST",
         coinMinimalDenom: "uist",
         coinDecimals: 6,
         gasPriceStep: {
-          low: 0,
-          average: 0,
-          high: 0,
+          low: 0.0034,
+          average: 0.007,
+          high: 0.02,
         },
       },
     ],

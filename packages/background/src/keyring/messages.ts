@@ -12,9 +12,15 @@ import {
   checkAndValidateADR36AminoSignDoc,
   EthermintChainIdHelper,
 } from "@keplr-wallet/cosmos";
-import { BIP44, EthSignType, KeplrSignOptions, Key } from "@keplr-wallet/types";
-
-import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
+import {
+  BIP44,
+  EthSignType,
+  KeplrSignOptions,
+  Key,
+  StdSignDoc,
+  AminoSignResponse,
+  StdSignature,
+} from "@keplr-wallet/types";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");

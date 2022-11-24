@@ -10,6 +10,9 @@ import {
   checkAndValidateADR36AminoSignDoc,
   makeADR36AminoSignDoc,
   verifyADR36AminoSignDoc,
+  encodeSecp256k1Pubkey,
+  encodeSecp256k1Signature,
+  serializeSignDoc,
 } from "@keplr-wallet/cosmos";
 import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
 
@@ -22,20 +25,14 @@ import {
   ChainInfo,
   EthSignType,
   KeplrSignOptions,
+  AminoSignResponse,
+  StdSignature,
+  StdSignDoc,
+  DirectSignResponse,
 } from "@keplr-wallet/types";
 import { APP_PORT, Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
-
-import {
-  AminoSignResponse,
-  encodeSecp256k1Pubkey,
-  encodeSecp256k1Signature,
-  serializeSignDoc,
-  StdSignature,
-  StdSignDoc,
-} from "@cosmjs/launchpad";
-import { DirectSignResponse, makeSignBytes } from "@cosmjs/proto-signing";
 
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
@@ -535,26 +532,21 @@ export class KeyRingService {
     )) as Uint8Array;
 
     const newSignDoc = SignDoc.decode(newSignDocBytes);
-    const {
-      accountNumber: newSignDocAccountNumber,
-      ...newSignDocRest
-    } = newSignDoc;
-    const cosmJSSignDoc = {
-      ...newSignDocRest,
-      accountNumber: Long.fromString(newSignDocAccountNumber),
-    };
 
     try {
       const signature = await this.keyRing.sign(
         env,
         chainId,
         coinType,
-        makeSignBytes(cosmJSSignDoc),
+        newSignDocBytes,
         ethereumKeyFeatures.signing
       );
 
       return {
-        signed: cosmJSSignDoc,
+        signed: {
+          ...newSignDoc,
+          accountNumber: Long.fromString(newSignDoc.accountNumber),
+        },
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
