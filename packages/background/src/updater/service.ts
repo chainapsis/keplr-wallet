@@ -35,6 +35,8 @@ export class ChainUpdaterService {
     if (updatedChainInfo) {
       chainInfo = {
         ...chainInfo,
+        walletUrlForStaking:
+          updatedChainInfo.walletUrlForStaking || origin.walletUrlForStaking,
         features: (() => {
           const features = chainInfo.features ?? [];
 
