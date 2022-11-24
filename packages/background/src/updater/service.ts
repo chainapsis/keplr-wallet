@@ -33,7 +33,20 @@ export class ChainUpdaterService {
     );
 
     if (updatedChainInfo) {
-      chainInfo = updatedChainInfo;
+      chainInfo = {
+        ...chainInfo,
+        features: (() => {
+          const features = chainInfo.features ?? [];
+
+          for (const f of updatedChainInfo.features ?? []) {
+            if (!features.includes(f)) {
+              features.push(f);
+            }
+          }
+
+          return features;
+        })(),
+      };
     }
 
     const local = await this.kvStore.get<Partial<ChainInfo>>(chainIdentifier);
