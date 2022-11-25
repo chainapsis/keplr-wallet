@@ -171,15 +171,27 @@ export class ChainsService {
       "/suggest-chain",
       SuggestChainInfoMsg.type(),
       {
-        ...chainInfo,
+        chainInfo,
         origin,
       }
     )) as ChainInfoWithRepoUpdateOptions;
 
     receivedChainInfo = {
-      ...receivedChainInfo,
+      ...(await validateBasicChainInfoType(receivedChainInfo)),
+      // Beta should be from suggested chain info itself.
       beta: chainInfo.beta,
+      updateFromRepoDisabled: receivedChainInfo.updateFromRepoDisabled,
     };
+
+    if (receivedChainInfo.updateFromRepoDisabled) {
+      console.log(
+        `Chain ${receivedChainInfo.chainName}(${receivedChainInfo.chainId}) added with updateFromRepoDisabled`
+      );
+    } else {
+      console.log(
+        `Chain ${receivedChainInfo.chainName}(${receivedChainInfo.chainId}) added`
+      );
+    }
 
     await this.permissionService.addPermission(
       [chainInfo.chainId],

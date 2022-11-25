@@ -7,13 +7,20 @@ import {
 import { flow, makeObservable, observable } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import Axios from "axios";
+import { toGenerator } from "@keplr-wallet/common";
 
 export class ChainSuggestStore {
   @observable
   protected _isLoading: boolean = false;
 
-  @observable
-  communityChainInfo: ChainInfo | undefined = undefined;
+  @observable.shallow
+  protected communityChainInfo: Map<
+    string,
+    {
+      chainInfo: ChainInfo | undefined;
+      isLoading: boolean;
+    }
+  > = new Map();
 
   constructor(
     protected readonly interactionStore: InteractionStore,
@@ -26,9 +33,10 @@ export class ChainSuggestStore {
   }
 
   get waitingSuggestedChainInfo() {
-    const datas = this.interactionStore.getDatas<
-      ChainInfo & { origin: string }
-    >(SuggestChainInfoMsg.type());
+    const datas = this.interactionStore.getDatas<{
+      chainInfo: ChainInfo;
+      origin: string;
+    }>(SuggestChainInfoMsg.type());
 
     if (datas.length > 0) {
       return datas[0];
@@ -44,26 +52,61 @@ export class ChainSuggestStore {
     return `${this.communityChainInfoRepoUrl}/blob/main/cosmos/${chainIdHelper.identifier}.json`;
   }
 
+  getCommunityChainInfo(
+    chainId: string
+  ): {
+    chainInfo: ChainInfo | undefined;
+    isLoading: boolean;
+  } {
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    if (!this.communityChainInfo.has(chainIdentifier)) {
+      this.fetchCommunityChainInfo(chainId);
+    }
+
+    return this.communityChainInfo.get(chainIdentifier)!;
+  }
+
   @flow
-  *fetchCommunityChainInfo() {
-    this._isLoading = true;
+  protected *fetchCommunityChainInfo(chainId: string) {
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    const communityChainInfo = this.communityChainInfo.get(chainIdentifier);
+    if (communityChainInfo) {
+      return;
+    }
 
-    if (this.waitingSuggestedChainInfo) {
-      try {
-        const chainIdentifier = ChainIdHelper.parse(
-          this.waitingSuggestedChainInfo.data.chainId
-        ).identifier;
-        const chainInfoResponse = yield Axios.get<ChainInfo>(
-          `/cosmos/${chainIdentifier}.json`,
-          {
-            baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/main`,
-          }
+    this.communityChainInfo.set(chainIdentifier, {
+      isLoading: true,
+      chainInfo: undefined,
+    });
+
+    try {
+      const response = yield* toGenerator(
+        Axios.get<ChainInfo>(`/cosmos/${chainIdentifier}.json`, {
+          baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/main`,
+        })
+      );
+
+      if (
+        ChainIdHelper.parse(response.data.chainId).identifier !==
+        chainIdentifier
+      ) {
+        throw new Error(
+          `Invalid chain identifier: (expected: ${chainIdentifier}, actual: ${
+            ChainIdHelper.parse(response.data.chainId).identifier
+          })`
         );
-
-        this.communityChainInfo = chainInfoResponse.data;
-      } finally {
-        this._isLoading = false;
       }
+
+      this.communityChainInfo.set(chainIdentifier, {
+        isLoading: false,
+        chainInfo: response.data,
+      });
+    } catch (e) {
+      console.log(e);
+      this.communityChainInfo.set(chainIdentifier, {
+        isLoading: false,
+        chainInfo: undefined,
+      });
     }
   }
 

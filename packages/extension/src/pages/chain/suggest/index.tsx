@@ -14,46 +14,38 @@ import { GithubIcon, InformationCircleOutline } from "../../../components/icon";
 
 export const ChainSuggestedPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, analyticsStore, uiConfigStore } = useStore();
-  const [isRawDataMode, setIsRawDataMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
+  const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
   const history = useHistory();
 
   const interactionInfo = useInteractionInfo(() => {
     chainSuggestStore.rejectAll();
   });
 
+  const communityChainInfo = chainSuggestStore.waitingSuggestedChainInfo
+    ? chainSuggestStore.getCommunityChainInfo(
+        chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.chainId
+      )
+    : undefined;
+
   useEffect(() => {
     if (chainSuggestStore.waitingSuggestedChainInfo) {
       analyticsStore.logEvent("Chain suggested", {
-        chainId: chainSuggestStore.waitingSuggestedChainInfo.data.chainId,
-        chainName: chainSuggestStore.waitingSuggestedChainInfo.data.chainName,
-        rpc: chainSuggestStore.waitingSuggestedChainInfo.data.rpc,
-        rest: chainSuggestStore.waitingSuggestedChainInfo.data.rest,
+        chainId:
+          chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.chainId,
+        chainName:
+          chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.chainName,
+        rpc: chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.rpc,
+        rest: chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.rest,
       });
-
-      // Get community chain information
-      chainSuggestStore.fetchCommunityChainInfo();
     }
-  }, [
-    analyticsStore,
-    chainSuggestStore,
-    chainSuggestStore.waitingSuggestedChainInfo,
-  ]);
+  }, [analyticsStore, chainSuggestStore.waitingSuggestedChainInfo]);
 
   useEffect(() => {
-    setIsRawDataMode(!chainSuggestStore.communityChainInfo);
-  }, [chainSuggestStore.communityChainInfo]);
-
-  // Set loading page
-  useEffect(() => {
-    if (!chainSuggestStore.isLoading) {
-      setTimeout(() => {
-        setIsLoading(chainSuggestStore.isLoading);
-      }, 1000);
-    } else {
-      setIsLoading(chainSuggestStore.isLoading);
-    }
-  }, [chainSuggestStore.isLoading]);
+    setTimeout(() => {
+      setIsLoadingPlaceholder(false);
+    }, 1000);
+  }, []);
 
   if (!chainSuggestStore.waitingSuggestedChainInfo) {
     return null;
@@ -61,7 +53,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
 
   return (
     <EmptyLayout style={{ height: "100%" }}>
-      {isLoading ? (
+      {isLoadingPlaceholder ? (
         <div className={style.container}>
           <div className={style.content}>
             <div className={style.logo}>
@@ -131,13 +123,15 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
         </div>
       ) : (
         <div className={style.container}>
-          {isRawDataMode ? (
+          {updateFromRepoDisabled || !communityChainInfo?.chainInfo ? (
             <div className={style.content}>
-              {chainSuggestStore.communityChainInfo && (
+              {communityChainInfo?.chainInfo && (
                 <img
                   className={style.backButton}
                   src={require("../../../public/assets/svg/arrow-left.svg")}
-                  onClick={() => setIsRawDataMode(false)}
+                  onClick={() => {
+                    setUpdateFromRepoDisabled(false);
+                  }}
                 />
               )}
               <h1 className={style.header}>
@@ -146,7 +140,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   values={{
                     chainName:
                       chainSuggestStore.waitingSuggestedChainInfo?.data
-                        .chainName,
+                        .chainInfo.chainName,
                   }}
                 />
               </h1>
@@ -168,53 +162,50 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                 <div className={style.chainInfoContainer}>
                   <pre className={style.chainInfo}>
                     {JSON.stringify(
-                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      (({ beta, origin, ...chainInfo }) => chainInfo)(
-                        chainSuggestStore.waitingSuggestedChainInfo.data
-                      ),
+                      chainSuggestStore.waitingSuggestedChainInfo.data
+                        .chainInfo,
                       undefined,
                       2
                     )}
                   </pre>
                 </div>
 
-                {uiConfigStore.isDeveloper &&
-                  !chainSuggestStore.communityChainInfo && (
-                    <div
-                      className={classNames(
-                        style.developerInfo,
-                        "custom-control custom-checkbox"
-                      )}
+                {uiConfigStore.isDeveloper && !communityChainInfo?.chainInfo && (
+                  <div
+                    className={classNames(
+                      style.developerInfo,
+                      "custom-control custom-checkbox"
+                    )}
+                  >
+                    <input
+                      className="custom-control-input"
+                      id="use-community-checkbox"
+                      type="checkbox"
+                      checked={updateFromRepoDisabled}
+                      onChange={(e) => {
+                        setUpdateFromRepoDisabled(e.target.checked);
+                      }}
+                    />
+                    <label
+                      className="custom-control-label"
+                      htmlFor="use-community-checkbox"
+                      style={{ color: "#323C4A", paddingTop: "1px" }}
                     >
-                      <input
-                        className="custom-control-input"
-                        id="use-community-checkbox"
-                        type="checkbox"
-                      />
-                      <label
-                        className="custom-control-label"
-                        htmlFor="use-community-checkbox"
-                        style={{ color: "#323C4A", paddingTop: "1px" }}
-                      >
-                        <FormattedMessage id="chain.suggested.developer.checkbox" />
-                      </label>
-                    </div>
-                  )}
+                      <FormattedMessage id="chain.suggested.developer.checkbox" />
+                    </label>
+                  </div>
+                )}
 
                 <div
                   className={classNames(
                     style.approveInfoContainer,
-                    !chainSuggestStore.communityChainInfo
-                      ? style.info
-                      : style.alert
+                    !communityChainInfo?.chainInfo ? style.info : style.alert
                   )}
                 >
                   <div className={style.titleContainer}>
                     <InformationCircleOutline
                       fill={
-                        !chainSuggestStore.communityChainInfo
-                          ? "#566172"
-                          : "#F0224B"
+                        !communityChainInfo?.chainInfo ? "#566172" : "#F0224B"
                       }
                     />
                     <div className={style.text}>
@@ -222,13 +213,13 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                     </div>
                   </div>
                   <div className={style.content}>
-                    {!chainSuggestStore.communityChainInfo ? (
+                    {!communityChainInfo?.chainInfo ? (
                       <FormattedMessage id="chain.suggested.approve-info.content" />
                     ) : (
                       <FormattedMessage id="chain.suggested.approve-alert.content" />
                     )}
                   </div>
-                  {!chainSuggestStore.communityChainInfo && (
+                  {!communityChainInfo?.chainInfo && (
                     <div className={style.link}>
                       <a
                         href={chainSuggestStore.communityChainInfoRepoUrl}
@@ -250,8 +241,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   <img
                     className={style.logoImage}
                     src={
-                      chainSuggestStore.communityChainInfo
-                        ?.chainSymbolImageUrl ||
+                      communityChainInfo?.chainInfo?.chainSymbolImageUrl ||
                       require("../../../public/assets/logo-256.png")
                     }
                     alt="chain logo"
@@ -277,7 +267,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                   values={{
                     chainName:
                       chainSuggestStore.waitingSuggestedChainInfo?.data
-                        .chainName,
+                        .chainInfo.chainName,
                   }}
                 />
               </h1>
@@ -293,7 +283,8 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                 <div className={style.tag}>
                   <a
                     href={chainSuggestStore.getCommunityChainInfoUrl(
-                      chainSuggestStore.waitingSuggestedChainInfo?.data.chainId
+                      chainSuggestStore.waitingSuggestedChainInfo?.data
+                        .chainInfo.chainId
                     )}
                     target="_blank"
                     rel="noreferrer"
@@ -313,7 +304,8 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
                     host:
                       chainSuggestStore.waitingSuggestedChainInfo?.data.origin,
                     chainId:
-                      chainSuggestStore.waitingSuggestedChainInfo?.data.chainId,
+                      chainSuggestStore.waitingSuggestedChainInfo?.data
+                        .chainInfo.chainId,
                     // eslint-disable-next-line react/display-name
                     b: (...chunks: any) => <b>{chunks}</b>,
                   }}
@@ -323,7 +315,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
               {uiConfigStore.isDeveloper && (
                 <div
                   className={style.chainDetailContainer}
-                  onClick={() => setIsRawDataMode(true)}
+                  onClick={() => setUpdateFromRepoDisabled(true)}
                 >
                   <FormattedMessage id="chain.suggested.add-chain-as-suggested" />
                   <img
@@ -365,14 +357,15 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
               onClick={async (e) => {
                 e.preventDefault();
 
-                const chainInfo = isRawDataMode
-                  ? chainSuggestStore.waitingSuggestedChainInfo?.data
-                  : chainSuggestStore.communityChainInfo;
+                const chainInfo = updateFromRepoDisabled
+                  ? chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo
+                  : communityChainInfo?.chainInfo ||
+                    chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo;
 
                 if (chainInfo) {
                   await chainSuggestStore.approve({
                     ...chainInfo,
-                    updateFromRepoDisabled: isRawDataMode,
+                    updateFromRepoDisabled,
                   });
                 }
 
