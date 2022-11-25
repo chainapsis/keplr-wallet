@@ -1916,5 +1916,5 @@ export const PrivilegedOrigins: string[] = ["https://wallet.keplr.app"];
 
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
-  repoName: "cicd-test",
+  repoName: "keplr-chain-registry",
 };
