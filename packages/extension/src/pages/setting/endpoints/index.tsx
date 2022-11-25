@@ -16,13 +16,13 @@ import { Input } from "../../../components/form";
 import style from "./style.module.scss";
 import useForm from "react-hook-form";
 import { useNotification } from "../../../components/notification";
-import { KeplrError } from "@keplr-wallet/router";
 import { useConfirm } from "../../../components/confirm";
 import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
   checkRestConnectivity,
   checkRPCConnectivity,
+  DifferentChainVersionError,
 } from "@keplr-wallet/chain-validator";
 
 interface FormData {
@@ -135,23 +135,22 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
           onSubmit={handleSubmit(async (data) => {
             setIsLoading(true);
 
+            let rpcConnSuccess = false;
             try {
               try {
                 await checkRPCConnectivity(selectedChainId, data.rpc);
+                rpcConnSuccess = true;
                 await checkRestConnectivity(selectedChainId, data.lcd);
               } catch (e) {
                 if (
-                  // Note the implementation of `ChainUpdaterService.checkEndpointsConnectivity`.
                   // In the case of this error, the chain version is different.
                   // It gives a warning and handles it if the user wants.
-                  e instanceof KeplrError &&
-                  e.module === "updater" &&
-                  (e.code === 8002 || e.code === 8102)
+                  e instanceof DifferentChainVersionError
                 ) {
                   if (
                     !(await confirm.confirm({
                       paragraph: `The ${
-                        e.code === 8002 ? "RPC" : "LCD"
+                        rpcConnSuccess ? "LCD" : "RPC"
                       } endpoint of the node might have different version with the registered chain. Do you want to proceed?`,
                     }))
                   ) {

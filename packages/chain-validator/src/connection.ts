@@ -1,6 +1,14 @@
 import Axios, { AxiosResponse } from "axios";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
+export class DifferentChainVersionError extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, DifferentChainVersionError.prototype);
+  }
+}
+
 export async function checkRPCConnectivity(
   chainId: string,
   rpc: string,
@@ -52,7 +60,7 @@ export async function checkRPCConnectivity(
     // In the form of {chain_identifier}-{chain_version}, if the identifier is the same but the version is different, it is strictly an error,
     // but it is actually the same chain but the chain version of the node is different.
     // In this case, it is possible to treat as a warning and proceed as it is, so this is separated with above error.
-    throw new Error(
+    throw new DifferentChainVersionError(
       `RPC endpoint has different chain id (expected: ${chainId}, actual: ${resultStatus.data.result.node_info.network})`
     );
   }
@@ -137,7 +145,7 @@ export async function checkRestConnectivity(
     // In the form of {chain_identifier}-{chain_version}, if the identifier is the same but the version is different, it is strictly an error,
     // but it is actually the same chain but the chain version of the node is different.
     // In this case, it is possible to treat as a warning and proceed as it is, so this is separated with above error.
-    throw new Error(
+    throw new DifferentChainVersionError(
       `LCD endpoint has different chain id (expected: ${chainId}, actual: ${resultLCDNodeInfo.data.default_node_info.network})`
     );
   }
