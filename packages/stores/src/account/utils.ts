@@ -1,4 +1,4 @@
-import { AminoSignResponse } from "@cosmjs/launchpad";
+import { AminoSignResponse } from "@keplr-wallet/types";
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 import { ProtoMsgsOrWithAminoMsgs } from "./types";
 
