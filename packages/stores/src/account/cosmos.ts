@@ -532,7 +532,7 @@ export class CosmosAccountImpl {
           signOptions
         );
       }
-      
+
       return await keplr.experimentalSignEIP712CosmosTx_v0(
         this.chainId,
         this.base.bech32Address,
