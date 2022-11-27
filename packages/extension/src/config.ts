@@ -1910,10 +1910,10 @@ export const EmbedChainInfos: ChainInfo[] = [
     beta: true,
   },
   {
-    rpc: "https://devnet.tm.injective.dev",
-    rest: "https://devnet.lcd.injective.dev",
-    chainId: "injective-777",
-    chainName: "Injective Devnet",
+    rpc: "https://tm.injective.network",
+    rest: "https://lcd.injective.network",
+    chainId: "injective-1",
+    chainName: "Injective",
     stakeCurrency: {
       coinDenom: "INJ",
       coinMinimalDenom: "inj",
