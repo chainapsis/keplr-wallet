@@ -16,7 +16,7 @@ import Joi, { ObjectSchema } from "joi";
 export const CurrencySchema = Joi.object<Currency>({
   coinDenom: Joi.string().required(),
   coinMinimalDenom: Joi.string().required(),
-  coinDecimals: Joi.number().integer().min(0).max(18).required(),
+  coinDecimals: Joi.number().strict().integer().min(0).max(18).required(),
   coinGeckoId: Joi.string(),
   coinImageUrl: Joi.string().uri(),
 });
@@ -69,9 +69,9 @@ const GasPriceStepSchema = Joi.object<{
   readonly average: number;
   readonly high: number;
 }>({
-  low: Joi.number().required(),
-  average: Joi.number().required(),
-  high: Joi.number().required(),
+  low: Joi.number().strict().required(),
+  average: Joi.number().strict().required(),
+  high: Joi.number().strict().required(),
 }).custom((value) => {
   if (value.low > value.average) {
     throw new Error("Low gas price step can not be greater than average");
@@ -99,7 +99,7 @@ export const Bech32ConfigSchema = Joi.object<Bech32Config>({
 });
 
 export const SuggestingBIP44Schema = Joi.object<{ coinType: number }>({
-  coinType: Joi.number().integer().min(0).required(),
+  coinType: Joi.number().strict().integer().min(0).required(),
   // Alow the any keys for compatibility of cosmosJS's BIP44 (for legacy).
 }).unknown(true);
 
@@ -188,7 +188,7 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       return values;
     })
     .required(),
-  coinType: Joi.number().integer(),
+  coinType: Joi.number().strict().integer(),
   beta: Joi.boolean(),
   features: Joi.array()
     .items(Joi.string().valid(...SupportedChainFeatures))
