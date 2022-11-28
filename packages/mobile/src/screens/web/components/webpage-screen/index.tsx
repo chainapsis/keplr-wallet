@@ -112,7 +112,12 @@ export const WebpageScreen: FunctionComponent<
   useEffect(() => {
     if (waitingSuggestedChainInfo) {
       if (enableSuggestChain) {
-        chainSuggestStore.approve();
+        chainSuggestStore.approve({
+          ...waitingSuggestedChainInfo.data.chainInfo,
+          // In mobile, the suggest chain function is experimental and it is unclear what will happen in the future.
+          // For now, disable the option below.
+          updateFromRepoDisabled: true,
+        });
       } else {
         chainSuggestStore.reject();
       }

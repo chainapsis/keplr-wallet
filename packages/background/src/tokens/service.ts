@@ -9,7 +9,7 @@ import {
   CurrencySchema,
   CW20CurrencySchema,
   Secret20CurrencySchema,
-} from "../chains";
+} from "@keplr-wallet/chain-validator";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";

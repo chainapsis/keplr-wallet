@@ -6,7 +6,7 @@ import {
   CW20CurrencySchema,
   FeeCurrencySchema,
   Secret20CurrencySchema,
-} from "./types";
+} from "./schema";
 import {
   AppCurrency,
   ChainInfo,
@@ -17,6 +17,7 @@ import {
 } from "@keplr-wallet/types";
 import { Bech32Config } from "@keplr-wallet/types";
 import Joi from "joi";
+import { Mutable } from "utility-types";
 
 const AppCurrencySchemaTest = Joi.array().items(
   CurrencySchema,
@@ -636,7 +637,7 @@ describe("Test chain info schema", () => {
   });
 
   it("test chain info schema", async () => {
-    const generatePlainChainInfo = (): ChainInfo => {
+    const generatePlainChainInfo = (): Mutable<ChainInfo> => {
       return {
         rpc: "http://test.com",
         rest: "http://test.com",
@@ -677,6 +678,7 @@ describe("Test chain info schema", () => {
             },
           },
         ],
+        chainSymbolImageUrl: "https://test.com/image.png",
       };
     };
 
@@ -707,7 +709,78 @@ describe("Test chain info schema", () => {
 
     await assert.doesNotReject(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [],
+      });
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [
+          {
+            coinType: 119,
+          },
+        ],
+      });
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [
+          {
+            coinType: 119,
+          },
+          {
+            coinType: 120,
+          },
+        ],
+      });
+    });
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        chainSymbolImageUrl: "not url",
+      });
+    });
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [
+          {
+            // Duplicated with chainInfo.bip44.coinType
+            coinType: 118,
+          },
+          {
+            coinType: 120,
+          },
+        ],
+      });
+    }, "should reject if duplication exists in bip44");
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+
+      await ChainInfoSchema.validateAsync({
+        ...chainInfo,
+        alternativeBIP44s: [
+          {
+            coinType: 119,
+          },
+          {
+            coinType: 119,
+          },
+        ],
+      });
+    }, "should reject if duplication exists in bip44");
+
+    await assert.doesNotReject(async () => {
+      const chainInfo = generatePlainChainInfo();
       chainInfo.currencies = [
         {
           coinDenom: "TEST",
@@ -720,7 +793,6 @@ describe("Test chain info schema", () => {
           coinDecimals: 6,
         },
       ];
-      // @ts-ignore
       chainInfo.feeCurrencies = [
         {
           coinDenom: "TEST",
@@ -739,7 +811,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo.currencies = [
         {
           coinDenom: "TEST",
@@ -758,7 +829,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo.feeCurrencies = [
         {
           coinDenom: "TEST",
@@ -785,7 +855,6 @@ describe("Test chain info schema", () => {
 
     await assert.doesNotReject(async () => {
       let chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["currencies"] = [
         {
           coinDenom: "TEST",
@@ -817,7 +886,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["feeCurrencies"] = [
         {
           type: "cw20",
@@ -834,11 +902,17 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["rpc"] = "asd";
 
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when rpc is not uri");
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      chainInfo["rpc"] = "http://test.com?test=1";
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw error when rpc has query string");
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
@@ -850,11 +924,17 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["rest"] = "asd";
 
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when rest is not uri");
+
+    await assert.rejects(async () => {
+      const chainInfo = generatePlainChainInfo();
+      chainInfo["rest"] = "http://test.com?test=1";
+
+      await ChainInfoSchema.validateAsync(chainInfo);
+    }, "Should throw error when rest has query string");
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
@@ -874,7 +954,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["chainId"] = "";
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -890,7 +969,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["chainName"] = "";
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -942,7 +1020,6 @@ describe("Test chain info schema", () => {
 
     await assert.doesNotReject(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["bip44"] = { coinType: 0 };
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -950,7 +1027,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["bip44"] = { coinType: -1 };
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -958,7 +1034,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["bip44"] = { coinType: 1.1 };
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -1000,7 +1075,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["currencies"] = [];
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -1008,13 +1082,13 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["currencies"] = [
         {
           coinDenom: "TEST",
           coinMinimalDenom: "utest",
           coinDecimals: 6,
         },
+        // @ts-ignore
         {
           // coinDenom: "TEST",
           coinMinimalDenom: "utest",
@@ -1035,7 +1109,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["feeCurrencies"] = [];
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -1043,13 +1116,13 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["feeCurrencies"] = [
         {
           coinDenom: "TEST",
           coinMinimalDenom: "utest",
           coinDecimals: 6,
         },
+        // @ts-ignore
         {
           // coinDenom: "TEST",
           coinMinimalDenom: "utest",
@@ -1066,12 +1139,10 @@ describe("Test chain info schema", () => {
 
     await assert.doesNotReject(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["features"] = [stargate, cosmwasm];
 
       await ChainInfoSchema.validateAsync(chainInfo);
 
-      // @ts-ignore
       chainInfo["features"] = [stargate, secretwasm];
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -1079,7 +1150,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["features"] = ["unknown"];
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -1087,7 +1157,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["features"] = [stargate, stargate];
 
       await ChainInfoSchema.validateAsync(chainInfo);
@@ -1095,7 +1164,6 @@ describe("Test chain info schema", () => {
 
     await assert.rejects(async () => {
       const chainInfo = generatePlainChainInfo();
-      // @ts-ignore
       chainInfo["features"] = [cosmwasm, secretwasm];
 
       await ChainInfoSchema.validateAsync(chainInfo);
