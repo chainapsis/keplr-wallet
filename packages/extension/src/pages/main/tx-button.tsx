@@ -100,7 +100,10 @@ export const TxButtonView: FunctionComponent = observer(() => {
   };
 
   return (
-    <div className={styleTxButton.containerTxButton}>
+    <div
+      className={styleTxButton.containerTxButton}
+      style={{ margin: "0px -2px" }}
+    >
       <Button
         className={styleTxButton.button}
         style={
