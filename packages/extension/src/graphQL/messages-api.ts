@@ -1,41 +1,87 @@
 import { ApolloClient, gql, InMemoryCache, split } from "@apollo/client";
-import { getMainDefinition } from "@apollo/client/utilities";
+import {
+  getMainDefinition,
+  ObservableSubscription,
+} from "@apollo/client/utilities";
 import { store } from "../chatStore";
 import {
   setBlockedList,
   setBlockedUser,
   setMessageError,
   setUnblockedUser,
-  updateAuthorMessages,
-  updateSenderMessages,
+  updateMessages,
+  updateLatestSentMessage,
 } from "../chatStore/messages-slice";
+import { CHAT_PAGE_COUNT, GROUP_PAGE_COUNT } from "../config.ui.var";
 import { encryptAllData } from "../utils/encrypt-message";
 import { client, createWSLink, httpLink } from "./client";
 import {
   block,
   blockedList,
+  groups,
+  groupsWithAddresses,
   listenMessages,
+  mailbox,
   NewMessageUpdate,
-  receiveMessages,
   sendMessages,
   unblock,
 } from "./messages-queries";
-
-export const fetchMessages = async () => {
+import { recieveGroups } from "./recieve-messages";
+let querySubscription: ObservableSubscription;
+export const fetchMessages = async (groupId: string, page: number) => {
   const state = store.getState();
   const { data, errors } = await client.query({
-    query: gql(receiveMessages),
+    query: gql(mailbox),
     fetchPolicy: "no-cache",
     context: {
       headers: {
         Authorization: `Bearer ${state.user.accessToken}`,
       },
     },
+    variables: {
+      groupId,
+      page,
+      pageCount: CHAT_PAGE_COUNT,
+    },
   });
 
   if (errors) console.log("errors", errors);
+  return data.mailbox;
+};
 
-  return data.mailbox.messages;
+interface groupQueryVariables {
+  page: number;
+  pageCount: number;
+  addresses?: string[];
+  addressQueryString?: string;
+}
+
+export const fetchGroups = async (
+  page: number,
+  addressQueryString: string,
+  addresses: string[]
+) => {
+  const groupsQuery = addresses.length ? groupsWithAddresses : groups;
+  const variables: groupQueryVariables = {
+    page,
+    pageCount: GROUP_PAGE_COUNT,
+  };
+  if (addresses.length) variables["addresses"] = addresses;
+  else variables["addressQueryString"] = addressQueryString;
+  console.log(groupsQuery, variables);
+  const state = store.getState();
+  const { data, errors } = await client.query({
+    query: gql(groupsQuery),
+    fetchPolicy: "no-cache",
+    context: {
+      headers: {
+        Authorization: `Bearer ${state.user.accessToken}`,
+      },
+    },
+    variables: variables,
+  });
+  if (errors) console.log("errors", errors);
+  return data.groups;
 };
 
 export const fetchBlockList = async () => {
@@ -161,8 +207,8 @@ export const deliverMessages = async (
       });
 
       if (data?.dispatchMessages?.length > 0) {
-        store.dispatch(updateSenderMessages(data?.dispatchMessages[0]));
-        return data;
+        store.dispatch(updateLatestSentMessage(data?.dispatchMessages[0]));
+        return data?.dispatchMessages[0];
       }
       return null;
     }
@@ -197,7 +243,7 @@ export const messageListener = () => {
     link: splitLink,
     cache: new InMemoryCache(),
   });
-  newClient
+  querySubscription = newClient
     .subscribe({
       query: gql(listenMessages),
       context: {
@@ -208,7 +254,8 @@ export const messageListener = () => {
     })
     .subscribe({
       next({ data }: { data: { newMessageUpdate: NewMessageUpdate } }) {
-        store.dispatch(updateAuthorMessages(data.newMessageUpdate.message));
+        store.dispatch(updateMessages(data.newMessageUpdate.message));
+        recieveGroups(0, data.newMessageUpdate.message.target);
       },
       error(err) {
         console.error("err", err);
@@ -224,4 +271,8 @@ export const messageListener = () => {
         console.log("completed");
       },
     });
+};
+
+export const messageListenerUnsubscribe = () => {
+  if (querySubscription) querySubscription.unsubscribe();
 };

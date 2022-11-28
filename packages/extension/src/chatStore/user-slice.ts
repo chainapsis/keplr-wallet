@@ -1,26 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = {
+  notifications: [],
+  accessToken: "",
+  messagingPubKey: {
+    publicKey: null,
+    privacySetting: null,
+  },
+  isChatActive: false,
+};
+
 export const userSlice = createSlice({
   name: "user",
-  initialState: {
-    notifications: [],
-    accessToken: "",
-    messagingPubKey: {
-      publicKey: null,
-      privacySetting: null,
-    },
-    isChatActive: false,
-  },
+  initialState: initialState,
   reducers: {
-    resetUser: (state, _action) => {
-      state.notifications = [];
-      state.messagingPubKey = {
-        publicKey: null,
-        privacySetting: null,
-      };
-      state.accessToken = "";
-      state.isChatActive = false;
-    },
+    resetUser: (_state, _action) => initialState,
     setNotifications: (state, action) => {
       state.notifications = action.payload;
     },

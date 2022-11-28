@@ -15,7 +15,8 @@ import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { store } from "../../../chatStore";
 import { resetUser } from "../../../chatStore/user-slice";
-import { addMessageList } from "../../../chatStore/messages-slice";
+import { resetChatList } from "../../../chatStore/messages-slice";
+import { messageListenerUnsubscribe } from "../../../graphQL/messages-api";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -111,7 +112,8 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                         analyticsStore.logEvent("Account changed");
                         loadingIndicator.setIsLoading("keyring", false);
                         store.dispatch(resetUser({}));
-                        store.dispatch(addMessageList({}));
+                        store.dispatch(resetChatList({}));
+                        messageListenerUnsubscribe();
                         history.push("/");
                       } catch (e) {
                         console.log(`Failed to change keyring: ${e.message}`);

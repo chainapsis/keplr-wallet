@@ -77,21 +77,16 @@
   margin-right: 5px;
   cursor: pointer;
 }
-.chatArea.showButton {
-  height: 57vh;
-}
-.chatArea.hideButton {
-  height: 70vh;
-}
+
 .chatArea {
   display: flex;
   flex-direction: column;
-
+  height: 70vh;
   .messages {
     height: 63vh;
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: clip;
     margin-right: -12px;
     margin-bottom: 10px;
@@ -108,7 +103,13 @@
     }
   }
 }
-
+.loader {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+}
 .inputText {
   // margin-left: -12px;
   border: #525f7f 1px solid;
@@ -119,7 +120,7 @@
   align-items: center;
 
   .inputArea {
-    width: 343px;
+    width: 330px;
     padding: 4.5px 10px;
     border-radius: 5px;
     height: 33px;

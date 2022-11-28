@@ -16,9 +16,12 @@ const defaultOptions: DefaultOptions = {
     errorPolicy: "all",
   },
 };
-
+// export const MESSAGING_SERVER =
+//   "https://messaging-server.sandbox-london-b.fetch-ai.com/graphql";
+export const MESSAGING_SERVER = "https://messaging.fetch-ai.network/graphql";
+// export const MESSAGING_SERVER = "http://localhost:4000/graphql";
 const client = new ApolloClient({
-  uri: "https://messaging.fetch-ai.network/graphql",
+  uri: MESSAGING_SERVER,
   cache: new InMemoryCache(),
   defaultOptions,
 });

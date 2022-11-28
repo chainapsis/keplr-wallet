@@ -1,17 +1,27 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Message } from "../graphQL/messages-queries";
+import { CHAT_PAGE_COUNT, GROUP_PAGE_COUNT } from "../config.ui.var";
 
 export interface MessageMap {
   [key: string]: Message;
 }
 
 interface ContactState {
-  messageList: MessageMap;
-  lastMessage?: Message;
+  contactAddress: string;
+  messages: MessageMap;
   pubKey?: string;
+  pagination: Pagination;
 }
 
-interface MessagesState {
+export interface Pagination {
+  page: number;
+  pageCount: number;
+  total: number;
+  lastPage: number;
+}
+
+//key is group ID
+export interface MessagesState {
   [key: string]: ContactState;
 }
 
@@ -19,46 +29,101 @@ interface BlockedAddressState {
   [key: string]: boolean;
 }
 
-interface PubKey {
-  contact: string;
-  value: string;
+export interface Group {
+  id: string; // groupID
+  name: string; // contactAddress
+  lastMessageContents: string;
+  createdAt: string;
+  lastMessageTimestamp: string;
+  lastMessageSender: string;
+}
+
+export interface Groups {
+  [contactAddress: string]: Group;
 }
 
 interface State {
-  chat: MessagesState;
+  groups: Groups;
+  groupsPagination: Pagination;
+  chats: MessagesState;
   blockedAddress: BlockedAddressState;
   errorMessage?: { type: string; message: string; level: number };
+  isChatGroupPopulated: boolean;
+  isChatSubscriptionActive: boolean;
 }
 
-const initialState: State = { chat: {}, blockedAddress: {} };
+const initialState: State = {
+  groups: {},
+  groupsPagination: {
+    page: -1,
+    pageCount: GROUP_PAGE_COUNT,
+    lastPage: 0,
+    total: GROUP_PAGE_COUNT,
+  },
+  chats: {},
+  blockedAddress: {},
+  isChatGroupPopulated: false,
+  isChatSubscriptionActive: false,
+};
 
 export const messagesSlice = createSlice({
   name: "messages",
   initialState,
   reducers: {
-    addMessageList: (state, action) => {
-      state.chat = action.payload;
-      state.errorMessage = { type: "", message: "", level: 0 };
+    setGroups: (state, action) => {
+      const { groups, pagination } = action.payload;
+      state.groups = { ...state.groups, ...groups };
+      state.groupsPagination = pagination;
     },
-    updateAuthorMessages: (state: any, action: PayloadAction<Message>) => {
-      const { sender, id } = action.payload;
-      state.chat[sender].messages[id] = action.payload;
-      state.chat[sender].lastMessage = action.payload;
-    },
-    updateSenderMessages: (state: any, action: PayloadAction<Message>) => {
-      const { target, id } = action.payload;
-      if (!state.chat[target]) {
-        state.chat[target] = {
+    updateChatList: (state, action) => {
+      const { userAddress, messages, pagination } = action.payload;
+      if (!state.chats[userAddress])
+        state.chats[userAddress] = {
+          contactAddress: userAddress,
           messages: {},
-          lastMessage: {},
+          pagination: {
+            page: 0,
+            pageCount: CHAT_PAGE_COUNT,
+            lastPage: 0,
+            total: CHAT_PAGE_COUNT,
+          },
+        };
+      const newMessages = { ...state.chats[userAddress].messages, ...messages };
+      state.chats[userAddress].messages = newMessages;
+      state.chats[userAddress].pagination = pagination;
+    },
+    resetChatList: (_state, _action) => initialState,
+    updateMessages: (state: any, action: PayloadAction<Message>) => {
+      const { sender, id } = action.payload;
+      if (!state.chats[sender]) {
+        state.chats[sender] = {
+          contactAddress: sender,
+          messages: {},
+          pagination: {
+            page: 0,
+            pageCount: CHAT_PAGE_COUNT,
+            lastPage: 0,
+            total: CHAT_PAGE_COUNT,
+          },
         };
       }
-      state.chat[target].messages[id] = action.payload;
-      state.chat[target].lastMessage = action.payload;
+      state.chats[sender].messages[id] = action.payload;
     },
-    setAuthorPubKey: (state, action: PayloadAction<PubKey>) => {
-      const { contact, value } = action.payload;
-      state.chat[contact].pubKey = value;
+    updateLatestSentMessage: (state: any, action: PayloadAction<Message>) => {
+      const { target, id } = action.payload;
+      if (!state.chats[target]) {
+        state.chats[target] = {
+          contactAddress: target,
+          messages: {},
+          pagination: {
+            page: 0,
+            pageCount: CHAT_PAGE_COUNT,
+            lastPage: 0,
+            total: CHAT_PAGE_COUNT,
+          },
+        };
+      }
+      state.chats[target].messages[id] = action.payload;
     },
     setBlockedList: (state, action) => {
       const blockedList = action.payload;
@@ -78,23 +143,40 @@ export const messagesSlice = createSlice({
     setMessageError: (state, action) => {
       state.errorMessage = action.payload;
     },
+    setIsChatGroupPopulated: (state, action) => {
+      state.isChatGroupPopulated = action.payload;
+    },
+    setIsChatSubscriptionActive: (state, action) => {
+      state.isChatSubscriptionActive = action.payload;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
 export const {
+  setGroups,
   setMessageError,
-  addMessageList,
-  updateAuthorMessages,
-  updateSenderMessages,
-  setAuthorPubKey,
+  resetChatList,
+  updateChatList,
+  updateMessages,
+  updateLatestSentMessage,
   setBlockedList,
   setBlockedUser,
   setUnblockedUser,
+  setIsChatGroupPopulated,
+  setIsChatSubscriptionActive,
 } = messagesSlice.actions;
 
-export const userMessages = (state: any) => state.messages.chat;
+export const userChatGroups = (state: any) => state.messages.groups;
+export const userChatGroupPagination = (state: any) =>
+  state.messages.groupsPagination;
+
+export const userMessages = (state: any) => state.messages.chats;
 export const userMessagesError = (state: any) => state.messages.errorMessage;
 export const userBlockedAddresses = (state: any) =>
   state.messages.blockedAddress;
+export const userChatSubscriptionActive = (state: { messages: any }) =>
+  state.messages.isChatSubscriptionActive;
+export const userChatStorePopulated = (state: { messages: any }) =>
+  state.messages.isChatGroupPopulated;
 export const messageStore = messagesSlice.reducer;

@@ -1,119 +1,34 @@
 .chatContainer {
-  padding: 12px;
   background-color: #fff;
   border-radius: 5px;
-  margin-left: -10px;
-  margin-right: -10px;
-
+  margin-left: -8px;
+  margin-right: -12px;
+  margin-bottom: -12px;
+  height: auto;
   .title {
     text-align: left;
     font-size: 20px;
     color: #525f7f;
     line-height: 16px;
     font-weight: 500;
-    margin: 0 0 15px 0;
+    margin: 12px;
   }
 
-  .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 101;
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-  .popupContainer {
-    position: absolute;
-    width: 320px;
-    margin: auto;
-    height: 495px;
-    background-color: #fff;
-    z-index: 200;
-    bottom: 40px;
-    left: 18px;
-    padding: 10px 20px;
-    border-radius: 20px;
-    box-shadow: 0px 0px 100px 20px #585858;
-
-    .options-label {
-      margin-left: 5px;
-    }
-    img {
-      margin: 0 auto;
-      width: 50%;
-      display: block;
-      border-radius: 500px;
-      margin-top: 10px;
-    }
-    .infoContainer {
-      h3 {
-        color: #3b82f6;
-        margin-bottom: 0;
-      }
-      p,
-      form {
-        font-size: 14px;
-        color: #525f7f;
-      }
-      p {
-        margin-bottom: 0.8rem;
-      }
-      p:nth-of-type(2) {
-        margin-bottom: 0 !important;
-      }
-    }
-    button {
-      padding: 14px;
-      font-size: medium;
-      color: #fff;
-      background-color: #3b82f6;
-      border: none;
-      width: 282px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  }
-
-  .searchContainer {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    .searchBox {
-      display: flex;
-      padding: 5px;
-      flex: 1;
-      background-color: #f2f3f6;
-      border-radius: 4px;
-      align-items: center;
-      gap: 10px;
-      margin-right: 10px;
-      img {
-        width: 16px;
-        height: 16px;
-      }
-      input {
-        border: none;
-        outline: none;
-        background: transparent;
-        &::placeholder {
-          color: #525f7f;
-        }
-        flex-grow: 1;
-      }
-    }
-  }
-  .messagesContainer {
+  .groupsArea {
     margin-top: 20px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    .messageContainer {
+    height: 63vh;
+    gap: 10px;
+    overflow-y: auto;
+    overflow-x: clip;
+    .group {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 12px;
       cursor: pointer;
+
       .initials {
         width: 24px;
         height: 24px;
@@ -182,4 +97,12 @@
     height: 120px;
     margin-bottom: 20px;
   }
+}
+
+.loader {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
 }

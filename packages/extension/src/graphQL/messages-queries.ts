@@ -11,15 +11,60 @@ export const sendMessages = `mutation Mutation($messages: [InputMessage!]!) {
 
 // TODO(!!!): I expect these also need types associated for all of the queries
 //            here
-export const receiveMessages = `query Query {
-  mailbox {
+export const mailbox = `query Mailbox($groupId: String, $page: Int, $pageCount: Int) {
+  mailbox(groupId: $groupId, page: $page, pageCount: $pageCount) {
     messages {
       id
-      sender
       target
+      sender
+      groupId
       contents
       expiryTimestamp
       commitTimestamp
+    }
+    pagination {
+      lastPage
+      page
+      pageCount
+      total
+    }
+  }
+}`;
+
+export const groups = `query Query($addressQueryString: String, $page: Int, $pageCount: Int) {
+  groups(addressQueryString: $addressQueryString, page: $page, pageCount: $pageCount) {
+    groups {
+      createdAt
+      id
+      lastMessageSender
+      lastMessageContents
+      name
+      lastMessageTimestamp
+    }
+    pagination {
+      lastPage
+      page
+      total
+      pageCount
+    }
+  }
+}`;
+
+export const groupsWithAddresses = `query Query($page: Int, $pageCount: Int, $addresses: [String!]) {
+  groups(page: $page, pageCount: $pageCount, addresses: $addresses) {
+    groups {
+      createdAt
+      id
+      lastMessageSender
+      lastMessageContents
+      name
+      lastMessageTimestamp
+    }
+    pagination {
+      lastPage
+      page
+      total
+      pageCount
     }
   }
 }`;
@@ -29,6 +74,7 @@ export interface Message {
   sender: string;
   target: string;
   contents: string;
+  groupId: string;
   expiryTimestamp: string;
   commitTimestamp: string;
 }

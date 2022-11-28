@@ -20,7 +20,6 @@ import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { store } from "../../chatStore";
 import { setIsChatActive } from "../../chatStore/user-slice";
-// import { fetchPublicKey } from "../../utils/fetch-public-key";
 
 export const ProgressBar = ({
   width,
