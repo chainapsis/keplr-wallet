@@ -2048,4 +2048,5 @@ export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
   repoName: "keplr-chain-registry",
+  branchName: "main",
 };

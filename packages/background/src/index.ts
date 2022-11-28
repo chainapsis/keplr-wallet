@@ -43,6 +43,7 @@ export function init(
   communityChainInfoRepo: {
     readonly organizationName: string;
     readonly repoName: string;
+    readonly branchName: string;
   },
   commonCrypto: CommonCrypto,
   notification: Notification,

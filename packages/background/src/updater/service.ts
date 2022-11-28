@@ -16,6 +16,7 @@ export class ChainUpdaterService {
     protected readonly communityChainInfoRepo: {
       readonly organizationName: string;
       readonly repoName: string;
+      readonly branchName: string;
     }
   ) {}
 
@@ -117,7 +118,7 @@ export class ChainUpdaterService {
       const res = await Axios.get<ChainInfo>(
         `/cosmos/${chainIdentifier}.json`,
         {
-          baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/main`,
+          baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
         }
       );
 
