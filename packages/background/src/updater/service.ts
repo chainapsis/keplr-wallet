@@ -115,44 +115,49 @@ export class ChainUpdaterService {
     try {
       const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
-      const res = await Axios.get<ChainInfo>(
-        `/cosmos/${chainIdentifier}.json`,
-        {
-          baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
-        }
-      );
-
-      let chainInfo: ChainInfo = res.data;
-
-      const fetchedChainIdentifier = ChainIdHelper.parse(chainInfo.chainId)
-        .identifier;
-      if (chainIdentifier !== fetchedChainIdentifier) {
-        console.log(
-          `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
-        );
-        return false;
-      }
-
       let repoUpdated = false;
 
-      const prevFetchedChainInfo = await this.kvStore.get<ChainInfo>(
-        "updated-chain-info/" + chainIdentifier
-      );
-      if (
-        !prevFetchedChainInfo ||
-        sortedJsonByKeyStringify(prevFetchedChainInfo) !==
-          sortedJsonByKeyStringify(chainInfo)
-      ) {
-        repoUpdated = true;
-
-        chainInfo = await validateBasicChainInfoType(chainInfo);
-
-        await this.kvStore.set<ChainInfo>(
-          "updated-chain-info/" + chainIdentifier,
-          chainInfo
+      try {
+        const res = await Axios.get<ChainInfo>(
+          `/cosmos/${chainIdentifier}.json`,
+          {
+            baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
+          }
         );
 
-        this.chainsService.clearCachedChainInfos();
+        let chainInfo: ChainInfo = res.data;
+
+        const fetchedChainIdentifier = ChainIdHelper.parse(chainInfo.chainId)
+          .identifier;
+        if (chainIdentifier !== fetchedChainIdentifier) {
+          console.log(
+            `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
+          );
+          return false;
+        }
+
+        const prevFetchedChainInfo = await this.kvStore.get<ChainInfo>(
+          "updated-chain-info/" + chainIdentifier
+        );
+        if (
+          !prevFetchedChainInfo ||
+          sortedJsonByKeyStringify(prevFetchedChainInfo) !==
+            sortedJsonByKeyStringify(chainInfo)
+        ) {
+          repoUpdated = true;
+
+          chainInfo = await validateBasicChainInfoType(chainInfo);
+
+          await this.kvStore.set<ChainInfo>(
+            "updated-chain-info/" + chainIdentifier,
+            chainInfo
+          );
+
+          this.chainsService.clearCachedChainInfos();
+        }
+      } catch (e) {
+        // Proceed logic event if fetching from github failed
+        console.log(e);
       }
 
       const updatedChainInfo = await this.chainsService.getChainInfo(chainId);
