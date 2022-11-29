@@ -756,7 +756,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpc: "https://rpc-certik.keplr.app",
     rest: "https://lcd-certik.keplr.app",
     chainId: "shentu-2.2",
-    chainName: "Certik",
+    chainName: "Shentu",
     stakeCurrency: {
       coinDenom: "CTK",
       coinMinimalDenom: "uctk",
