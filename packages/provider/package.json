@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/provider",
-  "version": "0.11.21-rc.0",
+  "version": "0.11.21-rc.1",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -17,8 +17,8 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/router": "0.11.21-rc.0",
-    "@keplr-wallet/types": "0.11.21-rc.0",
+    "@keplr-wallet/router": "0.11.21-rc.1",
+    "@keplr-wallet/types": "0.11.21-rc.1",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "long": "^4.0.0",
