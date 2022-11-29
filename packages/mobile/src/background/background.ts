@@ -32,6 +32,7 @@ init(
     "https://app.regen.network",
     "https://app.stride.zone",
   ],
+  ["https://wallet.keplr.app"],
   {
     rng: getRandomBytesAsync,
   },

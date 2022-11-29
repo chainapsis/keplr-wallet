@@ -20,6 +20,7 @@ init(
   new ContentScriptMessageRequester(),
   EmbedChainInfos,
   PrivilegedOrigins,
+  PrivilegedOrigins,
   {
     rng: (array) => {
       return Promise.resolve(crypto.getRandomValues(array));
