@@ -361,6 +361,7 @@ export class RootStore {
       "ethereum"
     );
 
+    // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
       (() => {
         if (!AmplitudeApiKey) {

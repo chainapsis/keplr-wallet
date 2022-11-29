@@ -24,7 +24,7 @@ export type DrawerContentProps = DrawerContentComponentProps<DrawerContentOption
 
 export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
   (props) => {
-    const { chainStore, analyticsStore } = useStore();
+    const { chainStore } = useStore();
     const navigation = useNavigation();
 
     const safeAreaInsets = useSafeAreaInsets();
@@ -96,12 +96,6 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
               <RectButton
                 key={chainInfo.chainId}
                 onPress={() => {
-                  analyticsStore.logEvent("Chain changed", {
-                    chainId: chainStore.current.chainId,
-                    chainName: chainStore.current.chainName,
-                    toChainId: chainInfo.chainId,
-                    toChainName: chainInfo.chainName,
-                  });
                   chainStore.selectChain(chainInfo.chainId);
                   chainStore.saveLastViewChainId();
                   navigation.dispatch(DrawerActions.closeDrawer());
