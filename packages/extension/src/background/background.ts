@@ -26,6 +26,7 @@ init(
   new ContentScriptMessageRequester(),
   EmbedChainInfos,
   PrivilegedOrigins,
+  PrivilegedOrigins,
   CommunityChainInfoRepo,
   {
     rng: (array) => {

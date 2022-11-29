@@ -545,3 +545,29 @@ export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
     return GetTxEncryptionKeyMsg.type();
   }
 }
+
+export class GetAnalyticsIdMsg extends Message<string> {
+  public static type() {
+    return "get-analytics-id";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "analytics";
+  }
+
+  type(): string {
+    return GetAnalyticsIdMsg.type();
+  }
+}
