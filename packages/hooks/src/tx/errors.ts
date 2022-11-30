@@ -109,3 +109,11 @@ export class InvalidHexError extends Error {
     Object.setPrototypeOf(this, InvalidHexError.prototype);
   }
 }
+
+export class MemoSuspectMnemonicInclusion extends Error {
+  constructor(m: string) {
+    super(m);
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, MemoSuspectMnemonicInclusion.prototype);
+  }
+}

@@ -20,6 +20,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useState } from "react";
 import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 import { isAddress } from "@ethersproject/address";
+import { Buffer } from "buffer/";
 
 export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
   @observable
@@ -27,6 +28,8 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
 
   @observable
   protected _ensEndpoint: string | undefined = undefined;
+  @observable
+  protected _allowHexAddressOnEthermint: boolean | undefined = undefined;
 
   @observable
   protected _bech32Prefix: string | undefined = undefined;
@@ -81,6 +84,26 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
       }
     }
 
+    if (this._allowHexAddressOnEthermint) {
+      const hasEthereumAddress = this.chainInfo.features?.includes(
+        "eth-address-gen"
+      );
+      if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
+        try {
+          if (isAddress(rawRecipient)) {
+            const buf = Buffer.from(
+              rawRecipient.replace("0x", "").toLowerCase(),
+              "hex"
+            );
+            return new Bech32Address(buf).toBech32(this.bech32Prefix);
+          }
+        } catch {
+          return "";
+        }
+        return "";
+      }
+    }
+
     return rawRecipient;
   }
 
@@ -111,6 +134,11 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
     this._ensEndpoint = endpoint;
   }
 
+  @action
+  setAllowHexAddressOnEthermint(value: boolean | undefined) {
+    this._allowHexAddressOnEthermint = value;
+  }
+
   @computed
   get error(): Error | undefined {
     const rawRecipient = this.rawRecipient.trim();
@@ -119,14 +147,20 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
       return new EmptyAddressError("Address is empty");
     }
 
-    const hasEthereumAddress = this.chainInfo.features?.includes(
-      "eth-address-gen"
-    );
-    if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
-      if (isAddress(rawRecipient)) {
-        return;
+    if (this._allowHexAddressOnEthermint) {
+      const hasEthereumAddress = this.chainInfo.features?.includes(
+        "eth-address-gen"
+      );
+      if (hasEthereumAddress && rawRecipient.startsWith("0x")) {
+        try {
+          if (isAddress(rawRecipient)) {
+            return;
+          }
+        } catch (e) {
+          return e;
+        }
+        return new InvalidHexError("Invalid hex address for chain");
       }
-      return new InvalidHexError("Invalid hex address for chain");
     }
 
     if (ObservableEnsFetcher.isValidENS(rawRecipient)) {
@@ -175,11 +209,15 @@ export class RecipientConfig extends TxChainSetter implements IRecipientConfig {
 export const useRecipientConfig = (
   chainGetter: ChainGetter,
   chainId: string,
-  ensEndpoint?: string
+  options: {
+    ensEndpoint?: string;
+    allowHexAddressOnEthermint?: boolean;
+  } = {}
 ) => {
   const [config] = useState(() => new RecipientConfig(chainGetter, chainId));
   config.setChain(chainId);
-  config.setENSEndpoint(ensEndpoint);
+  config.setENSEndpoint(options.ensEndpoint);
+  config.setAllowHexAddressOnEthermint(options.allowHexAddressOnEthermint);
 
   return config;
 };

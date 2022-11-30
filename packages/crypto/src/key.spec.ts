@@ -1,5 +1,6 @@
 import { Mnemonic } from "./mnemonic";
 import { PrivKeySecp256k1 } from "./key";
+import { Hash } from "./hash";
 
 describe("Test priv key", () => {
   it("priv key should generate the valid pub key", () => {
@@ -47,5 +48,40 @@ describe("Test priv key", () => {
         188,
       ])
     );
+  });
+
+  it("priv key should generate the valid signature", () => {
+    const privKey = PrivKeySecp256k1.generateRandomKey();
+    const pubKey = privKey.getPubKey();
+
+    const data = new Uint8Array([1, 2, 3]);
+    const signature = privKey.signDigest32(Hash.sha256(data));
+    expect(signature).toStrictEqual(privKey.sign(data));
+
+    expect(pubKey.verify(data, signature)).toBe(true);
+    expect(pubKey.verifyDigest32(Hash.sha256(data), signature)).toBe(true);
+  });
+
+  it("test assertions", () => {
+    const privKey = PrivKeySecp256k1.generateRandomKey();
+    const pubKey = privKey.getPubKey();
+
+    expect(() => {
+      // Not 32 bytes hash
+      privKey.signDigest32(new Uint8Array([1, 2, 3]));
+    }).toThrow();
+
+    expect(() => {
+      // Not 32 bytes hash
+      pubKey.verifyDigest32(new Uint8Array([1, 2, 3]), new Uint8Array(64));
+    }).toThrow();
+
+    expect(() => {
+      // Not 64 bytes signature
+      pubKey.verifyDigest32(
+        Hash.sha256(new Uint8Array([1, 2, 3])),
+        new Uint8Array(63)
+      );
+    }).toThrow();
   });
 });

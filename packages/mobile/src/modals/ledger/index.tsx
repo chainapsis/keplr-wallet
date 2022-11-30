@@ -18,7 +18,7 @@ import TransportBLE, {
   bleManager,
 } from "@ledgerhq/react-native-hw-transport-ble";
 import { LoadingSpinner } from "../../components/spinner";
-import { Ledger, LedgerInitErrorOn } from "@keplr-wallet/background";
+import { Ledger, LedgerApp, LedgerInitErrorOn } from "@keplr-wallet/background";
 import { getLastUsedLedgerDeviceId } from "../../utils/ledger";
 import { RectButton } from "../../components/rect-button";
 import { useUnmount } from "../../hooks";
@@ -365,7 +365,11 @@ const LedgerNanoBLESelector: FunctionComponent<{
 
     try {
       setIsConnecting(true);
-      const ledger = await Ledger.init(() => TransportBLE.open(deviceId));
+      const ledger = await Ledger.init(
+        () => TransportBLE.open(deviceId),
+        undefined,
+        LedgerApp.Cosmos
+      );
       await ledger.close();
 
       return true;

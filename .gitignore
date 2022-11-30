@@ -6,12 +6,10 @@ dist
 prod
 .gitsecret/keys/random_seed
 !*.secret
-packages/extension/src/config.var.tsx
 
 yarn-error.log
 
 build
-packages/extension/src/config.ui.var.tsx
 
 .cache
 

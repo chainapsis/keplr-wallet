@@ -23,5 +23,10 @@ export function parseDomainUntilSecondLevel(param: string): string {
     throw new Error(`Invalid domain: ${param}`);
   }
 
+  const i = split[split.length - 1].indexOf(":");
+  if (i >= 0) {
+    split[split.length - 1] = split[split.length - 1].slice(0, i);
+  }
+
   return split[split.length - 2] + "." + split[split.length - 1];
 }

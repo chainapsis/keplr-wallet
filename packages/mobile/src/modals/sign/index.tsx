@@ -13,7 +13,7 @@ import {
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { Button } from "../../components/button";
-import { Msg as AminoMsg } from "@cosmjs/launchpad";
+import { Msg as AminoMsg } from "@keplr-wallet/types";
 import { Msg } from "./msg";
 import { observer } from "mobx-react-lite";
 import { useUnmount } from "../../hooks";

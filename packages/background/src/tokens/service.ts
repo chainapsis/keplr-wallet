@@ -9,9 +9,9 @@ import {
 import {
   CurrencySchema,
   CW20CurrencySchema,
-  Erc20CurrencySchema,
+  ERC20CurrencySchema,
   Secret20CurrencySchema,
-} from "../chains";
+} from "@keplr-wallet/chain-validator";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
@@ -328,6 +328,9 @@ export class TokensService {
     chainInfo: ChainInfo,
     currency: AppCurrency
   ): Promise<AppCurrency> {
+    console.log(`ACLOG: validating currency`);
+    console.log(chainInfo);
+    console.log(currency);
     // Validate the schema.
     if ("type" in currency) {
       switch (currency.type) {
@@ -396,7 +399,7 @@ export class TokensService {
     currency: ERC20Currency
   ): Promise<ERC20Currency> {
     // Validate the schema.
-    currency = await Erc20CurrencySchema.validateAsync(currency);
+    currency = await ERC20CurrencySchema.validateAsync(currency);
 
     // Validate the contract address.
     if (!isAddress(currency.contractAddress)) {
