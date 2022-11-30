@@ -22,24 +22,39 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
 
   const intl = useIntl();
 
-  const [loading, setLoading] = useState(false);
-
   const { keyRingStore } = useStore();
-  const { register, handleSubmit, errors, setError } = useForm<FormData>({
+
+  const waitingNameData = keyRingStore.waitingNameData?.data;
+
+  const {
+    register,
+    handleSubmit,
+    errors,
+    setError,
+    setValue,
+  } = useForm<FormData>({
     defaultValues: {
       name: "",
     },
   });
 
   useEffect(() => {
-    if (parseInt(match.params.index).toString() !== match.params.index) {
-      throw new KeplrError("keyring", 201, "Invalid index");
+    if (waitingNameData?.defaultName) {
+      setValue("name", waitingNameData.defaultName);
     }
-  }, [match.params.index]);
+  }, [waitingNameData, setValue]);
+
+  const [loading, setLoading] = useState(false);
 
   const keyStore = useMemo(() => {
     return keyRingStore.multiKeyStoreInfo[parseInt(match.params.index)];
   }, [keyRingStore.multiKeyStoreInfo, match.params.index]);
+
+  useEffect(() => {
+    if (parseInt(match.params.index).toString() !== match.params.index) {
+      throw new KeplrError("keyring", 201, "Invalid index");
+    }
+  }, [match.params.index]);
 
   return (
     <HeaderLayout
@@ -48,9 +63,13 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
       alternativeTitle={intl.formatMessage({
         id: "setting.keyring.change.name",
       })}
-      onBackButton={() => {
-        history.goBack();
-      }}
+      onBackButton={
+        waitingNameData
+          ? () => {
+              history.goBack();
+            }
+          : undefined
+      }
     >
       <Form
         className={styleName.container}
@@ -62,6 +81,14 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
               parseInt(match.params.index),
               data.name
             );
+
+            // Close the popup by external change name message
+            if (waitingNameData !== undefined) {
+              keyRingStore.approveChangeName(data.name);
+              window.close();
+              return;
+            }
+
             history.push("/");
           } catch (e) {
             console.log("Fail to decrypt: " + e.message);
@@ -81,9 +108,10 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
           label={intl.formatMessage({
             id: "setting.keyring.change.previous-name",
           })}
-          value={keyStore.meta?.name}
+          value={keyStore?.meta?.name ?? ""}
           readOnly={true}
         />
+
         <Input
           type="text"
           label={intl.formatMessage({
@@ -96,7 +124,9 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
               id: "setting.keyring.change.input.name.error.required",
             }),
           })}
+          readOnly={waitingNameData !== undefined && !waitingNameData?.editable}
         />
+
         <div style={{ flex: 1 }} />
         <Button type="submit" color="primary" block data-loading={loading}>
           <FormattedMessage id="setting.keyring.change.name.button.save" />
