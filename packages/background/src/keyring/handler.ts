@@ -446,15 +446,21 @@ const handleInitNonDefaultLedgerAppMsg: (
   };
 };
 
-// FIXME : add index in msg
-// InternalHandler<UpdateNameKeyRingMsg>
 const handleChangeKeyNameMsg: (
   service: KeyRingService
 ) => InternalHandler<ChangeKeyRingNameMsg> = (service) => {
   return async (env, msg) => {
+    let index = 0;
+    service.getMultiKeyStoreInfo().forEach(({ selected }, idx) => {
+      if (selected) {
+        index = idx;
+      }
+    });
+
     return await service.changeKeyRingName(env, {
       defaultName: msg.defaultName,
       editable: msg.editable,
+      index,
     });
   };
 };

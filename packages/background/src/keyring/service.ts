@@ -726,14 +726,17 @@ export class KeyRingService {
     return await this.keyRing.initializeNonDefaultLedgerApp(env, ledgerApp);
   }
 
-  // FIXME : get index
   async changeKeyRingName(
     env: Env,
-    { defaultName, editable }: { defaultName: string; editable: boolean }
+    {
+      defaultName,
+      editable,
+      index,
+    }: { defaultName: string; editable: boolean; index: number }
   ) {
     return (await this.interactionService.waitApprove(
       env,
-      "/setting/keyring/change/name/0",
+      `/setting/keyring/change/name/${index}`,
       "change-keyring-name",
       { defaultName, editable }
     )) as string;
