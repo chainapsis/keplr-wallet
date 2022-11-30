@@ -5,14 +5,14 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import style from "./chain-list.module.scss";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
+import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { useConfirm } from "../../components/confirm";
 import { useIntl } from "react-intl";
 
 const ChainElement: FunctionComponent<{
-  chainInfo: ChainInfoWithCoreTypes;
+  chainInfo: ChainInfoWithEmbed;
 }> = observer(({ chainInfo }) => {
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
 
   const intl = useIntl();
 
@@ -26,6 +26,12 @@ const ChainElement: FunctionComponent<{
       })}
       onClick={() => {
         if (chainInfo.chainId !== chainStore.current.chainId) {
+          analyticsStore.logEvent("Chain changed", {
+            chainId: chainStore.current.chainId,
+            chainName: chainStore.current.chainName,
+            toChainId: chainInfo.chainId,
+            toChainName: chainInfo.chainName,
+          });
           chainStore.selectChain(chainInfo.chainId);
           chainStore.saveLastViewChainId();
         }

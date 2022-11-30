@@ -28,8 +28,6 @@ import {
   CheckPasswordMsg,
   ExportKeyRingDatasMsg,
   RequestVerifyADR36AminoSignDoc,
-  RequestSignEIP712CosmosTxMsg_v0,
-  InitNonDefaultLedgerAppMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -83,11 +81,6 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as RequestSignAminoMsg
         );
-      case RequestSignEIP712CosmosTxMsg_v0:
-        return handleRequestSignEIP712CosmosTxMsg_v0(service)(
-          env,
-          msg as RequestSignEIP712CosmosTxMsg_v0
-        );
       case RequestVerifyADR36AminoSignDoc:
         return handleRequestVerifyADR36AminoSignDoc(service)(
           env,
@@ -121,11 +114,6 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleExportKeyRingDatasMsg(service)(
           env,
           msg as ExportKeyRingDatasMsg
-        );
-      case InitNonDefaultLedgerAppMsg:
-        return handleInitNonDefaultLedgerAppMsg(service)(
-          env,
-          msg as InitNonDefaultLedgerAppMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -302,28 +290,6 @@ const handleRequestSignAminoMsg: (
   };
 };
 
-const handleRequestSignEIP712CosmosTxMsg_v0: (
-  service: KeyRingService
-) => InternalHandler<RequestSignEIP712CosmosTxMsg_v0> = (service) => {
-  return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainId,
-      msg.origin
-    );
-
-    return await service.requestSignEIP712CosmosTx_v0(
-      env,
-      msg.origin,
-      msg.chainId,
-      msg.signer,
-      msg.eip712,
-      msg.signDoc,
-      msg.signOptions
-    );
-  };
-};
-
 const handleRequestVerifyADR36AminoSignDoc: (
   service: KeyRingService
 ) => InternalHandler<RequestVerifyADR36AminoSignDoc> = (service) => {
@@ -429,13 +395,5 @@ const handleExportKeyRingDatasMsg: (
 ) => InternalHandler<ExportKeyRingDatasMsg> = (service) => {
   return async (_, msg) => {
     return await service.exportKeyRingDatas(msg.password);
-  };
-};
-
-const handleInitNonDefaultLedgerAppMsg: (
-  service: KeyRingService
-) => InternalHandler<InitNonDefaultLedgerAppMsg> = (service) => {
-  return async (env, msg) => {
-    await service.initializeNonDefaultLedgerApp(env, msg.ledgerApp);
   };
 };

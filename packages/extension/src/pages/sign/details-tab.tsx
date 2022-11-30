@@ -6,7 +6,7 @@ import { useStore } from "../../stores";
 import styleDetailsTab from "./details-tab.module.scss";
 
 import { renderAminoMessage } from "./amino";
-import { Msg } from "@keplr-wallet/types";
+import { Msg } from "@cosmjs/launchpad";
 import { FormattedMessage, useIntl } from "react-intl";
 import { FeeButtons, MemoInput } from "../../components/form";
 import {
@@ -31,8 +31,6 @@ export const DetailsTab: FunctionComponent<{
 
   preferNoSetFee: boolean;
   preferNoSetMemo: boolean;
-
-  isNeedLedgerEthBlindSigning: boolean;
 }> = observer(
   ({
     signDocHelper,
@@ -42,7 +40,6 @@ export const DetailsTab: FunctionComponent<{
     isInternal,
     preferNoSetFee,
     preferNoSetMemo,
-    isNeedLedgerEthBlindSigning,
   }) => {
     const { chainStore, priceStore, accountStore } = useStore();
     const intl = useIntl();
@@ -216,17 +213,6 @@ export const DetailsTab: FunctionComponent<{
             }
           </React.Fragment>
         )}
-        {isNeedLedgerEthBlindSigning ? (
-          <div className={styleDetailsTab.ethLedgerBlindSigningWarning}>
-            <div className={styleDetailsTab.title}>
-              Before you click ‘Approve’
-            </div>
-            <ul className={styleDetailsTab.list}>
-              <li>Connect your Ledger device and select the Ethereum app</li>
-              <li>Enable ‘blind signing’ on your Ledger device</li>
-            </ul>
-          </div>
-        ) : null}
       </div>
     );
   }

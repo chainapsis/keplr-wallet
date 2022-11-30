@@ -22,12 +22,6 @@ COPY ./ /app
 
 WORKDIR /app
 
-ARG KEPLR_EXT_ETHEREUM_ENDPOINT
-ARG KEPLR_EXT_AMPLITUDE_API_KEY
-
-ENV KEPLR_EXT_ETHEREUM_ENDPOINT $KEPLR_EXT_ETHEREUM_ENDPOINT
-ENV KEPLR_EXT_AMPLITUDE_API_KEY $KEPLR_EXT_AMPLITUDE_API_KEY
-
 RUN cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
 RUN yarn install --frozen-lockfile
 

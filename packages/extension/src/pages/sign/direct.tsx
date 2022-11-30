@@ -18,6 +18,7 @@ import {
   renderUnknownMessage,
 } from "./messages";
 import { Buffer } from "buffer/";
+import { fromUtf8 } from "@cosmjs/encoding";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import {
   MsgBeginRedelegate,
@@ -106,7 +107,7 @@ export function renderDirectMessage(
             instantiateContractMsg.admin,
             instantiateContractMsg.codeId,
             instantiateContractMsg.label,
-            JSON.parse(Buffer.from(instantiateContractMsg.msg).toString())
+            JSON.parse(fromUtf8(instantiateContractMsg.msg))
           );
         }
         case "/cosmwasm.wasm.v1.MsgExecuteContract": {
@@ -117,7 +118,7 @@ export function renderDirectMessage(
             executeContractMsg.funds,
             undefined,
             executeContractMsg.contract,
-            JSON.parse(Buffer.from(executeContractMsg.msg).toString())
+            JSON.parse(fromUtf8(executeContractMsg.msg))
           );
         }
         case "/cosmos.authz.v1beta1.MsgGrant": {

@@ -125,15 +125,24 @@ export function renderAminoMessage(
       );
     }
 
-    if (
-      msg.type === msgOpts.cosmwasm.msgOpts.executeWasm.type ||
-      msg.type === msgOpts.secret.msgOpts.executeSecretWasm.type
-    ) {
+    if (msg.type === msgOpts.cosmwasm.msgOpts.executeWasm.type) {
       const value = msg.value as MsgExecuteContract["value"];
       return renderMsgExecuteContract(
         currencies,
         intl,
-        value.funds ?? value.sent_funds ?? [],
+        value.funds ?? [],
+        undefined,
+        value.contract,
+        value.msg
+      );
+    }
+
+    if (msg.type === msgOpts.secret.msgOpts.executeSecretWasm.type) {
+      const value = msg.value as MsgExecuteContract["value"];
+      return renderMsgExecuteContract(
+        currencies,
+        intl,
+        value.sent_funds ?? [],
         value.callback_code_hash,
         value.contract,
         value.msg

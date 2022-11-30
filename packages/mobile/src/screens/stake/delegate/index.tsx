@@ -6,6 +6,7 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { View } from "react-native";
 import { useStore } from "../../../stores";
 import { useDelegateTxConfig } from "@keplr-wallet/hooks";
+import { EthereumEndpoint } from "../../../config";
 import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
@@ -39,7 +40,8 @@ export const DelegateScreen: FunctionComponent = observer(() => {
     queriesStore,
     accountStore,
     chainStore.current.chainId,
-    account.bech32Address
+    account.bech32Address,
+    EthereumEndpoint
   );
 
   useEffect(() => {

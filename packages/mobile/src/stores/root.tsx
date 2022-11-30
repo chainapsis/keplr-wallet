@@ -1,8 +1,4 @@
-import {
-  CommunityChainInfoRepo,
-  EmbedChainInfos,
-  EthereumEndpoint,
-} from "../config";
+import { EmbedChainInfos, EthereumEndpoint } from "../config";
 import {
   KeyRingStore,
   InteractionStore,
@@ -24,7 +20,7 @@ import {
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
+import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { RNEnv, RNRouterUI, RNMessageRequesterInternal } from "../router";
 import { ChainStore } from "./chain";
 import EventEmitter from "eventemitter3";
@@ -59,11 +55,11 @@ export class RootStore {
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
-  public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
+  public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
-  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithCoreTypes>;
-  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithCoreTypes>;
-  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithCoreTypes>;
+  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>;
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
@@ -109,10 +105,7 @@ export class RootStore {
       new RNMessageRequesterInternal()
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
-    this.chainSuggestStore = new ChainSuggestStore(
-      this.interactionStore,
-      CommunityChainInfoRepo
-    );
+    this.chainSuggestStore = new ChainSuggestStore(this.interactionStore);
 
     this.chainStore = new ChainStore(
       EmbedChainInfos,
@@ -290,7 +283,7 @@ export class RootStore {
       this.interactionStore
     );
 
-    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithCoreTypes>(
+    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
       new AsyncKVStore("store_test_ibc_currency_registrar"),
       24 * 3600 * 1000,
       this.chainStore,
@@ -304,7 +297,7 @@ export class RootStore {
       this.chainStore,
       this.queriesStore
     );
-    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithCoreTypes>(
+    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>(
       new AsyncKVStore("store_axelar_evm_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore,

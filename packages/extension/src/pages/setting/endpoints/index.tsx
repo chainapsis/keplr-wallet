@@ -16,14 +16,11 @@ import { Input } from "../../../components/form";
 import style from "./style.module.scss";
 import useForm from "react-hook-form";
 import { useNotification } from "../../../components/notification";
+import { ChainUpdaterService } from "@keplr-wallet/background";
+import { KeplrError } from "@keplr-wallet/router";
 import { useConfirm } from "../../../components/confirm";
 import { AlertExperimentalFeature } from "../../../components/alert-experimental-feature";
 import { FormattedMessage, useIntl } from "react-intl";
-import {
-  checkRestConnectivity,
-  checkRPCConnectivity,
-  DifferentChainVersionError,
-} from "@keplr-wallet/chain-validator";
 
 interface FormData {
   rpc: string;
@@ -135,22 +132,26 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
           onSubmit={handleSubmit(async (data) => {
             setIsLoading(true);
 
-            let rpcConnSuccess = false;
             try {
               try {
-                await checkRPCConnectivity(selectedChainId, data.rpc);
-                rpcConnSuccess = true;
-                await checkRestConnectivity(selectedChainId, data.lcd);
+                await ChainUpdaterService.checkEndpointsConnectivity(
+                  selectedChainId,
+                  data.rpc,
+                  data.lcd
+                );
               } catch (e) {
                 if (
+                  // Note the implementation of `ChainUpdaterService.checkEndpointsConnectivity`.
                   // In the case of this error, the chain version is different.
                   // It gives a warning and handles it if the user wants.
-                  e instanceof DifferentChainVersionError
+                  e instanceof KeplrError &&
+                  e.module === "updater" &&
+                  (e.code === 8002 || e.code === 8102)
                 ) {
                   if (
                     !(await confirm.confirm({
                       paragraph: `The ${
-                        rpcConnSuccess ? "LCD" : "RPC"
+                        e.code === 8002 ? "RPC" : "LCD"
                       } endpoint of the node might have different version with the registered chain. Do you want to proceed?`,
                     }))
                   ) {

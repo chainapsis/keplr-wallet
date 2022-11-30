@@ -10,11 +10,7 @@ import { init, ScryptParams } from "@keplr-wallet/background";
 import scrypt from "scrypt-js";
 import { Buffer } from "buffer/";
 
-import {
-  CommunityChainInfoRepo,
-  EmbedChainInfos,
-  PrivilegedOrigins,
-} from "../config";
+import { EmbedChainInfos, PrivilegedOrigins } from "../config";
 
 const router = new ExtensionRouter(ExtensionEnv.produceEnv);
 router.addGuard(ExtensionGuards.checkOriginIsValid);
@@ -26,8 +22,6 @@ init(
   new ContentScriptMessageRequester(),
   EmbedChainInfos,
   PrivilegedOrigins,
-  PrivilegedOrigins,
-  CommunityChainInfoRepo,
   {
     rng: (array) => {
       return Promise.resolve(crypto.getRandomValues(array));

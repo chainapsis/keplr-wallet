@@ -1,5 +1,5 @@
 import { ChainStore } from "./chain";
-import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
+import { EmbedChainInfos } from "../config";
 import {
   AmplitudeApiKey,
   EthereumEndpoint,
@@ -43,7 +43,7 @@ import {
   InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
 import { APP_PORT } from "@keplr-wallet/router";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
+import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
 import { FeeType } from "@keplr-wallet/hooks";
@@ -77,11 +77,11 @@ export class RootStore {
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
-  public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
+  public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
 
-  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithCoreTypes>;
-  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithCoreTypes>;
-  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithCoreTypes>;
+  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
+  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -156,10 +156,7 @@ export class RootStore {
       this.interactionStore,
       new InExtensionMessageRequester()
     );
-    this.chainSuggestStore = new ChainSuggestStore(
-      this.interactionStore,
-      CommunityChainInfoRepo
-    );
+    this.chainSuggestStore = new ChainSuggestStore(this.interactionStore);
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
@@ -341,7 +338,7 @@ export class RootStore {
       this.interactionStore
     );
 
-    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithCoreTypes>(
+    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
       new ExtensionKVStore("store_ibc_curreny_registrar"),
       24 * 3600 * 1000,
       this.chainStore,
@@ -349,19 +346,18 @@ export class RootStore {
       this.queriesStore,
       this.queriesStore
     );
-    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar<ChainInfoWithCoreTypes>(
+    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>(
       new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore
     );
-    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithCoreTypes>(
+    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>(
       new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
       this.chainStore,
       this.queriesStore,
       "ethereum"
     );
 
-    // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
       (() => {
         if (!AmplitudeApiKey) {

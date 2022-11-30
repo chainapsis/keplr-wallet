@@ -7,27 +7,29 @@ import {
   KeplrMode,
   KeplrSignOptions,
   Key,
+} from "@keplr-wallet/types";
+import { Result, JSONUint8Array } from "@keplr-wallet/router";
+import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
-  OfflineAminoSigner,
-  StdSignature,
   StdTx,
-  DirectSignResponse,
-  OfflineDirectSigner,
-} from "@keplr-wallet/types";
-import { Result, JSONUint8Array } from "@keplr-wallet/router";
+  OfflineSigner,
+  StdSignature,
+} from "@cosmjs/launchpad";
 import { SecretUtils } from "secretjs/types/enigmautils";
+
 import { KeplrEnigmaUtils } from "./enigma";
+import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
+
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
-import { KeplrCoreTypes } from "./core-types";
 
 export interface ProxyRequest {
   type: "proxy-request";
   id: string;
-  method: keyof (Keplr & KeplrCoreTypes);
+  method: keyof Keplr;
   args: any[];
 }
 
@@ -37,57 +39,15 @@ export interface ProxyRequestResponse {
   result: Result | undefined;
 }
 
-function defineUnwritablePropertyIfPossible(o: any, p: string, value: any) {
-  const descriptor = Object.getOwnPropertyDescriptor(o, p);
-  if (!descriptor || descriptor.writable) {
-    if (!descriptor || descriptor.configurable) {
-      Object.defineProperty(o, p, {
-        value,
-        writable: false,
-      });
-    } else {
-      o[p] = value;
-    }
-  } else {
-    console.warn(
-      `Failed to inject ${p} from keplr. Probably, other wallet is trying to intercept Keplr`
-    );
-  }
-}
-
-export function injectKeplrToWindow(keplr: IKeplr): void {
-  defineUnwritablePropertyIfPossible(window, "keplr", keplr);
-  defineUnwritablePropertyIfPossible(
-    window,
-    "getOfflineSigner",
-    keplr.getOfflineSigner
-  );
-  defineUnwritablePropertyIfPossible(
-    window,
-    "getOfflineSignerOnlyAmino",
-    keplr.getOfflineSignerOnlyAmino
-  );
-  defineUnwritablePropertyIfPossible(
-    window,
-    "getOfflineSignerAuto",
-    keplr.getOfflineSignerAuto
-  );
-  defineUnwritablePropertyIfPossible(
-    window,
-    "getEnigmaUtils",
-    keplr.getEnigmaUtils
-  );
-}
-
 /**
  * InjectedKeplr would be injected to the webpage.
  * In the webpage, it can't request any messages to the extension because it doesn't have any API related to the extension.
  * So, to request some methods of the extension, this will proxy the request to the content script that is injected to webpage on the extension level.
  * This will use `window.postMessage` to interact with the content script.
  */
-export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
+export class InjectedKeplr implements IKeplr {
   static startProxy(
-    keplr: IKeplr & KeplrCoreTypes,
+    keplr: IKeplr,
     eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       postMessage: (message: any) => void;
@@ -212,10 +172,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     });
   }
 
-  protected requestMethod(
-    method: keyof (IKeplr & KeplrCoreTypes),
-    args: any[]
-  ): Promise<any> {
+  protected requestMethod(method: keyof IKeplr, args: any[]): Promise<any> {
     const bytes = new Uint8Array(8);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map((value) => {
@@ -287,44 +244,7 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
         window.postMessage(message, window.location.origin),
     },
     protected readonly parseMessage?: (message: any) => any
-  ) {
-    // Freeze fields/method except for "defaultOptions"
-    // Intentionally, "defaultOptions" can be mutated to allow a webpage to change the options with cosmjs usage.
-    // Freeze fields
-    const fieldNames = Object.keys(this);
-    for (const fieldName of fieldNames) {
-      if (fieldName !== "defaultOptions") {
-        Object.defineProperty(this, fieldName, {
-          value: (this as any)[fieldName],
-          writable: false,
-        });
-      }
-
-      // If field is "eventListener", try to iterate one-level deep.
-      if (fieldName === "eventListener") {
-        const fieldNames = Object.keys(this.eventListener);
-        for (const fieldName of fieldNames) {
-          Object.defineProperty(this.eventListener, fieldName, {
-            value: (this.eventListener as any)[fieldName],
-            writable: false,
-          });
-        }
-      }
-    }
-    // Freeze methods
-    const methodNames = Object.getOwnPropertyNames(InjectedKeplr.prototype);
-    for (const methodName of methodNames) {
-      if (
-        methodName !== "constructor" &&
-        typeof (this as any)[methodName] === "function"
-      ) {
-        Object.defineProperty(this, methodName, {
-          value: (this as any)[methodName].bind(this),
-          writable: false,
-        });
-      }
-    }
-  }
+  ) {}
 
   async enable(chainIds: string | string[]): Promise<void> {
     await this.requestMethod("enable", [chainIds]);
@@ -458,17 +378,17 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     ]);
   }
 
-  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
+  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
   async getOfflineSignerAuto(
     chainId: string
-  ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
     const key = await this.getKey(chainId);
     if (key.isNanoLedger) {
       return new CosmJSOfflineSignerOnlyAmino(chainId, this);
@@ -546,29 +466,5 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
-  }
-
-  async experimentalSignEIP712CosmosTx_v0(
-    chainId: string,
-    signer: string,
-    eip712: {
-      types: Record<string, { name: string; type: string }[] | undefined>;
-      domain: Record<string, any>;
-      primaryType: string;
-    },
-    signDoc: StdSignDoc,
-    signOptions: KeplrSignOptions = {}
-  ): Promise<AminoSignResponse> {
-    return await this.requestMethod("experimentalSignEIP712CosmosTx_v0", [
-      chainId,
-      signer,
-      eip712,
-      signDoc,
-      deepmerge(this.defaultOptions.sign ?? {}, signOptions),
-    ]);
-  }
-
-  __core__getAnalyticsId(): Promise<string> {
-    return this.requestMethod("__core__getAnalyticsId", []);
   }
 }

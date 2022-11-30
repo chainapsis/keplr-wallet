@@ -5,13 +5,13 @@ import { action, makeObservable, observable, runInAction, toJS } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 
 export interface UIConfigOptions {
-  isDeveloperMode: boolean;
+  showAdvancedIBCTransfer: boolean;
 }
 
 export class UIConfigStore {
   @observable.deep
   protected options: UIConfigOptions = {
-    isDeveloperMode: false,
+    showAdvancedIBCTransfer: false,
   };
 
   protected _isBeta: boolean;
@@ -30,17 +30,7 @@ export class UIConfigStore {
 
   protected async init() {
     // There is no guarantee that this value will contain all options fields, as the options field may be added later.
-    // showAdvancedIBCTransfer is legacy value
-    const data = await this.kvStore.get<
-      Partial<UIConfigOptions & { showAdvancedIBCTransfer: boolean }>
-    >("options");
-
-    if (data?.showAdvancedIBCTransfer) {
-      // remove showAdvancedIBCTransfer legacy value
-      await this.kvStore.set("options", { isDeveloperMode: true });
-
-      this.options.isDeveloperMode = true;
-    }
+    const data = await this.kvStore.get<Partial<UIConfigOptions>>("options");
 
     runInAction(() => {
       this.options = {
@@ -48,6 +38,15 @@ export class UIConfigStore {
         ...data,
       };
     });
+  }
+
+  /**
+   * Currently, keplr only supports the IBC UI which the users should set the counterparty channel manually.
+   * However, it makes the normal users take a mistake.
+   * So, to reduce this problem, show the IBC UI to users who only turns on the `showAdvancedIBCTransfer` explicitly.
+   */
+  get showAdvancedIBCTransfer(): boolean {
+    return this.options.showAdvancedIBCTransfer;
   }
 
   get isBeta(): boolean {
@@ -58,13 +57,9 @@ export class UIConfigStore {
     return this._platform;
   }
 
-  get isDeveloper(): boolean {
-    return this.options.isDeveloperMode;
-  }
-
   @action
-  setDeveloperMode(value: boolean) {
-    this.options.isDeveloperMode = value;
+  setShowAdvancedIBCTransfer(value: boolean) {
+    this.options.showAdvancedIBCTransfer = value;
 
     // No need to await
     this.save();

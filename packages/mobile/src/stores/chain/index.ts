@@ -14,7 +14,7 @@ import {
 } from "@keplr-wallet/stores";
 
 import {
-  ChainInfoWithCoreTypes,
+  ChainInfoWithEmbed,
   GetChainInfosMsg,
   RemoveSuggestedChainInfoMsg,
   TryUpdateChainMsg,
@@ -71,7 +71,7 @@ class ObservableKVStore<Value> {
 }
 
 export class ChainStore extends BaseChainStore<
-  ChainInfoWithCoreTypes & AppChainInfo
+  ChainInfoWithEmbed & AppChainInfo
 > {
   @observable
   protected selectedChainId: string;
@@ -378,7 +378,7 @@ export class ChainStore extends BaseChainStore<
   }
 
   @computed
-  get current(): ChainInfoWithCoreTypes {
+  get current(): ChainInfoWithEmbed {
     if (this.hasChain(this.selectedChainId)) {
       return this.getChain(this.selectedChainId).raw;
     }
@@ -436,18 +436,12 @@ export class ChainStore extends BaseChainStore<
   @flow
   *tryUpdateChain(chainId: string) {
     const msg = new TryUpdateChainMsg(chainId);
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    if (result.updated) {
-      yield this.getChainInfosFromBackground();
-    }
+    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
+    yield this.getChainInfosFromBackground();
   }
 
   @override
-  protected setChainInfos(
-    chainInfos: (ChainInfoWithCoreTypes & AppChainInfo)[]
-  ) {
+  protected setChainInfos(chainInfos: (ChainInfoWithEmbed & AppChainInfo)[]) {
     super.setChainInfos(
       chainInfos.map((chainInfo) => {
         let hideInUI: boolean;

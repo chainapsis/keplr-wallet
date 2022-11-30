@@ -29,17 +29,13 @@ export const useIBCRecipientConfig = (
   chainGetter: ChainGetter,
   chainId: string,
   channelConfig: IIBCChannelConfig,
-  options: {
-    ensEndpoint?: string;
-    allowHexAddressOnEthermint?: boolean;
-  } = {}
+  ensEndpoint?: string
 ) => {
   const [config] = useState(
     () => new IBCRecipientConfig(chainGetter, chainId, channelConfig)
   );
   config.setChain(chainId);
-  config.setENSEndpoint(options.ensEndpoint);
-  config.setAllowHexAddressOnEthermint(options.allowHexAddressOnEthermint);
+  config.setENSEndpoint(ensEndpoint);
 
   return config;
 };

@@ -18,7 +18,6 @@ export class TxChainSetter implements ITxChainSetter {
 
   @computed
   get chainInfo(): ChainInfo & {
-    raw: ChainInfo;
     addUnknownCurrencies(...coinMinimalDenoms: string[]): void;
     findCurrency(coinMinimalDenom: string): AppCurrency | undefined;
     forceFindCurrency(coinMinimalDenom: string): AppCurrency;

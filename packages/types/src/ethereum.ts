@@ -1,5 +1,5 @@
 export enum EthSignType {
   MESSAGE = "message",
   TRANSACTION = "transaction",
-  EIP712 = "eip-712",
+  BYTE64 = "byte64",
 }

@@ -11,14 +11,15 @@ import {
   KeplrMode,
   KeplrSignOptions,
   Key,
-  DirectSignResponse,
-  OfflineDirectSigner,
+} from "@keplr-wallet/types";
+import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
+import {
   AminoSignResponse,
   BroadcastMode,
-  OfflineAminoSigner,
+  OfflineSigner,
   StdSignature,
   StdSignDoc,
-} from "@keplr-wallet/types";
+} from "@cosmjs/launchpad";
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
@@ -394,13 +395,13 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
+  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
   async getOfflineSignerAuto(
     chainId: string
-  ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
     const key = await this.getKey(chainId);
     if (key.isNanoLedger) {
       return new CosmJSOfflineSignerOnlyAmino(chainId, this);
@@ -408,7 +409,7 @@ export class KeplrWalletConnectV1 implements Keplr {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
+  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
@@ -480,20 +481,6 @@ export class KeplrWalletConnectV1 implements Keplr {
     _contractAddress: string,
     _viewingKey?: string
   ): Promise<void> {
-    throw new Error("Not yet implemented");
-  }
-
-  experimentalSignEIP712CosmosTx_v0(
-    _chainId: string,
-    _signer: string,
-    _eip712: {
-      types: Record<string, { name: string; type: string }[] | undefined>;
-      domain: Record<string, any>;
-      primaryType: string;
-    },
-    _signDoc: StdSignDoc,
-    _signOptions: KeplrSignOptions = {}
-  ): Promise<AminoSignResponse> {
     throw new Error("Not yet implemented");
   }
 }

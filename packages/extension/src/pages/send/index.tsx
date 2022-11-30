@@ -71,10 +71,7 @@ export const SendPage: FunctionComponent = observer(() => {
     accountStore,
     current.chainId,
     accountInfo.bech32Address,
-    {
-      ensEndpoint: EthereumEndpoint,
-      allowHexAddressOnEthermint: true,
-    }
+    EthereumEndpoint
   );
 
   const gasSimulatorKey = useMemo(() => {

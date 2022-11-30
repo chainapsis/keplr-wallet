@@ -11,10 +11,7 @@ export const useSendTxConfig = (
   accountStore: AccountStore,
   chainId: string,
   sender: string,
-  options: {
-    ensEndpoint?: string;
-    allowHexAddressOnEthermint?: boolean;
-  } = {}
+  ensEndpoint?: string
 ) => {
   const amountConfig = useAmountConfig(
     chainGetter,
@@ -42,7 +39,7 @@ export const useSendTxConfig = (
   // set the fee config of the amount config after initing the gas/fee configs.
   amountConfig.setFeeConfig(feeConfig);
 
-  const recipientConfig = useRecipientConfig(chainGetter, chainId, options);
+  const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
 
   return {
     amountConfig,

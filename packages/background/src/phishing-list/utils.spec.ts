@@ -30,10 +30,6 @@ describe("Test phishing list service utils", () => {
         expect: "test.com",
       },
       {
-        url: "test.com:123",
-        expect: "test.com",
-      },
-      {
         url: "test.com..",
         expect: "test.com",
       },
@@ -111,10 +107,6 @@ describe("Test phishing list service utils", () => {
       },
       {
         url: "https://asd..test.com.",
-        expect: "test.com",
-      },
-      {
-        url: "https://asd..test.com:999.",
         expect: "test.com",
       },
       {

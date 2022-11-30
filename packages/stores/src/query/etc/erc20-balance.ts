@@ -89,7 +89,6 @@ export class ObservableQueryERC20BalanceRegistry implements BalanceRegistry {
     minimalDenom: string
   ): ObservableQueryBalanceInner | undefined {
     const denomHelper = new DenomHelper(minimalDenom);
-    console.log(`ACLOG: Getting balance inner for denom ${minimalDenom}`);
     if (denomHelper.type === "erc20") {
       return new ObservableQueryERC20BalanceInner(
         this.kvStore,

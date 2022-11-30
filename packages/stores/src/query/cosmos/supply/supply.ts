@@ -42,11 +42,6 @@ export class ObservableQuerySupplyTotal extends ObservableChainQueryMap<SupplyTo
     return this.get(denom);
   }
 
-  // Somewhat strange. Only used for umee.
-  getQueryDenomByQueryString(denom: string): ObservableChainQuerySupplyTotal {
-    return this.get(`by_denom?denom=${denom}`);
-  }
-
   getQueryStakeDenom(): ObservableChainQuerySupplyTotal {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     return this.get(chainInfo.stakeCurrency.coinMinimalDenom);

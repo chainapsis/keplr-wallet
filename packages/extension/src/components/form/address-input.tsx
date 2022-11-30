@@ -125,6 +125,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               hideChainDropdown={true}
               selectHandler={selectAddressFromAddressBook}
               ibcChannelConfig={ibcChannelConfig}
+              isInTransaction={true}
             />
           </ModalBody>
         </Modal>

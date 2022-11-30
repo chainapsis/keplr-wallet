@@ -110,7 +110,7 @@
   "setting.token.add.secret20.checkbox.use-suggested-viewing-key": "Use webpage suggested viewing key",
   "setting.token.add.secret20.viewing-key": "Viewing Key",
 
-  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you register again.",
+  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register again.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
 
   "setting.endpoints": "Endpoints",
@@ -119,12 +119,10 @@
   "setting.endpoints.button.confirm": "Confirm",
 
   "setting.autolock": "Auto-Lock Timer",
-  "setting.autolock.duration": "Set the duration (unit: minutes)",
-  "setting.autolock.description": "With Auto-Lock enabled, Keplr will lock when the device is in sleep mode",
+  "setting.autolock.duration": "Duration (Unit: minute)",
+  "setting.autolock.description": "With the Auto-Lock enabled, Keplr would be locked whenever device goes to sleep mode",
   "setting.autolock.error.required": "Duration is required",
   "setting.autolock.error.out-of-range": "It cannot be less than 0 or greater than 4320(3days)",
-
-  "setting.developer-mode": "Developer Mode",
 
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
@@ -174,19 +172,10 @@
   "register.welcome.content": "Open the extension and sign in to begin your interchain journey.",
   "register.welcome.button.done": "Done",
 
-  "chain.suggested.title": "Add {chainName} to Keplr",
-  "chain.suggested.tooltip": "Chain info being added is from this web",
-  "chain.suggested.developer.checkbox": "Use this as the preferred code string and override info registered on the community repo",
+  "chain.suggested.title": "Chain Add Request",
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Keplr.",
-  "chain.suggested.approve-info.title": "Before You Approve",
-  "chain.suggested.approve-info.content": "Keplr recommends that ‘suggest chain’ info be managed by the community. At this time, this chain’s info has not been registered.",
-  "chain.suggested.approve-info.link": "Click here to update chain info on Github ->",
-  "chain.suggested.approve-alert.content": "Adding this chain requires information from a web page not managed by Keplr.",
   "chain.suggested.button.approve": "Approve",
   "chain.suggested.button.reject": "Reject",
-  "chain.suggested.community-driven": "Community Driven",
-  "chain.suggested.add-chain-as-suggested": "Add chain as suggested",
-  "chain.suggested.chain-info-is-from": "Chain info being added is from",
 
   "chain.remove.confirm.paragraph": "Are you sure to remove the {chainName}?",
 
@@ -288,7 +277,7 @@
   "ledger.step1": "Step 1",
   "ledger.step1.paragraph": "Connect and unlock your Ledger.",
   "ledger.step2": "Step 2",
-  "ledger.step2.paragraph": "Open the {ledgerApp} app on your Ledger device.",
+  "ledger.step2.paragraph": "Open the Cosmos app on your Ledger device.",
   "ledger.option.webhid.checkbox": "Use alternative USB connection method(HID)",
   "ledger.option.webhid.warning": "Please copy and paste the following link {link} on your browser and enable ‘experimental web platform features’",
   "ledger.option.webhid.link.copied": "Link copied!",

@@ -15,11 +15,11 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useHistory } from "react-router";
 import { observer } from "mobx-react-lite";
 import {
-  useFeeConfig,
   useInteractionInfo,
+  useSignDocHelper,
+  useFeeConfig,
   useMemoConfig,
   useSignDocAmountConfig,
-  useSignDocHelper,
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { ADR36SignDocDetailsTab } from "./adr-36";
@@ -298,9 +298,6 @@ export const SignPage: FunctionComponent = observer(() => {
                     }
                     preferNoSetFee={preferNoSetFee}
                     preferNoSetMemo={preferNoSetMemo}
-                    isNeedLedgerEthBlindSigning={
-                      ethSignType === EthSignType.EIP712
-                    }
                   />
                 )
               ) : null}

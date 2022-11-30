@@ -22,6 +22,7 @@ import { TokensCard } from "./tokens-card";
 import { usePrevious } from "../../hooks";
 import { BIP44Selectable } from "./bip44-selectable";
 import { useFocusEffect } from "@react-navigation/native";
+import { ChainUpdaterService } from "@keplr-wallet/background";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -44,14 +45,15 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const checkAndUpdateChainInfo = useCallback(() => {
     if (!chainStoreIsInitializing) {
       (async () => {
-        try {
-          await chainStore.tryUpdateChain(currentChainId);
-        } catch (e) {
-          console.log(e);
+        const result = await ChainUpdaterService.checkChainUpdate(currentChain);
+
+        // TODO: Add the modal for explicit chain update.
+        if (result.slient) {
+          chainStore.tryUpdateChain(currentChainId);
         }
       })();
     }
-  }, [chainStore, chainStoreIsInitializing, currentChainId]);
+  }, [chainStore, chainStoreIsInitializing, currentChain, currentChainId]);
 
   useEffect(() => {
     const appStateHandler = (state: AppStateStatus) => {

@@ -1,10 +1,10 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
-import { ChainInfoWithCoreTypes } from "./types";
+import { ChainInfoWithEmbed } from "./types";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 
 export class GetChainInfosMsg extends Message<{
-  chainInfos: ChainInfoWithCoreTypes[];
+  chainInfos: ChainInfoWithEmbed[];
 }> {
   public static type() {
     return "get-chain-infos";
@@ -51,9 +51,7 @@ export class SuggestChainInfoMsg extends Message<void> {
   }
 }
 
-export class RemoveSuggestedChainInfoMsg extends Message<
-  ChainInfoWithCoreTypes[]
-> {
+export class RemoveSuggestedChainInfoMsg extends Message<ChainInfoWithEmbed[]> {
   public static type() {
     return "remove-suggested-chain-info";
   }

@@ -3,12 +3,7 @@ import { fromHex, toHex } from "./hex";
 
 export class JSONUint8Array {
   static parse(text: string) {
-    return JSON.parse(text, (key, value) => {
-      // Prevent potential prototype poisoning.
-      if (key === "__proto__") {
-        throw new Error("__proto__ is disallowed");
-      }
-
+    return JSON.parse(text, (_, value) => {
       if (
         value &&
         typeof value === "string" &&
@@ -22,12 +17,7 @@ export class JSONUint8Array {
   }
 
   static stringify(obj: unknown): string {
-    return JSON.stringify(obj, (key, value) => {
-      // Prevent potential prototype poisoning.
-      if (key === "__proto__") {
-        throw new Error("__proto__ is disallowed");
-      }
-
+    return JSON.stringify(obj, (_, value) => {
       if (
         value &&
         (value instanceof Uint8Array ||

@@ -5,20 +5,9 @@ import { Bech32Config } from "./bech32";
 
 export interface ChainInfo {
   readonly rpc: string;
-  /**
-   * @deprecated Do not use
-   */
   readonly rpcConfig?: AxiosRequestConfig;
   readonly rest: string;
-  /**
-   * @deprecated Do not use
-   */
   readonly restConfig?: AxiosRequestConfig;
-  readonly nodeProvider?: {
-    readonly name: string;
-    readonly email: string;
-    readonly website?: string;
-  };
   readonly chainId: string;
   readonly chainName: string;
   /**
@@ -59,11 +48,5 @@ export interface ChainInfo {
    * If the blockchain is in an early stage, please set it as beta.
    */
   readonly beta?: boolean;
-
-  /**
-   * If the chain is EVM-enabled, set an Ethereum JSON-RPC endpoint here, to be used for ERC-20 token balances.
-   */
   readonly ethereumJsonRpc?: string;
-
-  readonly chainSymbolImageUrl?: string;
 }

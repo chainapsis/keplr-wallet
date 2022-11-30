@@ -304,6 +304,7 @@ export class ObservableQueryERC20ContractDataInner {
     return this._queryBalance.balance;
   }
 
+  // TODO: check computed
   get tokenInfo(): Erc20ContractTokenInfo {
     return {
       name: this.name,
@@ -357,9 +358,6 @@ export class ObservableQueryERC20ContractData extends HasMapStore<ObservableQuer
     ethereumURL: string = this.ethereumURL
   ): ObservableQueryERC20ContractDataInner {
     const key = `${contractAddress}\n${ethereumURL}`;
-    console.log(
-      `ACLOG: getting contract address ${contractAddress} at url ${ethereumURL}`
-    );
     return super.get(key);
   }
 }

@@ -4,9 +4,7 @@
  */
 export function getKeplrExtensionRouterId(): number {
   if (window.keplrExtensionRouterId == null) {
-    window.keplrExtensionRouterId = Math.floor(
-      Math.random() * Number.MAX_SAFE_INTEGER
-    );
+    window.keplrExtensionRouterId = Math.floor(Math.random() * 1000000);
   }
   return window.keplrExtensionRouterId;
 }

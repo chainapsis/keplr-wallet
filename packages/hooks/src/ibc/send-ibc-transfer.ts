@@ -20,7 +20,7 @@ import { useIBCRecipientConfig } from "./reciepient";
  * @param accountStore
  * @param chainId
  * @param sender
- * @param options
+ * @param ensEndpoint
  */
 export const useIBCTransferConfig = (
   chainGetter: ChainGetter,
@@ -34,10 +34,7 @@ export const useIBCTransferConfig = (
   }>,
   chainId: string,
   sender: string,
-  options: {
-    ensEndpoint?: string;
-    allowHexAddressOnEthermint?: boolean;
-  } = {}
+  ensEndpoint?: string
 ) => {
   const amountConfig = useIBCAmountConfig(
     chainGetter,
@@ -66,7 +63,7 @@ export const useIBCTransferConfig = (
     chainGetter,
     chainId,
     channelConfig,
-    options
+    ensEndpoint
   );
 
   return {

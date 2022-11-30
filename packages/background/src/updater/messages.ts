@@ -1,11 +1,8 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import { ChainInfoWithCoreTypes } from "../chains";
+import { ChainInfoWithEmbed } from "../chains";
 
-export class TryUpdateChainMsg extends Message<{
-  updated: boolean;
-  afterChainInfos: ChainInfoWithCoreTypes[];
-}> {
+export class TryUpdateChainMsg extends Message<void> {
   public static type() {
     return "try-update-chain";
   }
@@ -29,7 +26,7 @@ export class TryUpdateChainMsg extends Message<{
   }
 }
 
-export class SetChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
+export class SetChainEndpointsMsg extends Message<ChainInfoWithEmbed[]> {
   public static type() {
     return "set-chain-endpoints";
   }
@@ -72,7 +69,7 @@ export class SetChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
   }
 }
 
-export class ResetChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
+export class ResetChainEndpointsMsg extends Message<ChainInfoWithEmbed[]> {
   public static type() {
     return "reset-chain-endpoints";
   }

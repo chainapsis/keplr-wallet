@@ -3,7 +3,6 @@ import React, {
   ChangeEvent,
   useEffect,
   useState,
-  useLayoutEffect,
 } from "react";
 
 import { Button } from "reactstrap";
@@ -22,21 +21,13 @@ import classnames from "classnames";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNotification } from "../../components/notification";
 import delay from "delay";
+import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 export const LedgerGrantPage: FunctionComponent = observer(() => {
-  useLayoutEffect(() => {
-    // XXX: Temporal solution for fitting the popup window.
-    //      Even though this is noy proper way to adjust style,
-    //      it is safe because this page only can be open on popup.
-    document.documentElement.style.height = "100%";
-    document.body.style.height = "100%";
-    const app = document.getElementById("app");
-    if (app) {
-      app.style.height = "100%";
-    }
-  }, []);
+  // Force to fit the screen size.
+  useInteractionInfo();
 
   const { ledgerInitStore } = useStore();
 
@@ -93,10 +84,7 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
 
     try {
       const ledger = await Ledger.init(
-        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter,
-        undefined,
-        // requestedLedgerApp should be set if ledger init needed.
-        ledgerInitStore.requestedLedgerApp!
+        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter
       );
       await ledger.close();
       // Unfortunately, closing ledger blocks the writing to Ledger on background process.
@@ -146,34 +134,13 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
           <Instruction
             icon={
               <img
-                src={(() => {
-                  switch (ledgerInitStore.requestedLedgerApp) {
-                    case "ethereum":
-                      return require("../../public/assets/img/ethereum.svg");
-                    default:
-                      return require("../../public/assets/img/atom-o.svg");
-                  }
-                })()}
+                src={require("../../public/assets/img/atom-o.svg")}
                 style={{ height: "34px" }}
                 alt="atom"
               />
             }
             title={intl.formatMessage({ id: "ledger.step2" })}
-            paragraph={intl.formatMessage(
-              {
-                id: "ledger.step2.paragraph",
-              },
-              {
-                ledgerApp: (() => {
-                  switch (ledgerInitStore.requestedLedgerApp) {
-                    case "ethereum":
-                      return "Ethereum";
-                    default:
-                      return "Cosmos";
-                  }
-                })(),
-              }
-            )}
+            paragraph={intl.formatMessage({ id: "ledger.step2.paragraph" })}
             pass={initTryCount > 0 && initErrorOn == null}
           />
           <div style={{ flex: 1 }} />

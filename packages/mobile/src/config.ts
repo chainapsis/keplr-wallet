@@ -7,6 +7,7 @@ export const EthereumEndpoint =
   "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";
 
 export interface AppChainInfo extends ChainInfo {
+  readonly chainSymbolImageUrl?: string;
   readonly hideInUI?: boolean;
   readonly txExplorer?: {
     readonly name: string;
@@ -620,7 +621,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     rpc: "https://rpc-certik.keplr.app",
     rest: "https://lcd-certik.keplr.app",
     chainId: "shentu-2.2",
-    chainName: "Shentu",
+    chainName: "Certik",
     stakeCurrency: {
       coinDenom: "CTK",
       coinMinimalDenom: "uctk",
@@ -1140,24 +1141,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
     ],
     feeCurrencies: [
       {
-        coinDenom: "BLD",
-        coinMinimalDenom: "ubld",
-        coinDecimals: 6,
-        coinGeckoId: "agoric",
-        gasPriceStep: {
-          low: 0.012,
-          average: 0.024,
-          high: 0.071,
-        },
-      },
-      {
         coinDenom: "IST",
         coinMinimalDenom: "uist",
         coinDecimals: 6,
         gasPriceStep: {
-          low: 0.0034,
-          average: 0.007,
-          high: 0.02,
+          low: 0,
+          average: 0,
+          high: 0,
         },
       },
     ],
@@ -1330,31 +1320,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "EEUR",
         coinMinimalDenom: "eeur",
         coinDecimals: 6,
-        coinGeckoId: "e-money-eur",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-      },
-      {
-        coinDenom: "ECHF",
-        coinMinimalDenom: "echf",
-        coinDecimals: 6,
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-      },
-      {
-        coinDenom: "ESEK",
-        coinMinimalDenom: "esek",
-        coinDecimals: 6,
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-      },
-      {
-        coinDenom: "ENOK",
-        coinMinimalDenom: "enok",
-        coinDecimals: 6,
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-      },
-      {
-        coinDenom: "EDKK",
-        coinMinimalDenom: "edkk",
-        coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
       },
     ],
@@ -1364,62 +1329,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "ungm",
         coinDecimals: 6,
         coinGeckoId: "e-money",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "EEUR",
-        coinMinimalDenom: "eeur",
-        coinDecimals: 6,
-        coinGeckoId: "e-money-eur",
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "ECHF",
-        coinMinimalDenom: "echf",
-        coinDecimals: 6,
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "ESEK",
-        coinMinimalDenom: "esek",
-        coinDecimals: 6,
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "ENOK",
-        coinMinimalDenom: "enok",
-        coinDecimals: 6,
-        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-        gasPriceStep: {
-          low: 1,
-          average: 1,
-          high: 1,
-        },
-      },
-      {
-        coinDenom: "EDKK",
-        coinMinimalDenom: "edkk",
-        coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
         gasPriceStep: {
           low: 1,
@@ -2044,9 +1953,3 @@ export const EmbedChainInfos: AppChainInfo[] = [
 ];
 
 export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";
-
-export const CommunityChainInfoRepo = {
-  organizationName: "chainapsis",
-  repoName: "keplr-chain-registry",
-  branchName: "main",
-};

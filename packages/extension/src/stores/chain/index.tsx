@@ -9,7 +9,7 @@ import {
 
 import { ChainInfo } from "@keplr-wallet/types";
 import {
-  ChainInfoWithCoreTypes,
+  ChainInfoWithEmbed,
   SetPersistentMemoryMsg,
   GetPersistentMemoryMsg,
   GetChainInfosMsg,
@@ -23,7 +23,7 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { MessageRequester } from "@keplr-wallet/router";
 import { toGenerator } from "@keplr-wallet/common";
 
-export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
+export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   @observable
   protected _selectedChainId: string;
 
@@ -71,7 +71,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @computed
-  get current(): ChainInfoInner<ChainInfoWithCoreTypes> {
+  get current(): ChainInfoInner<ChainInfoWithEmbed> {
     if (this.hasChain(this._selectedChainId)) {
       return this.getChain(this._selectedChainId);
     }
@@ -136,12 +136,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @flow
   *tryUpdateChain(chainId: string) {
     const msg = new TryUpdateChainMsg(chainId);
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    if (result.updated) {
-      yield this.getChainInfosFromBackground();
-    }
+    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
+    yield this.getChainInfosFromBackground();
   }
 
   @flow
