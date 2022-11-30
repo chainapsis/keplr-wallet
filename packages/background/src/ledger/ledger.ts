@@ -9,7 +9,6 @@ import { BIP44HDPath, EIP712MessageValidator } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 import { Buffer } from "buffer/";
 import { _TypedDataEncoder } from "@ethersproject/hash";
-import { bufferToHex } from "ethereumjs-util";
 import { domainHash, messageHash } from "./utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -214,8 +213,8 @@ export class Ledger {
         const signature = Ledger.ethSignatureToBytes(
           await this.ethereumApp.signEIP712HashedMessage(
             formattedPath,
-            bufferToHex(domainHash(data)),
-            bufferToHex(messageHash(data))
+            domainHash(data).toString("hex"),
+            messageHash(data).toString("hex")
           )
         );
 
