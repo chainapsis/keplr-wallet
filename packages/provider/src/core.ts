@@ -31,6 +31,7 @@ import {
   GetTxEncryptionKeyMsg,
   RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
+  GetAnalyticsIdMsg,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -40,8 +41,9 @@ import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
 import { Buffer } from "buffer/";
+import { KeplrCoreTypes } from "./core-types";
 
-export class Keplr implements IKeplr {
+export class Keplr implements IKeplr, KeplrCoreTypes {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
 
   public defaultOptions: KeplrIntereactionOptions = {};
@@ -361,5 +363,10 @@ export class Keplr implements IKeplr {
       ],
       memo: "",
     };
+  }
+
+  __core__getAnalyticsId(): Promise<string> {
+    const msg = new GetAnalyticsIdMsg();
+    return this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

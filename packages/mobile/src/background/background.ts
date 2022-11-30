@@ -31,6 +31,7 @@ init(
     "https://junoswap.com",
     "https://frontier.osmosis.zone",
   ],
+  ["https://wallet.keplr.app"],
   CommunityChainInfoRepo,
   {
     rng: getRandomBytesAsync,

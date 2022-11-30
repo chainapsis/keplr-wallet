@@ -22,11 +22,12 @@ import { KeplrEnigmaUtils } from "./enigma";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
+import { KeplrCoreTypes } from "./core-types";
 
 export interface ProxyRequest {
   type: "proxy-request";
   id: string;
-  method: keyof Keplr;
+  method: keyof (Keplr & KeplrCoreTypes);
   args: any[];
 }
 
@@ -84,9 +85,9 @@ export function injectKeplrToWindow(keplr: IKeplr): void {
  * So, to request some methods of the extension, this will proxy the request to the content script that is injected to webpage on the extension level.
  * This will use `window.postMessage` to interact with the content script.
  */
-export class InjectedKeplr implements IKeplr {
+export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   static startProxy(
-    keplr: IKeplr,
+    keplr: IKeplr & KeplrCoreTypes,
     eventListener: {
       addMessageListener: (fn: (e: any) => void) => void;
       postMessage: (message: any) => void;
@@ -211,7 +212,10 @@ export class InjectedKeplr implements IKeplr {
     });
   }
 
-  protected requestMethod(method: keyof IKeplr, args: any[]): Promise<any> {
+  protected requestMethod(
+    method: keyof (IKeplr & KeplrCoreTypes),
+    args: any[]
+  ): Promise<any> {
     const bytes = new Uint8Array(8);
     const id: string = Array.from(crypto.getRandomValues(bytes))
       .map((value) => {
@@ -562,5 +566,9 @@ export class InjectedKeplr implements IKeplr {
       signDoc,
       deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
+  }
+
+  __core__getAnalyticsId(): Promise<string> {
+    return this.requestMethod("__core__getAnalyticsId", []);
   }
 }

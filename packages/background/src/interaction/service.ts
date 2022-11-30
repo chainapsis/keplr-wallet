@@ -106,10 +106,14 @@ export class InteractionService {
     isInternal: boolean,
     data: unknown
   ): Promise<InteractionWaitingData> {
-    const bytes = new Uint8Array(8);
+    const bytes = new Uint8Array(12);
     const id: string = Array.from(await this.rng(bytes))
       .map((value) => {
-        return value.toString(16);
+        let v = value.toString(16);
+        if (v.length === 1) {
+          v = "0" + v;
+        }
+        return v;
       })
       .join("");
 

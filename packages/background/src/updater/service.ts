@@ -49,6 +49,7 @@ export class ChainUpdaterService {
 
           return features;
         })(),
+        beta: origin.beta,
       };
     }
 
