@@ -1867,7 +1867,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-evmos.keplr.app",
     ethereumJsonRpc: "https://eth.bd.evmos.org:8545",
     chainId: "evmos_9001-2",
-    chainName: "Evmos (Extension)",
+    chainName: "Evmos",
     stakeCurrency: {
       coinDenom: "EVMOS",
       coinMinimalDenom: "aevmos",

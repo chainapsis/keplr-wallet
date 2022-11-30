@@ -328,9 +328,6 @@ export class TokensService {
     chainInfo: ChainInfo,
     currency: AppCurrency
   ): Promise<AppCurrency> {
-    console.log(`ACLOG: validating currency`);
-    console.log(chainInfo);
-    console.log(currency);
     // Validate the schema.
     if ("type" in currency) {
       switch (currency.type) {

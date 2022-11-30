@@ -357,9 +357,6 @@ export class ObservableQueryERC20ContractData extends HasMapStore<ObservableQuer
     ethereumURL: string = this.ethereumURL
   ): ObservableQueryERC20ContractDataInner {
     const key = `${contractAddress}\n${ethereumURL}`;
-    console.log(
-      `ACLOG: getting contract address ${contractAddress} at url ${ethereumURL}`
-    );
     return super.get(key);
   }
 }

@@ -80,10 +80,6 @@ export const MainPage: FunctionComponent = observer(() => {
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(accountInfo.bech32Address);
 
-  console.log("ACLOG: Chain Info");
-  console.log(chainStore.current);
-  console.log(chainStore.current.raw);
-
   const tokens = queryBalances.unstakables.filter((bal) => {
     // Temporary implementation for trimming the 0 balanced native tokens.
     // TODO: Remove this part.
