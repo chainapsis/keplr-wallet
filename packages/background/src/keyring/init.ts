@@ -24,6 +24,7 @@ import {
   RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
+  ChangeKeyRingNameMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -54,6 +55,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(ExportKeyRingDatasMsg);
   router.registerMessage(RequestSignEIP712CosmosTxMsg_v0);
   router.registerMessage(InitNonDefaultLedgerAppMsg);
+  router.registerMessage(ChangeKeyRingNameMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }
