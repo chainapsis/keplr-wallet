@@ -513,7 +513,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
             response.data
           ) ||
-          ObservableQuery.guessResponseTruncated(headers, response.data))
+          ObservableQuery.guessResponseTruncated(headers, response.data) ||
+          response.data === "")
       ) {
         // In some devices, it is a http ok code, but a strange response is sometimes returned.
         // It's not that they can't query at all, it seems that they get weird response from time to time.
@@ -561,6 +562,15 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
           if (ObservableQuery.guessResponseTruncated(headers, response.data)) {
             throw new Error("The response data seems to be truncated");
+          }
+
+          // XXX: Definitely, empty string ("") is not error response.
+          //      But, the problem is that response is sometimes delivered with empty string even though it can not be empty string.
+          //      This only occurs on secret network on react-native. Cause may be from secret network itself or reverse proxy (nginx).
+          //      The exact cause is currently unknown, so treat this part as an incorrect response as in the above case.
+          //      Fortunately, there is no normal case to return empty string so far
+          if (response.data === "") {
+            throw new Error("Response empty");
           }
         }
       }
