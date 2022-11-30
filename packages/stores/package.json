@@ -20,9 +20,6 @@
     "@keplr-wallet/provider-mock": "0.11.21"
   },
   "dependencies": {
-    "@cosmjs/encoding": "^0.24.0-alpha.25",
-    "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@cosmjs/tendermint-rpc": "^0.24.1",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/address": "^5.6.0",
     "@ethersproject/bignumber": "^5.7.0",
