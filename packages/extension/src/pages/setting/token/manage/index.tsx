@@ -36,7 +36,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     }
   })() as "secretwasm" | "cosmwasm" | "erc20";
 
-  console.log(chainStore.current.currencies);
+  console.log(`ACLOG: ${chainStore.current.currencies}`);
 
   const appCurrencies = chainStore.current.currencies.filter((currency) => {
     switch (tokenType) {

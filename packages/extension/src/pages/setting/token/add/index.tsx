@@ -93,6 +93,10 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         );
       case "erc20":
         const ethereumUrl = chainStore.current.ethereumJsonRpc;
+        console.log(`ACLOG: logging ethereumUrl as ${ethereumUrl}`);
+        console.log(
+          `ACLOG: raw endpoint ${chainStore.current.raw.ethereumJsonRpc}`
+        );
         return queries.keplrETC.queryERC20Metadata.get(
           contractAddress,
           ethereumUrl

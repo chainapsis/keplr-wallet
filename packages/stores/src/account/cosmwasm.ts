@@ -1,10 +1,9 @@
 import { AccountSetBase, AccountSetBaseSuper, MsgOpt } from "./base";
 import { CosmwasmQueries, IQueriesStore, QueriesSetBase } from "../query";
 import { ChainGetter, CoinPrimitive } from "../common";
-import { StdFee } from "@cosmjs/launchpad";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
-import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
+import { AppCurrency, KeplrSignOptions, StdFee } from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly, Optional } from "utility-types";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { Buffer } from "buffer/";

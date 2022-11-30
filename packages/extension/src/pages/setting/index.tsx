@@ -41,6 +41,8 @@ export const SettingPage: FunctionComponent = observer(() => {
         }
       );
 
+  const isDeveloperMode = uiConfigStore.isDeveloper;
+
   return (
     <HeaderLayout
       showChainName={false}
@@ -129,11 +131,11 @@ export const SettingPage: FunctionComponent = observer(() => {
           )}
         />
         <PageButton
-          title="Show Advanced IBC Transfers"
+          title={intl.formatMessage({
+            id: "setting.developer-mode",
+          })}
           onClick={() => {
-            uiConfigStore.setShowAdvancedIBCTransfer(
-              !uiConfigStore.showAdvancedIBCTransfer
-            );
+            uiConfigStore.setDeveloperMode(!isDeveloperMode);
           }}
           icons={[
             <label
@@ -143,11 +145,9 @@ export const SettingPage: FunctionComponent = observer(() => {
             >
               <input
                 type="checkbox"
-                checked={uiConfigStore.showAdvancedIBCTransfer}
+                checked={isDeveloperMode}
                 onChange={() => {
-                  uiConfigStore.setShowAdvancedIBCTransfer(
-                    !uiConfigStore.showAdvancedIBCTransfer
-                  );
+                  uiConfigStore.setDeveloperMode(isDeveloperMode);
                 }}
               />
               <span className="custom-toggle-slider rounded-circle" />

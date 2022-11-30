@@ -9,9 +9,8 @@ import { TxChainSetter } from "./chain";
 import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Coin, CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
-import { FeeCurrency } from "@keplr-wallet/types";
+import { FeeCurrency, StdFee } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
-import { StdFee } from "@cosmjs/launchpad";
 import { useState } from "react";
 import { InsufficientFeeError, NotLoadedFeeError } from "./errors";
 import { QueriesStore } from "./internal";
@@ -311,7 +310,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    const gasPriceStep = this.feeCurrency?.gasPriceStep ?? DefaultGasPriceStep;
+    // For legacy support
+    // Fallback gas price step to legacy chain info which includes gas price step field in root,
+    // if there is no gas price step in fee currency.
+    const chainInfoWithGasPriceStep = (this.chainInfo.raw ?? {}) as {
+      gasPriceStep?: {
+        low: number;
+        average: number;
+        high: number;
+      };
+    };
+    const gasPriceStep =
+      this.feeCurrency?.gasPriceStep ??
+      chainInfoWithGasPriceStep.gasPriceStep ??
+      DefaultGasPriceStep;
 
     const gasPrice = new Dec(gasPriceStep[feeType].toString());
     const feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));

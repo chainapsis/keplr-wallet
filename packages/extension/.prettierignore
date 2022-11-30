@@ -14,3 +14,5 @@ prod/*
 build/*
 
 yarn.lock
+
+noop-alt-sign-in

@@ -46,6 +46,8 @@ export const ADR36SignDocDetailsTab: FunctionComponent<{
     }
   }, [signDocWrapper.aminoSignDoc.msgs, isADR36WithString]);
 
+  // TODO: Add warning view to let users turn on blind signing option on ledger if EIP712
+
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <div className={styleDetailsTab.msgContainer} style={{ flex: "none" }}>

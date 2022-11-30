@@ -8,13 +8,14 @@ jobs:
   publish:
     name: Request to deploy the mobile to other repo by generating repository dispatch
     runs-on: ubuntu-20.04
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
           token: ${{ secrets.TOKEN }}
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: "16"
           registry-url: "https://registry.npmjs.org"

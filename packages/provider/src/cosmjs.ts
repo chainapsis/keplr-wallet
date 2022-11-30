@@ -1,15 +1,15 @@
 import {
-  OfflineSigner,
+  Keplr,
+  OfflineDirectSigner,
+  OfflineAminoSigner,
   AccountData,
   AminoSignResponse,
   StdSignDoc,
-} from "@cosmjs/launchpad";
-import { Keplr } from "@keplr-wallet/types";
-import { OfflineDirectSigner } from "@cosmjs/proto-signing";
-import { DirectSignResponse } from "@cosmjs/proto-signing/build/signer";
-import { SignDoc } from "@cosmjs/proto-signing/build/codec/cosmos/tx/v1beta1/tx";
+  DirectSignResponse,
+  SignDoc,
+} from "@keplr-wallet/types";
 
-export class CosmJSOfflineSignerOnlyAmino implements OfflineSigner {
+export class CosmJSOfflineSignerOnlyAmino implements OfflineAminoSigner {
   constructor(
     protected readonly chainId: string,
     protected readonly keplr: Keplr
@@ -56,7 +56,7 @@ export class CosmJSOfflineSignerOnlyAmino implements OfflineSigner {
 
 export class CosmJSOfflineSigner
   extends CosmJSOfflineSignerOnlyAmino
-  implements OfflineSigner, OfflineDirectSigner {
+  implements OfflineAminoSigner, OfflineDirectSigner {
   constructor(
     protected readonly chainId: string,
     protected readonly keplr: Keplr

@@ -19,12 +19,12 @@ import { TokensView } from "./token";
 import { BIP44SelectModal } from "./bip44-select-modal";
 import { useIntl } from "react-intl";
 import { useConfirm } from "../../components/confirm";
-import { ChainUpdaterService } from "@keplr-wallet/background";
 import { IBCTransferView } from "./ibc-transfer";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { VestingInfo } from "./vesting-info";
+import { LedgerAppModal } from "./ledger-app-modal";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -40,28 +40,10 @@ export const MainPage: FunctionComponent = observer(() => {
   useEffect(() => {
     if (!chainStore.isInitializing && prevChainId.current !== currentChainId) {
       (async () => {
-        const result = await ChainUpdaterService.checkChainUpdate(
-          chainStore.current
-        );
-        if (result.explicit) {
-          // If chain info has been changed, warning the user wether update the chain or not.
-          if (
-            await confirm.confirm({
-              paragraph: intl.formatMessage({
-                id: "main.update-chain.confirm.paragraph",
-              }),
-              yes: intl.formatMessage({
-                id: "main.update-chain.confirm.yes",
-              }),
-              no: intl.formatMessage({
-                id: "main.update-chain.confirm.no",
-              }),
-            })
-          ) {
-            await chainStore.tryUpdateChain(chainStore.current.chainId);
-          }
-        } else if (result.slient) {
+        try {
           await chainStore.tryUpdateChain(chainStore.current.chainId);
+        } catch (e) {
+          console.log(e);
         }
       })();
 
@@ -97,6 +79,10 @@ export const MainPage: FunctionComponent = observer(() => {
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(accountInfo.bech32Address);
+
+  console.log("ACLOG: Chain Info");
+  console.log(chainStore.current);
+  console.log(chainStore.current.raw);
 
   const tokens = queryBalances.unstakables.filter((bal) => {
     // Temporary implementation for trimming the 0 balanced native tokens.
@@ -142,6 +128,7 @@ export const MainPage: FunctionComponent = observer(() => {
       }
     >
       <BIP44SelectModal />
+      <LedgerAppModal />
       <Card className={classnames(style.card, "shadow")}>
         <CardBody>
           <div className={style.containerAccountInner}>
@@ -166,7 +153,7 @@ export const MainPage: FunctionComponent = observer(() => {
           <CardBody>{<TokensView />}</CardBody>
         </Card>
       ) : null}
-      {uiConfigStore.showAdvancedIBCTransfer &&
+      {uiConfigStore.isDeveloper &&
       chainStore.current.features?.includes("ibc-transfer") ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>

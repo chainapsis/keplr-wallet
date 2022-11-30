@@ -2,6 +2,34 @@
 
 import "zx/globals";
 import glob from "glob";
+import fs from "fs";
+import path from "path";
+
+function cleanEmptyDirectory(dir) {
+  if (!fs.statSync(dir).isDirectory()) {
+    return;
+  }
+
+  const name = path.basename(dir);
+  if (name === "node_modules" || name === "proto-types-gen") {
+    return;
+  }
+
+  const dirCandidates = fs.readdirSync(dir);
+  if (dirCandidates.length === 0) {
+    fs.rmdirSync(dir);
+    return;
+  }
+
+  for (const candidate of dirCandidates) {
+    cleanEmptyDirectory(path.join(dir, candidate));
+  }
+
+  // Re-evaluate
+  if (fs.readdirSync(dir).length === 0) {
+    fs.rmdirSync(dir);
+  }
+}
 
 (async () => {
   try {
@@ -18,6 +46,8 @@ import glob from "glob";
         await $`rm -f ${path}`;
       }
     }
+
+    cleanEmptyDirectory(targetDir);
   } catch (e) {
     console.log(e);
     process.exit(1);
