@@ -160,4 +160,10 @@ export interface Keplr {
     signDoc: StdSignDoc,
     signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
+
+  /** Change wallet extension user name **/
+  changeKeyRingName(opts: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string>;
 }

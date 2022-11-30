@@ -496,4 +496,12 @@ export class KeplrWalletConnectV1 implements Keplr {
   ): Promise<AminoSignResponse> {
     throw new Error("Not yet implemented");
   }
+
+  // FIXME : ask @Heesung
+  changeKeyRingName(_opts: {
+    defaultName: string;
+    editable?: boolean | undefined;
+  }): Promise<string> {
+    throw new Error("Not yet implemented");
+  }
 }

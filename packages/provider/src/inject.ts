@@ -571,4 +571,16 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   __core__getAnalyticsId(): Promise<string> {
     return this.requestMethod("__core__getAnalyticsId", []);
   }
+
+  async changeKeyRingName({
+    defaultName,
+    editable = true,
+  }: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string> {
+    return await this.requestMethod("changeKeyRingName", [
+      { defaultName, editable },
+    ]);
+  }
 }

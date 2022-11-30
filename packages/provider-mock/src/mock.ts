@@ -264,4 +264,11 @@ export class MockKeplr implements Keplr {
   ): Promise<AminoSignResponse> {
     throw new Error("Not yet implemented");
   }
+
+  changeKeyRingName(_opts: {
+    defaultName: string;
+    editable?: boolean | undefined;
+  }): Promise<string> {
+    throw new Error("Not yet implemented");
+  }
 }
