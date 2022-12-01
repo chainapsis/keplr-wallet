@@ -149,6 +149,8 @@ module.exports = {
     }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: isEnvDevelopment ? "development" : "production",
+      KEPLR_EXT_ETHEREUM_ENDPOINT: "",
+      KEPLR_EXT_AMPLITUDE_API_KEY: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
@@ -178,11 +180,6 @@ module.exports = {
       template: "./src/index.html",
       filename: "blocklist.html",
       chunks: ["blocklist"],
-    }),
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: "development",
-      KEPLR_EXT_ETHEREUM_ENDPOINT: "",
-      KEPLR_EXT_AMPLITUDE_API_KEY: "",
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",
