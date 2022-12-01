@@ -9,7 +9,6 @@ import { HashRouter, Route } from "react-router-dom";
 
 import { RegisterPage } from "./renewal/pages/register";
 import { StoreProvider } from "./stores";
-import { GlobalStyles } from "./renewal/styles";
 import { AppIntlProvider } from "./languages";
 import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
@@ -21,7 +20,6 @@ const App: FunctionComponent = () => {
         languageToFiatCurrency={LanguageToFiatCurrency}
       >
         <React.Fragment>
-          <GlobalStyles />
           <Normalize />
           <HashRouter>
             <Route exact path="/register" component={RegisterPage} />
