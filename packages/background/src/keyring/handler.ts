@@ -450,12 +450,16 @@ const handleChangeKeyNameMsg: (
   service: KeyRingService
 ) => InternalHandler<ChangeKeyRingNameMsg> = (service) => {
   return async (env, msg) => {
-    let index = 0;
+    let index = -1;
     service.getMultiKeyStoreInfo().forEach(({ selected }, idx) => {
       if (selected) {
         index = idx;
       }
     });
+
+    if (index === -1) {
+      throw new Error("No account selected");
+    }
 
     return await service.changeKeyRingName(env, {
       defaultName: msg.defaultName,
