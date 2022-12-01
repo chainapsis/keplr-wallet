@@ -1,10 +1,6 @@
 import { IAmountConfig, IFeeConfig } from "./types";
 import { TxChainSetter } from "./chain";
-import {
-  ChainGetter,
-  CoinPrimitive,
-  IQueriesStore,
-} from "@keplr-wallet/stores";
+import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
 import {
@@ -16,6 +12,7 @@ import {
 } from "./errors";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { useState } from "react";
+import { QueriesStore } from "./internal";
 
 export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
@@ -35,7 +32,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
   constructor(
     chainGetter: ChainGetter,
-    protected readonly queriesStore: IQueriesStore,
+    protected readonly queriesStore: QueriesStore,
     initialChainId: string,
     sender: string,
     feeConfig: IFeeConfig | undefined
@@ -222,7 +219,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
 export const useAmountConfig = (
   chainGetter: ChainGetter,
-  queriesStore: IQueriesStore,
+  queriesStore: QueriesStore,
   chainId: string,
   sender: string
 ) => {

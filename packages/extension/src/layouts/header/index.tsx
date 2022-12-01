@@ -50,7 +50,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
         left={
           <div className={style.menuContainer}>
             {menuRenderer ? (
-              <>
+              <React.Fragment>
                 <Menu isOpen={isMenuOpen}>{menuRenderer}</Menu>
                 <motion.div
                   className={style["menu-img"]}
@@ -60,7 +60,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
                 >
                   <MenuButton />
                 </motion.div>
-              </>
+              </React.Fragment>
             ) : null}
             {onBackButton ? (
               <div

@@ -1,9 +1,4 @@
-import {
-  ChainGetter,
-  IAccountStore,
-  IQueriesStore,
-  MsgOpt,
-} from "@keplr-wallet/stores";
+import { ChainGetter, IAccountStore, MsgOpt } from "@keplr-wallet/stores";
 import {
   AmountConfig,
   GasConfig,
@@ -14,6 +9,7 @@ import {
 import { AppCurrency } from "@keplr-wallet/types";
 import { useState } from "react";
 import { makeObservable, override } from "mobx";
+import { QueriesStore } from "./internal";
 
 export class DelegateAmountConfig extends AmountConfig {
   get sendableCurrencies(): AppCurrency[] {
@@ -52,7 +48,7 @@ export class DelegateGasConfig extends GasConfig {
 
 export const useDelegateAmountConfig = (
   chainGetter: ChainGetter,
-  queriesStore: IQueriesStore,
+  queriesStore: QueriesStore,
   chainId: string,
   sender: string
 ) => {
@@ -93,7 +89,7 @@ export const useDelegateGasConfig = (
 
 export const useDelegateTxConfig = (
   chainGetter: ChainGetter,
-  queriesStore: IQueriesStore,
+  queriesStore: QueriesStore,
   accountStore: IAccountStore<{
     cosmos: {
       readonly msgOpts: {
@@ -102,8 +98,7 @@ export const useDelegateTxConfig = (
     };
   }>,
   chainId: string,
-  sender: string,
-  ensEndpoint?: string
+  sender: string
 ) => {
   const amountConfig = useDelegateAmountConfig(
     chainGetter,
@@ -126,7 +121,7 @@ export const useDelegateTxConfig = (
   // set the fee config of the amount config after initing the gas/fee configs.
   amountConfig.setFeeConfig(feeConfig);
 
-  const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
+  const recipientConfig = useRecipientConfig(chainGetter, chainId);
   recipientConfig.setBech32Prefix(
     chainGetter.getChain(chainId).bech32Config.bech32PrefixValAddr
   );

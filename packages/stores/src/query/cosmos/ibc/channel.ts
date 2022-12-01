@@ -8,6 +8,8 @@ import { ChannelResponse } from "./types";
 import { autorun } from "mobx";
 
 export class ObservableChainQueryIBCChannel extends ObservableChainQuery<ChannelResponse> {
+  protected disposer?: () => void;
+
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -21,15 +23,30 @@ export class ObservableChainQueryIBCChannel extends ObservableChainQuery<Channel
       chainGetter,
       `/ibc/core/channel/v1beta1/channels/${channelId}/ports/${portId}`
     );
+  }
 
-    autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
-        this.setUrl(
-          `/ibc/core/channel/v1/channels/${this.channelId}/ports/${this.portId}`
-        );
-      }
+  protected onStart() {
+    super.onStart();
+
+    return new Promise<void>((resolve) => {
+      this.disposer = autorun(() => {
+        const chainInfo = this.chainGetter.getChain(this.chainId);
+        if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
+          this.setUrl(
+            `/ibc/core/channel/v1/channels/${this.channelId}/ports/${this.portId}`
+          );
+        }
+        resolve();
+      });
     });
+  }
+
+  protected onStop() {
+    if (this.disposer) {
+      this.disposer();
+      this.disposer = undefined;
+    }
+    super.onStop();
   }
 }
 

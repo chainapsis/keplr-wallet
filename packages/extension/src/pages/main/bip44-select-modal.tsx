@@ -153,16 +153,26 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
         });
 
       Promise.all([...queryBalancesWaiter, ...queryAccountsWaiter]).then(() => {
+        // Remember that `waitFreshResponse()` not throw an error even if query fails.
+
         // Assume that the first one as the main account of paths.
         const others = selectables.selectables.slice(1);
 
         // Check that the others have some balances/
-        const hasBalances = others.find((other) => {
+        const hasBalancesOrError = others.find((other) => {
           const balances = queries.queryBalances.getQueryBech32Address(
             other.bech32Address
           ).balances;
           for (let i = 0; i < balances.length; i++) {
             const bal = balances[i];
+
+            if (bal.error) {
+              console.log(
+                "Open bip44 selector modal due to failure of querying balance",
+                bal.error
+              );
+              return true;
+            }
 
             if (bal.balance.toDec().gt(new Dec(0))) {
               return true;
@@ -172,17 +182,35 @@ export const BIP44SelectModal: FunctionComponent = observer(() => {
           return false;
         });
 
-        // Check that the others have sent txs.
-        const hasSequence = others.find((other) => {
+        // Check that the account exist on chain.
+        // With stargate implementation, querying account fails with 404 status if account not exists.
+        // But, if account receives some native tokens, the account would be created and it may deserve to be chosen.
+        const hasAccountOrError = others.find((other) => {
           const account = queries.cosmos.queryAccount.getQueryBech32Address(
             other.bech32Address
           );
-          return account.sequence !== "0";
+          if (account.error && account.error.message) {
+            if (
+              // In this case, it means that the account not exist on chain, and handle it as 0 sequence.
+              account.error.status === 404 &&
+              account.error.message.includes(
+                `account ${other.bech32Address} not found`
+              )
+            ) {
+              return false;
+            }
+            console.log(
+              "Open bip44 selector modal due to failure of querying account",
+              account.error
+            );
+            return true;
+          }
+          return true;
         });
 
         // If there is no other accounts that have the balances or have sent txs,
         // just select the first account without requesting the users to select the account they want.
-        if (!hasBalances && !hasSequence) {
+        if (!hasBalancesOrError && !hasAccountOrError) {
           keyRingStore.setKeyStoreCoinType(
             chainStore.current.chainId,
             selectables.selectables[0].path.coinType

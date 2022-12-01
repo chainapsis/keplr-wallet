@@ -7,7 +7,6 @@ export const EthereumEndpoint =
   "https://mainnet.infura.io/v3/eeb00e81cdb2410098d5a270eff9b341";
 
 export interface AppChainInfo extends ChainInfo {
-  readonly chainSymbolImageUrl?: string;
   readonly hideInUI?: boolean;
   readonly txExplorer?: {
     readonly name: string;
@@ -98,14 +97,14 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "osmosis",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/osmo.png",
+        gasPriceStep: {
+          low: 0,
+          average: 0.025,
+          high: 0.04,
+        },
       },
     ],
     coinType: 118,
-    gasPriceStep: {
-      low: 0,
-      average: 0.025,
-      high: 0.04,
-    },
     features: ["ibc-transfer", "ibc-go", "cosmwasm"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/osmo.png",
     txExplorer: {
@@ -150,14 +149,14 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "secret",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/secret.png",
+        gasPriceStep: {
+          low: 0.1,
+          average: 0.25,
+          high: 0.3,
+        },
       },
     ],
     coinType: 529,
-    gasPriceStep: {
-      low: 0.1,
-      average: 0.25,
-      high: 0.3,
-    },
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/secret.png",
     features: ["secretwasm"],
@@ -242,13 +241,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinGeckoId: "crypto-com-chain",
         coinImageUrl:
           "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
+        gasPriceStep: {
+          low: 0.025,
+          average: 0.03,
+          high: 0.04,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0.025,
-      average: 0.03,
-      high: 0.04,
-    },
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/crypto-org.png",
     features: ["ibc-transfer"],
@@ -286,13 +285,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "starname",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/starname.png",
+        gasPriceStep: {
+          low: 1,
+          average: 2,
+          high: 3,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 1,
-      average: 2,
-      high: 3,
-    },
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/starname.png",
     features: ["ibc-transfer"],
@@ -605,13 +604,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: "sifchain",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/sifchain.png",
+        gasPriceStep: {
+          low: 500000000000,
+          average: 1000000000000,
+          high: 2000000000000,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 500000000000,
-      average: 1000000000000,
-      high: 2000000000000,
-    },
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/sifchain.png",
     features: [],
@@ -621,7 +620,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     rpc: "https://rpc-certik.keplr.app",
     rest: "https://lcd-certik.keplr.app",
     chainId: "shentu-2.2",
-    chainName: "Certik",
+    chainName: "Shentu",
     stakeCurrency: {
       coinDenom: "CTK",
       coinMinimalDenom: "uctk",
@@ -695,13 +694,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "iris-network",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/iris.png",
+        gasPriceStep: {
+          low: 0.2,
+          average: 0.3,
+          high: 0.4,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0.2,
-      average: 0.3,
-      high: 0.4,
-    },
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/iris.png",
     features: ["ibc-transfer"],
     hideInUI: true,
@@ -775,13 +774,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "juno-network",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.0025,
+          high: 0.004,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0.001,
-      average: 0.0025,
-      high: 0.004,
-    },
     features: ["cosmwasm", "ibc-transfer", "ibc-go", "wasmd_0.24+"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/juno.png",
     txExplorer: {
@@ -845,8 +844,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
     },
     bip44: {
-      coinType: 750,
+      coinType: 118,
     },
+    alternativeBIP44s: [
+      {
+        coinType: 750,
+      },
+    ],
     bech32Config: Bech32Address.defaultBech32Config("persistence"),
     currencies: [
       {
@@ -866,13 +870,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinGeckoId: "persistence",
         coinImageUrl:
           "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
+        gasPriceStep: {
+          low: 0,
+          average: 0.025,
+          high: 0.04,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0,
-      average: 0.025,
-      high: 0.04,
-    },
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/persistence.png",
     features: ["ibc-transfer", "ibc-go"],
@@ -886,6 +890,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
       coinDecimals: 6,
+      coinGeckoId: "axelar",
       coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
     },
     bip44: {
@@ -897,6 +902,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
       {
@@ -1013,14 +1019,15 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "AXL",
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
+        coinGeckoId: "axelar",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
+        gasPriceStep: {
+          low: 0.007,
+          average: 0.007,
+          high: 0.01,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0.007,
-      average: 0.007,
-      high: 0.01,
-    },
     features: ["ibc-transfer", "ibc-go", "axelar-evm-bridge"],
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
@@ -1091,13 +1098,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uumee",
         coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
+        gasPriceStep: {
+          low: 0.05,
+          average: 0.06,
+          high: 0.1,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0,
-      average: 0.025,
-      high: 0.04,
-    },
     features: ["ibc-transfer", "ibc-go"],
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/umee.png",
   },
@@ -1133,16 +1140,27 @@ export const EmbedChainInfos: AppChainInfo[] = [
     ],
     feeCurrencies: [
       {
+        coinDenom: "BLD",
+        coinMinimalDenom: "ubld",
+        coinDecimals: 6,
+        coinGeckoId: "agoric",
+        gasPriceStep: {
+          low: 0.012,
+          average: 0.024,
+          high: 0.071,
+        },
+      },
+      {
         coinDenom: "IST",
         coinMinimalDenom: "uist",
         coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.0034,
+          average: 0.007,
+          high: 0.02,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0,
-      average: 0,
-      high: 0,
-    },
     features: ["ibc-go"],
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/agoric.png",
@@ -1221,13 +1239,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "sentinel",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/sentinel.png",
+        gasPriceStep: {
+          low: 0.1,
+          average: 0.25,
+          high: 0.4,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0.1,
-      average: 0.25,
-      high: 0.4,
-    },
     chainSymbolImageUrl:
       "https://dhj8dql1kzq2v.cloudfront.net/white/sentinel.png",
     features: ["ibc-transfer"],
@@ -1312,6 +1330,31 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "EEUR",
         coinMinimalDenom: "eeur",
         coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
       },
     ],
@@ -1322,13 +1365,69 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "e-money",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "EEUR",
+        coinMinimalDenom: "eeur",
+        coinDecimals: 6,
+        coinGeckoId: "e-money-eur",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ECHF",
+        coinMinimalDenom: "echf",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ESEK",
+        coinMinimalDenom: "esek",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "ENOK",
+        coinMinimalDenom: "enok",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+      {
+        coinDenom: "EDKK",
+        coinMinimalDenom: "edkk",
+        coinDecimals: 6,
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 1,
-      average: 1,
-      high: 1,
-    },
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
     features: ["ibc-transfer"],
     hideInUI: true,
@@ -1405,19 +1504,24 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uluna",
         coinDecimals: 6,
         coinGeckoId: "terra-luna",
+        gasPriceStep: {
+          low: 0.015,
+          average: 0.015,
+          high: 0.015,
+        },
       },
       {
         coinDenom: "UST",
         coinMinimalDenom: "uusd",
         coinDecimals: 6,
         coinGeckoId: "terrausd",
+        gasPriceStep: {
+          low: 0.015,
+          average: 0.015,
+          high: 0.015,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0.015,
-      average: 0.015,
-      high: 0.015,
-    },
     features: ["ibc-transfer"],
     hideInUI: true,
   },
@@ -1580,13 +1684,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "umed",
         coinDecimals: 6,
         coinGeckoId: "medibloc",
+        gasPriceStep: {
+          low: 5,
+          average: 7,
+          high: 9,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 5,
-      average: 7,
-      high: 9,
-    },
     features: ["ibc-transfer"],
     hideInUI: true,
   },
@@ -1678,13 +1782,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "CHEQ",
         coinMinimalDenom: "ncheq",
         coinDecimals: 9,
+        gasPriceStep: {
+          low: 25,
+          average: 30,
+          high: 50,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 25,
-      average: 30,
-      high: 50,
-    },
     features: ["ibc-transfer", "ibc-go"],
     hideInUI: true,
   },
@@ -1714,13 +1818,13 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "HUAHUA",
         coinMinimalDenom: "uhuahua",
         coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.025,
+          average: 0.03,
+          high: 0.035,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0.025,
-      average: 0.03,
-      high: 0.035,
-    },
     features: ["ibc-transfer", "ibc-go"],
     hideInUI: true,
   },
@@ -1849,16 +1953,100 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinDenom: "DIG",
         coinMinimalDenom: "udig",
         coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.025,
+          average: 0.03,
+          high: 0.035,
+        },
       },
     ],
-    gasPriceStep: {
-      low: 0.025,
-      average: 0.03,
-      high: 0.035,
-    },
     features: ["ibc-transfer", "ibc-go"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://rpc-evmos.keplr.app",
+    rest: "https://lcd-evmos.keplr.app",
+    chainId: "evmos_9001-2",
+    chainName: "Evmos",
+    stakeCurrency: {
+      coinDenom: "EVMOS",
+      coinMinimalDenom: "aevmos",
+      coinDecimals: 18,
+      coinGeckoId: "evmos",
+    },
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("evmos"),
+    currencies: [
+      {
+        coinDenom: "EVMOS",
+        coinMinimalDenom: "aevmos",
+        coinDecimals: 18,
+        coinGeckoId: "evmos",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "EVMOS",
+        coinMinimalDenom: "aevmos",
+        coinDecimals: 18,
+        coinGeckoId: "evmos",
+        gasPriceStep: {
+          low: 25000000000,
+          average: 25000000000,
+          high: 40000000000,
+        },
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    hideInUI: true,
+  },
+  {
+    rpc: "https://public.api.injective.network",
+    rest: "https://public.lcd.injective.network",
+    chainId: "injective-1",
+    chainName: "Injective",
+    stakeCurrency: {
+      coinDenom: "INJ",
+      coinMinimalDenom: "inj",
+      coinDecimals: 18,
+      coinGeckoId: "injective-protocol",
+    },
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("inj"),
+    currencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+        gasPriceStep: {
+          low: 0.0005,
+          average: 0.0007,
+          high: 0.0009,
+        },
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
     hideInUI: true,
   },
 ];
 
 export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";
+
+export const CommunityChainInfoRepo = {
+  organizationName: "chainapsis",
+  repoName: "keplr-chain-registry",
+  branchName: "main",
+};

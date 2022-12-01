@@ -2,7 +2,7 @@
 require("setimmediate");
 // Shim ------------
 
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import { AppIntlProvider } from "./languages";
@@ -32,7 +32,10 @@ import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 
 import { StoreProvider, useStore } from "./stores";
-import { KeyRingStatus } from "@keplr-wallet/background";
+import {
+  KeyRingStatus,
+  StartAutoLockMonitoringMsg,
+} from "@keplr-wallet/background";
 import { SignPage } from "./pages/sign";
 import { ChainSuggestedPage } from "./pages/chain/suggest";
 import Modal from "react-modal";
@@ -53,15 +56,15 @@ import { AddTokenPage } from "./pages/setting/token/add";
 import { ManageTokenPage } from "./pages/setting/token/manage";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
-
-import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
+import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 import manifest from "./manifest.json";
 import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
-import { LogPageViewWrapper } from "./components/analytics";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
+import { SettingAutoLockPage } from "./pages/setting/autolock";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -106,6 +109,15 @@ Modal.defaultStyles = {
 const StateRenderer: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
+  useEffect(() => {
+    // Notify to auto lock service to start activation check whenever the keyring is unlocked.
+    if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
+      const msg = new StartAutoLockMonitoringMsg();
+      const requester = new InExtensionMessageRequester();
+      requester.sendMessage(BACKGROUND_PORT, msg);
+    }
+  }, [keyRingStore.status]);
+
   if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
     return <MainPage />;
   } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
@@ -142,7 +154,7 @@ const StateRenderer: FunctionComponent = observer(() => {
 ReactDOM.render(
   <StoreProvider>
     <AppIntlProvider
-      additionalMessages={AdditonalIntlMessages}
+      additionalMessages={AdditionalIntlMessages}
       languageToFiatCurrency={LanguageToFiatCurrency}
     >
       <LoadingIndicatorProvider>
@@ -150,97 +162,88 @@ ReactDOM.render(
           <NotificationProvider>
             <ConfirmProvider>
               <HashRouter>
-                <LogPageViewWrapper>
-                  <Route exact path="/" component={StateRenderer} />
-                  <Route exact path="/unlock" component={LockPage} />
-                  <Route exact path="/access" component={AccessPage} />
-                  <Route
-                    exact
-                    path="/access/viewing-key"
-                    component={Secret20ViewingKeyAccessPage}
-                  />
-                  <Route exact path="/register" component={RegisterPage} />
-                  <Route exact path="/send" component={SendPage} />
-                  <Route
-                    exact
-                    path="/ibc-transfer"
-                    component={IBCTransferPage}
-                  />
-                  <Route exact path="/setting" component={SettingPage} />
-                  <Route
-                    exact
-                    path="/ledger-grant"
-                    component={LedgerGrantPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/language"
-                    component={SettingLanguagePage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/fiat"
-                    component={SettingFiatPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/connections"
-                    component={SettingConnectionsPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/connections/viewing-key/:contractAddress"
-                    component={SettingSecret20ViewingKeyConnectionsPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/address-book"
-                    component={AddressBookPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/export-to-mobile"
-                    component={ExportToMobilePage}
-                  />
-                  <Route exact path="/setting/credit" component={CreditPage} />
-                  <Route
-                    exact
-                    path="/setting/set-keyring"
-                    component={SetKeyRingPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/export/:index"
-                    component={ExportPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/clear/:index"
-                    component={ClearPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/keyring/change/name/:index"
-                    component={ChangeNamePage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/token/add"
-                    component={AddTokenPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/token/manage"
-                    component={ManageTokenPage}
-                  />
-                  <Route
-                    exact
-                    path="/setting/endpoints"
-                    component={SettingEndpointsPage}
-                  />
-                  <Route path="/sign" component={SignPage} />
-                  <Route path="/suggest-chain" component={ChainSuggestedPage} />
-                </LogPageViewWrapper>
+                <Route exact path="/" component={StateRenderer} />
+                <Route exact path="/unlock" component={LockPage} />
+                <Route exact path="/access" component={AccessPage} />
+                <Route
+                  exact
+                  path="/access/viewing-key"
+                  component={Secret20ViewingKeyAccessPage}
+                />
+                <Route exact path="/register" component={RegisterPage} />
+                <Route exact path="/send" component={SendPage} />
+                <Route exact path="/ibc-transfer" component={IBCTransferPage} />
+                <Route exact path="/setting" component={SettingPage} />
+                <Route exact path="/ledger-grant" component={LedgerGrantPage} />
+                <Route
+                  exact
+                  path="/setting/language"
+                  component={SettingLanguagePage}
+                />
+                <Route exact path="/setting/fiat" component={SettingFiatPage} />
+                <Route
+                  exact
+                  path="/setting/connections"
+                  component={SettingConnectionsPage}
+                />
+                <Route
+                  exact
+                  path="/setting/connections/viewing-key/:contractAddress"
+                  component={SettingSecret20ViewingKeyConnectionsPage}
+                />
+                <Route
+                  exact
+                  path="/setting/address-book"
+                  component={AddressBookPage}
+                />
+                <Route
+                  exact
+                  path="/setting/export-to-mobile"
+                  component={ExportToMobilePage}
+                />
+                <Route exact path="/setting/credit" component={CreditPage} />
+                <Route
+                  exact
+                  path="/setting/set-keyring"
+                  component={SetKeyRingPage}
+                />
+                <Route
+                  exact
+                  path="/setting/export/:index"
+                  component={ExportPage}
+                />
+                <Route
+                  exact
+                  path="/setting/clear/:index"
+                  component={ClearPage}
+                />
+                <Route
+                  exact
+                  path="/setting/keyring/change/name/:index"
+                  component={ChangeNamePage}
+                />
+                <Route
+                  exact
+                  path="/setting/token/add"
+                  component={AddTokenPage}
+                />
+                <Route
+                  exact
+                  path="/setting/token/manage"
+                  component={ManageTokenPage}
+                />
+                <Route
+                  exact
+                  path="/setting/endpoints"
+                  component={SettingEndpointsPage}
+                />
+                <Route
+                  exact
+                  path="/setting/autolock"
+                  component={SettingAutoLockPage}
+                />
+                <Route path="/sign" component={SignPage} />
+                <Route path="/suggest-chain" component={ChainSuggestedPage} />
               </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>

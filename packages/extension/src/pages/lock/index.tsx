@@ -17,6 +17,9 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { useHistory } from "react-router";
 import delay from "delay";
+import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 interface FormData {
   password: string;
@@ -56,6 +59,12 @@ export const LockPage: FunctionComponent = observer(() => {
           setLoading(true);
           try {
             await keyRingStore.unlock(data.password);
+
+            const msg = new StartAutoLockMonitoringMsg();
+            const requester = new InExtensionMessageRequester();
+            // Make sure to notify that auto lock service to start check locking after duration.
+            await requester.sendMessage(BACKGROUND_PORT, msg);
+
             if (interactionInfo.interaction) {
               if (!interactionInfo.interactionInternal) {
                 // XXX: If the connection doesn't have the permission,

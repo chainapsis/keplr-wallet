@@ -7,7 +7,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 import { ObservableQuery, QueryResponse } from "../../../common";
-import Axios, { CancelToken } from "axios";
+import Axios from "axios";
 import PQueue from "p-queue";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
@@ -64,11 +64,11 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
   }
 
   protected async fetchResponse(
-    cancelToken: CancelToken
+    abortController: AbortController
   ): Promise<{ response: QueryResponse<KeybaseResult>; headers: any }> {
     return await ObservableQueryValidatorThumbnail.fetchingThumbnailQueue.add(
       () => {
-        return super.fetchResponse(cancelToken);
+        return super.fetchResponse(abortController);
       }
     );
   }

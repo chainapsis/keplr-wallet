@@ -81,7 +81,7 @@ platform :android do
       UI.user_error!("BUGSNAG_API_KEY is not provided")
     end
     sh("cd ../.. && appcenter codepush release-react -a #{ENV["ANDROID_APPCENTER_APP_NAME"]} -d Production -t #{target_version} --output-dir build")
-    sh("cd ../.. && npx bugsnag-source-maps upload-react-native --api-key #{ENV["BUGSNAG_API_KEY"]} --code-bundle-id #{version} --platform android --source-map build/CodePush/index.android.bundle.map --bundle build/CodePush/index.android.bundle")
+    # sh("cd ../.. && npx bugsnag-source-maps upload-react-native --api-key #{ENV["BUGSNAG_API_KEY"]} --code-bundle-id #{version} --platform android --source-map build/CodePush/index.android.bundle.map --bundle build/CodePush/index.android.bundle")
   end
 
   desc "Deploy a new version to the Google Play"

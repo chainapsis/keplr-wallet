@@ -3,8 +3,8 @@ FROM ubuntu:20.04
 # Install dependencies for build
 RUN apt-get update && apt -y install build-essential libusb-1.0-0-dev curl unzip
 
-# Install node 14
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+# Install node 16
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt -y install nodejs
 
 # Install yarn
@@ -21,6 +21,12 @@ RUN mkdir app
 COPY ./ /app
 
 WORKDIR /app
+
+ARG KEPLR_EXT_ETHEREUM_ENDPOINT
+ARG KEPLR_EXT_AMPLITUDE_API_KEY
+
+ENV KEPLR_EXT_ETHEREUM_ENDPOINT $KEPLR_EXT_ETHEREUM_ENDPOINT
+ENV KEPLR_EXT_AMPLITUDE_API_KEY $KEPLR_EXT_AMPLITUDE_API_KEY
 
 RUN cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
 RUN yarn install --frozen-lockfile

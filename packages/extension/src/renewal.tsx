@@ -11,13 +11,13 @@ import { RegisterPage } from "./renewal/pages/register";
 import { StoreProvider } from "./stores";
 import { GlobalStyles } from "./renewal/styles";
 import { AppIntlProvider } from "./languages";
-import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
+import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
       <AppIntlProvider
-        additionalMessages={AdditonalIntlMessages}
+        additionalMessages={AdditionalIntlMessages}
         languageToFiatCurrency={LanguageToFiatCurrency}
       >
         <React.Fragment>

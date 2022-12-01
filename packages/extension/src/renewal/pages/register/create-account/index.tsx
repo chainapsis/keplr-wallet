@@ -273,7 +273,12 @@ const StepTwo: FunctionComponent<StepTwoProps> = observer(
                 newMnemonicConfig.name,
                 newMnemonicConfig.mnemonic,
                 newMnemonicConfig.password,
-                bip44Option.bip44HDPath
+                // TODO: Handle bip44 path
+                {
+                  account: 0,
+                  change: 0,
+                  addressIndex: 0,
+                }
               );
               analyticsStore.setUserProperties({
                 registerType: "seed",

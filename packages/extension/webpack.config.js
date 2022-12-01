@@ -6,6 +6,7 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
+const fs = require("fs");
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
 const isDisableSplitChunks = process.env.DISABLE_SPLIT_CHUNKS === "true";
@@ -16,6 +17,22 @@ const commonResolve = (dir) => ({
     assets: path.resolve(__dirname, dir),
   },
 });
+const altResolve = () => {
+  const p = path.resolve(__dirname, "./src/keplr-torus-signin/index.ts");
+
+  if (fs.existsSync(p)) {
+    return {
+      alias: {
+        "alt-sign-in": path.resolve(
+          __dirname,
+          "./src/keplr-torus-signin/index.ts"
+        ),
+      },
+    };
+  }
+
+  return {};
+};
 const sassRule = {
   test: /(\.s?css)|(\.sass)$/,
   oneOf: [
@@ -74,6 +91,7 @@ module.exports = {
   entry: {
     popup: ["./src/index.tsx"],
     renewal: ["./src/renewal.tsx"],
+    blocklist: ["./src/pages/blocklist/index.tsx"],
     background: ["./src/background/background.ts"],
     contentScripts: ["./src/content-scripts/content-scripts.ts"],
     injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
@@ -100,6 +118,7 @@ module.exports = {
   },
   resolve: {
     ...commonResolve("src/public/assets"),
+    ...altResolve(),
     fallback: {
       os: require.resolve("os-browserify/browser"),
       buffer: require.resolve("buffer/"),
@@ -154,6 +173,16 @@ module.exports = {
       template: "./src/renewal.html",
       filename: "renewal.html",
       chunks: ["renewal"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "blocklist.html",
+      chunks: ["blocklist"],
+    }),
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: "development",
+      KEPLR_EXT_ETHEREUM_ENDPOINT: "",
+      KEPLR_EXT_AMPLITUDE_API_KEY: "",
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",
