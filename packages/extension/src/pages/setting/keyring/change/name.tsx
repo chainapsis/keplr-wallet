@@ -10,7 +10,7 @@ import { useStore } from "../../../../stores";
 import { observer } from "mobx-react-lite";
 
 import styleName from "./name.module.scss";
-import { KeplrError } from "@keplr-wallet/router";
+import { KeyRingStatus } from "@keplr-wallet/background";
 
 interface FormData {
   name: string;
@@ -50,11 +50,17 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
     return keyRingStore.multiKeyStoreInfo[parseInt(match.params.index)];
   }, [keyRingStore.multiKeyStoreInfo, match.params.index]);
 
+  const isKeyStoreReady = keyRingStore.status === KeyRingStatus.UNLOCKED;
+
   useEffect(() => {
     if (parseInt(match.params.index).toString() !== match.params.index) {
-      throw new KeplrError("keyring", 201, "Invalid index");
+      throw new Error("Invalid keyring index, check the url");
     }
   }, [match.params.index]);
+
+  if (isKeyStoreReady && keyStore === undefined) {
+    return null;
+  }
 
   return (
     <HeaderLayout
@@ -63,31 +69,27 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
       alternativeTitle={intl.formatMessage({
         id: "setting.keyring.change.name",
       })}
-      onBackButton={
-        waitingNameData
-          ? () => {
-              history.goBack();
-            }
-          : undefined
-      }
+      onBackButton={() => {
+        history.goBack();
+      }}
     >
       <Form
         className={styleName.container}
         onSubmit={handleSubmit(async (data) => {
           setLoading(true);
           try {
+            // Close the popup by external change name message
+            if (waitingNameData !== undefined) {
+              await keyRingStore.approveChangeName(data.name);
+              window.close();
+              return;
+            }
+
             // Make sure that name is changed
             await keyRingStore.updateNameKeyRing(
               parseInt(match.params.index),
               data.name
             );
-
-            // Close the popup by external change name message
-            if (waitingNameData !== undefined) {
-              keyRingStore.approveChangeName(data.name);
-              window.close();
-              return;
-            }
 
             history.push("/");
           } catch (e) {
@@ -111,7 +113,6 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
           value={keyStore?.meta?.name ?? ""}
           readOnly={true}
         />
-
         <Input
           type="text"
           label={intl.formatMessage({
@@ -119,11 +120,15 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
           })}
           name="name"
           error={errors.name && errors.name.message}
-          ref={register({
-            required: intl.formatMessage({
-              id: "setting.keyring.change.input.name.error.required",
-            }),
-          })}
+          ref={
+            keyStore === undefined
+              ? null
+              : register({
+                  required: intl.formatMessage({
+                    id: "setting.keyring.change.input.name.error.required",
+                  }),
+                })
+          }
           readOnly={waitingNameData !== undefined && !waitingNameData?.editable}
         />
 
