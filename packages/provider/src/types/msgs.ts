@@ -600,7 +600,7 @@ export class GetAnalyticsIdMsg extends Message<string> {
   }
 }
 
-export class DisconnectMessage extends Message<void> {
+export class DisconnectKeyStoreMessage extends Message<void> {
   public static type() {
     return "disconnect-key-store";
   }
@@ -622,6 +622,6 @@ export class DisconnectMessage extends Message<void> {
   }
 
   type(): string {
-    return DisconnectMessage.type();
+    return DisconnectKeyStoreMessage.type();
   }
 }
