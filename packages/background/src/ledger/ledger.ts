@@ -213,8 +213,8 @@ export class Ledger {
         const signature = Ledger.ethSignatureToBytes(
           await this.ethereumApp.signEIP712HashedMessage(
             formattedPath,
-            domainHash(data).toString("hex"),
-            messageHash(data).toString("hex")
+            domainHash(data),
+            messageHash(data)
           )
         );
 
