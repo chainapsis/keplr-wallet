@@ -12,6 +12,7 @@ import {
   OfflineAminoSigner,
   OfflineDirectSigner,
   DirectSignResponse,
+  ICNSAdr36Signatures,
 } from "@keplr-wallet/types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import {
@@ -137,6 +138,16 @@ export class MockKeplr implements Keplr {
     _data: string | Uint8Array,
     _type: EthSignType
   ): Promise<Uint8Array> {
+    throw new Error("Not implemented");
+  }
+
+  signICNSAdr36(
+    _chainId: string,
+    _contractAddress: string,
+    _signer: string,
+    _username: string,
+    _addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures> {
     throw new Error("Not implemented");
   }
 

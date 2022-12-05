@@ -18,6 +18,7 @@ import {
   OfflineAminoSigner,
   StdSignature,
   StdSignDoc,
+  ICNSAdr36Signatures,
 } from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
@@ -391,6 +392,16 @@ export class KeplrWalletConnectV1 implements Keplr {
     _data: string | Uint8Array,
     _mode: EthSignType
   ): Promise<Uint8Array> {
+    throw new Error("Not yet implemented");
+  }
+
+  signICNSAdr36(
+    _chainId: string,
+    _contractAddress: string,
+    _signer: string,
+    _username: string,
+    _addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures> {
     throw new Error("Not yet implemented");
   }
 

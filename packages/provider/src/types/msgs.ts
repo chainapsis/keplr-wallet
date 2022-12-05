@@ -307,6 +307,66 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
   }
 }
 
+export class RequestICNSAdr36SignaturesMsg extends Message<
+  {
+    chainId: string;
+    bech32Prefix: string;
+    signatureSalt: number;
+    signature: Uint8Array;
+  }[]
+> {
+  public static type() {
+    return "request-icns-adr-36-signatures";
+  }
+
+  constructor(
+    readonly chainId: string,
+    readonly contractAddress: string,
+    readonly signer: string,
+    readonly username: string,
+    readonly addressChainIds: string[]
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.contractAddress) {
+      throw new Error("contract address not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    // Validate bech32 address.
+    // Bech32Address.validate(this.signer);
+
+    if (!this.username) {
+      throw new Error("username not set");
+    }
+
+    if (!this.addressChainIds || this.addressChainIds.length === 0) {
+      throw new Error("address chain ids not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestICNSAdr36SignaturesMsg.type();
+  }
+}
+
 export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
   public static type() {
     return "request-verify-adr-36-amino-doc";

@@ -25,6 +25,14 @@ export interface Key {
   readonly isNanoLedger: boolean;
 }
 
+export type ICNSAdr36Signatures = {
+  chainId: string;
+  bech32Prefix: string;
+  // TODO: Add address hash field
+  signatureSalt: number;
+  signature: Uint8Array;
+}[];
+
 export type KeplrMode = "core" | "extension" | "mobile-web" | "walletconnect";
 
 export interface KeplrIntereactionOptions {
@@ -80,6 +88,14 @@ export interface Keplr {
     tx: Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array>;
+
+  signICNSAdr36(
+    chainId: string,
+    contractAddress: string,
+    signer: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures>;
 
   signArbitrary(
     chainId: string,
