@@ -29,6 +29,7 @@ import {
   SignInteractionStore,
   TokensStore,
   WalletStatus,
+  ICNSInteractionStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -63,6 +64,7 @@ export class RootStore {
   public readonly signInteractionStore: SignInteractionStore;
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+  public readonly icnsInteractionStore: ICNSInteractionStore;
 
   public readonly queriesStore: QueriesStore<
     [
@@ -160,6 +162,7 @@ export class RootStore {
       this.interactionStore,
       CommunityChainInfoRepo
     );
+    this.icnsInteractionStore = new ICNSInteractionStore(this.interactionStore);
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
