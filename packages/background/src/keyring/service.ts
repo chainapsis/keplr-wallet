@@ -38,6 +38,7 @@ import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
+import { RequestICNSAdr36SignaturesMsg } from "./messages";
 
 export class KeyRingService {
   private keyRing!: KeyRing;
@@ -552,6 +553,119 @@ export class KeyRingService {
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
+  }
+
+  async requestICNSAdr36Signatures(
+    env: Env,
+    chainId: string,
+    contractAddress: string,
+    signer: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<
+    {
+      chainId: string;
+      bech32Prefix: string;
+      signatureSalt: number;
+      signature: Uint8Array;
+    }[]
+  > {
+    const r: {
+      chainId: string;
+      bech32Prefix: string;
+      signatureSalt: number;
+      signature: Uint8Array;
+    }[] = [];
+
+    const interactionInfo = {
+      chainId,
+      signer,
+      username,
+      accountInfos: [] as {
+        chainId: string;
+        bech32Prefix: string;
+        bech32Address: string;
+      }[],
+    };
+
+    {
+      // Do this on other code block to avoid variable conflict.
+      const chainInfo = await this.chainsService.getChainInfo(chainId);
+
+      Bech32Address.validate(
+        contractAddress,
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      );
+
+      const key = await this.getKey(chainId);
+      const bech32Address = new Bech32Address(key.address).toBech32(
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      );
+
+      if (bech32Address !== signer) {
+        throw new Error(
+          `Unmatched signer: (expected: ${bech32Address}, actual: ${signer})`
+        );
+      }
+    }
+    const salt = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+
+    for (const chainId of addressChainIds) {
+      const chainInfo = await this.chainsService.getChainInfo(chainId);
+
+      const key = await this.getKey(chainId);
+
+      const bech32Address = new Bech32Address(key.address).toBech32(
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      );
+
+      interactionInfo.accountInfos.push({
+        chainId: chainInfo.chainId,
+        bech32Prefix: chainInfo.bech32Config.bech32PrefixAccAddr,
+        bech32Address: bech32Address,
+      });
+    }
+
+    await this.interactionService.waitApprove(
+      env,
+      "/icns/adr36-signatures",
+      RequestICNSAdr36SignaturesMsg.type(),
+      interactionInfo
+    );
+
+    for (const accountInfo of interactionInfo.accountInfos) {
+      const data = `The following is the information for ICNS registration for ${username}.${accountInfo.bech32Prefix}.
+Chain id: ${chainId}
+Contract Address: ${contractAddress}
+Address: ${signer}
+Salt: ${salt}`;
+
+      const signDoc = makeADR36AminoSignDoc(signer, data);
+
+      const coinType = await this.chainsService.getChainCoinType(
+        accountInfo.chainId
+      );
+      const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
+        accountInfo.chainId
+      );
+
+      const signature = await this.keyRing.sign(
+        env,
+        accountInfo.chainId,
+        coinType,
+        serializeSignDoc(signDoc),
+        ethereumKeyFeatures.signing
+      );
+
+      r.push({
+        chainId: accountInfo.chainId,
+        bech32Prefix: accountInfo.bech32Prefix,
+        signatureSalt: salt,
+        signature,
+      });
+    }
+
+    return r;
   }
 
   async verifyADR36AminoSignDoc(
