@@ -30,6 +30,7 @@ import {
   RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
+  DisconnectKeyStoreMessage,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -126,6 +127,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleInitNonDefaultLedgerAppMsg(service)(
           env,
           msg as InitNonDefaultLedgerAppMsg
+        );
+      case DisconnectKeyStoreMessage:
+        return handleDisconnectKeyStoreMsg(service)(
+          env,
+          msg as DisconnectKeyStoreMessage
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -437,5 +443,13 @@ const handleInitNonDefaultLedgerAppMsg: (
 ) => InternalHandler<InitNonDefaultLedgerAppMsg> = (service) => {
   return async (env, msg) => {
     await service.initializeNonDefaultLedgerApp(env, msg.ledgerApp);
+  };
+};
+
+const handleDisconnectKeyStoreMsg: (
+  service: KeyRingService
+) => InternalHandler<DisconnectKeyStoreMessage> = (service) => {
+  return async () => {
+    await service.disconnectKeyStore();
   };
 };
