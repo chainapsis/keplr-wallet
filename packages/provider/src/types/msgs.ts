@@ -48,10 +48,6 @@ export class DisableAccessMsg extends Message<void> {
     }
   }
 
-  approveExternal(): boolean {
-    return true;
-  }
-
   route(): string {
     return "permission";
   }
@@ -611,10 +607,6 @@ export class DisconnectKeyStoreMessage extends Message<void> {
 
   validateBasic(): void {
     // noop
-  }
-
-  approveExternal(): boolean {
-    return true;
   }
 
   route(): string {

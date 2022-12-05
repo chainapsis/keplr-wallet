@@ -384,7 +384,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async disconnect(): Promise<void> {
-    return await this.requester.sendMessage(
+    await this.requester.sendMessage(
       BACKGROUND_PORT,
       new DisconnectKeyStoreMessage()
     );
