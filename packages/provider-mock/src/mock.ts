@@ -264,4 +264,12 @@ export class MockKeplr implements Keplr {
   ): Promise<AminoSignResponse> {
     throw new Error("Not yet implemented");
   }
+
+  disable(_chainIds: string | string[]): Promise<void> {
+    throw new Error("Not yet implemented");
+  }
+
+  disconnect(): Promise<void> {
+    throw new Error("Not yet implemented");
+  }
 }

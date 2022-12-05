@@ -330,6 +330,14 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     await this.requestMethod("enable", [chainIds]);
   }
 
+  async disable(chainIds: string | string[]): Promise<void> {
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
+    return await this.requestMethod("disable", [chainIds]);
+  }
+
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
     if (
       chainInfo.features?.includes("stargate") ||
@@ -570,5 +578,9 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 
   __core__getAnalyticsId(): Promise<string> {
     return this.requestMethod("__core__getAnalyticsId", []);
+  }
+
+  async disconnect(): Promise<void> {
+    return await this.requestMethod("disconnect", []);
   }
 }

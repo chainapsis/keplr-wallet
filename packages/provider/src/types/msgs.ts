@@ -33,6 +33,34 @@ export class EnableAccessMsg extends Message<void> {
   }
 }
 
+export class DisableAccessMsg extends Message<void> {
+  public static type() {
+    return "disable-access";
+  }
+
+  constructor(public readonly chainIds: string[]) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainIds || this.chainIds.length === 0) {
+      throw new Error("chain id not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "permission";
+  }
+
+  type(): string {
+    return DisableAccessMsg.type();
+  }
+}
+
 export class GetKeyMsg extends Message<Key> {
   public static type() {
     return "get-key";
@@ -569,5 +597,31 @@ export class GetAnalyticsIdMsg extends Message<string> {
 
   type(): string {
     return GetAnalyticsIdMsg.type();
+  }
+}
+
+export class DisconnectMessage extends Message<void> {
+  public static type() {
+    return "disconnect-key-store";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return DisconnectMessage.type();
   }
 }

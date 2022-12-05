@@ -50,6 +50,11 @@ export interface Keplr {
 
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainIds: string | string[]): Promise<void>;
+  /**
+   * @param chainIds disable(Remove approve domain(s)) target chain ID(s).
+   */
+  disable(chainIds: string | string[]): Promise<void>;
+
   getKey(chainId: string): Promise<Key>;
   signAmino(
     chainId: string,
@@ -160,4 +165,9 @@ export interface Keplr {
     signDoc: StdSignDoc,
     signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
+
+  /**
+   * disconnect means locking the Keystore
+   */
+  disconnect(): Promise<void>;
 }
