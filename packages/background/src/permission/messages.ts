@@ -29,6 +29,34 @@ export class EnableAccessMsg extends Message<void> {
   }
 }
 
+export class DisableAccessMsg extends Message<void> {
+  public static type() {
+    return "disable-access";
+  }
+
+  constructor(public readonly chainIds: string[]) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainIds || this.chainIds.length === 0) {
+      throw new KeplrError("permission", 100, "chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  type(): string {
+    return DisableAccessMsg.type();
+  }
+}
+
 export class GetPermissionOriginsMsg extends Message<string[]> {
   public static type() {
     return "get-permission-origins";

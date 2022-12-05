@@ -82,6 +82,32 @@ export class PermissionService {
     await this.checkBasicAccessPermission(env, chainIds, origin);
   }
 
+  async removeBasicAccessPermission(
+    env: Env,
+    chainIds: string | string[],
+    origin: string
+  ) {
+    await this.keyRingService.enable(env);
+
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
+    for (const chainId of chainIds) {
+      const hasPermission = this.hasPermisson(
+        chainId,
+        getBasicAccessPermissionType(),
+        origin
+      );
+
+      if (hasPermission) {
+        this.removePermission(chainId, getBasicAccessPermissionType(), [
+          origin,
+        ]);
+      }
+    }
+  }
+
   async grantPermission(
     env: Env,
     url: string,
