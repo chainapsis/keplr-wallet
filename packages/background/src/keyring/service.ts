@@ -217,6 +217,7 @@ export class KeyRingService {
     const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
       chainId
     );
+
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
       this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
@@ -402,7 +403,7 @@ export class KeyRingService {
       domain: Record<string, any>;
       primaryType: string;
     },
-    signDoc: StdSignDoc,
+    signDoc: StdSignDoc & { timeout_height?: string },
     signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     signDoc = {
