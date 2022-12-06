@@ -1,6 +1,7 @@
 import { Mnemonic } from "./mnemonic";
 import { PrivKeySecp256k1 } from "./key";
 import { Hash } from "./hash";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 describe("Test priv key", () => {
   it("priv key should generate the valid pub key", () => {
@@ -83,5 +84,23 @@ describe("Test priv key", () => {
         new Uint8Array(63)
       );
     }).toThrow();
+  });
+
+  it("test eth address", () => {
+    const privKey = new PrivKeySecp256k1(
+      Mnemonic.generateWalletFromMnemonic(
+        "notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius",
+        `m/44'/60'/0'/0/0`
+      )
+    );
+
+    const ethAddress = privKey.getPubKey().getEthAddress();
+
+    expect(Buffer.from(ethAddress).toString("hex")).toBe(
+      "d38de26638cbf4f5c99bd8787fedfdb50c3f236a"
+    );
+    expect(new Bech32Address(ethAddress).toBech32("evmos")).toBe(
+      "evmos16wx7ye3ce060tjvmmpu8lm0ak5xr7gm238xyss"
+    );
   });
 });

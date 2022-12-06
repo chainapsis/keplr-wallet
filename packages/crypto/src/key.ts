@@ -68,6 +68,7 @@ export class PubKeySecp256k1 {
     return new Uint8Array(this.pubKey);
   }
 
+  // Cosmos address
   getAddress(): Uint8Array {
     let hash = CryptoJS.SHA256(
       CryptoJS.lib.WordArray.create(this.pubKey as any)
@@ -75,6 +76,14 @@ export class PubKeySecp256k1 {
     hash = CryptoJS.RIPEMD160(CryptoJS.enc.Hex.parse(hash)).toString();
 
     return new Uint8Array(Buffer.from(hash, "hex"));
+  }
+
+  getEthAddress(): Uint8Array {
+    // Should be uncompressed.
+    // And remove prefix byte.
+    // And hash by keccak256.
+    // Use last 20 bytes.
+    return Hash.keccak256(this.toBytes(true).slice(1)).slice(-20);
   }
 
   toKeyPair(): ec.KeyPair {
