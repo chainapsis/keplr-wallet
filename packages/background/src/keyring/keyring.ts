@@ -1301,7 +1301,7 @@ export class KeyRing {
   //      They make unnecessary and silly minor changes to ethermint spec.
   //      Thus, there is a probability that it will potentially not work on other chains and they blame us.
   //      So, block them explicitly for now.
-  public throwErrorIfEthermintWithLedgerButNotEvmos(chainId: string) {
+  public throwErrorIfEthermintWithLedgerButNotSupported(chainId: string) {
     if (this.keyStore && this.keyStore.type === "ledger") {
       if (!chainId.startsWith("evmos_") && !chainId.startsWith("injective")) {
         throw new KeplrError(
