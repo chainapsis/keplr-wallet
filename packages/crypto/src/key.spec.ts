@@ -1,7 +1,6 @@
 import { Mnemonic } from "./mnemonic";
 import { PrivKeySecp256k1 } from "./key";
 import { Hash } from "./hash";
-import { Bech32Address } from "@keplr-wallet/cosmos";
 
 describe("Test priv key", () => {
   it("priv key should generate the valid pub key", () => {
@@ -98,9 +97,6 @@ describe("Test priv key", () => {
 
     expect(Buffer.from(ethAddress).toString("hex")).toBe(
       "d38de26638cbf4f5c99bd8787fedfdb50c3f236a"
-    );
-    expect(new Bech32Address(ethAddress).toBech32("evmos")).toBe(
-      "evmos16wx7ye3ce060tjvmmpu8lm0ak5xr7gm238xyss"
     );
   });
 });
