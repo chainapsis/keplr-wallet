@@ -47,6 +47,7 @@ module.exports = {
       },
     ],
     "import/no-default-export": "error",
+    "import/no-useless-path-segments": "error",
     "unused-imports/no-unused-imports": "error",
   },
   settings: {
