@@ -8,7 +8,6 @@ import { EthSignType } from "@keplr-wallet/types";
 import { BIP44HDPath, EIP712MessageValidator } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 import { Buffer } from "buffer/";
-import { _TypedDataEncoder } from "@ethersproject/hash";
 import { domainHash, messageHash } from "./utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -210,15 +209,14 @@ export class Ledger {
           JSON.parse(Buffer.from(message).toString())
         );
 
-        const signature = Ledger.ethSignatureToBytes(
+        // Unfortunately, signEIP712Message not works on ledger yet.
+        return Ledger.ethSignatureToBytes(
           await this.ethereumApp.signEIP712HashedMessage(
             formattedPath,
             domainHash(data),
             messageHash(data)
           )
         );
-
-        return signature;
       }
       default:
         throw new Error(`Unknown sign type: ${signType}`);
