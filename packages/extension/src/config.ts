@@ -1910,8 +1910,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     beta: true,
   },
   {
-    rpc: "https://tm.injective.network",
-    rest: "https://lcd.injective.network",
+    rpc: "https://rpc-injective.keplr.app",
+    rest: "https://lcd-injective.keplr.app",
     chainId: "injective-1",
     chainName: "Injective",
     stakeCurrency: {
