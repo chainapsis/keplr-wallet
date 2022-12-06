@@ -287,3 +287,24 @@ export const getEip712SignaturesBasedOnChainId = (params: {
 
   return [new Uint8Array(0)];
 };
+
+export const getAminoSignDocBasedOnChainId = (
+  signDoc: any,
+  params: { chainId: string; timeoutHeight?: string }
+) => {
+  const { chainId, timeoutHeight } = params;
+  const chainIsInjective = chainId.startsWith("injective");
+
+  /**
+   * Injective doesn't need feePayer to be included but requires
+   * timeout_height in the sign doc
+   */
+  if (chainIsInjective && timeoutHeight) {
+    return {
+      ...signDoc,
+      timeout_height: timeoutHeight.toString(),
+    };
+  }
+
+  return signDoc;
+};

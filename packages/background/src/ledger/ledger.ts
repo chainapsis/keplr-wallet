@@ -8,8 +8,7 @@ import { EthSignType } from "@keplr-wallet/types";
 import { BIP44HDPath, EIP712MessageValidator } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 import { Buffer } from "buffer/";
-import { _TypedDataEncoder } from "@ethersproject/hash";
-import { domainHash, messageHash } from "./utils";
+import { domainHash, messageHash } from "./../keyring/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const CosmosApp: any = require("ledger-cosmos-js").default;

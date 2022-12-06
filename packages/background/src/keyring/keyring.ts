@@ -18,7 +18,7 @@ import { Wallet } from "@ethersproject/wallet";
 import * as BytesUtils from "@ethersproject/bytes";
 import { computeAddress } from "@ethersproject/transactions";
 import { EIP712MessageValidator } from "./eip712";
-import { _TypedDataEncoder } from "@ethersproject/hash";
+import { domainHash, messageHash } from "./utils";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -862,8 +862,11 @@ export class KeyRing {
         const data = await EIP712MessageValidator.validateAsync(
           JSON.parse(Buffer.from(message).toString())
         );
-        // Since ethermint eip712 tx uses non-standard format, it cannot pass validation of ethersjs.
-        // Therefore, it should be handled at a slightly lower level.
+
+        /**
+         * Since ethermint eip712 tx uses non-standard format, it cannot pass validation of ethersjs.
+         * Therefore, it should be handled at a slightly lower level.
+         */
         const signature = await ethWallet._signingKey().signDigest(
           Hash.keccak256(
             Buffer.concat([
@@ -871,43 +874,12 @@ export class KeyRing {
               Buffer.from("19", "hex"),
               // Version: 1
               Buffer.from("01", "hex"),
-              Buffer.from(
-                _TypedDataEncoder
-                  .hashStruct(
-                    "EIP712Domain",
-                    { EIP712Domain: data.types.EIP712Domain },
-                    data.domain
-                  )
-                  .replace("0x", ""),
-                "hex"
-              ),
-              Buffer.from(
-                _TypedDataEncoder
-                  .from(
-                    // Seems that there is no way to set primary type and the first type becomes primary type.
-                    (() => {
-                      const types = { ...data.types };
-                      delete types["EIP712Domain"];
-                      const primary = types[data.primaryType];
-                      if (!primary) {
-                        throw new Error(
-                          `No matched primary type: ${data.primaryType}`
-                        );
-                      }
-                      delete types[data.primaryType];
-                      return {
-                        [data.primaryType]: primary,
-                        ...types,
-                      };
-                    })()
-                  )
-                  .hash(data.message)
-                  .replace("0x", ""),
-                "hex"
-              ),
+              Buffer.from(domainHash(data).replace("0x", ""), "hex"),
+              Buffer.from(messageHash(data).replace("0x", ""), "hex"),
             ])
           )
         );
+
         return Buffer.concat([
           Buffer.from(signature.r.replace("0x", ""), "hex"),
           Buffer.from(signature.s.replace("0x", ""), "hex"),
@@ -1224,6 +1196,7 @@ export class KeyRing {
     Object.keys(publicKeys)
       .filter((k) => publicKeys[k] != null)
       .forEach(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         (k) => (publicKeyMap[k] = Buffer.from(publicKeys[k]!).toString("hex"))
       );
 

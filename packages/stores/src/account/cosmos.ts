@@ -49,6 +49,7 @@ import {
   getEip712SignDocBasedOnChainId,
   getEip712TypedDataBasedOnChainId,
   getEip712Web3ExtensionPartialBasedOnChainId,
+  getAminoSignDocBasedOnChainId,
   txEventsWithPreOnFulfill,
 } from "./utils";
 import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
@@ -528,7 +529,10 @@ export class CosmosAccountImpl {
         return await keplr.signAmino(
           this.chainId,
           this.base.bech32Address,
-          signDoc,
+          getAminoSignDocBasedOnChainId(signDoc, {
+            chainId: this.chainId,
+            timeoutHeight: timeoutHeight,
+          }),
           signOptions
         );
       }
