@@ -58,7 +58,13 @@ export class PrivKeySecp256k1 {
 export class PubKeySecp256k1 {
   constructor(protected readonly pubKey: Uint8Array) {}
 
-  toBytes(): Uint8Array {
+  toBytes(uncompressed?: boolean): Uint8Array {
+    if (uncompressed) {
+      const keyPair = this.toKeyPair();
+      return new Uint8Array(
+        Buffer.from(keyPair.getPublic().encode("hex", false), "hex")
+      );
+    }
     return new Uint8Array(this.pubKey);
   }
 
