@@ -88,6 +88,7 @@ export const MigrateMetamaskPrivateKeyPage: FunctionComponent<{
             }),
           })}
           error={errors.name && errors.name.message}
+          maxLength={20}
         />
         <Input
           label={intl.formatMessage({

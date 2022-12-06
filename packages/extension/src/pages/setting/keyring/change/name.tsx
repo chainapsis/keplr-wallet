@@ -95,6 +95,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
               id: "setting.keyring.change.input.name.error.required",
             }),
           })}
+          maxLength={20}
         />
         <div style={{ flex: 1 }} />
         <Button type="submit" color="primary" block data-loading={loading}>

@@ -185,6 +185,7 @@ export const GenerateMnemonicModePage: FunctionComponent<{
             }),
           })}
           error={errors.name && errors.name.message}
+          maxLength={20}
         />
         {registerConfig.mode === "create" ? (
           <React.Fragment>
