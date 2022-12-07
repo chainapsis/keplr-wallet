@@ -142,6 +142,10 @@ export class ObservableQueryInflation {
           .distributionProportions.staking;
         const bondedTokens = this._queryPool.bondedTokens;
 
+        if (bondedTokens.toDec().isZero()) {
+          return new IntPretty(new Dec(0));
+        }
+
         return new IntPretty(
           stakingProportion
             .mul(annualProvisions.toDec())
