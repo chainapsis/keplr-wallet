@@ -1,34 +1,3 @@
-import { ObservableQuery } from "../../../../common";
-import { KVStore } from "@keplr-wallet/common";
-import Axios from "axios";
-import { computed, makeObservable } from "mobx";
-
-export type SifchainLiquidityAPYResult = { rate: number };
-
-export class ObservableQueryStride extends ObservableQuery {
-  protected readonly chainId: string;
-
-  constructor(kvStore: KVStore, chainId: string) {
-    const instance = Axios.create({
-      baseURL: "https://stride-fleet.main.stridenet.co/api",
-    });
-
-    super(kvStore, instance, `beta/validator/stakingRewards`);
-
-    this.chainId = chainId;
-    makeObservable(this);
-  }
-
-  protected canFetch(): boolean {
-    return this.chainId.startsWith("sifchain");
-  }
-
-  @computed
-  get liquidityAPY(): number {
-    if (this.response) {
-      return Number(this.response.data.rate) * 100;
-    }
-
-    return 0;
-  }
-}
+export * from "./epoch-provisions";
+export * from "./params";
+export * from "./types";

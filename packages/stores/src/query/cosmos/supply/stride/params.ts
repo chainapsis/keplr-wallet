@@ -13,7 +13,7 @@ export class ObservableQueryStrideMintParams extends ObservableQuery<StrideMintP
       baseURL: "https://stride-fleet.main.stridenet.co/api",
     });
 
-    super(kvStore, instance, `/mint/v1beta/params`);
+    super(kvStore, instance, `/mint/v1beta1/params`);
 
     this.chainId = chainId;
     makeObservable(this);
