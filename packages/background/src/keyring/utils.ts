@@ -1,6 +1,9 @@
 import { _TypedDataEncoder as TypedDataEncoder } from "@ethersproject/hash";
 
-export const domainHash = (message: any) =>
+export const domainHash = (message: {
+  types: Record<string, { name: string; type: string }[]>;
+  domain: Record<string, any>;
+}): string =>
   TypedDataEncoder.hashStruct(
     "EIP712Domain",
     { EIP712Domain: message.types.EIP712Domain },
@@ -8,7 +11,11 @@ export const domainHash = (message: any) =>
   );
 
 // Seems that there is no way to set primary type and the first type becomes primary type.
-export const messageHash = (message: any) =>
+export const messageHash = (message: {
+  types: Record<string, { name: string; type: string }[]>;
+  primaryType: string;
+  message: Record<string, unknown>;
+}): string =>
   TypedDataEncoder.from(
     (() => {
       const types = { ...message.types };
