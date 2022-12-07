@@ -34,6 +34,8 @@ export interface StdSignDoc {
   readonly chain_id: string;
   readonly account_number: string;
   readonly sequence: string;
+  // Should be nullable
+  readonly timeout_height?: string;
   readonly fee: StdFee;
   readonly msgs: readonly Msg[];
   readonly memo: string;

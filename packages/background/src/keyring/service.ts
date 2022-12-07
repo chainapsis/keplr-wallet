@@ -403,7 +403,7 @@ export class KeyRingService {
       domain: Record<string, any>;
       primaryType: string;
     },
-    signDoc: StdSignDoc & { timeout_height?: string },
+    signDoc: StdSignDoc,
     signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     signDoc = {

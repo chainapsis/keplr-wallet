@@ -1,4 +1,3 @@
-import { AminoSignResponse } from "@keplr-wallet/types";
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 import { ProtoMsgsOrWithAminoMsgs } from "./types";
 
@@ -80,7 +79,11 @@ export function txEventsWithPreOnFulfill(
 export const getEip712TypedDataBasedOnChainId = (
   chainId: string,
   msgs: ProtoMsgsOrWithAminoMsgs
-) => {
+): {
+  types: Record<string, { name: string; type: string }[] | undefined>;
+  domain: Record<string, any>;
+  primaryType: string;
+} => {
   const chainIsInjective = chainId.startsWith("injective");
   const { ethChainId } = EthermintChainIdHelper.parse(chainId);
 
@@ -128,10 +131,8 @@ export const getEip712TypedDataBasedOnChainId = (
     primaryType: "Tx",
   };
 
-  /**
-   * Injective doesn't need feePayer to be included but requires
-   * timeout_height in the types
-   */
+  // Injective doesn't need feePayer to be included but requires
+  // timeout_height in the types
   if (chainIsInjective) {
     types.types.Tx = [
       ...types.types.Tx,
@@ -149,141 +150,4 @@ export const getEip712TypedDataBasedOnChainId = (
 
   // Return default types for Evmos
   return types;
-};
-
-export const getEip712SignDocBasedOnChainId = (
-  signDoc: any,
-  params: { chainId: string; bech32Address: string; timeoutHeight?: string }
-) => {
-  const { chainId, bech32Address, timeoutHeight } = params;
-  const chainIsInjective = chainId.startsWith("injective");
-
-  // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
-  //      That means this part is not standard.
-  const altSignDoc = {
-    ...signDoc,
-    fee: {
-      ...signDoc.fee,
-      feePayer: bech32Address,
-    },
-  };
-
-  /**
-   * Injective doesn't need feePayer to be included but requires
-   * timeout_height in the sign doc
-   */
-  if (chainIsInjective && timeoutHeight) {
-    delete altSignDoc.fee.feePayer;
-
-    return {
-      ...altSignDoc,
-      timeout_height: timeoutHeight.toString(),
-    };
-  }
-
-  return altSignDoc;
-};
-
-export const getEip712Web3ExtensionPartialBasedOnChainId = (params: {
-  chainId: string;
-  bech32Address: string;
-  signature: string /* in base64 */;
-}) => {
-  const { chainId, bech32Address, signature } = params;
-  const chainIsInjective = chainId.startsWith("injective");
-
-  const partial = {
-    typedDataChainId: EthermintChainIdHelper.parse(
-      chainId
-    ).ethChainId.toString(),
-    feePayer: bech32Address,
-    feePayerSig: Buffer.from(signature, "base64"),
-  } as {
-    typedDataChainId: string;
-    feePayer?: string;
-    feePayerSig?: Uint8Array;
-  };
-
-  /**
-   * Injective doesn't need feePayer to be included
-   * in the Web3Extension
-   */
-  if (chainIsInjective) {
-    delete partial.feePayer;
-    delete partial.feePayerSig;
-
-    return partial;
-  }
-
-  return partial;
-};
-
-export const getEip712FeePayerPartialBasedOnChainId = (params: {
-  chainId: string;
-  eip712Signing: boolean;
-  signResponse: AminoSignResponse;
-}): {
-  amount: {
-    denom: string;
-    amount: string;
-  }[];
-  gasLimit: string;
-  feePayer?: string;
-} => {
-  const { chainId, eip712Signing, signResponse } = params;
-  const chainIsInjective = chainId.startsWith("injective");
-  const [amount] = signResponse.signed.fee.amount;
-
-  const partial = {
-    amount: [{ amount: amount.amount, denom: amount.denom }],
-    gasLimit: signResponse.signed.fee.gas,
-  } as {
-    amount: {
-      denom: string;
-      amount: string;
-    }[];
-    gasLimit: string;
-    feePayer?: string;
-  };
-
-  if (!eip712Signing) {
-    return partial;
-  }
-
-  // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-  partial.feePayer = (signResponse.signed as any).fee["feePayer"];
-
-  /**
-   * Injective doesn't need feePayer to be included
-   * in the Fee
-   */
-  if (chainIsInjective) {
-    delete partial.feePayer;
-
-    return partial;
-  }
-
-  return partial;
-};
-
-export const getEip712SignaturesBasedOnChainId = (params: {
-  chainId: string;
-  eip712Signing: boolean;
-  signResponse: AminoSignResponse;
-}) => {
-  const { chainId, eip712Signing, signResponse } = params;
-  const chainIsInjective = chainId.startsWith("injective");
-
-  if (!eip712Signing) {
-    return [Buffer.from(signResponse.signature.signature, "base64")];
-  }
-
-  /**
-   * Injective needs the signature in the signatures list
-   */
-  if (chainIsInjective) {
-    return [Buffer.from(signResponse.signature.signature, "base64")];
-  }
-
-  return [new Uint8Array(0)];
 };
