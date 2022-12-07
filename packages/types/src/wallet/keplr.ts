@@ -9,7 +9,7 @@ import {
   DirectSignResponse,
   OfflineDirectSigner,
 } from "../cosmjs";
-import { SecretUtils } from "secretjs/types/enigmautils";
+import { EncryptionUtils as SecretUtils } from "secretjs/types/encryption";
 import Long from "long";
 
 export interface Key {

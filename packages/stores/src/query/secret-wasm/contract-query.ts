@@ -5,7 +5,7 @@ import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
 import { QueryResponse } from "../../common";
-
+import { toBase64, fromBase64 } from "secretjs";
 import { Buffer } from "buffer/";
 
 export class ObservableSecretContractChainQuery<
@@ -89,13 +89,9 @@ export class ObservableSecretContractChainQuery<
       );
       this.nonce = encrypted.slice(0, 32);
 
-      const encoded = Buffer.from(
-        Buffer.from(encrypted).toString("base64")
-      ).toString("hex");
+      const encoded = toBase64(encrypted);
 
-      this.setUrl(
-        `/wasm/contract/${this.contractAddress}/query/${encoded}?encoding=hex`
-      );
+      this.setUrl(this.getSecretWasmUrl(this.contractAddress, encoded));
     }
 
     this._isIniting = false;
@@ -159,7 +155,7 @@ export class ObservableSecretContractChainQuery<
 
     const decrypted = await this.keplr
       .getEnigmaUtils(this.chainId)
-      .decrypt(Buffer.from(encResult.result.smart, "base64"), this.nonce);
+      .decrypt(fromBase64(encResult.result.smart), this.nonce);
 
     const message = Buffer.from(
       Buffer.from(decrypted).toString(),
@@ -178,15 +174,20 @@ export class ObservableSecretContractChainQuery<
     };
   }
 
+  protected getSecretWasmUrl(contractAddress: string, msg: string): string {
+    return `/compute/v1beta1/${contractAddress}?query=${msg}`;
+  }
+
   // Actually, the url of fetching the secret20 balance will be changed every time.
   // So, we should save it with deterministic key.
   protected getCacheKey(): string {
     return `${this.instance.name}-${
       this.instance.defaults.baseURL
     }${this.instance.getUri({
-      url: `/wasm/contract/${this.contractAddress}/query/${JSON.stringify(
-        this.obj
-      )}?encoding=json`,
+      url: this.getSecretWasmUrl(
+        this.contractAddress,
+        JSON.stringify(this.obj)
+      ),
     })}`;
   }
 

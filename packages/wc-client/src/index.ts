@@ -23,7 +23,7 @@ import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
 } from "@keplr-wallet/provider";
-import { SecretUtils } from "secretjs/types/enigmautils";
+import { EncryptionUtils as SecretUtils } from "secretjs/types/encryption";
 import { payloadId } from "@walletconnect/utils";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";

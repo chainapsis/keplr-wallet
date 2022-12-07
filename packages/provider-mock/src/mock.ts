@@ -13,7 +13,7 @@ import {
   OfflineDirectSigner,
   DirectSignResponse,
 } from "@keplr-wallet/types";
-import { SecretUtils } from "secretjs/types/enigmautils";
+import { EncryptionUtils as SecretUtils } from "secretjs/types/encryption";
 import {
   Bech32Address,
   encodeSecp256k1Signature,
