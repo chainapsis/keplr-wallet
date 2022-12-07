@@ -1000,89 +1000,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: "https://rpc-kava.keplr.app",
-    rest: "https://lcd-kava.keplr.app",
-    chainId: "kava_2222-10",
-    chainName: "Kava",
-    stakeCurrency: {
-      coinDenom: "KAVA",
-      coinMinimalDenom: "ukava",
-      coinDecimals: 6,
-      coinGeckoId: "kava",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/kava"
-        : "http://localhost:8080/chains/kava",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/kava"
-        : "http://localhost:8080/chains/kava",
-    bip44: { coinType: 459 },
-    alternativeBIP44s: [{ coinType: 118 }],
-    bech32Config: Bech32Address.defaultBech32Config("kava"),
-    currencies: [
-      {
-        coinDenom: "KAVA",
-        coinMinimalDenom: "ukava",
-        coinDecimals: 6,
-        coinGeckoId: "kava",
-      },
-      {
-        coinDenom: "SWP",
-        coinMinimalDenom: "swp",
-        coinDecimals: 6,
-        coinGeckoId: "kava-swap",
-      },
-      {
-        coinDenom: "USDX",
-        coinMinimalDenom: "usdx",
-        coinDecimals: 6,
-        coinGeckoId: "usdx",
-      },
-      {
-        coinDenom: "HARD",
-        coinMinimalDenom: "hard",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "BNB",
-        coinMinimalDenom: "bnb",
-        coinDecimals: 8,
-      },
-      {
-        coinDenom: "BTCB",
-        coinMinimalDenom: "btcb",
-        coinDecimals: 8,
-      },
-      {
-        coinDenom: "BUSD",
-        coinMinimalDenom: "busd",
-        coinDecimals: 8,
-      },
-      {
-        coinDenom: "XRPB",
-        coinMinimalDenom: "xrpb",
-        coinDecimals: 8,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "KAVA",
-        coinMinimalDenom: "ukava",
-        coinDecimals: 6,
-        coinGeckoId: "kava",
-        gasPriceStep: {
-          low: 0.05,
-          average: 0.1,
-          high: 0.25,
-        },
-      },
-    ],
-    coinType: 459,
-    beta: true,
-  },
-  {
     rpc: "https://rpc-impacthub.keplr.app",
     rest: "https://lcd-impacthub.keplr.app",
     chainId: "impacthub-3",
@@ -1863,6 +1780,88 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer", "ibc-go"],
   },
   {
+    rpc: "https://rpc-kava.keplr.app",
+    rest: "https://lcd-kava.keplr.app",
+    chainId: "kava_2222-10",
+    chainName: "Kava",
+    stakeCurrency: {
+      coinDenom: "KAVA",
+      coinMinimalDenom: "ukava",
+      coinDecimals: 6,
+      coinGeckoId: "kava",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/kava"
+        : "http://localhost:8080/chains/kava",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/kava"
+        : "http://localhost:8080/chains/kava",
+    bip44: { coinType: 459 },
+    alternativeBIP44s: [{ coinType: 118 }],
+    bech32Config: Bech32Address.defaultBech32Config("kava"),
+    currencies: [
+      {
+        coinDenom: "KAVA",
+        coinMinimalDenom: "ukava",
+        coinDecimals: 6,
+        coinGeckoId: "kava",
+      },
+      {
+        coinDenom: "SWP",
+        coinMinimalDenom: "swp",
+        coinDecimals: 6,
+        coinGeckoId: "kava-swap",
+      },
+      {
+        coinDenom: "USDX",
+        coinMinimalDenom: "usdx",
+        coinDecimals: 6,
+        coinGeckoId: "usdx",
+      },
+      {
+        coinDenom: "HARD",
+        coinMinimalDenom: "hard",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "bnb",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "BTCB",
+        coinMinimalDenom: "btcb",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "BUSD",
+        coinMinimalDenom: "busd",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "XRPB",
+        coinMinimalDenom: "xrpb",
+        coinDecimals: 8,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "KAVA",
+        coinMinimalDenom: "ukava",
+        coinDecimals: 6,
+        coinGeckoId: "kava",
+        gasPriceStep: {
+          low: 0.05,
+          average: 0.1,
+          high: 0.25,
+        },
+      },
+    ],
+    coinType: 459,
+  },
+  {
     rpc: "https://rpc-evmos.keplr.app",
     rest: "https://lcd-evmos.keplr.app",
     chainId: "evmos_9001-2",
@@ -1907,7 +1906,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
-    beta: true,
   },
   {
     rpc: "https://rpc-injective.keplr.app",
@@ -1954,7 +1952,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
-    beta: true,
   },
 ];
 
