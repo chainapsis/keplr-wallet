@@ -217,9 +217,10 @@ export class KeyRingService {
     const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
       chainId
     );
+
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
-      this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
+      this.keyRing.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
     }
 
     return this.keyRing.getKey(
@@ -264,7 +265,7 @@ export class KeyRingService {
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
-      this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
+      this.keyRing.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
     }
 
     const key = await this.keyRing.getKey(
@@ -420,7 +421,7 @@ export class KeyRingService {
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
-      this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
+      this.keyRing.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
     }
 
     const key = await this.keyRing.getKey(
@@ -500,7 +501,7 @@ export class KeyRingService {
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
-      this.keyRing.throwErrorIfEthermintWithLedgerButNotEvmos(chainId);
+      this.keyRing.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
     }
 
     const key = await this.keyRing.getKey(

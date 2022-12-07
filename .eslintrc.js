@@ -8,7 +8,7 @@ module.exports = {
     "prettier/standard",
     "plugin:import/typescript",
   ],
-  plugins: ["react-hooks", "unicorn", "import"],
+  plugins: ["react-hooks", "unicorn", "import", "unused-imports"],
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: "module",
@@ -47,6 +47,8 @@ module.exports = {
       },
     ],
     "import/no-default-export": "error",
+    "import/no-useless-path-segments": "error",
+    "unused-imports/no-unused-imports": "error",
   },
   settings: {
     react: {

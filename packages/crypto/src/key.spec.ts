@@ -84,4 +84,19 @@ describe("Test priv key", () => {
       );
     }).toThrow();
   });
+
+  it("test eth address", () => {
+    const privKey = new PrivKeySecp256k1(
+      Mnemonic.generateWalletFromMnemonic(
+        "notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius",
+        `m/44'/60'/0'/0/0`
+      )
+    );
+
+    const ethAddress = privKey.getPubKey().getEthAddress();
+
+    expect(Buffer.from(ethAddress).toString("hex")).toBe(
+      "d38de26638cbf4f5c99bd8787fedfdb50c3f236a"
+    );
+  });
 });

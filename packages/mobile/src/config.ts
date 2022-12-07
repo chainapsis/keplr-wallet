@@ -150,7 +150,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinGeckoId: "secret",
         coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/secret.png",
         gasPriceStep: {
-          low: 0.1,
+          low: 0.2,
           average: 0.25,
           high: 0.3,
         },
