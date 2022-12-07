@@ -128,6 +128,7 @@ export class ObservableQueryInflation {
 
           return new IntPretty(dec);
         }
+      } else if (chainInfo.chainId.startsWith("stride")) {
       } else {
         dec = new Dec(this._queryMint.response?.data.inflation ?? "0").mul(
           DecUtils.getPrecisionDec(2)

@@ -9,3 +9,7 @@ export type MintingInflation = {
   // Dec
   inflation: string;
 };
+
+export type EpochProvisions = {
+  epoch_provisions: string;
+};
