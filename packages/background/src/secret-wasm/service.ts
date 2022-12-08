@@ -1,4 +1,4 @@
-import { EnigmaUtils } from "secretjs";
+import { EnigmaUtils as SecretUtils } from "secretjs";
 import { KeyRingService } from "../keyring";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
@@ -19,7 +19,7 @@ export class SecretWasmService {
     ) => Promise<Uint8Array>
   > = new Map();
 
-  protected cacheEnigmaUtils: Map<string, EnigmaUtils> = new Map();
+  protected cacheEnigmaUtils: Map<string, SecretUtils> = new Map();
 
   protected chainsService!: ChainsService;
   protected keyRingService!: KeyRingService;

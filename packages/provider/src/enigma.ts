@@ -1,4 +1,4 @@
-import { EncryptionUtils as SecretUtils } from "secretjs/src/encryption";
+import { EncryptionUtils as SecretUtils } from "secretjs";
 import { Keplr } from "@keplr-wallet/types";
 
 /**

@@ -17,7 +17,7 @@ import {
   OfflineDirectSigner,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
-import { EncryptionUtils as SecretUtils } from "secretjs/types/encryption";
+import { EncryptionUtils as SecretUtils } from "secretjs";
 import { KeplrEnigmaUtils } from "./enigma";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";

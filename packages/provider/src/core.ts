@@ -32,7 +32,7 @@ import {
   RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
 } from "./types";
-import { EncryptionUtils as SecretUtils } from "secretjs/types/encryption";
+import { EncryptionUtils as SecretUtils } from "secretjs";
 
 import { KeplrEnigmaUtils } from "./enigma";
 
