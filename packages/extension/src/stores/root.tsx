@@ -29,12 +29,13 @@ import {
   SignInteractionStore,
   TokensStore,
   WalletStatus,
+  ERC20Queries,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
   GravityBridgeCurrencyRegsitrar,
   AxelarEVMBridgeCurrencyRegistrar,
-} from "@keplr-wallet/stores";
+} from "@keplr-wallet/stores-etc";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   ContentScriptEnv,
@@ -69,6 +70,7 @@ export class RootStore {
       CosmosQueries,
       CosmwasmQueries,
       SecretQueries,
+      ERC20Queries,
       OsmosisQueries,
       KeplrETCQueries
     ]
@@ -169,6 +171,7 @@ export class RootStore {
       SecretQueries.use({
         apiGetter: getKeplrFromWindow,
       }),
+      ERC20Queries.use(),
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,

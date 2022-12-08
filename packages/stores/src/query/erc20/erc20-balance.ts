@@ -3,11 +3,26 @@ import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
-import { ObservableQueryERC20ContractData } from "./erc20/query";
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import { ObservableQueryERC20ContractData } from "./contract-query";
+
+export class ObservableQueryERC20Balance extends ObservableQueryERC20ContractData {
+  constructor(
+    kvStore: KVStore,
+    chainId: string,
+    chainGetter: ChainGetter,
+    protected readonly contractAddress: string,
+    protected readonly bech32Address: string
+  ) {
+    super(kvStore, chainId, chainGetter, contractAddress, bech32Address);
+  }
+
+  fetch() {
+    return this.queryContractData;
+  }
+}
 
 export class ObservableQueryERC20BalanceInner extends ObservableQueryBalanceInner {
-  protected readonly queryErc20Balance: ObservableQueryERC20ContractData;
+  protected readonly queryERC20Balance: ObservableQueryERC20Balance;
 
   constructor(
     kvStore: KVStore,
@@ -28,30 +43,23 @@ export class ObservableQueryERC20BalanceInner extends ObservableQueryBalanceInne
     // Skip super methods
     makeObservable(this);
 
-    const ethereumUrl = chainGetter.getChain(chainId).ethereumJsonRpc ?? "";
-    let userAddress = "";
-    try {
-      userAddress = Bech32Address.fromBech32(
-        this.bech32Address,
-        this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
-      ).toHex(true);
-    } catch (e) {}
-
-    this.queryErc20Balance = new ObservableQueryERC20ContractData(
+    this.queryERC20Balance = new ObservableQueryERC20Balance(
       kvStore,
-      ethereumUrl,
-      userAddress
+      chainId,
+      chainGetter,
+      denomHelper.contractAddress,
+      bech32Address
     );
   }
 
-  // This method doesn't have the role because the fetching is executed by queryErc20Balance
+  // This method doesn't have the role because the fetching is executed by queryERC20Balance
   protected canFetch(): boolean {
     return false;
   }
 
   @override
   *fetch() {
-    yield this.queryErc20Balance.get(this.denomHelper.contractAddress);
+    yield this.queryERC20Balance.fetch();
   }
 
   @computed
@@ -68,8 +76,7 @@ export class ObservableQueryERC20BalanceInner extends ObservableQueryBalanceInne
       throw new Error(`Unknown currency: ${denom}`);
     }
 
-    const balance = this.queryErc20Balance.get(this.denomHelper.contractAddress)
-      .balance;
+    const balance = this.queryERC20Balance.fetch().balance;
 
     if (!balance) {
       return new CoinPretty(currency, new Int(0)).ready(false);

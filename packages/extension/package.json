@@ -31,6 +31,7 @@
     "@keplr-wallet/router": "0.11.21",
     "@keplr-wallet/router-extension": "0.11.21",
     "@keplr-wallet/stores": "0.11.21",
+    "@keplr-wallet/stores-etc": "0.11.21",
     "@keplr-wallet/types": "0.11.21",
     "@keplr-wallet/unit": "0.11.21",
     "@walletconnect/client": "^1.6.4",
