@@ -66,12 +66,12 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  async disable(chainIds: string | string[]): Promise<string> {
+  async disable(chainIds: string | string[]): Promise<void> {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
     }
 
-    return await this.requester.sendMessage(
+    await this.requester.sendMessage(
       BACKGROUND_PORT,
       new DisableAccessMsg(chainIds)
     );

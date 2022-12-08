@@ -29,7 +29,7 @@ export class EnableAccessMsg extends Message<void> {
   }
 }
 
-export class DisableAccessMsg extends Message<string> {
+export class DisableAccessMsg extends Message<void> {
   public static type() {
     return "disable-access";
   }

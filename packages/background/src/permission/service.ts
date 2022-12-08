@@ -93,7 +93,6 @@ export class PermissionService {
       chainIds = [chainIds];
     }
 
-    const targetChainIds = [];
     for (const chainId of chainIds) {
       const hasPermission = this.hasPermisson(
         chainId,
@@ -105,17 +104,8 @@ export class PermissionService {
         this.removePermission(chainId, getBasicAccessPermissionType(), [
           origin,
         ]);
-        targetChainIds.push(chainId);
       }
     }
-
-    if (targetChainIds.length > 0) {
-      return `${origin} permission is removed from ${targetChainIds.join(
-        ", "
-      )}`;
-    }
-
-    return `${origin} permission is not granted`;
   }
 
   async grantPermission(

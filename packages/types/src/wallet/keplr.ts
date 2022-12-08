@@ -53,7 +53,7 @@ export interface Keplr {
   /**
    * @param chainIds disable(Remove approve domain(s)) target chain ID(s).
    */
-  disable(chainIds: string | string[]): Promise<string>;
+  disable(chainIds: string | string[]): Promise<void>;
 
   getKey(chainId: string): Promise<Key>;
   signAmino(
