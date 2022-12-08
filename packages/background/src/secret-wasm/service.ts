@@ -1,4 +1,7 @@
-import { EnigmaUtils as SecretUtils } from "secretjs";
+import {
+  EncryptionUtilsImpl as SecretUtilsImpl,
+  EncryptionUtils as SecretUtils,
+} from "secretjs";
 import { KeyRingService } from "../keyring";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
@@ -54,7 +57,7 @@ export class SecretWasmService {
     const seed = await this.getSeed(env, chainInfo);
 
     const utils = this.getEnigmaUtils(chainInfo, seed);
-    return utils.pubkey;
+    return utils.getPubkey();
   }
 
   async getTxEncryptionKey(
@@ -124,7 +127,7 @@ export class SecretWasmService {
     return await utils.decrypt(ciphertext, nonce);
   }
 
-  private getEnigmaUtils(chainInfo: ChainInfo, seed: Uint8Array): EnigmaUtils {
+  private getEnigmaUtils(chainInfo: ChainInfo, seed: Uint8Array): SecretUtils {
     const key = `${chainInfo.chainId}-${Buffer.from(seed).toString("hex")}`;
 
     if (this.cacheEnigmaUtils.has(key)) {
@@ -133,7 +136,7 @@ export class SecretWasmService {
     }
 
     // TODO: Handle the rest config.
-    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    const utils = new SecretUtilsImpl(chainInfo.rest, seed);
     this.cacheEnigmaUtils.set(key, utils);
 
     return utils;
