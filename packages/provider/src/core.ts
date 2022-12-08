@@ -33,7 +33,6 @@ import {
   RequestSignEIP712CosmosTxMsg_v0,
   GetAnalyticsIdMsg,
   DisableAccessMsg,
-  DisconnectKeyStoreMessage,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -381,12 +380,5 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   __core__getAnalyticsId(): Promise<string> {
     const msg = new GetAnalyticsIdMsg();
     return this.requester.sendMessage(BACKGROUND_PORT, msg);
-  }
-
-  async disconnect(): Promise<void> {
-    await this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new DisconnectKeyStoreMessage()
-    );
   }
 }

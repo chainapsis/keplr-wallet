@@ -165,9 +165,4 @@ export interface Keplr {
     signDoc: StdSignDoc,
     signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
-
-  /**
-   * disconnect means locking the Keystore
-   */
-  disconnect(): Promise<void>;
 }

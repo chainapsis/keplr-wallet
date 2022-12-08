@@ -500,8 +500,4 @@ export class KeplrWalletConnectV1 implements Keplr {
   disable(_chainIds: string | string[]): Promise<void> {
     throw new Error("Not yet implemented");
   }
-
-  disconnect(): Promise<void> {
-    throw new Error("Not yet implemented");
-  }
 }

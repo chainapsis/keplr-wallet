@@ -595,25 +595,3 @@ export class GetAnalyticsIdMsg extends Message<string> {
     return GetAnalyticsIdMsg.type();
   }
 }
-
-export class DisconnectKeyStoreMessage extends Message<void> {
-  public static type() {
-    return "disconnect-key-store";
-  }
-
-  constructor() {
-    super();
-  }
-
-  validateBasic(): void {
-    // noop
-  }
-
-  route(): string {
-    return "keyring";
-  }
-
-  type(): string {
-    return DisconnectKeyStoreMessage.type();
-  }
-}

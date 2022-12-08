@@ -726,8 +726,4 @@ export class KeyRingService {
   async initializeNonDefaultLedgerApp(env: Env, ledgerApp: LedgerApp) {
     return await this.keyRing.initializeNonDefaultLedgerApp(env, ledgerApp);
   }
-
-  async disconnectKeyStore(): Promise<void> {
-    return this.keyRing.lock();
-  }
 }

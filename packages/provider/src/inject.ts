@@ -575,8 +575,4 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   __core__getAnalyticsId(): Promise<string> {
     return this.requestMethod("__core__getAnalyticsId", []);
   }
-
-  async disconnect(): Promise<void> {
-    return await this.requestMethod("disconnect", []);
-  }
 }

@@ -968,29 +968,3 @@ export class InitNonDefaultLedgerAppMsg extends Message<void> {
     return InitNonDefaultLedgerAppMsg.type();
   }
 }
-
-export class DisconnectKeyStoreMessage extends Message<void> {
-  public static type() {
-    return "disconnect-key-store";
-  }
-
-  constructor() {
-    super();
-  }
-
-  validateBasic(): void {
-    // noop
-  }
-
-  approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return DisconnectKeyStoreMessage.type();
-  }
-}
