@@ -1907,6 +1907,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
   },
+  /*
   {
     rpc: "https://rpc-injective.keplr.app",
     rest: "https://lcd-injective.keplr.app",
@@ -1953,6 +1954,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
   },
+     */
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
