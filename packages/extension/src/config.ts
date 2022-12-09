@@ -1000,9 +1000,9 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: "https://rpc-impacthub.keplr.app",
-    rest: "https://lcd-impacthub.keplr.app",
-    chainId: "impacthub-3",
+    rpc: "https://rpc-ixo.keplr.app",
+    rest: "https://lcd-ixo.keplr.app",
+    chainId: "ixo-4",
     chainName: "ixo",
     stakeCurrency: {
       coinDenom: "IXO",
@@ -1860,6 +1860,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 459,
+    beta: true,
   },
   {
     rpc: "https://rpc-evmos.keplr.app",
@@ -1906,7 +1907,9 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    beta: true,
   },
+  /*
   {
     rpc: "https://rpc-injective.keplr.app",
     rest: "https://lcd-injective.keplr.app",
@@ -1953,6 +1956,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
   },
+     */
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
