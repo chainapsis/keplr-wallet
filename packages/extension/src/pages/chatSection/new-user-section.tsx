@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import amplitude from "amplitude-js";
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
@@ -24,22 +25,37 @@ export const NewUserSection = ({
       <div className={style.buttons}>
         <button
           style={{ padding: "4px 20px" }}
-          onClick={() =>
+          onClick={() => {
+            amplitude.getInstance().logEvent("Add to address click", {});
             history.push({
               pathname: "/setting/address-book",
               state: {
                 openModal: true,
                 addressInputValue: userName,
               },
-            })
-          }
+            });
+          }}
         >
           Add
         </button>
         {blockedUsers[userName] ? (
-          <button onClick={() => handleClick("unblock")}>Unblock</button>
+          <button
+            onClick={() => {
+              amplitude.getInstance().logEvent("Unblock click", {});
+              handleClick("unblock");
+            }}
+          >
+            Unblock
+          </button>
         ) : (
-          <button onClick={() => handleClick("block")}>Block</button>
+          <button
+            onClick={() => {
+              amplitude.getInstance().logEvent("Block click", {});
+              handleClick("block");
+            }}
+          >
+            Block
+          </button>
         )}
       </div>
     </div>

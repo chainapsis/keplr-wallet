@@ -18,6 +18,7 @@ import { useStore } from "../../stores";
 import { fetchPublicKey } from "../../utils/fetch-public-key";
 import { Menu } from "../main/menu";
 import { ActionsPopup } from "./actions-popup";
+
 import { Dropdown } from "./chat-actions-popup";
 import { ChatsViewSection } from "./chats-view-section";
 import { UserNameSection } from "./username-section";

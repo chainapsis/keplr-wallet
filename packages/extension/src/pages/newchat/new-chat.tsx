@@ -26,6 +26,7 @@ import jazzicon from "@metamask/jazzicon";
 import ReactHtmlParser from "react-html-parser";
 import { fromBech32 } from "@cosmjs/encoding";
 import { ChatLoader } from "../../components/chat-loader";
+import amplitude from "amplitude-js";
 
 const NewUser = (props: { address: NameAddress }) => {
   const history = useHistory();
@@ -60,7 +61,12 @@ const NewUser = (props: { address: NameAddress }) => {
   ]);
 
   const handleClick = () => {
-    if (!isLoading) history.push(`/chat/${address}`);
+    if (!isLoading) {
+      amplitude.getInstance().logEvent("Open DM click", {
+        from: "New chat",
+      });
+      history.push(`/chat/${address}`);
+    }
   };
 
   return (
@@ -226,6 +232,7 @@ export const NewChat: FunctionComponent = observer(() => {
                 style={{ margin: "2px 0 0 12px", cursor: "pointer" }}
                 aria-hidden="true"
                 onClick={() => {
+                  amplitude.getInstance().logEvent("Address book viewed", {});
                   history.push("/setting/address-book");
                 }}
               />

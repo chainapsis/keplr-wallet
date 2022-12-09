@@ -1,3 +1,4 @@
+import amplitude from "amplitude-js";
 import React from "react";
 import { useHistory } from "react-router";
 import newChatIcon from "../../public/assets/icon/new-chat.png";
@@ -25,7 +26,12 @@ export const ChatSearchInput = ({
           onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
-      <div onClick={() => history.push("/newChat")}>
+      <div
+        onClick={() => {
+          amplitude.getInstance().logEvent("New chat click", {});
+          history.push("/newChat");
+        }}
+      >
         <img style={{ cursor: "pointer" }} src={newChatIcon} alt="" />
       </div>
     </div>

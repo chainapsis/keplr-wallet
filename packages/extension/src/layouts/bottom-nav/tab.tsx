@@ -1,3 +1,4 @@
+import amplitude from "amplitude-js";
 import React from "react";
 import { useLocation, useHistory } from "react-router-dom";
 import { UncontrolledTooltip } from "reactstrap";
@@ -36,7 +37,12 @@ export const Tab = ({
         isActive ? style.active : disabled ? style.disabled : null
       }`}
       onClick={() => {
-        if (!disabled) history.push(path);
+        if (!disabled) {
+          if (path === "/chat") {
+            amplitude.getInstance().logEvent("Chat tab click", {});
+          }
+          history.push(path);
+        }
       }}
     >
       <img src={isActive ? activeTabIcon : icon} alt="tab" />

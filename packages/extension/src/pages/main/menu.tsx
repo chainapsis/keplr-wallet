@@ -6,6 +6,7 @@ import { useStore } from "../../stores";
 
 import { FormattedMessage } from "react-intl";
 import { useHistory } from "react-router";
+import amplitude from "amplitude-js";
 
 export const Menu: FunctionComponent = observer(() => {
   const { chainStore, keyRingStore } = useStore();
@@ -17,6 +18,7 @@ export const Menu: FunctionComponent = observer(() => {
       <div
         className={styleMenu.item}
         onClick={() => {
+          amplitude.getInstance().logEvent("Address book viewed", {});
           history.push({
             pathname: "/setting/address-book",
           });

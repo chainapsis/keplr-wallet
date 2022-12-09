@@ -2,6 +2,7 @@ import { RegisterPublicKey } from "@keplr-wallet/background/build/messaging";
 import { PrivacySetting } from "@keplr-wallet/background/build/messaging/types";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import amplitude from "amplitude-js";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
@@ -82,6 +83,9 @@ export const Privacy: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             updatePrivacy(PrivacySetting.Everybody);
+            amplitude.getInstance().logEvent("Privacy setting click", {
+              SelectedPrivacySetting: PrivacySetting.Everybody,
+            });
           }}
           icons={useMemo(
             () =>
@@ -103,6 +107,9 @@ export const Privacy: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             updatePrivacy(PrivacySetting.Contacts);
+            amplitude.getInstance().logEvent("Privacy setting click", {
+              SelectedPrivacySetting: PrivacySetting.Contacts,
+            });
           }}
           icons={useMemo(
             () =>
@@ -124,6 +131,9 @@ export const Privacy: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
             updatePrivacy(PrivacySetting.Nobody);
+            amplitude.getInstance().logEvent("Privacy setting click", {
+              SelectedPrivacySetting: PrivacySetting.Nobody,
+            });
           }}
           icons={useMemo(
             () =>

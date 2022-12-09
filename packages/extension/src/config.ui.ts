@@ -4,7 +4,8 @@ import {
   ETHEREUM_ENDPOINT,
   ADDITIONAL_INTL_MESSAGES,
   ADDITIONAL_SIGN_IN_PREPEND,
-  AMPLITUDE_API_KEY,
+  DEV_AMPLITUDE_API_KEY,
+  PROD_AMPLITUDE_API_KEY,
 } from "./config.ui.var";
 import {
   IntlMessages,
@@ -102,4 +103,7 @@ export const AdditionalSignInPrepend:
 
 export const AdditonalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
 
-export const AmplitudeApiKey = AMPLITUDE_API_KEY;
+export const AmplitudeApiKey =
+  process.env.NODE_ENV === "production"
+    ? PROD_AMPLITUDE_API_KEY
+    : DEV_AMPLITUDE_API_KEY;
