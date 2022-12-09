@@ -434,14 +434,14 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   signICNSAdr36(
     chainId: string,
     contractAddress: string,
-    signer: string,
+    owner: string,
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {
     return this.requestMethod("signICNSAdr36", [
       chainId,
       contractAddress,
-      signer,
+      owner,
       username,
       addressChainIds,
     ]);

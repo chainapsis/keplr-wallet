@@ -226,7 +226,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   signICNSAdr36(
     chainId: string,
     contractAddress: string,
-    signer: string,
+    owner: string,
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {
@@ -235,7 +235,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       new RequestICNSAdr36SignaturesMsg(
         chainId,
         contractAddress,
-        signer,
+        owner,
         username,
         addressChainIds
       )

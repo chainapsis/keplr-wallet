@@ -39,6 +39,7 @@ import Long from "long";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
 import { RequestICNSAdr36SignaturesMsg } from "./messages";
+import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 
 export class KeyRingService {
   private keyRing!: KeyRing;
@@ -559,13 +560,16 @@ export class KeyRingService {
     env: Env,
     chainId: string,
     contractAddress: string,
-    signer: string,
+    owner: string,
     username: string,
     addressChainIds: string[]
   ): Promise<
     {
       chainId: string;
       bech32Prefix: string;
+      bech32Address: string;
+      addressHash: "cosmos" | "ethereum";
+      pubKey: Uint8Array;
       signatureSalt: number;
       signature: Uint8Array;
     }[]
@@ -573,18 +577,22 @@ export class KeyRingService {
     const r: {
       chainId: string;
       bech32Prefix: string;
+      bech32Address: string;
+      addressHash: "cosmos" | "ethereum";
+      pubKey: Uint8Array;
       signatureSalt: number;
       signature: Uint8Array;
     }[] = [];
 
     const interactionInfo = {
       chainId,
-      signer,
+      owner,
       username,
       accountInfos: [] as {
         chainId: string;
         bech32Prefix: string;
         bech32Address: string;
+        pubKey: Uint8Array;
       }[],
     };
 
@@ -602,9 +610,9 @@ export class KeyRingService {
         chainInfo.bech32Config.bech32PrefixAccAddr
       );
 
-      if (bech32Address !== signer) {
+      if (bech32Address !== owner) {
         throw new Error(
-          `Unmatched signer: (expected: ${bech32Address}, actual: ${signer})`
+          `Unmatched owner: (expected: ${bech32Address}, actual: ${owner})`
         );
       }
     }
@@ -623,6 +631,7 @@ export class KeyRingService {
         chainId: chainInfo.chainId,
         bech32Prefix: chainInfo.bech32Config.bech32PrefixAccAddr,
         bech32Address: bech32Address,
+        pubKey: key.pubKey,
       });
     }
 
@@ -637,10 +646,10 @@ export class KeyRingService {
       const data = `The following is the information for ICNS registration for ${username}.${accountInfo.bech32Prefix}.
 Chain id: ${chainId}
 Contract Address: ${contractAddress}
-Address: ${signer}
+Owner: ${owner}
 Salt: ${salt}`;
 
-      const signDoc = makeADR36AminoSignDoc(signer, data);
+      const signDoc = makeADR36AminoSignDoc(accountInfo.bech32Address, data);
 
       const coinType = await this.chainsService.getChainCoinType(
         accountInfo.chainId
@@ -660,6 +669,13 @@ Salt: ${salt}`;
       r.push({
         chainId: accountInfo.chainId,
         bech32Prefix: accountInfo.bech32Prefix,
+        bech32Address: accountInfo.bech32Address,
+        addressHash: ethereumKeyFeatures.signing ? "ethereum" : "cosmos",
+        pubKey: new PubKeySecp256k1(accountInfo.pubKey).toBytes(
+          // Should return uncompressed format if ethereum.
+          // Else return as compressed format.
+          ethereumKeyFeatures.signing
+        ),
         signatureSalt: salt,
         signature,
       });

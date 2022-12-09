@@ -401,7 +401,7 @@ const handleRequestICNSAdr36SignaturesMsg: (
       env,
       msg.chainId,
       msg.contractAddress,
-      msg.signer,
+      msg.owner,
       msg.username,
       msg.addressChainIds
     );

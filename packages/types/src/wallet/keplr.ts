@@ -28,7 +28,9 @@ export interface Key {
 export type ICNSAdr36Signatures = {
   chainId: string;
   bech32Prefix: string;
-  // TODO: Add address hash field
+  bech32Address: string;
+  addressHash: "cosmos" | "ethereum";
+  pubKey: Uint8Array;
   signatureSalt: number;
   signature: Uint8Array;
 }[];
@@ -92,7 +94,7 @@ export interface Keplr {
   signICNSAdr36(
     chainId: string,
     contractAddress: string,
-    signer: string,
+    owner: string,
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures>;

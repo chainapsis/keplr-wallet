@@ -16,7 +16,7 @@ export class ICNSInteractionStore {
   get waitingDatas() {
     return this.interactionStore.getDatas<{
       chainId: string;
-      signer: string;
+      owner: string;
       username: string;
       accountInfos: {
         chainId: string;
@@ -30,7 +30,7 @@ export class ICNSInteractionStore {
   get waitingData():
     | InteractionWaitingData<{
         chainId: string;
-        signer: string;
+        owner: string;
         username: string;
         accountInfos: {
           chainId: string;

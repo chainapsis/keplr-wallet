@@ -144,7 +144,7 @@ export class MockKeplr implements Keplr {
   signICNSAdr36(
     _chainId: string,
     _contractAddress: string,
-    _signer: string,
+    _owner: string,
     _username: string,
     _addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {

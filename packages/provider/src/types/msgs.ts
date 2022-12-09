@@ -311,6 +311,9 @@ export class RequestICNSAdr36SignaturesMsg extends Message<
   {
     chainId: string;
     bech32Prefix: string;
+    bech32Address: string;
+    addressHash: "cosmos" | "ethereum";
+    pubKey: Uint8Array;
     signatureSalt: number;
     signature: Uint8Array;
   }[]
@@ -322,7 +325,7 @@ export class RequestICNSAdr36SignaturesMsg extends Message<
   constructor(
     readonly chainId: string,
     readonly contractAddress: string,
-    readonly signer: string,
+    readonly owner: string,
     readonly username: string,
     readonly addressChainIds: string[]
   ) {
@@ -338,7 +341,7 @@ export class RequestICNSAdr36SignaturesMsg extends Message<
       throw new Error("contract address not set");
     }
 
-    if (!this.signer) {
+    if (!this.owner) {
       throw new Error("signer not set");
     }
 
