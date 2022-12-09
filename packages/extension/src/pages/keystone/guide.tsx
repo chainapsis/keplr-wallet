@@ -94,11 +94,7 @@ export function Guide({ onScan }: { onScan(): void }) {
         </div>
       </div>
       <div className={style.btns}>
-        <Button
-          color={stepIndex === 3 ? "primary" : "secondary"}
-          block
-          onClick={onScan}
-        >
+        <Button color="primary" block onClick={onScan}>
           Scan the QR code
         </Button>
       </div>
