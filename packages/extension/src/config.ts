@@ -1860,6 +1860,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     coinType: 459,
+    beta: true,
   },
   {
     rpc: "https://rpc-evmos.keplr.app",
@@ -1906,6 +1907,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    beta: true,
   },
   /*
   {
