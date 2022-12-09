@@ -1000,9 +1000,9 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: "https://rpc-impacthub.keplr.app",
-    rest: "https://lcd-impacthub.keplr.app",
-    chainId: "impacthub-3",
+    rpc: "https://rpc-ixo.keplr.app",
+    rest: "https://lcd-ixo.keplr.app",
+    chainId: "ixo-4",
     chainName: "ixo",
     stakeCurrency: {
       coinDenom: "IXO",
