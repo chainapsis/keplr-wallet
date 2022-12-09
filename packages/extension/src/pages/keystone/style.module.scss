@@ -121,10 +121,12 @@ html[data-keystone-page] {
     bottom: -10px;
   }
   .pagination {
-    position: relative;
-    bottom: 0;
-    padding: 16px 0 24px;
-    line-height: 0;
+    &:global(.swiper-pagination-bullets.swiper-pagination-horizontal) {
+      position: relative;
+      bottom: 0;
+      padding: 16px 0 24px;
+      line-height: 0;
+    }
     :global(.swiper-pagination-bullet) {
       width: 12px;
       height: 4px;
