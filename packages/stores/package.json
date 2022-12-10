@@ -36,6 +36,6 @@
     "mobx-utils": "^6.0.3",
     "p-queue": "^6.6.2",
     "utility-types": "^3.10.0",
-    "secretjs": "1.5.0"
+    "secretjs": "1.5.1"
   }
 }

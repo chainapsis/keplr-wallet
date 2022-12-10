@@ -26,6 +26,6 @@
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "long": "^4.0.0",
-    "secretjs": "1.5.0"
+    "secretjs": "1.5.1"
   }
 }
