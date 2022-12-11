@@ -19,6 +19,7 @@ import {
   StdSignature,
   StdSignDoc,
   ICNSAdr36Signatures,
+  ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
@@ -505,6 +506,12 @@ export class KeplrWalletConnectV1 implements Keplr {
     _signDoc: StdSignDoc,
     _signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
+    throw new Error("Not yet implemented");
+  }
+
+  getChainInfosWithoutEndpoints(): Promise<{
+    chainInfos: ChainInfoWithoutEndpoints[];
+  }> {
     throw new Error("Not yet implemented");
   }
 }

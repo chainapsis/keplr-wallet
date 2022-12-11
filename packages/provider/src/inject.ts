@@ -16,6 +16,7 @@ import {
   DirectSignResponse,
   OfflineDirectSigner,
   ICNSAdr36Signatures,
+  ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { SecretUtils } from "secretjs/types/enigmautils";
@@ -583,6 +584,12 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       signDoc,
       deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
+  }
+
+  async getChainInfosWithoutEndpoints(): Promise<{
+    chainInfos: ChainInfoWithoutEndpoints[];
+  }> {
+    return await this.requestMethod("getChainInfosWithoutEndpoints", []);
   }
 
   __core__getAnalyticsId(): Promise<string> {

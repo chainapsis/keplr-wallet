@@ -13,6 +13,7 @@ import {
   OfflineDirectSigner,
   DirectSignResponse,
   ICNSAdr36Signatures,
+  ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import {
@@ -273,6 +274,12 @@ export class MockKeplr implements Keplr {
     _signDoc: StdSignDoc,
     _signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
+    throw new Error("Not yet implemented");
+  }
+
+  getChainInfosWithoutEndpoints(): Promise<{
+    chainInfos: ChainInfoWithoutEndpoints[];
+  }> {
     throw new Error("Not yet implemented");
   }
 }

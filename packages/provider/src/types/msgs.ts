@@ -7,6 +7,7 @@ import {
   AminoSignResponse,
   StdSignature,
   StdSignDoc,
+  ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
 
 export class EnableAccessMsg extends Message<void> {
@@ -606,6 +607,26 @@ export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
 
   type(): string {
     return GetTxEncryptionKeyMsg.type();
+  }
+}
+
+export class GetChainInfosWithoutEndpointsMsg extends Message<{
+  chainInfos: ChainInfoWithoutEndpoints[];
+}> {
+  public static type() {
+    return "get-chain-infos-without-endpoints";
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "chains";
+  }
+
+  type(): string {
+    return GetChainInfosWithoutEndpointsMsg.type();
   }
 }
 

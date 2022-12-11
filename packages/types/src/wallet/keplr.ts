@@ -1,4 +1,4 @@
-import { ChainInfo } from "../chain-info";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "../chain-info";
 import { EthSignType } from "../ethereum";
 import {
   BroadcastMode,
@@ -178,4 +178,8 @@ export interface Keplr {
     signDoc: StdSignDoc,
     signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
+
+  getChainInfosWithoutEndpoints(): Promise<{
+    chainInfos: ChainInfoWithoutEndpoints[];
+  }>;
 }
