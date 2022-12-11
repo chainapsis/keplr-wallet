@@ -2,7 +2,7 @@ import {
   ChainInfoWithCoreTypes,
   ChainInfoWithRepoUpdateOptions,
 } from "./types";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
 import { KVStore, Debouncer, MemoryKVStore } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
@@ -111,6 +111,16 @@ export class ChainsService {
 
     return result;
   });
+
+  async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
+    return (await this.getChainInfos()).map(
+      ({ rpc, rest, nodeProvider, ...chainInfoWithoutEndpoints }) => {
+        return {
+          ...chainInfoWithoutEndpoints,
+        };
+      }
+    );
+  }
 
   clearCachedChainInfos() {
     this.cachedChainInfos = undefined;
