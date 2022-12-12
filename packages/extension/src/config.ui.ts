@@ -108,5 +108,5 @@ export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
 export const ICNSInfo = {
   chainId: "osmo-test-4",
   resolverAddress:
-    "osmo1kdwtz4vpc0p50c22w0rpsmrsfvkuh8gncark9j6vwxkma4s7jmwsaf8yds",
+    "osmo1hnjg39mu9r9tygy6zpypd25rhmh9726jm369uh7z0r6gjkmnk5zs3tdtug",
 };
