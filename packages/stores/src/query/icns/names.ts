@@ -19,13 +19,9 @@ export class ObservableQueryICNSNamesInner extends ObservableCosmwasmContractCha
   }
 
   @computed
-  get primaryName(): string | undefined {
+  get primaryName(): string {
     if (!this.response || !this.response.data) {
-      return undefined;
-    }
-
-    if (!this.response.data.primary_name) {
-      return undefined;
+      return "";
     }
 
     return this.response.data.primary_name;
