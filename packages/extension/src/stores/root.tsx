@@ -30,6 +30,7 @@ import {
   TokensStore,
   WalletStatus,
   ICNSInteractionStore,
+  ICNSQueries,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -72,7 +73,8 @@ export class RootStore {
       CosmwasmQueries,
       SecretQueries,
       OsmosisQueries,
-      KeplrETCQueries
+      KeplrETCQueries,
+      ICNSQueries
     ]
   >;
   public readonly accountStore: AccountStore<
@@ -175,7 +177,8 @@ export class RootStore {
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
-      })
+      }),
+      ICNSQueries.use()
     );
 
     this.accountStore = new AccountStore(

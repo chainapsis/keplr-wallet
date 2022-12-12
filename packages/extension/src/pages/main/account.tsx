@@ -11,10 +11,17 @@ import { ToolTip } from "../../components/tooltip";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { KeplrError } from "@keplr-wallet/router";
+import { ICNSInfo } from "../../config.ui";
 
 export const AccountView: FunctionComponent = observer(() => {
-  const { accountStore, chainStore } = useStore();
+  const { accountStore, chainStore, queriesStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+
+  const queries = queriesStore.get(ICNSInfo.chainId);
+  const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+    ICNSInfo.resolverAddress,
+    accountStore.getAccount(chainStore.current.chainId).bech32Address
+  );
 
   const intl = useIntl();
 
@@ -46,15 +53,38 @@ export const AccountView: FunctionComponent = observer(() => {
       <div className={styleAccount.containerName}>
         <div style={{ flex: 1 }} />
         <div className={styleAccount.name}>
-          {accountInfo.walletStatus === WalletStatus.Loaded
-            ? accountInfo.name ||
-              intl.formatMessage({
+          {(() => {
+            if (accountInfo.walletStatus === WalletStatus.Loaded) {
+              if (icnsQuery.primaryName) {
+                return icnsQuery.primaryName;
+              }
+
+              if (accountInfo.name) {
+                return accountInfo.name;
+              }
+              return intl.formatMessage({
                 id: "setting.keyring.unnamed-account",
-              })
-            : accountInfo.walletStatus === WalletStatus.Rejected
-            ? "Unable to Load Key"
-            : "Loading..."}
+              });
+            } else if (accountInfo.walletStatus === WalletStatus.Rejected) {
+              return "Unable to Load Key";
+            } else {
+              return "Loading...";
+            }
+          })()}
         </div>
+        {icnsQuery.primaryName ? (
+          <div style={{ display: "flex", alignItems: "center", height: "1px" }}>
+            <img
+              style={{
+                width: "24px",
+                height: "24px",
+                marginLeft: "2px",
+              }}
+              src={require("../../public/assets/img/icns-mark.png")}
+              alt="icns-registered"
+            />
+          </div>
+        ) : null}
         <div style={{ flex: 1 }} />
       </div>
       {accountInfo.walletStatus === WalletStatus.Rejected && (
