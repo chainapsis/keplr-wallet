@@ -163,7 +163,8 @@ export class CosmosQueriesImpl {
 
     const queryStrideMintParams = new ObservableQueryStrideMintParams(
       kvStore,
-      chainId
+      chainId,
+      chainGetter
     );
 
     this.queryInflation = new ObservableQueryInflation(

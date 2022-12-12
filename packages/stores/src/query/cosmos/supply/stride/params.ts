@@ -1,26 +1,15 @@
 import { KVStore } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
-import Axios from "axios";
 import { computed, makeObservable } from "mobx";
-import { ObservableQuery } from "../../../../common";
+import { ChainGetter } from "../../../../common";
+import { ObservableChainQuery } from "../../../chain-query";
 import { StrideMintParams } from "./types";
 
-export class ObservableQueryStrideMintParams extends ObservableQuery<StrideMintParams> {
-  protected readonly chainId: string;
+export class ObservableQueryStrideMintParams extends ObservableChainQuery<StrideMintParams> {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
+    super(kvStore, chainId, chainGetter, `/mint/v1beta1/params`);
 
-  constructor(kvStore: KVStore, chainId: string) {
-    const instance = Axios.create({
-      baseURL: "https://stride-fleet.main.stridenet.co/api",
-    });
-
-    super(kvStore, instance, `/mint/v1beta1/params`);
-
-    this.chainId = chainId;
     makeObservable(this);
-  }
-
-  protected canFetch(): boolean {
-    return this.chainId.startsWith("stride");
   }
 
   get mintDenom(): string | undefined {
