@@ -110,11 +110,9 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
-  async getChainInfosWithoutEndpoints(): Promise<{
-    chainInfos: ChainInfoWithoutEndpoints[];
-  }> {
+  async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
     const msg = new GetChainInfosWithoutEndpointsMsg();
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).chainInfos;
   }
 
   async sendTx(

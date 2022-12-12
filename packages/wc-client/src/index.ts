@@ -509,9 +509,7 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  getChainInfosWithoutEndpoints(): Promise<{
-    chainInfos: ChainInfoWithoutEndpoints[];
-  }> {
+  getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
     throw new Error("Not yet implemented");
   }
 }

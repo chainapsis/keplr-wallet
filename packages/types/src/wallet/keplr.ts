@@ -179,7 +179,5 @@ export interface Keplr {
     signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
 
-  getChainInfosWithoutEndpoints(): Promise<{
-    chainInfos: ChainInfoWithoutEndpoints[];
-  }>;
+  getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]>;
 }
