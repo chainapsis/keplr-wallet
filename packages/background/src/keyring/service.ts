@@ -642,44 +642,70 @@ export class KeyRingService {
       interactionInfo
     );
 
+    const ownerBech32 = Bech32Address.fromBech32(owner);
     for (const accountInfo of interactionInfo.accountInfos) {
-      const data = `The following is the information for ICNS registration for ${username}.${accountInfo.bech32Prefix}.
+      if (
+        ownerBech32.toHex(false) !==
+        Bech32Address.fromBech32(accountInfo.bech32Address).toHex(false)
+      ) {
+        // When only the address is different with owner, the signature is necessary.
+        const data = `The following is the information for ICNS registration for ${username}.${accountInfo.bech32Prefix}.
 
 Chain id: ${chainId}
 Contract Address: ${contractAddress}
 Owner: ${owner}
 Salt: ${salt}`;
 
-      const signDoc = makeADR36AminoSignDoc(accountInfo.bech32Address, data);
+        const signDoc = makeADR36AminoSignDoc(accountInfo.bech32Address, data);
 
-      const coinType = await this.chainsService.getChainCoinType(
-        accountInfo.chainId
-      );
-      const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
-        accountInfo.chainId
-      );
+        const coinType = await this.chainsService.getChainCoinType(
+          accountInfo.chainId
+        );
+        const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
+          accountInfo.chainId
+        );
 
-      const signature = await this.keyRing.sign(
-        env,
-        accountInfo.chainId,
-        coinType,
-        serializeSignDoc(signDoc),
-        ethereumKeyFeatures.signing
-      );
-
-      r.push({
-        chainId: accountInfo.chainId,
-        bech32Prefix: accountInfo.bech32Prefix,
-        bech32Address: accountInfo.bech32Address,
-        addressHash: ethereumKeyFeatures.signing ? "ethereum" : "cosmos",
-        pubKey: new PubKeySecp256k1(accountInfo.pubKey).toBytes(
-          // Should return uncompressed format if ethereum.
-          // Else return as compressed format.
+        const signature = await this.keyRing.sign(
+          env,
+          accountInfo.chainId,
+          coinType,
+          serializeSignDoc(signDoc),
           ethereumKeyFeatures.signing
-        ),
-        signatureSalt: salt,
-        signature,
-      });
+        );
+
+        r.push({
+          chainId: accountInfo.chainId,
+          bech32Prefix: accountInfo.bech32Prefix,
+          bech32Address: accountInfo.bech32Address,
+          addressHash: ethereumKeyFeatures.signing ? "ethereum" : "cosmos",
+          pubKey: new PubKeySecp256k1(accountInfo.pubKey).toBytes(
+            // Should return uncompressed format if ethereum.
+            // Else return as compressed format.
+            ethereumKeyFeatures.signing
+          ),
+          signatureSalt: salt,
+          signature,
+        });
+      } else {
+        // If address is same with owner, there is no need to sign.
+        const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
+          accountInfo.chainId
+        );
+
+        r.push({
+          chainId: accountInfo.chainId,
+          bech32Prefix: accountInfo.bech32Prefix,
+          bech32Address: accountInfo.bech32Address,
+          addressHash: ethereumKeyFeatures.signing ? "ethereum" : "cosmos",
+          pubKey: new PubKeySecp256k1(accountInfo.pubKey).toBytes(
+            // Should return uncompressed format if ethereum.
+            // Else return as compressed format.
+            ethereumKeyFeatures.signing
+          ),
+          signatureSalt: 0,
+          signature: new Uint8Array(0),
+        });
+      }
     }
 
     return r;
