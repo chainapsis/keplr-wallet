@@ -644,6 +644,7 @@ export class KeyRingService {
 
     for (const accountInfo of interactionInfo.accountInfos) {
       const data = `The following is the information for ICNS registration for ${username}.${accountInfo.bech32Prefix}.
+
 Chain id: ${chainId}
 Contract Address: ${contractAddress}
 Owner: ${owner}
