@@ -22,7 +22,7 @@ export class ChainsService {
 
   protected chainUpdaterService!: ChainUpdaterService;
   protected interactionService!: InteractionService;
-  protected permissionService!: PermissionService;
+  public permissionService!: PermissionService;
 
   protected readonly kvStoreForSuggestChain: KVStore;
 

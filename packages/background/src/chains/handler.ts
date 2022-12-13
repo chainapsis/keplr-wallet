@@ -56,7 +56,14 @@ const handleGetChainInfosMsg: (
 const handleGetChainInfosWithoutEndpointsMsg: (
   service: ChainsService
 ) => InternalHandler<GetChainInfosWithoutEndpointsMsg> = (service) => {
-  return async () => {
+  return async (env, msg) => {
+    await service.permissionService.checkOrGrantGlobalPermission(
+      env,
+      "/permissions/grant/get-chain-infos",
+      "get-chain-infos",
+      msg.origin
+    );
+
     const chainInfos = await service.getChainInfosWithoutEndpoints();
     return {
       chainInfos,
