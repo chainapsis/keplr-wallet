@@ -1,8 +1,10 @@
 import {
   AddPermissionOrigin,
   EnableAccessMsg,
+  GetGlobalPermissionOriginsMsg,
   GetOriginPermittedChainsMsg,
   GetPermissionOriginsMsg,
+  RemoveGlobalPermissionOriginMsg,
   RemovePermissionOrigin,
 } from "./messages";
 import {
@@ -40,6 +42,16 @@ export const getHandler: (service: PermissionService) => Handler = (
         return handleRemovePermissionOrigin(service)(
           env,
           msg as RemovePermissionOrigin
+        );
+      case GetGlobalPermissionOriginsMsg:
+        return handleGetGlobalPermissionOrigins(service)(
+          env,
+          msg as GetGlobalPermissionOriginsMsg
+        );
+      case RemoveGlobalPermissionOriginMsg:
+        return handleRemoveGlobalPermissionOrigin(service)(
+          env,
+          msg as RemoveGlobalPermissionOriginMsg
         );
       default:
         throw new KeplrError("permission", 120, "Unknown msg type");
@@ -93,6 +105,24 @@ const handleRemovePermissionOrigin: (
 ) => InternalHandler<RemovePermissionOrigin> = (service) => {
   return async (_, msg) => {
     await service.removePermission(msg.chainId, msg.permissionType, [
+      msg.permissionOrigin,
+    ]);
+  };
+};
+
+const handleGetGlobalPermissionOrigins: (
+  service: PermissionService
+) => InternalHandler<GetGlobalPermissionOriginsMsg> = (service) => {
+  return async (_, msg) => {
+    return service.getGlobalPermissionOrigins(msg.permissionType);
+  };
+};
+
+const handleRemoveGlobalPermissionOrigin: (
+  service: PermissionService
+) => InternalHandler<RemoveGlobalPermissionOriginMsg> = (service) => {
+  return async (_, msg) => {
+    return service.removeGlobalPermission(msg.permissionType, [
       msg.permissionOrigin,
     ]);
   };

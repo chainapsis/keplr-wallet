@@ -62,6 +62,7 @@ import { SettingEndpointsPage } from "./pages/setting/endpoints";
 import { SettingAutoLockPage } from "./pages/setting/autolock";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { ICNSAdr36SignPage } from "./pages/icns/sign";
+import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -245,6 +246,10 @@ ReactDOM.render(
                   component={ICNSAdr36SignPage}
                 />
                 <Route path="/suggest-chain" component={ChainSuggestedPage} />
+                <Route
+                  path="/permissions/grant/get-chain-infos"
+                  component={GrantGlobalPermissionGetChainInfosPage}
+                />
               </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>

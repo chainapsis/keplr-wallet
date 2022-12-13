@@ -389,6 +389,20 @@ export class PermissionService {
     await this.save();
   }
 
+  async removeGlobalPermission(type: string, origins: string[]) {
+    const originMap = {
+      ...this.globalPermissionMap[type],
+    };
+
+    for (const origin of origins) {
+      delete originMap[origin];
+    }
+
+    this.globalPermissionMap[type] = originMap;
+
+    await this.save();
+  }
+
   async removeAllPermissions(chainId: string) {
     this.permissionMap[ChainIdHelper.parse(chainId).identifier] = undefined;
 

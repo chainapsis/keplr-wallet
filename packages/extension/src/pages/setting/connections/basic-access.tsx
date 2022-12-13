@@ -58,6 +58,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
             {chainStore.getChain(selectedChainId).chainName}
           </DropdownToggle>
           <DropdownMenu>
+            <DropdownItem>Get Chain Infos</DropdownItem>
             {chainStore.chainInfos.map((chainInfo) => {
               return (
                 <DropdownItem
