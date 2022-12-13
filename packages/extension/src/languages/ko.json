@@ -43,10 +43,15 @@
   "setting.fiat.automatic": "자동",
   "setting.fiat.automatic-with-fiat": "자동 ({fiat})",
 
-  "setting.connections": "연결 관리",
-  "setting.connections.paragraph": "지갑에 연결을 허용한 웹사이트를 관리합니다",
+  "setting.security-privacy": "보안과 개인정보",
+
+  "setting.connections": "지갑 접근 권한",
+  "setting.connections.paragraph": "주소와 서명을 요청할 수 있는 웹사이트",
   "setting.connections.confirm.delete-connection.title": "연결 삭제",
   "setting.connections.confirm.delete-connection.paragraph": "이 연결을 삭제하시겠습니까?",
+
+  "setting.permissions.get-chain-infos": "체인 목록 접근",
+  "setting.permissions.get-chain-infos.paragraph": "체인 목록에 접근할 수 있는 웹사이트",
 
   "setting.address-book.button.add": "주소 추가",
   "setting.address-book.add-address.title": "주소 추가",
