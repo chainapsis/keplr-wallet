@@ -285,6 +285,8 @@
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{neuron}</b> create link {br}<b>{link}</b>",
 
+  "sign.icns.registration.title": "Request registration",
+
   "ledger.step1": "Step 1",
   "ledger.step1.paragraph": "Connect and unlock your Ledger.",
   "ledger.step2": "Step 2",

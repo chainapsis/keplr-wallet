@@ -5,6 +5,7 @@ import { useStore } from "../../../stores";
 import { EmptyLayout } from "../../../layouts/empty-layout";
 import style from "./style.module.scss";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { useIntl } from "react-intl";
 
 export const ICNSAdr36SignPage: FunctionComponent = observer(() => {
   useLayoutEffect(() => {
@@ -19,12 +20,23 @@ export const ICNSAdr36SignPage: FunctionComponent = observer(() => {
     }
   }, []);
 
+  const intl = useIntl();
+
   const { icnsInteractionStore } = useStore();
 
   return (
     <EmptyLayout style={{ height: "100%" }}>
       <div className={style.container}>
-        <div style={{ flex: 1, overflow: "scroll", borderRadius: "14px" }}>
+        <img
+          src={require("../../../public/assets/icns-logo.png")}
+          className={style.logo}
+        />
+        <h1 className={style.title}>
+          {intl.formatMessage({
+            id: "sign.icns.registration.title",
+          })}
+        </h1>
+        <div className={style.namesContainer}>
           {icnsInteractionStore.waitingData?.data.accountInfos.map(
             (accountInfo, i) => {
               return (
@@ -48,7 +60,6 @@ export const ICNSAdr36SignPage: FunctionComponent = observer(() => {
             className={style.button}
             color="danger"
             outline={true}
-            block={true}
             onClick={(e) => {
               e.preventDefault();
 
@@ -61,12 +72,13 @@ export const ICNSAdr36SignPage: FunctionComponent = observer(() => {
               window.close();
             }}
           >
-            Reject
+            {intl.formatMessage({
+              id: "sign.button.reject",
+            })}
           </Button>
           <Button
             className={style.button}
             color="primary"
-            block={true}
             disabled={!icnsInteractionStore.waitingData}
             onClick={(e) => {
               e.preventDefault();
@@ -80,7 +92,9 @@ export const ICNSAdr36SignPage: FunctionComponent = observer(() => {
               window.close();
             }}
           >
-            Approve
+            {intl.formatMessage({
+              id: "sign.button.approve",
+            })}
           </Button>
         </div>
       </div>
