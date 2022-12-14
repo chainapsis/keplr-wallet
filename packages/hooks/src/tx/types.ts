@@ -59,8 +59,10 @@ export interface IRecipientConfig extends ITxChainSetter {
 }
 
 export interface IRecipientConfigWithICNS extends IRecipientConfig {
-  readonly isICNS: boolean;
+  readonly isICNSEnabled: boolean;
+  readonly isICNSName: boolean;
   readonly isICNSFetching: boolean;
+  readonly icnsExpectedBech32Prefix: string;
 }
 
 export interface IAmountConfig extends ITxChainSetter {

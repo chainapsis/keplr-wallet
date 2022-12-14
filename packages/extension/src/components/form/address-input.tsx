@@ -41,6 +41,10 @@ export interface AddressInputProps {
   disabled?: boolean;
 }
 
+function numOfCharacter(str: string, c: string): number {
+  return str.split(c).length - 1;
+}
+
 export const AddressInput: FunctionComponent<AddressInputProps> = observer(
   ({
     recipientConfig,
@@ -88,9 +92,9 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       }
     }, [intl, error]);
 
-    const isICNS: boolean = (() => {
-      if ("isICNS" in recipientConfig) {
-        return recipientConfig.isICNS;
+    const isICNSName: boolean = (() => {
+      if ("isICNSName" in recipientConfig) {
+        return recipientConfig.isICNSName;
       }
       return false;
     })();
@@ -146,7 +150,19 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               )}
               value={recipientConfig.rawRecipient}
               onChange={(e) => {
-                recipientConfig.setRawRecipient(e.target.value);
+                let value = e.target.value;
+                if (
+                  // If icns is possible and users enters ".", complete bech32 prefix automatically.
+                  "isICNSEnabled" in recipientConfig &&
+                  recipientConfig.isICNSEnabled &&
+                  value.length > 0 &&
+                  value[value.length - 1] === "." &&
+                  numOfCharacter(value, ".") === 1 &&
+                  numOfCharacter(recipientConfig.rawRecipient, ".") === 0
+                ) {
+                  value = value + recipientConfig.icnsExpectedBech32Prefix;
+                }
+                recipientConfig.setRawRecipient(value);
                 e.preventDefault();
               }}
               autoComplete="off"
@@ -170,7 +186,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               <i className="fa fa-spinner fa-spin fa-fw" />
             </FormText>
           ) : null}
-          {!isICNSfetching && isICNS && !error ? (
+          {!isICNSfetching && isICNSName && !error ? (
             <FormText>{recipientConfig.recipient}</FormText>
           ) : null}
           {errorText != null ? (

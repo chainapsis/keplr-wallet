@@ -17,6 +17,10 @@ import { AddressBookIcon } from "../icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSmartNavigation } from "../../navigation";
 
+function numOfCharacter(str: string, c: string): number {
+  return str.split(c).length - 1;
+}
+
 export const AddressInput: FunctionComponent<
   {
     labelStyle?: TextStyle;
@@ -71,9 +75,9 @@ export const AddressInput: FunctionComponent<
       }
     }, [error]);
 
-    const isICNS: boolean = (() => {
-      if ("isICNS" in recipientConfig) {
-        return recipientConfig.isICNS;
+    const isICNSName: boolean = (() => {
+      if ("isICNSName" in recipientConfig) {
+        return recipientConfig.isICNSName;
       }
       return false;
     })();
@@ -95,10 +99,21 @@ export const AddressInput: FunctionComponent<
         error={errorText}
         value={recipientConfig.rawRecipient}
         onChangeText={(text) => {
+          if (
+            // If icns is possible and users enters ".", complete bech32 prefix automatically.
+            "isICNSEnabled" in recipientConfig &&
+            recipientConfig.isICNSEnabled &&
+            text.length > 0 &&
+            text[text.length - 1] === "." &&
+            numOfCharacter(text, ".") === 1 &&
+            numOfCharacter(recipientConfig.rawRecipient, ".") === 0
+          ) {
+            text = text + recipientConfig.icnsExpectedBech32Prefix;
+          }
           recipientConfig.setRawRecipient(text);
         }}
         paragraph={
-          isICNS ? (
+          isICNSName ? (
             isICNSfetching ? (
               <View>
                 <View

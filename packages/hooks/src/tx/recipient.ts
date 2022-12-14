@@ -137,8 +137,12 @@ export class RecipientConfig
     this._icns = icns;
   }
 
+  get isICNSEnabled(): boolean {
+    return !!this._icns;
+  }
+
   @computed
-  get isICNS(): boolean {
+  get isICNSName(): boolean {
     const rawRecipient = this.rawRecipient.trim();
 
     if (this._icns) {
@@ -150,7 +154,7 @@ export class RecipientConfig
 
   @computed
   get isICNSFetching(): boolean {
-    if (!this.isICNS) {
+    if (!this.isICNSName) {
       return false;
     }
 
@@ -159,10 +163,14 @@ export class RecipientConfig
     return this.getICNSFetchData(rawRecipient).isFetching;
   }
 
+  get icnsExpectedBech32Prefix(): string {
+    return this.bech32Prefix;
+  }
+
   get recipient(): string {
     const rawRecipient = this.rawRecipient.trim();
 
-    if (this.isICNS) {
+    if (this.isICNSName) {
       try {
         return this.getICNSFetchData(rawRecipient).bech32Address || "";
       } catch {
@@ -206,7 +214,7 @@ export class RecipientConfig
       return new EmptyAddressError("Address is empty");
     }
 
-    if (this.isICNS) {
+    if (this.isICNSName) {
       try {
         const fetched = this.getICNSFetchData(rawRecipient);
         if (fetched.isFetching) {
