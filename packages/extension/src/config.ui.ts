@@ -105,8 +105,4 @@ export const AdditionalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
 
 export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
 
-export const ICNSInfo = {
-  chainId: "osmo-test-4",
-  resolverContractAddress:
-    "osmo1hnjg39mu9r9tygy6zpypd25rhmh9726jm369uh7z0r6gjkmnk5zs3tdtug",
-};
+export const ICNSInfo = undefined;

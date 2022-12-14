@@ -67,6 +67,50 @@ export class UIConfigStore {
         ...data,
       };
     });
+
+    try {
+      // Temporal solution for ICNS updates dynamically.
+      const data = await this.kvStore.get<{
+        readonly chainId: string;
+        readonly resolverContractAddress: string;
+      }>("________temp____icns_updates");
+
+      if (data) {
+        runInAction(() => {
+          this._icnsInfo = data;
+        });
+      }
+
+      const icnsInfoFetched = await fetch(
+        "https://icns-updates.s3.us-west-2.amazonaws.com/icns-info.json"
+      );
+
+      if (icnsInfoFetched.ok) {
+        const icnsInfo = await icnsInfoFetched.json();
+        if (
+          icnsInfo &&
+          typeof icnsInfo.chainId === "string" &&
+          typeof icnsInfo.resolverContractAddress === "string"
+        ) {
+          console.log("ICNS info fetched", icnsInfo);
+          runInAction(() => {
+            this._icnsInfo = {
+              chainId: icnsInfo.chainId,
+              resolverContractAddress: icnsInfo.resolverContractAddress,
+            };
+          });
+
+          await this.kvStore.set("________temp____icns_updates", {
+            chainId: icnsInfo.chainId,
+            resolverContractAddress: icnsInfo.resolverContractAddress,
+          });
+        } else {
+          await this.kvStore.set("________temp____icns_updates", null);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   get isBeta(): boolean {
