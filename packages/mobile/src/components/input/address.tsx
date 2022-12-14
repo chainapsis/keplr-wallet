@@ -2,16 +2,15 @@ import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import {
   EmptyAddressError,
-  ENSFailedToFetchError,
-  ENSIsFetchingError,
-  ENSNotSupportedError,
+  ICNSFailedToFetchError,
+  ICNSIsFetchingError,
   IMemoConfig,
   InvalidBech32Error,
   IRecipientConfig,
+  IRecipientConfigWithICNS,
 } from "@keplr-wallet/hooks";
 import { TextStyle, View, ViewStyle } from "react-native";
 import { TextInput } from "./input";
-import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 import { LoadingSpinner } from "../spinner";
 import { useStyle } from "../../styles";
 import { AddressBookIcon } from "../icon";
@@ -27,7 +26,7 @@ export const AddressInput: FunctionComponent<
 
     label: string;
 
-    recipientConfig: IRecipientConfig;
+    recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
   } & (
     | {
         memoConfig?: IMemoConfig;
@@ -53,10 +52,6 @@ export const AddressInput: FunctionComponent<
 
     const style = useStyle();
 
-    const isENSAddress = ObservableEnsFetcher.isValidENS(
-      recipientConfig.rawRecipient
-    );
-
     const error = recipientConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -66,11 +61,9 @@ export const AddressInput: FunctionComponent<
             return;
           case InvalidBech32Error:
             return "Invalid address";
-          case ENSNotSupportedError:
-            return "ENS not supported";
-          case ENSFailedToFetchError:
-            return "Failed to fetch the address from ENS";
-          case ENSIsFetchingError:
+          case ICNSFailedToFetchError:
+            return "Failed to fetch the address from ICNS";
+          case ICNSIsFetchingError:
             return;
           default:
             return "Unknown error";
@@ -78,7 +71,19 @@ export const AddressInput: FunctionComponent<
       }
     }, [error]);
 
-    const isENSLoading: boolean = error instanceof ENSIsFetchingError;
+    const isICNS: boolean = (() => {
+      if ("isICNS" in recipientConfig) {
+        return recipientConfig.isICNS;
+      }
+      return false;
+    })();
+
+    const isICNSfetching: boolean = (() => {
+      if ("isICNSFetching" in recipientConfig) {
+        return recipientConfig.isICNSFetching;
+      }
+      return false;
+    })();
 
     return (
       <TextInput
@@ -93,8 +98,8 @@ export const AddressInput: FunctionComponent<
           recipientConfig.setRawRecipient(text);
         }}
         paragraph={
-          isENSAddress ? (
-            isENSLoading ? (
+          isICNS ? (
+            isICNSfetching ? (
               <View>
                 <View
                   style={style.flatten([
