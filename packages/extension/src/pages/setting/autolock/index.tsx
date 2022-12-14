@@ -60,6 +60,7 @@ export const SettingAutoLockPage: FunctionComponent = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
+      smallTitle={true}
       alternativeTitle={intl.formatMessage({
         id: "setting.autolock",
       })}

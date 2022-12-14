@@ -40,8 +40,9 @@ export const SettingPermissionsGetChainInfosPage: FunctionComponent = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
+      smallTitle={true}
       alternativeTitle={intl.formatMessage({
-        id: "setting.connections",
+        id: "setting.permissions.get-chain-infos",
       })}
       onBackButton={() => {
         history.goBack();

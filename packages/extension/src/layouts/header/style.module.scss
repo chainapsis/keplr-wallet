@@ -33,6 +33,10 @@ $menu-icon-gap: 14px;
     font-size: 24px;
 
     margin-right: 6px;
+
+    &.small {
+      font-size: 18px;
+    }
   }
 
   .title-icon-container {
