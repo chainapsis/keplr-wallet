@@ -92,7 +92,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         },
       },
     ],
-    features: ["ibc-transfer", "ibc-go", "cosmwasm", "osmosis-txfees"],
+    features: [
+      "ibc-transfer",
+      "ibc-go",
+      "cosmwasm",
+      "wasmd_0.24+",
+      "osmosis-txfees",
+    ],
   },
   {
     rpc: "https://rpc-secret.keplr.app",
