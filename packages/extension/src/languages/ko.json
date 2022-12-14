@@ -200,10 +200,6 @@
 
   "send.input.recipient": "받는 주소",
   "send.input.recipient.error.invalid": "잘못된 주소입니다",
-  "send.input.recipient.error.ens-invalid-name": "잘못된 ENS 이름 형식입니다",
-  "send.input.recipient.error.ens-not-found": "ENS 이름을 찾을 수 없습니다",
-  "sned.input.recipient.error.ens-unknown-error": "ENS로부터 주소를 받는데 실패했습니다",
-  "send.input.recipient.error.ens-not-supported": "이 체인에는 ENS가 지원되지 않습니다",
   "send.input.amount": "수량",
   "send.input.amount.error.insufficient": "자산이 부족합니다",
   "send.input.memo": "메모 (선택사항)",
@@ -292,8 +288,7 @@
   "fee-buttons.select.high": "빠름",
 
   "input.recipient.error.invalid-bech32": "잘못된 주소입니다",
-  "input.recipient.error.ens-not-supported": "이 체인에는 ENS가 지원되지 않습니다",
-  "input.recipient.error.ens-failed-to-fetch": "ENS로부터 주소를 받는데 실패했습니다",
+  "input.recipient.error.icns-failed-to-fetch": "ICNS로부터 주소를 받는데 실패했습니다",
   "input.amount.error.invalid-number": "잘못된 숫자입니",
   "input.amount.error.is-zero": "0이 아니여야 합니다",
   "input.amount.error.is-negative": "양수여야 합니다",

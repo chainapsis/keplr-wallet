@@ -19,18 +19,17 @@ import {
   EmptyAddressError,
   IRecipientConfig,
   IMemoConfig,
-  ENSNotSupportedError,
-  ENSFailedToFetchError,
-  ENSIsFetchingError,
+  ICNSFailedToFetchError,
+  ICNSIsFetchingError,
   IIBCChannelConfig,
   InvalidHexError,
+  IRecipientConfigWithICNS,
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
-import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 
 export interface AddressInputProps {
-  recipientConfig: IRecipientConfig;
+  recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
   memoConfig?: IMemoConfig;
   ibcChannelConfig?: IIBCChannelConfig;
 
@@ -62,10 +61,6 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       return `input-${Buffer.from(bytes).toString("hex")}`;
     });
 
-    const isENSAddress = ObservableEnsFetcher.isValidENS(
-      recipientConfig.rawRecipient
-    );
-
     const error = recipientConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -77,15 +72,11 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             return intl.formatMessage({
               id: "input.recipient.error.invalid-bech32",
             });
-          case ENSNotSupportedError:
+          case ICNSFailedToFetchError:
             return intl.formatMessage({
-              id: "input.recipient.error.ens-not-supported",
+              id: "input.recipient.error.icns-failed-to-fetch",
             });
-          case ENSFailedToFetchError:
-            return intl.formatMessage({
-              id: "input.recipient.error.ens-failed-to-fetch",
-            });
-          case ENSIsFetchingError:
+          case ICNSIsFetchingError:
             return;
           case InvalidHexError:
             return intl.formatMessage({
@@ -97,7 +88,19 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       }
     }, [intl, error]);
 
-    const isENSLoading: boolean = error instanceof ENSIsFetchingError;
+    const isICNS: boolean = (() => {
+      if ("isICNS" in recipientConfig) {
+        return recipientConfig.isICNS;
+      }
+      return false;
+    })();
+
+    const isICNSfetching: boolean = (() => {
+      if ("isICNSFetching" in recipientConfig) {
+        return recipientConfig.isICNSFetching;
+      }
+      return false;
+    })();
 
     const selectAddressFromAddressBook = {
       setRecipient: (recipient: string) => {
@@ -162,12 +165,12 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               </Button>
             ) : null}
           </InputGroup>
-          {isENSLoading ? (
+          {isICNSfetching ? (
             <FormText>
               <i className="fa fa-spinner fa-spin fa-fw" />
             </FormText>
           ) : null}
-          {!isENSLoading && isENSAddress && !error ? (
+          {!isICNSfetching && isICNS && !error ? (
             <FormText>{recipientConfig.recipient}</FormText>
           ) : null}
           {errorText != null ? (

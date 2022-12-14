@@ -219,10 +219,6 @@
 
   "send.input.recipient": "Recipient",
   "send.input.recipient.error.invalid": "Invalid address",
-  "send.input.recipient.error.ens-invalid-name": "Invalid ENS name format",
-  "send.input.recipient.error.ens-not-found": "ENS name not found",
-  "sned.input.recipient.error.ens-unknown-error": "Failed to get address from ENS",
-  "send.input.recipient.error.ens-not-supported": "ENS not supported for this chain",
   "send.input.amount": "Amount",
   "send.input.amount.error.insufficient": "Insufficient asset",
   "send.input.memo": "Memo (Optional)",
@@ -311,8 +307,7 @@
   "fee-buttons.select.high": "High",
 
   "input.recipient.error.invalid-bech32": "Invalid address",
-  "input.recipient.error.ens-not-supported": "ENS not supported for this chain",
-  "input.recipient.error.ens-failed-to-fetch": "Failed to get address from ENS",
+  "input.recipient.error.icns-failed-to-fetch": "Failed to get address from ICNS",
   "input.recipient.error.invalid-hex": "Invalid hex address",
   "input.amount.error.invalid-number": "Invalid number",
   "input.amount.error.is-zero": "Amount should not be zero",
