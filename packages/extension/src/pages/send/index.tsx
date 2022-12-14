@@ -21,7 +21,6 @@ import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
 import { useGasSimulator, useSendTxConfig } from "@keplr-wallet/hooks";
-import { ICNSInfo } from "../../config.ui";
 import {
   fitPopupWindow,
   openPopupWindow,
@@ -60,6 +59,7 @@ export const SendPage: FunctionComponent = observer(() => {
     priceStore,
     queriesStore,
     analyticsStore,
+    uiConfigStore,
   } = useStore();
   const current = chainStore.current;
 
@@ -73,10 +73,7 @@ export const SendPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     {
       allowHexAddressOnEthermint: true,
-      icns: {
-        chainId: ICNSInfo.chainId,
-        resolverContractAddress: ICNSInfo.resolverAddress,
-      },
+      icns: uiConfigStore.icnsInfo,
     }
   );
 

@@ -33,7 +33,13 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const [phase, setPhase] = useState<"channel" | "amount">("channel");
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    analyticsStore,
+    uiConfigStore,
+  } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const notification = useNotification();
@@ -46,6 +52,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     {
       allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
     }
   );
   const gasSimulator = useGasSimulator(

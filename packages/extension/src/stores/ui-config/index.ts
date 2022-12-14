@@ -17,11 +17,30 @@ export class UIConfigStore {
   protected _isBeta: boolean;
   protected _platform: "chrome" | "firefox" = "chrome";
 
-  constructor(protected readonly kvStore: KVStore) {
+  // Struct is required for compatibility with recipient config hook
+  @observable.struct
+  protected _icnsInfo:
+    | {
+        readonly chainId: string;
+        readonly resolverContractAddress: string;
+      }
+    | undefined = undefined;
+
+  constructor(
+    protected readonly kvStore: KVStore,
+    _icnsInfo:
+      | {
+          readonly chainId: string;
+          readonly resolverContractAddress: string;
+        }
+      | undefined
+  ) {
     this._isBeta = navigator.userAgent.includes("Firefox");
     this._platform = navigator.userAgent.includes("Firefox")
       ? "firefox"
       : "chrome";
+
+    this._icnsInfo = _icnsInfo;
 
     makeObservable(this);
 
@@ -68,6 +87,10 @@ export class UIConfigStore {
 
     // No need to await
     this.save();
+  }
+
+  get icnsInfo() {
+    return this._icnsInfo;
   }
 
   async save() {

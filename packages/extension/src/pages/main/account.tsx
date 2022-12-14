@@ -11,17 +11,25 @@ import { ToolTip } from "../../components/tooltip";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { KeplrError } from "@keplr-wallet/router";
-import { ICNSInfo } from "../../config.ui";
 
 export const AccountView: FunctionComponent = observer(() => {
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-  const queries = queriesStore.get(ICNSInfo.chainId);
-  const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
-    ICNSInfo.resolverAddress,
-    accountStore.getAccount(chainStore.current.chainId).bech32Address
-  );
+  const icnsPrimaryName = (() => {
+    if (
+      uiConfigStore.icnsInfo &&
+      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+    ) {
+      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+        uiConfigStore.icnsInfo.resolverContractAddress,
+        accountStore.getAccount(chainStore.current.chainId).bech32Address
+      );
+
+      return icnsQuery.primaryName;
+    }
+  })();
 
   const intl = useIntl();
 
@@ -55,8 +63,8 @@ export const AccountView: FunctionComponent = observer(() => {
         <div className={styleAccount.name}>
           {(() => {
             if (accountInfo.walletStatus === WalletStatus.Loaded) {
-              if (icnsQuery.primaryName) {
-                return icnsQuery.primaryName;
+              if (icnsPrimaryName) {
+                return icnsPrimaryName;
               }
 
               if (accountInfo.name) {
@@ -72,7 +80,7 @@ export const AccountView: FunctionComponent = observer(() => {
             }
           })()}
         </div>
-        {icnsQuery.primaryName ? (
+        {icnsPrimaryName ? (
           <div style={{ display: "flex", alignItems: "center", height: "1px" }}>
             <img
               style={{
