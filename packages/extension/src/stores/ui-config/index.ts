@@ -26,6 +26,9 @@ export class UIConfigStore {
       }
     | undefined = undefined;
 
+  @observable
+  protected _icnsFrontendLink: string = "";
+
   constructor(
     protected readonly kvStore: KVStore,
     _icnsInfo:
@@ -81,18 +84,48 @@ export class UIConfigStore {
         });
       }
 
+      {
+        const data = await this.kvStore.get<string>(
+          "________temp____icns_updates__link"
+        );
+        if (data) {
+          runInAction(() => {
+            this._icnsFrontendLink = data;
+          });
+        }
+      }
+
       const icnsInfoFetched = await fetch(
         "https://icns-updates.s3.us-west-2.amazonaws.com/icns-info.json"
       );
 
       if (icnsInfoFetched.ok) {
         const icnsInfo = await icnsInfoFetched.json();
+
+        console.log("ICNS info fetched", icnsInfo);
+
+        if (icnsInfo && typeof icnsInfo.icnsFrontendLink === "string") {
+          runInAction(() => {
+            this._icnsFrontendLink = icnsInfo.icnsFrontendLink;
+          });
+
+          await this.kvStore.set(
+            "________temp____icns_updates__link",
+            icnsInfo.icnsFrontendLink
+          );
+        } else {
+          runInAction(() => {
+            this._icnsFrontendLink = "";
+          });
+
+          await this.kvStore.set("________temp____icns_updates__link", null);
+        }
+
         if (
           icnsInfo &&
           typeof icnsInfo.chainId === "string" &&
           typeof icnsInfo.resolverContractAddress === "string"
         ) {
-          console.log("ICNS info fetched", icnsInfo);
           runInAction(() => {
             this._icnsInfo = {
               chainId: icnsInfo.chainId,
@@ -139,6 +172,10 @@ export class UIConfigStore {
 
   get icnsInfo() {
     return this._icnsInfo;
+  }
+
+  get icnsFrontendLink(): string {
+    return this._icnsFrontendLink;
   }
 
   async save() {
