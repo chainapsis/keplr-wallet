@@ -105,6 +105,10 @@ export class UIConfigStore {
             resolverContractAddress: icnsInfo.resolverContractAddress,
           });
         } else {
+          runInAction(() => {
+            this._icnsInfo = undefined;
+          });
+
           await this.kvStore.set("________temp____icns_updates", null);
         }
       }
