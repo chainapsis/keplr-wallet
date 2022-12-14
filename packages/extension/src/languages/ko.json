@@ -192,6 +192,9 @@
   "access.button.approve": "허락",
   "access.button.reject": "거부",
 
+  "permissions.grant.get-chain-infos.description.title": "<b>{host}</b>가 케플러 정보에 접근을 요청합니다.",
+  "permissions.grant.get-chain-infos.description.list1": "케플러에 등록된 체인 목록을 알 수 있습니다",
+
   "lock.input.password": "비밀번호",
   "lock.input.password.error.required": "비밀번호를 입력하세요",
   "lock.input.password.error.invalid": "잘못된 비밀번호입니다",

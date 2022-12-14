@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { EmptyLayout } from "../../../layouts/empty-layout";
 import style from "./style.module.scss";
@@ -19,6 +19,18 @@ export const GrantGlobalPermissionGetChainInfosPage: FunctionComponent = observe
       "get-chain-infos"
     );
 
+    const host = useMemo(() => {
+      if (waitingPermissions.length > 0) {
+        return waitingPermissions[0].data.origins
+          .map((origin) => {
+            return new URL(origin).host;
+          })
+          .join(", ");
+      } else {
+        return "";
+      }
+    }, [waitingPermissions]);
+
     return (
       <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
         <div className={style.container}>
@@ -30,13 +42,22 @@ export const GrantGlobalPermissionGetChainInfosPage: FunctionComponent = observe
           <h1 className={style.header}>
             <FormattedMessage id="access.title" />
           </h1>
-          <p className={style.paragraph}>test</p>
+          <p className={style.paragraph}>
+            <FormattedMessage
+              id="permissions.grant.get-chain-infos.description.title"
+              values={{
+                host,
+                // eslint-disable-next-line react/display-name
+                b: (...chunks: any) => <b>{chunks}</b>,
+              }}
+            />
+          </p>
           <div className={style.permission}>
             <FormattedMessage id="access.permission.title" />
           </div>
           <ul>
             <li>
-              <FormattedMessage id="access.permission.account" />
+              <FormattedMessage id="permissions.grant.get-chain-infos.description.list1" />
             </li>
           </ul>
           <div style={{ flex: 1 }} />
