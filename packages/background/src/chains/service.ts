@@ -2,7 +2,7 @@ import {
   ChainInfoWithCoreTypes,
   ChainInfoWithRepoUpdateOptions,
 } from "./types";
-import { ChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
 import { KVStore, Debouncer, MemoryKVStore } from "@keplr-wallet/common";
 import { ChainUpdaterService } from "../updater";
 import { InteractionService } from "../interaction";
@@ -11,6 +11,7 @@ import { SuggestChainInfoMsg } from "./messages";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { validateBasicChainInfoType } from "@keplr-wallet/chain-validator";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
+import { Mutable, Optional } from "utility-types";
 
 type ChainRemovedHandler = (chainId: string, identifier: string) => void;
 
@@ -21,7 +22,7 @@ export class ChainsService {
 
   protected chainUpdaterService!: ChainUpdaterService;
   protected interactionService!: InteractionService;
-  protected permissionService!: PermissionService;
+  public permissionService!: PermissionService;
 
   protected readonly kvStoreForSuggestChain: KVStore;
 
@@ -111,6 +112,33 @@ export class ChainsService {
 
     return result;
   });
+
+  async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
+    return (await this.getChainInfos()).map<ChainInfoWithoutEndpoints>(
+      (chainInfo) => {
+        const chainInfoMutable: Mutable<
+          Optional<
+            ChainInfoWithCoreTypes,
+            "rpc" | "rest" | "updateFromRepoDisabled" | "embeded"
+          >
+        > = {
+          ...chainInfo,
+        };
+
+        // Should remove fields not related to `ChainInfoWithoutEndpoints`
+        delete chainInfoMutable.rpc;
+        delete chainInfoMutable.rpcConfig;
+        delete chainInfoMutable.rest;
+        delete chainInfoMutable.restConfig;
+        delete chainInfoMutable.nodeProvider;
+
+        delete chainInfoMutable.updateFromRepoDisabled;
+        delete chainInfoMutable.embeded;
+
+        return chainInfoMutable;
+      }
+    );
+  }
 
   clearCachedChainInfos() {
     this.cachedChainInfos = undefined;

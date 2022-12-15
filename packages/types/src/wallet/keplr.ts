@@ -1,4 +1,4 @@
-import { ChainInfo } from "../chain-info";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "../chain-info";
 import { EthSignType } from "../ethereum";
 import {
   BroadcastMode,
@@ -24,6 +24,16 @@ export interface Key {
   // this can be used to select the amino or direct signer.
   readonly isNanoLedger: boolean;
 }
+
+export type ICNSAdr36Signatures = {
+  chainId: string;
+  bech32Prefix: string;
+  bech32Address: string;
+  addressHash: "cosmos" | "ethereum";
+  pubKey: Uint8Array;
+  signatureSalt: number;
+  signature: Uint8Array;
+}[];
 
 export type KeplrMode = "core" | "extension" | "mobile-web" | "walletconnect";
 
@@ -80,6 +90,14 @@ export interface Keplr {
     tx: Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array>;
+
+  signICNSAdr36(
+    chainId: string,
+    contractAddress: string,
+    owner: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures>;
 
   signArbitrary(
     chainId: string,
@@ -160,4 +178,6 @@ export interface Keplr {
     signDoc: StdSignDoc,
     signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
+
+  getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]>;
 }

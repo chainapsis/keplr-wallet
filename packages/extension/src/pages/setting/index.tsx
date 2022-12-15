@@ -87,14 +87,11 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
-            id: "setting.connections",
-          })}
-          paragraph={intl.formatMessage({
-            id: "setting.connections.paragraph",
+            id: "setting.security-privacy",
           })}
           onClick={() => {
             history.push({
-              pathname: "/setting/connections",
+              pathname: "/setting/security-privacy",
             });
           }}
           icons={useMemo(
@@ -109,20 +106,6 @@ export const SettingPage: FunctionComponent = observer(() => {
           onClick={() => {
             history.push({
               pathname: "/setting/export-to-mobile",
-            });
-          }}
-          icons={useMemo(
-            () => [<i key="next" className="fas fa-chevron-right" />],
-            []
-          )}
-        />
-        <PageButton
-          title={intl.formatMessage({
-            id: "setting.autolock",
-          })}
-          onClick={() => {
-            history.push({
-              pathname: "/setting/autolock",
             });
           }}
           icons={useMemo(

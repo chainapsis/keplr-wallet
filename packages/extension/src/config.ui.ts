@@ -104,3 +104,5 @@ export const AdditionalSignInPrepend:
 export const AdditionalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
 
 export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
+
+export const ICNSInfo = undefined;

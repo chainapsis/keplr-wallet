@@ -12,6 +12,8 @@ export interface ChainGetter {
     findCurrency(coinMinimalDenom: string): AppCurrency | undefined;
     forceFindCurrency(coinMinimalDenom: string): AppCurrency;
   };
+
+  hasChain(chainId: string): boolean;
 }
 
 export type CoinPrimitive = {

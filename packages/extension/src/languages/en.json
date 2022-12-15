@@ -45,10 +45,15 @@
   "setting.fiat.automatic": "Automatic",
   "setting.fiat.automatic-with-fiat": "Automatic ({fiat})",
 
-  "setting.connections": "Manage Connections",
-  "setting.connections.paragraph": "Manage websites connected to your wallet",
+  "setting.security-privacy": "Security & Privacy",
+
+  "setting.connections": "Wallet Access Permissions",
+  "setting.connections.paragraph": "Websites that can access address/signing",
   "setting.connections.confirm.delete-connection.title": "Disable Connection",
   "setting.connections.confirm.delete-connection.paragraph": "Are you sure you want to disable this connection?",
+
+  "setting.permissions.get-chain-infos": "Chain List Access",
+  "setting.permissions.get-chain-infos.paragraph": "Websites that can access your active chain list",
 
   "setting.address-book.button.add": "Add New",
   "setting.address-book.add-address.title": "Add Address",
@@ -199,6 +204,9 @@
   "access.button.approve": "Approve",
   "access.button.reject": "Reject",
 
+  "permissions.grant.get-chain-infos.description.title": "<b>{host}</b> is requesting to connect to your Keplr.",
+  "permissions.grant.get-chain-infos.description.list1": "Get the list of all chains on your Keplr Wallet",
+
   "access.viewing-key.title": "Requesting Viewing Key",
   "access.viewing-key.paragraph": "<b>{host}</b> is requesting to get your token's viewing key on <b>{contractAddress}</b>.",
   "access.viewing-key.permission.title": "By approving this request, the website will:",
@@ -214,10 +222,6 @@
 
   "send.input.recipient": "Recipient",
   "send.input.recipient.error.invalid": "Invalid address",
-  "send.input.recipient.error.ens-invalid-name": "Invalid ENS name format",
-  "send.input.recipient.error.ens-not-found": "ENS name not found",
-  "sned.input.recipient.error.ens-unknown-error": "Failed to get address from ENS",
-  "send.input.recipient.error.ens-not-supported": "ENS not supported for this chain",
   "send.input.amount": "Amount",
   "send.input.amount.error.insufficient": "Insufficient asset",
   "send.input.memo": "Memo (Optional)",
@@ -285,6 +289,8 @@
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{neuron}</b> create link {br}<b>{link}</b>",
 
+  "sign.icns.registration.title": "Request registration",
+
   "ledger.step1": "Step 1",
   "ledger.step1.paragraph": "Connect and unlock your Ledger.",
   "ledger.step2": "Step 2",
@@ -304,8 +310,7 @@
   "fee-buttons.select.high": "High",
 
   "input.recipient.error.invalid-bech32": "Invalid address",
-  "input.recipient.error.ens-not-supported": "ENS not supported for this chain",
-  "input.recipient.error.ens-failed-to-fetch": "Failed to get address from ENS",
+  "input.recipient.error.icns-failed-to-fetch": "Failed to get address from ICNS",
   "input.recipient.error.invalid-hex": "Invalid hex address",
   "input.amount.error.invalid-number": "Invalid number",
   "input.amount.error.is-zero": "Amount should not be zero",

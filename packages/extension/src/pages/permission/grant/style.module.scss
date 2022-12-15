@@ -1,0 +1,44 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .header {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .paragraph {
+    text-align: center;
+    padding: 0 24px;
+    overflow-y: auto;
+  }
+
+  .permission {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #525f7f;
+    text-align: center;
+  }
+
+  ul {
+    list-style: none;
+    font-size: 14px;
+    padding: 0;
+    width: fit-content;
+    margin: auto;
+    color: #525f7f;
+
+    li:before {
+      content: "- ";
+    }
+  }
+
+  .buttons {
+    display: flex;
+  }
+
+  .button {
+    flex: 1;
+  }
+}
