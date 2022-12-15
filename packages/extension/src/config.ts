@@ -1959,56 +1959,6 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
   },
-  {
-    rpc: "https://rpc.testnet.osmosis.zone",
-    rest: "https://lcd.testnet.osmosis.zone",
-    chainId: "osmo-test-4",
-    chainName: "Osmosis",
-    stakeCurrency: {
-      coinDenom: "OSMO",
-      coinMinimalDenom: "uosmo",
-      coinDecimals: 6,
-      coinGeckoId: "osmosis",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://app.osmosis.zone"
-        : "https://app.osmosis.zone",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/osmosis"
-        : "http://localhost:8080/chains/osmosis",
-    bip44: { coinType: 118 },
-    bech32Config: Bech32Address.defaultBech32Config("osmo"),
-    currencies: [
-      {
-        coinDenom: "OSMO",
-        coinMinimalDenom: "uosmo",
-        coinDecimals: 6,
-        coinGeckoId: "osmosis",
-      },
-      {
-        coinDenom: "ION",
-        coinMinimalDenom: "uion",
-        coinDecimals: 6,
-        coinGeckoId: "ion",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "OSMO",
-        coinMinimalDenom: "uosmo",
-        coinDecimals: 6,
-        coinGeckoId: "osmosis",
-        gasPriceStep: {
-          low: 0,
-          average: 0.025,
-          high: 0.04,
-        },
-      },
-    ],
-    features: ["ibc-transfer", "ibc-go", "cosmwasm", "osmosis-txfees"],
-  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
