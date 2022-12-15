@@ -15,6 +15,8 @@ import {
   StdTx,
   DirectSignResponse,
   OfflineDirectSigner,
+  ICNSAdr36Signatures,
+  ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { SecretUtils } from "secretjs/types/enigmautils";
@@ -430,6 +432,22 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     return await this.requestMethod("signArbitrary", [chainId, signer, data]);
   }
 
+  signICNSAdr36(
+    chainId: string,
+    contractAddress: string,
+    owner: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures> {
+    return this.requestMethod("signICNSAdr36", [
+      chainId,
+      contractAddress,
+      owner,
+      username,
+      addressChainIds,
+    ]);
+  }
+
   async verifyArbitrary(
     chainId: string,
     signer: string,
@@ -566,6 +584,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
       signDoc,
       deepmerge(this.defaultOptions.sign ?? {}, signOptions),
     ]);
+  }
+
+  async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
+    return await this.requestMethod("getChainInfosWithoutEndpoints", []);
   }
 
   __core__getAnalyticsId(): Promise<string> {

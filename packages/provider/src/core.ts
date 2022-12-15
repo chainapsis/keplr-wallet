@@ -14,6 +14,8 @@ import {
   StdSignature,
   DirectSignResponse,
   OfflineDirectSigner,
+  ICNSAdr36Signatures,
+  ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
@@ -32,6 +34,8 @@ import {
   RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
   GetAnalyticsIdMsg,
+  RequestICNSAdr36SignaturesMsg,
+  GetChainInfosWithoutEndpointsMsg,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -104,6 +108,11 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   async getKey(chainId: string): Promise<Key> {
     const msg = new GetKeyMsg(chainId);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
+    const msg = new GetChainInfosWithoutEndpointsMsg();
+    return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).chainInfos;
   }
 
   async sendTx(
@@ -219,6 +228,25 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     const signature = (await this.requester.sendMessage(BACKGROUND_PORT, msg))
       .signature;
     return Buffer.from(signature.signature, "base64");
+  }
+
+  signICNSAdr36(
+    chainId: string,
+    contractAddress: string,
+    owner: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures> {
+    return this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new RequestICNSAdr36SignaturesMsg(
+        chainId,
+        contractAddress,
+        owner,
+        username,
+        addressChainIds
+      )
+    );
   }
 
   getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {

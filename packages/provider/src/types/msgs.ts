@@ -7,6 +7,7 @@ import {
   AminoSignResponse,
   StdSignature,
   StdSignDoc,
+  ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
 
 export class EnableAccessMsg extends Message<void> {
@@ -307,6 +308,69 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
   }
 }
 
+export class RequestICNSAdr36SignaturesMsg extends Message<
+  {
+    chainId: string;
+    bech32Prefix: string;
+    bech32Address: string;
+    addressHash: "cosmos" | "ethereum";
+    pubKey: Uint8Array;
+    signatureSalt: number;
+    signature: Uint8Array;
+  }[]
+> {
+  public static type() {
+    return "request-icns-adr-36-signatures";
+  }
+
+  constructor(
+    readonly chainId: string,
+    readonly contractAddress: string,
+    readonly owner: string,
+    readonly username: string,
+    readonly addressChainIds: string[]
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.contractAddress) {
+      throw new Error("contract address not set");
+    }
+
+    if (!this.owner) {
+      throw new Error("signer not set");
+    }
+
+    // Validate bech32 address.
+    // Bech32Address.validate(this.signer);
+
+    if (!this.username) {
+      throw new Error("username not set");
+    }
+
+    if (!this.addressChainIds || this.addressChainIds.length === 0) {
+      throw new Error("address chain ids not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestICNSAdr36SignaturesMsg.type();
+  }
+}
+
 export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
   public static type() {
     return "request-verify-adr-36-amino-doc";
@@ -543,6 +607,26 @@ export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
 
   type(): string {
     return GetTxEncryptionKeyMsg.type();
+  }
+}
+
+export class GetChainInfosWithoutEndpointsMsg extends Message<{
+  chainInfos: ChainInfoWithoutEndpoints[];
+}> {
+  public static type() {
+    return "get-chain-infos-without-endpoints";
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "chains";
+  }
+
+  type(): string {
+    return GetChainInfosWithoutEndpointsMsg.type();
   }
 }
 

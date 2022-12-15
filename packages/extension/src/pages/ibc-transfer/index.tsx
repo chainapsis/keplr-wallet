@@ -24,7 +24,6 @@ import {
   useIBCTransferConfig,
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
-import { EthereumEndpoint } from "../../config.ui";
 import { useNotification } from "../../components/notification";
 import { FormattedMessage, useIntl } from "react-intl";
 import { ExtensionKVStore } from "@keplr-wallet/common";
@@ -34,7 +33,13 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const [phase, setPhase] = useState<"channel" | "amount">("channel");
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    analyticsStore,
+    uiConfigStore,
+  } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
   const notification = useNotification();
@@ -46,8 +51,8 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     chainStore.current.chainId,
     accountInfo.bech32Address,
     {
-      ensEndpoint: EthereumEndpoint,
       allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
     }
   );
   const gasSimulator = useGasSimulator(

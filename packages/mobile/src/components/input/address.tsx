@@ -2,21 +2,24 @@ import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import {
   EmptyAddressError,
-  ENSFailedToFetchError,
-  ENSIsFetchingError,
-  ENSNotSupportedError,
+  ICNSFailedToFetchError,
+  ICNSIsFetchingError,
   IMemoConfig,
   InvalidBech32Error,
   IRecipientConfig,
+  IRecipientConfigWithICNS,
 } from "@keplr-wallet/hooks";
 import { TextStyle, View, ViewStyle } from "react-native";
 import { TextInput } from "./input";
-import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 import { LoadingSpinner } from "../spinner";
 import { useStyle } from "../../styles";
 import { AddressBookIcon } from "../icon";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSmartNavigation } from "../../navigation";
+
+function numOfCharacter(str: string, c: string): number {
+  return str.split(c).length - 1;
+}
 
 export const AddressInput: FunctionComponent<
   {
@@ -27,7 +30,7 @@ export const AddressInput: FunctionComponent<
 
     label: string;
 
-    recipientConfig: IRecipientConfig;
+    recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
   } & (
     | {
         memoConfig?: IMemoConfig;
@@ -53,10 +56,6 @@ export const AddressInput: FunctionComponent<
 
     const style = useStyle();
 
-    const isENSAddress = ObservableEnsFetcher.isValidENS(
-      recipientConfig.rawRecipient
-    );
-
     const error = recipientConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
@@ -66,11 +65,9 @@ export const AddressInput: FunctionComponent<
             return;
           case InvalidBech32Error:
             return "Invalid address";
-          case ENSNotSupportedError:
-            return "ENS not supported";
-          case ENSFailedToFetchError:
-            return "Failed to fetch the address from ENS";
-          case ENSIsFetchingError:
+          case ICNSFailedToFetchError:
+            return "Failed to fetch the address from ICNS";
+          case ICNSIsFetchingError:
             return;
           default:
             return "Unknown error";
@@ -78,7 +75,19 @@ export const AddressInput: FunctionComponent<
       }
     }, [error]);
 
-    const isENSLoading: boolean = error instanceof ENSIsFetchingError;
+    const isICNSName: boolean = (() => {
+      if ("isICNSName" in recipientConfig) {
+        return recipientConfig.isICNSName;
+      }
+      return false;
+    })();
+
+    const isICNSfetching: boolean = (() => {
+      if ("isICNSFetching" in recipientConfig) {
+        return recipientConfig.isICNSFetching;
+      }
+      return false;
+    })();
 
     return (
       <TextInput
@@ -90,11 +99,22 @@ export const AddressInput: FunctionComponent<
         error={errorText}
         value={recipientConfig.rawRecipient}
         onChangeText={(text) => {
+          if (
+            // If icns is possible and users enters ".", complete bech32 prefix automatically.
+            "isICNSEnabled" in recipientConfig &&
+            recipientConfig.isICNSEnabled &&
+            text.length > 0 &&
+            text[text.length - 1] === "." &&
+            numOfCharacter(text, ".") === 1 &&
+            numOfCharacter(recipientConfig.rawRecipient, ".") === 0
+          ) {
+            text = text + recipientConfig.icnsExpectedBech32Prefix;
+          }
           recipientConfig.setRawRecipient(text);
         }}
         paragraph={
-          isENSAddress ? (
-            isENSLoading ? (
+          isICNSName ? (
+            isICNSfetching ? (
               <View>
                 <View
                   style={style.flatten([

@@ -14,27 +14,19 @@ export class InvalidBech32Error extends Error {
   }
 }
 
-export class ENSNotSupportedError extends Error {
+export class ICNSIsFetchingError extends Error {
   constructor(m: string) {
     super(m);
     // Set the prototype explicitly.
-    Object.setPrototypeOf(this, ENSNotSupportedError.prototype);
+    Object.setPrototypeOf(this, ICNSIsFetchingError.prototype);
   }
 }
 
-export class ENSIsFetchingError extends Error {
+export class ICNSFailedToFetchError extends Error {
   constructor(m: string) {
     super(m);
     // Set the prototype explicitly.
-    Object.setPrototypeOf(this, ENSIsFetchingError.prototype);
-  }
-}
-
-export class ENSFailedToFetchError extends Error {
-  constructor(m: string) {
-    super(m);
-    // Set the prototype explicitly.
-    Object.setPrototypeOf(this, ENSFailedToFetchError.prototype);
+    Object.setPrototypeOf(this, ICNSFailedToFetchError.prototype);
   }
 }
 
