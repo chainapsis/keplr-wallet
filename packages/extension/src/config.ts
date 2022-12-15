@@ -41,7 +41,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "cosmos",
       },
     ],
-    coinType: 118,
     features: ["ibc-transfer", "ibc-go"],
   },
   {
@@ -149,7 +148,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         },
       },
     ],
-    coinType: 529,
     features: ["secretwasm", "ibc-go", "ibc-transfer"],
   },
   {
@@ -1957,7 +1955,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         },
       },
     ],
-    coinType: 459,
   },
 ];
 
