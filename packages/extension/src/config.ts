@@ -1194,6 +1194,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "IST",
         coinMinimalDenom: "uist",
         coinDecimals: 6,
+        coinGeckoId: "inter-stable-token",
       },
     ],
     feeCurrencies: [
@@ -1212,6 +1213,7 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDenom: "IST",
         coinMinimalDenom: "uist",
         coinDecimals: 6,
+        coinGeckoId: "inter-stable-token",
         gasPriceStep: {
           low: 0.0034,
           average: 0.007,
