@@ -1956,6 +1956,49 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
   },
+  {
+    rpc: "https://rpc-quicksilver.keplr.app",
+    rest: "https://lcd-quicksilver.keplr.app",
+    chainId: "quicksilver-1",
+    chainName: "Quicksilver",
+    stakeCurrency: {
+      coinDenom: "QCK",
+      coinMinimalDenom: "uqck",
+      coinDecimals: 6,
+    },
+    walletUrlForStaking: "https://wallet.keplr.app/chains/quicksilver",
+    bip44: {
+      coinType: 118
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "quick",
+      bech32PrefixAccPub: "quickpub",
+      bech32PrefixValAddr: "quickvaloper",
+      bech32PrefixValPub: "quickvaloperpub",
+      bech32PrefixConsAddr: "quickvalcons",
+      bech32PrefixConsPub: "quickvalconspub"
+    },
+    currencies: [
+      {
+        coinDenom: "QCK",
+        coinMinimalDenom: "uqck",
+        coinDecimals: 6,
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "QCK",
+        coinMinimalDenom: "uqck",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0,
+          average: 0.0001,
+          high: 0.00025
+        }
+      }
+    ],
+    features: []
+  }
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
