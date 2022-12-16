@@ -1758,45 +1758,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     },
   },
   {
-    rpc: "https://public.api.injective.network",
-    rest: "https://public.lcd.injective.network",
-    chainId: "injective-1",
-    chainName: "Injective",
-    stakeCurrency: {
-      coinDenom: "INJ",
-      coinMinimalDenom: "inj",
-      coinDecimals: 18,
-      coinGeckoId: "injective-protocol",
-    },
-    bip44: {
-      coinType: 60,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("inj"),
-    currencies: [
-      {
-        coinDenom: "INJ",
-        coinMinimalDenom: "inj",
-        coinDecimals: 18,
-        coinGeckoId: "injective-protocol",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "INJ",
-        coinMinimalDenom: "inj",
-        coinDecimals: 18,
-        coinGeckoId: "injective-protocol",
-        gasPriceStep: {
-          low: 0.0005,
-          average: 0.0007,
-          high: 0.0009,
-        },
-      },
-    ],
-    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
-    hideInUI: true,
-  },
-  {
     rpc: "https://rpc-crypto-org.keplr.app",
     rest: "https://lcd-crypto-org.keplr.app",
     chainId: "crypto-org-chain-mainnet-1",
@@ -1913,6 +1874,50 @@ export const EmbedChainInfos: AppChainInfo[] = [
     txExplorer: {
       name: "Mintscan",
       txUrl: "https://www.mintscan.io/stride/txs/{txHash}",
+    },
+  },
+  {
+    rpc: "https://rpc-injective.keplr.app",
+    rest: "https://lcd-injective.keplr.app",
+    chainId: "injective-1",
+    chainName: "Injective",
+    stakeCurrency: {
+      coinDenom: "INJ",
+      coinMinimalDenom: "inj",
+      coinDecimals: 18,
+      coinGeckoId: "injective-protocol",
+    },
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("inj"),
+    currencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+        gasPriceStep: {
+          low: 5000000000,
+          average: 25000000000,
+          high: 50000000000,
+        },
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    chainSymbolImageUrl:
+      "https://dhj8dql1kzq2v.cloudfront.net/white/injective.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/injective/txs/{txHash}",
     },
   },
 ];
