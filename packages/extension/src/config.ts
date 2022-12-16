@@ -1966,7 +1966,9 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: "uqck",
       coinDecimals: 6,
     },
-    walletUrlForStaking: "https://wallet.keplr.app/chains/quicksilver",
+    walletUrlForStaking: process.env.NODE_ENV === "production"
+      ? "https://wallet.keplr.app/chains/quicksilver"
+      : "http://localhost:8080/chains/quicksilver",
     bip44: {
       coinType: 118
     },
