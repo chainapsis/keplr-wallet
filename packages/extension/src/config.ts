@@ -769,12 +769,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/certik"
-        : "http://localhost:8080/chains/certik",
+        ? "https://wallet.keplr.app/chains/shentu"
+        : "http://localhost:8080/chains/shentu",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/certik"
-        : "http://localhost:8080/chains/certik",
+        ? "https://wallet.keplr.app/chains/shentu"
+        : "http://localhost:8080/chains/shentu",
     bip44: {
       coinType: 118,
     },
@@ -1955,6 +1955,52 @@ export const EmbedChainInfos: ChainInfo[] = [
         },
       },
     ],
+  },
+  {
+    rpc: "https://rpc-quicksilver.keplr.app",
+    rest: "https://lcd-quicksilver.keplr.app",
+    chainId: "quicksilver-1",
+    chainName: "Quicksilver",
+    stakeCurrency: {
+      coinDenom: "QCK",
+      coinMinimalDenom: "uqck",
+      coinDecimals: 6,
+    },
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/quicksilver"
+        : "http://localhost:8080/chains/quicksilver",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "quick",
+      bech32PrefixAccPub: "quickpub",
+      bech32PrefixValAddr: "quickvaloper",
+      bech32PrefixValPub: "quickvaloperpub",
+      bech32PrefixConsAddr: "quickvalcons",
+      bech32PrefixConsPub: "quickvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "QCK",
+        coinMinimalDenom: "uqck",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "QCK",
+        coinMinimalDenom: "uqck",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0,
+          average: 0.0001,
+          high: 0.00025,
+        },
+      },
+    ],
+    features: [],
   },
 ];
 
