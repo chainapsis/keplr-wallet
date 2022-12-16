@@ -769,12 +769,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/certik"
-        : "http://localhost:8080/chains/certik",
+        ? "https://wallet.keplr.app/chains/shentu"
+        : "http://localhost:8080/chains/shentu",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/certik"
-        : "http://localhost:8080/chains/certik",
+        ? "https://wallet.keplr.app/chains/shentu"
+        : "http://localhost:8080/chains/shentu",
     bip44: {
       coinType: 118,
     },
