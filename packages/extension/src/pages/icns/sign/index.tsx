@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useLayoutEffect } from "react";
+import React, { FunctionComponent, useEffect, useLayoutEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Button } from "reactstrap";
 import { useStore } from "../../../stores";
@@ -23,6 +23,18 @@ export const ICNSAdr36SignPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   const { icnsInteractionStore } = useStore();
+
+  useEffect(() => {
+    // Execute the clean-up function when closing window.
+    const beforeunload = async () => {
+      icnsInteractionStore.rejectAll();
+    };
+
+    addEventListener("beforeunload", beforeunload);
+    return () => {
+      removeEventListener("beforeunload", beforeunload);
+    };
+  }, [icnsInteractionStore]);
 
   return (
     <EmptyLayout style={{ height: "100%" }}>
