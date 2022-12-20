@@ -67,7 +67,7 @@
     "secretjs": "0.17.7",
     "sha.js": "^2.4.11",
     "utility-types": "^3.10.0",
-    "webextension-polyfill": "^0.7.0"
+    "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
     "@types/amplitude-js": "^8.0.1",
