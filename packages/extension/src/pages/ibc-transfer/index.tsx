@@ -24,7 +24,6 @@ import {
   useIBCTransferConfig,
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
-import { EthereumEndpoint } from "../../config.ui";
 import { useNotification } from "../../components/notification";
 import { FormattedMessage, useIntl } from "react-intl";
 import { ExtensionKVStore } from "@keplr-wallet/common";
@@ -46,7 +45,6 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     chainStore.current.chainId,
     accountInfo.bech32Address,
     {
-      ensEndpoint: EthereumEndpoint,
       allowHexAddressOnEthermint: true,
     }
   );
