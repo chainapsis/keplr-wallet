@@ -6,7 +6,7 @@ import {
   checkChainFeatures,
   validateBasicChainInfoType,
 } from "@keplr-wallet/chain-validator";
-import Axios from "axios";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export class ChainUpdaterService {
   public chainsService!: ChainsService;
@@ -119,13 +119,10 @@ export class ChainUpdaterService {
       let repoUpdated = false;
 
       try {
-        const res = await Axios.get<ChainInfo>(
-          `/cosmos/${chainIdentifier}.json`,
-          {
-            baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
-          }
+        const res = await simpleFetch<ChainInfo>(
+          `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
+          `/cosmos/${chainIdentifier}.json`
         );
-
         let chainInfo: ChainInfo = res.data;
 
         const fetchedChainIdentifier = ChainIdHelper.parse(chainInfo.chainId)
@@ -282,15 +279,13 @@ export class ChainUpdaterService {
   }
 
   protected async checkChainIdFromRPC(rpc: string): Promise<string> {
-    const statusResponse = await Axios.get<{
+    const statusResponse = await simpleFetch<{
       result: {
         node_info: {
           network: string;
         };
       };
-    }>("/status", {
-      baseURL: rpc,
-    });
+    }>(rpc, "/status");
 
     return statusResponse.data.result.node_info.network;
   }

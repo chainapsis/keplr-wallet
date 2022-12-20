@@ -127,9 +127,7 @@ export class ChainsService {
 
         // Should remove fields not related to `ChainInfoWithoutEndpoints`
         delete chainInfoMutable.rpc;
-        delete chainInfoMutable.rpcConfig;
         delete chainInfoMutable.rest;
-        delete chainInfoMutable.restConfig;
         delete chainInfoMutable.nodeProvider;
 
         delete chainInfoMutable.updateFromRepoDisabled;

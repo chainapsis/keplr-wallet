@@ -2,7 +2,6 @@ import { Keplr, BroadcastMode } from "@keplr-wallet/types";
 import WalletConnect from "@walletconnect/client";
 import { KeplrQRCodeModalV1 } from "@keplr-wallet/wc-qrcode-modal";
 import { KeplrWalletConnectV1 } from "@keplr-wallet/wc-client";
-import Axios from "axios";
 import { EmbedChainInfos } from "./config";
 import { Buffer } from "buffer/";
 
@@ -30,14 +29,26 @@ async function sendTx(
     })(),
   };
 
-  const restInstance = Axios.create({
-    baseURL: EmbedChainInfos.find((chainInfo) => chainInfo.chainId === chainId)!
-      .rest,
-  });
+  const result = await fetch(
+    new URL(
+      "/cosmos/tx/v1beta1/txs",
+      EmbedChainInfos.find((chainInfo) => chainInfo.chainId === chainId)!.rest
+    ).toString(),
+    {
+      method: "POST",
+      body: JSON.stringify(params),
+    }
+  );
 
-  const result = await restInstance.post("/cosmos/tx/v1beta1/txs", params);
+  if (!result.ok) {
+    throw new Error("Network error");
+  }
 
-  return Buffer.from(result.data["tx_response"].txhash, "hex");
+  if (result.status !== 200) {
+    throw new Error("Invalid response");
+  }
+
+  return Buffer.from((await result.json()).data["tx_response"].txhash, "hex");
 }
 
 export function getWCKeplr(): Promise<Keplr> {
