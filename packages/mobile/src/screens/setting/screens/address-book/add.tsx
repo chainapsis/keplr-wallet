@@ -17,6 +17,7 @@ import {
 } from "../../../../components/input";
 import { Button } from "../../../../components/button";
 import { useSmartNavigation } from "../../../../navigation";
+import { ICNSInfo } from "../../../../config";
 
 export const AddAddressBookScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -42,6 +43,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
   const [name, setName] = useState("");
   const recipientConfig = useRecipientConfig(chainStore, route.params.chainId, {
     allowHexAddressOnEthermint: true,
+    icns: ICNSInfo,
   });
   const memoConfig = useMemoConfig(chainStore, route.params.chainId);
 

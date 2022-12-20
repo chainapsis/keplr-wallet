@@ -18,6 +18,7 @@ import { useSmartNavigation } from "../../navigation";
 import { Buffer } from "buffer/";
 import { DenomHelper } from "@keplr-wallet/common";
 import { AsyncKVStore } from "../../common";
+import { ICNSInfo } from "../../config";
 
 export const SendScreen: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
@@ -54,6 +55,7 @@ export const SendScreen: FunctionComponent = observer(() => {
     account.bech32Address,
     {
       allowHexAddressOnEthermint: true,
+      icns: ICNSInfo,
     }
   );
 

@@ -1923,3 +1923,9 @@ export const EmbedChainInfos: AppChainInfo[] = [
 ];
 
 export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";
+
+export const ICNSInfo = {
+  chainId: "osmosis-1",
+  resolverContractAddress:
+    "osmo1xk0s8xgktn9x5vwcgtjdxqzadg88fgn33p8u9cnpdxwemvxscvast52cdd",
+};
