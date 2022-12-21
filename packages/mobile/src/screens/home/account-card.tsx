@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { Card, CardBody } from "../../components/card";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
+import { Image, StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStore } from "../../stores";
 import { useStyle } from "../../styles";
 import { AddressCopyable } from "../../components/address-copyable";
@@ -15,6 +15,7 @@ import { Dec } from "@keplr-wallet/unit";
 import { LedgerNotSupportedModal } from "./ledger-not-supported-modal";
 import { KeplrError } from "@keplr-wallet/router";
 import { LedgerSupportedModal } from "./leger-supported-modal";
+import { ICNSInfo } from "../../config";
 
 export const AccountCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -27,6 +28,11 @@ export const AccountCard: FunctionComponent<{
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
+  const icnsQueries = queriesStore.get(ICNSInfo.chainId);
+  const icnsQuery = icnsQueries.icns.queryICNSNames.getQueryContract(
+    ICNSInfo.resolverContractAddress,
+    accountStore.getAccount(chainStore.current.chainId).bech32Address
+  );
 
   const queryStakable = queries.queryBalances.getQueryBech32Address(
     account.bech32Address
@@ -106,11 +112,38 @@ export const AccountCard: FunctionComponent<{
       />
       <CardBody style={style.flatten(["padding-bottom-0"])}>
         <View style={style.flatten(["flex", "items-center"])}>
-          <Text
-            style={style.flatten(["h4", "color-text-high", "margin-bottom-8"])}
-          >
-            {account.name || "..."}
-          </Text>
+          <View style={style.flatten(["flex", "flex-row", "items-center"])}>
+            <Text
+              style={style.flatten([
+                "h4",
+                "color-text-high",
+                "margin-bottom-8",
+              ])}
+            >
+              {icnsQuery.primaryName
+                ? icnsQuery.primaryName
+                : account.name || "..."}
+            </Text>
+
+            {icnsQuery.primaryName ? (
+              <View
+                style={style.flatten(["height-1", "flex", "justify-center"])}
+              >
+                <Image
+                  source={require("../../assets/image/icns-mark.png")}
+                  style={style.flatten([
+                    "width-20",
+                    "height-20",
+                    "margin-left-4",
+                    "margin-bottom-8",
+                  ])}
+                  resizeMode="contain"
+                  fadeDuration={0}
+                />
+              </View>
+            ) : null}
+          </View>
+
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
           <View style={style.flatten(["margin-top-28", "margin-bottom-16"])}>
             <DoubleDoughnutChart data={data} />

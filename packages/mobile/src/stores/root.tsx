@@ -17,6 +17,7 @@ import {
   IBCCurrencyRegsitrar,
   PermissionStore,
   ChainSuggestStore,
+  ICNSQueries,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -49,7 +50,13 @@ export class RootStore {
   public readonly chainSuggestStore: ChainSuggestStore;
 
   public readonly queriesStore: QueriesStore<
-    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
+    [
+      CosmosQueries,
+      CosmwasmQueries,
+      SecretQueries,
+      KeplrETCQueries,
+      ICNSQueries
+    ]
   >;
   public readonly accountStore: AccountStore<
     [CosmosAccount, CosmwasmAccount, SecretAccount]
@@ -144,7 +151,8 @@ export class RootStore {
       }),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
-      })
+      }),
+      ICNSQueries.use()
     );
 
     this.accountStore = new AccountStore(
