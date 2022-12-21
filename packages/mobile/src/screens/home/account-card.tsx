@@ -112,14 +112,15 @@ export const AccountCard: FunctionComponent<{
       />
       <CardBody style={style.flatten(["padding-bottom-0"])}>
         <View style={style.flatten(["flex", "items-center"])}>
-          <View style={style.flatten(["flex", "flex-row", "items-center"])}>
-            <Text
-              style={style.flatten([
-                "h4",
-                "color-text-high",
-                "margin-bottom-8",
-              ])}
-            >
+          <View
+            style={style.flatten([
+              "flex",
+              "flex-row",
+              "items-center",
+              "margin-bottom-8",
+            ])}
+          >
+            <Text style={style.flatten(["h4", "color-text-high"])}>
               {icnsQuery.primaryName
                 ? icnsQuery.primaryName
                 : account.name || "..."}
@@ -135,7 +136,6 @@ export const AccountCard: FunctionComponent<{
                     "width-20",
                     "height-20",
                     "margin-left-4",
-                    "margin-bottom-8",
                   ])}
                   resizeMode="contain"
                   fadeDuration={0}
