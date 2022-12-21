@@ -28,6 +28,7 @@ import {
   PopupSize,
 } from "@keplr-wallet/popup";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -76,6 +77,25 @@ export const SendPage: FunctionComponent = observer(() => {
       allowHexAddressOnEthermint: true,
     }
   );
+
+  const denomHelper = useMemo(() => {
+    if (sendConfigs.amountConfig.sendCurrency) {
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+
+      // Begin fetching contract data for unit conversion on send
+      if (denomHelper.type === "erc20") {
+        accountInfo.ethereum.fetchContractTokenInfo(
+          denomHelper.contractAddress
+        );
+      }
+
+      return denomHelper;
+    }
+
+    return undefined;
+  }, [sendConfigs.amountConfig.sendCurrency, accountInfo]);
 
   const gasSimulatorKey = useMemo(() => {
     if (sendConfigs.amountConfig.sendCurrency) {
@@ -275,30 +295,58 @@ export const SendPage: FunctionComponent = observer(() => {
             try {
               const stdFee = sendConfigs.feeConfig.toStdFee();
 
-              const tx = accountInfo.makeSendTokenTx(
-                sendConfigs.amountConfig.amount,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                sendConfigs.amountConfig.sendCurrency!,
-                sendConfigs.recipientConfig.recipient
-              );
-
-              await tx.send(
-                stdFee,
-                sendConfigs.memoConfig.memo,
-                {
-                  preferNoSetFee: true,
-                  preferNoSetMemo: true,
-                },
-                {
-                  onBroadcasted: () => {
-                    analyticsStore.logEvent("Send token tx broadcasted", {
-                      chainId: chainStore.current.chainId,
-                      chainName: chainStore.current.chainName,
-                      feeType: sendConfigs.feeConfig.feeType,
-                    });
-                  },
+              if (denomHelper?.type === "erc20") {
+                let maxFees;
+                // Set max fee if it exists in a valid form
+                if (stdFee.amount.length > 0) {
+                  maxFees = BigNumber.from(stdFee.amount[0].amount);
                 }
-              );
+
+                if (!maxFees) {
+                  throw new Error("Invalid fee, could not create transaction");
+                }
+
+                const gasLimit = BigNumber.from(stdFee.gas);
+
+                const contractAddress = denomHelper.contractAddress;
+
+                await accountInfo.ethereum.broadcastERC20TokenTransfer(
+                  sendConfigs.amountConfig.sendCurrency,
+                  contractAddress,
+                  sendConfigs.recipientConfig.recipient,
+                  accountInfo.ethereum.scaleNativeToContractDenom(
+                    sendConfigs.amountConfig.amount,
+                    contractAddress
+                  ),
+                  maxFees.div(gasLimit),
+                  gasLimit
+                );
+              } else {
+                const tx = accountInfo.makeSendTokenTx(
+                  sendConfigs.amountConfig.amount,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  sendConfigs.amountConfig.sendCurrency!,
+                  sendConfigs.recipientConfig.recipient
+                );
+
+                await tx.send(
+                  stdFee,
+                  sendConfigs.memoConfig.memo,
+                  {
+                    preferNoSetFee: true,
+                    preferNoSetMemo: true,
+                  },
+                  {
+                    onBroadcasted: () => {
+                      analyticsStore.logEvent("Send token tx broadcasted", {
+                        chainId: chainStore.current.chainId,
+                        chainName: chainStore.current.chainName,
+                        feeType: sendConfigs.feeConfig.feeType,
+                      });
+                    },
+                  }
+                );
+              }
 
               if (!isDetachedPage) {
                 history.replace("/");
@@ -341,10 +389,13 @@ export const SendPage: FunctionComponent = observer(() => {
                 id: "send.input-button.balance",
               })}
             />
-            <MemoInput
-              memoConfig={sendConfigs.memoConfig}
-              label={intl.formatMessage({ id: "send.input.memo" })}
-            />
+            {/* Hide memo field for ERC-20 transactions */}
+            {denomHelper?.type !== "erc20" && (
+              <MemoInput
+                memoConfig={sendConfigs.memoConfig}
+                label={intl.formatMessage({ id: "send.input.memo" })}
+              />
+            )}
             <FeeButtons
               feeConfig={sendConfigs.feeConfig}
               gasConfig={sendConfigs.gasConfig}

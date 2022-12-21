@@ -12,6 +12,7 @@ import {
   CosmosAccount,
   CosmosQueries,
   CosmwasmAccount,
+  EthereumAccount,
   CosmwasmQueries,
   OsmosisQueries,
   DeferInitialQueryController,
@@ -76,7 +77,7 @@ export class RootStore {
     ]
   >;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount]
+    [CosmosAccount, CosmwasmAccount, SecretAccount, EthereumAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
@@ -302,6 +303,9 @@ export class RootStore {
             };
           }
         },
+      }),
+      EthereumAccount.use({
+        queriesStore: this.queriesStore,
       })
     );
 

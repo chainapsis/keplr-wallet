@@ -242,13 +242,6 @@ export const TokensView: FunctionComponent = observer(() => {
             key={i.toString()}
             balance={token}
             onClick={() => {
-              if (
-                new DenomHelper(token.currency.coinMinimalDenom).type ===
-                "erc20"
-              ) {
-                alert("Send for ERC-20 coming soon!");
-                return;
-              }
               history.push({
                 pathname: "/send",
                 search: `?defaultDenom=${token.currency.coinMinimalDenom}`,

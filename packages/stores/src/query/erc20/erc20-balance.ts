@@ -16,8 +16,20 @@ export class ObservableQueryERC20Balance extends ObservableQueryERC20ContractDat
     super(kvStore, chainId, chainGetter, contractAddress, bech32Address);
   }
 
+  get balance() {
+    return this.queryContractData.balance;
+  }
+
+  protected canFetch(): boolean {
+    return this.bech32Address !== "";
+  }
+
   fetch() {
-    return this.queryContractData;
+    this.queryContractData.queryBalance.fetch();
+  }
+
+  get isFetching() {
+    return this.queryContractData.queryBalance.isFetching;
   }
 }
 
@@ -57,6 +69,10 @@ export class ObservableQueryERC20BalanceInner extends ObservableQueryBalanceInne
     return false;
   }
 
+  get isFetching(): boolean {
+    return this.queryERC20Balance.isFetching;
+  }
+
   @override
   *fetch() {
     yield this.queryERC20Balance.fetch();
@@ -76,7 +92,7 @@ export class ObservableQueryERC20BalanceInner extends ObservableQueryBalanceInne
       throw new Error(`Unknown currency: ${denom}`);
     }
 
-    const balance = this.queryERC20Balance.fetch().balance;
+    const balance = this.queryERC20Balance.balance;
 
     if (!balance) {
       return new CoinPretty(currency, new Int(0)).ready(false);

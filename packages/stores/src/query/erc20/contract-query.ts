@@ -8,7 +8,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 
 import { ERC20ContractTokenInfo } from "./types";
 
-const erc20MetadataInterface: Interface = new Interface([
+export const erc20MetadataInterface: Interface = new Interface([
   {
     constant: true,
     inputs: [],
@@ -64,6 +64,33 @@ const erc20MetadataInterface: Interface = new Interface([
       {
         name: "",
         type: "uint256",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: "from",
+        type: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+      },
+      {
+        name: "value",
+        type: "uint256",
+      },
+    ],
+    name: "transferFrom",
+    outputs: [
+      {
+        name: "",
+        type: "bool",
       },
     ],
     payable: false,
@@ -235,6 +262,9 @@ export class ObservableQueryERC20ContractBalance extends ObservableJsonRPCQuery<
   }
 }
 
+/**
+ * Query for ERC20 Metadata and for an account's balance on the given ERC-20 contract
+ */
 export class ObservableQueryERC20ContractDataInner {
   protected readonly _queryName: ObservableQueryERC20MetadataName;
   protected readonly _querySymbol: ObservableQueryERC20MetadataSymbol;
@@ -281,6 +311,14 @@ export class ObservableQueryERC20ContractDataInner {
     return this._querySymbol;
   }
 
+  get queryDecimals(): ObservableQueryERC20MetadataDecimals {
+    return this._queryDecimals;
+  }
+
+  get queryBalance(): ObservableQueryERC20ContractBalance {
+    return this._queryBalance;
+  }
+
   get symbol(): string | undefined {
     return this._querySymbol.symbol;
   }
@@ -325,8 +363,7 @@ export class ObservableQueryERC20ContractDataInner {
 
 /**
  * Query ERC20 metadata (https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#IERC20Metadata)
- * This is on temporal stage to implement currency registrar for gravity bridge and axelar network.
- * It is not possible to handle multiple networks on Ethereum at the same time.
+ * and contract data (https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#IERC20).
  */
 export class ObservableQueryERC20ContractData {
   protected queryContractData: ObservableQueryERC20ContractDataInner;
