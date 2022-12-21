@@ -91,6 +91,30 @@ export class GetOriginPermittedChainsMsg extends Message<string[]> {
   }
 }
 
+export class GetGlobalPermissionOriginsMsg extends Message<string[]> {
+  public static type() {
+    return "get-global-permission-origins";
+  }
+
+  constructor(public readonly permissionType: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.permissionType) {
+      throw new KeplrError("permission", 110, "empty permission type");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetGlobalPermissionOriginsMsg.type();
+  }
+}
+
 export class AddPermissionOrigin extends Message<void> {
   public static type() {
     return "add-permission-origin";
@@ -160,5 +184,36 @@ export class RemovePermissionOrigin extends Message<void> {
 
   type(): string {
     return RemovePermissionOrigin.type();
+  }
+}
+
+export class RemoveGlobalPermissionOriginMsg extends Message<void> {
+  public static type() {
+    return "remove-global-permission-origin";
+  }
+
+  constructor(
+    public readonly permissionType: string,
+    public readonly permissionOrigin: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.permissionType) {
+      throw new KeplrError("permission", 110, "empty permission type");
+    }
+
+    if (!this.permissionOrigin) {
+      throw new KeplrError("permission", 111, "empty permission origin");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RemoveGlobalPermissionOriginMsg.type();
   }
 }

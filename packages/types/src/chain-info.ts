@@ -67,3 +67,8 @@ export interface ChainInfo {
 
   readonly chainSymbolImageUrl?: string;
 }
+
+export type ChainInfoWithoutEndpoints = Omit<
+  ChainInfo,
+  "rest" | "rpc" | "nodeProvider"
+>;

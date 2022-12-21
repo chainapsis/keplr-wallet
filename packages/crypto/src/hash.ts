@@ -8,7 +8,7 @@ export class Hash {
   }
 
   static keccak256(data: Uint8Array): Uint8Array {
-    return new Buffer(keccak256(data).replace("0x", ""), "hex");
+    return Buffer.from(keccak256(data).replace("0x", ""), "hex");
   }
 
   static truncHashPortion(

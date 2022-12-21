@@ -51,6 +51,7 @@ export const ExportToMobilePage: FunctionComponent = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
+      smallTitle={true}
       alternativeTitle={intl.formatMessage({
         id: "setting.export-to-mobile",
       })}

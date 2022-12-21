@@ -6,9 +6,26 @@ export class EthermintChainIdHelper {
   ): {
     identifier: string;
     version: number;
-
     ethChainId: number;
   } {
+    const cosmosChainId = ChainIdHelper.parse(chainId);
+
+    if (chainId.startsWith("injective")) {
+      const injectiveTestnetChainIds = ["injective-777", "injective-888"];
+
+      if (injectiveTestnetChainIds.includes(chainId)) {
+        return {
+          ethChainId: 5,
+          ...cosmosChainId,
+        };
+      }
+
+      return {
+        ethChainId: 1,
+        ...cosmosChainId,
+      };
+    }
+
     const matches = chainId.match(
       "^([a-z]{1,})_{1}([1-9][0-9]*)-{1}([1-9][0-9]*)$"
     );
@@ -22,8 +39,6 @@ export class EthermintChainIdHelper {
     ) {
       throw new Error(`Invalid chainId for ethermint: ${chainId}`);
     }
-
-    const cosmosChainId = ChainIdHelper.parse(chainId);
 
     return {
       ...cosmosChainId,

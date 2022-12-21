@@ -62,6 +62,7 @@ jobs:
         KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
     - run: docker run -v $(pwd):/data builder
       working-directory: ../temp
+    - run: sudo apt-get update
     - run: sudo apt-get install gh awscli
     - run: mkdir release && cd release && gh release download $GITHUB_REF_NAME --pattern '*.firefox.zip' --repo https://github.com/chainapsis/keplr-wallet
       working-directory: ../temp

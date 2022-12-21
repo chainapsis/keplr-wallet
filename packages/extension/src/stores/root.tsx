@@ -4,6 +4,8 @@ import {
   AmplitudeApiKey,
   EthereumEndpoint,
   FiatCurrencies,
+  ICNSFrontendLink,
+  ICNSInfo,
 } from "../config.ui";
 import {
   AccountStore,
@@ -31,6 +33,9 @@ import {
   TokensStore,
   WalletStatus,
   ERC20Queries,
+  ICNSInteractionStore,
+  ICNSQueries,
+  GeneralPermissionStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -62,9 +67,11 @@ export class RootStore {
 
   protected readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
+  public readonly generalPermissionStore: GeneralPermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+  public readonly icnsInteractionStore: ICNSInteractionStore;
 
   public readonly queriesStore: QueriesStore<
     [
@@ -73,7 +80,8 @@ export class RootStore {
       SecretQueries,
       ERC20Queries,
       OsmosisQueries,
-      KeplrETCQueries
+      KeplrETCQueries,
+      ICNSQueries
     ]
   >;
   public readonly accountStore: AccountStore<
@@ -108,7 +116,9 @@ export class RootStore {
 
   constructor() {
     this.uiConfigStore = new UIConfigStore(
-      new ExtensionKVStore("store_ui_config")
+      new ExtensionKVStore("store_ui_config"),
+      ICNSInfo,
+      ICNSFrontendLink
     );
 
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
@@ -154,6 +164,10 @@ export class RootStore {
       this.interactionStore,
       new InExtensionMessageRequester()
     );
+    this.generalPermissionStore = new GeneralPermissionStore(
+      this.interactionStore,
+      new InExtensionMessageRequester()
+    );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
     this.ledgerInitStore = new LedgerInitStore(
       this.interactionStore,
@@ -163,6 +177,7 @@ export class RootStore {
       this.interactionStore,
       CommunityChainInfoRepo
     );
+    this.icnsInteractionStore = new ICNSInteractionStore(this.interactionStore);
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
@@ -176,7 +191,8 @@ export class RootStore {
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
-      })
+      }),
+      ICNSQueries.use()
     );
 
     this.accountStore = new AccountStore(

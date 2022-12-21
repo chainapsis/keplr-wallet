@@ -12,6 +12,8 @@ import {
   OfflineAminoSigner,
   OfflineDirectSigner,
   DirectSignResponse,
+  ICNSAdr36Signatures,
+  ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import {
@@ -140,6 +142,16 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
+  signICNSAdr36(
+    _chainId: string,
+    _contractAddress: string,
+    _owner: string,
+    _username: string,
+    _addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures> {
+    throw new Error("Not implemented");
+  }
+
   getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
@@ -262,6 +274,10 @@ export class MockKeplr implements Keplr {
     _signDoc: StdSignDoc,
     _signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
+    throw new Error("Not yet implemented");
+  }
+
+  getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
     throw new Error("Not yet implemented");
   }
 }

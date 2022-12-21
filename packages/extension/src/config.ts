@@ -41,7 +41,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "cosmos",
       },
     ],
-    coinType: 118,
     features: ["ibc-transfer", "ibc-go"],
   },
   {
@@ -92,7 +91,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         },
       },
     ],
-    features: ["ibc-transfer", "ibc-go", "cosmwasm", "osmosis-txfees"],
+    features: [
+      "ibc-transfer",
+      "ibc-go",
+      "cosmwasm",
+      "wasmd_0.24+",
+      "osmosis-txfees",
+    ],
   },
   {
     rpc: "https://rpc-secret.keplr.app",
@@ -137,13 +142,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "secret",
         gasPriceStep: {
-          low: 0.0125,
-          average: 0.1,
-          high: 0.25,
+          low: 0.2,
+          average: 0.25,
+          high: 0.3,
         },
       },
     ],
-    coinType: 529,
     features: ["secretwasm", "ibc-go", "ibc-transfer"],
   },
   {
@@ -765,12 +769,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/certik"
-        : "http://localhost:8080/chains/certik",
+        ? "https://wallet.keplr.app/chains/shentu"
+        : "http://localhost:8080/chains/shentu",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/certik"
-        : "http://localhost:8080/chains/certik",
+        ? "https://wallet.keplr.app/chains/shentu"
+        : "http://localhost:8080/chains/shentu",
     bip44: {
       coinType: 118,
     },
@@ -1000,92 +1004,9 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
-    rpc: "https://rpc-kava.keplr.app",
-    rest: "https://lcd-kava.keplr.app",
-    chainId: "kava_2222-10",
-    chainName: "Kava",
-    stakeCurrency: {
-      coinDenom: "KAVA",
-      coinMinimalDenom: "ukava",
-      coinDecimals: 6,
-      coinGeckoId: "kava",
-    },
-    walletUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/kava"
-        : "http://localhost:8080/chains/kava",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/kava"
-        : "http://localhost:8080/chains/kava",
-    bip44: { coinType: 459 },
-    alternativeBIP44s: [{ coinType: 118 }],
-    bech32Config: Bech32Address.defaultBech32Config("kava"),
-    currencies: [
-      {
-        coinDenom: "KAVA",
-        coinMinimalDenom: "ukava",
-        coinDecimals: 6,
-        coinGeckoId: "kava",
-      },
-      {
-        coinDenom: "SWP",
-        coinMinimalDenom: "swp",
-        coinDecimals: 6,
-        coinGeckoId: "kava-swap",
-      },
-      {
-        coinDenom: "USDX",
-        coinMinimalDenom: "usdx",
-        coinDecimals: 6,
-        coinGeckoId: "usdx",
-      },
-      {
-        coinDenom: "HARD",
-        coinMinimalDenom: "hard",
-        coinDecimals: 6,
-      },
-      {
-        coinDenom: "BNB",
-        coinMinimalDenom: "bnb",
-        coinDecimals: 8,
-      },
-      {
-        coinDenom: "BTCB",
-        coinMinimalDenom: "btcb",
-        coinDecimals: 8,
-      },
-      {
-        coinDenom: "BUSD",
-        coinMinimalDenom: "busd",
-        coinDecimals: 8,
-      },
-      {
-        coinDenom: "XRPB",
-        coinMinimalDenom: "xrpb",
-        coinDecimals: 8,
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "KAVA",
-        coinMinimalDenom: "ukava",
-        coinDecimals: 6,
-        coinGeckoId: "kava",
-        gasPriceStep: {
-          low: 0.05,
-          average: 0.1,
-          high: 0.25,
-        },
-      },
-    ],
-    coinType: 459,
-    beta: true,
-  },
-  {
-    rpc: "https://rpc-impacthub.keplr.app",
-    rest: "https://lcd-impacthub.keplr.app",
-    chainId: "impacthub-3",
+    rpc: "https://rpc-ixo.keplr.app",
+    rest: "https://lcd-ixo.keplr.app",
+    chainId: "ixo-4",
     chainName: "ixo",
     stakeCurrency: {
       coinDenom: "IXO",
@@ -1998,7 +1919,179 @@ export const EmbedChainInfos: ChainInfo[] = [
       "eth-key-sign",
       "erc20",
     ],
-    beta: true,
+  },
+  {
+    rpc: "https://rpc-injective.keplr.app",
+    rest: "https://lcd-injective.keplr.app",
+    chainId: "injective-1",
+    chainName: "Injective",
+    stakeCurrency: {
+      coinDenom: "INJ",
+      coinMinimalDenom: "inj",
+      coinDecimals: 18,
+      coinGeckoId: "injective-protocol",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/injective"
+        : "http://localhost:8080/chains/injective",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/injective"
+        : "http://localhost:8080/chains/injective",
+    bip44: {
+      coinType: 60,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("inj"),
+    currencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "INJ",
+        coinMinimalDenom: "inj",
+        coinDecimals: 18,
+        coinGeckoId: "injective-protocol",
+        gasPriceStep: {
+          low: 5000000000,
+          average: 25000000000,
+          high: 50000000000,
+        },
+      },
+    ],
+    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+  },
+  {
+    rpc: "https://rpc-kava.keplr.app",
+    rest: "https://lcd-kava.keplr.app",
+    chainId: "kava_2222-10",
+    chainName: "Kava",
+    stakeCurrency: {
+      coinDenom: "KAVA",
+      coinMinimalDenom: "ukava",
+      coinDecimals: 6,
+      coinGeckoId: "kava",
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/kava"
+        : "http://localhost:8080/chains/kava",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/kava"
+        : "http://localhost:8080/chains/kava",
+    bip44: { coinType: 459 },
+    alternativeBIP44s: [{ coinType: 118 }],
+    bech32Config: Bech32Address.defaultBech32Config("kava"),
+    currencies: [
+      {
+        coinDenom: "KAVA",
+        coinMinimalDenom: "ukava",
+        coinDecimals: 6,
+        coinGeckoId: "kava",
+      },
+      {
+        coinDenom: "SWP",
+        coinMinimalDenom: "swp",
+        coinDecimals: 6,
+        coinGeckoId: "kava-swap",
+      },
+      {
+        coinDenom: "USDX",
+        coinMinimalDenom: "usdx",
+        coinDecimals: 6,
+        coinGeckoId: "usdx",
+      },
+      {
+        coinDenom: "HARD",
+        coinMinimalDenom: "hard",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "BNB",
+        coinMinimalDenom: "bnb",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "BTCB",
+        coinMinimalDenom: "btcb",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "BUSD",
+        coinMinimalDenom: "busd",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "XRPB",
+        coinMinimalDenom: "xrpb",
+        coinDecimals: 8,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "KAVA",
+        coinMinimalDenom: "ukava",
+        coinDecimals: 6,
+        coinGeckoId: "kava",
+        gasPriceStep: {
+          low: 0.05,
+          average: 0.1,
+          high: 0.25,
+        },
+      },
+    ],
+  },
+  {
+    rpc: "https://rpc-quicksilver.keplr.app",
+    rest: "https://lcd-quicksilver.keplr.app",
+    chainId: "quicksilver-1",
+    chainName: "Quicksilver",
+    stakeCurrency: {
+      coinDenom: "QCK",
+      coinMinimalDenom: "uqck",
+      coinDecimals: 6,
+    },
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/quicksilver"
+        : "http://localhost:8080/chains/quicksilver",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "quick",
+      bech32PrefixAccPub: "quickpub",
+      bech32PrefixValAddr: "quickvaloper",
+      bech32PrefixValPub: "quickvaloperpub",
+      bech32PrefixConsAddr: "quickvalcons",
+      bech32PrefixConsPub: "quickvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "QCK",
+        coinMinimalDenom: "uqck",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "QCK",
+        coinMinimalDenom: "uqck",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0,
+          average: 0.0001,
+          high: 0.00025,
+        },
+      },
+    ],
+    features: [],
   },
 ];
 

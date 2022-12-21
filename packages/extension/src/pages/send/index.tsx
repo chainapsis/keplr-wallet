@@ -21,7 +21,6 @@ import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
 import { useGasSimulator, useSendTxConfig } from "@keplr-wallet/hooks";
-import { EthereumEndpoint } from "../../config.ui";
 import {
   fitPopupWindow,
   openPopupWindow,
@@ -61,6 +60,7 @@ export const SendPage: FunctionComponent = observer(() => {
     priceStore,
     queriesStore,
     analyticsStore,
+    uiConfigStore,
   } = useStore();
   const current = chainStore.current;
 
@@ -73,8 +73,8 @@ export const SendPage: FunctionComponent = observer(() => {
     current.chainId,
     accountInfo.bech32Address,
     {
-      ensEndpoint: EthereumEndpoint,
       allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
     }
   );
 

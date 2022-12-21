@@ -125,7 +125,12 @@ export const MainPage: FunctionComponent = observer(() => {
     >
       <BIP44SelectModal />
       <LedgerAppModal />
-      <Card className={classnames(style.card, "shadow")}>
+      <Card
+        className={classnames(style.card, "shadow")}
+        style={{
+          marginBottom: "12px",
+        }}
+      >
         <CardBody>
           <div className={style.containerAccountInner}>
             <AccountView />
@@ -136,6 +141,19 @@ export const MainPage: FunctionComponent = observer(() => {
           </div>
         </CardBody>
       </Card>
+      {uiConfigStore.needShowICNSFrontendLink(current.chainId) ? (
+        <a
+          href={uiConfigStore.icnsFrontendLink}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img
+            src={require("../../public/assets/img/icns-banner.png")}
+            style={{ width: "100%", marginBottom: "12px" }}
+          />
+        </a>
+      ) : null}
+
       {showVestingInfo ? <VestingInfo /> : null}
       {chainStore.current.walletUrlForStaking ? (
         <Card className={classnames(style.card, "shadow")}>

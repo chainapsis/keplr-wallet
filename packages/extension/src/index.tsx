@@ -61,6 +61,10 @@ import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
 import { SettingAutoLockPage } from "./pages/setting/autolock";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { ICNSAdr36SignPage } from "./pages/icns/sign";
+import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
+import { SettingSecurityPrivacyPage } from "./pages/setting/security-privacy";
+import { SettingPermissionsGetChainInfosPage } from "./pages/setting/security-privacy/permissions/get-chain-infos";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -238,8 +242,25 @@ ReactDOM.render(
                   path="/setting/autolock"
                   component={SettingAutoLockPage}
                 />
+                <Route
+                  exact
+                  path="/setting/security-privacy"
+                  component={SettingSecurityPrivacyPage}
+                />
                 <Route path="/sign" component={SignPage} />
+                <Route
+                  path="/icns/adr36-signatures"
+                  component={ICNSAdr36SignPage}
+                />
                 <Route path="/suggest-chain" component={ChainSuggestedPage} />
+                <Route
+                  path="/permissions/grant/get-chain-infos"
+                  component={GrantGlobalPermissionGetChainInfosPage}
+                />
+                <Route
+                  path="/setting/permissions/get-chain-infos"
+                  component={SettingPermissionsGetChainInfosPage}
+                />
               </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>

@@ -12,8 +12,11 @@ export const useSendTxConfig = (
   chainId: string,
   sender: string,
   options: {
-    ensEndpoint?: string;
     allowHexAddressOnEthermint?: boolean;
+    icns?: {
+      chainId: string;
+      resolverContractAddress: string;
+    };
   } = {}
 ) => {
   const amountConfig = useAmountConfig(
