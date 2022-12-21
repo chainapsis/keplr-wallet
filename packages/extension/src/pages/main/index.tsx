@@ -139,7 +139,7 @@ export const MainPage: FunctionComponent = observer(() => {
           </div>
         </CardBody>
       </Card>
-      {uiConfigStore.icnsFrontendLink ? (
+      {uiConfigStore.needShowICNSFrontendLink(current.chainId) ? (
         <a
           href={uiConfigStore.icnsFrontendLink}
           target="_blank"

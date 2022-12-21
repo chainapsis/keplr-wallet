@@ -3,6 +3,8 @@
  */
 import { action, makeObservable, observable, runInAction, toJS } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
+import { computedFn } from "mobx-utils";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -29,14 +31,16 @@ export class UIConfigStore {
   @observable
   protected _icnsFrontendLink: string = "";
 
+  @observable
+  protected _icnsFrontendAllowlistChains: string = "";
+
   constructor(
     protected readonly kvStore: KVStore,
-    _icnsInfo:
-      | {
-          readonly chainId: string;
-          readonly resolverContractAddress: string;
-        }
-      | undefined
+    _icnsInfo?: {
+      readonly chainId: string;
+      readonly resolverContractAddress: string;
+    },
+    _icnsFrontendLink?: string
   ) {
     this._isBeta = navigator.userAgent.includes("Firefox");
     this._platform = navigator.userAgent.includes("Firefox")
@@ -44,6 +48,7 @@ export class UIConfigStore {
       : "chrome";
 
     this._icnsInfo = _icnsInfo;
+    this._icnsFrontendLink = _icnsFrontendLink || "";
 
     makeObservable(this);
 
@@ -71,82 +76,31 @@ export class UIConfigStore {
       };
     });
 
-    try {
-      // Temporal solution for ICNS updates dynamically.
-      const data = await this.kvStore.get<{
-        readonly chainId: string;
-        readonly resolverContractAddress: string;
-      }>("________temp____icns_updates");
+    if (this.icnsFrontendLink) {
+      try {
+        const prev = await this.kvStore.get<string>("______icns___allowlist");
+        if (prev) {
+          runInAction(() => {
+            this._icnsFrontendAllowlistChains = prev;
+          });
+        }
 
-      if (data) {
-        runInAction(() => {
-          this._icnsInfo = data;
-        });
-      }
-
-      {
-        const data = await this.kvStore.get<string>(
-          "________temp____icns_updates__link"
+        const icnsAllowlistRes = await fetch(
+          new URL("/api/allowlist", this.icnsFrontendLink).toString()
         );
-        if (data) {
+
+        if (icnsAllowlistRes.ok && icnsAllowlistRes.status === 200) {
+          const res = await icnsAllowlistRes.json();
+          const chains = res?.chains || "";
+
           runInAction(() => {
-            this._icnsFrontendLink = data;
+            this._icnsFrontendAllowlistChains = chains;
           });
+          await this.kvStore.set("______icns___allowlist", chains);
         }
+      } catch (e) {
+        console.log(e);
       }
-
-      const icnsInfoFetched = await fetch(
-        "https://icns-updates.s3.us-west-2.amazonaws.com/icns-info.json"
-      );
-
-      if (icnsInfoFetched.ok) {
-        const icnsInfo = await icnsInfoFetched.json();
-
-        console.log("ICNS info fetched", icnsInfo);
-
-        if (icnsInfo && typeof icnsInfo.icnsFrontendLink === "string") {
-          runInAction(() => {
-            this._icnsFrontendLink = icnsInfo.icnsFrontendLink;
-          });
-
-          await this.kvStore.set(
-            "________temp____icns_updates__link",
-            icnsInfo.icnsFrontendLink
-          );
-        } else {
-          runInAction(() => {
-            this._icnsFrontendLink = "";
-          });
-
-          await this.kvStore.set("________temp____icns_updates__link", null);
-        }
-
-        if (
-          icnsInfo &&
-          typeof icnsInfo.chainId === "string" &&
-          typeof icnsInfo.resolverContractAddress === "string"
-        ) {
-          runInAction(() => {
-            this._icnsInfo = {
-              chainId: icnsInfo.chainId,
-              resolverContractAddress: icnsInfo.resolverContractAddress,
-            };
-          });
-
-          await this.kvStore.set("________temp____icns_updates", {
-            chainId: icnsInfo.chainId,
-            resolverContractAddress: icnsInfo.resolverContractAddress,
-          });
-        } else {
-          runInAction(() => {
-            this._icnsInfo = undefined;
-          });
-
-          await this.kvStore.set("________temp____icns_updates", null);
-        }
-      }
-    } catch (e) {
-      console.log(e);
     }
   }
 
@@ -177,6 +131,36 @@ export class UIConfigStore {
   get icnsFrontendLink(): string {
     return this._icnsFrontendLink;
   }
+
+  needShowICNSFrontendLink = computedFn((chainId: string): boolean => {
+    if (!this.icnsFrontendLink) {
+      return false;
+    }
+
+    if (!this._icnsFrontendAllowlistChains) {
+      return true;
+    }
+
+    try {
+      const allowIdentifiers = this._icnsFrontendAllowlistChains
+        .split(",")
+        .map((str) => str.trim())
+        .filter((str) => str.length > 0)
+        .map((chainId) => ChainIdHelper.parse(chainId).identifier);
+
+      const allowIdentifierMap = new Map<string, boolean | undefined>();
+      for (const identifier of allowIdentifiers) {
+        allowIdentifierMap.set(identifier, true);
+      }
+
+      return (
+        allowIdentifierMap.get(ChainIdHelper.parse(chainId).identifier) === true
+      );
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+  });
 
   async save() {
     const data = toJS(this.options);
