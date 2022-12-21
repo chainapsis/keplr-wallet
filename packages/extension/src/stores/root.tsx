@@ -4,6 +4,7 @@ import {
   AmplitudeApiKey,
   EthereumEndpoint,
   FiatCurrencies,
+  ICNSFrontendLink,
   ICNSInfo,
 } from "../config.ui";
 import {
@@ -113,7 +114,8 @@ export class RootStore {
   constructor() {
     this.uiConfigStore = new UIConfigStore(
       new ExtensionKVStore("store_ui_config"),
-      ICNSInfo
+      ICNSInfo,
+      ICNSFrontendLink
     );
 
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
