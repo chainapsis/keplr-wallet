@@ -1833,12 +1833,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
-        coinDenom: "ibc GRAV",
-        coinMinimalDenom:
-          "erc20:0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd:ibc GRAV",
-        coinDecimals: 6,
-      },
-      {
         coinDenom: "JUNO",
         coinMinimalDenom:
           "erc20:0x3452e23F9c4cC62c70B7ADAd699B264AF3549C19:JUNO",
@@ -1863,15 +1857,57 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
-        coinDenom: "ibc G-USDC",
+        coinDenom: "TORI",
         coinMinimalDenom:
-          "erc20:0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687:ibc G-USDC",
+          "erc20:0x205CF44075E77A3543abC690437F3b2819bc450a:TORI",
         coinDecimals: 6,
+      },
+      {
+        coinDenom: "USK",
+        coinMinimalDenom:
+          "erc20:0x13974cf36984216C90D1F4FC815C156092feA396:USK",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "axlDAI",
+        coinMinimalDenom:
+          "erc20:0x4A2a90D444DbB7163B5861b772f882BbA394Ca67:axlDAI",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "axlUSDT",
+        coinMinimalDenom:
+          "erc20:0xe01C6D4987Fc8dCE22988DADa92d56dA701d0Fe0:axlUSDT",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "axlWBTC",
+        coinMinimalDenom:
+          "erc20:0xF5b24c0093b65408ACE53df7ce86a02448d53b25:axlWBTC",
+        coinDecimals: 8,
+      },
+      {
+        coinDenom: "axlWETH",
+        coinMinimalDenom:
+          "erc20:0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5:axlWETH",
+        coinDecimals: 18,
       },
       {
         coinDenom: "axlUSDC",
         coinMinimalDenom:
           "erc20:0x15C3Eb3B621d1Bff62CbA1c9536B7c1AE9149b57:axlUSDC",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ibc GRAV",
+        coinMinimalDenom:
+          "erc20:0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd:ibc GRAV",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ibc G-USDC",
+        coinMinimalDenom:
+          "erc20:0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687:ibc G-USDC",
         coinDecimals: 6,
       },
       {
@@ -1897,6 +1933,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom:
           "erc20:0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E:ibc G-WETH",
         coinDecimals: 18,
+      },
+      {
+        coinDenom: "stATOM",
+        coinMinimalDenom:
+          "erc20:0xc8B4d3e67238e38B20d38908646fF6F4F48De5EC:stATOM",
+        coinDecimals: 6,
       },
     ],
     feeCurrencies: [
