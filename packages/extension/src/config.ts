@@ -1815,9 +1815,9 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinGeckoId: "evmos",
       },
       {
-        coinDenom: "EVMOS",
+        coinDenom: "WEVMOS",
         coinMinimalDenom:
-          "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:EVMOS",
+          "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:WEVMOS",
         coinDecimals: 18,
       },
       {
@@ -1833,9 +1833,9 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
-        coinDenom: "GRAV",
+        coinDenom: "ibc GRAV",
         coinMinimalDenom:
-          "erc20:0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd:GRAV",
+          "erc20:0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd:ibc GRAV",
         coinDecimals: 6,
       },
       {
@@ -1863,9 +1863,9 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
-        coinDenom: "USDC.grv",
+        coinDenom: "ibc G-USDC",
         coinMinimalDenom:
-          "erc20:0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687:USDC.grv",
+          "erc20:0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687:ibc G-USDC",
         coinDecimals: 6,
       },
       {
@@ -1875,27 +1875,27 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
       },
       {
-        coinDenom: "gDAI",
+        coinDenom: "ibc G-DAI",
         coinMinimalDenom:
-          "erc20:0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75:gDAI",
+          "erc20:0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75:ibc G-DAI",
         coinDecimals: 18,
       },
       {
-        coinDenom: "gUSDT",
+        coinDenom: "ibc G-USDT",
         coinMinimalDenom:
-          "erc20:0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265:gUSDT",
+          "erc20:0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265:ibc G-USDT",
         coinDecimals: 6,
       },
       {
-        coinDenom: "gWBTC",
+        coinDenom: "ibc G-WBTC",
         coinMinimalDenom:
-          "erc20:0x1D54EcB8583Ca25895c512A8308389fFD581F9c9:gWBTC",
+          "erc20:0x1D54EcB8583Ca25895c512A8308389fFD581F9c9:ibc G-WBTC",
         coinDecimals: 8,
       },
       {
-        coinDenom: "gWETH",
+        coinDenom: "ibc G-WETH",
         coinMinimalDenom:
-          "erc20:0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E:gWETH",
+          "erc20:0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E:ibc G-WETH",
         coinDecimals: 18,
       },
     ],
