@@ -9,7 +9,7 @@ import {
   DirectSignResponse,
   OfflineDirectSigner,
 } from "../cosmjs";
-import { SecretUtils } from "secretjs/types/enigmautils";
+import { SecretUtils } from "../secretjs";
 import Long from "long";
 
 export interface Key {
@@ -60,6 +60,15 @@ export interface Keplr {
 
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainIds: string | string[]): Promise<void>;
+  /**
+   * Delete permissions granted to origin.
+   * If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).
+   * Else, remove all permissions granted to origin (In this case, permissions that are not assigned to each chain, such as getChainInfosWithoutEndpoints(), are also deleted).
+   *
+   * @param chainIds disable(Remove approve domain(s)) target chain ID(s).
+   */
+  disable(chainIds?: string | string[]): Promise<void>;
+
   getKey(chainId: string): Promise<Key>;
   signAmino(
     chainId: string,
@@ -180,4 +189,10 @@ export interface Keplr {
   ): Promise<AminoSignResponse>;
 
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]>;
+
+  /** Change wallet extension user name **/
+  changeKeyRingName(opts: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string>;
 }

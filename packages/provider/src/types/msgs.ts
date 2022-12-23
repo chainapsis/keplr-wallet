@@ -34,6 +34,30 @@ export class EnableAccessMsg extends Message<void> {
   }
 }
 
+export class DisableAccessMsg extends Message<void> {
+  public static type() {
+    return "disable-access";
+  }
+
+  constructor(public readonly chainIds: string[]) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainIds) {
+      throw new Error("chain id not set");
+    }
+  }
+
+  route(): string {
+    return "permission";
+  }
+
+  type(): string {
+    return DisableAccessMsg.type();
+  }
+}
+
 export class GetKeyMsg extends Message<Key> {
   public static type() {
     return "get-key";
@@ -653,5 +677,33 @@ export class GetAnalyticsIdMsg extends Message<string> {
 
   type(): string {
     return GetAnalyticsIdMsg.type();
+  }
+}
+
+export class ChangeKeyRingNameMsg extends Message<string> {
+  public static type() {
+    return "change-keyring-name-msg";
+  }
+
+  constructor(
+    public readonly defaultName: string,
+    public readonly editable: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // Not allow empty name.
+    if (!this.defaultName) {
+      throw new Error("default name not set");
+    }
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return ChangeKeyRingNameMsg.type();
   }
 }

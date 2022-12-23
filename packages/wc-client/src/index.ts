@@ -20,12 +20,12 @@ import {
   StdSignDoc,
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
+  SecretUtils,
 } from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
 } from "@keplr-wallet/provider";
-import { SecretUtils } from "secretjs/types/enigmautils";
 import { payloadId } from "@walletconnect/utils";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";
@@ -510,6 +510,17 @@ export class KeplrWalletConnectV1 implements Keplr {
   }
 
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
+    throw new Error("Not yet implemented");
+  }
+
+  disable(_chainIds?: string | string[]): Promise<void> {
+    throw new Error("Not yet implemented");
+  }
+
+  changeKeyRingName(_opts: {
+    defaultName: string;
+    editable?: boolean | undefined;
+  }): Promise<string> {
     throw new Error("Not yet implemented");
   }
 }
