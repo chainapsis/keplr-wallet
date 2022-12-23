@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "axios": "^0.27.2",
-    "long": "^4.0.0",
-    "secretjs": "0.17.7"
+    "long": "^4.0.0"
   }
 }
