@@ -363,6 +363,10 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
       return undefined;
     }
 
+    if (coin.toDec().isZero()) {
+      return new PricePretty(fiatCurrency, 0);
+    }
+
     const price = this.getPrice(coin.currency.coinGeckoId, vsCurrrency);
     if (price === undefined) {
       return new PricePretty(fiatCurrency, new Int(0)).ready(false);
