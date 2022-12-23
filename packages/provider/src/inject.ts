@@ -332,6 +332,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     await this.requestMethod("enable", [chainIds]);
   }
 
+  async disable(chainIds: string | string[]): Promise<void> {
+    await this.requestMethod("disable", [chainIds]);
+  }
+
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
     if (
       chainInfo.features?.includes("stargate") ||

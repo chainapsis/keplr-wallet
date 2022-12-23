@@ -280,4 +280,8 @@ export class MockKeplr implements Keplr {
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
     throw new Error("Not yet implemented");
   }
+
+  disable(_chainIds: string | string[]): Promise<void> {
+    throw new Error("Not yet implemented");
+  }
 }

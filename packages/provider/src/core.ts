@@ -36,6 +36,7 @@ import {
   GetAnalyticsIdMsg,
   RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
+  DisableAccessMsg,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -66,6 +67,17 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     await this.requester.sendMessage(
       BACKGROUND_PORT,
       new EnableAccessMsg(chainIds)
+    );
+  }
+
+  async disable(chainIds: string | string[]): Promise<void> {
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
+    await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new DisableAccessMsg(chainIds)
     );
   }
 
