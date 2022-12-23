@@ -16,6 +16,7 @@ import {
   OfflineDirectSigner,
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
+  SecretUtils,
 } from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
@@ -39,7 +40,6 @@ import {
   DisableAccessMsg,
   ChangeKeyRingNameMsg,
 } from "./types";
-import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
 

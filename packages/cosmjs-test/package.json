@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@cosmjs/stargate": "^0.29.3",
-    "@keplr-wallet/provider-mock": "0.11.28"
+    "@keplr-wallet/provider-mock": "0.11.28",
+    "secretjs": "^1.6.0"
   }
 }

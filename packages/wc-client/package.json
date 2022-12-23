@@ -23,7 +23,6 @@
     "@walletconnect/types": "^1.6.4",
     "@walletconnect/utils": "^1.6.4",
     "buffer": "^6.0.3",
-    "deepmerge": "^4.2.2",
-    "secretjs": "0.17.7"
+    "deepmerge": "^4.2.2"
   }
 }

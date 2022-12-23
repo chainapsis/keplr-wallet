@@ -20,12 +20,12 @@ import {
   StdSignDoc,
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
+  SecretUtils,
 } from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
 } from "@keplr-wallet/provider";
-import { SecretUtils } from "secretjs/types/enigmautils";
 import { payloadId } from "@walletconnect/utils";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";

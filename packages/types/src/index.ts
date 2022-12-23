@@ -6,4 +6,4 @@ export * from "./wallet";
 export * from "./window";
 export * from "./ethereum";
 export * from "./cosmjs";
-export * from "./enigma-utils";
+export * from "./secretjs";

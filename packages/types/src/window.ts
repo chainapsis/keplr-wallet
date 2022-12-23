@@ -1,6 +1,6 @@
 import { Keplr } from "./wallet";
 import { OfflineAminoSigner, OfflineDirectSigner } from "./cosmjs";
-import { SecretUtils } from "./enigma-utils";
+import { SecretUtils } from "./secretjs";
 
 export interface Window {
   keplr?: Keplr;
