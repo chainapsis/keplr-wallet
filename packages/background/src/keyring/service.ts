@@ -886,17 +886,18 @@ Salt: ${salt}`;
 
   async changeKeyRingName(
     env: Env,
-    {
-      defaultName,
-      editable,
-      index,
-    }: { defaultName: string; editable: boolean; index: number }
-  ) {
-    return (await this.interactionService.waitApprove(
+    index: number,
+    { defaultName, editable }: { defaultName: string; editable: boolean }
+  ): Promise<string> {
+    const newName = (await this.interactionService.waitApprove(
       env,
       `/setting/keyring/change/name/${index}`,
       "change-keyring-name",
       { defaultName, editable }
     )) as string;
+
+    await this.updateNameKeyRing(index, newName);
+
+    return newName;
   }
 }

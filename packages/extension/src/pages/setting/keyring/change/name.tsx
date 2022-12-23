@@ -58,7 +58,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
     }
   }, [match.params.index]);
 
-  if (isKeyStoreReady && keyStore === undefined) {
+  if (isKeyStoreReady && keyStore == null) {
     return null;
   }
 
@@ -79,7 +79,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
           setLoading(true);
           try {
             // Close the popup by external change name message
-            if (waitingNameData !== undefined) {
+            if (waitingNameData != null) {
               await keyRingStore.approveChangeName(data.name);
               window.close();
               return;
@@ -120,15 +120,11 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
           })}
           name="name"
           error={errors.name && errors.name.message}
-          ref={
-            keyStore === undefined
-              ? null
-              : register({
-                  required: intl.formatMessage({
-                    id: "setting.keyring.change.input.name.error.required",
-                  }),
-                })
-          }
+          ref={register({
+            required: intl.formatMessage({
+              id: "setting.keyring.change.input.name.error.required",
+            }),
+          })}
           readOnly={waitingNameData !== undefined && !waitingNameData?.editable}
         />
 

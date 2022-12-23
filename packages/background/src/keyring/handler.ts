@@ -477,6 +477,9 @@ const handleChangeKeyNameMsg: (
   service: KeyRingService
 ) => InternalHandler<ChangeKeyRingNameMsg> = (service) => {
   return async (env, msg) => {
+    // Ensure that keyring is unlocked and selected.
+    await service.enable(env);
+
     let index = -1;
     service.getMultiKeyStoreInfo().forEach(({ selected }, idx) => {
       if (selected) {
@@ -488,10 +491,9 @@ const handleChangeKeyNameMsg: (
       throw new Error("No account selected");
     }
 
-    return await service.changeKeyRingName(env, {
+    return await service.changeKeyRingName(env, index, {
       defaultName: msg.defaultName,
       editable: msg.editable,
-      index,
     });
   };
 };
