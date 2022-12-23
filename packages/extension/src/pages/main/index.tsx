@@ -25,6 +25,7 @@ import { Dec } from "@keplr-wallet/unit";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { VestingInfo } from "./vesting-info";
 import { LedgerAppModal } from "./ledger-app-modal";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -50,6 +51,16 @@ export const MainPage: FunctionComponent = observer(() => {
       prevChainId.current = currentChainId;
     }
   }, [chainStore, confirm, chainStore.isInitializing, currentChainId, intl]);
+
+  useEffect(() => {
+    if (ChainIdHelper.parse(currentChainId).identifier === "sifchain") {
+      confirm.confirm({
+        paragraph: "Sifchain has been halted for unknown reason.",
+        hideNo: true,
+      });
+    }
+    // `confirm` must not be included to deps.
+  }, [currentChainId]);
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
