@@ -883,4 +883,20 @@ Salt: ${salt}`;
   async initializeNonDefaultLedgerApp(env: Env, ledgerApp: LedgerApp) {
     return await this.keyRing.initializeNonDefaultLedgerApp(env, ledgerApp);
   }
+
+  async changeKeyRingName(
+    env: Env,
+    {
+      defaultName,
+      editable,
+      index,
+    }: { defaultName: string; editable: boolean; index: number }
+  ) {
+    return (await this.interactionService.waitApprove(
+      env,
+      `/setting/keyring/change/name/${index}`,
+      "change-keyring-name",
+      { defaultName, editable }
+    )) as string;
+  }
 }

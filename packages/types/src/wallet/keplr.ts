@@ -189,4 +189,10 @@ export interface Keplr {
   ): Promise<AminoSignResponse>;
 
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]>;
+
+  /** Change wallet extension user name **/
+  changeKeyRingName(opts: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string>;
 }

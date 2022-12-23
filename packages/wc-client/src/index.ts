@@ -516,4 +516,11 @@ export class KeplrWalletConnectV1 implements Keplr {
   disable(_chainIds?: string | string[]): Promise<void> {
     throw new Error("Not yet implemented");
   }
+
+  changeKeyRingName(_opts: {
+    defaultName: string;
+    editable?: boolean | undefined;
+  }): Promise<string> {
+    throw new Error("Not yet implemented");
+  }
 }

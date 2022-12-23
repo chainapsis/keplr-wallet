@@ -37,6 +37,7 @@ import {
   RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
   DisableAccessMsg,
+  ChangeKeyRingNameMsg,
 } from "./types";
 import { SecretUtils } from "secretjs/types/enigmautils";
 
@@ -408,5 +409,17 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   __core__getAnalyticsId(): Promise<string> {
     const msg = new GetAnalyticsIdMsg();
     return this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async changeKeyRingName({
+    defaultName,
+    editable = true,
+  }: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string> {
+    const msg = new ChangeKeyRingNameMsg(defaultName, editable);
+
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }
