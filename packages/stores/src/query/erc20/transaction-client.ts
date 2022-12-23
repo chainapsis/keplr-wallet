@@ -96,8 +96,7 @@ export class ERC20TxClient {
     const nonce = await this.provider.getTransactionCount(sender);
 
     // Convert contract data to hex string using ABCI encoding.
-    const contractData = this.encodeContractData("transferFrom", [
-      sender,
+    const contractData = this.encodeContractData("transfer", [
       recipient,
       value.toHexString(),
     ]);

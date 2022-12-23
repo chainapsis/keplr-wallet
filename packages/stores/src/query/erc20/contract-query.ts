@@ -71,22 +71,18 @@ export const erc20MetadataInterface: Interface = new Interface([
     type: "function",
   },
   {
-    constant: true,
+    constant: false,
     inputs: [
-      {
-        name: "from",
-        type: "address",
-      },
       {
         name: "to",
         type: "address",
       },
       {
-        name: "value",
+        name: "amount",
         type: "uint256",
       },
     ],
-    name: "transferFrom",
+    name: "transfer",
     outputs: [
       {
         name: "",
@@ -94,7 +90,7 @@ export const erc20MetadataInterface: Interface = new Interface([
       },
     ],
     payable: false,
-    stateMutability: "view",
+    stateMutability: "nonPayable",
     type: "function",
   },
 ]);

@@ -80,22 +80,13 @@ export const SendPage: FunctionComponent = observer(() => {
 
   const denomHelper = useMemo(() => {
     if (sendConfigs.amountConfig.sendCurrency) {
-      const denomHelper = new DenomHelper(
+      return new DenomHelper(
         sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
       );
-
-      // Begin fetching contract data for unit conversion on send
-      if (denomHelper.type === "erc20") {
-        accountInfo.ethereum.fetchContractTokenInfo(
-          denomHelper.contractAddress
-        );
-      }
-
-      return denomHelper;
     }
 
     return undefined;
-  }, [sendConfigs.amountConfig.sendCurrency, accountInfo]);
+  }, [sendConfigs.amountConfig.sendCurrency]);
 
   const gasSimulatorKey = useMemo(() => {
     if (sendConfigs.amountConfig.sendCurrency) {
@@ -316,7 +307,7 @@ export const SendPage: FunctionComponent = observer(() => {
                   sendConfigs.recipientConfig.recipient,
                   accountInfo.ethereum.scaleNativeToContractDenom(
                     sendConfigs.amountConfig.amount,
-                    contractAddress
+                    sendConfigs.amountConfig.sendCurrency.coinDecimals
                   ),
                   maxFees.div(gasLimit),
                   gasLimit

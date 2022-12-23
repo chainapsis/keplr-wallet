@@ -1,9 +1,5 @@
 import { AccountSetBase, AccountSetBaseSuper } from "./base";
-import {
-  IQueriesStore,
-  ERC20Queries,
-  ObservableQueryERC20ContractInfo,
-} from "../query";
+import { IQueriesStore, ERC20Queries } from "../query";
 import { Buffer } from "buffer/";
 import { ChainGetter } from "../common";
 import { AppCurrency, EthSignType } from "@keplr-wallet/types";
@@ -38,11 +34,6 @@ export const EthereumAccount = {
 };
 
 export class EthereumAccountImpl {
-  protected erc20ContractQueries: Map<
-    string,
-    ObservableQueryERC20ContractInfo
-  > = new Map();
-
   constructor(
     protected readonly base: AccountSetBase & CosmosAccount,
     protected readonly chainGetter: ChainGetter,
@@ -103,10 +94,7 @@ export class EthereumAccountImpl {
     }
 
     // Wait for block confirmation, then refresh balance
-    const receipt = await txClient.waitForTransaction(response.hash);
-
-    console.log("Receipt");
-    console.log(receipt);
+    await txClient.waitForTransaction(response.hash);
 
     // Refresh the token balance on successful transaction
     const queryBalance = this.queriesStore
@@ -121,40 +109,10 @@ export class EthereumAccountImpl {
     }
   }
 
-  public fetchContractTokenInfo(contractAddress: string) {
-    if (!this.erc20ContractQueries.has(contractAddress)) {
-      const erc20ContractQuery = this.queriesStore.get(this.chainId).erc20
-        .queryERC20ContractInfo;
-
-      // Start contract query
-      erc20ContractQuery.getQueryContract(contractAddress).tokenInfo;
-
-      // Save query in internal map
-      this.erc20ContractQueries.set(contractAddress, erc20ContractQuery);
-    }
-  }
-
   public scaleNativeToContractDenom(
     value: string,
-    contractAddress: string
+    decimals: number
   ): BigNumber {
-    // Fetch cached token info
-    const erc20ContractQuery = this.erc20ContractQueries.get(contractAddress);
-    if (!erc20ContractQuery) {
-      throw new Error("No pre-fetched contract query found");
-    }
-
-    const tokenInfo = erc20ContractQuery.getQueryContract(contractAddress)
-      .tokenInfo;
-
-    if (!tokenInfo || !tokenInfo.decimals) {
-      throw new Error(
-        "Token info not found, cannot convert to contract denomination"
-      );
-    }
-
-    const decimals = tokenInfo.decimals;
-
     // Convert to contract denomination
     const factor = new Dec(10).pow(new Int(decimals));
     const dec = new Dec(value).mul(factor);
