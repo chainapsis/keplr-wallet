@@ -70,14 +70,14 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  async disable(chainIds: string | string[]): Promise<void> {
+  async disable(chainIds?: string | string[]): Promise<void> {
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
     }
 
     await this.requester.sendMessage(
       BACKGROUND_PORT,
-      new DisableAccessMsg(chainIds)
+      new DisableAccessMsg(chainIds ?? [])
     );
   }
 

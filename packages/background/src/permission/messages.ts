@@ -39,7 +39,7 @@ export class DisableAccessMsg extends Message<void> {
   }
 
   validateBasic(): void {
-    if (!this.chainIds || this.chainIds.length === 0) {
+    if (!this.chainIds) {
       throw new KeplrError("permission", 100, "chain id not set");
     }
   }

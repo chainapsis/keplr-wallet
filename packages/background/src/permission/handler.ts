@@ -78,11 +78,7 @@ const handleDisableAccessMsg: (
   service: PermissionService
 ) => InternalHandler<EnableAccessMsg> = (service) => {
   return async (env, msg) => {
-    return await service.removeBasicAccessPermission(
-      env,
-      msg.chainIds,
-      msg.origin
-    );
+    return await service.disable(env, msg.chainIds, msg.origin);
   };
 };
 
