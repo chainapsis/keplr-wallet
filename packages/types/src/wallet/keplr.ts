@@ -61,9 +61,13 @@ export interface Keplr {
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainIds: string | string[]): Promise<void>;
   /**
+   * Delete permissions granted to origin.
+   * If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).
+   * Else, remove all permissions granted to origin (In this case, permissions that are not assigned to each chain, such as getChainInfosWithoutEndpoints(), are also deleted).
+   *
    * @param chainIds disable(Remove approve domain(s)) target chain ID(s).
    */
-  disable(chainIds: string | string[]): Promise<void>;
+  disable(chainIds?: string | string[]): Promise<void>;
 
   getKey(chainId: string): Promise<Key>;
   signAmino(

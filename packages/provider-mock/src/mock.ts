@@ -281,7 +281,7 @@ export class MockKeplr implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  disable(_chainIds: string | string[]): Promise<void> {
+  disable(_chainIds?: string | string[]): Promise<void> {
     throw new Error("Not yet implemented");
   }
 }
