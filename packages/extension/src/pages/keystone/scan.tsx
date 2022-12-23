@@ -90,13 +90,13 @@ export function Scan({ type, onChange, onBack }: Props) {
             options={{
               width: 248,
               height: 248,
+              blur: false,
             }}
           />
         </div>
         {isPermitted ? (
           <p className={style["help-text"]}>
-            Position the QR code in front of your camera. The screen is blurred
-            but this will not affect the scan.
+            Position the QR code in front of your camera.
           </p>
         ) : (
           <p className={style["error-text"]}>

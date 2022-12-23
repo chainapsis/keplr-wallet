@@ -68,11 +68,6 @@ export const RegisterPage: FunctionComponent = observer(() => {
       intro: RecoverMnemonicIntro,
       page: RecoverMnemonicPage,
     },
-    {
-      type: TypeImportKeystone,
-      intro: ImportKeystoneIntro,
-      page: ImportKeystonePage,
-    },
     // Currently, there is no way to use ledger with keplr on firefox.
     // Temporarily, hide the ledger usage.
     ...(uiConfigStore.platform !== "firefox"
@@ -84,6 +79,11 @@ export const RegisterPage: FunctionComponent = observer(() => {
           },
         ]
       : []),
+    {
+      type: TypeImportKeystone,
+      intro: ImportKeystoneIntro,
+      page: ImportKeystonePage,
+    },
   ]);
 
   return (

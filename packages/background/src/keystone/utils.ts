@@ -1,16 +1,16 @@
-import { Slip10RawIndex, stringToPath } from "@cosmjs/crypto";
-
-export const toNumber = (num: Slip10RawIndex) =>
-  num.toNumber() - (num.isHardened() ? 2 ** 31 : 0);
+export const toNumber = (num: string) => {
+  const isHardened = /'$/.test(num);
+  return isHardened ? +num.slice(0, -1) : +num;
+};
 
 export const parseHDPath = (hdPath: string) => {
-  const path = stringToPath(hdPath);
+  const path = hdPath.split(/\//);
   return {
-    coinType: toNumber(path[1]),
+    coinType: toNumber(path[2]),
     bip44HDPath: {
-      account: toNumber(path[2]),
-      change: toNumber(path[3]),
-      addressIndex: toNumber(path[4]),
+      account: toNumber(path[3]),
+      change: toNumber(path[4]),
+      addressIndex: toNumber(path[5]),
     },
   };
 };

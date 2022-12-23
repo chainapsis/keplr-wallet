@@ -5,8 +5,7 @@
     "outDir": "build",
     "declaration": true,
     "rootDir": "src",
-    "jsx": "react",
-    "skipLibCheck": true
+    "jsx": "react"
   },
   "include": [
     "src/**/*"

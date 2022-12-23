@@ -368,6 +368,7 @@ export class KeyRing {
     this.password = password;
     this.keyStore = keyStore;
     this.multiKeyStore.push(this.keyStore);
+    this.keystonePublicKey = publicKey;
 
     await this.save();
 

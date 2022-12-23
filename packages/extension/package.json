@@ -16,7 +16,6 @@
     "version": "zx ./scripts/lerna-lifecyle-version.mjs"
   },
   "dependencies": {
-    "@cosmjs/crypto": "^0.29.3",
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@keplr-wallet/analytics": "0.11.28",
     "@keplr-wallet/background": "0.11.28",
