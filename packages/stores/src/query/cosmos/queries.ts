@@ -39,6 +39,10 @@ import {
 import { ObservableQueryDistributionParams } from "./distribution";
 import { ObservableQueryRPCStatus } from "./status";
 import { ObservableQueryJunoAnnualProvisions } from "./supply/juno";
+import {
+  ObservableQueryStrideEpochProvisions,
+  ObservableQueryStrideMintParams,
+} from "./supply/stride";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;
@@ -157,6 +161,12 @@ export class CosmosQueriesImpl {
       chainGetter
     );
 
+    const queryStrideMintParams = new ObservableQueryStrideMintParams(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
     this.queryInflation = new ObservableQueryInflation(
       chainId,
       chainGetter,
@@ -174,7 +184,9 @@ export class CosmosQueriesImpl {
       ),
       osmosisMintParams,
       new ObservableQueryJunoAnnualProvisions(kvStore, chainId, chainGetter),
-      this.queryDistributionParams
+      this.queryDistributionParams,
+      new ObservableQueryStrideEpochProvisions(kvStore, chainId, chainGetter),
+      queryStrideMintParams
     );
     this.queryRewards = new ObservableQueryRewards(
       kvStore,
