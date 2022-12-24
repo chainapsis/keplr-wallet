@@ -57,11 +57,10 @@ export class EthereumAccountImpl {
       throw new Error("Can't get the Keplr API");
     }
 
+    // Get hex representations of sender and recipient
     const senderBech32 = this.base.bech32Address;
-    // Get hex representation of sender's account
     const senderHex = this.base.ethereumHexAddress;
 
-    // Convert recipient address to hex
     const recipientHex = Bech32Address.fromBech32(
       recipientBech32,
       this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
@@ -87,14 +86,20 @@ export class EthereumAccountImpl {
 
     const response = await txClient.broadcastSignedTx(signedTxBytes);
 
-    // If applicable, send the hash back
+    // Send the transaction hash back
     const hash = Buffer.from(response.hash.replace("0x", ""), "hex");
     if (onTxEvents?.onBroadcasted) {
       onTxEvents.onBroadcasted(hash);
     }
 
-    // Wait for block confirmation, then refresh balance
-    await txClient.waitForTransaction(response.hash);
+    // Wait for block confirmation and transaction status
+    const receipt = await txClient.waitForTransaction(response.hash);
+    if (!receipt.status) {
+      // For some reason, receipt.logs are empty, so we show a generic error message instead
+      throw new Error(
+        "EVM transaction execution rejected, please check all fields and retry."
+      );
+    }
 
     // Refresh the token balance on successful transaction
     const queryBalance = this.queriesStore
