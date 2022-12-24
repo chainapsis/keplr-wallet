@@ -331,6 +331,7 @@ export class ObservableQueryERC20ContractDataInner {
     return this._queryBalance.balance;
   }
 
+  @computed
   get tokenInfo(): ERC20ContractTokenInfo {
     return {
       name: this.name,
@@ -341,6 +342,7 @@ export class ObservableQueryERC20ContractDataInner {
 
   @computed
   get isFetching(): boolean {
+    // Ignore queryBalance, since userAddress may be empty
     return (
       this._queryDecimals.isFetching ||
       this._queryName.isFetching ||
@@ -349,6 +351,7 @@ export class ObservableQueryERC20ContractDataInner {
   }
 
   get error(): QueryError<unknown> | undefined {
+    // Ignore queryBalance, since userAddress may be empty
     return (
       this._queryDecimals.error ||
       this._queryName.error ||

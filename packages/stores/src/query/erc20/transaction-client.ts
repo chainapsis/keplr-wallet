@@ -61,6 +61,9 @@ export class ERC20TxClient {
     // Fill the chain's numerical chainId by default.
     const defaultChainId = parseChainId(this.chainId);
 
+    const defaultType = 2;
+    const defaultAccessList: [string, string[]][] = [];
+
     return {
       chainId: chainId ?? defaultChainId,
       to,
@@ -69,8 +72,8 @@ export class ERC20TxClient {
       maxFeePerGas: maxFeePerGas?.toHexString(),
       gasLimit: gasLimit?.toHexString(),
       data,
-      type: type ?? 2,
-      accessList: accessList ?? [],
+      type: type ?? defaultType,
+      accessList: accessList ?? defaultAccessList,
     };
   }
 
@@ -101,10 +104,12 @@ export class ERC20TxClient {
       value.toHexString(),
     ]);
 
+    const txValue = BigNumber.from(0);
+
     const tx = this.createSignableEthereumTx(
       contractAddress,
       nonce,
-      BigNumber.from(0),
+      txValue,
       contractData,
       maxFeePerGas,
       gasLimit

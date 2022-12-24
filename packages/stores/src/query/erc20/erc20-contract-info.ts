@@ -22,17 +22,15 @@ export class ObservableQueryERC20ContractInfoInner extends ObservableQueryERC20C
       return undefined;
     }
 
-    return {
-      decimals: this.queryContractData.decimals,
-      symbol: this.queryContractData.symbol,
-      name: this.queryContractData.name,
-    };
+    return this.queryContractData.tokenInfo;
   }
 
+  @computed
   get isFetching(): boolean {
     return this.queryContractData.isFetching;
   }
 
+  @computed
   get error(): QueryError<unknown> | undefined {
     return this.queryContractData.error;
   }

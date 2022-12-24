@@ -20,7 +20,7 @@ export class IBCAmountConfig extends AmountConfig {
 
   @computed
   get sendableCurrencies(): AppCurrency[] {
-    // Only native currencies can be sent by IBC transfer.
+    // Only native currencies and Evmos ERC-20's can be sent by IBC transfer.
     return super.sendableCurrencies.filter((cur) => {
       const type = new DenomHelper(cur.coinMinimalDenom).type;
       return (

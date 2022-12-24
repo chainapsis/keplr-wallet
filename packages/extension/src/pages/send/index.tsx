@@ -287,29 +287,26 @@ export const SendPage: FunctionComponent = observer(() => {
               const stdFee = sendConfigs.feeConfig.toStdFee();
 
               if (denomHelper?.type === "erc20") {
-                let maxFees;
-                // Set max fee if it exists in a valid form
-                if (stdFee.amount.length > 0) {
-                  maxFees = BigNumber.from(stdFee.amount[0].amount);
+                if (stdFee.amount.length === 0) {
+                  throw new Error(
+                    "No fee amount found, could not create transaction"
+                  );
                 }
 
-                if (!maxFees) {
-                  throw new Error("Invalid fee, could not create transaction");
-                }
-
+                const totalFees = BigNumber.from(stdFee.amount[0].amount);
                 const gasLimit = BigNumber.from(stdFee.gas);
 
-                const contractAddress = denomHelper.contractAddress;
+                const maxFeePerGas = totalFees.div(gasLimit);
 
                 await accountInfo.ethereum.broadcastERC20TokenTransfer(
                   sendConfigs.amountConfig.sendCurrency,
-                  contractAddress,
+                  denomHelper.contractAddress,
                   sendConfigs.recipientConfig.recipient,
-                  accountInfo.ethereum.scaleNativeToContractDenom(
+                  accountInfo.ethereum.convertNativeToContractDenom(
                     sendConfigs.amountConfig.amount,
                     sendConfigs.amountConfig.sendCurrency.coinDecimals
                   ),
-                  maxFees.div(gasLimit),
+                  maxFeePerGas,
                   gasLimit
                 );
               } else {

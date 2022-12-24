@@ -890,10 +890,10 @@ export class CosmosAccountImpl {
     recipient: string
   ) {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-    if (
-      denomHelper.type !== "native" &&
-      !(denomHelper.type === "erc20" && this.chainId.includes("evmos"))
-    ) {
+    const isEvmosERC20 =
+      denomHelper.type === "erc20" && this.chainId.includes("evmos");
+
+    if (denomHelper.type !== "native" && !isEvmosERC20) {
       // Only accept native tokens or Evmos ERC-20
       throw new Error("Only native token can be sent via IBC");
     }
@@ -949,10 +949,9 @@ export class CosmosAccountImpl {
         const timeoutTimestamp = eip712Signing ? "18446744073709551615" : "0";
 
         // Use the contract address for Evmos ERC-20 tokens
-        const actualDenom =
-          denomHelper.type === "erc20" && this.chainId.includes("evmos")
-            ? `erc20/${denomHelper.contractAddress}`
-            : currency.coinMinimalDenom;
+        const actualDenom = isEvmosERC20
+          ? `erc20/${denomHelper.contractAddress}`
+          : currency.coinMinimalDenom;
 
         const msg = {
           type: this.msgOpts.ibcTransfer.type,

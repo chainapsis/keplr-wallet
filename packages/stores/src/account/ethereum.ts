@@ -114,7 +114,7 @@ export class EthereumAccountImpl {
     }
   }
 
-  public scaleNativeToContractDenom(
+  public convertNativeToContractDenom(
     value: string,
     decimals: number
   ): BigNumber {

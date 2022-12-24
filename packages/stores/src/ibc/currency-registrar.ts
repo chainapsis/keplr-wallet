@@ -129,13 +129,14 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     coinMinimalDenom: string
   ): [AppCurrency | undefined, boolean] | undefined {
     const denomHelper = new DenomHelper(coinMinimalDenom);
+    const isEvmosERC20 =
+      denomHelper.type === "erc20" &&
+      this.chainInfoInner.chainId.includes("evmos");
+
     if (
       (denomHelper.type !== "native" ||
         !denomHelper.denom.startsWith("ibc/")) &&
-      !(
-        denomHelper.type === "erc20" &&
-        this.chainInfoInner.chainId.includes("evmos")
-      )
+      !isEvmosERC20
     ) {
       // IBC Currency's denom should start with "ibc/" and be native,
       // but enable ERC-20's on Evmos.
