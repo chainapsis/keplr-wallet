@@ -93,9 +93,7 @@ export class ObservableSecretContractChainQuery<
         Buffer.from(encrypted).toString("base64")
       ).toString("hex");
 
-      this.setUrl(
-        `/wasm/contract/${this.contractAddress}/query/${encoded}?encoding=hex`
-      );
+      this.setUrl(this.getSecretWasmUrl(this.contractAddress, encoded));
     }
 
     this._isIniting = false;
@@ -178,15 +176,20 @@ export class ObservableSecretContractChainQuery<
     };
   }
 
+  protected getSecretWasmUrl(contractAddress: string, msg: string): string {
+    return `/compute/v1beta1/${contractAddress}?query=${msg}`;
+  }
+
   // Actually, the url of fetching the secret20 balance will be changed every time.
   // So, we should save it with deterministic key.
   protected getCacheKey(): string {
     return `${this.instance.name}-${
       this.instance.defaults.baseURL
     }${this.instance.getUri({
-      url: `/wasm/contract/${this.contractAddress}/query/${JSON.stringify(
-        this.obj
-      )}?encoding=json`,
+      url: this.getSecretWasmUrl(
+        this.contractAddress,
+        JSON.stringify(this.obj)
+      ),
     })}`;
   }
 
