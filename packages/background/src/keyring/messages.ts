@@ -628,7 +628,7 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
       const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
 
       if (
-        this.eip712.domain.chainId !== ethChainId.toString() &&
+        parseFloat(this.eip712.domain.chainId) !== ethChainId &&
         this.eip712.domain.chainId !== "0x" + ethChainId.toString(16)
       ) {
         throw new Error(
