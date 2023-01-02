@@ -13,30 +13,9 @@ export const ConfirmDialog: FunctionComponent<{
   yes?: string;
   no?: string;
 
-  hideNo?: boolean;
-
   onConfirm?: () => void;
   onReject?: () => void;
-}> = ({
-  img: imgElement,
-  title,
-  paragraph,
-  yes,
-  no,
-  hideNo,
-  onConfirm,
-  onReject,
-}) => {
-  const noCallback = useCallback(
-    (e) => {
-      if (onReject) {
-        onReject();
-      }
-      e.preventDefault();
-    },
-    [onReject]
-  );
-
+}> = ({ img: imgElement, title, paragraph, yes, no, onConfirm, onReject }) => {
   return (
     <div className={style.dialog}>
       <div className={style.bodyContainer}>
@@ -45,18 +24,23 @@ export const ConfirmDialog: FunctionComponent<{
         <p>{paragraph}</p>
       </div>
       <div className={style.buttons}>
-        {!hideNo ? (
-          <Button
-            type="button"
-            size="sm"
-            color="default"
-            outline
-            onClick={noCallback}
-          >
-            {no ? no : <FormattedMessage id="confirm.no" />}
-          </Button>
-        ) : null}
-
+        <Button
+          type="button"
+          size="sm"
+          color="default"
+          outline
+          onClick={useCallback(
+            (e) => {
+              if (onReject) {
+                onReject();
+              }
+              e.preventDefault();
+            },
+            [onReject]
+          )}
+        >
+          {no ? no : <FormattedMessage id="confirm.no" />}
+        </Button>
         <Button
           type="button"
           size="sm"
