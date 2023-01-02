@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import style from "./style.module.scss";
 import { useSelector } from "react-redux";
-import { userMessagesError } from "../../chatStore/messages-slice";
+import {
+  setMessageError,
+  userMessagesError,
+} from "../../chatStore/messages-slice";
+import { store } from "../../chatStore";
 
 export const ChatErrorPopup = () => {
   const errorMessage = useSelector(userMessagesError);
@@ -13,6 +17,13 @@ export const ChatErrorPopup = () => {
 
   const handleOk = () => {
     setConfirmAction(false);
+    store.dispatch(
+      setMessageError({
+        type: "",
+        message: "",
+        level: 3,
+      })
+    );
   };
 
   return errorMessage?.message?.length && confirmAction ? (

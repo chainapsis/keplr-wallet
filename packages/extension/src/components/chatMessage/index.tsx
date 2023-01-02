@@ -1,10 +1,13 @@
 import classnames from "classnames";
 import React, { useEffect, useState } from "react";
 import { Container } from "reactstrap";
-import deliveredIcon from "../../public/assets/icon/delivered.png";
+import deliveredIcon from "../../public/assets/icon/chat-unseen-status.png";
+import chatSeenIcon from "../../public/assets/icon/chat-seen-status.png";
 import { decryptMessage } from "../../utils/decrypt-message";
 import style from "./style.module.scss";
 import { isToday, isYesterday, format } from "date-fns";
+import { store } from "../../chatStore/index";
+import { setMessageError } from "../../chatStore/messages-slice";
 
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp);
@@ -17,22 +20,31 @@ export const ChatMessage = ({
   isSender,
   timestamp,
   showDate,
+  groupLastSeenTimestamp,
 }: {
   chainId: string;
   isSender: boolean;
   message: string;
   timestamp: number;
   showDate: boolean;
+  groupLastSeenTimestamp: number;
 }) => {
   const [decryptedMessage, setDecryptedMessage] = useState("");
 
   useEffect(() => {
     decryptMessage(chainId, message, isSender)
       .then((message) => {
-        setDecryptedMessage(message);
+        setDecryptedMessage(message.content.text);
       })
       .catch((e) => {
-        setDecryptedMessage(e.message);
+        store.dispatch(
+          setMessageError({
+            type: "authorization",
+            message: "Something went wrong, Please try again in sometime.",
+            level: 3,
+          })
+        );
+        console.log("Error", e.message);
       });
   }, [chainId, isSender, message]);
 
@@ -69,7 +81,12 @@ export const ChatMessage = ({
           )}
           <div className={style.timestamp}>
             {formatTime(timestamp)}
-            {isSender && <img alt="" src={deliveredIcon} />}
+            {isSender && groupLastSeenTimestamp < timestamp && (
+              <img alt="delivered" src={deliveredIcon} />
+            )}
+            {isSender && groupLastSeenTimestamp >= timestamp && (
+              <img alt="seen" src={chatSeenIcon} />
+            )}
           </div>
         </Container>
       </div>

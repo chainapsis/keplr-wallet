@@ -39,7 +39,8 @@ export class RegisterPublicKey extends Message<PubKey> {
     public readonly chainId: string,
     public readonly accessToken: string,
     public readonly address: string,
-    public readonly privacySetting: PrivacySetting
+    public readonly privacySetting: PrivacySetting,
+    public readonly chatReadReceiptSetting?: boolean
   ) {
     super();
   }

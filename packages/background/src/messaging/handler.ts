@@ -66,7 +66,8 @@ const handleRegisterPublicKey: (
       msg.chainId,
       msg.address,
       msg.accessToken,
-      msg.privacySetting
+      msg.privacySetting,
+      msg.chatReadReceiptSetting
     );
   };
 };

@@ -41,6 +41,7 @@ export class MessagingService {
       return {
         publicKey: toHex(privateKey.publicKey.compressed),
         privacySetting: undefined,
+        chatReadReceiptSetting: true,
       };
     } else {
       return await this.lookupPublicKey(accessToken, targetAddress);
@@ -61,7 +62,8 @@ export class MessagingService {
     chainId: string,
     address: string,
     accessToken: string,
-    privacySetting: PrivacySetting
+    privacySetting: PrivacySetting,
+    chatReadReceiptSetting?: boolean
   ): Promise<PubKey> {
     const sk = await this.getPrivateKey(env, chainId);
     const privateKey = new PrivateKey(Buffer.from(sk));
@@ -71,24 +73,29 @@ export class MessagingService {
     if (
       !regPubKey.privacySetting ||
       !regPubKey.publicKey ||
-      regPubKey.privacySetting !== privacySetting
+      !!chatReadReceiptSetting ||
+      regPubKey.privacySetting !== privacySetting ||
+      regPubKey.chatReadReceiptSetting !== chatReadReceiptSetting
     ) {
       await registerPubKey(
         accessToken,
         pubKey,
         address,
+        MESSAGE_CHANNEL_ID,
         privacySetting,
-        MESSAGE_CHANNEL_ID
+        chatReadReceiptSetting
       );
       this._publicKeyCache.set(address, {
         publicKey: pubKey,
         privacySetting,
+        chatReadReceiptSetting,
       });
     }
 
     return {
       publicKey: pubKey,
       privacySetting,
+      chatReadReceiptSetting,
     };
   }
 
@@ -198,6 +205,7 @@ export class MessagingService {
       return {
         publicKey: undefined,
         privacySetting: undefined,
+        chatReadReceiptSetting: true,
       };
     }
 

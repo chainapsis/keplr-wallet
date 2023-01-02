@@ -14,22 +14,27 @@ export const httpLink = new HttpLink({
   uri: GRAPHQL_URL.MESSAGING_SERVER,
 });
 
+let link: GraphQLWsLink | null = null;
+
 export const createWSLink = (token: string) => {
-  return new GraphQLWsLink(
-    createClient({
-      url: GRAPHQL_URL.SUBSCRIPTION_SERVER,
-      connectionParams: {
-        authorization: `Bearer ${token}`,
-      },
-      on: {
-        connecting: () => {
-          console.log("connecting");
+  if (link == null) {
+    link = new GraphQLWsLink(
+      createClient({
+        url: GRAPHQL_URL.SUBSCRIPTION_SERVER,
+        connectionParams: {
+          authorization: `Bearer ${token}`,
         },
-        opened: () => {
-          console.log("opened");
-          store.dispatch(setIsChatSubscriptionActive(true));
+        on: {
+          connecting: () => {
+            console.log("connecting");
+          },
+          opened: () => {
+            console.log("opened");
+            store.dispatch(setIsChatSubscriptionActive(true));
+          },
         },
-      },
-    })
-  );
+      })
+    );
+  }
+  return link;
 };

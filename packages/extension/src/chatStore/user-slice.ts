@@ -6,6 +6,7 @@ const initialState = {
   messagingPubKey: {
     publicKey: null,
     privacySetting: null,
+    chatReadReceiptSetting: true,
   },
   isChatActive: false,
 };

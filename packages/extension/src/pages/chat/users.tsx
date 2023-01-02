@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import {
   Group,
+  GroupAddress,
   Groups,
   Pagination,
   userChatGroupPagination,
@@ -15,48 +16,151 @@ import { recieveGroups } from "../../graphQL/recieve-messages";
 import { useOnScreen } from "../../hooks/use-on-screen";
 import rightArrowIcon from "../../public/assets/icon/right-arrow.png";
 import { useStore } from "../../stores";
+import { decryptGroupTimestamp } from "../../utils/decrypt-group";
 import { decryptMessage } from "../../utils/decrypt-message";
 import { formatAddress } from "../../utils/format";
 import style from "./style.module.scss";
 import amplitude from "amplitude-js";
+import { userDetails } from "../../chatStore/user-slice";
+import { PrivacySetting } from "@keplr-wallet/background/build/messaging/types";
 
 const User: React.FC<{
   chainId: string;
   group: Group;
   contactName: string;
-  contactAddress: string;
-}> = ({ chainId, group, contactName, contactAddress }) => {
+  targetAddress: string;
+}> = ({ chainId, group, contactName, targetAddress }) => {
   const [message, setMessage] = useState("");
+  const [groupData, setGroupData] = useState(group);
+
   const history = useHistory();
+
   const handleClick = () => {
     amplitude.getInstance().logEvent("Open DM click", {
       from: "Chat history",
     });
-    history.push(`/chat/${contactAddress}`);
+    history.push(`/chat/${targetAddress}`);
   };
+
+  /// Current wallet user
+  const sender = groupData?.addresses.find(
+    (val) => val?.address !== targetAddress
+  );
+  /// Target user
+  const receiver = groupData?.addresses.find(
+    (val) => val?.address === targetAddress
+  );
+
+  const decryptGrpAddresses = async (
+    groupAddress: GroupAddress,
+    isSender: boolean
+  ) => {
+    if (groupAddress && groupAddress.groupLastSeenTimestamp) {
+      const data = await decryptGroupTimestamp(
+        chainId,
+        groupAddress.groupLastSeenTimestamp,
+        isSender
+      );
+
+      Object.assign(groupAddress, {
+        groupLastSeenTimestamp: new Date(data).getTime(),
+      });
+    }
+    if (groupAddress && groupAddress.lastSeenTimestamp) {
+      const data = await decryptGroupTimestamp(
+        chainId,
+        groupAddress.lastSeenTimestamp,
+        isSender
+      );
+      Object.assign(groupAddress, {
+        lastSeenTimestamp: new Date(data).getTime(),
+      });
+    }
+
+    return groupAddress;
+  };
+
+  const decryptGrp = async (group: Group) => {
+    const tempGroup = { ...group };
+    let tempSenderAddress: GroupAddress | undefined;
+    let tempReceiverAddress: GroupAddress | undefined;
+
+    /// Shallow copy
+    /// Decrypting sender data
+    const senderAddress = {
+      ...group.addresses.find((val) => val.address !== targetAddress),
+    };
+    if (senderAddress)
+      tempSenderAddress = await decryptGrpAddresses(
+        senderAddress as GroupAddress,
+        group.lastMessageSender === targetAddress
+      );
+
+    /// Decrypting receiver data
+    const receiverAddress = {
+      ...group.addresses.find((val) => val.address === targetAddress),
+    };
+    if (receiverAddress)
+      tempReceiverAddress = await decryptGrpAddresses(
+        receiverAddress as GroupAddress,
+        group.lastMessageSender !== targetAddress
+      );
+
+    /// Storing decryptin address into the group object and updating the UI
+    if (tempSenderAddress && tempReceiverAddress) {
+      const tempGroupAddress = [tempSenderAddress, tempReceiverAddress];
+      tempGroup.addresses = tempGroupAddress;
+      setGroupData(tempGroup);
+    }
+  };
+
   const decryptMsg = async (
     chainId: string,
     contents: string,
     isSender: boolean
   ) => {
     const message = await decryptMessage(chainId, contents, isSender);
-    setMessage(message);
+    setMessage(message.content.text);
   };
 
   useEffect(() => {
-    if (group)
+    if (group) {
       decryptMsg(
         chainId,
         group.lastMessageContents,
-        group.lastMessageSender !== contactAddress
+        group.lastMessageSender !== targetAddress
       );
-  }, [chainId, contactAddress, group]);
+      decryptGrp(group);
+    }
+  }, [chainId, targetAddress, group]);
 
   return (
-    <div className={style.group} onClick={handleClick}>
+    <div
+      className={style.group}
+      style={{ position: "relative" }}
+      onClick={handleClick}
+    >
+      {Number(sender?.lastSeenTimestamp) <
+        Number(receiver?.lastSeenTimestamp) &&
+        group.lastMessageSender === targetAddress &&
+        Number(group.lastMessageTimestamp) >
+          Number(sender?.lastSeenTimestamp) && (
+          <span
+            style={{
+              height: "12px",
+              width: "12px",
+              backgroundColor: "#d027e5",
+              borderRadius: "20px",
+              bottom: "20px",
+              left: "6px",
+              position: "absolute",
+              zIndex: 1,
+            }}
+          />
+        )}
       <div className={style.initials}>
         {ReactHtmlParser(
-          jazzicon(24, parseInt(fromBech32(contactAddress).data.toString(), 16))
+          jazzicon(24, parseInt(fromBech32(targetAddress).data.toString(), 16))
             .outerHTML
         )}
       </div>
@@ -81,6 +185,8 @@ export const ChatsGroupSection: React.FC<{
   addresses: NameAddress;
   setLoadingChats: any;
 }> = ({ chainId, addresses, setLoadingChats, searchString }) => {
+  const history = useHistory();
+  const userState = useSelector(userDetails);
   const groups: Groups = useSelector(userChatGroups);
   const groupsPagination: Pagination = useSelector(userChatGroupPagination);
   const [loadingGroups, setLoadingGroups] = useState(false);
@@ -113,16 +219,31 @@ export const ChatsGroupSection: React.FC<{
 
   const filterGroups = (contact: string) => {
     const contactAddressBookName = addresses[contact];
-    if (searchString.length > 0) {
-      if (
-        !contactAddressBookName
-          ?.toLowerCase()
-          .includes(searchString.trim().toLowerCase()) &&
-        !contact.toLowerCase().includes(searchString.trim().toLowerCase())
-      )
-        return false;
+
+    if (userState?.messagingPubKey.privacySetting === PrivacySetting.Contacts) {
+      if (searchString.length > 0) {
+        if (
+          !contactAddressBookName
+            ?.toLowerCase()
+            .includes(searchString.trim().toLowerCase())
+        )
+          return false;
+      }
+
+      return !!contactAddressBookName;
+    } else {
+      /// PrivacySetting.Everybody
+      if (searchString.length > 0) {
+        if (
+          !contactAddressBookName
+            ?.toLowerCase()
+            .includes(searchString.trim().toLowerCase()) &&
+          !contact.toLowerCase().includes(searchString.trim().toLowerCase())
+        )
+          return false;
+      }
+      return true;
     }
-    return true;
   };
 
   if (!Object.keys(groups).length)
@@ -131,6 +252,35 @@ export const ChatsGroupSection: React.FC<{
         <div className={style.resultText}>
           No results. Don&apos;t worry you can create a new chat by clicking on
           the icon beside the search box.
+        </div>
+      </div>
+    );
+
+  if (
+    !Object.keys(groups).filter((contact) => filterGroups(contact)).length &&
+    userState.messagingPubKey.privacySetting &&
+    userState.messagingPubKey.privacySetting === PrivacySetting.Contacts
+  )
+    return (
+      <div className={style.groupsArea}>
+        <div className={style.resultText}>
+          If you are searching for an address not in your address book, you
+          can&apos;t see them due to your selected privacy settings being
+          &quot;contact only&quot;. Please add the address to your address book
+          to be able to chat with them or change your privacy settings.
+          <br />
+          <a
+            href="#"
+            style={{
+              textDecoration: "underline",
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              history.push("/setting/chat/privacy");
+            }}
+          >
+            Go to chat privacy settings
+          </a>
         </div>
       </div>
     );
@@ -149,29 +299,29 @@ export const ChatsGroupSection: React.FC<{
       {Object.keys(groups)
         .sort(
           (a, b) =>
-            parseFloat(groups[b].createdAt) - parseFloat(groups[a].createdAt)
+            parseFloat(groups[b].lastMessageTimestamp) -
+            parseFloat(groups[a].lastMessageTimestamp)
         )
         .filter((contact) => filterGroups(contact))
         .map((contact, index) => {
           // translate the contact address into the address book name if it exists
           const contactAddressBookName = addresses[contact];
           return (
-            <>
+            <div key={groups[contact].id}>
               <User
-                key={index}
                 group={groups[contact]}
                 contactName={
                   contactAddressBookName
                     ? formatAddress(contactAddressBookName)
                     : formatAddress(contact)
                 }
-                contactAddress={contact}
+                targetAddress={contact}
                 chainId={chainId}
               />
               {index === Object.keys(groups).length - 10 && (
                 <div ref={messagesEncRef} />
               )}
-            </>
+            </div>
           );
         })}
       {groupsPagination?.lastPage > groupsPagination?.page && (

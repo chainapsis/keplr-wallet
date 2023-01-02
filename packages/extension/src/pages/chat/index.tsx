@@ -26,7 +26,11 @@ import { DeactivatedChat } from "../../components/chat/deactivated-chat";
 import { SwitchUser } from "../../components/switch-user";
 import { EthereumEndpoint } from "../../config.ui";
 import { AUTH_SERVER } from "../../config.ui.var";
-import { fetchBlockList, messageListener } from "../../graphQL/messages-api";
+import {
+  fetchBlockList,
+  groupReadUnreadListener,
+  messageListener,
+} from "../../graphQL/messages-api";
 import { recieveGroups } from "../../graphQL/recieve-messages";
 import { HeaderLayout } from "../../layouts";
 import { useStore } from "../../stores";
@@ -99,7 +103,11 @@ const ChatView = () => {
     const getMessagesAndBlocks = async () => {
       setLoadingChats(true);
       try {
-        if (!chatSubscriptionActive) messageListener();
+        if (!chatSubscriptionActive) {
+          groupReadUnreadListener(walletAddress);
+          messageListener();
+        }
+
         if (!chatStorePopulated) {
           await recieveGroups(0, walletAddress);
           await fetchBlockList();
@@ -181,6 +189,7 @@ const ChatView = () => {
     userState.accessToken.length,
     userState.messagingPubKey.publicKey,
     userState.messagingPubKey.privacySetting,
+    userState.messagingPubKey.chatReadReceiptSetting,
   ]);
 
   const [addresses, setAddresses] = useState<NameAddress>({});

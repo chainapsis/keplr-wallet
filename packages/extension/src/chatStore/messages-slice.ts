@@ -29,13 +29,25 @@ interface BlockedAddressState {
   [key: string]: boolean;
 }
 
+export interface GroupAddress {
+  address: string;
+  pubKey: string;
+  lastSeenTimestamp: string;
+  groupLastSeenTimestamp: string;
+  encryptedSymmetricKey: string;
+  isAdmin: boolean;
+}
+
 export interface Group {
   id: string; // groupID
   name: string; // contactAddress
+  isDm: boolean;
+  addresses: GroupAddress[];
   lastMessageContents: string;
-  createdAt: string;
-  lastMessageTimestamp: string;
   lastMessageSender: string;
+  lastMessageTimestamp: string;
+  lastSeenTimestamp: string;
+  createdAt: string;
 }
 
 export interface Groups {
@@ -100,7 +112,7 @@ export const messagesSlice = createSlice({
           contactAddress: sender,
           messages: {},
           pagination: {
-            page: 0,
+            page: -1,
             pageCount: CHAT_PAGE_COUNT,
             lastPage: 0,
             total: CHAT_PAGE_COUNT,
@@ -108,6 +120,14 @@ export const messagesSlice = createSlice({
         };
       }
       state.chats[sender].messages[id] = action.payload;
+    },
+    updateGroupsData: (state: any, action: PayloadAction<any>) => {
+      const group = action.payload;
+      const key = group?.userAddress;
+      const updatedGroup = {
+        [key]: group,
+      };
+      state.groups = { ...state.groups, ...updatedGroup };
     },
     updateLatestSentMessage: (state: any, action: PayloadAction<Message>) => {
       const { target, id } = action.payload;
@@ -159,6 +179,7 @@ export const {
   resetChatList,
   updateChatList,
   updateMessages,
+  updateGroupsData,
   updateLatestSentMessage,
   setBlockedList,
   setBlockedUser,

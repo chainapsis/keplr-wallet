@@ -6,6 +6,8 @@ import style from "./style.module.scss";
 import { useLanguage } from "../../languages";
 import { useIntl } from "react-intl";
 import { observer } from "mobx-react-lite";
+import { userChatActive } from "../../chatStore/user-slice";
+import { useSelector } from "react-redux";
 // import { useStore } from "../../stores";
 
 export const SettingPage: FunctionComponent = observer(() => {
@@ -40,6 +42,7 @@ export const SettingPage: FunctionComponent = observer(() => {
           fiat: language.fiatCurrency.toUpperCase(),
         }
       );
+  const isChatActive = useSelector(userChatActive);
 
   return (
     <HeaderLayout
@@ -101,11 +104,16 @@ export const SettingPage: FunctionComponent = observer(() => {
           )}
         />
         <PageButton
+          style={{ cursor: isChatActive ? "pointer" : "not-allowed" }}
+          paragraph={
+            isChatActive ? "" : "You need FET balance to use this feature"
+          }
           title={"Chat"}
           onClick={() => {
-            history.push({
-              pathname: "/setting/chat",
-            });
+            if (isChatActive)
+              history.push({
+                pathname: "/setting/chat",
+              });
           }}
           icons={useMemo(
             () => [<i key="next" className="fas fa-chevron-right" />],

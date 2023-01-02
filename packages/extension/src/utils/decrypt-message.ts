@@ -2,12 +2,13 @@ import { fromBase64, fromUtf8 } from "@cosmjs/encoding";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { DecryptMessagingMessage } from "@keplr-wallet/background/build/messaging";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { MessagePrimitive } from "./encrypt-message";
 
 export const decryptMessage = async (
   chainId: string,
   content: string,
   isSender: boolean
-): Promise<string> => {
+): Promise<MessagePrimitive> => {
   const data = Buffer.from(content, "base64").toString("ascii");
   const dataEnvelopeDecoded = JSON.parse(data);
   const decodedData = Buffer.from(dataEnvelopeDecoded.data, "base64").toString(
@@ -21,7 +22,19 @@ export const decryptMessage = async (
   );
 
   const parsedDataString = JSON.parse(decryptedData);
-  return parsedDataString.content.text;
+
+  return {
+    content: parsedDataString.content,
+    groupLastSeenTimestamp: !!parsedDataString.groupLastSeenTimestamp
+      ? new Date(parsedDataString.groupLastSeenTimestamp)
+      : new Date(),
+    lastSeenTimestamp: !!parsedDataString.groupLastSeenTimestamp
+      ? new Date(parsedDataString.groupLastSeenTimestamp)
+      : new Date(),
+    sender: parsedDataString.sender,
+    target: parsedDataString.target,
+    type: parsedDataString.type,
+  };
 };
 
 /**

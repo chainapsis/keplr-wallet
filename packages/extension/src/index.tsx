@@ -65,6 +65,7 @@ import { NewChat } from "./pages/newchat/new-chat";
 import { ChatSettings } from "./pages/setting/chat";
 import { BlockList } from "./pages/setting/chat/block";
 import { Privacy } from "./pages/setting/chat/privacy";
+import { ReadRecipt } from "./pages/setting/chat/readRecipt";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -218,6 +219,11 @@ const Application: FunctionComponent = () => {
                         exact
                         path="/setting/chat/privacy"
                         component={Privacy}
+                      />
+                      <Route
+                        exact
+                        path="/setting/chat/readRecipt"
+                        component={ReadRecipt}
                       />
                       <Route
                         exact

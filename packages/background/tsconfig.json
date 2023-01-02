@@ -7,5 +7,5 @@
     "rootDir": "src",
     "emitDecoratorMetadata": true
   },
-  "excluded" : ["**/*.wasm"]
+  "excluded": ["**/*.wasm"]
 }

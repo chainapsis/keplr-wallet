@@ -213,7 +213,9 @@ export const AssetView: FunctionComponent = observer(() => {
     ? !totalPrice.toDec().isZero()
     : !total.toDec().isZero();
 
-  store.dispatch(setIsChatActive(hasBalance));
+  store.dispatch(
+    setIsChatActive(process.env.NODE_ENV === "production" ? hasBalance : true)
+  );
   if (!hasBalance) {
     return (
       <EmptyState

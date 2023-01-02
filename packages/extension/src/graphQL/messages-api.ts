@@ -11,41 +11,69 @@ import {
   setUnblockedUser,
   updateMessages,
   updateLatestSentMessage,
+  updateGroupsData,
 } from "../chatStore/messages-slice";
 import { CHAT_PAGE_COUNT, GROUP_PAGE_COUNT } from "../config.ui.var";
 import { encryptAllData } from "../utils/encrypt-message";
+import { encryptGroupTimestamp } from "../utils/encrypt-group";
 import { client, createWSLink, httpLink } from "./client";
 import {
   block,
   blockedList,
   groups,
   groupsWithAddresses,
+  groupReadUnread,
   listenMessages,
   mailbox,
+  mailboxWithTimestamp,
   NewMessageUpdate,
   sendMessages,
   unblock,
+  updateGroupLastSeen,
 } from "./messages-queries";
 import { recieveGroups } from "./recieve-messages";
 let querySubscription: ObservableSubscription;
-export const fetchMessages = async (groupId: string, page: number) => {
+let queryGroupReadUnreadSubscription: ObservableSubscription;
+
+interface messagesVariables {
+  page?: number;
+  pageCount?: number;
+  groupId: string;
+  afterTimestamp?: string;
+}
+export const fetchMessages = async (
+  groupId: string,
+  afterTimestamp: string | null | undefined,
+  page: number
+) => {
   const state = store.getState();
+  let variables: messagesVariables = {
+    groupId: groupId,
+  };
+  if (!!afterTimestamp) {
+    variables = { ...variables, afterTimestamp: afterTimestamp };
+  } else {
+    variables = {
+      ...variables,
+      page,
+      pageCount: CHAT_PAGE_COUNT,
+    };
+  }
+
+  const messageQuery = !!afterTimestamp ? mailboxWithTimestamp : mailbox;
   const { data, errors } = await client.query({
-    query: gql(mailbox),
+    query: gql(messageQuery),
     fetchPolicy: "no-cache",
     context: {
       headers: {
         Authorization: `Bearer ${state.user.accessToken}`,
       },
     },
-    variables: {
-      groupId,
-      page,
-      pageCount: CHAT_PAGE_COUNT,
-    },
+    variables,
   });
 
   if (errors) console.log("errors", errors);
+
   return data.mailbox;
 };
 
@@ -68,7 +96,6 @@ export const fetchGroups = async (
   };
   if (addresses.length) variables["addresses"] = addresses;
   else variables["addressQueryString"] = addressQueryString;
-  console.log(groupsQuery, variables);
   const state = store.getState();
   const { data, errors } = await client.query({
     query: gql(groupsQuery),
@@ -212,12 +239,12 @@ export const deliverMessages = async (
       }
       return null;
     }
-  } catch (e) {
-    console.log(e);
+  } catch (e: any) {
     store.dispatch(
       setMessageError({
         type: "delivery",
-        message: "Something went wrong, Message can't be delivered",
+        message:
+          e?.message || "Something went wrong, Message can't be delivered",
         level: 1,
       })
     );
@@ -273,6 +300,112 @@ export const messageListener = () => {
     });
 };
 
-export const messageListenerUnsubscribe = () => {
+export const groupReadUnreadListener = (userAddress: string) => {
+  const state = store.getState();
+  const wsLink = createWSLink(state.user.accessToken);
+  const splitLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+      return (
+        definition.kind === "OperationDefinition" &&
+        definition.operation === "subscription"
+      );
+    },
+    wsLink,
+    httpLink
+  );
+  const newClient = new ApolloClient({
+    link: splitLink,
+    cache: new InMemoryCache(),
+  });
+  queryGroupReadUnreadSubscription = newClient
+    .subscribe({
+      query: gql(groupReadUnread),
+      context: {
+        headers: {
+          authorization: `Bearer ${state.user.accessToken}`,
+        },
+      },
+    })
+    .subscribe({
+      next({ data }: { data: any }) {
+        const group = data.groupUpdate.group;
+
+        group.userAddress =
+          group.id.split("-")[0].toLowerCase() !== userAddress.toLowerCase()
+            ? group.id.split("-")[0]
+            : group.id.split("-")[1];
+        store.dispatch(updateGroupsData(group));
+      },
+      error(err) {
+        console.error("err", err);
+        store.dispatch(
+          setMessageError({
+            type: "subscription",
+            message: "Something went wrong, Cant fetch latest messages",
+            level: 1,
+          })
+        );
+      },
+      complete() {
+        console.log("completed");
+      },
+    });
+};
+
+export const messageAndGroupListenerUnsubscribe = () => {
   if (querySubscription) querySubscription.unsubscribe();
+  if (queryGroupReadUnreadSubscription)
+    queryGroupReadUnreadSubscription.unsubscribe();
+};
+
+export const updateGroupTimestamp = async (
+  groupId: string,
+  accessToken: string,
+  chainId: string,
+  senderAddress: string,
+  targetAddress: string,
+  lastSeenTimestamp: Date,
+  groupLastSeenTimestamp: Date
+) => {
+  const state = store.getState();
+  try {
+    /// Encrypting last seen timestamp
+    const encryptedLastSeenTimestamp = await encryptGroupTimestamp(
+      accessToken,
+      chainId,
+      lastSeenTimestamp,
+      senderAddress,
+      targetAddress
+    );
+    /// Encrypting group last seen timestamp
+    const encryptedGroupLastSeenTimestamp = await encryptGroupTimestamp(
+      accessToken,
+      chainId,
+      groupLastSeenTimestamp,
+      senderAddress,
+      targetAddress
+    );
+    const { data } = await client.mutate({
+      mutation: gql(updateGroupLastSeen),
+      fetchPolicy: "no-cache",
+      context: {
+        headers: {
+          Authorization: `Bearer ${state.user.accessToken}`,
+        },
+      },
+      variables: {
+        groupId,
+        lastSeenTimestamp: encryptedLastSeenTimestamp,
+        groupLastSeenTimestamp: encryptedGroupLastSeenTimestamp,
+      },
+    });
+
+    /// Updating the last seen status
+    const group = data.updateGroupLastSeen;
+    group.userAddress = targetAddress;
+    store.dispatch(updateGroupsData(group));
+  } catch (err) {
+    console.error("err", err);
+  }
 };

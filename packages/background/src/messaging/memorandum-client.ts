@@ -30,8 +30,9 @@ export const registerPubKey = async (
   accessToken: string,
   messagingPubKey: string,
   walletAddress: string,
+  channelId: string,
   privacySetting: PrivacySetting,
-  channelId: string
+  chatReadReceiptSetting?: boolean
 ): Promise<void> => {
   try {
     await client.mutate({
@@ -39,6 +40,7 @@ export const registerPubKey = async (
         updatePublicKey(publicKeyDetails: $publicKeyDetails) {
           publicKey
           privacySetting
+          readReceipt
         }
       }`),
       variables: {
@@ -47,6 +49,7 @@ export const registerPubKey = async (
           address: walletAddress,
           channelId,
           privacySetting,
+          readReceipt: chatReadReceiptSetting,
         },
       },
       context: {
@@ -71,6 +74,7 @@ export const getPubKey = async (
         publicKey(address: $address, channelId: $channelId) {
           publicKey
           privacySetting
+          readReceipt
         }
       }`),
       variables: {
@@ -87,12 +91,14 @@ export const getPubKey = async (
     return {
       publicKey: data.publicKey && data.publicKey.publicKey,
       privacySetting: data.publicKey && data.publicKey.privacySetting,
+      chatReadReceiptSetting: data.publicKey && data.publicKey.readReceipt,
     };
   } catch (e) {
     console.log(e);
     return {
       publicKey: undefined,
       privacySetting: undefined,
+      chatReadReceiptSetting: true,
     };
   }
 };

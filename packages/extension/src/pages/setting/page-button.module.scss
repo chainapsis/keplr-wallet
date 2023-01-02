@@ -50,7 +50,7 @@
 
       max-width: 280px;
       text-overflow: ellipsis;
-      overflow: hidden;
+      max-lines: 2;
     }
   }
 

@@ -8,37 +8,29 @@ import {
 } from "@keplr-wallet/background/build/messaging";
 import { MESSAGE_CHANNEL_ID } from "@keplr-wallet/background/build/messaging/constants";
 
-export interface MessageEnvelope {
+export interface GroupTimestampUpdateEnvelope {
   data: string; // base64 encoded
   senderPublicKey: string; // base64 encoded
   targetPublicKey: string; // base64 encoded
-  groupLastSeenTimestamp: Date;
-  lastSeenTimestamp: Date;
   signature: string; // base64 encoded signature
   channelId: string;
 }
-
-export interface MessagePrimitive {
+export interface GroupTimestampUpdatePrimitive {
   sender: string;
   target: string;
-  groupLastSeenTimestamp: Date;
-  lastSeenTimestamp: Date;
-  type: 1;
-  content: {
-    text: string;
-  };
+  content: Date;
 }
 
-export const encryptAllData = async (
+export const encryptGroupTimestamp = async (
   accessToken: string,
   chainId: string,
-  messageStr: any,
+  timestamp: Date,
   senderAddress: string,
   targetAddress: string
 ): Promise<string> => {
-  const dataEnvelope = await encryptToEnvelope(
+  const dataEnvelope = await encryptGroupTimestampToEnvelope(
     chainId,
-    messageStr,
+    timestamp,
     senderAddress,
     targetAddress,
     accessToken
@@ -47,7 +39,7 @@ export const encryptAllData = async (
 };
 
 /**
- * Encrypts the specified message and generates an envelope that can be submitted
+ * Encrypts the specified group timestamp and generates an envelope that can be submitted
  * to the memorandum service
  *
  * @param chainId The current chainId
@@ -56,13 +48,13 @@ export const encryptAllData = async (
  * @param targetAddress The target address for the message recipient
  * @param accessToken The access token for the memorandum service
  */
-export async function encryptToEnvelope(
+export async function encryptGroupTimestampToEnvelope(
   chainId: string,
-  messageStr: string,
+  timestamp: Date,
   senderAddress: string,
   targetAddress: string,
   accessToken: string
-): Promise<MessageEnvelope> {
+): Promise<GroupTimestampUpdateEnvelope> {
   // TODO: ideally this is cached
   const requester = new InExtensionMessageRequester();
 
@@ -81,15 +73,10 @@ export async function encryptToEnvelope(
     throw new Error("Public key not available");
   }
 
-  const message: MessagePrimitive = {
+  const message: GroupTimestampUpdatePrimitive = {
     sender: senderPublicKey.publicKey, //public key
     target: targetPublicKey.publicKey, // public key
-    groupLastSeenTimestamp: new Date(),
-    lastSeenTimestamp: new Date(),
-    type: 1, //private_message
-    content: {
-      text: messageStr,
-    },
+    content: timestamp,
   };
 
   // encrypt the message
@@ -130,8 +117,6 @@ export async function encryptToEnvelope(
     data: encodedData,
     senderPublicKey: senderPublicKey.publicKey,
     targetPublicKey: targetPublicKey.publicKey,
-    groupLastSeenTimestamp: new Date(),
-    lastSeenTimestamp: new Date(),
     signature,
     channelId: MESSAGE_CHANNEL_ID,
   };

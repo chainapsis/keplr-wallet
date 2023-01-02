@@ -1,0 +1,134 @@
+@import "../../../../styles/var";
+
+.container {
+  margin: 0 calc(#{$layout-padding} * -1) calc(#{$layout-padding} * -1);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chatContainer {
+  padding: 10px 0 20px 0;
+  background-color: #fff;
+  // border-radius: 5px;
+  margin-left: -10px;
+  margin-right: -10px;
+  border-top: #e9ecef solid 1px;
+
+  .messagesContainer {
+    // margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .messageContainer {
+      display: flex;
+      // justify-content: space-between;
+      align-items: center;
+      padding: 0 12px;
+      margin-top: 10px;
+      cursor: pointer;
+
+      .initials {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #d0def5;
+        color: #525f7f;
+        margin-right: 8px;
+        font-weight: 400;
+        font-size: 15px;
+        line-height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .messageInner {
+        width: 80%;
+
+        .name {
+          font-weight: 400;
+          font-size: 15px;
+          color: #525f7f;
+          height: 20px;
+        }
+      }
+    }
+  }
+}
+
+.popup {
+  width: 310px;
+  position: absolute;
+  border: solid #dee2e6 1px;
+  background-color: #ffffff;
+  margin: 20px 15px;
+  border-radius: 15px;
+  padding-bottom: 10px;
+  cursor: pointer;
+  top: 30%;
+
+  // display: flex;
+  // flex-direction: column;
+  // padding: 0px 20px;
+  h4 {
+    // border-bottom: solid #DEE2E6 2px;
+    padding: 0 20px 10px 20px;
+    color: #525f7f;
+    margin: 10px 0 0 0;
+    font-size: 18px;
+  }
+
+  .textContainer {
+    text-align: left;
+    padding: 0 15px;
+    font-size: 14px;
+    color: #808da0;
+    width: 280px;
+
+    label {
+      margin-left: 10px;
+    }
+  }
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom: solid #dee2e6 2px;
+    align-items: center;
+
+    img {
+      width: 8px;
+      height: 8px;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+  }
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 10px;
+  border-top: solid #dee2e6 2px;
+
+  button {
+    margin-left: 8px;
+    padding: 5px 10px;
+    border: solid #3b82f6 1px;
+    border-radius: 5px;
+    color: #3b82f6;
+    background-color: #ffffff;
+    cursor: pointer;
+  }
+
+  .btn {
+    color: #ffffff;
+    background-color: #3b82f6;
+  }
+}

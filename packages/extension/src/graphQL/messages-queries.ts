@@ -11,6 +11,21 @@ export const sendMessages = `mutation Mutation($messages: [InputMessage!]!) {
 
 // TODO(!!!): I expect these also need types associated for all of the queries
 //            here
+
+export const mailboxWithTimestamp = `query Query($groupId: String, $afterTimestamp: Date) {
+  mailbox(groupId: $groupId, afterTimestamp: $afterTimestamp) {
+    messages {
+      commitTimestamp
+      contents
+      expiryTimestamp
+      groupId
+      id
+      target
+      sender
+    }
+  }
+}`;
+
 export const mailbox = `query Mailbox($groupId: String, $page: Int, $pageCount: Int) {
   mailbox(groupId: $groupId, page: $page, pageCount: $pageCount) {
     messages {
@@ -34,12 +49,23 @@ export const mailbox = `query Mailbox($groupId: String, $page: Int, $pageCount: 
 export const groups = `query Query($addressQueryString: String, $page: Int, $pageCount: Int) {
   groups(addressQueryString: $addressQueryString, page: $page, pageCount: $pageCount) {
     groups {
-      createdAt
       id
-      lastMessageSender
-      lastMessageContents
       name
+      isDm
+      description
+      lastMessageContents
+      lastMessageSender
       lastMessageTimestamp
+      lastSeenTimestamp
+      addresses {
+        address
+        pubKey
+        lastSeenTimestamp
+        groupLastSeenTimestamp
+        encryptedSymmetricKey
+        isAdmin
+      }
+      createdAt
     }
     pagination {
       lastPage
@@ -53,12 +79,23 @@ export const groups = `query Query($addressQueryString: String, $page: Int, $pag
 export const groupsWithAddresses = `query Query($page: Int, $pageCount: Int, $addresses: [String!]) {
   groups(page: $page, pageCount: $pageCount, addresses: $addresses) {
     groups {
-      createdAt
       id
-      lastMessageSender
-      lastMessageContents
       name
+      isDm
+      description
+      lastMessageContents
+      lastMessageSender
       lastMessageTimestamp
+      lastSeenTimestamp
+      addresses {
+        address
+        pubKey
+        lastSeenTimestamp
+        groupLastSeenTimestamp
+        encryptedSymmetricKey
+        isAdmin
+      }
+      createdAt
     }
     pagination {
       lastPage
@@ -98,6 +135,34 @@ export const listenMessages = `subscription NewMessageUpdate {
     }
   }`;
 
+export interface Addresses {
+  address: string;
+  lastSeenTimestamp: string;
+}
+
+export const groupReadUnread = `subscription GroupUpdate {
+  groupUpdate {
+    group {
+      id
+      name
+      isDm
+      lastMessageContents
+      lastMessageSender
+      lastMessageTimestamp
+      lastSeenTimestamp
+      addresses {
+        address
+        pubKey
+        lastSeenTimestamp
+        groupLastSeenTimestamp
+        encryptedSymmetricKey
+        isAdmin
+      }
+      createdAt
+    }
+  }
+}`;
+
 export const blockedList = `query Query($channelId: ChannelId!) {
     blockedList(channelId: $channelId) {
       id
@@ -125,5 +190,27 @@ export const unblock = `mutation Mutation($blockedAddress: String!, $channelId: 
     blockedAddress
     channelId
     timestamp
+  }
+}`;
+
+export const updateGroupLastSeen = `mutation Mutation($groupId: String!, $lastSeenTimestamp: String!, $groupLastSeenTimestamp: String!) {
+  updateGroupLastSeen(groupId: $groupId, lastSeenTimestamp: $lastSeenTimestamp, groupLastSeenTimestamp: $groupLastSeenTimestamp) {
+    id
+    name
+    isDm
+    description
+    lastMessageContents
+    lastMessageSender
+    lastMessageTimestamp
+    lastSeenTimestamp
+    addresses {
+      address
+      pubKey
+      lastSeenTimestamp
+      groupLastSeenTimestamp
+      encryptedSymmetricKey
+      isAdmin
+    }
+    createdAt
   }
 }`;

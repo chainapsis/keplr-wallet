@@ -36,6 +36,12 @@ export const ChatSettings: FunctionComponent = observer(() => {
   const [privacyParagraph, setPrivacyParagraph] = useState(
     "setting.privacy.paragraph.everybody"
   );
+  const [chatReadReceiptParagraph, setchatReadReceiptParagraph] = useState(
+    "setting.receipts.paragraph.on"
+  );
+  const [privacySetting, setPrivacySetting] = useState(
+    PrivacySetting.Everybody
+  );
 
   useEffect(() => {
     const setJWTAndFetchMsgPubKey = async () => {
@@ -45,6 +51,7 @@ export const ChatSettings: FunctionComponent = observer(() => {
 
       const pubKey = await fetchPublicKey(res, current.chainId, walletAddress);
       store.dispatch(setMessagingPubKey(pubKey));
+      setPrivacySetting(pubKey?.privacySetting || PrivacySetting.Everybody);
 
       if (pubKey?.privacySetting)
         setPrivacyParagraph(
@@ -53,6 +60,13 @@ export const ChatSettings: FunctionComponent = observer(() => {
             : pubKey.privacySetting === PrivacySetting.Contacts
             ? "setting.privacy.paragraph.contact"
             : "setting.privacy.paragraph.everybody"
+        );
+
+      if (pubKey?.chatReadReceiptSetting != null)
+        setchatReadReceiptParagraph(
+          pubKey.chatReadReceiptSetting
+            ? "setting.receipts.paragraph.on"
+            : "setting.receipts.paragraph"
         );
 
       if (
@@ -100,6 +114,8 @@ export const ChatSettings: FunctionComponent = observer(() => {
                   Object.keys(blockedUsers).filter((user) => blockedUsers[user])
                     .length
                 } Addresses Blocked`
+              : privacySetting == PrivacySetting.Nobody
+              ? "Please change your chat privacy settings"
               : "Please Activate Chat Functionality to Proceed"
           }
           onClick={() => {
@@ -133,23 +149,23 @@ export const ChatSettings: FunctionComponent = observer(() => {
             []
           )}
         />
-        {/* <PageButton
+        <PageButton
           title={intl.formatMessage({
             id: "setting.receipts",
           })}
           paragraph={intl.formatMessage({
-            id: "setting.receipts.paragraph",
+            id: chatReadReceiptParagraph,
           })}
-          // onClick={() => {
-          //   history.push({
-          //     pathname: "/setting/block",
-          //   });
-          // }}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/chat/readRecipt",
+            });
+          }}
           icons={useMemo(
             () => [<i key="next" className="fas fa-chevron-right" />],
             []
           )}
-        /> */}
+        />
       </div>
     </HeaderLayout>
   );

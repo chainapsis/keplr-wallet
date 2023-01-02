@@ -2,48 +2,47 @@ import { RegisterPublicKey } from "@keplr-wallet/background/build/messaging";
 import { PrivacySetting } from "@keplr-wallet/background/build/messaging/types";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import amplitude from "amplitude-js";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useMemo, useState } from "react";
-import { useIntl } from "react-intl";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router";
+import { useIntl } from "react-intl";
 import { store } from "../../../../chatStore";
+import { useHistory } from "react-router";
 import {
   setMessagingPubKey,
   userDetails,
 } from "../../../../chatStore/user-slice";
 import { useLoadingIndicator } from "../../../../components/loading-indicator";
 import { HeaderLayout } from "../../../../layouts";
-import { useStore } from "../../../../stores";
 import { PageButton } from "../../page-button";
+import { useStore } from "../../../../stores";
 import style from "./style.module.scss";
+import amplitude from "amplitude-js";
 
-export const Privacy: FunctionComponent = observer(() => {
-  // const language = useLanguage();
+export const ReadRecipt: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
+
+  const loadingIndicator = useLoadingIndicator();
   const { chainStore, accountStore } = useStore();
 
   const walletAddress = accountStore.getAccount(chainStore.current.chainId)
     .bech32Address;
 
   const userState = useSelector(userDetails);
-
-  const [
-    selectedPrivacySetting,
-    setSelectedPrivacySetting,
-  ] = useState<PrivacySetting>(
+  const requester = new InExtensionMessageRequester();
+  const [selectedPrivacySetting] = useState<PrivacySetting>(
     userState?.messagingPubKey.privacySetting
       ? userState?.messagingPubKey.privacySetting
       : PrivacySetting.Everybody
   );
+  const [chatReceiptSetting, setChatReceiptSetting] = useState(
+    userState?.messagingPubKey.chatReadReceiptSetting == null
+      ? true
+      : userState?.messagingPubKey.chatReadReceiptSetting
+  );
 
-  const loadingIndicator = useLoadingIndicator();
-
-  const requester = new InExtensionMessageRequester();
-
-  const updatePrivacy = async (setting: PrivacySetting) => {
+  const updatePrivacy = async (setting: boolean) => {
     loadingIndicator.setIsLoading("privacy", true);
     try {
       const messagingPubKey = await requester.sendMessage(
@@ -52,12 +51,12 @@ export const Privacy: FunctionComponent = observer(() => {
           chainStore.current.chainId,
           userState.accessToken,
           walletAddress,
+          selectedPrivacySetting,
           setting
         )
       );
-
       store.dispatch(setMessagingPubKey(messagingPubKey));
-      setSelectedPrivacySetting(setting);
+      setChatReceiptSetting(setting);
     } catch (e) {
       // Show error toaster
       console.error("error", e);
@@ -71,7 +70,7 @@ export const Privacy: FunctionComponent = observer(() => {
       showChainName={false}
       canChangeChainInfo={false}
       alternativeTitle={intl.formatMessage({
-        id: "setting.privacy",
+        id: "setting.receipts",
       })}
       onBackButton={() => {
         history.goBack();
@@ -79,17 +78,24 @@ export const Privacy: FunctionComponent = observer(() => {
     >
       <div className={style.container}>
         <PageButton
-          title="Everybody"
+          title={intl.formatMessage({
+            id: "setting.privacy.chat.receipts.on",
+          })}
+          paragraph={intl.formatMessage({
+            id: "setting.privacy.chat.receipts.on.paragraph",
+          })}
           onClick={(e) => {
             e.preventDefault();
-            updatePrivacy(PrivacySetting.Everybody);
-            amplitude.getInstance().logEvent("Privacy setting click", {
-              selectedPrivacySetting: PrivacySetting.Everybody,
-            });
+            updatePrivacy(true);
+            amplitude
+              .getInstance()
+              .logEvent("Read Receipts Privacy setting click", {
+                readRecipt: true,
+              });
           }}
           icons={useMemo(
             () =>
-              selectedPrivacySetting === PrivacySetting.Everybody
+              chatReceiptSetting
                 ? [
                     <img
                       key={0}
@@ -99,21 +105,28 @@ export const Privacy: FunctionComponent = observer(() => {
                     />,
                   ]
                 : [],
-            [selectedPrivacySetting]
+            [chatReceiptSetting]
           )}
         />
         <PageButton
-          title="Contacts"
+          title={intl.formatMessage({
+            id: "setting.privacy.chat.receipts.off",
+          })}
+          paragraph={intl.formatMessage({
+            id: "setting.privacy.chat.receipts.off.paragraph",
+          })}
           onClick={(e) => {
             e.preventDefault();
-            updatePrivacy(PrivacySetting.Contacts);
-            amplitude.getInstance().logEvent("Privacy setting click", {
-              selectedPrivacySetting: PrivacySetting.Contacts,
-            });
+            updatePrivacy(false);
+            amplitude
+              .getInstance()
+              .logEvent("Read Receipts Privacy setting click", {
+                readRecipt: false,
+              });
           }}
           icons={useMemo(
             () =>
-              selectedPrivacySetting === PrivacySetting.Contacts
+              !chatReceiptSetting
                 ? [
                     <img
                       key={0}
@@ -123,31 +136,7 @@ export const Privacy: FunctionComponent = observer(() => {
                     />,
                   ]
                 : [],
-            [selectedPrivacySetting]
-          )}
-        />
-        <PageButton
-          title="Nobody"
-          onClick={(e) => {
-            e.preventDefault();
-            updatePrivacy(PrivacySetting.Nobody);
-            amplitude.getInstance().logEvent("Privacy setting click", {
-              selectedPrivacySetting: PrivacySetting.Nobody,
-            });
-          }}
-          icons={useMemo(
-            () =>
-              selectedPrivacySetting === PrivacySetting.Nobody
-                ? [
-                    <img
-                      key={0}
-                      src={require("../../../../public/assets/svg/tick-icon.svg")}
-                      style={{ width: "100%" }}
-                      alt="message"
-                    />,
-                  ]
-                : [],
-            [selectedPrivacySetting]
+            [chatReceiptSetting]
           )}
         />
       </div>

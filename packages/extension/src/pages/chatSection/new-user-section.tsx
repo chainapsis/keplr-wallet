@@ -7,10 +7,10 @@ import { userBlockedAddresses } from "../../chatStore/messages-slice";
 import style from "./style.module.scss";
 
 export const NewUserSection = ({
-  userName,
+  targetAddress,
   handleClick,
 }: {
-  userName: string;
+  targetAddress: string;
   handleClick: any;
 }) => {
   const history = useHistory();
@@ -31,14 +31,14 @@ export const NewUserSection = ({
               pathname: "/setting/address-book",
               state: {
                 openModal: true,
-                addressInputValue: userName,
+                addressInputValue: targetAddress,
               },
             });
           }}
         >
           Add
         </button>
-        {blockedUsers[userName] ? (
+        {blockedUsers[targetAddress] ? (
           <button
             onClick={() => {
               amplitude.getInstance().logEvent("Unblock click", {});

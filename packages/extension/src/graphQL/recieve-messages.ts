@@ -4,14 +4,20 @@ import {
   updateChatList,
   setIsChatGroupPopulated,
 } from "../chatStore/messages-slice";
+import { CHAT_PAGE_COUNT } from "../config.ui.var";
 import { fetchGroups, fetchMessages } from "./messages-api";
 
 export const recieveMessages = async (
   userAddress: string,
+  afterTimestamp: string | null | undefined,
   page: number,
   _groupId: string
 ) => {
-  const { messages, pagination } = await fetchMessages(_groupId, page);
+  const { messages, pagination } = await fetchMessages(
+    _groupId,
+    afterTimestamp,
+    page
+  );
   const messagesObj: any = {};
 
   if (messages) {
@@ -21,6 +27,12 @@ export const recieveMessages = async (
     store.dispatch(
       updateChatList({ userAddress, messages: messagesObj, pagination })
     );
+
+    /// fetching the read records after unread to avoid the pagination stuck
+    if (!!afterTimestamp) {
+      const tmpPage = Math.floor(messages.length / CHAT_PAGE_COUNT);
+      await recieveMessages(userAddress, null, tmpPage, _groupId);
+    }
   }
   return messagesObj;
 };

@@ -57,6 +57,7 @@ const NewUser = (props: { address: NameAddress }) => {
     address,
     user.accessToken,
     user.messagingPubKey.privacySetting,
+    user.messagingPubKey.chatReadReceiptSetting,
     current.chainId,
   ]);
 
