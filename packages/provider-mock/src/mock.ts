@@ -113,6 +113,7 @@ export class MockKeplr implements Keplr {
           .bech32PrefixAccAddr
       ),
       isNanoLedger: false,
+      isKeystone: false,
     };
   }
 

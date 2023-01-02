@@ -33,6 +33,7 @@
     "@keplr-wallet/stores-etc": "0.11.29-rc.0",
     "@keplr-wallet/types": "0.11.29-rc.0",
     "@keplr-wallet/unit": "0.11.29-rc.0",
+    "@keystonehq/animated-qr": "^0.3.1-alpha.0",
     "@walletconnect/client": "^1.6.4",
     "aes-js": "^3.1.2",
     "alt-sign-in": "file:./noop-alt-sign-in",
@@ -65,6 +66,7 @@
     "reactstrap": "^8.4.1",
     "scrypt-js": "^3.0.1",
     "sha.js": "^2.4.11",
+    "swiper": "^8.4.4",
     "utility-types": "^3.10.0",
     "webextension-polyfill": "^0.7.0"
   },

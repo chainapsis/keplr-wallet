@@ -7,7 +7,12 @@ import {
 } from "@keplr-wallet/crypto";
 import { KVStore } from "@keplr-wallet/common";
 import { LedgerApp, LedgerService } from "../ledger";
-import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
+import {
+  BIP44HDPath,
+  CommonCrypto,
+  ExportKeyRingData,
+  SignMode,
+} from "./types";
 import { ChainInfo, EthSignType } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 
@@ -19,6 +24,9 @@ import * as BytesUtils from "@ethersproject/bytes";
 import { computeAddress } from "@ethersproject/transactions";
 import { EIP712MessageValidator } from "./eip712";
 import { domainHash, messageHash } from "./utils";
+import { KeystoneService } from "../keystone";
+import { publicKeyConvert } from "secp256k1";
+import { KeystoneKeyringData } from "../keystone/cosmos-keyring";
 
 export enum KeyRingStatus {
   NOTLOADED,
@@ -31,6 +39,7 @@ export interface Key {
   algo: string;
   pubKey: Uint8Array;
   address: Uint8Array;
+  isKeystone: boolean;
   isNanoLedger: boolean;
 }
 
@@ -63,6 +72,7 @@ export class KeyRing {
   private _privateKey?: Uint8Array;
   private _mnemonicMasterSeed?: Uint8Array;
   private _ledgerPublicKeyCache?: Record<string, Uint8Array | undefined>;
+  private _keystonePublicKeyCache?: KeystoneKeyringData;
 
   private keyStore: KeyStore | null;
 
@@ -74,6 +84,7 @@ export class KeyRing {
     private readonly embedChainInfos: ChainInfo[],
     private readonly kvStore: KVStore,
     private readonly ledgerKeeper: LedgerService,
+    private readonly keystoneService: KeystoneService,
     private readonly crypto: CommonCrypto
   ) {
     this.loaded = false;
@@ -83,20 +94,30 @@ export class KeyRing {
 
   public static getTypeOfKeyStore(
     keyStore: Omit<KeyStore, "crypto">
-  ): "mnemonic" | "privateKey" | "ledger" {
+  ): "mnemonic" | "privateKey" | "ledger" | "keystone" {
     const type = keyStore.type;
     if (type == null) {
       return "mnemonic";
     }
 
-    if (type !== "mnemonic" && type !== "privateKey" && type !== "ledger") {
+    if (
+      type !== "mnemonic" &&
+      type !== "privateKey" &&
+      type !== "ledger" &&
+      type !== "keystone"
+    ) {
       throw new KeplrError("keyring", 132, "Invalid type of key store");
     }
 
     return type;
   }
 
-  public get type(): "mnemonic" | "privateKey" | "ledger" | "none" {
+  public get type():
+    | "mnemonic"
+    | "privateKey"
+    | "ledger"
+    | "keystone"
+    | "none" {
     if (!this.keyStore) {
       return "none";
     } else {
@@ -108,7 +129,8 @@ export class KeyRing {
     return (
       this.privateKey == null &&
       this.mnemonicMasterSeed == null &&
-      this.ledgerPublicKeyCache == null
+      this.ledgerPublicKeyCache == null &&
+      this.keystonePublicKey == null
     );
   }
 
@@ -120,6 +142,7 @@ export class KeyRing {
     this._privateKey = privateKey;
     this._mnemonicMasterSeed = undefined;
     this._ledgerPublicKeyCache = undefined;
+    this._keystonePublicKeyCache = undefined;
     this.cached = new Map();
   }
 
@@ -129,6 +152,19 @@ export class KeyRing {
 
   private set mnemonicMasterSeed(masterSeed: Uint8Array | undefined) {
     this._mnemonicMasterSeed = masterSeed;
+    this._privateKey = undefined;
+    this._ledgerPublicKeyCache = undefined;
+    this._keystonePublicKeyCache = undefined;
+    this.cached = new Map();
+  }
+
+  private get keystonePublicKey(): KeystoneKeyringData | undefined {
+    return this._keystonePublicKeyCache;
+  }
+
+  private set keystonePublicKey(publicKey: KeystoneKeyringData | undefined) {
+    this._keystonePublicKeyCache = publicKey;
+    this._mnemonicMasterSeed = undefined;
     this._privateKey = undefined;
     this._ledgerPublicKeyCache = undefined;
     this.cached = new Map();
@@ -299,6 +335,49 @@ export class KeyRing {
     };
   }
 
+  public async createKeystoneKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    if (this.status !== KeyRingStatus.EMPTY) {
+      throw new KeplrError(
+        "keyring",
+        142,
+        "Key ring is not loaded or not empty"
+      );
+    }
+
+    // Get public key first
+    const publicKey = await this.keystoneService.getPubkey(env, bip44HDPath);
+
+    const keyStore = await KeyRing.CreateKeystoneKeyStore(
+      this.crypto,
+      kdf,
+      publicKey,
+      password,
+      await this.assignKeyStoreIdMeta(meta),
+      bip44HDPath
+    );
+
+    this.password = password;
+    this.keyStore = keyStore;
+    this.multiKeyStore.push(this.keyStore);
+    this.keystonePublicKey = publicKey;
+
+    await this.save();
+
+    return {
+      status: this.status,
+      multiKeyStoreInfo: this.getMultiKeyStoreInfo(),
+    };
+  }
+
   public async createLedgerKey(
     env: Env,
     kdf: "scrypt" | "sha256" | "pbkdf2",
@@ -406,6 +485,21 @@ export class KeyRing {
       }
 
       this.ledgerPublicKeyCache = pubKeys;
+    } else if (this.type === "keystone") {
+      const cipherText = await Crypto.decrypt(
+        this.crypto,
+        this.keyStore,
+        password
+      );
+      try {
+        this.keystonePublicKey = JSON.parse(Buffer.from(cipherText).toString());
+      } catch (e: any) {
+        throw new KeplrError(
+          "keyring",
+          146,
+          "Unexpected content of Keystone public keys"
+        );
+      }
     } else {
       throw new KeplrError("keyring", 145, "Unexpected type of keyring");
     }
@@ -669,6 +763,7 @@ export class KeyRing {
           algo: "ethsecp256k1",
           pubKey: pubKey,
           address: Buffer.from(address.replace("0x", ""), "hex"),
+          isKeystone: false,
           isNanoLedger: true,
         };
       }
@@ -681,7 +776,37 @@ export class KeyRing {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
         address: pubKey.getAddress(),
+        isKeystone: false,
         isNanoLedger: true,
+      };
+    } else if (this.keyStore.type === "keystone") {
+      if (!this.keystonePublicKey || this.keystonePublicKey.keys.length === 0) {
+        throw new KeplrError("keyring", 160, "Keystone public key not set");
+      }
+      const key = this.keystonePublicKey.keys.find(
+        (e) => e.coinType === coinType
+      );
+      if (!key) {
+        throw new KeplrError("keyring", 161, "CoinType is not available");
+      }
+      if (useEthereumAddress) {
+        const pubKey = publicKeyConvert(Buffer.from(key.pubKey, "hex"), true);
+        const address = computeAddress(pubKey);
+        return {
+          algo: "ethsecp256k1",
+          pubKey,
+          address: Buffer.from(address.replace(/^0x/, ""), "hex"),
+          isKeystone: true,
+          isNanoLedger: false,
+        };
+      }
+      const pubKey = new PubKeySecp256k1(Buffer.from(key.pubKey, "hex"));
+      return {
+        algo: "secp256k1",
+        pubKey: pubKey.toBytes(),
+        address: pubKey.getAddress(),
+        isKeystone: true,
+        isNanoLedger: false,
       };
     } else {
       const privKey = this.loadPrivKey(coinType);
@@ -695,6 +820,7 @@ export class KeyRing {
           algo: "ethsecp256k1",
           pubKey: pubKey.toBytes(),
           address: Buffer.from(wallet.address.replace("0x", ""), "hex"),
+          isKeystone: false,
           isNanoLedger: false,
         };
       }
@@ -704,6 +830,7 @@ export class KeyRing {
         algo: "secp256k1",
         pubKey: pubKey.toBytes(),
         address: pubKey.getAddress(),
+        isKeystone: false,
         isNanoLedger: false,
       };
     }
@@ -764,7 +891,8 @@ export class KeyRing {
     chainId: string,
     defaultCoinType: number,
     message: Uint8Array,
-    useEthereumSigning: boolean
+    useEthereumSigning: boolean,
+    mode: SignMode = SignMode.Amino
   ): Promise<Uint8Array> {
     if (this.status !== KeyRingStatus.UNLOCKED) {
       throw new KeplrError("keyring", 143, "Key ring is not unlocked");
@@ -794,6 +922,17 @@ export class KeyRing {
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
         await this.ensureLedgerPublicKey(LedgerApp.Cosmos),
         message
+      );
+    } else if (this.keyStore.type === "keystone") {
+      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+      return await this.keystoneService.sign(
+        env,
+        coinType,
+        KeyRing.getKeyStoreBIP44Path(this.keyStore),
+        this.loadKey(coinType, useEthereumSigning),
+        this.keystonePublicKey as KeystoneKeyringData,
+        message,
+        mode
       );
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
@@ -843,6 +982,20 @@ export class KeyRing {
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
         await this.ensureLedgerPublicKey(LedgerApp.Ethereum),
         message
+      );
+    }
+
+    if (this.keyStore.type === "keystone") {
+      const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+      return this.keystoneService.signEthereum(
+        env,
+        coinType,
+        chainId,
+        KeyRing.getKeyStoreBIP44Path(this.keyStore),
+        this.loadKey(coinType, true),
+        this.keystonePublicKey as KeystoneKeyringData,
+        message,
+        type
       );
     }
 
@@ -984,6 +1137,42 @@ export class KeyRing {
       this.password,
       await this.assignKeyStoreIdMeta(meta)
     );
+    this.multiKeyStore.push(keyStore);
+
+    await this.save();
+    return {
+      multiKeyStoreInfo: this.getMultiKeyStoreInfo(),
+    };
+  }
+
+  public async addKeystoneKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
+      throw new KeplrError(
+        "keyring",
+        141,
+        "Key ring is locked or not initialized"
+      );
+    }
+
+    // Get public key first
+    const publicKey = await this.keystoneService.getPubkey(env, bip44HDPath);
+
+    const keyStore = await KeyRing.CreateKeystoneKeyStore(
+      this.crypto,
+      kdf,
+      publicKey,
+      this.password,
+      await this.assignKeyStoreIdMeta(meta),
+      bip44HDPath
+    );
+
     this.multiKeyStore.push(keyStore);
 
     await this.save();
@@ -1184,6 +1373,25 @@ export class KeyRing {
       Buffer.from(privateKey).toString("hex"),
       password,
       meta
+    );
+  }
+
+  private static async CreateKeystoneKeyStore(
+    crypto: CommonCrypto,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    publicKey: KeystoneKeyringData,
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath
+  ): Promise<KeyStore> {
+    return await Crypto.encrypt(
+      crypto,
+      kdf,
+      "keystone",
+      JSON.stringify(publicKey),
+      password,
+      meta,
+      bip44HDPath
     );
   }
 

@@ -50,6 +50,8 @@ export class AccountSetBase {
   protected _bech32Address: string = "";
   @observable
   protected _isNanoLedger: boolean = false;
+  @observable
+  protected _isKeystone: boolean = false;
 
   @observable
   protected _txTypeInProgress: string = "";
@@ -194,6 +196,7 @@ export class AccountSetBase {
       const key = yield* toGenerator(keplr.getKey(this.chainId));
       this._bech32Address = key.bech32Address;
       this._isNanoLedger = key.isNanoLedger;
+      this._isKeystone = key.isKeystone;
       this._name = key.name;
       this._pubKey = key.pubKey;
 
@@ -205,6 +208,7 @@ export class AccountSetBase {
       // Reset properties, and set status to Rejected
       this._bech32Address = "";
       this._isNanoLedger = false;
+      this._isKeystone = false;
       this._name = "";
       this._pubKey = new Uint8Array(0);
 
@@ -228,6 +232,7 @@ export class AccountSetBase {
     );
     this._bech32Address = "";
     this._isNanoLedger = false;
+    this._isKeystone = false;
     this._name = "";
     this._pubKey = new Uint8Array(0);
     this._rejectionReason = undefined;
@@ -332,6 +337,10 @@ export class AccountSetBase {
 
   get isNanoLedger(): boolean {
     return this._isNanoLedger;
+  }
+
+  get isKeystone(): boolean {
+    return this._isKeystone;
   }
 
   /**
