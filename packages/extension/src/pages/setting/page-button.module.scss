@@ -54,6 +54,14 @@
     }
   }
 
+  .inner-container-sub-paragraph {
+    width: 280px;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
   .icon-container {
     display: flex;
     flex-direction: column;

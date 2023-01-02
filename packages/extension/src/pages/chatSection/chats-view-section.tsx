@@ -272,7 +272,7 @@ export const ChatsViewSection = ({
   const handleKeydown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     //it triggers by pressing the enter key
     const { key } = e as React.KeyboardEvent<HTMLTextAreaElement>;
-    if (key === "Enter" && enterKeyCount == 0) {
+    if (key === "Enter" && !e.shiftKey && enterKeyCount == 0) {
       enterKeyCount = 1;
       handleSendMessage(e);
     }

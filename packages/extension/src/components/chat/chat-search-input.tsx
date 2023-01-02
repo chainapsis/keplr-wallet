@@ -32,7 +32,7 @@ export const ChatSearchInput = ({
           history.push("/newChat");
         }}
       >
-        <img style={{ cursor: "pointer" }} src={newChatIcon} alt="" />
+        <img className={style.newChatIcon} src={newChatIcon} alt="" />
       </div>
     </div>
   );

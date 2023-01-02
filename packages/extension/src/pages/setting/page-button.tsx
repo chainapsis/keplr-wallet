@@ -39,7 +39,11 @@ export const PageButton: FunctionComponent<
           <h1>{title}</h1>
         </ToolTip>
         {paragraph ? <p>{paragraph}</p> : null}
-        {subParagraph ? <p>{subParagraph}</p> : null}
+        {subParagraph ? (
+          <p className={stylePageButton.innerContainerSubParagraph}>
+            {subParagraph}
+          </p>
+        ) : null}
       </div>
       <div style={{ flex: 1 }} />
       {icons
