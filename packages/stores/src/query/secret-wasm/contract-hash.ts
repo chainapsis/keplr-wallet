@@ -14,7 +14,7 @@ export class ObservableQuerySecretContractCodeHashInner extends ObservableChainQ
       kvStore,
       chainId,
       chainGetter,
-      `/wasm/contract/${contractAddress}/code-hash`
+      `/compute/v1beta1/code_hash/by_contract_address/${contractAddress}`
     );
   }
 

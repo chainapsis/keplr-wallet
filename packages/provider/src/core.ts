@@ -37,7 +37,7 @@ import {
   RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
 } from "./types";
-import { SecretUtils } from "secretjs/types/enigmautils";
+import { EncryptionUtils as SecretUtils } from "secretjs";
 
 import { KeplrEnigmaUtils } from "./enigma";
 

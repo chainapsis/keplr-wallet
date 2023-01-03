@@ -15,7 +15,7 @@ import {
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
 } from "@keplr-wallet/types";
-import { SecretUtils } from "secretjs/types/enigmautils";
+import { EncryptionUtils as SecretUtils } from "secretjs";
 import {
   Bech32Address,
   encodeSecp256k1Signature,
