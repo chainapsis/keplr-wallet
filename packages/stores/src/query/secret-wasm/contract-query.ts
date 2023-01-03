@@ -89,10 +89,7 @@ export class ObservableSecretContractChainQuery<
       );
       this.nonce = encrypted.slice(0, 32);
 
-      const encoded = Buffer.from(
-        Buffer.from(encrypted).toString("base64")
-      ).toString("hex");
-
+      const encoded = Buffer.from(encrypted).toString("base64");
       this.setUrl(this.getSecretWasmUrl(this.contractAddress, encoded));
     }
 
