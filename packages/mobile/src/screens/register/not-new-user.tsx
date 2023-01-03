@@ -120,7 +120,7 @@ export const RegisterNotNewUserScreen: FunctionComponent = observer(() => {
           "color-text-low",
         ])}
       >
-        Powered by Torus
+        Powered by Web3Auth
       </Text>
       <Button
         containerStyle={style.flatten(["margin-bottom-16"])}
