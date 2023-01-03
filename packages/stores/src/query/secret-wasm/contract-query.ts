@@ -174,7 +174,8 @@ export class ObservableSecretContractChainQuery<
   }
 
   protected getSecretWasmUrl(contractAddress: string, msg: string): string {
-    return `/compute/v1beta1/${contractAddress}?query=${msg}`;
+    const queryParam = new URLSearchParams({ query: msg });
+    return `/compute/v1beta1/${contractAddress}?${queryParam.toString()}`;
   }
 
   // Actually, the url of fetching the secret20 balance will be changed every time.
@@ -202,6 +203,6 @@ export class ObservableSecretContractChainQuery<
 
     // Code hash is persistent, so it is safe not to consider that the response is from cache or network.
     // TODO: Handle the error case.
-    return queryCodeHash.response.data.result;
+    return queryCodeHash.response.data.code_hash;
   }
 }
