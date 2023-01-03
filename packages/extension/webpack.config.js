@@ -117,7 +117,12 @@ const extensionConfig = () => {
         excludeChunks: ["background", "contentScripts", "injectedScript"],
       }),
       new WriteFilePlugin(),
-      new webpack.EnvironmentPlugin(["NODE_ENV", "USER_ENV"]),
+      new webpack.EnvironmentPlugin([
+        "NODE_ENV",
+        "USER_ENV",
+        "PROD_AMPLITUDE_API_KEY",
+        "DEV_AMPLITUDE_API_KEY",
+      ]),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
       }),
