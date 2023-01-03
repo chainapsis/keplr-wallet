@@ -4,13 +4,12 @@ require("setimmediate");
 
 import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
-import { Normalize } from "styled-normalize";
 import { HashRouter, Route } from "react-router-dom";
-
 import { RegisterPage } from "./renewal/pages/register";
 import { StoreProvider } from "./stores";
 import { AppIntlProvider } from "./languages";
 import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
+import { GlobalStyle } from "./renewal/styles";
 
 const App: FunctionComponent = () => {
   return (
@@ -20,7 +19,7 @@ const App: FunctionComponent = () => {
         languageToFiatCurrency={LanguageToFiatCurrency}
       >
         <React.Fragment>
-          <Normalize />
+          <GlobalStyle />
           <HashRouter>
             <Route exact path="/register" component={RegisterPage} />
           </HashRouter>

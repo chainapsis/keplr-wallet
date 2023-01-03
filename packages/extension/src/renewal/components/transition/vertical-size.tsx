@@ -2,16 +2,18 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { animated, SpringConfig, useSpringValue } from "@react-spring/web";
 
-const Container = styled(animated.div)<{
-  width: string;
-}>`
-  position: relative;
-  overflow: hidden;
-  width: ${({ width }) => width};
-`;
+const Styles = {
+  Container: styled(animated.div)<{
+    width?: string;
+  }>`
+    position: relative;
+    overflow: hidden;
+    width: ${({ width }) => width};
+  `,
+};
 
 export const VerticalResizeTransition: FunctionComponent<{
-  width: string;
+  width?: string;
   transitionAlign?: "top" | "middle" | "bottom";
 
   springConfig?: SpringConfig;
@@ -49,7 +51,7 @@ export const VerticalResizeTransition: FunctionComponent<{
   }, [resizeObserver]);
 
   return (
-    <Container
+    <Styles.Container
       width={width}
       style={{
         height: heightPx.to((heightPx) =>
@@ -87,6 +89,6 @@ export const VerticalResizeTransition: FunctionComponent<{
       >
         {children}
       </animated.div>
-    </Container>
+    </Styles.Container>
   );
 };

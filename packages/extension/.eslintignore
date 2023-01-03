@@ -4,6 +4,8 @@
 **/*.png
 **/*.svg
 **/*.ttf
+**/*.woff
+**/*.woff2
 **/*.secret
 **/*.md
 **/*.log

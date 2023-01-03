@@ -35,43 +35,44 @@ interface ScenePropsInternalTypes extends SceneProps {
   onAminEnd?: () => void;
 }
 
-const SceneContainer = styled(animated.div)<{
-  top: boolean;
-  zIndex: number;
-  transitionAlign?: "top" | "middle" | "bottom";
-}>`
-  display: grid;
-  grid-template-columns: 1fr;
+const Styles = {
+  Container: styled(animated.div)<{
+    top: boolean;
+    zIndex: number;
+    transitionAlign?: "top" | "middle" | "bottom";
+  }>`
+    display: grid;
+    grid-template-columns: 1fr;
 
-  z-index: ${({ zIndex }) => zIndex};
+    z-index: ${({ zIndex }) => zIndex};
 
-  width: 100%;
+    width: 100%;
 
-  ${({ top }) => {
-    if (top) {
-      return css`
-        position: relative;
-        left: auto;
-        right: auto;
+    ${({ top }) => {
+      if (top) {
+        return css`
+          position: relative;
+          left: auto;
+          right: auto;
 
-        pointer-events: auto;
-      `;
-    } else {
-      return css`
-        position: absolute;
-        left: 0;
-        right: 0;
+          pointer-events: auto;
+        `;
+      } else {
+        return css`
+          position: absolute;
+          left: 0;
+          right: 0;
 
-        pointer-events: none;
-      `;
-    }
-  }}
-`;
-
-const SceneElement = styled.div`
-  grid-row-start: 1;
-  grid-column-start: 1;
-`;
+          pointer-events: none;
+        `;
+      }
+    }}
+  `,
+  Element: styled.div`
+    grid-row-start: 1;
+    grid-column-start: 1;
+  `,
+};
 
 // eslint-disable-next-line react/display-name
 export const SceneTransition = forwardRef<
@@ -80,7 +81,7 @@ export const SceneTransition = forwardRef<
     scenes: Scene[];
     initialSceneProps: SceneProps;
 
-    width: string;
+    width?: string;
     transitionAlign?: "top" | "middle" | "bottom";
 
     springConfig?: SpringConfig;
@@ -251,7 +252,7 @@ const SceneComponent: FunctionComponent<{
   })();
 
   return (
-    <SceneContainer
+    <Styles.Container
       top={top}
       zIndex={index}
       transitionAlign={transitionAlign}
@@ -280,7 +281,7 @@ const SceneComponent: FunctionComponent<{
           .to((x) => `translate(${x}%, ${y}%)`),
       }}
     >
-      <SceneElement>{children}</SceneElement>
-    </SceneContainer>
+      <Styles.Element>{children}</Styles.Element>
+    </Styles.Container>
   );
 };

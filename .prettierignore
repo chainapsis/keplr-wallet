@@ -1,6 +1,8 @@
 **/*.png
 **/*.svg
 **/*.ttf
+**/*.woff
+**/*.woff2
 **/*.secret
 **/*.md
 .DS_Store

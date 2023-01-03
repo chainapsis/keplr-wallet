@@ -1,13 +1,10 @@
-import { useRegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import styled from "styled-components";
-import { useStore } from "../../../stores";
-import { Card } from "../../components/card";
-import { Gutter } from "../../components/gutter";
 import { ColorPalette } from "../../styles";
-import { CreateAccount, CreateAccountType } from "./create-account";
-import { RegisterIntro } from "./intro";
+import { Card } from "../../components/card";
+import { SceneTransition } from "../../components/transition";
+import { Button } from "../../components/button";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -21,41 +18,44 @@ const Container = styled.div`
   position: relative;
 `;
 
-const Notice = styled.span`
+const RegisterCard = styled(Card)`
+  padding: 3.125rem 5rem;
+  background-color: ${ColorPalette["white"]};
+  border-radius: 1rem;
+  border: 1px solid ${ColorPalette["gray-50"]};
+
+  max-width: 34.25rem;
+  width: 100%;
+`;
+
+const NoticeText = styled.span`
   font-weight: 400;
-  font-size: 16px;
-  line-height: 22px;
+  font-size: 1rem;
+  line-height: 1.375;
   color: ${ColorPalette["platinum-200"]};
 `;
 
 export const RegisterPage: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
-
-  const registerConfig = useRegisterConfig(keyRingStore, []);
-
   return (
     <Container>
-      <Gutter size="2.5rem" />
-      <Card
-        width="100%"
-        maxWidth={registerConfig.isIntro ? "34.25rem" : "35rem"}
-        padding="50px 80px"
-        isAnimated
-      >
-        {registerConfig.isIntro && (
-          <RegisterIntro registerConfig={registerConfig} />
-        )}
-        {registerConfig.type === CreateAccountType && (
-          <CreateAccount registerConfig={registerConfig} />
-        )}
-      </Card>
-      <Gutter size="2.5rem" />
-      <Notice>
+      <RegisterCard>
+        <SceneTransition
+          scenes={[
+            {
+              name: "test",
+              element: Button,
+            },
+          ]}
+          initialSceneProps={{
+            name: "test",
+          }}
+        />
+      </RegisterCard>
+      <NoticeText>
         All sensitive information is stored only on your device.
         <br />
         This process does not require an internet conenction.
-      </Notice>
-      <Gutter size="2.5rem" />
+      </NoticeText>
     </Container>
   );
 });

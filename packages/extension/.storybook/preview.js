@@ -1,9 +1,9 @@
-import { GlobalStyles } from "../src/renewal/styles";
+import { GlobalStyle } from "../src/renewal/styles";
 
 export const decorators = [
   (Story) => (
     <>
-      <GlobalStyles />
+      <GlobalStyle />
       <Story />
     </>
   ),
