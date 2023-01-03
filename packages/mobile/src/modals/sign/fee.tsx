@@ -114,6 +114,12 @@ export const FeeInSign: FunctionComponent<{
             style={style.flatten(["flex-row", "items-center"])}
             disabled={!canFeeEditable}
             onPress={() => {
+              // FeeButtons need to use `getFeeTypePretty` method.
+              // However, if fee is manual mode,  `getFeeTypePretty` method throws an error.
+              // To avoid this, we should change the fee type before opening the modal.
+              if (feeConfig.isManual) {
+                feeConfig.setFeeType("average");
+              }
               setIsSetFeeModalOpen(true);
             }}
           >

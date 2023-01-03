@@ -100,7 +100,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
       if (feeConfig.feeCurrency && !feeConfig.fee) {
         feeConfig.setFeeType("average");
       }
-    }, [feeConfig]);
+    }, [feeConfig, feeConfig.feeCurrency, feeConfig.fee]);
 
     // For chains without feeCurrencies, Keplr assumes tx doesn’t need to include information about the fee and the fee button does not have to be rendered.
     // The architecture is designed so that fee button is not rendered if the parental component doesn’t have a feeCurrency.
