@@ -1,5 +1,6 @@
 import { MockKeplr } from "@keplr-wallet/provider-mock";
 import { SigningStargateClient } from "@cosmjs/stargate";
+import { SecretNetworkClient } from "secretjs";
 
 /*
  * Currently, these tests do not test behavior.
@@ -125,5 +126,38 @@ describe("Test cosmjs compatibility", () => {
         chainId: "test-1",
       }
     );
+  });
+
+  test("test type conflict with secretjs", async () => {
+    const keplr = new MockKeplr(
+      () => {
+        throw new Error("Not implemented");
+      },
+      [
+        {
+          chainId: "test-1",
+          bech32Config: {
+            bech32PrefixAccAddr: "test",
+          },
+        },
+      ],
+      "diary match wagon soccer worth planet sea stumble thought post easily want"
+    );
+
+    const offlineSigner = keplr.getOfflineSigner("test-1");
+
+    const signer = (await offlineSigner.getAccounts())[0].address;
+    expect(signer).toBe("test1ce0nzfm5a0j5yg48xz88qr430caaxdrs2ec4f4");
+
+    expect(
+      () =>
+        new SecretNetworkClient({
+          url: "no-op",
+          chainId: "test-1",
+          wallet: offlineSigner,
+          walletAddress: "test1ce0nzfm5a0j5yg48xz88qr430caaxdrs2ec4f4",
+          encryptionUtils: keplr.getEnigmaUtils("test-1"),
+        })
+    ).toThrow();
   });
 });

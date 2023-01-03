@@ -14,8 +14,8 @@ import {
   DirectSignResponse,
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
+  SecretUtils,
 } from "@keplr-wallet/types";
-import { SecretUtils } from "secretjs/types/enigmautils";
 import {
   Bech32Address,
   encodeSecp256k1Signature,
@@ -94,7 +94,7 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
-  getEnigmaUtils(): SecretUtils {
+  getEnigmaUtils(_chainId: string): SecretUtils {
     throw new Error("Not implemented");
   }
 
@@ -278,6 +278,17 @@ export class MockKeplr implements Keplr {
   }
 
   getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
+    throw new Error("Not yet implemented");
+  }
+
+  disable(_chainIds?: string | string[]): Promise<void> {
+    throw new Error("Not yet implemented");
+  }
+
+  changeKeyRingName(_opts: {
+    defaultName: string;
+    editable?: boolean | undefined;
+  }): Promise<string> {
     throw new Error("Not yet implemented");
   }
 }

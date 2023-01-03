@@ -16,6 +16,7 @@ import {
   OfflineDirectSigner,
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
+  SecretUtils,
 } from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
@@ -36,8 +37,9 @@ import {
   GetAnalyticsIdMsg,
   RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
+  DisableAccessMsg,
+  ChangeKeyRingNameMsg,
 } from "./types";
-import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
 
@@ -66,6 +68,17 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     await this.requester.sendMessage(
       BACKGROUND_PORT,
       new EnableAccessMsg(chainIds)
+    );
+  }
+
+  async disable(chainIds?: string | string[]): Promise<void> {
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
+    await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new DisableAccessMsg(chainIds ?? [])
     );
   }
 
@@ -396,5 +409,17 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   __core__getAnalyticsId(): Promise<string> {
     const msg = new GetAnalyticsIdMsg();
     return this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async changeKeyRingName({
+    defaultName,
+    editable = true,
+  }: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string> {
+    const msg = new ChangeKeyRingNameMsg(defaultName, editable);
+
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

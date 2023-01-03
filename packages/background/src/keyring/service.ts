@@ -883,4 +883,21 @@ Salt: ${salt}`;
   async initializeNonDefaultLedgerApp(env: Env, ledgerApp: LedgerApp) {
     return await this.keyRing.initializeNonDefaultLedgerApp(env, ledgerApp);
   }
+
+  async changeKeyRingName(
+    env: Env,
+    index: number,
+    { defaultName, editable }: { defaultName: string; editable: boolean }
+  ): Promise<string> {
+    const newName = (await this.interactionService.waitApprove(
+      env,
+      `/setting/keyring/change/name/${index}`,
+      "change-keyring-name",
+      { defaultName, editable }
+    )) as string;
+
+    await this.updateNameKeyRing(index, newName);
+
+    return newName;
+  }
 }
