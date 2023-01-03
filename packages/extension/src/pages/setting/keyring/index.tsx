@@ -15,7 +15,10 @@ import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { store } from "../../../chatStore";
 import { resetUser } from "../../../chatStore/user-slice";
-import { resetChatList } from "../../../chatStore/messages-slice";
+import {
+  resetChatList,
+  setIsChatSubscriptionActive,
+} from "../../../chatStore/messages-slice";
 import { messageAndGroupListenerUnsubscribe } from "../../../graphQL/messages-api";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
@@ -113,6 +116,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                         loadingIndicator.setIsLoading("keyring", false);
                         store.dispatch(resetUser({}));
                         store.dispatch(resetChatList({}));
+                        store.dispatch(setIsChatSubscriptionActive(false));
                         messageAndGroupListenerUnsubscribe();
                         history.push("/");
                       } catch (e) {

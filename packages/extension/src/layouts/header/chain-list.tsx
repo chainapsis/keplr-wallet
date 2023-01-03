@@ -5,7 +5,10 @@ import React, { FunctionComponent } from "react";
 import { useIntl } from "react-intl";
 import { useHistory } from "react-router";
 import { store } from "../../chatStore";
-import { resetChatList } from "../../chatStore/messages-slice";
+import {
+  resetChatList,
+  setIsChatSubscriptionActive,
+} from "../../chatStore/messages-slice";
 import { resetUser } from "../../chatStore/user-slice";
 import { useConfirm } from "../../components/confirm";
 import { messageAndGroupListenerUnsubscribe } from "../../graphQL/messages-api";
@@ -41,6 +44,7 @@ const ChainElement: FunctionComponent<{
         chainStore.saveLastViewChainId();
         store.dispatch(resetUser({}));
         store.dispatch(resetChatList({}));
+        store.dispatch(setIsChatSubscriptionActive(false));
         messageAndGroupListenerUnsubscribe();
         history.push("/");
         if (Object.values(properties).length > 0) {

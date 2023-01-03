@@ -42,7 +42,7 @@ export const MemoInput: FunctionComponent<MemoInputProps> = observer(
           }}
           value={memoConfig.memo}
           onChange={(e) => {
-            memoConfig.setMemo(e.target.value);
+            memoConfig.setMemo(e.target.value.substring(0, 256));
             e.preventDefault();
           }}
           autoComplete="off"
