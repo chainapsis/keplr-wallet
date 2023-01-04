@@ -5,7 +5,7 @@ on:
 
 jobs:
   test:
-    name: Test code base
+    name: Test code base and upload to chromatic
     runs-on: ubuntu-20.04
     timeout-minutes: 30
     steps:
@@ -21,3 +21,6 @@ jobs:
       - run: curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-x86_64.zip
       - run: unzip protoc-21.3-linux-x86_64.zip -d $HOME/protoc && echo $HOME/protoc/bin >> $GITHUB_PATH
       - run: yarn ci
+      - run: yarn workspace @keplr-wallet/extension chromatic
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
