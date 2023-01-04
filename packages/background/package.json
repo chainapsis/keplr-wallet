@@ -48,7 +48,6 @@
     "@keystonehq/base-eth-keyring": "^0.6.4",
     "@keystonehq/cosmos-keyring": "^0.0.1-alpha.0",
     "@keystonehq/bc-ur-registry": "^0.5.1",
-    "@cosmjs/crypto": "^0.29.3",
     "aes-js": "^3.1.2",
     "axios": "^0.27.2",
     "big-integer": "^1.6.48",
