@@ -16,6 +16,16 @@ export interface SceneTransitionRef {
   pop(): void;
 }
 
+export interface SceneTransitionProps {
+  scenes: Scene[];
+  initialSceneProps: SceneProps;
+
+  width?: string;
+  transitionAlign?: "top" | "middle" | "bottom";
+
+  springConfig?: SpringConfig;
+}
+
 export interface Scene {
   name: string;
   element: ElementType;
@@ -77,15 +87,7 @@ const Styles = {
 // eslint-disable-next-line react/display-name
 export const SceneTransition = forwardRef<
   SceneTransitionRef,
-  {
-    scenes: Scene[];
-    initialSceneProps: SceneProps;
-
-    width?: string;
-    transitionAlign?: "top" | "middle" | "bottom";
-
-    springConfig?: SpringConfig;
-  }
+  SceneTransitionProps
 >(
   (
     { scenes, initialSceneProps, width, transitionAlign, springConfig },
