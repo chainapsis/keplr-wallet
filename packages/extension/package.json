@@ -20,7 +20,7 @@
     "version": "zx ./scripts/lerna-lifecyle-version.mjs",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "chromatic": "npx chromatic --project-token=c3711418713b"
+    "chromatic": "chromatic --project-token=${CHROMATIC_PROJECT_TOKEN}"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.11.2",
