@@ -22,6 +22,13 @@ const buttonStyleFromColorAndMode: Record<
         background-color: ${ColorPalette["blue-400"]};
 
         ${makeTextAndSvgColor(ColorPalette["white"])}
+
+        :hover {
+          ::after {
+            background-color: ${ColorPalette["gray-500"]};
+            opacity: 0.2;
+          }
+        }
       `,
       disabled: css`
         background-color: ${ColorPalette["blue-200"]};
@@ -35,6 +42,15 @@ const buttonStyleFromColorAndMode: Record<
         border: 1px solid ${ColorPalette["blue-100"]};
 
         ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+
+        :hover {
+          ::after {
+            border: 1px solid transparent;
+
+            background-color: ${ColorPalette["gray-500"]};
+            opacity: 0.1;
+          }
+        }
       `,
       disabled: css`
         background-color: ${ColorPalette["blue-10"]};
@@ -48,6 +64,10 @@ const buttonStyleFromColorAndMode: Record<
         background-color: transparent;
 
         ${makeTextAndSvgColor(ColorPalette["blue-400"])}
+
+        :hover {
+          background-color: ${ColorPalette["platinum-500"] + "33"};
+        }
       `,
       disabled: css`
         background-color: transparent;
@@ -62,6 +82,13 @@ const buttonStyleFromColorAndMode: Record<
         background-color: ${ColorPalette["red-400"]};
 
         ${makeTextAndSvgColor(ColorPalette["white"])}
+
+        :hover {
+          ::after {
+            background-color: ${ColorPalette["platinum-500"]};
+            opacity: 0.2;
+          }
+        }
       `,
       disabled: css`
         background-color: ${ColorPalette["red-200"]};
@@ -75,6 +102,13 @@ const buttonStyleFromColorAndMode: Record<
         border: 1px solid ${ColorPalette["red-200"]};
 
         ${makeTextAndSvgColor(ColorPalette["red-400"])}
+
+        :hover {
+          ::after {
+            background-color: ${ColorPalette["platinum-500"]};
+            opacity: 0.1;
+          }
+        }
       `,
       disabled: css`
         background-color: ${ColorPalette["red-50"]};
@@ -88,6 +122,10 @@ const buttonStyleFromColorAndMode: Record<
         background-color: transparent;
 
         ${makeTextAndSvgColor(ColorPalette["red-400"])}
+
+        :hover {
+          background-color: ${ColorPalette["platinum-500"] + "33"};
+        }
       `,
       disabled: css`
         background-color: transparent;
@@ -102,6 +140,13 @@ const buttonStyleFromColorAndMode: Record<
         background-color: ${ColorPalette["platinum-200"]};
 
         ${makeTextAndSvgColor(ColorPalette["white"])}
+
+        :hover {
+          ::after {
+            background-color: ${ColorPalette["platinum-500"]};
+            opacity: 0.2;
+          }
+        }
       `,
       disabled: css`
         background-color: ${ColorPalette["platinum-100"]};
@@ -115,6 +160,13 @@ const buttonStyleFromColorAndMode: Record<
         border: 1px solid ${ColorPalette["platinum-200"]};
 
         ${makeTextAndSvgColor(ColorPalette["platinum-300"])}
+
+        :hover {
+          ::after {
+            background-color: ${ColorPalette["platinum-500"]};
+            opacity: 0.1;
+          }
+        }
       `,
       disabled: css`
         background-color: ${ColorPalette["platinum-50"]};
@@ -128,6 +180,10 @@ const buttonStyleFromColorAndMode: Record<
         background-color: transparent;
 
         ${makeTextAndSvgColor(ColorPalette["platinum-200"])}
+
+        :hover {
+          background-color: ${ColorPalette["platinum-500"] + "33"};
+        }
       `,
       disabled: css`
         background-color: transparent;
@@ -160,6 +216,7 @@ export const Styles = {
     align-items: center;
     border-radius: 0.5rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+    overflow: hidden;
 
     // Default font style.
     // Override these in "buttonStyleFromColorAndMode" if needed.
@@ -181,6 +238,18 @@ export const Styles = {
     border-color: transparent;
     border-image: none;
     padding: 0;
+
+    // For hovering.
+    position: relative;
+    ::after {
+      content: "";
+
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
 
     ${({ color, mode, disabled }) =>
       buttonStyleFromColorAndMode[color || "primary"][mode || "fill"][
