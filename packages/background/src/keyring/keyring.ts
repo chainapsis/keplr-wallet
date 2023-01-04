@@ -438,6 +438,7 @@ export class KeyRing {
     this.mnemonicMasterSeed = undefined;
     this.privateKey = undefined;
     this.ledgerPublicKeyCache = undefined;
+    this.keystonePublicKey = undefined;
     this.password = "";
   }
 
