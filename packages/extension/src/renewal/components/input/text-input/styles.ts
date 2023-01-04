@@ -43,11 +43,12 @@ export const Styles = {
     // Used for making button fill parent horizontally.
     margin-bottom: 1.5rem;
   `,
-  TextInput: styled.input<TextInputProps>`
+  TextInput: styled.input<TextInputProps & { isTextarea?: boolean }>`
     width: 100%;
-    height: 3rem;
+    height: ${({ isTextarea }) => (isTextarea ? undefined : "3rem")};
     margin: 0;
-    padding: 0 0.75rem;
+    padding: ${({ isTextarea }) =>
+      isTextarea ? "0.75rem 0.75rem" : "0 0.75rem"};
     background-color: ${ColorPalette["white"]};
     border: 1px solid ${ColorPalette["gray-100"]};
     border-radius: 0.5rem;
