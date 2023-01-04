@@ -39,9 +39,13 @@ const getSubTextStyleForErrorOrParagraph = (
 };
 
 export const Styles = {
-  Container: styled.div`
+  Container: styled.div<{ isTextarea?: boolean; removeBottomMargin?: boolean }>`
     // Used for making button fill parent horizontally.
-    margin-bottom: 1.5rem;
+    margin-bottom: ${({ removeBottomMargin }) =>
+      removeBottomMargin ? undefined : "1.5rem"};
+    // Without this, text-area's height will be expanded slightly.
+    // I don't know why yet :(
+    line-height: ${({ isTextarea }) => (isTextarea ? 0 : undefined)};
   `,
   TextInput: styled.input<TextInputProps & { isTextarea?: boolean }>`
     width: 100%;

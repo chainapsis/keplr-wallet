@@ -8,7 +8,12 @@ export const Textarea = forwardRef<
   TextInputProps & React.TextareaHTMLAttributes<HTMLTextAreaElement>
 >(({ className, style, label, paragraph, error, ...props }, ref) => {
   return (
-    <Styles.Container className={className} style={style}>
+    <Styles.Container
+      className={className}
+      style={style}
+      isTextarea={true}
+      removeBottomMargin={props.removeBottomMargin}
+    >
       {label ? <Styles.Label>{label}</Styles.Label> : null}
       <Styles.TextInput
         {...props}
