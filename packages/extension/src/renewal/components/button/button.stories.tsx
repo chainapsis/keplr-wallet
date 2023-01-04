@@ -1,7 +1,6 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Button, ButtonColor, ButtonProps } from ".";
-import { Gutter } from "../gutter";
 import { Stack } from "../stack";
 
 export default {
