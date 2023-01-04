@@ -256,5 +256,4 @@ export const Styles = {
         disabled ? "disabled" : "enabled"
       ]}
   `,
-  Text: styled.div``,
 };

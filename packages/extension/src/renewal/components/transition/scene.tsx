@@ -46,7 +46,9 @@ interface ScenePropsInternalTypes extends SceneProps {
 }
 
 const Styles = {
-  Container: styled(animated.div)<{
+  Container: styled(animated.div).withConfig({
+    shouldForwardProp: (prop) => prop === "style" || prop === "children",
+  })<{
     top: boolean;
     zIndex: number;
     transitionAlign?: "top" | "middle" | "bottom";

@@ -3,7 +3,9 @@ import styled from "styled-components";
 import { animated, SpringConfig, useSpringValue } from "@react-spring/web";
 
 const Styles = {
-  Container: styled(animated.div)<{
+  Container: styled(animated.div).withConfig({
+    shouldForwardProp: (prop) => prop === "style" || prop === "children",
+  })<{
     width?: string;
   }>`
     position: relative;
