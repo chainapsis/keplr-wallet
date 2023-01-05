@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { animated, SpringConfig, useSpringValue } from "@react-spring/web";
+import { animated, useSpringValue } from "@react-spring/web";
+import { VerticalResizeTransitionProps } from "./types";
 
 const Styles = {
   Container: styled(animated.div).withConfig({
@@ -14,16 +15,17 @@ const Styles = {
   `,
 };
 
-export const VerticalResizeTransition: FunctionComponent<{
-  width?: string;
-  transitionAlign?: "top" | "bottom" | "center";
-
-  springConfig?: SpringConfig;
-}> = ({ children, width, transitionAlign, springConfig }) => {
+export const VerticalResizeTransition: FunctionComponent<VerticalResizeTransitionProps> = ({
+  children,
+  width,
+  transitionAlign,
+  springConfig,
+}) => {
   // if -1, it means not initialized yet.
   const heightPx = useSpringValue<number>(-1, {
     config: springConfig,
   });
+  const [heightInited, setHeightInited] = useState(false);
 
   const observerContainerRef = useRef<HTMLDivElement | null>(null);
   const [resizeObserver] = useState(() => {
@@ -40,6 +42,7 @@ export const VerticalResizeTransition: FunctionComponent<{
           // At first, set height without animation.
           heightPx.set(boxSize.blockSize);
           initialized = true;
+          setHeightInited(true);
         } else {
           heightPx.start(boxSize.blockSize);
         }
@@ -65,6 +68,12 @@ export const VerticalResizeTransition: FunctionComponent<{
         ref={observerContainerRef}
         style={{
           ...(() => {
+            if (!heightInited) {
+              return {
+                top: 0,
+              };
+            }
+
             switch (transitionAlign) {
               case "center":
                 return {

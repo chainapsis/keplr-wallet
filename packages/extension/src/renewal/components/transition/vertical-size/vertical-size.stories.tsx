@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useState } from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { VerticalResizeTransition } from ".";
-import { Button, ButtonProps } from "../button";
-import { Stack } from "../stack";
+import { VerticalResizeTransition, VerticalResizeTransitionProps } from ".";
+import { Button } from "../../button";
+import { Stack } from "../../stack";
 
 export default {
   title: "Transitions/Resize",
@@ -41,7 +41,9 @@ const RandomHeightBoxes: FunctionComponent<{
   );
 };
 
-const Template: ComponentStory<typeof Button> = (props: ButtonProps) => {
+const Template: ComponentStory<typeof VerticalResizeTransition> = (
+  props: VerticalResizeTransitionProps
+) => {
   const [num, setNum] = useState(0);
 
   return (
