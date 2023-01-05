@@ -25,7 +25,7 @@ const Styles = {
 export const Columns: FunctionComponent<ColumnsProps> = ({
   children,
   sum,
-  align,
+  columnAlign,
   alignY,
   gutter,
 }) => {
@@ -47,11 +47,11 @@ export const Columns: FunctionComponent<ColumnsProps> = ({
     <Styles.Container alignY={alignY}>
       {remainingWeight > 0
         ? (() => {
-            if (align === "left") {
+            if (columnAlign === "left") {
               return <Column weight={remainingWeight} />;
             }
 
-            if (align === "center") {
+            if (columnAlign === "center") {
               return <Column weight={remainingWeight / 2} />;
             }
           })()
@@ -81,11 +81,11 @@ export const Columns: FunctionComponent<ColumnsProps> = ({
       })}
       {remainingWeight > 0
         ? (() => {
-            if (align === "center") {
+            if (columnAlign === "center") {
               return <Column weight={remainingWeight / 2} />;
             }
 
-            if (align !== "left") {
+            if (columnAlign !== "left") {
               return <Column weight={remainingWeight} />;
             }
           })()

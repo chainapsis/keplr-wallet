@@ -2,13 +2,13 @@ export interface ColumnProps {
   weight: number;
 }
 
-export type ColumnsAlign = "left" | "right" | "center";
+export type ColumnsColumnAlign = "left" | "right" | "center";
 export type ColumnsAlignY = "top" | "bottom" | "center";
 
 export interface ColumnsProps {
   sum: number;
 
-  align?: ColumnsAlign;
+  columnAlign?: ColumnsColumnAlign;
   alignY?: ColumnsAlignY;
   gutter?: string;
 }
