@@ -5,8 +5,8 @@ import React, {
   CSSProperties,
 } from "react";
 import { Gutter } from "../gutter";
-import { isFragment } from "react-is";
 import styled from "styled-components";
+import { flattenFragment } from "../../utils";
 
 export interface StackProps {
   gutter?: string;
@@ -37,13 +37,6 @@ export const Styles = {
     }};
   `,
 };
-
-function flattenFragment(children: React.ReactNode): React.ReactNode {
-  while (isFragment(children)) {
-    children = children.props.children;
-  }
-  return children;
-}
 
 export const Stack: FunctionComponent<StackProps> = ({
   children,
