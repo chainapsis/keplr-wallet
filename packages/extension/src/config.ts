@@ -1987,6 +1987,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uqck",
         coinDecimals: 6,
       },
+      {
+        coinDenom: "qSTARS",
+        coinMinimalDenom: "uqstars",
+        coinDecimals: 6,
+    },
     ],
     feeCurrencies: [
       {
