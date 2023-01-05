@@ -65,29 +65,32 @@ export const Styles = {
     outline: none;
 
     font-size: 1rem;
+    line-height: 110%;
     font-weight: 400;
+    letter-spacing: -0.1px;
     color: ${ColorPalette["black"]};
 
     ${({ error, paragraph }) =>
       getTextInputStyleForErrorOrParagraph(error, paragraph)}
   `,
   Label: styled.div`
-    margin-bottom: 3px;
+    margin-bottom: 0.5rem;
 
     font-weight: 600;
     font-size: 0.875rem;
-    line-height: 1.5;
+    line-height: 110%;
     color: ${ColorPalette["platinum-300"]};
   `,
   SubText: styled.div<Pick<TextInputProps, "error" | "paragraph">>`
     position: absolute;
 
     top: 4px;
-    left: 0.5rem;
+    left: 6px;
 
     font-weight: 400;
     font-size: 0.75rem;
-    line-height: 1.15;
+    line-height: 110%;
+    letter-spacing: 0.3px;
 
     ${({ error, paragraph }) =>
       getSubTextStyleForErrorOrParagraph(error, paragraph)}
