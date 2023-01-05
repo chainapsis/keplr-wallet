@@ -4926,12 +4926,12 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@keystonehq/animated-qr@^0.3.1-alpha.0":
-  version "0.3.1-alpha.0"
-  resolved "https://registry.yarnpkg.com/@keystonehq/animated-qr/-/animated-qr-0.3.1-alpha.0.tgz#b66c04931b293f481a33fdf9a4d365ca6c102516"
-  integrity sha512-lJGNVVmNUD4GKXi7lTVOItsvAIcWtEFgqznQRLigDAMEwsszrtWdEJb6sM+ZSUzkWkbLMejvdGpN1vI1SJuXHQ==
+"@keystonehq/animated-qr@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@keystonehq/animated-qr/-/animated-qr-0.4.1.tgz#af2432f3d23dece1bd97c2350d2335f4eba0bcca"
+  integrity sha512-5kL+cU2Cav5Ok7CG2PAw+QTdB+mkpDY4xBtI7Fg5RcErk5zAf7ojsn6264L3KFc14M5GeN+NoYqd+504PVFNiQ==
   dependencies:
-    "@keystonehq/ur-decoder" "^0.7.1-alpha.0"
+    "@keystonehq/ur-decoder" "^0.8.1"
     "@ngraveio/bc-ur" "^1.1.6"
     "@zxing/browser" "^0.1.1"
     "@zxing/library" "^0.19.1"
@@ -4948,12 +4948,12 @@
     hdkey "^2.0.1"
     uuid "^8.3.2"
 
-"@keystonehq/bc-ur-registry-cosmos@^0.0.2-alpha.1":
-  version "0.0.2-alpha.1"
-  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry-cosmos/-/bc-ur-registry-cosmos-0.0.2-alpha.1.tgz#809937c14232a73474ac5e1a8507c9eb82c1e2e2"
-  integrity sha512-W52SKU3rYKRpzEoqYLaGJpDNisbrrONxh62z6+nT0ZnvJ+SbBbED2GnfSEPKa1EbyV26Q6Ij7JizA/YDOXYGCA==
+"@keystonehq/bc-ur-registry-cosmos@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry-cosmos/-/bc-ur-registry-cosmos-0.1.1.tgz#c5c3f1aa8be02b5d101da31d1adf6db92b400583"
+  integrity sha512-nH60iVcgUFio9MH2T4a/yri3aCXvwlxs+3NOXZnlPjXIS0B4ZYi16svk8g4r59evEiRXaNv8e+nZpaSDJEANwQ==
   dependencies:
-    "@keystonehq/bc-ur-registry" "^0.5.0"
+    "@keystonehq/bc-ur-registry" "0.5.4"
     bs58check "^2.1.2"
     uuid "^8.3.2"
 
@@ -4977,6 +4977,15 @@
     hdkey "^2.0.1"
     uuid "^8.3.2"
 
+"@keystonehq/bc-ur-registry@0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry/-/bc-ur-registry-0.5.4.tgz#5802486a29f5d772520d15579d40fba02860e27f"
+  integrity sha512-z7bZe10I5k0zz9znmDTXh+o3Rzb5XsRVpwAzexubOaLxVdZ0F7aMbe2LoEsw766Hpox/7zARi7UGmLz5C8BAzA==
+  dependencies:
+    "@ngraveio/bc-ur" "^1.1.5"
+    bs58check "^2.1.2"
+    tslib "^2.3.0"
+
 "@keystonehq/bc-ur-registry@^0.4.4":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry/-/bc-ur-registry-0.4.4.tgz#3073fdd4b33cdcbd04526a313a7685891a4b4583"
@@ -4995,38 +5004,34 @@
     base58check "^2.0.0"
     tslib "^2.3.0"
 
-"@keystonehq/cosmos-keyring@^0.0.1-alpha.0":
-  version "0.0.1-alpha.0"
-  resolved "https://registry.yarnpkg.com/@keystonehq/cosmos-keyring/-/cosmos-keyring-0.0.1-alpha.0.tgz#458332567eeaa0130b49fc050092708ade060526"
-  integrity sha512-hf9XvtwmnLO2doKYAzNlKYtZygQmSt9CT3fBOlDeM71xb0jVDQfiahCRE8JjSK1dqlKr4JQORpFg8ZpviAs4Vw==
+"@keystonehq/cosmos-keyring@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@keystonehq/cosmos-keyring/-/cosmos-keyring-0.0.3.tgz#af64d681524511b3e466d3bb02fcf46690466dfc"
+  integrity sha512-mNE9/0gzD7wzHK4K/cqPV4VaCg7O3WOT8tnQ1fuIebGFqb2/gCjynfbGvm2HA2aX+clf2KsstYkImWmIUJzXew==
   dependencies:
     "@keystonehq/bc-ur-registry" "^0.5.0"
-    "@keystonehq/bc-ur-registry-cosmos" "^0.0.2-alpha.1"
-    "@keystonehq/sdk" "^0.14.1-alpha.1"
+    "@keystonehq/bc-ur-registry-cosmos" "^0.1.1"
+    "@keystonehq/sdk" "^0.15.2"
     uuid "^8.3.2"
 
-"@keystonehq/sdk@^0.14.1-alpha.1":
-  version "0.14.1-alpha.1"
-  resolved "https://registry.yarnpkg.com/@keystonehq/sdk/-/sdk-0.14.1-alpha.1.tgz#7ce29abd76c59387e1e02cc982f20a4738802d44"
-  integrity sha512-y7Icx4RMhE2SrrNAZtP5KapWxA2jjxqH132S1chOSB2en+SYyFhlxZWp6trKBhsaOnhXJv+TILdn4srKBifumA==
+"@keystonehq/sdk@^0.15.2":
+  version "0.15.2"
+  resolved "https://registry.yarnpkg.com/@keystonehq/sdk/-/sdk-0.15.2.tgz#726ed1c0b320185de21e74c5b1a38458987d2e93"
+  integrity sha512-GGSOyGc9PmKpw5RctMbXUjp/kdQe5ZVpr7ug8ygQZZQNO/hbNPaIKDRBukVfIlIaD+T/G9pSSrgIq1ZIdn7NTg==
   dependencies:
     "@ngraveio/bc-ur" "^1.0.0"
     qrcode.react "^1.0.1"
-    react "16.13.1"
-    react-dom "16.13.1"
     react-modal "^3.12.1"
     react-qr-reader "^2.2.1"
     rxjs "^6.6.3"
-    typescript "^4.6.2"
 
-"@keystonehq/ur-decoder@^0.7.1-alpha.0":
-  version "0.7.1-alpha.0"
-  resolved "https://registry.yarnpkg.com/@keystonehq/ur-decoder/-/ur-decoder-0.7.1-alpha.0.tgz#c55807fd34fb591d8a0d874b0c30ca6a40fb2546"
-  integrity sha512-nD71QIo+ZGavzLW593ePYu2C6N6Na3IvULh0HxjG2S/fH50avKROx2VexFytVo6TGS7iwa6JqbQTY+AMlTiJ7w==
+"@keystonehq/ur-decoder@^0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@keystonehq/ur-decoder/-/ur-decoder-0.8.1.tgz#83706d673e5f2289fe7d6171d7a517146d366696"
+  integrity sha512-Qs5oagSiwAzoyzsknK6L27BoUxgQUO2N6zNwlkWdKC0ipGh8SqIk+iJLs6j0y9yYHI9bhcAfybIfSv2wIhnnyQ==
   dependencies:
     "@keystonehq/bc-ur-registry-eth" "^0.6.12"
     "@ngraveio/bc-ur" "^1.1.6"
-    typescript "^4.6.2"
 
 "@ledgerhq/cryptoassets@^6.33.0":
   version "6.33.0"
@@ -21390,16 +21395,6 @@ react-dom@16.12.0:
     prop-types "^15.6.2"
     scheduler "^0.18.0"
 
-react-dom@16.13.1:
-  version "16.13.1"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.13.1.tgz#c1bd37331a0486c078ee54c4740720993b2e0e7f"
-  integrity sha512-81PIMmVLnCNLO/fFOQxdQkvEq/+Hfpv24XNJfpyZhTRfO0QcmQIF/PgCa1zCOj2w1hrn12MFLyaJ/G0+Mxtfag==
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-    prop-types "^15.6.2"
-    scheduler "^0.19.1"
-
 react-dom@^16.14.0:
   version "16.14.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.14.0.tgz#7ad838ec29a777fb3c75c3a190f661cf92ab8b89"
@@ -21892,15 +21887,6 @@ react@16.12.0:
   version "16.12.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.12.0.tgz#0c0a9c6a142429e3614834d5a778e18aa78a0b83"
   integrity sha512-fglqy3k5E+81pA8s+7K0/T3DBCF0ZDOher1elBFzF7O6arXJgzyu/FW+COxFvAWXJoJN9KIZbT2LXlukwphYTA==
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-    prop-types "^15.6.2"
-
-react@16.13.1:
-  version "16.13.1"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.13.1.tgz#2e818822f1a9743122c063d6410d85c1e3afe48e"
-  integrity sha512-YMZQQq32xHLX0bz5Mnibv1/LHb3Sqzngu7xstSM+vrkE5Kzr9xE0yMByK5kMoTK30YVJE61WfbxIFFvfeDKT1w==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
@@ -24853,11 +24839,6 @@ typescript@^4.1.3:
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.1.5.tgz#123a3b214aaff3be32926f0d8f1f6e704eb89a72"
   integrity sha512-6OSu9PTIzmn9TCDiovULTnET6BgXtDYL4Gg4szY+cGsc3JP1dQL8qvE8kShTRx1NIw4Q9IBHlwODjkjWEtMUyA==
-
-typescript@^4.6.2:
-  version "4.8.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.8.4.tgz#c464abca159669597be5f96b8943500b238e60e6"
-  integrity sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==
 
 typical@^4.0.0:
   version "4.0.0"
