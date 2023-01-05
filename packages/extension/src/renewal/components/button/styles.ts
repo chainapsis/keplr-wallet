@@ -66,7 +66,7 @@ const buttonStyleFromColorAndMode: Record<
         ${makeTextAndSvgColor(ColorPalette["blue-400"])}
 
         :hover {
-          background-color: ${ColorPalette["platinum-500"] + "33"};
+          ${makeTextAndSvgColor(ColorPalette["blue-500"])}
         }
       `,
       disabled: css`
@@ -124,7 +124,7 @@ const buttonStyleFromColorAndMode: Record<
         ${makeTextAndSvgColor(ColorPalette["red-400"])}
 
         :hover {
-          background-color: ${ColorPalette["platinum-500"] + "33"};
+          ${makeTextAndSvgColor(ColorPalette["red-500"])}
         }
       `,
       disabled: css`
@@ -182,7 +182,7 @@ const buttonStyleFromColorAndMode: Record<
         ${makeTextAndSvgColor(ColorPalette["platinum-200"])}
 
         :hover {
-          background-color: ${ColorPalette["platinum-500"] + "33"};
+          ${makeTextAndSvgColor(ColorPalette["platinum-300"])}
         }
       `,
       disabled: css`
@@ -195,14 +195,26 @@ const buttonStyleFromColorAndMode: Record<
 };
 
 export const Styles = {
-  Container: styled.div`
+  Container: styled.div<Pick<ButtonProps, "mode">>`
     // Used for making button fill parent horizontally.
+
+    // If text mode, it doesn't fill the parent's width.
+    ${({ mode }) => {
+      if (mode) {
+        return css`
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        `;
+      }
+    }}
   `,
 
   // "onClick" field should be omitted because "onClick" prop already exists on html button component.
   // If not omitted, they are intersected with each other.
   Button: styled.button<Omit<ButtonProps, "onClick">>`
-    width: 100%;
+    // If text mode, it doesn't fill the parent's width.
+    width: ${({ mode }) => (mode === "text" ? "auto" : "100%")};
     height: ${({ size }) => {
       switch (size) {
         case "small":
@@ -238,6 +250,15 @@ export const Styles = {
     border-color: transparent;
     border-image: none;
     padding: 0;
+
+    ${({ mode }) => {
+      if (mode) {
+        // Add additional touch area for text mode.
+        return css`
+          padding: 0 7.5%;
+        `;
+      }
+    }}
 
     // For hovering.
     position: relative;

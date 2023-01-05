@@ -10,7 +10,11 @@ export const Button: FunctionComponent<ButtonProps> = ({
   ...otherProps
 }) => {
   return (
-    <Styles.Container style={style} className={className}>
+    <Styles.Container
+      style={style}
+      className={className}
+      mode={otherProps.mode}
+    >
       <Styles.Button
         {...otherProps}
         onClick={(e) => {
