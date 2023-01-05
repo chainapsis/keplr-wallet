@@ -1,10 +1,10 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Textarea, TextInputProps } from ".";
+import { Textarea as CompTextarea, TextInputProps } from ".";
 
 export default {
   title: "Components/Textarea",
-  component: Textarea,
+  component: CompTextarea,
   argTypes: {
     className: {
       control: false,
@@ -20,23 +20,25 @@ export default {
       </div>
     ),
   ],
-} as ComponentMeta<typeof Textarea>;
+} as ComponentMeta<typeof CompTextarea>;
 
-const Template: ComponentStory<typeof Textarea> = (props: TextInputProps) => {
+const Template: ComponentStory<typeof CompTextarea> = (
+  props: TextInputProps
+) => {
   return (
     <div
       style={{
         maxWidth: "30rem",
       }}
     >
-      <Textarea {...props} />
-      <Textarea {...props} />
-      <Textarea {...props} />
+      <CompTextarea {...props} />
+      <CompTextarea {...props} />
+      <CompTextarea {...props} />
     </div>
   );
 };
 
-export const Default = Template.bind({});
-Default.args = {
+export const Textarea = Template.bind({});
+Textarea.args = {
   label: "Label",
 };

@@ -1,10 +1,10 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { TextInput, TextInputProps } from ".";
+import { TextInput as CompTextInput, TextInputProps } from ".";
 
 export default {
   title: "Components/TextInput",
-  component: TextInput,
+  component: CompTextInput,
   argTypes: {
     className: {
       control: false,
@@ -20,23 +20,25 @@ export default {
       </div>
     ),
   ],
-} as ComponentMeta<typeof TextInput>;
+} as ComponentMeta<typeof CompTextInput>;
 
-const Template: ComponentStory<typeof TextInput> = (props: TextInputProps) => {
+const Template: ComponentStory<typeof CompTextInput> = (
+  props: TextInputProps
+) => {
   return (
     <div
       style={{
         maxWidth: "30rem",
       }}
     >
-      <TextInput {...props} />
-      <TextInput {...props} />
-      <TextInput {...props} />
+      <CompTextInput {...props} />
+      <CompTextInput {...props} />
+      <CompTextInput {...props} />
     </div>
   );
 };
 
-export const Default = Template.bind({});
-Default.args = {
+export const TextInput = Template.bind({});
+TextInput.args = {
   label: "Label",
 };
