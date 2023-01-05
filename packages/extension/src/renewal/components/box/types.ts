@@ -5,7 +5,11 @@ export type BoxAlignY = "top" | "bottom" | "center";
 
 export interface BoxProps {
   width?: string;
+  minWidth?: string;
+  maxWidth?: string;
   height?: string;
+  minHeight?: string;
+  maxHeight?: string;
   backgroundColor?: string;
   borderRadius?: string;
   padding?: string;
