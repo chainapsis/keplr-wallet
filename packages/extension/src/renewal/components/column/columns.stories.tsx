@@ -2,6 +2,7 @@ import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Column, Columns, ColumnsProps } from ".";
 import { Gutter } from "../gutter";
+import { Box } from "../box";
 
 export default {
   title: "Components/Columns",
@@ -22,15 +23,27 @@ export default {
 
 const Template: ComponentStory<typeof Columns> = (props: ColumnsProps) => {
   return (
-    <div>
+    <div
+      style={{
+        color: "white",
+      }}
+    >
       <Columns {...props}>
-        <Column weight={2}>test</Column>
-        <Column weight={6}>
-          test
-          <br />
-          test
+        <Column weight={2}>
+          <Box padding="1rem" backgroundColor="#333333">
+            2
+          </Box>
         </Column>
-        <Column weight={2}>test</Column>
+        <Column weight={6}>
+          <Box padding="2rem" backgroundColor="#444444">
+            6
+          </Box>
+        </Column>
+        <Column weight={6}>
+          <Box padding="1.5rem" backgroundColor="#555555">
+            2
+          </Box>
+        </Column>
       </Columns>
     </div>
   );
@@ -45,17 +58,25 @@ const ComplexGutterTemplate: ComponentStory<typeof Columns> = (
   props: ColumnsProps
 ) => {
   return (
-    <div>
+    <div style={{ color: "white" }}>
       <Columns {...props}>
-        <Gutter size="0.5rem" />
-        <Column weight={2}>test</Column>
         <Gutter size="1rem" />
-        <Column weight={6}>
-          test
-          <br />
-          test
+        <Column weight={2}>
+          <Box padding="1rem" backgroundColor="#333333">
+            2
+          </Box>
         </Column>
-        <Column weight={2}>test</Column>
+        <Gutter size="2rem" />
+        <Column weight={6}>
+          <Box padding="2rem" backgroundColor="#444444">
+            6
+          </Box>
+        </Column>
+        <Column weight={6}>
+          <Box padding="1.5rem" backgroundColor="#555555">
+            2
+          </Box>
+        </Column>
       </Columns>
     </div>
   );
