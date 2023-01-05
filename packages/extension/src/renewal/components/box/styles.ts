@@ -27,18 +27,7 @@ export const Styles = {
 
     display: flex;
     flex-direction: column;
-    align-items: ${({ alignY }) => {
-      if (alignY === "top") {
-        return "flex-start";
-      }
-      if (alignY === "center") {
-        return "center";
-      }
-      if (alignY === "bottom") {
-        return "flex-end";
-      }
-    }};
-    justify-content: ${({ alignX }) => {
+    align-items: ${({ alignX }) => {
       if (alignX === "left") {
         return "flex-start";
       }
@@ -46,6 +35,17 @@ export const Styles = {
         return "center";
       }
       if (alignX === "right") {
+        return "flex-end";
+      }
+    }};
+    justify-content: ${({ alignY }) => {
+      if (alignY === "top") {
+        return "flex-start";
+      }
+      if (alignY === "center") {
+        return "center";
+      }
+      if (alignY === "bottom") {
         return "flex-end";
       }
     }};
