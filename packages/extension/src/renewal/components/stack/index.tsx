@@ -1,27 +1,19 @@
-import React, {
-  FunctionComponent,
-  Children,
-  isValidElement,
-  CSSProperties,
-} from "react";
+import React, { FunctionComponent, Children, isValidElement } from "react";
 import { Gutter } from "../gutter";
 import styled from "styled-components";
 import { flattenFragment } from "../../utils";
 
 export interface StackProps {
   gutter?: string;
-  align?: "left" | "right" | "center";
-
-  className?: string;
-  style?: CSSProperties;
+  alignX?: "left" | "right" | "center";
 }
 
-export const Styles = {
+const Styles = {
   Container: styled.div<StackProps>`
     display: flex;
     flex-direction: column;
-    align-items: ${({ align }) => {
-      switch (align) {
+    align-items: ${({ alignX }) => {
+      switch (alignX) {
         case "left": {
           return "flex-start";
         }
