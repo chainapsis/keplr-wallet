@@ -41,7 +41,7 @@ const Template: ComponentStory<typeof Columns> = (props: ColumnsProps) => {
         </Column>
         <Column weight={6}>
           <Box padding="1.5rem" backgroundColor="#555555">
-            2
+            6
           </Box>
         </Column>
       </Columns>
@@ -74,7 +74,7 @@ const ComplexGutterTemplate: ComponentStory<typeof Columns> = (
         </Column>
         <Column weight={6}>
           <Box padding="1.5rem" backgroundColor="#555555">
-            2
+            6
           </Box>
         </Column>
       </Columns>
