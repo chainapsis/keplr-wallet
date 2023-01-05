@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { ColorPalette } from "../../styles";
 import { Card } from "../../components/card";
 import { SceneTransition } from "../../components/transition";
-import { Button } from "../../components/button";
+import { RegisterIntroScene } from "./intro";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -14,43 +14,34 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   background: linear-gradient(90deg, #fbf8ff 0%, #f7f8ff 100%);
-
-  position: relative;
-`;
-
-const RegisterCard = styled(Card)`
-  padding: 3.125rem 5rem;
-  background-color: ${ColorPalette["white"]};
-  border-radius: 1rem;
-  border: 1px solid ${ColorPalette["gray-50"]};
-
-  max-width: 34.25rem;
-  width: 100%;
 `;
 
 const NoticeText = styled.span`
   font-weight: 400;
   font-size: 1rem;
   line-height: 1.375;
+  letter-spacing: -0.1px;
   color: ${ColorPalette["platinum-200"]};
+
+  margin-top: 2.125rem;
 `;
 
 export const RegisterPage: FunctionComponent = observer(() => {
   return (
     <Container>
-      <RegisterCard>
+      <Card width="100%" maxWidth="34.25rem">
         <SceneTransition
           scenes={[
             {
-              name: "test",
-              element: Button,
+              name: "intro",
+              element: RegisterIntroScene,
             },
           ]}
           initialSceneProps={{
-            name: "test",
+            name: "intro",
           }}
         />
-      </RegisterCard>
+      </Card>
       <NoticeText>
         All sensitive information is stored only on your device.
         <br />
