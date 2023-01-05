@@ -11,12 +11,12 @@ const Styles = {
     flex-direction: row;
     align-items: ${({ alignY }) => {
       switch (alignY) {
+        case "top":
+          return "flex-start";
         case "bottom":
           return "flex-end";
         case "center":
           return "center";
-        default:
-          return "flex-start";
       }
     }};
   `,
