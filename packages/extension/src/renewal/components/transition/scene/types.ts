@@ -4,11 +4,18 @@ import { ElementType } from "react";
 export interface SceneTransitionContext {
   push(name: string, props?: Record<string, any>): void;
   pop(): void;
+  readonly stack: ReadonlyArray<string>;
 }
 
 export interface SceneTransitionRef {
   push(name: string, props?: Record<string, any>): void;
   pop(): void;
+  addSceneChangeListener(
+    listener: (stack: ReadonlyArray<string>) => void
+  ): void;
+  removeSceneChangeListener(
+    listener: (stack: ReadonlyArray<string>) => void
+  ): void;
 }
 
 export interface SceneTransitionProps {

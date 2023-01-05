@@ -6,6 +6,7 @@ import React, {
   useRef,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import { VerticalResizeTransition } from "../vertical-size";
 import styled, { css } from "styled-components";
@@ -80,6 +81,10 @@ export const SceneTransition = forwardRef<
         detached: false,
       },
     ]);
+
+    const sceneChangeListeners = useRef<
+      ((stack: ReadonlyArray<string>) => void)[]
+    >([]);
 
     const push = useCallback((name: string, props?: Record<string, any>) => {
       setStack((prevStack) => {
@@ -159,12 +164,36 @@ export const SceneTransition = forwardRef<
       () => ({
         push,
         pop,
+        addSceneChangeListener(
+          listener: (stack: ReadonlyArray<string>) => void
+        ) {
+          sceneChangeListeners.current.push(listener);
+        },
+        removeSceneChangeListener(
+          listener: (stack: ReadonlyArray<string>) => void
+        ) {
+          sceneChangeListeners.current = sceneChangeListeners.current.filter(
+            (l) => l !== listener
+          );
+        },
       }),
       [pop, push]
     );
 
+    const notDetachedStackNames = useMemo(() => {
+      return stack.filter((s) => !s.detached).map((s) => s.name);
+    }, [stack]);
+
+    useEffect(() => {
+      for (const listener of sceneChangeListeners.current) {
+        listener(notDetachedStackNames);
+      }
+    }, [notDetachedStackNames]);
+
     return (
-      <SceneTransitionContextBase.Provider value={{ push, pop }}>
+      <SceneTransitionContextBase.Provider
+        value={{ push, pop, stack: notDetachedStackNames }}
+      >
         <VerticalResizeTransition
           width={width}
           transitionAlign={transitionAlign}
