@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useRef, useState } from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { SceneTransitionProps, SceneTransition, SceneTransitionRef } from ".";
-import { Button } from "../button";
-import { Stack } from "../stack";
+import { Button } from "../../button";
+import { Stack } from "../../stack";
 
 export default {
   title: "Transitions/Scene",

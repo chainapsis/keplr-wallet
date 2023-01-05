@@ -16,7 +16,7 @@ const Styles = {
 
 export const VerticalResizeTransition: FunctionComponent<{
   width?: string;
-  transitionAlign?: "top" | "middle" | "bottom";
+  transitionAlign?: "top" | "bottom" | "center";
 
   springConfig?: SpringConfig;
 }> = ({ children, width, transitionAlign, springConfig }) => {
@@ -66,7 +66,7 @@ export const VerticalResizeTransition: FunctionComponent<{
         style={{
           ...(() => {
             switch (transitionAlign) {
-              case "middle":
+              case "center":
                 return {
                   top: "50%",
                   transform: "translateY(-50%)",

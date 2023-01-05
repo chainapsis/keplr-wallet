@@ -5,6 +5,7 @@ import { ColorPalette } from "../../styles";
 import { Card } from "../../components/card";
 import { SceneTransition } from "../../components/transition";
 import { RegisterIntroScene } from "./intro";
+import { NewMnemonicScene } from "./new-mnemonic";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -36,10 +37,15 @@ export const RegisterPage: FunctionComponent = observer(() => {
               name: "intro",
               element: RegisterIntroScene,
             },
+            {
+              name: "new-mnemonic",
+              element: NewMnemonicScene,
+            },
           ]}
           initialSceneProps={{
             name: "intro",
           }}
+          transitionAlign="center"
         />
       </Card>
       <NoticeText>

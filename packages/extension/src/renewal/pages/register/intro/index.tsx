@@ -6,6 +6,7 @@ import { Gutter } from "../../../components/gutter";
 import styled from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { XAxis, YAxis } from "../../../components/axis";
+import { useSceneTransition } from "../../../components/transition";
 
 const Styles = {
   BrandingText: styled.div`
@@ -18,6 +19,8 @@ const Styles = {
 };
 
 export const RegisterIntroScene: FunctionComponent = () => {
+  const sceneTransition = useSceneTransition();
+
   return (
     <RegisterSceneBox>
       <Stack gutter="1rem">
@@ -34,7 +37,7 @@ export const RegisterIntroScene: FunctionComponent = () => {
         <Button
           text="Create new seed"
           onClick={() => {
-            // TODO
+            sceneTransition.push("new-mnemonic");
           }}
         />
         <Button
