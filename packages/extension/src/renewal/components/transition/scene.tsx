@@ -287,18 +287,19 @@ const SceneComponent: FunctionComponent<{
             return;
           }
 
-          if (transitionAlign === "top") {
-            return {
-              top: 0,
-            };
-          } else if (transitionAlign === "bottom") {
-            return {
-              bottom: 0,
-            };
-          } else {
-            return {
-              top: "50%",
-            };
+          switch (transitionAlign) {
+            case "middle":
+              return {
+                top: "50%",
+              };
+            case "bottom":
+              return {
+                bottom: 0,
+              };
+            default:
+              return {
+                top: 0,
+              };
           }
         })(),
         opacity: opacity,

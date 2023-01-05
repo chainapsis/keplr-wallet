@@ -19,7 +19,7 @@ export const VerticalResizeTransition: FunctionComponent<{
   transitionAlign?: "top" | "middle" | "bottom";
 
   springConfig?: SpringConfig;
-}> = ({ children, width, transitionAlign = "top", springConfig }) => {
+}> = ({ children, width, transitionAlign, springConfig }) => {
   // if -1, it means not initialized yet.
   const heightPx = useSpringValue<number>(-1, {
     config: springConfig,
@@ -65,19 +65,20 @@ export const VerticalResizeTransition: FunctionComponent<{
         ref={observerContainerRef}
         style={{
           ...(() => {
-            if (transitionAlign === "top") {
-              return {
-                top: 0,
-              };
-            } else if (transitionAlign === "bottom") {
-              return {
-                bottom: 0,
-              };
-            } else {
-              return {
-                top: "50%",
-                transform: "translateY(-50%)",
-              };
+            switch (transitionAlign) {
+              case "middle":
+                return {
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                };
+              case "bottom":
+                return {
+                  bottom: 0,
+                };
+              default:
+                return {
+                  top: 0,
+                };
             }
           })(),
           ...(() => ({
