@@ -7,11 +7,6 @@ import { Box } from "../box";
 export default {
   title: "Components/Columns",
   component: Columns,
-  argTypes: {
-    sum: {
-      control: false,
-    },
-  },
   decorators: [
     (Story) => (
       <div style={{ margin: "3em" }}>
@@ -29,9 +24,9 @@ const Template: ComponentStory<typeof Columns> = (props: ColumnsProps) => {
       }}
     >
       <Columns {...props}>
-        <Column weight={2}>
+        <Column weight={3}>
           <Box padding="1rem" backgroundColor="#333333">
-            2
+            3
           </Box>
         </Column>
         <Column weight={6}>
@@ -39,9 +34,9 @@ const Template: ComponentStory<typeof Columns> = (props: ColumnsProps) => {
             6
           </Box>
         </Column>
-        <Column weight={6}>
+        <Column weight={1}>
           <Box padding="1.5rem" backgroundColor="#555555">
-            6
+            1
           </Box>
         </Column>
       </Columns>
@@ -61,9 +56,9 @@ const ComplexGutterTemplate: ComponentStory<typeof Columns> = (
     <div style={{ color: "white" }}>
       <Columns {...props}>
         <Gutter size="1rem" />
-        <Column weight={2}>
+        <Column weight={3}>
           <Box padding="1rem" backgroundColor="#333333">
-            2
+            3
           </Box>
         </Column>
         <Gutter size="2rem" />
@@ -72,9 +67,9 @@ const ComplexGutterTemplate: ComponentStory<typeof Columns> = (
             6
           </Box>
         </Column>
-        <Column weight={6}>
+        <Column weight={1}>
           <Box padding="1.5rem" backgroundColor="#555555">
-            6
+            1
           </Box>
         </Column>
       </Columns>

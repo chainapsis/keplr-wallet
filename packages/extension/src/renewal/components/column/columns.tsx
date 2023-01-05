@@ -47,7 +47,7 @@ export const Columns: FunctionComponent<ColumnsProps> = ({
     <Styles.Container alignY={alignY}>
       {remainingWeight > 0
         ? (() => {
-            if (columnAlign === "left") {
+            if (columnAlign === "right") {
               return <Column weight={remainingWeight} />;
             }
 
@@ -85,7 +85,7 @@ export const Columns: FunctionComponent<ColumnsProps> = ({
               return <Column weight={remainingWeight / 2} />;
             }
 
-            if (columnAlign !== "left") {
+            if (columnAlign !== "right") {
               return <Column weight={remainingWeight} />;
             }
           })()
