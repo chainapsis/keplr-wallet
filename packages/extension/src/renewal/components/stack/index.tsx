@@ -23,8 +23,6 @@ const Styles = {
         case "center": {
           return "center";
         }
-        default:
-          return undefined;
       }
     }};
   `,
