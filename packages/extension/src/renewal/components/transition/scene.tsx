@@ -41,6 +41,8 @@ interface ScenePropsInternalTypes extends SceneProps {
   top: boolean;
   initialX: number;
   targetX: number;
+  initialOpacity: number;
+  targetOpacity: number;
   detached: boolean;
   onAminEnd?: () => void;
 }
@@ -104,6 +106,8 @@ export const SceneTransition = forwardRef<
         top: true,
         initialX: 0,
         targetX: 0,
+        initialOpacity: 1,
+        targetOpacity: 1,
         detached: false,
       },
     ]);
@@ -121,6 +125,7 @@ export const SceneTransition = forwardRef<
             if (prevTop) {
               prevTop.top = false;
               prevTop.targetX = -1;
+              prevTop.targetOpacity = 0;
             }
 
             newStack.push({
@@ -130,6 +135,8 @@ export const SceneTransition = forwardRef<
               top: true,
               initialX: 1,
               targetX: 0,
+              initialOpacity: 0,
+              targetOpacity: 1,
               detached: false,
             });
 
@@ -161,6 +168,7 @@ export const SceneTransition = forwardRef<
 
               prevTop.top = false;
               prevTop.targetX = 1;
+              prevTop.targetOpacity = 0;
               prevTop.detached = true;
               prevTop.onAminEnd = () => {
                 setStack((prevStack) =>
@@ -172,6 +180,7 @@ export const SceneTransition = forwardRef<
             if (newTop) {
               newTop.top = true;
               newTop.targetX = 0;
+              newTop.targetOpacity = 1;
             }
 
             return newStack;
@@ -198,6 +207,8 @@ export const SceneTransition = forwardRef<
               index={index}
               initialX={props.initialX}
               targetX={props.targetX}
+              initialOpacity={props.initialOpacity}
+              targetOpacity={props.targetOpacity}
               onAnimEnd={props.onAminEnd}
               transitionAlign={transitionAlign}
               springConfig={springConfig}
@@ -216,6 +227,8 @@ const SceneComponent: FunctionComponent<{
   index: number;
   initialX: number;
   targetX: number;
+  initialOpacity: number;
+  targetOpacity: number;
   onAnimEnd?: () => void;
   transitionAlign?: "top" | "middle" | "bottom";
 
@@ -226,14 +239,22 @@ const SceneComponent: FunctionComponent<{
   index,
   initialX,
   targetX,
+  initialOpacity,
+  targetOpacity,
   onAnimEnd,
   transitionAlign,
 
   springConfig,
 }) => {
+  const opacity = useSpringValue<number>(initialOpacity);
+  useEffect(() => {
+    opacity.start(targetOpacity);
+  }, [opacity, targetOpacity]);
+
   const x = useSpringValue<number>(initialX, {
     config: springConfig,
   });
+
   const onAnimEndRef = useRef(onAnimEnd);
   onAnimEndRef.current = onAnimEnd;
 
@@ -280,6 +301,7 @@ const SceneComponent: FunctionComponent<{
             };
           }
         })(),
+        opacity: opacity,
         transform: x
           .to([-1, 1], [-100, 100])
           .to((x) => `translate(${x}%, ${y}%)`),
