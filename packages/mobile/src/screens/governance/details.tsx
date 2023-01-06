@@ -16,6 +16,7 @@ import { dateToLocalString } from "./utils";
 import { registerModal } from "../../modals/base";
 import { RectButton } from "../../components/rect-button";
 import { useSmartNavigation } from "../../navigation";
+import Markdown from "react-native-markdown-display";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -116,6 +117,23 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
   })();
 
   const intl = useIntl();
+
+  const convertDescriptionToMarkDown = (description: string) => {
+    const multiLineDescription = description.replace(
+      /\\n|\\\\n/g,
+      "&nbsp; \n\n"
+    );
+
+    const isItWrappedInQuotationMarks =
+      multiLineDescription.slice(0, 1) === '"' &&
+      multiLineDescription.slice(-1) === '"';
+
+    const unquotedDescription = isItWrappedInQuotationMarks
+      ? multiLineDescription.slice(1, -1)
+      : multiLineDescription;
+
+    return unquotedDescription;
+  };
 
   return (
     <CardBody>
@@ -271,7 +289,9 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
             // In IOS, the whole text would be selected, this process is somewhat strange, so it is disabled in IOS.
             selectable={Platform.OS === "android"}
           >
-            {proposal.description}
+            <Markdown>
+              {convertDescriptionToMarkDown(proposal.description)}
+            </Markdown>
           </Text>
         </View>
       ) : (
