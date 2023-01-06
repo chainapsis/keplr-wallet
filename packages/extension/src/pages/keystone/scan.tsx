@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import style from "./style.module.scss";
 import { AnimatedQRScanner, Purpose } from "@keystonehq/animated-qr";
 import { UR } from "@keplr-wallet/stores";
@@ -43,21 +43,46 @@ export function Scan({ type, onChange, onBack }: Props) {
     }
   };
 
-  const onError = () => {
+  const isErrored = useRef(false);
+  const onError = useCallback(() => {
     setIsMsgShow(true);
-  };
+    isErrored.current = true;
+  }, []);
 
-  const handleScan = async (ur: UR) => {
-    setIsConnecting(true);
-    try {
-      await onChange(ur);
-    } catch (err) {
-      console.error(err);
+  const closeMsg = useCallback(() => {
+    setIsMsgShow(false);
+    isErrored.current = false;
+  }, []);
+
+  const handleScan = useCallback(
+    async (ur: UR) => {
+      if (isErrored.current) {
+        return;
+      }
+      setIsConnecting(true);
+      try {
+        await onChange(ur);
+      } catch (err) {
+        console.error(err);
+        onError();
+      } finally {
+        setIsConnecting(false);
+      }
+    },
+    [onChange, onError]
+  );
+
+  const errorTimes = useRef<number[]>([]);
+  const handleError = useCallback(() => {
+    errorTimes.current.unshift(Date.now());
+    const n = 4;
+    if (
+      errorTimes.current[n] &&
+      errorTimes.current[0] - errorTimes.current[n] < 1000
+    ) {
       onError();
-    } finally {
-      setIsConnecting(false);
     }
-  };
+  }, [onError]);
 
   return (
     <div className={`${style.page}`}>
@@ -85,7 +110,7 @@ export function Scan({ type, onChange, onBack }: Props) {
           <AnimatedQRScanner
             purpose={purposeMap[type]}
             handleScan={handleScan}
-            handleError={onError}
+            handleError={handleError}
             videoLoaded={onVideoLoaded}
             options={{
               width: 248,
@@ -107,7 +132,7 @@ export function Scan({ type, onChange, onBack }: Props) {
 
       {isConnecting && <Loading title="Connecting" />}
       {isMsgShow && (
-        <Message onClose={() => setIsMsgShow(false)} type="error">
+        <Message onClose={closeMsg} type="error">
           Invalid QR code. Please ensure you have selected a valid QR code from
           your Keystone device.
           <a href="https://keyst.one/keplr" target="_blank" rel="noreferrer">
