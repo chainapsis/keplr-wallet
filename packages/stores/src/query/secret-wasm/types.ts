@@ -1,6 +1,5 @@
 export type SecretContractCodeHash = {
-  height: string;
-  result: string;
+  code_hash: string;
 };
 
 export type Secret20ContractTokenInfo = {
