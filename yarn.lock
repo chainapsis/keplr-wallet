@@ -3899,11 +3899,6 @@
   resolved "https://registry.yarnpkg.com/@emotion/memoize/-/memoize-0.7.4.tgz#19bf0f5af19149111c40d98bb0cf82119f5d9eeb"
   integrity sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==
 
-"@ensdomains/eth-ens-namehash@^2.0.15":
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/@ensdomains/eth-ens-namehash/-/eth-ens-namehash-2.0.15.tgz#5e5f2f24ba802aff8bc19edd822c9a11200cdf4a"
-  integrity sha512-JRDFP6+Hczb1E0/HhIg0PONgBYasfGfDheujmfxaZaAv/NAH4jE6Kf48WbqfRZdxt4IZI3jl3Ri7sZ1nP09lgw==
-
 "@ethersproject/abi@5.0.7":
   version "5.0.7"
   resolved "https://registry.yarnpkg.com/@ethersproject/abi/-/abi-5.0.7.tgz#79e52452bd3ca2956d0e1c964207a58ad1a0ee7b"
@@ -5560,18 +5555,6 @@
   dependencies:
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
-
-"@keplr-wallet/ens@0.11.17":
-  version "0.11.17"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/ens/-/ens-0.11.17.tgz#4930ce77de799eca23cf966400cfadad87e58097"
-  integrity sha512-6K2mK41Yre/YIg5IXIA2JKpex6hHj6Tx3xMuYLxA4YghedfmWIwd/aa/YmWtwTWipVjycXDBtkztmT+kw10zLA==
-  dependencies:
-    "@ensdomains/eth-ens-namehash" "^2.0.15"
-    "@ethersproject/abi" "^5.6.0"
-    "@keplr-wallet/common" "0.11.17"
-    axios "^0.27.2"
-    buffer "^6.0.3"
-    mobx "^6.1.7"
 
 "@ledgerhq/cryptoassets@^6.33.0":
   version "6.33.0"
@@ -19067,7 +19050,7 @@ mobx-utils@^6.0.5:
   resolved "https://registry.yarnpkg.com/mobx-utils/-/mobx-utils-6.0.5.tgz#0cce9afb07fbba1fb559f959f8cea1f44baa7252"
   integrity sha512-QOduwicYedD4mwYZRl8+c3BalljFDcubg+PUGqBkn8tOuBoj2q7GhjXBP6JXM9J+Zh+2mePK8IoToeLfqr3Z/w==
 
-mobx@^6.1.7, mobx@^6.6.1:
+mobx@^6.6.1:
   version "6.6.1"
   resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.6.1.tgz#70ee6aa82f25aeb7e7d522bd621207434e509318"
   integrity sha512-7su3UZv5JF+ohLr2opabjbUAERfXstMY+wiBtey8yNAPoB8H187RaQXuhFjNkH8aE4iHbDWnhDFZw0+5ic4nGQ==
