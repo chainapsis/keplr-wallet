@@ -490,7 +490,8 @@ export class CosmosAccountImpl {
         .getChain(this.chainId)
         .features?.includes("eth-key-sign") === true;
 
-    const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+    const eip712Signing =
+      useEthereumSign && (this.base.isNanoLedger || this.base.isKeystone);
 
     if (eip712Signing && !msgs.rlpTypes) {
       throw new Error(

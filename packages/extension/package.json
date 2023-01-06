@@ -65,6 +65,7 @@
     "reactstrap": "^8.4.1",
     "scrypt-js": "^3.0.1",
     "sha.js": "^2.4.11",
+    "swiper": "^8.4.4",
     "utility-types": "^3.10.0",
     "webextension-polyfill": "^0.7.0"
   },

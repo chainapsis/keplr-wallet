@@ -300,6 +300,48 @@ export class CreatePrivateKeyMsg extends Message<{
   }
 }
 
+export class CreateKeystoneKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
+  public static type() {
+    return "create-keystone-key";
+  }
+
+  constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
+    public readonly password: string,
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new KeplrError("keyring", 202, "Invalid kdf");
+    }
+
+    if (!this.password) {
+      throw new KeplrError("keyring", 274, "password not set");
+    }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CreateKeystoneKeyMsg.type();
+  }
+}
+
 export class CreateLedgerKeyMsg extends Message<{
   status: KeyRingStatus;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
@@ -381,6 +423,42 @@ export class AddPrivateKeyMsg extends Message<{
 
   type(): string {
     return AddPrivateKeyMsg.type();
+  }
+}
+
+export class AddKeystoneKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
+  public static type() {
+    return "add-keystone-key";
+  }
+
+  constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new KeplrError("keyring", 202, "Invalid kdf");
+    }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AddKeystoneKeyMsg.type();
   }
 }
 

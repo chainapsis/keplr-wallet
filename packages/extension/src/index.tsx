@@ -50,6 +50,7 @@ import { ExportPage } from "./pages/setting/export";
 import { LedgerGrantPage } from "./pages/ledger";
 import { AddTokenPage } from "./pages/setting/token/add";
 import { ManageTokenPage } from "./pages/setting/token/manage";
+import { KeystoneSignPage } from "./pages/keystone/sign";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
 import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
@@ -61,6 +62,7 @@ import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
 import { SettingAutoLockPage } from "./pages/setting/autolock";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { KeystoneImportPubkeyPage } from "./pages/keystone";
 import { ICNSAdr36SignPage } from "./pages/icns/sign";
 import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
 import { SettingSecurityPrivacyPage } from "./pages/setting/security-privacy";
@@ -174,6 +176,16 @@ ReactDOM.render(
                 <Route exact path="/send" component={SendPage} />
                 <Route exact path="/ibc-transfer" component={IBCTransferPage} />
                 <Route exact path="/setting" component={SettingPage} />
+                <Route
+                  exact
+                  path="/keystone/import-pubkey"
+                  component={KeystoneImportPubkeyPage}
+                />
+                <Route
+                  exact
+                  path="/keystone/sign"
+                  component={KeystoneSignPage}
+                />
                 <Route exact path="/ledger-grant" component={LedgerGrantPage} />
                 <Route
                   exact
