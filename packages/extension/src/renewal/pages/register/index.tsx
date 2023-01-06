@@ -1,11 +1,17 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
 import { Card } from "../../components/card";
-import { SceneTransition } from "../../components/transition";
+import {
+  SceneTransition,
+  SceneTransitionRef,
+} from "../../components/transition";
 import { RegisterIntroScene } from "./intro";
 import { NewMnemonicScene } from "./new-mnemonic";
+import { Gutter } from "../../components/gutter";
+import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
+import { Box } from "../../components/box";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -23,36 +29,80 @@ const NoticeText = styled.span`
   line-height: 1.375;
   letter-spacing: -0.1px;
   color: ${ColorPalette["platinum-200"]};
-
-  margin-top: 2.125rem;
 `;
 
 export const RegisterPage: FunctionComponent = observer(() => {
+  const sceneRef = useRef<SceneTransitionRef | null>(null);
+
+  const [bottomIntroCollapsed, setBottomIntroCollpased] = useState(false);
+
+  useEffect(() => {
+    const onSceneChanged = (stack: ReadonlyArray<string>) => {
+      if (stack.length === 0) {
+        throw new Error("Can't happen");
+      }
+
+      setBottomIntroCollpased(stack[stack.length - 1] !== "intro");
+    };
+
+    if (sceneRef.current) {
+      const scene = sceneRef.current;
+
+      scene.addSceneChangeListener(onSceneChanged);
+      return () => {
+        scene.removeSceneChangeListener(onSceneChanged);
+      };
+    }
+  }, []);
+
   return (
     <Container>
-      <Card width="100%" maxWidth="34.25rem">
-        <SceneTransition
-          scenes={[
-            {
+      <Box width="100%" maxWidth="34.25rem">
+        <Card>
+          <SceneTransition
+            ref={sceneRef}
+            scenes={[
+              {
+                name: "intro",
+                element: RegisterIntroScene,
+              },
+              {
+                name: "new-mnemonic",
+                element: NewMnemonicScene,
+              },
+            ]}
+            initialSceneProps={{
               name: "intro",
-              element: RegisterIntroScene,
-            },
-            {
-              name: "new-mnemonic",
-              element: NewMnemonicScene,
-            },
-          ]}
-          initialSceneProps={{
-            name: "intro",
-          }}
-          transitionAlign="center"
-        />
-      </Card>
-      <NoticeText>
-        All sensitive information is stored only on your device.
-        <br />
-        This process does not require an internet conenction.
-      </NoticeText>
+            }}
+            transitionAlign="center"
+          />
+        </Card>
+        <BottomIntro collapsed={bottomIntroCollapsed} />
+      </Box>
     </Container>
   );
 });
+
+const BottomIntro: FunctionComponent<{
+  collapsed: boolean;
+}> = ({ collapsed }) => {
+  return (
+    <React.Fragment>
+      <VerticalCollapseTransition collapsed={collapsed}>
+        <Gutter size="2.125rem" />
+      </VerticalCollapseTransition>
+      <VerticalCollapseTransition
+        collapsed={collapsed}
+        transitionAlign="bottom"
+      >
+        <Box alignX="center">
+          <NoticeText>
+            All sensitive information is stored only on your device.
+            <br />
+            This process does not require an internet conenction.
+          </NoticeText>
+        </Box>
+      </VerticalCollapseTransition>
+    </React.Fragment>
+  );
+};
