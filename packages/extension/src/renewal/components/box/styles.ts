@@ -3,6 +3,7 @@ import { BoxProps } from "./types";
 
 export const Styles = {
   Container: styled.div<BoxProps>`
+    position ${({ position }) => position || "static"};
     width: ${({ width }) => width};
     min-width: ${({ minWidth }) => minWidth};
     max-width: ${({ maxWidth }) => maxWidth};

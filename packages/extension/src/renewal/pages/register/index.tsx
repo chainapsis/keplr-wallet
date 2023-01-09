@@ -87,8 +87,8 @@ const BottomIntro: FunctionComponent<{
   collapsed: boolean;
 }> = ({ collapsed }) => {
   return (
-    <div style={{ position: "relative" }}>
-      <div style={{ position: "absolute", left: 0, right: 0 }}>
+    <Box position="relative">
+      <Box position="absolute" style={{ left: 0, right: 0 }}>
         <VerticalCollapseTransition collapsed={collapsed}>
           <Gutter size="2.125rem" />
         </VerticalCollapseTransition>
@@ -104,7 +104,7 @@ const BottomIntro: FunctionComponent<{
             </NoticeText>
           </Box>
         </VerticalCollapseTransition>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
