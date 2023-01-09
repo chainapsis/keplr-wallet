@@ -87,22 +87,24 @@ const BottomIntro: FunctionComponent<{
   collapsed: boolean;
 }> = ({ collapsed }) => {
   return (
-    <React.Fragment>
-      <VerticalCollapseTransition collapsed={collapsed}>
-        <Gutter size="2.125rem" />
-      </VerticalCollapseTransition>
-      <VerticalCollapseTransition
-        collapsed={collapsed}
-        transitionAlign="bottom"
-      >
-        <Box alignX="center">
-          <NoticeText>
-            All sensitive information is stored only on your device.
-            <br />
-            This process does not require an internet conenction.
-          </NoticeText>
-        </Box>
-      </VerticalCollapseTransition>
-    </React.Fragment>
+    <div style={{ position: "relative" }}>
+      <div style={{ position: "absolute", left: 0, right: 0 }}>
+        <VerticalCollapseTransition collapsed={collapsed}>
+          <Gutter size="2.125rem" />
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition
+          collapsed={collapsed}
+          transitionAlign="bottom"
+        >
+          <Box alignX="center">
+            <NoticeText>
+              All sensitive information is stored only on your device.
+              <br />
+              This process does not require an internet conenction.
+            </NoticeText>
+          </Box>
+        </VerticalCollapseTransition>
+      </div>
+    </div>
   );
 };

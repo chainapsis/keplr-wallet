@@ -5,6 +5,8 @@ export interface TextInputProps {
   paragraph?: string;
   error?: string;
 
+  readOnly?: boolean;
+
   removeBottomMargin?: boolean;
 
   className?: string;

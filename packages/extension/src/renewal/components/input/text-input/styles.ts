@@ -9,10 +9,6 @@ const getTextInputStyleForErrorOrParagraph = (
   if (error) {
     return css`
       border-color: ${ColorPalette["red-200"]};
-
-      :focus-visible {
-        border-color: ${ColorPalette["red-200"]};
-      }
     `;
   }
 
@@ -57,9 +53,15 @@ export const Styles = {
     border: 1px solid ${ColorPalette["gray-100"]};
     border-radius: 0.5rem;
 
-    :focus-visible {
-      border-color: ${ColorPalette["blue-400"]};
-    }
+    ${({ readOnly }) => {
+      if (!readOnly) {
+        return css`
+          :focus-visible {
+            border-color: ${ColorPalette["blue-400"]};
+          }
+        `;
+      }
+    }}
 
     // Remove normalized css properties
     outline: none;
