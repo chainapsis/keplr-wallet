@@ -11,6 +11,7 @@ import { TextInput } from "../../../components/input";
 import { XAxis } from "../../../components/axis";
 import { Styles } from "./styles";
 import { Gutter } from "../../../components/gutter";
+import { Bleed } from "../../../components/bleed";
 
 export const NewMnemonicScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
@@ -41,28 +42,30 @@ export const NewMnemonicScene: FunctionComponent = () => {
     <RegisterSceneBox>
       <RegisterSceneBoxHeader>New mnemonic</RegisterSceneBoxHeader>
       <Stack>
-        <Stack gutter="0.75rem">
-          {threeWords.map((words, i) => {
-            return (
-              <Columns key={i} sum={3}>
-                {words.map((word, j) => {
-                  return (
-                    <Column key={j} weight={1}>
-                      <XAxis alignY="center">
-                        <Styles.IndexText>{i * 3 + j + 1}.</Styles.IndexText>
-                        <TextInput
-                          value={word}
-                          readOnly={true}
-                          removeBottomMargin={true}
-                        />
-                      </XAxis>
-                    </Column>
-                  );
-                })}
-              </Columns>
-            );
-          })}
-        </Stack>
+        <Bleed left="1rem">
+          <Stack gutter="0.75rem">
+            {threeWords.map((words, i) => {
+              return (
+                <Columns key={i} sum={3}>
+                  {words.map((word, j) => {
+                    return (
+                      <Column key={j} weight={1}>
+                        <XAxis alignY="center">
+                          <Styles.IndexText>{i * 3 + j + 1}.</Styles.IndexText>
+                          <TextInput
+                            value={word}
+                            readOnly={true}
+                            removeBottomMargin={true}
+                          />
+                        </XAxis>
+                      </Column>
+                    );
+                  })}
+                </Columns>
+              );
+            })}
+          </Stack>
+        </Bleed>
         <Gutter size="1rem" />
         <Button
           mode="light"
