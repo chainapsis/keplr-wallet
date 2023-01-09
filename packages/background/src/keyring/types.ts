@@ -33,3 +33,8 @@ export interface ExportKeyRingData {
     [key: string]: string;
   };
 }
+
+export enum SignMode {
+  Amino = "amino",
+  Direct = "direct",
+}

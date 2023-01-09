@@ -299,7 +299,8 @@ export const SignPage: FunctionComponent = observer(() => {
                     preferNoSetFee={preferNoSetFee}
                     preferNoSetMemo={preferNoSetMemo}
                     isNeedLedgerEthBlindSigning={
-                      ethSignType === EthSignType.EIP712
+                      ethSignType === EthSignType.EIP712 &&
+                      accountStore.getAccount(current.chainId).isNanoLedger
                     }
                   />
                 )

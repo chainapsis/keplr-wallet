@@ -27,7 +27,3 @@ export type MintParmas = {
     developer_rewards_receiver: string;
   };
 };
-
-export type EpochProvisions = {
-  epoch_provisions: string;
-};

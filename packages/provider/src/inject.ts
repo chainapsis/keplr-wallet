@@ -17,9 +17,9 @@ import {
   OfflineDirectSigner,
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
+  SecretUtils,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
-import { SecretUtils } from "secretjs/types/enigmautils";
 import { KeplrEnigmaUtils } from "./enigma";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
@@ -332,6 +332,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     await this.requestMethod("enable", [chainIds]);
   }
 
+  async disable(chainIds?: string | string[]): Promise<void> {
+    await this.requestMethod("disable", [chainIds]);
+  }
+
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
     if (
       chainInfo.features?.includes("stargate") ||
@@ -592,5 +596,17 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 
   __core__getAnalyticsId(): Promise<string> {
     return this.requestMethod("__core__getAnalyticsId", []);
+  }
+
+  async changeKeyRingName({
+    defaultName,
+    editable = true,
+  }: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string> {
+    return await this.requestMethod("changeKeyRingName", [
+      { defaultName, editable },
+    ]);
   }
 }

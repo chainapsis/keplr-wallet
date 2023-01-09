@@ -175,6 +175,8 @@
   "register.import.textarea.private-key.error.invalid-length": "Invalid length of private key",
   "register.create.button.next": "Next",
 
+  "register.keystone.title": "Import Keystone (Beta)",
+
   "register.ledger.title": "Import ledger",
 
   "register.verify.button.register": "Register",

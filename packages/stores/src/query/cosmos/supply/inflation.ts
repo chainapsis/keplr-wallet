@@ -1,19 +1,23 @@
-import { computed, makeObservable } from "mobx";
 import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
-import { ObservableQuerySupplyTotal } from "./supply";
-import { MintingInflation } from "./types";
-import { ObservableChainQuery } from "../../chain-query";
+import { computed, makeObservable } from "mobx";
 import { ChainGetter } from "../../../common";
+import { ObservableChainQuery } from "../../chain-query";
+import { ObservableQueryDistributionParams } from "../distribution";
+import { ObservableQueryStakingPool } from "../staking";
 import { ObservableQueryIrisMintingInfation } from "./iris-minting";
-import { ObservableQuerySifchainLiquidityAPY } from "./sifchain";
+import { ObservableQueryJunoAnnualProvisions } from "./juno/annual-provisions";
 import {
   ObservableQueryOsmosisEpochProvisions,
   ObservableQueryOsmosisEpochs,
   ObservableQueryOsmosisMintParmas,
 } from "./osmosis";
-import { ObservableQueryDistributionParams } from "../distribution";
-import { ObservableQueryStakingPool } from "../staking";
-import { ObservableQueryJunoAnnualProvisions } from "./juno/annual-provisions";
+import { ObservableQuerySifchainLiquidityAPY } from "./sifchain";
+import {
+  ObservableQueryStrideEpochProvisions,
+  ObservableQueryStrideMintParams,
+} from "./stride";
+import { ObservableQuerySupplyTotal } from "./supply";
+import { MintingInflation } from "./types";
 
 export class ObservableQueryInflation {
   constructor(
@@ -28,7 +32,9 @@ export class ObservableQueryInflation {
     protected readonly _queryOsmosisEpochProvisions: ObservableQueryOsmosisEpochProvisions,
     protected readonly _queryOsmosisMintParams: ObservableQueryOsmosisMintParmas,
     protected readonly _queryJunoAnnualProvisions: ObservableQueryJunoAnnualProvisions,
-    protected readonly _queryDistributionParams: ObservableQueryDistributionParams
+    protected readonly _queryDistributionParams: ObservableQueryDistributionParams,
+    protected readonly _queryStrideEpochProvisions: ObservableQueryStrideEpochProvisions,
+    protected readonly _queryStrideMintParams: ObservableQueryStrideMintParams
   ) {
     makeObservable(this);
   }
@@ -128,6 +134,24 @@ export class ObservableQueryInflation {
 
           return new IntPretty(dec);
         }
+      } else if (chainInfo.chainId.startsWith("stride")) {
+        const annualProvisions = this._queryStrideEpochProvisions.epochProvisions.mul(
+          new Dec(365 * 24)
+        );
+        const stakingProportion = this._queryStrideMintParams
+          .distributionProportions.staking;
+        const bondedTokens = this._queryPool.bondedTokens;
+
+        if (bondedTokens.toDec().isZero()) {
+          return new IntPretty(new Dec(0));
+        }
+
+        return new IntPretty(
+          stakingProportion
+            .mul(annualProvisions.toDec())
+            .quo(bondedTokens.toDec())
+            .mulTruncate(DecUtils.getTenExponentNInPrecisionRange(2))
+        );
       } else {
         dec = new Dec(this._queryMint.response?.data.inflation ?? "0").mul(
           DecUtils.getPrecisionDec(2)

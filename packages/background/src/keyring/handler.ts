@@ -30,7 +30,10 @@ import {
   RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
+  CreateKeystoneKeyMsg,
+  AddKeystoneKeyMsg,
   RequestICNSAdr36SignaturesMsg,
+  ChangeKeyRingNameMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -66,11 +69,18 @@ export const getHandler: (service: KeyRingService) => Handler = (
         );
       case AddPrivateKeyMsg:
         return handleAddPrivateKeyMsg(service)(env, msg as AddPrivateKeyMsg);
+      case CreateKeystoneKeyMsg:
+        return handleCreateKeystoneKeyMsg(service)(
+          env,
+          msg as CreateKeystoneKeyMsg
+        );
       case CreateLedgerKeyMsg:
         return handleCreateLedgerKeyMsg(service)(
           env,
           msg as CreateLedgerKeyMsg
         );
+      case AddKeystoneKeyMsg:
+        return handleAddKeystoneKeyMsg(service)(env, msg as AddKeystoneKeyMsg);
       case AddLedgerKeyMsg:
         return handleAddLedgerKeyMsg(service)(env, msg as AddLedgerKeyMsg);
       case LockKeyRingMsg:
@@ -132,6 +142,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleInitNonDefaultLedgerAppMsg(service)(
           env,
           msg as InitNonDefaultLedgerAppMsg
+        );
+      case ChangeKeyRingNameMsg:
+        return handleChangeKeyNameMsg(service)(
+          env,
+          msg as ChangeKeyRingNameMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -219,6 +234,20 @@ const handleAddPrivateKeyMsg: (
   };
 };
 
+const handleCreateKeystoneKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<CreateKeystoneKeyMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.createKeystoneKey(
+      env,
+      msg.kdf,
+      msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
+  };
+};
+
 const handleCreateLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreateLedgerKeyMsg> = (service) => {
@@ -227,6 +256,19 @@ const handleCreateLedgerKeyMsg: (
       env,
       msg.kdf,
       msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
+  };
+};
+
+const handleAddKeystoneKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<AddKeystoneKeyMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.addKeystoneKey(
+      env,
+      msg.kdf,
       msg.meta,
       msg.bip44HDPath
     );
@@ -283,6 +325,7 @@ const handleGetKeyMsg: (
           .bech32PrefixAccAddr
       ),
       isNanoLedger: key.isNanoLedger,
+      isKeystone: key.isKeystone,
     };
   };
 };
@@ -464,5 +507,30 @@ const handleInitNonDefaultLedgerAppMsg: (
 ) => InternalHandler<InitNonDefaultLedgerAppMsg> = (service) => {
   return async (env, msg) => {
     await service.initializeNonDefaultLedgerApp(env, msg.ledgerApp);
+  };
+};
+
+const handleChangeKeyNameMsg: (
+  service: KeyRingService
+) => InternalHandler<ChangeKeyRingNameMsg> = (service) => {
+  return async (env, msg) => {
+    // Ensure that keyring is unlocked and selected.
+    await service.enable(env);
+
+    let index = -1;
+    service.getMultiKeyStoreInfo().forEach(({ selected }, idx) => {
+      if (selected) {
+        index = idx;
+      }
+    });
+
+    if (index === -1) {
+      throw new Error("No account selected");
+    }
+
+    return await service.changeKeyRingName(env, index, {
+      defaultName: msg.defaultName,
+      editable: msg.editable,
+    });
   };
 };

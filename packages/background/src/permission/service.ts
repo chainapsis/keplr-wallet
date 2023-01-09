@@ -92,6 +92,27 @@ export class PermissionService {
     await this.checkBasicAccessPermission(env, chainIds, origin);
   }
 
+  async disable(env: Env, chainIds: string | string[], origin: string) {
+    // Delete permissions granted to origin.
+    // If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).
+    // Else, remove all permissions granted to origin (In this case, permissions that are not assigned to each chain, such as getChainInfosWithoutEndpoints(), are also deleted).
+
+    await this.keyRingService.enable(env);
+
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
+    if (chainIds.length > 0) {
+      for (const chainId of chainIds) {
+        await this.removeAllTypePermissionToChainId(chainId, [origin]);
+      }
+    } else {
+      await this.removeAllTypePermission([origin]);
+      await this.removeAllTypeGlobalPermission([origin]);
+    }
+  }
+
   async checkOrGrantPermission(
     env: Env,
     url: string,
@@ -389,6 +410,50 @@ export class PermissionService {
     await this.save();
   }
 
+  async removeAllTypePermission(origins: string[]) {
+    for (const identifier of Object.keys(this.permissionMap)) {
+      const permissionsInChain = this.permissionMap[identifier];
+      if (!permissionsInChain) {
+        return;
+      }
+
+      for (const type of Object.keys(permissionsInChain)) {
+        const innerMap = permissionsInChain[type];
+        if (!innerMap) {
+          return;
+        }
+
+        for (const origin of origins) {
+          delete innerMap[origin];
+        }
+      }
+    }
+
+    await this.save();
+  }
+
+  async removeAllTypePermissionToChainId(chainId: string, origins: string[]) {
+    const permissionsInChain = this.permissionMap[
+      ChainIdHelper.parse(chainId).identifier
+    ];
+    if (!permissionsInChain) {
+      return;
+    }
+
+    for (const type of Object.keys(permissionsInChain)) {
+      const innerMap = permissionsInChain[type];
+      if (!innerMap) {
+        return;
+      }
+
+      for (const origin of origins) {
+        delete innerMap[origin];
+      }
+    }
+
+    await this.save();
+  }
+
   async removeGlobalPermission(type: string, origins: string[]) {
     const originMap = {
       ...this.globalPermissionMap[type],
@@ -399,6 +464,22 @@ export class PermissionService {
     }
 
     this.globalPermissionMap[type] = originMap;
+
+    await this.save();
+  }
+
+  async removeAllTypeGlobalPermission(origins: string[]) {
+    for (const type of Object.keys(this.globalPermissionMap)) {
+      const originMap = {
+        ...this.globalPermissionMap[type],
+      };
+
+      for (const origin of origins) {
+        delete originMap[origin];
+      }
+
+      this.globalPermissionMap[type] = originMap;
+    }
 
     await this.save();
   }

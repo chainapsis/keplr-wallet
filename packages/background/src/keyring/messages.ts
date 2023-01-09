@@ -27,6 +27,7 @@ const bip39 = require("bip39");
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { Buffer } from "buffer/";
 import { LedgerApp } from "../ledger";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
@@ -299,6 +300,48 @@ export class CreatePrivateKeyMsg extends Message<{
   }
 }
 
+export class CreateKeystoneKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
+  public static type() {
+    return "create-keystone-key";
+  }
+
+  constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
+    public readonly password: string,
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new KeplrError("keyring", 202, "Invalid kdf");
+    }
+
+    if (!this.password) {
+      throw new KeplrError("keyring", 274, "password not set");
+    }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CreateKeystoneKeyMsg.type();
+  }
+}
+
 export class CreateLedgerKeyMsg extends Message<{
   status: KeyRingStatus;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
@@ -380,6 +423,42 @@ export class AddPrivateKeyMsg extends Message<{
 
   type(): string {
     return AddPrivateKeyMsg.type();
+  }
+}
+
+export class AddKeystoneKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
+  public static type() {
+    return "add-keystone-key";
+  }
+
+  constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new KeplrError("keyring", 202, "Invalid kdf");
+    }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AddKeystoneKeyMsg.type();
   }
 }
 
@@ -627,10 +706,7 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
 
       const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
 
-      if (
-        this.eip712.domain.chainId !== ethChainId.toString() &&
-        this.eip712.domain.chainId !== "0x" + ethChainId.toString(16)
-      ) {
+      if (!BigNumber.from(this.eip712.domain.chainId).eq(ethChainId)) {
         throw new Error(
           `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${this.eip712.domain.chainId})`
         );
@@ -1032,5 +1108,37 @@ export class InitNonDefaultLedgerAppMsg extends Message<void> {
 
   type(): string {
     return InitNonDefaultLedgerAppMsg.type();
+  }
+}
+
+export class ChangeKeyRingNameMsg extends Message<string> {
+  public static type() {
+    return "change-keyring-name-msg";
+  }
+
+  constructor(
+    public readonly defaultName: string,
+    public readonly editable: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // Not allow empty name.
+    if (!this.defaultName) {
+      throw new Error("default name not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ChangeKeyRingNameMsg.type();
   }
 }
