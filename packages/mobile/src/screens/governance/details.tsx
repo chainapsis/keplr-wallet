@@ -144,7 +144,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
       ? description.slice(1, -1)
       : description;
 
-    description = description.replace(/\\n/g, "\n");
+    description = description.replace(/\\n|\\\\n/g, "\n");
 
     const html = md.render(description);
     return {
