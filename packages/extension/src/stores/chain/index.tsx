@@ -21,7 +21,7 @@ import {
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { MessageRequester } from "@keplr-wallet/router";
-import { toGenerator } from "@keplr-wallet/common";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
 
 export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable
@@ -31,7 +31,13 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected _isInitializing: boolean = false;
   protected deferChainIdSelect: string = "";
 
+  @observable
+  protected chainInfoInUIConfig: {
+    disabledChains: string[];
+  };
+
   constructor(
+    protected readonly kvStore: KVStore,
     embedChainInfos: ChainInfo[],
     protected readonly requester: MessageRequester,
     protected readonly deferInitialQueryController: DeferInitialQueryController
@@ -49,6 +55,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     this._selectedChainId = embedChainInfos[0].chainId;
 
+    this.chainInfoInUIConfig = {
+      disabledChains: [],
+    };
+
     makeObservable(this);
 
     this.init();
@@ -56,6 +66,78 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   get isInitializing(): boolean {
     return this._isInitializing;
+  }
+
+  @computed
+  get chainInfosInUI() {
+    return this.enabledChainInfosInUI;
+  }
+
+  @computed
+  get chainInfosWithUIConfig() {
+    return this._chainInfos.map((chainInfo) => {
+      if (this.disabledChainInfosInUI.includes(chainInfo)) {
+        return {
+          chainInfo,
+          disabled: true,
+        };
+      } else {
+        return {
+          chainInfo,
+          disabled: false,
+        };
+      }
+    });
+  }
+
+  @computed
+  protected get enabledChainInfosInUI() {
+    return this._chainInfos.filter(
+      (chainInfo) =>
+        !this.chainInfoInUIConfig.disabledChains.includes(chainInfo.chainId)
+    );
+  }
+
+  @computed
+  get disabledChainInfosInUI() {
+    return this._chainInfos.filter((chainInfo) =>
+      this.chainInfoInUIConfig.disabledChains.includes(chainInfo.chainId)
+    );
+  }
+
+  @flow
+  *toggleChainInfoInUI(chainId: string) {
+    let disableChainIds = [];
+
+    if (this.chainInfoInUIConfig.disabledChains.includes(chainId)) {
+      disableChainIds = this.chainInfoInUIConfig.disabledChains.filter(
+        (chain) => chain !== chainId
+      );
+    } else {
+      disableChainIds = [...this.chainInfoInUIConfig.disabledChains, chainId];
+    }
+
+    if (disableChainIds.length < this._chainInfos.length) {
+      yield this.kvStore.set<{ disabledChains: string[] }>(
+        "extension_chainInfoInUIConfig",
+        {
+          disabledChains: disableChainIds,
+        }
+      );
+
+      this.chainInfoInUIConfig.disabledChains = disableChainIds;
+    }
+
+    if (this.current.chainId === chainId) {
+      const other = this.chainInfosInUI.find(
+        (chainInfo) => chainInfo.chainId !== chainId
+      );
+
+      if (other) {
+        this.selectChain(other.chainId);
+        this.saveLastViewChainId();
+      }
+    }
   }
 
   get selectedChainId(): string {
@@ -111,6 +193,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     if (this.deferChainIdSelect) {
       this.selectChain(this.deferChainIdSelect);
       this.deferChainIdSelect = "";
+    }
+
+    const chainInfoUI = yield* toGenerator(
+      this.kvStore.get<{ disabledChains: string[] }>(
+        "extension_chainInfoInUIConfig"
+      )
+    );
+
+    if (chainInfoUI) {
+      this.chainInfoInUIConfig.disabledChains =
+        chainInfoUI.disabledChains ?? [];
     }
   }
 
