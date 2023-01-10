@@ -1,7 +1,14 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "../../components/page";
-import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+  ViewStyle,
+} from "react-native";
 import { Card, CardBody } from "../../components/card";
 import { useStyle } from "../../styles";
 import { Button } from "../../components/button";
@@ -16,6 +23,8 @@ import { dateToLocalString } from "./utils";
 import { registerModal } from "../../modals/base";
 import { RectButton } from "../../components/rect-button";
 import { useSmartNavigation } from "../../navigation";
+import MarkdownIt from "markdown-it";
+import { MemoizedHtmlRender } from "./internal/markdown";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -115,7 +124,50 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
     ).vote;
   })();
 
+  const proposalDescription = proposal?.description;
+  const descriptionHtml = useMemo(() => {
+    if (!proposalDescription) {
+      return undefined;
+    }
+
+    const md = new MarkdownIt({
+      linkify: true,
+      breaks: true,
+    });
+
+    let description = proposalDescription;
+
+    const isItWrappedInQuotationMarks =
+      description.slice(0, 1) === '"' && description.slice(-1) === '"';
+
+    description = isItWrappedInQuotationMarks
+      ? description.slice(1, -1)
+      : description;
+
+    description = description.replace(/\\n/g, "\n");
+
+    const html = md.render(description);
+    return {
+      html,
+    };
+  }, [proposalDescription]);
+
   const intl = useIntl();
+
+  const { width } = useWindowDimensions();
+  const paddingX = style.get("padding-x-card-horizontal").paddingLeft;
+  const contentWidth = (() => {
+    if (typeof paddingX !== "number" && typeof paddingX !== "string") {
+      console.log("padding x is not number", paddingX);
+      return width;
+    }
+    const pxNum = parseFloat(paddingX.toString());
+    if (Number.isNaN(pxNum)) {
+      console.log("padding x is not number", paddingX);
+      return width;
+    }
+    return width - pxNum * 2;
+  })();
 
   return (
     <CardBody>
@@ -261,18 +313,17 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
           >
             Description
           </Text>
-          <Text
-            style={style.flatten([
-              "body3",
-              "color-text-middle",
-              "dark:color-platinum-200",
-            ])}
-            // Text selection is only supported well in android.
-            // In IOS, the whole text would be selected, this process is somewhat strange, so it is disabled in IOS.
-            selectable={Platform.OS === "android"}
-          >
-            {proposal.description}
-          </Text>
+          {/*
+            Without memoization, the RenderHtml component sometimes warns about performance.
+            To be honest, I don't feel a problem with performance,
+            but I do memoization because it just sends a warning.
+          */}
+          {descriptionHtml ? (
+            <MemoizedHtmlRender
+              html={descriptionHtml.html}
+              contentWidth={contentWidth}
+            />
+          ) : null}
         </View>
       ) : (
         <LoadingSpinner
