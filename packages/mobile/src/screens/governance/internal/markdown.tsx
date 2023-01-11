@@ -18,6 +18,10 @@ export const MemoizedHtmlRender: FunctionComponent<{
         html,
       }}
       contentWidth={contentWidth}
+      // XXX: Comments on `RenderHtml` component recommend us not to use `StyleSheet`.
+      //      However, style builder itself uses `StyleSheet`.
+      //      I don't know how this affect in detail.
+      //      Anyway, there is no problem yet.
       baseStyle={style.flatten([
         "body3",
         "color-text-middle",
@@ -42,6 +46,16 @@ export const MemoizedHtmlRender: FunctionComponent<{
         ul: style.flatten(["margin-top-4", "margin-bottom-4"]),
         li: style.flatten(["margin-bottom-4"]),
         strong: style.flatten(["color-text-high", "dark:color-platinum-50"]),
+        a: {
+          ...style.flatten(["color-platinum-600", "dark:color-platinum-50"]),
+          ...{
+            // TODO: Add text decoration color support to style builder?
+            textDecorationColor: style.flatten([
+              "color-platinum-600",
+              "dark:color-platinum-50",
+            ]).color,
+          },
+        },
       }}
     />
   );
