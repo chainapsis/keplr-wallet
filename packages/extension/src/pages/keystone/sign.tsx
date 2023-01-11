@@ -87,7 +87,7 @@ export const KeystoneSignPage = observer(() => {
           transaction with your Keystone device.
         </div>
         <div>
-          <a href="https://keyst.one/keplr" target="_blank" rel="noreferrer">
+          <a href="https://keyst.one/t/keplr" target="_blank" rel="noreferrer">
             Tutorial
           </a>
         </div>
