@@ -135,6 +135,8 @@
 
   "setting.developer-mode": "Developer Mode",
 
+  "setting.chain-active.title": "Chain Active/Inactvie",
+
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
   "register.button.back": "Back",

@@ -115,6 +115,20 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
+            id: "setting.chain-active.title",
+          })}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/chain-active",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
+          title={intl.formatMessage({
             id: "setting.developer-mode",
           })}
           onClick={() => {
