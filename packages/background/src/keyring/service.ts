@@ -46,6 +46,7 @@ import { trimAminoSignDoc } from "./amino-sign-doc";
 import { KeystoneService } from "../keystone";
 import { RequestICNSAdr36SignaturesMsg } from "./messages";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { closePopupWindow } from "@keplr-wallet/popup";
 
 export class KeyRingService {
   private keyRing!: KeyRing;
@@ -694,13 +695,19 @@ Salt: ${salt}`;
           accountInfo.chainId
         );
 
-        const signature = await this.keyRing.sign(
-          env,
-          accountInfo.chainId,
-          coinType,
-          serializeSignDoc(signDoc),
-          ethereumKeyFeatures.signing
-        );
+        const signature = await this.keyRing
+          .sign(
+            env,
+            accountInfo.chainId,
+            coinType,
+            serializeSignDoc(signDoc),
+            ethereumKeyFeatures.signing
+          )
+          .finally(() => {
+            if (this.keyRing.type === "keystone") {
+              closePopupWindow("default");
+            }
+          });
 
         r.push({
           chainId: accountInfo.chainId,
