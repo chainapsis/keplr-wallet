@@ -115,6 +115,9 @@ export class KeystoneService {
                 bip44HDPath,
                 ur,
                 message,
+              },
+              {
+                channel: "keystone",
               }
             )) as StdSignDoc;
             if (res.abort) {
@@ -178,6 +181,9 @@ export class KeystoneService {
                 bip44HDPath,
                 ur,
                 message,
+              },
+              {
+                channel: "keystone",
               }
             )) as StdSignDoc;
             if (res.abort) {
