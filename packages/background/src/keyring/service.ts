@@ -701,7 +701,8 @@ Salt: ${salt}`;
             accountInfo.chainId,
             coinType,
             serializeSignDoc(signDoc),
-            ethereumKeyFeatures.signing
+            ethereumKeyFeatures.signing,
+            SignMode.Message
           )
           .finally(() => {
             if (this.keyRing.type === "keystone") {

@@ -37,4 +37,5 @@ export interface ExportKeyRingData {
 export enum SignMode {
   Amino = "amino",
   Direct = "direct",
+  Message = "message",
 }
