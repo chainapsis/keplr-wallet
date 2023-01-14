@@ -7,6 +7,8 @@ export const useVerticalResizeObserver = (
   const callbackRef = useRef(onResize);
   callbackRef.current = onResize;
 
+  const prev = useRef<number | undefined>();
+
   const [resizeObserver] = useState(() => {
     return new ResizeObserver((entries) => {
       if (entries.length > 0) {
@@ -15,7 +17,11 @@ export const useVerticalResizeObserver = (
           ? entry.borderBoxSize[0]
           : entry.borderBoxSize;
 
-        callbackRef.current(boxSize.blockSize);
+        const height = boxSize.blockSize;
+        if (prev.current == null || prev.current !== height) {
+          callbackRef.current(height);
+          prev.current = height;
+        }
       }
     });
   });
