@@ -286,7 +286,7 @@ const SceneComponent: FunctionComponent<{
   return (
     <Styles.Container
       top={top}
-      zIndex={index}
+      zIndex={index + 1}
       transitionAlign={transitionAlign}
       style={{
         ...(() => {
