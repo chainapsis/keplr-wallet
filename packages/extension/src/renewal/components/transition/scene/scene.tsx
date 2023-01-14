@@ -9,8 +9,14 @@ import React, {
   useMemo,
 } from "react";
 import { VerticalResizeTransition } from "../vertical-size";
-import styled, { css } from "styled-components";
-import { animated, SpringConfig, useSpringValue } from "@react-spring/web";
+import styled from "styled-components";
+import {
+  animated,
+  SpringConfig,
+  SpringValue,
+  to,
+  useSpringValue,
+} from "@react-spring/web";
 import { SceneTransitionProps, SceneTransitionRef } from "./types";
 import {
   ScenePropsInternalTypes,
@@ -21,7 +27,6 @@ const Styles = {
   Container: styled(animated.div).withConfig({
     shouldForwardProp: (prop) => prop === "style" || prop === "children",
   })<{
-    top: boolean;
     zIndex: number;
     transitionAlign?: "top" | "bottom" | "center";
   }>`
@@ -31,26 +36,6 @@ const Styles = {
     z-index: ${({ zIndex }) => zIndex};
 
     width: 100%;
-
-    ${({ top }) => {
-      if (top) {
-        return css`
-          position: relative;
-          left: auto;
-          right: auto;
-
-          pointer-events: auto;
-        `;
-      } else {
-        return css`
-          position: absolute;
-          left: 0;
-          right: 0;
-
-          pointer-events: none;
-        `;
-      }
-    }}
   `,
   Element: styled.div`
     grid-row-start: 1;
@@ -69,11 +54,12 @@ export const SceneTransition = forwardRef<
   ) => {
     const seq = useRef<number>(0);
 
-    const [stack, setStack] = useState<ScenePropsInternalTypes[]>([
+    const [stack, setStack] = useState<ScenePropsInternalTypes[]>(() => [
       {
         ...initialSceneProps,
         id: seq.current.toString(),
         top: true,
+        animTop: new SpringValue<boolean>(true),
         initialX: 0,
         targetX: 0,
         initialOpacity: 1,
@@ -95,6 +81,7 @@ export const SceneTransition = forwardRef<
         const prevTop = newStack.find((s) => s.top);
         if (prevTop) {
           prevTop.top = false;
+          prevTop.animTop.set(false);
           prevTop.targetX = -1;
           prevTop.targetOpacity = 0;
         }
@@ -104,6 +91,7 @@ export const SceneTransition = forwardRef<
           props: props,
           id: seq.current.toString(),
           top: true,
+          animTop: new SpringValue<boolean>(true),
           initialX: 1,
           targetX: 0,
           initialOpacity: 0,
@@ -139,6 +127,7 @@ export const SceneTransition = forwardRef<
           }
 
           prevTop.top = false;
+          prevTop.animTop.set(false);
           prevTop.targetX = 1;
           prevTop.targetOpacity = 0;
           prevTop.detached = true;
@@ -151,6 +140,7 @@ export const SceneTransition = forwardRef<
 
         if (newTop) {
           newTop.top = true;
+          newTop.animTop.set(true);
           newTop.targetX = 0;
           newTop.targetOpacity = 1;
         }
@@ -210,6 +200,7 @@ export const SceneTransition = forwardRef<
               <SceneComponent
                 key={props.id}
                 top={props.top}
+                animTop={props.animTop}
                 index={index}
                 initialX={props.initialX}
                 targetX={props.targetX}
@@ -231,6 +222,7 @@ export const SceneTransition = forwardRef<
 
 const SceneComponent: FunctionComponent<{
   top: boolean;
+  animTop: SpringValue<boolean>;
   index: number;
   initialX: number;
   targetX: number;
@@ -242,7 +234,7 @@ const SceneComponent: FunctionComponent<{
   springConfig?: SpringConfig;
 }> = ({
   children,
-  top,
+  animTop,
   index,
   initialX,
   targetX,
@@ -271,48 +263,136 @@ const SceneComponent: FunctionComponent<{
     });
   }, [targetX, x]);
 
-  const y = (() => {
-    if (top) {
-      return "0";
-    }
+  /*
+   Styling should satisfy below logic
+    const translateY = (() => {
+      if (top) {
+        return "0";
+      }
 
-    if (transitionAlign !== "center") {
-      return "0";
-    }
+      if (transitionAlign !== "center") {
+        return "0";
+      }
 
-    return "-50";
-  })();
+      return "-50";
+    })();
+
+   ...(() => {
+      if (top) {
+        return;
+      }
+
+      switch (transitionAlign) {
+        case "center":
+          return {
+            top: "50%",
+          };
+        case "bottom":
+          return {
+            bottom: 0,
+          };
+        default:
+          return {
+            top: 0,
+          };
+      }
+    })(),
+
+    ${({ top }) => {
+      if (top) {
+        return css`
+          position: relative;
+          left: auto;
+          right: auto;
+
+          pointer-events: auto;
+        `;
+      } else {
+        return css`
+          position: absolute;
+          left: 0;
+          right: 0;
+
+          pointer-events: none;
+        `;
+      }
+    }}
+   */
 
   return (
     <Styles.Container
-      top={top}
       zIndex={index + 1}
       transitionAlign={transitionAlign}
       style={{
-        ...(() => {
+        position: animTop.to((top) => {
           if (top) {
-            return;
+            return "relative";
+          } else {
+            return "absolute";
+          }
+        }),
+        top: animTop.to((top) => {
+          if (top) {
+            return "auto";
+          } else {
+            if (transitionAlign === "center") {
+              return "50%";
+            }
+            return "0";
+          }
+        }),
+        bottom: animTop.to((top) => {
+          if (top) {
+            return "auto";
+          } else {
+            if (transitionAlign === "bottom") {
+              return "0";
+            }
+            return "auto";
+          }
+        }),
+        left: animTop.to((top) => {
+          if (top) {
+            return "auto";
+          } else {
+            return "0";
+          }
+        }),
+        right: animTop.to((top) => {
+          if (top) {
+            return "auto";
+          } else {
+            return "0";
+          }
+        }),
+        pointerEvents: animTop.to((top) => {
+          if (top) {
+            return "auto";
+          } else {
+            return "none";
+          }
+        }),
+        opacity: opacity,
+        transform: to([x, animTop], (...args) => {
+          let x = args[0] as number;
+          const top = args[1] as boolean;
+
+          x = x * 100;
+          x = Math.max(x, -100);
+          x = Math.min(x, 100);
+
+          let y = 0;
+
+          if (!top) {
+            if (transitionAlign !== "center") {
+              y = 0;
+            } else {
+              y = -50;
+            }
           }
 
-          switch (transitionAlign) {
-            case "center":
-              return {
-                top: "50%",
-              };
-            case "bottom":
-              return {
-                bottom: 0,
-              };
-            default:
-              return {
-                top: 0,
-              };
-          }
-        })(),
-        opacity: opacity,
-        transform: x
-          .to([-1, 1], [-100, 100])
-          .to((x) => `translate(${x}%, ${y}%)`),
+          return `translate(${x}%, ${y}%)`;
+        }),
       }}
     >
       <Styles.Element>{children}</Styles.Element>
