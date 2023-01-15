@@ -19,6 +19,8 @@ import {
 } from "@react-spring/web";
 import { SceneTransitionProps, SceneTransitionRef } from "./types";
 import {
+  SceneDescendantRegistry,
+  SceneDescendantRegistryWrap,
   ScenePropsInternalTypes,
   SceneTransitionContextBase,
 } from "./internal";
@@ -180,6 +182,14 @@ export const SceneTransition = forwardRef<
       }
     }, [notDetachedStackNames]);
 
+    const topScene = stack.find((s) => s.top);
+    const [registry] = useState(
+      () => new SceneDescendantRegistry(topScene?.id ?? "")
+    );
+    // XXX: registry not handle component state.
+    //      Below never make re-render.
+    registry.setTopSceneId(topScene?.id ?? "");
+
     return (
       <SceneTransitionContextBase.Provider
         value={{ push, pop, stack: notDetachedStackNames }}
@@ -187,6 +197,7 @@ export const SceneTransition = forwardRef<
         <VerticalResizeTransition
           width={width}
           transitionAlign={transitionAlign}
+          registry={registry}
         >
           {stack.map((props, index) => {
             const scene = scenes.find((s) => s.name === props.name);
@@ -197,21 +208,26 @@ export const SceneTransition = forwardRef<
             const { children, ...remaining } = props.props ?? {};
 
             return (
-              <SceneComponent
+              <SceneDescendantRegistryWrap
                 key={props.id}
-                top={props.top}
-                animTop={props.animTop}
-                index={index}
-                initialX={props.initialX}
-                targetX={props.targetX}
-                initialOpacity={props.initialOpacity}
-                targetOpacity={props.targetOpacity}
-                onAnimEnd={props.onAminEnd}
-                transitionAlign={transitionAlign}
-                springConfig={springConfig}
+                sceneId={props.id}
+                parentRegistry={registry}
               >
-                <scene.element {...remaining}>{children}</scene.element>
-              </SceneComponent>
+                <SceneComponent
+                  top={props.top}
+                  animTop={props.animTop}
+                  index={index}
+                  initialX={props.initialX}
+                  targetX={props.targetX}
+                  initialOpacity={props.initialOpacity}
+                  targetOpacity={props.targetOpacity}
+                  onAnimEnd={props.onAminEnd}
+                  transitionAlign={transitionAlign}
+                  springConfig={springConfig}
+                >
+                  <scene.element {...remaining}>{children}</scene.element>
+                </SceneComponent>
+              </SceneDescendantRegistryWrap>
             );
           })}
         </VerticalResizeTransition>
