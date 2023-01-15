@@ -49,6 +49,13 @@ export const VerticalResizeTransition: FunctionComponent<VerticalResizeTransitio
   // To prevent this problem, we should defer `isDescendantAnimating()` to next frame.
   const isDescendantAnimatingLast = useRef<boolean | null>(null);
   const ref = useVerticalResizeObserver((height: number) => {
+    if (!initialized.current) {
+      // At first, set height without animation.
+      heightPx.set(height);
+      initialized.current = true;
+      return;
+    }
+
     const isDescendantAnimating = (() => {
       if (registry.isDescendantAnimating()) {
         isDescendantAnimatingLast.current = true;
@@ -67,12 +74,10 @@ export const VerticalResizeTransition: FunctionComponent<VerticalResizeTransitio
       return false;
     })();
 
-    if (initialized.current && !isDescendantAnimating) {
+    if (!isDescendantAnimating) {
       heightPx.start(height);
     } else {
-      // At first, set height without animation.
       heightPx.set(height);
-      initialized.current = true;
     }
   });
 
