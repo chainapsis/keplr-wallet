@@ -10,6 +10,7 @@ export interface SceneTransitionContext {
 export interface SceneTransitionRef {
   push(name: string, props?: Record<string, any>): void;
   pop(): void;
+  readonly stack: ReadonlyArray<string>;
   addSceneChangeListener(
     listener: (stack: ReadonlyArray<string>) => void
   ): void;

@@ -151,11 +151,18 @@ export const SceneTransition = forwardRef<
       });
     }, []);
 
+    const notDetachedStackNames = useMemo(() => {
+      return stack.filter((s) => !s.detached).map((s) => s.name);
+    }, [stack]);
+
     useImperativeHandle(
       ref,
       () => ({
         push,
         pop,
+        get stack(): ReadonlyArray<string> {
+          return notDetachedStackNames;
+        },
         addSceneChangeListener(
           listener: (stack: ReadonlyArray<string>) => void
         ) {
@@ -169,12 +176,8 @@ export const SceneTransition = forwardRef<
           );
         },
       }),
-      [pop, push]
+      [notDetachedStackNames, pop, push]
     );
-
-    const notDetachedStackNames = useMemo(() => {
-      return stack.filter((s) => !s.detached).map((s) => s.name);
-    }, [stack]);
 
     useEffect(() => {
       for (const listener of sceneChangeListeners.current) {
