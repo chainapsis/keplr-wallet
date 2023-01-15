@@ -48,7 +48,11 @@ export const NewMnemonicScene: FunctionComponent = () => {
       <RegisterSceneBoxHeader>New mnemonic</RegisterSceneBoxHeader>
       <Stack>
         <Bleed left="1rem">
-          <VerticalResizeTransition>
+          <VerticalResizeTransition
+            springConfig={{
+              precision: 1,
+            }}
+          >
             <Stack gutter="0.75rem">
               {threeWords.map((words, i) => {
                 return (

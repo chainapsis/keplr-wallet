@@ -90,12 +90,13 @@ const BottomIntro: FunctionComponent<{
     <Box position="relative">
       <Box position="absolute" style={{ left: 0, right: 0 }}>
         <VerticalCollapseTransition collapsed={collapsed}>
-          <Gutter size="2.125rem" />
+          <Gutter size="1.625rem" />
         </VerticalCollapseTransition>
         <VerticalCollapseTransition
           collapsed={collapsed}
           transitionAlign="bottom"
         >
+          <Gutter size="0.5rem" />
           <Box alignX="center">
             <NoticeText>
               All sensitive information is stored only on your device.
