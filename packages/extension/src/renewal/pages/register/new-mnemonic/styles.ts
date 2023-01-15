@@ -7,7 +7,7 @@ export const Styles = {
     font-size: 1rem;
     line-height: 1rem;
     text-align: right;
-    color: ${ColorPalette["platinum-600"]};
+    color: ${ColorPalette["platinum-300"]};
 
     min-width: 1.875rem;
     margin-right: 4px;
