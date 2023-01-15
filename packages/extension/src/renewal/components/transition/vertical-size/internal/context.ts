@@ -63,6 +63,9 @@ export class DescendantHeightPxRegistry {
   Thus, we need to share some values between parent and children.
   `registry` in context is handled as reference and should be persistent during component's lifecycle.
   Thus, should not be used for state, effect...
+
+  However, above method is not sufficient if multiple transitions occur at the same time.
+  Recommend not to use nested vertical transition.
  */
 export interface VerticalSizeInternalContext {
   registry: DescendantHeightPxRegistry;
