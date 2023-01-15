@@ -1,47 +1,24 @@
 import { createContext, useContext } from "react";
 import { SpringValue } from "@react-spring/web";
 
+/*
+  Check comment on `VerticalSizeInternalContext`
+ */
 export class DescendantHeightPxRegistry {
   protected seq: number = 0;
 
-  protected readonly _descendantsHeightPx: {
-    key: string;
-    value: SpringValue<number>;
-  }[] = [];
-
-  protected readonly _descendantsRegistry: {
+  protected readonly _registries: {
     key: string;
     value: DescendantHeightPxRegistry;
   }[] = [];
 
-  registerHeightPx(heightPx: SpringValue<number>): string {
-    this.seq++;
-
-    const key = this.seq.toString();
-    this._descendantsHeightPx.push({
-      key,
-      value: heightPx,
-    });
-
-    return key;
-  }
-
-  unregisterHeightPx(key: string): void {
-    const i = this._descendantsHeightPx.findIndex((d) => d.key === key);
-    if (i >= 0) {
-      this._descendantsHeightPx.splice(i, 1);
-    }
-  }
-
-  descendantsHeightPx(): SpringValue<number>[] {
-    return this._descendantsHeightPx.map((d) => d.value);
-  }
+  constructor(public readonly heightPx: SpringValue<number>) {}
 
   registerRegistry(registry: DescendantHeightPxRegistry): string {
     this.seq++;
 
     const key = this.seq.toString();
-    this._descendantsRegistry.push({
+    this._registries.push({
       key,
       value: registry,
     });
@@ -50,17 +27,43 @@ export class DescendantHeightPxRegistry {
   }
 
   unregisterRegistry(key: string): void {
-    const i = this._descendantsRegistry.findIndex((d) => d.key === key);
+    const i = this._registries.findIndex((d) => d.key === key);
     if (i >= 0) {
-      this._descendantsRegistry.splice(i, 1);
+      this._registries.splice(i, 1);
     }
   }
 
-  descendantsRegistry(): DescendantHeightPxRegistry[] {
-    return this._descendantsRegistry.map((d) => d.value);
+  isDescendantAnimating(): boolean {
+    for (const registry of this._registries) {
+      if (registry.value.isDescendantAnimatingWithSelf()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  protected isDescendantAnimatingWithSelf(): boolean {
+    if (this.heightPx.isAnimating) {
+      return true;
+    }
+
+    for (const registry of this._registries) {
+      if (registry.value.heightPx.isAnimating) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 
+/*
+  If vertical resize transition is nested, it is hard to handle transition well if child component's transition occurs.
+  So, to reduce this problem, parent component's size is not animating if child component's transition is in progress.
+  Thus, we need to share some values between parent and children.
+  `registry` in context is handled as reference and should be persistent during component's lifecycle.
+  Thus, should not be used for state, effect...
+ */
 export interface VerticalSizeInternalContext {
   registry: DescendantHeightPxRegistry;
 }

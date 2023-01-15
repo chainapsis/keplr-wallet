@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSpringValue } from "@react-spring/web";
 import { VerticalResizeTransitionProps } from "./types";
 import {
@@ -22,8 +28,9 @@ export const VerticalResizeTransition: FunctionComponent<VerticalResizeTransitio
     config: springConfig,
   });
 
-  const [registry] = useState(() => new DescendantHeightPxRegistry());
+  const [registry] = useState(() => new DescendantHeightPxRegistry(heightPx));
   const internalContext = useVerticalSizeInternalContext();
+
   useEffect(() => {
     if (internalContext) {
       const registryKey = internalContext.registry.registerRegistry(registry);
@@ -35,8 +42,32 @@ export const VerticalResizeTransition: FunctionComponent<VerticalResizeTransitio
   }, [internalContext, registry]);
 
   const initialized = useRef(false);
+  // For skipping transition when child vertical resize transition is in progress,
+  // we can use registry and internal context.
+  // However, the problem is that at the time when child transition ends, the last resizing occurs
+  // and below callback is called with child transition ends (not in progress), and it makes last resize execute animation.
+  // To prevent this problem, we should defer `isDescendantAnimating()` to next frame.
+  const isDescendantAnimatingLast = useRef<boolean | null>(null);
   const ref = useVerticalResizeObserver((height: number) => {
-    if (initialized.current) {
+    const isDescendantAnimating = (() => {
+      if (registry.isDescendantAnimating()) {
+        isDescendantAnimatingLast.current = true;
+        return true;
+      }
+
+      if (
+        isDescendantAnimatingLast.current != null &&
+        isDescendantAnimatingLast.current
+      ) {
+        setTimeout(() => {
+          isDescendantAnimatingLast.current = null;
+        }, 1);
+        return true;
+      }
+      return false;
+    })();
+
+    if (initialized.current && !isDescendantAnimating) {
       heightPx.start(height);
     } else {
       // At first, set height without animation.
@@ -45,6 +76,12 @@ export const VerticalResizeTransition: FunctionComponent<VerticalResizeTransitio
     }
   });
 
+  const contextValue = useMemo(() => {
+    return {
+      registry,
+    };
+  }, [registry]);
+
   return (
     <VerticalResizeContainer
       ref={ref}
@@ -52,11 +89,7 @@ export const VerticalResizeTransition: FunctionComponent<VerticalResizeTransitio
       width={width}
       transitionAlign={transitionAlign}
     >
-      <_VerticalSizeInternalContext.Provider
-        value={{
-          registry,
-        }}
-      >
+      <_VerticalSizeInternalContext.Provider value={contextValue}>
         {children}
       </_VerticalSizeInternalContext.Provider>
     </VerticalResizeContainer>
