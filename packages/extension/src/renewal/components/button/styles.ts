@@ -157,7 +157,7 @@ const buttonStyleFromColorAndMode: Record<
     light: {
       enabled: css`
         background-color: ${ColorPalette["platinum-50"]};
-        border: 1px solid ${ColorPalette["platinum-200"]};
+        border: 1px solid ${ColorPalette["platinum-100"]};
 
         ${makeTextAndSvgColor(ColorPalette["platinum-300"])}
 
