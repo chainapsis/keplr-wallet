@@ -12,7 +12,11 @@ export class DescendantHeightPxRegistry {
     value: DescendantHeightPxRegistry;
   }[] = [];
 
-  constructor(public readonly heightPx: SpringValue<number>) {}
+  public readonly heightPx: SpringValue<number>;
+
+  constructor(heightPx: SpringValue<number>) {
+    this.heightPx = heightPx;
+  }
 
   registerRegistry(registry: DescendantHeightPxRegistry): string {
     this.seq++;
