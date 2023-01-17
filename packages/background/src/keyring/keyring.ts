@@ -926,6 +926,18 @@ export class KeyRing {
       );
     } else if (this.keyStore.type === "keystone") {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
+      if (useEthereumSigning) {
+        return await this.keystoneService.signEthereum(
+          env,
+          coinType,
+          chainId,
+          KeyRing.getKeyStoreBIP44Path(this.keyStore),
+          this.loadKey(coinType, true),
+          this.keystonePublicKey as KeystoneKeyringData,
+          message,
+          EthSignType.MESSAGE
+        );
+      }
       return await this.keystoneService.sign(
         env,
         coinType,

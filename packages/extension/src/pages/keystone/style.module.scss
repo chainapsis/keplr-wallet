@@ -29,6 +29,7 @@ html[data-keystone-page] {
   color: var(--default);
   background-color: #fafbfd;
   position: relative;
+  overflow: auto;
   @media (min-width: ($popup-size-width + 1)) {
     border: var(--lighter) 1px solid;
     border-radius: 0.375rem;
@@ -180,8 +181,8 @@ html[data-keystone-page] {
 
 .sign {
   .display {
-    display: inline-block;
     margin: 22px auto;
+    width: 210px;
   }
   .btns {
     display: flex;

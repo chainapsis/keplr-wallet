@@ -67,6 +67,7 @@ import { ICNSAdr36SignPage } from "./pages/icns/sign";
 import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
 import { SettingSecurityPrivacyPage } from "./pages/setting/security-privacy";
 import { SettingPermissionsGetChainInfosPage } from "./pages/setting/security-privacy/permissions/get-chain-infos";
+import { ChainActivePage } from "./pages/setting/chain-active";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -272,6 +273,10 @@ ReactDOM.render(
                 <Route
                   path="/setting/permissions/get-chain-infos"
                   component={SettingPermissionsGetChainInfosPage}
+                />
+                <Route
+                  path="/setting/chain-active"
+                  component={ChainActivePage}
                 />
               </HashRouter>
             </ConfirmProvider>

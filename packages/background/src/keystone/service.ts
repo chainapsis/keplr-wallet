@@ -38,6 +38,7 @@ export interface StdSignDoc extends StdDoc {
 enum SignFunction {
   Amino = "signAminoTransaction",
   Direct = "signDirectTransaction",
+  Message = "signMessage",
 }
 
 enum EthSignFunction {
@@ -142,6 +143,7 @@ export class KeystoneService {
     const signFn: SignFunction = {
       [SignMode.Amino]: SignFunction.Amino,
       [SignMode.Direct]: SignFunction.Direct,
+      [SignMode.Message]: SignFunction.Message,
     }[mode];
     const res = await keyring[signFn](
       Buffer.from(key.pubKey).toString("hex"),

@@ -138,6 +138,7 @@ export class RootStore {
     ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
 
     this.chainStore = new ChainStore(
+      new ExtensionKVStore("store_chain_config"),
       EmbedChainInfos,
       new InExtensionMessageRequester(),
       ObservableQueryBase.experimentalDeferInitialQueryController

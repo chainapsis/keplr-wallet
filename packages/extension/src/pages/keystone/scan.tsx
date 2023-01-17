@@ -135,7 +135,7 @@ export function Scan({ type, onChange, onBack }: Props) {
         <Message onClose={closeMsg} type="error">
           Invalid QR code. Please ensure you have selected a valid QR code from
           your Keystone device.
-          <a href="https://keyst.one/keplr" target="_blank" rel="noreferrer">
+          <a href="https://keyst.one/t/keplr" target="_blank" rel="noreferrer">
             Tutorial
           </a>
         </Message>
