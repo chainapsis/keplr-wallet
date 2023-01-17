@@ -25,7 +25,12 @@ import { AsyncKVStore } from "../../common";
 import { useFocusEffect } from "@react-navigation/native";
 
 export const CameraScreen: FunctionComponent = observer(() => {
-  const { chainStore, walletConnectStore, keyRingStore } = useStore();
+  const {
+    chainStore,
+    walletConnectStore,
+    walletConnectV2Store,
+    keyRingStore,
+  } = useStore();
 
   const style = useStyle();
 
@@ -73,7 +78,9 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
             try {
               if (data.startsWith("wc:")) {
-                await walletConnectStore.initClient(data);
+                // TODO: wc v1과 v2 접근을 구분하는 방법이 있어야 함
+                await walletConnectV2Store.pair(data);
+                // await walletConnectStore.initClient(data);
 
                 smartNavigation.navigateSmart("Home", {});
               } else {

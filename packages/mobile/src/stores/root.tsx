@@ -38,6 +38,7 @@ import {
   GravityBridgeCurrencyRegsitrar,
   KeplrETCQueries,
 } from "@keplr-wallet/stores-etc";
+import { WalletConnectV2Store } from "./wallet-connect-v2";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -70,6 +71,7 @@ export class RootStore {
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
+  public readonly walletConnectV2Store: WalletConnectV2Store;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -321,6 +323,7 @@ export class RootStore {
       this.keyRingStore,
       this.permissionStore
     );
+    this.walletConnectV2Store = new WalletConnectV2Store();
 
     // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(

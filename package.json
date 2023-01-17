@@ -21,7 +21,8 @@
       "**/@react-native-async-storage/async-storage",
       "**/@ledgerhq/react-native-hw-transport-ble",
       "**/jetifier",
-      "**/@bugsnag/**"
+      "**/@bugsnag/**",
+      "**/@walletconnect/sign-client"
     ]
   },
   "scripts": {
