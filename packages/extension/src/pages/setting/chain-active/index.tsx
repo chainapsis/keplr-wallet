@@ -6,18 +6,15 @@ import { useHistory } from "react-router";
 import { useStore } from "../../../stores";
 import style from "../style.module.scss";
 import { PageButton } from "../page-button";
-import { ChainInfo } from "@keplr-wallet/types";
 
 const ChainItem: FunctionComponent<{
-  chainInfoUI: { chainInfo: ChainInfo; disabled: boolean };
+  chainName: string;
+  disabled: boolean;
   onClick: () => void;
-}> = (props) => {
-  const { chainInfoUI, onClick } = props;
-
+}> = ({ chainName, disabled, onClick }) => {
   return (
     <PageButton
-      title={chainInfoUI.chainInfo.chainName}
-      key={chainInfoUI.chainInfo.chainId}
+      title={chainName}
       onClick={onClick}
       icons={[
         <label
@@ -25,7 +22,7 @@ const ChainItem: FunctionComponent<{
           className="custom-toggle"
           style={{ marginBottom: 0 }}
         >
-          <input type="checkbox" checked={!chainInfoUI.disabled} />
+          <input type="checkbox" checked={!disabled} />
           <span className="custom-toggle-slider rounded-circle" />
         </label>,
       ]}
@@ -38,10 +35,6 @@ export const ChainActivePage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
   const { chainStore } = useStore();
-
-  const onClick = async (chainId: string) => {
-    await chainStore.toggleChainInfoInUI(chainId);
-  };
 
   return (
     <HeaderLayout
@@ -58,8 +51,13 @@ export const ChainActivePage: FunctionComponent = observer(() => {
         {chainStore.chainInfosWithUIConfig.map((chainInfoUI) => (
           <ChainItem
             key={chainInfoUI.chainInfo.chainId}
-            chainInfoUI={chainInfoUI}
-            onClick={() => onClick(chainInfoUI.chainInfo.chainId)}
+            chainName={chainInfoUI.chainInfo.chainName}
+            disabled={chainInfoUI.disabled}
+            onClick={async () => {
+              await chainStore.toggleChainInfoInUI(
+                chainInfoUI.chainInfo.chainId
+              );
+            }}
           />
         ))}
       </div>

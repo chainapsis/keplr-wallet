@@ -74,7 +74,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @computed
   get chainInfosWithUIConfig() {
-    return this._chainInfos.map((chainInfo) => {
+    return this.chainInfos.map((chainInfo) => {
       if (this.disabledChainInfosInUI.includes(chainInfo)) {
         return {
           chainInfo,
@@ -91,7 +91,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @computed
   protected get enabledChainInfosInUI() {
-    return this._chainInfos.filter(
+    return this.chainInfos.filter(
       (chainInfo) =>
         !this.chainInfoInUIConfig.disabledChains.includes(
           ChainIdHelper.parse(chainInfo.chainId).identifier
@@ -101,7 +101,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @computed
   get disabledChainInfosInUI() {
-    return this._chainInfos.filter((chainInfo) =>
+    return this.chainInfos.filter((chainInfo) =>
       this.chainInfoInUIConfig.disabledChains.includes(
         ChainIdHelper.parse(chainInfo.chainId).identifier
       )
@@ -118,19 +118,22 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         (chain) => chain !== chainId
       );
     } else {
+      if (this.enabledChainInfosInUI.length === 1) {
+        // Can't turn off all chains.
+        return;
+      }
+
       disableChainIds = [...this.chainInfoInUIConfig.disabledChains, chainId];
     }
 
-    if (disableChainIds.length < this._chainInfos.length) {
-      yield this.kvStore.set<{ disabledChains: string[] }>(
-        "extension_chainInfoInUIConfig",
-        {
-          disabledChains: disableChainIds,
-        }
-      );
+    yield this.kvStore.set<{ disabledChains: string[] }>(
+      "extension_chainInfoInUIConfig",
+      {
+        disabledChains: disableChainIds,
+      }
+    );
 
-      this.chainInfoInUIConfig.disabledChains = disableChainIds;
-    }
+    this.chainInfoInUIConfig.disabledChains = disableChainIds;
 
     if (ChainIdHelper.parse(this.current.chainId).identifier === chainId) {
       const other = this.chainInfosInUI.find(
