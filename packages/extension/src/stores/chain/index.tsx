@@ -10,8 +10,6 @@ import {
 import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithCoreTypes,
-  SetPersistentMemoryMsg,
-  GetPersistentMemoryMsg,
   GetChainInfosMsg,
   RemoveSuggestedChainInfoMsg,
   TryUpdateChainMsg,
@@ -22,6 +20,7 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { MessageRequester } from "@keplr-wallet/router";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable
@@ -94,19 +93,24 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected get enabledChainInfosInUI() {
     return this._chainInfos.filter(
       (chainInfo) =>
-        !this.chainInfoInUIConfig.disabledChains.includes(chainInfo.chainId)
+        !this.chainInfoInUIConfig.disabledChains.includes(
+          ChainIdHelper.parse(chainInfo.chainId).identifier
+        )
     );
   }
 
   @computed
   get disabledChainInfosInUI() {
     return this._chainInfos.filter((chainInfo) =>
-      this.chainInfoInUIConfig.disabledChains.includes(chainInfo.chainId)
+      this.chainInfoInUIConfig.disabledChains.includes(
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+      )
     );
   }
 
   @flow
   *toggleChainInfoInUI(chainId: string) {
+    chainId = ChainIdHelper.parse(chainId).identifier;
     let disableChainIds = [];
 
     if (this.chainInfoInUIConfig.disabledChains.includes(chainId)) {
@@ -128,9 +132,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.chainInfoInUIConfig.disabledChains = disableChainIds;
     }
 
-    if (this.current.chainId === chainId) {
+    if (ChainIdHelper.parse(this.current.chainId).identifier === chainId) {
       const other = this.chainInfosInUI.find(
-        (chainInfo) => chainInfo.chainId !== chainId
+        (chainInfo) =>
+          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainId
       );
 
       if (other) {
@@ -163,11 +168,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @flow
   *saveLastViewChainId() {
-    // Save last view chain id to persistent background
-    const msg = new SetPersistentMemoryMsg({
-      lastViewChainId: this._selectedChainId,
-    });
-    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
+    yield this.kvStore.set<string>(
+      "extension_last_view_chain_id",
+      this._selectedChainId
+    );
   }
 
   @flow
@@ -177,15 +181,13 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     this.deferInitialQueryController.ready();
 
-    // Get last view chain id to persistent background
-    const msg = new GetPersistentMemoryMsg();
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    const lastViewChainId = yield* toGenerator(
+      this.kvStore.get<string>("extension_last_view_chain_id")
     );
 
     if (!this.deferChainIdSelect) {
-      if (result && result.lastViewChainId) {
-        this.selectChain(result.lastViewChainId);
+      if (lastViewChainId) {
+        this.selectChain(lastViewChainId);
       }
     }
     this._isInitializing = false;
