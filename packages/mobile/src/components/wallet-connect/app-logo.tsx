@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useMemo } from "react";
-import WalletConnect from "@walletconnect/client";
 import FastImage, { ImageStyle } from "react-native-fast-image";
 import { StyleSheet, View, ViewStyle } from "react-native";
 import { VectorCharacter } from "../vector-character";
@@ -7,7 +6,11 @@ import { useStyle } from "../../styles";
 import { observer } from "mobx-react-lite";
 
 export const WCAppLogo: FunctionComponent<{
-  peerMeta: WalletConnect["peerMeta"];
+  peerMeta?: {
+    name?: string;
+    url?: string;
+    icons?: string[];
+  };
   logoStyle?: ImageStyle;
   altLogoStyle?: ViewStyle;
 }> = observer(({ peerMeta, logoStyle, altLogoStyle }) => {

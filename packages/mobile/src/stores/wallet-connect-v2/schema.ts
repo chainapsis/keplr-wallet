@@ -11,7 +11,13 @@ export const CosmosMethods = [
 // Keplr supports such event, but it doesn't include the data of address information.
 // Because that event not yet standardised enough, additionally emit "keplr_accountsChanged" event at the same time.
 // "accountsChanged" event can be changed.
-export const CosmosEvents = ["accountsChanged", "keplr_accountsChanged"];
+// And, there is "chainChanged" event not to block the request.
+// However, keplr doesn't invoke "chainChanged" event. The reason is multi-chain philosophy of keplr.
+export const CosmosEvents = [
+  "accountsChanged",
+  "keplr_accountsChanged",
+  "chainChanged",
+];
 
 export const SessionProposalSchema = Joi.object({
   params: Joi.object({

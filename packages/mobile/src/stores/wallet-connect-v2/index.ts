@@ -1,6 +1,12 @@
 import SignClient from "@walletconnect/sign-client";
 import { autorun, makeObservable, observable } from "mobx";
-import { SessionProposalSchema } from "./schema";
+import { CosmosEvents, CosmosMethods, SessionProposalSchema } from "./schema";
+import { KeyRingStore } from "@keplr-wallet/stores";
+import { KeyRingStatus } from "@keplr-wallet/background";
+import { ChainStore } from "../chain";
+import { WCV2MessageRequester } from "./msg-requester";
+import { Keplr } from "@keplr-wallet/provider";
+import { RNRouterBackground } from "../../router";
 
 export class WalletConnectV2Store {
   // This field is null until init
@@ -15,7 +21,21 @@ export class WalletConnectV2Store {
     }
   >();
 
-  constructor() {
+  @observable.shallow
+  protected pendingSessionProposalMetadataMap = new Map<
+    string,
+    {
+      name?: string;
+      description?: string;
+      url?: string;
+      icons?: string[];
+    }
+  >();
+
+  constructor(
+    protected readonly chainStore: ChainStore,
+    protected readonly keyRingStore: KeyRingStore
+  ) {
     makeObservable(this);
 
     this.init();
@@ -28,6 +48,32 @@ export class WalletConnectV2Store {
     });
 
     this.signClient.on("session_proposal", this.onSessionProposal.bind(this));
+  }
+
+  getSessionMetadata(
+    topic: string
+  ):
+    | {
+        name?: string;
+        description?: string;
+        url?: string;
+        icons?: string[];
+      }
+    | undefined {
+    if (!this.signClient) {
+      return;
+    }
+
+    if (this.pendingSessionProposalMetadataMap.has(topic)) {
+      return this.pendingSessionProposalMetadataMap.get(topic);
+    }
+
+    try {
+      return this.signClient.session.get(topic).peer.metadata;
+    } catch (e) {
+      console.log(e);
+      return;
+    }
   }
 
   protected async onSessionProposal(event: any) {
@@ -61,7 +107,36 @@ export class WalletConnectV2Store {
 
     try {
       const proposal = await SessionProposalSchema.validateAsync(event);
-      console.log(JSON.stringify(proposal));
+      const metadata = proposal.params?.proposer?.metadata;
+      if (metadata) {
+        this.pendingSessionProposalMetadataMap.set(topic, metadata);
+      }
+
+      const chainIds = proposal.params.requiredNamespaces.cosmos.chains.map(
+        (chainId: string) => chainId.replace("cosmos:", "")
+      );
+
+      const keplr = this.createKeplrAPI(topic);
+      await keplr.enable(chainIds);
+
+      const accounts: string[] = [];
+      for (const chainId of chainIds) {
+        const key = await keplr.getKey(chainId);
+        accounts.push(`cosmos:${chainId}:${key.bech32Address}`);
+      }
+
+      const { acknowledged } = await signClient.approve({
+        id,
+        namespaces: {
+          cosmos: {
+            accounts,
+            methods: CosmosMethods,
+            events: CosmosEvents,
+          },
+        },
+      });
+
+      await acknowledged();
     } catch (e) {
       await signClient.reject({
         id,
@@ -70,6 +145,8 @@ export class WalletConnectV2Store {
           message: e.message || e.toString(),
         },
       });
+    } finally {
+      this.pendingSessionProposalMetadataMap.delete(topic);
     }
   }
 
@@ -103,6 +180,8 @@ export class WalletConnectV2Store {
   }
 
   protected async ensureInit(): Promise<SignClient> {
+    await this.waitInitStores();
+
     if (this.signClient) {
       return this.signClient;
     }
@@ -118,5 +197,43 @@ export class WalletConnectV2Store {
         }
       });
     });
+  }
+
+  protected async waitInitStores(): Promise<void> {
+    // Wait until the chain store and account store is ready.
+    if (this.chainStore.isInitializing) {
+      await new Promise<void>((resolve) => {
+        const disposer = autorun(() => {
+          if (!this.chainStore.isInitializing) {
+            resolve();
+            if (disposer) {
+              disposer();
+            }
+          }
+        });
+      });
+    }
+
+    if (this.keyRingStore.status !== KeyRingStatus.UNLOCKED) {
+      await new Promise<void>((resolve) => {
+        const disposer = autorun(() => {
+          if (this.keyRingStore.status === KeyRingStatus.UNLOCKED) {
+            resolve();
+            if (disposer) {
+              disposer();
+            }
+          }
+        });
+      });
+    }
+  }
+
+  protected createKeplrAPI(topic: string) {
+    return new Keplr(
+      // TODO: Set version
+      "",
+      "core",
+      new WCV2MessageRequester(RNRouterBackground.EventEmitter, topic)
+    );
   }
 }

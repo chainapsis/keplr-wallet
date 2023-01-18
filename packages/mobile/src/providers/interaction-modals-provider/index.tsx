@@ -10,6 +10,7 @@ import { BackHandler, Platform } from "react-native";
 import { LoadingScreenModal } from "../loading-screen/modal";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import { AddTokenModal } from "../../modals/add-token";
+import { WCV2MessageRequester } from "../../stores/wallet-connect-v2/msg-requester";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
@@ -19,6 +20,7 @@ export const InteractionModalsProivder: FunctionComponent = observer(
       permissionStore,
       signInteractionStore,
       walletConnectStore,
+      walletConnectV2Store,
       tokensStore,
     } = useStore();
 
@@ -35,7 +37,8 @@ export const InteractionModalsProivder: FunctionComponent = observer(
         // If such apps needs the permissions, add these origins to the privileged origins.
         if (
           data.data.origins.length !== 1 ||
-          !WCMessageRequester.isVirtualSessionURL(data.data.origins[0])
+          (!WCMessageRequester.isVirtualSessionURL(data.data.origins[0]) &&
+            !WCV2MessageRequester.isVirtualURL(data.data.origins[0]))
         ) {
           permissionStore.reject(data.id);
         }
@@ -82,7 +85,20 @@ export const InteractionModalsProivder: FunctionComponent = observer(
           />
         ) : null}
         {permissionStore.waitingDatas.map((data) => {
+          let isWC = false;
+
           if (data.data.origins.length === 1) {
+            if (
+              WCV2MessageRequester.isVirtualURL(data.data.origins[0]) &&
+              walletConnectV2Store.getSessionMetadata(
+                WCV2MessageRequester.getTopicFromVirtualURL(
+                  data.data.origins[0]
+                )
+              )
+            ) {
+              isWC = true;
+            }
+
             if (
               WCMessageRequester.isVirtualSessionURL(data.data.origins[0]) &&
               walletConnectStore.getSession(
@@ -91,16 +107,20 @@ export const InteractionModalsProivder: FunctionComponent = observer(
                 )
               )
             ) {
-              return (
-                <WalletConnectApprovalModal
-                  key={data.id}
-                  isOpen={true}
-                  close={() => permissionStore.reject(data.id)}
-                  id={data.id}
-                  data={data.data}
-                />
-              );
+              isWC = true;
             }
+          }
+
+          if (isWC) {
+            return (
+              <WalletConnectApprovalModal
+                key={data.id}
+                isOpen={true}
+                close={() => permissionStore.reject(data.id)}
+                id={data.id}
+                data={data.data}
+              />
+            );
           }
 
           return null;

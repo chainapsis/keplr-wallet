@@ -323,7 +323,10 @@ export class RootStore {
       this.keyRingStore,
       this.permissionStore
     );
-    this.walletConnectV2Store = new WalletConnectV2Store();
+    this.walletConnectV2Store = new WalletConnectV2Store(
+      this.chainStore,
+      this.keyRingStore
+    );
 
     // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
