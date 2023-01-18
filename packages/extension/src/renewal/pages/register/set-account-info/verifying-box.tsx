@@ -62,30 +62,32 @@ export const VerifyingMnemonicBox = forwardRef<
       <XAxis alignY="center">
         {words.map((word, i) => {
           return (
-            <XAxis key={word.index} alignY="center">
-              <Styles.IndexText>{word.index + 1}.</Styles.IndexText>
-              <TextInput
-                value={inputs[word.index] ?? ""}
-                onChange={(e) => {
-                  e.preventDefault();
+            <React.Fragment key={word.index}>
+              <XAxis alignY="center">
+                <Styles.IndexText>{word.index + 1}.</Styles.IndexText>
+                <TextInput
+                  value={inputs[word.index] ?? ""}
+                  onChange={(e) => {
+                    e.preventDefault();
 
-                  setInputs({
-                    ...inputs,
-                    [word.index]: e.target.value,
-                  });
-                }}
-                errorBorder={(() => {
-                  if (validatingStarted) {
-                    return inputs[word.index]?.trim() !== word.word;
-                  }
-                  return false;
-                })()}
-                removeBottomMargin={true}
-              />
+                    setInputs({
+                      ...inputs,
+                      [word.index]: e.target.value,
+                    });
+                  }}
+                  errorBorder={(() => {
+                    if (validatingStarted) {
+                      return inputs[word.index]?.trim() !== word.word;
+                    }
+                    return false;
+                  })()}
+                  removeBottomMargin={true}
+                />
+              </XAxis>
               {i !== words.length - 1 ? (
                 <Gutter size="1.125rem" direction="horizontal" />
               ) : null}
-            </XAxis>
+            </React.Fragment>
           );
         })}
       </XAxis>
