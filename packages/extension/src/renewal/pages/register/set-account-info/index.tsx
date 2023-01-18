@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   RegisterSceneBox,
   RegisterSceneBoxHeader,
@@ -8,7 +13,7 @@ import { useSceneTransition } from "../../../components/transition";
 import { TextInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { Gutter } from "../../../components/gutter";
-import { VerifyingMnemonicBox } from "./verifying-box";
+import { VerifyingMnemonicBox, VerifyingMnemonicBoxRef } from "./verifying-box";
 
 export const SetAccountInfoScene: FunctionComponent<{
   mnemonic?: string;
@@ -67,19 +72,22 @@ export const SetAccountInfoScene: FunctionComponent<{
     }
   }, [mnemonic, needVerifyMnemonic]);
 
-  console.log(verifyingWords);
+  const verifyingBoxRef = useRef<VerifyingMnemonicBoxRef | null>(null);
 
   return (
     <RegisterSceneBox>
       <RegisterSceneBoxHeader>Create Account</RegisterSceneBoxHeader>
-      {verifyingWords.length > 0 ? (
-        <React.Fragment>
-          <VerifyingMnemonicBox words={verifyingWords} />
-          <Gutter size="1.75rem" />
-        </React.Fragment>
-      ) : null}
-      <Stack>
-        <form>
+      <form>
+        {verifyingWords.length > 0 ? (
+          <React.Fragment>
+            <VerifyingMnemonicBox
+              ref={verifyingBoxRef}
+              words={verifyingWords}
+            />
+            <Gutter size="1.75rem" />
+          </React.Fragment>
+        ) : null}
+        <Stack>
           <TextInput label="Name" />
           <TextInput label="Password" />
           <TextInput label="Verify password" />
@@ -87,11 +95,17 @@ export const SetAccountInfoScene: FunctionComponent<{
           <Button
             text="Next"
             onClick={() => {
-              alert("TODO");
+              if (
+                !needVerifyMnemonic ||
+                (verifyingBoxRef.current && verifyingBoxRef.current.validate())
+              ) {
+                alert("TODO");
+                sceneTransition.pop();
+              }
             }}
           />
-        </form>
-      </Stack>
+        </Stack>
+      </form>
     </RegisterSceneBox>
   );
 };

@@ -10,6 +10,10 @@ const getTextInputStyleForErrorOrParagraph = (
   if (error || errorBorder) {
     return css`
       border-color: ${ColorPalette["red-200"]};
+
+      :focus-visible {
+        border-color: ${ColorPalette["red-200"]};
+      }
     `;
   }
 

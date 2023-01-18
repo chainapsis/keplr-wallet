@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { Box } from "../../../components/box";
 import { TextInput } from "../../../components/input";
 import { XAxis } from "../../../components/axis";
@@ -19,13 +19,38 @@ const Styles = {
   `,
 };
 
-export const VerifyingMnemonicBox: FunctionComponent<{
-  words: {
-    index: number;
-    word: string;
-  }[];
-}> = ({ words }) => {
+export interface VerifyingMnemonicBoxRef {
+  validate: () => boolean;
+}
+
+export const VerifyingMnemonicBox = forwardRef<
+  VerifyingMnemonicBoxRef,
+  {
+    words: {
+      index: number;
+      word: string;
+    }[];
+  }
+>(({ words }, ref) => {
   const [inputs, setInputs] = useState<Record<number, string | undefined>>({});
+
+  const [validatingStarted, setValidatingStarted] = useState<boolean>(false);
+
+  const validate = () => {
+    setValidatingStarted(true);
+
+    for (const word of words) {
+      if (inputs[word.index]?.trim() !== word.word) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  useImperativeHandle(ref, () => {
+    return { validate };
+  });
 
   return (
     <Box
@@ -49,7 +74,12 @@ export const VerifyingMnemonicBox: FunctionComponent<{
                     [word.index]: e.target.value,
                   });
                 }}
-                errorBorder={true}
+                errorBorder={(() => {
+                  if (validatingStarted) {
+                    return inputs[word.index]?.trim() !== word.word;
+                  }
+                  return false;
+                })()}
                 removeBottomMargin={true}
               />
               {i !== words.length - 1 ? (
@@ -61,4 +91,4 @@ export const VerifyingMnemonicBox: FunctionComponent<{
       </XAxis>
     </Box>
   );
-};
+});
