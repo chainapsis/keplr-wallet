@@ -12,6 +12,7 @@ import { NewMnemonicScene } from "./new-mnemonic";
 import { Gutter } from "../../components/gutter";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { Box } from "../../components/box";
+import { SetAccountInfoScene } from "./set-account-info";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -34,6 +35,8 @@ const NoticeText = styled.span`
 export const RegisterPage: FunctionComponent = observer(() => {
   const sceneRef = useRef<SceneTransitionRef | null>(null);
 
+  const [topHeaderCollapsed, setTopHeaderCollapsed] = useState(true);
+
   const [bottomIntroCollapsed, setBottomIntroCollpased] = useState(false);
 
   useEffect(() => {
@@ -42,6 +45,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
         throw new Error("Can't happen");
       }
 
+      setTopHeaderCollapsed(stack.length <= 1);
       setBottomIntroCollpased(stack[stack.length - 1] !== "intro");
     };
 
@@ -57,7 +61,15 @@ export const RegisterPage: FunctionComponent = observer(() => {
 
   return (
     <Container>
-      <Box width="100%" maxWidth="34.25rem">
+      <Box width="100%" maxWidth="34.25rem" position="relative">
+        <TopHeader
+          collapsed={topHeaderCollapsed}
+          onBackClick={() => {
+            if (sceneRef.current && sceneRef.current.stack.length > 1) {
+              sceneRef.current.pop();
+            }
+          }}
+        />
         <Card>
           <SceneTransition
             ref={sceneRef}
@@ -70,6 +82,10 @@ export const RegisterPage: FunctionComponent = observer(() => {
                 name: "new-mnemonic",
                 element: NewMnemonicScene,
               },
+              {
+                name: "set-account-info",
+                element: SetAccountInfoScene,
+              },
             ]}
             initialSceneProps={{
               name: "intro",
@@ -77,13 +93,49 @@ export const RegisterPage: FunctionComponent = observer(() => {
             transitionAlign="center"
           />
         </Card>
-        <BottomIntro collapsed={bottomIntroCollapsed} />
+        <BottomIntroParagraph collapsed={bottomIntroCollapsed} />
       </Box>
     </Container>
   );
 });
 
-const BottomIntro: FunctionComponent<{
+const TopHeader: FunctionComponent<{
+  collapsed: boolean;
+  onBackClick: () => void;
+}> = ({ collapsed, onBackClick }) => {
+  return (
+    <Box
+      position="absolute"
+      height="2.5rem"
+      width="100%"
+      alignY="center"
+      zIndex={1000}
+    >
+      <VerticalCollapseTransition
+        collapsed={collapsed}
+        transitionAlign="center"
+      >
+        <div
+          style={{
+            fontSize: "1rem",
+            cursor: "pointer",
+            marginLeft: "0.5rem",
+            display: "inline-block",
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+
+            onBackClick();
+          }}
+        >
+          Back
+        </div>
+      </VerticalCollapseTransition>
+    </Box>
+  );
+};
+
+const BottomIntroParagraph: FunctionComponent<{
   collapsed: boolean;
 }> = ({ collapsed }) => {
   return (

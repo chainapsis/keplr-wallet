@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import {
   RegisterSceneBox,
   RegisterSceneBoxHeader,
@@ -17,35 +17,54 @@ import { Gutter } from "../../../components/gutter";
 import { Bleed } from "../../../components/bleed";
 import { HorizontalButtonGroup } from "../../../components/button-group";
 import { Box } from "../../../components/box";
+import { Mnemonic } from "@keplr-wallet/crypto";
+
+type WordsType = "12words" | "24words";
 
 export const NewMnemonicScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
 
-  const [words, setWords] = useState(
-    "bag edit veteran phrase catch seat injury fade pact tomorrow pact charge".split(
-      " "
-    )
-  );
+  const [wordsType, setWordsType] = useState<WordsType>("12words");
 
-  const threeWords: string[][] = useMemo(() => {
+  const [words, setWords] = useState<string[]>([]);
+
+  useEffect(() => {
+    const rng = (array: any) => {
+      return Promise.resolve(crypto.getRandomValues(array));
+    };
+
+    if (wordsType === "12words") {
+      Mnemonic.generateSeed(rng, 128).then((str) => setWords(str.split(" ")));
+    } else if (wordsType === "24words") {
+      Mnemonic.generateSeed(rng, 256).then((str) => setWords(str.split(" ")));
+    } else {
+      throw new Error(`Unknown words type: ${wordsType}`);
+    }
+  }, [wordsType]);
+
+  const threeColumnWords: [string, string, string][] = useMemo(() => {
+    const minRows = 4;
+
     let temp: string[] = [];
-    const r: string[][] = [];
+    const r: [string, string, string][] = [];
     for (const word of words) {
       temp.push(word);
       if (temp.length === 3) {
-        r.push(temp);
+        r.push([temp[0], temp[1], temp[2]]);
         temp = [];
       }
     }
 
     if (temp.length !== 0) {
-      r.push(temp);
+      r.push([temp[0] ?? "", temp[1] ?? "", temp[2] ?? ""]);
+    }
+
+    while (r.length < minRows) {
+      r.push(["", "", ""]);
     }
 
     return r;
   }, [words]);
-
-  const [buttonKey, setButtonKey] = useState("12words");
 
   return (
     <RegisterSceneBox>
@@ -63,9 +82,9 @@ export const NewMnemonicScene: FunctionComponent = () => {
                 text: "24 words",
               },
             ]}
-            selectedKey={buttonKey}
+            selectedKey={wordsType}
             onSelect={(key) => {
-              setButtonKey(key);
+              setWordsType(key as WordsType);
             }}
             buttonMinWidth="5.625rem"
           />
@@ -78,7 +97,7 @@ export const NewMnemonicScene: FunctionComponent = () => {
             }}
           >
             <Stack gutter="0.75rem">
-              {threeWords.map((words, i) => {
+              {threeColumnWords.map((words, i) => {
                 return (
                   <Columns key={i} sum={3}>
                     {words.map((word, j) => {
@@ -109,26 +128,19 @@ export const NewMnemonicScene: FunctionComponent = () => {
           size="small"
           text="Set BIP Path"
           onClick={() => {
-            if (words.length === 12) {
-              setWords(
-                "bag edit veteran phrase catch seat injury fade pact tomorrow pact charge bag edit veteran phrase catch seat injury fade pact tomorrow pact charge".split(
-                  " "
-                )
-              );
-            } else {
-              setWords(
-                "bag edit veteran phrase catch seat injury fade pact tomorrow pact charge".split(
-                  " "
-                )
-              );
-            }
+            alert("TODO: Not yet implemented");
           }}
         />
         <Gutter size="1rem" />
         <Button
           text="Next"
           onClick={() => {
-            sceneTransition.pop();
+            if (words.join(" ").trim() !== "") {
+              sceneTransition.push("set-account-info", {
+                mnemonic: words.join(" "),
+                needVerifyMnemonic: true,
+              });
+            }
           }}
         />
       </Stack>

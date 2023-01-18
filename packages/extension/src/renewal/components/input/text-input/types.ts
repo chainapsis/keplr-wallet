@@ -4,6 +4,7 @@ export interface TextInputProps {
   label?: string;
   paragraph?: string;
   error?: string;
+  errorBorder?: boolean;
 
   readOnly?: boolean;
 

@@ -26,6 +26,8 @@ export const Styles = {
     margin-top: ${({ marginTop, marginY }) => marginTop || marginY};
     margin-bottom: ${({ marginBottom, marginY }) => marginBottom || marginY};
 
+    z-index: ${({ zIndex }) => zIndex};
+    
     display: flex;
     flex-direction: column;
     align-items: ${({ alignX }) => {

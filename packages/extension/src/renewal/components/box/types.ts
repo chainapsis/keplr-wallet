@@ -28,6 +28,8 @@ export interface BoxProps {
   marginLeft?: string;
   marginRight?: string;
 
+  zIndex?: number;
+
   alignX?: BoxAlignX;
   alignY?: BoxAlignY;
 

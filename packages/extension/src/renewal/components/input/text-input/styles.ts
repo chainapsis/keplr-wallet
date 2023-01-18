@@ -4,9 +4,10 @@ import { TextInputProps } from "./types";
 
 const getTextInputStyleForErrorOrParagraph = (
   error?: string,
-  paragraph?: string
+  paragraph?: string,
+  errorBorder?: boolean
 ) => {
-  if (error) {
+  if (error || errorBorder) {
     return css`
       border-color: ${ColorPalette["red-200"]};
     `;
@@ -72,8 +73,8 @@ export const Styles = {
     letter-spacing: -0.1px;
     color: ${ColorPalette["black"]};
 
-    ${({ error, paragraph }) =>
-      getTextInputStyleForErrorOrParagraph(error, paragraph)}
+    ${({ error, paragraph, errorBorder }) =>
+      getTextInputStyleForErrorOrParagraph(error, paragraph, errorBorder)}
   `,
   Label: styled.div`
     margin-bottom: 0.5rem;
