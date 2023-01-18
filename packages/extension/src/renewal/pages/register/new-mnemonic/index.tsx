@@ -15,6 +15,8 @@ import { XAxis } from "../../../components/axis";
 import { Styles } from "./styles";
 import { Gutter } from "../../../components/gutter";
 import { Bleed } from "../../../components/bleed";
+import { HorizontalButtonGroup } from "../../../components/button-group";
+import { Box } from "../../../components/box";
 
 export const NewMnemonicScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
@@ -43,10 +45,32 @@ export const NewMnemonicScene: FunctionComponent = () => {
     return r;
   }, [words]);
 
+  const [buttonKey, setButtonKey] = useState("12words");
+
   return (
     <RegisterSceneBox>
       <RegisterSceneBoxHeader>New mnemonic</RegisterSceneBoxHeader>
       <Stack>
+        <Box alignX="center">
+          <HorizontalButtonGroup
+            buttons={[
+              {
+                key: "12words",
+                text: "12 words",
+              },
+              {
+                key: "24words",
+                text: "24 words",
+              },
+            ]}
+            selectedKey={buttonKey}
+            onSelect={(key) => {
+              setButtonKey(key);
+            }}
+            buttonMinWidth="5.625rem"
+          />
+        </Box>
+        <Gutter size="2rem" />
         <Bleed left="1rem">
           <VerticalResizeTransition
             springConfig={{

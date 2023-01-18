@@ -13,7 +13,8 @@ export const Styles = {
     selected: boolean;
     buttonMinWidth?: string;
   }>`
-    flex: 1;
+    // Setting "flex-basis" as "auto" is important to prevent text break when text has spaces.
+    flex: 1 1 auto;
 
     display: flex;
     align-items: center;
@@ -54,7 +55,8 @@ export const Styles = {
 
     border-width: 1px;
     border-style: solid;
-    border-color: ${ColorPalette["gray-50"]};
+    border-color: ${({ selected }) =>
+      selected ? ColorPalette["blue-100"] : ColorPalette["gray-50"]};
     border-left-style: none;
     border-right-style: none;
 
@@ -71,9 +73,12 @@ export const Styles = {
     // Remove normalized css properties.
     border-image: none;
   `,
-  Divider: styled.div`
+  Divider: styled.div<{
+    besideSelected: boolean;
+  }>`
     height: 100%;
     width: 1px;
-    background-color: ${ColorPalette["gray-50"]};
+    background-color: ${({ besideSelected }) =>
+      besideSelected ? ColorPalette["blue-100"] : ColorPalette["gray-50"]};
   `,
 };
