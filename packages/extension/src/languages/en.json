@@ -135,7 +135,7 @@
 
   "setting.developer-mode": "Developer Mode",
 
-  "setting.chain-active.title": "Chain Active/Inactvie",
+  "setting.chain-active.title": "Show/Hide Chains",
 
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",

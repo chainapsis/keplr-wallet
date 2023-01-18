@@ -123,7 +123,7 @@
 
   "setting.developer-mode": "개발자 모드",
 
-  "setting.chain-active.title": "체인 활성화/비활성화",
+  "setting.chain-active.title": "체인 보이기/숨기기",
 
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
