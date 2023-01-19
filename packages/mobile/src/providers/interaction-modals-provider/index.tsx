@@ -20,7 +20,6 @@ export const InteractionModalsProivder: FunctionComponent = observer(
       permissionStore,
       signInteractionStore,
       walletConnectStore,
-      walletConnectV2Store,
       tokensStore,
     } = useStore();
 
@@ -88,14 +87,7 @@ export const InteractionModalsProivder: FunctionComponent = observer(
           let isWC = false;
 
           if (data.data.origins.length === 1) {
-            if (
-              WCV2MessageRequester.isVirtualURL(data.data.origins[0]) &&
-              walletConnectV2Store.getSessionMetadata(
-                WCV2MessageRequester.getTopicFromVirtualURL(
-                  data.data.origins[0]
-                )
-              )
-            ) {
+            if (WCV2MessageRequester.isVirtualURL(data.data.origins[0])) {
               isWC = true;
             }
 

@@ -13,20 +13,20 @@ export class WCV2MessageRequester implements MessageRequester {
     protected readonly topic: string
   ) {}
 
-  static getVirtualURL = (topic: string): string => {
-    return `https://keplr_wc@v2_virtual.${topic}`;
+  static getVirtualURL = (id: string): string => {
+    return `https://keplr_wc_virtual@2.${id}`;
   };
 
   static isVirtualURL = (url: string): boolean => {
-    return url.startsWith("https://keplr_wc@v2_virtual.");
+    return url.startsWith("https://keplr_wc_virtual@2.");
   };
 
-  static getTopicFromVirtualURL = (url: string): string => {
+  static getIdFromVirtualURL = (url: string): string => {
     if (!WCV2MessageRequester.isVirtualURL(url)) {
       throw new Error("URL is not for wallet connect v2");
     }
 
-    return url.replace("https://keplr_wc@v2_virtual.", "").replace("/", "");
+    return url.replace("https://keplr_wc_virtual@2.", "").replace("/", "");
   };
 
   async sendMessage<M extends Message<unknown>>(

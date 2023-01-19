@@ -7,6 +7,10 @@ import { ChainStore } from "../chain";
 import { WCV2MessageRequester } from "./msg-requester";
 import { Keplr } from "@keplr-wallet/provider";
 import { RNRouterBackground } from "../../router";
+import { Buffer } from "buffer/";
+import { getRandomBytesAsync } from "../../common";
+import { KVStore } from "@keplr-wallet/common";
+import Long from "long";
 
 export class WalletConnectV2Store {
   // This field is null until init
@@ -33,6 +37,7 @@ export class WalletConnectV2Store {
   >();
 
   constructor(
+    protected readonly kvStore: KVStore,
     protected readonly chainStore: ChainStore,
     protected readonly keyRingStore: KeyRingStore
   ) {
@@ -48,24 +53,31 @@ export class WalletConnectV2Store {
     });
 
     this.signClient.on("session_proposal", this.onSessionProposal.bind(this));
+    this.signClient.on("session_request", this.onSessionRequest.bind(this));
   }
 
-  getSessionMetadata(
-    topic: string
-  ):
+  async getSessionMetadata(
+    id: string
+  ): Promise<
     | {
         name?: string;
         description?: string;
         url?: string;
         icons?: string[];
       }
-    | undefined {
+    | undefined
+  > {
     if (!this.signClient) {
       return;
     }
 
-    if (this.pendingSessionProposalMetadataMap.has(topic)) {
-      return this.pendingSessionProposalMetadataMap.get(topic);
+    if (this.pendingSessionProposalMetadataMap.has(id)) {
+      return this.pendingSessionProposalMetadataMap.get(id);
+    }
+
+    const topic = await this.kvStore.get(`id-to-topic:${id}`);
+    if (!topic) {
+      return;
     }
 
     try {
@@ -107,16 +119,21 @@ export class WalletConnectV2Store {
 
     try {
       const proposal = await SessionProposalSchema.validateAsync(event);
+
+      const randomId = Buffer.from(
+        await getRandomBytesAsync(new Uint32Array(10))
+      ).toString("hex");
+
       const metadata = proposal.params?.proposer?.metadata;
       if (metadata) {
-        this.pendingSessionProposalMetadataMap.set(topic, metadata);
+        this.pendingSessionProposalMetadataMap.set(randomId, metadata);
       }
 
       const chainIds = proposal.params.requiredNamespaces.cosmos.chains.map(
         (chainId: string) => chainId.replace("cosmos:", "")
       );
 
-      const keplr = this.createKeplrAPI(topic);
+      const keplr = this.createKeplrAPI(randomId);
       await keplr.enable(chainIds);
 
       const accounts: string[] = [];
@@ -125,7 +142,7 @@ export class WalletConnectV2Store {
         accounts.push(`cosmos:${chainId}:${key.bech32Address}`);
       }
 
-      const { acknowledged } = await signClient.approve({
+      const { topic: ackTopic, acknowledged } = await signClient.approve({
         id,
         namespaces: {
           cosmos: {
@@ -135,6 +152,9 @@ export class WalletConnectV2Store {
           },
         },
       });
+
+      await this.kvStore.set(`id-to-topic:${randomId}`, ackTopic);
+      await this.kvStore.set(`topic-to-id:${ackTopic}`, randomId);
 
       await acknowledged();
     } catch (e) {
@@ -147,6 +167,121 @@ export class WalletConnectV2Store {
       });
     } finally {
       this.pendingSessionProposalMetadataMap.delete(topic);
+    }
+  }
+
+  protected async onSessionRequest(event: any): Promise<void> {
+    const signClient = await this.ensureInit();
+
+    const id = event?.id;
+    if (!id) {
+      // In this case, nothing to do.
+      console.log("Invalid wc2 request");
+      return;
+    }
+    const topic = event?.topic;
+    if (!topic) {
+      // In this case, nothing to do.
+      console.log("Invalid wc2 request");
+      return;
+    }
+
+    try {
+      let chainId = event.params.chainId as string;
+      if (!chainId.startsWith("cosmos:")) {
+        throw new Error("Only cosmos chain supported");
+      }
+      chainId = chainId.replace("cosmos:", "");
+
+      const reqId = await this.kvStore.get<string>(`topic-to-id:${topic}`);
+      if (!reqId) {
+        throw new Error("Unregistered topic");
+      }
+
+      const keplr = this.createKeplrAPI(reqId);
+
+      const params = event.params.request.params;
+      switch (event.params.request.method) {
+        case "cosmos_getAccounts": {
+          const key = await keplr.getKey(chainId);
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: [
+                {
+                  algo: key.algo,
+                  address: key.bech32Address,
+                  pubkey: Buffer.from(key.pubKey).toString("hex"),
+                },
+              ],
+            },
+          });
+          break;
+        }
+        case "cosmos_signAmino": {
+          const res = await keplr.signAmino(
+            chainId,
+            params.signerAddress,
+            params.signDoc
+          );
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: {
+                signature: res.signature,
+                signed: res.signed,
+              },
+            },
+          });
+          break;
+        }
+        case "cosmos_signDirect": {
+          const res = await keplr.signDirect(chainId, params.signerAddress, {
+            ...params.signDoc,
+            accountNumber: Long.fromString(params.signDoc),
+          });
+          await signClient.respond({
+            topic,
+            response: {
+              id,
+              jsonrpc: "2.0",
+              result: {
+                signature: res.signature,
+                signed: {
+                  bodyBytes: Buffer.from(res.signed.bodyBytes).toString(
+                    "base64"
+                  ),
+                  authInfoBytes: Buffer.from(res.signed.authInfoBytes).toString(
+                    "base64"
+                  ),
+                  chainId: res.signed.chainId,
+                  accountNumber: res.signed.accountNumber.toString(),
+                },
+              },
+            },
+          });
+          break;
+        }
+        default:
+          throw new Error("Unknown request method");
+      }
+    } catch (e) {
+      console.log(e);
+      await signClient.respond({
+        topic,
+        response: {
+          id,
+          jsonrpc: "2.0",
+          error: {
+            code: 1,
+            message: e.message || e.toString(),
+          },
+        },
+      });
     }
   }
 
@@ -228,12 +363,12 @@ export class WalletConnectV2Store {
     }
   }
 
-  protected createKeplrAPI(topic: string) {
+  protected createKeplrAPI(id: string) {
     return new Keplr(
       // TODO: Set version
       "",
       "core",
-      new WCV2MessageRequester(RNRouterBackground.EventEmitter, topic)
+      new WCV2MessageRequester(RNRouterBackground.EventEmitter, id)
     );
   }
 }

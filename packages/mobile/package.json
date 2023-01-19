@@ -82,6 +82,7 @@
     "hypher": "^0.2.5",
     "joi": "^17.5.0",
     "js-yaml": "^4.1.0",
+    "long": "^4.0.0",
     "lottie-ios": "3.2.3",
     "lottie-react-native": "^4.0.3",
     "markdown-it": "^12.3.2",

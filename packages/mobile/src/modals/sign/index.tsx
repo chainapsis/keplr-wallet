@@ -20,11 +20,11 @@ import { useUnmount } from "../../hooks";
 import { FeeInSign } from "./fee";
 import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
 import { WCAppLogoAndName } from "../../components/wallet-connect";
-import WalletConnect from "@walletconnect/client";
 import { renderAminoMessage } from "./amino";
 import { renderDirectMessage } from "./direct";
 import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 import { unescapeHTML } from "@keplr-wallet/common";
+import { WCV2MessageRequester } from "../../stores/wallet-connect-v2/msg-requester";
 
 export const SignModal: FunctionComponent<{
   isOpen: boolean;
@@ -36,6 +36,7 @@ export const SignModal: FunctionComponent<{
       accountStore,
       queriesStore,
       walletConnectStore,
+      walletConnectV2Store,
       signInteractionStore,
     } = useStore();
     useUnmount(() => {
@@ -44,8 +45,8 @@ export const SignModal: FunctionComponent<{
 
     // Check that the request is from the wallet connect.
     // If this is undefiend, the request is not from the wallet connect.
-    const [wcSession, setWCSession] = useState<
-      WalletConnect["session"] | undefined
+    const [wcMetadata, setWCMetadata] = useState<
+      { name?: string; url?: string; icons?: string[] } | undefined
     >();
 
     const style = useStyle();
@@ -112,9 +113,25 @@ export const SignModal: FunctionComponent<{
           const sessionId = WCMessageRequester.getSessionIdFromVirtualURL(
             data.data.msgOrigin
           );
-          setWCSession(walletConnectStore.getSession(sessionId));
+          setWCMetadata(
+            walletConnectStore.getSession(sessionId)?.peerMeta || undefined
+          );
         } else {
-          setWCSession(undefined);
+          setWCMetadata(undefined);
+        }
+
+        if (
+          data.data.msgOrigin &&
+          WCV2MessageRequester.isVirtualURL(data.data.msgOrigin)
+        ) {
+          const id = WCV2MessageRequester.getIdFromVirtualURL(
+            data.data.msgOrigin
+          );
+          walletConnectV2Store
+            .getSessionMetadata(id)
+            .then((r) => setWCMetadata(r));
+        } else {
+          setWCMetadata(undefined);
         }
       }
     }, [
@@ -124,6 +141,7 @@ export const SignModal: FunctionComponent<{
       signDocHelper,
       signInteractionStore.waitingData,
       walletConnectStore,
+      walletConnectV2Store,
     ]);
 
     const mode = signDocHelper.signDocWrapper
@@ -212,10 +230,10 @@ export const SignModal: FunctionComponent<{
 
     return (
       <CardModal title="Confirm Transaction">
-        {wcSession ? (
+        {wcMetadata ? (
           <WCAppLogoAndName
             containerStyle={style.flatten(["margin-y-14"])}
-            peerMeta={wcSession.peerMeta}
+            peerMeta={wcMetadata}
           />
         ) : null}
         <View style={style.flatten(["margin-bottom-16"])}>

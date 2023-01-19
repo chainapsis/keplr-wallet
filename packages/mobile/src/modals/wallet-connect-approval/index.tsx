@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useLayoutEffect, useState } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { Text, View } from "react-native";
@@ -23,22 +23,28 @@ export const WalletConnectApprovalModal: FunctionComponent<{
       walletConnectV2Store,
     } = useStore();
 
-    const peerMeta = useMemo(() => {
+    const [peerMeta, setPeerMeta] = useState<
+      { name?: string; url?: string; icons?: string[] } | undefined
+    >(undefined);
+
+    useLayoutEffect(() => {
       if (data.origins.length !== 1) {
         throw new Error("Invalid origins");
       }
 
       if (WCMessageRequester.isVirtualSessionURL(data.origins[0])) {
-        return (
+        setPeerMeta(
           walletConnectStore.getSession(
             WCMessageRequester.getSessionIdFromVirtualURL(data.origins[0])
           )?.peerMeta || undefined
         );
       }
 
-      return walletConnectV2Store.getSessionMetadata(
-        WCV2MessageRequester.getTopicFromVirtualURL(data.origins[0])
-      );
+      walletConnectV2Store
+        .getSessionMetadata(
+          WCV2MessageRequester.getIdFromVirtualURL(data.origins[0])
+        )
+        .then((r) => setPeerMeta(r));
     }, [data.origins, walletConnectStore, walletConnectV2Store]);
 
     const appName = peerMeta?.name || peerMeta?.url || "unknown";
