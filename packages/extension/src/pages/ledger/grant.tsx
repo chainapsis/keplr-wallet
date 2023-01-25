@@ -1,15 +1,16 @@
 import React, {
-  FunctionComponent,
   ChangeEvent,
+  FunctionComponent,
   useEffect,
-  useState,
   useLayoutEffect,
+  useState,
 } from "react";
 
 import { Button } from "reactstrap";
 
 import {
   Ledger,
+  LedgerApp,
   LedgerInitErrorOn,
   LedgerWebHIDIniter,
   LedgerWebUSBIniter,
@@ -24,6 +25,7 @@ import { useNotification } from "../../components/notification";
 import delay from "delay";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
 
 export const LedgerGrantPage: FunctionComponent = observer(() => {
   useLayoutEffect(() => {
@@ -96,7 +98,8 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
         ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter,
         undefined,
         // requestedLedgerApp should be set if ledger init needed.
-        ledgerInitStore.requestedLedgerApp!
+        ledgerInitStore.requestedLedgerApp!,
+        ledgerInitStore.cosmosLikeApp || "Cosmos"
       );
       await ledger.close();
       // Unfortunately, closing ledger blocks the writing to Ledger on background process.
@@ -106,6 +109,29 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
       }
     } catch (e) {
       console.log(e);
+
+      const transportIniter = ledgerInitStore.isWebHID
+        ? LedgerWebHIDIniter
+        : LedgerWebUSBIniter;
+      if (ledgerInitStore.requestedLedgerApp === LedgerApp.Cosmos) {
+        // No wait and ignore error.
+        transportIniter()
+          .then((transport) => {
+            return CosmosApp.openApp(
+              transport,
+              ledgerInitStore.cosmosLikeApp || "Cosmos"
+            );
+          })
+          .catch((e) => console.log(e));
+      } else if (ledgerInitStore.requestedLedgerApp === LedgerApp.Ethereum) {
+        // No wait and ignore error.
+        transportIniter()
+          .then((transport) => {
+            return CosmosApp.openApp(transport, "Ethereum");
+          })
+          .catch((e) => console.log(e));
+      }
+
       if (e.errorOn != null) {
         initErrorOn = e.errorOn;
       } else {
@@ -150,6 +176,11 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
                   switch (ledgerInitStore.requestedLedgerApp) {
                     case "ethereum":
                       return require("../../public/assets/img/ethereum.svg");
+                    case "cosmos":
+                      if (ledgerInitStore.cosmosLikeApp === "Terra") {
+                        return require("../../public/assets/img/ledger-terra.svg");
+                      }
+                      return require("../../public/assets/img/atom-o.svg");
                     default:
                       return require("../../public/assets/img/atom-o.svg");
                   }
@@ -168,6 +199,8 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
                   switch (ledgerInitStore.requestedLedgerApp) {
                     case "ethereum":
                       return "Ethereum";
+                    case "cosmos":
+                      return ledgerInitStore.cosmosLikeApp || "Cosmos";
                     default:
                       return "Cosmos";
                   }

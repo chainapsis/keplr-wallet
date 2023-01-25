@@ -25,6 +25,8 @@ export interface KeyStore {
   coinTypeForChain: CoinTypeForChain;
   bip44HDPath?: BIP44HDPath;
   meta?: {
+    // "__ledger__cosmos_app_like__" is used for allowing other cosmos-like app such as "Terra"
+    // If "__ledger__cosmos_app_like__" is empty, handle it as "Cosmos" for backward compatibility.
     [key: string]: string;
   };
   crypto: {

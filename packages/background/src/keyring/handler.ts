@@ -257,7 +257,8 @@ const handleCreateLedgerKeyMsg: (
       msg.kdf,
       msg.password,
       msg.meta,
-      msg.bip44HDPath
+      msg.bip44HDPath,
+      msg.cosmosLikeApp
     );
   };
 };
@@ -279,7 +280,13 @@ const handleAddLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddLedgerKeyMsg> = (service) => {
   return async (env, msg) => {
-    return await service.addLedgerKey(env, msg.kdf, msg.meta, msg.bip44HDPath);
+    return await service.addLedgerKey(
+      env,
+      msg.kdf,
+      msg.meta,
+      msg.bip44HDPath,
+      msg.cosmosLikeApp
+    );
   };
 };
 
