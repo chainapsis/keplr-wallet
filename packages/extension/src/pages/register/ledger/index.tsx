@@ -73,7 +73,8 @@ export const ImportLedgerPage: FunctionComponent<{
             await registerConfig.createLedger(
               data.name,
               data.password,
-              bip44Option.bip44HDPath
+              bip44Option.bip44HDPath,
+              "Cosmos"
             );
             analyticsStore.setUserProperties({
               registerType: "ledger",
@@ -150,6 +151,33 @@ export const ImportLedgerPage: FunctionComponent<{
           data-loading={registerConfig.isLoading}
         >
           <FormattedMessage id="register.create.button.next" />
+        </Button>
+        <Button
+          type="button"
+          color="link"
+          onClick={handleSubmit(async (data: FormData) => {
+            if (registerConfig.isLoading) {
+              return;
+            }
+
+            try {
+              await registerConfig.createLedger(
+                data.name,
+                data.password,
+                bip44Option.bip44HDPath,
+                "Terra"
+              );
+              analyticsStore.setUserProperties({
+                registerType: "ledger",
+                accountType: "ledger",
+              });
+            } catch (e) {
+              alert(e.message ? e.message : e.toString());
+              registerConfig.clear();
+            }
+          })}
+        >
+          <FormattedMessage id="register.create.button.ledger.terra" />
         </Button>
       </Form>
       <BackButton

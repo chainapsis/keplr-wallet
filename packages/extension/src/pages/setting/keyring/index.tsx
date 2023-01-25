@@ -80,6 +80,14 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                 ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
                 : ""
             }`;
+
+            if (
+              keyStore.meta &&
+              keyStore.meta["__ledger__cosmos_app_like__"] &&
+              keyStore.meta["__ledger__cosmos_app_like__"] !== "Cosmos"
+            ) {
+              paragraph += ` (${keyStore.meta["__ledger__cosmos_app_like__"]})`;
+            }
           }
 
           return (

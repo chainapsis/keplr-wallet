@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.3.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="레이어_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	 y="0px" viewBox="0 0 32 31" style="enable-background:new 0 0 32 31;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#A5A5A5;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;}
+	.st2{filter:url(#Adobe_OpacityMaskFilter);}
+	.st3{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+	.st4{mask:url(#mask-2_00000119817911657479253170000005366761667158450822_);fill-rule:evenodd;clip-rule:evenodd;}
+</style>
+<g>
+	<path id="Fill-11" class="st0" d="M14.2,23.6c0.8,2.8,3.5,4.9,4.8,4.9c0,0,5.2-1,8-5.7c2.2-3.7,1.4-7.2-1.5-7.3
+		C24.4,15.6,12.7,18.3,14.2,23.6"/>
+	<path id="Fill-13" class="st0" d="M25.2,5.6C25.2,5.6,25.2,5.6,25.2,5.6L25.2,5.6c-2.3-2-5.3-3.1-8.5-3.1c-1.9,0-3.7,0.4-5.3,1.1
+		c-0.3,0.1-0.6,0.3-0.8,0.4c-0.2,0.1-0.4,0.2-0.5,0.3l0,0c-0.5,0.4-1,0.8-1.4,1.3c-3.8,5,8.9,8.6,15.6,8.6
+		C27.4,16.5,28.3,8,25.2,5.6"/>
+	<path id="Fill-15" class="st1" d="M12.2,5.7c-1.7,2.6-7.5,4.4-8.5,4.2c0,0,0,0,0,0c0-0.1,0.1-0.2,0.1-0.2C4.2,9,4.5,8.4,5,7.8
+		c0.4-0.6,0.9-1.1,1.4-1.6s1-1,1.6-1.4c0.4-0.3,0.7-0.5,1.1-0.7c0.8-0.5,1.6-0.5,1.9-0.5C13.5,3.6,12.2,5.7,12.2,5.7"/>
+	<g id="Group-19" transform="translate(0.000000, 8.708164)">
+		<g id="Clip-18">
+		</g>
+		<defs>
+			<filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="2.3" y="2.5" width="8.5" height="17.3">
+				<feColorMatrix  type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+			</filter>
+		</defs>
+		
+			<mask maskUnits="userSpaceOnUse" x="2.3" y="2.5" width="8.5" height="17.3" id="mask-2_00000119817911657479253170000005366761667158450822_">
+			<g class="st2">
+				<polygon id="path-1_00000141431476541763941290000009133001561877770648_" class="st3" points="2.3,2.5 10.8,2.5 10.8,19.8 
+					2.3,19.8 				"/>
+			</g>
+		</mask>
+		<path id="Fill-17" class="st4" d="M10.8,15.4c0.1,0.8,0,4.1-0.2,4.3c-0.1,0-0.4,0-1.3-0.5C8.8,19,8.4,18.7,8,18.4
+			c-0.6-0.4-1.1-0.9-1.6-1.4c-0.5-0.5-1-1-1.4-1.6c-0.4-0.6-0.8-1.2-1.1-1.8c-0.3-0.6-0.6-1.3-0.8-2C2.8,11,2.6,10.3,2.5,9.5
+			C2.4,8.8,2.3,8,2.3,7.3S2.4,5.8,2.5,5C2.6,4.3,2.8,3.6,3,2.9c0-0.1,0.1-0.3,0.1-0.4l0,0c1,1.3,2.1,2.5,3.1,3.9
+			c0.9,1.3,2.2,3.4,2.5,3.8C10.4,12.9,10.6,14.6,10.8,15.4"/>
+	</g>
+	<path id="Fill-20" class="st1" d="M29.9,16c0,1.8-0.3,3.5-1,5.1c-1.6,1.7-12.6-2.6-12.7-2.6c-1.5-0.7-6.1-2.7-6.5-5.8
+		C9.2,8.1,18.4,5,22.4,4.9c0.5,0,2,0,2.8,0.7C28.1,8.1,29.9,11.8,29.9,16"/>
+	<path id="Fill-22" class="st1" d="M22.5,28.3c-1.2,0.6-2.5,0.2-2.2-1c0.7-2.2,6.4-4.5,7.7-4.7c0.2,0,0.2,0.1,0.2,0.2
+		C26.8,25.1,24.9,27,22.5,28.3"/>
+</g>
+</svg>

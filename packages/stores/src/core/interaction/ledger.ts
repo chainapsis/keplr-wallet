@@ -21,6 +21,7 @@ export type LedgerInitDataType =
       // Should interact to resume the ledger initing on the background.
       event: "init-failed";
       ledgerApp: LedgerApp;
+      cosmosLikeApp?: string;
     }
   | {
       event: "init-aborted";
@@ -159,6 +160,25 @@ export class LedgerInitStore {
     for (const data of datas) {
       if (data.data.event === "init-failed") {
         return data.data.ledgerApp;
+      }
+    }
+
+    return;
+  }
+
+  @computed
+  get cosmosLikeApp(): string | undefined {
+    if (!this.isInitNeeded) {
+      return;
+    }
+
+    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
+      "ledger-init"
+    );
+
+    for (const data of datas) {
+      if (data.data.event === "init-failed") {
+        return data.data.cosmosLikeApp;
       }
     }
 
