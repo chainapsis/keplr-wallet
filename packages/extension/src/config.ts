@@ -2079,6 +2079,12 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: "terra-luna",
       },
+      {
+        coinDenom: "USTC",
+        coinMinimalDenom: "uusd",
+        coinDecimals: 6,
+        coinGeckoId: "terrausd",
+      },
     ],
     feeCurrencies: [
       {
@@ -2090,6 +2096,17 @@ export const EmbedChainInfos: ChainInfo[] = [
           low: 28.325,
           average: 28.325,
           high: 28.325,
+        },
+      },
+      {
+        coinDenom: "USTC",
+        coinMinimalDenom: "uusd",
+        coinDecimals: 6,
+        coinGeckoId: "terrausd",
+        gasPriceStep: {
+          low: 0.75,
+          average: 0.75,
+          high: 0.75,
         },
       },
     ],

@@ -38,6 +38,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   protected additionAmountToNeedFee: boolean = true;
 
   @observable
+  protected computeTerraClassicTax: boolean = false;
+
+  @observable
   protected _disableBalanceCheck: boolean = false;
 
   constructor(
@@ -47,12 +50,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     sender: string,
     protected readonly amountConfig: IAmountConfig,
     protected readonly gasConfig: IGasConfig,
-    additionAmountToNeedFee: boolean = true
+    additionAmountToNeedFee: boolean = true,
+    computeTerraClassicTax: boolean = false
   ) {
     super(chainGetter, initialChainId);
 
     this._sender = sender;
     this.additionAmountToNeedFee = additionAmountToNeedFee;
+    this.computeTerraClassicTax = computeTerraClassicTax;
 
     makeObservable(this);
   }
@@ -60,6 +65,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @action
   setAdditionAmountToNeedFee(additionAmountToNeedFee: boolean) {
     this.additionAmountToNeedFee = additionAmountToNeedFee;
+  }
+
+  @action
+  setComputeTerraClassicTax(computeTerraClassicTax: boolean) {
+    this.computeTerraClassicTax = computeTerraClassicTax;
   }
 
   get sender(): string {
@@ -99,6 +109,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @computed
   get feeCurrencies(): FeeCurrency[] {
     if (
+      this.computeTerraClassicTax &&
       this.chainInfo.features &&
       this.chainInfo.features.includes("terra-classic-fee")
     ) {
@@ -342,6 +353,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     let feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));
 
     if (
+      this.computeTerraClassicTax &&
       this.chainInfo.features &&
       this.chainInfo.features.includes("terra-classic-fee")
     ) {
@@ -515,7 +527,10 @@ export const useFeeConfig = (
   sender: string,
   amountConfig: IAmountConfig,
   gasConfig: IGasConfig,
-  additionAmountToNeedFee: boolean = true
+  opts: {
+    additionAmountToNeedFee?: boolean;
+    computeTerraClassicTax?: boolean;
+  } = {}
 ) => {
   const [config] = useState(
     () =>
@@ -526,12 +541,14 @@ export const useFeeConfig = (
         sender,
         amountConfig,
         gasConfig,
-        additionAmountToNeedFee
+        opts.additionAmountToNeedFee ?? true,
+        opts.computeTerraClassicTax ?? false
       )
   );
   config.setChain(chainId);
   config.setSender(sender);
-  config.setAdditionAmountToNeedFee(additionAmountToNeedFee);
+  config.setAdditionAmountToNeedFee(opts.additionAmountToNeedFee ?? true);
+  config.setComputeTerraClassicTax(opts.computeTerraClassicTax ?? false);
 
   return config;
 };
