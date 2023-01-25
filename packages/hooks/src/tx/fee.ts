@@ -98,6 +98,19 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get feeCurrencies(): FeeCurrency[] {
+    if (
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("terra-classic-fee")
+    ) {
+      const currency = this.chainInfo.feeCurrencies.find(
+        (c) =>
+          c.coinMinimalDenom === this.amountConfig.sendCurrency.coinMinimalDenom
+      );
+      if (currency) {
+        return [currency];
+      }
+    }
+
     if (this.canOsmosisTxFeesAndReady()) {
       const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
 
@@ -326,7 +339,36 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       DefaultGasPriceStep;
 
     const gasPrice = new Dec(gasPriceStep[feeType].toString());
-    const feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));
+    let feeAmount = gasPrice.mul(new Dec(this.gasConfig.gas));
+
+    if (
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("terra-classic-fee")
+    ) {
+      const etcQueries = this.queriesStore.get(this.chainId).keplrETC;
+      if (
+        etcQueries &&
+        etcQueries.queryTerraClassicTaxRate.response &&
+        etcQueries.queryTerraClassicTaxCaps.response
+      ) {
+        const taxRate = etcQueries.queryTerraClassicTaxRate.taxRate;
+        if (taxRate && taxRate.toDec().gt(new Dec(0))) {
+          const sendAmount = this.amountConfig.getAmountPrimitive();
+          if (sendAmount.denom === this.feeCurrency?.coinMinimalDenom) {
+            feeAmount = feeAmount.add(
+              new Dec(sendAmount.amount).mul(taxRate.toDec())
+            );
+
+            const taxCap = etcQueries.queryTerraClassicTaxCaps.getTaxCaps(
+              sendAmount.denom
+            );
+            if (taxCap && feeAmount.roundUp().gt(taxCap)) {
+              feeAmount = taxCap.toDec();
+            }
+          }
+        }
+      }
+    }
 
     return {
       denom: feeCurrency.coinMinimalDenom,

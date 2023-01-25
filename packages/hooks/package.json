@@ -28,6 +28,7 @@
     "@keplr-wallet/popup": "0.11.34",
     "@keplr-wallet/proto-types": "0.11.34",
     "@keplr-wallet/stores": "0.11.34",
+    "@keplr-wallet/stores-etc": "0.11.34",
     "@keplr-wallet/types": "0.11.34",
     "@keplr-wallet/unit": "0.11.34",
     "axios": "^0.27.2",
