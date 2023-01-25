@@ -72,6 +72,7 @@ export const SendPage: FunctionComponent = observer(() => {
     accountInfo.bech32Address,
     {
       allowHexAddressOnEthermint: true,
+      computeTerraClassicTax: true,
     }
   );
 
@@ -157,6 +158,19 @@ export const SendPage: FunctionComponent = observer(() => {
     sendConfigs.amountConfig.sendCurrency,
     sendConfigs.gasConfig,
   ]);
+
+  useEffect(() => {
+    if (
+      sendConfigs.feeConfig.chainInfo.features &&
+      sendConfigs.feeConfig.chainInfo.features.includes("terra-classic-fee")
+    ) {
+      // When considering stability tax for terra classic.
+      // Simulation itself doesn't consider the stability tax send.
+      // Thus, it always returns fairly lower gas.
+      // To adjust this, for terra classic, increase the default gas adjustment
+      gasSimulator.setGasAdjustment(1.6);
+    }
+  }, [gasSimulator, sendConfigs.feeConfig.chainInfo]);
 
   useEffect(() => {
     if (query.defaultDenom) {
@@ -338,6 +352,45 @@ export const SendPage: FunctionComponent = observer(() => {
               balanceText={intl.formatMessage({
                 id: "send.input-button.balance",
               })}
+              disableAllBalance={(() => {
+                if (
+                  // In the case of terra classic, tax is applied in proportion to the amount.
+                  // However, in this case, the tax itself changes the fee,
+                  // so if you use the max function, it will fall into infinite repetition.
+                  // We currently disable if chain is terra classic because we can't handle it properly.
+                  sendConfigs.feeConfig.chainInfo.features &&
+                  sendConfigs.feeConfig.chainInfo.features.includes(
+                    "terra-classic-fee"
+                  )
+                ) {
+                  return true;
+                }
+                return false;
+              })()}
+              overrideSelectableCurrencies={(() => {
+                if (
+                  chainStore.current.features &&
+                  chainStore.current.features.includes("terra-classic-fee")
+                ) {
+                  // At present, can't handle stability tax well if it is not registered native token.
+                  // So, for terra classic, disable other tokens.
+                  const currencies =
+                    sendConfigs.amountConfig.sendableCurrencies;
+                  return currencies.filter((cur) => {
+                    const denom = new DenomHelper(cur.coinMinimalDenom);
+                    if (
+                      denom.type !== "native" ||
+                      denom.denom.startsWith("ibc/")
+                    ) {
+                      return false;
+                    }
+
+                    return true;
+                  });
+                }
+
+                return undefined;
+              })()}
             />
             <MemoInput
               memoConfig={sendConfigs.memoConfig}

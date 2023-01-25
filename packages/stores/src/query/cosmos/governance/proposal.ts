@@ -6,6 +6,9 @@ import { computed, makeObservable } from "mobx";
 import { DeepReadonly } from "utility-types";
 import { CoinPretty, Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { ObservableQueryGovernance } from "./proposals";
+import { computedFn } from "mobx-utils";
+
+const zeroDec = new Dec(0);
 
 export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally> {
   constructor(
@@ -63,28 +66,47 @@ export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally>
 
   @computed
   get turnout(): IntPretty {
-    const pool = this.governance.getQueryPool();
-
-    const bondedTokenDec = pool.bondedTokens.toDec();
-
-    if (!pool.response || bondedTokenDec.equals(new Dec(0))) {
-      return new IntPretty(new Dec(0)).ready(false);
-    }
-
-    const tally = this.tally;
-    const tallySum = tally.yes
-      .add(tally.no)
-      .add(tally.abstain)
-      .add(tally.noWithVeto);
-
-    // TODO: Use `RatePretty`
-    return new IntPretty(
-      tallySum
-        .toDec()
-        .quoTruncate(bondedTokenDec)
-        .mulTruncate(DecUtils.getPrecisionDec(2))
-    ).ready(tally.yes.isReady);
+    return this.calcTurnout();
   }
+
+  calcTurnout(additionalBondedTokenAmount?: Int | Dec): IntPretty {
+    return this.computedCalcTurnout(additionalBondedTokenAmount ?? zeroDec);
+  }
+
+  // Remember that we can't optional parameter (additionalBondedTokenAmount?: Int | Dec).
+  // However, `additionalBondedTokenAmount` is not used often, so it is not suitable to request to pass that parameter.
+  // To avoid this problem, make separate method.
+  protected computedCalcTurnout = computedFn(
+    (additionalBondedTokenAmount: Int | Dec): IntPretty => {
+      const pool = this.governance.getQueryPool();
+
+      if (additionalBondedTokenAmount instanceof Int) {
+        additionalBondedTokenAmount = additionalBondedTokenAmount.toDec();
+      }
+
+      const bondedTokenDec = pool.bondedTokens
+        .toDec()
+        .add(additionalBondedTokenAmount);
+
+      if (!pool.response || bondedTokenDec.equals(new Dec(0))) {
+        return new IntPretty(new Dec(0)).ready(false);
+      }
+
+      const tally = this.tally;
+      const tallySum = tally.yes
+        .add(tally.no)
+        .add(tally.abstain)
+        .add(tally.noWithVeto);
+
+      // TODO: Use `RatePretty`
+      return new IntPretty(
+        tallySum
+          .toDec()
+          .quoTruncate(bondedTokenDec)
+          .mulTruncate(DecUtils.getPrecisionDec(2))
+      ).ready(tally.yes.isReady);
+    }
+  );
 
   /**
    * Return the voting tally.

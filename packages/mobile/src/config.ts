@@ -1223,57 +1223,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     hideInUI: true,
   },
   {
-    rpc: "https://rpc-columbus.keplr.app",
-    rest: "https://lcd-columbus.keplr.app",
-    chainId: "columbus-5",
-    chainName: "Terra",
-    stakeCurrency: {
-      coinDenom: "LUNA",
-      coinMinimalDenom: "uluna",
-      coinDecimals: 6,
-      coinGeckoId: "terra-luna",
-    },
-    bip44: {
-      coinType: 330,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("terra"),
-    currencies: [
-      {
-        coinDenom: "LUNA",
-        coinMinimalDenom: "uluna",
-        coinDecimals: 6,
-        coinGeckoId: "terra-luna",
-      },
-      {
-        coinDenom: "UST",
-        coinMinimalDenom: "uusd",
-        coinDecimals: 6,
-        coinGeckoId: "terrausd",
-      },
-      {
-        coinDenom: "KRT",
-        coinMinimalDenom: "ukrw",
-        coinDecimals: 6,
-        coinGeckoId: "terrakrw",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "LUNA",
-        coinMinimalDenom: "uluna",
-        coinDecimals: 6,
-        coinGeckoId: "terra-luna",
-        gasPriceStep: {
-          low: 0.015,
-          average: 0.015,
-          high: 0.015,
-        },
-      },
-    ],
-    features: ["ibc-transfer"],
-    hideInUI: true,
-  },
-  {
     rpc: "https://mainnet-node.like.co/rpc",
     rest: "https://mainnet-node.like.co",
     chainId: "likecoin-mainnet-2",
@@ -1919,6 +1868,189 @@ export const EmbedChainInfos: AppChainInfo[] = [
       name: "Mintscan",
       txUrl: "https://www.mintscan.io/injective/txs/{txHash}",
     },
+  },
+  {
+    rpc: "https://rpc-mars.keplr.app",
+    rest: "https://lcd-mars.keplr.app",
+    chainId: "mars-1",
+    chainName: "Mars Hub",
+    stakeCurrency: {
+      coinDenom: "MARS",
+      coinMinimalDenom: "umars",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/mars.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    alternativeBIP44s: [
+      {
+        coinType: 330,
+      },
+    ],
+    bech32Config: Bech32Address.defaultBech32Config("mars"),
+    currencies: [
+      {
+        coinDenom: "MARS",
+        coinMinimalDenom: "umars",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/mars.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MARS",
+        coinMinimalDenom: "umars",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0,
+          average: 0,
+          high: 0.01,
+        },
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/mars.png",
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/mars.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/mars-protocol/txs/{txHash}",
+    },
+  },
+  {
+    rpc: "https://rpc-phoenix.keplr.app",
+    rest: "https://lcd-phoenix.keplr.app",
+    chainId: "phoenix-1",
+    chainName: "Terra",
+    stakeCurrency: {
+      coinDenom: "LUNA",
+      coinMinimalDenom: "uluna",
+      coinDecimals: 6,
+      coinGeckoId: "terra-luna-2",
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/luna.png",
+    },
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/terra"
+        : "http://localhost:8080/chains/terra",
+    bip44: {
+      coinType: 330,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "terra",
+      bech32PrefixAccPub: "terrapub",
+      bech32PrefixValAddr: "terravaloper",
+      bech32PrefixValPub: "terravaloperpub",
+      bech32PrefixConsAddr: "terravalcons",
+      bech32PrefixConsPub: "terravalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LUNA",
+        coinMinimalDenom: "uluna",
+        coinDecimals: 6,
+        coinGeckoId: "terra-luna-2",
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/luna.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LUNA",
+        coinMinimalDenom: "uluna",
+        coinDecimals: 6,
+        coinGeckoId: "terra-luna-2",
+        gasPriceStep: {
+          low: 0.15,
+          average: 0.25,
+          high: 0.4,
+        },
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/luna.png",
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/phoenix.png",
+    txExplorer: {
+      name: "Terrascope",
+      txUrl: "https://terrasco.pe/mainnet/tx/{txHash}",
+    },
+  },
+  {
+    rpc: "https://rpc-columbus.keplr.app",
+    rest: "https://lcd-columbus.keplr.app",
+    chainId: "columbus-5",
+    chainName: "Terra Classic",
+    stakeCurrency: {
+      coinDenom: "LUNC",
+      coinMinimalDenom: "uluna",
+      coinDecimals: 6,
+      coinGeckoId: "terra-luna",
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/lunc.png",
+    },
+    bip44: {
+      coinType: 330,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "terra",
+      bech32PrefixAccPub: "terrapub",
+      bech32PrefixValAddr: "terravaloper",
+      bech32PrefixValPub: "terravaloperpub",
+      bech32PrefixConsAddr: "terravalcons",
+      bech32PrefixConsPub: "terravalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LUNC",
+        coinMinimalDenom: "uluna",
+        coinDecimals: 6,
+        coinGeckoId: "terra-luna",
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/lunc.png",
+      },
+      {
+        coinDenom: "USTC",
+        coinMinimalDenom: "uusd",
+        coinDecimals: 6,
+        coinGeckoId: "terrausd",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LUNC",
+        coinMinimalDenom: "uluna",
+        coinDecimals: 6,
+        coinGeckoId: "terra-luna",
+        gasPriceStep: {
+          low: 28.325,
+          average: 28.325,
+          high: 28.325,
+        },
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/lunc.png",
+      },
+      {
+        coinDenom: "USTC",
+        coinMinimalDenom: "uusd",
+        coinDecimals: 6,
+        coinGeckoId: "terrausd",
+        gasPriceStep: {
+          low: 0.75,
+          average: 0.75,
+          high: 0.75,
+        },
+      },
+    ],
+    features: ["terra-classic-fee"],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/columbus.png",
   },
 ];
 

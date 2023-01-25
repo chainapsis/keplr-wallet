@@ -55,6 +55,7 @@ export const SendScreen: FunctionComponent = observer(() => {
     account.bech32Address,
     {
       allowHexAddressOnEthermint: true,
+      computeTerraClassicTax: true,
       icns: ICNSInfo,
     }
   );
@@ -116,6 +117,19 @@ export const SendScreen: FunctionComponent = observer(() => {
       );
     }
   );
+
+  useEffect(() => {
+    if (
+      sendConfigs.feeConfig.chainInfo.features &&
+      sendConfigs.feeConfig.chainInfo.features.includes("terra-classic-fee")
+    ) {
+      // When considering stability tax for terra classic.
+      // Simulation itself doesn't consider the stability tax send.
+      // Thus, it always returns fairly lower gas.
+      // To adjust this, for terra classic, increase the default gas adjustment
+      gasSimulator.setGasAdjustment(1.6);
+    }
+  }, [gasSimulator, sendConfigs.feeConfig.chainInfo]);
 
   useEffect(() => {
     // To simulate secretwasm, we need to include the signature in the tx.
@@ -182,7 +196,25 @@ export const SendScreen: FunctionComponent = observer(() => {
         placeHolder="Select Token"
         amountConfig={sendConfigs.amountConfig}
       />
-      <AmountInput label="Amount" amountConfig={sendConfigs.amountConfig} />
+      <AmountInput
+        label="Amount"
+        amountConfig={sendConfigs.amountConfig}
+        disableAllBalance={(() => {
+          if (
+            // In the case of terra classic, tax is applied in proportion to the amount.
+            // However, in this case, the tax itself changes the fee,
+            // so if you use the max function, it will fall into infinite repetition.
+            // We currently disable if chain is terra classic because we can't handle it properly.
+            sendConfigs.feeConfig.chainInfo.features &&
+            sendConfigs.feeConfig.chainInfo.features.includes(
+              "terra-classic-fee"
+            )
+          ) {
+            return true;
+          }
+          return false;
+        })()}
+      />
       <MemoInput label="Memo (Optional)" memoConfig={sendConfigs.memoConfig} />
       <FeeButtons
         label="Fee"

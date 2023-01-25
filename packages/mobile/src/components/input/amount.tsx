@@ -23,6 +23,8 @@ export const AmountInput: FunctionComponent<{
   label: string;
 
   amountConfig: IAmountConfig;
+
+  disableAllBalance?: boolean;
 }> = observer(
   ({
     labelStyle,
@@ -31,6 +33,7 @@ export const AmountInput: FunctionComponent<{
     errorLabelStyle,
     label,
     amountConfig,
+    disableAllBalance,
   }) => {
     const style = useStyle();
 
@@ -74,39 +77,41 @@ export const AmountInput: FunctionComponent<{
               "justify-center",
             ])}
           >
-            <Button
-              text="MAX"
-              mode={(() => {
-                if (style.theme === "dark") {
-                  return "light";
-                } else {
-                  return amountConfig.fraction === 1 ? "light" : "fill";
-                }
-              })()}
-              size="small"
-              style={style.flatten(["padding-x-5", "padding-y-3"])}
-              containerStyle={style.flatten(
-                ["height-24", "border-radius-4"],
-                [
-                  !amountConfig.fraction &&
-                    "dark:background-color-platinum-500",
-                  amountConfig.fraction === 1 &&
-                    "dark:background-color-platinum-600",
-                ]
-              )}
-              textStyle={style.flatten(
-                ["normal-case", "text-caption2"],
-                [
-                  !amountConfig.fraction && "dark:color-platinum-50",
-                  amountConfig.fraction === 1 && "dark:color-platinum-200",
-                ]
-              )}
-              onPress={() => {
-                amountConfig.setFraction(
-                  !amountConfig.fraction ? 1 : undefined
-                );
-              }}
-            />
+            {!disableAllBalance ? (
+              <Button
+                text="MAX"
+                mode={(() => {
+                  if (style.theme === "dark") {
+                    return "light";
+                  } else {
+                    return amountConfig.fraction === 1 ? "light" : "fill";
+                  }
+                })()}
+                size="small"
+                style={style.flatten(["padding-x-5", "padding-y-3"])}
+                containerStyle={style.flatten(
+                  ["height-24", "border-radius-4"],
+                  [
+                    !amountConfig.fraction &&
+                      "dark:background-color-platinum-500",
+                    amountConfig.fraction === 1 &&
+                      "dark:background-color-platinum-600",
+                  ]
+                )}
+                textStyle={style.flatten(
+                  ["normal-case", "text-caption2"],
+                  [
+                    !amountConfig.fraction && "dark:color-platinum-50",
+                    amountConfig.fraction === 1 && "dark:color-platinum-200",
+                  ]
+                )}
+                onPress={() => {
+                  amountConfig.setFraction(
+                    !amountConfig.fraction ? 1 : undefined
+                  );
+                }}
+              />
+            ) : null}
           </View>
         }
         error={errorText}

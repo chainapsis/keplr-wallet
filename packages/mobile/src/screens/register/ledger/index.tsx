@@ -84,6 +84,41 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
     }
   });
 
+  const [isCreatingTerraApp, setIsCreatingTerraApp] = useState(false);
+
+  const terraAppSubmit = handleSubmit(async () => {
+    setIsCreatingTerraApp(true);
+
+    try {
+      await registerConfig.createLedger(
+        getValues("name"),
+        getValues("password"),
+        bip44Option.bip44HDPath,
+        "Terra"
+      );
+      analyticsStore.setUserProperties({
+        registerType: "ledger",
+        accountType: "ledger",
+      });
+
+      smartNavigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "Register.End",
+            params: {
+              password: getValues("password"),
+            },
+          },
+        ],
+      });
+    } catch (e) {
+      // Definitely, the error can be thrown when the ledger connection failed
+      console.log(e);
+      setIsCreatingTerraApp(false);
+    }
+  });
+
   return (
     <PageWithScrollView
       backgroundMode="tertiary"
@@ -190,7 +225,20 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
         </React.Fragment>
       ) : null}
       <View style={style.flatten(["flex-1"])} />
-      <Button text="Next" size="large" loading={isCreating} onPress={submit} />
+      <Button
+        containerStyle={style.flatten(["margin-bottom-8"])}
+        text="Use Terra Ledger app"
+        mode="text"
+        size="small"
+        loading={isCreatingTerraApp}
+        onPress={terraAppSubmit}
+      />
+      <Button
+        text="Use Cosmos Ledger app"
+        size="large"
+        loading={isCreating}
+        onPress={submit}
+      />
       {/* Mock element for bottom padding */}
       <View style={style.flatten(["height-page-pad"])} />
     </PageWithScrollView>

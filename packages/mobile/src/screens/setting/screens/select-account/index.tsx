@@ -12,6 +12,7 @@ import {
 } from "@keplr-wallet/background";
 import { View } from "react-native";
 import { useSmartNavigation } from "../../../../navigation";
+import { AppCoinType, App } from "@keplr-wallet/ledger-cosmos";
 
 const CheckIcon: FunctionComponent<{
   color: string;
@@ -48,11 +49,36 @@ export const getKeyStoreParagraph = (keyStore: MultiKeyStoreInfoElem) => {
 
   switch (keyStore.type) {
     case "ledger":
-      return `Ledger - m/44'/118'/${bip44HDPath.account}'${
+      const coinType = (() => {
+        if (
+          keyStore.meta &&
+          keyStore.meta["__ledger__cosmos_app_like__"] &&
+          keyStore.meta["__ledger__cosmos_app_like__"] !== "Cosmos"
+        ) {
+          return (
+            AppCoinType[keyStore.meta["__ledger__cosmos_app_like__"] as App] ||
+            118
+          );
+        }
+
+        return 118;
+      })();
+
+      let paragraph = `Ledger - m/44'/${coinType}'/${bip44HDPath.account}'${
         bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
           ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
           : ""
       }`;
+
+      if (
+        keyStore.meta &&
+        keyStore.meta["__ledger__cosmos_app_like__"] &&
+        keyStore.meta["__ledger__cosmos_app_like__"] !== "Cosmos"
+      ) {
+        paragraph += ` (${keyStore.meta["__ledger__cosmos_app_like__"]})`;
+      }
+
+      return paragraph;
     case "mnemonic":
       if (
         bip44HDPath.account !== 0 ||

@@ -179,7 +179,33 @@ export class RootStore {
       },
       CosmosAccount.use({
         queriesStore: this.queriesStore,
-        msgOptsCreator: () => {
+        msgOptsCreator: (chainId: string) => {
+          // For terra related chains
+          if (
+            chainId.startsWith("bombay-") ||
+            chainId.startsWith("columbus-")
+          ) {
+            return {
+              send: {
+                native: {
+                  type: "bank/MsgSend",
+                },
+              },
+              withdrawRewards: {
+                type: "distribution/MsgWithdrawDelegationReward",
+              },
+              delegate: {
+                type: "staking/MsgDelegate",
+              },
+              undelegate: {
+                type: "staking/MsgUndelegate",
+              },
+              redelegate: {
+                type: "staking/MsgBeginRedelegate",
+              },
+            };
+          }
+
           return {
             send: {
               native: {

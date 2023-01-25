@@ -89,7 +89,9 @@ export const useRedelegateTxConfig = (
     sender,
     amountConfig,
     gasConfig,
-    false
+    {
+      additionAmountToNeedFee: false,
+    }
   );
 
   const recipientConfig = useRecipientConfig(chainGetter, chainId);

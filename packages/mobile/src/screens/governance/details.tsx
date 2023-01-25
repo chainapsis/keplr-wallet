@@ -25,6 +25,7 @@ import { RectButton } from "../../components/rect-button";
 import { useSmartNavigation } from "../../navigation";
 import MarkdownIt from "markdown-it";
 import { MemoizedHtmlRender } from "./internal/markdown";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
@@ -169,6 +170,17 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
     return width - pxNum * 2;
   })();
 
+  const additionalBondedToken = (() => {
+    if (ChainIdHelper.parse(chainStore.current.chainId).identifier === "mars") {
+      return queries.queryBalances
+        .getQueryBech32Address(
+          "mars14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9smxjtde"
+        )
+        .stakable.balance.toDec();
+    }
+    return undefined;
+  })();
+
   return (
     <CardBody>
       {proposal ? (
@@ -208,7 +220,8 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
               <View style={style.flatten(["flex-1"])} />
               <Text
                 style={style.flatten(["body3", "color-text-middle"])}
-              >{`${proposal.turnout
+              >{`${proposal
+                .calcTurnout(additionalBondedToken)
                 .trim(true)
                 .maxDecimals(1)
                 .toString()}%`}</Text>
@@ -231,7 +244,10 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
                   ]),
                   {
                     width: `${parseFloat(
-                      proposal.turnout.toDec().toString(1)
+                      proposal
+                        .calcTurnout(additionalBondedToken)
+                        .toDec()
+                        .toString(1)
                     )}%`,
                   },
                 ])}

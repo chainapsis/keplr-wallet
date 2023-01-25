@@ -313,8 +313,19 @@ export const LedgerGranterModal: FunctionComponent<{
                       <Text
                         style={style.flatten(["subtitle3", "color-text-high"])}
                       >
-                        1. Open the {ledgerInitStore.requestedLedgerApp} app on
-                        your Ledger device
+                        1. Open the{" "}
+                        {(() => {
+                          if (
+                            !ledgerInitStore.requestedLedgerApp ||
+                            ledgerInitStore.requestedLedgerApp ===
+                              LedgerApp.Cosmos
+                          ) {
+                            return ledgerInitStore.cosmosLikeApp || "Cosmos";
+                          }
+
+                          return ledgerInitStore.requestedLedgerApp;
+                        })()}{" "}
+                        app on your Ledger device
                       </Text>
                       <Text
                         style={style.flatten(["subtitle3", "color-text-high"])}
@@ -429,6 +440,7 @@ const LedgerNanoBLESelector: FunctionComponent<{
       return true;
     } catch (e) {
       console.log(e);
+
       if (e.errorOn != null) {
         initErrorOn = e.errorOn;
       } else {
@@ -467,7 +479,15 @@ const LedgerNanoBLESelector: FunctionComponent<{
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.App ? (
           <Text style={style.flatten(["subtitle3", "color-text-low"])}>
-            Please open {cosmosLikeApp || chain} App
+            Please open{" "}
+            {(() => {
+              if (!chain || chain === LedgerApp.Cosmos) {
+                return cosmosLikeApp || "Cosmos";
+              }
+
+              return chain;
+            })()}{" "}
+            App
           </Text>
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.Unknown ? (
