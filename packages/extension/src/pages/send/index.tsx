@@ -369,6 +369,30 @@ export const SendPage: FunctionComponent = observer(() => {
                 }
                 return false;
               })()}
+              overrideSelectableCurrencies={(() => {
+                if (
+                  chainStore.current.features &&
+                  chainStore.current.features.includes("terra-classic-fee")
+                ) {
+                  // At present, can't handle stability tax well if it is not registered native token.
+                  // So, for terra classic, disable other tokens.
+                  const currencies =
+                    sendConfigs.amountConfig.sendableCurrencies;
+                  return currencies.filter((cur) => {
+                    const denom = new DenomHelper(cur.coinMinimalDenom);
+                    if (
+                      denom.type !== "native" ||
+                      denom.denom.startsWith("ibc/")
+                    ) {
+                      return false;
+                    }
+
+                    return true;
+                  });
+                }
+
+                return undefined;
+              })()}
             />
             <MemoInput
               memoConfig={sendConfigs.memoConfig}
