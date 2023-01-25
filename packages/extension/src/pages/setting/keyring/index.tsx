@@ -69,6 +69,24 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                 change: 0,
                 addressIndex: 0,
               };
+          let paragraph = keyStore.meta?.email
+            ? keyStore.meta.email
+            : undefined;
+          if (keyStore.type === "ledger") {
+            paragraph = `Ledger - m/44'/118'/${bip44HDPath.account}'${
+              bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
+                ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
+                : ""
+            }`;
+
+            if (
+              keyStore.meta &&
+              keyStore.meta["__ledger__cosmos_app_like__"] &&
+              keyStore.meta["__ledger__cosmos_app_like__"] !== "Cosmos"
+            ) {
+              paragraph += ` (${keyStore.meta["__ledger__cosmos_app_like__"]})`;
+            }
+          }
 
           return (
             <PageButton
@@ -86,17 +104,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                     })
                   : ""
               }`}
-              paragraph={
-                keyStore.type === "ledger"
-                  ? `Ledger - m/44'/118'/${bip44HDPath.account}'${
-                      bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
-                        ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
-                        : ""
-                    }`
-                  : keyStore.meta?.email
-                  ? keyStore.meta.email
-                  : undefined
-              }
+              paragraph={paragraph}
               onClick={
                 keyStore.selected
                   ? undefined
@@ -108,7 +116,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                         analyticsStore.logEvent("Account changed");
                         loadingIndicator.setIsLoading("keyring", false);
                         history.push("/");
-                      } catch (e) {
+                      } catch (e: any) {
                         console.log(`Failed to change keyring: ${e.message}`);
                         loadingIndicator.setIsLoading("keyring", false);
                       }

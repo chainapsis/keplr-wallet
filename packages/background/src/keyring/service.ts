@@ -188,7 +188,8 @@ export class KeyRingService {
     kdf: "scrypt" | "sha256" | "pbkdf2",
     password: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp?: string
   ): Promise<{
     status: KeyRingStatus;
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
@@ -198,7 +199,8 @@ export class KeyRingService {
       kdf,
       password,
       meta,
-      bip44HDPath
+      bip44HDPath,
+      cosmosLikeApp
     );
   }
 
@@ -638,11 +640,18 @@ export class KeyRingService {
     env: Env,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp?: string
   ): Promise<{
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
-    return this.keyRing.addLedgerKey(env, kdf, meta, bip44HDPath);
+    return this.keyRing.addLedgerKey(
+      env,
+      kdf,
+      meta,
+      bip44HDPath,
+      cosmosLikeApp
+    );
   }
 
   public async changeKeyStoreFromMultiKeyStore(

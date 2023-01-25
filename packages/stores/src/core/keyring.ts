@@ -203,9 +203,16 @@ export class KeyRingStore {
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
+    cosmosLikeApp: string,
     kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
-    const msg = new CreateLedgerKeyMsg(kdf, password, meta, bip44HDPath);
+    const msg = new CreateLedgerKeyMsg(
+      kdf,
+      password,
+      meta,
+      bip44HDPath,
+      cosmosLikeApp
+    );
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -242,9 +249,10 @@ export class KeyRingStore {
   *addLedgerKey(
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
+    cosmosLikeApp: string,
     kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
-    const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath);
+    const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath, cosmosLikeApp);
     this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     )).multiKeyStoreInfo;

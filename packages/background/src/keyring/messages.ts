@@ -311,7 +311,8 @@ export class CreateLedgerKeyMsg extends Message<{
     public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly password: string,
     public readonly meta: Record<string, string>,
-    public readonly bip44HDPath: BIP44HDPath
+    public readonly bip44HDPath: BIP44HDPath,
+    public readonly cosmosLikeApp?: string
   ) {
     super();
   }
@@ -393,7 +394,8 @@ export class AddLedgerKeyMsg extends Message<{
   constructor(
     public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly meta: Record<string, string>,
-    public readonly bip44HDPath: BIP44HDPath
+    public readonly bip44HDPath: BIP44HDPath,
+    public readonly cosmosLikeApp?: string
   ) {
     super();
   }

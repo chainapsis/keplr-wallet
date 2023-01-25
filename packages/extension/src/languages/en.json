@@ -163,6 +163,7 @@
   "register.import.textarea.private-key.error.invalid": "Invalid private key",
   "register.import.textarea.private-key.error.invalid-length": "Invalid length of private key",
   "register.create.button.next": "Next",
+  "register.create.button.ledger.terra": "Use Terra Ledger app",
 
   "register.ledger.title": "Import ledger",
 

@@ -304,7 +304,8 @@ export class KeyRing {
     kdf: "scrypt" | "sha256" | "pbkdf2",
     password: string,
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp?: string
   ): Promise<{
     status: KeyRingStatus;
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
@@ -317,11 +318,19 @@ export class KeyRing {
       );
     }
 
+    if (cosmosLikeApp) {
+      meta = {
+        ...meta,
+        __ledger__cosmos_app_like__: cosmosLikeApp,
+      };
+    }
+
     // Get public key first
     const publicKey = await this.ledgerKeeper.getPublicKey(
       env,
       LedgerApp.Cosmos,
-      bip44HDPath
+      bip44HDPath,
+      cosmosLikeApp
     );
 
     const pubKeys = {
@@ -781,11 +790,17 @@ export class KeyRing {
         throw new Error("Can't sign cosmos sign doc by ethereum app on ledger");
       }
 
+      const cosmosLikeApp =
+        (this.keyStore.meta
+          ? this.keyStore.meta["__ledger__cosmos_app_like__"]
+          : undefined) || "Cosmos";
+
       return await this.ledgerKeeper.sign(
         env,
         KeyRing.getKeyStoreBIP44Path(this.keyStore),
         await this.ensureLedgerPublicKey(LedgerApp.Cosmos),
-        message
+        message,
+        cosmosLikeApp
       );
     } else {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
@@ -984,7 +999,8 @@ export class KeyRing {
     env: Env,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp?: string
   ): Promise<{
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
@@ -996,11 +1012,19 @@ export class KeyRing {
       );
     }
 
+    if (cosmosLikeApp) {
+      meta = {
+        ...meta,
+        __ledger__cosmos_app_like__: cosmosLikeApp,
+      };
+    }
+
     // Get public key first
     const publicKey = await this.ledgerKeeper.getPublicKey(
       env,
       LedgerApp.Cosmos,
-      bip44HDPath
+      bip44HDPath,
+      cosmosLikeApp
     );
 
     const pubKeys = {

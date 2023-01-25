@@ -151,6 +151,7 @@
   "register.import.textarea.private-key.error.invalid": "잘못된 개인키 입니다",
   "register.import.textarea.private-key.error.invalid-length": "잘못된 길이의 개인키 입니다",
   "register.create.button.next": "다음",
+  "register.create.button.ledger.terra": "테라 앱 사용하기",
 
   "register.ledger.title": "렛저 계정 불러오기",
 
