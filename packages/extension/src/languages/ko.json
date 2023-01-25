@@ -35,6 +35,15 @@
   "main.update-chain.confirm.yes": "진행",
   "main.update-chain.confirm.no": "무시",
 
+  "main.authz.title": "AuthZ",
+  "main.authz.grant.grantee.information": "You authorized ",
+  "main.authz.grant.grantee.address": "Grantee Address",
+  "main.authz.grant.expiration.title": "Expiration dates",
+  "main.authz.grant.expiration.information": "Expiration dates: ",
+  "main.authz.grant.expiration.expired": "Expired",
+  "main.authz.grant.expiration.infinite": "Your Authz delegation will not be expired until you revoke it.",
+  "main.authz.grant.revoke": "Revoke",
+
   "setting.language": "언어",
   "setting.language.automatic": "자동 (브라우저 언어)",
   "setting.language.automatic-with-language": "자동 ({language})",
