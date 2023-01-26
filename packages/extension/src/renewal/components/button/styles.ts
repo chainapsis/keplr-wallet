@@ -244,15 +244,17 @@ export const Styles = {
     line-height: 110%;
     letter-spacing: 0.2px;
 
+    white-space: nowrap;
+
     // Remove normalized css properties.
     border-width: 0;
     border-style: none;
     border-color: transparent;
     border-image: none;
-    padding: 0;
+    padding: 0 0.75rem;
 
     ${({ mode }) => {
-      if (mode) {
+      if (mode === "text") {
         // Add additional touch area for text mode.
         return css`
           padding: 0 7.5%;

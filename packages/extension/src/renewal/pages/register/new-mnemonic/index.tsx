@@ -123,14 +123,16 @@ export const NewMnemonicScene: FunctionComponent = () => {
             <Gutter size="1rem" />
           </VerticalResizeTransition>
         </Bleed>
-        <Button
-          mode="light"
-          size="small"
-          text="Set BIP Path"
-          onClick={() => {
-            alert("TODO: Not yet implemented");
-          }}
-        />
+        <Box alignX="center">
+          <Button
+            mode="light"
+            size="small"
+            text="Set BIP Path"
+            onClick={() => {
+              alert("TODO: Not yet implemented");
+            }}
+          />
+        </Box>
         <Gutter size="1rem" />
         <Button
           text="Next"

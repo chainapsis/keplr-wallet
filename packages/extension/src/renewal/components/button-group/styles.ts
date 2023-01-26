@@ -13,15 +13,14 @@ export const Styles = {
     selected: boolean;
     buttonMinWidth?: string;
   }>`
-    // Setting "flex-basis" as "auto" is important to prevent text break when text has spaces.
-    flex: 1 1 auto;
+    flex: 1;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     height: 100%;
-    padding: 0 0.5rem;
+    padding: 0 0.75rem;
     min-width: ${({ buttonMinWidth }) => buttonMinWidth};
 
     ${({ selected }) => {
@@ -42,6 +41,8 @@ export const Styles = {
     line-height: 125%;
     letter-spacing: -0.1px;
     color: ${ColorPalette["gray-300"]};
+
+    white-space: nowrap;
 
     ${({ selected }) => {
       if (selected) {
