@@ -367,16 +367,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         if (taxRate && taxRate.toDec().gt(new Dec(0))) {
           const sendAmount = this.amountConfig.getAmountPrimitive();
           if (sendAmount.denom === this.feeCurrency?.coinMinimalDenom) {
-            feeAmount = feeAmount.add(
-              new Dec(sendAmount.amount).mul(taxRate.toDec())
-            );
-
+            let tax = new Dec(sendAmount.amount).mul(taxRate.toDec());
             const taxCap = etcQueries.queryTerraClassicTaxCaps.getTaxCaps(
               sendAmount.denom
             );
-            if (taxCap && feeAmount.roundUp().gt(taxCap)) {
-              feeAmount = taxCap.toDec();
+            if (taxCap && tax.roundUp().gt(taxCap)) {
+              tax = taxCap.toDec();
             }
+
+            feeAmount = feeAmount.add(tax);
           }
         }
       }
