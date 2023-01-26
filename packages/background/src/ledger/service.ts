@@ -46,29 +46,36 @@ export class LedgerService {
   async getPublicKey(
     env: Env,
     ledgerApp: LedgerApp,
-    bip44HDPath: BIP44HDPath
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp: string = "Cosmos"
   ): Promise<Uint8Array> {
-    return await this.useLedger(env, ledgerApp, async (ledger, retryCount) => {
-      try {
-        // Specific apps only support each coin type for app.
-        return await ledger.getPublicKey(ledgerApp, bip44HDPath);
-      } finally {
-        // Notify UI Ledger pubkey derivation succeeded only when Ledger initialization is tried again.
-        if (retryCount > 0) {
-          this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
-            event: "get-pubkey",
-            success: true,
-          });
+    return await this.useLedger(
+      env,
+      ledgerApp,
+      async (ledger, retryCount) => {
+        try {
+          // Specific apps only support each coin type for app.
+          return await ledger.getPublicKey(ledgerApp, bip44HDPath);
+        } finally {
+          // Notify UI Ledger pubkey derivation succeeded only when Ledger initialization is tried again.
+          if (retryCount > 0) {
+            this.interactionService.dispatchEvent(APP_PORT, "ledger-init", {
+              event: "get-pubkey",
+              success: true,
+            });
+          }
         }
-      }
-    });
+      },
+      cosmosLikeApp
+    );
   }
 
   async sign(
     env: Env,
     bip44HDPath: BIP44HDPath,
     expectedPubKey: Uint8Array,
-    message: Uint8Array
+    message: Uint8Array,
+    cosmosLikeApp: string = "Cosmos"
   ): Promise<Uint8Array> {
     const ledgerApp = LedgerApp.Cosmos;
 
@@ -104,7 +111,8 @@ export class LedgerService {
           }
           throw e;
         }
-      }
+      },
+      cosmosLikeApp
     );
   }
 
@@ -159,11 +167,12 @@ export class LedgerService {
   async useLedger<T>(
     env: Env,
     ledgerApp: LedgerApp,
-    fn: (ledger: Ledger, retryCount: number) => Promise<T>
+    fn: (ledger: Ledger, retryCount: number) => Promise<T>,
+    cosmosLikeApp: string = "Cosmos"
   ): Promise<T> {
     let ledger: { ledger: Ledger; retryCount: number } | undefined;
     try {
-      ledger = await this.initLedger(env, ledgerApp);
+      ledger = await this.initLedger(env, ledgerApp, cosmosLikeApp);
       return await fn(ledger.ledger, ledger.retryCount);
     } finally {
       if (ledger) {
@@ -174,7 +183,8 @@ export class LedgerService {
 
   async initLedger(
     env: Env,
-    ledgerApp: LedgerApp
+    ledgerApp: LedgerApp,
+    cosmosLikeApp: string = "Cosmos"
   ): Promise<{ ledger: Ledger; retryCount: number }> {
     if (this.previousInitAborter) {
       this.previousInitAborter(
@@ -215,7 +225,12 @@ export class LedgerService {
           throw new KeplrError("ledger", 112, `Unknown mode: ${mode}`);
         }
 
-        const ledger = await Ledger.init(transportIniter, initArgs, ledgerApp);
+        const ledger = await Ledger.init(
+          transportIniter,
+          initArgs,
+          ledgerApp,
+          cosmosLikeApp
+        );
         this.previousInitAborter = undefined;
         return {
           ledger,
@@ -237,6 +252,7 @@ export class LedgerService {
                   event: "init-failed",
                   ledgerApp,
                   mode,
+                  cosmosLikeApp,
                 },
                 {
                   forceOpenWindow: true,
