@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/ledger-cosmos",
-  "version": "0.11.34",
+  "version": "0.11.35-rc.0",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -15,8 +15,6 @@
     "test": "jest --passWithNoTests",
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
-  },
-  "devDependencies": {
   },
   "dependencies": {
     "buffer": "^6.0.3"
