@@ -257,6 +257,9 @@ export class RootStore {
                   type: "bank/MsgSend",
                 },
               },
+              withdrawRewards: {
+                type: "distribution/MsgWithdrawDelegationReward",
+              },
             };
           }
 
