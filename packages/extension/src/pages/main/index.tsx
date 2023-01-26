@@ -26,6 +26,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { VestingInfo } from "./vesting-info";
 import { LedgerAppModal } from "./ledger-app-modal";
 import { EvmosDashboardView } from "./evmos-dashboard";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -165,6 +166,22 @@ export const MainPage: FunctionComponent = observer(() => {
           <img
             src={require("../../public/assets/img/icns-banner.png")}
             style={{ width: "100%", marginBottom: "12px" }}
+          />
+        </a>
+      ) : null}
+      {ChainIdHelper.parse(current.chainId).identifier === "stargaze" ? (
+        <a
+          href="https://www.stargaze.zone/names"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img
+            src={require("../../public/assets/img/stargaze_banner.png")}
+            style={{
+              width: "100%",
+              marginBottom: "12px",
+              borderRadius: "4px",
+            }}
           />
         </a>
       ) : null}
