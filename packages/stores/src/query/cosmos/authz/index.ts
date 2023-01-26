@@ -17,7 +17,7 @@ export class ObservableQueryAuthZGranterInner extends ObservableChainQuery<Grant
       kvStore,
       chainId,
       chainGetter,
-      `/cosmos/authz/v1beta1/grants/granter/${granter}`
+      `/cosmos/authz/v1beta1/grants/granter/${granter}?pagination.limit=1000`
     );
   }
 }
