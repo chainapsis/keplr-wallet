@@ -32,7 +32,7 @@ export interface SendAuthorization extends BaseAuthorization {
 
 export interface StakeAuthorization extends BaseAuthorization {
   authorization_type: string;
-  max_tokens: TokenAmount;
+  max_tokens?: TokenAmount;
   deny_list?: { address: string[] };
   allow_list?: { address: string[] };
 }
