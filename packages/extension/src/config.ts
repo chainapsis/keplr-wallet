@@ -2052,7 +2052,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     chainId: "columbus-5",
     chainName: "Terra Classic",
     stakeCurrency: {
-      coinDenom: "LUNA",
+      coinDenom: "LUNC",
       coinMinimalDenom: "uluna",
       coinDecimals: 6,
       coinGeckoId: "terra-luna",
@@ -2074,7 +2074,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     currencies: [
       {
-        coinDenom: "LUNA",
+        coinDenom: "LUNC",
         coinMinimalDenom: "uluna",
         coinDecimals: 6,
         coinGeckoId: "terra-luna",
@@ -2088,7 +2088,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     feeCurrencies: [
       {
-        coinDenom: "LUNA",
+        coinDenom: "LUNC",
         coinMinimalDenom: "uluna",
         coinDecimals: 6,
         coinGeckoId: "terra-luna",
