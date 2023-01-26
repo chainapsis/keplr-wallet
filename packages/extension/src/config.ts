@@ -2042,6 +2042,11 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uluna",
         coinDecimals: 6,
         coinGeckoId: "terra-luna-2",
+        gasPriceStep: {
+          low: 0.15,
+          average: 0.25,
+          high: 0.4,
+        },
       },
     ],
     features: [],
@@ -2057,10 +2062,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinDecimals: 6,
       coinGeckoId: "terra-luna",
     },
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/columbus"
-        : "http://localhost:8080/chains/columbus",
     bip44: {
       coinType: 330,
     },
