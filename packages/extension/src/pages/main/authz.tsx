@@ -8,10 +8,6 @@ import { AuthZ } from "@keplr-wallet/stores";
 import { useHistory } from "react-router";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
-import {
-  GenericAuthorization,
-  StakeAuthorization,
-} from "@keplr-wallet/stores/build/query/cosmos/authz/types";
 
 interface Props {
   grants: AuthZ.Grant[];
@@ -19,10 +15,10 @@ interface Props {
 
 interface GrantFilter {
   name: string;
-  filter: (grant: AuthZ.Grant) => void;
+  filter: (grant: AuthZ.Grant) => boolean;
 }
 
-export const AuthZView: FunctionComponent<Props> = (props: Props) => {
+export const AuthZView: FunctionComponent<Props> = (props) => {
   const { grants } = props;
   const history = useHistory();
 
@@ -43,58 +39,58 @@ export const AuthZView: FunctionComponent<Props> = (props: Props) => {
       filter: (grant: AuthZ.Grant) =>
         isSendAuthorization(grant) ||
         (isGenericAuthorization(grant) &&
-          (grant.authorization as GenericAuthorization).msg ===
+          (grant.authorization as AuthZ.GenericAuthorization).msg ===
             "/cosmos.bank.v1beta1.MsgSend"),
     },
     {
       name: "Delegate",
       filter: (grant: AuthZ.Grant) =>
         (isStakeAuthorization(grant) &&
-          (grant.authorization as StakeAuthorization).authorization_type ===
-            "AUTHORIZATION_TYPE_DELEGATE") ||
+          (grant.authorization as AuthZ.StakeAuthorization)
+            .authorization_type === "AUTHORIZATION_TYPE_DELEGATE") ||
         (isGenericAuthorization(grant) &&
-          (grant.authorization as GenericAuthorization).msg ===
+          (grant.authorization as AuthZ.GenericAuthorization).msg ===
             "/cosmos.staking.v1beta1.MsgDelegate"),
     },
     {
       name: "Redelegate",
       filter: (grant: AuthZ.Grant) =>
         (isStakeAuthorization(grant) &&
-          (grant.authorization as StakeAuthorization).authorization_type ===
-            "AUTHORIZATION_TYPE_REDELEGATE") ||
+          (grant.authorization as AuthZ.StakeAuthorization)
+            .authorization_type === "AUTHORIZATION_TYPE_REDELEGATE") ||
         (isGenericAuthorization(grant) &&
-          (grant.authorization as GenericAuthorization).msg ===
+          (grant.authorization as AuthZ.GenericAuthorization).msg ===
             "/cosmos.staking.v1beta1.MsgBeginRedelegate"),
     },
     {
       name: "Undelegate",
       filter: (grant: AuthZ.Grant) =>
         (isStakeAuthorization(grant) &&
-          (grant.authorization as StakeAuthorization).authorization_type ===
-            "AUTHORIZATION_TYPE_UNDELEGATE") ||
+          (grant.authorization as AuthZ.StakeAuthorization)
+            .authorization_type === "AUTHORIZATION_TYPE_UNDELEGATE") ||
         (isGenericAuthorization(grant) &&
-          (grant.authorization as GenericAuthorization).msg ===
+          (grant.authorization as AuthZ.GenericAuthorization).msg ===
             "/cosmos.staking.v1beta1.MsgUndelegate"),
     },
     {
       name: "Withdraw Reward",
       filter: (grant: AuthZ.Grant) =>
         isGenericAuthorization(grant) &&
-        (grant.authorization as GenericAuthorization).msg ===
+        (grant.authorization as AuthZ.GenericAuthorization).msg ===
           "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
     },
     {
       name: "Vote",
       filter: (grant: AuthZ.Grant) =>
         isGenericAuthorization(grant) &&
-        (grant.authorization as GenericAuthorization).msg ===
+        (grant.authorization as AuthZ.GenericAuthorization).msg ===
           "/cosmos.gov.v1beta1.MsgVote",
     },
     {
       name: "Deposit",
       filter: (grant: AuthZ.Grant) =>
         isGenericAuthorization(grant) &&
-        (grant.authorization as GenericAuthorization).msg ===
+        (grant.authorization as AuthZ.GenericAuthorization).msg ===
           "/cosmos.gov.v1beta1.MsgDeposit",
     },
     {
@@ -109,7 +105,7 @@ export const AuthZView: FunctionComponent<Props> = (props: Props) => {
           "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
           "/cosmos.gov.v1beta1.MsgDeposit",
           "/cosmos.gov.v1beta1.MsgVote",
-        ].includes((grant.authorization as GenericAuthorization).msg),
+        ].includes((grant.authorization as AuthZ.GenericAuthorization).msg),
     },
   ];
 

@@ -1,14 +1,13 @@
-import React, { FunctionComponent, ReactNode, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 import styleCollapse from "./style.module.scss";
 import classNames from "classnames";
 
 interface Props {
   title: string;
   count?: string;
-  children: ReactNode;
 }
 
-export const Collapse: FunctionComponent<Props> = (props: Props) => {
+export const Collapse: FunctionComponent<Props> = (props) => {
   const { title, count, children } = props;
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
