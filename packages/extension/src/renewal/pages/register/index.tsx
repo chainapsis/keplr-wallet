@@ -13,6 +13,7 @@ import { Gutter } from "../../components/gutter";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { Box } from "../../components/box";
 import { SetAccountInfoScene } from "./set-account-info";
+import { RegisterCardHeader } from "./card-top-header";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -62,7 +63,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
   return (
     <Container>
       <Box width="100%" maxWidth="34.25rem" position="relative">
-        <TopHeader
+        <RegisterCardHeader
           collapsed={topHeaderCollapsed}
           onBackClick={() => {
             if (sceneRef.current && sceneRef.current.stack.length > 1) {
@@ -98,42 +99,6 @@ export const RegisterPage: FunctionComponent = observer(() => {
     </Container>
   );
 });
-
-const TopHeader: FunctionComponent<{
-  collapsed: boolean;
-  onBackClick: () => void;
-}> = ({ collapsed, onBackClick }) => {
-  return (
-    <Box
-      position="absolute"
-      height="2.5rem"
-      width="100%"
-      alignY="center"
-      zIndex={1000}
-    >
-      <VerticalCollapseTransition
-        collapsed={collapsed}
-        transitionAlign="center"
-      >
-        <div
-          style={{
-            fontSize: "1rem",
-            cursor: "pointer",
-            marginLeft: "0.5rem",
-            display: "inline-block",
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-
-            onBackClick();
-          }}
-        >
-          Back
-        </div>
-      </VerticalCollapseTransition>
-    </Box>
-  );
-};
 
 const BottomIntroParagraph: FunctionComponent<{
   collapsed: boolean;
