@@ -47,6 +47,11 @@
     cursor: pointer;
 
     .title {
+      display: flex;
+      flex-direction: row;
+
+      gap: 4px;
+
       font-weight: 400;
       font-size: 14px;
       line-height: 14px;
@@ -55,6 +60,14 @@
 
       .bold {
         font-weight: 600;
+      }
+
+      .tooltip {
+        font-weight: 400;
+        font-size: 10px;
+        line-height: 10px;
+
+        padding: 2px 4px;
       }
     }
 

@@ -40,7 +40,7 @@
   "main.update-chain.confirm.no": "Ignore",
 
   "main.authz.title": "AuthZ",
-  "main.authz.grant.grantee.information": "You authorized ",
+  "main.authz.grant.grantee.information": "You authorized",
   "main.authz.grant.grantee.address": "Grantee Address",
   "main.authz.grant.expiration.title": "Expiration dates",
   "main.authz.grant.expiration.information": "Expiration dates: ",
