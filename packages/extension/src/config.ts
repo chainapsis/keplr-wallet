@@ -2015,8 +2015,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     },
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/columbus"
-        : "http://localhost:8080/chains/columbus",
+        ? "https://wallet.keplr.app/chains/terra"
+        : "http://localhost:8080/chains/terra",
     bip44: {
       coinType: 330,
     },
