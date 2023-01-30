@@ -4,6 +4,7 @@ export const CosmosMethods = [
   "cosmos_getAccounts",
   "cosmos_signDirect",
   "cosmos_signAmino",
+  "keplr_getKey",
 ];
 // https://docs.walletconnect.com/2.0/javascript/web3wallet/wallet-usage#emit-session-events
 // On docs, it describes only about ethereum.

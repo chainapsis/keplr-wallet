@@ -1,8 +1,11 @@
 import SignClient from "@walletconnect/sign-client";
-import { action, autorun, makeObservable, observable } from "mobx";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { CosmosEvents, CosmosMethods, SessionProposalSchema } from "./schema";
 import { KeyRingStore, PermissionStore } from "@keplr-wallet/stores";
-import { KeyRingStatus } from "@keplr-wallet/background";
+import {
+  getBasicAccessPermissionType,
+  KeyRingStatus,
+} from "@keplr-wallet/background";
 import { ChainStore } from "../chain";
 import { WCV2MessageRequester } from "./msg-requester";
 import { Keplr } from "@keplr-wallet/provider";
@@ -11,6 +14,7 @@ import { Buffer } from "buffer/";
 import { getRandomBytesAsync } from "../../common";
 import { KVStore } from "@keplr-wallet/common";
 import Long from "long";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 function noop(fn: () => void): void {
   fn();
@@ -48,6 +52,10 @@ export class WalletConnectV2Store {
 
   constructor(
     protected readonly kvStore: KVStore,
+    protected readonly eventListener: {
+      addEventListener: (type: string, fn: () => unknown) => void;
+      removeEventListener: (type: string, fn: () => unknown) => void;
+    },
     protected readonly chainStore: ChainStore,
     protected readonly keyRingStore: KeyRingStore,
     protected readonly permissionStore: PermissionStore
@@ -58,14 +66,27 @@ export class WalletConnectV2Store {
   }
 
   protected async init(): Promise<void> {
-    this.signClient = await SignClient.init({
+    const signClient = await SignClient.init({
       projectId: "649c7f2209d1d1c8b6b9c2686fadd03e",
       relayerUrl: "wss://relay.walletconnect.com",
     });
 
-    this.signClient.on("session_proposal", this.onSessionProposal.bind(this));
-    this.signClient.on("session_request", this.onSessionRequest.bind(this));
-    this.signClient.on("session_delete", this.onSessionDelete.bind(this));
+    runInAction(() => {
+      this.signClient = signClient;
+    });
+
+    this.signClient!.on("session_proposal", this.onSessionProposal.bind(this));
+    this.signClient!.on("session_request", this.onSessionRequest.bind(this));
+    this.signClient!.on("session_delete", this.onSessionDelete.bind(this));
+
+    this.eventListener.addEventListener(
+      "keplr_keystoreunlock",
+      this.accountMayChanged.bind(this)
+    );
+    this.eventListener.addEventListener(
+      "keplr_keystorechange",
+      this.accountMayChanged.bind(this)
+    );
   }
 
   async getSessionMetadata(
@@ -102,8 +123,53 @@ export class WalletConnectV2Store {
     }
   }
 
+  getSession(
+    topic: string
+  ):
+    | {
+        topic: string;
+        namespaces: Record<
+          string,
+          | {
+              accounts: string[];
+              methods: string[];
+              events: string[];
+            }
+          | undefined
+        >;
+        peer: {
+          metadata: {
+            name?: string;
+            description?: string;
+            url?: string;
+            icons?: string[];
+          };
+        };
+      }
+    | undefined {
+    if (!this.signClient) {
+      return;
+    }
+
+    try {
+      return this.signClient.session.get(topic);
+    } catch (e) {
+      console.log(e);
+      return;
+    }
+  }
+
   getSessions(): {
     topic: string;
+    namespaces: Record<
+      string,
+      | {
+          accounts: string[];
+          methods: string[];
+          events: string[];
+        }
+      | undefined
+    >;
     peer: {
       metadata: {
         name?: string;
@@ -138,6 +204,100 @@ export class WalletConnectV2Store {
     this.forceReaction();
 
     await this.topicDisconnected(topic);
+  }
+
+  protected async accountMayChanged(): Promise<void> {
+    await this.ensureInit();
+
+    const sessions = this.getSessions();
+    for (const session of sessions) {
+      // no need to wait
+      this.accountMayChangedSession(session.topic);
+    }
+  }
+
+  /*
+    Based on the permissions allowed for each session, check if any changes are required for accounts in existing sessions.
+    If change is required, the session is updated and "accountsChanged" event is raised.
+   */
+  protected async accountMayChangedSession(topic: string): Promise<void> {
+    const signClient = await this.ensureInit();
+
+    const session = this.getSession(topic);
+    if (session) {
+      if (!session.namespaces["cosmos"]) {
+        return;
+      }
+
+      const namespaceMap: Record<string, string | undefined> = {};
+      for (const account of session.namespaces["cosmos"]!.accounts) {
+        const split = account.split(":");
+        if (split.length !== 3) {
+          return;
+        }
+        if (split[0] !== "cosmos") {
+          return;
+        }
+        const chainId = split[1];
+        namespaceMap[ChainIdHelper.parse(chainId).identifier] = split[2];
+      }
+
+      const newNamespaces = {
+        cosmos: {
+          ...session.namespaces["cosmos"],
+          accounts: [] as string[],
+        },
+      };
+
+      const changedInfos: { caip10: string; account: string }[] = [];
+
+      const randomId = await this.getRandomIdByTopic(topic);
+      if (randomId) {
+        const permittedChains = await this.permissionStore.getOriginPermittedChains(
+          WCV2MessageRequester.getVirtualURL(randomId),
+          getBasicAccessPermissionType()
+        );
+
+        const keplr = this.createKeplrAPI(randomId);
+
+        for (const chain of permittedChains) {
+          if (this.chainStore.hasChain(chain)) {
+            const key = await keplr.getKey(chain);
+            const chainInfo = this.chainStore.getChain(chain);
+
+            const account = `cosmos:${chainInfo.chainId}:${key.bech32Address}`;
+
+            newNamespaces.cosmos.accounts.push(account);
+
+            if (namespaceMap[chain] !== key.bech32Address) {
+              changedInfos.push({
+                caip10: `cosmos:${chainInfo.chainId}`,
+                account,
+              });
+            }
+          }
+        }
+      }
+
+      if (changedInfos.length > 0) {
+        await signClient.update({
+          topic,
+          namespaces: newNamespaces,
+        });
+
+        for (const changedInfo of changedInfos) {
+          // No need to wait
+          signClient.emit({
+            topic,
+            event: {
+              name: "accountsChanged",
+              data: [changedInfo.account],
+            },
+            chainId: changedInfo.caip10,
+          });
+        }
+      }
+    }
   }
 
   protected async onSessionDelete(event: any) {
@@ -277,6 +437,12 @@ export class WalletConnectV2Store {
         throw new Error("Unregistered topic");
       }
 
+      // Store permitted chains before processing request.
+      const permittedChains = await this.permissionStore.getOriginPermittedChains(
+        WCV2MessageRequester.getVirtualURL(reqId),
+        getBasicAccessPermissionType()
+      );
+
       const keplr = this.createKeplrAPI(reqId);
 
       const params = event.params.request.params;
@@ -366,6 +532,20 @@ export class WalletConnectV2Store {
         }
         default:
           throw new Error("Unknown request method");
+      }
+
+      // Keplr asks permission to user according to requests.
+      // It is possible that new permission added to session after requests.
+      // If changes exists, try to update session and emit event.
+      const newPermittedChains = await this.permissionStore.getOriginPermittedChains(
+        WCV2MessageRequester.getVirtualURL(reqId),
+        getBasicAccessPermissionType()
+      );
+      if (
+        JSON.stringify(permittedChains) !== JSON.stringify(newPermittedChains)
+      ) {
+        // No need to wait.
+        this.accountMayChangedSession(topic);
       }
     } catch (e) {
       console.log(e);
