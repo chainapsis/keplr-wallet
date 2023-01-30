@@ -292,7 +292,7 @@ export class WalletConnectV2Store {
                 {
                   algo: key.algo,
                   address: key.bech32Address,
-                  pubkey: Buffer.from(key.pubKey).toString("hex"),
+                  pubkey: Buffer.from(key.pubKey).toString("base64"),
                 },
               ],
             },
