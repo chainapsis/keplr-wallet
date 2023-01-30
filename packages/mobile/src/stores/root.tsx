@@ -326,7 +326,8 @@ export class RootStore {
     this.walletConnectV2Store = new WalletConnectV2Store(
       new AsyncKVStore("store_wallet_connect_v2"),
       this.chainStore,
-      this.keyRingStore
+      this.keyRingStore,
+      this.permissionStore
     );
 
     // XXX: Remember that userId would be set by `StoreProvider`

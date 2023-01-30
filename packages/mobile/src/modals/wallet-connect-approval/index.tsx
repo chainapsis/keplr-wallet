@@ -38,13 +38,13 @@ export const WalletConnectApprovalModal: FunctionComponent<{
             WCMessageRequester.getSessionIdFromVirtualURL(data.origins[0])
           )?.peerMeta || undefined
         );
+      } else {
+        walletConnectV2Store
+          .getSessionMetadata(
+            WCV2MessageRequester.getIdFromVirtualURL(data.origins[0])
+          )
+          .then((r) => setPeerMeta(r));
       }
-
-      walletConnectV2Store
-        .getSessionMetadata(
-          WCV2MessageRequester.getIdFromVirtualURL(data.origins[0])
-        )
-        .then((r) => setPeerMeta(r));
     }, [data.origins, walletConnectStore, walletConnectV2Store]);
 
     const appName = peerMeta?.name || peerMeta?.url || "unknown";
