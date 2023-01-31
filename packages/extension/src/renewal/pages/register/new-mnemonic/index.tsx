@@ -18,10 +18,13 @@ import { Bleed } from "../../../components/bleed";
 import { HorizontalButtonGroup } from "../../../components/button-group";
 import { Box } from "../../../components/box";
 import { Mnemonic } from "@keplr-wallet/crypto";
+import { SetBip44PathCard, useBIP44PathState } from "../components/bip-44-path";
+import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { observer } from "mobx-react-lite";
 
 type WordsType = "12words" | "24words";
 
-export const NewMnemonicScene: FunctionComponent = () => {
+export const NewMnemonicScene: FunctionComponent = observer(() => {
   const sceneTransition = useSceneTransition();
 
   const [wordsType, setWordsType] = useState<WordsType>("12words");
@@ -66,10 +69,21 @@ export const NewMnemonicScene: FunctionComponent = () => {
     return r;
   }, [words]);
 
+  const bip44PathState = useBIP44PathState();
+  const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
+
   return (
     <RegisterSceneBox>
       <RegisterSceneBoxHeader>New mnemonic</RegisterSceneBoxHeader>
       <Stack>
+        <Styles.WarningContainer>
+          <b>Backup your mnemonic seed securely.</b>
+          <ul>
+            <li>Anyone with your mnemonic seed can take your assets.</li>
+            <li>{`Lost mnemonic seed can't be recovered.`}</li>
+          </ul>
+        </Styles.WarningContainer>
+        <Gutter size="2rem" />
         <Box alignX="center">
           <HorizontalButtonGroup
             buttons={[
@@ -123,24 +137,38 @@ export const NewMnemonicScene: FunctionComponent = () => {
             <Gutter size="1rem" />
           </VerticalResizeTransition>
         </Bleed>
-        <Box alignX="center">
-          <Button
-            mode="light"
-            size="small"
-            text="Set BIP Path"
-            onClick={() => {
-              alert("TODO: Not yet implemented");
+        <Gutter size="1rem" />
+        <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
+          <Box alignX="center">
+            <Button
+              mode="light"
+              size="small"
+              text="Set BIP Path"
+              onClick={() => {
+                setIsBIP44CardOpen(true);
+              }}
+            />
+          </Box>
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
+          <SetBip44PathCard
+            state={bip44PathState}
+            onClose={() => {
+              setIsBIP44CardOpen(false);
             }}
           />
-        </Box>
+        </VerticalCollapseTransition>
+
         <Gutter size="1rem" />
         <Button
           text="Next"
+          disabled={!bip44PathState.isValid()}
           onClick={() => {
             if (words.join(" ").trim() !== "") {
               sceneTransition.push("set-account-info", {
                 mnemonic: words.join(" "),
                 needVerifyMnemonic: true,
+                bip44Path: bip44PathState.getPath(),
               });
             }
           }}
@@ -148,4 +176,4 @@ export const NewMnemonicScene: FunctionComponent = () => {
       </Stack>
     </RegisterSceneBox>
   );
-};
+});

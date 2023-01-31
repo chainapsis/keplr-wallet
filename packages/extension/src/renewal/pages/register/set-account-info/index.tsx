@@ -18,6 +18,11 @@ import { VerifyingMnemonicBox, VerifyingMnemonicBoxRef } from "./verifying-box";
 export const SetAccountInfoScene: FunctionComponent<{
   mnemonic?: string;
   needVerifyMnemonic?: boolean;
+  bip44Path?: {
+    account: number;
+    change: number;
+    addressIndex: number;
+  };
   privateKeyHex?: string;
 }> = ({ mnemonic, needVerifyMnemonic, privateKeyHex }) => {
   const sceneTransition = useSceneTransition();
