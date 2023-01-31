@@ -13,6 +13,7 @@ buildscript {
     }
     repositories {
         google()
+        mavenCentral()  // Maven Central repository
         jcenter()
     }
     dependencies {
@@ -23,6 +24,8 @@ buildscript {
         classpath("com.bugsnag:bugsnag-android-gradle-plugin:5.+")
 
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+
+        classpath("com.google.gms:google-services:4.3.13")
     }
 }
 
@@ -40,6 +43,8 @@ allprojects {
 
         google()
         jcenter()
+        mavenCentral()  // Maven Central repository
+
         maven { url 'https://www.jitpack.io' }
     }
 }

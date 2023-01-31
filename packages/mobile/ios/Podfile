@@ -24,6 +24,10 @@ target 'mobile' do
     :hermes_enabled => false
   )
 
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseMessaging', :modular_headers => true
+
   target 'mobileTests' do
     inherit! :complete
     # Pods for testing

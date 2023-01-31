@@ -2,11 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>bugsnag</key>
-	<dict>
-		<key>apiKey</key>
-		<string>f07be1dce2391227e818fbe3e4235bf4</string>
-	</dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -64,6 +61,10 @@
 	<string>App uses camera to scan address, extension, and WalletConnect QR code</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>App uses Face ID to unlock wallet</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -80,7 +81,10 @@
 	<false/>
 	<key>XSAppIconAssets</key>
 	<string>Images.xcassets/AppIcon.appiconset</string>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-    <true/>
+	<key>bugsnag</key>
+	<dict>
+		<key>apiKey</key>
+		<string>f07be1dce2391227e818fbe3e4235bf4</string>
+	</dict>
 </dict>
 </plist>

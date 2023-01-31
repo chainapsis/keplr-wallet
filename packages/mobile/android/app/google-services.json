@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "323515528365",
+    "project_id": "fcm-test-97604",
+    "storage_bucket": "fcm-test-97604.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:323515528365:android:f386e8626104400feec224",
+        "android_client_info": {
+          "package_name": "com.chainapsis.keplr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "323515528365-lssn7tdf6j5gkk3vvvauqgaltbp4jl83.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWEc7_kLJg7xHHIVJupZKXHlKTd07ktHQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "323515528365-lssn7tdf6j5gkk3vvvauqgaltbp4jl83.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
