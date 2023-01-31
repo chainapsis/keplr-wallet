@@ -18,9 +18,11 @@ export const Button: FunctionComponent<ButtonProps> = ({
       <Styles.Button
         {...otherProps}
         onClick={(e) => {
-          e.preventDefault();
+          if (onClick) {
+            e.preventDefault();
 
-          onClick();
+            onClick();
+          }
         }}
       >
         {text}

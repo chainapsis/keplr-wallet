@@ -12,7 +12,7 @@ import { NewMnemonicScene } from "./new-mnemonic";
 import { Gutter } from "../../components/gutter";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { Box } from "../../components/box";
-import { SetAccountInfoScene } from "./set-account-info";
+import { VerifyMnemonicScene } from "./verify-mnemonic";
 import { RegisterCardHeader } from "./card-top-header";
 
 const Container = styled.div`
@@ -84,8 +84,8 @@ export const RegisterPage: FunctionComponent = observer(() => {
                 element: NewMnemonicScene,
               },
               {
-                name: "set-account-info",
-                element: SetAccountInfoScene,
+                name: "verify-mnemonic",
+                element: VerifyMnemonicScene,
               },
             ]}
             initialSceneProps={{

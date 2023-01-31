@@ -11,7 +11,10 @@ export interface ButtonProps {
   disabled?: boolean;
   text?: string;
   // TODO: Add icon
-  onClick: () => void;
+  onClick?: () => void;
+
+  // Native html element
+  type?: "submit" | "reset" | "button";
 
   className?: string;
   style?: CSSProperties;

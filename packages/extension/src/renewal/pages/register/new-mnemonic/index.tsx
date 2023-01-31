@@ -165,7 +165,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
           disabled={!bip44PathState.isValid()}
           onClick={() => {
             if (words.join(" ").trim() !== "") {
-              sceneTransition.push("set-account-info", {
+              sceneTransition.push("verify-mnemonic", {
                 mnemonic: words.join(" "),
                 needVerifyMnemonic: true,
                 bip44Path: bip44PathState.getPath(),
