@@ -74,6 +74,12 @@ export class WalletConnectV2Store {
     const signClient = await SignClient.init({
       projectId: projectId,
       relayerUrl: "wss://relay.walletconnect.com",
+      metadata: {
+        name: "Keplr",
+        description: "Your Wallet for the Interchain",
+        url: "https://www.keplr.app",
+        icons: ["https://asset-icons.s3.us-west-2.amazonaws.com/keplr_512.png"],
+      },
     });
 
     runInAction(() => {
