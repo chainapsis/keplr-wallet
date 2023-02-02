@@ -66,8 +66,13 @@ export class WalletConnectV2Store {
   }
 
   protected async init(): Promise<void> {
+    const projectId = process.env["WC_PROJECT_ID"];
+    if (!projectId) {
+      return;
+    }
+
     const signClient = await SignClient.init({
-      projectId: "649c7f2209d1d1c8b6b9c2686fadd03e",
+      projectId: projectId,
       relayerUrl: "wss://relay.walletconnect.com",
     });
 
@@ -75,9 +80,9 @@ export class WalletConnectV2Store {
       this.signClient = signClient;
     });
 
-    this.signClient!.on("session_proposal", this.onSessionProposal.bind(this));
-    this.signClient!.on("session_request", this.onSessionRequest.bind(this));
-    this.signClient!.on("session_delete", this.onSessionDelete.bind(this));
+    signClient.on("session_proposal", this.onSessionProposal.bind(this));
+    signClient.on("session_request", this.onSessionRequest.bind(this));
+    signClient.on("session_delete", this.onSessionDelete.bind(this));
 
     this.eventListener.addEventListener(
       "keplr_keystoreunlock",

@@ -136,6 +136,7 @@
     "@types/react-native": "^0.63.2",
     "@types/react-test-renderer": "^16.9.2",
     "@types/sha.js": "^2.4.0",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "browserify": "^17.0.0",
     "get-yarn-workspaces": "^1.0.2",
     "metro-react-native-babel-preset": "^0.59.0",
