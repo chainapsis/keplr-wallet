@@ -388,7 +388,7 @@ const HomeScreenHeaderLeft: FunctionComponent = observer(() => {
 });
 
 const HomeScreenHeaderRight: FunctionComponent = observer(() => {
-  const { walletConnectStore } = useStore();
+  const { walletConnectStore, walletConnectV2Store } = useStore();
 
   const style = useStyle();
 
@@ -410,7 +410,8 @@ const HomeScreenHeaderRight: FunctionComponent = observer(() => {
           }
         />
       </HeaderRightButton>
-      {walletConnectStore.sessions.length > 0 ? (
+      {walletConnectStore.sessions.length > 0 ||
+      walletConnectV2Store.getSessions().length > 0 ? (
         <HeaderRightButton
           style={{
             right: 42,

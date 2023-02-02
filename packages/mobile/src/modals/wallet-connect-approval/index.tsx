@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useLayoutEffect, useState } from "react";
 import { registerModal } from "../base";
 import { CardModal } from "../card";
 import { Text, View } from "react-native";
@@ -8,6 +8,7 @@ import { useStore } from "../../stores";
 import { PermissionData } from "@keplr-wallet/background";
 import { WCMessageRequester } from "../../stores/wallet-connect/msg-requester";
 import { WCAppLogoAndName } from "../../components/wallet-connect";
+import { WCV2MessageRequester } from "../../stores/wallet-connect-v2/msg-requester";
 
 export const WalletConnectApprovalModal: FunctionComponent<{
   isOpen: boolean;
@@ -16,20 +17,37 @@ export const WalletConnectApprovalModal: FunctionComponent<{
   data: PermissionData;
 }> = registerModal(
   ({ id, data }) => {
-    const { permissionStore, walletConnectStore } = useStore();
+    const {
+      permissionStore,
+      walletConnectStore,
+      walletConnectV2Store,
+    } = useStore();
 
-    const session = useMemo(() => {
+    const [peerMeta, setPeerMeta] = useState<
+      { name?: string; url?: string; icons?: string[] } | undefined
+    >(undefined);
+
+    useLayoutEffect(() => {
       if (data.origins.length !== 1) {
         throw new Error("Invalid origins");
       }
 
-      return walletConnectStore.getSession(
-        WCMessageRequester.getSessionIdFromVirtualURL(data.origins[0])
-      )!;
-    }, [data.origins, walletConnectStore]);
+      if (WCMessageRequester.isVirtualSessionURL(data.origins[0])) {
+        setPeerMeta(
+          walletConnectStore.getSession(
+            WCMessageRequester.getSessionIdFromVirtualURL(data.origins[0])
+          )?.peerMeta || undefined
+        );
+      } else {
+        walletConnectV2Store
+          .getSessionMetadata(
+            WCV2MessageRequester.getIdFromVirtualURL(data.origins[0])
+          )
+          .then((r) => setPeerMeta(r));
+      }
+    }, [data.origins, walletConnectStore, walletConnectV2Store]);
 
-    const appName =
-      session.peerMeta?.name || session.peerMeta?.url || "unknown";
+    const appName = peerMeta?.name || peerMeta?.url || "unknown";
 
     const style = useStyle();
 
@@ -37,7 +55,7 @@ export const WalletConnectApprovalModal: FunctionComponent<{
       <CardModal title="Wallet Connect">
         <WCAppLogoAndName
           containerStyle={style.flatten(["margin-y-20"])}
-          peerMeta={session.peerMeta}
+          peerMeta={peerMeta}
         />
         <Text style={style.flatten(["margin-bottom-40", "text-center"])}>
           <Text

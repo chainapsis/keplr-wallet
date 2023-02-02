@@ -38,6 +38,7 @@ import {
   GravityBridgeCurrencyRegsitrar,
   KeplrETCQueries,
 } from "@keplr-wallet/stores-etc";
+import { WalletConnectV2Store } from "./wallet-connect-v2";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -70,6 +71,7 @@ export class RootStore {
 
   public readonly keychainStore: KeychainStore;
   public readonly walletConnectStore: WalletConnectStore;
+  public readonly walletConnectV2Store: WalletConnectV2Store;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -309,6 +311,20 @@ export class RootStore {
 
     this.walletConnectStore = new WalletConnectStore(
       new AsyncKVStore("store_wallet_connect"),
+      {
+        addEventListener: (type: string, fn: () => void) => {
+          eventEmitter.addListener(type, fn);
+        },
+        removeEventListener: (type: string, fn: () => void) => {
+          eventEmitter.removeListener(type, fn);
+        },
+      },
+      this.chainStore,
+      this.keyRingStore,
+      this.permissionStore
+    );
+    this.walletConnectV2Store = new WalletConnectV2Store(
+      new AsyncKVStore("store_wallet_connect_v2"),
       {
         addEventListener: (type: string, fn: () => void) => {
           eventEmitter.addListener(type, fn);

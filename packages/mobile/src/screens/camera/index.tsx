@@ -25,7 +25,12 @@ import { AsyncKVStore } from "../../common";
 import { useFocusEffect } from "@react-navigation/native";
 
 export const CameraScreen: FunctionComponent = observer(() => {
-  const { chainStore, walletConnectStore, keyRingStore } = useStore();
+  const {
+    chainStore,
+    walletConnectStore,
+    walletConnectV2Store,
+    keyRingStore,
+  } = useStore();
 
   const style = useStyle();
 
@@ -73,7 +78,11 @@ export const CameraScreen: FunctionComponent = observer(() => {
 
             try {
               if (data.startsWith("wc:")) {
-                await walletConnectStore.initClient(data);
+                if (data.includes("@2")) {
+                  await walletConnectV2Store.pair(data);
+                } else {
+                  await walletConnectStore.initClient(data);
+                }
 
                 smartNavigation.navigateSmart("Home", {});
               } else {
