@@ -23,6 +23,7 @@ import { usePrevious } from "../../hooks";
 import { BIP44Selectable } from "./bip44-selectable";
 import { useFocusEffect } from "@react-navigation/native";
 import { ChainUpdaterService } from "@keplr-wallet/background";
+import { NotificationController } from "./notification-controller";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -142,6 +143,8 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <GovernanceCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}
       />
+
+      <NotificationController />
     </PageWithScrollViewInBottomTabView>
   );
 });

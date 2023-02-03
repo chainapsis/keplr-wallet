@@ -9,7 +9,9 @@
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   <uses-permission android:name="android.permission.CAMERA"/>
   <uses-feature android:name="android.hardware.bluetooth_le"/>
+
   <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
   <application
     android:name=".MainApplication"
     android:label="@string/app_name"
@@ -20,6 +22,30 @@
   >
     <meta-data android:name="com.bugsnag.android.API_KEY"
                android:value="f07be1dce2391227e818fbe3e4235bf4"/>
+
+    <meta-data  android:name="com.dieam.reactnativepushnotification.notification_foreground"
+                android:value="false"/>
+    <meta-data  android:name="com.dieam.reactnativepushnotification.notification_color"
+                android:resource="@color/white"/>
+
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" android:exported="true" />
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" android:exported="true" />
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver" android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+        <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+      </intent-filter>
+    </receiver>
+
+    <service
+            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService"
+            android:exported="false" >
+      <intent-filter>
+        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+      </intent-filter>
+    </service>
+
     <activity
       android:name=".MainActivity"
       android:label="@string/app_name"

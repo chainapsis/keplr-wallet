@@ -98,13 +98,14 @@ export const TallyVoteInfoView: FunctionComponent<{
 export const GovernanceDetailsCardBody: FunctionComponent<{
   containerStyle?: ViewStyle;
   proposalId: string;
-}> = observer(({ proposalId, containerStyle }) => {
-  const { chainStore, queriesStore, accountStore } = useStore();
+  chainId: string;
+}> = observer(({ chainId, proposalId, containerStyle }) => {
+  const { queriesStore, accountStore } = useStore();
 
   const style = useStyle();
 
-  const account = accountStore.getAccount(chainStore.current.chainId);
-  const queries = queriesStore.get(chainStore.current.chainId);
+  const account = accountStore.getAccount(chainId);
+  const queries = queriesStore.get(chainId);
 
   const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
 
@@ -339,12 +340,13 @@ export const GovernanceVoteModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
   proposalId: string;
+  chainId: string;
 
   // Modal can't use the `useSmartNavigation` hook directly.
   // So need to get the props from the parent.
   smartNavigation: ReturnType<typeof useSmartNavigation>;
 }> = registerModal(
-  observer(({ proposalId, close, smartNavigation }) => {
+  observer(({ proposalId, chainId, close, smartNavigation }) => {
     const {
       chainStore,
       accountStore,
@@ -352,8 +354,8 @@ export const GovernanceVoteModal: FunctionComponent<{
       analyticsStore,
     } = useStore();
 
-    const account = accountStore.getAccount(chainStore.current.chainId);
-    const queries = queriesStore.get(chainStore.current.chainId);
+    const account = accountStore.getAccount(chainId);
+    const queries = queriesStore.get(chainId);
 
     const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
 
@@ -580,6 +582,7 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
         string,
         {
           proposalId: string;
+          chainId?: string;
         }
       >,
       string
@@ -587,9 +590,10 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
   >();
 
   const proposalId = route.params.proposalId;
+  const chainId = route.params.chainId ?? chainStore.current.chainId;
 
-  const queries = queriesStore.get(chainStore.current.chainId);
-  const account = accountStore.getAccount(chainStore.current.chainId);
+  const queries = queriesStore.get(chainId);
+  const account = accountStore.getAccount(chainId);
 
   const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
 
@@ -638,11 +642,13 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
         isOpen={isModalOpen}
         close={() => setIsModalOpen(false)}
         proposalId={proposalId}
+        chainId={chainId}
         smartNavigation={smartNavigation}
       />
       <Card style={style.flatten(["margin-top-card-gap"])}>
         <GovernanceDetailsCardBody
           proposalId={proposalId}
+          chainId={chainId}
           containerStyle={(() => {
             let marginBottom = 0;
 

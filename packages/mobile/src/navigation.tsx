@@ -325,6 +325,7 @@ const {
     };
     "Governance Details": {
       proposalId: string;
+      chainId?: string;
     };
     "Setting.ViewPrivateData": {
       privateData: string;

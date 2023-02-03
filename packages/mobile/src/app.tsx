@@ -1,10 +1,10 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import { StoreProvider } from "./stores";
 import { StyleProvider, useStyle } from "./styles";
 import { AppNavigation } from "./navigation";
 import { IntlProvider } from "react-intl";
 import { ModalsProvider } from "./modals/base";
-import { Alert, Platform, StatusBar } from "react-native";
+import { Platform, StatusBar } from "react-native";
 
 import codePush from "react-native-code-push";
 import { InteractionModalsProivder } from "./providers/interaction-modals-provider";
@@ -13,7 +13,6 @@ import { LoadingScreenProvider } from "./providers/loading-screen";
 import * as SplashScreen from "expo-splash-screen";
 import { ConfirmModalProvider } from "./providers/confirm-modal";
 import Bugsnag from "@bugsnag/react-native";
-import messaging from "@react-native-firebase/messaging";
 
 if (Platform.OS === "android") {
   // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
@@ -135,37 +134,6 @@ const CodePushAppBody: FunctionComponent = __DEV__
   : codePush(AppBody);
 
 export const App: FunctionComponent = () => {
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      console.log("======================================================");
-      console.log("foreground message", JSON.stringify(remoteMessage));
-      console.log("======================================================");
-      Alert.alert("A new FCM message arrived!", JSON.stringify(remoteMessage));
-    });
-
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      console.log("======================================================");
-      console.log("Message handled in the background!", remoteMessage);
-      console.log("======================================================");
-    });
-
-    test();
-    return unsubscribe;
-  }, []);
-
-  const test = async () => {
-    const authorizationStatus = await messaging().requestPermission();
-
-    if (authorizationStatus) {
-      console.log("Permission status:", authorizationStatus);
-    }
-    const fcmToken = await messaging().getToken();
-
-    if (fcmToken) {
-      console.log(fcmToken);
-    }
-  };
-
   if (ErrorBoundary) {
     return (
       <ErrorBoundary>
