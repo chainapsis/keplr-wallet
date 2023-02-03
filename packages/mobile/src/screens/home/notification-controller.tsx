@@ -3,6 +3,7 @@ import PushNotification from "react-native-push-notification";
 import messaging from "@react-native-firebase/messaging";
 import React, { FunctionComponent, useEffect } from "react";
 import { Platform } from "react-native";
+import PushNotificationIOS from "@react-native-community/push-notification-ios";
 
 export const NotificationController: FunctionComponent = ({ children }) => {
   const smartNavigation = useSmartNavigation();
@@ -37,6 +38,8 @@ export const NotificationController: FunctionComponent = ({ children }) => {
       if (notification.userInteraction) {
         notificationDataHandler(notification.data);
       }
+
+      notification.finish(PushNotificationIOS.FetchResult.NoData);
     },
   });
 
