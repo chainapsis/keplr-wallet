@@ -1,18 +1,70 @@
 import { SimpleFetchRequestOptions, SimpleFetchResponse } from "./types";
 import { SimpleFetchError } from "./error";
 
+function makeURL(baseURL: string, url: string): string {
+  const baseURLInstance = new URL(baseURL);
+  baseURL = removeLastSlashIfIs(baseURLInstance.origin);
+  url =
+    removeLastSlashIfIs(baseURLInstance.pathname) +
+    "/" +
+    removeFirstSlashIfIs(url);
+
+  return removeLastSlashIfIs(baseURL + "/" + removeFirstSlashIfIs(url));
+}
+
+function removeFirstSlashIfIs(str: string): string {
+  if (str.length > 0 && str[0] === "/") {
+    return str.slice(1);
+  }
+
+  return str;
+}
+
+function removeLastSlashIfIs(str: string): string {
+  if (str.length > 0 && str[str.length - 1] === "/") {
+    return str.slice(0, str.length - 1);
+  }
+
+  return str;
+}
+
 export async function simpleFetch<R>(
   baseURL: string,
-  url: string,
+  options?: SimpleFetchRequestOptions
+): Promise<SimpleFetchResponse<R>>;
+
+export async function simpleFetch<R>(
+  baseURL: string,
+  url?: string,
+  options?: SimpleFetchRequestOptions
+): Promise<SimpleFetchResponse<R>>;
+
+export async function simpleFetch<R>(
+  baseURL: string,
+  url?: string | SimpleFetchRequestOptions,
   options?: SimpleFetchRequestOptions
 ): Promise<SimpleFetchResponse<R>> {
+  if (typeof url !== "string") {
+    if (url) {
+      options = url;
+    }
+
+    url = "";
+  }
+
   if (url === "/") {
     // If url is "/", probably its mean should be to use only base url.
     // However, `URL` with "/" url generate the root url with removing trailing url from base url.
     // To prevent this invalid case, just handle "/" as "".
     url = "";
   }
-  const fetched = await fetch(new URL(url, baseURL).toString(), options);
+  const actualURL = makeURL(baseURL, url);
+  const fetched = await fetch(actualURL, {
+    headers: {
+      accept: "application/json, text/plain, */*",
+    },
+    ...options,
+  });
 
   let data: R;
 
@@ -32,6 +84,7 @@ export async function simpleFetch<R>(
   }
 
   const res = {
+    url: actualURL,
     data,
     headers: fetched.headers,
     status: fetched.status,
@@ -39,7 +92,7 @@ export async function simpleFetch<R>(
   };
 
   const validateStatusFn = options?.validateStatus || defaultValidateStatusFn;
-  if (validateStatusFn(fetched.status)) {
+  if (!validateStatusFn(fetched.status)) {
     throw new SimpleFetchError(baseURL, url, res);
   }
 

@@ -3,6 +3,7 @@ export interface SimpleFetchRequestOptions extends RequestInit {
 }
 
 export interface SimpleFetchResponse<R> {
+  readonly url: string;
   readonly data: R;
   readonly headers: Headers;
   readonly status: number;

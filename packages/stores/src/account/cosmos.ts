@@ -480,7 +480,7 @@ export class CosmosAccountImpl {
     }
 
     const account = await BaseAccount.fetchFromRest(
-      this.instance,
+      this.chainGetter.getChain(this.chainId).rest,
       this.base.bech32Address,
       true
     );
@@ -665,7 +665,7 @@ export class CosmosAccountImpl {
     gasUsed: number;
   }> {
     const account = await BaseAccount.fetchFromRest(
-      this.instance,
+      this.chainGetter.getChain(this.chainId).rest,
       this.base.bech32Address,
       true
     );

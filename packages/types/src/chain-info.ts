@@ -4,7 +4,15 @@ import { Bech32Config } from "./bech32";
 
 export interface ChainInfo {
   readonly rpc: string;
+  /**
+   * @deprecated Do not use
+   */
+  readonly rpcConfig?: any;
   readonly rest: string;
+  /**
+   * @deprecated Do not use
+   */
+  readonly restConfig?: any;
   readonly nodeProvider?: {
     readonly name: string;
     readonly email: string;
