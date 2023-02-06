@@ -60,7 +60,9 @@ export class TokensService {
         currency.contractAddress === contractAddress
     );
     // If the same currency is already registered, do nothing.
-    if (find) {
+    // For SNIP-20 token with a viewingKey input, this is
+    // an update operation to an already suggested token
+    if (find && !viewingKey) {
       return;
     }
 
