@@ -44,8 +44,8 @@ export class TokensService {
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
 
-  protected readonly onChainRemoved = (chainId: string) => {
-    this.clearTokens(chainId);
+  protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
+    this.clearTokens(chainInfo.chainId);
   };
 
   async suggestToken(
@@ -54,7 +54,7 @@ export class TokensService {
     contractAddress: string,
     viewingKey?: string
   ) {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
     const find = (await this.getTokens(chainId)).find(
       (currency) =>
@@ -100,7 +100,7 @@ export class TokensService {
   }
 
   async addToken(chainId: string, currency: AppCurrency) {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
     currency = await TokensService.validateCurrency(chainInfo, currency);
 
@@ -143,7 +143,7 @@ export class TokensService {
   }
 
   async removeToken(chainId: string, currency: AppCurrency) {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
     currency = await TokensService.validateCurrency(chainInfo, currency);
 

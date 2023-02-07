@@ -12,7 +12,14 @@ export abstract class Router {
 
   protected port = "";
 
+  protected _isInitialized: boolean = false;
+  protected _initWaiter: Promise<void> | undefined;
+
   constructor(protected readonly envProducer: EnvProducer) {}
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
 
   public registerMessage(
     msgCls: { new (...args: any): Message<unknown> } & { type(): string }
@@ -32,14 +39,42 @@ export abstract class Router {
     this.guards.push(guard);
   }
 
-  public abstract listen(port: string): void;
+  protected abstract attachHandler(): void;
 
-  public abstract unlisten(): void;
+  protected abstract detachHandler(): void;
+
+  public async listen(
+    port: string,
+    initFn?: () => Promise<void>
+  ): Promise<void> {
+    this.port = port;
+    this.attachHandler();
+
+    if (initFn) {
+      let initWaiter: (() => void) | undefined;
+      this._initWaiter = new Promise<void>((resolve) => {
+        initWaiter = resolve;
+      });
+      await initFn();
+      initWaiter!();
+    }
+    this._isInitialized = true;
+    return;
+  }
+
+  public unlisten(): void {
+    this.port = "";
+    this.detachHandler();
+  }
 
   protected async handleMessage(
     message: any,
     sender: MessageSender
   ): Promise<unknown> {
+    if (!this.isInitialized) {
+      await this._initWaiter;
+    }
+
     const msg = this.msgRegistry.parseMessage(JSONUint8Array.unwrap(message));
     const env = this.envProducer(sender, msg.routerMeta ?? {});
 

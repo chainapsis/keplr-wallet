@@ -3,11 +3,11 @@ import { ChainInfoWithCoreTypes } from "./types";
 import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 
-export class GetChainInfosMsg extends Message<{
+export class GetChainInfosWithCoreTypesMsg extends Message<{
   chainInfos: ChainInfoWithCoreTypes[];
 }> {
   public static type() {
-    return "get-chain-infos";
+    return "get-chain-infos-with-core-types";
   }
 
   validateBasic(): void {
@@ -19,7 +19,7 @@ export class GetChainInfosMsg extends Message<{
   }
 
   type(): string {
-    return GetChainInfosMsg.type();
+    return GetChainInfosWithCoreTypesMsg.type();
   }
 }
 

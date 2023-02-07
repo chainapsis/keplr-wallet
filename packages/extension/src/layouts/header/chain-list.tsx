@@ -32,7 +32,7 @@ const ChainElement: FunctionComponent<{
       }}
     >
       {chainInfo.chainName}
-      {!chainInfo.embeded &&
+      {!chainInfo.embedded &&
       chainStore.current.chainId !== chainInfo.chainId ? (
         <div className={style.removeBtn}>
           <i

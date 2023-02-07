@@ -11,6 +11,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ChainInfo } from "@keplr-wallet/types";
 
 export class PermissionService {
   protected globalPermissionMap: {
@@ -62,8 +63,8 @@ export class PermissionService {
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
 
-  protected readonly onChainRemoved = (chainId: string) => {
-    this.removeAllPermissions(chainId);
+  protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
+    this.removeAllPermissions(chainInfo.chainId);
   };
 
   async checkOrGrantBasicAccessPermission(

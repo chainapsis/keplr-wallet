@@ -5,5 +5,5 @@ export type ChainInfoWithRepoUpdateOptions = ChainInfo & {
 };
 
 export type ChainInfoWithCoreTypes = ChainInfo & {
-  embeded: boolean;
+  embedded: boolean;
 } & ChainInfoWithRepoUpdateOptions;
