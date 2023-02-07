@@ -85,8 +85,8 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
               }
             >
               <i
-                key="key"
-                className="fas fa-key"
+                key="copy"
+                className="fas fa-copy"
                 style={{
                   cursor: "pointer",
                 }}
@@ -120,8 +120,8 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                 }
               >
                 <i
-                  key="copy"
-                  className="fas fa-copy"
+                  key="key"
+                  className="fas fa-key"
                   style={{
                     cursor: "pointer",
                   }}
