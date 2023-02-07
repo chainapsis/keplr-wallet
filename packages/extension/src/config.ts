@@ -1665,8 +1665,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         gasPriceStep: {
           low: 0.05,
-          average: 0.06,
-          high: 0.1,
+          average: 0.1,
+          high: 0.2,
         },
       },
     ],
