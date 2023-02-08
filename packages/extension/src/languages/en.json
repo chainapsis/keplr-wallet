@@ -121,6 +121,9 @@
 
   "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you register again.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
+  "setting.token.manage.notification.viewing-key.copy.hover": "Viewing key copy",
+  "setting.token.manage.notification.contract-address.copy": "Contract address copied!",
+  "setting.token.manage.notification.contract-address.copy.hover": "Contract address copy",
 
   "setting.endpoints": "Endpoints",
   "setting.endpoints.paragraph": "Change into the node you wish to connect",
