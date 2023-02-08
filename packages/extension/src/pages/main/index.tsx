@@ -27,6 +27,7 @@ import { VestingInfo } from "./vesting-info";
 import { LedgerAppModal } from "./ledger-app-modal";
 import { EvmosDashboardView } from "./evmos-dashboard";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { AuthZView } from "./authz";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -81,6 +82,10 @@ export const MainPage: FunctionComponent = observer(() => {
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(accountInfo.bech32Address);
+
+  const queryAuthZGrants = queriesStore
+    .get(chainStore.current.chainId)
+    .cosmos.queryAuthZGranter.getGranter(accountInfo.bech32Address);
 
   const tokens = queryBalances.unstakables.filter((bal) => {
     if (
@@ -211,6 +216,13 @@ export const MainPage: FunctionComponent = observer(() => {
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>
             <IBCTransferView />
+          </CardBody>
+        </Card>
+      ) : null}
+      {queryAuthZGrants.response?.data.grants.length ? (
+        <Card className={classnames(style.card, "shadow")}>
+          <CardBody>
+            <AuthZView grants={queryAuthZGrants.response.data.grants} />
           </CardBody>
         </Card>
       ) : null}

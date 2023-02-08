@@ -39,6 +39,15 @@
   "main.update-chain.confirm.yes": "Proceed",
   "main.update-chain.confirm.no": "Ignore",
 
+  "main.authz.title": "AuthZ",
+  "main.authz.grant.grantee.information": "You authorized",
+  "main.authz.grant.grantee.address": "Grantee Address",
+  "main.authz.grant.expiration.title": "Expiration dates",
+  "main.authz.grant.expiration.information": "Expiration dates: ",
+  "main.authz.grant.expiration.expired": "Expired",
+  "main.authz.grant.expiration.infinite": "Your Authz delegation will not be expired until you revoke it.",
+  "main.authz.grant.revoke": "Revoke",
+
   "setting.language": "Language",
   "setting.language.automatic": "Automatic (Browser default)",
   "setting.language.automatic-with-language": "Automatic ({language})",

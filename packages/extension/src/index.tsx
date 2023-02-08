@@ -68,6 +68,7 @@ import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant
 import { SettingSecurityPrivacyPage } from "./pages/setting/security-privacy";
 import { SettingPermissionsGetChainInfosPage } from "./pages/setting/security-privacy/permissions/get-chain-infos";
 import { ChainActivePage } from "./pages/setting/chain-active";
+import { AuthZPage } from "./pages/authz";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -278,6 +279,7 @@ ReactDOM.render(
                   path="/setting/chain-active"
                   component={ChainActivePage}
                 />
+                <Route path="/authz" component={AuthZPage} />
               </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>
