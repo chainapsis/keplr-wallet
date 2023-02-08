@@ -3,8 +3,6 @@ $dark: rgba(0, 0, 0, 0.75);
 $bright: rgba(255, 255, 255, 0.75);
 
 :global {
-  height: 100%;
-
   [x-arrow] {
     position: absolute;
     z-index: 1000;
