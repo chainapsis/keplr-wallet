@@ -45,20 +45,25 @@ export class KeychainStore {
   }
 
   @flow
-  *getCredentials() {
-    if (!this.isBiometryOn) {
-      throw new Error("Biometry is off");
+  *checkBiometry() {
+    if (this.isBiometryOn) {
+      const credentials = yield* toGenerator(
+        Keychain.getGenericPassword(KeychainStore.defaultOptions)
+      );
+      if (credentials) {
+        const isValidBiometry = yield* toGenerator(
+          this.keyRingStore.checkPassword(credentials.password)
+        );
+
+        if (!isValidBiometry) {
+          throw new Error(
+            "Failed to get valid password from keychain. This may be due to changes of biometry information"
+          );
+        }
+      } else {
+        throw new Error("Failed to get credentials from keychain");
+      }
     }
-
-    const credentials = yield* toGenerator(
-      Keychain.getGenericPassword(KeychainStore.defaultOptions)
-    );
-
-    if (!credentials) {
-      throw new Error("Failed to get credentials from keychain");
-    }
-
-    return credentials;
   }
 
   @flow

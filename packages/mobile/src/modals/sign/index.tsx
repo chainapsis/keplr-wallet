@@ -288,7 +288,7 @@ export const SignModal: FunctionComponent<{
           onPress={async () => {
             try {
               if (keychainStore.isBiometryOnForSign) {
-                await keychainStore.getCredentials();
+                await keychainStore.checkBiometry();
               }
 
               if (signDocHelper.signDocWrapper) {
