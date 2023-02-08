@@ -38,6 +38,7 @@ export const SignModal: FunctionComponent<{
       walletConnectStore,
       walletConnectV2Store,
       signInteractionStore,
+      keychainStore,
     } = useStore();
     useUnmount(() => {
       signInteractionStore.rejectAll();
@@ -286,6 +287,10 @@ export const SignModal: FunctionComponent<{
           loading={signInteractionStore.isLoading}
           onPress={async () => {
             try {
+              if (keychainStore.isBiometryOnForSign) {
+                await keychainStore.getCredentials();
+              }
+
               if (signDocHelper.signDocWrapper) {
                 await signInteractionStore.approveAndWaitEnd(
                   signDocHelper.signDocWrapper

@@ -11,6 +11,9 @@ export class KeychainStore {
   @observable
   protected _isBiometryOn: boolean = false;
 
+  @observable
+  protected _isBiometryOnForSign: boolean = true;
+
   protected static defaultOptions: Keychain.Options = {
     authenticationPrompt: {
       title: "Biometric Authentication",
@@ -35,6 +38,27 @@ export class KeychainStore {
 
   get isBiometryOn(): boolean {
     return this._isBiometryOn;
+  }
+
+  get isBiometryOnForSign(): boolean {
+    return this._isBiometryOnForSign;
+  }
+
+  @flow
+  *getCredentials() {
+    if (!this.isBiometryOn) {
+      throw new Error("Biometry is off");
+    }
+
+    const credentials = yield* toGenerator(
+      Keychain.getGenericPassword(KeychainStore.defaultOptions)
+    );
+
+    if (!credentials) {
+      throw new Error("Failed to get credentials from keychain");
+    }
+
+    return credentials;
   }
 
   @flow
