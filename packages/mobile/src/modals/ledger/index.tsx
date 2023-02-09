@@ -329,6 +329,7 @@ export const LedgerGranterModal: FunctionComponent<{
                       <LedgerNanoBLESelector
                         key={device.id}
                         chain={ledgerInitStore.requestedLedgerApp}
+                        cosmosLikeApp={ledgerInitStore.cosmosLikeApp}
                         deviceId={device.id}
                         name={device.name}
                         onCanResume={async () => {
@@ -401,9 +402,10 @@ const LedgerErrorView: FunctionComponent<{
 const LedgerNanoBLESelector: FunctionComponent<{
   deviceId: string;
   chain: LedgerApp | undefined;
+  cosmosLikeApp: string | undefined;
   name: string;
   onCanResume: () => void;
-}> = ({ deviceId, chain, name, onCanResume }) => {
+}> = ({ deviceId, chain, cosmosLikeApp, name, onCanResume }) => {
   const style = useStyle();
 
   const [isConnecting, setIsConnecting] = useState(false);
@@ -419,7 +421,8 @@ const LedgerNanoBLESelector: FunctionComponent<{
       const ledger = await Ledger.init(
         () => TransportBLE.open(deviceId),
         undefined,
-        chain ?? LedgerApp.Cosmos
+        chain ?? LedgerApp.Cosmos,
+        cosmosLikeApp || "Cosmos"
       );
       await ledger.close();
 
@@ -464,7 +467,7 @@ const LedgerNanoBLESelector: FunctionComponent<{
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.App ? (
           <Text style={style.flatten(["subtitle3", "color-text-low"])}>
-            Please open {chain} App
+            Please open {cosmosLikeApp || chain} App
           </Text>
         ) : null}
         {!isConnecting && initErrorOn === LedgerInitErrorOn.Unknown ? (

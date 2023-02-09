@@ -58,7 +58,8 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
       await registerConfig.createLedger(
         getValues("name"),
         getValues("password"),
-        bip44Option.bip44HDPath
+        bip44Option.bip44HDPath,
+        "Cosmos"
       );
       analyticsStore.setUserProperties({
         registerType: "ledger",
