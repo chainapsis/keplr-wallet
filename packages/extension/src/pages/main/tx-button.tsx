@@ -15,6 +15,7 @@ import { useHistory } from "react-router";
 
 import classnames from "classnames";
 import { Dec } from "@keplr-wallet/unit";
+import { useBuy } from "../../hooks/useFiatOnOffRamp";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");
@@ -59,6 +60,9 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   const sendBtnRef = useRef<HTMLButtonElement>(null);
 
+  const buySupportServiceInfos = useBuy(chainStore.current.chainId);
+  const isCurrentChainSupportBuy = buySupportServiceInfos.length > 0;
+
   return (
     <div className={styleTxButton.containerTxButton}>
       <Modal
@@ -77,6 +81,20 @@ export const TxButtonView: FunctionComponent = observer(() => {
       >
         <DepositModal bech32Address={accountInfo.bech32Address} />
       </Modal>
+      {isCurrentChainSupportBuy && (
+        <Button
+          className={styleTxButton.button}
+          color="primary"
+          outline
+          onClick={(e) => {
+            e.preventDefault();
+
+            window.open(buySupportServiceInfos[0].buyUrl, "_blank");
+          }}
+        >
+          <FormattedMessage id="main.account.button.buy" />
+        </Button>
+      )}
       <Button
         className={styleTxButton.button}
         color="primary"
