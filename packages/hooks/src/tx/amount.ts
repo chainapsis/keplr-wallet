@@ -58,6 +58,13 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
   @action
   setSendCurrency(currency: AppCurrency | undefined) {
+    if (currency?.coinMinimalDenom !== this._sendCurrency?.coinMinimalDenom) {
+      this._amount = "";
+      if (this.fraction != null) {
+        this.setFraction(undefined);
+      }
+    }
+
     this._sendCurrency = currency;
   }
 
