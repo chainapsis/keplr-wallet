@@ -267,7 +267,7 @@ export class LedgerService {
                 await delay(5 * 60 * 1000, {
                   signal: timeoutAbortController.signal,
                 });
-              } catch (e) {
+              } catch (e: any) {
                 if (e.name === "AbortError") {
                   timeoutAborted = true;
                 } else {

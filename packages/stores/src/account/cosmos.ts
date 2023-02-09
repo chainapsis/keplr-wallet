@@ -375,7 +375,7 @@ export class CosmosAccountImpl {
       );
       txHash = result.txHash;
       signDoc = result.signDoc;
-    } catch (e) {
+    } catch (e: any) {
       this.base.setTxTypeInProgress("");
 
       if (this.txOpts.preTxEvents?.onBroadcastFailed) {

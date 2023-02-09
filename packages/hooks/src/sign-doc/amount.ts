@@ -156,7 +156,7 @@ export class SignDocAmountConfig
             }
             break;
         }
-      } catch (e) {
+      } catch (e: any) {
         console.log(
           `Error on the parsing the msg: ${e.message || e.toString()}`
         );
@@ -216,7 +216,7 @@ export class SignDocAmountConfig
             }
           }
         }
-      } catch (e) {
+      } catch (e: any) {
         console.log(
           `Error on the parsing the msg: ${e.message || e.toString()}`
         );

@@ -40,7 +40,7 @@ export class MockRouter extends Router {
         return: result,
       });
       return;
-    } catch (e) {
+    } catch (e: any) {
       console.log(
         `Failed to process msg ${message.type}: ${e?.message || e?.toString()}`
       );

@@ -78,7 +78,7 @@ export class Ledger {
       }
 
       return ledger;
-    } catch (e) {
+    } catch (e: any) {
       if (transport) {
         await transport.close();
       }

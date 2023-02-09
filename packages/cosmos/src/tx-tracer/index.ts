@@ -173,7 +173,7 @@ export class TendermintTxTracer {
             }
           }
         }
-      } catch (e) {
+      } catch (e: any) {
         console.log(
           `Tendermint websocket jsonrpc response is not JSON: ${
             e.message || e.toString()

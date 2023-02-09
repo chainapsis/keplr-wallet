@@ -110,7 +110,7 @@ export class ObservableSecretContractChainQuery<
       const fetched = await super.fetchResponse(abortController);
       response = fetched.response;
       headers = fetched.headers;
-    } catch (e) {
+    } catch (e: any) {
       if (e.response?.data?.error) {
         const encryptedError = e.response.data.error;
 

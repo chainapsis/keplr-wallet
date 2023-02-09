@@ -162,7 +162,7 @@ export async function checkChainFeatures(
         newFeatures.push(method.feature);
         features.push(method.feature);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.log(
         `Failed to try to fetch feature (${method.feature}): ${e.message || e}`
       );

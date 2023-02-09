@@ -181,7 +181,7 @@ export class CreateMnemonicKeyMsg extends Message<{
     // Keeper should handle the case of invalid checksome.
     try {
       bip39.mnemonicToEntropy(this.mnemonic);
-    } catch (e) {
+    } catch (e: any) {
       if (e.message !== "Invalid mnemonic checksum") {
         throw e;
       }
@@ -233,7 +233,7 @@ export class AddMnemonicKeyMsg extends Message<{
     // Keeper should handle the case of invalid checksome.
     try {
       bip39.mnemonicToEntropy(this.mnemonic);
-    } catch (e) {
+    } catch (e: any) {
       if (e.message !== "Invalid mnemonic checksum") {
         throw e;
       }

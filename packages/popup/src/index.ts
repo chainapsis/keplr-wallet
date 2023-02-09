@@ -54,7 +54,7 @@ export async function openPopupWindow(
       await browser.windows.update(lastWindowIds[channel] as number, {
         focused: true,
       });
-    } catch (e) {
+    } catch (e: any) {
       console.log(`Failed to update window focus: ${e.message}`);
     }
   }

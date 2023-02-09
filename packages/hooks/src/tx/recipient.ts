@@ -225,7 +225,7 @@ export class RecipientConfig
             "Failed to fetch the address from ICNS"
           );
         }
-      } catch (e) {
+      } catch (e: any) {
         return e;
       }
     }
@@ -239,7 +239,7 @@ export class RecipientConfig
           if (isAddress(rawRecipient)) {
             return;
           }
-        } catch (e) {
+        } catch (e: any) {
           return e;
         }
         return new InvalidHexError("Invalid hex address for chain");
@@ -248,7 +248,7 @@ export class RecipientConfig
 
     try {
       Bech32Address.validate(this.recipient, this.bech32Prefix);
-    } catch (e) {
+    } catch (e: any) {
       return new InvalidBech32Error(
         `Invalid bech32: ${e.message || e.toString()}`
       );
