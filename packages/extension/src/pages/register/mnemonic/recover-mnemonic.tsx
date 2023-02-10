@@ -361,7 +361,7 @@ export const RecoverMnemonicPage: FunctionComponent<{
                     accountType: "mnemonic",
                   });
                 }
-              } catch (e) {
+              } catch (e: any) {
                 alert(e.message ? e.message : e.toString());
                 registerConfig.clear();
               }

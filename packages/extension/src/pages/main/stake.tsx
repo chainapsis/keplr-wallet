@@ -80,7 +80,7 @@ export const StakeView: FunctionComponent = observer(() => {
         );
 
         history.replace("/");
-      } catch (e) {
+      } catch (e: any) {
         history.replace("/");
         notification.push({
           type: "warning",

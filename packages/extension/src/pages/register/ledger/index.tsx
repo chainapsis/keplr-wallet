@@ -79,7 +79,7 @@ export const ImportLedgerPage: FunctionComponent<{
               registerType: "ledger",
               accountType: "ledger",
             });
-          } catch (e) {
+          } catch (e: any) {
             alert(e.message ? e.message : e.toString());
             registerConfig.clear();
           }

@@ -147,7 +147,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               if (!viewingKey && !isOpenSecret20ViewingKey) {
                 try {
                   viewingKey = await createViewingKey();
-                } catch (e) {
+                } catch (e: any) {
                   notification.push({
                     placement: "top-center",
                     type: "danger",

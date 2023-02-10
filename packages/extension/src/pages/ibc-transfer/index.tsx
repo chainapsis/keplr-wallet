@@ -151,7 +151,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                 );
 
                 history.push("/");
-              } catch (e) {
+              } catch (e: any) {
                 history.replace("/");
                 notification.push({
                   type: "warning",

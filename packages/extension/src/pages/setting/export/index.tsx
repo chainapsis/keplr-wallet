@@ -88,7 +88,7 @@ export const ExportPage: FunctionComponent = observer(() => {
                       )
                     )
                   );
-                } catch (e) {
+                } catch (e: any) {
                   console.log("Fail to decrypt: " + e.message);
                   setError(
                     "password",

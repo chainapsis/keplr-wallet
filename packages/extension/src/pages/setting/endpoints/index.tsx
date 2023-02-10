@@ -142,7 +142,7 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
                 await checkRPCConnectivity(selectedChainId, data.rpc);
                 rpcConnSuccess = true;
                 await checkRestConnectivity(selectedChainId, data.lcd);
-              } catch (e) {
+              } catch (e: any) {
                 if (
                   // In the case of this error, the chain version is different.
                   // It gives a warning and handles it if the user wants.
@@ -178,7 +178,7 @@ export const SettingEndpointsPage: FunctionComponent = observer(() => {
               chainStore.selectChain(selectedChainId);
 
               history.push("/");
-            } catch (e) {
+            } catch (e: any) {
               notification.push({
                 type: "warning",
                 placement: "top-center",

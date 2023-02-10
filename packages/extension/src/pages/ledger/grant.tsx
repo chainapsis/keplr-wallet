@@ -104,7 +104,7 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
       if (!ledgerInitStore.isWebHID) {
         delay(1000);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.log(e);
       if (e.errorOn != null) {
         initErrorOn = e.errorOn;

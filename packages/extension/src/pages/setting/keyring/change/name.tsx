@@ -63,7 +63,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
               data.name
             );
             history.push("/");
-          } catch (e) {
+          } catch (e: any) {
             console.log("Fail to decrypt: " + e.message);
             setError(
               "name",

@@ -181,7 +181,7 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
             onSetExportKeyRingDatas(
               await keyRingStore.exportKeyRingDatas(data.password)
             );
-          } catch (e) {
+          } catch (e: any) {
             console.log("Fail to decrypt: " + e.message);
             setError(
               "password",

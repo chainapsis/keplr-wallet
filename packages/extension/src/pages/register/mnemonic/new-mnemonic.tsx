@@ -320,7 +320,7 @@ export const VerifyMnemonicModePage: FunctionComponent<{
               registerType: "seed",
               accountType: "mnemonic",
             });
-          } catch (e) {
+          } catch (e: any) {
             alert(e.message ? e.message : e.toString());
             registerConfig.clear();
           }

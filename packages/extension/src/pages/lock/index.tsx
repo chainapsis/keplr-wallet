@@ -7,7 +7,6 @@ import { Button, Form } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Banner } from "../../components/banner";
-import useForm from "react-hook-form";
 
 import { EmptyLayout } from "../../layouts/empty-layout";
 
@@ -20,6 +19,7 @@ import delay from "delay";
 import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import useForm from "react-hook-form";
 
 interface FormData {
   password: string;
@@ -81,7 +81,7 @@ export const LockPage: FunctionComponent = observer(() => {
                 history.replace("/");
               }
             }
-          } catch (e) {
+          } catch (e: any) {
             console.log("Fail to decrypt: " + e.message);
             setError(
               "password",

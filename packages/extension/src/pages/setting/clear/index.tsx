@@ -77,7 +77,7 @@ export const ClearPage: FunctionComponent = observer(() => {
               analyticsStore.logEvent("Account removed");
 
               history.push("/");
-            } catch (e) {
+            } catch (e: any) {
               console.log("Fail to decrypt: " + e.message);
               setError(
                 "password",
