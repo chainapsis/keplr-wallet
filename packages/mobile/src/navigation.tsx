@@ -520,7 +520,7 @@ export const RegisterNavigation: FunctionComponent = () => {
       <Stack.Screen
         options={{
           ...HeaderOnTertiaryScreenOptionsPreset,
-          title: "Import Hardware Wallet",
+          title: "Connect Hardware Wallet",
         }}
         name="Register.NewLedger"
         component={NewLedgerScreen}
