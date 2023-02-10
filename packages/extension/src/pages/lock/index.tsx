@@ -1,15 +1,15 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 
-import { PasswordInput } from "../../components/form";
+import { PasswordInput } from "@components/form";
 
 import { Button, Form } from "reactstrap";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { Banner } from "../../components/banner";
+import { Banner } from "@components/banner";
 import useForm from "react-hook-form";
 
-import { EmptyLayout } from "../../layouts/empty-layout";
+import { EmptyLayout } from "@layouts/empty-layout";
 
 import style from "./style.module.scss";
 
@@ -86,8 +86,8 @@ export const LockPage: FunctionComponent = observer(() => {
         })}
       >
         <Banner
-          icon={require("../../public/assets/temp-icon.svg")}
-          logo={require("../../public/assets/logo-temp.png")}
+          icon={require("@assets/temp-icon.svg")}
+          logo={require("@assets/logo-temp.png")}
         />
         <PasswordInput
           label={intl.formatMessage({

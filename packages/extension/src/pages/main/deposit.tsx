@@ -5,7 +5,7 @@ import styleDeposit from "./deposit.module.scss";
 import classnames from "classnames";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { useNotification } from "../../components/notification";
+import { useNotification } from "@components/notification";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { FormattedMessage } from "react-intl";

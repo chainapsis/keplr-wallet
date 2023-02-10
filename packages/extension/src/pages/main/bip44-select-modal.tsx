@@ -7,7 +7,7 @@ import { useStore } from "../../stores";
 import { observer } from "mobx-react-lite";
 import { FormattedMessage } from "react-intl";
 import { BIP44 } from "@keplr-wallet/types";
-import { useLoadingIndicator } from "../../components/loading-indicator";
+import { useLoadingIndicator } from "@components/loading-indicator";
 import { Dec } from "@keplr-wallet/unit";
 
 const BIP44Selectable: FunctionComponent<{

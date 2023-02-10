@@ -7,10 +7,13 @@
 
 .item {
   cursor: pointer;
-
+  color: #32325d;
   padding: 8px 20px;
   font-size: 24px;
   font-weight: bold;
+}
+
+a.item:hover {
   color: #32325d;
 }
 

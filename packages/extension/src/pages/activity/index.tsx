@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { useHistory } from "react-router";
-import { SwitchUser } from "../../components/switch-user";
-import { HeaderLayout } from "../../layouts";
+import { SwitchUser } from "@components/switch-user";
+import { HeaderLayout } from "@layouts/index";
 
 export const ActivityPage: FunctionComponent = () => {
   const history = useHistory();

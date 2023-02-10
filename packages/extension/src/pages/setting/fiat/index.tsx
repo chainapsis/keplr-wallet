@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { PageButton } from "../page-button";
 
 import style from "../style.module.scss";

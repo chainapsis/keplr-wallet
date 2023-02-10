@@ -3,7 +3,7 @@ import { useHistory } from "react-router";
 import { Button, Alert } from "reactstrap";
 
 import style from "./style.module.scss";
-import { EmptyLayout } from "../../../layouts/empty-layout";
+import { EmptyLayout } from "@layouts/empty-layout";
 import { FormattedMessage } from "react-intl";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
@@ -32,7 +32,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
       <div className={style.container}>
         <img
-          src={require("../../../public/assets/temp-icon.svg")}
+          src={require("@assets/temp-icon.svg")}
           alt="logo"
           style={{ height: "92px" }}
         />
@@ -55,7 +55,7 @@ export const ChainSuggestedPage: FunctionComponent = observer(() => {
         <Alert className={style.warning} color="warning">
           <div className={style.imgContainer}>
             <img
-              src={require("../../../public/assets/img/icons8-test-tube.svg")}
+              src={require("@assets/img/icons8-test-tube.svg")}
               alt="experiment"
             />
           </div>

@@ -1,12 +1,12 @@
 import React, { FunctionComponent, ReactNode } from "react";
 
-import { Header as CompHeader } from "../../components/header";
+import { Header as CompHeader } from "@components/header";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
-import { ToolTip } from "../../components/tooltip";
+import { ToolTip } from "@components/tooltip";
 
 import { ChainList } from "./chain-list";
 import { Menu, useMenu, MenuButton } from "../menu";

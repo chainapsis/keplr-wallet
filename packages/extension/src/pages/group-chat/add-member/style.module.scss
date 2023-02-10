@@ -1,0 +1,131 @@
+.searchContainer {
+  padding: 10px;
+  background-color: #ffffff;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  .searchBox {
+    display: flex;
+    padding: 5px;
+    flex: 1;
+    background-color: #f2f3f6;
+    border-radius: 4px;
+    align-items: center;
+    gap: 10px;
+    img {
+      width: 16px;
+      height: 16px;
+    }
+    input {
+      border: none;
+      outline: none;
+      background: transparent;
+      flex-grow: 1;
+      &::placeholder {
+        color: #525f7f;
+      }
+    }
+  }
+}
+.membersContainer {
+  padding: 10px;
+  background-color: #ffffff;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.newMemberContainer {
+  margin-left: -12px;
+  margin-right: -12px;
+
+  height: 70vh;
+  overflow-y: auto;
+}
+
+.resultText {
+  color: #808da0;
+  font-weight: 400;
+  font-size: 15px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.searchHelp {
+  font-size: 13px;
+  color: #808da0;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.contacts {
+  display: flex;
+}
+
+.button {
+  padding: 8px;
+  color: #fff;
+  text-align: center;
+  background-color: #3b82f6;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.875rem;
+  line-height: 19px;
+  display: flex;
+}
+
+.button:not(:disabled):not(.disabled) {
+  cursor: pointer;
+  background: #3b82f6;
+  border: 1px solid #3b82f6;
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.groupHeader {
+  height: 40%;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+  display: flex;
+}
+
+.groupName {
+  align-self: start;
+  text-align: start;
+  font-size: 0.875rem;
+  word-break: break-word;
+}
+
+.groupMembers {
+  align-self: start;
+  color: #525f7f;
+}
+
+.groupContainer {
+  text-align: center;
+  color: #808da0;
+  width: -webkit-fill-available;
+  background-color: #fff;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px;
+  line-height: 16px;
+  display: flex;
+  margin-left: -12px;
+  margin-right: -12px;
+  margin-bottom: -12px;
+}
+
+.initials {
+  display: inline-flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}

@@ -8,20 +8,20 @@ import { observer } from "mobx-react-lite";
 
 import { useStore } from "../../stores";
 
-import { useNotification } from "../../components/notification";
+import { useNotification } from "@components/notification";
 
 import { FormattedMessage } from "react-intl";
 import { useHistory } from "react-router";
 
 import { Dec } from "@keplr-wallet/unit";
 
-import reward from "../../public/assets/icon/reward.png";
-import send from "../../public/assets/icon/send.png";
-import stake from "../../public/assets/icon/stake.png";
+import reward from "@assets/icon/reward.png";
+import send from "@assets/icon/send.png";
+import stake from "@assets/icon/stake.png";
 
-import activeReward from "../../public/assets/icon/activeReward.png";
-import activeSend from "../../public/assets/icon/activeSend.png";
-import activeStake from "../../public/assets/icon/activeStake.png";
+import activeReward from "@assets/icon/activeReward.png";
+import activeSend from "@assets/icon/activeSend.png";
+import activeStake from "@assets/icon/activeStake.png";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();

@@ -5,13 +5,13 @@ import React, { FunctionComponent, useState } from "react";
 import { useIntl } from "react-intl";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { userBlockedAddresses } from "../../../../chatStore/messages-slice";
-import { HeaderLayout } from "../../../../layouts";
+import { NameAddress } from "@chatTypes";
+import { userBlockedAddresses } from "@chatStore/messages-slice";
+import { UnblockUserPopup } from "@components/chat-actions-popup/unblock-user-popup";
+import { HeaderLayout } from "@layouts/index";
 import { useStore } from "../../../../stores";
-import { formatAddress } from "../../../../utils/format";
-import { NameAddress } from "../../../chat/users";
+import { formatAddress } from "@utils/format";
 import style from "./style.module.scss";
-import { UnblockUserPopup } from "./unblock-user-popup";
 
 export const BlockList: FunctionComponent = observer(() => {
   // const language = useLanguage();
@@ -93,7 +93,7 @@ const BlockAddresses: React.FC<{
                   </div>
                   <div>
                     <img
-                      src={require("../../../../public/assets/svg/x-icon.svg")}
+                      src={require("@assets/svg/x-icon.svg")}
                       style={{ width: "80%" }}
                       alt="message"
                       onClick={() => {

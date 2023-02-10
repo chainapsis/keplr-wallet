@@ -4,14 +4,14 @@ import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
 import { useIntl } from "react-intl";
 import { useHistory } from "react-router";
-import { store } from "../../chatStore";
+import { store } from "@chatStore/index";
 import {
   resetChatList,
   setIsChatSubscriptionActive,
-} from "../../chatStore/messages-slice";
-import { resetUser } from "../../chatStore/user-slice";
-import { useConfirm } from "../../components/confirm";
-import { messageAndGroupListenerUnsubscribe } from "../../graphQL/messages-api";
+} from "@chatStore/messages-slice";
+import { resetUser } from "@chatStore/user-slice";
+import { useConfirm } from "@components/confirm";
+import { messageAndGroupListenerUnsubscribe } from "@graphQL/messages-api";
 import { useStore } from "../../stores";
 import style from "./chain-list.module.scss";
 

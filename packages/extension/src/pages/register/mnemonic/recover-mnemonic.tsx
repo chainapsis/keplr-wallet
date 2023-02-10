@@ -5,7 +5,7 @@ import { Button, Form } from "reactstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import style from "../style.module.scss";
 import { BackButton } from "../index";
-import { Input, PasswordInput, TextArea } from "../../../components/form";
+import { Input, PasswordInput, TextArea } from "@components/form";
 import useForm from "react-hook-form";
 import { observer } from "mobx-react-lite";
 import { RegisterConfig } from "@keplr-wallet/hooks";

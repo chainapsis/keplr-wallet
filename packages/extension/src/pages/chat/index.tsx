@@ -9,38 +9,39 @@ import {
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { store } from "../../chatStore";
+import { NameAddress } from "@chatTypes";
+import { store } from "@chatStore/index";
 import {
   setMessageError,
   userChatStorePopulated,
   userChatSubscriptionActive,
-} from "../../chatStore/messages-slice";
+} from "@chatStore/messages-slice";
 import {
   setAccessToken,
   setMessagingPubKey,
   userDetails,
-} from "../../chatStore/user-slice";
-import { ChatInitPopup } from "../../components/chat/chat-init-popup";
-import { ChatSearchInput } from "../../components/chat/chat-search-input";
-import { DeactivatedChat } from "../../components/chat/deactivated-chat";
-import { SwitchUser } from "../../components/switch-user";
+} from "@chatStore/user-slice";
+import { ChatErrorPopup } from "@components/chat-error-popup";
+import { ChatLoader } from "@components/chat-loader";
+import { ChatInitPopup } from "@components/chat/chat-init-popup";
+import { ChatSearchInput } from "@components/chat/chat-search-input";
+import { DeactivatedChat } from "@components/chat/deactivated-chat";
+import { SwitchUser } from "@components/switch-user";
 import { EthereumEndpoint } from "../../config.ui";
 import { AUTH_SERVER } from "../../config.ui.var";
 import {
   fetchBlockList,
-  groupReadUnreadListener,
+  groupsListener,
   messageListener,
-} from "../../graphQL/messages-api";
-import { recieveGroups } from "../../graphQL/recieve-messages";
-import { HeaderLayout } from "../../layouts";
+} from "@graphQL/messages-api";
+import { recieveGroups } from "@graphQL/recieve-messages";
+import { HeaderLayout } from "@layouts/index";
 import { useStore } from "../../stores";
-import { getJWT } from "../../utils/auth";
-import { fetchPublicKey } from "../../utils/fetch-public-key";
+import { getJWT } from "@utils/auth";
+import { fetchPublicKey } from "@utils/fetch-public-key";
 import { Menu } from "../main/menu";
 import style from "./style.module.scss";
-import { ChatsGroupSection, NameAddress } from "./users";
-import { ChatLoader } from "../../components/chat-loader";
-import { ChatErrorPopup } from "../../components/chat-error-popup";
+import { ChatsGroupHistory } from "./chat-group-history";
 
 const ChatView = () => {
   const userState = useSelector(userDetails);
@@ -104,8 +105,8 @@ const ChatView = () => {
       setLoadingChats(true);
       try {
         if (!chatSubscriptionActive) {
-          groupReadUnreadListener(walletAddress);
-          messageListener();
+          groupsListener(walletAddress);
+          messageListener(walletAddress);
         }
 
         if (!chatStorePopulated) {
@@ -248,7 +249,7 @@ const ChatView = () => {
         {loadingChats ? (
           <ChatLoader message="Loading chats, please wait..." />
         ) : (
-          <ChatsGroupSection
+          <ChatsGroupHistory
             searchString={inputVal}
             setLoadingChats={setLoadingChats}
             chainId={current.chainId}

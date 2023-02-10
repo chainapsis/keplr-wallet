@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { HeaderLayout } from "../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { useHistory } from "react-router";
 
 import style from "./style.module.scss";
@@ -11,7 +11,7 @@ import {
   FeeButtons,
   MemoInput,
   DestinationChainSelector,
-} from "../../components/form";
+} from "@components/form";
 import {
   IAmountConfig,
   IFeeConfig,
@@ -23,7 +23,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
 import { EthereumEndpoint } from "../../config.ui";
-import { useNotification } from "../../components/notification";
+import { useNotification } from "@components/notification";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {

@@ -3,7 +3,7 @@ import {
   getMainDefinition,
   ObservableSubscription,
 } from "@apollo/client/utilities";
-import { store } from "../chatStore";
+import { store } from "@chatStore/index";
 import {
   setBlockedList,
   setBlockedUser,
@@ -12,43 +12,50 @@ import {
   updateMessages,
   updateLatestSentMessage,
   updateGroupsData,
-} from "../chatStore/messages-slice";
+} from "@chatStore/messages-slice";
 import { CHAT_PAGE_COUNT, GROUP_PAGE_COUNT } from "../config.ui.var";
-import { encryptAllData } from "../utils/encrypt-message";
-import { encryptGroupTimestamp } from "../utils/encrypt-group";
+import { encryptAllData } from "@utils/encrypt-message";
+import {
+  encryptGroupMessage,
+  encryptGroupTimestamp,
+  GroupMessageType,
+} from "@utils/encrypt-group";
 import { client, createWSLink, httpLink } from "./client";
 import {
   block,
   blockedList,
   groups,
   groupsWithAddresses,
-  groupReadUnread,
+  listenGroups,
   listenMessages,
   mailbox,
   mailboxWithTimestamp,
-  NewMessageUpdate,
   sendMessages,
   unblock,
   updateGroupLastSeen,
 } from "./messages-queries";
 import { recieveGroups } from "./recieve-messages";
+import { NewMessageUpdate } from "@chatTypes";
 let querySubscription: ObservableSubscription;
-let queryGroupReadUnreadSubscription: ObservableSubscription;
+let queryGroupSubscription: ObservableSubscription;
 
 interface messagesVariables {
   page?: number;
   pageCount?: number;
   groupId: string;
+  isDm: boolean;
   afterTimestamp?: string;
 }
 export const fetchMessages = async (
   groupId: string,
+  isDm: boolean,
   afterTimestamp: string | null | undefined,
   page: number
 ) => {
   const state = store.getState();
   let variables: messagesVariables = {
-    groupId: groupId,
+    groupId,
+    isDm,
   };
   if (!!afterTimestamp) {
     variables = { ...variables, afterTimestamp: afterTimestamp };
@@ -252,7 +259,63 @@ export const deliverMessages = async (
   }
 };
 
-export const messageListener = () => {
+export const deliverGroupMessages = async (
+  accessToken: string,
+  chainId: string,
+  newMessage: any,
+  encryptedSymmetricKey: string,
+  messageType: GroupMessageType,
+  senderAddress: string,
+  groupId: string
+) => {
+  const state = store.getState();
+  try {
+    if (newMessage) {
+      const encryptedData = await encryptGroupMessage(
+        chainId,
+        newMessage,
+        messageType,
+        encryptedSymmetricKey,
+        senderAddress,
+        groupId,
+        accessToken
+      );
+      const { data } = await client.mutate({
+        mutation: gql(sendMessages),
+        variables: {
+          messages: [
+            {
+              contents: `${encryptedData}`,
+            },
+          ],
+        },
+        context: {
+          headers: {
+            Authorization: `Bearer ${state.user.accessToken}`,
+          },
+        },
+      });
+
+      if (data?.dispatchMessages?.length > 0) {
+        store.dispatch(updateLatestSentMessage(data?.dispatchMessages[0]));
+        return data?.dispatchMessages[0];
+      }
+      return null;
+    }
+  } catch (e: any) {
+    store.dispatch(
+      setMessageError({
+        type: "delivery",
+        message:
+          e?.message || "Something went wrong, Message can't be delivered",
+        level: 1,
+      })
+    );
+    return null;
+  }
+};
+
+export const messageListener = (userAddress: string) => {
   const state = store.getState();
   const wsLink = createWSLink(state.user.accessToken);
   const splitLink = split(
@@ -281,8 +344,15 @@ export const messageListener = () => {
     })
     .subscribe({
       next({ data }: { data: { newMessageUpdate: NewMessageUpdate } }) {
+        const { target, groupId } = data.newMessageUpdate.message;
+        /// Distinguish between Group and Single chat
+        const id = groupId.split("-").length == 2 ? target : userAddress;
         store.dispatch(updateMessages(data.newMessageUpdate.message));
-        recieveGroups(0, data.newMessageUpdate.message.target);
+
+        /// Adding timeout for temporaray as Remove At Group subscription not working
+        setTimeout(() => {
+          recieveGroups(0, id);
+        }, 100);
       },
       error(err) {
         console.error("err", err);
@@ -300,7 +370,7 @@ export const messageListener = () => {
     });
 };
 
-export const groupReadUnreadListener = (userAddress: string) => {
+export const groupsListener = (userAddress: string) => {
   const state = store.getState();
   const wsLink = createWSLink(state.user.accessToken);
   const splitLink = split(
@@ -318,9 +388,9 @@ export const groupReadUnreadListener = (userAddress: string) => {
     link: splitLink,
     cache: new InMemoryCache(),
   });
-  queryGroupReadUnreadSubscription = newClient
+  queryGroupSubscription = newClient
     .subscribe({
-      query: gql(groupReadUnread),
+      query: gql(listenGroups),
       context: {
         headers: {
           authorization: `Bearer ${state.user.accessToken}`,
@@ -331,10 +401,15 @@ export const groupReadUnreadListener = (userAddress: string) => {
       next({ data }: { data: any }) {
         const group = data.groupUpdate.group;
 
-        group.userAddress =
-          group.id.split("-")[0].toLowerCase() !== userAddress.toLowerCase()
-            ? group.id.split("-")[0]
-            : group.id.split("-")[1];
+        if (group.isDm) {
+          const ids = group.id.split("-");
+          group.userAddress =
+            ids[0].toLowerCase() !== userAddress.toLowerCase()
+              ? ids[0]
+              : ids[1];
+        } else {
+          group.userAddress = group.id;
+        }
         store.dispatch(updateGroupsData(group));
       },
       error(err) {
@@ -355,8 +430,7 @@ export const groupReadUnreadListener = (userAddress: string) => {
 
 export const messageAndGroupListenerUnsubscribe = () => {
   if (querySubscription) querySubscription.unsubscribe();
-  if (queryGroupReadUnreadSubscription)
-    queryGroupReadUnreadSubscription.unsubscribe();
+  if (queryGroupSubscription) queryGroupSubscription.unsubscribe();
 };
 
 export const updateGroupTimestamp = async (

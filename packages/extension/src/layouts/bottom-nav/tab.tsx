@@ -2,7 +2,7 @@ import amplitude from "amplitude-js";
 import React from "react";
 import { useLocation, useHistory } from "react-router-dom";
 import { UncontrolledTooltip } from "reactstrap";
-// import { ToolTip } from "../../components/tooltip";
+// import { ToolTip } from "@components/tooltip";
 
 import style from "./style.module.scss";
 
@@ -45,7 +45,7 @@ export const Tab = ({
         }
       }}
     >
-      <img src={isActive ? activeTabIcon : icon} alt="tab" />
+      <img draggable={false} src={isActive ? activeTabIcon : icon} alt="tab" />
       <div className={style.title}>{title}</div>
       {disabled && (
         <UncontrolledTooltip placement="top" target={title}>

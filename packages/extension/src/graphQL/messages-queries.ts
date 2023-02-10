@@ -3,6 +3,7 @@ export const sendMessages = `mutation Mutation($messages: [InputMessage!]!) {
       id
       sender
       target
+      groupId
       contents
       expiryTimestamp
       commitTimestamp
@@ -12,8 +13,8 @@ export const sendMessages = `mutation Mutation($messages: [InputMessage!]!) {
 // TODO(!!!): I expect these also need types associated for all of the queries
 //            here
 
-export const mailboxWithTimestamp = `query Query($groupId: String, $afterTimestamp: Date) {
-  mailbox(groupId: $groupId, afterTimestamp: $afterTimestamp) {
+export const mailboxWithTimestamp = `query Query($groupId: String, $isDm: Boolean, $afterTimestamp: Date) {
+  mailbox(groupId: $groupId, isDm: $isDm, afterTimestamp: $afterTimestamp) {
     messages {
       commitTimestamp
       contents
@@ -26,8 +27,8 @@ export const mailboxWithTimestamp = `query Query($groupId: String, $afterTimesta
   }
 }`;
 
-export const mailbox = `query Mailbox($groupId: String, $page: Int, $pageCount: Int) {
-  mailbox(groupId: $groupId, page: $page, pageCount: $pageCount) {
+export const mailbox = `query Mailbox($groupId: String, $isDm: Boolean, $page: Int, $pageCount: Int) {
+  mailbox(groupId: $groupId, isDm: $isDm, page: $page, pageCount: $pageCount) {
     messages {
       id
       target
@@ -64,7 +65,9 @@ export const groups = `query Query($addressQueryString: String, $page: Int, $pag
         groupLastSeenTimestamp
         encryptedSymmetricKey
         isAdmin
+        removedAt
       }
+      removedAt
       createdAt
     }
     pagination {
@@ -94,7 +97,9 @@ export const groupsWithAddresses = `query Query($page: Int, $pageCount: Int, $ad
         groupLastSeenTimestamp
         encryptedSymmetricKey
         isAdmin
+        removedAt
       }
+      removedAt
       createdAt
     }
     pagination {
@@ -106,26 +111,12 @@ export const groupsWithAddresses = `query Query($page: Int, $pageCount: Int, $ad
   }
 }`;
 
-export interface Message {
-  id: string;
-  sender: string;
-  target: string;
-  contents: string;
-  groupId: string;
-  expiryTimestamp: string;
-  commitTimestamp: string;
-}
-
-export interface NewMessageUpdate {
-  type: string;
-  message: Message;
-}
-
 export const listenMessages = `subscription NewMessageUpdate {
     newMessageUpdate {
       type
       message {
         id
+        groupId
         sender
         target
         contents
@@ -140,12 +131,13 @@ export interface Addresses {
   lastSeenTimestamp: string;
 }
 
-export const groupReadUnread = `subscription GroupUpdate {
+export const listenGroups = `subscription GroupUpdate {
   groupUpdate {
     group {
       id
       name
       isDm
+      description
       lastMessageContents
       lastMessageSender
       lastMessageTimestamp
@@ -157,8 +149,10 @@ export const groupReadUnread = `subscription GroupUpdate {
         groupLastSeenTimestamp
         encryptedSymmetricKey
         isAdmin
+        removedAt
       }
       createdAt
+      removedAt
     }
   }
 }`;
@@ -210,7 +204,9 @@ export const updateGroupLastSeen = `mutation Mutation($groupId: String!, $lastSe
       groupLastSeenTimestamp
       encryptedSymmetricKey
       isAdmin
+      removedAt
     }
     createdAt
+    removedAt
   }
 }`;

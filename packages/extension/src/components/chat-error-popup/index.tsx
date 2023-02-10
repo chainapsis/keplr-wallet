@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import style from "./style.module.scss";
 import { useSelector } from "react-redux";
-import {
-  setMessageError,
-  userMessagesError,
-} from "../../chatStore/messages-slice";
-import { store } from "../../chatStore";
+import { setMessageError, userMessagesError } from "@chatStore/messages-slice";
+import { store } from "@chatStore/index";
 
 export const ChatErrorPopup = () => {
   const errorMessage = useSelector(userMessagesError);

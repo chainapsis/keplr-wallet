@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect } from "react";
 
-import { EmptyLayout } from "../../layouts/empty-layout";
+import { EmptyLayout } from "@layouts/empty-layout";
 
 import { observer } from "mobx-react-lite";
 
@@ -93,13 +93,13 @@ export const RegisterPage: FunctionComponent = observer(() => {
       <div className={style.logoContainer}>
         <img
           className={style.icon}
-          src={require("../../public/assets/temp-icon.svg")}
+          src={require("@assets/temp-icon.svg")}
           alt="logo"
         />
         <div className={style.logoInnerContainer}>
           <img
             className={style.logo}
-            src={require("../../public/assets/logo-temp.png")}
+            src={require("@assets/logo-temp.png")}
             alt="logo"
           />
         </div>

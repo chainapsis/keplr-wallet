@@ -5,11 +5,11 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 
 import { useHistory, useRouteMatch } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
-import { PasswordInput } from "../../../components/form";
+import { PasswordInput } from "@components/form";
 import { Button, Form } from "reactstrap";
 import useForm from "react-hook-form";
 import { useStore } from "../../../stores";

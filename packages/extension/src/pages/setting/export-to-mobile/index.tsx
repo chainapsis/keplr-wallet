@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { useHistory } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -8,12 +8,12 @@ import QRCode from "qrcode.react";
 import style from "./style.module.scss";
 import WalletConnect from "@walletconnect/client";
 import { Buffer } from "buffer/";
-import { useLoadingIndicator } from "../../../components/loading-indicator";
+import { useLoadingIndicator } from "@components/loading-indicator";
 import { Button, Form } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import useForm from "react-hook-form";
-import { PasswordInput } from "../../../components/form";
+import { PasswordInput } from "@components/form";
 import { ExportKeyRingData } from "@keplr-wallet/background";
 import AES, { Counter } from "aes-js";
 import { AddressBookConfigMap, AddressBookData } from "@keplr-wallet/hooks";
@@ -107,7 +107,7 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
             height: "32px",
             marginRight: "12px",
           }}
-          src={require("../../../public/assets/svg/info-mark.svg")}
+          src={require("@assets/svg/info-mark.svg")}
           alt="info"
         />
         <div
@@ -145,7 +145,7 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
           marginLeft: "80px",
           marginRight: "80px",
         }}
-        src={require("../../../public/assets/svg/export-to-mobile.svg")}
+        src={require("@assets/svg/export-to-mobile.svg")}
         alt="export-to-mobile"
       />
       <div

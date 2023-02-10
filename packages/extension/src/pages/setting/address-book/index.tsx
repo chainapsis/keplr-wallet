@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useHistory, useLocation } from "react-router";
 import style from "../style.module.scss";
@@ -19,7 +19,7 @@ import { PageButton } from "../page-button";
 import { AddAddressModal } from "./add-address-modal";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { useConfirm } from "../../../components/confirm";
+import { useConfirm } from "@components/confirm";
 import {
   AddressBookSelectHandler,
   IIBCChannelConfig,
@@ -136,7 +136,7 @@ export const AddressBookPage: FunctionComponent<{
                 img: (
                   <img
                     alt=""
-                    src={require("../../../public/assets/img/trash.svg")}
+                    src={require("@assets/img/trash.svg")}
                     style={{ height: "80px" }}
                   />
                 ),

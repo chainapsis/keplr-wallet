@@ -1,32 +1,35 @@
+import { fromBech32 } from "@cosmjs/encoding";
+import { PrivacySetting } from "@keplr-wallet/background/build/messaging/types";
 import { ExtensionKVStore } from "@keplr-wallet/common";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 import {
   useAddressBookConfig,
   useIBCTransferConfig,
 } from "@keplr-wallet/hooks";
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { useHistory } from "react-router";
-import { HeaderLayout } from "../../layouts";
-import rightArrowIcon from "../../public/assets/icon/right-arrow.png";
-import searchIcon from "../../public/assets/icon/search.png";
-import { useStore } from "../../stores";
-import style from "./style.module.scss";
-import chevronLeft from "../../public/assets/icon/chevron-left.png";
-import { Bech32Address } from "@keplr-wallet/cosmos";
-import { observer } from "mobx-react-lite";
-import { SwitchUser } from "../../components/switch-user";
-import { EthereumEndpoint } from "../../config.ui";
-import { NameAddress } from "../chat/users";
-import { formatAddress } from "../../utils/format";
-import { fetchPublicKey } from "../../utils/fetch-public-key";
-import { useSelector } from "react-redux";
-import { userDetails } from "../../chatStore/user-slice";
-import { Menu } from "../main/menu";
-import { PrivacySetting } from "@keplr-wallet/background/build/messaging/types";
 import jazzicon from "@metamask/jazzicon";
-import ReactHtmlParser from "react-html-parser";
-import { fromBech32 } from "@cosmjs/encoding";
-import { ChatLoader } from "../../components/chat-loader";
 import amplitude from "amplitude-js";
+import { observer } from "mobx-react-lite";
+import React, { FunctionComponent, useEffect, useState } from "react";
+import ReactHtmlParser from "react-html-parser";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router";
+import { NameAddress } from "@chatTypes";
+import { userDetails } from "@chatStore/user-slice";
+import { ChatLoader } from "@components/chat-loader";
+import { SwitchUser } from "@components/switch-user";
+import { EthereumEndpoint } from "../../config.ui";
+import { HeaderLayout } from "@layouts/index";
+import chevronLeft from "@assets/icon/chevron-left.png";
+import rightArrowIcon from "@assets/icon/right-arrow.png";
+import searchIcon from "@assets/icon/search.png";
+import { useStore } from "../../stores";
+import { fetchPublicKey } from "@utils/fetch-public-key";
+import { formatAddress } from "@utils/format";
+import { Menu } from "../main/menu";
+import style from "./style.module.scss";
+import { store } from "@chatStore/index";
+import { resetNewGroup } from "@chatStore/new-group-slice";
+import { DeactivatedChat } from "@components/chat/deactivated-chat";
 
 const NewUser = (props: { address: NameAddress }) => {
   const history = useHistory();
@@ -89,7 +92,12 @@ const NewUser = (props: { address: NameAddress }) => {
         {isLoading ? (
           <i className="fas fa-spinner fa-spin ml-1" />
         ) : (
-          <img src={rightArrowIcon} style={{ width: "80%" }} alt="message" />
+          <img
+            draggable={false}
+            src={rightArrowIcon}
+            style={{ width: "80%" }}
+            alt="message"
+          />
         )}
       </div>
     </div>
@@ -136,11 +144,13 @@ export const NewChat: FunctionComponent = observer(() => {
     }
   );
 
-  const useraddresses: NameAddress[] = addressBookConfig.addressBookDatas.map(
-    (data) => {
+  const useraddresses: NameAddress[] = addressBookConfig.addressBookDatas
+    .map((data) => {
       return { name: data.name, address: data.address };
-    }
-  );
+    })
+    .sort(function (a, b) {
+      return a.name.localeCompare(b.name);
+    });
 
   useEffect(() => {
     setAddresses(useraddresses.filter((a) => a.address !== walletAddress));
@@ -184,6 +194,14 @@ export const NewChat: FunctionComponent = observer(() => {
       setAddresses(addresses);
     }
   };
+
+  if (
+    user.messagingPubKey.privacySetting &&
+    user.messagingPubKey.privacySetting === PrivacySetting.Nobody
+  ) {
+    return <DeactivatedChat />;
+  }
+
   return (
     <HeaderLayout
       showChainName={true}
@@ -194,8 +212,8 @@ export const NewChat: FunctionComponent = observer(() => {
       {!addressBookConfig.isLoaded ? (
         <ChatLoader message="Loading contacts, please wait..." />
       ) : (
-        <div>
-          <div className={style.newChatContainer}>
+        <div className={style.newChatContainer}>
+          <div className={style.newChatHeader}>
             <div className={style.leftBox}>
               <img
                 alt=""
@@ -210,7 +228,7 @@ export const NewChat: FunctionComponent = observer(() => {
           </div>
           <div className={style.searchContainer}>
             <div className={style.searchBox}>
-              <img src={searchIcon} alt="search" />
+              <img draggable={false} src={searchIcon} alt="search" />
               <input
                 placeholder="Search by name or address"
                 value={inputVal}
@@ -221,7 +239,20 @@ export const NewChat: FunctionComponent = observer(() => {
           <div className={style.searchHelp}>
             You can search your contacts or paste any valid {current.chainName}{" "}
             address to start a conversation.
+            <br /> or <br />
+            <button
+              className={style.button}
+              onClick={() => {
+                store.dispatch(resetNewGroup());
+                history.push({
+                  pathname: "/chat/group-chat/create",
+                });
+              }}
+            >
+              Create new group chat
+            </button>
           </div>
+
           <div className={style.messagesContainer}>
             {randomAddress && (
               <NewUser address={randomAddress} key={randomAddress.address} />

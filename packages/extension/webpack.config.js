@@ -11,10 +11,17 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
-const commonResolve = (dir) => ({
-  extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
+const commonResolve = () => ({
+  extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss", ".svg"],
   alias: {
-    assets: path.resolve(__dirname, dir),
+    "@components": path.resolve(__dirname, "src/components"),
+    "@layouts": path.resolve(__dirname, "src/layouts"),
+    "@chatStore": path.resolve(__dirname, "src/stores/chats"),
+    "@graphQL": path.resolve(__dirname, "src/graphQL"),
+    "@chatTypes": path.resolve(__dirname, "src/@types/chat"),
+    "@hooks": path.resolve(__dirname, "src/hooks"),
+    "@assets": path.resolve(__dirname, "src/public/assets"),
+    "@utils": path.resolve(__dirname, "src/utils"),
   },
 });
 const sassRule = {
@@ -89,7 +96,7 @@ const extensionConfig = () => {
       path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "prod"),
       filename: "[name].bundle.js",
     },
-    resolve: commonResolve("src/public/assets"),
+    resolve: commonResolve(),
     module: {
       rules: [sassRule, tsRule, fileRule],
     },

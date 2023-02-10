@@ -4,11 +4,11 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 
 import { useHistory, useLocation, useRouteMatch } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
-import { PasswordInput } from "../../../components/form";
+import { PasswordInput } from "@components/form";
 import { Button, Form } from "reactstrap";
 import useForm from "react-hook-form";
 import { WarningView } from "./warning-view";

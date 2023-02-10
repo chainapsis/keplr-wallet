@@ -42,7 +42,7 @@ export const WarningView: FunctionComponent<{
       ) : null}
       <div className={styleWarningView.trashContainer}>
         <img
-          src={require("../../../public/assets/img/icons8-trash-can.svg")}
+          src={require("@assets/img/icons8-trash-can.svg")}
           alt="trash-can"
         />
         <div>

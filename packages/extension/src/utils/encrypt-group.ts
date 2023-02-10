@@ -1,12 +1,16 @@
 import { toBase64, toUtf8 } from "@cosmjs/encoding";
-import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {
   EncryptMessagingMessage,
   GetMessagingPublicKey,
   SignMessagingPayload,
 } from "@keplr-wallet/background/build/messaging";
 import { MESSAGE_CHANNEL_ID } from "@keplr-wallet/background/build/messaging/constants";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import {
+  decryptEncryptedSymmetricKey,
+  encryptGroupData,
+} from "./symmetric-key";
 
 export interface GroupTimestampUpdateEnvelope {
   data: string; // base64 encoded
@@ -19,6 +23,19 @@ export interface GroupTimestampUpdatePrimitive {
   sender: string;
   target: string;
   content: Date;
+}
+
+export enum GroupMessageType {
+  message,
+  event,
+}
+
+export interface GroupMessageEnvelope {
+  data: string; // base64 encoded
+  senderPublicKey: string; // base64 encoded
+  targetGroupId: string; // base64 encoded
+  signature: string; // base64 encoded signature
+  channelId: string;
 }
 
 export const encryptGroupTimestamp = async (
@@ -117,6 +134,81 @@ export async function encryptGroupTimestampToEnvelope(
     data: encodedData,
     senderPublicKey: senderPublicKey.publicKey,
     targetPublicKey: targetPublicKey.publicKey,
+    signature,
+    channelId: MESSAGE_CHANNEL_ID,
+  };
+}
+
+export const encryptGroupMessage = async (
+  chainId: string,
+  messageStr: string,
+  messageType: GroupMessageType,
+  encryptedSymmetricKey: string,
+  senderAddress: string,
+  targetGroupId: string,
+  accessToken: string
+): Promise<string> => {
+  const dataEnvelope = await encryptGroupMessageToEnvelope(
+    chainId,
+    messageStr,
+    messageType,
+    encryptedSymmetricKey,
+    senderAddress,
+    targetGroupId,
+    accessToken
+  );
+  return toBase64(Buffer.from(JSON.stringify(dataEnvelope)));
+};
+
+export async function encryptGroupMessageToEnvelope(
+  chainId: string,
+  messageStr: string,
+  messageType: GroupMessageType,
+  encryptedSymmetricKey: string,
+  senderAddress: string,
+  targetGroupId: string,
+  accessToken: string
+): Promise<GroupMessageEnvelope> {
+  // TODO: ideally this is cached
+  const requester = new InExtensionMessageRequester();
+
+  // lookup both our (sender) and target public keys
+  const senderPublicKey = await requester.sendMessage(
+    BACKGROUND_PORT,
+    new GetMessagingPublicKey(chainId, accessToken, senderAddress)
+  );
+
+  if (!senderPublicKey.publicKey) {
+    throw new Error("Sender Public key not available");
+  }
+
+  const symmetricKey = await decryptEncryptedSymmetricKey(
+    chainId,
+    encryptedSymmetricKey
+  );
+  const message = {
+    senderPublicKey,
+    targetGroupId,
+    content: {
+      text: messageStr,
+      type: GroupMessageType[messageType],
+    },
+  };
+  const encodedData = toBase64(Buffer.from(JSON.stringify(message)));
+
+  const encryptedContent = encryptGroupData(symmetricKey, encodedData);
+  const encodedContent = toBase64(
+    Buffer.from(JSON.stringify(encryptedContent))
+  );
+  // get the signature for the payload
+  const signature = await requester.sendMessage(
+    BACKGROUND_PORT,
+    new SignMessagingPayload(chainId, encodedContent)
+  );
+  return {
+    data: encodedContent,
+    senderPublicKey: senderPublicKey.publicKey,
+    targetGroupId,
     signature,
     channelId: MESSAGE_CHANNEL_ID,
   };

@@ -10,7 +10,6 @@
     border-radius: 4px;
     align-items: center;
     gap: 10px;
-    margin-right: 10px;
     img {
       width: 16px;
       height: 16px;
@@ -39,7 +38,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 12px;
     cursor: pointer;
     .initials {
       width: 24px;
@@ -86,14 +84,18 @@
     }
   }
 }
+
 .newChatContainer {
   margin-left: -12px;
   margin-right: -12px;
   padding: 10px;
+  background-color: #ffffff;
+}
+
+.newChatHeader {
   align-items: center;
   display: flex;
   justify-content: space-between;
-  background-color: #ffffff;
   border-radius: 6px;
   flex-direction: row;
   .backBtn {
@@ -125,8 +127,23 @@
   font-size: 13px;
   color: #808da0;
   margin-top: 5px;
+  text-align: center;
 }
 
 .contacts {
   display: flex;
+}
+
+.button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 10px;
+  border: solid #3b82f6 1px;
+  border-radius: 6px;
+  color: #3b82f6;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  background: #ffffff;
 }

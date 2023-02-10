@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { BackButton } from "../index";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Input, TextArea } from "../../../components/form";
+import { Input, TextArea } from "@components/form";
 import style from "../style.module.scss";
 import { Button, Form } from "reactstrap";
 import useForm from "react-hook-form";

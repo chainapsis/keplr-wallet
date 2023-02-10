@@ -7,3 +7,13 @@ export const formatAddress = (address: string) => {
     );
   else return address;
 };
+
+export const formatGroupName = (address: string) => {
+  if (address?.length > 15)
+    return (
+      address.substring(0, 8) +
+      "..." +
+      address.substring(address.length - 6, address.length)
+    );
+  else return address;
+};

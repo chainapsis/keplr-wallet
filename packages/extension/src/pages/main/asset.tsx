@@ -6,20 +6,20 @@ import React, {
   useCallback,
 } from "react";
 import { FormattedMessage } from "react-intl";
-import { ToolTip } from "../../components/tooltip";
+import { ToolTip } from "@components/tooltip";
 import { useLanguage } from "../../languages";
 import { useStore } from "../../stores";
 import styleAsset from "./asset.module.scss";
 import { TxButtonView } from "./tx-button";
-import walletIcon from "../../public/assets/icon/wallet.png";
-import buyIcon from "../../public/assets/icon/buy.png";
+import walletIcon from "@assets/icon/wallet.png";
+import buyIcon from "@assets/icon/buy.png";
 import { DepositView } from "./deposit";
 import { DepositModal } from "./qr-code";
-import { useNotification } from "../../components/notification";
+import { useNotification } from "@components/notification";
 import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
-import { store } from "../../chatStore";
-import { setIsChatActive } from "../../chatStore/user-slice";
+import { store } from "@chatStore/index";
+import { setIsChatActive } from "@chatStore/user-slice";
 
 export const ProgressBar = ({
   width,

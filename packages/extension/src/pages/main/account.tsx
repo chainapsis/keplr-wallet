@@ -1,13 +1,13 @@
 import React, { FunctionComponent, useCallback } from "react";
 
-import { Address } from "../../components/address";
+import { Address } from "@components/address";
 
 import styleAccount from "./account.module.scss";
 
 import { WalletStatus } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
-import { useNotification } from "../../components/notification";
+import { useNotification } from "@components/notification";
 import { useStore } from "../../stores";
 
 export const AccountView: FunctionComponent = observer(() => {

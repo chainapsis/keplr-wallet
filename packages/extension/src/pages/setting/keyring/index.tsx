@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
@@ -9,17 +9,17 @@ import { useHistory } from "react-router";
 import { Button, Popover, PopoverBody } from "reactstrap";
 
 import style from "./style.module.scss";
-import { useLoadingIndicator } from "../../../components/loading-indicator";
+import { useLoadingIndicator } from "@components/loading-indicator";
 import { PageButton } from "../page-button";
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
-import { store } from "../../../chatStore";
-import { resetUser } from "../../../chatStore/user-slice";
+import { store } from "@chatStore/index";
+import { resetUser } from "@chatStore/user-slice";
 import {
   resetChatList,
   setIsChatSubscriptionActive,
-} from "../../../chatStore/messages-slice";
-import { messageAndGroupListenerUnsubscribe } from "../../../graphQL/messages-api";
+} from "@chatStore/messages-slice";
+import { messageAndGroupListenerUnsubscribe } from "@graphQL/messages-api";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const intl = useIntl();

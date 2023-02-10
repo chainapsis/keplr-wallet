@@ -8,9 +8,9 @@ import { Hash } from "@keplr-wallet/crypto";
 import { ObservableQueryBalanceInner } from "@keplr-wallet/stores/build/query/balances";
 import { UncontrolledTooltip } from "reactstrap";
 import { WrongViewingKeyError } from "@keplr-wallet/stores";
-import { useNotification } from "../../components/notification";
-import { useLoadingIndicator } from "../../components/loading-indicator";
-import sendIcon from "../../public/assets/icon/send.png";
+import { useNotification } from "@components/notification";
+import { useLoadingIndicator } from "@components/loading-indicator";
+import sendIcon from "@assets/icon/send.png";
 import { Dec } from "@keplr-wallet/unit";
 
 const TokenView: FunctionComponent<{

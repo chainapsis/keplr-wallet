@@ -1,23 +1,23 @@
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 // import { useLanguage } from "../../../languages";
 import { PrivacySetting } from "@keplr-wallet/background/build/messaging/types";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { store } from "../../../chatStore";
-import { userBlockedAddresses } from "../../../chatStore/messages-slice";
+import { store } from "@chatStore/index";
+import { userBlockedAddresses } from "@chatStore/messages-slice";
 import {
   setAccessToken,
   setMessagingPubKey,
   userDetails,
-} from "../../../chatStore/user-slice";
+} from "@chatStore/user-slice";
 import { AUTH_SERVER } from "../../../config.ui.var";
-import { fetchBlockList } from "../../../graphQL/messages-api";
+import { fetchBlockList } from "@graphQL/messages-api";
 import { useStore } from "../../../stores";
-import { getJWT } from "../../../utils/auth";
-import { fetchPublicKey } from "../../../utils/fetch-public-key";
+import { getJWT } from "@utils/auth";
+import { fetchPublicKey } from "@utils/fetch-public-key";
 import { PageButton } from "../page-button";
 import style from "./style.module.scss";
 

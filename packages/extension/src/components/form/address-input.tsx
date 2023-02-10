@@ -3,7 +3,6 @@ import {
   FormGroup,
   Label,
   Input,
-  FormFeedback,
   ModalBody,
   Modal,
   InputGroup,
@@ -174,9 +173,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             <FormText>{recipientConfig.recipient}</FormText>
           ) : null}
           {errorText != null ? (
-            <FormFeedback style={{ display: "block" }}>
-              {errorText}
-            </FormFeedback>
+            <div className={styleAddressInput.errorText}>{errorText}</div>
           ) : null}
         </FormGroup>
       </React.Fragment>

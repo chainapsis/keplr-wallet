@@ -1,5 +1,5 @@
 import React from "react";
-import loadingChatGif from "../../public/assets/chat-loading.gif";
+import loadingChatGif from "@assets/chat-loading.gif";
 
 export const ChatLoader = ({ message }: { message: string }) => {
   return (

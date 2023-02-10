@@ -1,19 +1,19 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { HeaderLayout } from "../../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { useHistory } from "react-router";
 import { useIntl, FormattedMessage } from "react-intl";
 
 import style from "./style.module.scss";
 import { Button, Form } from "reactstrap";
-import { Input } from "../../../../components/form";
+import { Input } from "@components/form";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import useForm from "react-hook-form";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
-import { useLoadingIndicator } from "../../../../components/loading-indicator";
-import { useNotification } from "../../../../components/notification";
+import { useLoadingIndicator } from "@components/loading-indicator";
+import { useNotification } from "@components/notification";
 
 interface FormData {
   contractAddress: string;

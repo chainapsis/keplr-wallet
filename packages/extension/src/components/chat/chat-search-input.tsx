@@ -1,8 +1,8 @@
 import amplitude from "amplitude-js";
 import React from "react";
 import { useHistory } from "react-router";
-import newChatIcon from "../../public/assets/icon/new-chat.png";
-import searchIcon from "../../public/assets/icon/search.png";
+import newChatIcon from "@assets/icon/new-chat.png";
+import searchIcon from "@assets/icon/search.png";
 import style from "./style.module.scss";
 
 export const ChatSearchInput = ({
@@ -18,7 +18,7 @@ export const ChatSearchInput = ({
   return (
     <div className={style.searchContainer}>
       <div className={style.searchBox}>
-        <img src={searchIcon} alt="search" />
+        <img draggable={false} src={searchIcon} alt="search" />
         <input
           placeholder="Search by name or address"
           value={searchInput}
@@ -32,7 +32,12 @@ export const ChatSearchInput = ({
           history.push("/newChat");
         }}
       >
-        <img className={style.newChatIcon} src={newChatIcon} alt="" />
+        <img
+          draggable={false}
+          className={style.newChatIcon}
+          src={newChatIcon}
+          alt=""
+        />
       </div>
     </div>
   );

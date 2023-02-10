@@ -4,15 +4,15 @@ import {
   FeeButtons,
   CoinInput,
   MemoInput,
-} from "../../components/form";
+} from "@components/form";
 import { useStore } from "../../stores";
 
-import { HeaderLayout } from "../../layouts";
+import { HeaderLayout } from "@layouts/index";
 
 import { observer } from "mobx-react-lite";
 
 import style from "./style.module.scss";
-import { useNotification } from "../../components/notification";
+import { useNotification } from "@components/notification";
 
 import { useIntl } from "react-intl";
 import { Button } from "reactstrap";

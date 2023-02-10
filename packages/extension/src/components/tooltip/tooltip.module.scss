@@ -15,7 +15,8 @@ $bright: rgba(255, 255, 255, 0.75);
     padding: 4px;
     border-radius: 6px;
     color: white;
-
+    word-break: break-word;
+    margin-right: 10px;
     z-index: 1000;
     transition: opacity 0.45s;
   }

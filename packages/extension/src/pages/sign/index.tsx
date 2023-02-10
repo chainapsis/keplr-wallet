@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { Button } from "reactstrap";
 
-import { HeaderLayout } from "../../layouts";
+import { HeaderLayout } from "@layouts/index";
 
 import style from "./style.module.scss";
 

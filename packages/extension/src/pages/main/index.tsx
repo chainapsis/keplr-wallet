@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useRef } from "react";
 
-import { HeaderLayout } from "../../layouts";
+import { HeaderLayout } from "@layouts/index";
 
 import { Card, CardBody } from "reactstrap";
 
@@ -8,8 +8,8 @@ import { ChainUpdaterService } from "@keplr-wallet/background";
 import classnames from "classnames";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
-import { useConfirm } from "../../components/confirm";
-import { SwitchUser } from "../../components/switch-user";
+import { useConfirm } from "@components/confirm";
+import { SwitchUser } from "@components/switch-user";
 import { useStore } from "../../stores";
 import { AccountView } from "./account";
 import { AssetView } from "./asset";

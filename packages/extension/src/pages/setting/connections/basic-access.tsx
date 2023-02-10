@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 
 import style from "../style.module.scss";
 import { useHistory } from "react-router";
@@ -15,7 +15,7 @@ import {
 
 import styleConnections from "./style.module.scss";
 import { useIntl } from "react-intl";
-import { useConfirm } from "../../../components/confirm";
+import { useConfirm } from "@components/confirm";
 
 export const SettingConnectionsPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -87,7 +87,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
                     img: (
                       <img
                         alt="unlink"
-                        src={require("../../../public/assets/img/broken-link.svg")}
+                        src={require("@assets/img/broken-link.svg")}
                         style={{ height: "80px" }}
                       />
                     ),

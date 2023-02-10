@@ -6,14 +6,11 @@ import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useIntl } from "react-intl";
-import { store } from "../../../../chatStore";
+import { store } from "@chatStore/index";
 import { useHistory } from "react-router";
-import {
-  setMessagingPubKey,
-  userDetails,
-} from "../../../../chatStore/user-slice";
-import { useLoadingIndicator } from "../../../../components/loading-indicator";
-import { HeaderLayout } from "../../../../layouts";
+import { setMessagingPubKey, userDetails } from "@chatStore/user-slice";
+import { useLoadingIndicator } from "@components/loading-indicator";
+import { HeaderLayout } from "@layouts/index";
 import { PageButton } from "../../page-button";
 import { useStore } from "../../../../stores";
 import style from "./style.module.scss";
@@ -99,7 +96,7 @@ export const ReadRecipt: FunctionComponent = observer(() => {
                 ? [
                     <img
                       key={0}
-                      src={require("../../../../public/assets/svg/tick-icon.svg")}
+                      src={require("@assets/svg/tick-icon.svg")}
                       style={{ width: "100%" }}
                       alt="message"
                     />,
@@ -130,7 +127,7 @@ export const ReadRecipt: FunctionComponent = observer(() => {
                 ? [
                     <img
                       key={0}
-                      src={require("../../../../public/assets/svg/tick-icon.svg")}
+                      src={require("@assets/svg/tick-icon.svg")}
                       style={{ width: "100%" }}
                       alt="message"
                     />,

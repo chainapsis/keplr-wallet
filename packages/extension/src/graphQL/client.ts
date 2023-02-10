@@ -1,8 +1,8 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
-import { store } from "../chatStore";
-import { setIsChatSubscriptionActive } from "../chatStore/messages-slice";
+import { store } from "@chatStore/index";
+import { setIsChatSubscriptionActive } from "@chatStore/messages-slice";
 import { GRAPHQL_URL } from "../config.ui.var";
 
 export const client = new ApolloClient({

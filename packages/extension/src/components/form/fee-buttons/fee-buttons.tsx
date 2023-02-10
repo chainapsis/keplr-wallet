@@ -271,10 +271,13 @@ export const FeeButtonsInner: FunctionComponent<
           </FormText>
         ) : null}
         {errorText != null ? (
-          <FormFeedback style={{ display: "block" }}>{errorText}</FormFeedback>
+          <FormFeedback style={{ display: "block", width: "80%" }}>
+            {errorText}
+          </FormFeedback>
         ) : null}
-        <div style={{ position: "absolute", right: 0 }}>
+        <div style={{ right: 0 }}>
           <Button
+            className={styleFeeButtons.setGasButton}
             size="sm"
             color="link"
             onClick={(e) => {

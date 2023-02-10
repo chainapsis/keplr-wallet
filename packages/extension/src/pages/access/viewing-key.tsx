@@ -9,7 +9,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
-import { EmptyLayout } from "../../layouts/empty-layout";
+import { EmptyLayout } from "@layouts/empty-layout";
 import { FormattedMessage } from "react-intl";
 
 export const Secret20ViewingKeyAccessPage: FunctionComponent = observer(() => {
@@ -48,7 +48,7 @@ export const Secret20ViewingKeyAccessPage: FunctionComponent = observer(() => {
     <EmptyLayout style={{ height: "100%", paddingTop: "80px" }}>
       <div className={style.container}>
         <img
-          src={require("../../public/assets/temp-icon.svg")}
+          src={require("@assets/temp-icon.svg")}
           alt="logo"
           style={{ height: "92px" }}
         />

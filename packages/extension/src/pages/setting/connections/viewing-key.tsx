@@ -4,9 +4,9 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import style from "../style.module.scss";
 import { PageButton } from "../page-button";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { useIntl } from "react-intl";
-import { useConfirm } from "../../../components/confirm";
+import { useConfirm } from "@components/confirm";
 
 export const SettingSecret20ViewingKeyConnectionsPage: FunctionComponent = observer(
   () => {
@@ -68,7 +68,7 @@ export const SettingSecret20ViewingKeyConnectionsPage: FunctionComponent = obser
                       img: (
                         <img
                           alt="unlink"
-                          src={require("../../../public/assets/img/broken-link.svg")}
+                          src={require("@assets/img/broken-link.svg")}
                           style={{ height: "80px" }}
                         />
                       ),

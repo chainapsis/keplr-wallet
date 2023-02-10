@@ -1,12 +1,12 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { HeaderLayout } from "../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { useHistory } from "react-router";
 import { PageButton } from "./page-button";
 import style from "./style.module.scss";
 import { useLanguage } from "../../languages";
 import { useIntl } from "react-intl";
 import { observer } from "mobx-react-lite";
-import { userChatActive } from "../../chatStore/user-slice";
+import { userChatActive } from "@chatStore/user-slice";
 import { useSelector } from "react-redux";
 // import { useStore } from "../../stores";
 

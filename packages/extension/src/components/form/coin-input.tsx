@@ -8,7 +8,6 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-  FormFeedback,
   FormGroup,
   Input,
   Label,
@@ -198,9 +197,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             autoComplete="off"
           />
           {errorText != null ? (
-            <FormFeedback style={{ display: "block" }}>
-              {errorText}
-            </FormFeedback>
+            <div className={styleCoinInput.errorText}>{errorText}</div>
           ) : null}
         </FormGroup>
       </React.Fragment>

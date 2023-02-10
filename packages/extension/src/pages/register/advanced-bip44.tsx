@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from "react";
 import { Button, FormGroup, Input, Label } from "reactstrap";
-import { useConfirm } from "../../components/confirm";
+import { useConfirm } from "@components/confirm";
 import { FormattedMessage, useIntl } from "react-intl";
 import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";

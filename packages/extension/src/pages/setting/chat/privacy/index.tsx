@@ -8,13 +8,10 @@ import React, { FunctionComponent, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { store } from "../../../../chatStore";
-import {
-  setMessagingPubKey,
-  userDetails,
-} from "../../../../chatStore/user-slice";
-import { useLoadingIndicator } from "../../../../components/loading-indicator";
-import { HeaderLayout } from "../../../../layouts";
+import { store } from "@chatStore/index";
+import { setMessagingPubKey, userDetails } from "@chatStore/user-slice";
+import { useLoadingIndicator } from "@components/loading-indicator";
+import { HeaderLayout } from "@layouts/index";
 import { useStore } from "../../../../stores";
 import { PageButton } from "../../page-button";
 import style from "./style.module.scss";
@@ -93,7 +90,7 @@ export const Privacy: FunctionComponent = observer(() => {
                 ? [
                     <img
                       key={0}
-                      src={require("../../../../public/assets/svg/tick-icon.svg")}
+                      src={require("@assets/svg/tick-icon.svg")}
                       style={{ width: "100%" }}
                       alt="message"
                     />,
@@ -117,7 +114,7 @@ export const Privacy: FunctionComponent = observer(() => {
                 ? [
                     <img
                       key={0}
-                      src={require("../../../../public/assets/svg/tick-icon.svg")}
+                      src={require("@assets/svg/tick-icon.svg")}
                       style={{ width: "100%" }}
                       alt="message"
                     />,
@@ -141,7 +138,7 @@ export const Privacy: FunctionComponent = observer(() => {
                 ? [
                     <img
                       key={0}
-                      src={require("../../../../public/assets/svg/tick-icon.svg")}
+                      src={require("@assets/svg/tick-icon.svg")}
                       style={{ width: "100%" }}
                       alt="message"
                     />,

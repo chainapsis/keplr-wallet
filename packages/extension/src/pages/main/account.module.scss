@@ -7,6 +7,16 @@
   font-size: 20px;
   color: #32325d;
   font-weight: bold;
+  overflow: hidden;
+  text-align: center;
+  word-break: break-all;
+  margin-right: 5px;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-height: 21px;
+  max-height: 48px;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .container-account {

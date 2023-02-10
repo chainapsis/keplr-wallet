@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { HeaderLayout } from "../../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { useHistory } from "react-router";
 import { useIntl } from "react-intl";
 import { PageButton } from "../page-button";

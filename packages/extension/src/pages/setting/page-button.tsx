@@ -3,7 +3,7 @@ import React, { FunctionComponent } from "react";
 import classnames from "classnames";
 
 import stylePageButton from "./page-button.module.scss";
-import { ToolTip } from "../../components/tooltip";
+import { ToolTip } from "@components/tooltip";
 
 export const PageButton: FunctionComponent<
   {

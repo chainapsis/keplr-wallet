@@ -6,10 +6,10 @@ import amplitude from "amplitude-js";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { store } from "../../chatStore";
-import { setMessageError } from "../../chatStore/messages-slice";
-import { setMessagingPubKey, userDetails } from "../../chatStore/user-slice";
-import privacyIcon from "../../public/assets/hello.png";
+import { store } from "@chatStore/index";
+import { setMessageError } from "@chatStore/messages-slice";
+import { setMessagingPubKey, userDetails } from "@chatStore/user-slice";
+import privacyIcon from "@assets/hello.png";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
 
@@ -82,7 +82,7 @@ export const ChatInitPopup = ({
     <>
       <div className={style.overlay} />
       <div className={style.popupContainer}>
-        <img src={privacyIcon} />
+        <img draggable={false} src={privacyIcon} />
         <br />
         <div className={style.infoContainer}>
           <h3>We have just added Chat!</h3>

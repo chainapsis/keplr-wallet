@@ -10,7 +10,7 @@ import styleStake from "./stake.module.scss";
 import classnames from "classnames";
 import { Dec } from "@keplr-wallet/unit";
 
-import { useNotification } from "../../components/notification";
+import { useNotification } from "@components/notification";
 
 import { useHistory } from "react-router";
 

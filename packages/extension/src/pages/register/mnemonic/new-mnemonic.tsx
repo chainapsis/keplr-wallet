@@ -10,7 +10,7 @@ import {
 } from "../advanced-bip44";
 import style from "../style.module.scss";
 import { Alert, Button, ButtonGroup, Form } from "reactstrap";
-import { Input, PasswordInput, TextArea } from "../../../components/form";
+import { Input, PasswordInput, TextArea } from "@components/form";
 import { BackButton } from "../index";
 import { NewMnemonicConfig, useNewMnemonicConfig, NumWords } from "./hook";
 import { useStore } from "../../../stores";

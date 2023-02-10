@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React from "react";
 import { useHistory } from "react-router";
-import { HeaderLayout } from "../../layouts";
+import { HeaderLayout } from "@layouts/index";
 import { Menu } from "../../pages/main/menu";
 import { SwitchUser } from "../switch-user";
 import style from "./style.module.scss";
@@ -20,7 +20,7 @@ export const DeactivatedChat = () => {
       <div className={style.lockedInnerContainer}>
         <img
           className={style.imgLock}
-          src={require("../../public/assets/img/icons8-lock.svg")}
+          src={require("@assets/img/icons8-lock.svg")}
           alt="lock"
         />
 
