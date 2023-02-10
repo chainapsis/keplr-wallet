@@ -31,6 +31,9 @@ init(
     "https://daodao.zone",
     "https://app.regen.network",
     "https://app.stride.zone",
+    "https://app.wynddao.com",
+    "https://osmosis.marsprotocol.io",
+    "https://hub.injective.network",
   ],
   ["https://wallet.keplr.app"],
   {

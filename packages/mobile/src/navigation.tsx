@@ -116,10 +116,12 @@ import {
   OsmosisFrontierWebpageScreen,
   StargazeWebpageScreen,
   UmeeWebpageScreen,
-  JunoswapWebpageScreen,
+  WYNDDaoWebpageScreen,
   DaoDaoWebpageScreen,
   RegenWebpageScreen,
   StrideWebpageScreen,
+  MarsWebpageScreen,
+  InjectiveWebpageScreen,
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
@@ -258,7 +260,7 @@ const {
     "Web.Umee": {
       upperScreenName: "Web",
     },
-    "Web.Junoswap": {
+    "Web.WYNDDao": {
       upperScreenName: "Web",
     },
     "Web.DaoDao": {
@@ -268,6 +270,12 @@ const {
       upperScreenName: "Web",
     },
     "Web.Stride": {
+      upperScreenName: "Web",
+    },
+    "Web.Mars": {
+      upperScreenName: "Web",
+    },
+    "Web.Injective": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -875,10 +883,12 @@ export const WebNavigation: FunctionComponent = () => {
       />
       <Stack.Screen name="Web.Stargaze" component={StargazeWebpageScreen} />
       <Stack.Screen name="Web.Umee" component={UmeeWebpageScreen} />
-      <Stack.Screen name="Web.Junoswap" component={JunoswapWebpageScreen} />
+      <Stack.Screen name="Web.WYNDDao" component={WYNDDaoWebpageScreen} />
       <Stack.Screen name="Web.DaoDao" component={DaoDaoWebpageScreen} />
       <Stack.Screen name="Web.Regen" component={RegenWebpageScreen} />
       <Stack.Screen name="Web.Stride" component={StrideWebpageScreen} />
+      <Stack.Screen name="Web.Mars" component={MarsWebpageScreen} />
+      <Stack.Screen name="Web.Injective" component={InjectiveWebpageScreen} />
     </Stack.Navigator>
   );
 };

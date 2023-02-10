@@ -57,10 +57,25 @@ export const WebScreen: FunctionComponent = () => {
         }}
       />
       <WebpageImageButton
-        name="Junoswap"
-        source={require("../../assets/image/webpage/junoswap.png")}
+        name="WYND Dao"
+        source={require("../../assets/image/webpage/wynddao.png")}
         onPress={() => {
-          smartNavigation.pushSmart("Web.Junoswap", {});
+          smartNavigation.pushSmart("Web.WYNDDao", {});
+        }}
+      />
+      <WebpageImageButton
+        name="DAO DAO"
+        source={require("../../assets/image/webpage/daodao.png")}
+        overlayStyle={style.flatten(["opacity-60"])}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.DaoDao", {});
+        }}
+      />
+      <WebpageImageButton
+        name="Injective"
+        source={require("../../assets/image/webpage/injective.png")}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.Injective", {});
         }}
       />
       <WebpageImageButton
@@ -86,11 +101,10 @@ export const WebScreen: FunctionComponent = () => {
         }}
       />
       <WebpageImageButton
-        name="DAO DAO"
-        source={require("../../assets/image/webpage/daodao.png")}
-        overlayStyle={style.flatten(["opacity-60"])}
+        name="Mars Hub"
+        source={require("../../assets/image/webpage/mars.png")}
         onPress={() => {
-          smartNavigation.pushSmart("Web.DaoDao", {});
+          smartNavigation.pushSmart("Web.Mars", {});
         }}
       />
       <WebpageImageButton

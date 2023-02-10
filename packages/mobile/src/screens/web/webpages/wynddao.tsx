@@ -1,12 +1,12 @@
 import React, { FunctionComponent } from "react";
 import { WebpageScreen } from "../components/webpage-screen";
 
-export const JunoswapWebpageScreen: FunctionComponent = () => {
+export const WYNDDaoWebpageScreen: FunctionComponent = () => {
   return (
     <WebpageScreen
-      name="Junoswap"
-      source={{ uri: "https://junoswap.com" }}
-      originWhitelist={["https://junoswap.com"]}
+      name="WYND Dao"
+      source={{ uri: "https://app.wynddao.com" }}
+      originWhitelist={["https://app.wynddao.com"]}
       experimentalOptions={{
         enableSuggestChain: true,
       }}
