@@ -100,7 +100,11 @@ export const KeyStoreItem: FunctionComponent<{
             />
           </View>
         )}
-        <View>
+        <View
+            style={StyleSheet.flatten([
+                style.flatten(["width-80-percent"])
+            ])}
+        >
           <Text
             style={StyleSheet.flatten([
               style.flatten(["h5", "color-text-high"]),
@@ -142,10 +146,10 @@ export const KeyStoreItem: FunctionComponent<{
         <RectButton
           style={StyleSheet.flatten([
             style.flatten([
-              "height-87",
+              "height-auto",
               "flex-row",
               "items-center",
-              "padding-x-20",
+              "padding-20",
               "background-color-white",
               "dark:background-color-platinum-600",
             ]),
