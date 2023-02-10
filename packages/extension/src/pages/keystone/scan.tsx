@@ -109,6 +109,7 @@ export function Scan({ type, onChange, onBack }: Props) {
           )}
           <AnimatedQRScanner
             purpose={purposeMap[type]}
+            urTypes={type !== ScanType.Sync ? ["evm-signature"] : []}
             handleScan={handleScan}
             handleError={handleError}
             videoLoaded={onVideoLoaded}
