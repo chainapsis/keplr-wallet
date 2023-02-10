@@ -88,6 +88,12 @@ const fileRule = {
   ],
 };
 
+const mjsRule = {
+  test: /\.mjs$/,
+  include: /node_modules/,
+  type: "javascript/auto",
+};
+
 const extensionConfig = (env, args) => {
   return {
     name: "extension",
@@ -124,7 +130,7 @@ const extensionConfig = (env, args) => {
       ...altResolve(),
     },
     module: {
-      rules: [sassRule, tsRule, fileRule],
+      rules: [sassRule, tsRule, fileRule, mjsRule],
     },
     plugins: [
       // Remove all and write anyway
