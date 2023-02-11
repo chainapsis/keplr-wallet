@@ -162,9 +162,9 @@
   "register.create.button.next": "다음",
   "register.create.button.ledger.terra": "테라 앱 사용하기",
 
-  "register.keystone.title": "키스톤 계정 불러오기 (베타)",
+  "register.keystone.title": "키스톤 계정 연결하기 (베타)",
 
-  "register.ledger.title": "렛저 계정 불러오기",
+  "register.ledger.title": "렛저 계정 연결하기",
 
   "register.verify.button.register": "등록",
 
