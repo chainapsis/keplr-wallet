@@ -63,15 +63,14 @@ export const ImportLedgerPage: FunctionComponent<{
   const ensureUSBPermission = async () => {
     const anyNavigator = navigator as any;
     if (ledgerInitStore.isWebHID) {
-      if (
-        !(await anyNavigator.hid.requestDevice({
-          filters: [
-            {
-              vendorId: ledgerUSBVendorId,
-            },
-          ],
-        }))
-      ) {
+      const device = await anyNavigator.hid.requestDevice({
+        filters: [
+          {
+            vendorId: ledgerUSBVendorId,
+          },
+        ],
+      });
+      if (!device || (Array.isArray(device) && device.length === 0)) {
         throw new Error("No device selected");
       }
     } else {
