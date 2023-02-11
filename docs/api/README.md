@@ -73,7 +73,7 @@ There may be multiple ways to achieve the same result, and no preferred method.
 
 If you were able to connect Keplr with CosmJS, you may skip to the [Use Keplr with CosmJS](./cosmjs.md) section.
 
-While Keplr supports an easy way to connect to CosmJS, there are additional functions specific to Keplr which provides additional features.
+While Keplr supports an easy way to connect to CosmJS, there are additional functions specific to Keplr which provide additional features.
 
 ### Using with Typescript
 **`window.d.ts`**
@@ -174,7 +174,7 @@ sendTx(
 ): Promise<Uint8Array>;
 ```
 
-This function requests Keplr to delegates the broadcasting of the transaction to Keplr's LCD endpoints (rather than the webpage broadcasting the transaction).
+This function requests Keplr to delegate the broadcasting of the transaction to Keplr's LCD endpoints (rather than the webpage broadcasting the transaction).
 This method returns the transaction hash if it succeeds to broadcast, if else the method will throw an error.
 When Keplr broadcasts the transaction, Keplr will send the notification on the transaction's progress.
 
@@ -196,7 +196,7 @@ verifyArbitrary(
 
 This is an experimental implementation of [ADR-36](https://github.com/cosmos/cosmos-sdk/blob/master/docs/architecture/adr-036-arbitrary-signature.md). Use this feature at your own risk.  
   
-It's main usage is to prove ownership of an account off-chain, requesting ADR-36 signature using the `signArbitrary` API.  
+Its main usage is to prove ownership of an account off-chain, requesting ADR-36 signature using the `signArbitrary` API.  
   
 If requested sign doc with the `signAnimo` API with the ADR-36 that Keplr requires instead of using the `signArbitary` API, it would function as `signArbitary`  
 - Only supports sign doc in the format of Amino. (in the case of protobuf, [ADR-36](https://github.com/cosmos/cosmos-sdk/blob/master/docs/architecture/adr-036-arbitrary-signature.md) requirements aren't fully specified for implementation)
