@@ -152,7 +152,8 @@ export function init(
     chainsService,
     permissionService,
     ledgerService,
-    keystoneService
+    keystoneService,
+    analyticsService
   );
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);

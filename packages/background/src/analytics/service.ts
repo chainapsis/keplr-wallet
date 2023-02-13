@@ -1,6 +1,13 @@
 import { KVStore } from "@keplr-wallet/common";
 import { RNG } from "@keplr-wallet/crypto";
 import { Env } from "@keplr-wallet/router";
+import { EthSignType } from "@keplr-wallet/types";
+import Axios from "axios";
+import { SignMode } from "../keyring";
+import {
+  KEPLR_EXT_ANALYTICS_API_URL,
+  KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
+} from "./constants";
 
 export class AnalyticsService {
   protected analyticsId: string = "";
@@ -40,5 +47,26 @@ export class AnalyticsService {
     }
 
     return this.analyticsId;
+  }
+
+  async logTransaction(loggingInfo: {
+    chainId: string;
+    signMode?: SignMode | EthSignType;
+  }): Promise<void> {
+    if (!KEPLR_EXT_ANALYTICS_API_URL || !KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN) {
+      return;
+    }
+
+    const loggerInstance = Axios.create({
+      baseURL: KEPLR_EXT_ANALYTICS_API_URL,
+    });
+    const loggingMsg = Buffer.from(JSON.stringify(loggingInfo)).toString(
+      "base64"
+    );
+    loggerInstance.get(`/log?msg=${loggingMsg}`, {
+      headers: {
+        Authorization: KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
+      },
+    });
   }
 }
