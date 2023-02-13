@@ -5000,6 +5000,15 @@
     hdkey "^2.0.1"
     uuid "^8.3.2"
 
+"@keystonehq/bc-ur-registry-evm@^0.1.1-alpha.0":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry-evm/-/bc-ur-registry-evm-0.1.1-alpha.0.tgz#4376cae15a07fb312835cd1f413ec005f5e6625e"
+  integrity sha512-jIl3/qc1ebn2T0guwu6Jp+tI7dMiSKe31x8gNFCwPnLmmQFP9FRD208xK3llDrQ6VW/Fbin7NJrzfjM13XhxDg==
+  dependencies:
+    "@keystonehq/bc-ur-registry" "0.5.4"
+    bs58check "^2.1.2"
+    uuid "^9.0.0"
+
 "@keystonehq/bc-ur-registry@0.5.4":
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry/-/bc-ur-registry-0.5.4.tgz#5802486a29f5d772520d15579d40fba02860e27f"
@@ -5037,10 +5046,31 @@
     "@keystonehq/sdk" "^0.15.2"
     uuid "^8.3.2"
 
+"@keystonehq/evm-keyring@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@keystonehq/evm-keyring/-/evm-keyring-0.1.1.tgz#41b8ca9bf92d0eaa0afa47456c33bc5e3198226b"
+  integrity sha512-/oOBEd6DYz+GMDhUwuof5AMxVh/BZlViOQ3WEAVBGxnhgfaZRPi9JSxz6ay7zGM6CL384ilVmqfzM6abS4clXA==
+  dependencies:
+    "@keystonehq/bc-ur-registry" "^0.5.0"
+    "@keystonehq/bc-ur-registry-evm" "^0.1.1-alpha.0"
+    "@keystonehq/sdk" "^0.15.6"
+    uuid "^9.0.0"
+
 "@keystonehq/sdk@^0.15.2":
   version "0.15.2"
   resolved "https://registry.yarnpkg.com/@keystonehq/sdk/-/sdk-0.15.2.tgz#726ed1c0b320185de21e74c5b1a38458987d2e93"
   integrity sha512-GGSOyGc9PmKpw5RctMbXUjp/kdQe5ZVpr7ug8ygQZZQNO/hbNPaIKDRBukVfIlIaD+T/G9pSSrgIq1ZIdn7NTg==
+  dependencies:
+    "@ngraveio/bc-ur" "^1.0.0"
+    qrcode.react "^1.0.1"
+    react-modal "^3.12.1"
+    react-qr-reader "^2.2.1"
+    rxjs "^6.6.3"
+
+"@keystonehq/sdk@^0.15.6":
+  version "0.15.6"
+  resolved "https://registry.yarnpkg.com/@keystonehq/sdk/-/sdk-0.15.6.tgz#a09952a90b5f1638366c8f3e0ee2315701a17571"
+  integrity sha512-2j6VrDUm8qKHe3OpEnFwoLjwNMxeEWCNpyDUPX1en1RzFz6+EFyCK49HIFYBYeLi9Ikwg/UWyYnEiOijO3Z+zw==
   dependencies:
     "@ngraveio/bc-ur" "^1.0.0"
     qrcode.react "^1.0.1"
@@ -25394,6 +25424,11 @@ uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+
+uuid@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 v8-compile-cache@^2.0.0:
   version "2.3.0"
