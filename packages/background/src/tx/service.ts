@@ -42,6 +42,7 @@ export class BackgroundTxService {
       },
       ...chainInfo.restConfig,
     });
+    const loggerInstance = Axios.create({ baseURL: "http://localhost:8080" });
 
     this.notification.create({
       iconRelativeUrl: "assets/logo-256.png",
@@ -77,6 +78,17 @@ export class BackgroundTxService {
         isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
         params
       );
+      const loggingMsg = Buffer.from(
+        JSON.stringify({
+          chainId,
+          signMode: isProtoTx ? "protobuf" : "amino",
+        })
+      ).toString("base64");
+      loggerInstance.get(`/log?msg=${loggingMsg}`, {
+        headers: {
+          Authorization: process.env["KEPLR_EXT_ANALYTICS_AUTH_TOKEN"] || "",
+        },
+      });
 
       const txResponse = isProtoTx ? result.data["tx_response"] : result.data;
 
