@@ -53,6 +53,10 @@ export class AnalyticsService {
     chainId: string;
     signMode?: SignMode | EthSignType;
   }): Promise<void> {
+    if (!KEPLR_EXT_ANALYTICS_API_URL || !KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN) {
+      return;
+    }
+
     const loggerInstance = Axios.create({
       baseURL: KEPLR_EXT_ANALYTICS_API_URL,
     });
