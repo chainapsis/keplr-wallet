@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
 import style from "./style.module.scss";
-import { AnimatedQRScanner, Purpose } from "@keystonehq/animated-qr";
+import { AnimatedQRScanner, Purpose, URType } from "@keystonehq/animated-qr";
 import { UR } from "@keplr-wallet/stores";
 import { Loading } from "./loading";
 import { Message } from "./message";
@@ -109,7 +109,7 @@ export function Scan({ type, onChange, onBack }: Props) {
           )}
           <AnimatedQRScanner
             purpose={purposeMap[type]}
-            urTypes={type !== ScanType.Sync ? ["evm-signature"] : []}
+            urTypes={type !== ScanType.Sync ? [URType.EVM_SIGNATURE] : []}
             handleScan={handleScan}
             handleError={handleError}
             videoLoaded={onVideoLoaded}
