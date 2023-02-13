@@ -35,6 +35,15 @@
   "main.update-chain.confirm.yes": "진행",
   "main.update-chain.confirm.no": "무시",
 
+  "main.authz.title": "AuthZ",
+  "main.authz.grant.grantee.information": "You authorized ",
+  "main.authz.grant.grantee.address": "Grantee Address",
+  "main.authz.grant.expiration.title": "Expiration dates",
+  "main.authz.grant.expiration.information": "Expiration dates: ",
+  "main.authz.grant.expiration.expired": "Expired",
+  "main.authz.grant.expiration.infinite": "Your Authz delegation will not be expired until you revoke it.",
+  "main.authz.grant.revoke": "Revoke",
+
   "setting.language": "언어",
   "setting.language.automatic": "자동 (브라우저 언어)",
   "setting.language.automatic-with-language": "자동 ({language})",
@@ -109,6 +118,9 @@
 
   "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",
   "setting.token.manage.notification.viewing-key.copy": "뷰잉키가 복사되었습니다",
+  "setting.token.manage.notification.viewing-key.copy.hover": "뷰잉키 복사",
+  "setting.token.manage.notification.contract-address.copy": "컨트랙트 주소가 복사되었습니다",
+  "setting.token.manage.notification.contract-address.copy.hover": "컨트랙트 주소 복사",
 
   "setting.endpoints": "노드 주소",
   "setting.endpoints.paragraph": "원하는 풀노드를 사용하도록 설정하세요",

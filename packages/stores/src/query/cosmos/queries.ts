@@ -43,6 +43,7 @@ import {
   ObservableQueryStrideEpochProvisions,
   ObservableQueryStrideMintParams,
 } from "./supply/stride";
+import { ObservableQueryAuthZGranter } from "./authz";
 
 export interface CosmosQueries {
   cosmos: CosmosQueriesImpl;
@@ -96,6 +97,7 @@ export class CosmosQueriesImpl {
   public readonly queryIBCDenomTrace: DeepReadonly<ObservableQueryDenomTrace>;
 
   public readonly querySifchainAPY: DeepReadonly<ObservableQuerySifchainLiquidityAPY>;
+  public readonly queryAuthZGranter: DeepReadonly<ObservableQueryAuthZGranter>;
 
   constructor(
     base: QueriesSetBase,
@@ -231,6 +233,11 @@ export class CosmosQueriesImpl {
       chainGetter
     );
     this.queryIBCDenomTrace = new ObservableQueryDenomTrace(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this.queryAuthZGranter = new ObservableQueryAuthZGranter(
       kvStore,
       chainId,
       chainGetter

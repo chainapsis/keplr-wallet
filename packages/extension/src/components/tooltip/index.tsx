@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 
 import Popper, { PopperOptions } from "popper.js";
 import classNames from "classnames";
@@ -11,6 +11,7 @@ export interface ToolTipProps {
   options?: PopperOptions;
   trigger: "hover" | "click" | "static"; // If trigger is staic, visibilitiy is handled by show props.
   show?: boolean;
+  childrenStyle?: CSSProperties;
 }
 
 interface ToolTipState {
@@ -83,7 +84,7 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
   }
 
   render() {
-    const { theme, tooltip, trigger, children } = this.props;
+    const { theme, tooltip, trigger, children, childrenStyle } = this.props;
 
     const show =
       this.props.trigger === "static" ? this.props.show : this.state.show;
@@ -123,7 +124,9 @@ export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
           <div x-arrow="" />
           {tooltip}
         </div>
-        <div ref={this.componentRef}>{children}</div>
+        <div style={childrenStyle} ref={this.componentRef}>
+          {children}
+        </div>
       </div>
     );
   }
