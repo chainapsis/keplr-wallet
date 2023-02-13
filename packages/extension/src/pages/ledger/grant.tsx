@@ -28,6 +28,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
 import { ledgerUSBVendorId } from "@ledgerhq/devices";
+import { Buffer } from "buffer/";
 
 export const LedgerGrantPage: FunctionComponent = observer(() => {
   useLayoutEffect(() => {
@@ -50,7 +51,7 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
 
   const [showWebHIDWarning, setShowWebHIDWarning] = useState(false);
   // TODO: Show link to full-screen grant permission page to ensure usb permission.
-  const [, setShowPermissionLink] = useState(false);
+  const [showPermissionLink, setShowPermissionLink] = useState(false);
 
   const testUSBDevices = useCallback(async (isWebHID: boolean) => {
     const anyNavigator = navigator as any;
@@ -241,6 +242,46 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
             pass={initTryCount > 0 && initErrorOn == null}
           />
           <div style={{ flex: 1 }} />
+          {showPermissionLink ? (
+            <div
+              style={{
+                fontSize: "13px",
+                lineHeight: "120%",
+                letterSpacing: "0.15px",
+                color: "#172B4D",
+                marginBottom: "0.5rem",
+              }}
+            >
+              If your Ledger is connected, but your browser {`doesn't`} detect
+              your wallet,{" "}
+              <a
+                style={{
+                  color: "#314FDF",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  browser.tabs
+                    .create({
+                      url: `/ledger-grant.html?request=${Buffer.from(
+                        JSON.stringify({
+                          app: ledgerInitStore.requestedLedgerApp,
+                          cosmosLikeApp: ledgerInitStore.cosmosLikeApp,
+                        })
+                      ).toString("base64")}`,
+                    })
+                    .then(() => {
+                      window.close();
+                    });
+                }}
+              >
+                click here
+              </a>{" "}
+              to grant permission from your browser.
+            </div>
+          ) : null}
           <div className="custom-control custom-checkbox mb-2">
             <input
               className="custom-control-input"

@@ -43,6 +43,23 @@ export class LedgerService {
     this.interactionService = interactionService;
   }
 
+  async tryLedgerInit(
+    env: Env,
+    ledgerApp: LedgerApp,
+    cosmosLikeApp: string = "Cosmos"
+  ): Promise<void> {
+    await this.getPublicKey(
+      env,
+      ledgerApp,
+      {
+        account: 0,
+        change: 0,
+        addressIndex: 0,
+      },
+      cosmosLikeApp
+    );
+  }
+
   async getPublicKey(
     env: Env,
     ledgerApp: LedgerApp,
