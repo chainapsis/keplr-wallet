@@ -142,8 +142,20 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
         await delay(500);
       }
 
-      // Test again to ensure usb permission after interaction.
-      if (!(await testUSBDevices(ledgerInitStore.isWebHID))) {
+      // I don't know the reason exactly.
+      // However, we sometimes should wait for some until actually app opened.
+      // It is hard to set exact delay. So, just wait for 500ms 5 times.
+      let tempSuccess = false;
+      for (let i = 0; i < 5; i++) {
+        // Test again to ensure usb permission after interaction.
+        if (await testUSBDevices(ledgerInitStore.isWebHID)) {
+          tempSuccess = true;
+          break;
+        }
+
+        await delay(500);
+      }
+      if (!tempSuccess) {
         throw new Error("There is no device selected");
       }
 
@@ -161,6 +173,8 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
       // I'm not sure why this happens. But, not closing reduce this problem if transport is webhid.
       if (!ledgerInitStore.isWebHID) {
         delay(1000);
+      } else {
+        delay(500);
       }
     } catch (e) {
       console.log(e);
