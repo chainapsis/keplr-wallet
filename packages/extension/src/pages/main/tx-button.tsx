@@ -15,29 +15,8 @@ import { useHistory } from "react-router";
 
 import classnames from "classnames";
 import { Dec } from "@keplr-wallet/unit";
-import { useBuy } from "../../hooks/useFiatOnOffRamp";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const QrCode = require("qrcode");
-
-const DepositModal: FunctionComponent<{
-  bech32Address: string;
-}> = ({ bech32Address }) => {
-  const qrCodeRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (qrCodeRef.current && bech32Address) {
-      QrCode.toCanvas(qrCodeRef.current, bech32Address);
-    }
-  }, [bech32Address]);
-
-  return (
-    <div className={styleTxButton.depositModal}>
-      <h1 style={{ marginBottom: 0 }}>Scan QR code</h1>
-      <canvas className={styleTxButton.qrcode} id="qrcode" ref={qrCodeRef} />
-    </div>
-  );
-};
+import { BuySupportServiceInfo, useBuy } from "../../hooks";
+import classNames from "classnames";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
@@ -48,7 +27,8 @@ export const TxButtonView: FunctionComponent = observer(() => {
     accountInfo.bech32Address
   );
 
-  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
@@ -60,27 +40,11 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   const sendBtnRef = useRef<HTMLButtonElement>(null);
 
-  const buySupportServiceInfos = useBuy(chainStore.current.chainId);
+  const buySupportServiceInfos = useBuy();
   const isCurrentChainSupportBuy = buySupportServiceInfos.length > 0;
 
   return (
     <div className={styleTxButton.containerTxButton}>
-      <Modal
-        style={{
-          content: {
-            width: "330px",
-            minWidth: "330px",
-            minHeight: "unset",
-            maxHeight: "unset",
-          },
-        }}
-        isOpen={isDepositOpen}
-        onRequestClose={() => {
-          setIsDepositOpen(false);
-        }}
-      >
-        <DepositModal bech32Address={accountInfo.bech32Address} />
-      </Modal>
       {isCurrentChainSupportBuy && (
         <Button
           className={styleTxButton.button}
@@ -89,7 +53,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
           onClick={(e) => {
             e.preventDefault();
 
-            window.open(buySupportServiceInfos[0].buyUrl, "_blank");
+            setIsBuyModalOpen(true);
           }}
         >
           <FormattedMessage id="main.account.button.buy" />
@@ -102,7 +66,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         onClick={(e) => {
           e.preventDefault();
 
-          setIsDepositOpen(true);
+          setIsDepositModalOpen(true);
         }}
       >
         <FormattedMessage id="main.account.button.deposit" />
@@ -141,6 +105,94 @@ export const TxButtonView: FunctionComponent = observer(() => {
           <FormattedMessage id="main.account.tooltip.no-asset" />
         </Tooltip>
       ) : null}
+      <Modal
+        style={{
+          content: {
+            width: "330px",
+            minWidth: "330px",
+            minHeight: "unset",
+            maxHeight: "unset",
+          },
+        }}
+        isOpen={isDepositModalOpen}
+        onRequestClose={() => {
+          setIsDepositModalOpen(false);
+        }}
+      >
+        <DepositModal bech32Address={accountInfo.bech32Address} />
+      </Modal>
+      <Modal
+        style={{
+          content: {
+            width: "330px",
+            minWidth: "330px",
+            minHeight: "unset",
+            maxHeight: "unset",
+            padding: "24px 12px",
+          },
+        }}
+        isOpen={isBuyModalOpen}
+        onRequestClose={() => {
+          setIsBuyModalOpen(false);
+        }}
+      >
+        <BuyModal buySupportServiceInfos={buySupportServiceInfos} />
+      </Modal>
     </div>
   );
 });
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const QrCode = require("qrcode");
+
+const DepositModal: FunctionComponent<{
+  bech32Address: string;
+}> = ({ bech32Address }) => {
+  const qrCodeRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (qrCodeRef.current && bech32Address) {
+      QrCode.toCanvas(qrCodeRef.current, bech32Address);
+    }
+  }, [bech32Address]);
+
+  return (
+    <div className={styleTxButton.depositModal}>
+      <h1 style={{ marginBottom: 0 }}>Scan QR code</h1>
+      <canvas className={styleTxButton.qrcode} id="qrcode" ref={qrCodeRef} />
+    </div>
+  );
+};
+
+const BuyModal: FunctionComponent<{
+  buySupportServiceInfos: BuySupportServiceInfo[];
+}> = ({ buySupportServiceInfos }) => {
+  return (
+    <div className={styleTxButton.depositModal}>
+      <h1 style={{ marginBottom: 0 }}>Buy Crypto</h1>
+      <div className={styleTxButton.buySupportServices}>
+        {buySupportServiceInfos.map((serviceInfo) => (
+          <a
+            key={serviceInfo.serviceId}
+            href={serviceInfo.buyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={classNames(styleTxButton.service, {
+              [styleTxButton.disabled]: !serviceInfo.buyUrl,
+            })}
+            onClick={(e) => !serviceInfo.buyUrl && e.preventDefault()}
+          >
+            <div className={styleTxButton.serviceLogoContainer}>
+              <img
+                src={require(`../../public/assets/img/fiat-on-off-ramp/${serviceInfo.serviceId}.svg`)}
+              />
+            </div>
+            <div className={styleTxButton.serviceName}>
+              {serviceInfo.serviceName}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+};

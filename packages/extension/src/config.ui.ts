@@ -115,7 +115,8 @@ export const ICNSInfo = {
 export const ICNSFrontendLink: string = "https://app.icns.xyz";
 
 export interface FiatOnOffRampServiceInfo {
-  serviceName: "moonpay" | "transak" | "kado";
+  serviceId: "moonpay" | "transak" | "kado";
+  serviceName: "MoonPay" | "Transak" | "Kado";
   apiKey?: string;
   buyOrigin: string;
   buySupportDefaultChainId: string;
@@ -125,8 +126,9 @@ export interface FiatOnOffRampServiceInfo {
 
 export const FiatOnOffRampServiceInfos: FiatOnOffRampServiceInfo[] = [
   {
-    serviceName: "transak",
-    apiKey: process.env.NEXT_PUBLIC_TRANSAK_API_KEY,
+    serviceId: "transak",
+    serviceName: "Transak",
+    apiKey: "81cfdf87-2a22-498e-bb7d-1c3675bd67f7",
     buyOrigin:
       process.env.NODE_ENV === "production"
         ? "https://global.transak.com"
@@ -135,8 +137,9 @@ export const FiatOnOffRampServiceInfos: FiatOnOffRampServiceInfo[] = [
     buySupportChainIds: ["osmosis-1", "cosmoshub-4", "secret-4"],
   },
   {
-    serviceName: "moonpay",
-    apiKey: process.env.NEXT_PUBLIC_MOONPAY_API_KEY,
+    serviceId: "moonpay",
+    serviceName: "MoonPay",
+    apiKey: "pk_test_B7gHMkJSmAiwRTWQdPcAmmhwjWbRvuR3",
     buyOrigin:
       process.env.NODE_ENV === "production"
         ? "https://buy.moonpay.com"
@@ -145,8 +148,9 @@ export const FiatOnOffRampServiceInfos: FiatOnOffRampServiceInfo[] = [
     buySupportChainIds: ["cosmoshub-4", "kava_2222-10"],
   },
   {
-    serviceName: "kado",
-    apiKey: process.env.NEXT_PUBLIC_KADO_API_KEY,
+    serviceId: "kado",
+    serviceName: "Kado",
+    apiKey: "7d87d30a-c929-410c-8476-d739ccf26bfd",
     buyOrigin: "https://app.kado.money",
     buySupportDefaultChainId: "osmosis-1",
     buySupportChainIds: ["osmosis-1", "juno-1", "evmos_9001-2"],
