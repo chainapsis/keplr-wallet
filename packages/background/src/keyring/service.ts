@@ -401,6 +401,7 @@ export class KeyRingService {
 
         this.analyticsSerice.logEventIgnoreError("tx_signed", {
           chainId,
+          isInternal: env.isInternalMsg,
           origin: msgOrigin,
           ethSignType: signOptions.ethSignType,
         });
@@ -429,6 +430,7 @@ export class KeyRingService {
 
       this.analyticsSerice.logEventIgnoreError("tx_signed", {
         chainId,
+        isInternal: env.isInternalMsg,
         origin: msgOrigin,
         signMode: SignMode.Amino,
         isADR36SignDoc,
@@ -525,6 +527,7 @@ export class KeyRingService {
 
       this.analyticsSerice.logEventIgnoreError("tx_signed", {
         chainId,
+        isInternal: env.isInternalMsg,
         origin: msgOrigin,
         ethSignType: EthSignType.EIP712,
       });
@@ -601,6 +604,7 @@ export class KeyRingService {
 
       this.analyticsSerice.logEventIgnoreError("tx_signed", {
         chainId,
+        isInternal: env.isInternalMsg,
         origin: msgOrigin,
         signMode: SignMode.Direct,
       });
