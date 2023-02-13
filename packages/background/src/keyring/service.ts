@@ -36,6 +36,7 @@ import {
   DirectSignResponse,
 } from "@keplr-wallet/types";
 import { APP_PORT, Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { AnalyticsService } from "../analytics";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
@@ -51,6 +52,7 @@ import { closePopupWindow } from "@keplr-wallet/popup";
 export class KeyRingService {
   private keyRing!: KeyRing;
 
+  protected analyticsSerice!: AnalyticsService;
   protected interactionService!: InteractionService;
   public chainsService!: ChainsService;
   public permissionService!: PermissionService;
@@ -66,7 +68,8 @@ export class KeyRingService {
     chainsService: ChainsService,
     permissionService: PermissionService,
     ledgerService: LedgerService,
-    keystoneService: KeystoneService
+    keystoneService: KeystoneService,
+    analyticsSerice: AnalyticsService
   ) {
     this.interactionService = interactionService;
     this.chainsService = chainsService;
@@ -81,6 +84,7 @@ export class KeyRingService {
     );
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
+    this.analyticsSerice = analyticsSerice;
   }
 
   protected readonly onChainRemoved = (chainId: string) => {
@@ -403,6 +407,11 @@ export class KeyRingService {
           },
         };
       } finally {
+        this.analyticsSerice.logTransaction({
+          chainId,
+          signMode: signOptions.ethSignType,
+        });
+
         this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
       }
     }
@@ -422,6 +431,11 @@ export class KeyRingService {
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
+      this.analyticsSerice.logTransaction({
+        chainId,
+        signMode: SignMode.Amino,
+      });
+
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
   }
@@ -584,6 +598,11 @@ export class KeyRingService {
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
+      this.analyticsSerice.logTransaction({
+        chainId,
+        signMode: SignMode.Direct,
+      });
+
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
   }

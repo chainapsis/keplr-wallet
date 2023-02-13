@@ -31,7 +31,8 @@ jobs:
         env:
           KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
           KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
-          KEPLR_EXT_ANALYTICS_AUTH_TOKEN: ${{ secrets.KEPLR_EXT_ANALYTICS_AUTH_TOKEN }}
+          KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: ${{ secrets.KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN }}
+          KEPLR_EXT_ANALYTICS_API_URL: ${{ secrets.KEPLR_EXT_ANALYTICS_API_URL }}
       - run: sudo apt-get install gh
       - run: npx zx ./scripts/publish.mjs
         env:
@@ -56,12 +57,13 @@ jobs:
     - run: cp ./build/firefox-archive.tar.gz ../firefox-archive.tar.gz
     - run: mkdir temp && tar xvzf firefox-archive.tar.gz -C temp
       working-directory: ..
-    - run: docker build -f ./docker/Dockerfile -t builder --build-arg KEPLR_EXT_ETHEREUM_ENDPOINT=$KEPLR_EXT_ETHEREUM_ENDPOINT --build-arg KEPLR_EXT_AMPLITUDE_API_KEY=$KEPLR_EXT_AMPLITUDE_API_KEY --build-arg KEPLR_EXT_ANALYTICS_AUTH_TOKEN=$KEPLR_EXT_ANALYTICS_AUTH_TOKEN .
+    - run: docker build -f ./docker/Dockerfile -t builder --build-arg KEPLR_EXT_ETHEREUM_ENDPOINT=$KEPLR_EXT_ETHEREUM_ENDPOINT --build-arg KEPLR_EXT_AMPLITUDE_API_KEY=$KEPLR_EXT_AMPLITUDE_API_KEY --build-arg KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN=$KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN --build-arg KEPLR_EXT_ANALYTICS_API_URL=$KEPLR_EXT_ANALYTICS_API_URL .
       working-directory: ../temp
       env:
         KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
         KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
-        KEPLR_EXT_ANALYTICS_AUTH_TOKEN: ${{ secrets.KEPLR_EXT_ANALYTICS_AUTH_TOKEN }}
+        KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: ${{ secrets.KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN }}
+        KEPLR_EXT_ANALYTICS_API_URL: ${{ secrets.KEPLR_EXT_ANALYTICS_API_URL }}
     - run: docker run -v $(pwd):/data builder
       working-directory: ../temp
     - run: sudo apt-get update
