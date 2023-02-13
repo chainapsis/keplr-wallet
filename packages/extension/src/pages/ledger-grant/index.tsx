@@ -2,11 +2,11 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import React, { FunctionComponent, useState } from "react";
 import {
+  Ledger,
   LedgerApp,
   LedgerGetWebHIDFlagMsg,
   LedgerWebHIDIniter,
   LedgerWebUSBIniter,
-  TryLedgerInitMsg,
 } from "@keplr-wallet/background";
 import ReactDOM from "react-dom";
 import style from "./style.module.scss";
@@ -158,9 +158,10 @@ export const LedgerGrantFullScreenPage: FunctionComponent = () => {
         BACKGROUND_PORT,
         new LedgerGetWebHIDFlagMsg()
       );
-      const transport = isWebHID
-        ? await LedgerWebHIDIniter()
-        : await LedgerWebUSBIniter();
+      const transportIniter = isWebHID
+        ? LedgerWebHIDIniter
+        : LedgerWebUSBIniter;
+      const transport = await transportIniter();
 
       try {
         await CosmosApp.openApp(
@@ -177,10 +178,17 @@ export const LedgerGrantFullScreenPage: FunctionComponent = () => {
       } finally {
         await transport.close();
 
-        await msgRequester.sendMessage(
-          BACKGROUND_PORT,
-          new TryLedgerInitMsg(request.app, request.cosmosLikeApp)
-        );
+        let ledger: Ledger | undefined;
+        try {
+          ledger = await Ledger.init(
+            transportIniter,
+            undefined,
+            request.app,
+            request.cosmosLikeApp
+          );
+        } finally {
+          await ledger?.close();
+        }
 
         setSucceded(true);
       }

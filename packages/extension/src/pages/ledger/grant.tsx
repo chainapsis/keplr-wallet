@@ -109,7 +109,6 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
   const [initSucceed, setInitSucceed] = useState(false);
 
   const tryInit = async () => {
-    setInitTryCount(initTryCount + 1);
     setTryInitializing(true);
 
     let deviceSelected = false;
@@ -117,6 +116,33 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
     let initErrorOn: LedgerInitErrorOn | undefined;
 
     try {
+      if (!(await testUSBDevices(ledgerInitStore.isWebHID))) {
+        throw new Error("There is no device selected");
+      }
+
+      const transportIniter = ledgerInitStore.isWebHID
+        ? LedgerWebHIDIniter
+        : LedgerWebUSBIniter;
+      const transport = await transportIniter();
+      try {
+        if (ledgerInitStore.requestedLedgerApp === LedgerApp.Cosmos) {
+          await CosmosApp.openApp(
+            transport,
+            ledgerInitStore.cosmosLikeApp || "Cosmos"
+          );
+        } else if (ledgerInitStore.requestedLedgerApp === LedgerApp.Ethereum) {
+          await CosmosApp.openApp(transport, "Ethereum");
+        }
+      } catch (e) {
+        // Ignore error
+        console.log(e);
+      } finally {
+        await transport.close();
+
+        await delay(500);
+      }
+
+      // Test again to ensure usb permission after interaction.
       if (!(await testUSBDevices(ledgerInitStore.isWebHID))) {
         throw new Error("There is no device selected");
       }
@@ -139,30 +165,6 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
     } catch (e) {
       console.log(e);
 
-      if (deviceSelected) {
-        const transportIniter = ledgerInitStore.isWebHID
-          ? LedgerWebHIDIniter
-          : LedgerWebUSBIniter;
-        if (ledgerInitStore.requestedLedgerApp === LedgerApp.Cosmos) {
-          // No wait and ignore error.
-          transportIniter()
-            .then((transport) => {
-              return CosmosApp.openApp(
-                transport,
-                ledgerInitStore.cosmosLikeApp || "Cosmos"
-              );
-            })
-            .catch((e) => console.log(e));
-        } else if (ledgerInitStore.requestedLedgerApp === LedgerApp.Ethereum) {
-          // No wait and ignore error.
-          transportIniter()
-            .then((transport) => {
-              return CosmosApp.openApp(transport, "Ethereum");
-            })
-            .catch((e) => console.log(e));
-        }
-      }
-
       if (e.errorOn != null) {
         initErrorOn = e.errorOn;
       } else {
@@ -170,6 +172,7 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
       }
     }
 
+    setInitTryCount(initTryCount + 1);
     setInitErrorOn(initErrorOn);
     setTryInitializing(false);
     setShowPermissionLink(!deviceSelected);
