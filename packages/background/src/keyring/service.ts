@@ -399,6 +399,12 @@ export class KeyRingService {
           signOptions.ethSignType
         );
 
+        this.analyticsSerice.logEventIgnoreError("tx_signed", {
+          chainId,
+          origin: msgOrigin,
+          ethSignType: signOptions.ethSignType,
+        });
+
         return {
           signed: newSignDoc, // Included to match return type
           signature: {
@@ -407,11 +413,6 @@ export class KeyRingService {
           },
         };
       } finally {
-        this.analyticsSerice.logTransaction({
-          chainId,
-          signMode: signOptions.ethSignType,
-        });
-
         this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
       }
     }
@@ -426,16 +427,18 @@ export class KeyRingService {
         SignMode.Amino
       );
 
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        origin: msgOrigin,
+        signMode: SignMode.Amino,
+        isADR36SignDoc,
+      });
+
       return {
         signed: newSignDoc,
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
-      this.analyticsSerice.logTransaction({
-        chainId,
-        signMode: SignMode.Amino,
-      });
-
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
   }
@@ -520,6 +523,12 @@ export class KeyRingService {
         EthSignType.EIP712
       );
 
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        origin: msgOrigin,
+        ethSignType: EthSignType.EIP712,
+      });
+
       return {
         signed: newSignDoc,
         signature: {
@@ -590,6 +599,12 @@ export class KeyRingService {
         SignMode.Direct
       );
 
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        origin: msgOrigin,
+        signMode: SignMode.Direct,
+      });
+
       return {
         signed: {
           ...newSignDoc,
@@ -598,11 +613,6 @@ export class KeyRingService {
         signature: encodeSecp256k1Signature(key.pubKey, signature),
       };
     } finally {
-      this.analyticsSerice.logTransaction({
-        chainId,
-        signMode: SignMode.Direct,
-      });
-
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
   }
