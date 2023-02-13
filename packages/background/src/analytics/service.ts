@@ -49,7 +49,10 @@ export class AnalyticsService {
 
   async logEvent(
     event: string,
-    params: Record<string, number | string | boolean | undefined>
+    params: Record<
+      string,
+      number | string | boolean | number[] | string[] | undefined
+    >
   ): Promise<void> {
     if (!KEPLR_EXT_ANALYTICS_API_URL || !KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN) {
       return;
@@ -74,7 +77,10 @@ export class AnalyticsService {
 
   logEventIgnoreError(
     event: string,
-    params: Record<string, number | string | boolean | undefined>
+    params: Record<
+      string,
+      number | string | boolean | number[] | string[] | undefined
+    >
   ): void {
     this.logEvent(event, params).catch((e) => console.log(e));
   }

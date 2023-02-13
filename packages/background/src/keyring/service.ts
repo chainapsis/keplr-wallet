@@ -40,7 +40,10 @@ import { AnalyticsService } from "../analytics";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  SignDoc,
+  TxBody,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
@@ -428,11 +431,16 @@ export class KeyRingService {
         SignMode.Amino
       );
 
+      const msgTypes = newSignDoc.msgs
+        .filter((msg) => msg.type)
+        .map((msg) => msg.type);
+
       this.analyticsSerice.logEventIgnoreError("tx_signed", {
         chainId,
         isInternal: env.isInternalMsg,
         origin: msgOrigin,
         signMode: SignMode.Amino,
+        msgTypes,
         isADR36SignDoc,
       });
 
@@ -525,11 +533,16 @@ export class KeyRingService {
         EthSignType.EIP712
       );
 
+      const msgTypes = newSignDoc.msgs
+        .filter((msg) => msg.type)
+        .map((msg) => msg.type);
+
       this.analyticsSerice.logEventIgnoreError("tx_signed", {
         chainId,
         isInternal: env.isInternalMsg,
         origin: msgOrigin,
         ethSignType: EthSignType.EIP712,
+        msgTypes,
       });
 
       return {
@@ -602,11 +615,16 @@ export class KeyRingService {
         SignMode.Direct
       );
 
+      const msgTypes = TxBody.decode(newSignDoc.bodyBytes).messages.map(
+        (msg) => msg.typeUrl
+      );
+
       this.analyticsSerice.logEventIgnoreError("tx_signed", {
         chainId,
         isInternal: env.isInternalMsg,
         origin: msgOrigin,
         signMode: SignMode.Direct,
+        msgTypes,
       });
 
       return {
