@@ -12,6 +12,7 @@ import ReactDOM from "react-dom";
 import style from "./style.module.scss";
 import { Buffer } from "buffer/";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
+import delay from "delay";
 
 const PrimaryLoading: FunctionComponent = () => {
   return (
@@ -177,6 +178,8 @@ export const LedgerGrantFullScreenPage: FunctionComponent = () => {
         console.log(e);
       } finally {
         await transport.close();
+
+        await delay(500);
 
         let ledger: Ledger | undefined;
         try {
