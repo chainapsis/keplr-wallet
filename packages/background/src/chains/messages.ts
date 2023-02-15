@@ -34,7 +34,7 @@ export class GetChainInfosWithoutEndpointsMsg extends Message<{
     // noop
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -62,7 +62,7 @@ export class SuggestChainInfoMsg extends Message<void> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

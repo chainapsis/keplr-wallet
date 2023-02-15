@@ -58,10 +58,7 @@ export class CosmJSOfflineSigner
   extends CosmJSOfflineSignerOnlyAmino
   implements OfflineAminoSigner, OfflineDirectSigner
 {
-  constructor(
-    protected readonly chainId: string,
-    protected readonly keplr: Keplr
-  ) {
+  constructor(chainId: string, keplr: Keplr) {
     super(chainId, keplr);
   }
 

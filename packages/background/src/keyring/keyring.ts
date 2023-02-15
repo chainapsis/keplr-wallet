@@ -1466,7 +1466,7 @@ export class KeyRing {
   }
 
   private static getKeyStoreId(keyStore: KeyStore): string {
-    const id = keyStore.meta?.__id__;
+    const id = keyStore.meta?.["__id__"];
     if (!id) {
       throw new KeplrError("keyring", 131, "Key store's id is empty");
     }

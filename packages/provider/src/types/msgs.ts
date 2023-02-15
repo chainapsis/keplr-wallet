@@ -319,7 +319,7 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -382,7 +382,7 @@ export class RequestICNSAdr36SignaturesMsg extends Message<
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -667,7 +667,7 @@ export class GetAnalyticsIdMsg extends Message<string> {
     // noop
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

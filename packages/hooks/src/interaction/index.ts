@@ -22,8 +22,8 @@ export const useInteractionInfo = (
   cleanUpRef.current = cleanUp;
 
   const result = {
-    interaction: query.interaction === "true",
-    interactionInternal: query.interactionInternal === "true",
+    interaction: query["interaction"] === "true",
+    interactionInternal: query["interactionInternal"] === "true",
   };
 
   useEffect(() => {

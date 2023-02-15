@@ -14,7 +14,7 @@ export class GetAnalyticsIdMsg extends Message<string> {
     // noop
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

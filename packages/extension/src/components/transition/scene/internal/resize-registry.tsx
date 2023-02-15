@@ -26,7 +26,7 @@ export class SceneDescendantRegistry extends DescendantRegistryBase {
     }
   }
 
-  isDescendantAnimating(): boolean {
+  override isDescendantAnimating(): boolean {
     for (const registry of this._registries) {
       if (
         registry.value instanceof SceneElementDescendantRegistry &&

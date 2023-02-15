@@ -20,7 +20,7 @@ export class SendGasConfig extends GasConfig {
   }
 
   @override
-  get gas(): number {
+  override get gas(): number {
     // If gas not set manually, assume that the tx is for MsgSend.
     // And, set the default gas according to the currency type.
     if (this._gasRaw == null && this.amountConfig.sendCurrency) {
@@ -44,7 +44,7 @@ export class SendGasConfig extends GasConfig {
   }
 
   @override
-  get error(): Error | undefined {
+  override get error(): Error | undefined {
     if (this.amountConfig.sendCurrency) {
       const denomHelper = new DenomHelper(
         this.amountConfig.sendCurrency.coinMinimalDenom

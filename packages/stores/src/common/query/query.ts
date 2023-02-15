@@ -806,13 +806,13 @@ export class ObservableQuery<
     this.setUrl(url);
   }
 
-  protected onStart() {
+  protected override onStart() {
     super.onStart();
 
     ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
   }
 
-  protected onStop() {
+  protected override onStop() {
     super.onStop();
 
     ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);

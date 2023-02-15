@@ -39,7 +39,7 @@ export class SuggestTokenMsg extends Message<void> {
     super();
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -138,7 +138,7 @@ export class GetSecret20ViewingKey extends Message<string> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

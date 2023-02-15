@@ -10,7 +10,7 @@ export class ObservableQueryICNSNamesInner extends ObservableCosmwasmContractCha
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly contractAddress: string,
+    contractAddress: string,
     protected readonly address: string
   ) {
     super(kvStore, chainId, chainGetter, contractAddress, {
@@ -38,11 +38,7 @@ export class ObservableQueryICNSNamesInner extends ObservableCosmwasmContractCha
 }
 
 export class ObservableQueryICNSNames extends ObservableChainQueryMap<ICNSNames> {
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
-  ) {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     super(kvStore, chainId, chainGetter, (key: string) => {
       const split = key.split("/");
       return new ObservableQueryICNSNamesInner(

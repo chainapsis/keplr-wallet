@@ -29,7 +29,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
     this.bech32Address = bech32Address;
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
   }
@@ -112,11 +112,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
 }
 
 export class ObservableQueryDelegations extends ObservableChainQueryMap<Delegations> {
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
-  ) {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     super(kvStore, chainId, chainGetter, (bech32Address: string) => {
       return new ObservableQueryDelegationsInner(
         this.kvStore,

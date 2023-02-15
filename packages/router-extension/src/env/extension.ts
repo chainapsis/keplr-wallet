@@ -167,8 +167,8 @@ export class ExtensionEnv {
             // and process only the view that has the same router id of the requested frontend.
             return (
               window.location.href !== backgroundPage.location.href &&
-              (routerMeta.routerId == null ||
-                routerMeta.routerId === window.keplrExtensionRouterId)
+              (routerMeta["routerId"] == null ||
+                routerMeta["routerId"] === window.keplrExtensionRouterId)
             );
           });
         if (views.length > 0) {
@@ -179,7 +179,7 @@ export class ExtensionEnv {
 
         msg.routerMeta = {
           ...msg.routerMeta,
-          receiverRouterId: routerMeta.routerId,
+          receiverRouterId: routerMeta["routerId"],
         };
 
         return await new InExtensionMessageRequester().sendMessage(

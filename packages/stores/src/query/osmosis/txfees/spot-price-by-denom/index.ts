@@ -44,11 +44,7 @@ export class ObservableQueryTxFeesSpotPriceByDenomInner extends ObservableChainQ
 }
 
 export class ObservableQueryTxFeesSpotPriceByDenom extends ObservableChainQueryMap<SpotPriceByDenom> {
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
-  ) {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     super(kvStore, chainId, chainGetter, (denom: string) => {
       return new ObservableQueryTxFeesSpotPriceByDenomInner(
         this.kvStore,

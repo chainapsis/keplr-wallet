@@ -28,7 +28,7 @@ export class RedelegateGasConfig extends GasConfig {
   }
 
   @override
-  get gas(): number {
+  override get gas(): number {
     // If gas not set manually, assume that the tx is for MsgTransfer.
     if (this._gasRaw == null) {
       return this.accountStore.getAccount(this.chainId).cosmos.msgOpts

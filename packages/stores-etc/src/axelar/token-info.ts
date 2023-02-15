@@ -52,11 +52,7 @@ export class ObservableQueryEVMTokenInfoInner extends ObservableChainQuery<Token
 }
 
 export class ObservableQueryEVMTokenInfo extends ObservableChainQueryMap<TokenInfo> {
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
-  ) {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     super(kvStore, chainId, chainGetter, (key: string) => {
       const i = key.indexOf("/");
       const chain = key.slice(0, i);

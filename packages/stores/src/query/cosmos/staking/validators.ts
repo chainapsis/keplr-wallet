@@ -59,11 +59,11 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
     this.validator = validator;
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return this.validator.description.identity !== "";
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<KeybaseResult>; headers: any }> {
     return await ObservableQueryValidatorThumbnail.fetchingThumbnailQueue.add(
@@ -197,11 +197,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
 }
 
 export class ObservableQueryValidators extends ObservableChainQueryMap<Validators> {
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
-  ) {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     super(kvStore, chainId, chainGetter, (status: string) => {
       return new ObservableQueryValidatorsInner(
         this.kvStore,

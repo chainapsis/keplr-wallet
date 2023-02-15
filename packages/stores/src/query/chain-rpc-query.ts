@@ -35,7 +35,7 @@ export class ObservableChainQueryRPC<
   }
 
   @override
-  protected get instance(): AxiosInstance {
+  protected override get instance(): AxiosInstance {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
     return Axios.create({

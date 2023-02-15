@@ -25,7 +25,7 @@ export class ObservableChainQueryClientState extends ObservableChainQuery<Client
     );
   }
 
-  protected onStart() {
+  protected override onStart() {
     super.onStart();
 
     return new Promise<void>((resolve) => {
@@ -41,7 +41,7 @@ export class ObservableChainQueryClientState extends ObservableChainQuery<Client
     });
   }
 
-  protected onStop() {
+  protected override onStop() {
     if (this.disposer) {
       this.disposer();
       this.disposer = undefined;
@@ -58,17 +58,14 @@ export class ObservableChainQueryClientState extends ObservableChainQuery<Client
       return undefined;
     }
 
-    return this.response.data.identified_client_state?.client_state
-      ?.chain_id as string | undefined;
+    return this.response.data.identified_client_state?.client_state?.[
+      "chain_id"
+    ] as string | undefined;
   }
 }
 
 export class ObservableQueryIBCClientState extends ObservableChainQueryMap<ClientStateResponse> {
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
-  ) {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     super(kvStore, chainId, chainGetter, (key: string) => {
       const params = JSON.parse(key);
 

@@ -40,7 +40,7 @@ export class CheckURLIsPhishingMsg extends Message<boolean> {
     // Will be checked in background process
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -66,7 +66,7 @@ export class CheckBadTwitterIdMsg extends Message<boolean> {
     // noop
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

@@ -25,7 +25,7 @@ export class ObservableChainQueryIBCChannel extends ObservableChainQuery<Channel
     );
   }
 
-  protected onStart() {
+  protected override onStart() {
     super.onStart();
 
     return new Promise<void>((resolve) => {
@@ -41,7 +41,7 @@ export class ObservableChainQueryIBCChannel extends ObservableChainQuery<Channel
     });
   }
 
-  protected onStop() {
+  protected override onStop() {
     if (this.disposer) {
       this.disposer();
       this.disposer = undefined;
@@ -51,11 +51,7 @@ export class ObservableChainQueryIBCChannel extends ObservableChainQuery<Channel
 }
 
 export class ObservableQueryIBCChannel extends ObservableChainQueryMap<ChannelResponse> {
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
-  ) {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     super(kvStore, chainId, chainGetter, (key: string) => {
       const params = JSON.parse(key);
 

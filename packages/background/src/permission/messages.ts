@@ -20,7 +20,7 @@ export class EnableAccessMsg extends Message<void> {
     return ROUTE;
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -48,7 +48,7 @@ export class DisableAccessMsg extends Message<void> {
     return ROUTE;
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

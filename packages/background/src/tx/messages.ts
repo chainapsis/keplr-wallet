@@ -32,7 +32,7 @@ export class SendTxMsg extends Message<Uint8Array> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

@@ -225,7 +225,7 @@ export class ObservableQueryERC20Metadata extends HasMapStore<ObservableQueryERC
     });
   }
 
-  get(contractAddress: string): ObservableQueryERC20MetadataInner {
+  override get(contractAddress: string): ObservableQueryERC20MetadataInner {
     return super.get(contractAddress);
   }
 }

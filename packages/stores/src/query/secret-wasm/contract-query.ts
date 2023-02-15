@@ -34,7 +34,7 @@ export class ObservableSecretContractChainQuery<
     makeObservable(this);
   }
 
-  protected async onStart() {
+  protected override async onStart() {
     super.onStart();
 
     if (!this.keplr) {
@@ -52,7 +52,7 @@ export class ObservableSecretContractChainQuery<
     await this.init();
   }
 
-  get isFetching(): boolean {
+  override get isFetching(): boolean {
     return (
       this.querySecretContractCodeHash.getQueryContract(this.contractAddress)
         .isFetching ||
@@ -62,7 +62,7 @@ export class ObservableSecretContractChainQuery<
     );
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     if (
       !this.querySecretContractCodeHash.getQueryContract(this.contractAddress)
         .response
@@ -96,7 +96,7 @@ export class ObservableSecretContractChainQuery<
     this._isIniting = false;
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
     let response: QueryResponse<T>;
@@ -178,7 +178,7 @@ export class ObservableSecretContractChainQuery<
 
   // Actually, the url of fetching the secret20 balance will be changed every time.
   // So, we should save it with deterministic key.
-  protected getCacheKey(): string {
+  protected override getCacheKey(): string {
     return `${this.instance.name}-${
       this.instance.defaults.baseURL
     }${this.instance.getUri({

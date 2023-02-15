@@ -10,7 +10,7 @@ export class ObservableQueryCw20ContactInfoInner extends ObservableCosmwasmContr
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly contractAddress: string
+    contractAddress: string
   ) {
     super(kvStore, chainId, chainGetter, contractAddress, { token_info: {} });
   }
@@ -26,11 +26,7 @@ export class ObservableQueryCw20ContactInfoInner extends ObservableCosmwasmContr
 }
 
 export class ObservableQueryCw20ContractInfo extends ObservableChainQueryMap<Cw20ContractTokenInfo> {
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
-  ) {
+  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
     super(kvStore, chainId, chainGetter, (contractAddress: string) => {
       return new ObservableQueryCw20ContactInfoInner(
         this.kvStore,

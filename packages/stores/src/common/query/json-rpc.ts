@@ -41,7 +41,7 @@ export class ObservableJsonRPCQuery<
     this.fetch();
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
     const result = await this.instance.post<{
@@ -84,7 +84,7 @@ export class ObservableJsonRPCQuery<
     };
   }
 
-  protected getCacheKey(): string {
+  protected override getCacheKey(): string {
     const paramsHash = Buffer.from(
       Hash.sha256(Buffer.from(JSON.stringify(this.params))).slice(0, 8)
     ).toString("hex");
