@@ -16,7 +16,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
       - run: npm install --global yarn
       - run: sudo apt-get update
       - run: sudo apt-get install libusb-1.0-0-dev

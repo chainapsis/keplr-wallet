@@ -17,7 +17,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '18'
           registry-url: "https://registry.npmjs.org"
       - run: npm install --global yarn
       - run: sudo apt-get update
@@ -51,7 +51,7 @@ jobs:
     - name: Setup node
       uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: '18'
     - run: docker build -f ./docker/create-firefox-archive/Dockerfile -t archiver .
     - run: docker run -v $(pwd):/data archiver
     - run: cp ./build/firefox-archive.tar.gz ../firefox-archive.tar.gz
