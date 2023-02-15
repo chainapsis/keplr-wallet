@@ -36,10 +36,14 @@ import {
   DirectSignResponse,
 } from "@keplr-wallet/types";
 import { APP_PORT, Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { AnalyticsService } from "../analytics";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  SignDoc,
+  TxBody,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
@@ -51,6 +55,7 @@ import { closePopupWindow } from "@keplr-wallet/popup";
 export class KeyRingService {
   private keyRing!: KeyRing;
 
+  protected analyticsSerice!: AnalyticsService;
   protected interactionService!: InteractionService;
   public chainsService!: ChainsService;
   public permissionService!: PermissionService;
@@ -66,7 +71,8 @@ export class KeyRingService {
     chainsService: ChainsService,
     permissionService: PermissionService,
     ledgerService: LedgerService,
-    keystoneService: KeystoneService
+    keystoneService: KeystoneService,
+    analyticsSerice: AnalyticsService
   ) {
     this.interactionService = interactionService;
     this.chainsService = chainsService;
@@ -81,6 +87,7 @@ export class KeyRingService {
     );
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
+    this.analyticsSerice = analyticsSerice;
   }
 
   protected readonly onChainRemoved = (chainId: string) => {
@@ -395,6 +402,13 @@ export class KeyRingService {
           signOptions.ethSignType
         );
 
+        this.analyticsSerice.logEventIgnoreError("tx_signed", {
+          chainId,
+          isInternal: env.isInternalMsg,
+          origin: msgOrigin,
+          ethSignType: signOptions.ethSignType,
+        });
+
         return {
           signed: newSignDoc, // Included to match return type
           signature: {
@@ -416,6 +430,19 @@ export class KeyRingService {
         ethereumKeyFeatures.signing,
         SignMode.Amino
       );
+
+      const msgTypes = newSignDoc.msgs
+        .filter((msg) => msg.type)
+        .map((msg) => msg.type);
+
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        signMode: SignMode.Amino,
+        msgTypes,
+        isADR36SignDoc,
+      });
 
       return {
         signed: newSignDoc,
@@ -506,6 +533,18 @@ export class KeyRingService {
         EthSignType.EIP712
       );
 
+      const msgTypes = newSignDoc.msgs
+        .filter((msg) => msg.type)
+        .map((msg) => msg.type);
+
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        ethSignType: EthSignType.EIP712,
+        msgTypes,
+      });
+
       return {
         signed: newSignDoc,
         signature: {
@@ -575,6 +614,18 @@ export class KeyRingService {
         ethereumKeyFeatures.signing,
         SignMode.Direct
       );
+
+      const msgTypes = TxBody.decode(newSignDoc.bodyBytes).messages.map(
+        (msg) => msg.typeUrl
+      );
+
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        signMode: SignMode.Direct,
+        msgTypes,
+      });
 
       return {
         signed: {

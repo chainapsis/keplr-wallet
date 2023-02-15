@@ -191,9 +191,9 @@
   "register.create.button.next": "Next",
   "register.create.button.ledger.terra": "Use Terra Ledger app",
 
-  "register.keystone.title": "Import Keystone (Beta)",
+  "register.keystone.title": "Connect Keystone (Beta)",
 
-  "register.ledger.title": "Import ledger",
+  "register.ledger.title": "Connect ledger",
 
   "register.verify.button.register": "Register",
 

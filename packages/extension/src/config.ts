@@ -2167,6 +2167,7 @@ export const EmbedChainInfos: ChainInfo[] = [
 export const PrivilegedOrigins: string[] = [
   "https://wallet.keplr.app",
   "https://validator.keplr.app",
+  "https://chains.keplr.app",
 ];
 
 export const CommunityChainInfoRepo = {
