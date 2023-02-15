@@ -40,7 +40,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   const sendBtnRef = useRef<HTMLButtonElement>(null);
 
-  const buySupportServiceInfos = useBuy();
+  const { buySupportServiceInfos } = useBuy();
   const isCurrentChainSupportBuy = buySupportServiceInfos.length > 0;
 
   return (
@@ -119,7 +119,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
           setIsDepositModalOpen(false);
         }}
       >
-        <DepositModal bech32Address={accountInfo.bech32Address} />
+        <DepositModalContent bech32Address={accountInfo.bech32Address} />
       </Modal>
       <Modal
         style={{
@@ -136,7 +136,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
           setIsBuyModalOpen(false);
         }}
       >
-        <BuyModal buySupportServiceInfos={buySupportServiceInfos} />
+        <BuyModalContent buySupportServiceInfos={buySupportServiceInfos} />
       </Modal>
     </div>
   );
@@ -145,7 +145,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QrCode = require("qrcode");
 
-const DepositModal: FunctionComponent<{
+const DepositModalContent: FunctionComponent<{
   bech32Address: string;
 }> = ({ bech32Address }) => {
   const qrCodeRef = useRef<HTMLCanvasElement>(null);
@@ -157,18 +157,18 @@ const DepositModal: FunctionComponent<{
   }, [bech32Address]);
 
   return (
-    <div className={styleTxButton.depositModal}>
+    <div className={styleTxButton.modalContent}>
       <h1 style={{ marginBottom: 0 }}>Scan QR code</h1>
       <canvas className={styleTxButton.qrcode} id="qrcode" ref={qrCodeRef} />
     </div>
   );
 };
 
-const BuyModal: FunctionComponent<{
+const BuyModalContent: FunctionComponent<{
   buySupportServiceInfos: BuySupportServiceInfo[];
 }> = ({ buySupportServiceInfos }) => {
   return (
-    <div className={styleTxButton.depositModal}>
+    <div className={styleTxButton.modalContent}>
       <h1 style={{ marginBottom: 0 }}>Buy Crypto</h1>
       <div className={styleTxButton.buySupportServices}>
         {buySupportServiceInfos.map((serviceInfo) => (

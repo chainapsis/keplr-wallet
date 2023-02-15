@@ -114,7 +114,7 @@ export const ICNSInfo = {
 // If not needed, just set as empty string ("")
 export const ICNSFrontendLink: string = "https://app.icns.xyz";
 
-export interface FiatOnOffRampServiceInfo {
+export interface FiatOnRampServiceInfo {
   serviceId: "moonpay" | "transak" | "kado";
   serviceName: "MoonPay" | "Transak" | "Kado";
   apiKey?: string;
@@ -124,7 +124,7 @@ export interface FiatOnOffRampServiceInfo {
   buySupportCurrencies?: Currency[];
 }
 
-export const FiatOnOffRampServiceInfos: FiatOnOffRampServiceInfo[] = [
+export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
   {
     serviceId: "transak",
     serviceName: "Transak",

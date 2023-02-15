@@ -9,13 +9,10 @@ import {
 import Axios from "axios";
 import { useEffect, useState } from "react";
 
-import {
-  FiatOnOffRampServiceInfo,
-  FiatOnOffRampServiceInfos,
-} from "../config.ui";
+import { FiatOnRampServiceInfo, FiatOnRampServiceInfos } from "../config.ui";
 import { useStore } from "../stores";
 
-export interface BuySupportServiceInfo extends FiatOnOffRampServiceInfo {
+export interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
   buySupportChainAccounts?: (AccountSetBase &
     CosmosAccount &
     CosmwasmAccount &
@@ -31,7 +28,7 @@ export const useBuy = () => {
   const currentChainAccount = accountStore.getAccount(currentChainId);
   const currentChainInfo = chainStore.current;
 
-  const buySupportServiceInfos: BuySupportServiceInfo[] = FiatOnOffRampServiceInfos.map(
+  const buySupportServiceInfos: BuySupportServiceInfo[] = FiatOnRampServiceInfos.map(
     (serviceInfo) => {
       if (!serviceInfo.buySupportChainIds.includes(currentChainId)) {
         return serviceInfo;
@@ -184,5 +181,7 @@ export const useBuy = () => {
     })
   );
 
-  return newBuySupportServiceInfos;
+  return {
+    buySupportServiceInfos: newBuySupportServiceInfos,
+  };
 };
