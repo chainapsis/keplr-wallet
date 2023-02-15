@@ -639,11 +639,13 @@ describe("Test decimals", () => {
       expect: Dec;
     }[] = [
       {
+        // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
         num: 12345678901234567890123,
         str: "1.2345678901234568e+22",
         expect: new Dec("12345678901234568000000"),
       },
       {
+        // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
         num: -12345678901234567890123,
         str: "-1.2345678901234568e+22",
         expect: new Dec("-12345678901234568000000"),

@@ -35,9 +35,7 @@ import { IndexedDBKVStore, KVStore } from "@keplr-wallet/common";
 // The chainID should be in the form: `{identifier}-{version}`
 const ChainVersionFormatRegExp = /(.+)-([\d]+)/;
 
-function parseChainId(
-  chainId: string
-): {
+function parseChainId(chainId: string): {
   identifier: string;
   version: number;
 } {

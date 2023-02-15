@@ -114,10 +114,10 @@ export interface VerticalSizeInternalContext {
   registry: IDescendantRegistry;
 }
 
-export const _VerticalSizeInternalContext = createContext<VerticalSizeInternalContext | null>(
-  null
-);
+export const _VerticalSizeInternalContext =
+  createContext<VerticalSizeInternalContext | null>(null);
 
-export const useVerticalSizeInternalContext = (): VerticalSizeInternalContext | null => {
-  return useContext(_VerticalSizeInternalContext);
-};
+export const useVerticalSizeInternalContext =
+  (): VerticalSizeInternalContext | null => {
+    return useContext(_VerticalSizeInternalContext);
+  };

@@ -518,7 +518,8 @@ export class CosmosAccountImpl {
       if (chainIsInjective) {
         // Due to injective's problem, it should exist if injective with ledger.
         // There is currently no effective way to handle this in keplr. Just set a very large number.
-        (signDocRaw as Mutable<StdSignDoc>).timeout_height = Number.MAX_SAFE_INTEGER.toString();
+        (signDocRaw as Mutable<StdSignDoc>).timeout_height =
+          Number.MAX_SAFE_INTEGER.toString();
       } else {
         // If not injective (evmos), they require fee payer.
         // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.

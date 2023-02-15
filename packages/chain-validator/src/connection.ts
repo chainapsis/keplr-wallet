@@ -12,9 +12,7 @@ export class DifferentChainVersionError extends Error {
 export async function checkRPCConnectivity(
   chainId: string,
   rpc: string,
-  wsObject?: (
-    url: string
-  ) => {
+  wsObject?: (url: string) => {
     readonly readyState: number;
     onerror: ((event: any) => void) | null;
     close(): void;

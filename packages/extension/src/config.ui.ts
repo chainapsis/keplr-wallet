@@ -85,9 +85,8 @@ export const FiatCurrencies: FiatCurrency[] = [
   },
 ];
 
-export const AdditionalSignInPrepend:
-  | RegisterOption[]
-  | undefined = ADDITIONAL_SIGN_IN_PREPEND;
+export const AdditionalSignInPrepend: RegisterOption[] | undefined =
+  ADDITIONAL_SIGN_IN_PREPEND;
 
 export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
 

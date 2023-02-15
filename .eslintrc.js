@@ -4,8 +4,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
     "plugin:prettier/recommended",
-    "prettier/react",
-    "prettier/standard",
+    "prettier",
     "plugin:import/typescript",
   ],
   plugins: ["react-hooks", "unicorn", "import", "unused-imports"],
@@ -17,7 +16,6 @@ module.exports = {
     },
   },
   rules: {
-    "prettier/prettier": "error",
     "react/prop-types": "off",
     "react/self-closing-comp": "error",
     "react/jsx-fragments": ["error", "element"],

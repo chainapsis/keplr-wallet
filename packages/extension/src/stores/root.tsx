@@ -135,7 +135,8 @@ export class RootStore {
     // and the queries should be executed again with the new endpoints.
     // If you do this, there is a high risk of network waste and unstable behavior.
     // Therefore, we defer the first queries until ready.
-    ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
+    ObservableQueryBase.experimentalDeferInitialQueryController =
+      new DeferInitialQueryController();
 
     this.chainStore = new ChainStore(
       new ExtensionKVStore("store_chain_config"),
@@ -364,25 +365,28 @@ export class RootStore {
       this.interactionStore
     );
 
-    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithCoreTypes>(
-      new ExtensionKVStore("store_ibc_curreny_registrar"),
-      24 * 3600 * 1000,
-      this.chainStore,
-      this.accountStore,
-      this.queriesStore,
-      this.queriesStore
-    );
-    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar<ChainInfoWithCoreTypes>(
-      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
-      this.chainStore,
-      this.queriesStore
-    );
-    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithCoreTypes>(
-      new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
-      this.chainStore,
-      this.queriesStore,
-      "ethereum"
-    );
+    this.ibcCurrencyRegistrar =
+      new IBCCurrencyRegsitrar<ChainInfoWithCoreTypes>(
+        new ExtensionKVStore("store_ibc_curreny_registrar"),
+        24 * 3600 * 1000,
+        this.chainStore,
+        this.accountStore,
+        this.queriesStore,
+        this.queriesStore
+      );
+    this.gravityBridgeCurrencyRegistrar =
+      new GravityBridgeCurrencyRegsitrar<ChainInfoWithCoreTypes>(
+        new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+        this.chainStore,
+        this.queriesStore
+      );
+    this.axelarEVMBridgeCurrencyRegistrar =
+      new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithCoreTypes>(
+        new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
+        this.chainStore,
+        this.queriesStore,
+        "ethereum"
+      );
 
     // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(

@@ -89,8 +89,9 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
     (validatorAddress: string): CoinPretty => {
       const delegations = this.delegations;
 
-      const stakeCurrency = this.chainGetter.getChain(this.chainId)
-        .stakeCurrency;
+      const stakeCurrency = this.chainGetter.getChain(
+        this.chainId
+      ).stakeCurrency;
 
       if (!this.response) {
         return new CoinPretty(stakeCurrency, new Int(0)).ready(false);

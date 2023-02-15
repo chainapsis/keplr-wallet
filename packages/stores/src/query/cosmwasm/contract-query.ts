@@ -73,7 +73,7 @@ export class ObservableCosmwasmContractChainQuery<
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
     const { response, headers } = await super.fetchResponse(abortController);
 
-    const wasmResult = (response.data as unknown) as
+    const wasmResult = response.data as unknown as
       | {
           data: any;
         }

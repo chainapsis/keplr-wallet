@@ -119,10 +119,8 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
 }
 
 export class ObservableQueryCosmosBalanceRegistry implements BalanceRegistry {
-  protected nativeBalances: Map<
-    string,
-    ObservableQueryCosmosBalances
-  > = new Map();
+  protected nativeBalances: Map<string, ObservableQueryCosmosBalances> =
+    new Map();
 
   constructor(protected readonly kvStore: KVStore) {}
 

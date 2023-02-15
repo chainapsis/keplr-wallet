@@ -23,6 +23,7 @@ export interface VerifyingMnemonicBoxRef {
   validate: () => boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export const VerifyingMnemonicBox = forwardRef<
   VerifyingMnemonicBoxRef,
   {

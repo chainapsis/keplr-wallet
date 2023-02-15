@@ -14,7 +14,8 @@ interface PlayUR {
 }
 
 export class KeystoneEthereumInteractionProvider
-  implements InteractionProvider {
+  implements InteractionProvider
+{
   private readUR: ReadUR = async () => {
     throw new Error("KeystoneError#readUR function is not set.");
   };

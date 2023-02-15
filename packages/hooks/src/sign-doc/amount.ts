@@ -26,7 +26,8 @@ export type AccountStore = IAccountStore<{
 // This sets the amount as the sum of the messages in the sign doc if the message is known and can be parsed.
 export class SignDocAmountConfig
   extends TxChainSetter
-  implements IAmountConfig {
+  implements IAmountConfig
+{
   @observable.ref
   protected signDocHelper?: SignDocHelper = undefined;
 
@@ -86,30 +87,28 @@ export class SignDocAmountConfig
     return this._sender;
   }
 
-  getAmountPrimitive = computedFn(
-    (): CoinPrimitive => {
-      if (
-        this.disableBalanceCheck ||
-        !this.signDocHelper?.signDocWrapper ||
-        this.chainInfo.feeCurrencies.length === 0
-      ) {
-        return {
-          amount: "0",
-          denom: this.sendCurrency.coinMinimalDenom,
-        };
-      }
-
-      if (this.signDocHelper.signDocWrapper.mode === "amino") {
-        return this.computeAmountInAminoMsgs(
-          this.signDocHelper.signDocWrapper.aminoSignDoc.msgs
-        );
-      } else {
-        return this.computeAmountInProtoMsgs(
-          this.signDocHelper.signDocWrapper.protoSignDoc.txMsgs
-        );
-      }
+  getAmountPrimitive = computedFn((): CoinPrimitive => {
+    if (
+      this.disableBalanceCheck ||
+      !this.signDocHelper?.signDocWrapper ||
+      this.chainInfo.feeCurrencies.length === 0
+    ) {
+      return {
+        amount: "0",
+        denom: this.sendCurrency.coinMinimalDenom,
+      };
     }
-  );
+
+    if (this.signDocHelper.signDocWrapper.mode === "amino") {
+      return this.computeAmountInAminoMsgs(
+        this.signDocHelper.signDocWrapper.aminoSignDoc.msgs
+      );
+    } else {
+      return this.computeAmountInProtoMsgs(
+        this.signDocHelper.signDocWrapper.protoSignDoc.txMsgs
+      );
+    }
+  });
 
   protected computeAmountInAminoMsgs(msgs: readonly Msg[]) {
     const amount = new Coin(this.sendCurrency.coinMinimalDenom, new Int(0));

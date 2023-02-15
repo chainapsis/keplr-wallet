@@ -33,9 +33,8 @@ export class GravityBridgeCurrencyRegsitrarInner<
 
     const contractAddress = denomHelper.denom.replace("gravity", "");
 
-    const erc20Metadata = queries.keplrETC.queryERC20Metadata.get(
-      contractAddress
-    );
+    const erc20Metadata =
+      queries.keplrETC.queryERC20Metadata.get(contractAddress);
     if (erc20Metadata.symbol && erc20Metadata.decimals != null) {
       return [
         {
@@ -53,10 +52,8 @@ export class GravityBridgeCurrencyRegsitrarInner<
 
 export class GravityBridgeCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
   @observable.shallow
-  protected map: Map<
-    string,
-    GravityBridgeCurrencyRegsitrarInner<C>
-  > = new Map();
+  protected map: Map<string, GravityBridgeCurrencyRegsitrarInner<C>> =
+    new Map();
 
   constructor(
     protected readonly kvStore: KVStore,

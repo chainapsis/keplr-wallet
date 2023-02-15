@@ -91,8 +91,8 @@ export class ObservableQueryInflation {
             mintParams.epochIdentifier
           ).duration;
           if (epochDuration) {
-            const epochProvision = this._queryOsmosisEpochProvisions
-              .epochProvisions;
+            const epochProvision =
+              this._queryOsmosisEpochProvisions.epochProvisions;
             if (
               epochProvision &&
               this._querySupplyTotal.getQueryStakeDenom().response
@@ -135,11 +135,12 @@ export class ObservableQueryInflation {
           return new IntPretty(dec);
         }
       } else if (chainInfo.chainId.startsWith("stride")) {
-        const annualProvisions = this._queryStrideEpochProvisions.epochProvisions.mul(
-          new Dec(365 * 24)
-        );
-        const stakingProportion = this._queryStrideMintParams
-          .distributionProportions.staking;
+        const annualProvisions =
+          this._queryStrideEpochProvisions.epochProvisions.mul(
+            new Dec(365 * 24)
+          );
+        const stakingProportion =
+          this._queryStrideMintParams.distributionProportions.staking;
         const bondedTokens = this._queryPool.bondedTokens;
 
         if (bondedTokens.toDec().isZero()) {
@@ -174,9 +175,10 @@ export class ObservableQueryInflation {
           }
 
           if (chainInfo.chainId.startsWith("umee")) {
-            const supplyTotalRes = this._querySupplyTotal.getQueryDenomByQueryString(
-              chainInfo.stakeCurrency.coinMinimalDenom
-            ).response;
+            const supplyTotalRes =
+              this._querySupplyTotal.getQueryDenomByQueryString(
+                chainInfo.stakeCurrency.coinMinimalDenom
+              ).response;
 
             if (!supplyTotalRes) {
               return "0";
@@ -185,8 +187,8 @@ export class ObservableQueryInflation {
             }
           }
 
-          const supplyTotalRes = this._querySupplyTotal.getQueryStakeDenom()
-            .response;
+          const supplyTotalRes =
+            this._querySupplyTotal.getQueryStakeDenom().response;
           if (!supplyTotalRes) {
             return "0";
           } else {

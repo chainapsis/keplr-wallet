@@ -109,7 +109,8 @@ export class ObservableSecretContractChainQuery<
       if (e.response?.data?.error) {
         const encryptedError = e.response.data.error;
 
-        const errorMessageRgx = /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
+        const errorMessageRgx =
+          /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
 
         const rgxMatches = errorMessageRgx.exec(encryptedError);
         if (rgxMatches != null && rgxMatches.length === 4) {
@@ -131,7 +132,7 @@ export class ObservableSecretContractChainQuery<
       throw e;
     }
 
-    const encResult = (response.data as unknown) as
+    const encResult = response.data as unknown as
       | {
           data: string;
         }

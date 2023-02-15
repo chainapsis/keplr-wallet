@@ -67,7 +67,8 @@ export function init(
     commonCrypto.rng
   );
 
-  const persistentMemoryService = new PersistentMemory.PersistentMemoryService();
+  const persistentMemoryService =
+    new PersistentMemory.PersistentMemoryService();
 
   const permissionService = new Permission.PermissionService(
     storeCreator("permission"),

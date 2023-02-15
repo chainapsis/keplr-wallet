@@ -60,8 +60,7 @@ export const Modal: FunctionComponent<{
         // Save the mobile link.
         saveMobileLinkInfo({
           name: "Keplr",
-          href:
-            "intent://wcV1#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;",
+          href: "intent://wcV1#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;",
         });
 
         return `intent://wcV1?${uri}#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;`;

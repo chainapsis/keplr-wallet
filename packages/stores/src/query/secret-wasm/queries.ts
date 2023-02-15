@@ -50,11 +50,8 @@ export class SecretQueriesImpl {
     chainGetter: ChainGetter,
     apiGetter: () => Promise<Keplr | undefined>
   ) {
-    this.querySecretContractCodeHash = new ObservableQuerySecretContractCodeHash(
-      kvStore,
-      chainId,
-      chainGetter
-    );
+    this.querySecretContractCodeHash =
+      new ObservableQuerySecretContractCodeHash(kvStore, chainId, chainGetter);
 
     base.queryBalances.addBalanceRegistry(
       new ObservableQuerySecret20BalanceRegistry(

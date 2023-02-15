@@ -1504,7 +1504,8 @@ describe("Test observable query", () => {
     const query = new MockObservableQuery(memStore, port, {}, "/invalid");
 
     const queryController = new DeferInitialQueryController();
-    ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
+    ObservableQueryBase.experimentalDeferInitialQueryController =
+      queryController;
 
     await new Promise((resolve) => {
       jest.advanceTimersByTime(150);
@@ -1608,7 +1609,8 @@ describe("Test observable query", () => {
     );
 
     const queryController = new DeferInitialQueryController();
-    ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
+    ObservableQueryBase.experimentalDeferInitialQueryController =
+      queryController;
 
     await new Promise((resolve) => {
       jest.advanceTimersByTime(150);

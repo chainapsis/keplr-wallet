@@ -54,9 +54,7 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
     );
   }
 
-  protected async fetchResponse(
-    abortController: AbortController
-  ): Promise<{
+  protected async fetchResponse(abortController: AbortController): Promise<{
     response: QueryResponse<{ balance: { amount: string } }>;
     headers: any;
   }> {

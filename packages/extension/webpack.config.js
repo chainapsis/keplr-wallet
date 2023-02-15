@@ -4,8 +4,8 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
-  .BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const fs = require("fs");
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
@@ -119,8 +119,7 @@ module.exports = {
           to: "./",
         },
         {
-          from:
-            "../../node_modules/webextension-polyfill/dist/browser-polyfill.js",
+          from: "../../node_modules/webextension-polyfill/dist/browser-polyfill.js",
           to: "./",
         },
       ],

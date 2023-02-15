@@ -60,6 +60,7 @@ export class KeystoneService {
     env: Env,
     bip44HDPath: BIP44HDPath
   ): Promise<KeystoneKeyringData> {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const keyring = useKeystoneCosmosKeyring({
       readUR: async () => {
         const res = (await this.interactionService.waitApprove(
@@ -102,6 +103,7 @@ export class KeystoneService {
   ): Promise<Uint8Array> {
     let signResolve: { (arg0: KeystoneUR): void };
     let signReject: { (arg0: unknown): void };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const keyring = useKeystoneCosmosKeyring({
       keyringData,
       playUR: async (ur) => {
@@ -166,6 +168,7 @@ export class KeystoneService {
   ): Promise<Uint8Array> {
     let signResolve: { (arg0: KeystoneUR): void };
     let signReject: { (arg0: unknown): void };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const keyring = useKeystoneEthereumKeyring({
       keyringData,
       playUR: async (ur) => {
@@ -236,7 +239,7 @@ export class KeystoneService {
       data
     );
     if (mode === EthSignType.TRANSACTION) {
-      const rlpData = ((signRes as any) as TypedTransaction).serialize();
+      const rlpData = (signRes as any as TypedTransaction).serialize();
       return rlpData;
     }
     return Buffer.from((signRes as string).replace(/^0x/, ""), "hex");

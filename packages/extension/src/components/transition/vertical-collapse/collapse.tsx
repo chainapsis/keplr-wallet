@@ -19,13 +19,9 @@ import {
   _VerticalSizeInternalContext,
 } from "../vertical-size/internal";
 
-export const VerticalCollapseTransition: FunctionComponent<VerticalCollapseTransitionProps> = ({
-  children,
-  collapsed,
-  width,
-  transitionAlign,
-  springConfig,
-}) => {
+export const VerticalCollapseTransition: FunctionComponent<
+  VerticalCollapseTransitionProps
+> = ({ children, collapsed, width, transitionAlign, springConfig }) => {
   const heightPx = useSpringValue(collapsed ? 0 : -1, {
     config: springConfig,
   });

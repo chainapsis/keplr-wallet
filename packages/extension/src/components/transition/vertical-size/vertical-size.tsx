@@ -18,7 +18,9 @@ import {
   useVerticalSizeInternalContext,
 } from "./internal";
 
-export const VerticalResizeTransition: FunctionComponent<VerticalResizeTransitionProps> = ({
+export const VerticalResizeTransition: FunctionComponent<
+  VerticalResizeTransitionProps
+> = ({
   children,
   width,
   transitionAlign,
