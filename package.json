@@ -67,7 +67,6 @@
     "@octokit/core": "^3.5.1",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.13.0",
-    "@types/webpack": "^4.39.1",
     "@types/filesystem": "^0.0.32",
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
