@@ -128,29 +128,23 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
   {
     serviceId: "transak",
     serviceName: "Transak",
-    apiKey: "81cfdf87-2a22-498e-bb7d-1c3675bd67f7",
-    buyOrigin:
-      process.env.NODE_ENV === "production"
-        ? "https://global.transak.com"
-        : "https://global-stg.transak.com",
+    apiKey: process.env["KEPLR_EXT_TRANSAK_API_KEY"] || "",
+    buyOrigin: "https://global.transak.com",
     buySupportDefaultChainId: "osmosis-1",
     buySupportChainIds: ["osmosis-1", "cosmoshub-4", "secret-4"],
   },
   {
     serviceId: "moonpay",
     serviceName: "MoonPay",
-    apiKey: "pk_test_B7gHMkJSmAiwRTWQdPcAmmhwjWbRvuR3",
-    buyOrigin:
-      process.env.NODE_ENV === "production"
-        ? "https://buy.moonpay.com"
-        : "https://buy-sandbox.moonpay.com",
+    apiKey: process.env["KEPLR_EXT_MOONPAY_API_KEY"] || "",
+    buyOrigin: "https://buy.moonpay.com",
     buySupportDefaultChainId: "cosmoshub-4",
     buySupportChainIds: ["cosmoshub-4", "kava_2222-10"],
   },
   {
     serviceId: "kado",
     serviceName: "Kado",
-    apiKey: "7d87d30a-c929-410c-8476-d739ccf26bfd",
+    apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] || "",
     buyOrigin: "https://app.kado.money",
     buySupportDefaultChainId: "osmosis-1",
     buySupportChainIds: ["osmosis-1", "juno-1", "evmos_9001-2"],
