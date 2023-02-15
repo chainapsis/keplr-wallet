@@ -12,7 +12,7 @@ const isEnvDevelopment = process.env.NODE_ENV !== "production";
 const isDisableSplitChunks = process.env.DISABLE_SPLIT_CHUNKS === "true";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
 const commonResolve = (dir) => ({
-  extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
+  extensions: [".ts", ".tsx", ".js", ".jsx"],
   alias: {
     assets: path.resolve(__dirname, dir),
   },
