@@ -1,145 +1,128 @@
-import React, { FunctionComponent, useEffect } from "react";
-
-import { EmptyLayout } from "../../layouts/empty-layout";
-
 import { observer } from "mobx-react-lite";
-
-import style from "./style.module.scss";
-
-import { Button } from "reactstrap";
-
-import { FormattedMessage } from "react-intl";
-
-import { useRegisterConfig } from "@keplr-wallet/hooks";
-import { useStore } from "../../stores";
-import { NewMnemonicIntro, NewMnemonicPage, TypeNewMnemonic } from "./mnemonic";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import styled from "styled-components";
+import { ColorPalette } from "../../styles";
+import { Card } from "../../components/card";
 import {
-  RecoverMnemonicIntro,
-  RecoverMnemonicPage,
-  TypeRecoverMnemonic,
-} from "./mnemonic";
-import {
-  ImportLedgerIntro,
-  ImportLedgerPage,
-  TypeImportLedger,
-} from "./ledger";
-import { WelcomePage } from "./welcome";
-import { AdditionalSignInPrepend } from "../../config.ui";
-import classnames from "classnames";
-import {
-  ImportKeystoneIntro,
-  ImportKeystonePage,
-  TypeImportKeystone,
-} from "./keystone";
+  SceneTransition,
+  SceneTransitionRef,
+} from "../../components/transition";
+import { RegisterIntroScene } from "./intro";
+import { NewMnemonicScene } from "./new-mnemonic";
+import { Gutter } from "../../components/gutter";
+import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
+import { Box } from "../../components/box";
+import { VerifyMnemonicScene } from "./verify-mnemonic";
+import { RegisterCardHeader } from "./card-top-header";
 
-export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
-  onClick,
-}) => {
-  return (
-    <div className={style.backButton}>
-      <Button color="link" onClick={onClick}>
-        <i className="fas fa-angle-left" style={{ marginRight: "8px" }} />
-        <FormattedMessage id="register.button.back" />
-      </Button>
-    </div>
-  );
-};
+const Container = styled.div`
+  min-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(90deg, #fbf8ff 0%, #f7f8ff 100%);
+`;
+
+const NoticeText = styled.span`
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.375;
+  letter-spacing: -0.1px;
+  color: ${ColorPalette["platinum-200"]};
+`;
 
 export const RegisterPage: FunctionComponent = observer(() => {
-  useEffect(() => {
-    document.documentElement.setAttribute("data-register-page", "true");
+  const sceneRef = useRef<SceneTransitionRef | null>(null);
 
-    return () => {
-      document.documentElement.removeAttribute("data-register-page");
+  const [topHeaderCollapsed, setTopHeaderCollapsed] = useState(true);
+
+  const [bottomIntroCollapsed, setBottomIntroCollpased] = useState(false);
+
+  useEffect(() => {
+    const onSceneChanged = (stack: ReadonlyArray<string>) => {
+      if (stack.length === 0) {
+        throw new Error("Can't happen");
+      }
+
+      setTopHeaderCollapsed(stack.length <= 1);
+      setBottomIntroCollpased(stack[stack.length - 1] !== "intro");
     };
+
+    if (sceneRef.current) {
+      const scene = sceneRef.current;
+
+      scene.addSceneChangeListener(onSceneChanged);
+      return () => {
+        scene.removeSceneChangeListener(onSceneChanged);
+      };
+    }
   }, []);
 
-  const { keyRingStore, uiConfigStore } = useStore();
-
-  const registerConfig = useRegisterConfig(keyRingStore, [
-    ...(AdditionalSignInPrepend ?? []),
-    {
-      type: TypeNewMnemonic,
-      intro: NewMnemonicIntro,
-      page: NewMnemonicPage,
-    },
-    {
-      type: TypeRecoverMnemonic,
-      intro: RecoverMnemonicIntro,
-      page: RecoverMnemonicPage,
-    },
-    // Currently, there is no way to use ledger with keplr on firefox.
-    // Temporarily, hide the ledger usage.
-    ...(uiConfigStore.platform !== "firefox"
-      ? [
-          {
-            type: TypeImportLedger,
-            intro: ImportLedgerIntro,
-            page: ImportLedgerPage,
-          },
-        ]
-      : []),
-    {
-      type: TypeImportKeystone,
-      intro: ImportKeystoneIntro,
-      page: ImportKeystonePage,
-    },
-  ]);
-
   return (
-    <EmptyLayout
-      className={classnames(style.container, {
-        large:
-          !registerConfig.isFinalized &&
-          registerConfig.type === "recover-mnemonic",
-      })}
-      style={{ height: "100%", backgroundColor: "white", padding: 0 }}
-    >
-      <div style={{ flex: 10 }} />
-      <div className={style.logoContainer}>
-        <div
-          className={classnames(style.logoInnerContainer, {
-            [style.justifyCenter]: registerConfig.isIntro,
-          })}
-        >
-          <img
-            className={style.icon}
-            src={
-              uiConfigStore.isBeta
-                ? require("../../public/assets/logo-beta-256.png")
-                : require("../../public/assets/logo-256.png")
+    <Container>
+      <Box width="100%" maxWidth="34.25rem" position="relative">
+        <RegisterCardHeader
+          collapsed={topHeaderCollapsed}
+          onBackClick={() => {
+            if (sceneRef.current && sceneRef.current.stack.length > 1) {
+              sceneRef.current.pop();
             }
-            alt="logo"
-          />
-          <img
-            className={style.brandText}
-            src={require("../../public/assets/brand-text-fit-logo-height.png")}
-            alt="logo"
-          />
-        </div>
-        {registerConfig.isIntro ? (
-          <div className={style.introBrandSubTextContainer}>
-            <img
-              className={style.introBrandSubText}
-              src={require("../../public/assets/brand-sub-text.png")}
-              alt="The Interchain Wallet"
-            />
-          </div>
-        ) : null}
-      </div>
-      {registerConfig.render()}
-      {registerConfig.isFinalized ? <WelcomePage /> : null}
-      {registerConfig.isIntro ? (
-        <div className={style.subContent}>
-          <FormattedMessage
-            id="register.intro.sub-content"
-            values={{
-              br: <br />,
+          }}
+        />
+        <Card>
+          <SceneTransition
+            ref={sceneRef}
+            scenes={[
+              {
+                name: "intro",
+                element: RegisterIntroScene,
+              },
+              {
+                name: "new-mnemonic",
+                element: NewMnemonicScene,
+              },
+              {
+                name: "verify-mnemonic",
+                element: VerifyMnemonicScene,
+              },
+            ]}
+            initialSceneProps={{
+              name: "intro",
             }}
+            transitionAlign="center"
           />
-        </div>
-      ) : null}
-      <div style={{ flex: 13 }} />
-    </EmptyLayout>
+        </Card>
+        <BottomIntroParagraph collapsed={bottomIntroCollapsed} />
+      </Box>
+    </Container>
   );
 });
+
+const BottomIntroParagraph: FunctionComponent<{
+  collapsed: boolean;
+}> = ({ collapsed }) => {
+  return (
+    <Box position="relative">
+      <Box position="absolute" style={{ left: 0, right: 0 }}>
+        <VerticalCollapseTransition collapsed={collapsed}>
+          <Gutter size="1.625rem" />
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition
+          collapsed={collapsed}
+          transitionAlign="bottom"
+        >
+          <Gutter size="0.5rem" />
+          <Box alignX="center">
+            <NoticeText>
+              All sensitive information is stored only on your device.
+              <br />
+              This process does not require an internet conenction.
+            </NoticeText>
+          </Box>
+        </VerticalCollapseTransition>
+      </Box>
+    </Box>
+  );
+};

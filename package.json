@@ -97,7 +97,6 @@
     "axios": "^0.27.2",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
-    "node-sass": "file:./etc/noop",
     "@ethereumjs/common": "2.6.2"
   },
   "packageManager": "yarn@1.19.0"

@@ -33,45 +33,6 @@ const altResolve = () => {
 
   return {};
 };
-const sassRule = {
-  test: /(\.s?css)|(\.sass)$/,
-  oneOf: [
-    // if ext includes module as prefix, it perform by css loader.
-    {
-      test: /.module(\.s?css)|(\.sass)$/,
-      use: [
-        "style-loader",
-        {
-          loader: "css-loader",
-          options: {
-            modules: {
-              localIdentName: "[local]-[hash:base64]",
-              exportLocalsConvention: "camelCase",
-            },
-          },
-        },
-        {
-          loader: "sass-loader",
-          options: {
-            implementation: require("sass"),
-          },
-        },
-      ],
-    },
-    {
-      use: [
-        "style-loader",
-        { loader: "css-loader", options: { modules: false } },
-        {
-          loader: "sass-loader",
-          options: {
-            implementation: require("sass"),
-          },
-        },
-      ],
-    },
-  ],
-};
 const tsRule = { test: /\.tsx?$/, loader: "ts-loader" };
 const fileRule = {
   test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
@@ -90,8 +51,6 @@ module.exports = {
   watch: isEnvDevelopment,
   entry: {
     popup: ["./src/index.tsx"],
-    renewal: ["./src/renewal.tsx"],
-    blocklist: ["./src/pages/blocklist/index.tsx"],
     background: ["./src/background/background.ts"],
     contentScripts: ["./src/content-scripts/content-scripts.ts"],
     injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
@@ -131,7 +90,6 @@ module.exports = {
   },
   module: {
     rules: [
-      sassRule,
       tsRule,
       fileRule,
       {
@@ -170,21 +128,6 @@ module.exports = {
       template: "./src/index.html",
       filename: "popup.html",
       chunks: ["popup"],
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/renewal.html",
-      filename: "renewal.html",
-      chunks: ["renewal"],
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/index.html",
-      filename: "blocklist.html",
-      chunks: ["blocklist"],
-    }),
-    new HtmlWebpackPlugin({
-      template: "./src/index.html",
-      filename: "ledger-grant.html",
-      chunks: ["ledgerGrant"],
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",
