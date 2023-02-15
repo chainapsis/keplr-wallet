@@ -14,7 +14,7 @@ require("./public/assets/icon/icon-beta-128.png");
 
 import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
-import { HashRouter, Route } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 import { RegisterPage } from "./pages/register";
 import { StoreProvider } from "./stores";
 import { GlobalStyle } from "./styles";
@@ -24,7 +24,9 @@ const App: FunctionComponent = () => {
     <StoreProvider>
       <GlobalStyle />
       <HashRouter>
-        <Route exact path="/register" component={RegisterPage} />
+        <Routes>
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
       </HashRouter>
     </StoreProvider>
   );

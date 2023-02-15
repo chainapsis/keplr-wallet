@@ -15,7 +15,7 @@ import { Button } from "../../../components/button";
 import { Gutter } from "../../../components/gutter";
 import { VerifyingMnemonicBox, VerifyingMnemonicBoxRef } from "./verifying-box";
 import { Styles } from "./styles";
-import useForm from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 interface FormData {
   name: string;
@@ -110,28 +110,31 @@ export const VerifyMnemonicScene: FunctionComponent<{
         <Stack>
           <TextInput
             label="Name"
-            name="name"
-            ref={form.register({
-              required: true,
-            })}
-            error={form.errors.name && form.errors.name.message}
-          />
-          <TextInput
-            label="Password"
-            name="password"
-            ref={form.register({
-              required: true,
-            })}
-            error={form.errors.password && form.errors.password.message}
-          />
-          <TextInput
-            label="Verify password"
-            name="confirmPassword"
-            ref={form.register({
+            {...form.register("name", {
               required: true,
             })}
             error={
-              form.errors.confirmPassword && form.errors.confirmPassword.message
+              form.formState.errors.name && form.formState.errors.name.message
+            }
+          />
+          <TextInput
+            label="Password"
+            {...form.register("password", {
+              required: true,
+            })}
+            error={
+              form.formState.errors.password &&
+              form.formState.errors.password.message
+            }
+          />
+          <TextInput
+            label="Verify password"
+            {...form.register("confirmPassword", {
+              required: true,
+            })}
+            error={
+              form.formState.errors.confirmPassword &&
+              form.formState.errors.confirmPassword.message
             }
           />
           <Gutter size="1rem" />
