@@ -14,6 +14,7 @@ export const CreditPage: FunctionComponent = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
+      smallTitle={true}
       alternativeTitle={intl.formatMessage({
         id: "setting.credit",
       })}

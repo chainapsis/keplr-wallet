@@ -54,6 +54,7 @@ import { ExportPage } from "./pages/setting/export";
 import { LedgerGrantPage } from "./pages/ledger";
 import { AddTokenPage } from "./pages/setting/token/add";
 import { ManageTokenPage } from "./pages/setting/token/manage";
+import { KeystoneSignPage } from "./pages/keystone/sign";
 
 // import * as BackgroundTxResult from "../../background/tx/foreground";
 import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
@@ -65,6 +66,13 @@ import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
 import { SettingAutoLockPage } from "./pages/setting/autolock";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { KeystoneImportPubkeyPage } from "./pages/keystone";
+import { ICNSAdr36SignPage } from "./pages/icns/sign";
+import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
+import { SettingSecurityPrivacyPage } from "./pages/setting/security-privacy";
+import { SettingPermissionsGetChainInfosPage } from "./pages/setting/security-privacy/permissions/get-chain-infos";
+import { ChainActivePage } from "./pages/setting/chain-active";
+import { AuthZPage } from "./pages/authz";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -174,6 +182,16 @@ ReactDOM.render(
                 <Route exact path="/send" component={SendPage} />
                 <Route exact path="/ibc-transfer" component={IBCTransferPage} />
                 <Route exact path="/setting" component={SettingPage} />
+                <Route
+                  exact
+                  path="/keystone/import-pubkey"
+                  component={KeystoneImportPubkeyPage}
+                />
+                <Route
+                  exact
+                  path="/keystone/sign"
+                  component={KeystoneSignPage}
+                />
                 <Route exact path="/ledger-grant" component={LedgerGrantPage} />
                 <Route
                   exact
@@ -242,8 +260,30 @@ ReactDOM.render(
                   path="/setting/autolock"
                   component={SettingAutoLockPage}
                 />
+                <Route
+                  exact
+                  path="/setting/security-privacy"
+                  component={SettingSecurityPrivacyPage}
+                />
                 <Route path="/sign" component={SignPage} />
+                <Route
+                  path="/icns/adr36-signatures"
+                  component={ICNSAdr36SignPage}
+                />
                 <Route path="/suggest-chain" component={ChainSuggestedPage} />
+                <Route
+                  path="/permissions/grant/get-chain-infos"
+                  component={GrantGlobalPermissionGetChainInfosPage}
+                />
+                <Route
+                  path="/setting/permissions/get-chain-infos"
+                  component={SettingPermissionsGetChainInfosPage}
+                />
+                <Route
+                  path="/setting/chain-active"
+                  component={ChainActivePage}
+                />
+                <Route path="/authz" component={AuthZPage} />
               </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>

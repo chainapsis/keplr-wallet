@@ -10,7 +10,6 @@ import {
 import { observer } from "mobx-react-lite";
 import { View } from "react-native";
 import { useStore } from "../../../../stores";
-import { EthereumEndpoint } from "../../../../config";
 import {
   AddressInput,
   MemoInput,
@@ -42,7 +41,6 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
 
   const [name, setName] = useState("");
   const recipientConfig = useRecipientConfig(chainStore, route.params.chainId, {
-    ensEndpoint: EthereumEndpoint,
     allowHexAddressOnEthermint: true,
   });
   const memoConfig = useMemoConfig(chainStore, route.params.chainId);

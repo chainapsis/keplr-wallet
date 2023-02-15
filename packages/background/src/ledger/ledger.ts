@@ -8,10 +8,8 @@ import { EthSignType } from "@keplr-wallet/types";
 import { BIP44HDPath, EIP712MessageValidator } from "../keyring";
 import { serialize } from "@ethersproject/transactions";
 import { Buffer } from "buffer/";
-import { _TypedDataEncoder } from "@ethersproject/hash";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const CosmosApp: any = require("ledger-cosmos-js").default;
+import { domainHash, messageHash } from "../keyring/utils";
+import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
 
 export enum LedgerApp {
   Cosmos = "cosmos",
@@ -43,14 +41,15 @@ export class LedgerInitError extends Error {
 
 export class Ledger {
   constructor(
-    private readonly cosmosApp: any,
-    private ethereumApp: Eth | undefined = undefined
+    public readonly cosmosApp: CosmosApp | undefined = undefined,
+    public readonly ethereumApp: Eth | undefined = undefined
   ) {}
 
   static async init(
     transportIniter: TransportIniter,
     initArgs: any[] = [],
-    app: LedgerApp
+    app: LedgerApp,
+    cosmosLikeApp: string
   ): Promise<Ledger> {
     const transport = await transportIniter(...initArgs);
     try {
@@ -62,10 +61,10 @@ export class Ledger {
         // To detect the screen saver mode, we should request the address before using.
         await ethereumApp.getAddress("m/44'/60'/0'/0/0");
 
-        return new Ledger(null, ethereumApp);
+        return new Ledger(undefined, ethereumApp);
       }
 
-      const cosmosApp = new CosmosApp(transport);
+      const cosmosApp = new CosmosApp(cosmosLikeApp, transport);
 
       const ledger = new Ledger(cosmosApp, undefined);
       const versionResponse = await ledger.getVersion();
@@ -75,6 +74,17 @@ export class Ledger {
       // So, handle this case as initializing failed in `Transport`.
       if (versionResponse.deviceLocked) {
         throw new KeplrError("ledger", 102, "Device is on screen saver");
+      }
+
+      let appName = "";
+      try {
+        const appInfo = await cosmosApp.getAppInfo();
+        appName = appInfo.app_name;
+      } catch (e) {
+        console.log(e);
+      }
+      if (appName && appName !== cosmosLikeApp) {
+        throw new KeplrError("ledger", 122, "Invalid cosmos app selected");
       }
 
       return ledger;
@@ -103,12 +113,13 @@ export class Ledger {
     }
 
     const result = await this.cosmosApp.getVersion();
+
     if (result.error_message !== "No errors") {
       throw new Error(result.error_message);
     }
 
     return {
-      deviceLocked: result.device_locked,
+      deviceLocked: result.device_locked ?? false,
       major: result.major,
       minor: result.minor,
       patch: result.patch,
@@ -139,8 +150,10 @@ export class Ledger {
         throw new KeplrError("ledger", 100, "Cosmos App not initialized");
       }
 
-      const result = await this.cosmosApp.publicKey(
-        Ledger.createPath(118, fields)
+      const result = await this.cosmosApp.getPublicKey(
+        fields.account,
+        fields.change,
+        fields.addressIndex
       );
       if (result.error_message !== "No errors") {
         throw new Error(result.error_message);
@@ -156,7 +169,9 @@ export class Ledger {
     }
 
     const result = await this.cosmosApp.sign(
-      Ledger.createPath(118, fields),
+      fields.account,
+      fields.change,
+      fields.addressIndex,
       message
     );
     if (result.error_message !== "No errors") {
@@ -212,31 +227,8 @@ export class Ledger {
         return Ledger.ethSignatureToBytes(
           await this.ethereumApp.signEIP712HashedMessage(
             formattedPath,
-            _TypedDataEncoder.hashStruct(
-              "EIP712Domain",
-              { EIP712Domain: data.types.EIP712Domain },
-              data.domain
-            ),
-            _TypedDataEncoder
-              .from(
-                // Seems that there is no way to set primary type and the first type becomes primary type.
-                (() => {
-                  const types = { ...data.types };
-                  delete types["EIP712Domain"];
-                  const primary = types[data.primaryType];
-                  if (!primary) {
-                    throw new Error(
-                      `No matched primary type: ${data.primaryType}`
-                    );
-                  }
-                  delete types[data.primaryType];
-                  return {
-                    [data.primaryType]: primary,
-                    ...types,
-                  };
-                })()
-              )
-              .hash(data.message)
+            domainHash(data),
+            messageHash(data)
           )
         );
       }

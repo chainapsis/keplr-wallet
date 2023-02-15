@@ -4,6 +4,8 @@ import {
   AmplitudeApiKey,
   EthereumEndpoint,
   FiatCurrencies,
+  ICNSFrontendLink,
+  ICNSInfo,
 } from "../config.ui";
 import {
   AccountStore,
@@ -21,6 +23,7 @@ import {
   InteractionStore,
   KeyRingStore,
   LedgerInitStore,
+  KeystoneStore,
   ObservableQueryBase,
   PermissionStore,
   QueriesStore,
@@ -29,6 +32,9 @@ import {
   SignInteractionStore,
   TokensStore,
   WalletStatus,
+  ICNSInteractionStore,
+  ICNSQueries,
+  GeneralPermissionStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -60,9 +66,12 @@ export class RootStore {
 
   protected readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
+  public readonly generalPermissionStore: GeneralPermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly ledgerInitStore: LedgerInitStore;
+  public readonly keystoneStore: KeystoneStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+  public readonly icnsInteractionStore: ICNSInteractionStore;
 
   public readonly queriesStore: QueriesStore<
     [
@@ -70,7 +79,8 @@ export class RootStore {
       CosmwasmQueries,
       SecretQueries,
       OsmosisQueries,
-      KeplrETCQueries
+      KeplrETCQueries,
+      ICNSQueries
     ]
   >;
   public readonly accountStore: AccountStore<
@@ -89,15 +99,15 @@ export class RootStore {
       chainName?: string;
       toChainId?: string;
       toChainName?: string;
-      registerType?: "seed" | "google" | "ledger" | "qr";
+      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
       feeType?: FeeType | undefined;
       isIbc?: boolean;
       rpc?: string;
       rest?: string;
     },
     {
-      registerType?: "seed" | "google" | "ledger" | "qr";
-      accountType?: "mnemonic" | "privateKey" | "ledger";
+      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
+      accountType?: "mnemonic" | "privateKey" | "ledger" | "keystone";
       currency?: string;
       language?: string;
     }
@@ -105,7 +115,9 @@ export class RootStore {
 
   constructor() {
     this.uiConfigStore = new UIConfigStore(
-      new ExtensionKVStore("store_ui_config")
+      new ExtensionKVStore("store_ui_config"),
+      ICNSInfo,
+      ICNSFrontendLink
     );
 
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
@@ -126,6 +138,7 @@ export class RootStore {
     ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
 
     this.chainStore = new ChainStore(
+      new ExtensionKVStore("store_chain_config"),
       EmbedChainInfos,
       new InExtensionMessageRequester(),
       ObservableQueryBase.experimentalDeferInitialQueryController
@@ -151,15 +164,21 @@ export class RootStore {
       this.interactionStore,
       new InExtensionMessageRequester()
     );
+    this.generalPermissionStore = new GeneralPermissionStore(
+      this.interactionStore,
+      new InExtensionMessageRequester()
+    );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
     this.ledgerInitStore = new LedgerInitStore(
       this.interactionStore,
       new InExtensionMessageRequester()
     );
+    this.keystoneStore = new KeystoneStore(this.interactionStore);
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo
     );
+    this.icnsInteractionStore = new ICNSInteractionStore(this.interactionStore);
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
@@ -172,7 +191,8 @@ export class RootStore {
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
-      })
+      }),
+      ICNSQueries.use()
     );
 
     this.accountStore = new AccountStore(
@@ -236,6 +256,9 @@ export class RootStore {
                 native: {
                   type: "bank/MsgSend",
                 },
+              },
+              withdrawRewards: {
+                type: "distribution/MsgWithdrawDelegationReward",
               },
             };
           }

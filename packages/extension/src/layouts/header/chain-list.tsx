@@ -63,13 +63,65 @@ const ChainElement: FunctionComponent<{
   );
 });
 
+const Divider: FunctionComponent = (props) => {
+  return (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <hr
+        className="my-3"
+        style={{
+          flex: 1,
+          borderTop: "1px solid #64646D",
+        }}
+      />
+      {props.children ? (
+        <div
+          style={{
+            fontSize: "14px",
+            color: "rgba(255, 255, 255)",
+            margin: "0 8px",
+          }}
+        >
+          {props.children}
+        </div>
+      ) : null}
+      <hr
+        className="my-3"
+        style={{
+          flex: 1,
+          borderTop: "1px solid #64646D",
+        }}
+      />
+    </div>
+  );
+};
+
+const ArrowRightIcon: FunctionComponent = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M9.42188 3.9375L14.4844 9L9.42188 14.0625M13.7813 9L3.51563 9"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
 export const ChainList: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
 
-  const mainChainList = chainStore.chainInfos.filter(
+  const mainChainList = chainStore.chainInfosInUI.filter(
     (chainInfo) => !chainInfo.beta
   );
-  const betaChainList = chainStore.chainInfos.filter(
+  const betaChainList = chainStore.chainInfosInUI.filter(
     (chainInfo) => chainInfo.beta
   );
 
@@ -78,36 +130,24 @@ export const ChainList: FunctionComponent = observer(() => {
       {mainChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}
-      {betaChainList.length > 0 ? (
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <hr
-            className="my-3"
-            style={{
-              flex: 1,
-              borderTop: "1px solid rgba(255, 255, 255)",
-            }}
-          />
-          <div
-            style={{
-              fontSize: "14px",
-              color: "rgba(255, 255, 255)",
-              margin: "0 8px",
-            }}
-          >
-            Beta support
-          </div>
-          <hr
-            className="my-3"
-            style={{
-              flex: 1,
-              borderTop: "1px solid rgba(255, 255, 255)",
-            }}
-          />
-        </div>
-      ) : null}
+      {betaChainList.length > 0 ? <Divider>Beta support</Divider> : null}
       {betaChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}
+
+      <Divider />
+      <a
+        href="https://chains.keplr.app/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <div className={classnames(style.chainName, style.addChain)}>
+          <div>chain.keplr.app</div>
+          <div>
+            <ArrowRightIcon />
+          </div>
+        </div>
+      </a>
     </div>
   );
 });

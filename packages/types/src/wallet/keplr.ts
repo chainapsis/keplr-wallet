@@ -1,4 +1,4 @@
-import { ChainInfo } from "../chain-info";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "../chain-info";
 import { EthSignType } from "../ethereum";
 import {
   BroadcastMode,
@@ -9,7 +9,7 @@ import {
   DirectSignResponse,
   OfflineDirectSigner,
 } from "../cosmjs";
-import { SecretUtils } from "secretjs/types/enigmautils";
+import { SecretUtils } from "../secretjs";
 import Long from "long";
 
 export interface Key {
@@ -23,7 +23,18 @@ export interface Key {
   // Because current cosmos app in the nano ledger doesn't support the direct (proto) format msgs,
   // this can be used to select the amino or direct signer.
   readonly isNanoLedger: boolean;
+  readonly isKeystone: boolean;
 }
+
+export type ICNSAdr36Signatures = {
+  chainId: string;
+  bech32Prefix: string;
+  bech32Address: string;
+  addressHash: "cosmos" | "ethereum";
+  pubKey: Uint8Array;
+  signatureSalt: number;
+  signature: Uint8Array;
+}[];
 
 export type KeplrMode = "core" | "extension" | "mobile-web" | "walletconnect";
 
@@ -50,6 +61,15 @@ export interface Keplr {
 
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainIds: string | string[]): Promise<void>;
+  /**
+   * Delete permissions granted to origin.
+   * If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).
+   * Else, remove all permissions granted to origin (In this case, permissions that are not assigned to each chain, such as getChainInfosWithoutEndpoints(), are also deleted).
+   *
+   * @param chainIds disable(Remove approve domain(s)) target chain ID(s).
+   */
+  disable(chainIds?: string | string[]): Promise<void>;
+
   getKey(chainId: string): Promise<Key>;
   signAmino(
     chainId: string,
@@ -80,6 +100,14 @@ export interface Keplr {
     tx: Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array>;
+
+  signICNSAdr36(
+    chainId: string,
+    contractAddress: string,
+    owner: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures>;
 
   signArbitrary(
     chainId: string,
@@ -160,4 +188,12 @@ export interface Keplr {
     signDoc: StdSignDoc,
     signOptions?: KeplrSignOptions
   ): Promise<AminoSignResponse>;
+
+  getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]>;
+
+  /** Change wallet extension user name **/
+  changeKeyRingName(opts: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string>;
 }

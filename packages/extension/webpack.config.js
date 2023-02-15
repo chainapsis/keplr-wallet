@@ -181,6 +181,11 @@ module.exports = {
       filename: "blocklist.html",
       chunks: ["blocklist"],
     }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "ledger-grant.html",
+      chunks: ["ledgerGrant"],
+    }),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",
     }),

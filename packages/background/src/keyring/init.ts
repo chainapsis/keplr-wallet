@@ -24,6 +24,10 @@ import {
   RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
+  CreateKeystoneKeyMsg,
+  AddKeystoneKeyMsg,
+  RequestICNSAdr36SignaturesMsg,
+  ChangeKeyRingNameMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -38,7 +42,9 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(AddMnemonicKeyMsg);
   router.registerMessage(CreatePrivateKeyMsg);
   router.registerMessage(AddPrivateKeyMsg);
+  router.registerMessage(CreateKeystoneKeyMsg);
   router.registerMessage(CreateLedgerKeyMsg);
+  router.registerMessage(AddKeystoneKeyMsg);
   router.registerMessage(AddLedgerKeyMsg);
   router.registerMessage(LockKeyRingMsg);
   router.registerMessage(UnlockKeyRingMsg);
@@ -54,6 +60,8 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(ExportKeyRingDatasMsg);
   router.registerMessage(RequestSignEIP712CosmosTxMsg_v0);
   router.registerMessage(InitNonDefaultLedgerAppMsg);
+  router.registerMessage(RequestICNSAdr36SignaturesMsg);
+  router.registerMessage(ChangeKeyRingNameMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

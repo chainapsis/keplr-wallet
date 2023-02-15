@@ -1,8 +1,10 @@
 import { AccountSetBaseSuper, MsgOpt, WalletStatus } from "./base";
 import {
+  AminoSignResponse,
   AppCurrency,
-  KeplrSignOptions,
   BroadcastMode,
+  Coin,
+  KeplrSignOptions,
   Msg,
   StdFee,
   StdSignDoc,
@@ -19,7 +21,6 @@ import {
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
-import { Coin } from "@keplr-wallet/proto-types/cosmos/base/v1beta1/coin";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import {
@@ -39,14 +40,18 @@ import {
 } from "@keplr-wallet/cosmos";
 import { BondStatus } from "../query/cosmos/staking/types";
 import { CosmosQueries, IQueriesStore, QueriesSetBase } from "../query";
-import { DeepPartial, DeepReadonly } from "utility-types";
+import { DeepPartial, DeepReadonly, Mutable } from "utility-types";
 import { ChainGetter } from "../common";
 import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";
 import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
-import { txEventsWithPreOnFulfill } from "./utils";
+import {
+  getEip712TypedDataBasedOnChainId,
+  txEventsWithPreOnFulfill,
+} from "./utils";
 import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
+import { MsgRevoke } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -486,7 +491,8 @@ export class CosmosAccountImpl {
         .getChain(this.chainId)
         .features?.includes("eth-key-sign") === true;
 
-    const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+    const eip712Signing =
+      useEthereumSign && (this.base.isNanoLedger || this.base.isKeystone);
 
     if (eip712Signing && !msgs.rlpTypes) {
       throw new Error(
@@ -506,9 +512,27 @@ export class CosmosAccountImpl {
       memo: escapeHTML(memo),
     };
 
+    const chainIsInjective = this.chainId.startsWith("injective");
+
+    if (eip712Signing) {
+      if (chainIsInjective) {
+        // Due to injective's problem, it should exist if injective with ledger.
+        // There is currently no effective way to handle this in keplr. Just set a very large number.
+        (signDocRaw as Mutable<StdSignDoc>).timeout_height = Number.MAX_SAFE_INTEGER.toString();
+      } else {
+        // If not injective (evmos), they require fee payer.
+        // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
+        //      That means this part is not standard.
+        (signDocRaw as Mutable<StdSignDoc>).fee = {
+          ...signDocRaw.fee,
+          feePayer: this.base.bech32Address,
+        };
+      }
+    }
+
     const signDoc = sortObjectByKey(signDocRaw);
 
-    const signResponse = await (async () => {
+    const signResponse: AminoSignResponse = await (async () => {
       if (!eip712Signing) {
         return await keplr.signAmino(
           this.chainId,
@@ -516,88 +540,47 @@ export class CosmosAccountImpl {
           signDoc,
           signOptions
         );
-      } else {
-        const altSignDoc = {
-          ...signDoc,
-        };
-
-        // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
-        //      That means this part is not standard.
-        altSignDoc.fee["feePayer"] = this.base.bech32Address;
-
-        return await keplr.experimentalSignEIP712CosmosTx_v0(
-          this.chainId,
-          this.base.bech32Address,
-          {
-            types: {
-              EIP712Domain: [
-                { name: "name", type: "string" },
-                { name: "version", type: "string" },
-                { name: "chainId", type: "uint256" },
-                // XXX: Maybe, non-standard format?
-                { name: "verifyingContract", type: "string" },
-                // XXX: Maybe, non-standard format?
-                { name: "salt", type: "string" },
-              ],
-              Tx: [
-                { name: "account_number", type: "string" },
-                { name: "chain_id", type: "string" },
-                { name: "fee", type: "Fee" },
-                { name: "memo", type: "string" },
-                { name: "msgs", type: "Msg[]" },
-                { name: "sequence", type: "string" },
-              ],
-              Fee: [
-                { name: "feePayer", type: "string" },
-                { name: "amount", type: "Coin[]" },
-                { name: "gas", type: "string" },
-              ],
-              Coin: [
-                { name: "denom", type: "string" },
-                { name: "amount", type: "string" },
-              ],
-              Msg: [
-                { name: "type", type: "string" },
-                { name: "value", type: "MsgValue" },
-              ],
-              ...msgs.rlpTypes,
-            },
-            domain: {
-              name: "Cosmos Web3",
-              version: "1.0.0",
-              chainId: EthermintChainIdHelper.parse(
-                this.chainId
-              ).ethChainId.toString(),
-              verifyingContract: "cosmos",
-              salt: "0",
-            },
-            primaryType: "Tx",
-          },
-          altSignDoc,
-          signOptions
-        );
       }
+
+      return await keplr.experimentalSignEIP712CosmosTx_v0(
+        this.chainId,
+        this.base.bech32Address,
+        getEip712TypedDataBasedOnChainId(this.chainId, msgs),
+        signDoc,
+        signOptions
+      );
     })();
 
     const signedTx = TxRaw.encode({
       bodyBytes: TxBody.encode(
         TxBody.fromPartial({
           messages: protoMsgs,
+          timeoutHeight: signResponse.signed.timeout_height,
           memo: signResponse.signed.memo,
           extensionOptions: eip712Signing
             ? [
                 {
-                  typeUrl: "/ethermint.types.v1.ExtensionOptionsWeb3Tx",
+                  typeUrl: (() => {
+                    if (chainIsInjective) {
+                      return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
+                    }
+
+                    return "/ethermint.types.v1.ExtensionOptionsWeb3Tx";
+                  })(),
                   value: ExtensionOptionsWeb3Tx.encode(
                     ExtensionOptionsWeb3Tx.fromPartial({
                       typedDataChainId: EthermintChainIdHelper.parse(
                         this.chainId
                       ).ethChainId.toString(),
-                      feePayer: this.base.bech32Address,
-                      feePayerSig: Buffer.from(
-                        signResponse.signature.signature,
-                        "base64"
-                      ),
+                      feePayer: !chainIsInjective
+                        ? signResponse.signed.fee.feePayer
+                        : undefined,
+                      feePayerSig: !chainIsInjective
+                        ? Buffer.from(
+                            signResponse.signature.signature,
+                            "base64"
+                          )
+                        : undefined,
                     })
                   ).finish(),
                 },
@@ -614,7 +597,7 @@ export class CosmosAccountImpl {
                   return "/cosmos.crypto.secp256k1.PubKey";
                 }
 
-                if (this.chainId.startsWith("injective")) {
+                if (chainIsInjective) {
                   return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
                 }
 
@@ -639,15 +622,18 @@ export class CosmosAccountImpl {
         fee: Fee.fromPartial({
           amount: signResponse.signed.fee.amount as Coin[],
           gasLimit: signResponse.signed.fee.gas,
-          payer: eip712Signing
-            ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-              signResponse.signed.fee["feePayer"]
-            : undefined,
+          payer:
+            eip712Signing && !chainIsInjective
+              ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
+                signResponse.signed.fee.feePayer
+              : undefined,
         }),
       }).finish(),
-      signatures: !eip712Signing
-        ? [Buffer.from(signResponse.signature.signature, "base64")]
-        : [new Uint8Array(0)],
+      signatures:
+        // Injective needs the signature in the signatures list even if eip712
+        !eip712Signing || chainIsInjective
+          ? [Buffer.from(signResponse.signature.signature, "base64")]
+          : [new Uint8Array(0)],
     }).finish();
 
     return {
@@ -1189,6 +1175,43 @@ export class CosmosAccountImpl {
           }
         }
       })
+    );
+  }
+
+  makeRevokeMsg(grantee: string, messageType: string) {
+    Bech32Address.validate(
+      grantee,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    );
+
+    const msg = {
+      granter: this.base.bech32Address,
+      grantee,
+      msg_type_url: messageType,
+    };
+
+    return this.makeTx(
+      "revoke",
+      {
+        aminoMsgs: [msg as any],
+        protoMsgs: [
+          {
+            typeUrl: "/cosmos.authz.v1beta1.MsgRevoke",
+            value: MsgRevoke.encode({
+              granter: this.base.bech32Address,
+              grantee,
+              msgTypeUrl: messageType,
+            }).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          this.queries.cosmos.queryAuthZGranter
+            .getGranter(this.base.bech32Address)
+            .fetch();
+        }
+      }
     );
   }
 

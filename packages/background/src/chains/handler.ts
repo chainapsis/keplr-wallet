@@ -8,6 +8,7 @@ import {
 import { ChainsService } from "./service";
 import {
   GetChainInfosMsg,
+  GetChainInfosWithoutEndpointsMsg,
   RemoveSuggestedChainInfoMsg,
   SuggestChainInfoMsg,
 } from "./messages";
@@ -20,6 +21,11 @@ export const getHandler: (service: ChainsService) => Handler = (service) => {
     switch (msg.constructor) {
       case GetChainInfosMsg:
         return handleGetChainInfosMsg(service)(env, msg as GetChainInfosMsg);
+      case GetChainInfosWithoutEndpointsMsg:
+        return handleGetChainInfosWithoutEndpointsMsg(service)(
+          env,
+          msg as GetChainInfosWithoutEndpointsMsg
+        );
       case SuggestChainInfoMsg:
         return handleSuggestChainInfoMsg(service)(
           env,
@@ -41,6 +47,24 @@ const handleGetChainInfosMsg: (
 ) => InternalHandler<GetChainInfosMsg> = (service) => {
   return async () => {
     const chainInfos = await service.getChainInfos();
+    return {
+      chainInfos,
+    };
+  };
+};
+
+const handleGetChainInfosWithoutEndpointsMsg: (
+  service: ChainsService
+) => InternalHandler<GetChainInfosWithoutEndpointsMsg> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkOrGrantGlobalPermission(
+      env,
+      "/permissions/grant/get-chain-infos",
+      "get-chain-infos",
+      msg.origin
+    );
+
+    const chainInfos = await service.getChainInfosWithoutEndpoints();
     return {
       chainInfos,
     };

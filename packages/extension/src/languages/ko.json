@@ -35,6 +35,15 @@
   "main.update-chain.confirm.yes": "진행",
   "main.update-chain.confirm.no": "무시",
 
+  "main.authz.title": "AuthZ",
+  "main.authz.grant.grantee.information": "You authorized ",
+  "main.authz.grant.grantee.address": "Grantee Address",
+  "main.authz.grant.expiration.title": "Expiration dates",
+  "main.authz.grant.expiration.information": "Expiration dates: ",
+  "main.authz.grant.expiration.expired": "Expired",
+  "main.authz.grant.expiration.infinite": "Your Authz delegation will not be expired until you revoke it.",
+  "main.authz.grant.revoke": "Revoke",
+
   "setting.language": "언어",
   "setting.language.automatic": "자동 (브라우저 언어)",
   "setting.language.automatic-with-language": "자동 ({language})",
@@ -43,10 +52,15 @@
   "setting.fiat.automatic": "자동",
   "setting.fiat.automatic-with-fiat": "자동 ({fiat})",
 
-  "setting.connections": "연결 관리",
-  "setting.connections.paragraph": "지갑에 연결을 허용한 웹사이트를 관리합니다",
+  "setting.security-privacy": "보안과 개인정보",
+
+  "setting.connections": "지갑 접근 권한",
+  "setting.connections.paragraph": "주소와 서명을 요청할 수 있는 웹사이트",
   "setting.connections.confirm.delete-connection.title": "연결 삭제",
   "setting.connections.confirm.delete-connection.paragraph": "이 연결을 삭제하시겠습니까?",
+
+  "setting.permissions.get-chain-infos": "체인 목록 접근",
+  "setting.permissions.get-chain-infos.paragraph": "체인 목록에 접근할 수 있는 웹사이트",
 
   "setting.address-book.button.add": "주소 추가",
   "setting.address-book.add-address.title": "주소 추가",
@@ -104,6 +118,9 @@
 
   "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",
   "setting.token.manage.notification.viewing-key.copy": "뷰잉키가 복사되었습니다",
+  "setting.token.manage.notification.viewing-key.copy.hover": "뷰잉키 복사",
+  "setting.token.manage.notification.contract-address.copy": "컨트랙트 주소가 복사되었습니다",
+  "setting.token.manage.notification.contract-address.copy.hover": "컨트랙트 주소 복사",
 
   "setting.endpoints": "노드 주소",
   "setting.endpoints.paragraph": "원하는 풀노드를 사용하도록 설정하세요",
@@ -117,6 +134,8 @@
   "setting.autolock.error.out-of-range": "잠금 주기는 0분 보다 작거나 4320분(3일)보다 클 수 없습니다",
 
   "setting.developer-mode": "개발자 모드",
+
+  "setting.chain-active.title": "체인 보이기/숨기기",
 
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
@@ -153,8 +172,11 @@
   "register.import.textarea.private-key.error.invalid": "잘못된 개인키 입니다",
   "register.import.textarea.private-key.error.invalid-length": "잘못된 길이의 개인키 입니다",
   "register.create.button.next": "다음",
+  "register.create.button.ledger.terra": "테라 앱 사용하기",
 
-  "register.ledger.title": "렛저 계정 불러오기",
+  "register.keystone.title": "키스톤 계정 연결하기 (베타)",
+
+  "register.ledger.title": "렛저 계정 연결하기",
 
   "register.verify.button.register": "등록",
 
@@ -187,6 +209,9 @@
   "access.button.approve": "허락",
   "access.button.reject": "거부",
 
+  "permissions.grant.get-chain-infos.description.title": "<b>{host}</b>가 케플러 정보에 접근을 요청합니다.",
+  "permissions.grant.get-chain-infos.description.list1": "케플러에 등록된 체인 목록을 알 수 있습니다",
+
   "lock.input.password": "비밀번호",
   "lock.input.password.error.required": "비밀번호를 입력하세요",
   "lock.input.password.error.invalid": "잘못된 비밀번호입니다",
@@ -195,10 +220,6 @@
 
   "send.input.recipient": "받는 주소",
   "send.input.recipient.error.invalid": "잘못된 주소입니다",
-  "send.input.recipient.error.ens-invalid-name": "잘못된 ENS 이름 형식입니다",
-  "send.input.recipient.error.ens-not-found": "ENS 이름을 찾을 수 없습니다",
-  "sned.input.recipient.error.ens-unknown-error": "ENS로부터 주소를 받는데 실패했습니다",
-  "send.input.recipient.error.ens-not-supported": "이 체인에는 ENS가 지원되지 않습니다",
   "send.input.amount": "수량",
   "send.input.amount.error.insufficient": "자산이 부족합니다",
   "send.input.memo": "메모 (선택사항)",
@@ -266,6 +287,8 @@
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{neuron}</b>가 링크<b>{link}</b>를 생성합니다",
 
+  "sign.icns.registration.title": "등록 요청",
+
   "ledger.step1": "1 단계",
   "ledger.step1.paragraph": "렛저를 연결하고 잠금을 해제하세요",
   "ledger.step2": "2 단계",
@@ -285,8 +308,7 @@
   "fee-buttons.select.high": "빠름",
 
   "input.recipient.error.invalid-bech32": "잘못된 주소입니다",
-  "input.recipient.error.ens-not-supported": "이 체인에는 ENS가 지원되지 않습니다",
-  "input.recipient.error.ens-failed-to-fetch": "ENS로부터 주소를 받는데 실패했습니다",
+  "input.recipient.error.icns-failed-to-fetch": "ICNS로부터 주소를 받는데 실패했습니다",
   "input.amount.error.invalid-number": "잘못된 숫자입니",
   "input.amount.error.is-zero": "0이 아니여야 합니다",
   "input.amount.error.is-negative": "양수여야 합니다",

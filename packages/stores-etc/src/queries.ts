@@ -3,6 +3,10 @@ import { KVStore } from "@keplr-wallet/common";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryERC20Metadata } from "./erc20";
 import { ObservableQueryEVMTokenInfo } from "./axelar";
+import {
+  ObservableQueryTaxCaps,
+  ObservableQueryTaxRate,
+} from "./terra-classic/treasury";
 
 export interface KeplrETCQueries {
   keplrETC: KeplrETCQueriesImpl;
@@ -40,6 +44,9 @@ export class KeplrETCQueriesImpl {
   public readonly queryERC20Metadata: DeepReadonly<ObservableQueryERC20Metadata>;
   public readonly queryEVMTokenInfo: DeepReadonly<ObservableQueryEVMTokenInfo>;
 
+  public readonly queryTerraClassicTaxRate: DeepReadonly<ObservableQueryTaxRate>;
+  public readonly queryTerraClassicTaxCaps: DeepReadonly<ObservableQueryTaxCaps>;
+
   constructor(
     _base: QueriesSetBase,
     kvStore: KVStore,
@@ -52,6 +59,17 @@ export class KeplrETCQueriesImpl {
       ethereumURL
     );
     this.queryEVMTokenInfo = new ObservableQueryEVMTokenInfo(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
+    this.queryTerraClassicTaxRate = new ObservableQueryTaxRate(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this.queryTerraClassicTaxCaps = new ObservableQueryTaxCaps(
       kvStore,
       chainId,
       chainGetter

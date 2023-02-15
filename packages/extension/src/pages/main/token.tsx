@@ -204,6 +204,22 @@ export const TokensView: FunctionComponent = observer(() => {
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(accountInfo.bech32Address)
     .unstakables.filter((bal) => {
+      if (
+        chainStore.current.features &&
+        chainStore.current.features.includes("terra-classic-fee")
+      ) {
+        // At present, can't handle stability tax well if it is not registered native token.
+        // So, for terra classic, disable other tokens.
+        const denom = new DenomHelper(bal.currency.coinMinimalDenom);
+        if (denom.type !== "native" || denom.denom.startsWith("ibc/")) {
+          return false;
+        }
+
+        if (denom.type === "native") {
+          return bal.balance.toDec().gt(new Dec("0"));
+        }
+      }
+
       // Temporary implementation for trimming the 0 balanced native tokens.
       // TODO: Remove this part.
       if (new DenomHelper(bal.currency.coinMinimalDenom).type === "native") {

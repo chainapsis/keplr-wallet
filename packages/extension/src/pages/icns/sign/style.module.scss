@@ -1,0 +1,64 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .logo {
+    display: block;
+    margin: 26px auto 18px auto;
+
+    width: 87px;
+    height: 87px;
+  }
+
+  .title {
+    margin-bottom: 13px;
+
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 29px;
+    text-align: center;
+
+    color: #000000;
+  }
+}
+
+.names-container {
+  flex: 1;
+  overflow-y: scroll;
+  border-radius: 14px;
+}
+
+.name-container {
+  padding: 14px 24px;
+  background: white;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #f2f2f2;
+  }
+
+  .name {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+
+    color: #000000;
+  }
+
+  .address {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 152.02%;
+
+    color: #9a9aa2;
+  }
+}
+
+.buttons {
+  display: flex;
+  margin-top: 12px;
+}
+
+.button {
+  flex: 1;
+}

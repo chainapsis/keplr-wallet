@@ -21,10 +21,12 @@ export interface KeyStore {
    * Type can be "mnemonic" or "privateKey".
    * Below version "1", type is not defined and it is considered as "mnemonic".
    */
-  type?: "mnemonic" | "privateKey" | "ledger";
+  type?: "mnemonic" | "privateKey" | "ledger" | "keystone";
   coinTypeForChain: CoinTypeForChain;
   bip44HDPath?: BIP44HDPath;
   meta?: {
+    // "__ledger__cosmos_app_like__" is used for allowing other cosmos-like app such as "Terra"
+    // If "__ledger__cosmos_app_like__" is empty, handle it as "Cosmos" for backward compatibility.
     [key: string]: string;
   };
   crypto: {
@@ -44,7 +46,7 @@ export class Crypto {
   public static async encrypt(
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
-    type: "mnemonic" | "privateKey" | "ledger",
+    type: "mnemonic" | "privateKey" | "ledger" | "keystone",
     text: string,
     password: string,
     meta: Record<string, string>,

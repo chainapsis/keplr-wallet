@@ -87,14 +87,11 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
-            id: "setting.connections",
-          })}
-          paragraph={intl.formatMessage({
-            id: "setting.connections.paragraph",
+            id: "setting.security-privacy",
           })}
           onClick={() => {
             history.push({
-              pathname: "/setting/connections",
+              pathname: "/setting/security-privacy",
             });
           }}
           icons={useMemo(
@@ -118,11 +115,11 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
-            id: "setting.autolock",
+            id: "setting.chain-active.title",
           })}
           onClick={() => {
             history.push({
-              pathname: "/setting/autolock",
+              pathname: "/setting/chain-active",
             });
           }}
           icons={useMemo(

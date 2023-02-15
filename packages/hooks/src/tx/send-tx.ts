@@ -12,8 +12,12 @@ export const useSendTxConfig = (
   chainId: string,
   sender: string,
   options: {
-    ensEndpoint?: string;
     allowHexAddressOnEthermint?: boolean;
+    icns?: {
+      chainId: string;
+      resolverContractAddress: string;
+    };
+    computeTerraClassicTax?: boolean;
   } = {}
 ) => {
   const amountConfig = useAmountConfig(
@@ -36,7 +40,10 @@ export const useSendTxConfig = (
     chainId,
     sender,
     amountConfig,
-    gasConfig
+    gasConfig,
+    {
+      computeTerraClassicTax: options.computeTerraClassicTax,
+    }
   );
   // Due to the circular references between the amount config and gas/fee configs,
   // set the fee config of the amount config after initing the gas/fee configs.

@@ -26,6 +26,11 @@ import {
 import { WelcomePage } from "./welcome";
 import { AdditionalSignInPrepend } from "../../config.ui";
 import classnames from "classnames";
+import {
+  ImportKeystoneIntro,
+  ImportKeystonePage,
+  TypeImportKeystone,
+} from "./keystone";
 
 export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
   onClick,
@@ -74,6 +79,11 @@ export const RegisterPage: FunctionComponent = observer(() => {
           },
         ]
       : []),
+    {
+      type: TypeImportKeystone,
+      intro: ImportKeystoneIntro,
+      page: ImportKeystonePage,
+    },
   ]);
 
   return (

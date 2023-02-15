@@ -17,6 +17,7 @@ export const SupportedChainFeatures = [
   "query:/cosmos/bank/v1beta1/spendable_balances",
   "axelar-evm-bridge",
   "osmosis-txfees",
+  "terra-classic-fee",
 ];
 
 /**

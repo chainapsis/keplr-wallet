@@ -58,6 +58,13 @@ export interface IRecipientConfig extends ITxChainSetter {
   error: Error | undefined;
 }
 
+export interface IRecipientConfigWithICNS extends IRecipientConfig {
+  readonly isICNSEnabled: boolean;
+  readonly isICNSName: boolean;
+  readonly isICNSFetching: boolean;
+  readonly icnsExpectedBech32Prefix: string;
+}
+
 export interface IAmountConfig extends ITxChainSetter {
   amount: string;
   setAmount(amount: string): void;

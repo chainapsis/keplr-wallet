@@ -120,7 +120,7 @@ export const RegisterNewUserScreen: FunctionComponent = observer(() => {
           "color-text-low",
         ])}
       >
-        Powered by Torus
+        Powered by Web3Auth
       </Text>
       <Button
         text="Create new mnemonic"

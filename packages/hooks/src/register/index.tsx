@@ -127,10 +127,43 @@ export class RegisterConfig {
     }
   }
 
+  // Create or add the keystone account.
+  // If the mode is "add", password will be ignored.
+  @flow
+  *createKeystone(name: string, password: string, bip44HDPath: BIP44HDPath) {
+    this._isLoading = true;
+    try {
+      if (this.mode === "create") {
+        yield this.keyRingStore.createKeystoneKey(
+          password,
+          {
+            name,
+          },
+          bip44HDPath
+        );
+      } else {
+        yield this.keyRingStore.addKeystoneKey(
+          {
+            name,
+          },
+          bip44HDPath
+        );
+      }
+      this._isFinalized = true;
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
   // Create or add the ledger account.
   // If the mode is "add", password will be ignored.
   @flow
-  *createLedger(name: string, password: string, bip44HDPath: BIP44HDPath) {
+  *createLedger(
+    name: string,
+    password: string,
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp: string
+  ) {
     this._isLoading = true;
     try {
       if (this.mode === "create") {
@@ -139,14 +172,16 @@ export class RegisterConfig {
           {
             name,
           },
-          bip44HDPath
+          bip44HDPath,
+          cosmosLikeApp
         );
       } else {
         yield this.keyRingStore.addLedgerKey(
           {
             name,
           },
-          bip44HDPath
+          bip44HDPath,
+          cosmosLikeApp
         );
       }
       this._isFinalized = true;
