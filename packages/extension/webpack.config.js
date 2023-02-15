@@ -51,6 +51,7 @@ module.exports = {
   watch: isEnvDevelopment,
   entry: {
     popup: ["./src/index.tsx"],
+    register: ["./src/register.tsx"],
     background: ["./src/background/background.ts"],
     contentScripts: ["./src/content-scripts/content-scripts.ts"],
     injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
@@ -128,6 +129,11 @@ module.exports = {
       template: "./src/index.html",
       filename: "popup.html",
       chunks: ["popup"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "register.html",
+      chunks: ["register"],
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",

@@ -12,22 +12,45 @@ require("./public/assets/icon/icon-beta-16.png");
 require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 
-import React, { FunctionComponent } from "react";
+import { KeyRingStatus } from "@keplr-wallet/background";
+import React, { FunctionComponent, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
-import { RegisterPage } from "./pages/register";
-import { StoreProvider } from "./stores";
+import { StoreProvider, useStore } from "./stores";
 import { GlobalStyle } from "./styles";
+import { observer } from "mobx-react-lite";
+
+const StateRoutes: FunctionComponent = observer(() => {
+  const { keyRingStore } = useStore();
+
+  useEffect(() => {
+    console.log(keyRingStore.status);
+    if (keyRingStore.status === KeyRingStatus.EMPTY) {
+      browser.tabs
+        .create({
+          url: "/register.html#",
+        })
+        .then(() => {
+          window.close();
+        });
+    }
+  }, [keyRingStore.status]);
+
+  return (
+    <HashRouter>
+      <Routes>
+        {/* TODO: Add routes here */}
+        <Route path="/" element={<div />} />
+      </Routes>
+    </HashRouter>
+  );
+});
 
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
       <GlobalStyle />
-      <HashRouter>
-        <Routes>
-          <Route path="/register" element={<RegisterPage />} />
-        </Routes>
-      </HashRouter>
+      <StateRoutes />
     </StoreProvider>
   );
 };
