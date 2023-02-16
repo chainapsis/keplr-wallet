@@ -42,6 +42,7 @@ export class AnalyticsStore<
   >
 > {
   constructor(
+    protected readonly legacyAnalyticsClient: AnalyticsClient,
     protected readonly analyticsClient: AnalyticsClient,
     protected readonly middleware: {
       logEvent?: (
@@ -55,10 +56,12 @@ export class AnalyticsStore<
   ) {}
 
   setUserId(id: string): void {
+    this.legacyAnalyticsClient.setUserId(id);
     this.analyticsClient.setUserId(id);
   }
 
   setUserProperties(userProperties: U): void {
+    this.legacyAnalyticsClient.setUserProperties(userProperties);
     this.analyticsClient.setUserProperties(userProperties);
   }
 
@@ -69,6 +72,7 @@ export class AnalyticsStore<
       eventProperties = res.eventProperties;
     }
 
+    this.legacyAnalyticsClient.logEvent(eventName, eventProperties);
     this.analyticsClient.logEvent(eventName, eventProperties);
   }
 

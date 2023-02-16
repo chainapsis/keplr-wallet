@@ -6,6 +6,7 @@ import {
   FiatCurrencies,
   ICNSFrontendLink,
   ICNSInfo,
+  LegacyAmplitudeApiKey,
 } from "../config.ui";
 import {
   AccountStore,
@@ -387,10 +388,23 @@ export class RootStore {
     // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
       (() => {
+        if (!LegacyAmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance("legacy");
+          amplitudeClient.init(LegacyAmplitudeApiKey, undefined, {
+            saveEvents: true,
+            platform: "Extension",
+          });
+
+          return amplitudeClient;
+        }
+      })(),
+      (() => {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
-          const amplitudeClient = Amplitude.getInstance();
+          const amplitudeClient = Amplitude.getInstance("new");
           amplitudeClient.init(AmplitudeApiKey, undefined, {
             saveEvents: true,
             platform: "Extension",
