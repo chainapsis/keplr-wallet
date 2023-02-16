@@ -5,22 +5,6 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**/@react-native-*/**",
-      "**/react-native",
-      "**/react-native/**",
-      "**/*-react-native",
-      "**/react-native-*",
-      "**/@react-navigation/**",
-      "**/expo-*",
-      "**/@unimodules/**",
-      "**/unimodules-*",
-      "**/native-base",
-      "**/@react-native-async-storage/async-storage",
-      "**/@ledgerhq/react-native-hw-transport-ble",
-      "**/jetifier",
-      "**/@bugsnag/**"
     ]
   },
   "scripts": {
@@ -65,9 +49,9 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@octokit/core": "^3.5.1",
+    "@types/filesystem": "^0.0.32",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.13.0",
-    "@types/filesystem": "^0.0.32",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
     "cross-env": "^5.2.0",
@@ -96,5 +80,6 @@
     "axios": "^0.27.2",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop"
-  }
+  },
+  "packageManager": "yarn@3.4.1"
 }

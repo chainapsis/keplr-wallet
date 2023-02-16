@@ -2,10 +2,8 @@
   "name": "mobile",
   "version": "0.11.41",
   "private": true,
-  "workspaces": {
-    "nohoist": [
-      "mobx-react-lite"
-    ]
+  "installConfig": {
+    "hoistingLimits": "workspaces"
   },
   "scripts": {
     "clean": "sh ./scripts/clean.sh",
