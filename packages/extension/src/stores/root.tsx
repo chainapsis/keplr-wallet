@@ -388,19 +388,6 @@ export class RootStore {
     // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
       (() => {
-        if (!LegacyAmplitudeApiKey) {
-          return new NoopAnalyticsClient();
-        } else {
-          const amplitudeClient = Amplitude.getInstance("legacy");
-          amplitudeClient.init(LegacyAmplitudeApiKey, undefined, {
-            saveEvents: true,
-            platform: "Extension",
-          });
-
-          return amplitudeClient;
-        }
-      })(),
-      (() => {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
@@ -438,7 +425,20 @@ export class RootStore {
             eventProperties,
           };
         },
-      }
+      },
+      (() => {
+        if (!LegacyAmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance("legacy");
+          amplitudeClient.init(LegacyAmplitudeApiKey, undefined, {
+            saveEvents: true,
+            platform: "Extension",
+          });
+
+          return amplitudeClient;
+        }
+      })()
     );
 
     router.listen(APP_PORT);
