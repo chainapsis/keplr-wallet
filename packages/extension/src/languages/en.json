@@ -29,6 +29,8 @@
 
   "main.address.copied": "Address copied!",
 
+  "main.suggest.chain.link": "Add Suggest Chains",
+
   "main.menu.settings": "Settings",
   "main.menu.address-book": "Address Book",
   "main.menu.token-list": "Token List",

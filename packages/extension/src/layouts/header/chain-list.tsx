@@ -95,28 +95,9 @@ const Divider: FunctionComponent = (props) => {
   );
 };
 
-const ArrowRightIcon: FunctionComponent = () => {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M9.42188 3.9375L14.4844 9L9.42188 14.0625M13.7813 9L3.51563 9"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-};
-
 export const ChainList: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
+  const intl = useIntl();
 
   const mainChainList = chainStore.chainInfosInUI.filter(
     (chainInfo) => !chainInfo.beta
@@ -142,10 +123,7 @@ export const ChainList: FunctionComponent = observer(() => {
         rel="noopener noreferrer"
       >
         <div className={classnames(style.chainName, style.addChain)}>
-          <div>chain.keplr.app</div>
-          <div>
-            <ArrowRightIcon />
-          </div>
+          <div>{intl.formatMessage({ id: "main.suggest.chain.link" })}</div>
         </div>
       </a>
     </div>

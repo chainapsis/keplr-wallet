@@ -25,6 +25,8 @@
 
   "main.address.copied": "주소가 복사되었습니다",
 
+  "main.suggest.chain.link": "더많은 체인 추가",
+
   "main.menu.settings": "설정",
   "main.menu.address-book": "주소록",
   "main.menu.token-list": "토큰 목록",
