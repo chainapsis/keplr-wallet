@@ -42,7 +42,7 @@ class SuggestChainReceiverKeplr extends Keplr {
     super(version, mode, requester);
   }
 
-  async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+  override async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
     // deep copy
     const mutableChainInfo = JSON.parse(
       JSON.stringify(chainInfo)
@@ -69,9 +69,9 @@ export const useInjectedSourceCode = () => {
 
   useEffect(() => {
     if (Platform.OS === "ios") {
-      RNFS.readFile(
-        `${RNFS.MainBundlePath}/injected-provider.bundle.js`
-      ).then((r) => setCode(r));
+      RNFS.readFile(`${RNFS.MainBundlePath}/injected-provider.bundle.js`).then(
+        (r) => setCode(r)
+      );
     } else {
       RNFS.readFileAssets("injected-provider.bundle.js").then((r) =>
         setCode(r)

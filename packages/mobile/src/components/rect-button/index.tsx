@@ -60,7 +60,7 @@ export const RectButton: FunctionComponent<
     flexWrap,
     backgroundColor,
     ...restStyle
-  } = propStyle ?? {};
+  } = (propStyle as ViewStyle) ?? {};
 
   return (
     <View

@@ -277,27 +277,23 @@ export class ChainStore extends BaseChainStore<
       (chainId) => ChainIdHelper.parse(chainId).identifier
     );
 
-    const enabledChainsMap: Record<
-      string,
-      boolean | undefined
-    > = this.enabledChainInfosInUI.reduce<Record<string, boolean | undefined>>(
-      (previous, current) => {
-        previous[ChainIdHelper.parse(current.chainId).identifier] = true;
-        return previous;
-      },
-      {}
-    );
+    const enabledChainsMap: Record<string, boolean | undefined> =
+      this.enabledChainInfosInUI.reduce<Record<string, boolean | undefined>>(
+        (previous, current) => {
+          previous[ChainIdHelper.parse(current.chainId).identifier] = true;
+          return previous;
+        },
+        {}
+      );
 
-    const disabledChainsMap: Record<
-      string,
-      boolean | undefined
-    > = this.disabledChainInfosInUI.reduce<Record<string, boolean | undefined>>(
-      (previous, current) => {
-        previous[ChainIdHelper.parse(current.chainId).identifier] = true;
-        return previous;
-      },
-      {}
-    );
+    const disabledChainsMap: Record<string, boolean | undefined> =
+      this.disabledChainInfosInUI.reduce<Record<string, boolean | undefined>>(
+        (previous, current) => {
+          previous[ChainIdHelper.parse(current.chainId).identifier] = true;
+          return previous;
+        },
+        {}
+      );
 
     // No need to wait
     this.chainInfoInUIConfig.setValue({
@@ -316,7 +312,8 @@ export class ChainStore extends BaseChainStore<
     if (this.chainInfoInUIConfig.value) {
       const i = this.chainInfoInUIConfig.value.disabledChains.indexOf(chainId);
       if (i >= 0) {
-        const disabledChains = this.chainInfoInUIConfig.value.disabledChains.slice();
+        const disabledChains =
+          this.chainInfoInUIConfig.value.disabledChains.slice();
         disabledChains.splice(i, 1);
 
         // No need to wait
@@ -349,10 +346,10 @@ export class ChainStore extends BaseChainStore<
           }
         }
 
-        const sortedEnabledChains = this.chainInfoInUIConfig.value.sortedEnabledChains.slice();
-        const i = this.chainInfoInUIConfig.value.sortedEnabledChains.indexOf(
-          chainId
-        );
+        const sortedEnabledChains =
+          this.chainInfoInUIConfig.value.sortedEnabledChains.slice();
+        const i =
+          this.chainInfoInUIConfig.value.sortedEnabledChains.indexOf(chainId);
         if (i >= 0) {
           sortedEnabledChains.splice(i, 1);
         }
@@ -445,7 +442,7 @@ export class ChainStore extends BaseChainStore<
   }
 
   @override
-  protected setChainInfos(
+  protected override setChainInfos(
     chainInfos: (ChainInfoWithCoreTypes & AppChainInfo)[]
   ) {
     super.setChainInfos(

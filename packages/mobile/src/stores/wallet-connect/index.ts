@@ -410,8 +410,8 @@ export class WalletConnectStore extends WalletConnectManager {
       addEventListener: (type: string, fn: () => unknown) => void;
       removeEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly chainStore: ChainStore,
-    protected readonly keyRingStore: KeyRingStore,
+    chainStore: ChainStore,
+    keyRingStore: KeyRingStore,
     protected readonly permissionStore: PermissionStore
   ) {
     super(chainStore, keyRingStore);
@@ -516,7 +516,7 @@ export class WalletConnectStore extends WalletConnectManager {
     this._isAndroidActivityKilled = true;
   }
 
-  protected onCallBeforeRequested(client: WalletConnect) {
+  protected override onCallBeforeRequested(client: WalletConnect) {
     super.onCallBeforeRequested(client);
 
     this.wcCallCount++;
@@ -527,7 +527,7 @@ export class WalletConnectStore extends WalletConnectManager {
   }
 
   @action
-  protected onCallAfterRequested(client: WalletConnect) {
+  protected override onCallAfterRequested(client: WalletConnect) {
     super.onCallAfterRequested(client);
 
     this.wcCallCount--;
@@ -571,10 +571,11 @@ export class WalletConnectStore extends WalletConnectManager {
 
       const keplr = this.createKeplrAPI(client.session.key);
 
-      const permittedChains = await this.permissionStore.getOriginPermittedChains(
-        WCMessageRequester.getVirtualSessionURL(client.session.key),
-        getBasicAccessPermissionType()
-      );
+      const permittedChains =
+        await this.permissionStore.getOriginPermittedChains(
+          WCMessageRequester.getVirtualSessionURL(client.session.key),
+          getBasicAccessPermissionType()
+        );
 
       for (const chain of permittedChains) {
         const key = keyForChainCache[chain] ?? (await keplr.getKey(chain));

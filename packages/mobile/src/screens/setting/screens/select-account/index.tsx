@@ -68,8 +68,8 @@ export const getKeyStoreParagraph = (keyStore: MultiKeyStoreInfoElem) => {
       return;
     case "privateKey":
       // Torus key
-      if (keyStore.meta?.email) {
-        return keyStore.meta.email;
+      if (keyStore.meta?.["email"]) {
+        return keyStore.meta["email"];
       }
       return;
   }
@@ -87,12 +87,13 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
       (keyStore) =>
         keyStore.type === "privateKey" &&
         keyStore.meta &&
-        keyStore.meta.email &&
+        keyStore.meta["email"] &&
         // In prior version, only the google sign in option exists.
         // But, now, there are two types of sign in (google, apple).
         // `socialType` in meta is introduced to determine which social sign in was used.
         // If there is no `socialType` field in meta, just assume that it was google sign in.
-        (!keyStore.meta.socialType || keyStore.meta.socialType === "google")
+        (!keyStore.meta["socialType"] ||
+          keyStore.meta["socialType"] === "google")
     );
   }, [keyRingStore.multiKeyStoreInfo]);
 
@@ -101,8 +102,8 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
       (keyStore) =>
         keyStore.type === "privateKey" &&
         keyStore.meta &&
-        keyStore.meta.email &&
-        keyStore.meta.socialType === "apple"
+        keyStore.meta["email"] &&
+        keyStore.meta["socialType"] === "apple"
     );
   }, [keyRingStore.multiKeyStoreInfo]);
 
@@ -120,7 +121,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
 
   const privateKeyStores = useMemo(() => {
     return keyRingStore.multiKeyStoreInfo.filter(
-      (keyStore) => keyStore.type === "privateKey" && !keyStore.meta?.email
+      (keyStore) => keyStore.type === "privateKey" && !keyStore.meta?.["email"]
     );
   }, [keyRingStore.multiKeyStoreInfo]);
 
@@ -152,7 +153,7 @@ export const SettingSelectAccountScreen: FunctionComponent = observer(() => {
               return (
                 <KeyStoreItem
                   key={i.toString()}
-                  label={keyStore.meta?.name || "Keplr Account"}
+                  label={keyStore.meta?.["name"] || "Keplr Account"}
                   paragraph={getKeyStoreParagraph(keyStore)}
                   topBorder={i === 0}
                   bottomBorder={keyStores.length - 1 !== i}
