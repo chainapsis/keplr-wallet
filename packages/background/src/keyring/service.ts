@@ -34,14 +34,19 @@ import { APP_PORT, Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  SignDoc,
+  TxBody,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
+import { AnalyticsService } from "../analytics";
 
 export class KeyRingService {
   private keyRing!: KeyRing;
 
+  protected analyticsService!: AnalyticsService;
   protected interactionService!: InteractionService;
   public chainsService!: ChainsService;
   public permissionService!: PermissionService;
@@ -56,11 +61,13 @@ export class KeyRingService {
     interactionService: InteractionService,
     chainsService: ChainsService,
     permissionService: PermissionService,
-    ledgerService: LedgerService
+    ledgerService: LedgerService,
+    analyticsService: AnalyticsService
   ) {
     this.interactionService = interactionService;
     this.chainsService = chainsService;
     this.permissionService = permissionService;
+    this.analyticsService = analyticsService;
 
     this.keyRing = new KeyRing(
       this.embedChainInfos,
@@ -365,6 +372,13 @@ export class KeyRingService {
           signOptions.ethSignType
         );
 
+        this.analyticsService.logEventIgnoreError("tx_signed", {
+          chainId,
+          isInternal: env.isInternalMsg,
+          origin: msgOrigin,
+          ethSignType: signOptions.ethSignType,
+        });
+
         return {
           signed: newSignDoc, // Included to match return type
           signature: {
@@ -385,6 +399,19 @@ export class KeyRingService {
         serializeSignDoc(newSignDoc),
         ethereumKeyFeatures.signing
       );
+
+      const msgTypes = newSignDoc.msgs
+        .filter((msg) => msg.type)
+        .map((msg) => msg.type);
+
+      this.analyticsService.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        signMode: "amino",
+        msgTypes,
+        isADR36SignDoc,
+      });
 
       return {
         signed: newSignDoc,
@@ -475,6 +502,18 @@ export class KeyRingService {
         EthSignType.EIP712
       );
 
+      const msgTypes = newSignDoc.msgs
+        .filter((msg) => msg.type)
+        .map((msg) => msg.type);
+
+      this.analyticsService.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        ethSignType: EthSignType.EIP712,
+        msgTypes,
+      });
+
       return {
         signed: newSignDoc,
         signature: {
@@ -543,6 +582,18 @@ export class KeyRingService {
         newSignDocBytes,
         ethereumKeyFeatures.signing
       );
+
+      const msgTypes = TxBody.decode(newSignDoc.bodyBytes).messages.map(
+        (msg) => msg.typeUrl
+      );
+
+      this.analyticsService.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        signMode: "direct",
+        msgTypes,
+      });
 
       return {
         signed: {

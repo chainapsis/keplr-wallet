@@ -8,7 +8,11 @@ module.exports = {
     [
       "transform-inline-environment-variables",
       {
-        include: ["WC_PROJECT_ID"],
+        include: [
+          "WC_PROJECT_ID",
+          "KEPLR_EXT_ANALYTICS_API_URL",
+          "KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN",
+        ],
       },
     ],
   ],

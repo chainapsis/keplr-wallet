@@ -138,7 +138,8 @@ export function init(
     interactionService,
     chainsService,
     permissionService,
-    ledgerService
+    ledgerService,
+    analyticsService
   );
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);
