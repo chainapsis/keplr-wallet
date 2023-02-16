@@ -24615,6 +24615,7 @@ __metadata:
     jest: ^29.4.3
     lerna: ^3.22.1
     lint-staged: ^10.5.4
+    node-gyp: ^9.3.1
     pre-commit: ^1.2.2
     prettier: ^2.8.4
     semver: ^7.3.5
@@ -27015,7 +27016,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp@npm:latest":
+"node-gyp@npm:^9.3.1, node-gyp@npm:latest":
   version: 9.3.1
   resolution: "node-gyp@npm:9.3.1"
   dependencies:
