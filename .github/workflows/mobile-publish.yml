@@ -20,7 +20,7 @@ jobs:
           node-version: '18'
           registry-url: "https://registry.npmjs.org"
       - run: npm install --global yarn
-      - run: yarn install --frozen-lockfile && yarn run repository-dispatch
+      - run: yarn install --immutable && yarn run repository-dispatch
         working-directory: scripts/mobile-publish
         env:
           MOBILE_PUBLISH_AUTH_KEY: ${{ secrets.MOBILE_PUBLISH_AUTH_KEY }}

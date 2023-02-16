@@ -25,7 +25,8 @@ jobs:
       - run: sudo apt-get install curl
       - run: curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-x86_64.zip
       - run: unzip protoc-21.3-linux-x86_64.zip -d $HOME/protoc && echo $HOME/protoc/bin >> $GITHUB_PATH
-      - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
+      - run: cd packages/extension/src/keplr-torus-signin && yarn install --immutable
+      - run: yarn install --immutable
       - run: yarn ci-lint
       - run: yarn ci
         env:
