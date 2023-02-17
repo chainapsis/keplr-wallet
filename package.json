@@ -48,10 +48,16 @@
       "prettier --check"
     ]
   },
+  "remarkConfig": {
+    "plugins": [
+      "@1stg/remark-preset"
+    ]
+  },
   "keywords": [],
   "author": "chainapsis",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@1stg/remark-preset": "^2.0.0",
     "@octokit/core": "^3.5.1",
     "@types/filesystem": "^0.0.32",
     "@types/jest": "^29.4.0",

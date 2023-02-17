@@ -5,6 +5,24 @@ __metadata:
   version: 6
   cacheKey: 8
 
+"@1stg/remark-preset@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@1stg/remark-preset@npm:2.0.0"
+  dependencies:
+    remark-frontmatter: ^4.0.1
+    remark-gfm: ^3.0.1
+    remark-lint: ^9.1.1
+    remark-lint-no-duplicate-headings: ^3.1.1
+    remark-lint-no-duplicate-headings-in-section: ^3.1.1
+    remark-preset-lint-consistent: ^5.1.1
+    remark-preset-lint-markdown-style-guide: ^5.1.2
+    remark-preset-lint-recommended: ^6.1.2
+    remark-preset-prettier: ^2.0.1
+    remark-validate-links: ^12.1.0
+  checksum: 0de9d6dc5a197ab77ee7716506fe5227b57550be7ae4d9e173f783cd3424a48395a7eb6ec77465439ede2ea2a2b5f78cc0e6c51a5e3a068e2da958df2f574b80
+  languageName: node
+  linkType: hard
+
 "@amplitude/react-native@npm:^2.7.0":
   version: 2.7.0
   resolution: "@amplitude/react-native@npm:2.7.0"
@@ -83,7 +101,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/code-frame@npm:^7.16.7, @babel/code-frame@npm:^7.18.6, @babel/code-frame@npm:^7.5.5":
+"@babel/code-frame@npm:^7.16.0, @babel/code-frame@npm:^7.16.7, @babel/code-frame@npm:^7.18.6, @babel/code-frame@npm:^7.5.5":
   version: 7.18.6
   resolution: "@babel/code-frame@npm:7.18.6"
   dependencies:
@@ -8778,6 +8796,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@npmcli/config@npm:^6.0.0":
+  version: 6.1.3
+  resolution: "@npmcli/config@npm:6.1.3"
+  dependencies:
+    "@npmcli/map-workspaces": ^3.0.2
+    ini: ^3.0.0
+    nopt: ^7.0.0
+    proc-log: ^3.0.0
+    read-package-json-fast: ^3.0.2
+    semver: ^7.3.5
+    walk-up-path: ^1.0.0
+  checksum: 3ca1d1301354af50ecbfbfd1d5a34459b0b68f6364758a188cc65f04dd517e260d6c21f631fcc3840e8c25826ba5756e114166881ec4227d540919280e6cb0f4
+  languageName: node
+  linkType: hard
+
 "@npmcli/fs@npm:^1.0.0":
   version: 1.1.1
   resolution: "@npmcli/fs@npm:1.1.1"
@@ -8798,6 +8831,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@npmcli/map-workspaces@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@npmcli/map-workspaces@npm:3.0.2"
+  dependencies:
+    "@npmcli/name-from-folder": ^2.0.0
+    glob: ^8.0.1
+    minimatch: ^6.1.6
+    read-package-json-fast: ^3.0.0
+  checksum: 8eec27414261e8333bdbe4d9901c3c75c63a0883b49a0cfa8596da591aa75465965e1883d76ead201724514c887403e0a8a324cdf7abf58be1366317bb4d1238
+  languageName: node
+  linkType: hard
+
 "@npmcli/move-file@npm:^1.0.1":
   version: 1.1.2
   resolution: "@npmcli/move-file@npm:1.1.2"
@@ -8815,6 +8860,13 @@ __metadata:
     mkdirp: ^1.0.4
     rimraf: ^3.0.2
   checksum: 52dc02259d98da517fae4cb3a0a3850227bdae4939dda1980b788a7670636ca2b4a01b58df03dd5f65c1e3cb70c50fa8ce5762b582b3f499ec30ee5ce1fd9380
+  languageName: node
+  linkType: hard
+
+"@npmcli/name-from-folder@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@npmcli/name-from-folder@npm:2.0.0"
+  checksum: fb3ef891aa57315fb6171866847f298577c8bda98a028e93e458048477133e142b4eb45ce9f3b80454f7c257612cb01754ee782d608507698dd712164436f5bd
   languageName: node
   linkType: hard
 
@@ -11268,6 +11320,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/concat-stream@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@types/concat-stream@npm:2.0.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: d82ace5cb92f9fc91660ae1a101fa0a6b6159da59b0351c28627b24c317670267bc527f24ef4fa2c08d00404b49882ca66bf5c75d47d2b5f48d2fd85f9c2ea4d
+  languageName: node
+  linkType: hard
+
 "@types/crc@npm:^3.4.0":
   version: 3.8.0
   resolution: "@types/crc@npm:3.8.0"
@@ -11461,6 +11522,13 @@ __metadata:
   version: 6.1.0
   resolution: "@types/html-minifier-terser@npm:6.1.0"
   checksum: eb843f6a8d662d44fb18ec61041117734c6aae77aa38df1be3b4712e8e50ffaa35f1e1c92fdd0fde14a5675fecf457abcd0d15a01fae7506c91926176967f452
+  languageName: node
+  linkType: hard
+
+"@types/is-empty@npm:^1.0.0":
+  version: 1.2.1
+  resolution: "@types/is-empty@npm:1.2.1"
+  checksum: 7fe50427bfe8e4bef75e448a20bb542a57ab69ed0a4e191fd41f7f4417f6bd7cccd5f395fd88a579befbcb2c93ee9ba082749730e052493ea988351691069465
   languageName: node
   linkType: hard
 
@@ -11669,7 +11737,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.13.0":
+"@types/node@npm:^18.0.0, @types/node@npm:^18.13.0":
   version: 18.13.0
   resolution: "@types/node@npm:18.13.0"
   checksum: 4ea10f8802848b01672bce938f678b6774ca2cee0c9774f12275ab064ae07818419c3e2e41d6257ce7ba846d1ea26c63214aa1dfa4166fa3746291752b8c6416
@@ -11862,6 +11930,13 @@ __metadata:
     "@types/react": "*"
     csstype: ^3.0.2
   checksum: 84f53b3101739b20d1731554fb7735bc2f3f5d050a8b392e9845403c8c8bbd729737d033978649f9195a97b557875b010d46e35a4538564a2d0dbcce661dbf76
+  languageName: node
+  linkType: hard
+
+"@types/supports-color@npm:^8.0.0":
+  version: 8.1.1
+  resolution: "@types/supports-color@npm:8.1.1"
+  checksum: 6f35588fc423bf6b511167b4aaa0348638567f7a74de24d77dfb930d2053757585e1799d9c903f3db7a23a9ef2518878de9427b20d2f4476899aaf923e98de11
   languageName: node
   linkType: hard
 
@@ -12845,6 +12920,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"abbrev@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "abbrev@npm:2.0.0"
+  checksum: 0e994ad2aa6575f94670d8a2149afe94465de9cedaaaac364e7fb43a40c3691c980ff74899f682f4ca58fa96b4cbd7421a015d3a6defe43a442117d7821a2f36
+  languageName: node
+  linkType: hard
+
 "abort-controller@npm:^3.0.0":
   version: 3.0.0
   resolution: "abort-controller@npm:3.0.0"
@@ -13343,6 +13425,13 @@ __metadata:
   version: 5.0.1
   resolution: "ansi-regex@npm:5.0.1"
   checksum: 2aa4bb54caf2d622f1afdad09441695af2a83aa3fe8b8afa581d205e57ed4261c183c4d3877cee25794443fde5876417d859c108078ab788d6af7e4fe52eb66b
+  languageName: node
+  linkType: hard
+
+"ansi-regex@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "ansi-regex@npm:6.0.1"
+  checksum: 1ff8b7667cded1de4fa2c9ae283e979fc87036864317da86a2e546725f96406746411d0d85e87a2d12fa5abd715d90006de7fa4fa0477c92321ad3b4c7d4e169
   languageName: node
   linkType: hard
 
@@ -18399,6 +18488,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eastasianwidth@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "eastasianwidth@npm:0.2.0"
+  checksum: 7d00d7cd8e49b9afa762a813faac332dee781932d6f2c848dc348939c4253f1d4564341b7af1d041853bc3f32c2ef141b58e0a4d9862c17a7f08f68df1e0f1ed
+  languageName: node
+  linkType: hard
+
 "ecc-jsbn@npm:~0.1.1":
   version: 0.1.2
   resolution: "ecc-jsbn@npm:0.1.2"
@@ -18499,6 +18595,13 @@ __metadata:
   version: 8.0.0
   resolution: "emoji-regex@npm:8.0.0"
   checksum: d4c5c39d5a9868b5fa152f00cada8a936868fd3367f33f71be515ecee4c803132d11b31a6222b2571b1e5f7e13890156a94880345594d0ce7e3c9895f560f192
+  languageName: node
+  linkType: hard
+
+"emoji-regex@npm:^9.2.2":
+  version: 9.2.2
+  resolution: "emoji-regex@npm:9.2.2"
+  checksum: 8487182da74aabd810ac6d6f1994111dfc0e331b01271ae01ec1eb0ad7b5ecc2bbbbd2f053c05cb55a1ac30449527d819bbfbf0e3de1023db308cbcb47f86601
   languageName: node
   linkType: hard
 
@@ -18648,7 +18751,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"error-ex@npm:^1.2.0, error-ex@npm:^1.3.1":
+"error-ex@npm:^1.2.0, error-ex@npm:^1.3.1, error-ex@npm:^1.3.2":
   version: 1.3.2
   resolution: "error-ex@npm:1.3.2"
   dependencies:
@@ -18999,6 +19102,13 @@ __metadata:
   version: 4.0.0
   resolution: "escape-string-regexp@npm:4.0.0"
   checksum: 98b48897d93060f2322108bf29db0feba7dd774be96cd069458d1453347b25ce8682ecc39859d4bca2203cc0ab19c237bcc71755eff49a0f8d90beadeeba5cc5
+  languageName: node
+  linkType: hard
+
+"escape-string-regexp@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "escape-string-regexp@npm:5.0.0"
+  checksum: 20daabe197f3cb198ec28546deebcf24b3dbb1a5a269184381b3116d12f0532e06007f4bc8da25669d6a7f8efb68db0758df4cd981f57bc5b57f521a3e12c59e
   languageName: node
   linkType: hard
 
@@ -20183,6 +20293,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fault@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "fault@npm:2.0.1"
+  dependencies:
+    format: ^0.2.0
+  checksum: c9b30f47d95769177130a9409976a899ed31eb598450fbad5b0d39f2f5f56d5f4a9ff9257e0bee8407cb0fc3ce37165657888c6aa6d78472e403893104329b72
+  languageName: node
+  linkType: hard
+
 "fb-watchman@npm:^2.0.0":
   version: 2.0.1
   resolution: "fb-watchman@npm:2.0.1"
@@ -20712,6 +20831,13 @@ __metadata:
     combined-stream: ^1.0.6
     mime-types: ^2.1.12
   checksum: 10c1780fa13dbe1ff3100114c2ce1f9307f8be10b14bf16e103815356ff567b6be39d70fc4a40f8990b9660012dc24b0f5e1dde1b6426166eb23a445ba068ca3
+  languageName: node
+  linkType: hard
+
+"format@npm:^0.2.0":
+  version: 0.2.2
+  resolution: "format@npm:0.2.2"
+  checksum: 646a60e1336250d802509cf24fb801e43bd4a70a07510c816fa133aa42cdbc9c21e66e9cc0801bb183c5b031c9d68be62e7fbb6877756e52357850f92aa28799
   languageName: node
   linkType: hard
 
@@ -21391,7 +21517,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^8.0.1":
+"glob@npm:^8.0.0, glob@npm:^8.0.1":
   version: 8.1.0
   resolution: "glob@npm:8.1.0"
   dependencies:
@@ -21963,6 +22089,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hosted-git-info@npm:^5.0.0":
+  version: 5.2.1
+  resolution: "hosted-git-info@npm:5.2.1"
+  dependencies:
+    lru-cache: ^7.5.1
+  checksum: fa35df185224adfd69141f3b2f8cc31f50e705a5ebb415ccfbfd055c5b94bd08d3e658edf1edad9e2ac7d81831ac7cf261f5d219b3adc8d744fb8cdacaaf2ead
+  languageName: node
+  linkType: hard
+
 "hsl-regex@npm:^1.0.0":
   version: 1.0.0
   resolution: "hsl-regex@npm:1.0.0"
@@ -22387,6 +22522,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ignore@npm:^5.0.0":
+  version: 5.2.4
+  resolution: "ignore@npm:5.2.4"
+  checksum: 3d4c309c6006e2621659311783eaea7ebcd41fe4ca1d78c91c473157ad6666a57a2df790fe0d07a12300d9aac2888204d7be8d59f9aaf665b1c7fcdb432517ef
+  languageName: node
+  linkType: hard
+
 "ignore@npm:^5.1.8":
   version: 5.1.9
   resolution: "ignore@npm:5.1.9"
@@ -22451,6 +22593,13 @@ __metadata:
   bin:
     import-local-fixture: fixtures/cli.js
   checksum: c74d9f9484c878cda1de3434613c7ff72d5dadcf20e5482542232d7c2575b713ff88701d6675fcf09a3684cb23fb407c8b333b9cbc59438712723d058d8e976c
+  languageName: node
+  linkType: hard
+
+"import-meta-resolve@npm:^2.0.0":
+  version: 2.2.1
+  resolution: "import-meta-resolve@npm:2.2.1"
+  checksum: 8dd5ff7f6e96dea13653cbf79457588b9850949fde0412dba3cc944f8a61a155a3713d65878d903af6b0db7da960600ef66dfe994311743cdd49fe33dc91b0c5
   languageName: node
   linkType: hard
 
@@ -22533,6 +22682,13 @@ __metadata:
   version: 1.3.8
   resolution: "ini@npm:1.3.8"
   checksum: dfd98b0ca3a4fc1e323e38a6c8eb8936e31a97a918d3b377649ea15bdb15d481207a0dda1021efbd86b464cae29a0d33c1d7dcaf6c5672bee17fa849bc50a1b3
+  languageName: node
+  linkType: hard
+
+"ini@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "ini@npm:3.0.1"
+  checksum: 947b582a822f06df3c22c75c90aec217d604ea11f7a20249530ee5c1cf8f508288439abe17b0e1d9b421bda5f4fae5e7aae0b18cb3ded5ac9d68f607df82f10f
   languageName: node
   linkType: hard
 
@@ -23071,6 +23227,13 @@ __metadata:
     is-object: ^1.0.1
     is-window: ^1.0.2
   checksum: 72aff0a7366b801c9d598d49452ec06544b52c3da92a0c6c3cacace33bb0c3df5ba1b4e422ac39224773316a553699d5920a1eb136919319f57d00e6384eb41b
+  languageName: node
+  linkType: hard
+
+"is-empty@npm:^1.0.0":
+  version: 1.2.0
+  resolution: "is-empty@npm:1.2.0"
+  checksum: dc80e0a8ad5439d98d128d126fe69e5dcd6b474e29753107bcfe82fc7d628c9da618d48bb24878a7891f231696405ad0a854dfe3cfc955c23d24e80d9e252e62
   languageName: node
   linkType: hard
 
@@ -24631,6 +24794,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json-parse-even-better-errors@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "json-parse-even-better-errors@npm:3.0.0"
+  checksum: f1970b5220c7fa23d888565510752c3d5e863f93668a202fcaa719739fa41485dfc6a1db212f702ebd3c873851cc067aebc2917e3f79763cae2fdb95046f38f3
+  languageName: node
+  linkType: hard
+
 "json-schema-traverse@npm:^0.4.1":
   version: 0.4.1
   resolution: "json-schema-traverse@npm:0.4.1"
@@ -24824,6 +24994,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "keplr@workspace:."
   dependencies:
+    "@1stg/remark-preset": ^2.0.0
     "@octokit/core": ^3.5.1
     "@types/filesystem": ^0.0.32
     "@types/jest": ^29.4.0
@@ -25014,6 +25185,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"levenshtein-edit-distance@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "levenshtein-edit-distance@npm:1.0.0"
+  bin:
+    levenshtein-edit-distance: cli.js
+  checksum: d628c4011a6724e4d6aea1af1c5d9ec8b3ba7f95eec0deb2e40ee77269e12b0433a7027f66e5375a17b803d36f86601c2692dfa4b2e6030aabc14969a2941de6
+  languageName: node
+  linkType: hard
+
 "levn@npm:^0.4.1":
   version: 0.4.1
   resolution: "levn@npm:0.4.1"
@@ -25045,6 +25225,13 @@ __metadata:
   version: 1.1.6
   resolution: "lines-and-columns@npm:1.1.6"
   checksum: 198a5436b1fa5cf703bae719c01c686b076f0ad7e1aafd95a58d626cabff302dc0414822126f2f80b58a8c3d66cda8a7b6da064f27130f87e1d3506d6dfd0d68
+  languageName: node
+  linkType: hard
+
+"lines-and-columns@npm:^2.0.2":
+  version: 2.0.3
+  resolution: "lines-and-columns@npm:2.0.3"
+  checksum: 5955363dfd7d3d7c476d002eb47944dbe0310d57959e2112dce004c0dc76cecfd479cf8c098fd479ff344acdf04ee0e82b455462a26492231ac152f6c48d17a1
   languageName: node
   linkType: hard
 
@@ -25127,6 +25314,16 @@ __metadata:
     strip-bom: ^3.0.0
     type-fest: ^0.3.0
   checksum: 8bf15599db9471e264d916f98f1f51eb5d1e6a26d0ec3711d17df54d5983ccba1a0a4db2a6490bb27171f1261b72bf237d557f34e87d26e724472b92bdbdd4f7
+  languageName: node
+  linkType: hard
+
+"load-plugin@npm:^5.0.0":
+  version: 5.1.0
+  resolution: "load-plugin@npm:5.1.0"
+  dependencies:
+    "@npmcli/config": ^6.0.0
+    import-meta-resolve: ^2.0.0
+  checksum: d450c9a0838cec7f7581abcb8ff9170a5c6e1bc1ca816e4288e4a014bc0e819c4ca16163fd78b7e1fb6c1dffedf6ac881f9893d5a025b69f369a157d9a2aacf6
   languageName: node
   linkType: hard
 
@@ -25480,6 +25677,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^7.5.1":
+  version: 7.16.0
+  resolution: "lru-cache@npm:7.16.0"
+  checksum: 1a5511a0e695154c37f443c495ebcf3170ec8c291df62e140329cf0c48e2549db836e69371853a28286dc9de73a98f486a7566c64246249a6041c43d4a28bc60
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^7.7.1":
   version: 7.15.0
   resolution: "lru-cache@npm:7.15.0"
@@ -25684,6 +25888,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"markdown-table@npm:^3.0.0":
+  version: 3.0.3
+  resolution: "markdown-table@npm:3.0.3"
+  checksum: 8fcd3d9018311120fbb97115987f8b1665a603f3134c93fbecc5d1463380c8036f789e2a62c19432058829e594fff8db9ff81c88f83690b2f8ed6c074f8d9e10
+  languageName: node
+  linkType: hard
+
 "md5-file@npm:^3.2.3":
   version: 3.2.3
   resolution: "md5-file@npm:3.2.3"
@@ -25717,6 +25928,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mdast-comment-marker@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "mdast-comment-marker@npm:2.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-mdx-expression: ^1.1.0
+  checksum: aab4b99068d7530404dced0442102b56fc88bdd385ede999e865386b505d7c8e2bd4f2111455d0d3d1f628dcbfc149042a721a172665fb6924c20033a50d5de0
+  languageName: node
+  linkType: hard
+
 "mdast-squeeze-paragraphs@npm:^4.0.0":
   version: 4.0.0
   resolution: "mdast-squeeze-paragraphs@npm:4.0.0"
@@ -25732,6 +25953,18 @@ __metadata:
   dependencies:
     unist-util-visit: ^2.0.0
   checksum: 2325f20b82b3fb8cb5fda77038ee0bbdd44f82cfca7c48a854724b58bc1fe5919630a3ce7c45e210726df59d46c881d020b2da7a493bfd1ee36eb2bbfef5d78e
+  languageName: node
+  linkType: hard
+
+"mdast-util-find-and-replace@npm:^2.0.0":
+  version: 2.2.2
+  resolution: "mdast-util-find-and-replace@npm:2.2.2"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    escape-string-regexp: ^5.0.0
+    unist-util-is: ^5.0.0
+    unist-util-visit-parents: ^5.0.0
+  checksum: b4ce463c43fe6e1c38a53a89703f755c84ab5437f49bff9a0ac751279733332ca11c85ed0262aa6c17481f77b555d26ca6d64e70d6814f5b8d12d34a3e53a60b
   languageName: node
   linkType: hard
 
@@ -25768,7 +26001,97 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mdast-util-mdx-expression@npm:^1.0.0":
+"mdast-util-frontmatter@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "mdast-util-frontmatter@npm:1.0.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-markdown: ^1.3.0
+    micromark-extension-frontmatter: ^1.0.0
+  checksum: 0b0552047b753931da8265f2231a0b79aad1309ad7ad6599181c2d264e9b70b61acf742f29bdf2de8e901eb6eb37dd42b6f66007e735fd8138b2bf4d9acb0118
+  languageName: node
+  linkType: hard
+
+"mdast-util-gfm-autolink-literal@npm:^1.0.0":
+  version: 1.0.3
+  resolution: "mdast-util-gfm-autolink-literal@npm:1.0.3"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    ccount: ^2.0.0
+    mdast-util-find-and-replace: ^2.0.0
+    micromark-util-character: ^1.0.0
+  checksum: 1748a8727cfc533bac0c287d6e72d571d165bfa77ae0418be4828177a3ec73c02c3f2ee534d87eb75cbaffa00c0866853bbcc60ae2255babb8210f7636ec2ce2
+  languageName: node
+  linkType: hard
+
+"mdast-util-gfm-footnote@npm:^1.0.0":
+  version: 1.0.2
+  resolution: "mdast-util-gfm-footnote@npm:1.0.2"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-markdown: ^1.3.0
+    micromark-util-normalize-identifier: ^1.0.0
+  checksum: 2d77505f9377ed7e14472ef5e6b8366c3fec2cf5f936bb36f9fbe5b97ccb7cce0464d9313c236fa86fb844206fd585db05707e4fcfb755e4fc1864194845f1f6
+  languageName: node
+  linkType: hard
+
+"mdast-util-gfm-strikethrough@npm:^1.0.0":
+  version: 1.0.3
+  resolution: "mdast-util-gfm-strikethrough@npm:1.0.3"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-markdown: ^1.3.0
+  checksum: 17003340ff1bba643ec4a59fd4370fc6a32885cab2d9750a508afa7225ea71449fb05acaef60faa89c6378b8bcfbd86a9d94b05f3c6651ff27a60e3ddefc2549
+  languageName: node
+  linkType: hard
+
+"mdast-util-gfm-table@npm:^1.0.0":
+  version: 1.0.7
+  resolution: "mdast-util-gfm-table@npm:1.0.7"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    markdown-table: ^3.0.0
+    mdast-util-from-markdown: ^1.0.0
+    mdast-util-to-markdown: ^1.3.0
+  checksum: 8b8c401bb4162e53f072a2dff8efbca880fd78d55af30601c791315ab6722cb2918176e8585792469a0c530cebb9df9b4e7fede75fdc4d83df2839e238836692
+  languageName: node
+  linkType: hard
+
+"mdast-util-gfm-task-list-item@npm:^1.0.0":
+  version: 1.0.2
+  resolution: "mdast-util-gfm-task-list-item@npm:1.0.2"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-markdown: ^1.3.0
+  checksum: c9b86037d6953b84f11fb2fc3aa23d5b8e14ca0dfcb0eb2fb289200e172bb9d5647bfceb4f86606dc6d935e8d58f6a458c04d3e55e87ff8513c7d4ade976200b
+  languageName: node
+  linkType: hard
+
+"mdast-util-gfm@npm:^2.0.0":
+  version: 2.0.2
+  resolution: "mdast-util-gfm@npm:2.0.2"
+  dependencies:
+    mdast-util-from-markdown: ^1.0.0
+    mdast-util-gfm-autolink-literal: ^1.0.0
+    mdast-util-gfm-footnote: ^1.0.0
+    mdast-util-gfm-strikethrough: ^1.0.0
+    mdast-util-gfm-table: ^1.0.0
+    mdast-util-gfm-task-list-item: ^1.0.0
+    mdast-util-to-markdown: ^1.0.0
+  checksum: 7078cb985255208bcbce94a121906417d38353c6b1a9acbe56ee8888010d3500608b5d51c16b0999ac63ca58848fb13012d55f26930ff6c6f3450f053d56514e
+  languageName: node
+  linkType: hard
+
+"mdast-util-heading-style@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "mdast-util-heading-style@npm:2.0.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+  checksum: 8ea1a36f526170f09e4ad597c3b75a580efe5b1736d6d21ccad222a002281ae4066414bf2e12911c72561762069a5045a817899a245999a66c01edefdba5a96b
+  languageName: node
+  linkType: hard
+
+"mdast-util-mdx-expression@npm:^1.0.0, mdast-util-mdx-expression@npm:^1.1.0":
   version: 1.3.2
   resolution: "mdast-util-mdx-expression@npm:1.3.2"
   dependencies:
@@ -26373,6 +26696,111 @@ __metadata:
   languageName: node
   linkType: hard
 
+"micromark-extension-frontmatter@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "micromark-extension-frontmatter@npm:1.0.0"
+  dependencies:
+    fault: ^2.0.0
+    micromark-util-character: ^1.0.0
+    micromark-util-symbol: ^1.0.0
+  checksum: d0bacd6aadd6e33e26245628b93f5bcaf9a1de47787cea6807f8569213ceeb1376c37fadcf059280f5eafe6a07682bd148989e65489e99c9a3f4d523eea5f5c0
+  languageName: node
+  linkType: hard
+
+"micromark-extension-gfm-autolink-literal@npm:^1.0.0":
+  version: 1.0.3
+  resolution: "micromark-extension-gfm-autolink-literal@npm:1.0.3"
+  dependencies:
+    micromark-util-character: ^1.0.0
+    micromark-util-sanitize-uri: ^1.0.0
+    micromark-util-symbol: ^1.0.0
+    micromark-util-types: ^1.0.0
+    uvu: ^0.5.0
+  checksum: bb181972ac346ca73ca1ab0b80b80c9d6509ed149799d2217d5442670f499c38a94edff73d32fa52b390d89640974cfbd7f29e4ad7d599581d5e1cabcae636a2
+  languageName: node
+  linkType: hard
+
+"micromark-extension-gfm-footnote@npm:^1.0.0":
+  version: 1.0.4
+  resolution: "micromark-extension-gfm-footnote@npm:1.0.4"
+  dependencies:
+    micromark-core-commonmark: ^1.0.0
+    micromark-factory-space: ^1.0.0
+    micromark-util-character: ^1.0.0
+    micromark-util-normalize-identifier: ^1.0.0
+    micromark-util-sanitize-uri: ^1.0.0
+    micromark-util-symbol: ^1.0.0
+    micromark-util-types: ^1.0.0
+    uvu: ^0.5.0
+  checksum: 8daa203f5cf753338d5ecdbaae6b3ab6319d34b6013b90ea6860bed299418cecf86e69e48dabe42562e334760c738c77c5acdb47e75ae26f5f01f02f3bf0952d
+  languageName: node
+  linkType: hard
+
+"micromark-extension-gfm-strikethrough@npm:^1.0.0":
+  version: 1.0.4
+  resolution: "micromark-extension-gfm-strikethrough@npm:1.0.4"
+  dependencies:
+    micromark-util-chunked: ^1.0.0
+    micromark-util-classify-character: ^1.0.0
+    micromark-util-resolve-all: ^1.0.0
+    micromark-util-symbol: ^1.0.0
+    micromark-util-types: ^1.0.0
+    uvu: ^0.5.0
+  checksum: f43d316b85fe93df1711cdcdc99a5320b941239349234bd262fc708cb67ad47bdfb41d1a7ebe2a5829816b0e9d3107380a5c1e558cb536a75354cbe4857823ba
+  languageName: node
+  linkType: hard
+
+"micromark-extension-gfm-table@npm:^1.0.0":
+  version: 1.0.5
+  resolution: "micromark-extension-gfm-table@npm:1.0.5"
+  dependencies:
+    micromark-factory-space: ^1.0.0
+    micromark-util-character: ^1.0.0
+    micromark-util-symbol: ^1.0.0
+    micromark-util-types: ^1.0.0
+    uvu: ^0.5.0
+  checksum: f0aab3b4333cc24b1534b08dc4cce986dd606df8b7ed913e5a1de9fe2d3ae67b2435663c0bc271b528874af4928e580e1ad540ea9117d7f2d74edb28859c97ef
+  languageName: node
+  linkType: hard
+
+"micromark-extension-gfm-tagfilter@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "micromark-extension-gfm-tagfilter@npm:1.0.1"
+  dependencies:
+    micromark-util-types: ^1.0.0
+  checksum: 63e8d68f25871722900a67a8001d5da21f19ea707f3566fc7d0b2eb1f6d52476848bb6a41576cf22470565124af9497c5aae842355faa4c14ec19cb1847e71ec
+  languageName: node
+  linkType: hard
+
+"micromark-extension-gfm-task-list-item@npm:^1.0.0":
+  version: 1.0.3
+  resolution: "micromark-extension-gfm-task-list-item@npm:1.0.3"
+  dependencies:
+    micromark-factory-space: ^1.0.0
+    micromark-util-character: ^1.0.0
+    micromark-util-symbol: ^1.0.0
+    micromark-util-types: ^1.0.0
+    uvu: ^0.5.0
+  checksum: d320b0c5301f87e211c06a2330d1ee0fee6da14f0d6d44d5211055b465dadff34390cd6b258a5e0ca376fcda3364fef9a12fe6e26a0c858231fa3b98ddbf7785
+  languageName: node
+  linkType: hard
+
+"micromark-extension-gfm@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "micromark-extension-gfm@npm:2.0.1"
+  dependencies:
+    micromark-extension-gfm-autolink-literal: ^1.0.0
+    micromark-extension-gfm-footnote: ^1.0.0
+    micromark-extension-gfm-strikethrough: ^1.0.0
+    micromark-extension-gfm-table: ^1.0.0
+    micromark-extension-gfm-tagfilter: ^1.0.0
+    micromark-extension-gfm-task-list-item: ^1.0.0
+    micromark-util-combine-extensions: ^1.0.0
+    micromark-util-types: ^1.0.0
+  checksum: b181479c87be38d5ae8d28e6dc52fab73c894fd2706876746f27a91fb186644ce03532a9c35dca2186327a0e2285cd5242ad0361dc89adedd4a50376ffd94e22
+  languageName: node
+  linkType: hard
+
 "micromark-extension-mdx-expression@npm:^1.0.0":
   version: 1.0.4
   resolution: "micromark-extension-mdx-expression@npm:1.0.4"
@@ -26937,6 +27365,15 @@ __metadata:
   dependencies:
     brace-expansion: ^2.0.1
   checksum: 7564208ef81d7065a370f788d337cd80a689e981042cb9a1d0e6580b6c6a8c9279eba80010516e258835a988363f99f54a6f711a315089b8b42694f5da9d0d77
+  languageName: node
+  linkType: hard
+
+"minimatch@npm:^6.1.6":
+  version: 6.2.0
+  resolution: "minimatch@npm:6.2.0"
+  dependencies:
+    brace-expansion: ^2.0.1
+  checksum: 0ffb77d05bd483fcc344ba3e64a501d569e658fa6c592d94e9716ffc7925de7a8c2ac294cafa822b160bd8b2cbf7e01012917e06ffb9a85cfa9604629b3f2c04
   languageName: node
   linkType: hard
 
@@ -27874,6 +28311,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nopt@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "nopt@npm:7.0.0"
+  dependencies:
+    abbrev: ^2.0.0
+  bin:
+    nopt: bin/nopt.js
+  checksum: 71d296ea66a00e877ff8dd432d004ae6844f582d2ac203ce191c5e2873a878401093f13193f25352a749ae77d422fe2df1c168f55a720ee5285c85e7de3cb3a3
+  languageName: node
+  linkType: hard
+
 "normalize-package-data@npm:^2.0.0, normalize-package-data@npm:^2.3.0, normalize-package-data@npm:^2.3.2, normalize-package-data@npm:^2.3.4, normalize-package-data@npm:^2.3.5, normalize-package-data@npm:^2.4.0, normalize-package-data@npm:^2.5.0":
   version: 2.5.0
   resolution: "normalize-package-data@npm:2.5.0"
@@ -27968,6 +28416,13 @@ __metadata:
   version: 1.0.1
   resolution: "npm-normalize-package-bin@npm:1.0.1"
   checksum: ae7f15155a1e3ace2653f12ddd1ee8eaa3c84452fdfbf2f1943e1de264e4b079c86645e2c55931a51a0a498cba31f70022a5219d5665fbcb221e99e58bc70122
+  languageName: node
+  linkType: hard
+
+"npm-normalize-package-bin@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "npm-normalize-package-bin@npm:3.0.0"
+  checksum: 6a34886c150b0f5302aad52a9446e5c939aa14eeb462323e75681517b36c6b9eaef83e1f5bc2d7e5154b3b752cbce81bed05e290db3f1f7edf857cbb895e35c0
   languageName: node
   linkType: hard
 
@@ -29035,6 +29490,18 @@ __metadata:
     json-parse-even-better-errors: ^2.3.0
     lines-and-columns: ^1.1.6
   checksum: 62085b17d64da57f40f6afc2ac1f4d95def18c4323577e1eced571db75d9ab59b297d1d10582920f84b15985cbfc6b6d450ccbf317644cfa176f3ed982ad87e2
+  languageName: node
+  linkType: hard
+
+"parse-json@npm:^6.0.0":
+  version: 6.0.2
+  resolution: "parse-json@npm:6.0.2"
+  dependencies:
+    "@babel/code-frame": ^7.16.0
+    error-ex: ^1.3.2
+    json-parse-even-better-errors: ^2.3.1
+    lines-and-columns: ^2.0.2
+  checksum: b33d93abf869f3102804896b9a1f8c04bf371e3c55d7afafaf18fca2813a20b2e14a1ae5c6823feea3b4fabc63f35984dc272fa057c4767531ffe1b46d52fa79
   languageName: node
   linkType: hard
 
@@ -30288,6 +30755,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"proc-log@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "proc-log@npm:3.0.0"
+  checksum: 02b64e1b3919e63df06f836b98d3af002b5cd92655cab18b5746e37374bfb73e03b84fe305454614b34c25b485cc687a9eebdccf0242cda8fda2475dd2c97e02
+  languageName: node
+  linkType: hard
+
 "process-nextick-args@npm:~2.0.0":
   version: 2.0.1
   resolution: "process-nextick-args@npm:2.0.1"
@@ -30429,6 +30903,15 @@ __metadata:
   dependencies:
     xtend: ^4.0.0
   checksum: fcf87c6542e59a8bbe31ca0b3255a4a63ac1059b01b04469680288998bcfa97f341ca989566adbb63975f4d85339030b82320c324a511532d390910d1c583893
+  languageName: node
+  linkType: hard
+
+"propose@npm:0.0.5":
+  version: 0.0.5
+  resolution: "propose@npm:0.0.5"
+  dependencies:
+    levenshtein-edit-distance: ^1.0.0
+  checksum: ad472212772dd0ef60cafa859f140176243bd318c989f76577d0bb3a18cb425c1db2aab30986e325946fdc130cb11fe3d34274220d29b3535de61427b0dd922b
   languageName: node
   linkType: hard
 
@@ -31473,6 +31956,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"read-package-json-fast@npm:^3.0.0, read-package-json-fast@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "read-package-json-fast@npm:3.0.2"
+  dependencies:
+    json-parse-even-better-errors: ^3.0.0
+    npm-normalize-package-bin: ^3.0.0
+  checksum: 8d406869f045f1d76e2a99865a8fd1c1af9c1dc06200b94d2b07eef87ed734b22703a8d72e1cd36ea36cc48e22020bdd187f88243c7dd0563f72114d38c17072
+  languageName: node
+  linkType: hard
+
 "read-package-json@npm:1 || 2, read-package-json@npm:^2.0.0, read-package-json@npm:^2.0.13":
   version: 2.1.2
   resolution: "read-package-json@npm:2.1.2"
@@ -31921,6 +32414,734 @@ __metadata:
   languageName: node
   linkType: hard
 
+"remark-frontmatter@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "remark-frontmatter@npm:4.0.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-frontmatter: ^1.0.0
+    micromark-extension-frontmatter: ^1.0.0
+    unified: ^10.0.0
+  checksum: c1c448923cd0239e9eeafb42d7129c05081c9a1bca4c8164b562cbb748e80d103bfd058597a48d54000ce3c776200ab8ccd64a9679d955423f07e4a4e77f10c3
+  languageName: node
+  linkType: hard
+
+"remark-gfm@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "remark-gfm@npm:3.0.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-gfm: ^2.0.0
+    micromark-extension-gfm: ^2.0.0
+    unified: ^10.0.0
+  checksum: 02254f74d67b3419c2c9cf62d799ec35f6c6cd74db25c001361751991552a7ce86049a972107bff8122d85d15ae4a8d1a0618f3bc01a7df837af021ae9b2a04e
+  languageName: node
+  linkType: hard
+
+"remark-lint-blockquote-indentation@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-blockquote-indentation@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    pluralize: ^8.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 605636c4bf43ab98948e08302dedaf60aa6f16a9f40696b5685e99e22ef647b56415a3e7d803f20003ff1c57e310f784d9fc14e2c2caf78d4e17664a84f51696
+  languageName: node
+  linkType: hard
+
+"remark-lint-checkbox-character-style@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "remark-lint-checkbox-character-style@npm:4.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 7e35509f4bab21a697a0d4d8484b97c9c58cda775dda42a7f9133a1e60b8c966d32fc292e20c3c6b250b42103b0e1a8aa01db8210c34f2da87fcb4f988bcf767
+  languageName: node
+  linkType: hard
+
+"remark-lint-code-block-style@npm:^3.0.0":
+  version: 3.1.0
+  resolution: "remark-lint-code-block-style@npm:3.1.0"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 7fe60387a9f006928a7fc3265eaa4edda2b715d1ea5f3b6032fe75831e28631b3e7b563729b6093ddcae43e0356e19c22c0d373a748d4ed1d30d1d3b5eb5a339
+  languageName: node
+  linkType: hard
+
+"remark-lint-definition-case@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-definition-case@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 00e19d692ae029b0e47afd1633c596108f948eff861c77134892aed05bd139aab3dfa858b1b55db3d865412369d0e2af1d9e1fed35cf4ed582dc94cf6977059f
+  languageName: node
+  linkType: hard
+
+"remark-lint-definition-spacing@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-definition-spacing@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 4d8ae38fd24225f0f89d2dddc3eab505ed6f2eea4683c10a8e398c89545b485d8fcb475204ccacf1a37c7305bdd2bca6a7383947e404de5b164b913cd12a42d2
+  languageName: node
+  linkType: hard
+
+"remark-lint-emphasis-marker@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-emphasis-marker@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: db84e912a84ba2b5717d53bccb2393f8d132760c54b28d6a9b842439592e564d7eafeb4dd49ab859d9bf31b1693893728c1e047a451477da8d3b12450babf7d3
+  languageName: node
+  linkType: hard
+
+"remark-lint-fenced-code-flag@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-fenced-code-flag@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 729b8fd83df0df4f61ac92e9f56a9ddddbe68ef88c54d24d982620bfd302d720789d887b2338d57a5318cffda4ddff2ae76b89a404c56eb17826c87cf419c3f7
+  languageName: node
+  linkType: hard
+
+"remark-lint-fenced-code-marker@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-fenced-code-marker@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 7ce47fb1a3c457a52ef0044f619b9e6dbe8706a42c457eb56d063f75c6db8826253ac8dab5c4cb9cdcd89feb35a7997e30830a544fbca9e2b508923d743d2529
+  languageName: node
+  linkType: hard
+
+"remark-lint-file-extension@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "remark-lint-file-extension@npm:2.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+  checksum: 70bc12640e3d43bb81475f51d6156bbf0bb9829ce8a9ea26e893680d091f2f72ed9ac921364e1d654a628ec1f5666536a412a5e885f2c004e6d2857a04f7506e
+  languageName: node
+  linkType: hard
+
+"remark-lint-final-definition@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-final-definition@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 2bf203f268923e2e91a6bb5443ccfa400cc4c3d33f476bc676d549ff9a29263ba33ff4cd319a63786a649883c112de32f898ee082cb3ba098088f961f016b5fe
+  languageName: node
+  linkType: hard
+
+"remark-lint-final-newline@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "remark-lint-final-newline@npm:2.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+  checksum: d68291b1794dfa67d6b5cca1dd73ce3032dafd845efaf9e0514cf3361c9a495245fef975aaf72a987be8859bea22cd3b0b5b744cff7320d42ab1b67dae0cfe8d
+  languageName: node
+  linkType: hard
+
+"remark-lint-hard-break-spaces@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-hard-break-spaces@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 8e84b0c66ef8aefedd0ff36f8ce7bf4db1434ab591f21184d8b922622d9ed2ed6cb8c8d612d4c409cfeed11701a704625f4787b51018ff3e6cb67f66e4f71d10
+  languageName: node
+  linkType: hard
+
+"remark-lint-heading-increment@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-heading-increment@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 2895b5849e6fbf9436451c637b39aea3db9083766d9bd0178300f18096be4c1c4022dc049ea044ed3f766c0314ef03937e38603c6fbe4fecedacd24b647be03b
+  languageName: node
+  linkType: hard
+
+"remark-lint-heading-style@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-heading-style@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-heading-style: ^2.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: fb5ee308a4b4d64e8039dfdfddf20406e5164002c245955b29d99facad2e21af911d8ef10b26640ab0d1e3efe3a657afc9affd42f9ae9aeefa79e781ffd4c571
+  languageName: node
+  linkType: hard
+
+"remark-lint-link-title-style@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-link-title-style@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+    vfile-location: ^4.0.0
+  checksum: 29b38865fb9378390ab8818d4e121b77315ec525275e9c5c249c7b2c55e3bc359a2f17aa200c3343ad6d0926795a48ec78dddd10b061cf23b4126727af5435ed
+  languageName: node
+  linkType: hard
+
+"remark-lint-list-item-bullet-indent@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "remark-lint-list-item-bullet-indent@npm:4.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    pluralize: ^8.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 8248285196970ad5f84ab94db3cf64a6083012a07a06649acfa5bb4a22a8786221d67d6752d22a49ce14bd1e61dd69a51ee24f8277d05690843e24b89d482d09
+  languageName: node
+  linkType: hard
+
+"remark-lint-list-item-content-indent@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-list-item-content-indent@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    pluralize: ^8.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: ac1ea5f482af848050def5f550cbe0a42e610ce3cb200d54ab19d485fe923a80ee333e8cd005084ce0db5a834fce84b262547b43bb8f95f2c419ccee83ec7b0b
+  languageName: node
+  linkType: hard
+
+"remark-lint-list-item-indent@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-list-item-indent@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    pluralize: ^8.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 955c670d1617e3193a328624225cf52f1c59a75b65045dac8a644909ac834f65ab02b7647996d7e6f6a98456527f1cb4f3d4fa8a3be67e5ce51500bc4940d2ff
+  languageName: node
+  linkType: hard
+
+"remark-lint-list-item-spacing@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "remark-lint-list-item-spacing@npm:4.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 1c75e05572741e4e9b3ad65beaea85bd226196959c683017cef56ccb927d0f34ed4cdb4bad0074b1145e9b7b0c29c713c7dcec73a48c6625f8e38a112cdfde56
+  languageName: node
+  linkType: hard
+
+"remark-lint-maximum-heading-length@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-maximum-heading-length@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-string: ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: d477a436c07a410cb82600965a5f94c597398007f84fbcb9880db6f8b17fdb01194b394923a3d61c812402b38b3f58ce161216ee14b5a6e9ac8a02fac1b8d4f2
+  languageName: node
+  linkType: hard
+
+"remark-lint-maximum-line-length@npm:^3.0.0":
+  version: 3.1.2
+  resolution: "remark-lint-maximum-line-length@npm:3.1.2"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 1370014b718b8cc34f6a740d30bb91f404fb67b9cc8952297933e9f608cd75bcd72fc183ad686ab45aeedf1d4a37ad523d2768226d42b604e32a31edf0f99ab2
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-blockquote-without-marker@npm:^5.0.0":
+  version: 5.1.1
+  resolution: "remark-lint-no-blockquote-without-marker@npm:5.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+    vfile-location: ^4.0.0
+  checksum: 73d4583dbec06c206ed1ceeb754135117c478fa3c1e118c15446863910514ded3653f05f826b43f514728a6c0b3a6f26d463052fb8d2942c72df0c3b1a45be07
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-consecutive-blank-lines@npm:^4.0.0":
+  version: 4.1.2
+  resolution: "remark-lint-no-consecutive-blank-lines@npm:4.1.2"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    "@types/unist": ^2.0.0
+    pluralize: ^8.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 1c4d38ac356deb66a86c1f0d9a7b4c47630467b692ca82800d425177db9ed4c678fe553436228606b2d7804d37abae0370f1b75c5b5afc350d19e53375aa7cd2
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-duplicate-definitions@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-duplicate-definitions@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-stringify-position: ^3.0.0
+    unist-util-visit: ^4.0.0
+  checksum: a8de885eb64f521429ececfa72ea5d736c3a54c636c1d0c2c9aaf82c28cbb4c33a912d1caae5ae011635d36a40e550fb146be3d637e0968d573dbda465117a97
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-duplicate-headings-in-section@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "remark-lint-no-duplicate-headings-in-section@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-string: ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-stringify-position: ^3.0.0
+    unist-util-visit: ^4.0.0
+  checksum: cad91c4d75a36b370c511925c7aa34c9e528c07e11353d49a0cfec204422b4315b1b6ba8eef47e87e15e9e0e3cc039c57e22735d2156acf99d1e439312d837b8
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-duplicate-headings@npm:^3.0.0, remark-lint-no-duplicate-headings@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "remark-lint-no-duplicate-headings@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-string: ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-stringify-position: ^3.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 81baa468d1e90664a0777041bde07483c3611e8d154989c9e411662be14eed6420b43b1f1308ef34907ddf9d5973639439487534cf34a42227cce430388eabef
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-emphasis-as-heading@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-emphasis-as-heading@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 751937ce6eb19ac57c0b654e5585a0e0bb67e36f3353030ec5720bde3357bdf9c6791aeca90c02ba336a5a84b18b51b708d9bc5ffa0f05f5696d83f21785ed28
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-file-name-articles@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "remark-lint-no-file-name-articles@npm:2.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+  checksum: 9b23f833a4983900e4944521f4728eeb6a1ad26608fe91ec2e7b9d4c4571f9fb01961f08cf5c3e3f0e9ebe26d58afaca0301a28ce965d174d2c521d1bf50fe88
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-file-name-consecutive-dashes@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "remark-lint-no-file-name-consecutive-dashes@npm:2.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+  checksum: 860d037031af9cbcad696776a0f62f60d8b38b853582980b414a3463c8753d88d24e02db48266e2ab63894266d6122ab8cd47ba09ec01f0382f3035f3ace66ec
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-file-name-irregular-characters@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "remark-lint-no-file-name-irregular-characters@npm:2.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+  checksum: 67a89de0022bcf6a4ed84b47f36eb5dc5c60f407dffe745a16c81c6f69687008665a7bad37ea6f21fffd777d7a7fd87d6607bec1a8982add7eeb7ef64ed144eb
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-file-name-mixed-case@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "remark-lint-no-file-name-mixed-case@npm:2.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+  checksum: 242641391e330c2f2229c606fbcaaf8cefc1aab4dc244d63cac328710af06c22eb5eda912cfff49b7b81f4fc0a617195fb16c4a958b187913dd1b9643012deb5
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-file-name-outer-dashes@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "remark-lint-no-file-name-outer-dashes@npm:2.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+  checksum: 455ce51f8e90835a943f61797882103386623ecea102a9abf233009d068b35b68116b1c66487c7cd2acec28e200abdac0ff92c95ac271413a5e0d52ba8508959
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-heading-content-indent@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "remark-lint-no-heading-content-indent@npm:4.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-heading-style: ^2.0.0
+    pluralize: ^8.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 086eaffdfae19116cda175b0a803c444350f86059e9486d7f1a6b30138d53ff6e0a06c6587942aeff5850b226974be768e244e4b8575fa7b0271b714049b2bfa
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-heading-punctuation@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-heading-punctuation@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-string: ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 9f15c8b0767c5b05538b0ad333e6b24c57680375ed15fe929ec7481fac709afd9af708fb369bef6c89d972cfb168fe0f7dcc2f128cbb96a7b9dfa17ccbec8bad
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-inline-padding@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "remark-lint-no-inline-padding@npm:4.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-string: ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: fab21dc8fb4418b1bab16bb1b80742dea44a1ce560d83d6dc6019990a22af6a339c533d1c01d6e04f006ebd5f2875928971bcdb70732c149a5b8deb6e59d17b4
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-literal-urls@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-literal-urls@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-util-to-string: ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 305d0d24dbd14c0bd4bc843f2298eda92861fb1ce77f3079a1b89a52e620f35b52b12510f09006cc2e02bd356e0d80dec92d2615b09c5f6ef940c9116f70f499
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-multiple-toplevel-headings@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-multiple-toplevel-headings@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-stringify-position: ^3.0.0
+    unist-util-visit: ^4.0.0
+  checksum: dd462c590887bfa15c1551c832cfb7ce5db49645803751c695a14576d1d53c4ee2d83e18bc5549ec2b521e0eaf7804b313f15cf1ef2a614a8a2a26edbedd93d7
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-shell-dollars@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-shell-dollars@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: df675246299fb833151a3bf227902e85ca20c8990be5e80693ae4b2235cae5f913118940a2ceb11ee1233b4be7f4dac14ad25b445c2cf1d6f0b8246f9021fc65
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-shortcut-reference-image@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-shortcut-reference-image@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 8ad48be913dac09b9c1f78c1a5b91b98684d1ae93e3d4a78aad19ec5ffaa17172114c2ccaf947b256a510e26e80d72255df859159f621b4e13bcac8003c2c59d
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-shortcut-reference-link@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-shortcut-reference-link@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: c3b78bc0cbce6551dc47f4beda7e2e5c6a5f1f22e895d1d11865897c13f6105cd458a4b11a75576b503e2cff82b9d8de763326344323d6058a45b4b3114b018b
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-table-indentation@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "remark-lint-no-table-indentation@npm:4.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+    vfile-location: ^4.0.0
+  checksum: d594b79ba404c244fa13b966008abe57e8db754ea253d963be3a5bd2ba0de207fb52e8ca9020aa0f898dcdeb67e576397d5f19ae3b67b7d35693ff9b1bbfb209
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-undefined-references@npm:^4.0.0":
+  version: 4.2.0
+  resolution: "remark-lint-no-undefined-references@npm:4.2.0"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    micromark-util-normalize-identifier: ^1.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+    vfile-location: ^4.0.0
+  checksum: effedeb3f06dab28f6d8e7dbb664d18215eff328b3ee2a29b6061d54f4a825b571003d976d6daa3d04df332c66755c31a78b62da61679c2cc164bb4cfcca2942
+  languageName: node
+  linkType: hard
+
+"remark-lint-no-unused-definitions@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-no-unused-definitions@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 959e5d4e508c9265a846a3a23256f15f47a7f5bbed22f5c9494e190cd117ef3a44dbe429d2e53bf801d3bd1116549386be0c68c6ff4ee641d62fbb944fe775a1
+  languageName: node
+  linkType: hard
+
+"remark-lint-ordered-list-marker-style@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-ordered-list-marker-style@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: b7437f7176772aae80732402c4d2d7e13e84c0fe41dbaebf0db157b15b634057cd424f723d0fe6be2af31965a970359a5f0fe9116f948d555d25b51dc141bbc6
+  languageName: node
+  linkType: hard
+
+"remark-lint-ordered-list-marker-value@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-ordered-list-marker-value@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 532c0733d07225e3fc312afe3662ea09f04b8b42eca872c5d962830cd6b8a54773222292f2224306de3cabf1a65f3023cd4bd45d77430314283b1a7332169177
+  languageName: node
+  linkType: hard
+
+"remark-lint-rule-style@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-rule-style@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: e2899cfd21c530043e31eb52154eacc1a7f046945848fe227b5061a959ed896c48d108a567d85aefb2b0b8b9613c35aff2ce7cbd0e3c63774f3a924bcdd11e37
+  languageName: node
+  linkType: hard
+
+"remark-lint-strong-marker@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-strong-marker@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: af837e372ead8d8090f5bfe45dcef5034704e2b8b9690c0b0fb10fed9a60809d21b402d00065a96bde9195172b87bb83f65228f4351b872b48e61c6d75d8cea9
+  languageName: node
+  linkType: hard
+
+"remark-lint-table-cell-padding@npm:^4.0.0":
+  version: 4.1.2
+  resolution: "remark-lint-table-cell-padding@npm:4.1.2"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    "@types/unist": ^2.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 432e5c774ee1125caa93c0306b70b4f8f91e41c0a06c18454b1cd80bb22af063822529a77233983a26d2a9d8865e9a1727efb3739510cc92102da39aa0472ed3
+  languageName: node
+  linkType: hard
+
+"remark-lint-table-pipe-alignment@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-table-pipe-alignment@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 0dfe58de4ea5676f07e5a7c8ccea89ce3906539e801c51541b8f488c251ef8cd44ab2e24e09a6d20ca7bac0ca0ebbd529ff71bafe2874a21a890ab01c47335e2
+  languageName: node
+  linkType: hard
+
+"remark-lint-table-pipes@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "remark-lint-table-pipes@npm:4.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 14c973a5ef4372d25c4807cf00236be832388dd93cdab655bc7f5db9e234955b7bde08775221eb1553525d1a08b57fcdc8714c7d43e0e37fd1cd560cdd4fd727
+  languageName: node
+  linkType: hard
+
+"remark-lint-unordered-list-marker-style@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "remark-lint-unordered-list-marker-style@npm:3.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    unified: ^10.0.0
+    unified-lint-rule: ^2.0.0
+    unist-util-generated: ^2.0.0
+    unist-util-position: ^4.0.0
+    unist-util-visit: ^4.0.0
+  checksum: 226f572a00dc2f29ca0e085a12e0490a7e1d9e6508aa02f42d8b6c35be4b880f9d915aca2e2a72b92e96ac3c165a83810ca6599f386df7ec5ec999c74dbf0e07
+  languageName: node
+  linkType: hard
+
+"remark-lint@npm:^9.0.0, remark-lint@npm:^9.1.1":
+  version: 9.1.1
+  resolution: "remark-lint@npm:9.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    remark-message-control: ^7.0.0
+    unified: ^10.1.0
+  checksum: c5a2ca78fd9fca028cfd178b07782c4be543b56572e60bdc66032485ef5f043f7090a6026d1e4c7f56001af3783fde4d4c93e2f0035ba2e2dc60ecb51d898b17
+  languageName: node
+  linkType: hard
+
 "remark-mdx@npm:1.6.22":
   version: 1.6.22
   resolution: "remark-mdx@npm:1.6.22"
@@ -31944,6 +33165,19 @@ __metadata:
     mdast-util-mdx: ^2.0.0
     micromark-extension-mdxjs: ^1.0.0
   checksum: 98486986c5b6f6a8321eb2f3b13c70fcd5644821428c77b7bfeb5ee5d4605b9761b322b2f6b531e83883cd2d5bc7bc4623427149aee00e1eba012f538b3d5627
+  languageName: node
+  linkType: hard
+
+"remark-message-control@npm:^7.0.0":
+  version: 7.1.1
+  resolution: "remark-message-control@npm:7.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    mdast-comment-marker: ^2.0.0
+    unified: ^10.0.0
+    unified-message-control: ^4.0.0
+    vfile: ^5.0.0
+  checksum: ac6058e93b07c9cb46a828e89b6f372063b76f4c41283358c2913c10e69076cba35401189c0a0eb2a60b7c31714dd30430e770346b2a0ac8ba6b81572345fdd9
   languageName: node
   linkType: hard
 
@@ -31982,6 +33216,117 @@ __metadata:
   languageName: node
   linkType: hard
 
+"remark-preset-lint-consistent@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "remark-preset-lint-consistent@npm:5.1.1"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    remark-lint: ^9.0.0
+    remark-lint-blockquote-indentation: ^3.0.0
+    remark-lint-checkbox-character-style: ^4.0.0
+    remark-lint-code-block-style: ^3.0.0
+    remark-lint-emphasis-marker: ^3.0.0
+    remark-lint-fenced-code-marker: ^3.0.0
+    remark-lint-heading-style: ^3.0.0
+    remark-lint-link-title-style: ^3.0.0
+    remark-lint-list-item-content-indent: ^3.0.0
+    remark-lint-ordered-list-marker-style: ^3.0.0
+    remark-lint-rule-style: ^3.0.0
+    remark-lint-strong-marker: ^3.0.0
+    remark-lint-table-cell-padding: ^4.0.0
+    unified: ^10.0.0
+  checksum: ee4b70662e7b6686a18940df6f3886bac58a94e80a048df2b9e79d4e155460556a5be16a6f211c72fd241fb8d081f17a0c04ab6628f1058166a62eb89a4ed3b4
+  languageName: node
+  linkType: hard
+
+"remark-preset-lint-markdown-style-guide@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "remark-preset-lint-markdown-style-guide@npm:5.1.2"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    remark-lint: ^9.0.0
+    remark-lint-blockquote-indentation: ^3.0.0
+    remark-lint-code-block-style: ^3.0.0
+    remark-lint-definition-case: ^3.0.0
+    remark-lint-definition-spacing: ^3.0.0
+    remark-lint-emphasis-marker: ^3.0.0
+    remark-lint-fenced-code-flag: ^3.0.0
+    remark-lint-fenced-code-marker: ^3.0.0
+    remark-lint-file-extension: ^2.0.0
+    remark-lint-final-definition: ^3.0.0
+    remark-lint-hard-break-spaces: ^3.0.0
+    remark-lint-heading-increment: ^3.0.0
+    remark-lint-heading-style: ^3.0.0
+    remark-lint-link-title-style: ^3.0.0
+    remark-lint-list-item-content-indent: ^3.0.0
+    remark-lint-list-item-indent: ^3.0.0
+    remark-lint-list-item-spacing: ^4.0.0
+    remark-lint-maximum-heading-length: ^3.0.0
+    remark-lint-maximum-line-length: ^3.0.0
+    remark-lint-no-blockquote-without-marker: ^5.0.0
+    remark-lint-no-consecutive-blank-lines: ^4.0.0
+    remark-lint-no-duplicate-headings: ^3.0.0
+    remark-lint-no-emphasis-as-heading: ^3.0.0
+    remark-lint-no-file-name-articles: ^2.0.0
+    remark-lint-no-file-name-consecutive-dashes: ^2.0.0
+    remark-lint-no-file-name-irregular-characters: ^2.0.0
+    remark-lint-no-file-name-mixed-case: ^2.0.0
+    remark-lint-no-file-name-outer-dashes: ^2.0.0
+    remark-lint-no-heading-punctuation: ^3.0.0
+    remark-lint-no-inline-padding: ^4.0.0
+    remark-lint-no-literal-urls: ^3.0.0
+    remark-lint-no-multiple-toplevel-headings: ^3.0.0
+    remark-lint-no-shell-dollars: ^3.0.0
+    remark-lint-no-shortcut-reference-image: ^3.0.0
+    remark-lint-no-shortcut-reference-link: ^3.0.0
+    remark-lint-no-table-indentation: ^4.0.0
+    remark-lint-ordered-list-marker-style: ^3.0.0
+    remark-lint-ordered-list-marker-value: ^3.0.0
+    remark-lint-rule-style: ^3.0.0
+    remark-lint-strong-marker: ^3.0.0
+    remark-lint-table-cell-padding: ^4.0.0
+    remark-lint-table-pipe-alignment: ^3.0.0
+    remark-lint-table-pipes: ^4.0.0
+    remark-lint-unordered-list-marker-style: ^3.0.0
+    unified: ^10.0.0
+  checksum: 795f9d3a6e406f8d449afadaf14d584e3680e3e89d00706b02ba7985efddb1b2243aa73ea668ee8eb53d9987f00d92511039c91dc359bc49a3850329a9e11c5a
+  languageName: node
+  linkType: hard
+
+"remark-preset-lint-recommended@npm:^6.1.2":
+  version: 6.1.2
+  resolution: "remark-preset-lint-recommended@npm:6.1.2"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    remark-lint: ^9.0.0
+    remark-lint-final-newline: ^2.0.0
+    remark-lint-hard-break-spaces: ^3.0.0
+    remark-lint-list-item-bullet-indent: ^4.0.0
+    remark-lint-list-item-indent: ^3.0.0
+    remark-lint-no-blockquote-without-marker: ^5.0.0
+    remark-lint-no-duplicate-definitions: ^3.0.0
+    remark-lint-no-heading-content-indent: ^4.0.0
+    remark-lint-no-inline-padding: ^4.0.0
+    remark-lint-no-literal-urls: ^3.0.0
+    remark-lint-no-shortcut-reference-image: ^3.0.0
+    remark-lint-no-shortcut-reference-link: ^3.0.0
+    remark-lint-no-undefined-references: ^4.0.0
+    remark-lint-no-unused-definitions: ^3.0.0
+    remark-lint-ordered-list-marker-style: ^3.0.0
+    unified: ^10.0.0
+  checksum: 8f92dab9648ed8030b6fa9b855b849d6e95536535b24c5622185f8134bba2131d69e4e496f8ca60ff7ff38e4bc1d2e755973cf6f11bb78eb78e975fb3f91e6c6
+  languageName: node
+  linkType: hard
+
+"remark-preset-prettier@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "remark-preset-prettier@npm:2.0.1"
+  peerDependencies:
+    prettier: ">=1.0.0"
+  checksum: 4c2bfbd902a81e4f5e5b68c4e75b43af402b3fc9049fd65023a6818be036b7f48f9d6f1a1e4b2cf354cb639c6f1a0a11c597b3e33eb2e1f93ce9a3f24a8c95b7
+  languageName: node
+  linkType: hard
+
 "remark-slug@npm:^6.0.0":
   version: 6.1.0
   resolution: "remark-slug@npm:6.1.0"
@@ -32010,6 +33355,25 @@ __metadata:
     mdast-util-to-markdown: ^1.0.0
     unified: ^10.0.0
   checksum: 25424201e698353f6c0afc9ec29a8cac1dac8c06750d92214e3216bd76ac37902a0ba3702ac2a11c1040938a667b3bc22d6949af1d35e8fc81a3572643cdc263
+  languageName: node
+  linkType: hard
+
+"remark-validate-links@npm:^12.1.0":
+  version: 12.1.0
+  resolution: "remark-validate-links@npm:12.1.0"
+  dependencies:
+    "@types/mdast": ^3.0.0
+    github-slugger: ^1.0.0
+    hosted-git-info: ^5.0.0
+    mdast-util-to-string: ^3.0.0
+    propose: 0.0.5
+    to-vfile: ^7.0.0
+    trough: ^2.0.0
+    unified: ^10.0.0
+    unified-engine: ^10.0.1
+    unist-util-visit: ^4.0.0
+    vfile: ^5.0.0
+  checksum: eb1743c0f4e9ca54a7da58f97d70e97393e10a5a7573e23559b6f4ac6ee8a98db6983cfd4bbf1bb9393966e002000943c20e2203d8364283f02b5f3dfdad48ad
   languageName: node
   linkType: hard
 
@@ -33972,6 +35336,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"string-width@npm:^5.0.0":
+  version: 5.1.2
+  resolution: "string-width@npm:5.1.2"
+  dependencies:
+    eastasianwidth: ^0.2.0
+    emoji-regex: ^9.2.2
+    strip-ansi: ^7.0.1
+  checksum: 7369deaa29f21dda9a438686154b62c2c5f661f8dda60449088f9f980196f7908fc39fdd1803e3e01541970287cf5deae336798337e9319a7055af89dafa7193
+  languageName: node
+  linkType: hard
+
 "string.prototype.matchall@npm:^4.0.0 || ^3.0.1":
   version: 4.0.7
   resolution: "string.prototype.matchall@npm:4.0.7"
@@ -34178,6 +35553,15 @@ __metadata:
   dependencies:
     ansi-regex: ^5.0.1
   checksum: f3cd25890aef3ba6e1a74e20896c21a46f482e93df4a06567cebf2b57edabb15133f1f94e57434e0a958d61186087b1008e89c94875d019910a213181a14fc8c
+  languageName: node
+  linkType: hard
+
+"strip-ansi@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "strip-ansi@npm:7.0.1"
+  dependencies:
+    ansi-regex: ^6.0.1
+  checksum: 257f78fa433520e7f9897722731d78599cb3fce29ff26a20a5e12ba4957463b50a01136f37c43707f4951817a75e90820174853d6ccc240997adc5df8f966039
   languageName: node
   linkType: hard
 
@@ -34481,6 +35865,13 @@ __metadata:
   dependencies:
     has-flag: ^4.0.0
   checksum: c052193a7e43c6cdc741eb7f378df605636e01ad434badf7324f17fb60c69a880d8d8fcdcb562cf94c2350e57b937d7425ab5b8326c67c2adc48f7c87c1db406
+  languageName: node
+  linkType: hard
+
+"supports-color@npm:^9.0.0":
+  version: 9.3.1
+  resolution: "supports-color@npm:9.3.1"
+  checksum: 00c4d1082a7ba0ee21cba1d4e4a466642635412e40476777b530aa5110d035e99a420cd048e1fb6811f2254c0946095fbb87a1eccf1af1d1ca45ab0a4535db93
   languageName: node
   linkType: hard
 
@@ -35135,6 +36526,16 @@ __metadata:
     regex-not: ^1.0.2
     safe-regex: ^1.1.0
   checksum: 4ed4a619059b64e204aad84e4e5f3ea82d97410988bcece7cf6cbfdbf193d11bff48cf53842d88b8bb00b1bfc0d048f61f20f0709e6f393fd8fe0122662d9db4
+  languageName: node
+  linkType: hard
+
+"to-vfile@npm:^7.0.0":
+  version: 7.2.4
+  resolution: "to-vfile@npm:7.2.4"
+  dependencies:
+    is-buffer: ^2.0.0
+    vfile: ^5.1.0
+  checksum: 5fa9bd6c3b0dae6abc65a882bef4d899940305237449740ee803c5ef87c1df56425290009abde7d215884f481c3254d78d19120f38109217c6c066676f2e7609
   languageName: node
   linkType: hard
 
@@ -35888,6 +37289,62 @@ __metadata:
   languageName: node
   linkType: hard
 
+"unified-engine@npm:^10.0.1":
+  version: 10.1.0
+  resolution: "unified-engine@npm:10.1.0"
+  dependencies:
+    "@types/concat-stream": ^2.0.0
+    "@types/debug": ^4.0.0
+    "@types/is-empty": ^1.0.0
+    "@types/node": ^18.0.0
+    "@types/unist": ^2.0.0
+    concat-stream: ^2.0.0
+    debug: ^4.0.0
+    fault: ^2.0.0
+    glob: ^8.0.0
+    ignore: ^5.0.0
+    is-buffer: ^2.0.0
+    is-empty: ^1.0.0
+    is-plain-obj: ^4.0.0
+    load-plugin: ^5.0.0
+    parse-json: ^6.0.0
+    to-vfile: ^7.0.0
+    trough: ^2.0.0
+    unist-util-inspect: ^7.0.0
+    vfile-message: ^3.0.0
+    vfile-reporter: ^7.0.0
+    vfile-statistics: ^2.0.0
+    yaml: ^2.0.0
+  checksum: 27f4e5cd05c70a0f8a0ffa011f20257d97d62dc1b7ced0fa3c70516f23a4e8e9b676496e94a04726c85da2783153412f526724e512ec1dddcf5af82ce39b2fd2
+  languageName: node
+  linkType: hard
+
+"unified-lint-rule@npm:^2.0.0":
+  version: 2.1.1
+  resolution: "unified-lint-rule@npm:2.1.1"
+  dependencies:
+    "@types/unist": ^2.0.0
+    trough: ^2.0.0
+    unified: ^10.0.0
+    vfile: ^5.0.0
+  checksum: 224cd0a89396d560674d7caac8cc9b52e89912954e83a4b940efadb3c41b34e5f6602c0d79f801a18666cf01427b1c6a09cf50abeb0f2b84f5c9d3b647885435
+  languageName: node
+  linkType: hard
+
+"unified-message-control@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "unified-message-control@npm:4.0.0"
+  dependencies:
+    "@types/unist": ^2.0.0
+    unist-util-is: ^5.0.0
+    unist-util-visit: ^3.0.0
+    vfile: ^5.0.0
+    vfile-location: ^4.0.0
+    vfile-message: ^3.0.0
+  checksum: a90a9f8c371fce8679162dcf917f82ed4562518ad37e12778cabc9cb02500d504cd29d2500f37d822fd450ea6ddfa5f7be82cdba6c1f221c53288d1f0f25fd2c
+  languageName: node
+  linkType: hard
+
 "unified@npm:9.2.0":
   version: 9.2.0
   resolution: "unified@npm:9.2.0"
@@ -35902,7 +37359,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unified@npm:^10.0.0, unified@npm:^10.1.2":
+"unified@npm:^10.0.0, unified@npm:^10.1.0, unified@npm:^10.1.2":
   version: 10.1.2
   resolution: "unified@npm:10.1.2"
   dependencies:
@@ -36016,6 +37473,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"unist-util-generated@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "unist-util-generated@npm:2.0.1"
+  checksum: 6221ad0571dcc9c8964d6b054f39ef6571ed59cc0ce3e88ae97ea1c70afe76b46412a5ffaa91f96814644ac8477e23fb1b477d71f8d70e625728c5258f5c0d99
+  languageName: node
+  linkType: hard
+
+"unist-util-inspect@npm:^7.0.0":
+  version: 7.0.2
+  resolution: "unist-util-inspect@npm:7.0.2"
+  dependencies:
+    "@types/unist": ^2.0.0
+  checksum: e8f2a3836516e5ac973d56914832fad83c2391686143008a40fa8c852eb452f04bd5a42c30ce716c52217b202328ca2f365c7f0f13e67f838603d659c39b9720
+  languageName: node
+  linkType: hard
+
 "unist-util-is@npm:^4.0.0":
   version: 4.1.0
   resolution: "unist-util-is@npm:4.1.0"
@@ -36043,6 +37516,15 @@ __metadata:
   version: 3.1.0
   resolution: "unist-util-position@npm:3.1.0"
   checksum: 10b3952e32a1ffabbecad41c3946237f7059f5bb6436796da05531a285f50b97e4f37cfc2f7164676d041063f40fe1ad92fbb8ca38d3ae8747328ebe738d738f
+  languageName: node
+  linkType: hard
+
+"unist-util-position@npm:^4.0.0":
+  version: 4.0.4
+  resolution: "unist-util-position@npm:4.0.4"
+  dependencies:
+    "@types/unist": ^2.0.0
+  checksum: e7487b6cec9365299695e3379ded270a1717074fa11fd2407c9b934fb08db6fe1d9077ddeaf877ecf1813665f8ccded5171693d3d9a7a01a125ec5cdd5e88691
   languageName: node
   linkType: hard
 
@@ -36102,7 +37584,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unist-util-visit-parents@npm:^5.1.1":
+"unist-util-visit-parents@npm:^4.0.0":
+  version: 4.1.1
+  resolution: "unist-util-visit-parents@npm:4.1.1"
+  dependencies:
+    "@types/unist": ^2.0.0
+    unist-util-is: ^5.0.0
+  checksum: 49d78984a6dd858a989f849d2b4330c8a04d1ee99c0e9920a5e37668cf847dab95db77a3bf0c8aaeb3e66abeae12e2d454949ec401614efef377d8f82d215662
+  languageName: node
+  linkType: hard
+
+"unist-util-visit-parents@npm:^5.0.0, unist-util-visit-parents@npm:^5.1.1":
   version: 5.1.3
   resolution: "unist-util-visit-parents@npm:5.1.3"
   dependencies:
@@ -36120,6 +37612,17 @@ __metadata:
     unist-util-is: ^4.0.0
     unist-util-visit-parents: ^3.0.0
   checksum: 1fe19d500e212128f96d8c3cfa3312846e586b797748a1fd195fe6479f06bc90a6f6904deb08eefc00dd58e83a1c8a32fb8677252d2273ad7a5e624525b69b8f
+  languageName: node
+  linkType: hard
+
+"unist-util-visit@npm:^3.0.0":
+  version: 3.1.0
+  resolution: "unist-util-visit@npm:3.1.0"
+  dependencies:
+    "@types/unist": ^2.0.0
+    unist-util-is: ^5.0.0
+    unist-util-visit-parents: ^4.0.0
+  checksum: c37dbc0c5509f85f3abdf46d927b3dd11e6c419159771b1f1a5ce446d36ac993d04b087e28bc6173a172e0fbe9d77e997f120029b2b449766ebe55b6f6e0cc2c
   languageName: node
   linkType: hard
 
@@ -36604,6 +38107,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"vfile-reporter@npm:^7.0.0":
+  version: 7.0.5
+  resolution: "vfile-reporter@npm:7.0.5"
+  dependencies:
+    "@types/supports-color": ^8.0.0
+    string-width: ^5.0.0
+    supports-color: ^9.0.0
+    unist-util-stringify-position: ^3.0.0
+    vfile: ^5.0.0
+    vfile-message: ^3.0.0
+    vfile-sort: ^3.0.0
+    vfile-statistics: ^2.0.0
+  checksum: 0d66370c6c821fbc850c898bfc48c73f19fb320792c532a3af0456bd0f3d395590b365009e60ca4c08ab09a0dabdd43311297bb5c6fbd0abb90bb5abce98264e
+  languageName: node
+  linkType: hard
+
+"vfile-sort@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "vfile-sort@npm:3.0.1"
+  dependencies:
+    vfile: ^5.0.0
+    vfile-message: ^3.0.0
+  checksum: 6a29e0513c03b3468c628cc27d1511e2f955c3095cd65eeddcb8f601b0972c0cb1f2dc008a7c760e217cf97a44e04e0331b00929b83adc6661b46043b03b5a24
+  languageName: node
+  linkType: hard
+
+"vfile-statistics@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "vfile-statistics@npm:2.0.1"
+  dependencies:
+    vfile: ^5.0.0
+    vfile-message: ^3.0.0
+  checksum: e3f731bcf992c61c1231a0793785b1288e0a004be9e18ff147e3ead901ae2d21723358609bfe0565881ffe202af68cb171b49753fc8b4bd7a30337aaef256266
+  languageName: node
+  linkType: hard
+
 "vfile@npm:^4.0.0":
   version: 4.2.1
   resolution: "vfile@npm:4.2.1"
@@ -36616,7 +38155,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vfile@npm:^5.0.0, vfile@npm:^5.3.4":
+"vfile@npm:^5.0.0, vfile@npm:^5.1.0, vfile@npm:^5.3.4":
   version: 5.3.7
   resolution: "vfile@npm:5.3.7"
   dependencies:
@@ -36678,6 +38217,13 @@ __metadata:
     webidl-conversions: ^4.0.2
     xml-name-validator: ^3.0.0
   checksum: 1683e083d0dfc1529988f8956510a3a26e90738b41c4df0c7eb95283bfbeabeb492308117dcd32afef2a141e2a959ddf10ce562983d91b9f474a530b9dcdd337
+  languageName: node
+  linkType: hard
+
+"walk-up-path@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "walk-up-path@npm:1.0.0"
+  checksum: b8019ac4fb9ba1576839ec66d2217f62ab773c1cc4c704bfd1c79b1359fef5366f1382d3ab230a66a14c3adb1bf0fe102d1fdaa3437881e69154dfd1432abd32
   languageName: node
   linkType: hard
 
@@ -37851,6 +39397,13 @@ __metadata:
   version: 1.10.2
   resolution: "yaml@npm:1.10.2"
   checksum: ce4ada136e8a78a0b08dc10b4b900936912d15de59905b2bf415b4d33c63df1d555d23acb2a41b23cf9fb5da41c256441afca3d6509de7247daa062fd2c5ea5f
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^2.0.0":
+  version: 2.2.1
+  resolution: "yaml@npm:2.2.1"
+  checksum: 84f68cbe462d5da4e7ded4a8bded949ffa912bc264472e5a684c3d45b22d8f73a3019963a32164023bdf3d83cfb6f5b58ff7b2b10ef5b717c630f40bd6369a23
   languageName: node
   linkType: hard
 
