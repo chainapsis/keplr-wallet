@@ -6,6 +6,7 @@ import {
   FiatCurrencies,
   ICNSFrontendLink,
   ICNSInfo,
+  LegacyAmplitudeApiKey,
 } from "../config.ui";
 import {
   AccountStore,
@@ -390,7 +391,7 @@ export class RootStore {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
-          const amplitudeClient = Amplitude.getInstance();
+          const amplitudeClient = Amplitude.getInstance("new");
           amplitudeClient.init(AmplitudeApiKey, undefined, {
             saveEvents: true,
             platform: "Extension",
@@ -424,7 +425,20 @@ export class RootStore {
             eventProperties,
           };
         },
-      }
+      },
+      (() => {
+        if (!LegacyAmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance("legacy");
+          amplitudeClient.init(LegacyAmplitudeApiKey, undefined, {
+            saveEvents: true,
+            platform: "Extension",
+          });
+
+          return amplitudeClient;
+        }
+      })()
     );
 
     router.listen(APP_PORT);

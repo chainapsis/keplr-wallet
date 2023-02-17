@@ -165,3 +165,41 @@ html[data-register-page="true"] {
     margin-left: 0 !important;
   }
 }
+
+.intro-icon {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  margin-top: -16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &:hover {
+    background: #485cce;
+  }
+}
+
+.dialog {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(10, 14, 27, 0.5);
+  .content {
+    width: 420px;
+    box-sizing: border-box;
+    padding: 20px 30px;
+    border-radius: 8px;
+    border: 1px solid #f5f5f5;
+    background: #fff;
+    text-align: center;
+  }
+}

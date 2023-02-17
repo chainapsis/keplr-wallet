@@ -30,6 +30,8 @@
 
   "main.address.copied": "Address copied!",
 
+  "main.suggest.chain.link": "Add Suggest Chains",
+
   "main.menu.settings": "Settings",
   "main.menu.address-book": "Address Book",
   "main.menu.token-list": "Token List",
@@ -191,7 +193,7 @@
   "register.create.button.next": "Next",
   "register.create.button.ledger.terra": "Use Terra Ledger app",
 
-  "register.keystone.title": "Connect Keystone (Beta)",
+  "register.keystone.title": "Connect Keystone",
 
   "register.ledger.title": "Connect ledger",
 

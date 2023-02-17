@@ -19,6 +19,7 @@ import { computeAddress } from "@ethersproject/transactions";
 import { publicKeyConvert } from "secp256k1";
 import Common from "@ethereumjs/common";
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
+import { Keyring as EvmKeyring } from "@keystonehq/evm-keyring";
 
 export const TYPE_KEYSTONE_GET_PUBKEY = "keystone-get-pubkey";
 export const TYPE_KEYSTONE_SIGN = "keystone-sign";
@@ -45,6 +46,12 @@ enum EthSignFunction {
   Transaction = "signTransaction",
   Message = "signMessage",
   Data = "signTypedData",
+}
+
+enum EvmSignFunction {
+  Amino = "signCosmosAmino",
+  Direct = "signCosmosDirect",
+  Message = "signArbitrary",
 }
 
 export class KeystoneService {
@@ -240,5 +247,77 @@ export class KeystoneService {
       return rlpData;
     }
     return Buffer.from((signRes as string).replace(/^0x/, ""), "hex");
+  }
+
+  async signEvm(
+    env: Env,
+    coinType: number,
+    bip44HDPath: BIP44HDPath,
+    key: Key,
+    keyringData: KeystoneKeyringData,
+    message: Uint8Array,
+    mode: SignMode,
+    chainId?: number
+  ): Promise<Uint8Array> {
+    let signResolve: { (arg0: KeystoneUR): void };
+    let signReject: { (arg0: unknown): void };
+    const keyring = new EvmKeyring({
+      ...keyringData,
+      keys: keyringData.keys.map((e, index) => ({
+        hdPath: `44'/${e.coinType}'/${e.bip44HDPath.account}'/${e.bip44HDPath.change}/${e.bip44HDPath.addressIndex}`,
+        index,
+        pubKey: e.pubKey,
+      })),
+    });
+    keyring.onPlayQR(async (ur) => {
+      (async () => {
+        try {
+          const res = (await this.interactionService.waitApprove(
+            env,
+            "/keystone/sign",
+            TYPE_KEYSTONE_SIGN,
+            {
+              coinType,
+              bip44HDPath,
+              ur,
+              message,
+            }
+          )) as StdSignDoc;
+          if (res.abort) {
+            throw new KeplrError(
+              "keystone",
+              301,
+              "The process has been canceled."
+            );
+          }
+          if (!res.signature) {
+            throw new KeplrError("keystone", 303, "Signature is empty.");
+          }
+          signResolve(res.signature);
+        } catch (err) {
+          signReject(err);
+        }
+      })();
+    });
+    keyring.onReadQR(
+      () =>
+        new Promise<KeystoneUR>((resolve, reject) => {
+          signResolve = resolve;
+          signReject = reject;
+        })
+    );
+    const signFn = {
+      [SignMode.Amino]: EvmSignFunction.Amino,
+      [SignMode.Direct]: EvmSignFunction.Direct,
+      [SignMode.Message]: EvmSignFunction.Message,
+    }[mode];
+    const res = await keyring[signFn](
+      Buffer.from(key.pubKey).toString("hex"),
+      message,
+      chainId,
+      Buffer.from(key.address).toString("hex"),
+      "Keplr"
+    );
+    return res.signature;
   }
 }
