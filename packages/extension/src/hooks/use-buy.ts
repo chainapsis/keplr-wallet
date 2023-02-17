@@ -40,10 +40,6 @@ export const useBuy = () => {
         (buySupportChainId) => chainStore.getChain(buySupportChainId)
       );
 
-      const buySupportDefaultChainInfo = chainStore.getChain(
-        serviceInfo.buySupportDefaultChainId
-      );
-
       const buyUrlParams = (() => {
         switch (serviceInfo.serviceId) {
           case "moonpay":
@@ -73,9 +69,6 @@ export const useBuy = () => {
                         }, {})
                       )
                     ),
-                    ...(buySupportDefaultChainInfo && {
-                      defaultCurrencyCode: buySupportDefaultChainInfo.stakeCurrency.coinDenom.toLowerCase(),
-                    }),
                   }),
             };
           case "transak":
@@ -106,10 +99,6 @@ export const useBuy = () => {
                       .map((chainInfo) => chainInfo.stakeCurrency.coinDenom)
                       .join(","),
                   }),
-              ...(buySupportDefaultChainInfo && {
-                defaultCryptoCurrency:
-                  buySupportDefaultChainInfo.stakeCurrency.coinDenom,
-              }),
             };
           case "kado":
             return {
