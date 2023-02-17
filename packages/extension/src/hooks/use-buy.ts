@@ -1,11 +1,10 @@
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background/src/chains";
 import {
   AccountSetBase,
-  ChainInfoInner,
   CosmosAccount,
   CosmwasmAccount,
   SecretAccount,
 } from "@keplr-wallet/stores";
+import { ChainInfo } from "@keplr-wallet/types";
 import Axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -17,7 +16,7 @@ export interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
     CosmosAccount &
     CosmwasmAccount &
     SecretAccount)[];
-  buySupportChainInfos?: ChainInfoInner<ChainInfoWithCoreTypes>[];
+  buySupportChainInfos?: ChainInfo[];
   buyUrl?: string;
 }
 
