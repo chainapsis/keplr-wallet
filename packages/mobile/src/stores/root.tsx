@@ -1,4 +1,8 @@
-import { EmbedChainInfos, EthereumEndpoint } from "../config";
+import {
+  EmbedChainInfos,
+  EthereumEndpoint,
+  LegacyAmplitudeApiKey,
+} from "../config";
 import {
   KeyRingStore,
   InteractionStore,
@@ -370,7 +374,7 @@ export class RootStore {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
-          const amplitudeClient = Amplitude.getInstance();
+          const amplitudeClient = Amplitude.getInstance("new");
           amplitudeClient.init(AmplitudeApiKey);
 
           return amplitudeClient;
@@ -401,7 +405,17 @@ export class RootStore {
             eventProperties,
           };
         },
-      }
+      },
+      (() => {
+        if (!LegacyAmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance("legacy");
+          amplitudeClient.init(LegacyAmplitudeApiKey);
+
+          return amplitudeClient;
+        }
+      })()
     );
   }
 }
