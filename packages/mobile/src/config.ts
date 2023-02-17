@@ -2057,7 +2057,9 @@ export const EmbedChainInfos: AppChainInfo[] = [
   },
 ];
 
-export const AmplitudeApiKey = "dbcaf47e30aae5b712bda7f892b2f0c4";
+export const LegacyAmplitudeApiKey =
+  process.env["KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY"] || "";
+export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
 
 export const ICNSInfo = {
   chainId: "osmosis-1",

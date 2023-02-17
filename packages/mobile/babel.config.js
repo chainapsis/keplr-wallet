@@ -12,6 +12,8 @@ module.exports = {
           "WC_PROJECT_ID",
           "KEPLR_EXT_ANALYTICS_API_URL",
           "KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN",
+          "KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY",
+          "KEPLR_EXT_AMPLITUDE_API_KEY",
         ],
       },
     ],
