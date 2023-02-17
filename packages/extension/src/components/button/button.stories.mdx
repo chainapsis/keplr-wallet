@@ -1,0 +1,66 @@
+import { Canvas, Meta, Story } from "@storybook/addon-docs";
+
+import { Button } from "./button";
+import { Template } from "./helper.stories";
+
+<Meta
+  title="Components/Button"
+  component={Button}
+  argTypes={{
+    mode: {
+      control: false,
+    },
+    color: {
+      control: false,
+    },
+    className: {
+      control: false,
+    },
+    style: {
+      control: false,
+    },
+  }}
+  decorators={[(story) => <div style={{ margin: "3em" }}>{story()}</div>]}
+/>
+
+# Button
+
+# Button
+
+그냥 버튼이다.
+
+<Canvas>
+  <Story
+    name="Fill"
+    args={{
+      color: "primary",
+      mode: "fill",
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+<Canvas>
+  <Story
+    name="Light"
+    args={{
+      color: "primary",
+      mode: "light",
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>
+
+<Canvas>
+  <Story
+    name="Text"
+    args={{
+      color: "primary",
+      mode: "text",
+    }}
+  >
+    {Template.bind({})}
+  </Story>
+</Canvas>

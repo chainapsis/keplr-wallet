@@ -31,6 +31,10 @@
       "eslint",
       "prettier --check"
     ],
+    "*.mdx": [
+      "eslint",
+      "prettier --check"
+    ],
     "*.mjs": [
       "eslint",
       "prettier --check"
@@ -58,6 +62,7 @@
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-mdx": "^2.0.5",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",

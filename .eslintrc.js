@@ -56,6 +56,18 @@ module.exports = {
         "import/no-default-export": "off",
       },
     },
+    {
+      // Make options for codes and MDX files separate
+      files: ["**/*.stories.mdx"],
+      extends: ["plugin:mdx/recommended"],
+      plugins: [],
+      rules: {
+        "import/no-extraneous-dependencies": "off",
+      },
+      settings: {
+        "mdx/code-blocks": true,
+      },
+    },
   ],
   settings: {
     react: {
