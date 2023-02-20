@@ -25,7 +25,11 @@ import { Template } from "./helper.stories";
 
 # Button
 
-그냥 버튼이다
+그냥 버튼이다.<br/>
+색은 세개를 지원한다. (Primary, Danger, Info) 모드는 세개가있다.<br/>
+(Fill, Light, Text) Text 모드의 경우는 다른 모드의 버튼들과 Container의 width는 동일하지만 실제 내부의 button은 width가 더 작고 터치 영역도 작다. 이건 디자인적인 요소로써 디자이너와 합의된 사항이다.<br/>
+
+## Fill
 
 <Canvas>
   <Story
@@ -39,6 +43,8 @@ import { Template } from "./helper.stories";
   </Story>
 </Canvas>
 
+## Light
+
 <Canvas>
   <Story
     name="Light"
@@ -50,6 +56,10 @@ import { Template } from "./helper.stories";
     {Template.bind({})}
   </Story>
 </Canvas>
+
+## Text
+
+이 경우 내부의 width와 터치 영역이 더 작다는 걸 주의
 
 <Canvas>
   <Story
