@@ -9,7 +9,7 @@ import { useBIP44Option } from "../advanced-bip44";
 import { BackButton } from "../index";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
-import { KeystoneIntroduction } from "./Introduction";
+import { KeystoneIntroduction } from "./introduction";
 
 export const TypeImportKeystone = "import-keystone";
 
