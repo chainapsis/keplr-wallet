@@ -111,6 +111,7 @@ export class RootStore {
       accountType?: "mnemonic" | "privateKey" | "ledger" | "keystone";
       currency?: string;
       language?: string;
+      totalAccounts?: number;
     }
   >;
 
