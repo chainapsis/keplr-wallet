@@ -184,7 +184,7 @@ const BuyModalContent: FunctionComponent<{
           >
             <div className={styleTxButton.serviceLogoContainer}>
               <img
-                src={require(`../../public/assets/img/fiat-on-off-ramp/${serviceInfo.serviceId}.svg`)}
+                src={require(`../../public/assets/img/fiat-on-ramp/${serviceInfo.serviceId}.svg`)}
               />
             </div>
             <div className={styleTxButton.serviceName}>
