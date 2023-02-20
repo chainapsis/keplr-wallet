@@ -2,7 +2,7 @@ name: Chromatic
 on:
   push:
     branches:
-      - renew-ui
+      - 2.0/develop
 
 jobs:
   chromatic:
