@@ -67,7 +67,7 @@ module.exports = {
           return false;
         }
 
-        return chunk.name === "popup" || chunk.name === "renewal";
+        return chunk.name === "popup" || chunk.name === "register";
       },
       cacheGroups: {
         popup: {
