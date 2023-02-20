@@ -3,6 +3,7 @@
   "main.account.chart.available-balance": "Available",
   "main.account.chart.staked-balance": "Staked",
   "main.account.button.buy": "Buy",
+  "main.account.button.buy.not-support": "Unavailable on this chain",
   "main.account.button.deposit": "Deposit",
   "main.account.button.send": "Send",
   "main.account.tooltip.no-asset": "No token in your account. Deposit some tokens to send.",

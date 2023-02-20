@@ -155,6 +155,8 @@ export const useBuy = () => {
         setMoonpayBuyUrlWithSign(data);
         setIsMoonpayBuyUrlSignLoading(false);
       })();
+    } else {
+      setMoonpayBuyUrlWithSign("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moonpayServiceInfo?.buyUrl]);
@@ -169,7 +171,13 @@ export const useBuy = () => {
     })
   );
 
+  const isSupportChain =
+    newBuySupportServiceInfos.filter((info) =>
+      info.buySupportChainIds.includes(chainStore.current.chainId)
+    ).length > 0;
+
   return {
     buySupportServiceInfos: newBuySupportServiceInfos,
+    isSupportChain,
   };
 };

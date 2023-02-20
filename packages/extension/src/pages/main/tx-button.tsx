@@ -30,7 +30,8 @@ export const TxButtonView: FunctionComponent = observer(() => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
-  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [sendTooltipOpen, setSendTooltipOpen] = useState(false);
+  const [buyTooltipOpen, setBuyTooltipOpen] = useState(false);
 
   const history = useHistory();
 
@@ -39,26 +40,43 @@ export const TxButtonView: FunctionComponent = observer(() => {
     undefined;
 
   const sendBtnRef = useRef<HTMLButtonElement>(null);
+  const buyBtnRef = useRef<HTMLButtonElement>(null);
 
-  const { buySupportServiceInfos } = useBuy();
+  const { isSupportChain, buySupportServiceInfos } = useBuy();
   const isCurrentChainSupportBuy = buySupportServiceInfos.length > 0;
 
   return (
     <div className={styleTxButton.containerTxButton}>
       {isCurrentChainSupportBuy && (
         <Button
-          className={styleTxButton.button}
+          innerRef={buyBtnRef}
+          className={classnames(styleTxButton.button, {
+            disabled: !isSupportChain,
+          })}
           color="primary"
           outline
           onClick={(e) => {
             e.preventDefault();
 
-            setIsBuyModalOpen(true);
+            if (isSupportChain) {
+              setIsBuyModalOpen(true);
+            }
           }}
         >
           <FormattedMessage id="main.account.button.buy" />
         </Button>
       )}
+      {!isSupportChain ? (
+        <Tooltip
+          placement="bottom"
+          isOpen={buyTooltipOpen}
+          target={buyBtnRef}
+          toggle={() => setBuyTooltipOpen((value) => !value)}
+          fade
+        >
+          <FormattedMessage id="main.account.button.buy.not-support" />
+        </Tooltip>
+      ) : null}
       <Button
         className={styleTxButton.button}
         color="primary"
@@ -97,9 +115,9 @@ export const TxButtonView: FunctionComponent = observer(() => {
       {!hasAssets ? (
         <Tooltip
           placement="bottom"
-          isOpen={tooltipOpen}
+          isOpen={sendTooltipOpen}
           target={sendBtnRef}
-          toggle={() => setTooltipOpen((value) => !value)}
+          toggle={() => setSendTooltipOpen((value) => !value)}
           fade
         >
           <FormattedMessage id="main.account.tooltip.no-asset" />
