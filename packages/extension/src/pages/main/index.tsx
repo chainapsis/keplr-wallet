@@ -33,7 +33,20 @@ export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
 
-  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    uiConfigStore,
+    keyRingStore,
+    analyticsStore,
+  } = useStore();
+
+  useEffect(() => {
+    analyticsStore.setUserProperties({
+      totalAccounts: keyRingStore.multiKeyStoreInfo.length,
+    });
+  }, [analyticsStore, keyRingStore.multiKeyStoreInfo.length]);
 
   const confirm = useConfirm();
 
