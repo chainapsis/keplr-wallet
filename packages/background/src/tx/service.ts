@@ -35,7 +35,7 @@ export class BackgroundTxService {
     tx: unknown,
     mode: "async" | "sync" | "block"
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
     const restInstance = Axios.create({
       ...{
         baseURL: chainInfo.rest,

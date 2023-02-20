@@ -10,11 +10,8 @@ import {
 import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithCoreTypes,
-  GetChainInfosMsg,
+  GetChainInfosWithCoreTypesMsg,
   RemoveSuggestedChainInfoMsg,
-  TryUpdateChainMsg,
-  SetChainEndpointsMsg,
-  ResetChainEndpointsMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
@@ -46,7 +43,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         return {
           ...chainInfo,
           ...{
-            embeded: true,
+            embedded: true,
           },
         };
       })
@@ -214,7 +211,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @flow
   protected *getChainInfosFromBackground() {
-    const msg = new GetChainInfosMsg();
+    const msg = new GetChainInfosWithCoreTypesMsg();
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -232,40 +229,45 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @flow
-  *tryUpdateChain(chainId: string) {
-    const msg = new TryUpdateChainMsg(chainId);
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    if (result.updated) {
-      yield this.getChainInfosFromBackground();
-    }
+  *tryUpdateChain(_chainId: string) {
+    // const msg = new TryUpdateChainMsg(chainId);
+    // const result = yield* toGenerator(
+    //   this.requester.sendMessage(BACKGROUND_PORT, msg)
+    // );
+    // if (result.updated) {
+    //   yield this.getChainInfosFromBackground();
+    // }
+    throw new Error("TODO");
   }
 
   @flow
   *setChainEndpoints(
-    chainId: string,
-    rpc: string | undefined,
-    rest: string | undefined
+    _chainId: string,
+    _rpc: string | undefined,
+    _rest: string | undefined
   ) {
-    const msg = new SetChainEndpointsMsg(chainId, rpc, rest);
-    const newChainInfos = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+    // const msg = new SetChainEndpointsMsg(chainId, rpc, rest);
+    // const newChainInfos = yield* toGenerator(
+    //   this.requester.sendMessage(BACKGROUND_PORT, msg)
+    // );
+    //
+    // this.setChainInfos(newChainInfos);
 
-    this.setChainInfos(newChainInfos);
+    throw new Error("TODO");
 
     ObservableQuery.refreshAllObserved();
   }
 
   @flow
-  *resetChainEndpoints(chainId: string) {
-    const msg = new ResetChainEndpointsMsg(chainId);
-    const newChainInfos = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
+  *resetChainEndpoints(_chainId: string) {
+    // const msg = new ResetChainEndpointsMsg(chainId);
+    // const newChainInfos = yield* toGenerator(
+    //   this.requester.sendMessage(BACKGROUND_PORT, msg)
+    // );
+    //
+    // this.setChainInfos(newChainInfos);
 
-    this.setChainInfos(newChainInfos);
+    throw new Error("TODO");
 
     ObservableQuery.refreshAllObserved();
   }

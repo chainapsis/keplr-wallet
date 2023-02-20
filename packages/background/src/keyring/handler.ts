@@ -328,7 +328,7 @@ const handleGetKeyMsg: (
       pubKey: key.pubKey,
       address: key.address,
       bech32Address: new Bech32Address(key.address).toBech32(
-        (await service.chainsService.getChainInfo(msg.chainId)).bech32Config
+        service.chainsService.getChainInfoOrThrow(msg.chainId).bech32Config
           .bech32PrefixAccAddr
       ),
       isNanoLedger: key.isNanoLedger,

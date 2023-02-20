@@ -44,7 +44,7 @@ export class SecretWasmService {
   };
 
   async getPubkey(env: Env, chainId: string): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
     const keyRingType = await this.keyRingService.getKeyRingType();
     if (keyRingType === "none") {
@@ -62,7 +62,7 @@ export class SecretWasmService {
     chainId: string,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
     const keyRingType = await this.keyRingService.getKeyRingType();
     if (keyRingType === "none") {
@@ -82,7 +82,7 @@ export class SecretWasmService {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
     const keyRingType = await this.keyRingService.getKeyRingType();
     if (keyRingType === "none") {
@@ -106,7 +106,7 @@ export class SecretWasmService {
     ciphertext: Uint8Array,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
     const keyRingType = await this.keyRingService.getKeyRingType();
     if (keyRingType === "none") {

@@ -12,12 +12,7 @@ export class ExtensionRouter extends Router {
     super(envProducer);
   }
 
-  listen(port: string): void {
-    if (!port) {
-      throw new Error("Empty port");
-    }
-
-    this.port = port;
+  protected attachHandler() {
     browser.runtime.onMessage.addListener(this.onMessage);
     // Although security considerations cross-extension communication are in place,
     // we have put in additional security measures by disbling extension-to-extension communication until a formal security audit has taken place.
@@ -28,8 +23,7 @@ export class ExtensionRouter extends Router {
      */
   }
 
-  unlisten(): void {
-    this.port = "";
+  protected detachHandler() {
     browser.runtime.onMessage.removeListener(this.onMessage);
     // Although security considerations cross-extension communication are in place,
     // we have put in additional security measures by disbling extension-to-extension communication until a formal security audit has taken place.

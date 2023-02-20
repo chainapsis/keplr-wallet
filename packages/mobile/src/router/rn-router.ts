@@ -16,17 +16,11 @@ export class RNRouterBase extends Router {
     super(envProducer);
   }
 
-  listen(port: string): void {
-    if (!port) {
-      throw new Error("Empty port");
-    }
-
-    this.port = port;
+  protected attachHandler() {
     this.eventEmitter.addListener("message", this.onMessage);
   }
 
-  unlisten(): void {
-    this.port = "";
+  protected detachHandler() {
     this.eventEmitter.removeListener("message", this.onMessage);
   }
 

@@ -36,14 +36,10 @@ import {
   DirectSignResponse,
 } from "@keplr-wallet/types";
 import { APP_PORT, Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
-import { AnalyticsService } from "../analytics";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
-import {
-  SignDoc,
-  TxBody,
-} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
@@ -55,7 +51,6 @@ import { closePopupWindow } from "@keplr-wallet/popup";
 export class KeyRingService {
   private keyRing!: KeyRing;
 
-  protected analyticsSerice!: AnalyticsService;
   protected interactionService!: InteractionService;
   public chainsService!: ChainsService;
   public permissionService!: PermissionService;
@@ -71,8 +66,7 @@ export class KeyRingService {
     chainsService: ChainsService,
     permissionService: PermissionService,
     ledgerService: LedgerService,
-    keystoneService: KeystoneService,
-    analyticsSerice: AnalyticsService
+    keystoneService: KeystoneService
   ) {
     this.interactionService = interactionService;
     this.chainsService = chainsService;
@@ -87,11 +81,10 @@ export class KeyRingService {
     );
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
-    this.analyticsSerice = analyticsSerice;
   }
 
-  protected readonly onChainRemoved = (chainId: string) => {
-    this.keyRing.removeAllKeyStoreCoinType(chainId);
+  protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
+    this.keyRing.removeAllKeyStoreCoinType(chainInfo.chainId);
   };
 
   async restore(): Promise<{
@@ -253,8 +246,7 @@ export class KeyRingService {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const ethereumKeyFeatures =
-      await this.chainsService.getChainEthereumKeyFeatures(chainId);
+    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
@@ -263,7 +255,7 @@ export class KeyRingService {
 
     return this.keyRing.getKey(
       chainId,
-      await this.chainsService.getChainCoinType(chainId),
+      this.getChainCoinType(chainId),
       ethereumKeyFeatures.address
     );
   }
@@ -296,9 +288,8 @@ export class KeyRingService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const coinType = await this.chainsService.getChainCoinType(chainId);
-    const ethereumKeyFeatures =
-      await this.chainsService.getChainEthereumKeyFeatures(chainId);
+    const coinType = this.getChainCoinType(chainId);
+    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
@@ -310,8 +301,9 @@ export class KeyRingService {
       coinType,
       ethereumKeyFeatures.address
     );
-    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
-      .bech32Config.bech32PrefixAccAddr;
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        .bech32PrefixAccAddr;
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new KeplrError("keyring", 231, "Signer mismatched");
@@ -400,13 +392,6 @@ export class KeyRingService {
           signOptions.ethSignType
         );
 
-        this.analyticsSerice.logEventIgnoreError("tx_signed", {
-          chainId,
-          isInternal: env.isInternalMsg,
-          origin: msgOrigin,
-          ethSignType: signOptions.ethSignType,
-        });
-
         return {
           signed: newSignDoc, // Included to match return type
           signature: {
@@ -428,19 +413,6 @@ export class KeyRingService {
         ethereumKeyFeatures.signing,
         SignMode.Amino
       );
-
-      const msgTypes = newSignDoc.msgs
-        .filter((msg) => msg.type)
-        .map((msg) => msg.type);
-
-      this.analyticsSerice.logEventIgnoreError("tx_signed", {
-        chainId,
-        isInternal: env.isInternalMsg,
-        origin: msgOrigin,
-        signMode: SignMode.Amino,
-        msgTypes,
-        isADR36SignDoc,
-      });
 
       return {
         signed: newSignDoc,
@@ -472,9 +444,8 @@ export class KeyRingService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const coinType = await this.chainsService.getChainCoinType(chainId);
-    const ethereumKeyFeatures =
-      await this.chainsService.getChainEthereumKeyFeatures(chainId);
+    const coinType = this.getChainCoinType(chainId);
+    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
@@ -486,8 +457,9 @@ export class KeyRingService {
       coinType,
       ethereumKeyFeatures.address
     );
-    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
-      .bech32Config.bech32PrefixAccAddr;
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        .bech32PrefixAccAddr;
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new KeplrError("keyring", 231, "Signer mismatched");
@@ -530,18 +502,6 @@ export class KeyRingService {
         EthSignType.EIP712
       );
 
-      const msgTypes = newSignDoc.msgs
-        .filter((msg) => msg.type)
-        .map((msg) => msg.type);
-
-      this.analyticsSerice.logEventIgnoreError("tx_signed", {
-        chainId,
-        isInternal: env.isInternalMsg,
-        origin: msgOrigin,
-        ethSignType: EthSignType.EIP712,
-        msgTypes,
-      });
-
       return {
         signed: newSignDoc,
         signature: {
@@ -563,9 +523,8 @@ export class KeyRingService {
     signDoc: SignDoc,
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
-    const coinType = await this.chainsService.getChainCoinType(chainId);
-    const ethereumKeyFeatures =
-      await this.chainsService.getChainEthereumKeyFeatures(chainId);
+    const coinType = this.getChainCoinType(chainId);
+    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
@@ -578,7 +537,7 @@ export class KeyRingService {
       ethereumKeyFeatures.address
     );
     const bech32Address = new Bech32Address(key.address).toBech32(
-      (await this.chainsService.getChainInfo(chainId)).bech32Config
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         .bech32PrefixAccAddr
     );
     if (signer !== bech32Address) {
@@ -610,18 +569,6 @@ export class KeyRingService {
         ethereumKeyFeatures.signing,
         SignMode.Direct
       );
-
-      const msgTypes = TxBody.decode(newSignDoc.bodyBytes).messages.map(
-        (msg) => msg.typeUrl
-      );
-
-      this.analyticsSerice.logEventIgnoreError("tx_signed", {
-        chainId,
-        isInternal: env.isInternalMsg,
-        origin: msgOrigin,
-        signMode: SignMode.Direct,
-        msgTypes,
-      });
 
       return {
         signed: {
@@ -677,7 +624,7 @@ export class KeyRingService {
 
     {
       // Do this on other code block to avoid variable conflict.
-      const chainInfo = await this.chainsService.getChainInfo(chainId);
+      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
       Bech32Address.validate(
         contractAddress,
@@ -698,7 +645,7 @@ export class KeyRingService {
     const salt = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
     for (const chainId of addressChainIds) {
-      const chainInfo = await this.chainsService.getChainInfo(chainId);
+      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
       const key = await this.getKey(chainId);
 
@@ -737,13 +684,10 @@ Salt: ${salt}`;
 
         const signDoc = makeADR36AminoSignDoc(accountInfo.bech32Address, data);
 
-        const coinType = await this.chainsService.getChainCoinType(
+        const coinType = this.getChainCoinType(accountInfo.chainId);
+        const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(
           accountInfo.chainId
         );
-        const ethereumKeyFeatures =
-          await this.chainsService.getChainEthereumKeyFeatures(
-            accountInfo.chainId
-          );
 
         const signature = await this.keyRing
           .sign(
@@ -775,10 +719,9 @@ Salt: ${salt}`;
         });
       } else {
         // If address is same with owner, there is no need to sign.
-        const ethereumKeyFeatures =
-          await this.chainsService.getChainEthereumKeyFeatures(
-            accountInfo.chainId
-          );
+        const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(
+          accountInfo.chainId
+        );
 
         r.push({
           chainId: accountInfo.chainId,
@@ -805,17 +748,17 @@ Salt: ${salt}`;
     data: Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
-    const coinType = await this.chainsService.getChainCoinType(chainId);
-    const ethereumKeyFeatures =
-      await this.chainsService.getChainEthereumKeyFeatures(chainId);
+    const coinType = this.getChainCoinType(chainId);
+    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
 
     const key = await this.keyRing.getKey(
       chainId,
       coinType,
       ethereumKeyFeatures.address
     );
-    const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
-      .bech32Config.bech32PrefixAccAddr;
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        .bech32PrefixAccAddr;
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new KeplrError("keyring", 231, "Signer mismatched");
@@ -851,9 +794,9 @@ Salt: ${salt}`;
     return this.keyRing.sign(
       env,
       chainId,
-      await this.chainsService.getChainCoinType(chainId),
+      this.getChainCoinType(chainId),
       message,
-      (await this.chainsService.getChainEthereumKeyFeatures(chainId)).signing
+      this.getChainEthereumKeyFeatures(chainId).signing
     );
   }
 
@@ -936,7 +879,7 @@ Salt: ${salt}`;
   async setKeyStoreCoinType(chainId: string, coinType: number): Promise<void> {
     const prevCoinType = this.keyRing.computeKeyStoreCoinType(
       chainId,
-      await this.chainsService.getChainCoinType(chainId)
+      this.getChainCoinType(chainId)
     );
 
     await this.keyRing.setKeyStoreCoinType(chainId, coinType);
@@ -959,14 +902,12 @@ Salt: ${salt}`;
     }
 
     const result = [];
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
     for (const path of paths) {
       const key = await this.keyRing.getKeyFromCoinType(
         path.coinType,
-        (
-          await this.chainsService.getChainEthereumKeyFeatures(chainId)
-        ).address
+        this.getChainEthereumKeyFeatures(chainId).address
       );
       const bech32Address = new Bech32Address(key.address).toBech32(
         chainInfo.bech32Config.bech32PrefixAccAddr
@@ -1004,5 +945,21 @@ Salt: ${salt}`;
     await this.updateNameKeyRing(index, newName);
 
     return newName;
+  }
+
+  protected getChainEthereumKeyFeatures(chainId: string): {
+    address: boolean;
+    signing: boolean;
+  } {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+    return {
+      address: chainInfo.features?.includes("eth-address-gen") ?? false,
+      signing: chainInfo.features?.includes("eth-key-sign") ?? false,
+    };
+  }
+
+  protected getChainCoinType(chainId: string): number {
+    return this.chainsService.getChainInfoOrThrow(chainId).bip44.coinType;
   }
 }

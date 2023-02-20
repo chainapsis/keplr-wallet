@@ -7,7 +7,6 @@ import * as Keystone from "./keystone/internal";
 import * as KeyRing from "./keyring/internal";
 import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
-import * as Updater from "./updater/internal";
 import * as Tokens from "./tokens/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
@@ -22,7 +21,6 @@ export * from "./keystone";
 export * from "./keyring";
 export * from "./secret-wasm";
 export * from "./tx";
-export * from "./updater";
 export * from "./tokens";
 export * from "./interaction";
 export * from "./permission";
@@ -52,15 +50,7 @@ export function init(
   },
   commonCrypto: CommonCrypto,
   notification: Notification,
-  ledgerOptions: Partial<LedgerOptions> = {},
-  experimentalOptions: Partial<{
-    suggestChain: Partial<{
-      // Chains registered as suggest chains are managed in memory.
-      // In other words, it disappears when the app is closed.
-      // General operation should be fine. This is a temporary solution for the mobile app.
-      useMemoryKVStore: boolean;
-    }>;
-  }> = {}
+  ledgerOptions: Partial<LedgerOptions> = {}
 ) {
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester,
@@ -75,20 +65,12 @@ export function init(
     privilegedOrigins
   );
 
-  const chainUpdaterService = new Updater.ChainUpdaterService(
-    storeCreator("updator"),
-    communityChainInfoRepo
-  );
-
   const tokensService = new Tokens.TokensService(storeCreator("tokens"));
 
   const chainsService = new Chains.ChainsService(
     storeCreator("chains"),
     embedChainInfos,
-    {
-      useMemoryKVStoreForSuggestChain:
-        experimentalOptions.suggestChain?.useMemoryKVStore,
-    }
+    communityChainInfoRepo
   );
 
   const ledgerService = new Ledger.LedgerService(
@@ -134,18 +116,13 @@ export function init(
 
   persistentMemoryService.init();
   permissionService.init(interactionService, chainsService, keyRingService);
-  chainUpdaterService.init(chainsService);
   tokensService.init(
     interactionService,
     permissionService,
     chainsService,
     keyRingService
   );
-  chainsService.init(
-    chainUpdaterService,
-    interactionService,
-    permissionService
-  );
+  chainsService.init();
   ledgerService.init(interactionService);
   keystoneService.init(interactionService);
   keyRingService.init(
@@ -153,8 +130,7 @@ export function init(
     chainsService,
     permissionService,
     ledgerService,
-    keystoneService,
-    analyticsService
+    keystoneService
   );
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);
@@ -167,7 +143,6 @@ export function init(
   Interaction.init(router, interactionService);
   PersistentMemory.init(router, persistentMemoryService);
   Permission.init(router, permissionService);
-  Updater.init(router, chainUpdaterService);
   Tokens.init(router, tokensService);
   Chains.init(router, chainsService);
   Ledger.init(router, ledgerService);
