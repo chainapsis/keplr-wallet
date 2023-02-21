@@ -150,7 +150,7 @@ export const useBuy = () => {
       (async () => {
         setIsMoonpayBuyUrlSignLoading(true);
         const { data } = await Axios.get<string>(
-          `http://localhost:3000/api/moonpay-sign?url=${encodeURIComponent(
+          `https://wallet.keplr.app/api/moonpay-sign?url=${encodeURIComponent(
             moonpayServiceInfo.buyUrl ?? ""
           )}`
         );
