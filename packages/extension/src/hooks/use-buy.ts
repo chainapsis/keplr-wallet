@@ -5,6 +5,8 @@ import {
   SecretAccount,
 } from "@keplr-wallet/stores";
 import { ChainInfo } from "@keplr-wallet/types";
+import Axios from "axios";
+import { useEffect, useState } from "react";
 
 import { FiatOnRampServiceInfo, FiatOnRampServiceInfos } from "../config.ui";
 import { useStore } from "../stores";
@@ -133,13 +135,49 @@ export const useBuy = () => {
     }
   );
 
+  const moonpayServiceInfo = buySupportServiceInfos.find(
+    (serviceInfo) => serviceInfo.serviceId === "moonpay"
+  );
+  const [moonpayBuyUrlWithSign, setMoonpayBuyUrlWithSign] = useState<string>(
+    ""
+  );
+  const [
+    isMoonpayBuyUrlSignLoading,
+    setIsMoonpayBuyUrlSignLoading,
+  ] = useState<boolean>(false);
+  useEffect(() => {
+    if (moonpayServiceInfo?.buyUrl) {
+      (async () => {
+        setIsMoonpayBuyUrlSignLoading(true);
+        const { data } = await Axios.get<string>(
+          `https://wallet.keplr.app/api/moonpay-sign?url=${moonpayServiceInfo.buyUrl}`
+        );
+        setMoonpayBuyUrlWithSign(data);
+        setIsMoonpayBuyUrlSignLoading(false);
+      })();
+    } else {
+      setMoonpayBuyUrlWithSign("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moonpayServiceInfo?.buyUrl]);
+
+  const newBuySupportServiceInfos = buySupportServiceInfos.map(
+    (serviceInfo) => ({
+      ...serviceInfo,
+      ...(serviceInfo?.serviceId === "moonpay" && {
+        buyUrl: moonpayBuyUrlWithSign,
+        isLoading: isMoonpayBuyUrlSignLoading,
+      }),
+    })
+  );
+
   const isSupportChain =
-    buySupportServiceInfos.filter((info) =>
+    newBuySupportServiceInfos.filter((info) =>
       info.buySupportChainIds.includes(chainStore.current.chainId)
     ).length > 0;
 
   return {
-    buySupportServiceInfos,
+    buySupportServiceInfos: newBuySupportServiceInfos,
     isSupportChain,
   };
 };
