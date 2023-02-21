@@ -174,7 +174,7 @@ export const useBuy = () => {
   );
 
   const isSupportChain =
-    newBuySupportServiceInfos.filter((info) =>
+    buySupportServiceInfos.filter((info) =>
       info.buySupportChainIds.includes(chainStore.current.chainId)
     ).length > 0;
 
