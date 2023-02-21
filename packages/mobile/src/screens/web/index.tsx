@@ -13,6 +13,7 @@ import { useSmartNavigation } from "../../navigation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RectButton } from "../../components/rect-button";
 import Svg, { Path, G, Defs, ClipPath } from "react-native-svg";
+import { LabelSelector } from "./components/label-selector";
 
 export const WebScreen: FunctionComponent = () => {
   const style = useStyle();
@@ -20,6 +21,8 @@ export const WebScreen: FunctionComponent = () => {
   const smartNavigation = useSmartNavigation();
 
   const safeAreaInsets = useSafeAreaInsets();
+
+  const [selectedLabelKey, setSelectedLabelKey] = useState("dex");
 
   return (
     <PageWithScrollViewInBottomTabView
@@ -34,7 +37,7 @@ export const WebScreen: FunctionComponent = () => {
     >
       <Text
         style={style.flatten([
-          "h3",
+          "h1",
           "color-text-high",
           "margin-top-44",
           "margin-bottom-20",
@@ -42,6 +45,32 @@ export const WebScreen: FunctionComponent = () => {
       >
         Discover Apps
       </Text>
+      <LabelSelector
+        selectedKey={selectedLabelKey}
+        labels={[
+          {
+            key: "dex",
+            label: "Dex",
+          },
+          {
+            key: "nft",
+            label: "NFT",
+          },
+          {
+            key: "lending",
+            label: "Lending",
+          },
+          {
+            key: "bridge",
+            label: "Bridge",
+          },
+          {
+            key: "refi",
+            label: "Re-fi",
+          },
+        ]}
+        onLabelSelect={setSelectedLabelKey}
+      />
       <WebpageImageButton
         name="Osmosis"
         source={require("../../assets/image/webpage/osmosis.png")}
