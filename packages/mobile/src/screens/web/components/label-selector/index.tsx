@@ -184,33 +184,43 @@ const Label: FunctionComponent<{
       {/*
           We need to calculate the width of default size label to scroll to the selected label.
           To achieve this, we render the label with opacity 0 and measure the width.
+          Without root view, text's size is affected by parent's size.
+          So, root view should be big enough to measure the text securely.
        */}
       <View
-        onLayout={(e) => {
-          onDefaultLabelLayout(
-            e.nativeEvent.layout.width,
-            e.nativeEvent.layout.height
-          );
-        }}
         style={StyleSheet.flatten([
           {
+            width: 300,
+            height: 300,
             position: "absolute",
             opacity: 0,
           },
         ])}
       >
-        <Text
-          style={StyleSheet.flatten([
-            {
-              fontSize: defaultFontSize,
-              letterSpacing: 0.2,
-              marginRight: 16,
-            },
-            style.flatten(["font-semibold"]),
-          ])}
+        <View
+          onLayout={(e) => {
+            onDefaultLabelLayout(
+              e.nativeEvent.layout.width,
+              e.nativeEvent.layout.height
+            );
+          }}
+          style={{
+            position: "absolute",
+          }}
         >
-          {label}
-        </Text>
+          <Text
+            style={StyleSheet.flatten([
+              {
+                fontSize: defaultFontSize,
+                letterSpacing: 0.2,
+                marginRight: 16,
+              },
+              style.flatten(["font-semibold"]),
+            ])}
+          >
+            {label}
+          </Text>
+        </View>
       </View>
 
       <Animated.Text
