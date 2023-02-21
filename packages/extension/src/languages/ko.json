@@ -2,6 +2,8 @@
   "main.account.chart.total-balance": "총 자산",
   "main.account.chart.available-balance": "전송 가능한 자산",
   "main.account.chart.staked-balance": "스테이킹된 자산",
+  "main.account.button.buy": "구입",
+  "main.account.button.buy.not-support": "이 체인에서는 지원되지 않습니다.",
   "main.account.button.deposit": "입금",
   "main.account.button.send": "보내기",
   "main.account.tooltip.no-asset": "계정에 자산이 없습니다. 자산을 입금해주세요.",

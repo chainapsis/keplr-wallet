@@ -186,6 +186,9 @@ const extensionConfig = (env, args) => {
         "KEPLR_EXT_AMPLITUDE_API_KEY",
         "KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN",
         "KEPLR_EXT_ANALYTICS_API_URL",
+        "KEPLR_EXT_TRANSAK_API_KEY",
+        "KEPLR_EXT_MOONPAY_API_KEY",
+        "KEPLR_EXT_KADO_API_KEY",
       ]),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
