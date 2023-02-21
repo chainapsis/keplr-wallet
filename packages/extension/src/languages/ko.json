@@ -2,6 +2,8 @@
   "main.account.chart.total-balance": "총 자산",
   "main.account.chart.available-balance": "전송 가능한 자산",
   "main.account.chart.staked-balance": "스테이킹된 자산",
+  "main.account.button.buy": "구입",
+  "main.account.button.buy.not-support": "이 체인에서는 지원되지 않습니다.",
   "main.account.button.deposit": "입금",
   "main.account.button.send": "보내기",
   "main.account.tooltip.no-asset": "계정에 자산이 없습니다. 자산을 입금해주세요.",
@@ -24,6 +26,8 @@
   "main.ibc.transfer.button": "전송",
 
   "main.address.copied": "주소가 복사되었습니다",
+
+  "main.suggest.chain.link": "더 많은 체인 추가",
 
   "main.menu.settings": "설정",
   "main.menu.address-book": "주소록",
@@ -174,7 +178,7 @@
   "register.create.button.next": "다음",
   "register.create.button.ledger.terra": "테라 앱 사용하기",
 
-  "register.keystone.title": "키스톤 계정 연결하기 (베타)",
+  "register.keystone.title": "키스톤 계정 연결하기",
 
   "register.ledger.title": "렛저 계정 연결하기",
 

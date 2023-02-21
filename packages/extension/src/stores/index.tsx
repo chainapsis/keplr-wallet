@@ -2,8 +2,11 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 
 import { createRootStore, RootStore } from "./root";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
-import { KeplrCoreTypes } from "@keplr-wallet/provider/build/core-types";
 import { Keplr } from "@keplr-wallet/types";
+
+interface KeplrCoreTypes {
+  __core__getAnalyticsId(): Promise<string>;
+}
 
 const storeContext = React.createContext<RootStore | null>(null);
 

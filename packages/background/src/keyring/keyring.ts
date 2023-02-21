@@ -17,7 +17,7 @@ import { ChainInfo, EthSignType } from "@keplr-wallet/types";
 import { Env, KeplrError } from "@keplr-wallet/router";
 
 import { Buffer } from "buffer/";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ChainIdHelper, EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 
 import { Wallet } from "@ethersproject/wallet";
 import * as BytesUtils from "@ethersproject/bytes";
@@ -942,15 +942,16 @@ export class KeyRing {
     } else if (this.keyStore.type === "keystone") {
       const coinType = this.computeKeyStoreCoinType(chainId, defaultCoinType);
       if (useEthereumSigning) {
-        return await this.keystoneService.signEthereum(
+        const ethChainId = EthermintChainIdHelper.parse(chainId).ethChainId;
+        return await this.keystoneService.signEvm(
           env,
           coinType,
-          chainId,
           KeyRing.getKeyStoreBIP44Path(this.keyStore),
           this.loadKey(coinType, true),
           this.keystonePublicKey as KeystoneKeyringData,
           message,
-          EthSignType.MESSAGE
+          mode,
+          ethChainId
         );
       }
       return await this.keystoneService.sign(

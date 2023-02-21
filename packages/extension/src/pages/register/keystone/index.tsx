@@ -9,6 +9,7 @@ import { useBIP44Option } from "../advanced-bip44";
 import { BackButton } from "../index";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { KeystoneIntroduction } from "./introduction";
 
 export const TypeImportKeystone = "import-keystone";
 
@@ -38,6 +39,7 @@ export const ImportKeystoneIntro: FunctionComponent<{
       }}
     >
       <FormattedMessage id="register.keystone.title" />
+      <KeystoneIntroduction className={style["intro-icon"]} />
     </Button>
   );
 });
