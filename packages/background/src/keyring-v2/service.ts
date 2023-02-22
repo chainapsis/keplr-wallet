@@ -75,15 +75,21 @@ export class KeyRingService {
   }
 
   // Return selected vault id.
-  // If selected vault doesn't exist for unknown reason, return undefined.
-  get selectedVaultId(): string | undefined {
+  // If selected vault doesn't exist for unknown reason,
+  // try to return first id for key rings.
+  // If key rings are empty, throw an error.
+  get selectedVaultId(): string {
     if (
       this._selectedVaultId &&
       this.vaultService.getVault("keyRing", this._selectedVaultId)
     ) {
       return this._selectedVaultId;
     }
-    return undefined;
+    const vaults = this.vaultService.getVaults("keyRing");
+    if (vaults.length === 0) {
+      throw new Error("Key ring is empty");
+    }
+    return vaults[0].id;
   }
 
   async createMnemonicKeyRing(
@@ -110,7 +116,7 @@ export class KeyRingService {
       bip44Path
     );
 
-    return this.vaultService.addVault(
+    const id = this.vaultService.addVault(
       "keyRing",
       {
         ...vaultData.insensitive,
@@ -119,21 +125,16 @@ export class KeyRingService {
       },
       vaultData.sensitive
     );
+
+    this._selectedVaultId = id;
+    return id;
   }
 
   getPubKeySelected(env: Env, chainId: string): Promise<PubKeySecp256k1> {
-    if (!this.selectedVaultId) {
-      throw new Error("KeyRing not selected");
-    }
-
     return this.getPubKey(env, chainId, this.selectedVaultId);
   }
 
   getKeyRingNameSelected(): string {
-    if (!this.selectedVaultId) {
-      throw new Error("KeyRing not selected");
-    }
-
     return this.getKeyRingName(this.selectedVaultId);
   }
 
@@ -152,10 +153,6 @@ export class KeyRingService {
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256"
   ): Promise<Uint8Array> {
-    if (!this.selectedVaultId) {
-      throw new Error("KeyRing not selected");
-    }
-
     return this.sign(env, chainId, this.selectedVaultId, data, digestMethod);
   }
 
