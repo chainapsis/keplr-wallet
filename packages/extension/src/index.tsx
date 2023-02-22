@@ -9,7 +9,7 @@ import { HashRouter, Route } from "react-router-dom";
 
 import { AccessPage, Secret20ViewingKeyAccessPage } from "./pages/access";
 import { RegisterPage } from "./pages/register";
-import { MainPage } from "./pages/main";
+// import { MainPage } from "./pages/main";
 import { LockPage } from "./pages/lock";
 import { SendPage } from "./pages/send";
 import { IBCTransferPage } from "./pages/ibc-transfer";
@@ -69,6 +69,10 @@ import { SettingSecurityPrivacyPage } from "./pages/setting/security-privacy";
 import { SettingPermissionsGetChainInfosPage } from "./pages/setting/security-privacy/permissions/get-chain-infos";
 import { ChainActivePage } from "./pages/setting/chain-active";
 import { AuthZPage } from "./pages/authz";
+import { OverviewPage } from "./pages/overview";
+import { SelectAssetPage } from "./pages/overview/select-asset";
+import { NewSendPage } from "./pages/overview/new-send";
+import { MainPage } from "./pages/main";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -124,6 +128,7 @@ const StateRenderer: FunctionComponent = observer(() => {
 
   if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
     return <MainPage />;
+    // return <OverviewPage />;
   } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
     return <LockPage />;
   } else if (keyRingStore.status === KeyRingStatus.EMPTY) {
@@ -166,6 +171,7 @@ ReactDOM.render(
           <NotificationProvider>
             <ConfirmProvider>
               <HashRouter>
+                <Route exact path="/main" component={MainPage} />
                 <Route exact path="/" component={StateRenderer} />
                 <Route exact path="/unlock" component={LockPage} />
                 <Route exact path="/access" component={AccessPage} />
@@ -280,6 +286,9 @@ ReactDOM.render(
                   component={ChainActivePage}
                 />
                 <Route path="/authz" component={AuthZPage} />
+                <Route path="/overview" component={OverviewPage} />
+                <Route path="/select-asset" component={SelectAssetPage} />
+                <Route path="/new-send/:currency" component={NewSendPage} />
               </HashRouter>
             </ConfirmProvider>
           </NotificationProvider>

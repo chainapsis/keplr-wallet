@@ -46,7 +46,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
     const chainInfoChangable =
       canChangeChainInfo &&
       chainStore.chainInfos.length > 1 &&
-      alternativeTitle == null;
+      (alternativeTitle == null || alternativeTitle === "Overview");
 
     return (
       <CompHeader
@@ -103,7 +103,9 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
                   [style.small]: smallTitle,
                 })}
               >
-                {showChainName
+                {alternativeTitle == "Overview"
+                  ? "Overview"
+                  : showChainName
                   ? chainStore.current.chainName
                   : alternativeTitle}
               </div>

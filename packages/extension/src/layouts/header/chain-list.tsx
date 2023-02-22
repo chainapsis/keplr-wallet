@@ -8,6 +8,7 @@ import style from "./chain-list.module.scss";
 import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 import { useConfirm } from "../../components/confirm";
 import { useIntl } from "react-intl";
+import { useLocation, useHistory } from "react-router";
 
 const ChainElement: FunctionComponent<{
   chainInfo: ChainInfoWithCoreTypes;
@@ -15,6 +16,8 @@ const ChainElement: FunctionComponent<{
   const { chainStore } = useStore();
 
   const intl = useIntl();
+  const location = useLocation();
+  const history = useHistory();
 
   const confirm = useConfirm();
 
@@ -22,9 +25,13 @@ const ChainElement: FunctionComponent<{
     <div
       className={classnames({
         [style.chainName]: true,
-        selected: chainInfo.chainId === chainStore.current.chainId,
+        selected:
+          chainInfo.chainId === chainStore.current.chainId &&
+          location.pathname !== "/overview",
       })}
       onClick={() => {
+        history.push("/main");
+
         if (chainInfo.chainId !== chainStore.current.chainId) {
           chainStore.selectChain(chainInfo.chainId);
           chainStore.saveLastViewChainId();
@@ -98,6 +105,8 @@ const Divider: FunctionComponent = (props) => {
 export const ChainList: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
   const intl = useIntl();
+  const history = useHistory();
+  const location = useLocation();
 
   const mainChainList = chainStore.chainInfosInUI.filter(
     (chainInfo) => !chainInfo.beta
@@ -108,6 +117,20 @@ export const ChainList: FunctionComponent = observer(() => {
 
   return (
     <div className={style.chainListContainer}>
+      <div
+        className={classnames(style.chainName, style.addChain)}
+        onClick={() => history.push("/overview")}
+      >
+        <div
+          style={{
+            color: location.pathname === "/overview" ? "white" : undefined,
+          }}
+        >
+          Overview
+        </div>
+      </div>
+
+      <Divider />
       {mainChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}

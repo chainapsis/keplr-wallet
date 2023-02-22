@@ -1,0 +1,85 @@
+.form-container {
+  height: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  gap: 32px;
+
+  .total-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+
+    .total-title {
+      font-size: 16px;
+    }
+
+    .total-value {
+      font-weight: 600;
+      font-size: 36px;
+      line-height: 44px;
+    }
+  }
+
+  .option-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    gap: 24px;
+
+    .option {
+      cursor: pointer;
+    }
+  }
+
+  .coin-container {
+    margin-bottom: 24px;
+    gap: 24px;
+
+    .coin-item {
+      border-top: 1px solid black;
+      justify-content: space-between;
+    }
+  }
+
+  .bottom-button {
+    width: 100%;
+    height: 48px;
+  }
+}
+
+.align-right {
+  align-items: flex-end;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.padding-16 {
+  padding: 16px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.flex-1 {
+  flex: 1;
+}
