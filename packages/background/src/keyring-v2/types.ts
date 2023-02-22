@@ -2,6 +2,22 @@ import { Env } from "@keplr-wallet/router";
 import { PlainObject, Vault } from "../vault";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 
+export type KeyRingStatus = "empty" | "locked" | "unlocked";
+
+export type BIP44HDPath = {
+  account: number;
+  change: number;
+  addressIndex: number;
+};
+
+export interface KeyInfo {
+  readonly id: string;
+  readonly name: string;
+  readonly type: string;
+  readonly isSelected: boolean;
+  readonly insensitive: PlainObject;
+}
+
 export interface KeyRing {
   supportedKeyRingType(): string;
   createKeyRingVault(

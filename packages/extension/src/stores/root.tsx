@@ -145,17 +145,7 @@ export class RootStore {
       ObservableQueryBase.experimentalDeferInitialQueryController
     );
 
-    this.keyRingStore = new KeyRingStore(
-      {
-        dispatchEvent: (type: string) => {
-          window.dispatchEvent(new Event(type));
-        },
-      },
-      "scrypt",
-      this.chainStore,
-      new InExtensionMessageRequester(),
-      this.interactionStore
-    );
+    this.keyRingStore = new KeyRingStore(new InExtensionMessageRequester());
 
     this.ibcChannelStore = new IBCChannelStore(
       new ExtensionKVStore("store_ibc_channel")

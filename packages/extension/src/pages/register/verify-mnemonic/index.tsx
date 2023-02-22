@@ -1,21 +1,17 @@
-import React, {
-  FunctionComponent,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { FunctionComponent, useMemo, useRef } from "react";
 import {
   RegisterSceneBox,
   RegisterSceneBoxHeader,
 } from "../components/register-scene-box";
 import { Stack } from "../../../components/stack";
-import { useSceneTransition } from "../../../components/transition";
 import { TextInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { Gutter } from "../../../components/gutter";
 import { VerifyingMnemonicBox, VerifyingMnemonicBoxRef } from "./verifying-box";
 import { Styles } from "./styles";
 import { useForm } from "react-hook-form";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
 
 interface FormData {
   name: string;
@@ -30,20 +26,14 @@ export const VerifyMnemonicScene: FunctionComponent<{
     change: number;
     addressIndex: number;
   };
-}> = ({ mnemonic, bip44Path }) => {
-  const sceneTransition = useSceneTransition();
+}> = observer(({ mnemonic, bip44Path }) => {
+  if (!mnemonic || !bip44Path) {
+    throw new Error("Mnemonic and bip44Path should be provided");
+  }
 
-  useLayoutEffect(() => {
-    if (!mnemonic || !bip44Path) {
-      throw new Error("Mnemonic and bip44Path should be provided");
-    }
-  }, [mnemonic, bip44Path]);
+  const { keyRingStore } = useStore();
 
   const verifyingWords = useMemo(() => {
-    if (!mnemonic) {
-      throw new Error("Null mnemonic");
-    }
-
     if (mnemonic.trim() === "") {
       throw new Error("Empty mnemonic");
     }
@@ -87,16 +77,21 @@ export const VerifyMnemonicScene: FunctionComponent<{
     <RegisterSceneBox>
       <RegisterSceneBoxHeader>Back Up Your Mnemonic</RegisterSceneBoxHeader>
       <form
-        onSubmit={form.handleSubmit((data) => {
-          console.log(data);
-
+        onSubmit={form.handleSubmit(async (data) => {
           if (!verifyingBoxRef.current) {
             throw new Error("Ref of verify box is null");
           }
 
           if (verifyingBoxRef.current.validate()) {
-            alert("TODO");
-            sceneTransition.pop();
+            await keyRingStore.newMnemonicKey(
+              mnemonic,
+              bip44Path,
+              data.name,
+              data.password
+            );
+
+            alert("TODO: Next page");
+            window.close();
           }
         })}
       >
@@ -143,4 +138,4 @@ export const VerifyMnemonicScene: FunctionComponent<{
       </form>
     </RegisterSceneBox>
   );
-};
+});

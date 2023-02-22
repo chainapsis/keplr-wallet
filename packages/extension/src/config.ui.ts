@@ -1,7 +1,5 @@
 // Seperate shared config from UI config to prevent code mixup between UI and background process code.
-import { RegisterOption } from "@keplr-wallet/hooks";
 import { FiatCurrency } from "@keplr-wallet/types";
-import { ADDITIONAL_SIGN_IN_PREPEND } from "alt-sign-in";
 
 export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
 export const CoinGeckoGetPrice = "/simple/price";
@@ -84,9 +82,6 @@ export const FiatCurrencies: FiatCurrency[] = [
     locale: "en-IN",
   },
 ];
-
-export const AdditionalSignInPrepend: RegisterOption[] | undefined =
-  ADDITIONAL_SIGN_IN_PREPEND;
 
 export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
 

@@ -12,20 +12,22 @@ require("./public/assets/icon/icon-beta-16.png");
 require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 
-import { KeyRingStatus } from "@keplr-wallet/background";
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
 import { GlobalStyle } from "./styles";
 import { observer } from "mobx-react-lite";
 
-const StateRoutes: FunctionComponent = observer(() => {
+const RoutesAfterReady: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
-  useEffect(() => {
-    console.log(keyRingStore.status);
-    if (keyRingStore.status === KeyRingStatus.EMPTY) {
+  const isReady = useMemo(() => {
+    if (keyRingStore.status === "not-loaded") {
+      return false;
+    }
+
+    if (keyRingStore.status === "empty") {
       browser.tabs
         .create({
           url: "/register.html#",
@@ -33,15 +35,23 @@ const StateRoutes: FunctionComponent = observer(() => {
         .then(() => {
           window.close();
         });
+
+      return false;
     }
+
+    return true;
   }, [keyRingStore.status]);
 
   return (
     <HashRouter>
-      <Routes>
-        {/* TODO: Add routes here */}
-        <Route path="/" element={<div />} />
-      </Routes>
+      {isReady ? (
+        <Routes>
+          {/* TODO: Add routes here */}
+          <Route path="/" element={<div />} />
+        </Routes>
+      ) : (
+        <div>TODO: Add preparing view</div>
+      )}
     </HashRouter>
   );
 });
@@ -50,7 +60,7 @@ const App: FunctionComponent = () => {
   return (
     <StoreProvider>
       <GlobalStyle />
-      <StateRoutes />
+      <RoutesAfterReady />
     </StoreProvider>
   );
 };

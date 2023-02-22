@@ -1,5 +1,5 @@
 import { VaultService, Vault } from "../vault";
-import { KeyRing } from "./types";
+import { BIP44HDPath, KeyInfo, KeyRing, KeyRingStatus } from "./types";
 import { Env } from "@keplr-wallet/router";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
@@ -39,8 +39,39 @@ export class KeyRingService {
     });
   }
 
+  lockKeyRing(): void {
+    this.vaultService.lock();
+  }
+
+  async unlockKeyRing(password: string): Promise<void> {
+    await this.vaultService.unlock(password);
+  }
+
+  get keyRingStatus(): KeyRingStatus {
+    if (
+      !this.vaultService.isSignedUp ||
+      this.vaultService.getVaults("keyRing").length === 0
+    ) {
+      return "empty";
+    }
+
+    return this.vaultService.isLocked ? "locked" : "unlocked";
+  }
+
   getKeyRingVaults(): Vault[] {
     return this.vaultService.getVaults("keyRing");
+  }
+
+  getKeyInfos(): KeyInfo[] {
+    return this.getKeyRingVaults().map((vault) => {
+      return {
+        id: vault.id,
+        name: vault.insensitive["keyRingName"] as string,
+        type: vault.insensitive["keyRingType"] as string,
+        isSelected: this._selectedVaultId === vault.id,
+        insensitive: vault.insensitive,
+      };
+    });
   }
 
   // Return selected vault id.
@@ -58,11 +89,7 @@ export class KeyRingService {
   async createMnemonicKeyRing(
     env: Env,
     mnemonic: string,
-    bip44Path: {
-      account: number;
-      change: number;
-      addressIndex: number;
-    },
+    bip44Path: BIP44HDPath,
     name: string,
     password?: string
   ): Promise<string> {
@@ -73,6 +100,8 @@ export class KeyRingService {
 
       await this.vaultService.signUp(password);
     }
+
+    KeyRingService.validateBIP44Path(bip44Path);
 
     const keyRing = this.getKeyRing("mnemonic");
     const vaultData = await keyRing.createKeyRingVault(
@@ -240,5 +269,25 @@ export class KeyRingService {
     }
 
     throw new Error(`Unsupported keyRing ${type}`);
+  }
+
+  protected static validateBIP44Path(bip44Path: BIP44HDPath): void {
+    if (!Number.isInteger(bip44Path.account) || bip44Path.account < 0) {
+      throw new Error("Invalid account in hd path");
+    }
+
+    if (
+      !Number.isInteger(bip44Path.change) ||
+      !(bip44Path.change === 0 || bip44Path.change === 1)
+    ) {
+      throw new Error("Invalid change in hd path");
+    }
+
+    if (
+      !Number.isInteger(bip44Path.addressIndex) ||
+      bip44Path.addressIndex < 0
+    ) {
+      throw new Error("Invalid address index in hd path");
+    }
   }
 }

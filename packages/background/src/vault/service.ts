@@ -92,6 +92,8 @@ export class VaultService {
     await this.setPasswordCryptoState(encrypted.cipher, encrypted.mac);
 
     this._isSignedUp = true;
+
+    await this.unlock(userPassword);
   }
 
   async changeUserPassword(

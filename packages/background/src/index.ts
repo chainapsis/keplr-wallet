@@ -13,6 +13,9 @@ import * as Permission from "./permission/internal";
 import * as PhishingList from "./phishing-list/internal";
 import * as AutoLocker from "./auto-lock-account/internal";
 import * as Analytics from "./analytics/internal";
+import * as Vault from "./vault/internal";
+import * as KeyRingV2 from "./keyring-v2/internal";
+import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
 
 export * from "./persistent-memory";
 export * from "./chains";
@@ -27,6 +30,8 @@ export * from "./permission";
 export * from "./phishing-list";
 export * from "./auto-lock-account";
 export * from "./analytics";
+export * as KeyRingV2 from "./keyring-v2";
+export * from "./vault";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -114,6 +119,23 @@ export function init(
     analyticsPrivilegedOrigins
   );
 
+  const vaultService = new Vault.VaultService(storeCreator("vault"));
+  const keyRingV2Service = new KeyRingV2.KeyRingService(
+    storeCreator("keyring-v2"),
+    chainsService,
+    vaultService,
+    [new KeyRingMnemonic.KeyRingMnemonicService(vaultService)]
+  );
+
+  chainsService
+    .init()
+    .then(() => {
+      return vaultService.init();
+    })
+    .then(() => {
+      return keyRingV2Service.init();
+    });
+
   persistentMemoryService.init();
   permissionService.init(interactionService, chainsService, keyRingService);
   tokensService.init(
@@ -122,7 +144,6 @@ export function init(
     chainsService,
     keyRingService
   );
-  chainsService.init();
   ledgerService.init(interactionService);
   keystoneService.init(interactionService);
   keyRingService.init(
@@ -152,4 +173,5 @@ export function init(
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
   Analytics.init(router, analyticsService);
+  KeyRingV2.init(router, keyRingV2Service);
 }

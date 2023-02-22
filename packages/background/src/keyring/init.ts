@@ -3,10 +3,8 @@ import {
   CreateMnemonicKeyMsg,
   CreatePrivateKeyMsg,
   GetKeyMsg,
-  UnlockKeyRingMsg,
   RequestSignAminoMsg,
   RequestSignDirectMsg,
-  LockKeyRingMsg,
   DeleteKeyRingMsg,
   UpdateNameKeyRingMsg,
   ShowKeyRingMsg,
@@ -46,8 +44,8 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(CreateLedgerKeyMsg);
   router.registerMessage(AddKeystoneKeyMsg);
   router.registerMessage(AddLedgerKeyMsg);
-  router.registerMessage(LockKeyRingMsg);
-  router.registerMessage(UnlockKeyRingMsg);
+  // router.registerMessage(LockKeyRingMsg);
+  // router.registerMessage(UnlockKeyRingMsg);
   router.registerMessage(GetKeyMsg);
   router.registerMessage(RequestSignAminoMsg);
   router.registerMessage(RequestVerifyADR36AminoSignDoc);

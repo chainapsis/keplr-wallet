@@ -7,6 +7,8 @@ import {
   PubKeySecp256k1,
 } from "@keplr-wallet/crypto";
 import { Env } from "@keplr-wallet/router";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bip39 = require("bip39");
 
 export class KeyRingMnemonicService {
   constructor(protected readonly vaultService: VaultService) {}
@@ -34,13 +36,15 @@ export class KeyRingMnemonicService {
     if (!mnemonic || typeof mnemonic !== "string") {
       throw new Error("Invalid arguments");
     }
-    if (
-      !bip44Path ||
-      typeof bip44Path.account !== "number" ||
-      typeof bip44Path.change !== "number" ||
-      typeof bip44Path.addressIndex !== "number"
-    ) {
-      throw new Error("Invalid arguments");
+
+    // Validate mnemonic.
+    // Checksome shouldn't be validated in this method.
+    try {
+      bip39.mnemonicToEntropy(mnemonic);
+    } catch (e) {
+      if (e.message !== "Invalid mnemonic checksum") {
+        throw e;
+      }
     }
 
     const masterSeed = Mnemonic.generateMasterSeedFromMnemonic(mnemonic);
