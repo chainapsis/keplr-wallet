@@ -59,10 +59,7 @@ export class VaultService {
     }
     autorun(() => {
       const js = toJS(this.vaultMap);
-      const obj: Record<string, Vault[]> = {};
-      for (const [key, value] of js) {
-        obj[key] = value;
-      }
+      const obj = Object.fromEntries(js);
       this.kvStore.set<Record<string, Vault[]>>("vaultMap", obj);
     });
   }
@@ -96,10 +93,7 @@ export class VaultService {
     await this.unlock(userPassword);
   }
 
-  async changeUserPassword(
-    prevUserPassword: string,
-    newUserPassword: string
-  ): Promise<void> {
+  async checkUserPassword(userPassword: string): Promise<void> {
     if (this.isLocked) {
       throw new Error("Vault is not unlocked");
     }
@@ -115,7 +109,7 @@ export class VaultService {
 
     // Make sure to prev user password is valid
     const password = await VaultService.decryptPassword(
-      prevUserPassword,
+      userPassword,
       this.cryptoRandom,
       prevEncrypted.mac,
       prevEncrypted.cipher
@@ -127,11 +121,18 @@ export class VaultService {
     ) {
       throw new Error("Password unmatched");
     }
+  }
+
+  async changeUserPassword(
+    prevUserPassword: string,
+    newUserPassword: string
+  ): Promise<void> {
+    await this.checkUserPassword(prevUserPassword);
 
     const newEncrypted = await VaultService.encryptPassword(
       newUserPassword,
       this.cryptoRandom,
-      password
+      this.password
     );
 
     await this.setPasswordCryptoState(newEncrypted.cipher, newEncrypted.mac);
@@ -193,7 +194,11 @@ export class VaultService {
     insensitive: PlainObject,
     sensitive: PlainObject
   ): string {
-    const prev = this.vaultMap.get(type) ?? [];
+    if (!this.vaultMap.has(type)) {
+      this.vaultMap.set(type, []);
+    }
+
+    const prev = this.vaultMap.get(type)!;
     const rand = new Uint8Array(8);
     crypto.getRandomValues(rand);
     const id = Buffer.from(rand).toString("hex");
