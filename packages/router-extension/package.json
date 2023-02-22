@@ -16,6 +16,7 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
+    "@keplr-wallet/common": "0.11.41",
     "@keplr-wallet/popup": "0.11.41",
     "@keplr-wallet/router": "0.11.41"
   }

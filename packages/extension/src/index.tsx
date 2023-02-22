@@ -47,7 +47,16 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       {isReady ? (
         <Routes>
           {/* TODO: Add routes here */}
-          <Route path="/" element={<div />} />
+          <Route
+            path="/"
+            element={
+              <div>
+                {keyRingStore.keyInfos.map((keyInfo) => {
+                  return <div key={keyInfo.id}>{JSON.stringify(keyInfo)}</div>;
+                })}
+              </div>
+            }
+          />
         </Routes>
       ) : (
         <div>TODO: Add preparing view</div>

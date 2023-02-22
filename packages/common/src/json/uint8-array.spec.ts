@@ -1,6 +1,6 @@
 import assert from "assert";
 
-import { JSONUint8Array } from "./index";
+import { JSONUint8Array } from "./uint8-array";
 
 describe("Test json with Uint8Array", () => {
   it("should stringify properly with uint8array", () => {

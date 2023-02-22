@@ -1,8 +1,5 @@
-import {
-  MessageRequester,
-  Message,
-  JSONUint8Array,
-} from "@keplr-wallet/router";
+import { MessageRequester, Message } from "@keplr-wallet/router";
+import { JSONUint8Array } from "@keplr-wallet/common";
 import { getKeplrExtensionRouterId } from "../utils";
 
 // The message requester to send the message to the content scripts.

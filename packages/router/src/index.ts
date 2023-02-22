@@ -6,4 +6,3 @@ export * from "./error";
 export * from "./message";
 export * from "./constant";
 export * from "./encoding";
-export * from "./json-uint8-array";
