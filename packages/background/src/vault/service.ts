@@ -1,4 +1,4 @@
-import { KVStore } from "@keplr-wallet/common";
+import { JSONUint8Array, KVStore } from "@keplr-wallet/common";
 import {
   action,
   autorun,
@@ -52,7 +52,9 @@ export class VaultService {
     );
     if (vaultMap) {
       runInAction(() => {
-        for (const [key, value] of Object.entries(vaultMap)) {
+        for (const [key, value] of JSONUint8Array.unwrap(
+          Object.entries(vaultMap)
+        )) {
           this.vaultMap.set(key, value);
         }
       });
@@ -60,7 +62,10 @@ export class VaultService {
     autorun(() => {
       const js = toJS(this.vaultMap);
       const obj = Object.fromEntries(js);
-      this.kvStore.set<Record<string, Vault[]>>("vaultMap", obj);
+      this.kvStore.set<Record<string, Vault[]>>(
+        "vaultMap",
+        JSONUint8Array.wrap(obj)
+      );
     });
   }
 
