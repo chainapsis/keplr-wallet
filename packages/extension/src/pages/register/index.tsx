@@ -118,7 +118,7 @@ const BottomIntroParagraph: FunctionComponent<{
             <NoticeText>
               All sensitive information is stored only on your device.
               <br />
-              This process does not require an internet conenction.
+              This process does not require an internet connection.
             </NoticeText>
           </Box>
         </VerticalCollapseTransition>
