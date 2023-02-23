@@ -16,12 +16,13 @@ import React, { FunctionComponent, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
-import { GlobalStyle } from "./styles";
+import { GlobalStyle, GlobalPopupStyle } from "./styles";
 import { observer } from "mobx-react-lite";
 import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import manifest from "./manifest.json";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { UnlockPage } from "./pages/unlock";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -79,19 +80,27 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
   return (
     <HashRouter>
       {isReady ? (
-        <Routes>
-          {/* TODO: Add routes here */}
-          <Route
-            path="/"
-            element={
-              <div>
-                {keyRingStore.keyInfos.map((keyInfo) => {
-                  return <div key={keyInfo.id}>{JSON.stringify(keyInfo)}</div>;
-                })}
-              </div>
-            }
-          />
-        </Routes>
+        keyRingStore.status === "locked" ? (
+          <UnlockPage />
+        ) : (
+          <Routes>
+            {/* TODO: Add routes here */}
+            <Route
+              path="/"
+              element={
+                <div>
+                  {keyRingStore.keyInfos.map((keyInfo) => {
+                    return (
+                      <div key={keyInfo.id}>
+                        {JSON.stringify(keyInfo, null, 2)}
+                      </div>
+                    );
+                  })}
+                </div>
+              }
+            />
+          </Routes>
+        )
       ) : (
         <div>TODO: Add preparing view</div>
       )}
@@ -103,6 +112,7 @@ const App: FunctionComponent = () => {
   return (
     <StoreProvider>
       <GlobalStyle />
+      <GlobalPopupStyle />
       <RoutesAfterReady />
     </StoreProvider>
   );
