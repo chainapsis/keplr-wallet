@@ -22,7 +22,7 @@ import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   EnableAccessMsg,
   SuggestChainInfoMsg,
-  GetKeyMsg,
+  GetCosmosKeyMsg,
   SuggestTokenMsg,
   SendTxMsg,
   GetSecret20ViewingKey,
@@ -121,7 +121,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const msg = new GetKeyMsg(chainId);
+    const msg = new GetCosmosKeyMsg(chainId);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 

@@ -4,16 +4,24 @@ import { ChainInfo, Key } from "@keplr-wallet/types";
 import { Env } from "@keplr-wallet/router";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
-export class KeyRingCosmos {
+export class KeyRingCosmosService {
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService
   ) {}
 
+  async init() {
+    // TODO: ?
+  }
+
   async getKeySelected(env: Env, chainId: string): Promise<Key> {
+    return await this.getKey(env, this.keyRingService.selectedVaultId, chainId);
+  }
+
+  async getKey(env: Env, vaultId: string, chainId: string): Promise<Key> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
-    const pubKey = await this.keyRingService.getPubKeySelected(env, chainId);
+    const pubKey = await this.keyRingService.getPubKey(env, chainId, vaultId);
 
     const ethereumFeatures = this.getChainEthereumKeyFeatures(chainInfo);
     const address = (() => {

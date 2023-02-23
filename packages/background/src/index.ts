@@ -16,6 +16,7 @@ import * as Analytics from "./analytics/internal";
 import * as Vault from "./vault/internal";
 import * as KeyRingV2 from "./keyring-v2/internal";
 import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
+import * as KeyRingCosmos from "./keyring-cosmos/internal";
 
 export * from "./persistent-memory";
 export * from "./chains";
@@ -32,6 +33,7 @@ export * from "./auto-lock-account";
 export * from "./analytics";
 export * as KeyRingV2 from "./keyring-v2";
 export * from "./vault";
+export * from "./keyring-cosmos";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -126,6 +128,10 @@ export function init(
     vaultService,
     [new KeyRingMnemonic.KeyRingMnemonicService(vaultService)]
   );
+  const keyRingCosmosService = new KeyRingCosmos.KeyRingCosmosService(
+    chainsService,
+    keyRingV2Service
+  );
 
   chainsService
     .init()
@@ -134,6 +140,9 @@ export function init(
     })
     .then(() => {
       return keyRingV2Service.init();
+    })
+    .then(() => {
+      return keyRingCosmosService.init();
     });
 
   persistentMemoryService.init();
@@ -174,4 +183,5 @@ export function init(
   AutoLocker.init(router, autoLockAccountService);
   Analytics.init(router, analyticsService);
   KeyRingV2.init(router, keyRingV2Service);
+  KeyRingCosmos.init(router, keyRingCosmosService);
 }

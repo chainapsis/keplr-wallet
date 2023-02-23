@@ -58,9 +58,9 @@ export class DisableAccessMsg extends Message<void> {
   }
 }
 
-export class GetKeyMsg extends Message<Key> {
+export class GetCosmosKeyMsg extends Message<Key> {
   public static type() {
-    return "get-key";
+    return "get-cosmos-key";
   }
 
   constructor(public readonly chainId: string) {
@@ -69,16 +69,20 @@ export class GetKeyMsg extends Message<Key> {
 
   validateBasic(): void {
     if (!this.chainId) {
-      throw new Error("chain id not set");
+      throw new Error("chainId is not set");
     }
   }
 
+  override approveExternal(): boolean {
+    return true;
+  }
+
   route(): string {
-    return "keyring";
+    return "keyring-cosmos";
   }
 
   type(): string {
-    return GetKeyMsg.type();
+    return GetCosmosKeyMsg.type();
   }
 }
 
