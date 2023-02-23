@@ -28,12 +28,12 @@ export interface KeyRing {
     sensitive: PlainObject;
   }>;
   getPubKey(
-    _: Env,
+    env: Env,
     vault: Vault,
     coinType: number
   ): PubKeySecp256k1 | Promise<PubKeySecp256k1>;
   sign(
-    _: Env,
+    env: Env,
     vault: Vault,
     coinType: number,
     data: Uint8Array,

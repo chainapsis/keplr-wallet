@@ -51,9 +51,10 @@ export class KeyRingMnemonicService {
     const masterSeedText = Buffer.from(masterSeed).toString("hex");
 
     return Promise.resolve({
-      insensitive: {},
-      sensitive: {
+      insensitive: {
         bip44Path,
+      },
+      sensitive: {
         masterSeedText,
         mnemonic,
       },

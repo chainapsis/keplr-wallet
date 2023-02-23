@@ -161,6 +161,10 @@ export class KeyRingService {
     chainId: string,
     vaultId: string
   ): Promise<PubKeySecp256k1> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
@@ -190,6 +194,10 @@ export class KeyRingService {
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256"
   ): Promise<Uint8Array> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
     const vault = this.vaultService.getVault("keyRing", vaultId);
@@ -229,6 +237,10 @@ export class KeyRingService {
     vault: Vault,
     coinType: number
   ): Promise<PubKeySecp256k1> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
     const keyRing = this.getVaultKeyRing(vault);
 
     return Promise.resolve(keyRing.getPubKey(env, vault, coinType));
@@ -241,6 +253,10 @@ export class KeyRingService {
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256"
   ): Promise<Uint8Array> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
     const keyRing = this.getVaultKeyRing(vault);
 
     return Promise.resolve(
