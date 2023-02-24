@@ -7,3 +7,4 @@ export * from "./window";
 export * from "./ethereum";
 export * from "./cosmjs";
 export * from "./secretjs";
+export * from "./settled";

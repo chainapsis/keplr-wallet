@@ -21,6 +21,7 @@ import {
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
   SecretUtils,
+  SettledResponses,
 } from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
@@ -329,6 +330,10 @@ export class KeplrWalletConnectV1 implements Keplr {
       name: response.name,
       pubKey: Buffer.from(response.pubKey, "hex"),
     };
+  }
+
+  getKeysSettled(_chainIds: string[]): Promise<SettledResponses<Key>> {
+    throw new Error("Not yet implemented");
   }
 
   protected getKeyLastSeenKey() {

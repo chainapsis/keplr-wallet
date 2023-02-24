@@ -17,6 +17,7 @@ import {
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
   SecretUtils,
+  SettledResponses,
 } from "@keplr-wallet/types";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
@@ -39,6 +40,7 @@ import {
   GetChainInfosWithoutEndpointsMsg,
   DisableAccessMsg,
   ChangeKeyRingNameMsg,
+  GetCosmosKeysSettledMsg,
 } from "./types";
 
 import { KeplrEnigmaUtils } from "./enigma";
@@ -122,6 +124,11 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
 
   async getKey(chainId: string): Promise<Key> {
     const msg = new GetCosmosKeyMsg(chainId);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
+    const msg = new GetCosmosKeysSettledMsg(chainIds);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 

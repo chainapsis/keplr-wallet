@@ -11,6 +11,7 @@ import {
 } from "../cosmjs";
 import { SecretUtils } from "../secretjs";
 import Long from "long";
+import { SettledResponses } from "../settled";
 
 export interface Key {
   // Name of the selected key store.
@@ -71,6 +72,7 @@ export interface Keplr {
   disable(chainIds?: string | string[]): Promise<void>;
 
   getKey(chainId: string): Promise<Key>;
+  getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>>;
   signAmino(
     chainId: string,
     signer: string,

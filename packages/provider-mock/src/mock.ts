@@ -15,6 +15,7 @@ import {
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
   SecretUtils,
+  SettledResponses,
 } from "@keplr-wallet/types";
 import {
   Bech32Address,
@@ -115,6 +116,10 @@ export class MockKeplr implements Keplr {
       isNanoLedger: false,
       isKeystone: false,
     };
+  }
+
+  getKeysSettled(_chainIds: string[]): Promise<SettledResponses<Key>> {
+    throw new Error("Not yet implemented");
   }
 
   signArbitrary(
