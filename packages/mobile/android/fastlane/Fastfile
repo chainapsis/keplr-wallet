@@ -80,7 +80,7 @@ platform :android do
     if !ENV["BUGSNAG_API_KEY"] || ENV["BUGSNAG_API_KEY"].length == 0
       UI.user_error!("BUGSNAG_API_KEY is not provided")
     end
-    sh("cd ../.. && appcenter codepush release-react -a #{ENV["ANDROID_APPCENTER_APP_NAME"]} -d Production -t #{target_version} --output-dir build")
+    sh("cd ../.. && appcenter codepush release-react -a #{ENV["ANDROID_APPCENTER_APP_NAME"]} -d Production -t #{target_version} --output-dir build --sourcemap-output build/CodePush/index.android.bundle.map")
     sh("cd ../.. && npx -p @bugsnag/source-maps bugsnag-source-maps upload-react-native --api-key #{ENV["BUGSNAG_API_KEY"]} --code-bundle-id #{version} --platform android --source-map build/CodePush/index.android.bundle.map --bundle build/CodePush/index.android.bundle")
   end
 
