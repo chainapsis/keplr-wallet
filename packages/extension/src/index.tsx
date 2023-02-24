@@ -23,6 +23,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import manifest from "./manifest.json";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { UnlockPage } from "./pages/unlock";
+import { MainPage } from "./pages/main";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -85,20 +86,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
         ) : (
           <Routes>
             {/* TODO: Add routes here */}
-            <Route
-              path="/"
-              element={
-                <div>
-                  {keyRingStore.keyInfos.map((keyInfo) => {
-                    return (
-                      <div key={keyInfo.id}>
-                        {JSON.stringify(keyInfo, null, 2)}
-                      </div>
-                    );
-                  })}
-                </div>
-              }
-            />
+            <Route path="/" element={<MainPage />} />
           </Routes>
         )
       ) : (

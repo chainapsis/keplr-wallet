@@ -2,6 +2,7 @@ import { AccountSetBase, WalletStatus } from "./base";
 import { ChainStore } from "../chain";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { MockKeplr } from "@keplr-wallet/provider-mock";
+import { AccountSharedContext } from "./context";
 
 describe("Test Account set base", () => {
   test("Account set base should be inited automatically if `autoInit` is true", async () => {
@@ -30,6 +31,7 @@ describe("Test Account set base", () => {
       },
       chainStore,
       "test",
+      new AccountSharedContext(),
       {
         suggestChain: false,
         autoInit: true,
@@ -87,6 +89,7 @@ describe("Test Account set base", () => {
       },
       chainStore,
       "test",
+      new AccountSharedContext(),
       {
         suggestChain: false,
         autoInit: false,

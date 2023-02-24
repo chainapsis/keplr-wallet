@@ -7,6 +7,7 @@ import {
 } from "../common";
 import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
 import { DeepReadonly, UnionToIntersection } from "utility-types";
+import { AccountSharedContext } from "./context";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export interface IAccountStore<T extends IObject = {}> {
@@ -40,11 +41,14 @@ export class AccountStore<
       Injects
     >
   ) {
+    const sharedContext = new AccountSharedContext();
+
     super((chainId: string) => {
       const accountSetBase = new AccountSetBaseSuper(
         eventListener,
         chainGetter,
         chainId,
+        sharedContext,
         storeOptsCreator(chainId)
       );
 

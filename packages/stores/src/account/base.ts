@@ -9,6 +9,7 @@ import { ChainGetter } from "../common";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MakeTxResponse } from "./types";
+import { AccountSharedContext } from "./context";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -89,6 +90,7 @@ export class AccountSetBase {
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
+    protected readonly sharedContext: AccountSharedContext,
     protected readonly opts: AccountSetOpts
   ) {
     makeObservable(this);
@@ -192,34 +194,36 @@ export class AccountSetBase {
       return;
     }
 
-    try {
-      const key = yield* toGenerator(keplr.getKey(this.chainId));
-      this._bech32Address = key.bech32Address;
-      this._isNanoLedger = key.isNanoLedger;
-      this._isKeystone = key.isKeystone;
-      this._name = key.name;
-      this._pubKey = key.pubKey;
+    // No need to wait for the result.
+    this.sharedContext.getKey(keplr, this.chainId, (res) => {
+      if (res.status === "fulfilled") {
+        const key = res.value;
+        this._bech32Address = key.bech32Address;
+        this._isNanoLedger = key.isNanoLedger;
+        this._isKeystone = key.isKeystone;
+        this._name = key.name;
+        this._pubKey = key.pubKey;
 
-      // Set the wallet status as loaded after getting all necessary infos.
-      this._walletStatus = WalletStatus.Loaded;
-    } catch (e) {
-      console.log(e);
-      // Caught error loading key
-      // Reset properties, and set status to Rejected
-      this._bech32Address = "";
-      this._isNanoLedger = false;
-      this._isKeystone = false;
-      this._name = "";
-      this._pubKey = new Uint8Array(0);
+        // Set the wallet status as loaded after getting all necessary infos.
+        this._walletStatus = WalletStatus.Loaded;
+      } else {
+        // Caught error loading key
+        // Reset properties, and set status to Rejected
+        this._bech32Address = "";
+        this._isNanoLedger = false;
+        this._isKeystone = false;
+        this._name = "";
+        this._pubKey = new Uint8Array(0);
 
-      this._walletStatus = WalletStatus.Rejected;
-      this._rejectionReason = e;
-    }
+        this._walletStatus = WalletStatus.Rejected;
+        this._rejectionReason = res.reason;
+      }
 
-    if (this._walletStatus !== WalletStatus.Rejected) {
-      // Reset previous rejection error message
-      this._rejectionReason = undefined;
-    }
+      if (this._walletStatus !== WalletStatus.Rejected) {
+        // Reset previous rejection error message
+        this._rejectionReason = undefined;
+      }
+    });
   }
 
   @action
