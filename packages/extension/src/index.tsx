@@ -111,11 +111,17 @@ const StateRenderer: FunctionComponent = observer(() => {
 
   useEffect(() => {
     // Notify to auto lock service to start activation check whenever the keyring is unlocked.
-    if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
-      const msg = new StartAutoLockMonitoringMsg();
-      const requester = new InExtensionMessageRequester();
-      requester.sendMessage(BACKGROUND_PORT, msg);
-    }
+    const autoLockInterval = setInterval(() => {
+      if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
+        const msg = new StartAutoLockMonitoringMsg();
+        const requester = new InExtensionMessageRequester();
+        requester.sendMessage(BACKGROUND_PORT, msg);
+      }
+    }, 30000);
+
+    return () => {
+      clearInterval(autoLockInterval);
+    };
   }, [keyRingStore.status]);
 
   if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
