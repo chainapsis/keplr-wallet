@@ -892,8 +892,9 @@ export class CosmosAccountImpl {
     recipient: string
   ) {
     const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-    const isEvmosERC20 =
-      denomHelper.type === "erc20" && this.chainId.includes("evmos");
+    const isEvmosERC20 = this.chainGetter
+      .getChain(this.chainId)
+      .features?.includes("evmos-erc20");
 
     if (denomHelper.type !== "native" && !isEvmosERC20) {
       // Only accept native tokens or Evmos ERC-20

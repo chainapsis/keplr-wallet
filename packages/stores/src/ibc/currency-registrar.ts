@@ -129,9 +129,7 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     coinMinimalDenom: string
   ): [AppCurrency | undefined, boolean] | undefined {
     const denomHelper = new DenomHelper(coinMinimalDenom);
-    const isEvmosERC20 =
-      denomHelper.type === "erc20" &&
-      this.chainInfoInner.chainId.includes("evmos");
+    const isEvmosERC20 = this.chainInfoInner.features?.includes("evmos-erc20");
 
     if (
       (denomHelper.type !== "native" ||
