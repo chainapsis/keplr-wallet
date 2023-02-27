@@ -20,7 +20,7 @@ export const ChatMember = (props: {
   onIconClick?: VoidCallback;
   onClick?: VoidCallback;
 }) => {
-  const { name, address } = props.address;
+  const { name, address, alreadyMember } = props.address;
   const {
     isSelected,
     isShowAdmin,
@@ -53,6 +53,7 @@ export const ChatMember = (props: {
         setIsLoading(false);
       }
     };
+
     isUserActive();
   }, [
     address,
@@ -71,7 +72,14 @@ export const ChatMember = (props: {
       return <div className={style.adminHeading}>Admin </div>;
     }
 
-    if (isActive && showSelectedIcon) {
+    /// [alreadyMember] Member is already a part of group
+    /// So hiding the add/remove icon
+    if (alreadyMember) {
+      return <></>;
+    }
+
+    /// [showSelectedIcon] from calling component to display icon or not
+    else if (isActive && showSelectedIcon) {
       return (
         <div>
           <i
@@ -110,7 +118,12 @@ export const ChatMember = (props: {
       </div>
       <div className={style.memberInner}>
         <div className={style.name}>{formatAddress(name)}</div>
-        {!isActive && <div className={style.name}>Inactive</div>}
+        {alreadyMember?.length > 1 && (
+          <div className={style.alreadyMemberText}>
+            Already added to the group
+          </div>
+        )}
+        {!isActive && <div className={style.inactiveText}>Inactive</div>}
       </div>
       {decideIconLabelView()}
     </div>

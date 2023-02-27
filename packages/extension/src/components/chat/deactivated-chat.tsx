@@ -32,6 +32,7 @@ export const DeactivatedChat = () => {
         <br />
         <a
           href="#"
+          draggable={false}
           style={{
             textDecoration: "underline",
           }}

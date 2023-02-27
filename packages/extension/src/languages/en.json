@@ -32,6 +32,7 @@
 
   "main.menu.settings": "Settings",
   "main.menu.address-book": "Address Book",
+  "main.menu.address-available": "Address is already available in the Address Book",
   "main.menu.token-list": "Token List",
   "main.menu.guide": "Guide",
   "main.menu.sign-out": "Sign out",
@@ -320,5 +321,7 @@
   "component.ibc.channel-registrar.chain-selector.button.add": "New IBC Transfer Channel",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
-  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save"
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save",
+
+  "chat.disappear-message": "Messages will disappear after 14 days."
 }

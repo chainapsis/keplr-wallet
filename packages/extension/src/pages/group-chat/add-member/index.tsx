@@ -100,14 +100,23 @@ export const AddMember: FunctionComponent = observer(() => {
   );
 
   const userAddresses: NameAddress[] = addressBookConfig.addressBookDatas
-    .filter((data) => {
+    .map((data) => {
       if (newGroupState.isEditGroup) {
         const isAlreadyMember = selectedMembers.find(
           (element) => element.address === data.address
         );
-        /// removing already added member
-        if (!isAlreadyMember) return { name: data.name, address: data.address };
-      } else return { name: data.name, address: data.address };
+
+        return {
+          name: data.name,
+          address: data.address,
+          alreadyMember: isAlreadyMember ? "true" : "",
+        };
+      } else
+        return {
+          name: data.name,
+          address: data.address,
+          alreadyMember: "",
+        };
     })
     .sort(function (a, b) {
       return a.name.localeCompare(b.name);
@@ -142,24 +151,20 @@ export const AddMember: FunctionComponent = observer(() => {
           searchedVal,
           chainStore.current.bech32Config.bech32PrefixAccAddr
         );
-        const address: NameAddress = {
-          name: formatAddress(searchedVal),
-          address: searchedVal,
-        };
 
+        let isAlreadyMember;
         /// validating the address in selected member in case of edit
         /// to avoid display the alread added member address
         if (newGroupState.isEditGroup) {
-          const isAlreadyMember = selectedMembers.find(
+          isAlreadyMember = selectedMembers.find(
             (element) => element.address === searchedVal
           );
-
-          if (isAlreadyMember) {
-            setAddresses([]);
-            setRandomAddress(undefined);
-            return;
-          }
         }
+        const address: NameAddress = {
+          name: formatAddress(searchedVal),
+          address: searchedVal,
+          alreadyMember: isAlreadyMember ? "true" : "",
+        };
 
         setRandomAddress(address);
         setAddresses([]);
@@ -343,6 +348,7 @@ export const AddMember: FunctionComponent = observer(() => {
                   <br />
                   <a
                     href="#"
+                    draggable={false}
                     style={{
                       textDecoration: "underline",
                     }}

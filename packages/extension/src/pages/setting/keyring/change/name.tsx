@@ -59,7 +59,7 @@ export const ChangeNamePage: FunctionComponent = observer(() => {
             // Make sure that name is changed
             await keyRingStore.updateNameKeyRing(
               parseInt(match.params.index),
-              data.name
+              data.name.trim()
             );
             history.push("/");
           } catch (e) {

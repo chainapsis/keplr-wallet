@@ -35,6 +35,7 @@ import amplitude from "amplitude-js";
 import { GroupChatPopup } from "@components/group-chat-popup";
 import { useNotification } from "@components/notification";
 import { createGroupEvent } from "@utils/group-events";
+import { ChatErrorPopup } from "@components/chat-error-popup";
 
 export const ReviewGroupChat: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -279,6 +280,7 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
         history.goBack();
       }}
     >
+      <ChatErrorPopup />
       <div className={style.tokens}>
         <img
           className={style.groupImage}

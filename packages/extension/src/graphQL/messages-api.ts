@@ -306,8 +306,7 @@ export const deliverGroupMessages = async (
     store.dispatch(
       setMessageError({
         type: "delivery",
-        message:
-          e?.message || "Something went wrong, Message can't be delivered",
+        message: "Something went wrong, Message can't be delivered",
         level: 1,
       })
     );

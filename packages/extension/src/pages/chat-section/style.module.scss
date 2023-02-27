@@ -111,28 +111,6 @@
   align-items: center;
   font-size: 12px;
 }
-.inputText {
-  // margin-left: -12px;
-  border: #525f7f 1px solid;
-  background: white;
-  display: flex;
-  flex-wrap: nowrap;
-  flex-direction: row;
-  align-items: center;
-
-  .inputArea {
-    width: 330px;
-    padding: 4.5px 10px;
-    border-radius: 5px;
-    height: 33px;
-    resize: none;
-    border: 0px;
-  }
-
-  .inputArea:focus {
-    outline: solid #11b4ff 0.5px;
-  }
-}
 
 .enterMessageIcon {
   // border: 1px solid #cad1d7;

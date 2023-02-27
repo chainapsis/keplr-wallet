@@ -1,0 +1,49 @@
+.input-section {
+  margin-left: -12px;
+  margin-right: -12px;
+  margin-bottom: -12px;
+  background: white;
+  padding: 12px;
+
+  .message-disappear {
+    font-weight: 400;
+    font-size: 15px;
+    color: #525f7f;
+    height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 21px;
+    max-height: 48px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    img {
+      height: 20px;
+      vertical-align: sub;
+    }
+  }
+
+  .inputText {
+    width: auto;
+    border: #525f7f 1px solid;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    padding-right: 6px;
+
+    .inputArea {
+      width: 100%;
+      padding: 4.5px 10px;
+      border-radius: 5px;
+      height: 33px;
+      resize: none;
+      border: 0px;
+    }
+  }
+
+  .inputText:focus-within {
+    border: #3b82f6 1.5px solid;
+  }
+}

@@ -44,6 +44,7 @@ import {
   removedAdminEvent,
   removeMemberEvent,
 } from "@utils/group-events";
+import { ChatErrorPopup } from "@components/chat-error-popup";
 
 export const EditMember: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -436,6 +437,7 @@ export const EditMember: FunctionComponent = observer(() => {
         history.goBack();
       }}
     >
+      <ChatErrorPopup />
       <div className={style.group}>
         <div className={style.groupContainer}>
           <div className={style.groupHeader}>
@@ -444,14 +446,6 @@ export const EditMember: FunctionComponent = observer(() => {
               {`${addresses.length} member${addresses.length > 1 ? "s" : ""}`}
               <i
                 className={"fa fa-user-plus"}
-                style={{
-                  width: "24px",
-                  height: "24px",
-                  padding: "2px 0 0 12px",
-                  cursor: "pointer",
-                  alignItems: "end",
-                  alignSelf: "end",
-                }}
                 aria-hidden="true"
                 onClick={() => {
                   history.push({

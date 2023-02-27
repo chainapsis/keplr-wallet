@@ -21,6 +21,7 @@ import { setGroups } from "@chatStore/messages-slice";
 import { recieveMessages } from "@graphQL/recieve-messages";
 import { createGroupEvent, updateInfoEvent } from "@utils/group-events";
 import amplitude from "amplitude-js";
+import { ChatErrorPopup } from "@components/chat-error-popup";
 
 export const CreateGroupChat: FunctionComponent = () => {
   const history = useHistory();
@@ -160,6 +161,7 @@ export const CreateGroupChat: FunctionComponent = () => {
       alternativeTitle={"New Group Chat"}
       onBackButton={() => handleBackButton()}
     >
+      <ChatErrorPopup />
       <div>
         {confirmAction && (
           <AlertPopup

@@ -17,10 +17,9 @@
   }
 
   .groupsArea {
-    margin-top: 20px;
+    padding-bottom: 20px;
     display: flex;
     flex-direction: column;
-    height: 63vh;
     gap: 10px;
     overflow-y: auto;
     overflow-x: clip;
@@ -115,6 +114,25 @@
   .img-lock {
     height: 120px;
     margin-bottom: 20px;
+  }
+}
+
+.message-disappear {
+  font-weight: 400;
+  font-size: 15px;
+  color: #525f7f;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 21px;
+  max-height: 48px;
+  display: flex;
+  gap: 8px;
+  padding: 0 12px;
+
+  img {
+    height: 20px;
+    vertical-align: sub;
   }
 }
 

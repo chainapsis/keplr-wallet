@@ -338,6 +338,17 @@
       color: #525f7f;
       height: 20px;
     }
+    .inactiveText {
+      font-weight: 400;
+      font-size: 14px;
+      color: red;
+      height: 20px;
+    }
+    .alreadyMemberText {
+      font-size: 14px;
+      color: #d3d3d3;
+      height: 20px;
+    }
     .memberText {
       text-overflow: ellipsis;
       overflow: hidden;

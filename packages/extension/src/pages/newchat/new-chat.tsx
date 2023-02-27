@@ -86,7 +86,7 @@ const NewUser = (props: { address: NameAddress }) => {
       </div>
       <div className={style.messageInner}>
         <div className={style.name}>{formatAddress(name)}</div>
-        {!isActive && <div className={style.name}>Inactive</div>}
+        {!isActive && <div className={style.inactiveText}>Inactive</div>}
       </div>
       <div>
         {isLoading ? (
@@ -289,6 +289,7 @@ export const NewChat: FunctionComponent = observer(() => {
                   <br />
                   <a
                     href="#"
+                    draggable={false}
                     style={{
                       textDecoration: "underline",
                     }}

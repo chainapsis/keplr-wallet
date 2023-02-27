@@ -9,8 +9,6 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import ReactTextareaAutosize from "react-textarea-autosize";
-import { InputGroup } from "reactstrap";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { AddressBookConfigMap } from "@keplr-wallet/hooks";
 import { Chats, Group, Groups, GroupAddress, NameAddress } from "@chatTypes";
@@ -20,11 +18,11 @@ import { CHAT_PAGE_COUNT } from "../../../config.ui.var";
 import { deliverGroupMessages } from "@graphQL/messages-api";
 import { recieveGroups, recieveMessages } from "@graphQL/recieve-messages";
 import { useOnScreen } from "@hooks/use-on-screen";
-import paperAirplaneIcon from "@assets/icon/paper-airplane.png";
 import { useStore } from "../../../stores";
 import style from "./style.module.scss";
 import { GroupMessageType } from "@utils/encrypt-group";
 import { GroupChatMessage } from "@components/group-chat-message";
+import { ChatInputSection } from "@components/chat-input-section";
 
 export const GroupChatsViewSection = ({
   isMemberRemoved,
@@ -305,36 +303,20 @@ export const GroupChatsViewSection = ({
         })}
         <div ref={messagesEndRef} className={"AAAAA"} />
       </div>
-
-      <InputGroup className={style.inputText}>
-        {
-          <ReactTextareaAutosize
-            maxRows={3}
-            className={`${style.inputArea} ${style["send-message-inputArea"]}`}
-            placeholder={
-              isMemberRemoved
-                ? "You can't send messages to this group because you're no longer a participant"
-                : "Type a new message..."
-            }
-            value={newMessage}
-            onChange={(event) => {
-              setNewMessage(event.target.value.substring(0, 499));
-            }}
-            onKeyDown={handleKeydown}
-            disabled={isMemberRemoved}
-          />
+      <ChatInputSection
+        placeholder={
+          isMemberRemoved
+            ? "You can't send messages to this group because you're no longer a participant"
+            : "Type a new message..."
         }
-        {newMessage?.length && newMessage.trim() !== "" ? (
-          <div
-            className={style["send-message-icon"]}
-            onClick={handleSendMessage}
-          >
-            <img draggable={false} src={paperAirplaneIcon} alt="" />
-          </div>
-        ) : (
-          ""
-        )}
-      </InputGroup>
+        value={newMessage}
+        onChange={(event) => {
+          setNewMessage(event.target.value.substring(0, 499));
+        }}
+        onClick={handleSendMessage}
+        onKeyDown={handleKeydown}
+        disabled={isMemberRemoved}
+      />
     </div>
   );
 };

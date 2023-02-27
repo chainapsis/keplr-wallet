@@ -41,7 +41,6 @@
   margin-right: -12px;
 
   height: 70vh;
-  overflow-y: auto;
 }
 
 .resultText {
@@ -127,6 +126,19 @@
 .groupMembers {
   align-self: start;
   color: #525f7f;
+
+  i {
+    width: 24px;
+    height: 24px;
+    padding: 2px 0 0 12px;
+    cursor: pointer;
+    align-items: end;
+    align-self: end;
+  }
+
+  i:hover {
+    color: #3b82f6;
+  }
 }
 
 .groupContainer {

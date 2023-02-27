@@ -11,7 +11,6 @@ import { userBlockedAddresses } from "@chatStore/messages-slice";
 import { userDetails } from "@chatStore/user-slice";
 import { ChatActionsPopup } from "@components/chat-actions-popup";
 import { ChatErrorPopup } from "@components/chat-error-popup";
-import { ChatLoader } from "@components/chat-loader";
 import { SwitchUser } from "@components/switch-user";
 import { EthereumEndpoint } from "../../config.ui";
 import { HeaderLayout } from "@layouts/index";
@@ -22,7 +21,6 @@ import { ChatActionsDropdown } from "@components/chat-actions-dropdown";
 import { ChatsViewSection } from "./chats-view-section";
 import { UserNameSection } from "./username-section";
 
-export const openValue = true;
 export const ChatSection: FunctionComponent = () => {
   const history = useHistory();
   const targetAddress = history.location.pathname.split("/")[2];
@@ -33,7 +31,6 @@ export const ChatSection: FunctionComponent = () => {
   const [targetPubKey, setTargetPubKey] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [confirmAction, setConfirmAction] = useState(false);
-  const [loadingChats, setLoadingChats] = useState(false);
   const [action, setAction] = useState("");
   const { chainStore, accountStore, queriesStore } = useStore();
   const current = chainStore.current;
@@ -118,37 +115,32 @@ export const ChatSection: FunctionComponent = () => {
       rightRenderer={<SwitchUser />}
     >
       <ChatErrorPopup />
-      {loadingChats ? (
-        <ChatLoader message="Arranging messages, please wait..." />
-      ) : (
-        <div>
-          <UserNameSection
-            handleDropDown={handleDropDown}
-            addresses={addresses}
-          />
-          <ChatActionsDropdown
-            added={contactName(addresses).length > 0}
-            showDropdown={showDropdown}
-            handleClick={handleClick}
-            blocked={blockedUsers[targetAddress]}
-          />
+      <div>
+        <UserNameSection
+          handleDropDown={handleDropDown}
+          addresses={addresses}
+        />
+        <ChatActionsDropdown
+          added={contactName(addresses).length > 0}
+          showDropdown={showDropdown}
+          handleClick={handleClick}
+          blocked={blockedUsers[targetAddress]}
+        />
 
-          <ChatsViewSection
-            isNewUser={isNewUser()}
-            isBlocked={blockedUsers[targetAddress]}
-            targetPubKey={targetPubKey}
-            setLoadingChats={setLoadingChats}
-            handleClick={handleClick}
-          />
+        <ChatsViewSection
+          isNewUser={isNewUser()}
+          isBlocked={blockedUsers[targetAddress]}
+          targetPubKey={targetPubKey}
+          handleClick={handleClick}
+        />
 
-          {confirmAction && (
-            <ChatActionsPopup
-              action={action}
-              setConfirmAction={setConfirmAction}
-            />
-          )}
-        </div>
-      )}
+        {confirmAction && (
+          <ChatActionsPopup
+            action={action}
+            setConfirmAction={setConfirmAction}
+          />
+        )}
+      </div>
     </HeaderLayout>
   );
 };

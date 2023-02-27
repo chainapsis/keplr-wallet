@@ -33,12 +33,12 @@ export const ChatSettings: FunctionComponent = observer(() => {
     .bech32Address;
   const [loadingChatSettings, setLoadingChatSettings] = useState(false);
   const [chatPubKeyExists, setChatPubKeyExists] = useState(true);
-  const [privacyParagraph, setPrivacyParagraph] = useState(
-    "setting.privacy.paragraph.everybody"
-  );
-  const [chatReadReceiptParagraph, setchatReadReceiptParagraph] = useState(
-    "setting.receipts.paragraph.on"
-  );
+  const [privacyParagraph, setPrivacyParagraph] = useState<
+    string | undefined
+  >();
+  const [chatReadReceiptParagraph, setchatReadReceiptParagraph] = useState<
+    string | undefined
+  >();
   const [privacySetting, setPrivacySetting] = useState(
     PrivacySetting.Everybody
   );
@@ -53,7 +53,7 @@ export const ChatSettings: FunctionComponent = observer(() => {
       store.dispatch(setMessagingPubKey(pubKey));
       setPrivacySetting(pubKey?.privacySetting || PrivacySetting.Everybody);
 
-      if (pubKey?.privacySetting)
+      if (pubKey?.privacySetting) {
         setPrivacyParagraph(
           pubKey.privacySetting === PrivacySetting.Nobody
             ? "setting.privacy.paragraph.nobody"
@@ -61,13 +61,19 @@ export const ChatSettings: FunctionComponent = observer(() => {
             ? "setting.privacy.paragraph.contact"
             : "setting.privacy.paragraph.everybody"
         );
+      } else {
+        setPrivacyParagraph("setting.privacy.paragraph.everybody");
+      }
 
-      if (pubKey?.chatReadReceiptSetting != null)
+      if (pubKey?.chatReadReceiptSetting != null) {
         setchatReadReceiptParagraph(
           pubKey.chatReadReceiptSetting
             ? "setting.receipts.paragraph.on"
             : "setting.receipts.paragraph"
         );
+      } else {
+        setchatReadReceiptParagraph("setting.receipts.paragraph.on");
+      }
 
       if (
         !pubKey?.publicKey ||
@@ -84,13 +90,7 @@ export const ChatSettings: FunctionComponent = observer(() => {
       !loadingChatSettings
     )
       setJWTAndFetchMsgPubKey();
-  }, [
-    current.chainId,
-    loadingChatSettings,
-    userState.accessToken.length,
-    userState.messagingPubKey.length,
-    walletAddress,
-  ]);
+  }, [current.chainId, walletAddress]);
 
   return (
     <HeaderLayout
@@ -136,9 +136,12 @@ export const ChatSettings: FunctionComponent = observer(() => {
           title={intl.formatMessage({
             id: "setting.privacy",
           })}
-          paragraph={intl.formatMessage({
-            id: privacyParagraph,
-          })}
+          paragraph={
+            privacyParagraph &&
+            intl.formatMessage({
+              id: privacyParagraph,
+            })
+          }
           onClick={() => {
             history.push({
               pathname: "/setting/chat/privacy",
@@ -153,9 +156,12 @@ export const ChatSettings: FunctionComponent = observer(() => {
           title={intl.formatMessage({
             id: "setting.receipts",
           })}
-          paragraph={intl.formatMessage({
-            id: chatReadReceiptParagraph,
-          })}
+          paragraph={
+            chatReadReceiptParagraph &&
+            intl.formatMessage({
+              id: chatReadReceiptParagraph,
+            })
+          }
           onClick={() => {
             history.push({
               pathname: "/setting/chat/readRecipt",

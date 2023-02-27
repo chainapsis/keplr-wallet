@@ -9,22 +9,19 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import ReactTextareaAutosize from "react-textarea-autosize";
-import { InputGroup } from "reactstrap";
 import { Chats, Group, GroupAddress, Groups } from "@chatTypes";
 import { userChatGroups, userMessages } from "@chatStore/messages-slice";
 import { userDetails } from "@chatStore/user-slice";
 import { ChatMessage } from "@components/chat-message";
-import { ToolTip } from "@components/tooltip";
 import { CHAT_PAGE_COUNT } from "../../config.ui.var";
 import { deliverMessages, updateGroupTimestamp } from "@graphQL/messages-api";
 import { recieveGroups, recieveMessages } from "@graphQL/recieve-messages";
 import { useOnScreen } from "@hooks/use-on-screen";
-import paperAirplaneIcon from "@assets/icon/paper-airplane.png";
 import { useStore } from "../../stores";
 import { decryptGroupTimestamp } from "@utils/decrypt-group";
 import { NewUserSection } from "./new-user-section";
 import style from "./style.module.scss";
+import { ChatInputSection } from "@components/chat-input-section";
 
 export const ChatsViewSection = ({
   isNewUser,
@@ -35,7 +32,6 @@ export const ChatsViewSection = ({
   isNewUser: boolean;
   isBlocked: boolean;
   targetPubKey: string;
-  setLoadingChats: any;
   handleClick: any;
 }) => {
   const history = useHistory();
@@ -109,36 +105,6 @@ export const ChatsViewSection = ({
     }
   }, [preLoadedChats]);
 
-  // const recieveData = async (tempGroup: Group | undefined) => {
-  //   const groupAdd = {
-  //     ...tempGroup?.addresses.find((val) => val?.address == targetAddress),
-  //   };
-
-  //   const groupAddress = { ...groupAdd };
-  //   if (groupAddress && groupAddress.groupLastSeenTimestamp) {
-  //     const data = await decryptGroupTimestamp(
-  //       current.chainId,
-  //       groupAddress.groupLastSeenTimestamp,
-  //       false
-  //     );
-  //     Object.assign(groupAddress, {
-  //       groupLastSeenTimestamp: new Date(data).getTime(),
-  //     });
-  //   }
-  //   if (groupAddress && groupAddress.lastSeenTimestamp) {
-  //     const data = await decryptGroupTimestamp(
-  //       current.chainId,
-  //       groupAddress.lastSeenTimestamp,
-  //       false
-  //     );
-
-  //     Object.assign(groupAddress, {
-  //       lastSeenTimestamp: new Date(data).getTime(),
-  //     });
-  //   }
-
-  //   return groupAddress;
-  // };
   const decryptGrpAddresses = async (
     groupAddress: GroupAddress,
     isSender: boolean
@@ -209,17 +175,6 @@ export const ChatsViewSection = ({
       ),
     };
     decryptGrp(tempGroup as Group);
-    // recieveData(tempGroup as Group).then((groupAddress) => {
-    //   const sample = (tempGroup as Group)?.addresses.map((value) => {
-    //     if (value.address === targetAddress) {
-    //       return groupAddress;
-    //     }
-    //     return value;
-    //   });
-    //   if (tempGroup) tempGroup.addresses = sample as GroupAddress[];
-
-    //   setGroup(tempGroup as Group);
-    // });
   }, [userGroups]);
 
   const messagesEndRef: any = useCallback(
@@ -396,7 +351,7 @@ export const ChatsViewSection = ({
                 Number(message?.commitTimestamp) >
                   Number(receiver?.lastSeenTimestamp) &&
                 message?.sender === targetAddress && (
-                  <div className={messagesEndRef} /> //ref={messagesEndRef}
+                  <div className={messagesEndRef} />
                 )}
               {lastUnreadMesageId === message.id && (
                 <div ref={messagesEndRef} className={"AAAAA"} />
@@ -409,49 +364,19 @@ export const ChatsViewSection = ({
           <div ref={messagesEndRef} className={"AAAAA"} />
         )}
       </div>
-
-      <InputGroup className={style.inputText}>
-        {targetPubKey.length ? (
-          <ReactTextareaAutosize
-            maxRows={3}
-            className={`${style.inputArea} ${style["send-message-inputArea"]}`}
-            placeholder={
-              isBlocked ? "This contact is blocked" : "Type a new message..."
-            }
-            value={newMessage}
-            onChange={(event) => {
-              setNewMessage(event.target.value.substring(0, 499));
-            }}
-            onKeyDown={handleKeydown}
-            disabled={isBlocked}
-          />
-        ) : (
-          <ToolTip
-            trigger="hover"
-            options={{ placement: "top" }}
-            tooltip={<div>No transaction history found for this user</div>}
-          >
-            <ReactTextareaAutosize
-              maxRows={3}
-              className={`${style.inputArea} ${style["send-message-inputArea"]}`}
-              placeholder={
-                isBlocked ? "This contact is blocked" : "Type a new message..."
-              }
-              disabled={true}
-            />
-          </ToolTip>
-        )}
-        {newMessage?.length && newMessage.trim() !== "" ? (
-          <div
-            className={style["send-message-icon"]}
-            onClick={handleSendMessage}
-          >
-            <img draggable={false} src={paperAirplaneIcon} alt="" />
-          </div>
-        ) : (
-          ""
-        )}
-      </InputGroup>
+      <ChatInputSection
+        placeholder={
+          isBlocked ? "This contact is blocked" : "Type a new message..."
+        }
+        value={newMessage}
+        onChange={(event) => {
+          setNewMessage(event.target.value.substring(0, 499));
+        }}
+        onClick={handleSendMessage}
+        onKeyDown={handleKeydown}
+        disabled={isBlocked}
+        isTargetPubKeyAvailable={targetPubKey.length ? true : false}
+      />
     </div>
   );
 };
