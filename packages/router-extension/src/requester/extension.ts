@@ -12,7 +12,7 @@ export class InExtensionMessageRequester implements MessageRequester {
     // Set message's origin.
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    msg["origin"] = window.location.origin;
+    msg["origin"] = globalThis.location.origin;
     msg.routerMeta = {
       ...msg.routerMeta,
       routerId: getKeplrExtensionRouterId(),
@@ -55,7 +55,7 @@ export class InExtensionMessageRequester implements MessageRequester {
     // Set message's origin.
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    msg["origin"] = window.location.origin;
+    msg["origin"] = globalThis.location.origin;
     msg.routerMeta = {
       ...msg.routerMeta,
       routerId: getKeplrExtensionRouterId(),
