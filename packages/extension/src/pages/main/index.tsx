@@ -25,7 +25,6 @@ import { Dec } from "@keplr-wallet/unit";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { VestingInfo } from "./vesting-info";
 import { LedgerAppModal } from "./ledger-app-modal";
-import { EvmosDashboardView } from "./evmos-dashboard";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { AuthZView } from "./authz";
 
@@ -219,13 +218,6 @@ export const MainPage: FunctionComponent = observer(() => {
           <CardBody>{<TokensView />}</CardBody>
         </Card>
       ) : null}
-      {chainStore.current.chainId === "evmos_9001-2" && (
-        <Card className={classnames(style.card, "shadow")}>
-          <CardBody>
-            <EvmosDashboardView />
-          </CardBody>
-        </Card>
-      )}
       {uiConfigStore.isDeveloper &&
       chainStore.current.features?.includes("ibc-transfer") ? (
         <Card className={classnames(style.card, "shadow")}>
