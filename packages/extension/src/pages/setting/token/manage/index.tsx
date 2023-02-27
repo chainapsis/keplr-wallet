@@ -27,10 +27,12 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
   const tokenType = (() => {
     const tokenTypes = ["secretwasm", "cosmwasm", "erc20"];
-    for (let i = 0; i < tokenTypes.length; i++) {
-      const type = tokenTypes[i];
+    for (const type of tokenTypes) {
+      const feature = type === "erc20" ? `evmos-${type}` : type;
       if (
-        chainStore.getChain(chainStore.current.chainId).features?.includes(type)
+        chainStore
+          .getChain(chainStore.current.chainId)
+          .features?.includes(feature)
       ) {
         return type;
       }

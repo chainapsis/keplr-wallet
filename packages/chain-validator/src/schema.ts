@@ -224,10 +224,12 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
       const numTokenContracts = [
         value.indexOf("cosmwasm"),
         value.indexOf("secretwasm"),
-        value.indexOf("erc20"),
+        value.indexOf("evmos-erc20"),
       ].filter((val) => val >= 0).length;
       if (numTokenContracts > 1) {
-        throw new Error("cosmwasm, secretwasm, and erc20 are not compatible");
+        throw new Error(
+          "cosmwasm, secretwasm, and evmos-erc20 are not compatible"
+        );
       }
 
       return value;

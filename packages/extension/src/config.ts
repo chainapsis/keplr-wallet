@@ -2007,7 +2007,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       "ibc-go",
       "eth-address-gen",
       "eth-key-sign",
-      "erc20",
+      "evmos-erc20",
     ],
   },
   {

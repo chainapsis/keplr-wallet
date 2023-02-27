@@ -70,7 +70,8 @@ export const AddTokenPage: FunctionComponent = observer(() => {
   const tokenType = (() => {
     const tokenTypes = ["secretwasm", "cosmwasm", "erc20"];
     for (const type of tokenTypes) {
-      if (chainStore.current.features?.includes(type)) {
+      const feature = type === "erc20" ? `evmos-${type}` : type;
+      if (chainStore.current.features?.includes(feature)) {
         return type;
       }
     }

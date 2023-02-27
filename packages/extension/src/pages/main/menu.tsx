@@ -38,7 +38,7 @@ export const Menu: FunctionComponent = observer(() => {
         (feature) =>
           feature === "cosmwasm" ||
           feature === "secretwasm" ||
-          feature === "erc20"
+          feature === "evmos-erc20"
       ) ? (
         <div
           className={styleMenu.item}
@@ -55,7 +55,7 @@ export const Menu: FunctionComponent = observer(() => {
         (feature) =>
           feature === "cosmwasm" ||
           feature === "secretwasm" ||
-          feature === "erc20"
+          feature === "evmos-erc20"
       ) ? (
         <div
           className={styleMenu.item}
