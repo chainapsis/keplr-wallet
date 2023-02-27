@@ -55,7 +55,7 @@ export class DebounceActionTimer<ARGS, R> {
 
       this.requests = [];
     } else {
-      this.setImmediate(this.tick);
+      this.nextTick(this.tick);
     }
   };
 
@@ -74,11 +74,15 @@ export class DebounceActionTimer<ARGS, R> {
   protected startTimer(): void {
     this.startTime = Date.now();
 
-    this.setImmediate(this.tick);
+    this.nextTick(this.tick);
   }
 
-  protected setImmediate(fn: () => void): void {
-    window.requestAnimationFrame(fn);
+  protected nextTick(fn: () => void): void {
+    if (typeof window !== "undefined") {
+      window.requestAnimationFrame(fn);
+    } else {
+      setTimeout(fn, 10);
+    }
   }
 }
 
