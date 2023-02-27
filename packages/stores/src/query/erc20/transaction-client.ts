@@ -9,7 +9,7 @@ import {
   TransactionResponse,
   TransactionReceipt,
 } from "@ethersproject/providers";
-import { parseChainId } from "@evmos/eip712";
+import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 
 export type SignableTx = {
   to?: string;
@@ -59,7 +59,8 @@ export class ERC20TxClient {
     }
 
     // Fill the chain's numerical chainId by default.
-    const defaultChainId = parseChainId(this.chainId);
+    const defaultChainId = EthermintChainIdHelper.parse(this.chainId)
+      .ethChainId;
 
     const defaultType = 2;
     const defaultAccessList: [string, string[]][] = [];
