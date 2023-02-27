@@ -25,12 +25,28 @@ import { Dec } from "@keplr-wallet/unit";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { VestingInfo } from "./vesting-info";
 import { LedgerAppModal } from "./ledger-app-modal";
+import { EvmosDashboardView } from "./evmos-dashboard";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { AuthZView } from "./authz";
 
 export const MainPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
 
-  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    uiConfigStore,
+    keyRingStore,
+    analyticsStore,
+  } = useStore();
+
+  useEffect(() => {
+    analyticsStore.setUserProperties({
+      totalAccounts: keyRingStore.multiKeyStoreInfo.length,
+    });
+  }, [analyticsStore, keyRingStore.multiKeyStoreInfo.length]);
 
   const confirm = useConfirm();
 
@@ -80,7 +96,27 @@ export const MainPage: FunctionComponent = observer(() => {
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(accountInfo.bech32Address);
 
+  const queryAuthZGrants = queriesStore
+    .get(chainStore.current.chainId)
+    .cosmos.queryAuthZGranter.getGranter(accountInfo.bech32Address);
+
   const tokens = queryBalances.unstakables.filter((bal) => {
+    if (
+      chainStore.current.features &&
+      chainStore.current.features.includes("terra-classic-fee")
+    ) {
+      // At present, can't handle stability tax well if it is not registered native token.
+      // So, for terra classic, disable other tokens.
+      const denom = new DenomHelper(bal.currency.coinMinimalDenom);
+      if (denom.type !== "native" || denom.denom.startsWith("ibc/")) {
+        return false;
+      }
+
+      if (denom.type === "native") {
+        return bal.balance.toDec().gt(new Dec("0"));
+      }
+    }
+
     // Temporary implementation for trimming the 0 balanced native tokens.
     // TODO: Remove this part.
     const currencyType = new DenomHelper(bal.currency.coinMinimalDenom).type;
@@ -153,6 +189,22 @@ export const MainPage: FunctionComponent = observer(() => {
           />
         </a>
       ) : null}
+      {ChainIdHelper.parse(current.chainId).identifier === "stargaze" ? (
+        <a
+          href="https://www.stargaze.zone/names"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img
+            src={require("../../public/assets/img/stargaze_banner.png")}
+            style={{
+              width: "100%",
+              marginBottom: "12px",
+              borderRadius: "4px",
+            }}
+          />
+        </a>
+      ) : null}
 
       {showVestingInfo ? <VestingInfo /> : null}
       {chainStore.current.walletUrlForStaking ? (
@@ -167,11 +219,25 @@ export const MainPage: FunctionComponent = observer(() => {
           <CardBody>{<TokensView />}</CardBody>
         </Card>
       ) : null}
+      {chainStore.current.chainId === "evmos_9001-2" && (
+        <Card className={classnames(style.card, "shadow")}>
+          <CardBody>
+            <EvmosDashboardView />
+          </CardBody>
+        </Card>
+      )}
       {uiConfigStore.isDeveloper &&
       chainStore.current.features?.includes("ibc-transfer") ? (
         <Card className={classnames(style.card, "shadow")}>
           <CardBody>
             <IBCTransferView />
+          </CardBody>
+        </Card>
+      ) : null}
+      {queryAuthZGrants.response?.data.grants.length ? (
+        <Card className={classnames(style.card, "shadow")}>
+          <CardBody>
+            <AuthZView grants={queryAuthZGrants.response.data.grants} />
           </CardBody>
         </Card>
       ) : null}

@@ -56,6 +56,7 @@ export type KeplrGetKeyWalletCoonectV1Response = {
   address: string;
   algo: string;
   bech32Address: string;
+  isKeystone: boolean;
   isNanoLedger: boolean;
   name: string;
   pubKey: string;
@@ -64,6 +65,7 @@ export type KeplrGetKeyWalletCoonectV1Response = {
 export type KeplrKeystoreMayChangedEventParam = {
   algo: string;
   name: string;
+  isKeystone: boolean;
   isNanoLedger: boolean;
   keys: {
     chainIdentifier: string;
@@ -143,6 +145,7 @@ export class KeplrWalletConnectV1 implements Keplr {
           address: mayChangedKey.address,
           algo: param.algo,
           bech32Address: mayChangedKey.bech32Address,
+          isKeystone: param.isKeystone,
           isNanoLedger: param.isNanoLedger,
           name: param.name,
           pubKey: mayChangedKey.pubKey,
@@ -160,6 +163,7 @@ export class KeplrWalletConnectV1 implements Keplr {
             if (
               mayChangedKey.algo !== savedKey.algo ||
               mayChangedKey.name !== savedKey.name ||
+              mayChangedKey.isKeystone !== savedKey.isKeystone ||
               mayChangedKey.isNanoLedger !== savedKey.isNanoLedger ||
               mayChangedKey.address !== savedKey.address ||
               mayChangedKey.bech32Address !== savedKey.bech32Address ||
@@ -300,6 +304,7 @@ export class KeplrWalletConnectV1 implements Keplr {
         address: Buffer.from(lastSeenKey.address, "hex"),
         algo: lastSeenKey.algo,
         bech32Address: lastSeenKey.bech32Address,
+        isKeystone: lastSeenKey.isKeystone,
         isNanoLedger: lastSeenKey.isNanoLedger,
         name: lastSeenKey.name,
         pubKey: Buffer.from(lastSeenKey.pubKey, "hex"),
@@ -321,6 +326,7 @@ export class KeplrWalletConnectV1 implements Keplr {
       address: Buffer.from(response.address, "hex"),
       algo: response.algo,
       bech32Address: response.bech32Address,
+      isKeystone: response.isKeystone,
       isNanoLedger: response.isNanoLedger,
       name: response.name,
       pubKey: Buffer.from(response.pubKey, "hex"),

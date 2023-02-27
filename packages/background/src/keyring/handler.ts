@@ -30,6 +30,8 @@ import {
   RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
+  CreateKeystoneKeyMsg,
+  AddKeystoneKeyMsg,
   RequestICNSAdr36SignaturesMsg,
   ChangeKeyRingNameMsg,
 } from "./messages";
@@ -67,11 +69,18 @@ export const getHandler: (service: KeyRingService) => Handler = (
         );
       case AddPrivateKeyMsg:
         return handleAddPrivateKeyMsg(service)(env, msg as AddPrivateKeyMsg);
+      case CreateKeystoneKeyMsg:
+        return handleCreateKeystoneKeyMsg(service)(
+          env,
+          msg as CreateKeystoneKeyMsg
+        );
       case CreateLedgerKeyMsg:
         return handleCreateLedgerKeyMsg(service)(
           env,
           msg as CreateLedgerKeyMsg
         );
+      case AddKeystoneKeyMsg:
+        return handleAddKeystoneKeyMsg(service)(env, msg as AddKeystoneKeyMsg);
       case AddLedgerKeyMsg:
         return handleAddLedgerKeyMsg(service)(env, msg as AddLedgerKeyMsg);
       case LockKeyRingMsg:
@@ -225,6 +234,20 @@ const handleAddPrivateKeyMsg: (
   };
 };
 
+const handleCreateKeystoneKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<CreateKeystoneKeyMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.createKeystoneKey(
+      env,
+      msg.kdf,
+      msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
+  };
+};
+
 const handleCreateLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreateLedgerKeyMsg> = (service) => {
@@ -233,6 +256,20 @@ const handleCreateLedgerKeyMsg: (
       env,
       msg.kdf,
       msg.password,
+      msg.meta,
+      msg.bip44HDPath,
+      msg.cosmosLikeApp
+    );
+  };
+};
+
+const handleAddKeystoneKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<AddKeystoneKeyMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.addKeystoneKey(
+      env,
+      msg.kdf,
       msg.meta,
       msg.bip44HDPath
     );
@@ -243,7 +280,13 @@ const handleAddLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddLedgerKeyMsg> = (service) => {
   return async (env, msg) => {
-    return await service.addLedgerKey(env, msg.kdf, msg.meta, msg.bip44HDPath);
+    return await service.addLedgerKey(
+      env,
+      msg.kdf,
+      msg.meta,
+      msg.bip44HDPath,
+      msg.cosmosLikeApp
+    );
   };
 };
 
@@ -289,6 +332,7 @@ const handleGetKeyMsg: (
           .bech32PrefixAccAddr
       ),
       isNanoLedger: key.isNanoLedger,
+      isKeystone: key.isKeystone,
     };
   };
 };

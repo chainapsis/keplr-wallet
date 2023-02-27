@@ -37,10 +37,18 @@ export interface CoinInputProps {
   label?: string;
 
   disableAllBalance?: boolean;
+
+  overrideSelectableCurrencies?: AppCurrency[];
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = observer(
-  ({ amountConfig, className, label, disableAllBalance }) => {
+  ({
+    amountConfig,
+    className,
+    label,
+    disableAllBalance,
+    overrideSelectableCurrencies,
+  }) => {
     const intl = useIntl();
 
     const { queriesStore } = useStore();
@@ -94,7 +102,9 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
 
     const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
 
-    const selectableCurrencies = amountConfig.sendableCurrencies
+    const selectableCurrencies = (
+      overrideSelectableCurrencies || amountConfig.sendableCurrencies
+    )
       .filter((cur) => {
         const bal = queryBalances.getBalanceFromCurrency(cur);
         return !bal.toDec().isZero();
@@ -123,12 +133,9 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
           </Label>
           <ButtonDropdown
             id={`selector-${randomId}`}
-            className={classnames(styleCoinInput.tokenSelector, {
-              disabled: amountConfig.isMax,
-            })}
+            className={classnames(styleCoinInput.tokenSelector)}
             isOpen={isOpenTokenSelector}
             toggle={() => setIsOpenTokenSelector((value) => !value)}
-            disabled={amountConfig.isMax}
           >
             <DropdownToggle caret>
               {formattedCoinDenom(amountConfig.sendCurrency)}
@@ -204,7 +211,6 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
               )
               .toString(amountConfig.sendCurrency?.coinDecimals ?? 0)}
             min={0}
-            disabled={amountConfig.isMax}
             autoComplete="off"
           />
           {errorText != null ? (

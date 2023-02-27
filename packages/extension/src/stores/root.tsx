@@ -6,6 +6,7 @@ import {
   FiatCurrencies,
   ICNSFrontendLink,
   ICNSInfo,
+  LegacyAmplitudeApiKey,
 } from "../config.ui";
 import {
   AccountStore,
@@ -24,6 +25,7 @@ import {
   InteractionStore,
   KeyRingStore,
   LedgerInitStore,
+  KeystoneStore,
   ObservableQueryBase,
   PermissionStore,
   QueriesStore,
@@ -70,6 +72,7 @@ export class RootStore {
   public readonly generalPermissionStore: GeneralPermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly ledgerInitStore: LedgerInitStore;
+  public readonly keystoneStore: KeystoneStore;
   public readonly chainSuggestStore: ChainSuggestStore;
   public readonly icnsInteractionStore: ICNSInteractionStore;
 
@@ -100,17 +103,18 @@ export class RootStore {
       chainName?: string;
       toChainId?: string;
       toChainName?: string;
-      registerType?: "seed" | "google" | "ledger" | "qr";
+      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
       feeType?: FeeType | undefined;
       isIbc?: boolean;
       rpc?: string;
       rest?: string;
     },
     {
-      registerType?: "seed" | "google" | "ledger" | "qr";
-      accountType?: "mnemonic" | "privateKey" | "ledger";
+      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
+      accountType?: "mnemonic" | "privateKey" | "ledger" | "keystone";
       currency?: string;
       language?: string;
+      totalAccounts?: number;
     }
   >;
 
@@ -139,6 +143,7 @@ export class RootStore {
     ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
 
     this.chainStore = new ChainStore(
+      new ExtensionKVStore("store_chain_config"),
       EmbedChainInfos,
       new InExtensionMessageRequester(),
       ObservableQueryBase.experimentalDeferInitialQueryController
@@ -173,6 +178,7 @@ export class RootStore {
       this.interactionStore,
       new InExtensionMessageRequester()
     );
+    this.keystoneStore = new KeystoneStore(this.interactionStore);
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo
@@ -256,6 +262,9 @@ export class RootStore {
                 native: {
                   type: "bank/MsgSend",
                 },
+              },
+              withdrawRewards: {
+                type: "distribution/MsgWithdrawDelegationReward",
               },
             };
           }
@@ -390,7 +399,7 @@ export class RootStore {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
-          const amplitudeClient = Amplitude.getInstance();
+          const amplitudeClient = Amplitude.getInstance("new");
           amplitudeClient.init(AmplitudeApiKey, undefined, {
             saveEvents: true,
             platform: "Extension",
@@ -424,7 +433,20 @@ export class RootStore {
             eventProperties,
           };
         },
-      }
+      },
+      (() => {
+        if (!LegacyAmplitudeApiKey) {
+          return new NoopAnalyticsClient();
+        } else {
+          const amplitudeClient = Amplitude.getInstance("legacy");
+          amplitudeClient.init(LegacyAmplitudeApiKey, undefined, {
+            saveEvents: true,
+            platform: "Extension",
+          });
+
+          return amplitudeClient;
+        }
+      })()
     );
 
     router.listen(APP_PORT);

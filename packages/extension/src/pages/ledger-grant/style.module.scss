@@ -1,0 +1,81 @@
+@charset "utf-8";
+
+@import url("https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700,800&display=swap");
+
+body {
+  font-family: "Nunito Sans", sans-serif;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  max-width: 764px;
+
+  margin-bottom: 40px;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 49px;
+  letter-spacing: 0.006em;
+
+  color: #1e1e24;
+
+  margin: 0;
+  margin-top: 36px;
+  margin-bottom: 12px;
+}
+
+.description {
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 124.4%;
+  letter-spacing: 0.002em;
+
+  color: #64646d;
+
+  margin: 0;
+  margin-bottom: 40px;
+}
+
+.buttonText {
+  display: flex;
+  align-items: center;
+
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 27px;
+  letter-spacing: -0.005em;
+
+  cursor: pointer;
+
+  color: #314fdf;
+}
+
+@keyframes spinAround {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+.spin {
+  -webkit-animation: spinAround 1.5s infinite linear;
+  animation: spinAround 1.5s infinite linear;
+}

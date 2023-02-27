@@ -99,6 +99,7 @@ const extensionConfig = (env, args) => {
     entry: {
       popup: ["./src/index.tsx"],
       blocklist: ["./src/pages/blocklist/index.tsx"],
+      ledgerGrant: ["./src/pages/ledger-grant/index.tsx"],
       background: ["./src/background/background.ts"],
       contentScripts: ["./src/content-scripts/content-scripts.ts"],
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
@@ -149,6 +150,7 @@ const extensionConfig = (env, args) => {
         filename: "popup.html",
         excludeChunks: [
           "blocklist",
+          "ledgerGrant",
           "background",
           "contentScripts",
           "injectedScript",
@@ -159,6 +161,18 @@ const extensionConfig = (env, args) => {
         filename: "blocklist.html",
         excludeChunks: [
           "popup",
+          "ledgerGrant",
+          "background",
+          "contentScripts",
+          "injectedScript",
+        ],
+      }),
+      new HtmlWebpackPlugin({
+        template: "./src/index.html",
+        filename: "ledger-grant.html",
+        excludeChunks: [
+          "popup",
+          "blocklist",
           "background",
           "contentScripts",
           "injectedScript",
@@ -168,7 +182,13 @@ const extensionConfig = (env, args) => {
       new webpack.EnvironmentPlugin([
         "NODE_ENV",
         "KEPLR_EXT_ETHEREUM_ENDPOINT",
+        "KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY",
         "KEPLR_EXT_AMPLITUDE_API_KEY",
+        "KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN",
+        "KEPLR_EXT_ANALYTICS_API_URL",
+        "KEPLR_EXT_TRANSAK_API_KEY",
+        "KEPLR_EXT_MOONPAY_API_KEY",
+        "KEPLR_EXT_KADO_API_KEY",
       ]),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",

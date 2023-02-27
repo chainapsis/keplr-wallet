@@ -2,6 +2,8 @@
   "main.account.chart.total-balance": "Total Balance",
   "main.account.chart.available-balance": "Available",
   "main.account.chart.staked-balance": "Staked",
+  "main.account.button.buy": "Buy",
+  "main.account.button.buy.not-support": "Unavailable on this chain",
   "main.account.button.deposit": "Deposit",
   "main.account.button.send": "Send",
   "main.account.tooltip.no-asset": "No token in your account. Deposit some tokens to send.",
@@ -23,7 +25,13 @@
   "main.ibc.transfer.paragraph": "Send tokens over IBC",
   "main.ibc.transfer.button": "Transfer",
 
+  "main.evmos.dashboard.title": "Dashboard",
+  "main.evmos.dashboard.paragraph": "View ERC-20 and IBC tokens",
+  "main.evmos.dashboard.button": "View",
+
   "main.address.copied": "Address copied!",
+
+  "main.suggest.chain.link": "Add Suggest Chains",
 
   "main.menu.settings": "Settings",
   "main.menu.address-book": "Address Book",
@@ -34,6 +42,15 @@
   "main.update-chain.confirm.paragraph": "Chain information has changed. Verify that a chain upgrade has taken place.",
   "main.update-chain.confirm.yes": "Proceed",
   "main.update-chain.confirm.no": "Ignore",
+
+  "main.authz.title": "AuthZ",
+  "main.authz.grant.grantee.information": "You authorized",
+  "main.authz.grant.grantee.address": "Grantee Address",
+  "main.authz.grant.expiration.title": "Expiration dates",
+  "main.authz.grant.expiration.information": "Expiration dates: ",
+  "main.authz.grant.expiration.expired": "Expired",
+  "main.authz.grant.expiration.infinite": "Your Authz delegation will not be expired until you revoke it.",
+  "main.authz.grant.revoke": "Revoke",
 
   "setting.language": "Language",
   "setting.language.automatic": "Automatic (Browser default)",
@@ -117,6 +134,9 @@
 
   "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you register again.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
+  "setting.token.manage.notification.viewing-key.copy.hover": "Viewing key copy",
+  "setting.token.manage.notification.contract-address.copy": "Contract address copied!",
+  "setting.token.manage.notification.contract-address.copy.hover": "Contract address copy",
 
   "setting.endpoints": "Endpoints",
   "setting.endpoints.paragraph": "Change into the node you wish to connect",
@@ -130,6 +150,8 @@
   "setting.autolock.error.out-of-range": "It cannot be less than 0 or greater than 4320(3days)",
 
   "setting.developer-mode": "Developer Mode",
+
+  "setting.chain-active.title": "Show/Hide Chains",
 
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
@@ -170,8 +192,11 @@
   "register.import.textarea.private-key.error.invalid": "Invalid private key",
   "register.import.textarea.private-key.error.invalid-length": "Invalid length of private key",
   "register.create.button.next": "Next",
+  "register.create.button.ledger.terra": "Use Terra Ledger app",
 
-  "register.ledger.title": "Import ledger",
+  "register.keystone.title": "Connect Keystone",
+
+  "register.ledger.title": "Connect ledger",
 
   "register.verify.button.register": "Register",
 

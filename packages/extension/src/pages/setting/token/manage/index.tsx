@@ -15,6 +15,7 @@ import {
   Secret20Currency,
 } from "@keplr-wallet/types";
 import { useIntl } from "react-intl";
+import { ToolTip } from "../../../../components/tooltip";
 
 export const ManageTokenPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -47,6 +48,24 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     }
   });
 
+  const copyText = async (text: string, messageId: string) => {
+    await navigator.clipboard.writeText(text);
+
+    // TODO: Show success tooltip.
+    notification.push({
+      placement: "top-center",
+      type: "success",
+      duration: 2,
+      content: intl.formatMessage({
+        id: messageId,
+      }),
+      canDelete: true,
+      transition: {
+        duration: 0.25,
+      },
+    });
+  };
+
   return (
     <HeaderLayout
       showChainName={false}
@@ -77,8 +96,22 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
           const icons: React.ReactElement[] = [];
 
-          if ("viewingKey" in customToken) {
-            icons.push(
+          icons.push(
+            <ToolTip
+              trigger="hover"
+              options={{
+                placement: "top-end",
+              }}
+              childrenStyle={{ display: "flex" }}
+              tooltip={
+                <div>
+                  {intl.formatMessage({
+                    id:
+                      "setting.token.manage.notification.contract-address.copy.hover",
+                  })}
+                </div>
+              }
+            >
               <i
                 key="copy"
                 className="fas fa-copy"
@@ -87,23 +120,48 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                 }}
                 onClick={async (e) => {
                   e.preventDefault();
-
-                  await navigator.clipboard.writeText(customToken.viewingKey);
-                  // TODO: Show success tooltip.
-                  notification.push({
-                    placement: "top-center",
-                    type: "success",
-                    duration: 2,
-                    content: intl.formatMessage({
-                      id: "setting.token.manage.notification.viewing-key.copy",
-                    }),
-                    canDelete: true,
-                    transition: {
-                      duration: 0.25,
-                    },
-                  });
+                  await copyText(
+                    customToken.contractAddress,
+                    "setting.token.manage.notification.contract-address.copy"
+                  );
                 }}
               />
+            </ToolTip>
+          );
+
+          if ("viewingKey" in customToken) {
+            icons.push(
+              <ToolTip
+                trigger="hover"
+                options={{
+                  placement: "top-end",
+                }}
+                childrenStyle={{ display: "flex" }}
+                tooltip={
+                  <div>
+                    {intl.formatMessage({
+                      id:
+                        "setting.token.manage.notification.viewing-key.copy.hover",
+                    })}
+                  </div>
+                }
+              >
+                <i
+                  key="key"
+                  className="fas fa-key"
+                  style={{
+                    cursor: "pointer",
+                  }}
+                  onClick={async (e) => {
+                    e.preventDefault();
+
+                    await copyText(
+                      customToken.viewingKey,
+                      "setting.token.manage.notification.viewing-key.copy"
+                    );
+                  }}
+                />
+              </ToolTip>
             );
           }
 

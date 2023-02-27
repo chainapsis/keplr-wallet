@@ -4,7 +4,7 @@ import {
   IntlMessages,
   LanguageToFiatCurrency as TypeLanguageToFiatCurrency,
 } from "./languages";
-import { FiatCurrency } from "@keplr-wallet/types";
+import { FiatCurrency, Currency } from "@keplr-wallet/types";
 import {
   ADDITIONAL_SIGN_IN_PREPEND,
   ADDITIONAL_INTL_MESSAGES,
@@ -103,6 +103,9 @@ export const AdditionalSignInPrepend:
 
 export const AdditionalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
 
+export const LegacyAmplitudeApiKey =
+  process.env["KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY"] || "";
+
 export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
 
 export const ICNSInfo = {
@@ -113,3 +116,44 @@ export const ICNSInfo = {
 
 // If not needed, just set as empty string ("")
 export const ICNSFrontendLink: string = "https://app.icns.xyz";
+
+export interface FiatOnRampServiceInfo {
+  serviceId: "moonpay" | "transak" | "kado";
+  serviceName: "MoonPay" | "Transak" | "Kado";
+  apiKey?: string;
+  buyOrigin: string;
+  buySupportChainIds: string[];
+  buySupportCurrencies?: Currency[];
+}
+
+export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
+  {
+    serviceId: "transak",
+    serviceName: "Transak",
+    apiKey: process.env["KEPLR_EXT_TRANSAK_API_KEY"] || "",
+    buyOrigin: "https://global.transak.com",
+    buySupportChainIds: ["osmosis-1", "cosmoshub-4", "secret-4"],
+  },
+  {
+    serviceId: "moonpay",
+    serviceName: "MoonPay",
+    apiKey: process.env["KEPLR_EXT_MOONPAY_API_KEY"] || "",
+    buyOrigin: "https://buy.moonpay.com",
+    buySupportChainIds: ["cosmoshub-4", "kava_2222-10"],
+  },
+  {
+    serviceId: "kado",
+    serviceName: "Kado",
+    apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] || "",
+    buyOrigin: "https://app.kado.money",
+    buySupportChainIds: ["osmosis-1", "juno-1", "evmos_9001-2"],
+    buySupportCurrencies: [
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+        coinGeckoId: "usd-coin",
+      },
+    ],
+  },
+];

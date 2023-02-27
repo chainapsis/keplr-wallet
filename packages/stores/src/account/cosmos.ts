@@ -51,6 +51,7 @@ import {
   txEventsWithPreOnFulfill,
 } from "./utils";
 import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
+import { MsgRevoke } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -490,7 +491,8 @@ export class CosmosAccountImpl {
         .getChain(this.chainId)
         .features?.includes("eth-key-sign") === true;
 
-    const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+    const eip712Signing =
+      useEthereumSign && (this.base.isNanoLedger || this.base.isKeystone);
 
     if (eip712Signing && !msgs.rlpTypes) {
       throw new Error(
@@ -1183,6 +1185,43 @@ export class CosmosAccountImpl {
           }
         }
       })
+    );
+  }
+
+  makeRevokeMsg(grantee: string, messageType: string) {
+    Bech32Address.validate(
+      grantee,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    );
+
+    const msg = {
+      granter: this.base.bech32Address,
+      grantee,
+      msg_type_url: messageType,
+    };
+
+    return this.makeTx(
+      "revoke",
+      {
+        aminoMsgs: [msg as any],
+        protoMsgs: [
+          {
+            typeUrl: "/cosmos.authz.v1beta1.MsgRevoke",
+            value: MsgRevoke.encode({
+              granter: this.base.bech32Address,
+              grantee,
+              msgTypeUrl: messageType,
+            }).finish(),
+          },
+        ],
+      },
+      (tx) => {
+        if (tx.code == null || tx.code === 0) {
+          this.queries.cosmos.queryAuthZGranter
+            .getGranter(this.base.bech32Address)
+            .fetch();
+        }
+      }
     );
   }
 

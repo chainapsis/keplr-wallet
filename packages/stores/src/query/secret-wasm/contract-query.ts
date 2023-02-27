@@ -89,13 +89,8 @@ export class ObservableSecretContractChainQuery<
       );
       this.nonce = encrypted.slice(0, 32);
 
-      const encoded = Buffer.from(
-        Buffer.from(encrypted).toString("base64")
-      ).toString("hex");
-
-      this.setUrl(
-        `/wasm/contract/${this.contractAddress}/query/${encoded}?encoding=hex`
-      );
+      const encoded = Buffer.from(encrypted).toString("base64");
+      this.setUrl(this.getSecretWasmUrl(this.contractAddress, encoded));
     }
 
     this._isIniting = false;
@@ -138,10 +133,7 @@ export class ObservableSecretContractChainQuery<
 
     const encResult = (response.data as unknown) as
       | {
-          height: string;
-          result: {
-            smart: string;
-          };
+          data: string;
         }
       | undefined;
 
@@ -159,7 +151,7 @@ export class ObservableSecretContractChainQuery<
 
     const decrypted = await this.keplr
       .getEnigmaUtils(this.chainId)
-      .decrypt(Buffer.from(encResult.result.smart, "base64"), this.nonce);
+      .decrypt(Buffer.from(encResult.data, "base64"), this.nonce);
 
     const message = Buffer.from(
       Buffer.from(decrypted).toString(),
@@ -178,15 +170,21 @@ export class ObservableSecretContractChainQuery<
     };
   }
 
+  protected getSecretWasmUrl(contractAddress: string, msg: string): string {
+    const queryParam = new URLSearchParams({ query: msg });
+    return `/compute/v1beta1/query/${contractAddress}?${queryParam.toString()}`;
+  }
+
   // Actually, the url of fetching the secret20 balance will be changed every time.
   // So, we should save it with deterministic key.
   protected getCacheKey(): string {
     return `${this.instance.name}-${
       this.instance.defaults.baseURL
     }${this.instance.getUri({
-      url: `/wasm/contract/${this.contractAddress}/query/${JSON.stringify(
-        this.obj
-      )}?encoding=json`,
+      url: this.getSecretWasmUrl(
+        this.contractAddress,
+        JSON.stringify(this.obj)
+      ),
     })}`;
   }
 
@@ -202,6 +200,6 @@ export class ObservableSecretContractChainQuery<
 
     // Code hash is persistent, so it is safe not to consider that the response is from cache or network.
     // TODO: Handle the error case.
-    return queryCodeHash.response.data.result;
+    return queryCodeHash.response.data.code_hash;
   }
 }

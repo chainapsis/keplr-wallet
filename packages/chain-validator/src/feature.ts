@@ -18,6 +18,7 @@ export const SupportedChainFeatures = [
   "axelar-evm-bridge",
   "osmosis-txfees",
   "erc20",
+  "terra-classic-fee",
 ];
 
 /**

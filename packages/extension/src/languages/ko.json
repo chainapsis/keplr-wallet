@@ -2,6 +2,8 @@
   "main.account.chart.total-balance": "총 자산",
   "main.account.chart.available-balance": "전송 가능한 자산",
   "main.account.chart.staked-balance": "스테이킹된 자산",
+  "main.account.button.buy": "구입",
+  "main.account.button.buy.not-support": "이 체인에서는 지원되지 않습니다.",
   "main.account.button.deposit": "입금",
   "main.account.button.send": "보내기",
   "main.account.tooltip.no-asset": "계정에 자산이 없습니다. 자산을 입금해주세요.",
@@ -25,6 +27,8 @@
 
   "main.address.copied": "주소가 복사되었습니다",
 
+  "main.suggest.chain.link": "더 많은 체인 추가",
+
   "main.menu.settings": "설정",
   "main.menu.address-book": "주소록",
   "main.menu.token-list": "토큰 목록",
@@ -34,6 +38,15 @@
   "main.update-chain.confirm.paragraph": "체인의 정보가 변했습니다. 체인이 업데이트되었는지 확인하세요.",
   "main.update-chain.confirm.yes": "진행",
   "main.update-chain.confirm.no": "무시",
+
+  "main.authz.title": "AuthZ",
+  "main.authz.grant.grantee.information": "You authorized ",
+  "main.authz.grant.grantee.address": "Grantee Address",
+  "main.authz.grant.expiration.title": "Expiration dates",
+  "main.authz.grant.expiration.information": "Expiration dates: ",
+  "main.authz.grant.expiration.expired": "Expired",
+  "main.authz.grant.expiration.infinite": "Your Authz delegation will not be expired until you revoke it.",
+  "main.authz.grant.revoke": "Revoke",
 
   "setting.language": "언어",
   "setting.language.automatic": "자동 (브라우저 언어)",
@@ -109,6 +122,9 @@
 
   "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",
   "setting.token.manage.notification.viewing-key.copy": "뷰잉키가 복사되었습니다",
+  "setting.token.manage.notification.viewing-key.copy.hover": "뷰잉키 복사",
+  "setting.token.manage.notification.contract-address.copy": "컨트랙트 주소가 복사되었습니다",
+  "setting.token.manage.notification.contract-address.copy.hover": "컨트랙트 주소 복사",
 
   "setting.endpoints": "노드 주소",
   "setting.endpoints.paragraph": "원하는 풀노드를 사용하도록 설정하세요",
@@ -122,6 +138,8 @@
   "setting.autolock.error.out-of-range": "잠금 주기는 0분 보다 작거나 4320분(3일)보다 클 수 없습니다",
 
   "setting.developer-mode": "개발자 모드",
+
+  "setting.chain-active.title": "체인 보이기/숨기기",
 
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
@@ -158,8 +176,11 @@
   "register.import.textarea.private-key.error.invalid": "잘못된 개인키 입니다",
   "register.import.textarea.private-key.error.invalid-length": "잘못된 길이의 개인키 입니다",
   "register.create.button.next": "다음",
+  "register.create.button.ledger.terra": "테라 앱 사용하기",
 
-  "register.ledger.title": "렛저 계정 불러오기",
+  "register.keystone.title": "키스톤 계정 연결하기",
+
+  "register.ledger.title": "렛저 계정 연결하기",
 
   "register.verify.button.register": "등록",
 

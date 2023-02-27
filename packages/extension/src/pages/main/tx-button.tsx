@@ -15,28 +15,8 @@ import { useHistory } from "react-router";
 
 import classnames from "classnames";
 import { Dec } from "@keplr-wallet/unit";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const QrCode = require("qrcode");
-
-const DepositModal: FunctionComponent<{
-  bech32Address: string;
-}> = ({ bech32Address }) => {
-  const qrCodeRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (qrCodeRef.current && bech32Address) {
-      QrCode.toCanvas(qrCodeRef.current, bech32Address);
-    }
-  }, [bech32Address]);
-
-  return (
-    <div className={styleTxButton.depositModal}>
-      <h1 style={{ marginBottom: 0 }}>Scan QR code</h1>
-      <canvas className={styleTxButton.qrcode} id="qrcode" ref={qrCodeRef} />
-    </div>
-  );
-};
+import { BuySupportServiceInfo, useBuy } from "../../hooks";
+import classNames from "classnames";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
@@ -47,9 +27,11 @@ export const TxButtonView: FunctionComponent = observer(() => {
     accountInfo.bech32Address
   );
 
-  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
-  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [sendTooltipOpen, setSendTooltipOpen] = useState(false);
+  const [buyTooltipOpen, setBuyTooltipOpen] = useState(false);
 
   const history = useHistory();
 
@@ -58,25 +40,43 @@ export const TxButtonView: FunctionComponent = observer(() => {
     undefined;
 
   const sendBtnRef = useRef<HTMLButtonElement>(null);
+  const buyBtnRef = useRef<HTMLButtonElement>(null);
+
+  const { isSupportChain, buySupportServiceInfos } = useBuy();
+  const isCurrentChainSupportBuy = buySupportServiceInfos.length > 0;
 
   return (
     <div className={styleTxButton.containerTxButton}>
-      <Modal
-        style={{
-          content: {
-            width: "330px",
-            minWidth: "330px",
-            minHeight: "unset",
-            maxHeight: "unset",
-          },
-        }}
-        isOpen={isDepositOpen}
-        onRequestClose={() => {
-          setIsDepositOpen(false);
-        }}
-      >
-        <DepositModal bech32Address={accountInfo.bech32Address} />
-      </Modal>
+      {isCurrentChainSupportBuy && (
+        <Button
+          innerRef={buyBtnRef}
+          className={classnames(styleTxButton.button, {
+            disabled: !isSupportChain,
+          })}
+          color="primary"
+          outline
+          onClick={(e) => {
+            e.preventDefault();
+
+            if (isSupportChain) {
+              setIsBuyModalOpen(true);
+            }
+          }}
+        >
+          <FormattedMessage id="main.account.button.buy" />
+        </Button>
+      )}
+      {!isSupportChain ? (
+        <Tooltip
+          placement="bottom"
+          isOpen={buyTooltipOpen}
+          target={buyBtnRef}
+          toggle={() => setBuyTooltipOpen((value) => !value)}
+          fade
+        >
+          <FormattedMessage id="main.account.button.buy.not-support" />
+        </Tooltip>
+      ) : null}
       <Button
         className={styleTxButton.button}
         color="primary"
@@ -84,7 +84,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
         onClick={(e) => {
           e.preventDefault();
 
-          setIsDepositOpen(true);
+          setIsDepositModalOpen(true);
         }}
       >
         <FormattedMessage id="main.account.button.deposit" />
@@ -115,14 +115,102 @@ export const TxButtonView: FunctionComponent = observer(() => {
       {!hasAssets ? (
         <Tooltip
           placement="bottom"
-          isOpen={tooltipOpen}
+          isOpen={sendTooltipOpen}
           target={sendBtnRef}
-          toggle={() => setTooltipOpen((value) => !value)}
+          toggle={() => setSendTooltipOpen((value) => !value)}
           fade
         >
           <FormattedMessage id="main.account.tooltip.no-asset" />
         </Tooltip>
       ) : null}
+      <Modal
+        style={{
+          content: {
+            width: "330px",
+            minWidth: "330px",
+            minHeight: "unset",
+            maxHeight: "unset",
+          },
+        }}
+        isOpen={isDepositModalOpen}
+        onRequestClose={() => {
+          setIsDepositModalOpen(false);
+        }}
+      >
+        <DepositModalContent bech32Address={accountInfo.bech32Address} />
+      </Modal>
+      <Modal
+        style={{
+          content: {
+            width: "330px",
+            minWidth: "330px",
+            minHeight: "unset",
+            maxHeight: "unset",
+            padding: "24px 12px",
+          },
+        }}
+        isOpen={isBuyModalOpen}
+        onRequestClose={() => {
+          setIsBuyModalOpen(false);
+        }}
+      >
+        <BuyModalContent buySupportServiceInfos={buySupportServiceInfos} />
+      </Modal>
     </div>
   );
 });
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const QrCode = require("qrcode");
+
+const DepositModalContent: FunctionComponent<{
+  bech32Address: string;
+}> = ({ bech32Address }) => {
+  const qrCodeRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (qrCodeRef.current && bech32Address) {
+      QrCode.toCanvas(qrCodeRef.current, bech32Address);
+    }
+  }, [bech32Address]);
+
+  return (
+    <div className={styleTxButton.modalContent}>
+      <h1 style={{ marginBottom: 0 }}>Scan QR code</h1>
+      <canvas className={styleTxButton.qrcode} id="qrcode" ref={qrCodeRef} />
+    </div>
+  );
+};
+
+const BuyModalContent: FunctionComponent<{
+  buySupportServiceInfos: BuySupportServiceInfo[];
+}> = ({ buySupportServiceInfos }) => {
+  return (
+    <div className={styleTxButton.modalContent}>
+      <h1 style={{ marginBottom: 0 }}>Buy Crypto</h1>
+      <div className={styleTxButton.buySupportServices}>
+        {buySupportServiceInfos.map((serviceInfo) => (
+          <a
+            key={serviceInfo.serviceId}
+            href={serviceInfo.buyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={classNames(styleTxButton.service, {
+              [styleTxButton.disabled]: !serviceInfo.buyUrl,
+            })}
+            onClick={(e) => !serviceInfo.buyUrl && e.preventDefault()}
+          >
+            <div className={styleTxButton.serviceLogoContainer}>
+              <img
+                src={require(`../../public/assets/img/fiat-on-ramp/${serviceInfo.serviceId}.svg`)}
+              />
+            </div>
+            <div className={styleTxButton.serviceName}>
+              {serviceInfo.serviceName}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+};

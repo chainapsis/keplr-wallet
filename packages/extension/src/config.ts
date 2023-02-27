@@ -192,6 +192,54 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["ibc-transfer"],
   },
   {
+    rpc: "https://rpc-mars.keplr.app",
+    rest: "https://lcd-mars.keplr.app",
+    chainId: "mars-1",
+    chainName: "Mars Hub",
+    stakeCurrency: {
+      coinDenom: "MARS",
+      coinMinimalDenom: "umars",
+      coinDecimals: 6,
+    },
+    walletUrl:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/mars"
+        : "http://localhost:8080/chains/mars",
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/mars"
+        : "http://localhost:8080/chains/mars",
+    bip44: {
+      coinType: 118,
+    },
+    alternativeBIP44s: [
+      {
+        coinType: 330,
+      },
+    ],
+    bech32Config: Bech32Address.defaultBech32Config("mars"),
+    currencies: [
+      {
+        coinDenom: "MARS",
+        coinMinimalDenom: "umars",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MARS",
+        coinMinimalDenom: "umars",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0,
+          average: 0,
+          high: 0.01,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
     rpc: "https://rpc-crypto-org.keplr.app",
     rest: "https://lcd-crypto-org.keplr.app",
     chainId: "crypto-org-chain-mainnet-1",
@@ -2135,12 +2183,124 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-phoenix.keplr.app",
+    rest: "https://lcd-phoenix.keplr.app",
+    chainId: "phoenix-1",
+    chainName: "Terra",
+    stakeCurrency: {
+      coinDenom: "LUNA",
+      coinMinimalDenom: "uluna",
+      coinDecimals: 6,
+      coinGeckoId: "terra-luna-2",
+    },
+    walletUrlForStaking:
+      process.env.NODE_ENV === "production"
+        ? "https://wallet.keplr.app/chains/terra"
+        : "http://localhost:8080/chains/terra",
+    bip44: {
+      coinType: 330,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "terra",
+      bech32PrefixAccPub: "terrapub",
+      bech32PrefixValAddr: "terravaloper",
+      bech32PrefixValPub: "terravaloperpub",
+      bech32PrefixConsAddr: "terravalcons",
+      bech32PrefixConsPub: "terravalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LUNA",
+        coinMinimalDenom: "uluna",
+        coinDecimals: 6,
+        coinGeckoId: "terra-luna-2",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LUNA",
+        coinMinimalDenom: "uluna",
+        coinDecimals: 6,
+        coinGeckoId: "terra-luna-2",
+        gasPriceStep: {
+          low: 0.15,
+          average: 0.25,
+          high: 0.4,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-columbus.keplr.app",
+    rest: "https://lcd-columbus.keplr.app",
+    chainId: "columbus-5",
+    chainName: "Terra Classic",
+    stakeCurrency: {
+      coinDenom: "LUNC",
+      coinMinimalDenom: "uluna",
+      coinDecimals: 6,
+      coinGeckoId: "terra-luna",
+    },
+    bip44: {
+      coinType: 330,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "terra",
+      bech32PrefixAccPub: "terrapub",
+      bech32PrefixValAddr: "terravaloper",
+      bech32PrefixValPub: "terravaloperpub",
+      bech32PrefixConsAddr: "terravalcons",
+      bech32PrefixConsPub: "terravalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LUNC",
+        coinMinimalDenom: "uluna",
+        coinDecimals: 6,
+        coinGeckoId: "terra-luna",
+      },
+      {
+        coinDenom: "USTC",
+        coinMinimalDenom: "uusd",
+        coinDecimals: 6,
+        coinGeckoId: "terrausd",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LUNC",
+        coinMinimalDenom: "uluna",
+        coinDecimals: 6,
+        coinGeckoId: "terra-luna",
+        gasPriceStep: {
+          low: 28.325,
+          average: 28.325,
+          high: 28.325,
+        },
+      },
+      {
+        coinDenom: "USTC",
+        coinMinimalDenom: "uusd",
+        coinDecimals: 6,
+        coinGeckoId: "terrausd",
+        gasPriceStep: {
+          low: 0.75,
+          average: 0.75,
+          high: 0.75,
+        },
+      },
+    ],
+    features: ["terra-classic-fee"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
 export const PrivilegedOrigins: string[] = [
   "https://wallet.keplr.app",
   "https://validator.keplr.app",
+  "https://chains.keplr.app",
 ];
 
 export const CommunityChainInfoRepo = {

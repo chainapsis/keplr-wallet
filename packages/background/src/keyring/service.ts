@@ -14,7 +14,12 @@ import {
   encodeSecp256k1Signature,
   serializeSignDoc,
 } from "@keplr-wallet/cosmos";
-import { BIP44HDPath, CommonCrypto, ExportKeyRingData } from "./types";
+import {
+  BIP44HDPath,
+  CommonCrypto,
+  ExportKeyRingData,
+  SignMode,
+} from "./types";
 
 import { escapeHTML, KVStore, sortObjectByKey } from "@keplr-wallet/common";
 
@@ -31,19 +36,26 @@ import {
   DirectSignResponse,
 } from "@keplr-wallet/types";
 import { APP_PORT, Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { AnalyticsService } from "../analytics";
 import { InteractionService } from "../interaction";
 import { PermissionService } from "../permission";
 
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  SignDoc,
+  TxBody,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { Buffer } from "buffer/";
 import { trimAminoSignDoc } from "./amino-sign-doc";
+import { KeystoneService } from "../keystone";
 import { RequestICNSAdr36SignaturesMsg } from "./messages";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { closePopupWindow } from "@keplr-wallet/popup";
 
 export class KeyRingService {
   private keyRing!: KeyRing;
 
+  protected analyticsSerice!: AnalyticsService;
   protected interactionService!: InteractionService;
   public chainsService!: ChainsService;
   public permissionService!: PermissionService;
@@ -58,7 +70,9 @@ export class KeyRingService {
     interactionService: InteractionService,
     chainsService: ChainsService,
     permissionService: PermissionService,
-    ledgerService: LedgerService
+    ledgerService: LedgerService,
+    keystoneService: KeystoneService,
+    analyticsSerice: AnalyticsService
   ) {
     this.interactionService = interactionService;
     this.chainsService = chainsService;
@@ -68,10 +82,12 @@ export class KeyRingService {
       this.embedChainInfos,
       this.kvStore,
       ledgerService,
+      keystoneService,
       this.crypto
     );
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
+    this.analyticsSerice = analyticsSerice;
   }
 
   protected readonly onChainRemoved = (chainId: string) => {
@@ -185,7 +201,7 @@ export class KeyRingService {
     return await this.keyRing.createPrivateKey(kdf, privateKey, password, meta);
   }
 
-  async createLedgerKey(
+  async createKeystoneKey(
     env: Env,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     password: string,
@@ -195,12 +211,33 @@ export class KeyRingService {
     status: KeyRingStatus;
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
-    return await this.keyRing.createLedgerKey(
+    return await this.keyRing.createKeystoneKey(
       env,
       kdf,
       password,
       meta,
       bip44HDPath
+    );
+  }
+
+  async createLedgerKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp?: string
+  ): Promise<{
+    status: KeyRingStatus;
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    return await this.keyRing.createLedgerKey(
+      env,
+      kdf,
+      password,
+      meta,
+      bip44HDPath,
+      cosmosLikeApp
     );
   }
 
@@ -365,6 +402,13 @@ export class KeyRingService {
           signOptions.ethSignType
         );
 
+        this.analyticsSerice.logEventIgnoreError("tx_signed", {
+          chainId,
+          isInternal: env.isInternalMsg,
+          origin: msgOrigin,
+          ethSignType: signOptions.ethSignType,
+        });
+
         return {
           signed: newSignDoc, // Included to match return type
           signature: {
@@ -383,8 +427,22 @@ export class KeyRingService {
         chainId,
         coinType,
         serializeSignDoc(newSignDoc),
-        ethereumKeyFeatures.signing
+        ethereumKeyFeatures.signing,
+        SignMode.Amino
       );
+
+      const msgTypes = newSignDoc.msgs
+        .filter((msg) => msg.type)
+        .map((msg) => msg.type);
+
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        signMode: SignMode.Amino,
+        msgTypes,
+        isADR36SignDoc,
+      });
 
       return {
         signed: newSignDoc,
@@ -475,6 +533,18 @@ export class KeyRingService {
         EthSignType.EIP712
       );
 
+      const msgTypes = newSignDoc.msgs
+        .filter((msg) => msg.type)
+        .map((msg) => msg.type);
+
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        ethSignType: EthSignType.EIP712,
+        msgTypes,
+      });
+
       return {
         signed: newSignDoc,
         signature: {
@@ -541,8 +611,21 @@ export class KeyRingService {
         chainId,
         coinType,
         newSignDocBytes,
-        ethereumKeyFeatures.signing
+        ethereumKeyFeatures.signing,
+        SignMode.Direct
       );
+
+      const msgTypes = TxBody.decode(newSignDoc.bodyBytes).messages.map(
+        (msg) => msg.typeUrl
+      );
+
+      this.analyticsSerice.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: env.isInternalMsg,
+        origin: msgOrigin,
+        signMode: SignMode.Direct,
+        msgTypes,
+      });
 
       return {
         signed: {
@@ -665,13 +748,20 @@ Salt: ${salt}`;
           accountInfo.chainId
         );
 
-        const signature = await this.keyRing.sign(
-          env,
-          accountInfo.chainId,
-          coinType,
-          serializeSignDoc(signDoc),
-          ethereumKeyFeatures.signing
-        );
+        const signature = await this.keyRing
+          .sign(
+            env,
+            accountInfo.chainId,
+            coinType,
+            serializeSignDoc(signDoc),
+            ethereumKeyFeatures.signing,
+            SignMode.Message
+          )
+          .finally(() => {
+            if (this.keyRing.type === "keystone") {
+              closePopupWindow("default");
+            }
+          });
 
         r.push({
           chainId: accountInfo.chainId,
@@ -791,7 +881,7 @@ Salt: ${salt}`;
     return this.keyRing.addPrivateKey(kdf, privateKey, meta);
   }
 
-  async addLedgerKey(
+  async addKeystoneKey(
     env: Env,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     meta: Record<string, string>,
@@ -799,7 +889,25 @@ Salt: ${salt}`;
   ): Promise<{
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
-    return this.keyRing.addLedgerKey(env, kdf, meta, bip44HDPath);
+    return this.keyRing.addKeystoneKey(env, kdf, meta, bip44HDPath);
+  }
+
+  async addLedgerKey(
+    env: Env,
+    kdf: "scrypt" | "sha256" | "pbkdf2",
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp?: string
+  ): Promise<{
+    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+  }> {
+    return this.keyRing.addLedgerKey(
+      env,
+      kdf,
+      meta,
+      bip44HDPath,
+      cosmosLikeApp
+    );
   }
 
   public async changeKeyStoreFromMultiKeyStore(

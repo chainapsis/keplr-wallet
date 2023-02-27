@@ -410,7 +410,7 @@ export class SecretAccountImpl {
       );
     }
 
-    const contractCodeHash = queryContractCodeHashResponse.data.result;
+    const contractCodeHash = queryContractCodeHashResponse.data.code_hash;
 
     const keplr = await this.base.getKeplr();
     if (!keplr) {

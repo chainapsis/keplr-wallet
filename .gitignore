@@ -6,6 +6,7 @@ dist
 prod
 .gitsecret/keys/random_seed
 !*.secret
+*.log
 
 yarn-error.log
 
