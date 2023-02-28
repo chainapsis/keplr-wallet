@@ -1869,6 +1869,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         type: "erc20",
         contractAddress: "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/evmos/images/evmos.png",
       },
       {
         coinDenom: "ATOM",
@@ -1877,6 +1879,28 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0xC5e00D3b04563950941f7137B5AfA3a534F0D6d6",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.png",
+      },
+      {
+        coinDenom: "CMDX",
+        coinMinimalDenom:
+          "erc20:0xF0965c8f0755CF080a61C91EDd6707F0532c8fE7:CMDX",
+        coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0xF0965c8f0755CF080a61C91EDd6707F0532c8fE7",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/comdex/images/cmdx.png",
+      },
+      {
+        coinDenom: "CMST",
+        coinMinimalDenom:
+          "erc20:0x9d6F2a9fDB32708e1AC07788cc29D6125ac73027:CMST",
+        coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x9d6F2a9fDB32708e1AC07788cc29D6125ac73027",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/comdex/images/cmst.png",
       },
       {
         coinDenom: "EEUR",
@@ -1885,6 +1909,18 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0x5db67696C3c088DfBf588d3dd849f44266ff0ffa",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/emoney/images/eeur.png",
+      },
+      {
+        coinDenom: "GRAV",
+        coinMinimalDenom:
+          "erc20:0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd:GRAV",
+        coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/gravitybridge/images/grav.png",
       },
       {
         coinDenom: "JUNO",
@@ -1893,6 +1929,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0x3452e23F9c4cC62c70B7ADAd699B264AF3549C19",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/juno/images/juno.png",
       },
       {
         coinDenom: "OSMO",
@@ -1901,6 +1939,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0xFA3C22C069B9556A4B2f7EcE1Ee3B467909f4864",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/images/osmo.png",
       },
       {
         coinDenom: "REGEN",
@@ -1909,6 +1949,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0x0CE35b0D42608Ca54Eb7bcc8044f7087C18E7717",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/regen/images/regen.png",
       },
       {
         coinDenom: "STARS",
@@ -1917,6 +1959,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0x5aD523d94Efb56C400941eb6F34393b84c75ba39",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/stargaze/images/stars.png",
       },
       {
         coinDenom: "TORI",
@@ -1925,6 +1969,18 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0x205CF44075E77A3543abC690437F3b2819bc450a",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/teritori/images/utori.png",
+      },
+      {
+        coinDenom: "USDC.grv",
+        coinMinimalDenom:
+          "erc20:0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687:USDC.grv",
+        coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/gravitybridge/images/gusdc.png",
       },
       {
         coinDenom: "USK",
@@ -1933,6 +1989,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0x13974cf36984216C90D1F4FC815C156092feA396",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/kuji.png",
       },
       {
         coinDenom: "axlDAI",
@@ -1941,30 +1999,8 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 18,
         type: "erc20",
         contractAddress: "0x4A2a90D444DbB7163B5861b772f882BbA394Ca67",
-      },
-      {
-        coinDenom: "axlUSDT",
-        coinMinimalDenom:
-          "erc20:0xe01C6D4987Fc8dCE22988DADa92d56dA701d0Fe0:axlUSDT",
-        coinDecimals: 6,
-        type: "erc20",
-        contractAddress: "0xe01C6D4987Fc8dCE22988DADa92d56dA701d0Fe0",
-      },
-      {
-        coinDenom: "axlWBTC",
-        coinMinimalDenom:
-          "erc20:0xF5b24c0093b65408ACE53df7ce86a02448d53b25:axlWBTC",
-        coinDecimals: 8,
-        type: "erc20",
-        contractAddress: "0xF5b24c0093b65408ACE53df7ce86a02448d53b25",
-      },
-      {
-        coinDenom: "axlWETH",
-        coinMinimalDenom:
-          "erc20:0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5:axlWETH",
-        coinDecimals: 18,
-        type: "erc20",
-        contractAddress: "0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/axelar/images/axldai.png",
       },
       {
         coinDenom: "axlUSDC",
@@ -1973,54 +2009,78 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0x15C3Eb3B621d1Bff62CbA1c9536B7c1AE9149b57",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/axelar/images/axlusdc.png",
       },
       {
-        coinDenom: "ibc GRAV",
+        coinDenom: "axlUSDT",
         coinMinimalDenom:
-          "erc20:0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd:ibc GRAV",
+          "erc20:0xe01C6D4987Fc8dCE22988DADa92d56dA701d0Fe0:axlUSDT",
         coinDecimals: 6,
         type: "erc20",
-        contractAddress: "0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd",
+        contractAddress: "0xe01C6D4987Fc8dCE22988DADa92d56dA701d0Fe0",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/axelar/images/axlusdt.png",
       },
       {
-        coinDenom: "ibc G-USDC",
+        coinDenom: "axlWBTC",
         coinMinimalDenom:
-          "erc20:0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687:ibc G-USDC",
-        coinDecimals: 6,
+          "erc20:0xF5b24c0093b65408ACE53df7ce86a02448d53b25:axlWBTC",
+        coinDecimals: 8,
         type: "erc20",
-        contractAddress: "0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687",
+        contractAddress: "0xF5b24c0093b65408ACE53df7ce86a02448d53b25",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/axelar/images/axlwbtc.png",
       },
       {
-        coinDenom: "ibc G-DAI",
+        coinDenom: "axlWETH",
         coinMinimalDenom:
-          "erc20:0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75:ibc G-DAI",
+          "erc20:0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5:axlWETH",
+        coinDecimals: 18,
+        type: "erc20",
+        contractAddress: "0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/axelar/images/axlweth.png",
+      },
+      {
+        coinDenom: "gDAI",
+        coinMinimalDenom:
+          "erc20:0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75:gDAI",
         coinDecimals: 18,
         type: "erc20",
         contractAddress: "0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/gravitybridge/images/gdai.png",
       },
       {
-        coinDenom: "ibc G-USDT",
+        coinDenom: "gUSDT",
         coinMinimalDenom:
-          "erc20:0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265:ibc G-USDT",
+          "erc20:0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265:gUSDT",
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/gravitybridge/images/gusdt.png",
       },
       {
-        coinDenom: "ibc G-WBTC",
+        coinDenom: "gWBTC",
         coinMinimalDenom:
-          "erc20:0x1D54EcB8583Ca25895c512A8308389fFD581F9c9:ibc G-WBTC",
+          "erc20:0x1D54EcB8583Ca25895c512A8308389fFD581F9c9:gWBTC",
         coinDecimals: 8,
         type: "erc20",
         contractAddress: "0x1D54EcB8583Ca25895c512A8308389fFD581F9c9",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/gravitybridge/images/gwbtc.png",
       },
       {
-        coinDenom: "ibc G-WETH",
+        coinDenom: "gWETH",
         coinMinimalDenom:
-          "erc20:0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E:ibc G-WETH",
+          "erc20:0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E:gWETH",
         coinDecimals: 18,
         type: "erc20",
         contractAddress: "0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/gravitybridge/images/gweth.png",
       },
       {
         coinDenom: "stATOM",
@@ -2029,6 +2089,18 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinDecimals: 6,
         type: "erc20",
         contractAddress: "0xc8B4d3e67238e38B20d38908646fF6F4F48De5EC",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/stride/images/statom.png",
+      },
+      {
+        coinDenom: "stEVMOS",
+        coinMinimalDenom:
+          "erc20:0x2C68D1d6aB986Ff4640b51e1F14C716a076E44C4:stEVMOS",
+        coinDecimals: 18,
+        type: "erc20",
+        contractAddress: "0x2C68D1d6aB986Ff4640b51e1F14C716a076E44C4",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/stride/images/stevmos.png",
       },
     ],
     feeCurrencies: [
