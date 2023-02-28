@@ -44,7 +44,7 @@ export class EthereumAccountImpl {
     currency: AppCurrency,
     contractAddress: string,
     recipientBech32: string,
-    value: Int,
+    amount: string,
     maxFeePerGas: Int,
     gasLimit: Int,
     onTxEvents?: {
@@ -64,6 +64,11 @@ export class EthereumAccountImpl {
       recipientBech32,
       this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
     ).toHex(true);
+
+    const value = this.convertNativeToContractDenom(
+      amount,
+      currency.coinDecimals
+    );
 
     const txClient = this.queriesStore.get(this.chainId).erc20.txClient;
 
@@ -113,7 +118,7 @@ export class EthereumAccountImpl {
     }
   }
 
-  public convertNativeToContractDenom(value: string, decimals: number): Int {
+  protected convertNativeToContractDenom(value: string, decimals: number): Int {
     // Convert to contract denomination
     const factor = new Dec(10).pow(new Int(decimals));
     const dec = new Dec(value).mul(factor);

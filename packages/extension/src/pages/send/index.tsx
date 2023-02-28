@@ -316,10 +316,7 @@ export const SendPage: FunctionComponent = observer(() => {
                   sendConfigs.amountConfig.sendCurrency,
                   denomHelper.contractAddress,
                   sendConfigs.recipientConfig.recipient,
-                  accountInfo.ethereum.convertNativeToContractDenom(
-                    sendConfigs.amountConfig.amount,
-                    sendConfigs.amountConfig.sendCurrency.coinDecimals
-                  ),
+                  sendConfigs.amountConfig.amount,
                   maxFeePerGas,
                   gasLimit
                 );
