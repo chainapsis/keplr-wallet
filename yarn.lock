@@ -5249,8 +5249,10 @@ __metadata:
   resolution: "@keplr-wallet/common@workspace:packages/common"
   dependencies:
     "@keplr-wallet/crypto": 0.11.41
+    "@keplr-wallet/types": 0.11.41
     buffer: ^6.0.3
     delay: ^4.4.0
+    mobx: ^6.1.7
   languageName: unknown
   linkType: soft
 
