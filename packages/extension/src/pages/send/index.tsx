@@ -301,12 +301,6 @@ export const SendPage: FunctionComponent = observer(() => {
               const stdFee = sendConfigs.feeConfig.toStdFee();
 
               if (denomHelper?.type === "erc20") {
-                if (stdFee.amount.length === 0) {
-                  throw new Error(
-                    "No fee amount found, could not create transaction"
-                  );
-                }
-
                 const totalFees = new Int(stdFee.amount[0].amount);
                 const gasLimit = new Int(stdFee.gas);
 
