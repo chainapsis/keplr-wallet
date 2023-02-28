@@ -7,8 +7,11 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { store } from "@chatStore/index";
-import { setMessageError } from "@chatStore/messages-slice";
-import { setMessagingPubKey, userDetails } from "@chatStore/user-slice";
+import {
+  resetUser,
+  setMessagingPubKey,
+  userDetails,
+} from "@chatStore/user-slice";
 import privacyIcon from "@assets/hello.png";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
@@ -57,16 +60,11 @@ export const ChatInitPopup = ({
       );
 
       store.dispatch(setMessagingPubKey(messagingPubKey));
+      history.replace("/chat");
     } catch (e) {
       // Show error toaster
       console.error("error", e);
-      store.dispatch(
-        setMessageError({
-          type: "setup",
-          message: "Something went wrong, Please try again in sometime.",
-          level: 3,
-        })
-      );
+      store.dispatch(resetUser({}));
       // Redirect to home
       history.replace("/");
     } finally {

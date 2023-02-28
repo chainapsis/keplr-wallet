@@ -32,7 +32,10 @@ export const registerPubKey = async (
   walletAddress: string,
   channelId: string,
   privacySetting: PrivacySetting,
-  chatReadReceiptSetting?: boolean
+  chatReadReceiptSetting?: boolean,
+  signingPubKey?: string,
+  signature?: string,
+  signedObjBase64?: string
 ): Promise<void> => {
   try {
     await client.mutate({
@@ -50,6 +53,9 @@ export const registerPubKey = async (
           channelId,
           privacySetting,
           readReceipt: chatReadReceiptSetting,
+          signingPubKey,
+          signature,
+          signedObjBase64,
         },
       },
       context: {
@@ -60,6 +66,7 @@ export const registerPubKey = async (
     });
   } catch (e) {
     console.log(e);
+    throw new Error("Pub key registration failed");
   }
 };
 
