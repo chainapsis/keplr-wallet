@@ -3,9 +3,9 @@ import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
-import { ObservableQueryERC20ContractData } from "./contract-query";
+import { ObservableQueryERC20ContractBalance } from "./balance-query";
 
-export class ObservableQueryERC20Balance extends ObservableQueryERC20ContractData {
+export class ObservableQueryERC20Balance extends ObservableQueryERC20ContractBalance {
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -17,7 +17,7 @@ export class ObservableQueryERC20Balance extends ObservableQueryERC20ContractDat
   }
 
   get balance() {
-    return this.queryContractData.balance;
+    return this.queryContractBalance.balance;
   }
 
   protected canFetch(): boolean {
@@ -25,11 +25,11 @@ export class ObservableQueryERC20Balance extends ObservableQueryERC20ContractDat
   }
 
   fetch() {
-    this.queryContractData.queryBalance.fetch();
+    this.queryContractBalance.fetch();
   }
 
   get isFetching() {
-    return this.queryContractData.queryBalance.isFetching;
+    return this.queryContractBalance.isFetching;
   }
 }
 

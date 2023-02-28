@@ -1,6 +1,6 @@
 import { ChainGetter } from "../../common";
 import { isAddress } from "@ethersproject/address";
-import { erc20MetadataInterface } from "./contract-query";
+import { erc20ContractInterface } from "./common";
 import {
   JsonRpcProvider,
   Provider,
@@ -74,7 +74,7 @@ export class ERC20TxClient {
   }
 
   protected encodeContractData(method: string, params?: Array<any>): string {
-    return erc20MetadataInterface.encodeFunctionData(method, params);
+    return erc20ContractInterface.encodeFunctionData(method, params);
   }
 
   public async createERC20TokenTransferTx(

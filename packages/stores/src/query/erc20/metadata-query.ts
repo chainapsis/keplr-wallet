@@ -1,99 +1,10 @@
 import { QueryError, ObservableJsonRPCQuery, ChainGetter } from "../../common";
 import { KVStore } from "@keplr-wallet/common";
 import Axios from "axios";
-import { Interface } from "@ethersproject/abi";
 import { computed, makeObservable } from "mobx";
-import { Bech32Address } from "@keplr-wallet/cosmos";
-import { Int } from "@keplr-wallet/unit";
 
 import { ERC20ContractTokenInfo } from "./types";
-
-export const erc20MetadataInterface: Interface = new Interface([
-  {
-    constant: true,
-    inputs: [],
-    name: "name",
-    outputs: [
-      {
-        name: "",
-        type: "string",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "symbol",
-    outputs: [
-      {
-        name: "",
-        type: "string",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "decimals",
-    outputs: [
-      {
-        name: "",
-        type: "uint8",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        name: "address",
-        type: "address",
-      },
-    ],
-    name: "balanceOf",
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: "to",
-        type: "address",
-      },
-      {
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "transfer",
-    outputs: [
-      {
-        name: "",
-        type: "bool",
-      },
-    ],
-    payable: false,
-    stateMutability: "nonPayable",
-    type: "function",
-  },
-]);
+import { erc20ContractInterface } from "./common";
 
 export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<string> {
   constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
@@ -106,7 +17,7 @@ export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<str
     super(kvStore, instance, "", "eth_call", [
       {
         to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("name"),
+        data: erc20ContractInterface.encodeFunctionData("name"),
       },
       "latest",
     ]);
@@ -121,7 +32,7 @@ export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<str
     }
 
     try {
-      return erc20MetadataInterface.decodeFunctionResult(
+      return erc20ContractInterface.decodeFunctionResult(
         "name",
         this.response.data
       )[0];
@@ -143,7 +54,7 @@ export class ObservableQueryERC20MetadataSymbol extends ObservableJsonRPCQuery<s
     super(kvStore, instance, "", "eth_call", [
       {
         to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("symbol"),
+        data: erc20ContractInterface.encodeFunctionData("symbol"),
       },
       "latest",
     ]);
@@ -158,7 +69,7 @@ export class ObservableQueryERC20MetadataSymbol extends ObservableJsonRPCQuery<s
     }
 
     try {
-      return erc20MetadataInterface.decodeFunctionResult(
+      return erc20ContractInterface.decodeFunctionResult(
         "symbol",
         this.response.data
       )[0];
@@ -180,7 +91,7 @@ export class ObservableQueryERC20MetadataDecimals extends ObservableJsonRPCQuery
     super(kvStore, instance, "", "eth_call", [
       {
         to: contractAddress,
-        data: erc20MetadataInterface.encodeFunctionData("decimals"),
+        data: erc20ContractInterface.encodeFunctionData("decimals"),
       },
       "latest",
     ]);
@@ -195,7 +106,7 @@ export class ObservableQueryERC20MetadataDecimals extends ObservableJsonRPCQuery
     }
 
     try {
-      return erc20MetadataInterface.decodeFunctionResult(
+      return erc20ContractInterface.decodeFunctionResult(
         "decimals",
         this.response.data
       )[0];
@@ -206,73 +117,15 @@ export class ObservableQueryERC20MetadataDecimals extends ObservableJsonRPCQuery
   }
 }
 
-export class ObservableQueryERC20ContractBalance extends ObservableJsonRPCQuery<string> {
-  constructor(
-    kvStore: KVStore,
-    ethereumURL: string,
-    contractAddress: string,
-    userAddress: string
-  ) {
-    const instance = Axios.create({
-      ...{
-        baseURL: ethereumURL,
-      },
-    });
-
-    let messageData: string;
-    try {
-      messageData = erc20MetadataInterface.encodeFunctionData("balanceOf", [
-        userAddress,
-      ]);
-    } catch (e) {
-      messageData = "";
-    }
-
-    super(kvStore, instance, "", "eth_call", [
-      {
-        to: contractAddress,
-        data: messageData,
-      },
-      "latest",
-    ]);
-
-    makeObservable(this);
-  }
-
-  @computed
-  get balance(): string | undefined {
-    if (!this.response) {
-      return undefined;
-    }
-
-    try {
-      const balance = erc20MetadataInterface.decodeFunctionResult(
-        "balanceOf",
-        this.response.data
-      )[0] as Int;
-      return balance.toString();
-    } catch (e) {
-      console.log(e);
-    }
-    return undefined;
-  }
-}
-
 /**
  * Query for ERC20 Metadata and for an account's balance on the given ERC-20 contract
  */
-export class ObservableQueryERC20ContractDataInner {
+export class ObservableQueryERC20MetadataInner {
   protected readonly _queryName: ObservableQueryERC20MetadataName;
   protected readonly _querySymbol: ObservableQueryERC20MetadataSymbol;
   protected readonly _queryDecimals: ObservableQueryERC20MetadataDecimals;
-  protected readonly _queryBalance: ObservableQueryERC20ContractBalance;
 
-  constructor(
-    kvStore: KVStore,
-    ethereumURL: string,
-    contractAddress: string,
-    userAddress: string
-  ) {
+  constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
     this._queryName = new ObservableQueryERC20MetadataName(
       kvStore,
       ethereumURL,
@@ -290,13 +143,6 @@ export class ObservableQueryERC20ContractDataInner {
       ethereumURL,
       contractAddress
     );
-
-    this._queryBalance = new ObservableQueryERC20ContractBalance(
-      kvStore,
-      ethereumURL,
-      contractAddress,
-      userAddress
-    );
   }
 
   get queryName(): ObservableQueryERC20MetadataName {
@@ -311,10 +157,6 @@ export class ObservableQueryERC20ContractDataInner {
     return this._queryDecimals;
   }
 
-  get queryBalance(): ObservableQueryERC20ContractBalance {
-    return this._queryBalance;
-  }
-
   get symbol(): string | undefined {
     return this._querySymbol.symbol;
   }
@@ -325,10 +167,6 @@ export class ObservableQueryERC20ContractDataInner {
 
   get decimals(): number | undefined {
     return this._queryDecimals.decimals;
-  }
-
-  get balance(): string | undefined {
-    return this._queryBalance.balance;
   }
 
   @computed
@@ -342,7 +180,6 @@ export class ObservableQueryERC20ContractDataInner {
 
   @computed
   get isFetching(): boolean {
-    // Ignore queryBalance, since userAddress may be empty
     return (
       this._queryDecimals.isFetching ||
       this._queryName.isFetching ||
@@ -351,7 +188,6 @@ export class ObservableQueryERC20ContractDataInner {
   }
 
   get error(): QueryError<unknown> | undefined {
-    // Ignore queryBalance, since userAddress may be empty
     return (
       this._queryDecimals.error ||
       this._queryName.error ||
@@ -362,32 +198,22 @@ export class ObservableQueryERC20ContractDataInner {
 
 /**
  * Query ERC20 metadata (https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#IERC20Metadata)
- * and contract data (https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#IERC20).
  */
-export class ObservableQueryERC20ContractData {
-  protected queryContractData: ObservableQueryERC20ContractDataInner;
+export class ObservableQueryERC20Metadata {
+  protected queryContractMetadata: ObservableQueryERC20MetadataInner;
 
   constructor(
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly contractAddress: string,
-    protected readonly bech32Address: string
+    protected readonly contractAddress: string
   ) {
     const ethereumUrl = chainGetter.getChain(chainId).ethereumJsonRpc ?? "";
-    let userAddress = "";
-    try {
-      userAddress = Bech32Address.fromBech32(
-        this.bech32Address,
-        chainGetter.getChain(chainId).bech32Config.bech32PrefixAccAddr
-      ).toHex(true);
-    } catch (e) {}
 
-    this.queryContractData = new ObservableQueryERC20ContractDataInner(
+    this.queryContractMetadata = new ObservableQueryERC20MetadataInner(
       kvStore,
       ethereumUrl,
-      contractAddress,
-      userAddress
+      contractAddress
     );
   }
 }
