@@ -1867,126 +1867,168 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom:
           "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:WEVMOS",
         coinDecimals: 18,
+        type: "erc20",
+        contractAddress: "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
       },
       {
         coinDenom: "ATOM",
         coinMinimalDenom:
           "erc20:0xC5e00D3b04563950941f7137B5AfA3a534F0D6d6:ATOM",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0xC5e00D3b04563950941f7137B5AfA3a534F0D6d6",
       },
       {
         coinDenom: "EEUR",
         coinMinimalDenom:
           "erc20:0x5db67696C3c088DfBf588d3dd849f44266ff0ffa:EEUR",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x5db67696C3c088DfBf588d3dd849f44266ff0ffa",
       },
       {
         coinDenom: "JUNO",
         coinMinimalDenom:
           "erc20:0x3452e23F9c4cC62c70B7ADAd699B264AF3549C19:JUNO",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x3452e23F9c4cC62c70B7ADAd699B264AF3549C19",
       },
       {
         coinDenom: "OSMO",
         coinMinimalDenom:
           "erc20:0xFA3C22C069B9556A4B2f7EcE1Ee3B467909f4864:OSMO",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0xFA3C22C069B9556A4B2f7EcE1Ee3B467909f4864",
       },
       {
         coinDenom: "REGEN",
         coinMinimalDenom:
           "erc20:0x0CE35b0D42608Ca54Eb7bcc8044f7087C18E7717:REGEN",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x0CE35b0D42608Ca54Eb7bcc8044f7087C18E7717",
       },
       {
         coinDenom: "STARS",
         coinMinimalDenom:
           "erc20:0x5aD523d94Efb56C400941eb6F34393b84c75ba39:STARS",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x5aD523d94Efb56C400941eb6F34393b84c75ba39",
       },
       {
         coinDenom: "TORI",
         coinMinimalDenom:
           "erc20:0x205CF44075E77A3543abC690437F3b2819bc450a:TORI",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x205CF44075E77A3543abC690437F3b2819bc450a",
       },
       {
         coinDenom: "USK",
         coinMinimalDenom:
           "erc20:0x13974cf36984216C90D1F4FC815C156092feA396:USK",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x13974cf36984216C90D1F4FC815C156092feA396",
       },
       {
         coinDenom: "axlDAI",
         coinMinimalDenom:
           "erc20:0x4A2a90D444DbB7163B5861b772f882BbA394Ca67:axlDAI",
         coinDecimals: 18,
+        type: "erc20",
+        contractAddress: "0x4A2a90D444DbB7163B5861b772f882BbA394Ca67",
       },
       {
         coinDenom: "axlUSDT",
         coinMinimalDenom:
           "erc20:0xe01C6D4987Fc8dCE22988DADa92d56dA701d0Fe0:axlUSDT",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0xe01C6D4987Fc8dCE22988DADa92d56dA701d0Fe0",
       },
       {
         coinDenom: "axlWBTC",
         coinMinimalDenom:
           "erc20:0xF5b24c0093b65408ACE53df7ce86a02448d53b25:axlWBTC",
         coinDecimals: 8,
+        type: "erc20",
+        contractAddress: "0xF5b24c0093b65408ACE53df7ce86a02448d53b25",
       },
       {
         coinDenom: "axlWETH",
         coinMinimalDenom:
           "erc20:0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5:axlWETH",
         coinDecimals: 18,
+        type: "erc20",
+        contractAddress: "0x50dE24B3f0B3136C50FA8A3B8ebc8BD80a269ce5",
       },
       {
         coinDenom: "axlUSDC",
         coinMinimalDenom:
           "erc20:0x15C3Eb3B621d1Bff62CbA1c9536B7c1AE9149b57:axlUSDC",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x15C3Eb3B621d1Bff62CbA1c9536B7c1AE9149b57",
       },
       {
         coinDenom: "ibc GRAV",
         coinMinimalDenom:
           "erc20:0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd:ibc GRAV",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd",
       },
       {
         coinDenom: "ibc G-USDC",
         coinMinimalDenom:
           "erc20:0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687:ibc G-USDC",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0x5FD55A1B9FC24967C4dB09C513C3BA0DFa7FF687",
       },
       {
         coinDenom: "ibc G-DAI",
         coinMinimalDenom:
           "erc20:0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75:ibc G-DAI",
         coinDecimals: 18,
+        type: "erc20",
+        contractAddress: "0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75",
       },
       {
         coinDenom: "ibc G-USDT",
         coinMinimalDenom:
           "erc20:0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265:ibc G-USDT",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265",
       },
       {
         coinDenom: "ibc G-WBTC",
         coinMinimalDenom:
           "erc20:0x1D54EcB8583Ca25895c512A8308389fFD581F9c9:ibc G-WBTC",
         coinDecimals: 8,
+        type: "erc20",
+        contractAddress: "0x1D54EcB8583Ca25895c512A8308389fFD581F9c9",
       },
       {
         coinDenom: "ibc G-WETH",
         coinMinimalDenom:
           "erc20:0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E:ibc G-WETH",
         coinDecimals: 18,
+        type: "erc20",
+        contractAddress: "0xc03345448969Dd8C00e9E4A85d2d9722d093aF8E",
       },
       {
         coinDenom: "stATOM",
         coinMinimalDenom:
           "erc20:0xc8B4d3e67238e38B20d38908646fF6F4F48De5EC:stATOM",
         coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0xc8B4d3e67238e38B20d38908646fF6F4F48De5EC",
       },
     ],
     feeCurrencies: [

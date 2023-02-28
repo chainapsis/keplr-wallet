@@ -2,7 +2,7 @@ import { AccountSetBase, AccountSetBaseSuper } from "./base";
 import { IQueriesStore, ERC20Queries } from "../query";
 import { Buffer } from "buffer/";
 import { ChainGetter } from "../common";
-import { AppCurrency, EthSignType } from "@keplr-wallet/types";
+import { ERC20Currency, EthSignType } from "@keplr-wallet/types";
 import { CosmosAccount } from "./cosmos";
 import { Dec, Int } from "@keplr-wallet/unit";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -41,8 +41,7 @@ export class EthereumAccountImpl {
   ) {}
 
   public async broadcastERC20TokenTransfer(
-    currency: AppCurrency,
-    contractAddress: string,
+    currency: ERC20Currency,
     recipientBech32: string,
     amount: string,
     maxFeePerGas: Int,
@@ -54,6 +53,10 @@ export class EthereumAccountImpl {
     const keplr = await this.base.getKeplr();
     if (!keplr) {
       throw new Error("Can't get the Keplr API");
+    }
+
+    if (!currency) {
+      throw new Error("Invalid currency, expected valid ERC-20 token");
     }
 
     // Get hex representations of sender and recipient
@@ -73,7 +76,7 @@ export class EthereumAccountImpl {
     const txClient = this.queriesStore.get(this.chainId).erc20.txClient;
 
     const tx = await txClient.createERC20TokenTransferTx(
-      contractAddress,
+      currency.contractAddress,
       senderHex,
       recipientHex,
       value,

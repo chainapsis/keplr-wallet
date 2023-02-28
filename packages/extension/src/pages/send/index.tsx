@@ -28,6 +28,7 @@ import {
 } from "@keplr-wallet/popup";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { Int } from "@keplr-wallet/unit";
+import { ERC20Currency } from "@keplr-wallet/types";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -301,16 +302,21 @@ export const SendPage: FunctionComponent = observer(() => {
               const stdFee = sendConfigs.feeConfig.toStdFee();
 
               if (denomHelper?.type === "erc20") {
+                const currency = sendConfigs.amountConfig
+                  .sendCurrency as ERC20Currency;
+
                 const totalFees = new Int(stdFee.amount[0].amount);
                 const gasLimit = new Int(stdFee.gas);
 
                 const maxFeePerGas = totalFees.div(gasLimit);
 
+                const recipient = sendConfigs.recipientConfig.recipient;
+                const amount = sendConfigs.amountConfig.amount;
+
                 await accountInfo.ethereum.broadcastERC20TokenTransfer(
-                  sendConfigs.amountConfig.sendCurrency,
-                  denomHelper.contractAddress,
-                  sendConfigs.recipientConfig.recipient,
-                  sendConfigs.amountConfig.amount,
+                  currency,
+                  recipient,
+                  amount,
                   maxFeePerGas,
                   gasLimit
                 );
