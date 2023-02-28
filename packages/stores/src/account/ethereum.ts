@@ -1,5 +1,5 @@
 import { AccountSetBase, AccountSetBaseSuper } from "./base";
-import { IQueriesStore, ERC20Queries } from "../query";
+import { IQueriesStore, ERC20Queries, ERC20TxClient } from "../query";
 import { Buffer } from "buffer/";
 import { ChainGetter } from "../common";
 import { ERC20Currency, EthSignType } from "@keplr-wallet/types";
@@ -73,7 +73,7 @@ export class EthereumAccountImpl {
       currency.coinDecimals
     );
 
-    const txClient = this.queriesStore.get(this.chainId).erc20.txClient;
+    const txClient = new ERC20TxClient(this.chainId, this.chainGetter);
 
     const tx = await txClient.createERC20TokenTransferTx(
       currency.contractAddress,

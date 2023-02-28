@@ -1,4 +1,3 @@
-import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { isAddress } from "@ethersproject/address";
 import { erc20MetadataInterface } from "./contract-query";
@@ -32,11 +31,7 @@ export type SignableTx = {
 export class ERC20TxClient {
   protected provider?: Provider;
 
-  constructor(
-    readonly kvStore: KVStore,
-    readonly chainId: string,
-    readonly chainGetter: ChainGetter
-  ) {
+  constructor(readonly chainId: string, readonly chainGetter: ChainGetter) {
     const ethereumUrl = this.chainGetter.getChain(chainId).ethereumJsonRpc;
     if (ethereumUrl) {
       this.provider = new JsonRpcProvider(ethereumUrl);

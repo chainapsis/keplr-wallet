@@ -4,7 +4,6 @@ import { KVStore } from "@keplr-wallet/common";
 import { ObservableQueryERC20ContractInfo } from "./erc20-contract-info";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryERC20BalanceRegistry } from "./erc20-balance";
-import { ERC20TxClient } from "./transaction-client";
 
 export interface ERC20Queries {
   erc20: ERC20QueriesImpl;
@@ -37,7 +36,6 @@ export const ERC20Queries = {
 
 export class ERC20QueriesImpl {
   public readonly queryERC20ContractInfo: DeepReadonly<ObservableQueryERC20ContractInfo>;
-  public readonly txClient: DeepReadonly<ERC20TxClient>;
 
   constructor(
     base: QueriesSetBase,
@@ -54,7 +52,5 @@ export class ERC20QueriesImpl {
       chainId,
       chainGetter
     );
-
-    this.txClient = new ERC20TxClient(kvStore, chainId, chainGetter);
   }
 }
