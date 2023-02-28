@@ -139,7 +139,7 @@ export class ERC20TxClient {
       );
     }
 
-    // Timeout after 5 seconds by default
-    return await this.provider.waitForTransaction(hash, 1, 5000);
+    // Timeout after 12 seconds by default
+    return await this.provider.waitForTransaction(hash, 1, 12000);
   }
 }
