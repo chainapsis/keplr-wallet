@@ -3,8 +3,8 @@ import { KVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import { Interface } from "@ethersproject/abi";
 import { computed, makeObservable } from "mobx";
-import { BigNumber } from "@ethersproject/bignumber";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { Int } from "@keplr-wallet/unit";
 
 import { ERC20ContractTokenInfo } from "./types";
 
@@ -249,7 +249,7 @@ export class ObservableQueryERC20ContractBalance extends ObservableJsonRPCQuery<
       const balance = erc20MetadataInterface.decodeFunctionResult(
         "balanceOf",
         this.response.data
-      )[0] as BigNumber;
+      )[0] as Int;
       return balance.toString();
     } catch (e) {
       console.log(e);

@@ -4,7 +4,6 @@ import { Buffer } from "buffer/";
 import { ChainGetter } from "../common";
 import { AppCurrency, EthSignType } from "@keplr-wallet/types";
 import { CosmosAccount } from "./cosmos";
-import { BigNumber } from "@ethersproject/bignumber";
 import { Dec, Int } from "@keplr-wallet/unit";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
@@ -45,9 +44,9 @@ export class EthereumAccountImpl {
     currency: AppCurrency,
     contractAddress: string,
     recipientBech32: string,
-    value: BigNumber,
-    maxFeePerGas: BigNumber,
-    gasLimit: BigNumber,
+    value: Int,
+    maxFeePerGas: Int,
+    gasLimit: Int,
     onTxEvents?: {
       onBroadcasted?: (txHash: Uint8Array) => void;
     }
@@ -114,14 +113,11 @@ export class EthereumAccountImpl {
     }
   }
 
-  public convertNativeToContractDenom(
-    value: string,
-    decimals: number
-  ): BigNumber {
+  public convertNativeToContractDenom(value: string, decimals: number): Int {
     // Convert to contract denomination
     const factor = new Dec(10).pow(new Int(decimals));
     const dec = new Dec(value).mul(factor);
 
-    return BigNumber.from(dec.truncate().toString());
+    return new Int(dec.truncate().toString());
   }
 }

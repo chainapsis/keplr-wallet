@@ -51,6 +51,19 @@ export class Int {
     return this.int.toString(10);
   }
 
+  public toHexString(): string {
+    return this.int.toString(16);
+  }
+
+  public toHexStringFormatted(): string {
+    const hex = this.toHexString();
+    if (hex.length % 2 !== 0) {
+      return `0x0${hex}`;
+    }
+
+    return `0x${hex}`;
+  }
+
   public isNegative(): boolean {
     return this.int.isNegative();
   }

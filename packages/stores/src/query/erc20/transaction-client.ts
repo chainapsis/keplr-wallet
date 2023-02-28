@@ -1,6 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
-import { BigNumber } from "@ethersproject/bignumber";
 import { isAddress } from "@ethersproject/address";
 import { erc20MetadataInterface } from "./contract-query";
 import {
@@ -9,6 +8,7 @@ import {
   TransactionResponse,
   TransactionReceipt,
 } from "@ethersproject/providers";
+import { Int } from "@keplr-wallet/unit";
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 
 export type SignableTx = {
@@ -46,10 +46,10 @@ export class ERC20TxClient {
   protected createSignableEthereumTx(
     to: string,
     nonce: number,
-    value: BigNumber,
+    value: Int,
     data: string,
-    maxFeePerGas?: BigNumber,
-    gasLimit?: BigNumber,
+    maxFeePerGas?: Int,
+    gasLimit?: Int,
     chainId?: number,
     type?: number,
     accessList?: Array<[string, Array<string>]>
@@ -69,9 +69,9 @@ export class ERC20TxClient {
       chainId: chainId ?? defaultChainId,
       to,
       nonce,
-      value: value.toHexString(),
-      maxFeePerGas: maxFeePerGas?.toHexString(),
-      gasLimit: gasLimit?.toHexString(),
+      value: value.toHexStringFormatted(),
+      maxFeePerGas: maxFeePerGas?.toHexStringFormatted(),
+      gasLimit: gasLimit?.toHexStringFormatted(),
       data,
       type: type ?? defaultType,
       accessList: accessList ?? defaultAccessList,
@@ -86,9 +86,9 @@ export class ERC20TxClient {
     contractAddress: string,
     sender: string,
     recipient: string,
-    value: BigNumber,
-    maxFeePerGas: BigNumber,
-    gasLimit: BigNumber
+    value: Int,
+    maxFeePerGas: Int,
+    gasLimit: Int
   ): Promise<SignableTx> {
     if (!this.provider) {
       throw new Error(
@@ -102,10 +102,10 @@ export class ERC20TxClient {
     // Convert contract data to hex string using ABCI encoding.
     const contractData = this.encodeContractData("transfer", [
       recipient,
-      value.toHexString(),
+      value.toHexStringFormatted(),
     ]);
 
-    const txValue = BigNumber.from(0);
+    const txValue = new Int(0);
 
     const tx = this.createSignableEthereumTx(
       contractAddress,

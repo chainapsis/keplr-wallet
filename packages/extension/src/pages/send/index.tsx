@@ -27,7 +27,7 @@ import {
   PopupSize,
 } from "@keplr-wallet/popup";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
-import { BigNumber } from "@ethersproject/bignumber";
+import { Int } from "@keplr-wallet/unit";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -307,8 +307,8 @@ export const SendPage: FunctionComponent = observer(() => {
                   );
                 }
 
-                const totalFees = BigNumber.from(stdFee.amount[0].amount);
-                const gasLimit = BigNumber.from(stdFee.gas);
+                const totalFees = new Int(stdFee.amount[0].amount);
+                const gasLimit = new Int(stdFee.gas);
 
                 const maxFeePerGas = totalFees.div(gasLimit);
 
