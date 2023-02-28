@@ -215,7 +215,7 @@ describe("Test Int/Uint", () => {
     expect(new Int(10).toHexString()).toBe("a");
     expect(new Int(20).toHexString()).toBe("14");
 
-    expect(new Int("1e9").toHexString()).toBe("3b9aca00");
+    expect(new Int(1000000000).toHexString()).toBe("3b9aca00");
   });
 
   it("Test Int toHexStringFormatted", () => {
@@ -223,6 +223,6 @@ describe("Test Int/Uint", () => {
     expect(new Int(10).toHexStringFormatted()).toBe("0x0a");
     expect(new Int(20).toHexStringFormatted()).toBe("0x14");
 
-    expect(new Int("1e9").toHexStringFormatted()).toBe("0x3b9aca00");
+    expect(new Int(1000000000).toHexStringFormatted()).toBe("0x3b9aca00");
   });
 });
