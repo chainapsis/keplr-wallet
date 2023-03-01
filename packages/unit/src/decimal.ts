@@ -19,9 +19,14 @@ export class Dec {
     "133499189745056880149688856635597007162669032647290798121690100488888732861290034376435130433535"
   );
 
-  protected static readonly precisionMultipliers: {
-    [key: string]: bigInteger.BigInteger | undefined;
-  } = {};
+  static readonly zero = new Dec(0);
+  /** Smallest `Dec` with current precision. */
+  static readonly smallestDec = new Dec("1", Dec.precision);
+  static readonly one = new Dec(1);
+
+  protected static precisionMultipliers:
+    | Map<string, bigInteger.BigInteger>
+    | undefined;
   protected static calcPrecisionMultiplier(
     prec: number
   ): bigInteger.BigInteger {
@@ -31,14 +36,19 @@ export class Dec {
     if (prec > Dec.precision) {
       throw new Error("Too much precision");
     }
-    if (Dec.precisionMultipliers[prec.toString()]) {
+    const key = prec.toString();
+    if (!Dec.precisionMultipliers) {
+      Dec.precisionMultipliers = new Map();
+    }
+    const cached = Dec.precisionMultipliers.get(key);
+    if (cached) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return Dec.precisionMultipliers[prec.toString()]!;
+      return cached;
     }
 
     const zerosToAdd = Dec.precision - prec;
     const multiplier = bigInteger(10).pow(zerosToAdd);
-    Dec.precisionMultipliers[prec.toString()] = multiplier;
+    Dec.precisionMultipliers.set(key, multiplier);
     return multiplier;
   }
 
@@ -211,6 +221,39 @@ export class Dec {
     }
 
     return base.mul(tmp);
+  }
+
+  public approxSqrt(): Dec {
+    return this.approxRoot(2);
+  }
+
+  public approxRoot(root: number, maxIters = 300): Dec {
+    if (this.isNegative()) {
+      return this.neg().approxRoot(root).neg();
+    }
+
+    if (root === 1 || this.isZero() || this.equals(Dec.one)) {
+      return this;
+    }
+
+    if (root === 0) {
+      return Dec.one;
+    }
+
+    let [guess, delta] = [Dec.one, Dec.one];
+    for (let i = 0; delta.abs().gt(Dec.smallestDec) && i < maxIters; i++) {
+      let prev = guess.pow(new Int(root - 1));
+      if (prev.isZero()) {
+        prev = Dec.smallestDec;
+      }
+      delta = this.quo(prev);
+      delta = delta.sub(guess);
+      delta = delta.quoTruncate(new Dec(root));
+
+      guess = guess.add(delta);
+    }
+
+    return guess;
   }
 
   public mul(d2: Dec): Dec {
