@@ -43,6 +43,11 @@ export function init(
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
   analyticsPrivilegedOrigins: string[],
+  communityChainInfoRepo: {
+    readonly organizationName: string;
+    readonly repoName: string;
+    readonly branchName: string;
+  },
   commonCrypto: CommonCrypto,
   notification: Notification,
   ledgerOptions: Partial<LedgerOptions> = {},
@@ -68,7 +73,8 @@ export function init(
   );
 
   const chainUpdaterService = new Updater.ChainUpdaterService(
-    storeCreator("updator")
+    storeCreator("updator"),
+    communityChainInfoRepo
   );
 
   const tokensService = new Tokens.TokensService(storeCreator("tokens"));
@@ -144,11 +150,8 @@ export function init(
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);
   phishingListService.init();
-  // Auto lock account module only work on web browser at present
-  if (typeof browser !== "undefined") {
-    // No need to wait because user can't interact with app right after launch.
-    autoLockAccountService.init(keyRingService);
-  }
+  // No need to wait because user can't interact with app right after launch.
+  autoLockAccountService.init(keyRingService);
   // No need to wait because user can't interact with app right after launch.
   analyticsService.init();
 

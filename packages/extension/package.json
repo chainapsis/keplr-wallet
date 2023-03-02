@@ -19,6 +19,7 @@
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@keplr-wallet/analytics": "0.11.17",
     "@keplr-wallet/background": "0.11.17",
+    "@keplr-wallet/chain-validator": "0.11.42-rc.3",
     "@keplr-wallet/common": "0.11.17",
     "@keplr-wallet/cosmos": "0.11.17",
     "@keplr-wallet/crypto": "0.11.17",
@@ -64,6 +65,7 @@
     "react-router-dom": "^5.1.2",
     "reactstrap": "^8.4.1",
     "secretjs": "0.17.7",
+    "scrypt-js": "^3.0.1",
     "sha.js": "^2.4.11",
     "utility-types": "^3.10.0",
     "webextension-polyfill": "^0.7.0"

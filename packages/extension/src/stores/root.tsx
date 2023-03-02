@@ -1,5 +1,5 @@
 import { ChainStore } from "./chain";
-import { EmbedChainInfos } from "../config";
+import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
 import {
   AmplitudeApiKey,
   EthereumEndpoint,
@@ -17,7 +17,6 @@ import {
   DeferInitialQueryController,
   getKeplrFromWindow,
   IBCChannelStore,
-  IBCCurrencyRegsitrar,
   InteractionStore,
   KeyRingStore,
   LedgerInitStore,
@@ -30,11 +29,7 @@ import {
   TokensStore,
   WalletStatus,
 } from "@keplr-wallet/stores";
-import {
-  KeplrETCQueries,
-  GravityBridgeCurrencyRegsitrar,
-  AxelarEVMBridgeCurrencyRegistrar,
-} from "@keplr-wallet/stores-etc";
+import { KeplrETCQueries } from "@keplr-wallet/stores-etc";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import {
   ContentScriptEnv,
@@ -43,7 +38,7 @@ import {
   InExtensionMessageRequester,
 } from "@keplr-wallet/router-extension";
 import { APP_PORT } from "@keplr-wallet/router";
-import { ChainInfoWithEmbed } from "@keplr-wallet/background";
+import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
 import { FeeType } from "@keplr-wallet/hooks";
@@ -77,11 +72,7 @@ export class RootStore {
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
-  public readonly tokensStore: TokensStore<ChainInfoWithEmbed>;
-
-  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithEmbed>;
-  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>;
-  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>;
+  public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -126,6 +117,7 @@ export class RootStore {
     ObservableQueryBase.experimentalDeferInitialQueryController = new DeferInitialQueryController();
 
     this.chainStore = new ChainStore(
+      new ExtensionKVStore("store_chain_config"),
       EmbedChainInfos,
       new InExtensionMessageRequester(),
       ObservableQueryBase.experimentalDeferInitialQueryController
@@ -156,7 +148,10 @@ export class RootStore {
       this.interactionStore,
       new InExtensionMessageRequester()
     );
-    this.chainSuggestStore = new ChainSuggestStore(this.interactionStore);
+    this.chainSuggestStore = new ChainSuggestStore(
+      this.interactionStore,
+      CommunityChainInfoRepo
+    );
 
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
@@ -233,6 +228,9 @@ export class RootStore {
                 native: {
                   type: "bank/MsgSend",
                 },
+              },
+              withdrawRewards: {
+                type: "distribution/MsgWithdrawDelegationReward",
               },
             };
           }
@@ -337,33 +335,13 @@ export class RootStore {
       new InExtensionMessageRequester(),
       this.interactionStore
     );
-
-    this.ibcCurrencyRegistrar = new IBCCurrencyRegsitrar<ChainInfoWithEmbed>(
-      new ExtensionKVStore("store_ibc_curreny_registrar"),
-      24 * 3600 * 1000,
-      this.chainStore,
-      this.accountStore,
-      this.queriesStore,
-      this.queriesStore
-    );
-    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegsitrar<ChainInfoWithEmbed>(
-      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
-      this.chainStore,
-      this.queriesStore
-    );
-    this.axelarEVMBridgeCurrencyRegistrar = new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithEmbed>(
-      new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
-      this.chainStore,
-      this.queriesStore,
-      "ethereum"
-    );
-
+    // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
       (() => {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
-          const amplitudeClient = Amplitude.getInstance();
+          const amplitudeClient = Amplitude.getInstance("new");
           amplitudeClient.init(AmplitudeApiKey, undefined, {
             saveEvents: true,
             platform: "Extension",
