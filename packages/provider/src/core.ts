@@ -118,6 +118,13 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       );
     }
 
+    if ((chainInfo as any).coinType) {
+      console.warn(
+        "The `coinType` field of the `ChainInfo` is removed. This is automatically handled as of right now, but the upcoming update would potentially cause errors."
+      );
+      delete (chainInfo as any).coinType;
+    }
+
     const msg = new SuggestChainInfoMsg(chainInfo);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
