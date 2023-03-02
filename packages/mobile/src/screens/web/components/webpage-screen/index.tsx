@@ -27,6 +27,7 @@ import { Mutable } from "utility-types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import Axios from "axios";
 import { CommunityChainInfoRepo } from "../../../../config";
+import { checkChainFeatures } from "@keplr-wallet/chain-validator";
 
 // Due to the limitations of the current structure, it is not possible to approve the suggest chain and immediately reflect the updated chain infos.
 // Since chain infos cannot be reflected immediately, a problem may occur if a request comes in during that delay.
@@ -77,6 +78,7 @@ class SuggestChainReceiverKeplr extends Keplr {
       console.log("error", e);
     }
 
+    await checkChainFeatures(mutableChainInfo);
     await super.experimentalSuggestChain(mutableChainInfo);
     await this.suggestChainReceiver(mutableChainInfo);
   }
