@@ -1,7 +1,7 @@
 import { KVStore } from "@keplr-wallet/common";
 import { Dec } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
-import { ChainGetter } from "../../../../common";
+import { ChainGetter } from "../../../../chain";
 import { ObservableChainQuery } from "../../../chain-query";
 import { StrideMintParams } from "./types";
 

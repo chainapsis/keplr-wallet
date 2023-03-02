@@ -1,7 +1,7 @@
 import { ObservableChainQuery } from "../../chain-query";
 import { StakingParams } from "./types";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { computed, makeObservable } from "mobx";
 
 export class ObservableQueryStakingParams extends ObservableChainQuery<StakingParams> {

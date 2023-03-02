@@ -1,9 +1,9 @@
 import { observable, action, computed, makeObservable, flow } from "mobx";
 
 import {
-  ChainInfoInner,
   ChainStore as BaseChainStore,
   DeferInitialQueryController,
+  IChainInfoImpl,
   ObservableQuery,
 } from "@keplr-wallet/stores";
 
@@ -158,7 +158,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @computed
-  get current(): ChainInfoInner<ChainInfoWithCoreTypes> {
+  get current(): IChainInfoImpl<ChainInfoWithCoreTypes> {
     if (this.hasChain(this._selectedChainId)) {
       return this.getChain(this._selectedChainId);
     }
@@ -215,7 +215,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.setChainInfos(result.chainInfos);
+    this.setEmbeddedChainInfos(result.chainInfos);
   }
 
   @flow
@@ -225,7 +225,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this.setChainInfos(chainInfos);
+    this.setEmbeddedChainInfos(chainInfos);
   }
 
   @flow

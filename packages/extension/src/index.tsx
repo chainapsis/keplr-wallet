@@ -17,6 +17,7 @@ import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
 import { GlobalStyle, GlobalPopupStyle } from "./styles";
+import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -25,6 +26,10 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { UnlockPage } from "./pages/unlock";
 import { MainPage } from "./pages/main";
 
+configure({
+  enforceActions: "always", // Make mobx to strict mode.
+});
+
 window.keplr = new Keplr(
   manifest.version,
   "core",
@@ -32,13 +37,10 @@ window.keplr = new Keplr(
 );
 
 const RoutesAfterReady: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, keyRingStore } = useStore();
+  const { chainStore, accountStore, keyRingStore, ibcCurrencyRegistrar } =
+    useStore();
 
   const isReady = useMemo(() => {
-    if (chainStore.isInitializing) {
-      return false;
-    }
-
     if (keyRingStore.status === "not-loaded") {
       return false;
     }
@@ -52,6 +54,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           window.close();
         });
 
+      return false;
+    }
+
+    if (chainStore.isInitializing) {
       return false;
     }
 
@@ -70,11 +76,16 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       }
     }
 
+    if (!ibcCurrencyRegistrar.isInitialized) {
+      return false;
+    }
+
     return true;
   }, [
     accountStore,
     chainStore.chainInfos,
     chainStore.isInitializing,
+    ibcCurrencyRegistrar.isInitialized,
     keyRingStore.status,
   ]);
 

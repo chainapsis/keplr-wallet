@@ -1,7 +1,7 @@
 import { ObservableChainQuery } from "../../chain-query";
 import { MintingInflation } from "./types";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 
 export class ObservableQueryMintingInfation extends ObservableChainQuery<MintingInflation> {
   constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {

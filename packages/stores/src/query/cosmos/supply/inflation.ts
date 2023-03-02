@@ -1,6 +1,6 @@
 import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { ObservableChainQuery } from "../../chain-query";
 import { ObservableQueryDistributionParams } from "../distribution";
 import { ObservableQueryStakingPool } from "../staking";

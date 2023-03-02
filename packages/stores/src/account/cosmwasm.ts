@@ -1,6 +1,7 @@
 import { AccountSetBase, AccountSetBaseSuper, MsgOpt } from "./base";
 import { CosmwasmQueries, IQueriesStore, QueriesSetBase } from "../query";
-import { ChainGetter, CoinPrimitive } from "../common";
+import { CoinPrimitive } from "../common";
+import { ChainGetter } from "../chain";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { AppCurrency, KeplrSignOptions, StdFee } from "@keplr-wallet/types";

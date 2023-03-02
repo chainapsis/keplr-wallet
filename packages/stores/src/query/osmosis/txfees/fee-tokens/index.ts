@@ -1,6 +1,7 @@
 import { ObservableChainQuery } from "../../../chain-query";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter, QueryResponse } from "../../../../common";
+import { QueryResponse } from "../../../../common";
+import { ChainGetter } from "../../../../chain";
 import { computed, makeObservable } from "mobx";
 import { FeeTokens } from "./types";
 import { FeeCurrency } from "@keplr-wallet/types";
@@ -18,7 +19,7 @@ export class ObservableQueryTxFeesFeeTokens extends ObservableChainQuery<FeeToke
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const denoms = response.data.fee_tokens.map((token) => token.denom);
-    chainInfo.addUnknownCurrencies(...denoms);
+    chainInfo.addUnknownDenoms(...denoms);
   }
 
   @computed

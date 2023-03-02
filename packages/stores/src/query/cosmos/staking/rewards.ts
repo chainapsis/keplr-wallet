@@ -4,7 +4,7 @@ import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { Currency } from "@keplr-wallet/types";

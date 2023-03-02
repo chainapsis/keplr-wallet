@@ -19,7 +19,7 @@ import {
   DeferInitialQueryController,
   getKeplrFromWindow,
   IBCChannelStore,
-  IBCCurrencyRegsitrar,
+  IBCCurrencyRegistrar,
   InteractionStore,
   KeyRingStore,
   LedgerInitStore,
@@ -37,7 +37,7 @@ import {
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
-  GravityBridgeCurrencyRegsitrar,
+  GravityBridgeCurrencyRegistrar,
   AxelarEVMBridgeCurrencyRegistrar,
 } from "@keplr-wallet/stores-etc";
 import { ExtensionKVStore } from "@keplr-wallet/common";
@@ -88,9 +88,9 @@ export class RootStore {
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
 
-  protected readonly ibcCurrencyRegistrar: IBCCurrencyRegsitrar<ChainInfoWithCoreTypes>;
-  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegsitrar<ChainInfoWithCoreTypes>;
-  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithCoreTypes>;
+  public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
+  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
+  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -333,23 +333,20 @@ export class RootStore {
       this.interactionStore
     );
 
-    this.ibcCurrencyRegistrar =
-      new IBCCurrencyRegsitrar<ChainInfoWithCoreTypes>(
-        new ExtensionKVStore("store_ibc_curreny_registrar"),
-        24 * 3600 * 1000,
-        this.chainStore,
-        this.accountStore,
-        this.queriesStore,
-        this.queriesStore
-      );
-    this.gravityBridgeCurrencyRegistrar =
-      new GravityBridgeCurrencyRegsitrar<ChainInfoWithCoreTypes>(
-        new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
-        this.chainStore,
-        this.queriesStore
-      );
+    this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
+      new ExtensionKVStore("store_ibc_curreny_registrar"),
+      24 * 3600 * 1000,
+      this.chainStore,
+      this.accountStore,
+      this.queriesStore
+    );
+    this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(
+      new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+      this.chainStore,
+      this.queriesStore
+    );
     this.axelarEVMBridgeCurrencyRegistrar =
-      new AxelarEVMBridgeCurrencyRegistrar<ChainInfoWithCoreTypes>(
+      new AxelarEVMBridgeCurrencyRegistrar(
         new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
         this.chainStore,
         this.queriesStore,

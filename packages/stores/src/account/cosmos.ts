@@ -41,7 +41,7 @@ import {
 import { BondStatus } from "../query/cosmos/staking/types";
 import { CosmosQueries, IQueriesStore, QueriesSetBase } from "../query";
 import { DeepPartial, DeepReadonly, Mutable } from "utility-types";
-import { ChainGetter } from "../common";
+import { ChainGetter } from "../chain";
 import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";

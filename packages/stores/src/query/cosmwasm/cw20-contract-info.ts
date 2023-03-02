@@ -1,7 +1,7 @@
 import { Cw20ContractTokenInfo } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ObservableChainQueryMap } from "../chain-query";
-import { ChainGetter } from "../../common";
+import { ChainGetter } from "../../chain";
 import { computed } from "mobx";
 import { ObservableCosmwasmContractChainQuery } from "./contract-query";
 

@@ -3,7 +3,7 @@ import {
   ObservableChainQueryMap,
 } from "../../../chain-query";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../../common";
+import { ChainGetter } from "../../../../chain";
 import { computed, makeObservable } from "mobx";
 import { SpotPriceByDenom } from "./types";
 import { Dec } from "@keplr-wallet/unit";

@@ -1,4 +1,4 @@
-import { ChainGetter } from "../../../../common";
+import { ChainGetter } from "../../../../chain";
 import { ObservableChainQuery } from "../../../chain-query";
 import { AnnualProvisions } from "./types";
 import { KVStore } from "@keplr-wallet/common";

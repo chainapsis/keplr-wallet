@@ -5,7 +5,7 @@ import {
   KeplrSignOptions,
   StdFee,
 } from "@keplr-wallet/types";
-import { ChainGetter } from "../common";
+import { ChainGetter } from "../chain";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MakeTxResponse } from "./types";
@@ -152,7 +152,7 @@ export class AccountSetBase {
     keplr: Keplr,
     chainInfo: ReturnType<ChainGetter["getChain"]>
   ): Promise<void> {
-    await keplr.experimentalSuggestChain(chainInfo.raw);
+    await keplr.experimentalSuggestChain(chainInfo.embedded);
   }
 
   private readonly handleInit = () => this.init();

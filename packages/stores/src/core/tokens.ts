@@ -22,7 +22,7 @@ export class TokensStoreInner {
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly chainStore: ChainStore<any>,
+    protected readonly chainStore: ChainStore,
     protected readonly chainId: string,
     protected readonly requester: MessageRequester
   ) {
@@ -105,31 +105,32 @@ export class TokensStore<
     });
     makeObservable(this);
 
-    this.chainStore.addSetChainInfoHandler((chainInfoInner) => {
-      autorun(() => {
-        const chainIdentifier = ChainIdHelper.parse(chainInfoInner.chainId);
+    autorun(() => {
+      const chainInfos = this.chainStore.chainInfos;
+      for (const chainInfo of chainInfos) {
+        const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
 
         // Tokens should be changed whenever the account changed.
         // But, the added currencies are not removed automatically.
         // So, we should remove the prev token currencies from the chain info.
         const prevToken = this.prevTokens.get(chainIdentifier.identifier) ?? [];
-        chainInfoInner.removeCurrencies(
+        chainInfo.removeCurrencies(
           ...prevToken.map((token) => token.coinMinimalDenom)
         );
 
-        const inner = this.getTokensOf(chainInfoInner.chainId);
-        chainInfoInner.addCurrencies(...inner.tokens);
+        const inner = this.getTokensOf(chainInfo.chainId);
+        chainInfo.addCurrencies(...inner.tokens);
 
         this.prevTokens.set(
           chainIdentifier.identifier,
           inner.tokens as AppCurrency[]
         );
-      });
+      }
     });
   }
 
   getTokensOf(chainId: string) {
-    return this.get(chainId);
+    return this.get(ChainIdHelper.parse(chainId).identifier);
   }
 
   get waitingSuggestedToken() {

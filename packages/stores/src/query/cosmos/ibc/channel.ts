@@ -3,7 +3,7 @@ import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { ChannelResponse } from "./types";
 import { autorun } from "mobx";
 

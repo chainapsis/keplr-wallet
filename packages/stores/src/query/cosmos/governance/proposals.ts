@@ -7,7 +7,7 @@ import {
   ObservableQueryGovParamVoting,
 } from "./params";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { DeepReadonly } from "utility-types";
 import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";

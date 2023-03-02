@@ -1,6 +1,6 @@
 import { QueriesSetBase } from "../queries";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../common";
+import { ChainGetter } from "../../chain";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryTxFeesFeeTokens } from "./txfees/fee-tokens";
 import { ObservableQueryTxFeesSpotPriceByDenom } from "./txfees/spot-price-by-denom";

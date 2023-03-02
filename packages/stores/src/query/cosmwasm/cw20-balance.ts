@@ -1,6 +1,6 @@
 import { computed, makeObservable, override } from "mobx";
 import { DenomHelper, KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../common";
+import { ChainGetter } from "../../chain";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
 import { Cw20ContractBalance } from "./types";

@@ -110,8 +110,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   get feeCurrencies(): FeeCurrency[] {
     if (
       this.computeTerraClassicTax &&
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("terra-classic-fee")
+      this.chainInfo.hasFeature("terra-classic-fee")
     ) {
       const currency = this.chainInfo.feeCurrencies.find(
         (c) =>
@@ -261,10 +260,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canOsmosisTxFeesAndReady(): boolean {
-    if (
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("osmosis-txfees")
-    ) {
+    if (this.chainInfo.hasFeature("osmosis-txfees")) {
       if (!this.queriesStore.get(this.chainId).osmosis) {
         console.log(
           "Chain has osmosis-txfees feature. But no osmosis queries provided."
@@ -299,8 +295,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }
 
     if (
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("osmosis-txfees") &&
+      this.chainInfo.hasFeature("osmosis-txfees") &&
       this.queriesStore.get(this.chainId).osmosis &&
       this.queriesStore
         .get(this.chainId)
@@ -337,7 +332,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     // For legacy support
     // Fallback gas price step to legacy chain info which includes gas price step field in root,
     // if there is no gas price step in fee currency.
-    const chainInfoWithGasPriceStep = (this.chainInfo.raw ?? {}) as {
+    const chainInfoWithGasPriceStep = (this.chainInfo.embedded ?? {}) as {
       gasPriceStep?: {
         low: number;
         average: number;
@@ -354,8 +349,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     if (
       this.computeTerraClassicTax &&
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("terra-classic-fee")
+      this.chainInfo.hasFeature("terra-classic-fee")
     ) {
       const etcQueries = this.queriesStore.get(this.chainId).keplrETC;
       if (
@@ -444,8 +438,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     if (
       this.feeCurrency &&
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("osmosis-txfees") &&
+      this.chainInfo.hasFeature("osmosis-txfees") &&
       this.queriesStore.get(this.chainId).osmosis &&
       this.queriesStore
         .get(this.chainId)

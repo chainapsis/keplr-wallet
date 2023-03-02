@@ -1,13 +1,16 @@
-import { flow, makeObservable, observable, runInAction } from "mobx";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import { ChainInfoInner, ChainStore } from "../chain";
 import {
-  CosmosQueries,
-  CosmwasmQueries,
-  IQueriesStore,
-  QueriesSetBase,
-} from "../query";
-import { DenomHelper, KVStore, toGenerator } from "@keplr-wallet/common";
+  action,
+  autorun,
+  makeObservable,
+  observable,
+  runInAction,
+  toJS,
+} from "mobx";
+import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { IChainInfoImpl, ChainStore } from "../chain";
+import { CosmosQueries, CosmwasmQueries, IQueriesStore } from "../query";
+import { DenomHelper, KVStore } from "@keplr-wallet/common";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 type CacheIBCDenomData = {
   denomTrace: {
@@ -19,13 +22,41 @@ type CacheIBCDenomData = {
   };
   originChainId: string | undefined;
   counterpartyChainId: string | undefined;
+  timestamp: number;
 };
 
-export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
-  @observable
-  protected isInitialized = false;
-  @observable
-  protected isInitializing = false;
+/**
+ * IBCCurrencyRegistrar gets the native balances that exist on the chain itself (ex. atom, scrt...)
+ * And, IBCCurrencyRegistrar registers the currencies from IBC to the chain info.
+ * In cosmos-sdk, the denomination of IBC token has the form of "ibc/{hash}".
+ * And, its paths can be found by getting the denom trace from the node.
+ * If the native balance querier's response have the token that is form of IBC token,
+ * this will try to get the denom info by traversing the paths, and register the currency with the decimal and denom info.
+ * But, if failed to traverse the paths, this will register the currency with 0 decimal and the minimal denom even though it is not suitable for human.
+ */
+export class IBCCurrencyRegistrar {
+  static defaultCoinDenomGenerator(
+    denomTrace: {
+      denom: string;
+      paths: {
+        portId: string;
+        channelId: string;
+      }[];
+    },
+    _: ChainInfo | undefined,
+    counterpartyChainInfo: ChainInfo | undefined,
+    originCurrency: AppCurrency | undefined
+  ): string {
+    if (originCurrency) {
+      return `${originCurrency.coinDenom} (${
+        counterpartyChainInfo ? counterpartyChainInfo.chainName : "Unknown"
+      }/${denomTrace.paths[0].channelId})`;
+    } else {
+      return `${denomTrace.denom} (${
+        counterpartyChainInfo ? counterpartyChainInfo.chainName : "Unknown"
+      }/${denomTrace.paths[0].channelId})`;
+    }
+  }
 
   /**
    * Because the `QueryStore` returns the response from cache first if the last response exists, it takes the IO.
@@ -37,26 +68,24 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
    * @protected
    */
   @observable.shallow
-  protected cacheDenomTracePaths: Map<
-    string,
-    CacheIBCDenomData & { timestamp: number }
-  > = new Map();
+  protected cacheDenomTracePaths: Map<string, CacheIBCDenomData> = new Map();
+
+  @observable
+  public isInitialized = false;
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly cacheDuration: number,
-    protected readonly chainInfoInner: ChainInfoInner<C>,
-    protected readonly chainStore: ChainStore<C>,
+    protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
+    protected readonly chainStore: ChainStore,
     protected readonly accountStore: {
       hasAccount(chainId: string): boolean;
       getAccount(chainId: string): {
         bech32Address: string;
       };
     },
-    protected readonly queriesStore: IQueriesStore<CosmosQueries>,
-    protected readonly cosmwasmQueriesStore:
-      | IQueriesStore<CosmwasmQueries>
-      | undefined,
+    protected readonly queriesStore: IQueriesStore<
+      CosmosQueries & Partial<CosmwasmQueries>
+    >,
     protected readonly coinDenomGenerator: (
       denomTrace: {
         denom: string;
@@ -65,67 +94,59 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
           channelId: string;
         }[];
       },
-      originChainInfo: ChainInfoInner | undefined,
-      counterpartyChainInfo: ChainInfoInner | undefined,
+      originChainInfo: IChainInfoImpl | undefined,
+      counterpartyChainInfo: IChainInfoImpl | undefined,
       originCurrency: AppCurrency | undefined
-    ) => string
+    ) => string = IBCCurrencyRegistrar.defaultCoinDenomGenerator
   ) {
-    makeObservable(this);
-  }
-
-  @flow
-  protected *restoreCache() {
-    this.isInitializing = true;
-
-    const key = `cache-ibc-denom-trace-paths/${this.chainInfoInner.chainId}`;
-    const obj = yield* toGenerator(
-      this.kvStore.get<
-        Record<string, CacheIBCDenomData & { timestamp: number }>
-      >(key)
+    this.chainStore.registerCurrencyRegistrar(
+      this.ibcCurrencyRegistrar.bind(this)
     );
 
-    if (obj) {
-      for (const key of Object.keys(obj)) {
-        this.cacheDenomTracePaths.set(key, obj[key]);
-      }
+    makeObservable(this);
+
+    this.init();
+  }
+
+  protected async init() {
+    const key = `cache-ibc-denom-trace-paths`;
+    const saved = await this.kvStore.get<Record<string, CacheIBCDenomData>>(
+      key
+    );
+    if (saved) {
+      runInAction(() => {
+        for (const [key, value] of Object.entries(saved)) {
+          if (Date.now() - value.timestamp < this.cacheDuration) {
+            this.cacheDenomTracePaths.set(key, value);
+          }
+        }
+      });
     }
 
-    this.isInitialized = true;
-    this.isInitializing = false;
-  }
-
-  protected getCacheIBCDenomData(
-    denomTraceHash: string
-  ): CacheIBCDenomData | undefined {
-    const result = this.cacheDenomTracePaths.get(denomTraceHash);
-    if (result && result.timestamp + this.cacheDuration > Date.now()) {
-      return result;
-    }
-  }
-
-  @flow
-  protected *setCacheIBCDenomData(
-    denomTraceHash: string,
-    data: CacheIBCDenomData
-  ) {
-    this.cacheDenomTracePaths.set(denomTraceHash, {
-      ...data,
-      timestamp: Date.now(),
+    autorun(() => {
+      const js = toJS(this.cacheDenomTracePaths);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<Record<string, CacheIBCDenomData>>(key, obj);
     });
 
-    const obj: Record<string, CacheIBCDenomData> = {};
-
-    this.cacheDenomTracePaths.forEach((value, key) => {
-      obj[key] = value;
+    runInAction(() => {
+      this.isInitialized = true;
     });
-
-    const key = `cache-ibc-denom-trace-paths/${this.chainInfoInner.chainId}`;
-    yield this.kvStore.set(key, obj);
   }
 
-  registerUnknownCurrencies(
+  protected ibcCurrencyRegistrar(
+    chainId: string,
     coinMinimalDenom: string
-  ): [AppCurrency | undefined, boolean] | undefined {
+  ):
+    | {
+        value: AppCurrency | undefined;
+        done: boolean;
+      }
+    | undefined {
+    if (!this.chainStore.hasChain(chainId)) {
+      return;
+    }
+
     const denomHelper = new DenomHelper(coinMinimalDenom);
     if (
       denomHelper.type !== "native" ||
@@ -135,23 +156,19 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
       return;
     }
 
-    // When the unknown ibc denom is delivered, try to restore the cache from storage.
     if (!this.isInitialized) {
-      this.restoreCache();
+      return {
+        value: undefined,
+        done: false,
+      };
     }
 
-    if (this.isInitializing) {
-      return [undefined, false];
-    }
-
-    const queries = this.queriesStore.get(this.chainInfoInner.chainId);
+    const queries = this.queriesStore.get(chainId);
 
     const hash = denomHelper.denom.replace("ibc/", "");
 
-    const cached = this.getCacheIBCDenomData(hash);
-
-    let counterpartyChainInfo: ChainInfoInner | undefined;
-    let originChainInfo: ChainInfoInner | undefined;
+    let counterpartyChainInfo: IChainInfoImpl | undefined;
+    let originChainInfo: IChainInfoImpl | undefined;
     let denomTrace:
       | {
           denom: string;
@@ -162,21 +179,28 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
         }
       | undefined;
 
+    const cached = this.getCacheIBCDenomData(chainId, hash);
     if (cached) {
-      denomTrace = cached.denomTrace;
-      if (
-        cached.originChainId &&
-        this.chainStore.hasChain(cached.originChainId)
-      ) {
-        originChainInfo = this.chainStore.getChain(cached.originChainId);
-      }
-      if (
-        cached.counterpartyChainId &&
-        this.chainStore.hasChain(cached.counterpartyChainId)
-      ) {
-        counterpartyChainInfo = this.chainStore.getChain(
-          cached.counterpartyChainId
-        );
+      if (Date.now() - cached.timestamp < this.cacheDuration) {
+        denomTrace = cached.denomTrace;
+        if (
+          cached.originChainId &&
+          this.chainStore.hasChain(cached.originChainId)
+        ) {
+          originChainInfo = this.chainStore.getChain(cached.originChainId);
+        }
+        if (
+          cached.counterpartyChainId &&
+          this.chainStore.hasChain(cached.counterpartyChainId)
+        ) {
+          counterpartyChainInfo = this.chainStore.getChain(
+            cached.counterpartyChainId
+          );
+        }
+      } else {
+        runInAction(() => {
+          this.cacheDenomTracePaths.delete(hash);
+        });
       }
     } else {
       const queryDenomTrace =
@@ -186,7 +210,7 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
       if (denomTrace) {
         const paths = denomTrace.paths;
         // The previous chain id from current path.
-        let chainIdBefore = this.chainInfoInner.chainId;
+        let chainIdBefore = chainId;
         for (const path of paths) {
           const clientState = this.queriesStore
             .get(chainIdBefore)
@@ -215,10 +239,11 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
         }
 
         if (originChainInfo) {
-          this.setCacheIBCDenomData(hash, {
+          this.setCacheIBCDenomData(chainId, hash, {
             counterpartyChainId: counterpartyChainInfo?.chainId,
             denomTrace,
             originChainId: originChainInfo.chainId,
+            timestamp: Date.now(),
           });
         }
       }
@@ -231,30 +256,33 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
           (cur) =>
             denomTrace && cur.coinMinimalDenom.startsWith(denomTrace.denom)
         );
-        if (!cw20Currency && this.cosmwasmQueriesStore) {
-          const cosmwasmQuries = this.cosmwasmQueriesStore.get(
-            originChainInfo.chainId
-          );
-          const contractAddress = denomTrace.denom.replace("cw20:", "");
-          const contractInfo =
-            cosmwasmQuries.cosmwasm.querycw20ContractInfo.getQueryContract(
-              contractAddress
-            );
-          if (contractInfo.response) {
-            cw20Currency = {
-              type: "cw20",
-              contractAddress,
-              coinDecimals: contractInfo.response.data.decimals,
-              coinDenom: contractInfo.response.data.symbol,
-              coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
-            };
-            originChainInfo.addCurrencies(cw20Currency);
+        if (
+          !cw20Currency &&
+          this.chainStore.hasChain(originChainInfo.chainId)
+        ) {
+          const originQueries = this.queriesStore.get(originChainInfo.chainId);
+          if (originQueries.cosmwasm) {
+            const contractAddress = denomTrace.denom.replace("cw20:", "");
+            const contractInfo =
+              originQueries.cosmwasm.querycw20ContractInfo.getQueryContract(
+                contractAddress
+              );
+            if (contractInfo.response) {
+              cw20Currency = {
+                type: "cw20",
+                contractAddress,
+                coinDecimals: contractInfo.response.data.decimals,
+                coinDenom: contractInfo.response.data.symbol,
+                coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
+              };
+              originChainInfo.addCurrencies(cw20Currency);
+            }
           }
         }
 
         if (cw20Currency) {
-          return [
-            {
+          return {
+            value: {
               coinDecimals: cw20Currency.coinDecimals,
               coinGeckoId: cw20Currency.coinGeckoId,
               coinImageUrl: cw20Currency.coinImageUrl,
@@ -269,15 +297,15 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
               originChainId: originChainInfo.chainId,
               originCurrency: cw20Currency,
             },
-            true,
-          ];
+            done: true,
+          };
         }
       } else {
         const currency = originChainInfo.findCurrency(denomTrace.denom);
 
         if (currency && !("paths" in currency)) {
-          return [
-            {
+          return {
+            value: {
               coinDecimals: currency.coinDecimals,
               coinGeckoId: currency.coinGeckoId,
               coinImageUrl: currency.coinImageUrl,
@@ -292,16 +320,16 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
               originChainId: originChainInfo.chainId,
               originCurrency: currency,
             },
-            true,
-          ];
+            done: true,
+          };
         }
       }
 
       // In this case, just show the raw currency.
       // But, it is possible to know the currency from query later.
       // So, let them to be observed.
-      return [
-        {
+      return {
+        value: {
           coinDecimals: 0,
           coinMinimalDenom: denomHelper.denom,
           coinDenom: this.coinDenomGenerator(
@@ -314,115 +342,34 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
           originChainId: undefined,
           originCurrency: undefined,
         },
-        false,
-      ];
-    }
-
-    return [undefined, false];
-  }
-}
-
-/**
- * IBCCurrencyRegsitrar gets the native balances that exist on the chain itself (ex. atom, scrt...)
- * And, IBCCurrencyRegsitrar registers the currencies from IBC to the chain info.
- * In cosmos-sdk, the denomination of IBC token has the form of "ibc/{hash}".
- * And, its paths can be found by getting the denom trace from the node.
- * If the native balance querier's response have the token that is form of IBC token,
- * this will try to get the denom info by traversing the paths, and register the currency with the decimal and denom info.
- * But, if failed to traverse the paths, this will register the currency with 0 decimal and the minimal denom even though it is not suitable for human.
- */
-export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
-  @observable.shallow
-  protected map: Map<string, IBCCurrencyRegsitrarInner<C>> = new Map();
-
-  static defaultCoinDenomGenerator(
-    denomTrace: {
-      denom: string;
-      paths: {
-        portId: string;
-        channelId: string;
-      }[];
-    },
-    _: ChainInfoInner | undefined,
-    counterpartyChainInfo: ChainInfoInner | undefined,
-    originCurrency: AppCurrency | undefined
-  ): string {
-    if (originCurrency) {
-      return `${originCurrency.coinDenom} (${
-        counterpartyChainInfo ? counterpartyChainInfo.chainName : "Unknown"
-      }/${denomTrace.paths[0].channelId})`;
-    } else {
-      return `${denomTrace.denom} (${
-        counterpartyChainInfo ? counterpartyChainInfo.chainName : "Unknown"
-      }/${denomTrace.paths[0].channelId})`;
-    }
-  }
-
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
-    protected readonly chainStore: ChainStore<C>,
-    protected readonly accountStore: {
-      hasAccount(chainId: string): boolean;
-      getAccount(chainId: string): {
-        bech32Address: string;
+        done: false,
       };
-    },
-    protected readonly queriesStore: {
-      get(chainId: string): QueriesSetBase & CosmosQueries;
-    },
-    protected readonly cosmwasmQueriesStore:
-      | {
-          get(chainId: string): QueriesSetBase & CosmwasmQueries;
-        }
-      | undefined,
-    protected readonly coinDenomGenerator: (
-      denomTrace: {
-        denom: string;
-        paths: {
-          portId: string;
-          channelId: string;
-        }[];
-      },
-      originChainInfo: ChainInfoInner | undefined,
-      counterpartyChainInfo: ChainInfoInner | undefined,
-      originCurrency: AppCurrency | undefined
-    ) => string = IBCCurrencyRegsitrar.defaultCoinDenomGenerator
-  ) {
-    this.chainStore.addSetChainInfoHandler((chainInfoInner) =>
-      this.setChainInfoHandler(chainInfoInner)
-    );
-  }
-
-  setChainInfoHandler(chainInfoInner: ChainInfoInner<C>): void {
-    const inner = this.get(chainInfoInner);
-    chainInfoInner.registerCurrencyRegistrar((coinMinimalDenom) =>
-      inner.registerUnknownCurrencies(coinMinimalDenom)
-    );
-  }
-
-  protected get(
-    chainInfoInner: ChainInfoInner<C>
-  ): IBCCurrencyRegsitrarInner<C> {
-    if (!this.map.has(chainInfoInner.chainId)) {
-      runInAction(() => {
-        this.map.set(
-          chainInfoInner.chainId,
-          new IBCCurrencyRegsitrarInner<C>(
-            this.kvStore,
-            this.cacheDuration,
-            chainInfoInner,
-            this.chainStore,
-            this.accountStore,
-            this.queriesStore,
-            this.cosmwasmQueriesStore,
-            this.coinDenomGenerator
-          )
-        );
-      });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.map.get(chainInfoInner.chainId)!;
+    return {
+      value: undefined,
+      done: false,
+    };
+  }
+
+  protected getCacheIBCDenomData(
+    chainId: string,
+    denomTraceHash: string
+  ): CacheIBCDenomData | undefined {
+    return this.cacheDenomTracePaths.get(
+      `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`
+    );
+  }
+
+  @action
+  protected setCacheIBCDenomData(
+    chainId: string,
+    denomTraceHash: string,
+    data: CacheIBCDenomData
+  ) {
+    this.cacheDenomTracePaths.set(
+      `${ChainIdHelper.parse(chainId).identifier}/${denomTraceHash}`,
+      data
+    );
   }
 }

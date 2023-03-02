@@ -3,7 +3,7 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { Granter } from "./types";
 
 export class ObservableQueryAuthZGranterInner extends ObservableChainQuery<Granter> {

@@ -14,20 +14,15 @@ import {
   Currency,
   FeeCurrency,
 } from "@keplr-wallet/types";
-import { ChainGetter } from "../common";
+import { IChainInfoImpl, IChainStore, CurrencyRegistrar } from "./types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { DeepReadonly } from "utility-types";
 import { keepAlive } from "mobx-utils";
 
-type CurrencyRegistrar = (
-  coinMinimalDenom: string
-) => AppCurrency | [AppCurrency | undefined, boolean] | undefined;
-
-export class ChainInfoInner<C extends ChainInfo = ChainInfo>
-  implements ChainInfo
+export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
+  implements IChainInfoImpl<C>
 {
   @observable.ref
-  protected _chainInfo: C;
+  protected _embedded: C;
 
   @observable.shallow
   protected unknownDenoms: string[] = [];
@@ -35,40 +30,18 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
   @observable.shallow
   protected registeredCurrencies: AppCurrency[] = [];
 
-  /**
-   * 위의 unknownDenoms에 값이 들어오면 밑의 배열의 함수를 순차적으로 실행한다.
-   * 만약 Currency 반환하면 그 registrar이 그 denom을 처리했다고 판단하고 순회를 멈춘다.
-   * 또한 AppCurrency가 아니라 [AppCurrency, boolean]의 튜플을 반활할 수 있는데
-   * 튜플을 반활할 경우 뒤의 boolean이 true일 때우(committed)까지 계속 observe한다.
-   * IBC 토큰을 처리하는 경우처럼 쿼리가 다 되기 전에 raw한 currency를 반환할 필요가 있는 경우처럼
-   * 등록된 currency가 나중에 replace될 수 있는 경우에 사용할 수 있다.
-   */
-  @observable
-  protected currencyRegistrars: CurrencyRegistrar[] = [];
-
-  constructor(chainInfo: C) {
-    this._chainInfo = chainInfo;
+  constructor(
+    embedded: C,
+    protected readonly currencyRegistry: {
+      getCurrencyRegistrar: CurrencyRegistrar;
+    }
+  ) {
+    this._embedded = embedded;
 
     makeObservable(this);
 
     keepAlive(this, "currencyMap");
-  }
-
-  protected getCurrencyFromRegistrars(
-    coinMinimalDenom: string
-  ): [AppCurrency | undefined, boolean] | undefined {
-    for (let i = 0; i < this.currencyRegistrars.length; i++) {
-      const registrar = this.currencyRegistrars[i];
-      const currency = registrar(coinMinimalDenom);
-      if (currency) {
-        // AppCurrency일 경우
-        if ("coinMinimalDenom" in currency) {
-          return [currency, true];
-        }
-        return currency;
-      }
-    }
-    return undefined;
+    keepAlive(this, "unknownDenomMap");
   }
 
   /*
@@ -78,9 +51,9 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
    * IBC denom의 등록을 요청할 때 쓸 수 있다.
    */
   @action
-  addUnknownCurrencies(...coinMinimalDenoms: string[]) {
+  addUnknownDenoms(...coinMinimalDenoms: string[]) {
     for (const coinMinimalDenom of coinMinimalDenoms) {
-      if (this.unknownDenoms.find((denom) => denom === coinMinimalDenom)) {
+      if (this.unknownDenomMap.get(coinMinimalDenom)) {
         continue;
       }
 
@@ -91,25 +64,28 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
       this.unknownDenoms.push(coinMinimalDenom);
 
       const disposer = autorun(() => {
-        const registered = this.getCurrencyFromRegistrars(coinMinimalDenom);
-        if (registered) {
-          const [currency, committed] = registered;
-          runInAction(() => {
-            if (currency) {
+        const generator = this.currencyRegistry.getCurrencyRegistrar(
+          this.chainId,
+          coinMinimalDenom
+        );
+        if (generator) {
+          const currency = generator.value;
+          if (currency) {
+            runInAction(() => {
               const index = this.unknownDenoms.findIndex(
-                (denom) => denom === coinMinimalDenom
+                (denom) => denom === currency.coinMinimalDenom
               );
               if (index >= 0) {
                 this.unknownDenoms.splice(index, 1);
               }
 
               this.addOrReplaceCurrency(currency);
-            }
+            });
 
-            if (committed) {
+            if (generator.done) {
               disposer();
             }
-          });
+          }
         } else {
           disposer();
         }
@@ -117,33 +93,32 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
     }
   }
 
-  @action
-  registerCurrencyRegistrar(registrar: CurrencyRegistrar): void {
-    this.currencyRegistrars.push(registrar);
-  }
-
-  @action
-  setChainInfo(chainInfo: C) {
-    this._chainInfo = chainInfo;
-  }
-
-  get raw(): C {
-    return this._chainInfo;
+  get embedded(): C {
+    return this._embedded;
   }
 
   get chainId(): string {
-    return this._chainInfo.chainId;
+    return this._embedded.chainId;
   }
 
   get currencies(): AppCurrency[] {
-    return this._chainInfo.currencies.concat(this.registeredCurrencies);
+    return this._embedded.currencies.concat(this.registeredCurrencies);
   }
 
   @computed
-  get currencyMap(): Map<string, AppCurrency> {
+  protected get currencyMap(): Map<string, AppCurrency> {
     const result: Map<string, AppCurrency> = new Map();
     for (const currency of this.currencies) {
       result.set(currency.coinMinimalDenom, currency);
+    }
+    return result;
+  }
+
+  @computed
+  protected get unknownDenomMap(): Map<string, boolean> {
+    const result: Map<string, boolean> = new Map();
+    for (const denom of this.unknownDenoms) {
+      result.set(denom, true);
     }
     return result;
   }
@@ -179,7 +154,7 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
     if (this.currencyMap.has(coinMinimalDenom)) {
       return this.currencyMap.get(coinMinimalDenom);
     }
-    this.addUnknownCurrencies(coinMinimalDenom);
+    this.addUnknownDenoms(coinMinimalDenom);
 
     // Unknown denom can be registered synchronously in some cases.
     // For this case, re-try to get currency.
@@ -219,140 +194,149 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
   }
 
   get stakeCurrency(): Currency {
-    return this.raw.stakeCurrency;
+    return this._embedded.stakeCurrency;
   }
 
   get alternativeBIP44s(): BIP44[] | undefined {
-    return this.raw.alternativeBIP44s;
+    return this._embedded.alternativeBIP44s;
   }
 
   get bech32Config(): Bech32Config {
-    return this.raw.bech32Config;
+    return this._embedded.bech32Config;
   }
+
   get beta(): boolean | undefined {
-    return this.raw.beta;
+    return this._embedded.beta;
   }
 
   get bip44(): BIP44 {
-    return this.raw.bip44;
+    return this._embedded.bip44;
   }
 
   get chainName(): string {
-    return this.raw.chainName;
+    return this._embedded.chainName;
   }
 
-  get features(): string[] | undefined {
-    return this.raw.features;
+  get features(): string[] {
+    return this._embedded.features ?? [];
   }
 
   get feeCurrencies(): FeeCurrency[] {
-    return this.raw.feeCurrencies;
+    return this._embedded.feeCurrencies;
   }
 
   get rest(): string {
-    return this.raw.rest;
+    return this._embedded.rest;
   }
 
   get rpc(): string {
-    return this.raw.rpc;
+    return this._embedded.rpc;
   }
 
   get walletUrl(): string | undefined {
-    return this.raw.walletUrl;
+    return this._embedded.walletUrl;
   }
 
   get walletUrlForStaking(): string | undefined {
-    return this.raw.walletUrlForStaking;
+    return this._embedded.walletUrlForStaking;
+  }
+
+  hasFeature(feature: string): boolean {
+    return !!(
+      this._embedded.features && this._embedded.features.includes(feature)
+    );
+  }
+
+  @action
+  setEmbeddedChainInfo(embedded: C) {
+    this._embedded = embedded;
   }
 }
 
-export type ChainInfoOverrider<C extends ChainInfo = ChainInfo> = (
-  chainInfo: DeepReadonly<C>
-) => C;
-
 export class ChainStore<C extends ChainInfo = ChainInfo>
-  implements ChainGetter
+  implements IChainStore<C>
 {
   @observable.ref
-  protected _chainInfos!: ChainInfoInner<C>[];
+  protected _chainInfos: ChainInfoImpl<C>[] = [];
 
-  protected setChainInfoHandlers: ((
-    chainInfoInner: ChainInfoInner<C>
-  ) => void)[] = [];
-
-  protected _cachedChainInfosMap: Map<string, ChainInfoInner<C>> = new Map();
+  @observable
+  protected currencyRegistrars: CurrencyRegistrar[] = [];
 
   constructor(embedChainInfos: C[]) {
-    this.setChainInfos(embedChainInfos);
-
     makeObservable(this);
+
+    this.setEmbeddedChainInfos(embedChainInfos);
+
+    keepAlive(this, "chainInfoMap");
   }
 
-  get chainInfos(): ChainInfoInner<C>[] {
+  get chainInfos(): IChainInfoImpl<C>[] {
     return this._chainInfos;
   }
 
-  getChain(chainId: string): ChainInfoInner<C> {
+  @computed
+  protected get chainInfoMap(): Map<string, ChainInfoImpl<C>> {
+    const result: Map<string, ChainInfoImpl<C>> = new Map();
+    for (const chainInfo of this._chainInfos) {
+      result.set(ChainIdHelper.parse(chainInfo.chainId).identifier, chainInfo);
+    }
+    return result;
+  }
+
+  getChain(chainId: string): IChainInfoImpl<C> {
     const chainIdentifier = ChainIdHelper.parse(chainId);
 
-    const find = this.chainInfos.find((info) => {
-      return (
-        ChainIdHelper.parse(info.chainId).identifier ===
-        chainIdentifier.identifier
-      );
-    });
+    const chainInfo = this.chainInfoMap.get(chainIdentifier.identifier);
 
-    if (!find) {
+    if (!chainInfo) {
       throw new Error(`Unknown chain info: ${chainId}`);
     }
 
-    return find;
+    return chainInfo;
   }
 
   hasChain(chainId: string): boolean {
     const chainIdentifier = ChainIdHelper.parse(chainId);
 
-    const find = this.chainInfos.find((info) => {
-      return (
-        ChainIdHelper.parse(info.chainId).identifier ===
-        chainIdentifier.identifier
-      );
-    });
-
-    return find != null;
-  }
-
-  addSetChainInfoHandler(handler: (chainInfoInner: ChainInfoInner<C>) => void) {
-    this.setChainInfoHandlers.push(handler);
-
-    for (const chainInfo of this.chainInfos) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const cached = this._cachedChainInfosMap.get(chainInfo.chainId)!;
-      handler(cached);
-    }
+    return this.chainInfoMap.has(chainIdentifier.identifier);
   }
 
   @action
-  protected setChainInfos(chainInfos: C[]) {
-    const chainInfoInners: ChainInfoInner<C>[] = [];
+  protected setEmbeddedChainInfos(chainInfos: C[]) {
+    this._chainInfos = chainInfos.map((chainInfo) => {
+      const prev = this.chainInfoMap.get(
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+      );
+      if (prev) {
+        prev.setEmbeddedChainInfo(chainInfo);
+        return prev;
+      }
 
-    for (const chainInfo of chainInfos) {
-      if (this._cachedChainInfosMap.has(chainInfo.chainId)) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const cached = this._cachedChainInfosMap.get(chainInfo.chainId)!;
-        cached.setChainInfo(chainInfo);
-        chainInfoInners.push(cached);
-      } else {
-        const chainInfoInner = new ChainInfoInner(chainInfo);
-        this._cachedChainInfosMap.set(chainInfo.chainId, chainInfoInner);
-        chainInfoInners.push(chainInfoInner);
+      return new ChainInfoImpl(chainInfo, this);
+    });
+  }
 
-        for (const handler of this.setChainInfoHandlers) {
-          handler(chainInfoInner);
-        }
+  getCurrencyRegistrar(
+    chainId: string,
+    coinMinimalDenom: string
+  ):
+    | {
+        value: AppCurrency | undefined;
+        done: boolean;
+      }
+    | undefined {
+    for (let i = 0; i < this.currencyRegistrars.length; i++) {
+      const registrar = this.currencyRegistrars[i];
+      const generator = registrar(chainId, coinMinimalDenom);
+      if (generator) {
+        return generator;
       }
     }
+    return undefined;
+  }
 
-    this._chainInfos = chainInfoInners;
+  @action
+  registerCurrencyRegistrar(registrar: CurrencyRegistrar): void {
+    this.currencyRegistrars.push(registrar);
   }
 }

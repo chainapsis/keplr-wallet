@@ -3,7 +3,7 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { AuthAccount } from "./types";
 import { computed, makeObservable } from "mobx";
 import { BaseAccount } from "@keplr-wallet/cosmos";

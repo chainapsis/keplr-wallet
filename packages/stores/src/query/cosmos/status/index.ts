@@ -1,5 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { ObservableChainQueryRPC } from "../../chain-rpc-query";
 import { Int } from "@keplr-wallet/unit";
 
