@@ -65,6 +65,7 @@
     "aes-js": "^3.1.2",
     "appcenter": "^4.1.0",
     "appcenter-analytics": "^4.1.0",
+    "axios": "^0.27.2",
     "bip39": "^3.0.4",
     "buffer": "^6.0.3",
     "color-alpha": "^1.1.3",

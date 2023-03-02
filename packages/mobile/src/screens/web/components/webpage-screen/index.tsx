@@ -24,6 +24,9 @@ import { AppCurrency, ChainInfo, KeplrMode } from "@keplr-wallet/types";
 import { MessageRequester } from "@keplr-wallet/router";
 import { autorun } from "mobx";
 import { Mutable } from "utility-types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import Axios from "axios";
+import { CommunityChainInfoRepo } from "../../../../config";
 
 // Due to the limitations of the current structure, it is not possible to approve the suggest chain and immediately reflect the updated chain infos.
 // Since chain infos cannot be reflected immediately, a problem may occur if a request comes in during that delay.
@@ -44,7 +47,7 @@ class SuggestChainReceiverKeplr extends Keplr {
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
     // deep copy
-    const mutableChainInfo = JSON.parse(
+    let mutableChainInfo = JSON.parse(
       JSON.stringify(chainInfo)
     ) as Mutable<ChainInfo>;
 
@@ -58,6 +61,21 @@ class SuggestChainReceiverKeplr extends Keplr {
       delete mutableCur.coinGeckoId;
       return mutableCur;
     });
+
+    const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
+
+    try {
+      const res = await Axios.get<ChainInfo>(
+        `/cosmos/${chainIdentifier}.json`,
+        {
+          baseURL: `https://raw.githubusercontent.com/${CommunityChainInfoRepo.organizationName}/${CommunityChainInfoRepo.repoName}/${CommunityChainInfoRepo.branchName}`,
+        }
+      );
+
+      mutableChainInfo = res.data;
+    } catch (e) {
+      console.log("error", e);
+    }
 
     await super.experimentalSuggestChain(mutableChainInfo);
     await this.suggestChainReceiver(mutableChainInfo);
@@ -112,7 +130,7 @@ export const WebpageScreen: FunctionComponent<
   useEffect(() => {
     if (waitingSuggestedChainInfo) {
       if (enableSuggestChain) {
-        chainSuggestStore.approve();
+        chainSuggestStore.approve(waitingSuggestedChainInfo.data.chainInfo);
       } else {
         chainSuggestStore.reject();
       }
