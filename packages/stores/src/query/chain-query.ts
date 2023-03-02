@@ -22,10 +22,7 @@ export class ObservableChainQuery<
     const chainInfo = chainGetter.getChain(chainId);
 
     const instance = Axios.create({
-      ...{
-        baseURL: chainInfo.rest,
-      },
-      ...chainInfo.restConfig,
+      baseURL: chainInfo.rest,
     });
 
     super(kvStore, instance, url);
@@ -39,10 +36,7 @@ export class ObservableChainQuery<
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
     return Axios.create({
-      ...{
-        baseURL: chainInfo.rest,
-      },
-      ...chainInfo.restConfig,
+      baseURL: chainInfo.rest,
     });
   }
 

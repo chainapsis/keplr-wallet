@@ -37,10 +37,7 @@ export class BackgroundTxService {
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
     const restInstance = Axios.create({
-      ...{
-        baseURL: chainInfo.rest,
-      },
-      ...chainInfo.restConfig,
+      baseURL: chainInfo.rest,
     });
 
     this.notification.create({

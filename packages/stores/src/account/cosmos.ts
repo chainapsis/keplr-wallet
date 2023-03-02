@@ -875,10 +875,7 @@ export class CosmosAccountImpl {
   get instance(): AxiosInstance {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     return Axios.create({
-      ...{
-        baseURL: chainInfo.rest,
-      },
-      ...chainInfo.restConfig,
+      baseURL: chainInfo.rest,
     });
   }
 

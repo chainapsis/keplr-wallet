@@ -1,19 +1,10 @@
 import { Currency, AppCurrency, FeeCurrency } from "./currency";
 import { BIP44 } from "./bip44";
-import { AxiosRequestConfig } from "axios";
 import { Bech32Config } from "./bech32";
 
 export interface ChainInfo {
   readonly rpc: string;
-  /**
-   * @deprecated Do not use
-   */
-  readonly rpcConfig?: AxiosRequestConfig;
   readonly rest: string;
-  /**
-   * @deprecated Do not use
-   */
-  readonly restConfig?: AxiosRequestConfig;
   readonly nodeProvider?: {
     readonly name: string;
     readonly email: string;
