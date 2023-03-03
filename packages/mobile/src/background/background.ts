@@ -9,7 +9,7 @@ import TransportBLE from "@ledgerhq/react-native-hw-transport-ble";
 import { getRandomBytesAsync } from "../common";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
-import { EmbedChainInfos } from "../config";
+import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
 import {
   getLastUsedLedgerDeviceId,
   setLastUsedLedgerDeviceId,
@@ -36,6 +36,7 @@ init(
     "https://hub.injective.network",
   ],
   ["https://wallet.keplr.app"],
+  CommunityChainInfoRepo,
   {
     rng: getRandomBytesAsync,
   },

@@ -2066,3 +2066,9 @@ export const ICNSInfo = {
   resolverContractAddress:
     "osmo1xk0s8xgktn9x5vwcgtjdxqzadg88fgn33p8u9cnpdxwemvxscvast52cdd",
 };
+
+export const CommunityChainInfoRepo = {
+  organizationName: "chainapsis",
+  repoName: "keplr-chain-registry",
+  branchName: "main",
+};

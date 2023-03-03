@@ -9,9 +9,7 @@ import {
 
 import { ChainInfo } from "@keplr-wallet/types";
 import {
-  ChainInfoWithEmbed,
-  SetPersistentMemoryMsg,
-  GetPersistentMemoryMsg,
+  ChainInfoWithCoreTypes,
   GetChainInfosMsg,
   RemoveSuggestedChainInfoMsg,
   TryUpdateChainMsg,
@@ -21,9 +19,10 @@ import {
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 import { MessageRequester } from "@keplr-wallet/router";
-import { toGenerator } from "@keplr-wallet/common";
+import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
+export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable
   protected _selectedChainId: string;
 
@@ -31,7 +30,13 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   protected _isInitializing: boolean = false;
   protected deferChainIdSelect: string = "";
 
+  @observable
+  protected chainInfoInUIConfig: {
+    disabledChains: string[];
+  };
+
   constructor(
+    protected readonly kvStore: KVStore,
     embedChainInfos: ChainInfo[],
     protected readonly requester: MessageRequester,
     protected readonly deferInitialQueryController: DeferInitialQueryController
@@ -49,6 +54,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
 
     this._selectedChainId = embedChainInfos[0].chainId;
 
+    this.chainInfoInUIConfig = {
+      disabledChains: [],
+    };
+
     makeObservable(this);
 
     this.init();
@@ -56,6 +65,87 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
 
   get isInitializing(): boolean {
     return this._isInitializing;
+  }
+
+  @computed
+  get chainInfosInUI() {
+    return this.enabledChainInfosInUI;
+  }
+
+  @computed
+  get chainInfosWithUIConfig() {
+    return this.chainInfos.map((chainInfo) => {
+      if (this.disabledChainInfosInUI.includes(chainInfo)) {
+        return {
+          chainInfo,
+          disabled: true,
+        };
+      } else {
+        return {
+          chainInfo,
+          disabled: false,
+        };
+      }
+    });
+  }
+
+  @computed
+  protected get enabledChainInfosInUI() {
+    return this.chainInfos.filter(
+      (chainInfo) =>
+        !this.chainInfoInUIConfig.disabledChains.includes(
+          ChainIdHelper.parse(chainInfo.chainId).identifier
+        )
+    );
+  }
+
+  @computed
+  get disabledChainInfosInUI() {
+    return this.chainInfos.filter((chainInfo) =>
+      this.chainInfoInUIConfig.disabledChains.includes(
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+      )
+    );
+  }
+
+  @flow
+  *toggleChainInfoInUI(chainId: string) {
+    chainId = ChainIdHelper.parse(chainId).identifier;
+    let disableChainIds = [];
+
+    if (this.chainInfoInUIConfig.disabledChains.includes(chainId)) {
+      disableChainIds = this.chainInfoInUIConfig.disabledChains.filter(
+        (chain) => chain !== chainId
+      );
+    } else {
+      if (this.enabledChainInfosInUI.length === 1) {
+        // Can't turn off all chains.
+        return;
+      }
+
+      disableChainIds = [...this.chainInfoInUIConfig.disabledChains, chainId];
+    }
+
+    yield this.kvStore.set<{ disabledChains: string[] }>(
+      "extension_chainInfoInUIConfig",
+      {
+        disabledChains: disableChainIds,
+      }
+    );
+
+    this.chainInfoInUIConfig.disabledChains = disableChainIds;
+
+    if (ChainIdHelper.parse(this.current.chainId).identifier === chainId) {
+      const other = this.chainInfosInUI.find(
+        (chainInfo) =>
+          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainId
+      );
+
+      if (other) {
+        this.selectChain(other.chainId);
+        this.saveLastViewChainId();
+      }
+    }
   }
 
   get selectedChainId(): string {
@@ -71,7 +161,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   }
 
   @computed
-  get current(): ChainInfoInner<ChainInfoWithEmbed> {
+  get current(): ChainInfoInner<ChainInfoWithCoreTypes> {
     if (this.hasChain(this._selectedChainId)) {
       return this.getChain(this._selectedChainId);
     }
@@ -81,11 +171,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
 
   @flow
   *saveLastViewChainId() {
-    // Save last view chain id to persistent background
-    const msg = new SetPersistentMemoryMsg({
-      lastViewChainId: this._selectedChainId,
-    });
-    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
+    yield this.kvStore.set<string>(
+      "extension_last_view_chain_id",
+      this._selectedChainId
+    );
   }
 
   @flow
@@ -95,15 +184,13 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
 
     this.deferInitialQueryController.ready();
 
-    // Get last view chain id to persistent background
-    const msg = new GetPersistentMemoryMsg();
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    const lastViewChainId = yield* toGenerator(
+      this.kvStore.get<string>("extension_last_view_chain_id")
     );
 
     if (!this.deferChainIdSelect) {
-      if (result && result.lastViewChainId) {
-        this.selectChain(result.lastViewChainId);
+      if (lastViewChainId) {
+        this.selectChain(lastViewChainId);
       }
     }
     this._isInitializing = false;
@@ -111,6 +198,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
     if (this.deferChainIdSelect) {
       this.selectChain(this.deferChainIdSelect);
       this.deferChainIdSelect = "";
+    }
+
+    const chainInfoUI = yield* toGenerator(
+      this.kvStore.get<{ disabledChains: string[] }>(
+        "extension_chainInfoInUIConfig"
+      )
+    );
+
+    if (chainInfoUI) {
+      this.chainInfoInUIConfig.disabledChains =
+        chainInfoUI.disabledChains ?? [];
     }
   }
 
@@ -136,8 +234,12 @@ export class ChainStore extends BaseChainStore<ChainInfoWithEmbed> {
   @flow
   *tryUpdateChain(chainId: string) {
     const msg = new TryUpdateChainMsg(chainId);
-    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
-    yield this.getChainInfosFromBackground();
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    if (result.updated) {
+      yield this.getChainInfosFromBackground();
+    }
   }
 
   @flow

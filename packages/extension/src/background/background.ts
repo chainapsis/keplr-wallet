@@ -8,7 +8,11 @@ import {
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { init } from "@keplr-wallet/background";
 
-import { EmbedChainInfos, PrivilegedOrigins } from "../config";
+import {
+  CommunityChainInfoRepo,
+  EmbedChainInfos,
+  PrivilegedOrigins,
+} from "../config";
 
 const router = new ExtensionRouter(ExtensionEnv.produceEnv);
 router.addGuard(ExtensionGuards.checkOriginIsValid);
@@ -21,6 +25,7 @@ init(
   EmbedChainInfos,
   PrivilegedOrigins,
   PrivilegedOrigins,
+  CommunityChainInfoRepo,
   {
     rng: (array) => {
       return Promise.resolve(crypto.getRandomValues(array));

@@ -41,6 +41,8 @@ export const SettingPage: FunctionComponent = observer(() => {
         }
       );
 
+  const isDeveloperMode = uiConfigStore.isDeveloper;
+
   return (
     <HeaderLayout
       showChainName={false}
@@ -85,14 +87,11 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
-            id: "setting.connections",
-          })}
-          paragraph={intl.formatMessage({
-            id: "setting.connections.paragraph",
+            id: "setting.security-privacy",
           })}
           onClick={() => {
             history.push({
-              pathname: "/setting/connections",
+              pathname: "/setting/security-privacy",
             });
           }}
           icons={useMemo(
@@ -116,11 +115,11 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
-            id: "setting.autolock",
+            id: "setting.chain-active.title",
           })}
           onClick={() => {
             history.push({
-              pathname: "/setting/autolock",
+              pathname: "/setting/chain-active",
             });
           }}
           icons={useMemo(
@@ -129,11 +128,11 @@ export const SettingPage: FunctionComponent = observer(() => {
           )}
         />
         <PageButton
-          title="Show Advanced IBC Transfers"
+          title={intl.formatMessage({
+            id: "setting.developer-mode",
+          })}
           onClick={() => {
-            uiConfigStore.setShowAdvancedIBCTransfer(
-              !uiConfigStore.showAdvancedIBCTransfer
-            );
+            uiConfigStore.setDeveloperMode(!isDeveloperMode);
           }}
           icons={[
             <label
@@ -143,11 +142,9 @@ export const SettingPage: FunctionComponent = observer(() => {
             >
               <input
                 type="checkbox"
-                checked={uiConfigStore.showAdvancedIBCTransfer}
+                checked={isDeveloperMode}
                 onChange={() => {
-                  uiConfigStore.setShowAdvancedIBCTransfer(
-                    !uiConfigStore.showAdvancedIBCTransfer
-                  );
+                  uiConfigStore.setDeveloperMode(isDeveloperMode);
                 }}
               />
               <span className="custom-toggle-slider rounded-circle" />
