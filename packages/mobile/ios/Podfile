@@ -36,6 +36,29 @@ target 'mobile' do
   # use_flipper!()
 
   post_install do |installer|
+    # Run the React-Native post install
     react_native_post_install(installer)
+
+    # Get the development team id from the main project
+    dev_team_id = ""
+    project = installer.aggregate_targets[0].user_project
+    project.targets.each do |target|
+      target.build_configurations.each do |config|
+        if dev_team_id.empty? and !config.build_settings['DEVELOPMENT_TEAM'].nil?
+          dev_team_id = config.build_settings['DEVELOPMENT_TEAM']
+        end
+      end
+    end
+
+    # Reconfigure the pods, update deployment target and signing settings
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        if target.respond_to?(:product_type) and target.product_type == 'com.apple.product-type.bundle'
+          config.build_settings['DEVELOPMENT_TEAM'] = dev_team_id
+          config.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution';
+          config.build_settings['CODE_SIGN_STYLE'] = 'Manual';
+        end
+      end
+    end
   end
 end
