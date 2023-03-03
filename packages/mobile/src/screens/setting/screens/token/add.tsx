@@ -91,31 +91,33 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
         editable={false}
         value={queryTokenInfo?.decimals.toString() ?? ""}
       />
-      <View
-        style={StyleSheet.flatten([
-          style.flatten(["flex-row", "justify-center"]),
-        ])}
-      >
-        <Button
-          text="Advanced"
-          mode="text"
-          rightIcon={
-            <View style={style.flatten(["padding-left-4"])}>
-              {isAdvanced ? (
-                <UpArrowIcon size={16} color="#314FDF" />
-              ) : (
-                <DownArrowIcon size={16} color="#314FDF" />
-              )}
-            </View>
-          }
+      {isSecret20 ? (
+        <View
           style={StyleSheet.flatten([
-            style.flatten(["width-122", "items-center"]),
+            style.flatten(["flex-row", "justify-center"]),
           ])}
-          onPress={() => {
-            setAdvanced(!isAdvanced);
-          }}
-        />
-      </View>
+        >
+          <Button
+            text="Advanced"
+            mode="text"
+            rightIcon={
+              <View style={style.flatten(["padding-left-4"])}>
+                {isAdvanced ? (
+                  <UpArrowIcon size={16} color="#314FDF" />
+                ) : (
+                  <DownArrowIcon size={16} color="#314FDF" />
+                )}
+              </View>
+            }
+            style={StyleSheet.flatten([
+              style.flatten(["width-122", "items-center"]),
+            ])}
+            onPress={() => {
+              setAdvanced(!isAdvanced);
+            }}
+          />
+        </View>
+      ) : null}
       {isAdvanced ? (
         <TextInput
           label="Viewing key"
