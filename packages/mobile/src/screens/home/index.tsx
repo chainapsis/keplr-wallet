@@ -45,13 +45,13 @@ export const HomeScreen: FunctionComponent = observer(() => {
     if (!chainStoreIsInitializing) {
       (async () => {
         try {
-          await chainStore.tryUpdateChain(chainStore.current.chainId);
+          await chainStore.tryUpdateChain(currentChainId);
         } catch (e) {
           console.log(e);
         }
       })();
     }
-  }, [chainStore, chainStoreIsInitializing, currentChain, currentChainId]);
+  }, [chainStore, chainStoreIsInitializing, currentChainId]);
 
   useEffect(() => {
     const appStateHandler = (state: AppStateStatus) => {

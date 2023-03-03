@@ -150,8 +150,10 @@ export function init(
   secretWasmService.init(chainsService, keyRingService, permissionService);
   backgroundTxService.init(chainsService, permissionService);
   phishingListService.init();
-  // No need to wait because user can't interact with app right after launch.
-  autoLockAccountService.init(keyRingService);
+  if (typeof browser !== "undefined") {
+    // No need to wait because user can't interact with app right after launch.
+    autoLockAccountService.init(keyRingService);
+  }
   // No need to wait because user can't interact with app right after launch.
   analyticsService.init();
 

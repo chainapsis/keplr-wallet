@@ -157,6 +157,11 @@ export class ChainUpdaterService {
             ...stakeCurrency,
             coinImageUrl: originChainInfo.stakeCurrency.coinImageUrl,
           };
+        } else {
+          stakeCurrency = {
+            ...stakeCurrency,
+            coinImageUrl: undefined,
+          };
         }
 
         chainInfo = {

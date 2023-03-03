@@ -28,6 +28,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import Axios from "axios";
 import { CommunityChainInfoRepo } from "../../../../config";
 import { checkChainFeatures } from "@keplr-wallet/chain-validator";
+import { ChainGetter } from "@keplr-wallet/stores";
 
 // Due to the limitations of the current structure, it is not possible to approve the suggest chain and immediately reflect the updated chain infos.
 // Since chain infos cannot be reflected immediately, a problem may occur if a request comes in during that delay.
@@ -36,6 +37,7 @@ import { checkChainFeatures } from "@keplr-wallet/chain-validator";
 // TODO: Solve this problem by structural way and remove the class below.
 class SuggestChainReceiverKeplr extends Keplr {
   constructor(
+    protected readonly chainGetter: ChainGetter,
     version: string,
     mode: KeplrMode,
     requester: MessageRequester,
@@ -47,21 +49,17 @@ class SuggestChainReceiverKeplr extends Keplr {
   }
 
   async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+    if (this.chainGetter.hasChain(chainInfo.chainId)) {
+      // If already registered, just do nothing and fallback to default process.
+      await super.experimentalSuggestChain(chainInfo);
+      await this.suggestChainReceiver(chainInfo);
+      return;
+    }
+
     // deep copy
     let mutableChainInfo = JSON.parse(
       JSON.stringify(chainInfo)
     ) as Mutable<ChainInfo>;
-
-    mutableChainInfo.currencies = mutableChainInfo.currencies.map((cur) => {
-      const mutableCur = cur as Mutable<AppCurrency>;
-      // Although the coinImageUrl field exists in currency, displaying an icon through it is not yet standardized enough.
-      // And even in dApps themselves, there are many cases where this field is set incorrectly because it is not yet used by the app itself.
-      // For this reason, disable it for a moment.
-      // coinGeckoId is also disabled because it is often set incorrectly in dApp.
-      delete mutableCur.coinImageUrl;
-      delete mutableCur.coinGeckoId;
-      return mutableCur;
-    });
 
     const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
 
@@ -78,7 +76,40 @@ class SuggestChainReceiverKeplr extends Keplr {
       console.log("error", e);
     }
 
-    await checkChainFeatures(mutableChainInfo);
+    mutableChainInfo.stakeCurrency = {
+      ...mutableChainInfo.stakeCurrency,
+      coinImageUrl: undefined,
+      coinGeckoId: undefined,
+    };
+    mutableChainInfo.currencies = mutableChainInfo.currencies.map((cur) => {
+      const mutableCur = cur as Mutable<AppCurrency>;
+      // Although the coinImageUrl field exists in currency, displaying an icon through it is not yet standardized enough.
+      // And even in dApps themselves, there are many cases where this field is set incorrectly because it is not yet used by the app itself.
+      // For this reason, disable it for a moment.
+      // coinGeckoId is also disabled because it is often set incorrectly in dApp.
+      delete mutableCur.coinImageUrl;
+      delete mutableCur.coinGeckoId;
+      return mutableCur;
+    });
+    mutableChainInfo.feeCurrencies = mutableChainInfo.feeCurrencies.map(
+      (cur) => {
+        const mutableCur = cur as Mutable<AppCurrency>;
+        // Although the coinImageUrl field exists in currency, displaying an icon through it is not yet standardized enough.
+        // And even in dApps themselves, there are many cases where this field is set incorrectly because it is not yet used by the app itself.
+        // For this reason, disable it for a moment.
+        // coinGeckoId is also disabled because it is often set incorrectly in dApp.
+        delete mutableCur.coinImageUrl;
+        delete mutableCur.coinGeckoId;
+        return mutableCur;
+      }
+    );
+
+    const features = await checkChainFeatures(mutableChainInfo);
+    if (features.length > 0) {
+      mutableChainInfo.features = mutableChainInfo.features
+        ? mutableChainInfo.features.concat(features)
+        : features;
+    }
     await super.experimentalSuggestChain(mutableChainInfo);
     await this.suggestChainReceiver(mutableChainInfo);
   }
@@ -143,6 +174,7 @@ export const WebpageScreen: FunctionComponent<
   const [keplr] = useState(
     () =>
       new SuggestChainReceiverKeplr(
+        chainStore,
         "0.10.10",
         "core",
         new RNMessageRequesterExternal(() => {
