@@ -130,6 +130,15 @@ export class ChainUpdaterService {
 
         let chainInfo: ChainInfo = res.data;
 
+        let chainSymbolImageUrl: string | undefined = undefined;
+
+        if (
+          originChainInfo.stakeCurrency.coinMinimalDenom ===
+          chainInfo.stakeCurrency.coinMinimalDenom
+        ) {
+          chainSymbolImageUrl = originChainInfo.chainSymbolImageUrl;
+        }
+
         const currencies = chainInfo.currencies.map((currency: AppCurrency) => {
           const hasCurrency = originChainInfo.currencies.find(
             (originCurrency) =>
@@ -166,6 +175,7 @@ export class ChainUpdaterService {
 
         chainInfo = {
           ...chainInfo,
+          chainSymbolImageUrl,
           stakeCurrency,
           currencies,
           feeCurrencies,
