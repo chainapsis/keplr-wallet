@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { PageWithScrollView } from "../../../../components/page";
 import { StyleSheet, View } from "react-native";
 import { useStyle } from "../../../../styles";
@@ -19,6 +19,8 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
 
   const [isAdvanced, setAdvanced] = useState(false);
   const [viewingKey, setViewingKey] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
 
   const navigation = useNavigation();
   const loadingScreen = useLoadingScreen();
@@ -44,6 +46,19 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
   const queryContractInfo = query.getQueryContract(recipientConfig.recipient);
   const queryTokenInfo = queryContractInfo.tokenInfo;
   const tokensOf = tokensStore.getTokensOf(chainStore.current.chainId);
+
+  useEffect(() => {
+    if (recipientConfig.recipient) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    }
+
+    setTimeout(() =>
+      setIsDisabled(!queryTokenInfo || queryContractInfo.error != null)
+    );
+  }, [recipientConfig.recipient]);
 
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -130,8 +145,8 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
       <Button
         text="Submit"
         size="large"
-        disabled={!queryContractInfo || queryContractInfo.error != null}
-        loading={!queryTokenInfo && queryContractInfo.isFetching}
+        disabled={isDisabled}
+        loading={isLoading}
         onPress={async () => {
           if (queryTokenInfo) {
             if (
