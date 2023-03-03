@@ -23,6 +23,7 @@ import {
   PermissionStore,
   ChainSuggestStore,
   ICNSQueries,
+  OsmosisQueries,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -61,7 +62,8 @@ export class RootStore {
       CosmwasmQueries,
       SecretQueries,
       KeplrETCQueries,
-      ICNSQueries
+      ICNSQueries,
+      OsmosisQueries
     ]
   >;
   public readonly accountStore: AccountStore<
@@ -162,7 +164,8 @@ export class RootStore {
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
       }),
-      ICNSQueries.use()
+      ICNSQueries.use(),
+      OsmosisQueries.use()
     );
 
     this.accountStore = new AccountStore(

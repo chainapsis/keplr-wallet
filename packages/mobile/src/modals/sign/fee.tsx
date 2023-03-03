@@ -13,6 +13,7 @@ import { CardModal } from "../card";
 import { FeeButtons, getFeeErrorText } from "../../components/input";
 import { Button } from "../../components/button";
 import { LoadingSpinner } from "../../components/spinner";
+import { GasInput } from "../../components/input/gas";
 
 const FeeButtonsModal: FunctionComponent<{
   isOpen: boolean;
@@ -30,6 +31,7 @@ const FeeButtonsModal: FunctionComponent<{
           feeConfig={feeConfig}
           gasConfig={gasConfig}
         />
+        <GasInput label="Gas Amount" gasConfig={gasConfig} />
         <Button
           color="primary"
           size="large"
