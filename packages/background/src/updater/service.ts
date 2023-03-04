@@ -133,8 +133,8 @@ export class ChainUpdaterService {
         let chainSymbolImageUrl: string | undefined = undefined;
 
         if (
-          originChainInfo.stakeCurrency.coinMinimalDenom ===
-          chainInfo.stakeCurrency.coinMinimalDenom
+          ChainIdHelper.parse(originChainInfo.chainId).identifier ===
+          ChainIdHelper.parse(chainInfo.chainId).identifier
         ) {
           chainSymbolImageUrl = originChainInfo.chainSymbolImageUrl;
         }
