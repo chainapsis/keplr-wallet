@@ -140,6 +140,7 @@ platform :ios do
     upload_to_testflight(
       apple_id: apple_id,
       team_id: team_id,
+      app_identifier: "com.chainapsis.keplrwallet",
       skip_submission: true
     )
 
