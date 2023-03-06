@@ -2,7 +2,6 @@ import { observable, action, computed, makeObservable, flow } from "mobx";
 
 import {
   ChainStore as BaseChainStore,
-  DeferInitialQueryController,
   IChainInfoImpl,
   ObservableQuery,
 } from "@keplr-wallet/stores";
@@ -35,8 +34,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   constructor(
     protected readonly kvStore: KVStore,
     embedChainInfos: ChainInfo[],
-    protected readonly requester: MessageRequester,
-    protected readonly deferInitialQueryController: DeferInitialQueryController
+    protected readonly requester: MessageRequester
   ) {
     super(
       embedChainInfos.map((chainInfo) => {
@@ -178,8 +176,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected *init() {
     this._isInitializing = true;
     yield this.getChainInfosFromBackground();
-
-    this.deferInitialQueryController.ready();
 
     const lastViewChainId = yield* toGenerator(
       this.kvStore.get<string>("extension_last_view_chain_id")

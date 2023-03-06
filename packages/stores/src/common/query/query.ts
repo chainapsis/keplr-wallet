@@ -140,62 +140,11 @@ class FlowCanceler {
   }
 }
 
-export class DeferInitialQueryController {
-  @observable
-  protected _isReady: boolean = false;
-
-  constructor() {
-    makeObservable(this);
-  }
-
-  @action
-  ready() {
-    this._isReady = true;
-  }
-
-  wait(): Promise<void> {
-    if (this.isReady) {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve) => {
-      const disposer = autorun(() => {
-        if (this.isReady) {
-          resolve();
-          if (disposer) {
-            disposer();
-          }
-        }
-      });
-    });
-  }
-
-  get isReady(): boolean {
-    return this._isReady;
-  }
-}
-
 /**
  * Base of the observable query classes.
  * This recommends to use the Axios to query the response.
  */
 export abstract class ObservableQueryBase<T = unknown, E = unknown> {
-  /**
-   * Allows to decide when to start the first query.
-   *
-   * This is a temporarily added feature to implement custom rpc/lcd feature in keplr extension or mobile.
-   * Because custom rpc/lcd are handled in the background process and the front-end cannot synchronously get those values,
-   * Rather than not showing the UI to the user during the delay, the UI is shown and the start of the query is delayed immediately after getting those values.
-   *
-   * XXX: Having a global field for this feature doesn't seem desirable in the long run.
-   *      Unless it's a keplr extension or mobile, you don't need to care about this field.
-   *      This field will soon be removed and can be replaced by other implementation.
-   *
-   */
-  public static experimentalDeferInitialQueryController:
-    | DeferInitialQueryController
-    | undefined = undefined;
-
   protected static suspectedResponseDatasWithInvalidValue: string[] = [
     "The network connection was lost.",
     "The request timed out.",
@@ -229,7 +178,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   private readonly queryCanceler: FlowCanceler;
   private readonly onStartCanceler: FlowCanceler;
-  private readonly queryControllerConceler: FlowCanceler;
 
   private observedCount: number = 0;
 
@@ -254,7 +202,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
     this.queryCanceler = new FlowCanceler();
     this.onStartCanceler = new FlowCanceler();
-    this.queryControllerConceler = new FlowCanceler();
 
     makeObservable(this);
 
@@ -396,34 +343,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       return;
     }
 
-    if (
-      ObservableQueryBase.experimentalDeferInitialQueryController &&
-      !ObservableQueryBase.experimentalDeferInitialQueryController.isReady
-    ) {
-      this._isFetching = true;
-
-      if (this.queryControllerConceler.hasCancelable) {
-        this.queryControllerConceler.cancel();
-      }
-
-      try {
-        yield this.queryControllerConceler.callOrCanceled(
-          () =>
-            ObservableQueryBase.experimentalDeferInitialQueryController?.wait() ??
-            Promise.resolve()
-        );
-      } catch (e) {
-        if (e instanceof FlowCancelerError) {
-          return;
-        }
-        throw e;
-      }
-
-      // Recheck
-      if (!this.isStarted) {
-        return;
-      }
-    }
     if (!this.canFetch()) {
       return;
     }
