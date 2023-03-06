@@ -127,7 +127,9 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
         text="Submit"
         size="large"
         disabled={!tokenInfo || queryContractInfo.error != null}
-        loading={queryContractInfo.isFetching}
+        loading={
+          recipientConfig.recipient.length > 0 && queryContractInfo.isFetching
+        }
         onPress={async () => {
           if (tokenInfo) {
             if (
