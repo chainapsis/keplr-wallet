@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { PageWithScrollView } from "../../../../components/page";
 import { StyleSheet, View } from "react-native";
 import { useStyle } from "../../../../styles";
@@ -19,8 +19,6 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
 
   const [isAdvanced, setAdvanced] = useState(false);
   const [viewingKey, setViewingKey] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(true);
 
   const navigation = useNavigation();
   const loadingScreen = useLoadingScreen();
@@ -44,21 +42,8 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
     : queries.cosmwasm.querycw20ContractInfo;
 
   const queryContractInfo = query.getQueryContract(recipientConfig.recipient);
-  const queryTokenInfo = queryContractInfo.tokenInfo;
+  const tokenInfo = queryContractInfo.tokenInfo;
   const tokensOf = tokensStore.getTokensOf(chainStore.current.chainId);
-
-  useEffect(() => {
-    if (recipientConfig.recipient) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-    }
-
-    setTimeout(() =>
-      setIsDisabled(!queryTokenInfo || queryContractInfo.error != null)
-    );
-  }, [recipientConfig.recipient]);
 
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -91,20 +76,16 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
         recipientConfig={recipientConfig}
         disableAddressBook={true}
       />
-      <TextInput
-        label="Name"
-        editable={false}
-        value={queryTokenInfo?.name ?? ""}
-      />
+      <TextInput label="Name" editable={false} value={tokenInfo?.name ?? ""} />
       <TextInput
         label="Symbol"
         editable={false}
-        value={queryTokenInfo?.symbol ?? ""}
+        value={tokenInfo?.symbol ?? ""}
       />
       <TextInput
         label="Decimals"
         editable={false}
-        value={queryTokenInfo?.decimals.toString() ?? ""}
+        value={tokenInfo?.decimals.toString() ?? ""}
       />
       {isSecret20 ? (
         <View
@@ -145,14 +126,14 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
       <Button
         text="Submit"
         size="large"
-        disabled={isDisabled}
-        loading={isLoading}
+        disabled={!tokenInfo || queryContractInfo.error != null}
+        loading={queryContractInfo.isFetching}
         onPress={async () => {
-          if (queryTokenInfo) {
+          if (tokenInfo) {
             if (
-              queryTokenInfo?.decimals != null &&
-              queryTokenInfo.name &&
-              queryTokenInfo.symbol
+              tokenInfo?.decimals != null &&
+              tokenInfo.name &&
+              tokenInfo.symbol
             ) {
               let currency: AppCurrency;
 
@@ -167,17 +148,17 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
                   type: "secret20",
                   contractAddress: recipientConfig.recipient,
                   viewingKey: newViewingKey,
-                  coinMinimalDenom: queryTokenInfo.name,
-                  coinDenom: queryTokenInfo.symbol,
-                  coinDecimals: queryTokenInfo.decimals,
+                  coinMinimalDenom: tokenInfo.name,
+                  coinDenom: tokenInfo.symbol,
+                  coinDecimals: tokenInfo.decimals,
                 };
               } else {
                 currency = {
                   type: "cw20",
                   contractAddress: recipientConfig.recipient,
-                  coinMinimalDenom: queryTokenInfo.name,
-                  coinDenom: queryTokenInfo.symbol,
-                  coinDecimals: queryTokenInfo.decimals,
+                  coinMinimalDenom: tokenInfo.name,
+                  coinDenom: tokenInfo.symbol,
+                  coinDecimals: tokenInfo.decimals,
                 };
               }
 
