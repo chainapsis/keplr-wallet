@@ -145,7 +145,7 @@ export class AccountSetBase {
         await this.suggestChain(keplr, chainInfo);
       }
     }
-    await keplr.enable(chainId);
+    // await keplr.enable(chainId);
   }
 
   protected async suggestChain(
