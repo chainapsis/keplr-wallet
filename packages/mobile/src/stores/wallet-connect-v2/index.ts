@@ -497,8 +497,10 @@ export class WalletConnectV2Store {
         }
         case "cosmos_signDirect": {
           const res = await keplr.signDirect(chainId, params.signerAddress, {
-            ...params.signDoc,
-            accountNumber: Long.fromString(params.signDoc),
+            bodyBytes: Buffer.from(params.signDoc.bodyBytes, "base64"),
+            authInfoBytes: Buffer.from(params.signDoc.authInfoBytes, "base64"),
+            chainId: params.signDoc.chainId,
+            accountNumber: Long.fromString(params.signDoc.accountNumber),
           });
           await signClient.respond({
             topic,
