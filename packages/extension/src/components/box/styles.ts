@@ -52,5 +52,7 @@ export const Styles = {
         return "flex-end";
       }
     }};
+    
+    cursor: ${({ cursor }) => cursor};
   `,
 };

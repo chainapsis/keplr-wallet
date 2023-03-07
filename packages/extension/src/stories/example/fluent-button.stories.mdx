@@ -1,0 +1,84 @@
+import { Canvas, Meta, Story } from "@storybook/addon-docs";
+import { PlaceHolder } from "./helper.stories";
+import { Box } from "../../components/box";
+import { YAxis } from "../../components/axis";
+import { Gutter } from "../../components/gutter";
+import { Column, Columns } from "../../components/column";
+import { Button } from "../../components/button";
+import { TextInput } from "../../components/input";
+
+<Meta
+  title="Examples/Columns"
+  decorators={[(story) => <div style={{ margin: "3em" }}>{story()}</div>]}
+/>
+
+_여기서 maxWidth를 설정한 건 대부분 스토리북에서 좀 더 예쁘게 보이도록 할 목적임_
+
+<br />
+
+## 이미지와 텍스트를 가로로 정렬하는 레이아웃
+
+이 레이아웃은 메인 사진과 몇개의 텍스트와 오른쪽의 아이콘을 가지고 있다<br/>
+메인 사진과 아이콘은 이미지일 것이기 때문에 크기는 정해져있을 것이다<br/>
+중간에 텍스트들은 길이가 다를 수 있기 때문에 메인 사진과 아이콘을 사용하고 남은 공간을 다 차지해야한다<br/>
+이 버튼을 layout 컴포넌트를 통해서 구성하도록 시도한다<br/>
+이를 이루기 위해서 Columns를 사용한다<br/>
+Columns는 bootstrap 등에서 가로로 12등분하고 그것을 기준으로 Column을 가로로 정렬하는 기능과 유사하다<br/>
+하지만 bootstrap 등과의 차이점은 Columns에 sum을 설정할 수 있다는 점이다. 12등분하고 싶다면 sum을 12로 설정하면 된다<br/>
+그리고 또 중요한 부분은 Columns는 자식으로있는 Column을 Column이 아닌 컴포넌트를 사용하고 남은 space에 대해서만 등분한다는 점이다<br/>
+이 점을 이용해서 sum이 1인 Columns를 기준으로 양 옆에 이미지들을 배치하고 weight가 1인 Column을 이용해서 text를 위치시킨다<br/>
+이 경우 Columns와 Column의 등분 기능은 의미가 없지만<br/>
+Columns가 Column이 아닌 컴포넌트에 의해서 남은 공간만을 Column에 할당한다는 점을 이용해서 텍스트를 중간에 남은 공간을 차지하도록 위치시킬 수 있다<br/>
+
+<Canvas>
+  <Story name="Layout with image and text">
+    <Box
+      backgroundColor="#CCCCCC"
+      maxWidth="20rem"
+      padding="1rem"
+      cursor="pointer"
+    >
+      <Columns sum={1} alignY="center">
+        <PlaceHolder width="3rem" height="3rem" />
+        <Gutter size="0.5rem" />
+        <Column weight={1}>
+          <YAxis>
+            Title
+            <Gutter size="0.25rem" />
+            Paragraph
+          </YAxis>
+        </Column>
+        <PlaceHolder width="1.5rem" height="1.5rem" />
+      </Columns>
+    </Box>
+  </Story>
+</Canvas>
+
+## Label과 버튼, 텍스트 인풋을 가지는 레이아웃
+
+이 레이아웃은 위 쪽에 Label과 Button을 가지고 있다<br/>
+아래 쪽에는 텍스트 인풋이 있다<br/>
+위 쪽을 만들기 위해서 위에서 했던것과 비슷하게 Columns를 사용한다<br/>
+대신에 이 경우에는 Column 안에 아무것도 넣지 않아서 단지 Label과 버튼을 양옆으로 몰기위한 용도로만 사용한다<br/>
+이때 버튼은 어쩔 수 없이 특정한 width를 가져야만한다. 버튼 그 자체에 width를 설정하는게 아니라 Box를 이용해서 width를 설정하고<br/>
+그 하위에 버튼을 넣어서 버튼이 Box를 채우도록 한다<br/>
+컴포넌트 자체에 width를 설정하는 것보다 다용도로 사용할 수 있는 Box를 통해서 width를 설정하는 걸 더 선호한다<br/>
+아래 쪽에는 텍스트 인풋을 넣는다<br/>
+
+<Canvas>
+  <Story name="Layout with label and text input">
+    <Box backgroundColor="#CCCCCC" maxWidth="20rem" padding="1rem">
+      <YAxis>
+        <Columns sum={1} alignY="center">
+          Label
+          <Column weight={1} />
+          <Box minWidth="3rem">
+            <Button text="Button" size="small" />
+          </Box>
+        </Columns>
+        <Gutter size="0.5rem" />
+        <TextInput removeBottomMargin={true} />
+      </YAxis>
+    </Box>
+  </Story>
+</Canvas>

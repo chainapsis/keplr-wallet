@@ -33,6 +33,8 @@ export interface BoxProps {
   alignX?: BoxAlignX;
   alignY?: BoxAlignY;
 
+  cursor?: "pointer" | "not-allowed" | "progress";
+
   className?: string;
   style?: CSSProperties;
 }
