@@ -118,8 +118,28 @@ export class MockKeplr implements Keplr {
     };
   }
 
-  getKeysSettled(_chainIds: string[]): Promise<SettledResponses<Key>> {
-    throw new Error("Not yet implemented");
+  async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
+    return chainIds.map((chainId) => {
+      const wallet = this.getWallet(chainId);
+
+      return {
+        status: "fulfilled",
+        value: {
+          name: "mock",
+          algo: "secp256k1",
+          pubKey: wallet.getPubKey().toBytes(),
+          address: wallet.getPubKey().getAddress(),
+          bech32Address: new Bech32Address(
+            wallet.getPubKey().getAddress()
+          ).toBech32(
+            this.chainInfos.find((c) => c.chainId === chainId)!.bech32Config
+              .bech32PrefixAccAddr
+          ),
+          isNanoLedger: false,
+          isKeystone: false,
+        },
+      };
+    });
   }
 
   signArbitrary(
