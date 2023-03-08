@@ -3,7 +3,7 @@ import { KVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-type ScamProposal = { [key: string]: string[] };
+type ScamProposal = Record<string, string[] | undefined>;
 
 export class ScamProposalStore extends ObservableQuery<ScamProposal> {
   constructor(
@@ -27,7 +27,10 @@ export class ScamProposalStore extends ObservableQuery<ScamProposal> {
       const scamProposalIds =
         proposals[ChainIdHelper.parse(chainId).identifier];
 
-      return scamProposalIds.includes(proposalId);
+      if (scamProposalIds) {
+        return scamProposalIds.includes(proposalId);
+      }
+      return false;
     }
 
     return false;
