@@ -124,6 +124,7 @@ export interface FiatOnRampServiceInfo {
   buyOrigin: string;
   buySupportChainIds: string[];
   buySupportCurrencies?: Currency[];
+  buySupportCurrenciesByChainId?: Record<string, Currency[]>;
 }
 
 export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
@@ -149,11 +150,43 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
     buySupportChainIds: ["cosmoshub-4", "osmosis-1", "juno-1", "evmos_9001-2"],
     buySupportCurrencies: [
       {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "uatom",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+      },
+      {
         coinDenom: "USDC",
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,
         coinGeckoId: "usd-coin",
       },
     ],
+    buySupportCurrenciesByChainId: {
+      "cosmoshub-4": [
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+          coinGeckoId: "cosmos",
+        },
+      ],
+      "osmosis-1": [
+        {
+          coinDenom: "USDC",
+          coinMinimalDenom: "uusdc",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+        },
+      ],
+      "juno-1": [
+        {
+          coinDenom: "USDC",
+          coinMinimalDenom: "uusdc",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+        },
+      ],
+    },
   },
 ];
