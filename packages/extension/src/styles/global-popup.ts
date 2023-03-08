@@ -1,7 +1,7 @@
 import { createGlobalStyle } from "styled-components";
 
 // Max: 800
-const width = 420;
+const width = 360;
 // Max: 600
 const height = 600;
 
