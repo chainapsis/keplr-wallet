@@ -43,6 +43,10 @@ export class KeyRingService {
     this.vaultService.lock();
   }
 
+  async ensureUnlockInteractive(_: Env): Promise<void> {
+    throw new Error("TODO");
+  }
+
   async unlockKeyRing(password: string): Promise<void> {
     await this.vaultService.unlock(password);
   }

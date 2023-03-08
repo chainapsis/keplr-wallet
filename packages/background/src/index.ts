@@ -67,17 +67,19 @@ export function init(
   const persistentMemoryService =
     new PersistentMemory.PersistentMemoryService();
 
-  const permissionService = new Permission.PermissionService(
-    storeCreator("permission"),
-    privilegedOrigins
-  );
-
   const tokensService = new Tokens.TokensService(storeCreator("tokens"));
 
   const chainsService = new Chains.ChainsService(
     storeCreator("chains"),
     embedChainInfos,
     communityChainInfoRepo
+  );
+
+  const permissionService = new Permission.PermissionService(
+    storeCreator("permission"),
+    privilegedOrigins,
+    interactionService,
+    chainsService
   );
 
   const ledgerService = new Ledger.LedgerService(
@@ -143,10 +145,12 @@ export function init(
     })
     .then(() => {
       return keyRingCosmosService.init();
+    })
+    .then(() => {
+      return permissionService.init();
     });
 
   persistentMemoryService.init();
-  permissionService.init(interactionService, chainsService, keyRingService);
   tokensService.init(
     interactionService,
     permissionService,
@@ -172,7 +176,7 @@ export function init(
 
   Interaction.init(router, interactionService);
   PersistentMemory.init(router, persistentMemoryService);
-  Permission.init(router, permissionService);
+  Permission.init(router, permissionService, keyRingV2Service);
   Tokens.init(router, tokensService);
   Chains.init(router, chainsService);
   Ledger.init(router, ledgerService);

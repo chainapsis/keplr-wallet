@@ -16,16 +16,24 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import { PermissionService } from "./service";
+import { KeyRingService } from "../keyring-v2";
 
-export const getHandler: (service: PermissionService) => Handler = (
-  service
-) => {
+export const getHandler: (
+  service: PermissionService,
+  keyRingService: KeyRingService
+) => Handler = (service, keyRingService) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
       case EnableAccessMsg:
-        return handleEnableAccessMsg(service)(env, msg as EnableAccessMsg);
+        return handleEnableAccessMsg(service, keyRingService)(
+          env,
+          msg as EnableAccessMsg
+        );
       case DisableAccessMsg:
-        return handleDisableAccessMsg(service)(env, msg as DisableAccessMsg);
+        return handleDisableAccessMsg(service, keyRingService)(
+          env,
+          msg as DisableAccessMsg
+        );
       case GetPermissionOriginsMsg:
         return handleGetPermissionOriginsMsg(service)(
           env,
@@ -63,9 +71,12 @@ export const getHandler: (service: PermissionService) => Handler = (
 };
 
 const handleEnableAccessMsg: (
-  service: PermissionService
-) => InternalHandler<EnableAccessMsg> = (service) => {
+  service: PermissionService,
+  keyRingService: KeyRingService
+) => InternalHandler<EnableAccessMsg> = (service, keyRingService) => {
   return async (env, msg) => {
+    await keyRingService.ensureUnlockInteractive(env);
+
     return await service.checkOrGrantBasicAccessPermission(
       env,
       msg.chainIds,
@@ -75,10 +86,13 @@ const handleEnableAccessMsg: (
 };
 
 const handleDisableAccessMsg: (
-  service: PermissionService
-) => InternalHandler<EnableAccessMsg> = (service) => {
+  service: PermissionService,
+  keyRingService: KeyRingService
+) => InternalHandler<EnableAccessMsg> = (service, keyRingService) => {
   return async (env, msg) => {
-    return await service.disable(env, msg.chainIds, msg.origin);
+    await keyRingService.ensureUnlockInteractive(env);
+
+    return service.disable(msg.chainIds, msg.origin);
   };
 };
 
@@ -104,8 +118,8 @@ const handleGetOriginPermittedChainsMsg: (
 const handleAddPermissionOrigin: (
   service: PermissionService
 ) => InternalHandler<AddPermissionOrigin> = (service) => {
-  return async (_, msg) => {
-    await service.addPermission([msg.chainId], msg.permissionType, [
+  return (_, msg) => {
+    service.addPermission([msg.chainId], msg.permissionType, [
       msg.permissionOrigin,
     ]);
   };
@@ -114,8 +128,8 @@ const handleAddPermissionOrigin: (
 const handleRemovePermissionOrigin: (
   service: PermissionService
 ) => InternalHandler<RemovePermissionOrigin> = (service) => {
-  return async (_, msg) => {
-    await service.removePermission(msg.chainId, msg.permissionType, [
+  return (_, msg) => {
+    service.removePermission(msg.chainId, msg.permissionType, [
       msg.permissionOrigin,
     ]);
   };
@@ -124,7 +138,7 @@ const handleRemovePermissionOrigin: (
 const handleGetGlobalPermissionOrigins: (
   service: PermissionService
 ) => InternalHandler<GetGlobalPermissionOriginsMsg> = (service) => {
-  return async (_, msg) => {
+  return (_, msg) => {
     return service.getGlobalPermissionOrigins(msg.permissionType);
   };
 };
@@ -132,7 +146,7 @@ const handleGetGlobalPermissionOrigins: (
 const handleRemoveGlobalPermissionOrigin: (
   service: PermissionService
 ) => InternalHandler<RemoveGlobalPermissionOriginMsg> = (service) => {
-  return async (_, msg) => {
+  return (_, msg) => {
     return service.removeGlobalPermission(msg.permissionType, [
       msg.permissionOrigin,
     ]);

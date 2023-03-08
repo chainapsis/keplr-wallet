@@ -308,7 +308,7 @@ export class TokensService {
 
     const type = getSecret20ViewingKeyPermissionType(contractAddress);
 
-    if (!this.permissionService.hasPermisson(chainId, type, origin)) {
+    if (!this.permissionService.hasPermission(chainId, type, origin)) {
       await this.permissionService.grantPermission(
         env,
         "/access/viewing-key",

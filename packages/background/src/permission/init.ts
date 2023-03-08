@@ -10,10 +10,15 @@ import {
   GetGlobalPermissionOriginsMsg,
   RemoveGlobalPermissionOriginMsg,
 } from "./messages";
+import { KeyRingService } from "../keyring-v2";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
 
-export function init(router: Router, service: PermissionService): void {
+export function init(
+  router: Router,
+  service: PermissionService,
+  keyRingService: KeyRingService
+): void {
   router.registerMessage(EnableAccessMsg);
   router.registerMessage(DisableAccessMsg);
   router.registerMessage(GetPermissionOriginsMsg);
@@ -23,5 +28,5 @@ export function init(router: Router, service: PermissionService): void {
   router.registerMessage(GetGlobalPermissionOriginsMsg);
   router.registerMessage(RemoveGlobalPermissionOriginMsg);
 
-  router.addHandler(ROUTE, getHandler(service));
+  router.addHandler(ROUTE, getHandler(service, keyRingService));
 }
