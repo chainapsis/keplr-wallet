@@ -116,7 +116,7 @@ export const useBuy = () => {
                   onRevCurrency:
                     serviceInfo.buySupportCurrenciesByChainId?.[
                       currentChainId
-                    ][0].coinDenom,
+                    ]?.[0].coinDenom,
                   network: currentChainInfo.chainName.toUpperCase(),
                 }),
             };

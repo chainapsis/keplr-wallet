@@ -124,7 +124,7 @@ export interface FiatOnRampServiceInfo {
   buyOrigin: string;
   buySupportChainIds: string[];
   buySupportCurrencies?: Currency[];
-  buySupportCurrenciesByChainId?: Record<string, Currency[]>;
+  buySupportCurrenciesByChainId?: Record<string, Currency[] | undefined>;
 }
 
 export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
