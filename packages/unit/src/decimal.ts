@@ -19,12 +19,7 @@ export class Dec {
     "133499189745056880149688856635597007162669032647290798121690100488888732861290034376435130433535"
   );
 
-  static readonly zero = new Dec(0);
-  /** Smallest `Dec` with current precision. */
-  static readonly smallestDec = new Dec("1", Dec.precision);
-  static readonly one = new Dec(1);
-
-  protected static precisionMultipliers: Map<
+  public static readonly precisionMultipliers: Map<
     string,
     bigInteger.BigInteger
   > = new Map();
@@ -74,6 +69,11 @@ export class Dec {
       isDownToZero: /^[0.]*$/.test(res),
     };
   }
+
+  static readonly zero = new Dec(0);
+  /** Smallest `Dec` with current precision. */
+  static readonly smallestDec = new Dec("1", Dec.precision);
+  static readonly one = new Dec(1);
 
   protected int: bigInteger.BigInteger;
 
