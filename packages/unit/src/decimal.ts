@@ -24,9 +24,10 @@ export class Dec {
   static readonly smallestDec = new Dec("1", Dec.precision);
   static readonly one = new Dec(1);
 
-  protected static precisionMultipliers:
-    | Map<string, bigInteger.BigInteger>
-    | undefined;
+  protected static precisionMultipliers: Map<
+    string,
+    bigInteger.BigInteger
+  > = new Map();
   protected static calcPrecisionMultiplier(
     prec: number
   ): bigInteger.BigInteger {
@@ -37,12 +38,8 @@ export class Dec {
       throw new Error("Too much precision");
     }
     const key = prec.toString();
-    if (!Dec.precisionMultipliers) {
-      Dec.precisionMultipliers = new Map();
-    }
     const cached = Dec.precisionMultipliers.get(key);
     if (cached) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return cached;
     }
 
