@@ -113,6 +113,10 @@ export const useBuy = () => {
               ...(currentChainInfo &&
                 currentChainAccount && {
                   onToAddress: currentChainAccount.bech32Address,
+                  onRevCurrency:
+                    serviceInfo.buySupportCurrenciesByChainId?.[
+                      currentChainId
+                    ]?.[0].coinDenom,
                   network: currentChainInfo.chainName.toUpperCase(),
                 }),
             };

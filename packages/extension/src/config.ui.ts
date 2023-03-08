@@ -124,6 +124,7 @@ export interface FiatOnRampServiceInfo {
   buyOrigin: string;
   buySupportChainIds: string[];
   buySupportCurrencies?: Currency[];
+  buySupportCurrenciesByChainId?: Record<string, Currency[] | undefined>;
 }
 
 export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
@@ -146,14 +147,74 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
     serviceName: "Kado",
     apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] || "",
     buyOrigin: "https://app.kado.money",
-    buySupportChainIds: ["osmosis-1", "juno-1", "phoenix-1"],
+    buySupportChainIds: [
+      "cosmoshub-4",
+      "osmosis-1",
+      "juno-1",
+      "phoenix-1",
+      "injective-1",
+    ],
     buySupportCurrencies: [
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom: "uatom",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+      },
       {
         coinDenom: "USDC",
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,
         coinGeckoId: "usd-coin",
       },
+      {
+        coinDenom: "USDT",
+        coinMinimalDenom: "uusdt",
+        coinDecimals: 6,
+        coinGeckoId: "tether",
+      },
     ],
+    buySupportCurrenciesByChainId: {
+      "cosmoshub-4": [
+        {
+          coinDenom: "ATOM",
+          coinMinimalDenom: "uatom",
+          coinDecimals: 6,
+          coinGeckoId: "cosmos",
+        },
+      ],
+      "osmosis-1": [
+        {
+          coinDenom: "USDC",
+          coinMinimalDenom: "uusdc",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+        },
+      ],
+      "juno-1": [
+        {
+          coinDenom: "USDC",
+          coinMinimalDenom: "uusdc",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+        },
+      ],
+      "phoenix-1": [
+        {
+          coinDenom: "USDC",
+          coinMinimalDenom: "uusdc",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+        },
+      ],
+      "injective-1": [
+        {
+          coinDenom: "USDT",
+          coinMinimalDenom: "uusdt",
+          coinDecimals: 6,
+          coinGeckoId: "tether",
+        },
+      ],
+    },
   },
 ];
