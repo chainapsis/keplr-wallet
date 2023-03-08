@@ -9,14 +9,20 @@ import { useStyle } from "../../styles";
 import { ProposalStatus } from "@keplr-wallet/stores/build/query/cosmos/governance/types";
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore } = useStore();
+  const { chainStore, queriesStore, scamProposalStore } = useStore();
 
   const style = useStyle();
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const sections = useMemo(() => {
-    const proposals = queries.cosmos.queryGovernance.proposals;
+    const proposals = queries.cosmos.queryGovernance.proposals.filter(
+      (proposal) =>
+        !scamProposalStore.isScamProposal(
+          chainStore.current.chainId,
+          proposal.id
+        )
+    );
 
     return [
       {

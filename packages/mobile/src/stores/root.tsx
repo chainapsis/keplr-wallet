@@ -24,6 +24,7 @@ import {
   ChainSuggestStore,
   ICNSQueries,
   OsmosisQueries,
+  ScamProposalStore,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -101,6 +102,8 @@ export class RootStore {
       language?: string;
     }
   >;
+
+  public readonly scamProposalStore: ScamProposalStore;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -423,6 +426,10 @@ export class RootStore {
           return amplitudeClient;
         }
       })()
+    );
+
+    this.scamProposalStore = new ScamProposalStore(
+      new AsyncKVStore("store_scam_proposal")
     );
   }
 }

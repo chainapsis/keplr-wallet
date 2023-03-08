@@ -26,7 +26,13 @@ import { useFocusEffect } from "@react-navigation/native";
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    priceStore,
+    scamProposalStore,
+  } = useStore();
 
   const style = useStyle();
 
@@ -99,6 +105,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     // fetching new query responses here would make query responses on all other components also refresh.
 
     await Promise.all([
+      scamProposalStore.waitFreshResponse(),
       priceStore.waitFreshResponse(),
       ...queries.queryBalances
         .getQueryBech32Address(account.bech32Address)
@@ -117,7 +124,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
     ]);
 
     setRefreshing(false);
-  }, [accountStore, chainStore, priceStore, queriesStore]);
+  }, [accountStore, chainStore, priceStore, queriesStore, scamProposalStore]);
 
   return (
     <PageWithScrollViewInBottomTabView
