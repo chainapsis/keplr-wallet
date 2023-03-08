@@ -14,7 +14,6 @@ export const GovernanceCard: FunctionComponent<{
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const currentChain = chainStore.current;
   const allProposals = queries.cosmos.queryGovernance.proposals;
 
   // Assume that the all proposals are descending order.
@@ -43,13 +42,8 @@ export const GovernanceCard: FunctionComponent<{
         }
       }
     }
-
-    if (currentChain.chainId.startsWith("cosmoshub-")) {
-      result = result.filter((p) => p.id !== "640");
-    }
-
     return result;
-  }, [allProposals, currentChain.chainId]);
+  }, [allProposals]);
 
   const smartNavigation = useSmartNavigation();
 

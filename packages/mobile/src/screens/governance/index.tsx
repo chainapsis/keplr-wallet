@@ -14,24 +14,18 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const currentChain = chainStore.current;
 
   const sections = useMemo(() => {
     const proposals = queries.cosmos.queryGovernance.proposals;
 
     return [
       {
-        data: proposals
-          .filter((p) => p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD)
-          .filter((p) => {
-            if (currentChain.chainId.startsWith("cosmoshub-")) {
-              return p.id !== "640";
-            }
-            return true;
-          }),
+        data: proposals.filter(
+          (p) => p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD
+        ),
       },
     ];
-  }, [currentChain.chainId, queries.cosmos.queryGovernance.proposals]);
+  }, [queries.cosmos.queryGovernance.proposals]);
 
   return (
     <PageWithSectionList
