@@ -147,7 +147,7 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
     serviceName: "Kado",
     apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] || "",
     buyOrigin: "https://app.kado.money",
-    buySupportChainIds: ["cosmoshub-4", "osmosis-1", "juno-1", "evmos_9001-2"],
+    buySupportChainIds: ["cosmoshub-4", "osmosis-1", "juno-1", "phoenix-1"],
     buySupportCurrencies: [
       {
         coinDenom: "ATOM",
@@ -180,6 +180,14 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
         },
       ],
       "juno-1": [
+        {
+          coinDenom: "USDC",
+          coinMinimalDenom: "uusdc",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+        },
+      ],
+      "phoenix-1": [
         {
           coinDenom: "USDC",
           coinMinimalDenom: "uusdc",
