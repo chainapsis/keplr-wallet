@@ -33,6 +33,10 @@ export class KeyRingStore {
     return this._keyInfos;
   }
 
+  get isEmpty(): boolean {
+    return this._status === "empty";
+  }
+
   @flow
   *newMnemonicKey(
     mnemonic: string,
