@@ -5497,6 +5497,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-wallet/simple-fetch@workspace:packages/simple-fetch":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/simple-fetch@workspace:packages/simple-fetch"
+  languageName: unknown
+  linkType: soft
+
 "@keplr-wallet/stores-etc@0.11.41, @keplr-wallet/stores-etc@workspace:packages/stores-etc":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-etc@workspace:packages/stores-etc"
