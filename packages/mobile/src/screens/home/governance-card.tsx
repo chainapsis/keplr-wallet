@@ -10,12 +10,14 @@ import { useSmartNavigation } from "../../navigation";
 export const GovernanceCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 }> = observer(({ containerStyle }) => {
-  const { chainStore, queriesStore } = useStore();
+  const { chainStore, queriesStore, scamProposalStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
 
-  const currentChain = chainStore.current;
-  const allProposals = queries.cosmos.queryGovernance.proposals;
+  const allProposals = queries.cosmos.queryGovernance.proposals.filter(
+    (proposal) =>
+      !scamProposalStore.isScamProposal(chainStore.current.chainId, proposal.id)
+  );
 
   // Assume that the all proposals are descending order.
   // And, show the recent proposals on voting period.
@@ -43,13 +45,8 @@ export const GovernanceCard: FunctionComponent<{
         }
       }
     }
-
-    if (currentChain.chainId.startsWith("cosmoshub-")) {
-      result = result.filter((p) => p.id !== "640");
-    }
-
     return result;
-  }, [allProposals, currentChain.chainId]);
+  }, [allProposals]);
 
   const smartNavigation = useSmartNavigation();
 

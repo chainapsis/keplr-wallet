@@ -45,6 +45,7 @@ import {
 } from "@keplr-wallet/stores-etc";
 import { WalletConnectV2Store } from "./wallet-connect-v2";
 import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
+import { ScamProposalStore } from "./scam-proposal";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
@@ -101,6 +102,8 @@ export class RootStore {
       language?: string;
     }
   >;
+
+  public readonly scamProposalStore: ScamProposalStore;
 
   constructor() {
     const router = new RNRouterUI(RNEnv.produceEnv);
@@ -423,6 +426,10 @@ export class RootStore {
           return amplitudeClient;
         }
       })()
+    );
+
+    this.scamProposalStore = new ScamProposalStore(
+      new AsyncKVStore("store_scam_proposal")
     );
   }
 }

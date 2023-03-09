@@ -9,29 +9,29 @@ import { useStyle } from "../../styles";
 import { ProposalStatus } from "@keplr-wallet/stores/build/query/cosmos/governance/types";
 
 export const GovernanceScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore } = useStore();
+  const { chainStore, queriesStore, scamProposalStore } = useStore();
 
   const style = useStyle();
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const currentChain = chainStore.current;
 
   const sections = useMemo(() => {
-    const proposals = queries.cosmos.queryGovernance.proposals;
+    const proposals = queries.cosmos.queryGovernance.proposals.filter(
+      (proposal) =>
+        !scamProposalStore.isScamProposal(
+          chainStore.current.chainId,
+          proposal.id
+        )
+    );
 
     return [
       {
-        data: proposals
-          .filter((p) => p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD)
-          .filter((p) => {
-            if (currentChain.chainId.startsWith("cosmoshub-")) {
-              return p.id !== "640";
-            }
-            return true;
-          }),
+        data: proposals.filter(
+          (p) => p.proposalStatus !== ProposalStatus.DEPOSIT_PERIOD
+        ),
       },
     ];
-  }, [currentChain.chainId, queries.cosmos.queryGovernance.proposals]);
+  }, [queries.cosmos.queryGovernance.proposals]);
 
   return (
     <PageWithSectionList
