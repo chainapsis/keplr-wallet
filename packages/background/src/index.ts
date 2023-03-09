@@ -1,6 +1,5 @@
 import { MessageRequester, Router } from "@keplr-wallet/router";
 
-import * as PersistentMemory from "./persistent-memory/internal";
 import * as Chains from "./chains/internal";
 import * as Ledger from "./ledger/internal";
 import * as Keystone from "./keystone/internal";
@@ -18,7 +17,6 @@ import * as KeyRingV2 from "./keyring-v2/internal";
 import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 
-export * from "./persistent-memory";
 export * from "./chains";
 export * from "./ledger";
 export * from "./keystone";
@@ -63,9 +61,6 @@ export function init(
     eventMsgRequester,
     commonCrypto.rng
   );
-
-  const persistentMemoryService =
-    new PersistentMemory.PersistentMemoryService();
 
   const tokensService = new Tokens.TokensService(storeCreator("tokens"));
 
@@ -150,7 +145,6 @@ export function init(
       return permissionService.init();
     });
 
-  persistentMemoryService.init();
   tokensService.init(
     interactionService,
     permissionService,
@@ -175,7 +169,6 @@ export function init(
   analyticsService.init();
 
   Interaction.init(router, interactionService);
-  PersistentMemory.init(router, persistentMemoryService);
   Permission.init(router, permissionService, keyRingV2Service);
   Tokens.init(router, tokensService);
   Chains.init(router, chainsService);
