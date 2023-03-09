@@ -54,7 +54,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       sendAutoLockMonitorMsg();
       const autoLockInterval = setInterval(() => {
         sendAutoLockMonitorMsg();
-      }, 30000);
+      }, 10000);
 
       return () => {
         clearInterval(autoLockInterval);

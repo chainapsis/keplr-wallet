@@ -12,14 +12,7 @@ export class AutoLockAccountService {
 
   protected autoLockTimer: NodeJS.Timeout | null = null;
 
-  constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly opts: {
-      readonly monitoringInterval: number;
-    } = {
-      monitoringInterval: 10000,
-    }
-  ) {}
+  constructor(protected readonly kvStore: KVStore) {}
 
   async init(keyringService: {
     lock: () => void;
