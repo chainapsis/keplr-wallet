@@ -15,11 +15,11 @@ import {
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainInfoWithCoreTypes } from "./types";
 import { computedFn } from "mobx-utils";
-import Axios from "axios";
 import {
   checkChainFeatures,
   validateBasicChainInfoType,
 } from "@keplr-wallet/chain-validator";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
@@ -215,9 +215,10 @@ export class ChainsService {
 
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
-    const res = await Axios.get<ChainInfo>(`/cosmos/${chainIdentifier}.json`, {
-      baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
-    });
+    const res = await simpleFetch<ChainInfo>(
+      `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
+      `/cosmos/${chainIdentifier}.json`
+    );
 
     let chainInfo: ChainInfo = res.data;
 
@@ -273,15 +274,13 @@ export class ChainsService {
     const chainInfo = this.getChainInfoOrThrow(chainId);
 
     let chainIdUpdated = false;
-    const statusResponse = await Axios.get<{
+    const statusResponse = await simpleFetch<{
       result: {
         node_info: {
           network: string;
         };
       };
-    }>("/status", {
-      baseURL: chainInfo.rpc,
-    });
+    }>(chainInfo.rpc, "/status");
 
     const chainIdFromRPC = statusResponse.data.result.node_info.network;
     if (ChainIdHelper.parse(chainIdFromRPC).identifier !== chainIdentifier) {

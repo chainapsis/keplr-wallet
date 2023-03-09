@@ -1,11 +1,11 @@
 import { KVStore } from "@keplr-wallet/common";
 import { RNG } from "@keplr-wallet/crypto";
 import { Env } from "@keplr-wallet/router";
-import Axios from "axios";
 import {
   KEPLR_EXT_ANALYTICS_API_URL,
   KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
 } from "./constants";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export class AnalyticsService {
   protected analyticsId: string = "";
@@ -58,9 +58,6 @@ export class AnalyticsService {
       return;
     }
 
-    const loggerInstance = Axios.create({
-      baseURL: KEPLR_EXT_ANALYTICS_API_URL,
-    });
     const loggingMsg = Buffer.from(
       JSON.stringify({
         ...params,
@@ -68,7 +65,7 @@ export class AnalyticsService {
         analyticsId: this.analyticsId,
       })
     ).toString("base64");
-    await loggerInstance.get(`/log?msg=${loggingMsg}`, {
+    await simpleFetch(KEPLR_EXT_ANALYTICS_API_URL, `/log?msg=${loggingMsg}`, {
       headers: {
         Authorization: KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
       },
