@@ -14,6 +14,7 @@ import { VerticalCollapseTransition } from "../../components/transition/vertical
 import { Box } from "../../components/box";
 import { VerifyMnemonicScene } from "./verify-mnemonic";
 import { RegisterCardHeader } from "./card-top-header";
+import { RecoverMnemonicScene } from "./recover-mnemonic";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -86,6 +87,10 @@ export const RegisterPage: FunctionComponent = observer(() => {
               {
                 name: "verify-mnemonic",
                 element: VerifyMnemonicScene,
+              },
+              {
+                name: "recover-mnemonic",
+                element: RecoverMnemonicScene,
               },
             ]}
             initialSceneProps={{

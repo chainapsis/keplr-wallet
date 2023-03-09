@@ -44,7 +44,7 @@ export const RegisterIntroScene: FunctionComponent = () => {
           text="Import Existing Account"
           mode="light"
           onClick={() => {
-            // TODO
+            sceneTransition.push("recover-mnemonic");
           }}
         />
         <Button
