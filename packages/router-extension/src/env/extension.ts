@@ -156,13 +156,13 @@ export class ExtensionEnv {
         const replacePageMsg = new ReplacePageMsg(url);
         replacePageMsg.routerMeta = {
           ...replacePageMsg.routerMeta,
-          receiverRouterId: routerMeta.routerId,
+          receiverRouterId: routerMeta["routerId"],
         };
         await messageRequester.sendMessage(APP_PORT, replacePageMsg);
 
         msg.routerMeta = {
           ...msg.routerMeta,
-          receiverRouterId: routerMeta.routerId,
+          receiverRouterId: routerMeta["routerId"],
         };
 
         return await new InExtensionMessageRequester().sendMessage(
