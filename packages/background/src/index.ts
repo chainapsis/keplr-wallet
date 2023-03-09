@@ -56,7 +56,9 @@ export function init(
   commonCrypto: CommonCrypto,
   notification: Notification,
   ledgerOptions: Partial<LedgerOptions> = {}
-) {
+): {
+  initFn: () => Promise<void>;
+} {
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester,
     commonCrypto.rng
@@ -130,44 +132,6 @@ export function init(
     keyRingV2Service
   );
 
-  chainsService
-    .init()
-    .then(() => {
-      return vaultService.init();
-    })
-    .then(() => {
-      return keyRingV2Service.init();
-    })
-    .then(() => {
-      return keyRingCosmosService.init();
-    })
-    .then(() => {
-      return permissionService.init();
-    });
-
-  tokensService.init(
-    interactionService,
-    permissionService,
-    chainsService,
-    keyRingService
-  );
-  ledgerService.init(interactionService);
-  keystoneService.init(interactionService);
-  keyRingService.init(
-    interactionService,
-    chainsService,
-    permissionService,
-    ledgerService,
-    keystoneService
-  );
-  secretWasmService.init(chainsService, keyRingService, permissionService);
-  backgroundTxService.init(chainsService, permissionService);
-  phishingListService.init();
-  // No need to wait because user can't interact with app right after launch.
-  autoLockAccountService.init(keyRingService);
-  // No need to wait because user can't interact with app right after launch.
-  analyticsService.init();
-
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService, keyRingV2Service);
   Tokens.init(router, tokensService);
@@ -181,4 +145,36 @@ export function init(
   Analytics.init(router, analyticsService);
   KeyRingV2.init(router, keyRingV2Service);
   KeyRingCosmos.init(router, keyRingCosmosService);
+
+  return {
+    initFn: async () => {
+      await chainsService.init();
+      await vaultService.init();
+      await keyRingV2Service.init();
+      await keyRingCosmosService.init();
+      await permissionService.init();
+
+      tokensService.init(
+        interactionService,
+        permissionService,
+        chainsService,
+        keyRingService
+      );
+      ledgerService.init(interactionService);
+      keystoneService.init(interactionService);
+      keyRingService.init(
+        interactionService,
+        chainsService,
+        permissionService,
+        ledgerService,
+        keystoneService
+      );
+      secretWasmService.init(chainsService, keyRingService, permissionService);
+      backgroundTxService.init(chainsService, permissionService);
+      phishingListService.init();
+      await autoLockAccountService.init(keyRingService);
+      // No need to wait because user can't interact with app right after launch.
+      await analyticsService.init();
+    },
+  };
 }
