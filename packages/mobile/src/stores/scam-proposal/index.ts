@@ -1,7 +1,7 @@
-import { ObservableQuery } from "../common";
 import { KVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ObservableQuery } from "@keplr-wallet/stores";
 
 type ScamProposal = Record<string, string[] | undefined>;
 

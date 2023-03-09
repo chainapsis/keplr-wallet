@@ -24,7 +24,6 @@ import {
   ChainSuggestStore,
   ICNSQueries,
   OsmosisQueries,
-  ScamProposalStore,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -46,6 +45,7 @@ import {
 } from "@keplr-wallet/stores-etc";
 import { WalletConnectV2Store } from "./wallet-connect-v2";
 import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
+import { ScamProposalStore } from "./scam-proposal";
 
 export class RootStore {
   public readonly chainStore: ChainStore;
