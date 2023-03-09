@@ -1,6 +1,5 @@
 import { ObservableQuery, QueryOptions } from "./query";
 import { KVStore, MemoryKVStore } from "@keplr-wallet/common";
-import Axios from "axios";
 import Http from "http";
 import { autorun } from "mobx";
 
@@ -11,11 +10,7 @@ export class MockObservableQuery extends ObservableQuery<number> {
     options: Partial<QueryOptions> = {},
     url: string = "/test"
   ) {
-    const instance = Axios.create({
-      baseURL: `http://127.0.0.1:${port}`,
-    });
-
-    super(kvStore, instance, url, options);
+    super(kvStore, `http://127.0.0.1:${port}`, url, options);
   }
 
   changeURL(url: string) {
@@ -39,11 +34,7 @@ export class MockOnStartObservableQuery extends ObservableQuery<number> {
       readonly onStartUrl?: string;
     } = {}
   ) {
-    const instance = Axios.create({
-      baseURL: `http://127.0.0.1:${port}`,
-    });
-
-    super(kvStore, instance, url, options);
+    super(kvStore, `http://127.0.0.1:${port}`, url, options);
 
     this.onStartOptions = onStartOptions;
   }

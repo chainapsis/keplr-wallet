@@ -1,7 +1,5 @@
 import { ObservableQuery } from "../common";
 import { KVStore } from "@keplr-wallet/common";
-import Axios, { AxiosInstance } from "axios";
-import { override } from "mobx";
 import { ChainGetter } from "../chain";
 import { HasMapStore } from "../common";
 
@@ -21,23 +19,10 @@ export class ObservableChainQueryRPC<
   ) {
     const chainInfo = chainGetter.getChain(chainId);
 
-    const instance = Axios.create({
-      baseURL: chainInfo.rpc,
-    });
-
-    super(kvStore, instance, url);
+    super(kvStore, chainInfo.rpc, url);
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;
-  }
-
-  @override
-  protected override get instance(): AxiosInstance {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-
-    return Axios.create({
-      baseURL: chainInfo.rpc,
-    });
   }
 
   get chainId(): string {

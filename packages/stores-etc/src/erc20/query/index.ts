@@ -1,6 +1,5 @@
 import { HasMapStore, ObservableJsonRPCQuery } from "@keplr-wallet/stores";
 import { KVStore } from "@keplr-wallet/common";
-import Axios from "axios";
 import { Interface } from "@ethersproject/abi";
 import { computed, makeObservable } from "mobx";
 
@@ -51,13 +50,7 @@ const erc20MetadataInterface: Interface = new Interface([
 
 export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<string> {
   constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    const instance = Axios.create({
-      ...{
-        baseURL: ethereumURL,
-      },
-    });
-
-    super(kvStore, instance, "", "eth_call", [
+    super(kvStore, ethereumURL, "", "eth_call", [
       {
         to: contractAddress,
         data: erc20MetadataInterface.encodeFunctionData("name"),
@@ -88,13 +81,7 @@ export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<str
 
 export class ObservableQueryERC20MetadataSymbol extends ObservableJsonRPCQuery<string> {
   constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    const instance = Axios.create({
-      ...{
-        baseURL: ethereumURL,
-      },
-    });
-
-    super(kvStore, instance, "", "eth_call", [
+    super(kvStore, ethereumURL, "", "eth_call", [
       {
         to: contractAddress,
         data: erc20MetadataInterface.encodeFunctionData("symbol"),
@@ -125,13 +112,7 @@ export class ObservableQueryERC20MetadataSymbol extends ObservableJsonRPCQuery<s
 
 export class ObservableQueryERC20MetadataDecimals extends ObservableJsonRPCQuery<string> {
   constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    const instance = Axios.create({
-      ...{
-        baseURL: ethereumURL,
-      },
-    });
-
-    super(kvStore, instance, "", "eth_call", [
+    super(kvStore, ethereumURL, "", "eth_call", [
       {
         to: contractAddress,
         data: erc20MetadataInterface.encodeFunctionData("decimals"),

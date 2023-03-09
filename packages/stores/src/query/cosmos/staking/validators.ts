@@ -7,7 +7,6 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../chain";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 import { ObservableQuery, QueryResponse } from "../../../common";
-import Axios from "axios";
 import PQueue from "p-queue";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
@@ -45,13 +44,9 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
   protected readonly validator: Validator;
 
   constructor(kvStore: KVStore, validator: Validator) {
-    const instance = Axios.create({
-      baseURL: "https://keybase.io/",
-    });
-
     super(
       kvStore,
-      instance,
+      "https://keybase.io/",
       `_/api/1.0/user/lookup.json?fields=pictures&key_suffix=${validator.description.identity}`
     );
     makeObservable(this);

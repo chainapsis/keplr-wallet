@@ -7,6 +7,7 @@ import { Keplr } from "@keplr-wallet/types";
 import { QueryResponse } from "../../common";
 
 import { Buffer } from "buffer/";
+import { makeURL } from "@keplr-wallet/simple-fetch";
 
 export class ObservableSecretContractChainQuery<
   T
@@ -179,14 +180,10 @@ export class ObservableSecretContractChainQuery<
   // Actually, the url of fetching the secret20 balance will be changed every time.
   // So, we should save it with deterministic key.
   protected override getCacheKey(): string {
-    return `${this.instance.name}-${
-      this.instance.defaults.baseURL
-    }${this.instance.getUri({
-      url: this.getSecretWasmUrl(
-        this.contractAddress,
-        JSON.stringify(this.obj)
-      ),
-    })}`;
+    return makeURL(
+      this.baseURL,
+      this.getSecretWasmUrl(this.contractAddress, JSON.stringify(this.obj))
+    );
   }
 
   @computed

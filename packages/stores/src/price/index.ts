@@ -1,12 +1,12 @@
 import { ObservableQuery, QueryResponse } from "../common";
 import { CoinGeckoSimplePrice } from "./types";
-import Axios from "axios";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { Dec, CoinPretty, Int, PricePretty } from "@keplr-wallet/unit";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
 import { action, flow, makeObservable, observable } from "mobx";
+import { makeURL } from "@keplr-wallet/simple-fetch";
 
 class Throttler {
   protected fns: (() => void)[] = [];
@@ -179,11 +179,11 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
       readonly throttleDuration?: number;
     } = {}
   ) {
-    const instance = Axios.create({
-      baseURL: options.baseURL || "https://api.coingecko.com/api/v3",
-    });
-
-    super(kvStore, instance, "/simple/price");
+    super(
+      kvStore,
+      options.baseURL || "https://api.coingecko.com/api/v3",
+      "/simple/price"
+    );
 
     this.isInitialized = false;
 
@@ -317,11 +317,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   protected override getCacheKey(): string {
     // Because the uri of the coingecko would be changed according to the coin ids and vsCurrencies.
     // Therefore, just using the uri as the cache key is not useful.
-    return `${this.instance.name}-${
-      this.instance.defaults.baseURL
-    }${this.instance.getUri({
-      url: "/simple/price",
-    })}`;
+    return makeURL(this.baseURL, "/simple/price");
   }
 
   getPrice(coinId: string, vsCurrency?: string): number | undefined {

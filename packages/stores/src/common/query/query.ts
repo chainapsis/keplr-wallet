@@ -1,7 +1,6 @@
 import {
   action,
   autorun,
-  computed,
   flow,
   makeObservable,
   observable,
@@ -9,11 +8,10 @@ import {
   onBecomeUnobserved,
   reaction,
 } from "mobx";
-import Axios, { AxiosInstance } from "axios";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
-import { DeepReadonly } from "utility-types";
 import { HasMapStore } from "../map";
 import EventEmitter from "eventemitter3";
+import { makeURL, simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export type QueryOptions = {
   // millisec
@@ -142,7 +140,7 @@ class FlowCanceler {
 
 /**
  * Base of the observable query classes.
- * This recommends to use the Axios to query the response.
+ * This recommends to use the fetch to query the response.
  */
 export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   protected static suspectedResponseDatasWithInvalidValue: string[] = [
@@ -186,19 +184,16 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   // If environment is NodeJS, intervalId should be NodeJS.Timeout.
   private intervalId: number | NodeJS.Timeout | undefined = undefined;
 
-  @observable.ref
-  protected _instance: AxiosInstance;
+  @observable
+  protected baseURL: string;
 
-  protected constructor(
-    instance: AxiosInstance,
-    options: Partial<QueryOptions>
-  ) {
+  protected constructor(baseURL: string, options: Partial<QueryOptions>) {
     this.options = {
       ...defaultOptions,
       ...options,
     };
 
-    this._instance = instance;
+    this.baseURL = baseURL;
 
     this.queryCanceler = new FlowCanceler();
     this.onStartCanceler = new FlowCanceler();
@@ -327,15 +322,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     return this._isFetching;
   }
 
-  // Return the instance.
-  // You can memorize this by using @computed if you need to override this.
-  // NOTE: If this getter returns the different instance with previous instance.
-  // It will be used in the latter fetching.
-  @computed
-  protected get instance(): DeepReadonly<AxiosInstance> {
-    return this._instance;
-  }
-
   @flow
   *fetch(): Generator<unknown, any, any> {
     // If not started, do nothing.
@@ -408,7 +394,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     const abortController = new AbortController();
 
     let fetchingProceedNext = false;
-    let skipAxiosCancelError = false;
+    let skipAbortError = false;
 
     try {
       let hasStarted = false;
@@ -490,9 +476,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       // Should not wait.
       this.saveResponse(response);
     } catch (e) {
-      // If axios canceled, do nothing.
-      if (Axios.isCancel(e)) {
-        skipAxiosCancelError = true;
+      // If error is from abort, do nothing.
+      if (e.name === "AbortError") {
+        skipAbortError = true;
         return;
       }
 
@@ -504,7 +490,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         return;
       }
 
-      // If error is from Axios, and get response.
+      // If error is from simple fetch, and get response.
       if (e.response) {
         // Default is status text
         let message: string = e.response.statusText;
@@ -557,7 +543,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         this.setError(error);
       }
     } finally {
-      if (!skipAxiosCancelError) {
+      if (!skipAbortError) {
         if (!fetchingProceedNext) {
           this._isFetching = false;
         }
@@ -715,11 +701,11 @@ export class ObservableQuery<
 
   constructor(
     protected readonly kvStore: KVStore,
-    instance: AxiosInstance,
+    baseURL: string,
     url: string,
     options: Partial<QueryOptions> = {}
   ) {
-    super(instance, options);
+    super(baseURL, options);
     makeObservable(this);
 
     this.setUrl(url);
@@ -763,7 +749,7 @@ export class ObservableQuery<
   protected async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
-    const result = await this.instance.get<T>(this.url, {
+    const result = await simpleFetch<T>(this.baseURL, this.url, {
       signal: abortController.signal,
     });
     return {
@@ -778,11 +764,7 @@ export class ObservableQuery<
   }
 
   protected getCacheKey(): string {
-    return `${this.instance.name}-${
-      this.instance.defaults.baseURL
-    }${this.instance.getUri({
-      url: this.url,
-    })}`;
+    return makeURL(this.baseURL, this.url);
   }
 
   protected async saveResponse(

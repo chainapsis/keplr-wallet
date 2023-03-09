@@ -1,7 +1,7 @@
 import { SimpleFetchRequestOptions, SimpleFetchResponse } from "./types";
 import { SimpleFetchError } from "./error";
 
-function makeURL(baseURL: string, url: string): string {
+export function makeURL(baseURL: string, url: string): string {
   const baseURLInstance = new URL(baseURL);
   baseURL = removeLastSlashIfIs(baseURLInstance.origin);
   url =
