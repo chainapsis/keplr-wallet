@@ -129,20 +129,6 @@ export interface FiatOnRampServiceInfo {
 
 export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
   {
-    serviceId: "transak",
-    serviceName: "Transak",
-    apiKey: process.env["KEPLR_EXT_TRANSAK_API_KEY"] || "",
-    buyOrigin: "https://global.transak.com",
-    buySupportChainIds: ["osmosis-1", "cosmoshub-4", "secret-4"],
-  },
-  {
-    serviceId: "moonpay",
-    serviceName: "MoonPay",
-    apiKey: process.env["KEPLR_EXT_MOONPAY_API_KEY"] || "",
-    buyOrigin: "https://buy.moonpay.com",
-    buySupportChainIds: ["cosmoshub-4", "kava_2222-10"],
-  },
-  {
     serviceId: "kado",
     serviceName: "Kado",
     apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] || "",
@@ -216,5 +202,19 @@ export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
         },
       ],
     },
+  },
+  {
+    serviceId: "transak",
+    serviceName: "Transak",
+    apiKey: process.env["KEPLR_EXT_TRANSAK_API_KEY"] || "",
+    buyOrigin: "https://global.transak.com",
+    buySupportChainIds: ["osmosis-1", "cosmoshub-4", "secret-4"],
+  },
+  {
+    serviceId: "moonpay",
+    serviceName: "MoonPay",
+    apiKey: process.env["KEPLR_EXT_MOONPAY_API_KEY"] || "",
+    buyOrigin: "https://buy.moonpay.com",
+    buySupportChainIds: ["cosmoshub-4", "kava_2222-10"],
   },
 ];
