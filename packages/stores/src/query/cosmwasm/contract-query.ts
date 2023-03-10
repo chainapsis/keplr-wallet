@@ -27,24 +27,20 @@ export class ObservableCosmwasmContractChainQuery<
     );
   }
 
-  protected override onStart() {
+  protected override onStart(): void {
     super.onStart();
 
-    return new Promise<void>((resolve) => {
-      this.disposer = autorun(() => {
-        const chainInfo = this.chainGetter.getChain(this.chainId);
-        if (chainInfo.features && chainInfo.features.includes("wasmd_0.24+")) {
-          if (this.url.startsWith("/wasm/v1/")) {
-            this.setUrl(`/cosmwasm${this.url}`);
-          }
-        } else {
-          if (this.url.startsWith("/cosmwasm/")) {
-            this.setUrl(`${this.url.replace("/cosmwasm", "")}`);
-          }
+    this.disposer = autorun(() => {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      if (chainInfo.features && chainInfo.features.includes("wasmd_0.24+")) {
+        if (this.url.startsWith("/wasm/v1/")) {
+          this.setUrl(`/cosmwasm${this.url}`);
         }
-
-        resolve();
-      });
+      } else {
+        if (this.url.startsWith("/cosmwasm/")) {
+          this.setUrl(`${this.url.replace("/cosmwasm", "")}`);
+        }
+      }
     });
   }
 

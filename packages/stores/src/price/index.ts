@@ -210,10 +210,10 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     this.restoreDefaultVsCurrency();
   }
 
-  protected override onStart() {
+  protected override onStart(): void {
     super.onStart();
 
-    return this.init();
+    this.init();
   }
 
   async init() {

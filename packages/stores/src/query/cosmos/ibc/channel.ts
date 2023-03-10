@@ -25,19 +25,16 @@ export class ObservableChainQueryIBCChannel extends ObservableChainQuery<Channel
     );
   }
 
-  protected override onStart() {
+  protected override onStart(): void {
     super.onStart();
 
-    return new Promise<void>((resolve) => {
-      this.disposer = autorun(() => {
-        const chainInfo = this.chainGetter.getChain(this.chainId);
-        if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
-          this.setUrl(
-            `/ibc/core/channel/v1/channels/${this.channelId}/ports/${this.portId}`
-          );
-        }
-        resolve();
-      });
+    this.disposer = autorun(() => {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
+        this.setUrl(
+          `/ibc/core/channel/v1/channels/${this.channelId}/ports/${this.portId}`
+        );
+      }
     });
   }
 

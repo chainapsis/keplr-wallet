@@ -172,10 +172,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
-  private _pendingOnStart: boolean = false;
-
   private readonly queryCanceler: FlowCanceler;
-  private readonly onStartCanceler: FlowCanceler;
 
   private observedCount: number = 0;
 
@@ -196,7 +193,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this.baseURL = baseURL;
 
     this.queryCanceler = new FlowCanceler();
-    this.onStartCanceler = new FlowCanceler();
 
     makeObservable(this);
 
@@ -231,46 +227,17 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   private start() {
     if (!this._isStarted) {
       this._isStarted = true;
-      const promise = this.onStart();
-      if (promise) {
-        this.handleAsyncOnStart(promise);
-      } else {
-        this.postStart();
-      }
-    }
-  }
-
-  @flow
-  private *handleAsyncOnStart(promise: PromiseLike<void>) {
-    this._pendingOnStart = true;
-    this._isFetching = true;
-
-    try {
-      yield this.onStartCanceler.callOrCanceledWithPromise(promise);
-      if (this._isStarted) {
-        this._pendingOnStart = false;
-        this.postStart();
-      }
-    } catch (e) {
-      if (e instanceof FlowCancelerError) {
-        return;
-      }
-      throw e;
+      this.postStart();
     }
   }
 
   @action
   private stop() {
     if (this._isStarted) {
-      if (this.onStartCanceler.hasCancelable) {
-        this.onStartCanceler.cancel();
-      }
-
       if (this.isFetching && this.queryCanceler.hasCancelable) {
         this.cancel();
       }
 
-      this._pendingOnStart = false;
       this._isFetching = false;
 
       if (this.intervalId != null) {
@@ -304,12 +271,12 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
   }
 
-  protected onStart(): void | Promise<void> {
+  protected onStart(): void {
     // noop yet.
     // Override this if you need something to do whenever starting.
   }
 
-  protected onStop() {
+  protected onStop(): void {
     // noop yet.
     // Override this if you need something to do whenever starting.
   }
@@ -325,7 +292,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @flow
   *fetch(): Generator<unknown, any, any> {
     // If not started, do nothing.
-    if (!this.isStarted || this._pendingOnStart) {
+    if (!this.isStarted) {
       return;
     }
 
@@ -711,13 +678,13 @@ export class ObservableQuery<
     this.setUrl(url);
   }
 
-  protected override onStart() {
+  protected override onStart(): void {
     super.onStart();
 
     ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
   }
 
-  protected override onStop() {
+  protected override onStop(): void {
     super.onStop();
 
     ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);

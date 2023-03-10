@@ -24,17 +24,14 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
     );
   }
 
-  protected override onStart() {
+  protected override onStart(): void {
     super.onStart();
 
-    return new Promise<void>((resolve) => {
-      this.disposer = autorun(() => {
-        const chainInfo = this.chainGetter.getChain(this.chainId);
-        if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
-          this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${this.hash}`);
-        }
-        resolve();
-      });
+    this.disposer = autorun(() => {
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
+        this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${this.hash}`);
+      }
     });
   }
 
