@@ -1,12 +1,13 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import { HeaderLayout } from "../../layouts/header";
 
 export const MainPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
   return (
-    <div>
+    <HeaderLayout title="Wallet Name">
       {chainStore.chainInfosInUI.map((chainInfo) => {
         return (
           <div key={chainInfo.chainId}>
@@ -28,6 +29,6 @@ export const MainPage: FunctionComponent = observer(() => {
           </div>
         );
       })}
-    </div>
+    </HeaderLayout>
   );
 });
