@@ -1,20 +1,20 @@
-import { KeyRingStatus } from "../keyring";
+import { KeyRingStatus } from "../keyring-v2";
 import { AutoLockAccountService } from "./service";
 import { MemoryKVStore } from "@keplr-wallet/common";
 import EventEmitter from "events";
 
 class MockKeyRingService {
-  public keyRingStatus: KeyRingStatus = KeyRingStatus.NOTLOADED;
+  public keyRingStatus: KeyRingStatus = "empty";
   public isLocked = true;
 
   unlock() {
     this.isLocked = false;
-    this.keyRingStatus = KeyRingStatus.UNLOCKED;
+    this.keyRingStatus = "unlocked";
   }
 
   lock() {
     this.isLocked = true;
-    this.keyRingStatus = KeyRingStatus.LOCKED;
+    this.keyRingStatus = "locked";
   }
 }
 
@@ -34,8 +34,11 @@ describe("Test auto lock account service", () => {
     } as any;
 
     const keyRingService = new MockKeyRingService();
-    const service = new AutoLockAccountService(new MemoryKVStore("test"));
-    await service.init(keyRingService);
+    const service = new AutoLockAccountService(
+      new MemoryKVStore("test"),
+      keyRingService as any
+    );
+    await service.init();
 
     expect(mockListener).toBeCalledTimes(1);
     jest.restoreAllMocks();
@@ -57,15 +60,15 @@ describe("Test auto lock account service", () => {
 
     const keyRingService = new MockKeyRingService();
     const memStore = new MemoryKVStore("test");
-    let service = new AutoLockAccountService(memStore);
-    await service.init(keyRingService);
+    let service = new AutoLockAccountService(memStore, keyRingService as any);
+    await service.init();
 
     // Set duration.
     await service.setDuration(1000);
     expect(service.getAutoLockDuration()).toBe(1000);
 
-    service = new AutoLockAccountService(memStore);
-    await service.init(keyRingService);
+    service = new AutoLockAccountService(memStore, keyRingService as any);
+    await service.init();
 
     expect(service.getAutoLockDuration()).toBe(1000);
 
@@ -87,8 +90,11 @@ describe("Test auto lock account service", () => {
     } as any;
 
     const keyRingService = new MockKeyRingService();
-    const service = new AutoLockAccountService(new MemoryKVStore("test"));
-    await service.init(keyRingService);
+    const service = new AutoLockAccountService(
+      new MemoryKVStore("test"),
+      keyRingService as any
+    );
+    await service.init();
 
     keyRingService.unlock();
     event.emit("onStateChanged", "locked");
@@ -114,8 +120,11 @@ describe("Test auto lock account service", () => {
     } as any;
 
     const keyRingService = new MockKeyRingService();
-    const service = new AutoLockAccountService(new MemoryKVStore("test"));
-    await service.init(keyRingService);
+    const service = new AutoLockAccountService(
+      new MemoryKVStore("test"),
+      keyRingService as any
+    );
+    await service.init();
 
     await service.setDuration(1000);
 

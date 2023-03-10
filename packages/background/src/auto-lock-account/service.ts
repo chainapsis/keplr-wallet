@@ -1,25 +1,18 @@
 import { KVStore } from "@keplr-wallet/common";
-import { KeyRingStatus } from "../keyring";
+import { KeyRingService } from "../keyring-v2";
 
 export class AutoLockAccountService {
-  protected keyringService!: {
-    lock: () => void;
-    readonly keyRingStatus: KeyRingStatus;
-  };
-
   // Unit: ms
   protected autoLockDuration: number = 0;
 
   protected autoLockTimer: NodeJS.Timeout | null = null;
 
-  constructor(protected readonly kvStore: KVStore) {}
+  constructor(
+    protected readonly kvStore: KVStore,
+    protected readonly keyRingService: KeyRingService
+  ) {}
 
-  async init(keyringService: {
-    lock: () => void;
-    readonly keyRingStatus: KeyRingStatus;
-  }) {
-    this.keyringService = keyringService;
-
+  async init() {
     browser.idle.onStateChanged.addListener((idle) => {
       this.stateChangedHandler(idle);
     });
@@ -66,16 +59,12 @@ export class AutoLockAccountService {
 
   private lock() {
     if (this.keyRingIsUnlocked) {
-      this.keyringService.lock();
+      this.keyRingService.lockKeyRing();
     }
   }
 
   get keyRingIsUnlocked(): boolean {
-    if (this.keyringService == null) {
-      throw new Error("Keyring service is null");
-    }
-
-    return this.keyringService.keyRingStatus === KeyRingStatus.UNLOCKED;
+    return this.keyRingService.keyRingStatus === "unlocked";
   }
 
   public getAutoLockDuration(): number {

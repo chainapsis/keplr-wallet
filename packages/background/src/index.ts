@@ -111,9 +111,6 @@ export function init(
     retryIntervalMs: 10 * 60 * 1000, // 10 mins,
     allowTimeoutMs: 10 * 60 * 1000, // 10 mins,
   });
-  const autoLockAccountService = new AutoLocker.AutoLockAccountService(
-    storeCreator("auto-lock-account")
-  );
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
     commonCrypto.rng,
@@ -129,6 +126,10 @@ export function init(
   );
   const keyRingCosmosService = new KeyRingCosmos.KeyRingCosmosService(
     chainsService,
+    keyRingV2Service
+  );
+  const autoLockAccountService = new AutoLocker.AutoLockAccountService(
+    storeCreator("auto-lock-account"),
     keyRingV2Service
   );
 
@@ -172,7 +173,7 @@ export function init(
       secretWasmService.init(chainsService, keyRingService, permissionService);
       backgroundTxService.init(chainsService, permissionService);
       phishingListService.init();
-      await autoLockAccountService.init(keyRingService);
+      await autoLockAccountService.init();
       // No need to wait because user can't interact with app right after launch.
       await analyticsService.init();
     },
