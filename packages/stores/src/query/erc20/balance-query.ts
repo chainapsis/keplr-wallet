@@ -2,7 +2,6 @@ import { QueryError, ObservableJsonRPCQuery, ChainGetter } from "../../common";
 import { KVStore } from "@keplr-wallet/common";
 import Axios from "axios";
 import { computed, makeObservable } from "mobx";
-import { Int } from "@keplr-wallet/unit";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { erc20ContractInterface } from "./common";
 
@@ -49,7 +48,7 @@ export class ObservableQueryERC20ContractDataBalance extends ObservableJsonRPCQu
       const balance = erc20ContractInterface.decodeFunctionResult(
         "balanceOf",
         this.response.data
-      )[0] as Int;
+      )[0];
       return balance.toString();
     } catch (e) {
       console.log(e);

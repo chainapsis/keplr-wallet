@@ -56,6 +56,12 @@ export class Int {
   }
 
   public toHexStringFormatted(): string {
+    if (this.isNegative()) {
+      throw new Error(
+        `Cannot format negative integer as hex: ${this.toString()}`
+      );
+    }
+
     const hex = this.toHexString();
     if (hex.length % 2 !== 0) {
       return `0x0${hex}`;

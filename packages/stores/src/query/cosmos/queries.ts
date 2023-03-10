@@ -39,7 +39,6 @@ import {
 import { ObservableQueryDistributionParams } from "./distribution";
 import { ObservableQueryRPCStatus } from "./status";
 import { ObservableQueryJunoAnnualProvisions } from "./supply/juno";
-import { ObservableQueryERC20BalanceRegistry } from "../erc20/erc20-balance";
 import {
   ObservableQueryStrideEpochProvisions,
   ObservableQueryStrideMintParams,
@@ -119,10 +118,6 @@ export class CosmosQueriesImpl {
 
     base.queryBalances.addBalanceRegistry(
       new ObservableQueryCosmosBalanceRegistry(kvStore)
-    );
-
-    base.queryBalances.addBalanceRegistry(
-      new ObservableQueryERC20BalanceRegistry(kvStore)
     );
 
     this.queryAccount = new ObservableQueryAccount(

@@ -4,7 +4,7 @@ import { Buffer } from "buffer/";
 import { ChainGetter } from "../common";
 import { ERC20Currency, EthSignType } from "@keplr-wallet/types";
 import { CosmosAccount } from "./cosmos";
-import { Dec, Int } from "@keplr-wallet/unit";
+import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export interface EthereumAccount {
@@ -123,7 +123,7 @@ export class EthereumAccountImpl {
 
   protected convertNativeToContractDenom(value: string, decimals: number): Int {
     // Convert to contract denomination
-    const factor = new Dec(10).pow(new Int(decimals));
+    const factor = DecUtils.getTenExponentN(decimals);
     const dec = new Dec(value).mul(factor);
 
     return new Int(dec.truncate().toString());
