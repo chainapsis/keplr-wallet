@@ -25,10 +25,6 @@
   "main.ibc.transfer.paragraph": "Send tokens over IBC",
   "main.ibc.transfer.button": "Transfer",
 
-  "main.evmos.dashboard.title": "Dashboard",
-  "main.evmos.dashboard.paragraph": "View ERC-20 and IBC tokens",
-  "main.evmos.dashboard.button": "View",
-
   "main.address.copied": "Address copied!",
 
   "main.suggest.chain.link": "Add Suggest Chains",

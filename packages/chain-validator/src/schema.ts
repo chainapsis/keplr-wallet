@@ -8,6 +8,7 @@ import {
   FeeCurrency,
   Secret20Currency,
   WithGasPriceStep,
+  ERC20Currency,
 } from "@keplr-wallet/types";
 import { SupportedChainFeatures } from "./feature";
 
@@ -49,6 +50,27 @@ export const Secret20CurrencySchema = (CurrencySchema as ObjectSchema<Secret20Cu
     viewingKey: Joi.string().required(),
   })
   .custom((value: Secret20Currency) => {
+    if (
+      value.coinMinimalDenom.startsWith(
+        `${value.type}:${value.contractAddress}:`
+      )
+    ) {
+      return value;
+    } else {
+      return {
+        ...value,
+        coinMinimalDenom:
+          `${value.type}:${value.contractAddress}:` + value.coinMinimalDenom,
+      };
+    }
+  });
+
+export const ERC20CurrencySchema = (CurrencySchema as ObjectSchema<ERC20Currency>)
+  .keys({
+    type: Joi.string().equal("erc20").required(),
+    contractAddress: Joi.string().required(),
+  })
+  .custom((value: ERC20Currency) => {
     if (
       value.coinMinimalDenom.startsWith(
         `${value.type}:${value.contractAddress}:`
@@ -158,7 +180,12 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
   bech32Config: Bech32ConfigSchema.required(),
   currencies: Joi.array()
     .min(1)
-    .items(CurrencySchema, CW20CurrencySchema, Secret20CurrencySchema)
+    .items(
+      CurrencySchema,
+      CW20CurrencySchema,
+      Secret20CurrencySchema,
+      ERC20CurrencySchema
+    )
     .custom((values: AppCurrency[]) => {
       const dups: { [denom: string]: boolean | undefined } = {};
 
@@ -194,13 +221,21 @@ export const ChainInfoSchema = Joi.object<ChainInfo>({
     .items(Joi.string().valid(...SupportedChainFeatures))
     .unique()
     .custom((value: string[]) => {
-      if (value.indexOf("cosmwasm") >= 0 && value.indexOf("secretwasm") >= 0) {
-        throw new Error("cosmwasm and secretwasm are not compatible");
+      const numTokenContracts = [
+        value.indexOf("cosmwasm"),
+        value.indexOf("secretwasm"),
+        value.indexOf("evmos-erc20"),
+      ].filter((val) => val >= 0).length;
+      if (numTokenContracts > 1) {
+        throw new Error(
+          "cosmwasm, secretwasm, and evmos-erc20 are not compatible"
+        );
       }
 
       return value;
     }),
   chainSymbolImageUrl: Joi.string().uri(),
+  ethereumJsonRpc: Joi.string().uri(),
 }).custom((value: ChainInfo) => {
   if (
     value.alternativeBIP44s?.find(

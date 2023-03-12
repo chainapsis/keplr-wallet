@@ -60,6 +60,11 @@ export interface ChainInfo {
    */
   readonly beta?: boolean;
 
+  /**
+   * If the chain is EVM-enabled, set an Ethereum JSON-RPC endpoint here, to be used for ERC-20 token balances.
+   */
+  readonly ethereumJsonRpc?: string;
+
   readonly chainSymbolImageUrl?: string;
 }
 
