@@ -101,6 +101,7 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return this._embedded.chainId;
   }
 
+  @computed
   get currencies(): AppCurrency[] {
     return this._embedded.currencies.concat(this.registeredCurrencies);
   }
@@ -125,6 +126,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
 
   @action
   addCurrencies(...currencies: AppCurrency[]) {
+    if (currencies.length === 0) {
+      return;
+    }
+
     const currencyMap = this.currencyMap;
     for (const currency of currencies) {
       if (!currencyMap.has(currency.coinMinimalDenom)) {
@@ -135,6 +140,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
 
   @action
   removeCurrencies(...coinMinimalDenoms: string[]) {
+    if (coinMinimalDenoms.length === 0) {
+      return;
+    }
+
     const map = new Map<string, boolean>();
     for (const coinMinimalDenom of coinMinimalDenoms) {
       map.set(coinMinimalDenom, true);
