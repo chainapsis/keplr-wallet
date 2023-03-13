@@ -138,6 +138,35 @@ class FlowCanceler {
   }
 }
 
+class FunctionQueue {
+  protected queue: (() => void | Promise<void>)[] = [];
+  protected isPendingPromise = false;
+
+  enqueue(fn: () => void | Promise<void>) {
+    this.queue.push(fn);
+
+    this.handleQueue();
+  }
+
+  protected handleQueue() {
+    if (!this.isPendingPromise && this.queue.length > 0) {
+      const fn = this.queue.shift();
+      if (fn) {
+        const r = fn();
+        if (typeof r === "object" && "then" in r) {
+          this.isPendingPromise = true;
+          r.then(() => {
+            this.isPendingPromise = false;
+            this.handleQueue();
+          });
+        } else {
+          this.handleQueue();
+        }
+      }
+    }
+  }
+}
+
 /**
  * Base of the observable query classes.
  * This recommends to use the fetch to query the response.
@@ -172,6 +201,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
+  private stateQueue = new FunctionQueue();
+  private pendingOnStart = false;
   private readonly queryCanceler: FlowCanceler;
 
   private observedCount: number = 0;
@@ -227,7 +258,21 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   private start() {
     if (!this._isStarted) {
       this._isStarted = true;
-      this.postStart();
+      // For async onStart() method, set isFetching as true in advance.
+      this._isFetching = true;
+      this.stateQueue.enqueue(() => {
+        const r = this.onStart();
+        if (typeof r === "object" && "then" in r) {
+          this.pendingOnStart = true;
+          return r.then(() => {
+            this.pendingOnStart = false;
+          });
+        }
+        return r;
+      });
+      this.stateQueue.enqueue(() => {
+        return this.postStart();
+      });
     }
   }
 
@@ -245,7 +290,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       }
       this.intervalId = undefined;
 
-      this.onStop();
+      this.stateQueue.enqueue(() => {
+        return this.onStop();
+      });
       this._isStarted = false;
     }
   }
@@ -271,7 +318,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     }
   }
 
-  protected onStart(): void {
+  protected onStart(): void | Promise<void> {
     // noop yet.
     // Override this if you need something to do whenever starting.
   }
@@ -292,11 +339,14 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @flow
   *fetch(): Generator<unknown, any, any> {
     // If not started, do nothing.
-    if (!this.isStarted) {
+    if (!this.isStarted || this.pendingOnStart) {
       return;
     }
 
     if (!this.canFetch()) {
+      if (this._isFetching) {
+        this._isFetching = false;
+      }
       return;
     }
 
@@ -361,7 +411,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     const abortController = new AbortController();
 
     let fetchingProceedNext = false;
-    let skipAbortError = false;
 
     try {
       let hasStarted = false;
@@ -443,12 +492,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       // Should not wait.
       this.saveResponse(response);
     } catch (e) {
-      // If error is from abort, do nothing.
-      if (e.name === "AbortError") {
-        skipAbortError = true;
-        return;
-      }
-
       if (e instanceof FlowCancelerError) {
         // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues.
         if (e.message === "__fetching__proceed__next__") {
@@ -510,10 +553,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         this.setError(error);
       }
     } finally {
-      if (!skipAbortError) {
-        if (!fetchingProceedNext) {
-          this._isFetching = false;
-        }
+      if (!fetchingProceedNext) {
+        this._isFetching = false;
       }
     }
   }
@@ -678,7 +719,7 @@ export class ObservableQuery<
     this.setUrl(url);
   }
 
-  protected override onStart(): void {
+  protected override onStart(): void | Promise<void> {
     super.onStart();
 
     ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
