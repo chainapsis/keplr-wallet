@@ -12,6 +12,7 @@ import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { HasMapStore } from "../map";
 import EventEmitter from "eventemitter3";
 import { makeURL, simpleFetch } from "@keplr-wallet/simple-fetch";
+import { QuerySharedContext } from "./context";
 
 export type QueryOptions = {
   // millisec
@@ -167,6 +168,8 @@ class FunctionQueue {
   }
 }
 
+export const querySharedContext = new QuerySharedContext();
+
 /**
  * Base of the observable query classes.
  * This recommends to use the fetch to query the response.
@@ -215,7 +218,15 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   protected baseURL: string;
 
-  protected constructor(baseURL: string, options: Partial<QueryOptions>) {
+  @observable
+  protected _url: string = "";
+
+  protected constructor(
+    protected readonly kvStore: KVStore,
+    baseURL: string,
+    url: string,
+    options: Partial<QueryOptions>
+  ) {
     this.options = {
       ...defaultOptions,
       ...options,
@@ -226,6 +237,8 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this.queryCanceler = new FlowCanceler();
 
     makeObservable(this);
+
+    this.setUrl(url);
 
     onBecomeObserved(this, "_response", this.becomeObserved);
     onBecomeObserved(this, "_isFetching", this.becomeObserved);
@@ -260,15 +273,12 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       this._isStarted = true;
       // For async onStart() method, set isFetching as true in advance.
       this._isFetching = true;
+      this.pendingOnStart = true;
       this.stateQueue.enqueue(() => {
-        const r = this.onStart();
-        if (typeof r === "object" && "then" in r) {
-          this.pendingOnStart = true;
-          return r.then(() => {
-            this.pendingOnStart = false;
-          });
-        }
-        return r;
+        return this.onStart();
+      });
+      this.stateQueue.enqueue(() => {
+        this.pendingOnStart = false;
       });
       this.stateQueue.enqueue(() => {
         return this.postStart();
@@ -360,8 +370,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     if (!this._response) {
       this._isFetching = true;
 
-      const promise = this.loadStaledResponse();
-
       const handleStaledResponse = (
         staledResponse: QueryResponse<T> | undefined
       ) => {
@@ -377,16 +385,31 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         return false;
       };
 
+      let satisfyCache = false;
+
       // When first load, try to load the last response from disk.
       // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
+      const promise = querySharedContext.loadStore<
+        QueryResponse<T> | undefined
+      >(this.kvStore, this.getCacheKey(), (res) => {
+        if (res.status === "rejected") {
+          console.warn("Failed to get the last response from disk.");
+        } else {
+          let response = res.value;
+          if (response) {
+            response = {
+              ...response,
+              staled: true,
+            };
+          }
+          satisfyCache = handleStaledResponse(response);
+        }
+      });
       if (this.options.cacheMaxAge <= 0) {
         // To improve performance, don't wait the loading to proceed if cache age not set.
-        promise.then((staledResponse) => {
-          handleStaledResponse(staledResponse);
-        });
       } else {
-        const staledResponse = yield* toGenerator(promise);
-        if (handleStaledResponse(staledResponse)) {
+        yield promise;
+        if (satisfyCache) {
           this._isFetching = false;
           return;
         }
@@ -485,12 +508,15 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           }
         }
       }
-      this.setResponse(response);
-      // Clear the error if fetching succeeds.
-      this.setError(undefined);
 
       // Should not wait.
       this.saveResponse(response);
+
+      yield querySharedContext.handleResponse(() => {
+        this.setResponse(response);
+        // Clear the error if fetching succeeds.
+        this.setError(undefined);
+      });
     } catch (e) {
       if (e instanceof FlowCancelerError) {
         // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues.
@@ -532,7 +558,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           data: e.response.data,
         };
 
-        this.setError(error);
+        yield querySharedContext.handleResponse(() => {
+          this.setError(error);
+        });
       } else if (e.request) {
         // if can't get the response.
         const error: QueryError<E> = {
@@ -541,7 +569,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           message: "Failed to get response",
         };
 
-        this.setError(error);
+        yield querySharedContext.handleResponse(() => {
+          this.setError(error);
+        });
       } else {
         const error: QueryError<E> = {
           status: 0,
@@ -550,7 +580,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           data: e,
         };
 
-        this.setError(error);
+        yield querySharedContext.handleResponse(() => {
+          this.setError(error);
+        });
       }
     } finally {
       if (!fetchingProceedNext) {
@@ -579,6 +611,18 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
   private cancel(message?: string): void {
     this.queryCanceler.cancel(message);
+  }
+
+  get url(): string {
+    return this._url;
+  }
+
+  @action
+  protected setUrl(url: string) {
+    if (this._url !== url) {
+      this._url = url;
+      this.fetch();
+    }
   }
 
   /**
@@ -661,6 +705,10 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     });
   }
 
+  protected getCacheKey(): string {
+    return makeURL(this.baseURL, this.url);
+  }
+
   protected abstract fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }>;
@@ -671,17 +719,12 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
    * @param response
    * @protected
    */
-  protected abstract saveResponse(
+  protected async saveResponse(
     response: Readonly<QueryResponse<T>>
-  ): Promise<void>;
-
-  /**
-   * Used for loading the last response from disk.
-   * @protected
-   */
-  protected abstract loadStaledResponse(): Promise<
-    QueryResponse<T> | undefined
-  >;
+  ): Promise<void> {
+    const key = this.getCacheKey();
+    await this.kvStore.set(key, response);
+  }
 }
 
 /**
@@ -704,19 +747,14 @@ export class ObservableQuery<
     });
   }
 
-  @observable
-  protected _url: string = "";
-
   constructor(
-    protected readonly kvStore: KVStore,
+    kvStore: KVStore,
     baseURL: string,
     url: string,
     options: Partial<QueryOptions> = {}
   ) {
-    super(baseURL, options);
+    super(kvStore, baseURL, url, options);
     makeObservable(this);
-
-    this.setUrl(url);
   }
 
   protected override onStart(): void | Promise<void> {
@@ -742,18 +780,6 @@ export class ObservableQuery<
     }
   };
 
-  get url(): string {
-    return this._url;
-  }
-
-  @action
-  protected setUrl(url: string) {
-    if (this._url !== url) {
-      this._url = url;
-      this.fetch();
-    }
-  }
-
   protected async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
@@ -769,29 +795,6 @@ export class ObservableQuery<
         timestamp: Date.now(),
       },
     };
-  }
-
-  protected getCacheKey(): string {
-    return makeURL(this.baseURL, this.url);
-  }
-
-  protected async saveResponse(
-    response: Readonly<QueryResponse<T>>
-  ): Promise<void> {
-    const key = this.getCacheKey();
-    await this.kvStore.set(key, response);
-  }
-
-  protected async loadStaledResponse(): Promise<QueryResponse<T> | undefined> {
-    const key = this.getCacheKey();
-    const response = await this.kvStore.get<QueryResponse<T>>(key);
-    if (response) {
-      return {
-        ...response,
-        staled: true,
-      };
-    }
-    return undefined;
   }
 }
 
