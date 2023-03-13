@@ -1,20 +1,21 @@
 import { computed, makeObservable, override } from "mobx";
-import { DenomHelper, KVStore } from "@keplr-wallet/common";
+import { DenomHelper } from "@keplr-wallet/common";
 import { ChainGetter } from "../../chain";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, ObservableQueryBalanceInner } from "../balances";
 import { Cw20ContractBalance } from "./types";
 import { ObservableCosmwasmContractChainQuery } from "./contract-query";
+import { QuerySharedContext } from "../../common";
 
 export class ObservableQueryCw20Balance extends ObservableCosmwasmContractChainQuery<Cw20ContractBalance> {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     contractAddress: string,
     protected readonly bech32Address: string
   ) {
-    super(kvStore, chainId, chainGetter, contractAddress, {
+    super(sharedContext, chainId, chainGetter, contractAddress, {
       balance: { address: bech32Address },
     });
   }
@@ -28,14 +29,14 @@ export class ObservableQueryCw20BalanceInner extends ObservableQueryBalanceInner
   protected readonly queryCw20Balance: ObservableQueryCw20Balance;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     denomHelper: DenomHelper,
     protected readonly bech32Address: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       // No need to set the url at initial.
@@ -46,7 +47,7 @@ export class ObservableQueryCw20BalanceInner extends ObservableQueryBalanceInner
     makeObservable(this);
 
     this.queryCw20Balance = new ObservableQueryCw20Balance(
-      kvStore,
+      this.sharedContext,
       chainId,
       chainGetter,
       denomHelper.contractAddress,
@@ -93,7 +94,7 @@ export class ObservableQueryCw20BalanceInner extends ObservableQueryBalanceInner
 }
 
 export class ObservableQueryCw20BalanceRegistry implements BalanceRegistry {
-  constructor(protected readonly kvStore: KVStore) {}
+  constructor(protected readonly sharedContext: QuerySharedContext) {}
 
   getBalanceInner(
     chainId: string,
@@ -104,7 +105,7 @@ export class ObservableQueryCw20BalanceRegistry implements BalanceRegistry {
     const denomHelper = new DenomHelper(minimalDenom);
     if (denomHelper.type === "cw20") {
       return new ObservableQueryCw20BalanceInner(
-        this.kvStore,
+        this.sharedContext,
         chainId,
         chainGetter,
         denomHelper,

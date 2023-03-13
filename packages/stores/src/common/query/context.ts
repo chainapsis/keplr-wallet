@@ -1,67 +1,65 @@
-import { DebounceActionTimer, KVStore } from "@keplr-wallet/common";
+import { DebounceActionTimer, KVStore, MultiGet } from "@keplr-wallet/common";
 import { SettledResponse } from "@keplr-wallet/types";
 import { WrapMultiGetKVStore } from "@keplr-wallet/common/build/kv-store/multi-get";
 
 export class QuerySharedContext {
-  protected storeDebounceTimer = new DebounceActionTimer<
-    [kvStore: KVStore, key: string],
-    any
-  >(0, async (requests) => {
-    const map = new Map<KVStore, Set<string>>();
-    const resMap = new Map<KVStore, Map<string, any>>();
+  protected multiGetStore: MultiGet;
 
-    for (const req of requests) {
-      if (!map.has(req.args[0])) {
-        map.set(req.args[0], new Set());
-      }
+  protected storeDebounceTimer: DebounceActionTimer<[key: string], any>;
 
-      if (!resMap.has(req.args[0])) {
-        resMap.set(req.args[0], new Map());
-      }
+  protected handleResponseDebounceTimer: DebounceActionTimer<[], void>;
 
-      map.get(req.args[0])!.add(req.args[1]);
+  constructor(
+    protected readonly kvStore: KVStore | (KVStore & MultiGet),
+    protected readonly options: {
+      responseDebounceMs: number;
+    }
+  ) {
+    if ("multiGet" in kvStore) {
+      this.multiGetStore = kvStore;
+    } else {
+      this.multiGetStore = new WrapMultiGetKVStore(kvStore);
     }
 
-    for (const [kvStore, keySet] of map) {
-      const keys = Array.from(keySet);
-      const res = await new WrapMultiGetKVStore(kvStore).multiGet(keys);
+    this.storeDebounceTimer = new DebounceActionTimer<[key: string], any>(
+      0,
+      async (requests) => {
+        // Remove duplicated keys
+        const keys = Array.from(new Set(requests.map((req) => req.args[0])));
+        const res = await this.multiGetStore.multiGet(keys);
 
-      const resMapPerKVStore = resMap.get(kvStore)!;
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        resMapPerKVStore.set(key, res[key]);
+        return requests.map((req) => {
+          return {
+            status: "fulfilled",
+            value: res[req.args[0]],
+          };
+        });
       }
+    );
 
-      resMap.set(kvStore, resMapPerKVStore);
-    }
-
-    return requests.map((req) => {
-      return {
-        status: "fulfilled",
-        value: resMap.get(req.args[0])!.get(req.args[1])!,
-      };
-    });
-  });
-
-  protected handleResponseDebounceTimer = new DebounceActionTimer<[], void>(
-    50,
-    (requests) => {
-      return requests.map(() => ({
-        status: "fulfilled",
-        value: undefined,
-      }));
-    }
-  );
+    this.handleResponseDebounceTimer = new DebounceActionTimer<[], void>(
+      this.options.responseDebounceMs,
+      (requests) => {
+        return requests.map(() => ({
+          status: "fulfilled",
+          value: undefined,
+        }));
+      }
+    );
+  }
 
   loadStore<T = unknown>(
-    kvStore: KVStore,
     key: string,
     action: (value: SettledResponse<T | undefined>) => void
   ) {
-    return this.storeDebounceTimer.call([kvStore, key], action);
+    return this.storeDebounceTimer.call([key], action);
   }
 
   handleResponse(action: () => void) {
     return this.handleResponseDebounceTimer.call([], action);
+  }
+
+  async saveResponse(key: string, response: unknown): Promise<void> {
+    await this.kvStore.set(key, response);
   }
 }

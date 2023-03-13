@@ -1,5 +1,5 @@
-import { ObservableQuery, QueryOptions, QueryResponse } from "./index";
-import { KVStore } from "@keplr-wallet/common";
+import { ObservableQuery, QueryOptions, QueryResponse } from "./query";
+import { QuerySharedContext } from "./context";
 import { action, makeObservable, observable } from "mobx";
 import { Hash } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
@@ -17,14 +17,14 @@ export class ObservableJsonRPCQuery<
   protected _params: readonly any[];
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     baseURL: string,
     url: string,
     protected readonly method: string,
     params: readonly any[],
     options: Partial<QueryOptions> = {}
   ) {
-    super(kvStore, baseURL, url, options);
+    super(sharedContext, baseURL, url, options);
 
     this._params = params;
 

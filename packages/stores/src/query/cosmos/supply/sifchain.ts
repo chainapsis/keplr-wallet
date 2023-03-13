@@ -1,5 +1,4 @@
-import { ObservableQuery } from "../../../common";
-import { KVStore } from "@keplr-wallet/common";
+import { ObservableQuery, QuerySharedContext } from "../../../common";
 import { computed, makeObservable } from "mobx";
 
 export type SifchainLiquidityAPYResult = { rate: number };
@@ -7,9 +6,9 @@ export type SifchainLiquidityAPYResult = { rate: number };
 export class ObservableQuerySifchainLiquidityAPY extends ObservableQuery<SifchainLiquidityAPYResult> {
   protected readonly chainId: string;
 
-  constructor(kvStore: KVStore, chainId: string) {
+  constructor(sharedContext: QuerySharedContext, chainId: string) {
     super(
-      kvStore,
+      sharedContext,
       "https://data.sifchain.finance/",
       `beta/validator/stakingRewards`
     );

@@ -1,5 +1,4 @@
-import { ObservableQuery } from "../common";
-import { KVStore } from "@keplr-wallet/common";
+import { ObservableQuery, QuerySharedContext } from "../common";
 import { ChainGetter } from "../chain";
 import { HasMapStore } from "../common";
 
@@ -12,14 +11,14 @@ export class ObservableChainQueryRPC<
   protected readonly chainGetter: ChainGetter;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     url: string
   ) {
     const chainInfo = chainGetter.getChain(chainId);
 
-    super(kvStore, chainInfo.rpc, url);
+    super(sharedContext, chainInfo.rpc, url);
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;
@@ -35,7 +34,7 @@ export class ObservableChainQueryRPCMap<
   E = unknown
 > extends HasMapStore<ObservableChainQueryRPC<T, E>> {
   constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
     creater: (key: string) => ObservableChainQueryRPC<T, E>

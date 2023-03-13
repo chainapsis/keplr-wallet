@@ -1,4 +1,3 @@
-import { KVStore } from "@keplr-wallet/common";
 import {
   ObservableChainQuery,
   ObservableChainQueryMap,
@@ -6,18 +5,19 @@ import {
 import { ChainGetter } from "../../../chain";
 import { DenomTraceResponse } from "./types";
 import { autorun, computed } from "mobx";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTraceResponse> {
   protected disposer?: () => void;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly hash: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/ibc/applications/transfer/v1beta1/denom_traces/${hash}`
@@ -102,10 +102,14 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
 }
 
 export class ObservableQueryDenomTrace extends ObservableChainQueryMap<DenomTraceResponse> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, (hash: string) => {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(sharedContext, chainId, chainGetter, (hash: string) => {
       return new ObservableChainQueryDenomTrace(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         hash

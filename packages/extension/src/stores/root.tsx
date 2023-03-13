@@ -167,6 +167,9 @@ export class RootStore {
     this.queriesStore = new QueriesStore(
       new ExtensionKVStore("store_queries"),
       this.chainStore,
+      {
+        responseDebounceMs: 50,
+      },
       CosmosQueries.use(),
       CosmwasmQueries.use(),
       SecretQueries.use({

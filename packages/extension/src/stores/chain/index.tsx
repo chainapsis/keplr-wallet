@@ -3,7 +3,6 @@ import { observable, action, computed, makeObservable, flow } from "mobx";
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
-  ObservableQuery,
 } from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
@@ -251,7 +250,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     throw new Error("TODO");
 
-    ObservableQuery.refreshAllObserved();
+    // ObservableQuery.refreshAllObserved();
   }
 
   @flow
@@ -265,6 +264,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     throw new Error("TODO");
 
-    ObservableQuery.refreshAllObserved();
+    // ObservableQuery.refreshAllObserved();
   }
 }

@@ -1,5 +1,8 @@
-import { QueriesSetBase, ChainGetter } from "@keplr-wallet/stores";
-import { KVStore } from "@keplr-wallet/common";
+import {
+  QueriesSetBase,
+  ChainGetter,
+  QuerySharedContext,
+} from "@keplr-wallet/stores";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryERC20Metadata } from "./erc20";
 import { ObservableQueryEVMTokenInfo } from "./axelar";
@@ -17,20 +20,20 @@ export const KeplrETCQueries = {
     ethereumURL: string;
   }): (
     queriesSetBase: QueriesSetBase,
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter
   ) => KeplrETCQueries {
     return (
       queriesSetBase: QueriesSetBase,
-      kvStore: KVStore,
+      sharedContext: QuerySharedContext,
       chainId: string,
       chainGetter: ChainGetter
     ) => {
       return {
         keplrETC: new KeplrETCQueriesImpl(
           queriesSetBase,
-          kvStore,
+          sharedContext,
           chainId,
           chainGetter,
           options.ethereumURL
@@ -49,28 +52,28 @@ export class KeplrETCQueriesImpl {
 
   constructor(
     _base: QueriesSetBase,
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     ethereumURL: string
   ) {
     this.queryERC20Metadata = new ObservableQueryERC20Metadata(
-      kvStore,
+      sharedContext,
       ethereumURL
     );
     this.queryEVMTokenInfo = new ObservableQueryEVMTokenInfo(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter
     );
 
     this.queryTerraClassicTaxRate = new ObservableQueryTaxRate(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter
     );
     this.queryTerraClassicTaxCaps = new ObservableQueryTaxCaps(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter
     );

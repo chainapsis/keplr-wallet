@@ -1,10 +1,10 @@
 import { ObservableChainQuery } from "../chain-query";
-import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../../chain";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
-import { QueryResponse } from "../../common";
+import { QueryResponse, QuerySharedContext } from "../../common";
 
 import { Buffer } from "buffer/";
 import { makeURL } from "@keplr-wallet/simple-fetch";
@@ -21,7 +21,7 @@ export class ObservableSecretContractChainQuery<
   protected _isIniting: boolean = false;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly apiGetter: () => Promise<Keplr | undefined>,
@@ -31,7 +31,7 @@ export class ObservableSecretContractChainQuery<
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
     // Don't need to set the url initially because it can't request without encyption.
-    super(kvStore, chainId, chainGetter, ``);
+    super(sharedContext, chainId, chainGetter, ``);
     makeObservable(this);
   }
 

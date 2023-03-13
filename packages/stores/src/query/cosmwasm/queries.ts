@@ -1,9 +1,9 @@
 import { QueriesSetBase } from "../queries";
 import { ChainGetter } from "../../chain";
-import { KVStore } from "@keplr-wallet/common";
 import { ObservableQueryCw20ContractInfo } from "./cw20-contract-info";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryCw20BalanceRegistry } from "./cw20-balance";
+import { QuerySharedContext } from "../../common";
 
 export interface CosmwasmQueries {
   cosmwasm: CosmwasmQueriesImpl;
@@ -12,20 +12,20 @@ export interface CosmwasmQueries {
 export const CosmwasmQueries = {
   use(): (
     queriesSetBase: QueriesSetBase,
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter
   ) => CosmwasmQueries {
     return (
       queriesSetBase: QueriesSetBase,
-      kvStore: KVStore,
+      sharedContext: QuerySharedContext,
       chainId: string,
       chainGetter: ChainGetter
     ) => {
       return {
         cosmwasm: new CosmwasmQueriesImpl(
           queriesSetBase,
-          kvStore,
+          sharedContext,
           chainId,
           chainGetter
         ),
@@ -39,16 +39,16 @@ export class CosmwasmQueriesImpl {
 
   constructor(
     base: QueriesSetBase,
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter
   ) {
     base.queryBalances.addBalanceRegistry(
-      new ObservableQueryCw20BalanceRegistry(kvStore)
+      new ObservableQueryCw20BalanceRegistry(sharedContext)
     );
 
     this.querycw20ContractInfo = new ObservableQueryCw20ContractInfo(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter
     );

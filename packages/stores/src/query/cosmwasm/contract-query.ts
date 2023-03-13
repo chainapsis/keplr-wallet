@@ -1,7 +1,6 @@
 import { ObservableChainQuery } from "../chain-query";
-import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../chain";
-import { QueryResponse } from "../../common";
+import { QueryResponse, QuerySharedContext } from "../../common";
 
 import { Buffer } from "buffer/";
 import { autorun } from "mobx";
@@ -12,7 +11,7 @@ export class ObservableCosmwasmContractChainQuery<
   protected disposer?: () => void;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly contractAddress: string,
@@ -20,7 +19,7 @@ export class ObservableCosmwasmContractChainQuery<
     protected obj: object
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       ObservableCosmwasmContractChainQuery.getUrlFromObj(contractAddress, obj)

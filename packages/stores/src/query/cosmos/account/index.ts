@@ -2,21 +2,21 @@ import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
-import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../chain";
 import { AuthAccount } from "./types";
 import { computed, makeObservable } from "mobx";
 import { BaseAccount } from "@keplr-wallet/cosmos";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccount> {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly bech32Address: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/auth/v1beta1/accounts/${bech32Address}`
@@ -63,10 +63,14 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
 }
 
 export class ObservableQueryAccount extends ObservableChainQueryMap<AuthAccount> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, (bech32Address) => {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(sharedContext, chainId, chainGetter, (bech32Address) => {
       return new ObservableQueryAccountInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         bech32Address

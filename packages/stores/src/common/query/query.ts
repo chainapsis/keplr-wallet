@@ -8,9 +8,8 @@ import {
   onBecomeUnobserved,
   reaction,
 } from "mobx";
-import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { toGenerator } from "@keplr-wallet/common";
 import { HasMapStore } from "../map";
-import EventEmitter from "eventemitter3";
 import { makeURL, simpleFetch } from "@keplr-wallet/simple-fetch";
 import { QuerySharedContext } from "./context";
 
@@ -168,13 +167,11 @@ class FunctionQueue {
   }
 }
 
-export const querySharedContext = new QuerySharedContext();
-
 /**
  * Base of the observable query classes.
  * This recommends to use the fetch to query the response.
  */
-export abstract class ObservableQueryBase<T = unknown, E = unknown> {
+export abstract class ObservableQuery<T = unknown, E = unknown> {
   protected static suspectedResponseDatasWithInvalidValue: string[] = [
     "The network connection was lost.",
     "The request timed out.",
@@ -222,10 +219,10 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   protected _url: string = "";
 
   protected constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly sharedContext: QuerySharedContext,
     baseURL: string,
     url: string,
-    options: Partial<QueryOptions>
+    options: Partial<QueryOptions> = {}
   ) {
     this.options = {
       ...defaultOptions,
@@ -389,9 +386,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
       // When first load, try to load the last response from disk.
       // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
-      const promise = querySharedContext.loadStore<
+      const promise = this.sharedContext.loadStore<
         QueryResponse<T> | undefined
-      >(this.kvStore, this.getCacheKey(), (res) => {
+      >(this.getCacheKey(), (res) => {
         if (res.status === "rejected") {
           console.warn("Failed to get the last response from disk.");
         } else {
@@ -512,7 +509,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       // Should not wait.
       this.saveResponse(response);
 
-      yield querySharedContext.handleResponse(() => {
+      yield this.sharedContext.handleResponse(() => {
         this.setResponse(response);
         // Clear the error if fetching succeeds.
         this.setError(undefined);
@@ -558,7 +555,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           data: e.response.data,
         };
 
-        yield querySharedContext.handleResponse(() => {
+        yield this.sharedContext.handleResponse(() => {
           this.setError(error);
         });
       } else if (e.request) {
@@ -569,7 +566,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           message: "Failed to get response",
         };
 
-        yield querySharedContext.handleResponse(() => {
+        yield this.sharedContext.handleResponse(() => {
           this.setError(error);
         });
       } else {
@@ -580,7 +577,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           data: e,
         };
 
-        yield querySharedContext.handleResponse(() => {
+        yield this.sharedContext.handleResponse(() => {
           this.setError(error);
         });
       }
@@ -709,77 +706,6 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     return makeURL(this.baseURL, this.url);
   }
 
-  protected abstract fetchResponse(
-    abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }>;
-
-  /**
-   * Used for saving the last response to disk.
-   * This should not make observable state changes.
-   * @param response
-   * @protected
-   */
-  protected async saveResponse(
-    response: Readonly<QueryResponse<T>>
-  ): Promise<void> {
-    const key = this.getCacheKey();
-    await this.kvStore.set(key, response);
-  }
-}
-
-/**
- * ObservableQuery defines the event class to query the result from endpoint.
- * This supports the stale state if previous query exists.
- */
-export class ObservableQuery<
-  T = unknown,
-  E = unknown
-> extends ObservableQueryBase<T, E> {
-  protected static eventListener: EventEmitter = new EventEmitter();
-
-  public static refreshAllObserved() {
-    ObservableQuery.eventListener.emit("refresh");
-  }
-
-  public static refreshAllObservedIfError() {
-    ObservableQuery.eventListener.emit("refresh", {
-      ifError: true,
-    });
-  }
-
-  constructor(
-    kvStore: KVStore,
-    baseURL: string,
-    url: string,
-    options: Partial<QueryOptions> = {}
-  ) {
-    super(kvStore, baseURL, url, options);
-    makeObservable(this);
-  }
-
-  protected override onStart(): void | Promise<void> {
-    super.onStart();
-
-    ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
-  }
-
-  protected override onStop(): void {
-    super.onStop();
-
-    ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
-  }
-
-  protected readonly refreshHandler = (data: any) => {
-    const ifError = data?.ifError;
-    if (ifError) {
-      if (this.error) {
-        this.fetch();
-      }
-    } else {
-      this.fetch();
-    }
-  };
-
   protected async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
@@ -795,6 +721,19 @@ export class ObservableQuery<
         timestamp: Date.now(),
       },
     };
+  }
+
+  /**
+   * Used for saving the last response to disk.
+   * This should not make observable state changes.
+   * @param response
+   * @protected
+   */
+  protected async saveResponse(
+    response: Readonly<QueryResponse<T>>
+  ): Promise<void> {
+    const key = this.getCacheKey();
+    await this.sharedContext.saveResponse(key, response);
   }
 }
 

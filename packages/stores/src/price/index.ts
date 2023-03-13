@@ -1,4 +1,4 @@
-import { ObservableQuery, QueryResponse } from "../common";
+import { ObservableQuery, QueryResponse, QuerySharedContext } from "../common";
 import { CoinGeckoSimplePrice } from "./types";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { Dec, CoinPretty, Int, PricePretty } from "@keplr-wallet/unit";
@@ -167,7 +167,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   protected _throttler: Throttler;
 
   constructor(
-    kvStore: KVStore,
+    protected readonly kvStore: KVStore,
     supportedVsCurrencies: {
       [vsCurrency: string]: FiatCurrency;
     },
@@ -180,7 +180,9 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     } = {}
   ) {
     super(
-      kvStore,
+      new QuerySharedContext(kvStore, {
+        responseDebounceMs: 0,
+      }),
       options.baseURL || "https://api.coingecko.com/api/v3",
       "/simple/price"
     );

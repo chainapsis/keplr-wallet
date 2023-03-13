@@ -1,5 +1,8 @@
-import { HasMapStore, ObservableJsonRPCQuery } from "@keplr-wallet/stores";
-import { KVStore } from "@keplr-wallet/common";
+import {
+  HasMapStore,
+  ObservableJsonRPCQuery,
+  QuerySharedContext,
+} from "@keplr-wallet/stores";
 import { Interface } from "@ethersproject/abi";
 import { computed, makeObservable } from "mobx";
 
@@ -49,8 +52,12 @@ const erc20MetadataInterface: Interface = new Interface([
 ]);
 
 export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<string> {
-  constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    super(kvStore, ethereumURL, "", "eth_call", [
+  constructor(
+    sharedContext: QuerySharedContext,
+    ethereumURL: string,
+    contractAddress: string
+  ) {
+    super(sharedContext, ethereumURL, "", "eth_call", [
       {
         to: contractAddress,
         data: erc20MetadataInterface.encodeFunctionData("name"),
@@ -80,8 +87,12 @@ export class ObservableQueryERC20MetadataName extends ObservableJsonRPCQuery<str
 }
 
 export class ObservableQueryERC20MetadataSymbol extends ObservableJsonRPCQuery<string> {
-  constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    super(kvStore, ethereumURL, "", "eth_call", [
+  constructor(
+    sharedContext: QuerySharedContext,
+    ethereumURL: string,
+    contractAddress: string
+  ) {
+    super(sharedContext, ethereumURL, "", "eth_call", [
       {
         to: contractAddress,
         data: erc20MetadataInterface.encodeFunctionData("symbol"),
@@ -111,8 +122,12 @@ export class ObservableQueryERC20MetadataSymbol extends ObservableJsonRPCQuery<s
 }
 
 export class ObservableQueryERC20MetadataDecimals extends ObservableJsonRPCQuery<string> {
-  constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
-    super(kvStore, ethereumURL, "", "eth_call", [
+  constructor(
+    sharedContext: QuerySharedContext,
+    ethereumURL: string,
+    contractAddress: string
+  ) {
+    super(sharedContext, ethereumURL, "", "eth_call", [
       {
         to: contractAddress,
         data: erc20MetadataInterface.encodeFunctionData("decimals"),
@@ -146,21 +161,25 @@ export class ObservableQueryERC20MetadataInner {
   protected readonly _querySymbol: ObservableQueryERC20MetadataSymbol;
   protected readonly _queryDecimals: ObservableQueryERC20MetadataDecimals;
 
-  constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
+  constructor(
+    protected readonly sharedContext: QuerySharedContext,
+    ethereumURL: string,
+    contractAddress: string
+  ) {
     this._queryName = new ObservableQueryERC20MetadataName(
-      kvStore,
+      sharedContext,
       ethereumURL,
       contractAddress
     );
 
     this._querySymbol = new ObservableQueryERC20MetadataSymbol(
-      kvStore,
+      sharedContext,
       ethereumURL,
       contractAddress
     );
 
     this._queryDecimals = new ObservableQueryERC20MetadataDecimals(
-      kvStore,
+      sharedContext,
       ethereumURL,
       contractAddress
     );
@@ -194,12 +213,12 @@ export class ObservableQueryERC20MetadataInner {
  */
 export class ObservableQueryERC20Metadata extends HasMapStore<ObservableQueryERC20MetadataInner> {
   constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly sharedContext: QuerySharedContext,
     protected readonly ethereumURL: string
   ) {
     super((contractAddress) => {
       return new ObservableQueryERC20MetadataInner(
-        this.kvStore,
+        this.sharedContext,
         this.ethereumURL,
         contractAddress
       );
