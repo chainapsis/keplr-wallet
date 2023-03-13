@@ -37,4 +37,6 @@ export interface BoxProps {
 
   className?: string;
   style?: CSSProperties;
+
+  onClick?: () => void;
 }

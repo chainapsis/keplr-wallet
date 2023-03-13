@@ -2,12 +2,17 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { HeaderLayout } from "../../layouts/header";
+import { BackButton, ProfileButton } from "../../layouts/header/components";
 
 export const MainPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
   return (
-    <HeaderLayout title="Wallet Name">
+    <HeaderLayout
+      title="Wallet Name"
+      left={<BackButton />}
+      right={<ProfileButton />}
+    >
       {chainStore.chainInfosInUI.map((chainInfo) => {
         return (
           <div key={chainInfo.chainId}>
