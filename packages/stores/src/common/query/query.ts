@@ -375,11 +375,13 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
             this.options.cacheMaxAge <= 0 ||
             staledResponse.timestamp > Date.now() - this.options.cacheMaxAge
           ) {
-            this.setResponse({
+            const response = {
               ...staledResponse,
               staled: true,
               local: true,
-            });
+            };
+            this.onReceiveResponse(response);
+            this.setResponse(response);
             return true;
           }
         }
@@ -511,6 +513,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
       // Should not wait.
       this.saveResponse(response);
 
+      this.onReceiveResponse(response);
       yield this.sharedContext.handleResponse(() => {
         this.setResponse(response);
         // Clear the error if fetching succeeds.
@@ -625,6 +628,15 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
   @action
   protected setError(error: QueryError<E> | undefined) {
     this._error = error;
+  }
+
+  // Invoked when response received from local or query without considering debouncing.
+  // If debouncing is enabled, the response is set after debouncing is finished.
+  // Thus, it have a little delay.
+  // If you want to use the response without debouncing delay, override onReceivedResponse() instead.
+  protected onReceiveResponse(_: Readonly<QueryResponse<T>>): void {
+    // noop.
+    // Override this if needed.
   }
 
   private cancel(message?: string): void {

@@ -22,8 +22,10 @@ export class ObservableQueryTxFeesFeeTokens extends ObservableChainQuery<FeeToke
     makeObservable(this);
   }
 
-  protected override setResponse(response: Readonly<QueryResponse<FeeTokens>>) {
-    super.setResponse(response);
+  protected override onReceiveResponse(
+    response: Readonly<QueryResponse<FeeTokens>>
+  ) {
+    super.onReceiveResponse(response);
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const denoms = response.data.fee_tokens.map((token) => token.denom);

@@ -107,8 +107,10 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
     }
   }
 
-  protected override setResponse(response: Readonly<QueryResponse<Balances>>) {
-    super.setResponse(response);
+  protected override onReceiveResponse(
+    response: Readonly<QueryResponse<Balances>>
+  ) {
+    super.onReceiveResponse(response);
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
     // 반환된 response 안의 denom을 등록하도록 시도한다.
