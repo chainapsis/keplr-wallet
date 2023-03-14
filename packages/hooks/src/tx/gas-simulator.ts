@@ -14,7 +14,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
 import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
 import { Coin, StdFee } from "@keplr-wallet/types";
-import Axios, { AxiosResponse } from "axios";
+import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 
 type TxSimulate = Pick<MakeTxResponse, "simulate">;
 export type SimulateGasFn = () => TxSimulate;
@@ -378,8 +378,8 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
             });
           })
           .catch((e) => {
-            if (Axios.isAxiosError(e) && e.response) {
-              const response = e.response as AxiosResponse;
+            if (isSimpleFetchError(e) && e.response) {
+              const response = e.response;
               if (
                 response.status === 400 &&
                 response.data?.message &&

@@ -1,22 +1,22 @@
 import { ObservableChainQuery } from "../../chain-query";
 import { Proposal, ProposalStatus, ProposalTally } from "./types";
-import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../chain";
 import { computed, makeObservable } from "mobx";
 import { DeepReadonly } from "utility-types";
 import { CoinPretty, Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { ObservableQueryGovernance } from "./proposals";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally> {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly _raw: Proposal,
     protected readonly governance: ObservableQueryGovernance
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/gov/v1beta1/proposals/${_raw.proposal_id}/tally`

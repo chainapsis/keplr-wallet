@@ -1,10 +1,10 @@
-import { ObservableQuery, QueryOptions, QueryResponse } from "./index";
-import { KVStore } from "@keplr-wallet/common";
-import { AxiosInstance } from "axios";
+import { ObservableQuery, QueryOptions } from "./query";
+import { QuerySharedContext } from "./context";
 import { action, makeObservable, observable } from "mobx";
 import { Hash } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
 import { HasMapStore } from "../map";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 /**
  * Experimental implementation for json rpc.
@@ -17,14 +17,14 @@ export class ObservableJsonRPCQuery<
   protected _params: readonly any[];
 
   constructor(
-    kvStore: KVStore,
-    instance: AxiosInstance,
+    sharedContext: QuerySharedContext,
+    baseURL: string,
     url: string,
     protected readonly method: string,
     params: readonly any[],
     options: Partial<QueryOptions> = {}
   ) {
-    super(kvStore, instance, url, options);
+    super(sharedContext, baseURL, url, options);
 
     this._params = params;
 
@@ -43,8 +43,8 @@ export class ObservableJsonRPCQuery<
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }> {
-    const result = await this.instance.post<{
+  ): Promise<{ headers: any; data: T }> {
+    const result = await simpleFetch<{
       jsonrpc: "2.0";
       result?: T;
       id: string;
@@ -52,18 +52,16 @@ export class ObservableJsonRPCQuery<
         code?: number;
         message?: string;
       };
-    }>(
-      this.url,
-      {
+    }>(this.baseURL, this.url, {
+      method: "POST",
+      body: JSON.stringify({
         jsonrpc: "2.0",
         id: "1",
         method: this.method,
         params: this.params,
-      },
-      {
-        signal: abortController.signal,
-      }
-    );
+      }),
+      signal: abortController.signal,
+    });
 
     if (result.data.error && result.data.error.message) {
       throw new Error(result.data.error.message);
@@ -75,12 +73,7 @@ export class ObservableJsonRPCQuery<
 
     return {
       headers: result.headers,
-      response: {
-        data: result.data.result,
-        status: result.status,
-        staled: false,
-        timestamp: Date.now(),
-      },
+      data: result.data.result,
     };
   }
 

@@ -1,22 +1,49 @@
 import { ObservableChainQuery } from "../../chain-query";
 import { GovParamsDeposit, GovParamsTally, GovParamsVoting } from "./types";
-import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../chain";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryGovParamTally extends ObservableChainQuery<GovParamsTally> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, `/cosmos/gov/v1beta1/params/tallying`);
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      `/cosmos/gov/v1beta1/params/tallying`
+    );
   }
 }
 
 export class ObservableQueryGovParamVoting extends ObservableChainQuery<GovParamsVoting> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, `/cosmos/gov/v1beta1/params/voting`);
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      `/cosmos/gov/v1beta1/params/voting`
+    );
   }
 }
 
 export class ObservableQueryGovParamDeposit extends ObservableChainQuery<GovParamsDeposit> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, `/cosmos/gov/v1beta1/params/deposit`);
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      `/cosmos/gov/v1beta1/params/deposit`
+    );
   }
 }

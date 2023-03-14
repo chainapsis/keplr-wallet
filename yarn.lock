@@ -5199,6 +5199,7 @@ __metadata:
     "@keplr-wallet/popup": 0.11.41
     "@keplr-wallet/proto-types": 0.11.41
     "@keplr-wallet/router": 0.11.41
+    "@keplr-wallet/simple-fetch": 0.11.41
     "@keplr-wallet/types": 0.11.41
     "@keplr-wallet/unit": 0.11.41
     "@keystonehq/base-eth-keyring": ^0.6.4
@@ -5216,7 +5217,6 @@ __metadata:
     "@types/w3c-web-hid": ^1.0.2
     "@types/w3c-web-usb": ^1.0.5
     aes-js: ^3.1.2
-    axios: ^0.27.2
     big-integer: ^1.6.48
     bip39: ^3.0.2
     buffer: ^6.0.3
@@ -5237,8 +5237,8 @@ __metadata:
   resolution: "@keplr-wallet/chain-validator@workspace:packages/chain-validator"
   dependencies:
     "@keplr-wallet/cosmos": 0.11.41
+    "@keplr-wallet/simple-fetch": 0.11.41
     "@keplr-wallet/types": 0.11.41
-    axios: ^0.27.2
     joi: ^17.5.0
     utility-types: ^3.10.0
   languageName: unknown
@@ -5264,9 +5264,9 @@ __metadata:
     "@keplr-wallet/common": 0.11.41
     "@keplr-wallet/crypto": 0.11.41
     "@keplr-wallet/proto-types": 0.11.41
+    "@keplr-wallet/simple-fetch": 0.11.41
     "@keplr-wallet/types": 0.11.41
     "@keplr-wallet/unit": 0.11.41
-    axios: ^0.27.2
     bech32: ^1.1.4
     buffer: ^6.0.3
     long: ^4.0.0
@@ -5339,7 +5339,6 @@ __metadata:
     aes-js: ^3.1.2
     alt-sign-in: "file:./noop-alt-sign-in"
     amplitude-js: ^8.16.0
-    axios: ^0.27.2
     babel-loader: ^8.2.5
     bip39: ^3.0.2
     buffer: ^6.0.3
@@ -5381,7 +5380,7 @@ __metadata:
     swiper: ^8.4.4
     ts-loader: ^9.4.2
     utility-types: ^3.10.0
-    webextension-polyfill: ^0.7.0
+    webextension-polyfill: ^0.10.0
     webpack: ^5.74.0
     webpack-bundle-analyzer: ^4.5.0
     webpack-cli: ^5.0.1
@@ -5399,12 +5398,12 @@ __metadata:
     "@keplr-wallet/crypto": 0.11.41
     "@keplr-wallet/popup": 0.11.41
     "@keplr-wallet/proto-types": 0.11.41
+    "@keplr-wallet/simple-fetch": 0.11.41
     "@keplr-wallet/stores": 0.11.41
     "@keplr-wallet/stores-etc": 0.11.41
     "@keplr-wallet/types": 0.11.41
     "@keplr-wallet/unit": 0.11.41
     "@types/react": ^16.14.4
-    axios: ^0.27.2
     buffer: ^6.0.3
     long: ^4.0.0
     mobx: ^6.1.7
@@ -5497,16 +5496,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-wallet/simple-fetch@0.11.41, @keplr-wallet/simple-fetch@workspace:packages/simple-fetch":
+  version: 0.0.0-use.local
+  resolution: "@keplr-wallet/simple-fetch@workspace:packages/simple-fetch"
+  languageName: unknown
+  linkType: soft
+
 "@keplr-wallet/stores-etc@0.11.41, @keplr-wallet/stores-etc@workspace:packages/stores-etc":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/stores-etc@workspace:packages/stores-etc"
   dependencies:
     "@ethersproject/abi": ^5.6.0
     "@keplr-wallet/common": 0.11.41
+    "@keplr-wallet/simple-fetch": 0.11.41
     "@keplr-wallet/stores": 0.11.41
     "@keplr-wallet/types": 0.11.41
     "@keplr-wallet/unit": 0.11.41
-    axios: ^0.27.2
     mobx: ^6.1.7
     mobx-utils: ^6.0.3
     utility-types: ^3.10.0
@@ -5524,9 +5529,9 @@ __metadata:
     "@keplr-wallet/proto-types": 0.11.41
     "@keplr-wallet/provider-mock": 0.11.41
     "@keplr-wallet/router": 0.11.41
+    "@keplr-wallet/simple-fetch": 0.11.41
     "@keplr-wallet/types": 0.11.41
     "@keplr-wallet/unit": 0.11.41
-    axios: ^0.27.2
     buffer: ^6.0.3
     deepmerge: ^4.2.2
     eventemitter3: ^4.0.7
@@ -5541,7 +5546,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/types@workspace:packages/types"
   dependencies:
-    axios: ^0.27.2
     long: ^4.0.0
   languageName: unknown
   linkType: soft
@@ -5562,6 +5566,7 @@ __metadata:
   dependencies:
     "@keplr-wallet/common": 0.11.41
     "@keplr-wallet/cosmos": 0.11.41
+    "@keplr-wallet/simple-fetch": 0.11.41
     "@keplr-wallet/stores": 0.11.41
     "@keplr-wallet/types": 0.11.41
     "@keplr-wallet/wc-client": 0.11.41
@@ -5570,7 +5575,6 @@ __metadata:
     "@types/react-dom": ^16.9.11
     "@walletconnect/client": ^1.6.5
     "@walletconnect/qrcode-modal": ^1.6.5
-    axios: ^0.27.2
     buffer: ^6.0.3
     mobx-react-lite: ^3.2.0
     parcel-bundler: ^1.12.5
@@ -31574,10 +31578,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webextension-polyfill@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "webextension-polyfill@npm:0.7.0"
-  checksum: fb738a5de07feb593875e02f25c3ab4276c8736118929556c8d4bdf965bb0f11c96ea263cd397b9b21259e8faf2dce2eaaa42ce08c922d96de7adb5896ec7d10
+"webextension-polyfill@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "webextension-polyfill@npm:0.10.0"
+  checksum: 4a59036bda571360c2c0b2fb03fe1dc244f233946bcf9a6766f677956c40fd14d270aaa69cdba95e4ac521014afbe4008bfa5959d0ac39f91c990eb206587f91
   languageName: node
   linkType: hard
 

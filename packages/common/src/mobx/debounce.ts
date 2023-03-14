@@ -1,12 +1,14 @@
 import { SettledResponse, SettledResponses } from "@keplr-wallet/types";
 import { runInAction } from "mobx";
 
+type Request<ARGS, R> = {
+  args: ARGS;
+  action: (res: SettledResponse<R>) => void;
+  resolver: () => void;
+};
+
 export class DebounceActionTimer<ARGS, R> {
-  protected requests: {
-    args: ARGS;
-    action: (res: SettledResponse<R>) => void;
-    resolver: () => void;
-  }[] = [];
+  protected requests: Request<ARGS, R>[] = [];
 
   protected startTime: number = 0;
 
@@ -30,27 +32,38 @@ export class DebounceActionTimer<ARGS, R> {
     }
 
     if (shouldExec) {
+      // Should use sliced (copied) array
       const requests = this.requests.slice();
-
-      // Should use sliced array
-      Promise.resolve(this.handler(requests)).then((responses) => {
-        runInAction(() => {
-          for (let i = 0; i < requests.length; i++) {
-            const req = requests[i];
-            const res = responses[i];
-
-            req.action(res);
-          }
+      const responses = this.handler(requests);
+      if (typeof responses === "object" && "then" in responses) {
+        Promise.resolve(responses).then((responses) => {
+          this.handleResponses(requests, responses);
         });
-
-        for (const req of requests) {
-          req.resolver();
-        }
-      });
+      } else {
+        this.handleResponses(requests, responses);
+      }
 
       this.requests = [];
     } else {
       this.nextTick(this.tick);
+    }
+  };
+
+  protected handleResponses: (
+    requests: Request<ARGS, R>[],
+    responses: SettledResponses<R>
+  ) => void = (requests, responses) => {
+    runInAction(() => {
+      for (let i = 0; i < requests.length; i++) {
+        const req = requests[i];
+        const res = responses[i];
+
+        req.action(res);
+      }
+    });
+
+    for (const req of requests) {
+      req.resolver();
     }
   };
 
@@ -73,10 +86,15 @@ export class DebounceActionTimer<ARGS, R> {
   }
 
   protected nextTick(fn: () => void): void {
-    if (typeof window !== "undefined") {
+    if (this.debounceMs <= 0) {
+      Promise.resolve().then(fn);
+      return;
+    }
+
+    if (typeof window !== "undefined" && window.requestAnimationFrame) {
       window.requestAnimationFrame(fn);
     } else {
-      setTimeout(fn, 10);
+      setTimeout(fn, this.debounceMs);
     }
   }
 }

@@ -1,6 +1,5 @@
 import { ObservableChainQuery } from "../../../chain-query";
-import { KVStore } from "@keplr-wallet/common";
-import { QueryResponse } from "../../../../common";
+import { QueryResponse, QuerySharedContext } from "../../../../common";
 import { ChainGetter } from "../../../../chain";
 import { computed, makeObservable } from "mobx";
 import { FeeTokens } from "./types";
@@ -8,14 +7,25 @@ import { FeeCurrency } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
 
 export class ObservableQueryTxFeesFeeTokens extends ObservableChainQuery<FeeTokens> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, "/osmosis/txfees/v1beta1/fee_tokens");
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      "/osmosis/txfees/v1beta1/fee_tokens"
+    );
 
     makeObservable(this);
   }
 
-  protected override setResponse(response: Readonly<QueryResponse<FeeTokens>>) {
-    super.setResponse(response);
+  protected override onReceiveResponse(
+    response: Readonly<QueryResponse<FeeTokens>>
+  ) {
+    super.onReceiveResponse(response);
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const denoms = response.data.fee_tokens.map((token) => token.denom);

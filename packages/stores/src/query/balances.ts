@@ -1,10 +1,10 @@
 import { ObservableChainQuery } from "./chain-query";
-import { DenomHelper, KVStore } from "@keplr-wallet/common";
+import { DenomHelper } from "@keplr-wallet/common";
 import { ChainGetter } from "../chain";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
-import { HasMapStore } from "../common";
+import { HasMapStore, QuerySharedContext } from "../common";
 import { computedFn } from "mobx-utils";
 
 export abstract class ObservableQueryBalanceInner<
@@ -12,13 +12,13 @@ export abstract class ObservableQueryBalanceInner<
   E = unknown
 > extends ObservableChainQuery<T, E> {
   protected constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     url: string,
     protected readonly denomHelper: DenomHelper
   ) {
-    super(kvStore, chainId, chainGetter, url);
+    super(sharedContext, chainId, chainGetter, url);
     makeObservable(this);
   }
 
@@ -56,7 +56,7 @@ export class ObservableQueryBalancesInner {
   protected balanceMap: Map<string, ObservableQueryBalanceInner> = new Map();
 
   constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
     protected readonly balanceRegistries: BalanceRegistry[],
@@ -207,13 +207,13 @@ export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalances
   protected balanceRegistries: BalanceRegistry[] = [];
 
   constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter
   ) {
     super((bech32Address: string) => {
       return new ObservableQueryBalancesInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         this.balanceRegistries,

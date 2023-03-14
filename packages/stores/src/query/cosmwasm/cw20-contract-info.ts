@@ -1,18 +1,20 @@
 import { Cw20ContractTokenInfo } from "./types";
-import { KVStore } from "@keplr-wallet/common";
 import { ObservableChainQueryMap } from "../chain-query";
 import { ChainGetter } from "../../chain";
 import { computed } from "mobx";
 import { ObservableCosmwasmContractChainQuery } from "./contract-query";
+import { QuerySharedContext } from "../../common";
 
 export class ObservableQueryCw20ContactInfoInner extends ObservableCosmwasmContractChainQuery<Cw20ContractTokenInfo> {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     contractAddress: string
   ) {
-    super(kvStore, chainId, chainGetter, contractAddress, { token_info: {} });
+    super(sharedContext, chainId, chainGetter, contractAddress, {
+      token_info: {},
+    });
   }
 
   @computed
@@ -26,10 +28,14 @@ export class ObservableQueryCw20ContactInfoInner extends ObservableCosmwasmContr
 }
 
 export class ObservableQueryCw20ContractInfo extends ObservableChainQueryMap<Cw20ContractTokenInfo> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, (contractAddress: string) => {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(sharedContext, chainId, chainGetter, (contractAddress: string) => {
       return new ObservableQueryCw20ContactInfoInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         contractAddress

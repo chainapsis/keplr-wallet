@@ -12,7 +12,7 @@ require("./public/assets/icon/icon-beta-16.png");
 require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
@@ -25,6 +25,8 @@ import manifest from "./manifest.json";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { UnlockPage } from "./pages/unlock";
 import { MainPage } from "./pages/main";
+import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -39,6 +41,26 @@ window.keplr = new Keplr(
 const RoutesAfterReady: FunctionComponent = observer(() => {
   const { chainStore, accountStore, keyRingStore, ibcCurrencyRegistrar } =
     useStore();
+
+  useEffect(() => {
+    if (keyRingStore.status === "unlocked") {
+      const sendAutoLockMonitorMsg = async () => {
+        const msg = new StartAutoLockMonitoringMsg();
+        const requester = new InExtensionMessageRequester();
+        await requester.sendMessage(BACKGROUND_PORT, msg);
+      };
+
+      // Notify to auto lock service to start activation check whenever the keyring is unlocked.
+      sendAutoLockMonitorMsg();
+      const autoLockInterval = setInterval(() => {
+        sendAutoLockMonitorMsg();
+      }, 10000);
+
+      return () => {
+        clearInterval(autoLockInterval);
+      };
+    }
+  }, [keyRingStore.status]);
 
   const isReady = useMemo(() => {
     if (keyRingStore.status === "not-loaded") {

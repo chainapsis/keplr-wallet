@@ -1,12 +1,13 @@
 import { ObservableChainQuery } from "../chain-query";
-import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../../chain";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
-import { QueryResponse } from "../../common";
+import { QuerySharedContext } from "../../common";
 
 import { Buffer } from "buffer/";
+import { makeURL } from "@keplr-wallet/simple-fetch";
 
 export class ObservableSecretContractChainQuery<
   T
@@ -20,7 +21,7 @@ export class ObservableSecretContractChainQuery<
   protected _isIniting: boolean = false;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly apiGetter: () => Promise<Keplr | undefined>,
@@ -30,7 +31,7 @@ export class ObservableSecretContractChainQuery<
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
     // Don't need to set the url initially because it can't request without encyption.
-    super(kvStore, chainId, chainGetter, ``);
+    super(sharedContext, chainId, chainGetter, ``);
     makeObservable(this);
   }
 
@@ -98,12 +99,12 @@ export class ObservableSecretContractChainQuery<
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }> {
-    let response: QueryResponse<T>;
+  ): Promise<{ headers: any; data: T }> {
+    let data: T;
     let headers: any;
     try {
       const fetched = await super.fetchResponse(abortController);
-      response = fetched.response;
+      data = fetched.data;
       headers = fetched.headers;
     } catch (e) {
       if (e.response?.data?.error) {
@@ -132,7 +133,7 @@ export class ObservableSecretContractChainQuery<
       throw e;
     }
 
-    const encResult = response.data as unknown as
+    const encResult = data as unknown as
       | {
           data: string;
         }
@@ -162,12 +163,7 @@ export class ObservableSecretContractChainQuery<
     const obj = JSON.parse(message);
     return {
       headers,
-      response: {
-        data: obj as T,
-        status: response.status,
-        staled: false,
-        timestamp: Date.now(),
-      },
+      data: obj as T,
     };
   }
 
@@ -179,14 +175,10 @@ export class ObservableSecretContractChainQuery<
   // Actually, the url of fetching the secret20 balance will be changed every time.
   // So, we should save it with deterministic key.
   protected override getCacheKey(): string {
-    return `${this.instance.name}-${
-      this.instance.defaults.baseURL
-    }${this.instance.getUri({
-      url: this.getSecretWasmUrl(
-        this.contractAddress,
-        JSON.stringify(this.obj)
-      ),
-    })}`;
+    return makeURL(
+      this.baseURL,
+      this.getSecretWasmUrl(this.contractAddress, JSON.stringify(this.obj))
+    );
   }
 
   @computed

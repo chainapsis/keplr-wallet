@@ -1,7 +1,4 @@
-import { ObservableQuery } from "../common";
-import { KVStore } from "@keplr-wallet/common";
-import Axios, { AxiosInstance } from "axios";
-import { override } from "mobx";
+import { ObservableQuery, QuerySharedContext } from "../common";
 import { ChainGetter } from "../chain";
 import { HasMapStore } from "../common";
 
@@ -14,30 +11,17 @@ export class ObservableChainQuery<
   protected readonly chainGetter: ChainGetter;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     url: string
   ) {
     const chainInfo = chainGetter.getChain(chainId);
 
-    const instance = Axios.create({
-      baseURL: chainInfo.rest,
-    });
-
-    super(kvStore, instance, url);
+    super(sharedContext, chainInfo.rest, url);
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;
-  }
-
-  @override
-  protected override get instance(): AxiosInstance {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-
-    return Axios.create({
-      baseURL: chainInfo.rest,
-    });
   }
 
   get chainId(): string {
@@ -50,11 +34,11 @@ export class ObservableChainQueryMap<
   E = unknown
 > extends HasMapStore<ObservableChainQuery<T, E>> {
   constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly sharedContext: QuerySharedContext,
     protected readonly chainId: string,
     protected readonly chainGetter: ChainGetter,
-    creater: (key: string) => ObservableChainQuery<T, E>
+    creator: (key: string) => ObservableChainQuery<T, E>
   ) {
-    super(creater);
+    super(creator);
   }
 }

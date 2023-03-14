@@ -3,22 +3,22 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { UnbondingDelegation, UnbondingDelegations } from "./types";
-import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../chain";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQuery<UnbondingDelegations> {
   protected bech32Address: string;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     bech32Address: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/staking/v1beta1/delegators/${bech32Address}/unbonding_delegations?pagination.limit=1000`
@@ -95,10 +95,14 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
 }
 
 export class ObservableQueryUnbondingDelegations extends ObservableChainQueryMap<UnbondingDelegations> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, (bech32Address: string) => {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(sharedContext, chainId, chainGetter, (bech32Address: string) => {
       return new ObservableQueryUnbondingDelegationsInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         bech32Address

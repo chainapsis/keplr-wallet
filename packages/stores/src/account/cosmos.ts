@@ -42,7 +42,6 @@ import { BondStatus } from "../query/cosmos/staking/types";
 import { CosmosQueries, IQueriesStore, QueriesSetBase } from "../query";
 import { DeepPartial, DeepReadonly, Mutable } from "utility-types";
 import { ChainGetter } from "../chain";
-import Axios, { AxiosInstance } from "axios";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";
 import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
@@ -52,6 +51,7 @@ import {
 } from "./utils";
 import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
 import { MsgRevoke } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -481,7 +481,7 @@ export class CosmosAccountImpl {
     }
 
     const account = await BaseAccount.fetchFromRest(
-      this.instance,
+      this.chainGetter.getChain(this.chainId).rest,
       this.base.bech32Address,
       true
     );
@@ -668,7 +668,7 @@ export class CosmosAccountImpl {
     gasUsed: number;
   }> {
     const account = await BaseAccount.fetchFromRest(
-      this.instance,
+      this.chainGetter.getChain(this.chainId).rest,
       this.base.bech32Address,
       true
     );
@@ -706,9 +706,17 @@ export class CosmosAccountImpl {
       signatures: [new Uint8Array(64)],
     }).finish();
 
-    const result = await this.instance.post("/cosmos/tx/v1beta1/simulate", {
-      tx_bytes: Buffer.from(unsignedTx).toString("base64"),
-    });
+    // TODO: Add response type
+    const result = await simpleFetch<any>(
+      this.chainGetter.getChain(this.chainId).rest,
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          tx_bytes: Buffer.from(unsignedTx).toString("base64"),
+        }),
+      }
+    );
 
     const gasUsed = parseInt(result.data.gas_info.gas_used);
     if (Number.isNaN(gasUsed)) {
@@ -870,13 +878,6 @@ export class CosmosAccountImpl {
       },
       sendWithGasPrice,
     };
-  }
-
-  get instance(): AxiosInstance {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return Axios.create({
-      baseURL: chainInfo.rest,
-    });
   }
 
   makeIBCTransferTx(

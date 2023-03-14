@@ -35,14 +35,16 @@ export class ExtensionKVStore extends BaseKVStore implements MultiGet {
   }
 
   async multiGet(keys: string[]): Promise<{ [key: string]: any }> {
+    // Remove duplications
+    keys = Array.from(new Set(keys));
+
     const res =
       (await ExtensionKVStore.KVStoreProvider!.multiGet(
         keys.map((k) => this.prefix() + "/" + k)
       )) ?? {};
-
     const prefixedKeys = Object.keys(res);
     for (const prefixedKey of prefixedKeys) {
-      const key = prefixedKey.slice(this.prefix().length + 2);
+      const key = prefixedKey.slice(this.prefix().length + 1);
       res[key] = res[prefixedKey];
 
       delete res[prefixedKey];

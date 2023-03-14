@@ -1,14 +1,18 @@
 import { ChainGetter } from "../../../../chain";
 import { ObservableChainQuery } from "../../../chain-query";
 import { AnnualProvisions } from "./types";
-import { KVStore } from "@keplr-wallet/common";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import { QuerySharedContext } from "../../../../common";
 
 export class ObservableQueryJunoAnnualProvisions extends ObservableChainQuery<AnnualProvisions> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       "/cosmos/mint/v1beta1/annual_provisions"

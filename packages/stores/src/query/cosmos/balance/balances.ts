@@ -1,5 +1,5 @@
-import { DenomHelper, KVStore } from "@keplr-wallet/common";
-import { QueryResponse } from "../../../common";
+import { DenomHelper } from "@keplr-wallet/common";
+import { QueryResponse, QuerySharedContext } from "../../../common";
 import { ChainGetter } from "../../../chain";
 import { computed, makeObservable, override } from "mobx";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
@@ -10,14 +10,14 @@ import { Balances } from "./types";
 
 export class ObservableQueryBalanceNative extends ObservableQueryBalanceInner {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     denomHelper: DenomHelper,
     protected readonly nativeBalances: ObservableQueryCosmosBalances
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       // No need to set the url
@@ -70,13 +70,13 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
   protected duplicatedFetchCheck: boolean = false;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     bech32Address: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/bank/v1beta1/balances/${bech32Address}?pagination.limit=1000`
@@ -107,8 +107,10 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
     }
   }
 
-  protected override setResponse(response: Readonly<QueryResponse<Balances>>) {
-    super.setResponse(response);
+  protected override onReceiveResponse(
+    response: Readonly<QueryResponse<Balances>>
+  ) {
+    super.onReceiveResponse(response);
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
     // 반환된 response 안의 denom을 등록하도록 시도한다.
@@ -123,7 +125,7 @@ export class ObservableQueryCosmosBalanceRegistry implements BalanceRegistry {
   protected nativeBalances: Map<string, ObservableQueryCosmosBalances> =
     new Map();
 
-  constructor(protected readonly kvStore: KVStore) {}
+  constructor(protected readonly sharedContext: QuerySharedContext) {}
 
   getBalanceInner(
     chainId: string,
@@ -142,7 +144,7 @@ export class ObservableQueryCosmosBalanceRegistry implements BalanceRegistry {
       this.nativeBalances.set(
         key,
         new ObservableQueryCosmosBalances(
-          this.kvStore,
+          this.sharedContext,
           chainId,
           chainGetter,
           bech32Address
@@ -151,7 +153,7 @@ export class ObservableQueryCosmosBalanceRegistry implements BalanceRegistry {
     }
 
     return new ObservableQueryBalanceNative(
-      this.kvStore,
+      this.sharedContext,
       chainId,
       chainGetter,
       denomHelper,

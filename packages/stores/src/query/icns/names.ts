@@ -1,19 +1,19 @@
 import { ObservableCosmwasmContractChainQuery } from "../cosmwasm/contract-query";
-import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../chain";
 import { computed } from "mobx";
 import { ObservableChainQueryMap } from "../chain-query";
 import { ICNSNames } from "./types";
+import { QuerySharedContext } from "../../common";
 
 export class ObservableQueryICNSNamesInner extends ObservableCosmwasmContractChainQuery<ICNSNames> {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     contractAddress: string,
     protected readonly address: string
   ) {
-    super(kvStore, chainId, chainGetter, contractAddress, {
+    super(sharedContext, chainId, chainGetter, contractAddress, {
       icns_names: { address: address },
     });
   }
@@ -38,11 +38,15 @@ export class ObservableQueryICNSNamesInner extends ObservableCosmwasmContractCha
 }
 
 export class ObservableQueryICNSNames extends ObservableChainQueryMap<ICNSNames> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, (key: string) => {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(sharedContext, chainId, chainGetter, (key: string) => {
       const split = key.split("/");
       return new ObservableQueryICNSNamesInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         split[0],

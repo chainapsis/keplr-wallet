@@ -1,6 +1,6 @@
 import { computed, makeObservable, override } from "mobx";
-import { DenomHelper, KVStore } from "@keplr-wallet/common";
-import { QueryResponse } from "../../common";
+import { DenomHelper } from "@keplr-wallet/common";
+import { QuerySharedContext } from "../../common";
 import { ChainGetter } from "../../chain";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { QueryError } from "../../common";
@@ -17,7 +17,7 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
   };
 }> {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     apiGetter: () => Promise<Keplr | undefined>,
@@ -27,7 +27,7 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
     querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       apiGetter,
@@ -58,18 +58,18 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{
-    response: QueryResponse<{ balance: { amount: string } }>;
+    data: { balance: { amount: string } };
     headers: any;
   }> {
-    const { response, headers } = await super.fetchResponse(abortController);
+    const { data, headers } = await super.fetchResponse(abortController);
 
-    if (response.data["viewing_key_error"]) {
-      throw new WrongViewingKeyError(response.data["viewing_key_error"]?.msg);
+    if (data["viewing_key_error"]) {
+      throw new WrongViewingKeyError(data["viewing_key_error"]?.msg);
     }
 
     return {
       headers,
-      response,
+      data,
     };
   }
 }
@@ -78,7 +78,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
   protected readonly querySecret20Balance: ObservableQuerySecret20Balance;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly apiGetter: () => Promise<Keplr | undefined>,
@@ -87,7 +87,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       // No need to set the url at initial.
@@ -107,7 +107,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
     })();
 
     this.querySecret20Balance = new ObservableQuerySecret20Balance(
-      kvStore,
+      this.sharedContext,
       chainId,
       chainGetter,
       this.apiGetter,
@@ -172,7 +172,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
 
 export class ObservableQuerySecret20BalanceRegistry implements BalanceRegistry {
   constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly sharedContext: QuerySharedContext,
     protected readonly apiGetter: () => Promise<Keplr | undefined>,
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {}
@@ -186,7 +186,7 @@ export class ObservableQuerySecret20BalanceRegistry implements BalanceRegistry {
     const denomHelper = new DenomHelper(minimalDenom);
     if (denomHelper.type === "secret20") {
       return new ObservableQuerySecret20BalanceInner(
-        this.kvStore,
+        this.sharedContext,
         chainId,
         chainGetter,
         this.apiGetter,
