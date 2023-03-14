@@ -44,7 +44,7 @@ export class MessagingService {
         chatReadReceiptSetting: true,
       };
     } else {
-      return await this.lookupPublicKey(accessToken, targetAddress);
+      return await this.lookupPublicKey(accessToken, targetAddress, chainId);
     }
   }
 
@@ -69,30 +69,7 @@ export class MessagingService {
     const privateKey = new PrivateKey(Buffer.from(sk));
     const pubKey = toHex(privateKey.publicKey.compressed);
 
-    const encoder = new TextEncoder();
-
-    const encoded = encoder.encode(pubKey);
-    const signDoc = {
-      chain_id: "",
-      account_number: "0",
-      sequence: "0",
-      fee: {
-        gas: "0",
-        amount: [],
-      },
-      msgs: [
-        {
-          type: "sign/MsgSignData",
-          value: {
-            signer: address,
-            data: toBase64(encoded),
-          },
-        },
-      ],
-      memo: "",
-    };
-
-    const regPubKey = await this.lookupPublicKey(accessToken, address);
+    const regPubKey = await this.lookupPublicKey(accessToken, address, chainId);
     if (
       !regPubKey.privacySetting ||
       !regPubKey.publicKey ||
@@ -100,17 +77,44 @@ export class MessagingService {
       regPubKey.privacySetting !== privacySetting ||
       regPubKey.chatReadReceiptSetting !== chatReadReceiptSetting
     ) {
-      const {
-        signature,
-        signed,
-      } = await this.keyRingService.requestSignAmino(
-        env,
-        "",
-        chainId,
-        address,
-        signDoc,
-        { isADR36WithString: true }
-      );
+      let signature;
+      let signed;
+      if (!regPubKey.publicKey || regPubKey.publicKey !== pubKey) {
+        const encoder = new TextEncoder();
+
+        const encoded = encoder.encode(pubKey);
+        const signDoc = {
+          chain_id: "",
+          account_number: "0",
+          sequence: "0",
+          fee: {
+            gas: "0",
+            amount: [],
+          },
+          msgs: [
+            {
+              type: "sign/MsgSignData",
+              value: {
+                signer: address,
+                data: toBase64(encoded),
+              },
+            },
+          ],
+          memo: "",
+        };
+
+        const signData = await this.keyRingService.requestSignAmino(
+          env,
+          "",
+          chainId,
+          address,
+          signDoc,
+          { isADR36WithString: true }
+        );
+
+        signature = signData.signature;
+        signed = signData.signed;
+      }
 
       await registerPubKey(
         accessToken,
@@ -118,13 +122,16 @@ export class MessagingService {
         address,
         MESSAGE_CHANNEL_ID,
         privacySetting,
+        chainId,
         chatReadReceiptSetting,
-        signature.pub_key.value,
-        signature.signature,
-        Buffer.from(JSON.stringify(signed)).toString("base64")
+        signature ? signature.pub_key.value : undefined,
+        signature ? signature.signature : undefined,
+        signed
+          ? Buffer.from(JSON.stringify(signed)).toString("base64")
+          : undefined
       );
 
-      this._publicKeyCache.set(address, {
+      this._publicKeyCache.set(`${address}-${chainId}`, {
         publicKey: pubKey,
         privacySetting,
         chatReadReceiptSetting,
@@ -179,7 +186,8 @@ export class MessagingService {
 
     const targetPublicKey = await this.lookupPublicKey(
       accessToken,
-      targetAddress
+      targetAddress,
+      _chainId
     );
 
     if (!targetPublicKey.publicKey)
@@ -224,10 +232,13 @@ export class MessagingService {
    */
   protected async lookupPublicKey(
     accessToken: string,
-    targetAddress: string
+    targetAddress: string,
+    chainId: string
   ): Promise<PubKey> {
     // Step 1. Query the cache
-    let targetPublicKey = this._publicKeyCache.get(targetAddress);
+    let targetPublicKey = this._publicKeyCache.get(
+      `${targetAddress}-${chainId}`
+    );
 
     if (targetPublicKey?.publicKey && targetPublicKey?.privacySetting) {
       return targetPublicKey;
@@ -238,7 +249,8 @@ export class MessagingService {
     targetPublicKey = await getPubKey(
       accessToken,
       targetAddress,
-      MESSAGE_CHANNEL_ID
+      MESSAGE_CHANNEL_ID,
+      chainId
     );
     if (!targetPublicKey) {
       return {
@@ -248,7 +260,7 @@ export class MessagingService {
       };
     }
 
-    this._publicKeyCache.set(targetAddress, targetPublicKey);
+    this._publicKeyCache.set(`${targetAddress}-${chainId}`, targetPublicKey);
 
     return targetPublicKey;
   }

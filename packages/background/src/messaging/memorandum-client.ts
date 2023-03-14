@@ -32,6 +32,7 @@ export const registerPubKey = async (
   walletAddress: string,
   channelId: string,
   privacySetting: PrivacySetting,
+  chainId: string,
   chatReadReceiptSetting?: boolean,
   signingPubKey?: string,
   signature?: string,
@@ -51,6 +52,7 @@ export const registerPubKey = async (
           publicKey: messagingPubKey,
           address: walletAddress,
           channelId,
+          chainId,
           privacySetting,
           readReceipt: chatReadReceiptSetting,
           signingPubKey,
@@ -73,12 +75,13 @@ export const registerPubKey = async (
 export const getPubKey = async (
   accessToken: string,
   targetAddress: string,
-  channelId: string
+  channelId: string,
+  chainId: string
 ): Promise<PubKey> => {
   try {
     const { data } = await client.query({
-      query: gql(`query Query($address: String!, $channelId: ChannelId!) {
-        publicKey(address: $address, channelId: $channelId) {
+      query: gql(`query Query($address: String!, $chainId: String!  $channelId: ChannelId!) {
+        publicKey(address: $address, chainId: $chainId, channelId: $channelId) {
           publicKey
           privacySetting
           readReceipt
@@ -87,6 +90,7 @@ export const getPubKey = async (
       variables: {
         address: targetAddress,
         channelId,
+        chainId,
       },
       context: {
         headers: {
