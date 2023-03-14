@@ -4,6 +4,9 @@ export class WrapMultiGetKVStore implements MultiGet {
   constructor(protected readonly kvStore: KVStore) {}
 
   async multiGet(keys: string[]): Promise<{ [key: string]: any }> {
+    // Remove duplications
+    keys = Array.from(new Set(keys));
+
     const res: { [key: string]: any } = {};
 
     const promises: Promise<void>[] = [];
