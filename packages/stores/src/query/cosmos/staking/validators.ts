@@ -5,11 +5,7 @@ import {
 import { BondStatus, Validators, Validator } from "./types";
 import { ChainGetter } from "../../../chain";
 import { computed, makeObservable, observable, runInAction } from "mobx";
-import {
-  ObservableQuery,
-  QueryResponse,
-  QuerySharedContext,
-} from "../../../common";
+import { ObservableQuery, QuerySharedContext } from "../../../common";
 import PQueue from "p-queue";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
@@ -63,7 +59,7 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<KeybaseResult>; headers: any }> {
+  ): Promise<{ headers: any; data: KeybaseResult }> {
     return await ObservableQueryValidatorThumbnail.fetchingThumbnailQueue.add(
       () => {
         return super.fetchResponse(abortController);

@@ -1,4 +1,4 @@
-import { ObservableQuery, QueryOptions, QueryResponse } from "./query";
+import { ObservableQuery, QueryOptions } from "./query";
 import { QuerySharedContext } from "./context";
 import { action, makeObservable, observable } from "mobx";
 import { Hash } from "@keplr-wallet/crypto";
@@ -43,7 +43,7 @@ export class ObservableJsonRPCQuery<
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }> {
+  ): Promise<{ headers: any; data: T }> {
     const result = await simpleFetch<{
       jsonrpc: "2.0";
       result?: T;
@@ -73,12 +73,7 @@ export class ObservableJsonRPCQuery<
 
     return {
       headers: result.headers,
-      response: {
-        data: result.data.result,
-        status: result.status,
-        staled: false,
-        timestamp: Date.now(),
-      },
+      data: result.data.result,
     };
   }
 

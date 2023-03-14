@@ -1,6 +1,6 @@
 import { computed, makeObservable, override } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
-import { QueryResponse, QuerySharedContext } from "../../common";
+import { QuerySharedContext } from "../../common";
 import { ChainGetter } from "../../chain";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { QueryError } from "../../common";
@@ -58,18 +58,18 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{
-    response: QueryResponse<{ balance: { amount: string } }>;
+    data: { balance: { amount: string } };
     headers: any;
   }> {
-    const { response, headers } = await super.fetchResponse(abortController);
+    const { data, headers } = await super.fetchResponse(abortController);
 
-    if (response.data["viewing_key_error"]) {
-      throw new WrongViewingKeyError(response.data["viewing_key_error"]?.msg);
+    if (data["viewing_key_error"]) {
+      throw new WrongViewingKeyError(data["viewing_key_error"]?.msg);
     }
 
     return {
       headers,
-      response,
+      data,
     };
   }
 }

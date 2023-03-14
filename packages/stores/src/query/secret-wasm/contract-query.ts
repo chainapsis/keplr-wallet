@@ -4,7 +4,7 @@ import { ChainGetter } from "../../chain";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
-import { QueryResponse, QuerySharedContext } from "../../common";
+import { QuerySharedContext } from "../../common";
 
 import { Buffer } from "buffer/";
 import { makeURL } from "@keplr-wallet/simple-fetch";
@@ -99,12 +99,12 @@ export class ObservableSecretContractChainQuery<
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }> {
-    let response: QueryResponse<T>;
+  ): Promise<{ headers: any; data: T }> {
+    let data: T;
     let headers: any;
     try {
       const fetched = await super.fetchResponse(abortController);
-      response = fetched.response;
+      data = fetched.data;
       headers = fetched.headers;
     } catch (e) {
       if (e.response?.data?.error) {
@@ -133,7 +133,7 @@ export class ObservableSecretContractChainQuery<
       throw e;
     }
 
-    const encResult = response.data as unknown as
+    const encResult = data as unknown as
       | {
           data: string;
         }
@@ -163,12 +163,7 @@ export class ObservableSecretContractChainQuery<
     const obj = JSON.parse(message);
     return {
       headers,
-      response: {
-        data: obj as T,
-        status: response.status,
-        staled: false,
-        timestamp: Date.now(),
-      },
+      data: obj as T,
     };
   }
 

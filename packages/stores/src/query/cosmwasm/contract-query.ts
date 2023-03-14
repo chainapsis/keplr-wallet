@@ -1,6 +1,6 @@
 import { ObservableChainQuery } from "../chain-query";
 import { ChainGetter } from "../../chain";
-import { QueryResponse, QuerySharedContext } from "../../common";
+import { QuerySharedContext } from "../../common";
 
 import { Buffer } from "buffer/";
 import { autorun } from "mobx";
@@ -65,10 +65,10 @@ export class ObservableCosmwasmContractChainQuery<
 
   protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }> {
-    const { response, headers } = await super.fetchResponse(abortController);
+  ): Promise<{ headers: any; data: T }> {
+    const { data, headers } = await super.fetchResponse(abortController);
 
-    const wasmResult = response.data as unknown as
+    const wasmResult = data as unknown as
       | {
           data: any;
         }
@@ -80,12 +80,7 @@ export class ObservableCosmwasmContractChainQuery<
 
     return {
       headers,
-      response: {
-        data: wasmResult.data as T,
-        status: response.status,
-        staled: false,
-        timestamp: Date.now(),
-      },
+      data: wasmResult.data as T,
     };
   }
 }

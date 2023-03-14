@@ -33,9 +33,9 @@ export type QueryError<E> = {
 };
 
 export type QueryResponse<T> = {
-  status: number;
   data: T;
   staled: boolean;
+  local: boolean;
   timestamp: number;
 };
 
@@ -375,7 +375,11 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
             this.options.cacheMaxAge <= 0 ||
             staledResponse.timestamp > Date.now() - this.options.cacheMaxAge
           ) {
-            this.setResponse(staledResponse);
+            this.setResponse({
+              ...staledResponse,
+              staled: true,
+              local: true,
+            });
             return true;
           }
         }
@@ -392,14 +396,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
         if (res.status === "rejected") {
           console.warn("Failed to get the last response from disk.");
         } else {
-          let response = res.value;
-          if (response) {
-            response = {
-              ...response,
-              staled: true,
-            };
-          }
-          satisfyCache = handleStaledResponse(response);
+          satisfyCache = handleStaledResponse(res.value);
         }
       });
       if (this.options.cacheMaxAge <= 0) {
@@ -434,7 +431,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
 
     try {
       let hasStarted = false;
-      let { response, headers } = yield* toGenerator(
+      let { data, headers } = yield* toGenerator(
         this.queryCanceler.callOrCanceled(
           () => {
             hasStarted = true;
@@ -448,13 +445,13 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
         )
       );
       if (
-        response.data &&
-        typeof response.data === "string" &&
-        (response.data.startsWith("stream was reset:") ||
+        data &&
+        typeof data === "string" &&
+        (data.startsWith("stream was reset:") ||
           ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
-            response.data
+            data
           ) ||
-          ObservableQuery.guessResponseTruncated(headers, response.data))
+          ObservableQuery.guessResponseTruncated(headers, data))
       ) {
         // In some devices, it is a http ok code, but a strange response is sometimes returned.
         // It's not that they can't query at all, it seems that they get weird response from time to time.
@@ -487,25 +484,31 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
             }
           )
         );
-        response = refetched.response;
+        data = refetched.data;
         headers = refetched.headers;
 
-        if (response.data && typeof response.data === "string") {
+        if (data && typeof data === "string") {
           if (
-            response.data.startsWith("stream was reset:") ||
+            data.startsWith("stream was reset:") ||
             ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
-              response.data
+              data
             )
           ) {
-            throw new Error(response.data);
+            throw new Error(data);
           }
 
-          if (ObservableQuery.guessResponseTruncated(headers, response.data)) {
+          if (ObservableQuery.guessResponseTruncated(headers, data)) {
             throw new Error("The response data seems to be truncated");
           }
         }
       }
 
+      const response: QueryResponse<T> = {
+        data,
+        staled: false,
+        local: false,
+        timestamp: Date.now(),
+      };
       // Should not wait.
       this.saveResponse(response);
 
@@ -708,18 +711,13 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
 
   protected async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }> {
+  ): Promise<{ headers: any; data: T }> {
     const result = await simpleFetch<T>(this.baseURL, this.url, {
       signal: abortController.signal,
     });
     return {
       headers: result.headers,
-      response: {
-        data: result.data,
-        status: result.status,
-        staled: false,
-        timestamp: Date.now(),
-      },
+      data: result.data,
     };
   }
 
