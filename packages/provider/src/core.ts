@@ -19,9 +19,12 @@ import {
   SecretUtils,
   SettledResponses,
 } from "@keplr-wallet/types";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
-  EnableAccessMsg,
+  BACKGROUND_PORT,
+  MessageRequester,
+  sendSimpleMessage,
+} from "@keplr-wallet/router";
+import {
   SuggestChainInfoMsg,
   GetCosmosKeyMsg,
   SuggestTokenMsg,
@@ -67,9 +70,14 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       chainIds = [chainIds];
     }
 
-    await this.requester.sendMessage(
+    await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new EnableAccessMsg(chainIds)
+      "permission",
+      "enable-access",
+      {
+        chainIds,
+      }
     );
   }
 
