@@ -127,9 +127,9 @@ export function verifyADR36AminoSignDoc(
   }
 
   const cryptoPubKey = new PubKeySecp256k1(pubKey);
-  const expectedSigner = new Bech32Address(cryptoPubKey.getAddress()).toBech32(
-    bech32PrefixAccAddr
-  );
+  const expectedSigner = new Bech32Address(
+    cryptoPubKey.getCosmosAddress()
+  ).toBech32(bech32PrefixAccAddr);
   const signer = signDoc.msgs[0].value.signer;
   if (expectedSigner !== signer) {
     throw new Error("Unmatched signer");

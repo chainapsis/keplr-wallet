@@ -29,7 +29,7 @@ export class KeyRingCosmosService {
         return pubKey.getEthAddress();
       }
 
-      return pubKey.getAddress();
+      return pubKey.getCosmosAddress();
     })();
 
     const bech32Address = new Bech32Address(address);
