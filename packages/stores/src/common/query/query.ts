@@ -390,15 +390,16 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
 
       // When first load, try to load the last response from disk.
       // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
-      const promise = this.sharedContext.loadStore<
-        QueryResponse<T> | undefined
-      >(this.getCacheKey(), (res) => {
-        if (res.status === "rejected") {
-          console.warn("Failed to get the last response from disk.");
-        } else {
-          satisfyCache = handleStaledResponse(res.value);
+      const promise = this.sharedContext.loadStore<QueryResponse<T>>(
+        this.getCacheKey(),
+        (res) => {
+          if (res.status === "rejected") {
+            console.warn("Failed to get the last response from disk.");
+          } else {
+            satisfyCache = handleStaledResponse(res.value);
+          }
         }
-      });
+      );
       if (this.options.cacheMaxAge <= 0) {
         // To improve performance, don't wait the loading to proceed if cache age not set.
       } else {
@@ -426,8 +427,6 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
     }
 
     const abortController = new AbortController();
-
-    let fetchingProceedNext = false;
 
     try {
       let hasStarted = false;
@@ -516,8 +515,13 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
         this.setResponse(response);
         // Clear the error if fetching succeeds.
         this.setError(undefined);
+
+        // Do not use finally block.
+        // Because finally block is called after the next yield and it makes re-render.
+        this._isFetching = false;
       });
     } catch (e) {
+      let fetchingProceedNext = false;
       if (e instanceof FlowCancelerError) {
         // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues.
         if (e.message === "__fetching__proceed__next__") {
@@ -560,6 +564,12 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
 
         yield this.sharedContext.handleResponse(() => {
           this.setError(error);
+
+          // Do not use finally block.
+          // Because finally block is called after the next yield and it makes re-render.
+          if (!fetchingProceedNext) {
+            this._isFetching = false;
+          }
         });
       } else if (e.request) {
         // if can't get the response.
@@ -571,6 +581,12 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
 
         yield this.sharedContext.handleResponse(() => {
           this.setError(error);
+
+          // Do not use finally block.
+          // Because finally block is called after the next yield and it makes re-render.
+          if (!fetchingProceedNext) {
+            this._isFetching = false;
+          }
         });
       } else {
         const error: QueryError<E> = {
@@ -582,11 +598,13 @@ export abstract class ObservableQuery<T = unknown, E = unknown> {
 
         yield this.sharedContext.handleResponse(() => {
           this.setError(error);
+
+          // Do not use finally block.
+          // Because finally block is called after the next yield and it makes re-render.
+          if (!fetchingProceedNext) {
+            this._isFetching = false;
+          }
         });
-      }
-    } finally {
-      if (!fetchingProceedNext) {
-        this._isFetching = false;
       }
     }
   }
