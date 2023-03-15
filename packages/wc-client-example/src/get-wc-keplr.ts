@@ -35,6 +35,9 @@ async function sendTx(
     "/cosmos/tx/v1beta1/txs",
     {
       method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
       body: JSON.stringify(params),
     }
   );

@@ -28,6 +28,7 @@ import { MainPage } from "./pages/main";
 import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { PermissionPage } from "./pages/permission";
+import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -126,6 +127,11 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
              */}
             <Route path="/" element={<MainPage />} />
             <Route path="/permission" element={<PermissionPage />} />
+            <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
+            <Route
+              path="/sign-cosmos-adr36"
+              element={<SignCosmosADR36Page />}
+            />
           </Routes>
         )
       ) : (

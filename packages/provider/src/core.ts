@@ -29,13 +29,11 @@ import {
   SuggestTokenMsg,
   SendTxMsg,
   GetSecret20ViewingKey,
-  RequestSignAminoMsg,
   RequestSignDirectMsg,
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
-  RequestVerifyADR36AminoSignDoc,
   RequestSignEIP712CosmosTxMsg_v0,
   GetAnalyticsIdMsg,
   RequestICNSAdr36SignaturesMsg,
@@ -183,13 +181,18 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    const msg = new RequestSignAminoMsg(
-      chainId,
-      signer,
-      signDoc,
-      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-cosmos-sign-amino",
+      {
+        chainId,
+        signer,
+        signDoc,
+        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+      }
     );
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   async signDirect(
@@ -234,14 +237,20 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
-    let isADR36WithString: boolean;
-    [data, isADR36WithString] = this.getDataForADR36(data);
-    const signDoc = this.getADR36SignDoc(signer, data);
-
-    const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
-      isADR36WithString,
-    });
-    return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).signature;
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-cosmos-sign-amino-adr-36",
+      {
+        chainId,
+        signer,
+        data: typeof data === "string" ? Buffer.from(data) : data,
+        signOptions: {
+          isADR36WithString: typeof data === "string",
+        },
+      }
+    );
   }
 
   async verifyArbitrary(
@@ -254,33 +263,27 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       data = Buffer.from(data);
     }
 
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new RequestVerifyADR36AminoSignDoc(chainId, signer, data, signature)
+      "keyring-cosmos",
+      "verify-cosmos-sign-amino-adr-36",
+      {
+        chainId,
+        signer,
+        data,
+        signature,
+      }
     );
   }
 
   async signEthereum(
-    chainId: string,
-    signer: string,
-    data: string | Uint8Array,
-    type: EthSignType
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array,
+    _type: EthSignType
   ): Promise<Uint8Array> {
-    let isADR36WithString: boolean;
-    [data, isADR36WithString] = this.getDataForADR36(data);
-    const signDoc = this.getADR36SignDoc(signer, data);
-
-    if (data === "") {
-      throw new Error("Signing empty data is not supported.");
-    }
-
-    const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
-      isADR36WithString,
-      ethSignType: type,
-    });
-    const signature = (await this.requester.sendMessage(BACKGROUND_PORT, msg))
-      .signature;
-    return Buffer.from(signature.signature, "base64");
+    throw new Error("TODO");
   }
 
   signICNSAdr36(
@@ -411,39 +414,6 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       deepmerge(this.defaultOptions.sign ?? {}, signOptions)
     );
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
-  }
-
-  protected getDataForADR36(data: string | Uint8Array): [string, boolean] {
-    let isADR36WithString = false;
-    if (typeof data === "string") {
-      data = Buffer.from(data).toString("base64");
-      isADR36WithString = true;
-    } else {
-      data = Buffer.from(data).toString("base64");
-    }
-    return [data, isADR36WithString];
-  }
-
-  protected getADR36SignDoc(signer: string, data: string): StdSignDoc {
-    return {
-      chain_id: "",
-      account_number: "0",
-      sequence: "0",
-      fee: {
-        gas: "0",
-        amount: [],
-      },
-      msgs: [
-        {
-          type: "sign/MsgSignData",
-          value: {
-            signer,
-            data,
-          },
-        },
-      ],
-      memo: "",
-    };
   }
 
   __core__getAnalyticsId(): Promise<string> {

@@ -44,7 +44,7 @@ export class SignInteractionStore {
           signDocBytes: Uint8Array;
           signOptions: KeplrSignOptions;
         }
-    >("request-sign");
+    >("request-sign-cosmos");
   }
 
   @computed

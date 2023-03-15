@@ -5,7 +5,13 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { GetCosmosKeyMsg, GetCosmosKeysSettledMsg } from "./messages";
+import {
+  GetCosmosKeyMsg,
+  GetCosmosKeysSettledMsg,
+  RequestCosmosSignAminoMsg,
+  RequestCosmosSignAminoADR36Msg,
+  VerifyCosmosSignAminoADR36Msg,
+} from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
 
@@ -28,6 +34,21 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as GetCosmosKeysSettledMsg);
+      case RequestCosmosSignAminoMsg:
+        return handleRequestCosmosSignAminoMsg(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestCosmosSignAminoMsg);
+      case RequestCosmosSignAminoADR36Msg:
+        return handleRequestCosmosSignAminoADR36Msg(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestCosmosSignAminoADR36Msg);
+      case VerifyCosmosSignAminoADR36Msg:
+        return handleVerifyCosmosSignAminoADR36Msg(
+          service,
+          permissionInteractionService
+        )(env, msg as VerifyCosmosSignAminoADR36Msg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -68,6 +89,82 @@ const handleGetCosmosKeysSettledMsg: (
 
     return await Promise.allSettled(
       msg.chainIds.map((chainId) => service.getKeySelected(env, chainId))
+    );
+  };
+};
+
+const handleRequestCosmosSignAminoMsg: (
+  service: KeyRingCosmosService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestCosmosSignAminoMsg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    return await service.signAminoSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc,
+      msg.signOptions
+    );
+  };
+};
+
+const handleRequestCosmosSignAminoADR36Msg: (
+  service: KeyRingCosmosService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestCosmosSignAminoADR36Msg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    return (
+      await service.signAminoADR36Selected(
+        env,
+        msg.origin,
+        msg.chainId,
+        msg.signer,
+        msg.data,
+        msg.signOptions
+      )
+    ).signature;
+  };
+};
+
+const handleVerifyCosmosSignAminoADR36Msg: (
+  service: KeyRingCosmosService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<VerifyCosmosSignAminoADR36Msg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    return await service.verifyAminoADR36Selected(
+      env,
+      msg.chainId,
+      msg.signer,
+      msg.data,
+      msg.signature
     );
   };
 };
