@@ -1169,4 +1169,90 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when the features has cosmwasm and secretwasm at the same time");
   });
+
+  it("test token currencies in chain info", async () => {
+    const generatePlainChainInfo = (): Mutable<ChainInfo> => {
+      return {
+        rpc: "http://test.com",
+        rest: "http://test.com",
+        chainId: "test-1",
+        chainName: "Test",
+        stakeCurrency: {
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6,
+        },
+        bip44: {
+          coinType: 118,
+        },
+        bech32Config: {
+          bech32PrefixAccAddr: "test",
+          bech32PrefixAccPub: "test",
+          bech32PrefixValAddr: "test",
+          bech32PrefixValPub: "test",
+          bech32PrefixConsAddr: "test",
+          bech32PrefixConsPub: "test",
+        },
+        currencies: [
+          {
+            coinDenom: "TEST",
+            coinMinimalDenom: "utest",
+            coinDecimals: 6,
+          },
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: "TEST",
+            coinMinimalDenom: "utest",
+            coinDecimals: 6,
+            gasPriceStep: {
+              low: 0.1,
+              average: 0.2,
+              high: 0.3,
+            },
+          },
+        ],
+        chainSymbolImageUrl: "https://test.com/image.png",
+      };
+    };
+
+    const chainInfo = generatePlainChainInfo();
+    const currencies = [
+      {
+        coinDenom: "EVMOS",
+        coinMinimalDenom: "aevmos",
+        coinDecimals: 18,
+        coinGeckoId: "evmos",
+      },
+      {
+        coinDenom: "WEVMOS",
+        coinMinimalDenom:
+          "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:WEVMOS",
+        coinDecimals: 18,
+        type: "erc20",
+        contractAddress: "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/evmos/images/evmos.png",
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "erc20:0xC5e00D3b04563950941f7137B5AfA3a534F0D6d6:ATOM",
+        coinDecimals: 6,
+        type: "erc20",
+        contractAddress: "0xC5e00D3b04563950941f7137B5AfA3a534F0D6d6",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.png",
+      },
+    ];
+    chainInfo["currencies"] = currencies;
+    let r = await ChainInfoSchema.validateAsync(chainInfo, {
+      stripUnknown: true,
+    });
+    expect(r.currencies).toStrictEqual(currencies);
+    r = await ChainInfoSchema.validateAsync(chainInfo, {
+      stripUnknown: false,
+    });
+    expect(r.currencies).toStrictEqual(currencies);
+  });
 });
