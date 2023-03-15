@@ -120,6 +120,11 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           <Routes>
             {/* TODO: Add routes here */}
             <Route path="/" element={<MainPage />} />
+            {/*
+                XXX: There is no need to register unlock page even though permission interaction service
+                     interacts with "/unlock" url because it can be handled by above `keyRingStore.status === "locked"" case.
+                <Route path="/unlock" element={<UnlockPage />} />
+               */}
           </Routes>
         )
       ) : (

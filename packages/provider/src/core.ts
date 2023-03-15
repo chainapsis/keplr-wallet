@@ -41,7 +41,6 @@ import {
   GetAnalyticsIdMsg,
   RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
-  DisableAccessMsg,
   ChangeKeyRingNameMsg,
   GetCosmosKeysSettledMsg,
 } from "./types";
@@ -73,7 +72,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     await sendSimpleMessage(
       this.requester,
       BACKGROUND_PORT,
-      "permission",
+      "permission-interactive",
       "enable-access",
       {
         chainIds,
@@ -86,9 +85,14 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       chainIds = [chainIds];
     }
 
-    await this.requester.sendMessage(
+    await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new DisableAccessMsg(chainIds ?? [])
+      "permission-interactive",
+      "disable-access",
+      {
+        chainIds,
+      }
     );
   }
 

@@ -62,7 +62,7 @@ export class RootStore {
   public readonly keyRingStore: KeyRingStore;
   public readonly ibcChannelStore: IBCChannelStore;
 
-  protected readonly interactionStore: InteractionStore;
+  public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
   public readonly generalPermissionStore: GeneralPermissionStore;
   public readonly signInteractionStore: SignInteractionStore;

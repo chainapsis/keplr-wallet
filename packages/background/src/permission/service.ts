@@ -102,25 +102,6 @@ export class PermissionService {
     this.checkBasicAccessPermission(env, chainIds, origin);
   }
 
-  disable(chainIds: string | string[], origin: string) {
-    // Delete permissions granted to origin.
-    // If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).
-    // Else, remove all permissions granted to origin (In this case, permissions that are not assigned to each chain, such as getChainInfosWithoutEndpoints(), are also deleted).
-
-    if (typeof chainIds === "string") {
-      chainIds = [chainIds];
-    }
-
-    if (chainIds.length > 0) {
-      for (const chainId of chainIds) {
-        this.removeAllTypePermissionToChainId(chainId, [origin]);
-      }
-    } else {
-      this.removeAllTypePermission([origin]);
-      this.removeAllTypeGlobalPermission([origin]);
-    }
-  }
-
   async checkOrGrantPermission(
     env: Env,
     url: string,
@@ -241,6 +222,10 @@ export class PermissionService {
   }
 
   checkBasicAccessPermission(env: Env, chainIds: string[], origin: string) {
+    if (chainIds.length === 0) {
+      throw new Error("Chain ids are empty");
+    }
+
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
       this.chainsService.getChainInfoOrThrow(chainId);
@@ -252,6 +237,32 @@ export class PermissionService {
         origin
       );
     }
+  }
+
+  hasBasicAccessPermission(
+    env: Env,
+    chainIds: string[],
+    origin: string
+  ): boolean {
+    if (chainIds.length === 0) {
+      throw new Error("Chain ids are empty");
+    }
+
+    if (env.isInternalMsg) {
+      return true;
+    }
+
+    for (const chainId of chainIds) {
+      // Make sure that the chain info is registered.
+      this.chainsService.getChainInfoOrThrow(chainId);
+
+      if (
+        !this.hasPermission(chainId, getBasicAccessPermissionType(), origin)
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   checkGlobalPermission(env: Env, type: string, origin: string) {

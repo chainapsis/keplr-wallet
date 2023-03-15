@@ -11,54 +11,6 @@ import {
   SettledResponses,
 } from "@keplr-wallet/types";
 
-export class EnableAccessMsg extends Message<void> {
-  public static type() {
-    return "enable-access";
-  }
-
-  constructor(public readonly chainIds: string[]) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainIds || this.chainIds.length === 0) {
-      throw new Error("chain id not set");
-    }
-  }
-
-  route(): string {
-    return "permission";
-  }
-
-  type(): string {
-    return EnableAccessMsg.type();
-  }
-}
-
-export class DisableAccessMsg extends Message<void> {
-  public static type() {
-    return "disable-access";
-  }
-
-  constructor(public readonly chainIds: string[]) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainIds) {
-      throw new Error("chain id not set");
-    }
-  }
-
-  route(): string {
-    return "permission";
-  }
-
-  type(): string {
-    return DisableAccessMsg.type();
-  }
-}
-
 export class GetCosmosKeyMsg extends Message<Key> {
   public static type() {
     return "get-cosmos-key";

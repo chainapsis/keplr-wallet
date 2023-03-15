@@ -6,6 +6,7 @@ import { ChainsService } from "../chains";
 import { autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { InteractionService } from "../interaction";
 
 export class KeyRingService {
   @observable
@@ -14,6 +15,7 @@ export class KeyRingService {
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
+    protected readonly interactionService: InteractionService,
     protected readonly vaultService: VaultService,
     protected readonly keyRings: KeyRing[]
   ) {
@@ -43,8 +45,15 @@ export class KeyRingService {
     this.vaultService.lock();
   }
 
-  async ensureUnlockInteractive(_: Env): Promise<void> {
-    throw new Error("TODO");
+  async ensureUnlockInteractive(
+    env: Env,
+    remainUIAfterInteraction: boolean = false
+  ): Promise<void> {
+    if (this.vaultService.isLocked) {
+      await this.interactionService.waitApprove(env, "/unlock", "unlock", {
+        remainUIAfterInteraction,
+      });
+    }
   }
 
   async unlockKeyRing(password: string): Promise<void> {
