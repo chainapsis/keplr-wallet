@@ -26,7 +26,6 @@ import {
 } from "@keplr-wallet/router";
 import {
   SuggestChainInfoMsg,
-  GetCosmosKeyMsg,
   SuggestTokenMsg,
   SendTxMsg,
   GetSecret20ViewingKey,
@@ -42,7 +41,6 @@ import {
   RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
   ChangeKeyRingNameMsg,
-  GetCosmosKeysSettledMsg,
 } from "./types";
 
 import { KeplrEnigmaUtils } from "./enigma";
@@ -91,7 +89,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       "permission-interactive",
       "disable-access",
       {
-        chainIds,
+        chainIds: chainIds ?? [],
       }
     );
   }
@@ -142,13 +140,27 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const msg = new GetCosmosKeyMsg(chainId);
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "get-cosmos-key",
+      {
+        chainId,
+      }
+    );
   }
 
   async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
-    const msg = new GetCosmosKeysSettledMsg(chainIds);
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "get-cosmos-keys-settled",
+      {
+        chainIds,
+      }
+    );
   }
 
   async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
