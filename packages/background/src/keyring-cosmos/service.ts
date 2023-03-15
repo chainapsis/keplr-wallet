@@ -23,9 +23,9 @@ export class KeyRingCosmosService {
 
     const pubKey = await this.keyRingService.getPubKey(env, chainId, vaultId);
 
-    const ethereumFeatures = this.getChainEthereumKeyFeatures(chainInfo);
+    const isEthermintLike = this.isEthermintLike(chainInfo);
     const address = (() => {
-      if (ethereumFeatures.address) {
+      if (isEthermintLike) {
         return pubKey.getEthAddress();
       }
 
@@ -36,7 +36,7 @@ export class KeyRingCosmosService {
 
     return {
       name: this.keyRingService.getKeyRingNameSelected(),
-      algo: ethereumFeatures.address ? "ethsecp256k1" : "secp256k1",
+      algo: isEthermintLike ? "ethsecp256k1" : "secp256k1",
       // TODO: Not sure we should return uncompressed pub key if ethermint.
       pubKey: pubKey.toBytes(),
       address,
@@ -49,13 +49,11 @@ export class KeyRingCosmosService {
     };
   }
 
-  protected getChainEthereumKeyFeatures(chainInfo: ChainInfo): {
-    address: boolean;
-    signing: boolean;
-  } {
-    return {
-      address: chainInfo.features?.includes("eth-address-gen") ?? false,
-      signing: chainInfo.features?.includes("eth-key-sign") ?? false,
-    };
+  protected isEthermintLike(chainInfo: ChainInfo): boolean {
+    return (
+      chainInfo.bip44.coinType === 60 ||
+      !!chainInfo.features?.includes("eth-address-gen") ||
+      !!chainInfo.features?.includes("eth-key-sign")
+    );
   }
 }

@@ -152,7 +152,11 @@ export function init(
   AutoLocker.init(router, autoLockAccountService);
   Analytics.init(router, analyticsService);
   KeyRingV2.init(router, keyRingV2Service);
-  KeyRingCosmos.init(router, keyRingCosmosService);
+  KeyRingCosmos.init(
+    router,
+    keyRingCosmosService,
+    permissionInteractiveService
+  );
   PermissionInteractive.init(router, permissionInteractiveService);
 
   return {

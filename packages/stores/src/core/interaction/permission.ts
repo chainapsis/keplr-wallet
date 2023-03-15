@@ -1,402 +1,67 @@
 import { InteractionStore } from "./interaction";
 import {
-  getBasicAccessPermissionType,
-  GetPermissionOriginsMsg,
-  INTERACTION_TYPE_PERMISSION,
-  isBasicAccessPermissionType,
-  PermissionData,
-  RemovePermissionOrigin,
-  isSecret20ViewingKeyPermissionType,
-  splitSecret20ViewingKeyPermissionType,
-  getSecret20ViewingKeyPermissionType,
-  AddPermissionOrigin,
-  GetOriginPermittedChainsMsg,
   GlobalPermissionData,
   INTERACTION_TYPE_GLOBAL_PERMISSION,
+  INTERACTION_TYPE_PERMISSION,
+  PermissionData,
 } from "@keplr-wallet/background";
-import { computed, flow, makeObservable, observable } from "mobx";
-import { HasMapStore } from "../../common";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import { toGenerator } from "@keplr-wallet/common";
+import { MessageRequester } from "@keplr-wallet/router";
 
-export class Secret20ViewingKeyPermissionInnerStore {
-  @observable.ref
-  protected _origins: string[] = [];
-
-  constructor(
-    protected readonly chainId: string,
-    protected readonly contractAddress: string,
-    protected readonly requester: MessageRequester
-  ) {
-    makeObservable(this);
-
-    this.refreshOrigins();
-  }
-
-  get origins(): string[] {
-    return this._origins;
-  }
-
-  @flow
-  *removeOrigin(origin: string) {
-    yield this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new RemovePermissionOrigin(
-        this.chainId,
-        getSecret20ViewingKeyPermissionType(this.contractAddress),
-        origin
-      )
-    );
-    yield this.refreshOrigins();
-  }
-
-  @flow
-  protected *refreshOrigins() {
-    this._origins = yield* toGenerator(
-      this.requester.sendMessage(
-        BACKGROUND_PORT,
-        new GetPermissionOriginsMsg(
-          this.chainId,
-          getSecret20ViewingKeyPermissionType(this.contractAddress)
-        )
-      )
-    );
-  }
-}
-
-export class BasicAccessPermissionInnerStore {
-  @observable.ref
-  protected _origins: string[] = [];
-
-  constructor(
-    protected readonly chainId: string,
-    protected readonly requester: MessageRequester
-  ) {
-    makeObservable(this);
-
-    this.refreshOrigins();
-  }
-
-  get origins(): string[] {
-    return this._origins;
-  }
-
-  @flow
-  *addOrigin(origin: string) {
-    yield this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new AddPermissionOrigin(
-        this.chainId,
-        getBasicAccessPermissionType(),
-        origin
-      )
-    );
-    yield this.refreshOrigins();
-  }
-
-  @flow
-  *removeOrigin(origin: string) {
-    yield this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new RemovePermissionOrigin(
-        this.chainId,
-        getBasicAccessPermissionType(),
-        origin
-      )
-    );
-    yield this.refreshOrigins();
-  }
-
-  @flow
-  protected *refreshOrigins() {
-    this._origins = yield* toGenerator(
-      this.requester.sendMessage(
-        BACKGROUND_PORT,
-        new GetPermissionOriginsMsg(
-          this.chainId,
-          getBasicAccessPermissionType()
-        )
-      )
-    );
-  }
-}
-
-interface MapKeyData {
-  type: "basicAccess" | "viewingKey";
-  chainId: string;
-  contractAddress: string;
-}
-
-// TODO: Replace this with GeneralPermissionStore
-export class PermissionStore extends HasMapStore<
-  BasicAccessPermissionInnerStore | Secret20ViewingKeyPermissionInnerStore
-> {
-  @observable
-  protected _isLoading: boolean = false;
-
+export class PermissionStore {
   constructor(
     protected readonly interactionStore: InteractionStore,
     protected readonly requester: MessageRequester
-  ) {
-    super((key: string) => {
-      const data = JSON.parse(key) as MapKeyData;
-      if (data.type === "basicAccess") {
-        return new BasicAccessPermissionInnerStore(
-          data.chainId,
-          this.requester
-        );
-      } else {
-        return new Secret20ViewingKeyPermissionInnerStore(
-          data.chainId,
-          data.contractAddress,
-          this.requester
-        );
-      }
-    });
-    makeObservable(this);
-  }
+  ) {}
 
-  getBasicAccessInfo(chainId: string): BasicAccessPermissionInnerStore {
-    const key = JSON.stringify({
-      type: "basicAccess",
-      chainId,
-      contractAddress: "",
-    });
-    return this.get(key) as BasicAccessPermissionInnerStore;
-  }
-
-  async getOriginPermittedChains(
-    origin: string,
-    type: string
-  ): Promise<string[]> {
-    return await this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new GetOriginPermittedChainsMsg(origin, type)
-    );
-  }
-
-  getSecret20ViewingKeyAccessInfo(
-    chainId: string,
-    contractAddress: string
-  ): Secret20ViewingKeyPermissionInnerStore {
-    const key = JSON.stringify({
-      type: "viewingKey",
-      chainId,
-      contractAddress,
-    });
-    return this.get(key) as Secret20ViewingKeyPermissionInnerStore;
-  }
-
-  @computed
-  get waitingBasicAccessPermissions(): {
-    id: string;
-    data: {
-      chainIds: string[];
-      origins: string[];
-    };
-  }[] {
-    const datas = this.waitingDatas;
-
-    const result = [];
-    for (const data of datas) {
-      if (isBasicAccessPermissionType(data.data.type)) {
-        result.push({
-          id: data.id,
-          data: {
-            chainIds: data.data.chainIds,
-            origins: data.data.origins,
-          },
-        });
-      }
+  get waitingPermissionData() {
+    if (this.waitingPermissionDatas.length > 0) {
+      return this.waitingPermissionDatas[0];
     }
-
-    return result;
   }
 
-  @computed
-  get waitingSecret20ViewingKeyAccessPermissions(): {
-    id: string;
-    data: {
-      chainIds: string[];
-      contractAddress: string;
-      origins: string[];
-    };
-  }[] {
-    const datas = this.waitingDatas;
-
-    const result = [];
-    for (const data of datas) {
-      if (isSecret20ViewingKeyPermissionType(data.data.type)) {
-        result.push({
-          id: data.id,
-          data: {
-            chainIds: data.data.chainIds,
-            contractAddress: splitSecret20ViewingKeyPermissionType(
-              data.data.type
-            ),
-            origins: data.data.origins,
-          },
-        });
-      }
-    }
-
-    return result;
-  }
-
-  get waitingDatas() {
+  get waitingPermissionDatas() {
     return this.interactionStore.getDatas<PermissionData>(
       INTERACTION_TYPE_PERMISSION
     );
   }
 
-  @flow
-  *approve(id: string) {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
-    } finally {
-      this._isLoading = false;
+  get waitingGlobalPermissionData() {
+    if (this.waitingGlobalPermissionDatas.length > 0) {
+      return this.waitingGlobalPermissionDatas[0];
     }
   }
 
-  @flow
-  *reject(id: string) {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.reject(INTERACTION_TYPE_PERMISSION, id);
-    } finally {
-      this._isLoading = false;
-    }
-  }
-
-  @flow
-  *rejectAll() {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.rejectAll(INTERACTION_TYPE_PERMISSION);
-    } finally {
-      this._isLoading = false;
-    }
-  }
-
-  get isLoading(): boolean {
-    return this._isLoading;
-  }
-}
-
-export class GeneralPermissionStore {
-  @observable
-  protected _isLoading: boolean = false;
-
-  constructor(
-    protected readonly interactionStore: InteractionStore,
-    protected readonly requester: MessageRequester
-  ) {
-    makeObservable(this);
-  }
-
-  async getOriginPermittedChains(
-    origin: string,
-    type: string
-  ): Promise<string[]> {
-    return await this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new GetOriginPermittedChainsMsg(origin, type)
-    );
-  }
-
-  get allWaitingPermissions() {
-    return this.interactionStore.getDatas<PermissionData>(
-      INTERACTION_TYPE_PERMISSION
-    );
-  }
-
-  get allWaitingGlobalPermissions() {
+  get waitingGlobalPermissionDatas() {
     return this.interactionStore.getDatas<GlobalPermissionData>(
       INTERACTION_TYPE_GLOBAL_PERMISSION
     );
   }
 
-  getWaitingGlobalPermissions(type: string) {
-    return this.interactionStore
-      .getDatas<PermissionData>(INTERACTION_TYPE_GLOBAL_PERMISSION)
-      .filter((data) => data.data.type === type);
+  async approvePermission(id: string) {
+    await this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
   }
 
-  getWaitingPermissions(type: string) {
-    return this.interactionStore
-      .getDatas<PermissionData>(INTERACTION_TYPE_PERMISSION)
-      .filter((data) => data.data.type === type);
+  async rejectPermission(id: string) {
+    await this.interactionStore.reject(INTERACTION_TYPE_PERMISSION, id);
   }
 
-  @flow
-  *approvePermission(id: string) {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
-    } finally {
-      this._isLoading = false;
-    }
+  async rejectPermissionAll() {
+    await this.interactionStore.rejectAll(INTERACTION_TYPE_PERMISSION);
   }
 
-  @flow
-  *rejectPermission(id: string) {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.reject(INTERACTION_TYPE_PERMISSION, id);
-    } finally {
-      this._isLoading = false;
-    }
+  async approveGlobalPermission(id: string) {
+    await this.interactionStore.approve(
+      INTERACTION_TYPE_GLOBAL_PERMISSION,
+      id,
+      {}
+    );
   }
 
-  @flow
-  *rejectAllPermission() {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.rejectAll(INTERACTION_TYPE_PERMISSION);
-    } finally {
-      this._isLoading = false;
-    }
+  async rejectGlobalPermission(id: string) {
+    await this.interactionStore.reject(INTERACTION_TYPE_GLOBAL_PERMISSION, id);
   }
 
-  @flow
-  *approveGlobalPermission(id: string) {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.approve(
-        INTERACTION_TYPE_GLOBAL_PERMISSION,
-        id,
-        {}
-      );
-    } finally {
-      this._isLoading = false;
-    }
-  }
-
-  @flow
-  *rejectGlobalPermission(id: string) {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.reject(
-        INTERACTION_TYPE_GLOBAL_PERMISSION,
-        id
-      );
-    } finally {
-      this._isLoading = false;
-    }
-  }
-
-  @flow
-  *rejectAllGlobalPermission() {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.rejectAll(INTERACTION_TYPE_GLOBAL_PERMISSION);
-    } finally {
-      this._isLoading = false;
-    }
-  }
-
-  get isLoading(): boolean {
-    return this._isLoading;
+  async rejectGlobalPermissionAll() {
+    await this.interactionStore.rejectAll(INTERACTION_TYPE_GLOBAL_PERMISSION);
   }
 }

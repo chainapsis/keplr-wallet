@@ -27,6 +27,7 @@ import { UnlockPage } from "./pages/unlock";
 import { MainPage } from "./pages/main";
 import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { PermissionPage } from "./pages/permission";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -118,13 +119,13 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           <UnlockPage />
         ) : (
           <Routes>
-            {/* TODO: Add routes here */}
-            <Route path="/" element={<MainPage />} />
             {/*
-                XXX: There is no need to register unlock page even though permission interaction service
-                     interacts with "/unlock" url because it can be handled by above `keyRingStore.status === "locked"" case.
-                <Route path="/unlock" element={<UnlockPage />} />
-               */}
+              XXX: There is no need to register unlock page even though permission interaction service
+                   interacts with "/unlock" url because it can be handled by above `keyRingStore.status === "locked"" case.
+              <Route path="/unlock" element={<UnlockPage />} />
+             */}
+            <Route path="/" element={<MainPage />} />
+            <Route path="/permission" element={<PermissionPage />} />
           </Routes>
         )
       ) : (
