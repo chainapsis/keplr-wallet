@@ -6,7 +6,7 @@ import {
   MessageRequester,
 } from "@keplr-wallet/router";
 import { PushEventDataMsg, PushInteractionDataMsg } from "./foreground";
-import { RNG } from "@keplr-wallet/crypto";
+import { Buffer } from "buffer/";
 
 export class InteractionService {
   protected waitingMap: Map<string, InteractionWaitingData> = new Map();
@@ -15,10 +15,7 @@ export class InteractionService {
     { onApprove: (result: unknown) => void; onReject: (e: Error) => void }
   > = new Map();
 
-  constructor(
-    protected readonly eventMsgRequester: MessageRequester,
-    protected readonly rng: RNG
-  ) {}
+  constructor(protected readonly eventMsgRequester: MessageRequester) {}
 
   init() {
     // noop
@@ -46,14 +43,14 @@ export class InteractionService {
     url: string,
     type: string,
     data: unknown,
-    options?: FnRequestInteractionOptions
+    options?: Omit<FnRequestInteractionOptions, "unstableOnClose">
   ): Promise<unknown> {
     if (!type) {
       throw new KeplrError("interaction", 101, "Type should not be empty");
     }
 
     // TODO: Add timeout?
-    const interactionWaitingData = await this.addDataToMap(
+    const interactionWaitingData = this.addDataToMap(
       type,
       env.isInternalMsg,
       data
@@ -61,12 +58,16 @@ export class InteractionService {
 
     const msg = new PushInteractionDataMsg(interactionWaitingData);
 
-    return await this.wait(msg.data.id, () => {
-      env.requestInteraction(url, msg, options);
-    });
+    return await this.wait(env, url, msg, options);
   }
 
-  protected async wait(id: string, fn: () => void): Promise<unknown> {
+  protected async wait(
+    env: Env,
+    url: string,
+    msg: PushInteractionDataMsg,
+    options?: Omit<FnRequestInteractionOptions, "unstableOnClose">
+  ): Promise<unknown> {
+    const id = msg.data.id;
     if (this.resolverMap.has(id)) {
       throw new KeplrError("interaction", 100, "Id is aleady in use");
     }
@@ -77,7 +78,12 @@ export class InteractionService {
         onReject: reject,
       });
 
-      fn();
+      env.requestInteraction(url, msg, {
+        ...options,
+        unstableOnClose: () => {
+          this.reject(id);
+        },
+      });
     });
   }
 
@@ -101,21 +107,14 @@ export class InteractionService {
     this.removeDataFromMap(id);
   }
 
-  protected async addDataToMap(
+  protected addDataToMap(
     type: string,
     isInternal: boolean,
     data: unknown
-  ): Promise<InteractionWaitingData> {
+  ): InteractionWaitingData {
     const bytes = new Uint8Array(12);
-    const id: string = Array.from(await this.rng(bytes))
-      .map((value) => {
-        let v = value.toString(16);
-        if (v.length === 1) {
-          v = "0" + v;
-        }
-        return v;
-      })
-      .join("");
+    crypto.getRandomValues(bytes);
+    const id = Buffer.from(bytes).toString("hex");
 
     const interactionWaitingData: InteractionWaitingData = {
       id,
