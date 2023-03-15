@@ -14,12 +14,18 @@ import { SupportedChainFeatures } from "./feature";
 
 import Joi, { ObjectSchema } from "joi";
 
-export const CurrencySchema = Joi.object<Currency>({
+export const CurrencySchema = Joi.object<
+  Currency & {
+    type?: undefined;
+  }
+>({
   coinDenom: Joi.string().required(),
   coinMinimalDenom: Joi.string().required(),
   coinDecimals: Joi.number().strict().integer().min(0).max(18).required(),
   coinGeckoId: Joi.string(),
   coinImageUrl: Joi.string().uri(),
+}).keys({
+  type: Joi.forbidden(),
 });
 
 export const CW20CurrencySchema = (CurrencySchema as ObjectSchema<CW20Currency>)
