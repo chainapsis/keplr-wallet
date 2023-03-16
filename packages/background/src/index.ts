@@ -16,6 +16,7 @@ import * as Vault from "./vault/internal";
 import * as KeyRingV2 from "./keyring-v2/internal";
 import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
+import * as PermissionInteractive from "./permission-interactive/internal";
 
 export * from "./chains";
 export * from "./ledger";
@@ -29,6 +30,7 @@ export * from "./permission";
 export * from "./phishing-list";
 export * from "./auto-lock-account";
 export * from "./analytics";
+export * from "./permission-interactive";
 export * as KeyRingV2 from "./keyring-v2";
 export * from "./vault";
 export * from "./keyring-cosmos";
@@ -60,8 +62,7 @@ export function init(
   initFn: () => Promise<void>;
 } {
   const interactionService = new Interaction.InteractionService(
-    eventMsgRequester,
-    commonCrypto.rng
+    eventMsgRequester
   );
 
   const tokensService = new Tokens.TokensService(storeCreator("tokens"));
@@ -121,20 +122,27 @@ export function init(
   const keyRingV2Service = new KeyRingV2.KeyRingService(
     storeCreator("keyring-v2"),
     chainsService,
+    interactionService,
     vaultService,
     [new KeyRingMnemonic.KeyRingMnemonicService(vaultService)]
   );
   const keyRingCosmosService = new KeyRingCosmos.KeyRingCosmosService(
     chainsService,
-    keyRingV2Service
+    keyRingV2Service,
+    interactionService
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
     keyRingV2Service
   );
+  const permissionInteractiveService =
+    new PermissionInteractive.PermissionInteractiveService(
+      permissionService,
+      keyRingV2Service
+    );
 
   Interaction.init(router, interactionService);
-  Permission.init(router, permissionService, keyRingV2Service);
+  Permission.init(router, permissionService);
   Tokens.init(router, tokensService);
   Chains.init(router, chainsService);
   Ledger.init(router, ledgerService);
@@ -145,7 +153,12 @@ export function init(
   AutoLocker.init(router, autoLockAccountService);
   Analytics.init(router, analyticsService);
   KeyRingV2.init(router, keyRingV2Service);
-  KeyRingCosmos.init(router, keyRingCosmosService);
+  KeyRingCosmos.init(
+    router,
+    keyRingCosmosService,
+    permissionInteractiveService
+  );
+  PermissionInteractive.init(router, permissionInteractiveService);
 
   return {
     initFn: async () => {
@@ -176,6 +189,7 @@ export function init(
       await autoLockAccountService.init();
       // No need to wait because user can't interact with app right after launch.
       await analyticsService.init();
+      await permissionInteractiveService.init();
     },
   };
 }

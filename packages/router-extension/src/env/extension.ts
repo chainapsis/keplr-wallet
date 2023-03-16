@@ -99,6 +99,18 @@ export class ExtensionEnv {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const tabId = window.tabs![0].id!;
 
+      if (tabId && options?.unstableOnClose) {
+        const listener = (_tabId: number) => {
+          if (tabId === _tabId) {
+            if (options?.unstableOnClose) {
+              options.unstableOnClose();
+            }
+            browser.tabs.onRemoved.removeListener(listener);
+          }
+        };
+        browser.tabs.onRemoved.addListener(listener);
+      }
+
       // Wait until that tab is loaded
       await (async () => {
         const tab = await browser.tabs.get(tabId);

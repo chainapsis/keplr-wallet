@@ -1,129 +1,12 @@
 import { Message } from "@keplr-wallet/router";
 import {
   ChainInfo,
-  EthSignType,
   KeplrSignOptions,
-  Key,
   AminoSignResponse,
   StdSignature,
   StdSignDoc,
   ChainInfoWithoutEndpoints,
-  SettledResponses,
 } from "@keplr-wallet/types";
-
-export class EnableAccessMsg extends Message<void> {
-  public static type() {
-    return "enable-access";
-  }
-
-  constructor(public readonly chainIds: string[]) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainIds || this.chainIds.length === 0) {
-      throw new Error("chain id not set");
-    }
-  }
-
-  route(): string {
-    return "permission";
-  }
-
-  type(): string {
-    return EnableAccessMsg.type();
-  }
-}
-
-export class DisableAccessMsg extends Message<void> {
-  public static type() {
-    return "disable-access";
-  }
-
-  constructor(public readonly chainIds: string[]) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainIds) {
-      throw new Error("chain id not set");
-    }
-  }
-
-  route(): string {
-    return "permission";
-  }
-
-  type(): string {
-    return DisableAccessMsg.type();
-  }
-}
-
-export class GetCosmosKeyMsg extends Message<Key> {
-  public static type() {
-    return "get-cosmos-key";
-  }
-
-  constructor(public readonly chainId: string) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chainId is not set");
-    }
-  }
-
-  override approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return "keyring-cosmos";
-  }
-
-  type(): string {
-    return GetCosmosKeyMsg.type();
-  }
-}
-
-export class GetCosmosKeysSettledMsg extends Message<SettledResponses<Key>> {
-  public static type() {
-    return "get-cosmos-keys-settled";
-  }
-
-  constructor(public readonly chainIds: string[]) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainIds || this.chainIds.length === 0) {
-      throw new Error("chainIds are not set");
-    }
-
-    const seen = new Map<string, boolean>();
-
-    for (const chainId of this.chainIds) {
-      if (seen.get(chainId)) {
-        throw new Error(`chainId ${chainId} is duplicated`);
-      }
-
-      seen.set(chainId, true);
-    }
-  }
-
-  override approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return "keyring-cosmos";
-  }
-
-  type(): string {
-    return GetCosmosKeysSettledMsg.type();
-  }
-}
 
 export class SuggestChainInfoMsg extends Message<void> {
   public static type() {
@@ -252,77 +135,6 @@ export class GetSecret20ViewingKey extends Message<string> {
   }
 }
 
-export class RequestSignAminoMsg extends Message<AminoSignResponse> {
-  public static type() {
-    return "request-sign-amino";
-  }
-
-  constructor(
-    public readonly chainId: string,
-    public readonly signer: string,
-    public readonly signDoc: StdSignDoc,
-    public readonly signOptions: KeplrSignOptions & {
-      // Hack option field to detect the sign arbitrary for string
-      isADR36WithString?: boolean;
-      ethSignType?: EthSignType;
-    } = {}
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id not set");
-    }
-
-    if (!this.signer) {
-      throw new Error("signer not set");
-    }
-
-    // It is not important to check this on the client side as opposed to increasing the bundle size.
-    // Validate bech32 address.
-    // Bech32Address.validate(this.signer);
-
-    const signDoc = this.signDoc;
-
-    // Check that the sign doc is for ADR-36,
-    // the validation should be performed on the background.
-    const hasOnlyMsgSignData = (() => {
-      if (
-        signDoc &&
-        signDoc.msgs &&
-        Array.isArray(signDoc.msgs) &&
-        signDoc.msgs.length === 1
-      ) {
-        const msg = signDoc.msgs[0];
-        return msg.type === "sign/MsgSignData";
-      } else {
-        return false;
-      }
-    })();
-
-    // If the sign doc is expected to be for ADR-36,
-    // it doesn't have to have the chain id in the sign doc.
-    if (!hasOnlyMsgSignData && signDoc.chain_id !== this.chainId) {
-      throw new Error(
-        "Chain id in the message is not matched with the requested chain id"
-      );
-    }
-
-    if (!this.signOptions) {
-      throw new Error("Sign options are null");
-    }
-  }
-
-  route(): string {
-    return "keyring";
-  }
-
-  type(): string {
-    return RequestSignAminoMsg.type();
-  }
-}
-
 export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> {
   public static type() {
     return "request-sign-eip-712-cosmos-tx-v0";
@@ -435,47 +247,6 @@ export class RequestICNSAdr36SignaturesMsg extends Message<
 
   type(): string {
     return RequestICNSAdr36SignaturesMsg.type();
-  }
-}
-
-export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
-  public static type() {
-    return "request-verify-adr-36-amino-doc";
-  }
-
-  constructor(
-    public readonly chainId: string,
-    public readonly signer: string,
-    public readonly data: Uint8Array,
-    public readonly signature: StdSignature
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id not set");
-    }
-
-    if (!this.signer) {
-      throw new Error("signer not set");
-    }
-
-    if (!this.signature) {
-      throw new Error("Signature not set");
-    }
-
-    // It is not important to check this on the client side as opposed to increasing the bundle size.
-    // Validate bech32 address.
-    // Bech32Address.validate(this.signer);
-  }
-
-  route(): string {
-    return "keyring";
-  }
-
-  type(): string {
-    return RequestVerifyADR36AminoSignDoc.type();
   }
 }
 

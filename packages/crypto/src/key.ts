@@ -56,22 +56,42 @@ export class PrivKeySecp256k1 {
 }
 
 export class PubKeySecp256k1 {
-  constructor(protected readonly pubKey: Uint8Array) {}
+  constructor(protected readonly pubKey: Uint8Array) {
+    if (pubKey.length !== 33 && pubKey.length !== 65) {
+      throw new Error(`Invalid length of public key: ${pubKey.length}`);
+    }
+  }
 
   toBytes(uncompressed?: boolean): Uint8Array {
+    if (uncompressed && this.pubKey.length === 65) {
+      return this.pubKey;
+    }
+    if (!uncompressed && this.pubKey.length === 33) {
+      return this.pubKey;
+    }
+
+    const keyPair = this.toKeyPair();
     if (uncompressed) {
-      const keyPair = this.toKeyPair();
       return new Uint8Array(
         Buffer.from(keyPair.getPublic().encode("hex", false), "hex")
       );
+    } else {
+      return new Uint8Array(
+        Buffer.from(keyPair.getPublic().encodeCompressed("hex"), "hex")
+      );
     }
-    return new Uint8Array(this.pubKey);
   }
 
-  // Cosmos address
+  /**
+   * @deprecated Use `getCosmosAddress()` instead.
+   */
   getAddress(): Uint8Array {
+    return this.getCosmosAddress();
+  }
+
+  getCosmosAddress(): Uint8Array {
     let hash = CryptoJS.SHA256(
-      CryptoJS.lib.WordArray.create(this.pubKey as any)
+      CryptoJS.lib.WordArray.create(this.toBytes(false) as any)
     ).toString();
     hash = CryptoJS.RIPEMD160(CryptoJS.enc.Hex.parse(hash)).toString();
 

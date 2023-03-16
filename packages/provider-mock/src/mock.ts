@@ -106,9 +106,9 @@ export class MockKeplr implements Keplr {
       name: "mock",
       algo: "secp256k1",
       pubKey: wallet.getPubKey().toBytes(),
-      address: wallet.getPubKey().getAddress(),
+      address: wallet.getPubKey().getCosmosAddress(),
       bech32Address: new Bech32Address(
-        wallet.getPubKey().getAddress()
+        wallet.getPubKey().getCosmosAddress()
       ).toBech32(
         this.chainInfos.find((c) => c.chainId === chainId)!.bech32Config
           .bech32PrefixAccAddr
@@ -128,9 +128,9 @@ export class MockKeplr implements Keplr {
           name: "mock",
           algo: "secp256k1",
           pubKey: wallet.getPubKey().toBytes(),
-          address: wallet.getPubKey().getAddress(),
+          address: wallet.getPubKey().getCosmosAddress(),
           bech32Address: new Bech32Address(
-            wallet.getPubKey().getAddress()
+            wallet.getPubKey().getCosmosAddress()
           ).toBech32(
             this.chainInfos.find((c) => c.chainId === chainId)!.bech32Config
               .bech32PrefixAccAddr

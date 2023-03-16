@@ -71,6 +71,9 @@ export class BackgroundTxService {
         isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
         {
           method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
           body: JSON.stringify(params),
         }
       );

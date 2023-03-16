@@ -31,7 +31,6 @@ import {
   TokensStore,
   ICNSInteractionStore,
   ICNSQueries,
-  GeneralPermissionStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -62,9 +61,8 @@ export class RootStore {
   public readonly keyRingStore: KeyRingStore;
   public readonly ibcChannelStore: IBCChannelStore;
 
-  protected readonly interactionStore: InteractionStore;
+  public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
-  public readonly generalPermissionStore: GeneralPermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly keystoneStore: KeystoneStore;
@@ -145,10 +143,6 @@ export class RootStore {
     );
 
     this.permissionStore = new PermissionStore(
-      this.interactionStore,
-      new InExtensionMessageRequester()
-    );
-    this.generalPermissionStore = new GeneralPermissionStore(
       this.interactionStore,
       new InExtensionMessageRequester()
     );

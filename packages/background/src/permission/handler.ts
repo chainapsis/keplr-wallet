@@ -1,7 +1,5 @@
 import {
   AddPermissionOrigin,
-  DisableAccessMsg,
-  EnableAccessMsg,
   GetGlobalPermissionOriginsMsg,
   GetOriginPermittedChainsMsg,
   GetPermissionOriginsMsg,
@@ -16,24 +14,12 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import { PermissionService } from "./service";
-import { KeyRingService } from "../keyring-v2";
 
-export const getHandler: (
-  service: PermissionService,
-  keyRingService: KeyRingService
-) => Handler = (service, keyRingService) => {
+export const getHandler: (service: PermissionService) => Handler = (
+  service
+) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
-      case EnableAccessMsg:
-        return handleEnableAccessMsg(service, keyRingService)(
-          env,
-          msg as EnableAccessMsg
-        );
-      case DisableAccessMsg:
-        return handleDisableAccessMsg(service, keyRingService)(
-          env,
-          msg as DisableAccessMsg
-        );
       case GetPermissionOriginsMsg:
         return handleGetPermissionOriginsMsg(service)(
           env,
@@ -67,32 +53,6 @@ export const getHandler: (
       default:
         throw new KeplrError("permission", 120, "Unknown msg type");
     }
-  };
-};
-
-const handleEnableAccessMsg: (
-  service: PermissionService,
-  keyRingService: KeyRingService
-) => InternalHandler<EnableAccessMsg> = (service, keyRingService) => {
-  return async (env, msg) => {
-    await keyRingService.ensureUnlockInteractive(env);
-
-    return await service.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainIds,
-      msg.origin
-    );
-  };
-};
-
-const handleDisableAccessMsg: (
-  service: PermissionService,
-  keyRingService: KeyRingService
-) => InternalHandler<EnableAccessMsg> = (service, keyRingService) => {
-  return async (env, msg) => {
-    await keyRingService.ensureUnlockInteractive(env);
-
-    return service.disable(msg.chainIds, msg.origin);
   };
 };
 

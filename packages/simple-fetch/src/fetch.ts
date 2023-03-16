@@ -59,11 +59,13 @@ export async function simpleFetch<R>(
     url = "";
   }
   const actualURL = makeURL(baseURL, url);
+  const { headers: optionHeaders, ...otherOptions } = options || {};
   const fetched = await fetch(actualURL, {
     headers: {
       accept: "application/json, text/plain, */*",
+      ...optionHeaders,
     },
-    ...options,
+    ...otherOptions,
   });
 
   let data: R;

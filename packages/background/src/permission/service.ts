@@ -39,37 +39,35 @@ export class PermissionService {
   async init() {
     const migration = await migrate(this.kvStore);
     if (migration) {
-      for (const key of Object.keys(migration)) {
-        const granted = migration[key];
-        if (granted) {
-          runInAction(() => {
+      runInAction(() => {
+        for (const key of Object.keys(migration)) {
+          const granted = migration[key];
+          if (granted) {
             this.permissionMap.set(key, true);
-          });
+          }
         }
-      }
+      });
     } else {
       const saved = await this.kvStore.get<Record<string, true | undefined>>(
         "permissionMap/v1"
       );
       if (saved) {
-        for (const key of Object.keys(saved)) {
-          const granted = saved[key];
-          if (granted) {
-            runInAction(() => {
+        runInAction(() => {
+          for (const key of Object.keys(saved)) {
+            const granted = saved[key];
+            if (granted) {
               this.permissionMap.set(key, true);
-            });
+            }
           }
-        }
+        });
       }
     }
 
     autorun(() => {
-      runInAction(() => {
-        this.kvStore.set(
-          "permissionMap/v1",
-          Object.fromEntries(this.permissionMap)
-        );
-      });
+      this.kvStore.set(
+        "permissionMap/v1",
+        Object.fromEntries(this.permissionMap)
+      );
     });
   }
 
@@ -102,28 +100,8 @@ export class PermissionService {
     this.checkBasicAccessPermission(env, chainIds, origin);
   }
 
-  disable(chainIds: string | string[], origin: string) {
-    // Delete permissions granted to origin.
-    // If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).
-    // Else, remove all permissions granted to origin (In this case, permissions that are not assigned to each chain, such as getChainInfosWithoutEndpoints(), are also deleted).
-
-    if (typeof chainIds === "string") {
-      chainIds = [chainIds];
-    }
-
-    if (chainIds.length > 0) {
-      for (const chainId of chainIds) {
-        this.removeAllTypePermissionToChainId(chainId, [origin]);
-      }
-    } else {
-      this.removeAllTypePermission([origin]);
-      this.removeAllTypeGlobalPermission([origin]);
-    }
-  }
-
   async checkOrGrantPermission(
     env: Env,
-    url: string,
     chainIds: string[],
     type: string,
     origin: string
@@ -138,7 +116,7 @@ export class PermissionService {
     }
 
     if (ungrantedChainIds.length > 0) {
-      await this.grantPermission(env, url, ungrantedChainIds, type, [origin]);
+      await this.grantPermission(env, ungrantedChainIds, type, [origin]);
     }
 
     for (const chainId of chainIds) {
@@ -146,14 +124,9 @@ export class PermissionService {
     }
   }
 
-  async checkOrGrantGlobalPermission(
-    env: Env,
-    url: string,
-    type: string,
-    origin: string
-  ) {
+  async checkOrGrantGlobalPermission(env: Env, type: string, origin: string) {
     if (!this.hasGlobalPermission(type, origin)) {
-      await this.grantGlobalPermission(env, url, type, [origin]);
+      await this.grantGlobalPermission(env, type, [origin]);
     }
 
     this.checkGlobalPermission(env, type, origin);
@@ -161,7 +134,6 @@ export class PermissionService {
 
   async grantPermission(
     env: Env,
-    url: string,
     chainIds: string[],
     type: string,
     origins: string[]
@@ -178,7 +150,7 @@ export class PermissionService {
 
     await this.interactionService.waitApprove(
       env,
-      url,
+      "/permission",
       INTERACTION_TYPE_PERMISSION,
       permissionData
     );
@@ -198,19 +170,13 @@ export class PermissionService {
 
     await this.grantPermission(
       env,
-      "/access",
       chainIds,
       getBasicAccessPermissionType(),
       origins
     );
   }
 
-  async grantGlobalPermission(
-    env: Env,
-    url: string,
-    type: string,
-    origins: string[]
-  ) {
+  async grantGlobalPermission(env: Env, type: string, origins: string[]) {
     if (env.isInternalMsg) {
       return;
     }
@@ -222,7 +188,7 @@ export class PermissionService {
 
     await this.interactionService.waitApprove(
       env,
-      url,
+      "/permission-global",
       INTERACTION_TYPE_GLOBAL_PERMISSION,
       permissionData
     );
@@ -241,6 +207,10 @@ export class PermissionService {
   }
 
   checkBasicAccessPermission(env: Env, chainIds: string[], origin: string) {
+    if (chainIds.length === 0) {
+      throw new Error("Chain ids are empty");
+    }
+
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
       this.chainsService.getChainInfoOrThrow(chainId);
@@ -252,6 +222,32 @@ export class PermissionService {
         origin
       );
     }
+  }
+
+  hasBasicAccessPermission(
+    env: Env,
+    chainIds: string[],
+    origin: string
+  ): boolean {
+    if (chainIds.length === 0) {
+      throw new Error("Chain ids are empty");
+    }
+
+    if (env.isInternalMsg) {
+      return true;
+    }
+
+    for (const chainId of chainIds) {
+      // Make sure that the chain info is registered.
+      this.chainsService.getChainInfoOrThrow(chainId);
+
+      if (
+        !this.hasPermission(chainId, getBasicAccessPermissionType(), origin)
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   checkGlobalPermission(env: Env, type: string, origin: string) {

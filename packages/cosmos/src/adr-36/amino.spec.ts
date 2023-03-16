@@ -479,7 +479,9 @@ describe("Test ADR-36 Amino Sign Doc", () => {
   it("Verify ADR-36 Amino sign doc", () => {
     const privKey = PrivKeySecp256k1.generateRandomKey();
     const pubKey = privKey.getPubKey();
-    const signer = new Bech32Address(pubKey.getAddress()).toBech32("osmo");
+    const signer = new Bech32Address(pubKey.getCosmosAddress()).toBech32(
+      "osmo"
+    );
 
     const signDoc = makeADR36AminoSignDoc(signer, new Uint8Array([1, 2, 3]));
 
