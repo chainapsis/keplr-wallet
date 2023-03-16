@@ -218,3 +218,22 @@ export const RegenItem: Item = {
   key: "regen",
   component: RegenImage,
 };
+
+const PStakeImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="pSTAKE"
+      source={require("../../assets/image/webpage/pstake.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.PStake", {});
+      }}
+    />
+  );
+};
+
+export const PStakeItem: Item = {
+  key: "pstake",
+  component: PStakeImage,
+};

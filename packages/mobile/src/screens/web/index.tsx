@@ -16,6 +16,7 @@ import {
   StrideItem,
   UmeeItem,
   WYNDDaoItem,
+  PStakeItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 
@@ -35,6 +36,7 @@ const WebpagesPerLabel: {
       MarsItem,
       UmeeItem,
       StrideItem,
+      PStakeItem,
       RegenItem,
     ],
   },
@@ -48,6 +50,7 @@ const WebpagesPerLabel: {
       MarsItem,
       UmeeItem,
       StrideItem,
+      PStakeItem,
     ],
   },
   {

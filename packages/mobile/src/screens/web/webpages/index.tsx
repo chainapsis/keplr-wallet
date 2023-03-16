@@ -7,3 +7,4 @@ export * from "./regen";
 export * from "./stride";
 export * from "./mars";
 export * from "./injective";
+export * from "./pstake";

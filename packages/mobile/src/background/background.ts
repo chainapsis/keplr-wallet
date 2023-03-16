@@ -34,6 +34,7 @@ init(
     "https://app.wynddao.com",
     "https://osmosis.marsprotocol.io",
     "https://hub.injective.network",
+    "https://cosmos.pstake.finance",
   ],
   ["https://wallet.keplr.app"],
   CommunityChainInfoRepo,
