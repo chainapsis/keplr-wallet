@@ -6,34 +6,57 @@ import { BackButton, ProfileButton } from "../../layouts/header/components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Buttons, ClaimAll, TokenView } from "./components";
 import { Stack } from "../../components/stack";
+import { CoinPretty } from "@keplr-wallet/unit";
+
+export interface ViewToken {
+  token: CoinPretty;
+  chainName: string;
+}
 
 export const MainPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
-  const allBalances = chainStore.chainInfosInUI.flatMap((chainInfo) => {
-    const chainId = chainInfo.chainId;
-    const accountAddress = accountStore.getAccount(chainId).bech32Address;
-    const queries = queriesStore.get(chainId);
+  const allBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
+    (chainInfo) => {
+      const chainId = chainInfo.chainId;
+      const accountAddress = accountStore.getAccount(chainId).bech32Address;
+      const queries = queriesStore.get(chainId);
 
-    const queryBalances =
-      queries.queryBalances.getQueryBech32Address(accountAddress);
+      const queryBalances =
+        queries.queryBalances.getQueryBech32Address(accountAddress);
 
-    return chainInfo.currencies.flatMap((currency) =>
-      queryBalances.getBalanceFromCurrency(currency)
-    );
-  });
+      const BalanceFromCurrency = chainInfo.currencies.flatMap((currency) =>
+        queryBalances.getBalanceFromCurrency(currency)
+      );
 
-  const stakableBalances = chainStore.chainInfosInUI.flatMap((chainInfo) => {
-    const chainId = chainInfo.chainId;
-    const accountAddress = accountStore.getAccount(chainId).bech32Address;
-    const queries = queriesStore.get(chainId);
+      return BalanceFromCurrency.map((balance) => {
+        return {
+          token: balance,
+          chainName: chainInfo.chainName,
+        };
+      });
+    }
+  );
 
-    return queries.queryBalances.getQueryBech32Address(accountAddress).stakable
-      .balance;
-  });
+  const stakableBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
+    (chainInfo) => {
+      const chainId = chainInfo.chainId;
+      const accountAddress = accountStore.getAccount(chainId).bech32Address;
+      const queries = queriesStore.get(chainId);
+
+      return {
+        token:
+          queries.queryBalances.getQueryBech32Address(accountAddress).stakable
+            .balance,
+        chainName: chainInfo.chainName,
+      };
+    }
+  );
 
   const ibcBalances = allBalances.filter((balance) => {
-    const denomHelper = new DenomHelper(balance.currency.coinMinimalDenom);
+    const denomHelper = new DenomHelper(
+      balance.token.currency.coinMinimalDenom
+    );
     return (
       denomHelper.type === "native" && denomHelper.denom.startsWith("ibc/")
     );
@@ -41,16 +64,25 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const tokenBalances = allBalances.filter((balance) => {
     const filteredIbcBalances = ibcBalances.map(
-      (ibcBalance) => ibcBalance.currency.coinMinimalDenom
+      (ibcBalance) => ibcBalance.token.currency.coinMinimalDenom
     );
     const stakeableBalances = stakableBalances.map(
-      (stakableBalance) => stakableBalance.currency.coinMinimalDenom
+      (stakableBalance) => stakableBalance.token.currency.coinMinimalDenom
     );
 
     return (
-      !filteredIbcBalances.includes(balance.currency.coinMinimalDenom) &&
-      !stakeableBalances.includes(balance.currency.coinMinimalDenom)
+      !filteredIbcBalances.includes(balance.token.currency.coinMinimalDenom) &&
+      !stakeableBalances.includes(balance.token.currency.coinMinimalDenom)
     );
+  });
+
+  const claimBalances = chainStore.chainInfosInUI.flatMap((chainInfo) => {
+    const chainId = chainInfo.chainId;
+    const accountAddress = accountStore.getAccount(chainId).bech32Address;
+    const queries = queriesStore.get(chainId);
+
+    return queries.cosmos.queryRewards.getQueryBech32Address(accountAddress)
+      .stakableReward;
   });
 
   return (
@@ -61,12 +93,12 @@ export const MainPage: FunctionComponent = observer(() => {
     >
       <Stack gutter="1rem">
         <Buttons />
-        <ClaimAll />
+        <ClaimAll tokens={claimBalances} />
       </Stack>
 
-      <TokenView title="Balance" tokens={stakableBalances} />
-      <TokenView title="Token Balance" tokens={tokenBalances} />
-      <TokenView title="IBC Balance" tokens={ibcBalances} />
+      <TokenView title="Balance" viewTokens={stakableBalances} />
+      <TokenView title="Token Balance" viewTokens={tokenBalances} />
+      <TokenView title="IBC Balance" viewTokens={ibcBalances} />
     </HeaderLayout>
   );
 });

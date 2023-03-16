@@ -1,37 +1,38 @@
-import React, { FunctionComponent } from "react";
-import { CoinPretty } from "@keplr-wallet/unit";
+import React, { FunctionComponent, useState } from "react";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { Column, Columns } from "../../../../components/column";
 import { observer } from "mobx-react-lite";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
+import { ViewToken } from "../../index";
 
-export interface TokenViewProps {
-  title: string;
-  tokens: CoinPretty[];
-}
-
-export const TokenItem: FunctionComponent<{ token: CoinPretty }> = observer(
-  ({ token }) => {
+export const TokenItem: FunctionComponent<{ viewToken: ViewToken }> = observer(
+  ({ viewToken }) => {
     const { priceStore } = useStore();
 
     return (
       <Columns sum={1}>
-        {token.currency.coinImageUrl && (
-          <img src={token.currency.coinImageUrl} />
+        {viewToken.token.currency.coinImageUrl && (
+          <img
+            width="32px"
+            height="32px"
+            src={viewToken.token.currency.coinImageUrl}
+          />
         )}
         <Column weight={1}>
           <Stack>
-            <Box>{token.currency.coinDenom}</Box>
+            <Box>{viewToken.token.currency.coinDenom}</Box>
+            <Box>{viewToken.chainName}</Box>
           </Stack>
         </Column>
 
         <Stack>
-          <Box>{token.hideDenom(true).toString()}</Box>
+          <Box>{viewToken.token.hideDenom(true).toString()}</Box>
           <Box>
             {parseFloat(
-              priceStore.calculatePrice(token)?.toDec().toString() ?? "0"
+              priceStore.calculatePrice(viewToken.token)?.toDec().toString() ??
+                "0"
             )}
           </Box>
         </Stack>
@@ -40,13 +41,13 @@ export const TokenItem: FunctionComponent<{ token: CoinPretty }> = observer(
   }
 );
 
-export const TokenView: FunctionComponent<TokenViewProps> = ({
-  title,
-  tokens,
-}) => {
-  const [isExpanded, setIsExpanded] = React.useState(true);
-  const alwaysShownTokens = tokens.slice(0, 2);
-  const collapsedTokens = tokens.slice(2);
+export const TokenView: FunctionComponent<{
+  title: string;
+  viewTokens: ViewToken[];
+}> = ({ title, viewTokens }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const alwaysShownTokens = viewTokens.slice(0, 2);
+  const collapsedTokens = viewTokens.slice(2);
 
   return (
     <Stack>
@@ -59,12 +60,18 @@ export const TokenView: FunctionComponent<TokenViewProps> = ({
       </Box>
 
       <Stack gutter="1rem">
-        {alwaysShownTokens.map((token) => (
-          <TokenItem token={token} key={token.currency.coinMinimalDenom} />
+        {alwaysShownTokens.map((viewToken) => (
+          <TokenItem
+            viewToken={viewToken}
+            key={viewToken.token.currency.coinMinimalDenom}
+          />
         ))}
         <VerticalCollapseTransition collapsed={isExpanded}>
-          {collapsedTokens.map((token) => (
-            <TokenItem token={token} key={token.currency.coinMinimalDenom} />
+          {collapsedTokens.map((viewToken) => (
+            <TokenItem
+              viewToken={viewToken}
+              key={viewToken.token.currency.coinMinimalDenom}
+            />
           ))}
         </VerticalCollapseTransition>
       </Stack>
