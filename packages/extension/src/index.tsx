@@ -1,4 +1,6 @@
 // Shim ------------
+import { SettingPage } from "./pages/setting";
+
 require("setimmediate");
 // Shim ------------
 
@@ -27,6 +29,7 @@ import { UnlockPage } from "./pages/unlock";
 import { MainPage } from "./pages/main";
 import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { GeneralPage } from "./pages/setting/general";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -120,6 +123,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           <Routes>
             {/* TODO: Add routes here */}
             <Route path="/" element={<MainPage />} />
+            <Route path="/setting" element={<SettingPage />} />
+            <Route path="/setting/general" element={<GeneralPage />} />
           </Routes>
         )
       ) : (
