@@ -3,23 +3,20 @@ import styled from "styled-components";
 import { HeaderProps } from "./types";
 
 const Styles = {
-  Container: styled.div`
-    padding-top: 4rem;
-  `,
+  Container: styled.div``,
 
   HeaderContainer: styled.div`
     height: 4rem;
-    position: fixed;
     top: 0;
     left: 0;
     right: 0;
   `,
 
   HeaderTitle: styled.div`
+    height: 4rem;
     position: absolute;
 
     top: 0;
-    bottom: 0;
     left: 0;
     right: 0;
 
@@ -28,11 +25,11 @@ const Styles = {
     align-items: center;
   `,
   HeaderLeft: styled.div`
+    height: 4rem;
     position: absolute;
 
     top: 0;
     left: 0;
-    bottom: 0;
 
     z-index: 100;
 
@@ -42,11 +39,11 @@ const Styles = {
   `,
 
   HeaderRight: styled.div`
+    height: 4rem;
     position: absolute;
 
     top: 0;
     right: 0;
-    bottom: 0;
 
     z-index: 100;
 

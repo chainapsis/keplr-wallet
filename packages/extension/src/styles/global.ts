@@ -16,6 +16,8 @@ export const GlobalStyle = createGlobalStyle`
 
   html, body {
     font-family: 'Mona Sans';
+    color: #F6F6F9;
+    background-color: #09090A;
   }
 
   // Set border-box as default for convenience.
