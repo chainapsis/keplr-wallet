@@ -28,7 +28,7 @@ import { MainPage } from "./pages/main";
 import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SettingPage } from "./pages/setting";
-import { GeneralPage } from "./pages/setting/general";
+import { SettingGeneralPage } from "./pages/setting/general";
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
 
@@ -129,7 +129,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
              */}
             <Route path="/" element={<MainPage />} />
             <Route path="/setting" element={<SettingPage />} />
-            <Route path="/setting/general" element={<GeneralPage />} />
+            <Route path="/setting/general" element={<SettingGeneralPage />} />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
             <Route

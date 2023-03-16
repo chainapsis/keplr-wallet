@@ -5,7 +5,7 @@ import { Stack } from "../../../components/stack";
 import { PageButton } from "../components";
 import { RightArrowIcon } from "../../../components/icon";
 
-export const GeneralPage: FunctionComponent = () => {
+export const SettingGeneralPage: FunctionComponent = () => {
   return (
     <HeaderLayout title="General" left={<BackButton />}>
       <Stack gutter="2rem">
