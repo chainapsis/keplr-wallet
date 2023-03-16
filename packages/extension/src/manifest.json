@@ -17,7 +17,7 @@
   "background": {
     "service_worker": "background.bundle.js"
   },
-  "permissions": ["storage", "notifications", "identity", "idle"],
+  "permissions": ["storage", "notifications", "identity", "idle", "alarms"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
