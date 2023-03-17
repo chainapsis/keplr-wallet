@@ -81,16 +81,16 @@ export const AddTokenPage: FunctionComponent = observer(() => {
 
   const queryContractInfo = (() => {
     switch (tokenType) {
-      case "cosmwasm":
-        return queries.cosmwasm.querycw20ContractInfo.getQueryContract(
-          contractAddress
-        );
       case "secretwasm":
         return queries.secret.querySecret20ContractInfo.getQueryContract(
           contractAddress
         );
       case "erc20":
         return queries.erc20.queryERC20ContractInfo.getQueryContract(
+          contractAddress
+        );
+      default:
+        return queries.cosmwasm.querycw20ContractInfo.getQueryContract(
           contractAddress
         );
     }
