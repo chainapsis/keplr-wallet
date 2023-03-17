@@ -10,15 +10,10 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import useForm from "react-hook-form";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import {
-  CW20Currency,
-  ERC20Currency,
-  Secret20Currency,
-} from "@keplr-wallet/types";
+import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
 import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { useLoadingIndicator } from "../../../../components/loading-indicator";
 import { useNotification } from "../../../../components/notification";
-import { isAddress } from "@ethersproject/address";
 
 interface FormData {
   contractAddress: string;
@@ -67,41 +62,21 @@ export const AddTokenPage: FunctionComponent = observer(() => {
     }
   }, [chainStore, contractAddress, form, tokensStore.waitingSuggestedToken]);
 
-  const tokenType = (() => {
-    const tokenTypes = ["secretwasm", "cosmwasm", "erc20"];
-    for (const type of tokenTypes) {
-      const feature = type === "erc20" ? `evmos-${type}` : type;
-      if (chainStore.current.features?.includes(feature)) {
-        return type;
-      }
-    }
-  })() as "secretwasm" | "cosmwasm" | "erc20";
+  const isSecret20 =
+    (chainStore.current.features ?? []).find(
+      (feature) => feature === "secretwasm"
+    ) != null;
 
   const queries = queriesStore.get(chainStore.current.chainId);
-
-  const queryContractInfo = (() => {
-    switch (tokenType) {
-      case "cosmwasm":
-        return queries.cosmwasm.querycw20ContractInfo.getQueryContract(
-          contractAddress
-        );
-      case "secretwasm":
-        return queries.secret.querySecret20ContractInfo.getQueryContract(
-          contractAddress
-        );
-      case "erc20":
-        return queries.erc20.queryERC20ContractInfo.getQueryContract(
-          contractAddress
-        );
-    }
-  })();
+  const query = isSecret20
+    ? queries.secret.querySecret20ContractInfo
+    : queries.cosmwasm.querycw20ContractInfo;
+  const queryContractInfo = query.getQueryContract(contractAddress);
 
   const tokenInfo = queryContractInfo.tokenInfo;
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] = useState(
     false
   );
-
-  const isSecret20 = tokenType === "secretwasm";
 
   const notification = useNotification();
   const loadingIndicator = useLoadingIndicator();
@@ -150,26 +125,9 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             tokenInfo.name &&
             tokenInfo.symbol
           ) {
-            if (tokenType === "cosmwasm") {
+            if (!isSecret20) {
               const currency: CW20Currency = {
                 type: "cw20",
-                contractAddress: data.contractAddress,
-                coinMinimalDenom: tokenInfo.name,
-                coinDenom: tokenInfo.symbol,
-                coinDecimals: tokenInfo.decimals,
-              };
-
-              if (
-                interactionInfo.interaction &&
-                tokensStore.waitingSuggestedToken
-              ) {
-                await tokensStore.approveSuggestedToken(currency);
-              } else {
-                await tokensOf.addToken(currency);
-              }
-            } else if (tokenType === "erc20") {
-              const currency: ERC20Currency = {
-                type: "erc20",
                 contractAddress: data.contractAddress,
                 coinMinimalDenom: tokenInfo.name,
                 coinDenom: tokenInfo.symbol,
@@ -280,12 +238,6 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             required: "Contract address is required",
             validate: (value: string): string | undefined => {
               try {
-                if (tokenType === "erc20") {
-                  if (!isAddress(value)) {
-                    throw new Error("Invalid contract address");
-                  }
-                  return;
-                }
                 Bech32Address.validate(
                   value,
                   chainStore.current.bech32Config.bech32PrefixAccAddr

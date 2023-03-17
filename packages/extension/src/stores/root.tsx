@@ -15,7 +15,6 @@ import {
   CosmosAccount,
   CosmosQueries,
   CosmwasmAccount,
-  EthereumAccount,
   CosmwasmQueries,
   OsmosisQueries,
   DeferInitialQueryController,
@@ -34,7 +33,6 @@ import {
   SignInteractionStore,
   TokensStore,
   WalletStatus,
-  ERC20Queries,
   ICNSInteractionStore,
   ICNSQueries,
   GeneralPermissionStore,
@@ -81,14 +79,13 @@ export class RootStore {
       CosmosQueries,
       CosmwasmQueries,
       SecretQueries,
-      ERC20Queries,
       OsmosisQueries,
       KeplrETCQueries,
       ICNSQueries
     ]
   >;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount, EthereumAccount]
+    [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
@@ -193,7 +190,6 @@ export class RootStore {
       SecretQueries.use({
         apiGetter: getKeplrFromWindow,
       }),
-      ERC20Queries.use(),
       OsmosisQueries.use(),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
@@ -328,9 +324,6 @@ export class RootStore {
             };
           }
         },
-      }),
-      EthereumAccount.use({
-        queriesStore: this.queriesStore,
       })
     );
 

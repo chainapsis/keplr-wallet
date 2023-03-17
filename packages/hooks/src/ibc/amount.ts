@@ -9,7 +9,7 @@ export class IBCAmountConfig extends AmountConfig {
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: IQueriesStore,
-    protected readonly initialChainId: string,
+    initialChainId: string,
     sender: string,
     feeConfig: IFeeConfig | undefined
   ) {
@@ -20,15 +20,10 @@ export class IBCAmountConfig extends AmountConfig {
 
   @computed
   get sendableCurrencies(): AppCurrency[] {
-    // Only native currencies and Evmos ERC-20's can be sent by IBC transfer.
-    return super.sendableCurrencies.filter((cur) => {
-      const type = new DenomHelper(cur.coinMinimalDenom).type;
-      const isEvmosERC20 = this.chainGetter
-        .getChain(this.initialChainId)
-        .features?.includes("evmos-erc20");
-
-      return type === "native" || isEvmosERC20;
-    });
+    // Only native currencies can be sent by IBC transfer.
+    return super.sendableCurrencies.filter(
+      (cur) => new DenomHelper(cur.coinMinimalDenom).type === "native"
+    );
   }
 }
 

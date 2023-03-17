@@ -891,13 +891,7 @@ export class CosmosAccountImpl {
     currency: AppCurrency,
     recipient: string
   ) {
-    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-    const isEvmosERC20 = this.chainGetter
-      .getChain(this.chainId)
-      .features?.includes("evmos-erc20");
-
-    if (denomHelper.type !== "native" && !isEvmosERC20) {
-      // Only accept native tokens or Evmos ERC-20
+    if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
       throw new Error("Only native token can be sent via IBC");
     }
 
@@ -951,18 +945,13 @@ export class CosmosAccountImpl {
         // Although we are not using `timeoutTimestamp` at present, just set it as mas uint64 only for eip712 cosmos tx.
         const timeoutTimestamp = eip712Signing ? "18446744073709551615" : "0";
 
-        // Use the contract address for Evmos ERC-20 tokens
-        const actualDenom = isEvmosERC20
-          ? `erc20/${denomHelper.contractAddress}`
-          : currency.coinMinimalDenom;
-
         const msg = {
           type: this.msgOpts.ibcTransfer.type,
           value: {
             source_port: channel.portId,
             source_channel: channel.channelId,
             token: {
-              denom: actualDenom,
+              denom: currency.coinMinimalDenom,
               amount: actualAmount,
             },
             sender: this.base.bech32Address,

@@ -26,7 +26,6 @@ import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useStore } from "../../stores";
 import { AppCurrency } from "@keplr-wallet/types";
-import { DenomHelper } from "@keplr-wallet/common";
 
 export interface CoinInputProps {
   amountConfig: IAmountConfig;
@@ -113,14 +112,6 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
         return a.coinDenom < b.coinDenom ? -1 : 1;
       });
 
-    const formattedCoinDenom = (currency: AppCurrency): string => {
-      const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-      if (denomHelper.type === "erc20") {
-        return `${currency.coinDenom} (ERC-20)`;
-      }
-      return currency.coinDenom;
-    };
-
     return (
       <React.Fragment>
         <FormGroup className={className}>
@@ -138,7 +129,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
             toggle={() => setIsOpenTokenSelector((value) => !value)}
           >
             <DropdownToggle caret>
-              {formattedCoinDenom(amountConfig.sendCurrency)}
+              {amountConfig.sendCurrency.coinDenom}
             </DropdownToggle>
             <DropdownMenu>
               {selectableCurrencies.map((currency) => {
@@ -155,7 +146,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
                       amountConfig.setSendCurrency(currency);
                     }}
                   >
-                    {formattedCoinDenom(currency)}
+                    {currency.coinDenom}
                   </DropdownItem>
                 );
               })}

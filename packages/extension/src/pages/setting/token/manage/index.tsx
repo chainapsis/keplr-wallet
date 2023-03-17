@@ -9,11 +9,7 @@ import { useStore } from "../../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useNotification } from "../../../../components/notification";
 import { useConfirm } from "../../../../components/confirm";
-import {
-  CW20Currency,
-  ERC20Currency,
-  Secret20Currency,
-} from "@keplr-wallet/types";
+import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
 import { useIntl } from "react-intl";
 import { ToolTip } from "../../../../components/tooltip";
 
@@ -25,28 +21,15 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
   const { chainStore, tokensStore } = useStore();
 
-  const tokenType = (() => {
-    const tokenTypes = ["secretwasm", "cosmwasm", "erc20"];
-    for (const type of tokenTypes) {
-      const feature = type === "erc20" ? `evmos-${type}` : type;
-      if (
-        chainStore
-          .getChain(chainStore.current.chainId)
-          .features?.includes(feature)
-      ) {
-        return type;
-      }
-    }
-  })() as "secretwasm" | "cosmwasm" | "erc20";
+  const isSecretWasm =
+    chainStore.current.features &&
+    chainStore.current.features.includes("secretwasm");
 
   const appCurrencies = chainStore.current.currencies.filter((currency) => {
-    switch (tokenType) {
-      case "secretwasm":
-        return "type" in currency && currency.type === "secret20";
-      case "cosmwasm":
-        return "type" in currency && currency.type === "cw20";
-      case "erc20":
-        return "type" in currency && currency.type === "erc20";
+    if (isSecretWasm) {
+      return "type" in currency && currency.type === "secret20";
+    } else {
+      return "type" in currency && currency.type === "cw20";
     }
   });
 
@@ -81,20 +64,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
     >
       <div className={style.container}>
         {appCurrencies.map((currency) => {
-          const customToken = currency as
-            | CW20Currency
-            | Secret20Currency
-            | ERC20Currency;
-
-          const customTokenAddress =
-            tokenType === "erc20"
-              ? customToken.contractAddress.length === 42
-                ? `${customToken.contractAddress.slice(
-                    0,
-                    10
-                  )}...${customToken.contractAddress.slice(-8)}`
-                : customToken.contractAddress
-              : Bech32Address.shortenAddress(customToken.contractAddress, 30);
+          const cosmwasmToken = currency as CW20Currency | Secret20Currency;
 
           const icons: React.ReactElement[] = [];
 
@@ -122,8 +92,9 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                 }}
                 onClick={async (e) => {
                   e.preventDefault();
+
                   await copyText(
-                    customToken.contractAddress,
+                    cosmwasmToken.contractAddress,
                     "setting.token.manage.notification.contract-address.copy"
                   );
                 }}
@@ -131,7 +102,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
             </ToolTip>
           );
 
-          if ("viewingKey" in customToken) {
+          if ("viewingKey" in cosmwasmToken) {
             icons.push(
               <ToolTip
                 trigger="hover"
@@ -158,7 +129,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                     e.preventDefault();
 
                     await copyText(
-                      customToken.viewingKey,
+                      cosmwasmToken.viewingKey,
                       "setting.token.manage.notification.viewing-key.copy"
                     );
                   }}
@@ -205,7 +176,7 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
                 ) {
                   await tokensStore
                     .getTokensOf(chainStore.current.chainId)
-                    .removeToken(customToken);
+                    .removeToken(cosmwasmToken);
                 }
               }}
             />
@@ -213,12 +184,15 @@ export const ManageTokenPage: FunctionComponent = observer(() => {
 
           return (
             <PageButton
-              key={customToken.contractAddress}
+              key={cosmwasmToken.contractAddress}
               style={{
                 cursor: "auto",
               }}
-              title={customToken.coinDenom}
-              paragraph={customTokenAddress}
+              title={cosmwasmToken.coinDenom}
+              paragraph={Bech32Address.shortenAddress(
+                cosmwasmToken.contractAddress,
+                30
+              )}
               icons={icons}
             />
           );

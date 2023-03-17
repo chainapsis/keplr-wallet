@@ -35,10 +35,7 @@ export const Menu: FunctionComponent = observer(() => {
         <FormattedMessage id="main.menu.settings" />
       </div>
       {(chainStore.current.features ?? []).find(
-        (feature) =>
-          feature === "cosmwasm" ||
-          feature === "secretwasm" ||
-          feature === "evmos-erc20"
+        (feature) => feature === "cosmwasm" || feature === "secretwasm"
       ) ? (
         <div
           className={styleMenu.item}
@@ -52,10 +49,7 @@ export const Menu: FunctionComponent = observer(() => {
         </div>
       ) : null}
       {(chainStore.current.features ?? []).find(
-        (feature) =>
-          feature === "cosmwasm" ||
-          feature === "secretwasm" ||
-          feature === "evmos-erc20"
+        (feature) => feature === "cosmwasm" || feature === "secretwasm"
       ) ? (
         <div
           className={styleMenu.item}

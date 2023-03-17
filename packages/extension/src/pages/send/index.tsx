@@ -27,8 +27,6 @@ import {
   PopupSize,
 } from "@keplr-wallet/popup";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
-import { Int } from "@keplr-wallet/unit";
-import { ERC20Currency } from "@keplr-wallet/types";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -79,16 +77,6 @@ export const SendPage: FunctionComponent = observer(() => {
       computeTerraClassicTax: true,
     }
   );
-
-  const denomHelper = useMemo(() => {
-    if (sendConfigs.amountConfig.sendCurrency) {
-      return new DenomHelper(
-        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
-      );
-    }
-
-    return undefined;
-  }, [sendConfigs.amountConfig.sendCurrency]);
 
   const gasSimulatorKey = useMemo(() => {
     if (sendConfigs.amountConfig.sendCurrency) {
@@ -301,51 +289,30 @@ export const SendPage: FunctionComponent = observer(() => {
             try {
               const stdFee = sendConfigs.feeConfig.toStdFee();
 
-              if (denomHelper?.type === "erc20") {
-                const currency = sendConfigs.amountConfig
-                  .sendCurrency as ERC20Currency;
+              const tx = accountInfo.makeSendTokenTx(
+                sendConfigs.amountConfig.amount,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                sendConfigs.amountConfig.sendCurrency!,
+                sendConfigs.recipientConfig.recipient
+              );
 
-                const totalFees = new Int(stdFee.amount[0].amount);
-                const gasLimit = new Int(stdFee.gas);
-
-                const maxFeePerGas = totalFees.div(gasLimit);
-
-                const recipient = sendConfigs.recipientConfig.recipient;
-                const amount = sendConfigs.amountConfig.amount;
-
-                await accountInfo.ethereum.broadcastERC20TokenTransfer(
-                  currency,
-                  recipient,
-                  amount,
-                  maxFeePerGas,
-                  gasLimit
-                );
-              } else {
-                const tx = accountInfo.makeSendTokenTx(
-                  sendConfigs.amountConfig.amount,
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  sendConfigs.amountConfig.sendCurrency!,
-                  sendConfigs.recipientConfig.recipient
-                );
-
-                await tx.send(
-                  stdFee,
-                  sendConfigs.memoConfig.memo,
-                  {
-                    preferNoSetFee: true,
-                    preferNoSetMemo: true,
+              await tx.send(
+                stdFee,
+                sendConfigs.memoConfig.memo,
+                {
+                  preferNoSetFee: true,
+                  preferNoSetMemo: true,
+                },
+                {
+                  onBroadcasted: () => {
+                    analyticsStore.logEvent("Send token tx broadcasted", {
+                      chainId: chainStore.current.chainId,
+                      chainName: chainStore.current.chainName,
+                      feeType: sendConfigs.feeConfig.feeType,
+                    });
                   },
-                  {
-                    onBroadcasted: () => {
-                      analyticsStore.logEvent("Send token tx broadcasted", {
-                        chainId: chainStore.current.chainId,
-                        chainName: chainStore.current.chainName,
-                        feeType: sendConfigs.feeConfig.feeType,
-                      });
-                    },
-                  }
-                );
-              }
+                }
+              );
 
               if (!isDetachedPage) {
                 history.replace("/");
@@ -427,13 +394,10 @@ export const SendPage: FunctionComponent = observer(() => {
                 return undefined;
               })()}
             />
-            {/* Hide memo field for ERC-20 transactions */}
-            {denomHelper?.type !== "erc20" && (
-              <MemoInput
-                memoConfig={sendConfigs.memoConfig}
-                label={intl.formatMessage({ id: "send.input.memo" })}
-              />
-            )}
+            <MemoInput
+              memoConfig={sendConfigs.memoConfig}
+              label={intl.formatMessage({ id: "send.input.memo" })}
+            />
             <FeeButtons
               feeConfig={sendConfigs.feeConfig}
               gasConfig={sendConfigs.gasConfig}
