@@ -31,6 +31,7 @@ import {
   TokensStore,
   ICNSInteractionStore,
   ICNSQueries,
+  PermissionManagerStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -60,6 +61,8 @@ export class RootStore {
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
   public readonly ibcChannelStore: IBCChannelStore;
+
+  public readonly permissionManagerStore: PermissionManagerStore;
 
   public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
@@ -117,6 +120,10 @@ export class RootStore {
     const interactionAddonService =
       new InteractionAddon.InteractionAddonService();
     InteractionAddon.init(router, interactionAddonService);
+
+    this.permissionManagerStore = new PermissionManagerStore(
+      new InExtensionMessageRequester()
+    );
 
     // Order is important.
     this.interactionStore = new InteractionStore(

@@ -30,6 +30,8 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SettingPage } from "./pages/setting";
 import { SettingGeneralPage } from "./pages/setting/general";
 import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
+import { SettingSecurityPage } from "./pages/setting/security";
+import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
 
@@ -144,6 +146,11 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/general/fiat"
               element={<SettingGeneralFiatPage />}
+            />
+            <Route path="/setting/security" element={<SettingSecurityPage />} />
+            <Route
+              path="/setting/security/permission"
+              element={<SettingSecurityPermissionPage />}
             />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />

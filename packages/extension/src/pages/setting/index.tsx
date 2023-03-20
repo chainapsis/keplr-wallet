@@ -36,6 +36,7 @@ export const SettingPage: FunctionComponent = observer(() => {
           title="Security & Privacy"
           paragraph="Language, Currency.."
           endIcon={<RightArrowIcon />}
+          onClick={() => navigate("/setting/security")}
         />
       </Stack>
     </HeaderLayout>
