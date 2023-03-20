@@ -49,12 +49,12 @@ export const VerticalCollapseTransition: FunctionComponent<
     }
   });
 
-  const opacity = useSpringValue(collapsed ? 0 : 1);
+  const opacity = useSpringValue(collapsed ? 0.1 : 1);
 
   useEffect(() => {
     if (collapsed) {
       heightPx.start(0);
-      opacity.start(0);
+      opacity.start(0.1);
     } else {
       heightPx.start(lastHeight.current);
       opacity.start(1);
