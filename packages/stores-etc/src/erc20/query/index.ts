@@ -193,6 +193,10 @@ export class ObservableQueryERC20MetadataInner {
     return this._querySymbol;
   }
 
+  get queryDecimals(): ObservableQueryERC20MetadataDecimals {
+    return this._queryDecimals;
+  }
+
   get symbol(): string | undefined {
     return this._querySymbol.symbol;
   }

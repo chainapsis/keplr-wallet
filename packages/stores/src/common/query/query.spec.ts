@@ -89,6 +89,8 @@ export class MockObservableQuery extends ObservableQuery<string> {
 
 describe("Test Query store", () => {
   it("test basic query", async () => {
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
+
     const store = new MockObservableQuery(
       new QuerySharedContext(new MemoryKVStore("test"), {
         responseDebounceMs: 10,
@@ -129,9 +131,13 @@ describe("Test Query store", () => {
     expect(store.isFetching).toBe(false);
 
     expect(store.response?.data).toBe("0");
+
+    expect(spyAbort).toBeCalledTimes(0);
   });
 
   it("test basic waitResponse()", async () => {
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
+
     const store = new MockObservableQuery(
       new QuerySharedContext(new MemoryKVStore("test"), {
         responseDebounceMs: 10,
@@ -155,9 +161,13 @@ describe("Test Query store", () => {
     expect(store.isFetching).toBe(false);
 
     expect(store.response?.data).toBe("0");
+
+    expect(spyAbort).toBeCalledTimes(0);
   });
 
   it("test basic waitResponse() with observation disposed", async () => {
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
+
     const store = new MockObservableQuery(
       new QuerySharedContext(new MemoryKVStore("test"), {
         responseDebounceMs: 10,
@@ -193,9 +203,13 @@ describe("Test Query store", () => {
     expect(store.isFetching).toBe(false);
 
     expect(store.response?.data).toBe("0");
+
+    expect(spyAbort).toBeCalledTimes(0);
   });
 
   it("test basic waitFreshResponse()", async () => {
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
+
     const store = new MockObservableQuery(
       new QuerySharedContext(new MemoryKVStore("test"), {
         responseDebounceMs: 10,
@@ -219,9 +233,13 @@ describe("Test Query store", () => {
     expect(store.isFetching).toBe(false);
 
     expect(store.response?.data).toBe("0");
+
+    expect(spyAbort).toBeCalledTimes(0);
   });
 
   it("test basic waitFreshResponse() with observation disposed", async () => {
+    const spyAbort = jest.spyOn(AbortController.prototype, "abort");
+
     const store = new MockObservableQuery(
       new QuerySharedContext(new MemoryKVStore("test"), {
         responseDebounceMs: 10,
@@ -257,5 +275,7 @@ describe("Test Query store", () => {
     expect(store.isFetching).toBe(false);
 
     expect(store.response?.data).toBe("0");
+
+    expect(spyAbort).toBeCalledTimes(0);
   });
 });

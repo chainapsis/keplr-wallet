@@ -48,13 +48,25 @@ export class GravityBridgeCurrencyRegistrar {
           coinDenom: erc20Metadata.symbol,
           coinDecimals: erc20Metadata.decimals,
         },
-        done: true,
+        done:
+          !erc20Metadata.querySymbol.isFetching &&
+          !erc20Metadata.queryDecimals.isFetching,
+      };
+    }
+
+    if (
+      erc20Metadata.querySymbol.isFetching ||
+      erc20Metadata.queryDecimals.isFetching
+    ) {
+      return {
+        value: undefined,
+        done: false,
       };
     }
 
     return {
       value: undefined,
-      done: false,
+      done: true,
     };
   }
 }

@@ -62,18 +62,16 @@ export class AxelarEVMBridgeCurrencyRegistrar {
       };
     }
 
-    // There is no matching response after query completes,
-    // there is no way to get the asset info.
-    if (!tokenInfo.isFetching) {
+    if (tokenInfo.isFetching) {
       return {
         value: undefined,
-        done: true,
+        done: false,
       };
     }
 
     return {
       value: undefined,
-      done: false,
+      done: true,
     };
   }
 }

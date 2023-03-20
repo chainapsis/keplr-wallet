@@ -251,6 +251,7 @@ export class IBCCurrencyRegistrar {
 
     if (originChainInfo && denomTrace) {
       if (denomTrace.denom.split(/^(cw20):(\w+)$/).length === 4) {
+        let isFetching = false;
         // If the origin currency is ics20-cw20.
         let cw20Currency = originChainInfo.currencies.find(
           (cur) =>
@@ -267,6 +268,7 @@ export class IBCCurrencyRegistrar {
               originQueries.cosmwasm.querycw20ContractInfo.getQueryContract(
                 contractAddress
               );
+            isFetching = contractInfo.isFetching;
             if (contractInfo.response) {
               cw20Currency = {
                 type: "cw20",
@@ -275,7 +277,6 @@ export class IBCCurrencyRegistrar {
                 coinDenom: contractInfo.response.data.symbol,
                 coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
               };
-              originChainInfo.addCurrencies(cw20Currency);
             }
           }
         }
@@ -297,7 +298,7 @@ export class IBCCurrencyRegistrar {
               originChainId: originChainInfo.chainId,
               originCurrency: cw20Currency,
             },
-            done: true,
+            done: !isFetching,
           };
         }
       } else {
