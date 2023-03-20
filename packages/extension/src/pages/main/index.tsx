@@ -17,6 +17,11 @@ import { BIP44SelectModal } from "./bip44-select-modal";
 import { Menu } from "./menu";
 import style from "./style.module.scss";
 import { TokensView } from "./token";
+import { AUTH_SERVER } from "../../config.ui.var";
+import { getJWT } from "@utils/auth";
+import { store } from "@chatStore/index";
+import { setAccessToken, setWalletConfig } from "@chatStore/user-slice";
+import { getWalletConfig } from "@graphQL/config-api";
 
 export const MainPage: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -75,6 +80,16 @@ export const MainPage: FunctionComponent = observer(() => {
   // });
 
   // const hasTokens = tokens.length > 0;
+
+  /// Fetching wallet config info
+  useEffect(() => {
+    getJWT(chainStore.current.chainId, AUTH_SERVER).then((res) => {
+      store.dispatch(setAccessToken(res));
+      getWalletConfig().then((config) =>
+        store.dispatch(setWalletConfig(config))
+      );
+    });
+  }, [chainStore.current.chainId]);
 
   return (
     <HeaderLayout
