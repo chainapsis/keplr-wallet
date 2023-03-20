@@ -110,12 +110,6 @@ export class RootStore {
   >;
 
   constructor() {
-    this.uiConfigStore = new UIConfigStore(
-      new ExtensionKVStore("store_ui_config"),
-      ICNSInfo,
-      ICNSFrontendLink
-    );
-
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 
@@ -315,6 +309,13 @@ export class RootStore {
         return obj;
       }, {}),
       "usd"
+    );
+
+    this.uiConfigStore = new UIConfigStore(
+      new ExtensionKVStore("store_ui_config"),
+      this.priceStore,
+      ICNSInfo,
+      ICNSFrontendLink
     );
 
     this.tokensStore = new TokensStore(

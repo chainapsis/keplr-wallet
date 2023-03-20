@@ -1,11 +1,11 @@
 import { ObservableQuery, QuerySharedContext } from "../common";
 import { CoinGeckoSimplePrice } from "./types";
-import { KVStore, toGenerator } from "@keplr-wallet/common";
+import { KVStore } from "@keplr-wallet/common";
 import { Dec, CoinPretty, Int, PricePretty } from "@keplr-wallet/unit";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
-import { action, flow, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import { makeURL } from "@keplr-wallet/simple-fetch";
 
 class Throttler {
@@ -208,8 +208,6 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     this._throttler = new Throttler(throttleDuration);
 
     makeObservable(this);
-
-    this.restoreDefaultVsCurrency();
   }
 
   protected override onStart(): Promise<void> {
@@ -241,21 +239,6 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   @action
   setDefaultVsCurrency(defaultVsCurrency: string) {
     this._defaultVsCurrency = defaultVsCurrency;
-    this.saveDefaultVsCurrency();
-  }
-
-  @flow
-  *restoreDefaultVsCurrency() {
-    const saved = yield* toGenerator(
-      this.kvStore.get<string>("__default_vs_currency")
-    );
-    if (saved) {
-      this._defaultVsCurrency = saved;
-    }
-  }
-
-  async saveDefaultVsCurrency() {
-    await this.kvStore.set("__default_vs_currency", this.defaultVsCurrency);
   }
 
   get supportedVsCurrencies(): DeepReadonly<{

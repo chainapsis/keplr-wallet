@@ -6,16 +6,22 @@ import { Stack } from "../../components/stack";
 import { PageButton } from "./components";
 import { SettingIcon, RightArrowIcon } from "../../components/icon";
 import { useNavigate } from "react-router";
+import { XAxis } from "../../components/axis";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
+
   return (
     <HeaderLayout title="Setting" left={<BackButton />}>
       <Stack gutter="2rem">
         <PageButton
-          title="General"
+          title={
+            <XAxis alignY="center">
+              <SettingIcon width={16} height={16} />
+              General
+            </XAxis>
+          }
           paragraph="Language, Currency.."
-          startIcon={<SettingIcon width={16} height={16} />}
           endIcon={<RightArrowIcon />}
           onClick={() => navigate("/setting/general")}
         />
