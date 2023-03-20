@@ -1,4 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
+import { PermissionKeyHelper } from "../helper";
 
 export type LegacyGlobalPermissionMap = {
   [type: string]:
@@ -42,7 +43,13 @@ export async function migrate(
               for (const origin of Object.keys(originMap)) {
                 const granted = typeMap[origin];
                 if (granted) {
-                  res[`${chainIdentifier}/${type}/${origin}`] = true;
+                  res[
+                    PermissionKeyHelper.getPermissionKey(
+                      chainIdentifier,
+                      type,
+                      origin
+                    )
+                  ] = true;
                 }
               }
             }
@@ -57,7 +64,8 @@ export async function migrate(
           for (const origin of Object.keys(originMap)) {
             const granted = globalMap[origin];
             if (granted) {
-              res[`_global__permission_/${type}/${origin}`] = true;
+              res[PermissionKeyHelper.getGlobalPermissionKey(type, origin)] =
+                true;
             }
           }
         }

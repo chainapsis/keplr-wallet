@@ -31,6 +31,7 @@ import {
   TokensStore,
   ICNSInteractionStore,
   ICNSQueries,
+  PermissionManagerStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -60,6 +61,8 @@ export class RootStore {
   public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
   public readonly ibcChannelStore: IBCChannelStore;
+
+  public readonly permissionManagerStore: PermissionManagerStore;
 
   public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
@@ -110,12 +113,6 @@ export class RootStore {
   >;
 
   constructor() {
-    this.uiConfigStore = new UIConfigStore(
-      new ExtensionKVStore("store_ui_config"),
-      ICNSInfo,
-      ICNSFrontendLink
-    );
-
     const router = new ExtensionRouter(ContentScriptEnv.produceEnv);
     router.addGuard(ContentScriptGuards.checkMessageIsInternal);
 
@@ -123,6 +120,10 @@ export class RootStore {
     const interactionAddonService =
       new InteractionAddon.InteractionAddonService();
     InteractionAddon.init(router, interactionAddonService);
+
+    this.permissionManagerStore = new PermissionManagerStore(
+      new InExtensionMessageRequester()
+    );
 
     // Order is important.
     this.interactionStore = new InteractionStore(
@@ -315,6 +316,13 @@ export class RootStore {
         return obj;
       }, {}),
       "usd"
+    );
+
+    this.uiConfigStore = new UIConfigStore(
+      new ExtensionKVStore("store_ui_config"),
+      this.priceStore,
+      ICNSInfo,
+      ICNSFrontendLink
     );
 
     this.tokensStore = new TokensStore(

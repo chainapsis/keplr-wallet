@@ -5,35 +5,39 @@ import { Stack } from "../../../../components/stack";
 import styled from "styled-components";
 
 export interface PageButtonProps {
-  title: string;
+  title: string | React.ReactNode;
   paragraph?: string;
-  startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
+
+  onClick?: () => void;
 }
 
 export const Styles = {
   Container: styled.div`
-    cursor: pointer;
+    cursor: ${({ onClick }) => (onClick ? "pointer" : "auto")};
   `,
 };
 
-export const PageButton: FunctionComponent<
-  PageButtonProps & React.HTMLAttributes<HTMLDivElement>
-> = (props) => {
-  const { title, paragraph, startIcon, endIcon } = props;
-
-  const attributes = { ...props };
-  delete attributes.paragraph;
-
+export const PageButton: FunctionComponent<PageButtonProps> = ({
+  title,
+  paragraph,
+  endIcon,
+  onClick,
+}) => {
   return (
-    <Styles.Container {...attributes}>
+    <Styles.Container
+      onClick={
+        onClick &&
+        ((e) => {
+          e.preventDefault();
+          onClick();
+        })
+      }
+    >
       <Columns sum={1} alignY="center">
         <Column weight={1}>
           <Stack>
-            <Columns sum={1} alignY="center">
-              <Box>{startIcon}</Box>
-              <Box>{title}</Box>
-            </Columns>
+            <Box>{title}</Box>
             <Box>{paragraph}</Box>
           </Stack>
         </Column>

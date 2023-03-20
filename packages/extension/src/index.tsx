@@ -29,6 +29,9 @@ import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SettingPage } from "./pages/setting";
 import { SettingGeneralPage } from "./pages/setting/general";
+import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
+import { SettingSecurityPage } from "./pages/setting/security";
+import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
 
@@ -43,8 +46,13 @@ window.keplr = new Keplr(
 );
 
 const RoutesAfterReady: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, keyRingStore, ibcCurrencyRegistrar } =
-    useStore();
+  const {
+    chainStore,
+    accountStore,
+    keyRingStore,
+    ibcCurrencyRegistrar,
+    uiConfigStore,
+  } = useStore();
 
   useEffect(() => {
     if (keyRingStore.status === "unlocked") {
@@ -106,12 +114,17 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (!uiConfigStore.isInitialized) {
+      return false;
+    }
+
     return true;
   }, [
     accountStore,
     chainStore.chainInfos,
     chainStore.isInitializing,
     ibcCurrencyRegistrar.isInitialized,
+    uiConfigStore.isInitialized,
     keyRingStore.status,
   ]);
 
@@ -130,6 +143,15 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route path="/" element={<MainPage />} />
             <Route path="/setting" element={<SettingPage />} />
             <Route path="/setting/general" element={<SettingGeneralPage />} />
+            <Route
+              path="/setting/general/fiat"
+              element={<SettingGeneralFiatPage />}
+            />
+            <Route path="/setting/security" element={<SettingSecurityPage />} />
+            <Route
+              path="/setting/security/permission"
+              element={<SettingSecurityPermissionPage />}
+            />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
             <Route

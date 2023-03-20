@@ -1,6 +1,7 @@
 import { InteractionService } from "../interaction";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import {
+  AllPermissionDataPerOrigin,
   getBasicAccessPermissionType,
   GlobalPermissionData,
   INTERACTION_TYPE_GLOBAL_PERMISSION,
@@ -74,6 +75,40 @@ export class PermissionService {
   protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
     this.removeAllPermissions(chainInfo.chainId);
   };
+
+  getAllPermissionDataPerOrigin(): AllPermissionDataPerOrigin {
+    const data: AllPermissionDataPerOrigin = {};
+
+    for (const key of this.permissionMap.keys()) {
+      const split = PermissionKeyHelper.splitPermissionKey(key);
+
+      const origin = split.origin;
+      if (!data[origin]) {
+        data[origin] = {
+          permissions: [],
+          globalPermissions: [],
+        };
+      }
+
+      if (!split.chainIdentifier) {
+        data[origin]!.globalPermissions.push({
+          type: split.type,
+        });
+      } else {
+        data[origin]!.permissions.push({
+          chainIdentifier: split.chainIdentifier,
+          type: split.type,
+        });
+      }
+    }
+
+    return data;
+  }
+
+  @action
+  clearAllPermissions() {
+    this.permissionMap.clear();
+  }
 
   async checkOrGrantBasicAccessPermission(
     env: Env,
@@ -290,7 +325,7 @@ export class PermissionService {
     (chainId: string, type: string): string[] => {
       const origins = [];
 
-      for (const key of Object.keys(this.permissionMap)) {
+      for (const key of this.permissionMap.keys()) {
         const origin = PermissionKeyHelper.getOriginFromPermissionKey(
           chainId,
           type,
@@ -312,7 +347,7 @@ export class PermissionService {
     (type: string): string[] => {
       const origins = [];
 
-      for (const key of Object.keys(this.permissionMap)) {
+      for (const key of this.permissionMap.keys()) {
         const origin = PermissionKeyHelper.getOriginFromGlobalPermissionKey(
           type,
           key
@@ -333,7 +368,7 @@ export class PermissionService {
     (origin: string, type: string): string[] => {
       const chains: string[] = [];
 
-      for (const key of Object.keys(this.permissionMap)) {
+      for (const key of this.permissionMap.keys()) {
         const chain = PermissionKeyHelper.getChainIdentifierFromPermissionKey(
           type,
           origin,
@@ -386,7 +421,7 @@ export class PermissionService {
   removeAllTypePermission(origins: string[]) {
     const deletes: string[] = [];
 
-    for (const key of Object.keys(this.permissionMap)) {
+    for (const key of this.permissionMap.keys()) {
       for (const origin of origins) {
         const typeAndOrigin =
           PermissionKeyHelper.getChainAndTypeFromPermissionKey(origin, key);
@@ -405,7 +440,7 @@ export class PermissionService {
   removeAllTypePermissionToChainId(chainId: string, origins: string[]) {
     const deletes: string[] = [];
 
-    for (const key of Object.keys(this.permissionMap)) {
+    for (const key of this.permissionMap.keys()) {
       const typeAndOrigin =
         PermissionKeyHelper.getTypeAndOriginFromPermissionKey(chainId, key);
       if (typeAndOrigin && origins.includes(typeAndOrigin.origin)) {
@@ -422,7 +457,7 @@ export class PermissionService {
   removeGlobalPermission(type: string, origins: string[]) {
     const deletes: string[] = [];
 
-    for (const key of Object.keys(this.permissionMap)) {
+    for (const key of this.permissionMap.keys()) {
       const typeAndOrigin =
         PermissionKeyHelper.getTypeAndOriginFromGlobalPermissionKey(key);
       if (
@@ -443,7 +478,7 @@ export class PermissionService {
   removeAllTypeGlobalPermission(origins: string[]) {
     const deletes: string[] = [];
 
-    for (const key of Object.keys(this.permissionMap)) {
+    for (const key of this.permissionMap.keys()) {
       const typeAndOrigin =
         PermissionKeyHelper.getTypeAndOriginFromGlobalPermissionKey(key);
       if (typeAndOrigin && origins.includes(typeAndOrigin.origin)) {
@@ -460,7 +495,7 @@ export class PermissionService {
   removeAllPermissions(chainId: string) {
     const deletes: string[] = [];
 
-    for (const key of Object.keys(this.permissionMap)) {
+    for (const key of this.permissionMap.keys()) {
       if (PermissionKeyHelper.getTypeAndOriginFromPermissionKey(chainId, key)) {
         deletes.push(key);
       }

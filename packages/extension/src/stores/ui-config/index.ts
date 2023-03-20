@@ -1,16 +1,29 @@
 /**
  * Store the config related to UI.
  */
-import { action, makeObservable, observable, runInAction, toJS } from "mobx";
+import {
+  action,
+  autorun,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+  toJS,
+} from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
+import { FiatCurrency } from "@keplr-wallet/types";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
 }
 
 export class UIConfigStore {
+  @observable
+  protected _isInitialized: boolean = false;
+
   @observable.deep
   protected options: UIConfigOptions = {
     isDeveloperMode: false,
@@ -34,8 +47,14 @@ export class UIConfigStore {
   @observable
   protected _icnsFrontendAllowlistChains: string = "";
 
+  // undefined means "automatic"
+  // If this value is undefined, the actual `fiatCurrency` getter should determine the fiat currency.
+  @observable
+  protected _fiatCurrency: string | undefined = undefined;
+
   constructor(
     protected readonly kvStore: KVStore,
+    protected readonly priceStore: CoinGeckoPriceStore,
     _icnsInfo?: {
       readonly chainId: string;
       readonly resolverContractAddress: string;
@@ -55,6 +74,10 @@ export class UIConfigStore {
     this.init();
   }
 
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
+
   protected async init() {
     // There is no guarantee that this value will contain all options fields, as the options field may be added later.
     // showAdvancedIBCTransfer is legacy value
@@ -69,12 +92,29 @@ export class UIConfigStore {
       this.options.isDeveloperMode = true;
     }
 
+    {
+      const saved = await this.kvStore.get<string>("fiatCurrency");
+      if (saved) {
+        this.selectFiatCurrency(saved);
+      } else {
+        this.selectFiatCurrency(undefined);
+      }
+      autorun(() => {
+        this.kvStore.set("fiatCurrency", this._fiatCurrency);
+      });
+    }
+
     runInAction(() => {
       this.options = {
         ...this.options,
         ...data,
       };
     });
+
+    runInAction(() => {
+      this._isInitialized = true;
+    });
+    // XXX: Below logic has fetching logic, so it should not be included in initialization logic.
 
     if (this.icnsFrontendLink) {
       try {
@@ -122,6 +162,42 @@ export class UIConfigStore {
 
     // No need to await
     this.save();
+  }
+
+  @computed
+  get fiatCurrency(): FiatCurrency & {
+    isAutomatic?: boolean;
+  } {
+    let fiatCurrency = this._fiatCurrency;
+    if (!fiatCurrency) {
+      // TODO: How to handle "automatic"?
+      fiatCurrency = "usd";
+    }
+
+    return {
+      ...(this.priceStore.supportedVsCurrencies[fiatCurrency] ?? {
+        currency: "usd",
+        symbol: "$",
+        maxDecimals: 2,
+        locale: "en-US",
+      }),
+      isAutomatic: !this._fiatCurrency,
+    };
+  }
+
+  @action
+  selectFiatCurrency(value: string | undefined) {
+    this._fiatCurrency = value;
+    if (!value) {
+      // TODO: How to handle "automatic"?
+      this.priceStore.setDefaultVsCurrency("usd");
+    } else {
+      this.priceStore.setDefaultVsCurrency(value);
+    }
+  }
+
+  get supportedFiatCurrencies() {
+    return this.priceStore.supportedVsCurrencies;
   }
 
   get icnsInfo() {

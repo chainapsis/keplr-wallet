@@ -1,5 +1,6 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
+import { AllPermissionDataPerOrigin } from "./types";
 
 export class GetPermissionOriginsMsg extends Message<string[]> {
   public static type() {
@@ -187,5 +188,73 @@ export class RemoveGlobalPermissionOriginMsg extends Message<void> {
 
   type(): string {
     return RemoveGlobalPermissionOriginMsg.type();
+  }
+}
+
+export class ClearOriginPermissionMsg extends Message<void> {
+  public static type() {
+    return "clear-origin-permission";
+  }
+
+  constructor(public readonly permissionOrigin: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.permissionOrigin) {
+      throw new KeplrError("permission", 111, "empty permission origin");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearOriginPermissionMsg.type();
+  }
+}
+
+export class ClearAllPermissionsMsg extends Message<void> {
+  public static type() {
+    return "clear-all-permissions";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllPermissionsMsg.type();
+  }
+}
+
+export class GetAllPermissionDataPerOriginMsg extends Message<AllPermissionDataPerOrigin> {
+  public static type() {
+    return "get-all-permission-data-per-origin";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetAllPermissionDataPerOriginMsg.type();
   }
 }
