@@ -6,37 +6,64 @@ import { Column, Columns } from "../../../../components/column";
 import { observer } from "mobx-react-lite";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { ViewToken } from "../../index";
+import {
+  Body2,
+  Caption1,
+  Subtitle2,
+  Subtitle4,
+} from "../../../../components/typography";
+import { ColorPalette } from "../../../../styles";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  QuestionIcon,
+} from "../../../../components/icon";
+import styled from "styled-components";
 
+const Styles = {
+  Container: styled.div`
+    background-color: ${ColorPalette["gray-600"]};
+    padding: 1rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+  `,
+};
 export const TokenItem: FunctionComponent<{ viewToken: ViewToken }> = observer(
   ({ viewToken }) => {
     const { priceStore } = useStore();
 
     return (
-      <Columns sum={1}>
-        {viewToken.token.currency.coinImageUrl && (
-          <img
-            width="32px"
-            height="32px"
-            src={viewToken.token.currency.coinImageUrl}
-          />
-        )}
-        <Column weight={1}>
-          <Stack>
-            <Box>{viewToken.token.currency.coinDenom}</Box>
-            <Box>{viewToken.chainName}</Box>
+      <Styles.Container>
+        <Columns sum={1} gutter="0.5rem" alignY="center">
+          {viewToken.token.currency.coinImageUrl && (
+            <img
+              width="36px"
+              height="36px"
+              src={viewToken.token.currency.coinImageUrl}
+            />
+          )}
+          <Stack gutter="0.25rem">
+            <Subtitle2>{viewToken.token.currency.coinDenom}</Subtitle2>
+            <Caption1 style={{ color: ColorPalette["gray-300"] }}>
+              {viewToken.chainInfo.chainName}
+            </Caption1>
           </Stack>
-        </Column>
 
-        <Stack>
-          <Box>{viewToken.token.hideDenom(true).toString()}</Box>
-          <Box>
-            {parseFloat(
-              priceStore.calculatePrice(viewToken.token)?.toDec().toString() ??
-                "0"
-            )}
-          </Box>
-        </Stack>
-      </Columns>
+          <Column weight={1} />
+
+          <Stack gutter="0.25rem" alignX="right">
+            <Body2>{viewToken.token.hideDenom(true).toString()}</Body2>
+            <Body2 style={{ color: ColorPalette["gray-300"] }}>
+              {parseFloat(
+                priceStore
+                  .calculatePrice(viewToken.token)
+                  ?.toDec()
+                  .toString() ?? "0"
+              )}
+            </Body2>
+          </Stack>
+        </Columns>
+      </Styles.Container>
     );
   }
 );
@@ -55,26 +82,64 @@ export const TokenView: FunctionComponent<{
         onClick={() => {
           setIsExpanded(!isExpanded);
         }}
+        cursor="pointer"
       >
-        <b>{title}</b>
+        <Columns sum={1} alignY="center">
+          <Subtitle4 style={{ color: ColorPalette["gray-300"] }}>
+            {title}
+          </Subtitle4>
+          <Box paddingLeft="0.375rem" paddingY="0.5rem">
+            <QuestionIcon
+              width="1rem"
+              height="1rem"
+              color={ColorPalette["gray-300"]}
+            />
+          </Box>
+
+          <Column weight={1} />
+
+          <Subtitle4 style={{ color: ColorPalette["gray-300"] }}>
+            {viewTokens.length}
+          </Subtitle4>
+          <Box paddingLeft="0.25rem">
+            {isExpanded ? (
+              <ArrowDownIcon
+                width="1rem"
+                height="1rem"
+                color={ColorPalette["gray-300"]}
+              />
+            ) : (
+              <ArrowUpIcon
+                width="1rem"
+                height="1rem"
+                color={ColorPalette["gray-300"]}
+              />
+            )}
+          </Box>
+        </Columns>
       </Box>
 
-      <Stack gutter="1rem">
+      <Stack gutter="0.5rem">
         {alwaysShownTokens.map((viewToken) => (
           <TokenItem
             viewToken={viewToken}
-            key={viewToken.token.currency.coinMinimalDenom}
+            key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
           />
         ))}
-        <VerticalCollapseTransition collapsed={isExpanded}>
-          {collapsedTokens.map((viewToken) => (
-            <TokenItem
-              viewToken={viewToken}
-              key={viewToken.token.currency.coinMinimalDenom}
-            />
-          ))}
-        </VerticalCollapseTransition>
       </Stack>
+
+      <Box marginTop="0.5rem">
+        <VerticalCollapseTransition collapsed={isExpanded}>
+          <Stack gutter="0.5rem">
+            {collapsedTokens.map((viewToken) => (
+              <TokenItem
+                viewToken={viewToken}
+                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+              />
+            ))}
+          </Stack>
+        </VerticalCollapseTransition>
+      </Box>
     </Stack>
   );
 };

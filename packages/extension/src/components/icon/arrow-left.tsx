@@ -1,10 +1,11 @@
 import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
+import { ColorPalette } from "../../styles";
 
-export const LeftArrowIcon: FunctionComponent<IconProps> = ({
+export const ArrowLeftIcon: FunctionComponent<IconProps> = ({
   width = 24,
   height = 24,
-  color = "#72747B",
+  color = ColorPalette["gray-300"],
 }) => {
   return (
     <svg

@@ -9,6 +9,7 @@ import InterSemiBold from "../public/assets/font/Inter-SemiBold.ttf";
 import InterBold from "../public/assets/font/Inter-Bold.ttf";
 import InterExtraBold from "../public/assets/font/Inter-ExtraBold.ttf";
 import InterBlack from "../public/assets/font/Inter-Black.ttf";
+import { ColorPalette } from "./colors";
 
 export const GlobalStyle = createGlobalStyle`
   ${normalize}
@@ -69,8 +70,8 @@ export const GlobalStyle = createGlobalStyle`
   
   html, body {
     font-family: 'Inter', sans-serif;
-    color: #F6F6F9;
-    background-color: #09090A;
+    color: ${ColorPalette.white};
+    background-color: ${ColorPalette["gray-700"]};
   }
 
   // Set border-box as default for convenience.

@@ -6,7 +6,7 @@ import { Gutter } from "../../../../components/gutter";
 
 export const Buttons: FunctionComponent = () => {
   return (
-    <Box paddingX="0.5rem">
+    <Box>
       <Columns sum={1}>
         <Column weight={1}>
           <Button text="Deposit" />

@@ -2,15 +2,26 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { HeaderLayout } from "../../layouts/header";
-import { BackButton, ProfileButton } from "../../layouts/header/components";
+import { ProfileButton } from "../../layouts/header/components";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Buttons, ClaimAll, TokenView } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { ChainInfo } from "@keplr-wallet/types";
+import styled from "styled-components";
+import { MenuIcon } from "../../components/icon";
+import { Box } from "../../components/box";
+
+const Styles = {
+  Container: styled.div`
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  `,
+};
 
 export interface ViewToken {
   token: CoinPretty;
-  chainName: string;
+  chainInfo: ChainInfo;
 }
 
 export const MainPage: FunctionComponent = observer(() => {
@@ -29,10 +40,10 @@ export const MainPage: FunctionComponent = observer(() => {
         queryBalances.getBalanceFromCurrency(currency)
       );
 
-      return BalanceFromCurrency.map((balance) => {
+      return BalanceFromCurrency.map((token) => {
         return {
-          token: balance,
-          chainName: chainInfo.chainName,
+          token,
+          chainInfo,
         };
       });
     }
@@ -48,7 +59,7 @@ export const MainPage: FunctionComponent = observer(() => {
         token:
           queries.queryBalances.getQueryBech32Address(accountAddress).stakable
             .balance,
-        chainName: chainInfo.chainName,
+        chainInfo,
       };
     }
   );
@@ -76,29 +87,40 @@ export const MainPage: FunctionComponent = observer(() => {
     );
   });
 
-  const claimBalances = chainStore.chainInfosInUI.flatMap((chainInfo) => {
-    const chainId = chainInfo.chainId;
-    const accountAddress = accountStore.getAccount(chainId).bech32Address;
-    const queries = queriesStore.get(chainId);
+  const claimBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
+    (chainInfo) => {
+      const chainId = chainInfo.chainId;
+      const accountAddress = accountStore.getAccount(chainId).bech32Address;
+      const queries = queriesStore.get(chainId);
 
-    return queries.cosmos.queryRewards.getQueryBech32Address(accountAddress)
-      .stakableReward;
-  });
+      return {
+        token:
+          queries.cosmos.queryRewards.getQueryBech32Address(accountAddress)
+            .stakableReward,
+        chainInfo,
+      };
+    }
+  );
 
   return (
     <HeaderLayout
       title="Wallet Name"
-      left={<BackButton />}
+      left={
+        <Box paddingLeft="1rem">
+          <MenuIcon />
+        </Box>
+      }
       right={<ProfileButton />}
     >
-      <Stack gutter="1rem">
-        <Buttons />
-        <ClaimAll tokens={claimBalances} />
-      </Stack>
-
-      <TokenView title="Balance" viewTokens={stakableBalances} />
-      <TokenView title="Token Balance" viewTokens={tokenBalances} />
-      <TokenView title="IBC Balance" viewTokens={ibcBalances} />
+      <Styles.Container>
+        <Stack gutter="1rem">
+          <Buttons />
+          <ClaimAll viewTokens={claimBalances} />
+          <TokenView title="Balance" viewTokens={stakableBalances} />
+          <TokenView title="Token Balance" viewTokens={tokenBalances} />
+          <TokenView title="IBC Balance" viewTokens={ibcBalances} />
+        </Stack>
+      </Styles.Container>
     </HeaderLayout>
   );
 });

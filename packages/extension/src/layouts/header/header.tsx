@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 import styled from "styled-components";
 import { HeaderProps } from "./types";
+import { Subtitle1 } from "../../components/typography";
 
 const Styles = {
   Container: styled.div``,
@@ -63,7 +64,9 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
     <Styles.Container>
       <Styles.HeaderContainer>
         {left && <Styles.HeaderLeft>{left}</Styles.HeaderLeft>}
-        <Styles.HeaderTitle>{title}</Styles.HeaderTitle>
+        <Styles.HeaderTitle>
+          <Subtitle1>{title}</Subtitle1>
+        </Styles.HeaderTitle>
         {right && <Styles.HeaderRight>{right}</Styles.HeaderRight>}
       </Styles.HeaderContainer>
 
