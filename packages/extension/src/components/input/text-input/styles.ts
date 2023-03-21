@@ -1,6 +1,7 @@
 import styled, { css } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { TextInputProps } from "./types";
+import { Caption2, Subtitle3 } from "../../typography";
 
 const getTextInputStyleForErrorOrParagraph = (
   error?: string,
@@ -9,7 +10,7 @@ const getTextInputStyleForErrorOrParagraph = (
 ) => {
   if (error || errorBorder) {
     return css`
-      border-color: ${ColorPalette["red-200"]};
+      border-color: #f0b622;
 
       :focus-visible {
         border-color: ${ColorPalette["red-200"]};
@@ -28,7 +29,7 @@ const getSubTextStyleForErrorOrParagraph = (
 ) => {
   if (error) {
     return css`
-      color: ${ColorPalette["red-400"]};
+      color: #f0b622;
     `;
   }
 
@@ -39,14 +40,38 @@ const getSubTextStyleForErrorOrParagraph = (
   }
 };
 
+const DisableStyle = css`
+  background-color: ${ColorPalette["gray-600"]};
+  cursor: not-allowed;
+
+  svg {
+    color: ${ColorPalette["gray-300"]};
+  }
+`;
+
 export const Styles = {
-  Container: styled.div<{ isTextarea?: boolean; removeBottomMargin?: boolean }>`
-    // Used for making button fill parent horizontally.
-    margin-bottom: ${({ removeBottomMargin }) =>
-      removeBottomMargin ? undefined : "1.5rem"};
+  Container: styled.div<{ isTextarea?: boolean }>`
     // Without this, text-area's height will be expanded slightly.
     // I don't know why yet :(
     line-height: ${({ isTextarea }) => (isTextarea ? 0 : undefined)};
+  `,
+  TextInputContainer: styled.div<TextInputProps & { isTextarea?: boolean }>`
+    border: 1px solid ${ColorPalette["gray-400"]};
+    border-radius: 0.5rem;
+    background-color: ${ColorPalette["gray-700"]};
+
+    :focus-within {
+      border-color: ${ColorPalette["gray-200"]};
+    }
+
+    ${({ disabled }) => {
+      if (disabled) {
+        return DisableStyle;
+      }
+    }}
+
+    ${({ error, paragraph, errorBorder }) =>
+      getTextInputStyleForErrorOrParagraph(error, paragraph, errorBorder)}
   `,
   TextInput: styled.input<TextInputProps & { isTextarea?: boolean }>`
     width: 100%;
@@ -54,51 +79,32 @@ export const Styles = {
     margin: 0;
     padding: ${({ isTextarea }) =>
       isTextarea ? "0.75rem 0.75rem" : "0 0.75rem"};
-    background-color: ${ColorPalette["white"]};
-    border: 1px solid ${ColorPalette["gray-100"]};
+    background-color: ${ColorPalette["gray-700"]};
+    border: 0;
     border-radius: 0.5rem;
+    color: ${ColorPalette["gray-300"]};
 
-    ${({ readOnly }) => {
-      if (!readOnly) {
-        return css`
-          :focus-visible {
-            border-color: ${ColorPalette["blue-400"]};
-          }
-        `;
+    :focus-visible {
+      color: ${ColorPalette["gray-50"]};
+    }
+
+    ${({ disabled }) => {
+      if (disabled) {
+        return DisableStyle;
       }
     }}
 
     // Remove normalized css properties
     outline: none;
 
-    font-size: 1rem;
-    line-height: 110%;
-    font-weight: 400;
-    letter-spacing: -0.1px;
-    color: ${ColorPalette["black"]};
-
-    ${({ error, paragraph, errorBorder }) =>
-      getTextInputStyleForErrorOrParagraph(error, paragraph, errorBorder)}
-  `,
-  Label: styled.div`
-    margin-bottom: 0.5rem;
-
-    font-weight: 600;
     font-size: 0.875rem;
-    line-height: 110%;
-    color: ${ColorPalette["platinum-300"]};
-  `,
-  SubText: styled.div<Pick<TextInputProps, "error" | "paragraph">>`
-    position: absolute;
-
-    top: 4px;
-    left: 6px;
-
     font-weight: 400;
-    font-size: 0.75rem;
-    line-height: 110%;
-    letter-spacing: 0.3px;
-
+  `,
+  Label: styled(Subtitle3)`
+    margin-bottom: 0.375rem;
+    color: ${ColorPalette["gray-100"]};
+  `,
+  SubText: styled(Caption2)<Pick<TextInputProps, "error" | "paragraph">>`
     ${({ error, paragraph }) =>
       getSubTextStyleForErrorOrParagraph(error, paragraph)}
   `,
