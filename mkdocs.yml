@@ -17,6 +17,7 @@ nav:
   - Deposit Tokens: 'deposit.md'
   - Send Tokens: 'send_tokens.md'
   - Recover Migrated ETH Account: 'migrate_erc20.md'
+  - Token Migration for Hardware Wallets: 'docs/token_migration_hw.md'
   - Staking: 'stake.md'
   - Utilities:
     - Address Book: 'address_book.md'
