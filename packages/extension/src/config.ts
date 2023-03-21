@@ -2161,6 +2161,43 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["terra-classic-fee"],
   },
+  {
+    rpc: "https://rpc-quasar.keplr.app",
+    rest: "https://lcd-quasar.keplr.app",
+    chainId: "quasar-1",
+    chainName: "Quasar",
+    stakeCurrency: {
+      coinDenom: "QSR",
+      coinMinimalDenom: "uqsr",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "quasar",
+      bech32PrefixAccPub: "quasarpub",
+      bech32PrefixValAddr: "quasarvaloper",
+      bech32PrefixValPub: "quasarvaloperpub",
+      bech32PrefixConsAddr: "quasarvalcons",
+      bech32PrefixConsPub: "quasarvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "QSR",
+        coinMinimalDenom: "uqsr",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "QSR",
+        coinMinimalDenom: "uqsr",
+        coinDecimals: 6,
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
