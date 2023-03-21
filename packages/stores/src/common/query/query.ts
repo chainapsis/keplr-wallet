@@ -167,11 +167,26 @@ class FunctionQueue {
   }
 }
 
+export interface IObservableQuery<T = unknown, E = unknown> {
+  isObserved: boolean;
+  isStarted: boolean;
+
+  response?: Readonly<QueryResponse<T>>;
+  error?: Readonly<QueryError<E>>;
+  isFetching: boolean;
+
+  fetch(): Generator<unknown, any, any> | Promise<void>;
+  waitResponse(): Promise<Readonly<QueryResponse<T>> | undefined>;
+  waitFreshResponse(): Promise<Readonly<QueryResponse<T>> | undefined>;
+}
+
 /**
  * Base of the observable query classes.
  * This recommends to use the fetch to query the response.
  */
-export abstract class ObservableQuery<T = unknown, E = unknown> {
+export abstract class ObservableQuery<T = unknown, E = unknown>
+  implements IObservableQuery<T, E>
+{
   protected static suspectedResponseDatasWithInvalidValue: string[] = [
     "The network connection was lost.",
     "The request timed out.",
