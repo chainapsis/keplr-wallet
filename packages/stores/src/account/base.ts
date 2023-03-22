@@ -31,7 +31,6 @@ export interface AccountSetOpts {
     chainInfo: ReturnType<ChainGetter["getChain"]>
   ) => Promise<void>;
   readonly autoInit: boolean;
-  readonly getKeplr: () => Promise<Keplr | undefined>;
 }
 
 export class AccountSetBase {
@@ -103,7 +102,7 @@ export class AccountSetBase {
   }
 
   getKeplr(): Promise<Keplr | undefined> {
-    return this.opts.getKeplr();
+    return this.sharedContext.getKeplr();
   }
 
   registerSendTokenFn(
@@ -135,24 +134,26 @@ export class AccountSetBase {
     this.makeSendTokenTxFns.push(fn);
   }
 
-  protected async enable(keplr: Keplr, chainId: string): Promise<void> {
+  protected async enable(chainId: string): Promise<void> {
     const chainInfo = this.chainGetter.getChain(chainId);
 
     if (this.opts.suggestChain) {
+      const keplr = await this.sharedContext.getKeplr();
       if (this.opts.suggestChainFn) {
-        await this.opts.suggestChainFn(keplr, chainInfo);
+        await this.sharedContext.suggestChain(async () => {
+          if (keplr && this.opts.suggestChainFn) {
+            await this.opts.suggestChainFn(keplr, chainInfo);
+          }
+        });
       } else {
-        await this.suggestChain(keplr, chainInfo);
+        await this.sharedContext.suggestChain(async () => {
+          if (keplr) {
+            await keplr.experimentalSuggestChain(chainInfo.embedded);
+          }
+        });
       }
     }
-    // await keplr.enable(chainId);
-  }
-
-  protected async suggestChain(
-    keplr: Keplr,
-    chainInfo: ReturnType<ChainGetter["getChain"]>
-  ): Promise<void> {
-    await keplr.experimentalSuggestChain(chainInfo.embedded);
+    await this.sharedContext.enable(chainId);
   }
 
   private readonly handleInit = () => this.init();
@@ -177,7 +178,7 @@ export class AccountSetBase {
     // Set wallet status as loading whenever try to init.
     this._walletStatus = WalletStatus.Loading;
 
-    const keplr = yield* toGenerator(this.getKeplr());
+    const keplr = yield* toGenerator(this.sharedContext.getKeplr());
     if (!keplr) {
       this._walletStatus = WalletStatus.NotExist;
       return;
@@ -186,7 +187,7 @@ export class AccountSetBase {
     this._walletVersion = keplr.version;
 
     try {
-      yield this.enable(keplr, this.chainId);
+      yield this.enable(this.chainId);
     } catch (e) {
       console.log(e);
       this._walletStatus = WalletStatus.Rejected;
@@ -195,7 +196,7 @@ export class AccountSetBase {
     }
 
     // No need to wait for the result.
-    this.sharedContext.getKey(keplr, this.chainId, (res) => {
+    this.sharedContext.getKey(this.chainId, (res) => {
       if (res.status === "fulfilled") {
         const key = res.value;
         this._bech32Address = key.bech32Address;

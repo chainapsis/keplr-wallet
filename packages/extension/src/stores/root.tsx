@@ -180,11 +180,11 @@ export class RootStore {
     this.accountStore = new AccountStore(
       window,
       this.chainStore,
+      getKeplrFromWindow,
       () => {
         return {
           suggestChain: false,
           autoInit: true,
-          getKeplr: getKeplrFromWindow,
         };
       },
       CosmosAccount.use({
