@@ -108,6 +108,12 @@ module.exports = {
     }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: isEnvDevelopment ? "development" : "production",
+      // XXX: SC_DISABLE_SPEEDY is used for force enabling speedy mode for styled-components.
+      //      According to the document, styled-components injects stylings to <style /> tag for each class name if development mode.
+      //      However, on production mode, it injects stylings by using CSSOM.
+      //      Probably, if development mode, this difference makes the blinking styling for transition components which changes the styling by JS code.
+      //      At present, rather than fixing this for development mode, We fix this by forcing cssom to be enabled, and will fix this later when we have time.
+      SC_DISABLE_SPEEDY: false,
       KEPLR_EXT_ETHEREUM_ENDPOINT: "",
       KEPLR_EXT_AMPLITUDE_API_KEY: "",
     }),
