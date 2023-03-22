@@ -1,59 +1,31 @@
-import { ObservableChainQuery } from "./chain-query";
 import { DenomHelper } from "@keplr-wallet/common";
 import { ChainGetter } from "../chain";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
-import { HasMapStore, QuerySharedContext } from "../common";
+import { HasMapStore, IObservableQuery, QuerySharedContext } from "../common";
 import { computedFn } from "mobx-utils";
 
-export abstract class ObservableQueryBalanceInner<
-  T = unknown,
-  E = unknown
-> extends ObservableChainQuery<T, E> {
-  protected constructor(
-    sharedContext: QuerySharedContext,
-    chainId: string,
-    chainGetter: ChainGetter,
-    url: string,
-    protected readonly denomHelper: DenomHelper
-  ) {
-    super(sharedContext, chainId, chainGetter, url);
-    makeObservable(this);
-  }
-
-  abstract get balance(): CoinPretty;
-
-  @computed
-  get currency(): AppCurrency {
-    const denom = this.denomHelper.denom;
-
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.findCurrency(denom);
-
-    // TODO: Infer the currency according to its denom (such if denom is `uatom` -> `Atom` with decimal 6)?
-    if (!currency) {
-      throw new Error(`Unknown currency: ${denom}`);
-    }
-
-    return currency;
-  }
+export interface IObservableQueryBalanceImpl extends IObservableQuery {
+  balance: CoinPretty;
+  currency: AppCurrency;
 }
 
 export interface BalanceRegistry {
-  getBalanceInner(
+  getBalanceImpl(
     chainId: string,
     chainGetter: ChainGetter,
     bech32Address: string,
     minimalDenom: string
-  ): ObservableQueryBalanceInner | undefined;
+  ): IObservableQueryBalanceImpl | undefined;
 }
 
-export class ObservableQueryBalancesInner {
+export class ObservableQueryBalancesImplMap {
   protected bech32Address: string;
 
   @observable.shallow
-  protected balanceMap: Map<string, ObservableQueryBalanceInner> = new Map();
+  protected balanceImplMap: Map<string, IObservableQueryBalanceImpl> =
+    new Map();
 
   constructor(
     protected readonly sharedContext: QuerySharedContext,
@@ -68,36 +40,36 @@ export class ObservableQueryBalancesInner {
   }
 
   fetch() {
-    this.balanceMap.forEach((bal) => bal.fetch());
+    this.balanceImplMap.forEach((bal) => bal.fetch());
   }
 
   protected getBalanceInner(
     currency: AppCurrency
-  ): ObservableQueryBalanceInner {
+  ): IObservableQueryBalanceImpl {
     let key = currency.coinMinimalDenom;
     // If the currency is secret20, it will be different according to not only the minimal denom but also the viewing key of the currency.
     if ("type" in currency && currency.type === "secret20") {
       key = currency.coinMinimalDenom + "/" + currency.viewingKey;
     }
 
-    if (!this.balanceMap.has(key)) {
+    if (!this.balanceImplMap.has(key)) {
       runInAction(() => {
-        let balanceInner: ObservableQueryBalanceInner | undefined;
+        let balanceImpl: IObservableQueryBalanceImpl | undefined;
 
         for (const registry of this.balanceRegistries) {
-          balanceInner = registry.getBalanceInner(
+          balanceImpl = registry.getBalanceImpl(
             this.chainId,
             this.chainGetter,
             this.bech32Address,
             currency.coinMinimalDenom
           );
-          if (balanceInner) {
+          if (balanceImpl) {
             break;
           }
         }
 
-        if (balanceInner) {
-          this.balanceMap.set(key, balanceInner);
+        if (balanceImpl) {
+          this.balanceImplMap.set(key, balanceImpl);
         } else {
           throw new Error(`Failed to get and parse the balance for ${key}`);
         }
@@ -105,11 +77,11 @@ export class ObservableQueryBalancesInner {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.balanceMap.get(key)!;
+    return this.balanceImplMap.get(key)!;
   }
 
   @computed
-  get stakable(): ObservableQueryBalanceInner {
+  get stakable(): IObservableQueryBalanceImpl {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
     return this.getBalanceInner(chainInfo.stakeCurrency);
@@ -119,7 +91,7 @@ export class ObservableQueryBalancesInner {
    * 알려진 모든 Currency들의 balance를 반환환다.
    */
   @computed
-  get balances(): ObservableQueryBalanceInner[] {
+  get balances(): IObservableQueryBalanceImpl[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
     const result = [];
@@ -136,7 +108,7 @@ export class ObservableQueryBalancesInner {
    * 알려진 모든 Currency들 중 0 이상의 잔고를 가진 balance를 반환환다.
    */
   @computed
-  get positiveBalances(): ObservableQueryBalanceInner[] {
+  get positiveBalances(): IObservableQueryBalanceImpl[] {
     const balances = this.balances;
     return balances.filter((bal) => bal.balance.toDec().gt(new Dec(0)));
   }
@@ -146,7 +118,7 @@ export class ObservableQueryBalancesInner {
    * Native token means that the token that exists on the `bank` module.
    */
   @computed
-  get nonNativeBalances(): ObservableQueryBalanceInner[] {
+  get nonNativeBalances(): IObservableQueryBalanceImpl[] {
     const balances = this.balances;
     return balances.filter(
       (bal) => new DenomHelper(bal.currency.coinMinimalDenom).type !== "native"
@@ -158,7 +130,7 @@ export class ObservableQueryBalancesInner {
    * Native token means that the token that exists on the `bank` module.
    */
   @computed
-  get positiveNativeUnstakables(): ObservableQueryBalanceInner[] {
+  get positiveNativeUnstakables(): IObservableQueryBalanceImpl[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
     const balances = this.balances;
@@ -172,7 +144,7 @@ export class ObservableQueryBalancesInner {
   }
 
   @computed
-  get unstakables(): ObservableQueryBalanceInner[] {
+  get unstakables(): IObservableQueryBalanceImpl[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
     const currencies = chainInfo.currencies.filter(
@@ -203,7 +175,7 @@ export class ObservableQueryBalancesInner {
   );
 }
 
-export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalancesInner> {
+export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalancesImplMap> {
   protected balanceRegistries: BalanceRegistry[] = [];
 
   constructor(
@@ -212,7 +184,7 @@ export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalances
     protected readonly chainGetter: ChainGetter
   ) {
     super((bech32Address: string) => {
-      return new ObservableQueryBalancesInner(
+      return new ObservableQueryBalancesImplMap(
         this.sharedContext,
         this.chainId,
         this.chainGetter,
@@ -226,7 +198,7 @@ export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalances
     this.balanceRegistries.push(registry);
   }
 
-  getQueryBech32Address(bech32Address: string): ObservableQueryBalancesInner {
-    return this.get(bech32Address) as ObservableQueryBalancesInner;
+  getQueryBech32Address(bech32Address: string): ObservableQueryBalancesImplMap {
+    return this.get(bech32Address) as ObservableQueryBalancesImplMap;
   }
 }
