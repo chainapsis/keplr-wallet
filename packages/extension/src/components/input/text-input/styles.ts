@@ -10,7 +10,7 @@ const getTextInputStyleForErrorOrParagraph = (
 ) => {
   if (error || errorBorder) {
     return css`
-      border-color: #f0b622;
+      border-color: ${ColorPalette["yellow-400"]};
 
       :focus-visible {
         border-color: ${ColorPalette["red-200"]};
@@ -29,7 +29,7 @@ const getSubTextStyleForErrorOrParagraph = (
 ) => {
   if (error) {
     return css`
-      color: #f0b622;
+      color: ${ColorPalette["yellow-400"]};
     `;
   }
 
@@ -64,7 +64,7 @@ export const Styles = {
       ${({ error }) => {
         if (error) {
           return css`
-            border-color: #f0b622;
+            border-color: ${ColorPalette["yellow-400"]};
           `;
         } else {
           return css`

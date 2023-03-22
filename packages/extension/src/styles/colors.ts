@@ -43,6 +43,13 @@ export const ColorPalette = {
   "pink-300": "#F891C4",
   "pink-400": "#FF6BB8",
 
+  "yellow-50": "#F8F2E3",
+  "yellow-100": "#F2E6C7",
+  "yellow-200": "#EDD18A",
+  "yellow-300": "#EBBF50",
+  "yellow-400": "#F0B622",
+  "yellow-500": "#D29C11",
+
   white: "#FEFEFE",
 
   "gray-10": "#F6F6F9",
