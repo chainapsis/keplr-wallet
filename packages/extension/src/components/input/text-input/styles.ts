@@ -61,7 +61,17 @@ export const Styles = {
     background-color: ${ColorPalette["gray-700"]};
 
     :focus-within {
-      border-color: ${ColorPalette["gray-200"]};
+      ${({ error }) => {
+        if (error) {
+          return css`
+            border-color: #f0b622;
+          `;
+        } else {
+          return css`
+            border-color: ${ColorPalette["gray-200"]};
+          `;
+        }
+      }}
     }
 
     ${({ disabled }) => {
@@ -82,10 +92,11 @@ export const Styles = {
     background-color: ${ColorPalette["gray-700"]};
     border: 0;
     border-radius: 0.5rem;
-    color: ${ColorPalette["gray-300"]};
 
-    :focus-visible {
-      color: ${ColorPalette["gray-50"]};
+    color: ${ColorPalette["gray-50"]};
+
+    ::placeholder {
+      color: ${ColorPalette["gray-300"]};
     }
 
     ${({ disabled }) => {
