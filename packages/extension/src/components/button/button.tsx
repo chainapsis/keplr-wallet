@@ -7,6 +7,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
   style,
   className,
   text,
+  right,
   ...otherProps
 }) => {
   return (
@@ -26,6 +27,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
         }}
       >
         {text}
+        {right ? <Styles.Right>{right}</Styles.Right> : null}
       </Styles.Button>
     </Styles.Container>
   );

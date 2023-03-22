@@ -25,170 +25,61 @@ const buttonStyleFromColorAndMode: Record<
 
         :hover {
           ::after {
-            background-color: ${ColorPalette["gray-500"]};
-            opacity: 0.2;
+            background-color: ${ColorPalette["gray-300"]};
+            opacity: 0.3;
+          }
+        }
+
+        :active {
+          ::after {
+            background-color: ${ColorPalette["gray-300"]};
+            opacity: 0.5;
           }
         }
       `,
       disabled: css`
-        background-color: ${ColorPalette["blue-200"]};
+        background-color: ${ColorPalette["blue-400"]};
+
+        ::after {
+          background-color: ${ColorPalette["gray-600"]};
+          opacity: 0.5;
+        }
 
         ${makeTextAndSvgColor(ColorPalette["white"])}
-      `,
-    },
-    light: {
-      enabled: css`
-        background-color: ${ColorPalette["blue-10"]};
-        border: 1px solid ${ColorPalette["blue-100"]};
-
-        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
-
-        :hover {
-          ::after {
-            border: 1px solid transparent;
-
-            background-color: ${ColorPalette["gray-500"]};
-            opacity: 0.1;
-          }
-        }
-      `,
-      disabled: css`
-        background-color: ${ColorPalette["blue-10"]};
-        border: 1px solid ${ColorPalette["blue-100"]};
-
-        ${makeTextAndSvgColor(ColorPalette["blue-200"])}
-      `,
-    },
-    text: {
-      enabled: css`
-        background-color: transparent;
-
-        ${makeTextAndSvgColor(ColorPalette["blue-400"])}
-
-        :hover {
-          ${makeTextAndSvgColor(ColorPalette["blue-500"])}
-        }
-      `,
-      disabled: css`
-        background-color: transparent;
-
-        ${makeTextAndSvgColor(ColorPalette["blue-200"])}
       `,
     },
   },
-  danger: {
+  secondary: {
     fill: {
       enabled: css`
-        background-color: ${ColorPalette["red-400"]};
+        background-color: ${ColorPalette["gray-400"]};
 
         ${makeTextAndSvgColor(ColorPalette["white"])}
 
         :hover {
           ::after {
-            background-color: ${ColorPalette["platinum-500"]};
+            background-color: ${ColorPalette["gray-300"]};
             opacity: 0.2;
           }
         }
-      `,
-      disabled: css`
-        background-color: ${ColorPalette["red-200"]};
 
-        ${makeTextAndSvgColor(ColorPalette["red-100"])}
-      `,
-    },
-    light: {
-      enabled: css`
-        background-color: ${ColorPalette["red-50"]};
-        border: 1px solid ${ColorPalette["red-200"]};
-
-        ${makeTextAndSvgColor(ColorPalette["red-400"])}
-
-        :hover {
+        :active {
           ::after {
-            background-color: ${ColorPalette["platinum-500"]};
-            opacity: 0.1;
+            background-color: ${ColorPalette["gray-300"]};
+            opacity: 0.4;
           }
         }
       `,
+
       disabled: css`
-        background-color: ${ColorPalette["red-50"]};
-        border: 1px solid ${ColorPalette["red-200"]};
+        background-color: ${ColorPalette["gray-400"]};
 
-        ${makeTextAndSvgColor(ColorPalette["red-200"])}
-      `,
-    },
-    text: {
-      enabled: css`
-        background-color: transparent;
-
-        ${makeTextAndSvgColor(ColorPalette["red-400"])}
-
-        :hover {
-          ${makeTextAndSvgColor(ColorPalette["red-500"])}
+        ::after {
+          background-color: ${ColorPalette["gray-600"]};
+          opacity: 0.5;
         }
-      `,
-      disabled: css`
-        background-color: transparent;
-
-        ${makeTextAndSvgColor(ColorPalette["red-200"])}
-      `,
-    },
-  },
-  info: {
-    fill: {
-      enabled: css`
-        background-color: ${ColorPalette["platinum-200"]};
 
         ${makeTextAndSvgColor(ColorPalette["white"])}
-
-        :hover {
-          ::after {
-            background-color: ${ColorPalette["platinum-500"]};
-            opacity: 0.2;
-          }
-        }
-      `,
-      disabled: css`
-        background-color: ${ColorPalette["platinum-100"]};
-
-        ${makeTextAndSvgColor(ColorPalette["white"])}
-      `,
-    },
-    light: {
-      enabled: css`
-        background-color: ${ColorPalette["platinum-50"]};
-        border: 1px solid ${ColorPalette["platinum-100"]};
-
-        ${makeTextAndSvgColor(ColorPalette["platinum-300"])}
-
-        :hover {
-          ::after {
-            background-color: ${ColorPalette["platinum-500"]};
-            opacity: 0.1;
-          }
-        }
-      `,
-      disabled: css`
-        background-color: ${ColorPalette["platinum-50"]};
-        border: 1px solid ${ColorPalette["platinum-200"]};
-
-        ${makeTextAndSvgColor(ColorPalette["platinum-100"])}
-      `,
-    },
-    text: {
-      enabled: css`
-        background-color: transparent;
-
-        ${makeTextAndSvgColor(ColorPalette["platinum-200"])}
-
-        :hover {
-          ${makeTextAndSvgColor(ColorPalette["platinum-300"])}
-        }
-      `,
-      disabled: css`
-        background-color: transparent;
-
-        ${makeTextAndSvgColor(ColorPalette["platinum-100"])}
       `,
     },
   },
@@ -198,29 +89,25 @@ export const Styles = {
   Container: styled.div<Pick<ButtonProps, "mode">>`
     // Used for making button fill parent horizontally.
 
-    // If text mode, it doesn't fill the parent's width.
-    ${({ mode }) => {
-      if (mode) {
-        return css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        `;
-      }
-    }}
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   `,
 
   // "onClick" field should be omitted because "onClick" prop already exists on html button component.
   // If not omitted, they are intersected with each other.
   Button: styled.button<Omit<ButtonProps, "onClick">>`
-    // If text mode, it doesn't fill the parent's width.
-    width: ${({ mode }) => (mode === "text" ? "auto" : "100%")};
+    width: 100%;
     height: ${({ size }) => {
       switch (size) {
+        case "extraSmall":
+          return "2rem";
         case "small":
-          return "2.375rem";
+          return "2.25rem";
+        case "large":
+          return "3rem";
         default:
-          return "3.25rem";
+          return "2.75rem";
       }
     }};
     display: flex;
@@ -235,13 +122,12 @@ export const Styles = {
     font-weight: 600;
     font-size: ${({ size }) => {
       switch (size) {
-        case "small":
-          return "0.875rem";
-        default:
+        case "large":
           return "1rem";
+        default:
+          return "0.875rem";
       }
     }};
-    line-height: 110%;
     letter-spacing: 0.2px;
 
     white-space: nowrap;
@@ -252,15 +138,6 @@ export const Styles = {
     border-color: transparent;
     border-image: none;
     padding: 0 0.75rem;
-
-    ${({ mode }) => {
-      if (mode === "text") {
-        // Add additional touch area for text mode.
-        return css`
-          padding: 0 7.5%;
-        `;
-      }
-    }}
 
     // For hovering.
     position: relative;
@@ -278,5 +155,11 @@ export const Styles = {
       buttonStyleFromColorAndMode[color || "primary"][mode || "fill"][
         disabled ? "disabled" : "enabled"
       ]}
+  `,
+  Right: styled.span`
+    height: 100%;
+    display: flex;
+    align-items: center;
+    margin-left: 0.25rem;
   `,
 };

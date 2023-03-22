@@ -1,8 +1,14 @@
-import { CSSProperties } from "react";
+import React, { CSSProperties } from "react";
 
-export type ButtonColor = "primary" | "danger" | "info";
-export type ButtonMode = "fill" | "light" | "text";
-export type ButtonSize = "default" | "small";
+export type ButtonColor = "primary" | "secondary";
+export type ButtonMode = "fill";
+export type ButtonType = "button" | "submit" | "reset";
+export type ButtonSize =
+  | "default"
+  | "extraSmall"
+  | "small"
+  | "medium"
+  | "large";
 
 export interface ButtonProps {
   color?: ButtonColor;
@@ -10,11 +16,11 @@ export interface ButtonProps {
   size?: ButtonSize;
   disabled?: boolean;
   text?: string;
-  // TODO: Add icon
+  right?: React.ReactNode;
   onClick?: () => void;
 
   // Native html element
-  type?: "submit" | "reset" | "button";
+  type?: ButtonType;
 
   className?: string;
   style?: CSSProperties;
