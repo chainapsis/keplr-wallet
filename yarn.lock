@@ -5329,8 +5329,6 @@ __metadata:
     "@types/chrome": 0.0.88
     "@types/classnames": ^2.3.1
     "@types/firefox-webext-browser": ^70.0.1
-    "@types/react": ^16.14.4
-    "@types/react-dom": ^16.9.11
     "@types/react-is": ^16.7.2
     "@types/resize-observer-browser": ^0.1.7
     "@types/sha.js": ^2.4.0
@@ -5353,16 +5351,11 @@ __metadata:
     https-browserify: ^1.0.0
     identity-obj-proxy: ^3.0.0
     joi: ^17.2.1
-    mobx: ^6.1.7
-    mobx-react-lite: ^3.2.0
-    mobx-utils: ^6.0.3
     os-browserify: ^0.3.0
     process: ^0.11.10
     qrcode: ^1.4.4
     qrcode.react: ^1.0.1
     query-string: ^6.8.3
-    react: ^16.14.0
-    react-dom: ^16.14.0
     react-hook-form: ^7.43.1
     react-intl: ^6.2.8
     react-is: ^16.13.1
@@ -5384,6 +5377,12 @@ __metadata:
     webpack: ^5.74.0
     webpack-bundle-analyzer: ^4.5.0
     webpack-cli: ^5.0.1
+  peerDependencies:
+    mobx: ^6
+    mobx-react-lite: ^3
+    mobx-utils: ^6
+    react: ^16.8.0 || ^17 || ^18
+    react-dom: ^16.8.0 || ^17 || ^18
   languageName: unknown
   linkType: soft
 
@@ -5404,9 +5403,11 @@ __metadata:
     "@keplr-wallet/unit": 0.11.41
     buffer: ^6.0.3
     long: ^4.0.0
-    mobx: ^6.1.7
-    mobx-utils: ^6.0.3
     utility-types: ^3.10.0
+  peerDependencies:
+    mobx: ^6
+    mobx-utils: ^6
+    react: ^16.8.0 || ^17 || ^18
   languageName: unknown
   linkType: soft
 
@@ -5567,15 +5568,14 @@ __metadata:
     "@keplr-wallet/types": 0.11.41
     "@keplr-wallet/wc-client": 0.11.41
     "@keplr-wallet/wc-qrcode-modal": 0.11.41
-    "@types/react": ^16.14.4
-    "@types/react-dom": ^16.9.11
     "@walletconnect/client": ^1.6.5
     "@walletconnect/qrcode-modal": ^1.6.5
     buffer: ^6.0.3
-    mobx-react-lite: ^3.2.0
     parcel-bundler: ^1.12.5
-    react: ^16.14.0
-    react-dom: ^16.14.0
+  peerDependencies:
+    mobx-react-lite: ^3
+    react: ^16.8.0 || ^17 || ^18
+    react-dom: ^16.8.0 || ^17 || ^18
   languageName: unknown
   linkType: soft
 
@@ -5597,13 +5597,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/wc-qrcode-modal@workspace:packages/wc-qrcode-modal"
   dependencies:
-    "@types/react": ^16.14.4
-    "@types/react-dom": ^16.9.11
     "@walletconnect/browser-utils": ^1.6.5
     "@walletconnect/types": ^1.6.5
     qrcode.react: ^1.0.1
-    react: ^16.14.0
-    react-dom: ^16.14.0
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18
+    react-dom: ^16.8.0 || ^17 || ^18
   languageName: unknown
   linkType: soft
 
@@ -20471,6 +20470,8 @@ __metadata:
     "@types/filesystem": ^0.0.32
     "@types/jest": ^29.4.0
     "@types/node": ^18.13.0
+    "@types/react": ^16.14.4
+    "@types/react-dom": ^16.9.11
     "@typescript-eslint/eslint-plugin": ^5.52.0
     "@typescript-eslint/parser": ^5.52.0
     cross-env: ^5.2.0
@@ -20487,9 +20488,14 @@ __metadata:
     jest: ^29.4.3
     lerna: ^3.22.1
     lint-staged: ^10.5.4
+    mobx: ^6.1.7
+    mobx-react-lite: ^3.2.0
+    mobx-utils: ^6.0.3
     node-gyp: ^9.3.1
     pre-commit: ^1.2.2
     prettier: ^2.8.4
+    react: ^16.14.0
+    react-dom: ^16.14.0
     semver: ^7.3.5
     ts-jest: ^29.0.5
     typescript: ^4.9.5

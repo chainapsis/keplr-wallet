@@ -52,16 +52,11 @@
     "delay": "^4.4.0",
     "https-browserify": "^1.0.0",
     "joi": "^17.2.1",
-    "mobx": "^6.1.7",
-    "mobx-react-lite": "^3.2.0",
-    "mobx-utils": "^6.0.3",
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "qrcode": "^1.4.4",
     "qrcode.react": "^1.0.1",
     "query-string": "^6.8.3",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
     "react-hook-form": "^7.43.1",
     "react-intl": "^6.2.8",
     "react-is": "^16.13.1",
@@ -93,8 +88,6 @@
     "@types/chrome": "0.0.88",
     "@types/classnames": "^2.3.1",
     "@types/firefox-webext-browser": "^70.0.1",
-    "@types/react": "^16.14.4",
-    "@types/react-dom": "^16.9.11",
     "@types/react-is": "^16.7.2",
     "@types/resize-observer-browser": "^0.1.7",
     "@types/sha.js": "^2.4.0",
@@ -111,5 +104,12 @@
     "webpack": "^5.74.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^5.0.1"
+  },
+  "peerDependencies": {
+    "mobx": "^6",
+    "mobx-react-lite": "^3",
+    "mobx-utils": "^6",
+    "react": "^16.8.0 || ^17 || ^18",
+    "react-dom": "^16.8.0 || ^17 || ^18"
   }
 }
