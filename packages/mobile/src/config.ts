@@ -2061,6 +2061,51 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://asset-icons.s3.us-west-2.amazonaws.com/white/columbus.png",
   },
+  {
+    rpc: "https://rpc-quasar.keplr.app",
+    rest: "https://lcd-quasar.keplr.app",
+    chainId: "quasar-1",
+    chainName: "Quasar",
+    stakeCurrency: {
+      coinDenom: "QSR",
+      coinMinimalDenom: "uqsr",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/quasar.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "quasar",
+      bech32PrefixAccPub: "quasarpub",
+      bech32PrefixValAddr: "quasarvaloper",
+      bech32PrefixValPub: "quasarvaloperpub",
+      bech32PrefixConsAddr: "quasarvalcons",
+      bech32PrefixConsPub: "quasarvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "QSR",
+        coinMinimalDenom: "uqsr",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/quasar.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "QSR",
+        coinMinimalDenom: "uqsr",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/quasar.png",
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/quasar.png",
+  },
 ];
 
 export const LegacyAmplitudeApiKey =
