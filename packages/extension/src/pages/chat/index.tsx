@@ -74,7 +74,6 @@ const ChatView = () => {
   const [inputVal, setInputVal] = useState("");
   const [openDialog, setIsOpendialog] = useState(false);
   const [authFail, setAuthFail] = useState(false);
-
   const requester = new InExtensionMessageRequester();
 
   function debounce(func: any, timeout = 500) {

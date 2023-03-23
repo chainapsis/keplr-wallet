@@ -120,7 +120,7 @@ const EmptyState = ({
       />
 
       <h1 className={styleAsset.title}>No funds added</h1>
-      <img src={walletIcon} alt="no fund" />
+      <img draggable={false} src={walletIcon} alt="no fund" />
       <p className={styleAsset.desc}>
         That’s okay, you can deposit tokens to your address or buy some.
       </p>
@@ -141,7 +141,7 @@ const EmptyState = ({
           className={styleAsset.buyButton}
         >
           <button>
-            <img src={buyIcon} alt="buy tokens" /> Buy Tokens
+            <img draggable={false} src={buyIcon} alt="buy tokens" /> Buy Tokens
           </button>
         </a>
       )}

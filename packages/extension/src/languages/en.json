@@ -323,5 +323,10 @@
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save",
 
-  "chat.disappear-message": "Messages will disappear after 14 days."
+  "chat.disappear-message": "Messages will disappear after 14 days.",
+
+  "notification.organisation.header-message": "Select atleast one organisation you want notifications from:",
+  "notification.topic.header-message": "Select the topics you are interested in receiving notifications for",
+  "notification.review.header-message": "You just set up your Notifications!",
+  "notification.item.flag-message": "Thanks for flagging this. We'll take a look at it"
 }

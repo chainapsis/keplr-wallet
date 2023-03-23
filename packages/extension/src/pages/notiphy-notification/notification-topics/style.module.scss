@@ -1,0 +1,73 @@
+.topicsContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .heading {
+    width: 328px;
+    height: 38px;
+    font-family: "Nunito Sans";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 120%;
+    color: #525f7f;
+  }
+
+  .isLoading {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    display: flex;
+    text-align: center;
+    height: 100%;
+  }
+
+  .topicChipsContainer {
+    height: 325px;
+    overflow-y: auto;
+
+    .resultText {
+      color: #808da0;
+      font-weight: 400;
+      font-size: 15px;
+      display: flex;
+      height: 100%;
+      p {
+        margin: auto;
+        text-align: center;
+      }
+    }
+  }
+
+  .selectedTopics {
+    margin-top: auto;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 19px;
+    text-align: center;
+    color: #525f7f;
+  }
+
+  .topicButton {
+    // margin-bottom: 0;
+    .button {
+      padding: 8px;
+
+      color: #fff;
+      text-align: center;
+      background-color: #3b82f6;
+      border: 1px solid #3b82f6;
+      border-radius: 4px;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.875rem;
+      line-height: 19px;
+      display: flex;
+      width: 100%;
+    }
+  }
+}

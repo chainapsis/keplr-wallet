@@ -1,0 +1,46 @@
+.topicChips {
+  margin: 0 5px;
+
+  .switch {
+    position: relative;
+    display: inline-block;
+
+    display: inline-block;
+    line-height: 1;
+    margin: 0;
+
+    input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+
+      &:checked + .contentInverter {
+        background-color: #2563eb;
+        color: #ffffff;
+      }
+    }
+
+    .contentInverter {
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+      border-radius: 33px;
+      padding: 8px 16px;
+
+      background: #ffffff;
+      border: 2px solid #2563eb;
+      border-radius: 33px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 22px;
+      color: #2563eb;
+    }
+  }
+}

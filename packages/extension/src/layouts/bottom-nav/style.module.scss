@@ -36,3 +36,14 @@
 .disabled {
   cursor: not-allowed;
 }
+
+.bell-dot {
+  height: 10px;
+  width: 10px;
+  background-color: #d027e5;
+  margin-left: 8px;
+  border-radius: 50px;
+  position: absolute;
+  right: 215px;
+  top: 5px;
+}

@@ -10,13 +10,13 @@ import style from "./style.module.scss";
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props extends HeaderProps {
   style?: CSSProperties;
+  showBottomMenu?: boolean;
 }
 
 export const HeaderLayout: FunctionComponent<Props> = (props) => {
   const { children } = props;
 
   const [isMenuOpen, setMenuOpen] = useState(false);
-
   const menuContext: MenuContext = {
     open: () => {
       setMenuOpen(true);
@@ -34,7 +34,8 @@ export const HeaderLayout: FunctionComponent<Props> = (props) => {
       <div className={style.container} style={props.style}>
         <Header {...props} isMenuOpen={isMenuOpen} />
         <div className={style.innerContainer}>{children}</div>
-        <BottomNav />
+
+        {(props.showBottomMenu ?? true) && <BottomNav />}
       </div>
     </MenuProvider>
   );

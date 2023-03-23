@@ -1,0 +1,130 @@
+.preventCenter {
+  margin: 0 8px;
+}
+
+.enableCenter {
+  margin: auto 8px;
+}
+.notificationModal {
+  display: flex;
+  flex-direction: column;
+  max-height: 85%;
+
+  background: #fff;
+
+  font-family: "Nunito Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 16px;
+  color: #525f7f;
+  .scrollView {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 244px;
+    width: 100%;
+    overflow-x: hidden;
+
+    .heading {
+      padding: 8px 16px;
+      display: flex;
+
+      .settings {
+        margin: auto 0;
+        margin-left: auto;
+        cursor: pointer;
+      }
+
+      .deleteIcon {
+        margin: auto 0;
+        cursor: pointer;
+
+        .clearAll {
+          margin: auto 2vw;
+          align-self: flex-end;
+          display: inline;
+          font-weight: 400;
+        }
+
+        &:hover {
+          color: #3b82f6;
+          img {
+            filter: invert(44%) sepia(82%) saturate(2717%) hue-rotate(202deg)
+              brightness(100%) contrast(94%);
+          }
+        }
+      }
+    }
+
+    .settings {
+      cursor: pointer;
+      display: flex;
+      justify-content: flex-end;
+      padding: 0;
+      margin-left: auto;
+      margin-right: 16px;
+      font-weight: 400;
+      &:hover {
+        color: #3b82f6;
+      }
+    }
+
+    .notifyContainer {
+      .greyCircle {
+        margin-top: 8px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 0;
+        height: 179px;
+        width: 179px;
+
+        border-radius: 50%;
+      }
+
+      .notifyHeading {
+        font-weight: 700;
+        font-size: 20px;
+        line-height: 16px;
+        text-align: center;
+        margin-top: 16px;
+        color: #525f7f;
+      }
+
+      .notifyDescription {
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 16px;
+
+        margin: 0 auto 16px;
+        width: 296px;
+        text-align: center;
+        color: #525f7f;
+      }
+      .notifySubHeading {
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 16px;
+        text-align: center;
+        margin-top: 16px;
+        color: #525f7f;
+      }
+
+      .notifyButton {
+        width: 296px;
+        margin: 0 16px 16px;
+        display: block;
+      }
+    }
+
+    .isLoading {
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      display: flex;
+      text-align: center;
+      height: 100%;
+      margin: auto;
+    }
+  }
+}

@@ -6,9 +6,13 @@ import style from "./style.module.scss";
 import { useLanguage } from "../../languages";
 import { useIntl } from "react-intl";
 import { observer } from "mobx-react-lite";
-import { userChatActive } from "@chatStore/user-slice";
+import {
+  userChatActive,
+  WalletConfig,
+  walletConfig,
+} from "@chatStore/user-slice";
 import { useSelector } from "react-redux";
-// import { useStore } from "../../stores";
+import { useStore } from "../../stores";
 
 export const SettingPage: FunctionComponent = observer(() => {
   // const { uiConfigStore } = useStore();
@@ -17,6 +21,10 @@ export const SettingPage: FunctionComponent = observer(() => {
   const history = useHistory();
   const intl = useIntl();
 
+  const { accountStore, chainStore } = useStore();
+  const current = chainStore.current;
+  const accountInfo = accountStore.getAccount(current.chainId);
+  const config: WalletConfig = useSelector(walletConfig);
   const paragraphLang = language.automatic
     ? intl.formatMessage(
         {
@@ -120,6 +128,22 @@ export const SettingPage: FunctionComponent = observer(() => {
             []
           )}
         />
+        {config.notiphyWhitelist !== undefined &&
+          config.notiphyWhitelist.length !== 0 &&
+          config.notiphyWhitelist.indexOf(accountInfo.bech32Address) !== -1 && (
+            <PageButton
+              title={"Notifications"}
+              onClick={() => {
+                history.push({
+                  pathname: "/setting/notifications",
+                });
+              }}
+              icons={useMemo(
+                () => [<i key="next" className="fas fa-chevron-right" />],
+                []
+              )}
+            />
+          )}
         {/* <PageButton
           title="Show Advanced IBC Transfers"
           onClick={() => {

@@ -1,0 +1,45 @@
+.newOrgMsgContainer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #f2f3f6;
+
+  padding: 16px;
+
+  &:hover {
+    background: #f2f6fd;
+  }
+
+  .newOrgMsg {
+    display: flex;
+
+    .newOrgName {
+      margin: auto 0;
+      font-weight: 700;
+    }
+    .newOrgNote {
+      margin: auto 0;
+      font-weight: 400;
+    }
+  }
+  .newOrgFollow {
+    .newOrgFollowLink {
+      margin: auto 8px;
+      color: #3b82f6;
+      font-weight: 700;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+
+    .newOrgCross {
+      cursor: pointer;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    display: flex;
+  }
+}

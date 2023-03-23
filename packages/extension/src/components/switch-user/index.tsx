@@ -4,7 +4,6 @@ import { useHistory } from "react-router";
 
 export const SwitchUser: FunctionComponent = () => {
   const history = useHistory();
-
   return (
     <div
       style={{
@@ -23,7 +22,11 @@ export const SwitchUser: FunctionComponent = () => {
           history.push("/setting/set-keyring");
         }}
       >
-        <i className="fa fa-user" aria-hidden="true" />
+        <i
+          className="fa fa-user"
+          aria-hidden="true"
+          style={{ width: "100%" }}
+        />
       </div>
     </div>
   );

@@ -9,10 +9,6 @@
     z-index: 100;
     background-color: #f8f9fe;
 
-    // border-bottom-style: solid;
-    // border-width: 1px;
-    // border-bottom-color: gray;
-
     &.fixed {
       position: fixed;
     }
@@ -34,6 +30,8 @@
   }
 
   .header-menu-right {
+    display: flex;
+    justify-content: flex-end;
     position: absolute;
     height: $header-height;
     top: 0;

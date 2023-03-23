@@ -1,0 +1,49 @@
+.listItem {
+  display: flex;
+
+  .checkbox {
+    height: 16px;
+    width: 16px;
+    border-radius: 2px;
+    margin: auto 0;
+    opacity: 40%;
+    &:checked {
+      opacity: 100%;
+    }
+  }
+
+  .image {
+    margin: auto 0;
+    margin-left: 12px;
+    margin-right: 10px;
+    box-sizing: content-box;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    img {
+      width: 100%;
+    }
+  }
+
+  .name {
+    margin: auto 0;
+    margin-left: 4px;
+    font-family: "Nunito Sans";
+    font-style: normal;
+    font-size: 16px;
+    line-height: 16px;
+    color: #525f7f;
+  }
+  .unselectedName {
+    font-weight: 400;
+  }
+
+  .selectedName {
+    font-weight: 700;
+  }
+}
