@@ -25,6 +25,9 @@ export const fetchAndPopulateNotifications = async (walletAddress: string) => {
   );
 
   store.dispatch(
-    setNotifications({ allNotifications: Object.values(notifications) })
+    setNotifications({
+      unreadNotification: Object.values(notifications).length > 0,
+      allNotifications: Object.values(notifications),
+    })
   );
 };

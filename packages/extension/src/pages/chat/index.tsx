@@ -175,7 +175,6 @@ const ChatView = () => {
     if (
       !userState?.messagingPubKey.publicKey &&
       !userState?.messagingPubKey.privacySetting &&
-      !userState?.accessToken.length &&
       !loadingChats &&
       !authFail
     ) {

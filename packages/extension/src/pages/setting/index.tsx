@@ -6,6 +6,7 @@ import style from "./style.module.scss";
 import { useLanguage } from "../../languages";
 import { useIntl } from "react-intl";
 import { observer } from "mobx-react-lite";
+import { userDetails } from "@chatStore/user-slice";
 import {
   userChatActive,
   WalletConfig,
@@ -25,6 +26,7 @@ export const SettingPage: FunctionComponent = observer(() => {
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const config: WalletConfig = useSelector(walletConfig);
+  const userState = useSelector(userDetails);
   const paragraphLang = language.automatic
     ? intl.formatMessage(
         {
@@ -111,23 +113,26 @@ export const SettingPage: FunctionComponent = observer(() => {
             []
           )}
         />
-        <PageButton
-          style={{ cursor: isChatActive ? "pointer" : "not-allowed" }}
-          paragraph={
-            isChatActive ? "" : "You need FET balance to use this feature"
-          }
-          title={"Chat"}
-          onClick={() => {
-            if (isChatActive)
-              history.push({
-                pathname: "/setting/chat",
-              });
-          }}
-          icons={useMemo(
-            () => [<i key="next" className="fas fa-chevron-right" />],
-            []
-          )}
-        />
+        {(userState.messagingPubKey?.publicKey?.length ||
+          userState.messagingPubKey?.privacySetting?.length) && (
+          <PageButton
+            style={{ cursor: isChatActive ? "pointer" : "not-allowed" }}
+            paragraph={
+              isChatActive ? "" : "You need FET balance to use this feature"
+            }
+            title={"Chat"}
+            onClick={() => {
+              if (isChatActive)
+                history.push({
+                  pathname: "/setting/chat",
+                });
+            }}
+            icons={useMemo(
+              () => [<i key="next" className="fas fa-chevron-right" />],
+              []
+            )}
+          />
+        )}
         {config.notiphyWhitelist !== undefined &&
           config.notiphyWhitelist.length !== 0 &&
           config.notiphyWhitelist.indexOf(accountInfo.bech32Address) !== -1 && (
