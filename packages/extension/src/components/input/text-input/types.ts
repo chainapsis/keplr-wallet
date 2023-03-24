@@ -12,5 +12,6 @@ export interface TextInputProps {
 
   disabled?: boolean;
   style?: CSSProperties;
+  left?: React.ReactNode;
   right?: React.ReactNode;
 }

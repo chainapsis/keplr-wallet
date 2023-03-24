@@ -85,7 +85,7 @@ export const Styles = {
   `,
   TextInput: styled.input<TextInputProps & { isTextarea?: boolean }>`
     width: 100%;
-    height: ${({ isTextarea }) => (isTextarea ? undefined : "3rem")};
+    height: ${({ isTextarea }) => (isTextarea ? undefined : "3.5rem")};
     margin: 0;
     padding: ${({ isTextarea }) =>
       isTextarea ? "0.75rem 0.75rem" : "0 0.75rem"};
@@ -118,5 +118,22 @@ export const Styles = {
   SubText: styled(Caption2)<Pick<TextInputProps, "error" | "paragraph">>`
     ${({ error, paragraph }) =>
       getSubTextStyleForErrorOrParagraph(error, paragraph)}
+  `,
+  Icon: styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 2rem;
+    :hover {
+      background-color: rgba(46, 46, 50, 0.5);
+    }
+    :active {
+      background-color: ${ColorPalette["gray-500"]};
+    }
   `,
 };

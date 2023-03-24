@@ -10,7 +10,17 @@ export const TextInput = forwardRef<
   TextInputProps & React.InputHTMLAttributes<HTMLInputElement>
 >(
   (
-    { className, style, label, paragraph, error, rightLabel, right, ...props },
+    {
+      className,
+      style,
+      label,
+      paragraph,
+      error,
+      rightLabel,
+      left,
+      right,
+      ...props
+    },
     ref
   ) => {
     return (
@@ -27,6 +37,12 @@ export const TextInput = forwardRef<
           {...props}
         >
           <Columns sum={1}>
+            {left ? (
+              <Box alignY="center" marginLeft="1rem">
+                <Styles.Icon>{left}</Styles.Icon>
+              </Box>
+            ) : null}
+
             <Column weight={1}>
               <Styles.TextInput
                 {...props}
@@ -36,8 +52,8 @@ export const TextInput = forwardRef<
               />
             </Column>
             {right ? (
-              <Box alignY="center" paddingRight="1rem">
-                {right}
+              <Box alignY="center" marginRight="1rem">
+                <Styles.Icon>{right}</Styles.Icon>
               </Box>
             ) : null}
           </Columns>

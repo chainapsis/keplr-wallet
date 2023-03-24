@@ -49,6 +49,19 @@ const Template: ComponentStory<typeof CompTextInput> = (
         <CompTextInput
           {...props}
           placeholder="Password"
+          left={<MenuIcon width="20px" height="20px" />}
+        />
+
+        <CompTextInput
+          {...props}
+          placeholder="Password"
+          left={<MenuIcon width="20px" height="20px" />}
+          right={<MenuIcon width="20px" height="20px" />}
+        />
+
+        <CompTextInput
+          {...props}
+          placeholder="Password"
           rightLabel={
             <Box
               style={{
