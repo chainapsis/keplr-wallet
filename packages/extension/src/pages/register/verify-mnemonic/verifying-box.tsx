@@ -82,7 +82,6 @@ export const VerifyingMnemonicBox = forwardRef<
                     }
                     return false;
                   })()}
-                  removeBottomMargin={true}
                 />
               </XAxis>
               {i !== words.length - 1 ? (

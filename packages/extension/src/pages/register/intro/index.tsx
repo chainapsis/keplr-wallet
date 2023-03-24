@@ -42,14 +42,12 @@ export const RegisterIntroScene: FunctionComponent = () => {
         />
         <Button
           text="Import Existing Account"
-          mode="light"
           onClick={() => {
             sceneTransition.push("recover-mnemonic");
           }}
         />
         <Button
           text="Connect Hardware Wallet"
-          mode="text"
           onClick={() => {
             // TODO
           }}

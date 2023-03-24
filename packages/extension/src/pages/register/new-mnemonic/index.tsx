@@ -121,11 +121,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
                             <Styles.IndexText>
                               {i * 3 + j + 1}.
                             </Styles.IndexText>
-                            <TextInput
-                              value={word}
-                              readOnly={true}
-                              removeBottomMargin={true}
-                            />
+                            <TextInput value={word} readOnly={true} />
                           </XAxis>
                         </Column>
                       );
@@ -141,7 +137,6 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
         <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
           <Box alignX="center">
             <Button
-              mode="light"
               size="small"
               text="Set BIP Path"
               onClick={() => {

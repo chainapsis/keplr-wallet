@@ -69,7 +69,6 @@ export const SetBip44PathCard: FunctionComponent<{
         <Gutter size="0.5rem" />
         <Styles.InputContainer>
           <TextInput
-            removeBottomMargin={true}
             type="number"
             min={0}
             value={state.accountText}
@@ -86,7 +85,6 @@ export const SetBip44PathCard: FunctionComponent<{
         <Gutter size="0.5rem" />
         <Styles.InputContainer>
           <TextInput
-            removeBottomMargin={true}
             type="number"
             min={0}
             max={1}
@@ -104,7 +102,6 @@ export const SetBip44PathCard: FunctionComponent<{
         <Gutter size="0.5rem" />
         <Styles.InputContainer>
           <TextInput
-            removeBottomMargin={true}
             type="number"
             min={0}
             value={state.addressIndexText}
