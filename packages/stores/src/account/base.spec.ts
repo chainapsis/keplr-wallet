@@ -31,19 +31,18 @@ describe("Test Account set base", () => {
       },
       chainStore,
       "test",
-      new AccountSharedContext(),
+      new AccountSharedContext(async () => {
+        return new MockKeplr(
+          async () => {
+            return new Uint8Array(0);
+          },
+          chainInfos,
+          "curious kitchen brief change imitate open close knock cause romance trim offer"
+        );
+      }),
       {
         suggestChain: false,
         autoInit: true,
-        getKeplr: async () => {
-          return new MockKeplr(
-            async () => {
-              return new Uint8Array(0);
-            },
-            chainInfos,
-            "curious kitchen brief change imitate open close knock cause romance trim offer"
-          );
-        },
       }
     );
 
@@ -89,19 +88,18 @@ describe("Test Account set base", () => {
       },
       chainStore,
       "test",
-      new AccountSharedContext(),
+      new AccountSharedContext(async () => {
+        return new MockKeplr(
+          async () => {
+            return new Uint8Array(0);
+          },
+          chainInfos,
+          "curious kitchen brief change imitate open close knock cause romance trim offer"
+        );
+      }),
       {
         suggestChain: false,
         autoInit: false,
-        getKeplr: async () => {
-          return new MockKeplr(
-            async () => {
-              return new Uint8Array(0);
-            },
-            chainInfos,
-            "curious kitchen brief change imitate open close knock cause romance trim offer"
-          );
-        },
       }
     );
 
