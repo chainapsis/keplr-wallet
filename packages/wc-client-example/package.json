@@ -17,14 +17,14 @@
     "@keplr-wallet/wc-qrcode-modal": "0.11.41",
     "@walletconnect/client": "^1.6.5",
     "@walletconnect/qrcode-modal": "^1.6.5",
-    "buffer": "^6.0.3",
-    "mobx-react-lite": "^3.2.0",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "buffer": "^6.0.3"
   },
   "devDependencies": {
-    "@types/react": "^16.14.4",
-    "@types/react-dom": "^16.9.11",
     "parcel-bundler": "^1.12.5"
+  },
+  "peerDependencies": {
+    "mobx-react-lite": "^3",
+    "react": "^16.8.0 || ^17 || ^18",
+    "react-dom": "^16.8.0 || ^17 || ^18"
   }
 }
