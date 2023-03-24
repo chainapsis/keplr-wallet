@@ -1,5 +1,6 @@
 export * from "./check";
 export * from "./arrow-up";
+export * from "./arrow-drop-down";
 export * from "./arrow-down";
 export * from "./arrow-left";
 export * from "./profile";
