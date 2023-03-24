@@ -7,6 +7,7 @@ import { RightArrowIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { Box } from "../../../components/box";
 
 export const SettingGeneralPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
@@ -15,35 +16,37 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout title="General" left={<BackButton />}>
-      <Stack gutter="2rem">
-        <PageButton
-          title="Language"
-          paragraph="Korean"
-          endIcon={<RightArrowIcon />}
-        />
+      <Box paddingX="0.75rem">
+        <Stack gutter="0.5rem">
+          <PageButton
+            title="Language"
+            paragraph="Korean"
+            endIcon={<RightArrowIcon />}
+          />
 
-        <PageButton
-          title="Currency"
-          paragraph={(() => {
-            const fiatCurrency = uiConfigStore.fiatCurrency;
-            if (fiatCurrency.isAutomatic) {
-              return `Automatic (${fiatCurrency.currency.toUpperCase()})`;
-            }
+          <PageButton
+            title="Currency"
+            paragraph={(() => {
+              const fiatCurrency = uiConfigStore.fiatCurrency;
+              if (fiatCurrency.isAutomatic) {
+                return `Automatic (${fiatCurrency.currency.toUpperCase()})`;
+              }
 
-            return uiConfigStore.fiatCurrency.currency.toUpperCase();
-          })()}
-          endIcon={<RightArrowIcon />}
-          onClick={() => navigate("/setting/general/fiat")}
-        />
+              return uiConfigStore.fiatCurrency.currency.toUpperCase();
+            })()}
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/fiat")}
+          />
 
-        <PageButton
-          title="AuthZ"
-          paragraph="3 delegation"
-          endIcon={<RightArrowIcon />}
-        />
+          <PageButton
+            title="AuthZ"
+            paragraph="3 delegation"
+            endIcon={<RightArrowIcon />}
+          />
 
-        <PageButton title="Link Keplr Mobile" endIcon={<RightArrowIcon />} />
-      </Stack>
+          <PageButton title="Link Keplr Mobile" endIcon={<RightArrowIcon />} />
+        </Stack>
+      </Box>
     </HeaderLayout>
   );
 });

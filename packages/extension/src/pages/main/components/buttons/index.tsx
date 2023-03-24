@@ -9,7 +9,7 @@ export const Buttons: FunctionComponent = () => {
     <Box>
       <Columns sum={1}>
         <Column weight={1}>
-          <Button text="Deposit" />
+          <Button text="Deposit" color="secondary" />
         </Column>
         <Gutter size="0.5rem" />
         <Column weight={1}>

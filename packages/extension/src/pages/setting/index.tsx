@@ -7,38 +7,37 @@ import { PageButton } from "./components";
 import { SettingIcon, RightArrowIcon } from "../../components/icon";
 import { useNavigate } from "react-router";
 import { XAxis } from "../../components/axis";
+import { Box } from "../../components/box";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
 
   return (
     <HeaderLayout title="Setting" left={<BackButton />}>
-      <Stack gutter="2rem">
-        <PageButton
-          title={
-            <XAxis alignY="center">
-              <SettingIcon width={16} height={16} />
-              General
-            </XAxis>
-          }
-          paragraph="Language, Currency.."
-          endIcon={<RightArrowIcon />}
-          onClick={() => navigate("/setting/general")}
-        />
+      <Box paddingX="0.75rem">
+        <Stack gutter="0.5rem">
+          <PageButton
+            title={<XAxis alignY="center">General</XAxis>}
+            paragraph="Language, Currency.."
+            startIcon={<SettingIcon width="1rem" height="1rem" />}
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general")}
+          />
 
-        <PageButton
-          title="Advanced"
-          paragraph="Language, Currency.."
-          endIcon={<RightArrowIcon />}
-        />
+          <PageButton
+            title="Advanced"
+            paragraph="Language, Currency.."
+            endIcon={<RightArrowIcon />}
+          />
 
-        <PageButton
-          title="Security & Privacy"
-          paragraph="Language, Currency.."
-          endIcon={<RightArrowIcon />}
-          onClick={() => navigate("/setting/security")}
-        />
-      </Stack>
+          <PageButton
+            title="Security & Privacy"
+            paragraph="Language, Currency.."
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/security")}
+          />
+        </Stack>
+      </Box>
     </HeaderLayout>
   );
 });

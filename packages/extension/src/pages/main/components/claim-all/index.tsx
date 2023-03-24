@@ -36,7 +36,7 @@ export const ClaimAll: FunctionComponent<{ viewTokens: ViewToken[] }> = ({
             </Subtitle2>
           </Stack>
         </Column>
-        <Button text="Claim All" />
+        <Button text="Claim All" size="small" />
       </Columns>
 
       <Box
