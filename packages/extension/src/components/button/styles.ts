@@ -105,7 +105,7 @@ export const Styles = {
         case "small":
           return "2.25rem";
         case "large":
-          return "3rem";
+          return "3.25rem";
         default:
           return "2.75rem";
       }
@@ -113,7 +113,7 @@ export const Styles = {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 0.5rem;
+    border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
     overflow: hidden;
 
