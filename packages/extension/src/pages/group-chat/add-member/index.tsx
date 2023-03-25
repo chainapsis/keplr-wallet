@@ -44,6 +44,7 @@ import { recieveMessages } from "@graphQL/recieve-messages";
 import { addMemberEvent } from "@utils/group-events";
 import { ToolTip } from "@components/tooltip";
 import { DeactivatedChat } from "@components/chat/deactivated-chat";
+import { ContactsOnlyMessage } from "@components/contacts-only-message";
 import amplitude from "amplitude-js";
 
 export const AddMember: FunctionComponent = observer(() => {
@@ -338,29 +339,7 @@ export const AddMember: FunctionComponent = observer(() => {
                 No results in your contacts.
               </div>
               {user?.messagingPubKey.privacySetting ===
-                PrivacySetting.Contacts && (
-                <div className={style.resultText}>
-                  If you are searching for an address not in your address book,
-                  you can&apos;t see them due to your selected privacy settings
-                  being &quot;contact only&quot;. Please add the address to your
-                  address book to be able to chat with them or change your
-                  privacy settings.
-                  <br />
-                  <a
-                    href="#"
-                    draggable={false}
-                    style={{
-                      textDecoration: "underline",
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      history.push("/setting/chat/privacy");
-                    }}
-                  >
-                    Go to chat privacy settings
-                  </a>
-                </div>
-              )}
+                PrivacySetting.Contacts && <ContactsOnlyMessage />}
             </div>
           )}
         </div>
@@ -407,7 +386,7 @@ export const AddMember: FunctionComponent = observer(() => {
             if (newGroupState.isEditGroup) {
               handleUpdateGroup();
             } else {
-              history.push("/chat/group-chat/review-details");
+              history.push("/group-chat/review-details");
             }
           }}
         >

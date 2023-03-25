@@ -1,6 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { persistReducer } from "redux-persist";
-// import { composeWithDevTools } from 'redux-devtools-extension';
 import localStorage from "redux-persist/lib/storage";
 import { messageStore } from "./messages-slice";
 import { newGroupStore } from "./new-group-slice";

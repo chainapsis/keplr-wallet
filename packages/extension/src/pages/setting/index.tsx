@@ -6,12 +6,8 @@ import style from "./style.module.scss";
 import { useLanguage } from "../../languages";
 import { useIntl } from "react-intl";
 import { observer } from "mobx-react-lite";
-import { userDetails } from "@chatStore/user-slice";
-import {
-  userChatActive,
-  WalletConfig,
-  walletConfig,
-} from "@chatStore/user-slice";
+import { userChatActive, userDetails } from "@chatStore/user-slice";
+import { WalletConfig, walletConfig } from "@chatStore/user-slice";
 import { useSelector } from "react-redux";
 import { useStore } from "../../stores";
 
@@ -52,8 +48,9 @@ export const SettingPage: FunctionComponent = observer(() => {
           fiat: language.fiatCurrency.toUpperCase(),
         }
       );
-  const isChatActive = useSelector(userChatActive);
-
+  const user = useSelector(userDetails);
+  const requiredNative = useSelector(userChatActive);
+  const isChatActive = !requiredNative || user.hasFET;
   return (
     <HeaderLayout
       showChainName={false}
@@ -116,13 +113,15 @@ export const SettingPage: FunctionComponent = observer(() => {
         {(userState.messagingPubKey?.publicKey?.length ||
           userState.messagingPubKey?.privacySetting?.length) && (
           <PageButton
-            style={{ cursor: isChatActive ? "pointer" : "not-allowed" }}
+            style={{
+              cursor: !isChatActive ? "pointer" : "not-allowed",
+            }}
             paragraph={
-              isChatActive ? "" : "You need FET balance to use this feature"
+              !isChatActive ? "" : "You need FET balance to use this feature"
             }
             title={"Chat"}
             onClick={() => {
-              if (isChatActive)
+              if (!isChatActive)
                 history.push({
                   pathname: "/setting/chat",
                 });

@@ -1,0 +1,52 @@
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 101;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popupContainer {
+  position: absolute;
+  width: 308px;
+  margin: auto;
+  height: 470px;
+  background-color: #fff;
+  z-index: 200;
+  top: 62px;
+  left: 26px;
+  padding: 32px 18px;
+  border-radius: 20px;
+  box-shadow: 0px 0px 100px 20px #585858;
+
+  img {
+    margin: 0px auto;
+    width: 170px;
+    display: block;
+    border-radius: 500px;
+  }
+  .infoContainer {
+    h3 {
+      color: #3b82f6;
+      margin-bottom: 0;
+      font-size: 20px;
+    }
+    p {
+      font-size: 14px;
+      font-weight: 400;
+      color: #525f7f;
+    }
+  }
+  button {
+    padding: 10px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #3b82f6;
+    border: none;
+    width: 276px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+}

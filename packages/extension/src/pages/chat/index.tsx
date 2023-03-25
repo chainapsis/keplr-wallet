@@ -40,8 +40,10 @@ import { useStore } from "../../stores";
 import { getJWT } from "@utils/auth";
 import { fetchPublicKey } from "@utils/fetch-public-key";
 import { Menu } from "../main/menu";
+import { AgentsHistory } from "./agent-history";
+import { GroupsHistory } from "./group-history";
 import style from "./style.module.scss";
-import { ChatsGroupHistory } from "./chat-group-history";
+import { ToolTip } from "@components/tooltip";
 
 const ChatView = () => {
   const userState = useSelector(userDetails);
@@ -74,6 +76,8 @@ const ChatView = () => {
   const [inputVal, setInputVal] = useState("");
   const [openDialog, setIsOpendialog] = useState(false);
   const [authFail, setAuthFail] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(1);
+
   const requester = new InExtensionMessageRequester();
 
   function debounce(func: any, timeout = 500) {
@@ -244,10 +248,53 @@ const ChatView = () => {
           setSearchInput={setInputVal}
           searchInput={inputVal}
         />
+        <div className={style.chatTabList}>
+          <div
+            className={style.chatTab}
+            style={{
+              borderBottom: selectedTab == 1 ? "2px solid #D43BF6" : "",
+              color: selectedTab == 1 ? "#D43BF6" : "#000000",
+            }}
+            onClick={() => setSelectedTab(1)}
+          >
+            People
+          </div>
+
+          <div
+            className={style.chatTab}
+            style={{
+              borderBottom: selectedTab == 2 ? "2px solid #3B82F6" : "",
+              color: selectedTab == 2 ? "#3B82F6" : "#000000",
+            }}
+            onClick={() =>
+              userState?.walletConfig?.fetchbotActive ? setSelectedTab(2) : {}
+            }
+          >
+            {userState?.walletConfig?.fetchbotActive &&
+            userState?.enabledChainIds.includes(current.chainId) ? (
+              "Agents"
+            ) : (
+              <ToolTip
+                trigger="hover"
+                options={{ placement: "bottom" }}
+                tooltip={<div>Coming Soon</div>}
+              >
+                Agents
+              </ToolTip>
+            )}
+          </div>
+        </div>
         {loadingChats ? (
           <ChatLoader message="Loading chats, please wait..." />
+        ) : selectedTab == 1 ? (
+          <GroupsHistory
+            searchString={inputVal}
+            setLoadingChats={setLoadingChats}
+            chainId={current.chainId}
+            addresses={addresses}
+          />
         ) : (
-          <ChatsGroupHistory
+          <AgentsHistory
             searchString={inputVal}
             setLoadingChats={setLoadingChats}
             chainId={current.chainId}

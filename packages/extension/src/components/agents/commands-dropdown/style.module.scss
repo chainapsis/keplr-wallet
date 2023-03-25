@@ -1,0 +1,33 @@
+.dropdown {
+  position: absolute;
+  border: solid #dee2e6 1px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  width: 98%;
+  padding: 5px;
+  margin-left: 3px;
+  bottom: 30px;
+  z-index: 2;
+}
+
+.enabled {
+  div {
+    align-items: center;
+    padding: 5px;
+    cursor: pointer;
+    color: black;
+  }
+
+  div:hover {
+    background-color: #c9d4e4;
+  }
+}
+
+.disabled {
+  div {
+    align-items: center;
+    padding: 5px;
+    cursor: not-allowed;
+    color: lightgrey;
+  }
+}

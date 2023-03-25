@@ -23,7 +23,7 @@ export interface MessagePrimitive {
   target: string;
   groupLastSeenTimestamp: Date;
   lastSeenTimestamp: Date;
-  type: 1;
+  type: 1 | 2;
   content: {
     text: string;
   };
@@ -32,13 +32,13 @@ export interface MessagePrimitive {
 export const encryptAllData = async (
   accessToken: string,
   chainId: string,
-  messageStr: any,
+  messageData: any,
   senderAddress: string,
   targetAddress: string
 ): Promise<string> => {
   const dataEnvelope = await encryptToEnvelope(
     chainId,
-    messageStr,
+    messageData,
     senderAddress,
     targetAddress,
     accessToken
@@ -58,7 +58,7 @@ export const encryptAllData = async (
  */
 export async function encryptToEnvelope(
   chainId: string,
-  messageStr: string,
+  messageData: any,
   senderAddress: string,
   targetAddress: string,
   accessToken: string
@@ -81,14 +81,16 @@ export async function encryptToEnvelope(
     throw new Error("Public key not available");
   }
 
+  const isString = typeof messageData === "string";
+
   const message: MessagePrimitive = {
     sender: senderPublicKey.publicKey, //public key
     target: targetPublicKey.publicKey, // public key
     groupLastSeenTimestamp: new Date(),
     lastSeenTimestamp: new Date(),
-    type: 1, //private_message
+    type: isString ? 1 : 2, //private_message
     content: {
-      text: messageStr,
+      text: isString ? messageData : JSON.stringify(messageData),
     },
   };
 

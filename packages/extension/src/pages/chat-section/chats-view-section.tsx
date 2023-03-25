@@ -179,7 +179,11 @@ export const ChatsViewSection = ({
 
   const messagesEndRef: any = useCallback(
     (node: any) => {
-      if (node) node.scrollIntoView({ block: "end" });
+      /// Wait 1 sec for design Rendering and then scroll
+      if (node)
+        setTimeout(() => {
+          node.scrollIntoView({ block: "end" });
+        }, 1000);
     },
     [messages]
   );
@@ -193,8 +197,6 @@ export const ChatsViewSection = ({
   useEffect(() => {
     const getChats = async () => {
       await loadUserList();
-      // if (pagination.page < 0) scrollToBottom();
-      // else messagesScrollRef.current.scrollIntoView(true);
       if (pagination.page >= 0) messagesScrollRef.current.scrollIntoView(true);
     };
     if (isOnScreen) getChats();

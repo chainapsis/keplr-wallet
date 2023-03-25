@@ -157,7 +157,20 @@ export const {
   setIsChatSubscriptionActive,
 } = messagesSlice.actions;
 
-export const userChatGroups = (state: any) => state.messages.groups;
+export const userChatGroups = (state: any) =>
+  Object.keys(state.messages.groups)
+    .filter((key) => !key.includes("agent"))
+    .reduce((obj: Groups, key: string) => {
+      obj[key] = state.messages.groups[key];
+      return obj;
+    }, {});
+export const userChatAgents = (state: any) =>
+  Object.keys(state.messages.groups)
+    .filter((key) => key.includes("agent"))
+    .reduce((obj: Groups, key: string) => {
+      obj[key] = state.messages.groups[key];
+      return obj;
+    }, {});
 export const userChatGroupPagination = (state: any) =>
   state.messages.groupsPagination;
 

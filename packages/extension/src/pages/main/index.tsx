@@ -17,6 +17,7 @@ import { BIP44SelectModal } from "./bip44-select-modal";
 import { Menu } from "./menu";
 import style from "./style.module.scss";
 import { TokensView } from "./token";
+import { ChatDisclaimer } from "@components/chat/chat-disclaimer";
 import { AUTH_SERVER } from "../../config.ui.var";
 import { getJWT } from "@utils/auth";
 import { store } from "@chatStore/index";
@@ -85,11 +86,13 @@ export const MainPage: FunctionComponent = observer(() => {
   useEffect(() => {
     getJWT(chainStore.current.chainId, AUTH_SERVER).then((res) => {
       store.dispatch(setAccessToken(res));
-      getWalletConfig().then((config) =>
-        store.dispatch(setWalletConfig(config))
-      );
+      getWalletConfig()
+        .then((config) => store.dispatch(setWalletConfig(config)))
+        .catch((error) => {
+          console.log(error);
+        });
     });
-  }, [chainStore.current.chainId]);
+  }, [chainStore.current.chainId, accountInfo.bech32Address]);
 
   return (
     <HeaderLayout
@@ -99,6 +102,7 @@ export const MainPage: FunctionComponent = observer(() => {
       rightRenderer={<SwitchUser />}
     >
       <BIP44SelectModal />
+      <ChatDisclaimer />
       <Card className={classnames(style.card, "shadow")}>
         <CardBody>
           <div className={style.containerAccountInner}>

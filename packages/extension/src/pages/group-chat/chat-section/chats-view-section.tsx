@@ -30,7 +30,7 @@ export const GroupChatsViewSection = ({
   isMemberRemoved: boolean;
 }) => {
   const history = useHistory();
-  const groupId = history.location.pathname.split("/")[3];
+  const groupId = history.location.pathname.split("/")[2];
 
   let enterKeyCount = 0;
   const user = useSelector(userDetails);
@@ -90,14 +90,9 @@ export const GroupChatsViewSection = ({
   const [newMessage, setNewMessage] = useState("");
 
   //Scrolling Logic
-  // const messagesEndRef: any = useRef();
   const messagesStartRef: any = createRef();
   const messagesScrollRef: any = useRef(null);
   const isOnScreen = useOnScreen(messagesStartRef);
-
-  // const scrollToBottom = () => {
-  //   if (messagesEndRef.current) messagesEndRef.current.scrollIntoView(true);
-  // };
 
   useEffect(() => {
     const updatedMessages = Object.values(preLoadedChats?.messages).sort(
@@ -108,29 +103,6 @@ export const GroupChatsViewSection = ({
 
     setMessages(updatedMessages);
     setPagination(preLoadedChats.pagination);
-
-    // const lastMessage =
-    //   updatedMessages && updatedMessages.length > 0
-    //     ? updatedMessages[updatedMessages.length - 1]
-    //     : null;
-
-    // if (
-    //   group?.id &&
-    //   lastMessage &&
-    //   lastMessage.sender !== accountInfo.bech32Address
-    // ) {
-    //   setTimeout(() => {
-    //     updateGroupTimestamp(
-    //       group?.id,
-    //       user.accessToken,
-    //       current.chainId,
-    //       accountInfo.bech32Address,
-    //       groupId,
-    //       new Date(lastMessage.commitTimestamp),
-    //       new Date(lastMessage.commitTimestamp)
-    //     );
-    //   }, 500);
-    // }
   }, [preLoadedChats]);
 
   useEffect(() => {
@@ -152,7 +124,10 @@ export const GroupChatsViewSection = ({
 
   const messagesEndRef: any = useCallback(
     (node: any) => {
-      if (node) node.scrollIntoView({ block: "end" });
+      /// Wait 1 sec for design Rendering and then scroll
+      setTimeout(() => {
+        node.scrollIntoView({ block: "end" });
+      }, 1000);
     },
     [messages]
   );
@@ -172,8 +147,6 @@ export const GroupChatsViewSection = ({
   useEffect(() => {
     const getChats = async () => {
       await loadUserList();
-      // if (pagination.page < 0) scrollToBottom();
-      // else messagesScrollRef.current.scrollIntoView(true);
       if (pagination.page >= 0) messagesScrollRef.current.scrollIntoView(true);
     };
     if (isOnScreen) getChats();
@@ -291,17 +264,10 @@ export const GroupChatsViewSection = ({
                 groupLastSeenTimestamp={0}
               />
               {index === CHAT_PAGE_COUNT && <div ref={messagesScrollRef} />}
-              {/* {message?.commitTimestamp &&
-                receiver?.lastSeenTimestamp &&
-                Number(message?.commitTimestamp) >
-                  Number(receiver?.lastSeenTimestamp) &&
-                message?.sender === targetAddress && (
-                  <div ref={messagesEndRef} className={messagesEndRef} />
-                )} */}
             </div>
           );
         })}
-        <div ref={messagesEndRef} className={"AAAAA"} />
+        <div ref={messagesEndRef} />
       </div>
       <ChatInputSection
         placeholder={

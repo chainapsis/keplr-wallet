@@ -48,6 +48,16 @@
   white-space: pre-wrap;
 }
 
+.buttonContainer {
+  margin-top: 10px;
+  padding: 5px 10px;
+  border: solid #3b82f6 1px;
+  border-radius: 5px;
+  color: #3b82f6;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
 .timestamp {
   display: flex;
   align-items: flex-end;

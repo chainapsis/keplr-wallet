@@ -29,7 +29,7 @@ export const ChatSearchInput = ({
       <div
         onClick={() => {
           amplitude.getInstance().logEvent("New chat click", {});
-          history.push("/newChat");
+          history.push("/new-chat");
         }}
       >
         <img

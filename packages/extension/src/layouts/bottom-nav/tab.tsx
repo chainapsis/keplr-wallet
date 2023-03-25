@@ -27,7 +27,8 @@ export const Tab = ({
   const location = useLocation();
   const isChatActive =
     title == "Chat" &&
-    (location.pathname == "/newChat" || location.pathname.startsWith("/chat/"));
+    (location.pathname == "/new-chat" ||
+      location.pathname.startsWith("/chat/"));
   const isActive = path === location.pathname || isChatActive;
 
   return (

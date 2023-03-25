@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { userDetails } from "@chatStore/user-slice";
 import {
   notificationsDetails,
   setNotifications,
-  userChatActive,
   walletConfig,
   WalletConfig,
 } from "@chatStore/user-slice";
-import { CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 import chatTabBlueIcon from "@assets/icon/chat-blue.png";
 import chatTabGreyIcon from "@assets/icon/chat-grey.png";
 import homeTabBlueIcon from "@assets/icon/home-blue.png";
@@ -103,21 +102,28 @@ const NotificationTab = () => {
 };
 const ChatTab = () => {
   const { chainStore } = useStore();
-  const isChatActive = useSelector(userChatActive);
+  const { hasFET, enabledChainIds } = useSelector(userDetails);
+  const config: WalletConfig = useSelector(walletConfig);
   const [chatTooltip, setChatTooltip] = useState("");
   const [chatDisabled, setChatDisabled] = useState(false);
-  const current = chainStore.current;
 
   useEffect(() => {
-    if (!isChatActive)
+    if (config.requiredNative && !hasFET) {
       setChatTooltip("You need to have FET balance to use this feature");
+      setChatDisabled(true);
+      return;
+    } else {
+      setChatTooltip("");
+      setChatDisabled(false);
+    }
 
-    if (current?.chainId !== CHAIN_ID_FETCHHUB)
+    if (!enabledChainIds.includes(chainStore.current?.chainId)) {
       setChatTooltip("Feature not available on this network");
+      setChatDisabled(true);
+      return;
+    }
+  }, [chainStore, hasFET, enabledChainIds, config.requiredNative]);
 
-    if (process.env.NODE_ENV === "production")
-      setChatDisabled(current?.chainId !== CHAIN_ID_FETCHHUB || !isChatActive);
-  }, [current.chainId, isChatActive]);
   return (
     <Tab
       title={"Chat"}

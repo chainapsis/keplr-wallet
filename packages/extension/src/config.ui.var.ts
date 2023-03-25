@@ -1,5 +1,9 @@
 import { IntlMessages } from "./languages";
 import { RegisterOption } from "@keplr-wallet/hooks";
+import sendTokenIcon from "@assets/icon/send-token.png";
+import claimTokenIcon from "@assets/icon/claim-token.png";
+import autoCompoundIcon from "@assets/icon/auto-compound.png";
+import closeIcon from "@assets/icon/close-grey.png";
 
 export const PROD_AMPLITUDE_API_KEY =
   process.env["PROD_AMPLITUDE_API_KEY"] || "";
@@ -41,3 +45,49 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export const GRAPHQL_URL = { SUBSCRIPTION_SERVER, MESSAGING_SERVER };
+
+export const AGENT_ADDRESS: { [key: string]: string } = {
+  [CHAIN_ID_FETCHHUB]:
+    "agent1qvmfez9k6fycllzqc6p7telhwyzzj709n32sc5x2q0ss62ehqc3e52qgna7",
+  [CHAIN_ID_DORADO]:
+    "agent1qdhydny2mmdntqn6dx3d3wpyukaq855j2yexl2f0z07d5esl76932mctpvf",
+};
+// export const AGENT_ADDRESS =
+//   "agent1qdh7x8k7se255j44dmt2yrpnxqdyn9qqt3dvcn4zy3dwq5qthl577v7njct";
+
+export const AGENT_COMMANDS = [
+  {
+    command: "/transferFET",
+    label: "transferFET (Transfer FET)",
+    icon: sendTokenIcon,
+    enabled: true,
+  },
+  {
+    command: "/sendToken",
+    label: "sendToken (Send Token)",
+    icon: sendTokenIcon,
+    enabled: false,
+  },
+  {
+    command: "/autoCompound",
+    label: "autoCompound (Auto-Compound Rewards)",
+    icon: autoCompoundIcon,
+    enabled: false,
+  },
+  {
+    command: "/redeemFET",
+    label: "redeemFET (Redeem Stake Rewards)",
+    icon: claimTokenIcon,
+    enabled: true,
+  },
+  {
+    command: "/cancel",
+    label: "cancel (Cancel Automation)",
+    icon: closeIcon,
+    enabled: true,
+  },
+];
+
+export const TRANSACTION_APPROVED = "Transaction approved";
+export const TRANSACTION_SENT = "Transaction sent";
+export const TRANSACTION_FAILED = "Transaction failed";

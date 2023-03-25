@@ -6,7 +6,7 @@ export const ChatLoader = ({ message }: { message: string }) => {
     <div
       style={{
         textAlign: "center",
-        margin: "140px 0px",
+        padding: "110px 0px",
       }}
     >
       <img draggable={false} src={loadingChatGif} width={100} />

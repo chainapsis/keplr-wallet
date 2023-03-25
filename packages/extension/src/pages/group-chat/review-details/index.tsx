@@ -266,7 +266,7 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
       history.go(-4);
       setTimeout(() => {
         amplitude.getInstance().logEvent("New group created", {});
-        history.push(`/chat/group-chat-section/${groupData.id}`);
+        history.push(`/group-chat-section/${groupData.id}`);
       }, 100);
     }
   };
@@ -297,7 +297,7 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
             className={style.button}
             size="large"
             onClick={async () => {
-              history.push("/chat/group-chat/edit-member");
+              history.push("/group-chat/edit-member");
             }}
           >
             Edit Chat Settings

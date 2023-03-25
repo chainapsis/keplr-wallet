@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import React, { useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import deliveredIcon from "@assets/icon/chat-unseen-status.png";
 import chatSeenIcon from "@assets/icon/chat-seen-status.png";
@@ -8,6 +8,7 @@ import style from "./style.module.scss";
 import { isToday, isYesterday, format } from "date-fns";
 import { store } from "@chatStore/index";
 import { setMessageError } from "@chatStore/messages-slice";
+import { MessagePrimitive } from "@utils/encrypt-message";
 
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp);
@@ -21,6 +22,7 @@ export const ChatMessage = ({
   timestamp,
   showDate,
   groupLastSeenTimestamp,
+  onClickSignTxn,
 }: {
   chainId: string;
   isSender: boolean;
@@ -28,13 +30,14 @@ export const ChatMessage = ({
   timestamp: number;
   showDate: boolean;
   groupLastSeenTimestamp: number;
+  onClickSignTxn?: (jsonData: string) => void;
 }) => {
-  const [decryptedMessage, setDecryptedMessage] = useState("");
+  const [decryptedMessage, setDecryptedMessage] = useState<MessagePrimitive>();
 
   useEffect(() => {
     decryptMessage(chainId, message, isSender)
       .then((message) => {
-        setDecryptedMessage(message.content.text);
+        setDecryptedMessage(message);
       })
       .catch((e) => {
         store.dispatch(
@@ -59,6 +62,45 @@ export const ChatMessage = ({
     return format(d, "dd MMMM yyyy");
   };
 
+  function decideMessageView(): ReactElement {
+    if (!decryptedMessage) {
+      return <i className="fas fa-spinner fa-spin ml-1" />;
+    }
+
+    if (decryptedMessage.type === 1) {
+      return (
+        <div className={style.message}>{decryptedMessage.content.text}</div>
+      );
+    } else {
+      if (isSender)
+        return (
+          <div className={style.message}>
+            {JSON.parse(decryptedMessage.content.text).message ||
+              "Cant Parse sent Message"}
+          </div>
+        );
+      else
+        return (
+          <div className={style.message}>
+            Please recheck parameters of the transaction in Data Tab before
+            approving the transaction.
+            <button
+              type="button"
+              disabled={!onClickSignTxn}
+              className={style.buttonContainer}
+              style={{ cursor: !onClickSignTxn ? "not-allowed" : "pointer" }}
+              onClick={() => {
+                if (onClickSignTxn)
+                  onClickSignTxn(decryptedMessage.content.text);
+              }}
+            >
+              Sign transaction
+            </button>
+          </div>
+        );
+    }
+  }
+
   return (
     <>
       <div className={style.currentDateContainer}>
@@ -74,11 +116,7 @@ export const ChatMessage = ({
             [style.senderBox]: isSender,
           })}
         >
-          {!decryptedMessage ? (
-            <i className="fas fa-spinner fa-spin ml-1" />
-          ) : (
-            <div className={style.message}>{decryptedMessage}</div>
-          )}
+          {decideMessageView()}
           <div className={style.timestamp}>
             {formatTime(timestamp)}
             {isSender && groupLastSeenTimestamp < timestamp && (

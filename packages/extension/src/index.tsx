@@ -61,7 +61,7 @@ import { ChatPage } from "./pages/chat";
 import { ChatSection } from "./pages/chat-section";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
 import { ChatStoreProvider } from "@components/chat/store";
-import { NewChat } from "./pages/newchat/new-chat";
+import { NewChat } from "./pages/new-chat";
 import { ChatSettings } from "./pages/setting/chat";
 import { BlockList } from "./pages/setting/chat/block";
 import { Privacy } from "./pages/setting/chat/privacy";
@@ -71,6 +71,7 @@ import { AddMember } from "./pages/group-chat/add-member";
 import { ReviewGroupChat } from "./pages/group-chat/review-details";
 import { GroupChatSection } from "./pages/group-chat/chat-section";
 import { EditMember } from "./pages/group-chat/edit-member";
+import { AgentChatSection } from "./pages/agent-chat-section";
 import { NotificationOrganizations } from "./pages/notiphy-notification/notification-organizations/index";
 import { NotificationTopics } from "./pages/notiphy-notification/notification-topics/index";
 import { SettingNotifications } from "./pages/setting/notification/index";
@@ -187,7 +188,7 @@ const Application: FunctionComponent = () => {
                       <Route exact path="/chat/:name" component={ChatSection} />
                       <Route
                         exact
-                        path="/chat/group-chat/create"
+                        path="/group-chat/create"
                         component={CreateGroupChat}
                       />
                       <Route
@@ -197,18 +198,23 @@ const Application: FunctionComponent = () => {
                       />
                       <Route
                         exact
-                        path="/chat/group-chat/edit-member"
+                        path="/group-chat/edit-member"
                         component={EditMember}
                       />
                       <Route
                         exact
-                        path="/chat/group-chat/review-details"
+                        path="/group-chat/review-details"
                         component={ReviewGroupChat}
                       />
                       <Route
                         exact
-                        path="/chat/group-chat-section/:name"
+                        path="/group-chat-section/:name"
                         component={GroupChatSection}
+                      />
+                      <Route
+                        exact
+                        path="/chat/agent/:name"
+                        component={AgentChatSection}
                       />
                       <Route exact path="/more" component={MorePage} />
                       <Route
@@ -320,7 +326,7 @@ const Application: FunctionComponent = () => {
                         path="/setting/token/manage"
                         component={ManageTokenPage}
                       />
-                      <Route exact path="/newchat" component={NewChat} />
+                      <Route exact path="/new-chat" component={NewChat} />
                       <Route path="/sign" component={SignPage} />
                       <Route
                         path="/suggest-chain"
