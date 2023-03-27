@@ -132,9 +132,10 @@ export const SettingPage: FunctionComponent = observer(() => {
             )}
           />
         )}
-        {config.notiphyWhitelist !== undefined &&
-          config.notiphyWhitelist.length !== 0 &&
-          config.notiphyWhitelist.indexOf(accountInfo.bech32Address) !== -1 && (
+        {config.notiphyWhitelist &&
+          (config.notiphyWhitelist.length === 0 ||
+            config.notiphyWhitelist.indexOf(accountInfo.bech32Address) !==
+              -1) && (
             <PageButton
               title={"Notifications"}
               onClick={() => {

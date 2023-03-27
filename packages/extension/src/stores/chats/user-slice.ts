@@ -17,7 +17,7 @@ const initialState = {
   } as NotificationSetup,
   accessToken: "",
   walletConfig: {
-    notiphyWhitelist: undefined,
+    notiphyWhitelist: process.env.NODE_ENV == "production" ? undefined : [],
     fetchbotActive: process.env.NODE_ENV !== "production",
     requiredNative: process.env.NODE_ENV == "production",
   } as WalletConfig,
