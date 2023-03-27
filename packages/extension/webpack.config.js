@@ -97,10 +97,10 @@ const extensionConfig = (env, args) => {
     // In development environment, webpack watch the file changes, and recompile
     watch: isEnvDevelopment,
     entry: {
+      background: ["./src/background/background.ts"],
       popup: ["./src/index.tsx"],
       blocklist: ["./src/pages/blocklist/index.tsx"],
       ledgerGrant: ["./src/pages/ledger-grant/index.tsx"],
-      background: ["./src/background/background.ts"],
       contentScripts: ["./src/content-scripts/content-scripts.ts"],
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
     },
@@ -111,11 +111,35 @@ const extensionConfig = (env, args) => {
     optimization: {
       splitChunks: {
         chunks(chunk) {
-          return chunk.name === "popup";
+          if (chunk.name === "reactChartJS") {
+            return false;
+          }
+
+          return (
+            chunk.name !== "contentScripts" && chunk.name !== "injectedScript"
+          );
         },
+
         cacheGroups: {
+          background: {
+            maxSize: 3_000_000,
+            maxInitialRequests: 100,
+            maxAsyncRequests: 100,
+          },
           popup: {
             maxSize: 3_000_000,
+            maxInitialRequests: 100,
+            maxAsyncRequests: 100,
+          },
+          blocklist: {
+            maxSize: 3_000_000,
+            maxInitialRequests: 100,
+            maxAsyncRequests: 100,
+          },
+          ledgerGrant: {
+            maxSize: 3_000_000,
+            maxInitialRequests: 100,
+            maxAsyncRequests: 100,
           },
         },
       },
@@ -146,12 +170,23 @@ const extensionConfig = (env, args) => {
         { copyUnmodified: true }
       ),
       new HtmlWebpackPlugin({
+        template: "./src/background.html",
+        filename: "background.html",
+        excludeChunks: [
+          "popup",
+          "blocklist",
+          "ledgerGrant",
+          "contentScripts",
+          "injectedScript",
+        ],
+      }),
+      new HtmlWebpackPlugin({
         template: "./src/index.html",
         filename: "popup.html",
         excludeChunks: [
+          "background",
           "blocklist",
           "ledgerGrant",
-          "background",
           "contentScripts",
           "injectedScript",
         ],
@@ -160,9 +195,9 @@ const extensionConfig = (env, args) => {
         template: "./src/index.html",
         filename: "blocklist.html",
         excludeChunks: [
+          "background",
           "popup",
           "ledgerGrant",
-          "background",
           "contentScripts",
           "injectedScript",
         ],
@@ -171,9 +206,9 @@ const extensionConfig = (env, args) => {
         template: "./src/index.html",
         filename: "ledger-grant.html",
         excludeChunks: [
+          "background",
           "popup",
           "blocklist",
-          "background",
           "contentScripts",
           "injectedScript",
         ],

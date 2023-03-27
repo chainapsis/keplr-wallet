@@ -15,7 +15,7 @@
     "default_title": "Keplr"
   },
   "background": {
-    "scripts": ["browser-polyfill.js", "background.bundle.js"],
+    "page": "background.html",
     "persistent": true
   },
   "permissions": ["storage", "notifications", "identity", "idle"],
