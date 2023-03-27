@@ -29,7 +29,7 @@ import amplitude from "amplitude-js";
 
 export const GroupChatSection: FunctionComponent = () => {
   const history = useHistory();
-  const groupId = history.location.pathname.split("/")[2];
+  const groupId = history.location.pathname.split("/")[3];
   const groups: Groups = useSelector(userChatGroups);
   const userChats: Chats = useSelector(userMessages);
 
@@ -99,12 +99,12 @@ export const GroupChatSection: FunctionComponent = () => {
     switch (option) {
       case GroupChatOptions.groupInfo:
         amplitude.getInstance().logEvent("Group info click", {});
-        navigateToPage("/group-chat/review-details");
+        navigateToPage("/chat/group-chat/review-details");
         break;
 
       case GroupChatOptions.chatSettings:
         amplitude.getInstance().logEvent("Group Chat setting click", {});
-        navigateToPage("/group-chat/create");
+        navigateToPage("/chat/group-chat/create");
         break;
 
       case GroupChatOptions.deleteGroup:

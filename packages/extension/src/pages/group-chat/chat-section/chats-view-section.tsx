@@ -30,7 +30,7 @@ export const GroupChatsViewSection = ({
   isMemberRemoved: boolean;
 }) => {
   const history = useHistory();
-  const groupId = history.location.pathname.split("/")[2];
+  const groupId = history.location.pathname.split("/")[3];
 
   let enterKeyCount = 0;
   const user = useSelector(userDetails);

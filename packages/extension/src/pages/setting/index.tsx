@@ -114,14 +114,14 @@ export const SettingPage: FunctionComponent = observer(() => {
           userState.messagingPubKey?.privacySetting?.length) && (
           <PageButton
             style={{
-              cursor: !isChatActive ? "pointer" : "not-allowed",
+              cursor: isChatActive ? "pointer" : "not-allowed",
             }}
             paragraph={
-              !isChatActive ? "" : "You need FET balance to use this feature"
+              isChatActive ? "" : "You need FET balance to use this feature"
             }
             title={"Chat"}
             onClick={() => {
-              if (!isChatActive)
+              if (isChatActive)
                 history.push({
                   pathname: "/setting/chat",
                 });

@@ -29,7 +29,7 @@ export const ChatGroupUser: React.FC<{
     amplitude.getInstance().logEvent("Open Group click", {
       from: "Chat history",
     });
-    history.push(`/group-chat-section/${group.id}`);
+    history.push(`/chat/group-chat-section/${group.id}`);
   };
 
   useEffect(() => {
