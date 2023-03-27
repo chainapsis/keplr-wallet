@@ -2,23 +2,21 @@ import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
 
 export const CheckIcon: FunctionComponent<IconProps> = ({
-  width = 16,
-  height = 16,
-  color = "#2DCE89",
+  width = 24,
+  height = 24,
 }) => {
   return (
     <svg
       width={width}
       height={height}
-      viewBox="0 0 16 16"
+      viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect width={width} height={height} rx="8" fill={color} />
       <path
-        d="M4 7.18182L7.11111 11L12 5"
-        stroke="white"
-        strokeWidth="2"
+        d="M4.5 12.75L10.5 18.75L19.5 5.25"
+        stroke="currentColor"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

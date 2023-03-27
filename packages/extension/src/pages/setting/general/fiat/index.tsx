@@ -7,6 +7,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useNavigate } from "react-router";
 import { Box } from "../../../../components/box";
+import { CheckIcon } from "../../../../components/icon";
 
 export const SettingGeneralFiatPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
@@ -43,6 +44,12 @@ export const SettingGeneralFiatPage: FunctionComponent = observer(() => {
 
                     navigate("/");
                   }}
+                  endIcon={
+                    fiatCurrency.currency ===
+                    uiConfigStore.fiatCurrency.currency ? (
+                      <CheckIcon width="1.25rem" height="1.25rem" />
+                    ) : null
+                  }
                 />
               );
             }
