@@ -842,7 +842,8 @@ Salt: ${salt}`;
       bech32Prefix,
       signDoc,
       Buffer.from(signature.pub_key.value, "base64"),
-      Buffer.from(signature.signature, "base64")
+      Buffer.from(signature.signature, "base64"),
+      ethereumKeyFeatures.address ? "ethsecp256k1" : "secp256k1"
     );
   }
 
