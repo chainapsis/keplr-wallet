@@ -1,10 +1,9 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { Column, Columns } from "../../../../components/column";
 import { observer } from "mobx-react-lite";
-import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { ViewToken } from "../../index";
 import {
   Body2,
@@ -13,11 +12,7 @@ import {
   Subtitle4,
 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  QuestionIcon,
-} from "../../../../components/icon";
+import { QuestionIcon } from "../../../../components/icon";
 import styled from "styled-components";
 
 const Styles = {
@@ -28,6 +23,24 @@ const Styles = {
     cursor: pointer;
   `,
 };
+
+export const TokenTitleView: FunctionComponent<{ title: string }> = ({
+  title,
+}) => {
+  return (
+    <Columns sum={1} alignY="center">
+      <Subtitle4 style={{ color: ColorPalette["gray-200"] }}>{title}</Subtitle4>
+      <Box paddingLeft="0.375rem" paddingY="0.5rem">
+        <QuestionIcon
+          width="1rem"
+          height="1rem"
+          color={ColorPalette["gray-300"]}
+        />
+      </Box>
+    </Columns>
+  );
+};
+
 export const TokenItem: FunctionComponent<{ viewToken: ViewToken }> = observer(
   ({ viewToken }) => {
     const { priceStore } = useStore();
@@ -67,79 +80,3 @@ export const TokenItem: FunctionComponent<{ viewToken: ViewToken }> = observer(
     );
   }
 );
-
-export const TokenView: FunctionComponent<{
-  title: string;
-  viewTokens: ViewToken[];
-}> = ({ title, viewTokens }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const alwaysShownTokens = viewTokens.slice(0, 2);
-  const collapsedTokens = viewTokens.slice(2);
-
-  return (
-    <Stack>
-      <Box
-        onClick={() => {
-          setIsExpanded(!isExpanded);
-        }}
-        cursor="pointer"
-      >
-        <Columns sum={1} alignY="center">
-          <Subtitle4 style={{ color: ColorPalette["gray-200"] }}>
-            {title}
-          </Subtitle4>
-          <Box paddingLeft="0.375rem" paddingY="0.5rem">
-            <QuestionIcon
-              width="1rem"
-              height="1rem"
-              color={ColorPalette["gray-300"]}
-            />
-          </Box>
-
-          <Column weight={1} />
-
-          <Subtitle4 style={{ color: ColorPalette["gray-300"] }}>
-            {viewTokens.length}
-          </Subtitle4>
-          <Box paddingLeft="0.25rem">
-            {isExpanded ? (
-              <ArrowDownIcon
-                width="1rem"
-                height="1rem"
-                color={ColorPalette["gray-300"]}
-              />
-            ) : (
-              <ArrowUpIcon
-                width="1rem"
-                height="1rem"
-                color={ColorPalette["gray-300"]}
-              />
-            )}
-          </Box>
-        </Columns>
-      </Box>
-
-      <Stack gutter="0.5rem">
-        {alwaysShownTokens.map((viewToken) => (
-          <TokenItem
-            viewToken={viewToken}
-            key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-          />
-        ))}
-      </Stack>
-
-      <Box marginTop="0.5rem">
-        <VerticalCollapseTransition collapsed={isExpanded}>
-          <Stack gutter="0.5rem">
-            {collapsedTokens.map((viewToken) => (
-              <TokenItem
-                viewToken={viewToken}
-                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-              />
-            ))}
-          </Stack>
-        </VerticalCollapseTransition>
-      </Box>
-    </Stack>
-  );
-};

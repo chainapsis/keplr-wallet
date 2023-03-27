@@ -4,13 +4,14 @@ import { useStore } from "../../stores";
 import { HeaderLayout } from "../../layouts/header";
 import { ProfileButton } from "../../layouts/header/components";
 import { DenomHelper } from "@keplr-wallet/common";
-import { Buttons, ClaimAll, TokenView } from "./components";
+import { Buttons, ClaimAll, TokenItem, TokenTitleView } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { ChainInfo } from "@keplr-wallet/types";
 import styled from "styled-components";
 import { MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
+import { CollapsibleList } from "../../components/collapsible-list";
 
 const Styles = {
   Container: styled.div`
@@ -102,6 +103,12 @@ export const MainPage: FunctionComponent = observer(() => {
     }
   );
 
+  const TokenViewData: { title: string; balance: ViewToken[] }[] = [
+    { title: "Balance", balance: stakableBalances },
+    { title: "Token Balance", balance: tokenBalances },
+    { title: "IBC Balance", balance: ibcBalances },
+  ];
+
   return (
     <HeaderLayout
       title="Wallet Name"
@@ -116,9 +123,27 @@ export const MainPage: FunctionComponent = observer(() => {
         <Stack gutter="1rem">
           <Buttons />
           <ClaimAll viewTokens={claimBalances} />
-          <TokenView title="Balance" viewTokens={stakableBalances} />
-          <TokenView title="Token Balance" viewTokens={tokenBalances} />
-          <TokenView title="IBC Balance" viewTokens={ibcBalances} />
+          {TokenViewData.map(({ title, balance }) => {
+            return (
+              <CollapsibleList
+                key={title}
+                title={<TokenTitleView title={title} />}
+                items={balance.slice(2).map((viewToken) => (
+                  <TokenItem
+                    viewToken={viewToken}
+                    key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                  />
+                ))}
+                alwaysShown={balance.slice(0, 2).map((viewToken) => (
+                  <TokenItem
+                    viewToken={viewToken}
+                    key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                  />
+                ))}
+                right={balance.length}
+              />
+            );
+          })}
         </Stack>
       </Styles.Container>
     </HeaderLayout>
