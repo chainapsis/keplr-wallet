@@ -15,6 +15,7 @@ require("./public/assets/icon/icon-beta-128.png");
 import React, { FunctionComponent, useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
+import { IntlProvider } from "react-intl";
 import { StoreProvider, useStore } from "./stores";
 import { GlobalStyle, GlobalPopupStyle } from "./styles";
 import { configure } from "mobx";
@@ -30,6 +31,8 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SettingPage } from "./pages/setting";
 import { SettingGeneralPage } from "./pages/setting/general";
 import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
+import { SettingGeneralAuthZPage } from "./pages/setting/general/authz";
+import { SettingGeneralAuthZRevokePage } from "./pages/setting/general/authz/revoke";
 import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
 import { PermissionPage } from "./pages/permission";
@@ -147,6 +150,14 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               path="/setting/general/fiat"
               element={<SettingGeneralFiatPage />}
             />
+            <Route
+              path="/setting/general/authz"
+              element={<SettingGeneralAuthZPage />}
+            />
+            <Route
+              path="/setting/general/authz/revoke"
+              element={<SettingGeneralAuthZRevokePage />}
+            />
             <Route path="/setting/security" element={<SettingSecurityPage />} />
             <Route
               path="/setting/security/permission"
@@ -170,9 +181,11 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
-      <GlobalStyle />
-      <GlobalPopupStyle />
-      <RoutesAfterReady />
+      <IntlProvider locale={navigator.language}>
+        <GlobalStyle />
+        <GlobalPopupStyle />
+        <RoutesAfterReady />
+      </IntlProvider>
     </StoreProvider>
   );
 };
