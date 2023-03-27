@@ -40,8 +40,8 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
 
           <PageButton
             title="AuthZ"
-            paragraph="3 delegation"
             endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/authz")}
           />
 
           <PageButton title="Link Keplr Mobile" endIcon={<RightArrowIcon />} />
