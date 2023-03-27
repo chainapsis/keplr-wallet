@@ -125,9 +125,10 @@ export const GroupChatsViewSection = ({
   const messagesEndRef: any = useCallback(
     (node: any) => {
       /// Wait 1 sec for design Rendering and then scroll
-      setTimeout(() => {
-        node.scrollIntoView({ block: "end" });
-      }, 1000);
+      if (node)
+        setTimeout(() => {
+          node.scrollIntoView({ block: "end" });
+        }, 1000);
     },
     [messages]
   );

@@ -10,6 +10,7 @@ import { CHAT_PAGE_COUNT, GROUP_PAGE_COUNT } from "../../config.ui.var";
 
 interface State {
   groups: Groups;
+  agents: Groups;
   groupsPagination: Pagination;
   chats: Chats;
   blockedAddress: BlockedAddressState;
@@ -20,6 +21,7 @@ interface State {
 
 const initialState: State = {
   groups: {},
+  agents: {},
   groupsPagination: {
     page: -1,
     pageCount: GROUP_PAGE_COUNT,
@@ -38,8 +40,26 @@ export const messagesSlice = createSlice({
   reducers: {
     setGroups: (state, action) => {
       const { groups, pagination } = action.payload;
-      state.groups = { ...state.groups, ...groups };
       state.groupsPagination = pagination;
+
+      const chatGroup = Object.keys(groups)
+        .filter((key) => !key.includes("agent"))
+        .reduce((obj: Groups, key: string) => {
+          obj[key] = groups[key];
+          return obj;
+        }, {});
+      if (Object.keys(chatGroup).length > 0)
+        state.groups = { ...state.groups, ...chatGroup };
+
+      const chatAgent = Object.keys(groups)
+        .filter((key) => key.includes("agent"))
+        .reduce((obj: Groups, key: string) => {
+          obj[key] = groups[key];
+          return obj;
+        }, {});
+
+      if (Object.keys(chatAgent).length > 0)
+        state.agents = { ...state.agents, ...chatAgent };
     },
     updateChatList: (state, action) => {
       const { userAddress, messages, pagination } = action.payload;
@@ -79,7 +99,7 @@ export const messagesSlice = createSlice({
     },
     updateGroupsData: (state: any, action: PayloadAction<any>) => {
       const group = action.payload;
-      let key;
+      let key: string;
       if (group.isDm) {
         key = group?.userAddress;
       } else {
@@ -89,11 +109,28 @@ export const messagesSlice = createSlice({
       const updatedGroup = {
         [key]: group,
       };
-      state.groups = { ...state.groups, ...updatedGroup };
+      const chatGroup = Object.keys(updatedGroup)
+        .filter((key) => !key.includes("agent"))
+        .reduce((obj: Groups, key: string) => {
+          obj[key] = updatedGroup[key];
+          return obj;
+        }, {});
+      if (Object.keys(chatGroup).length > 0)
+        state.groups = { ...state.groups, ...chatGroup };
+
+      const chatAgent = Object.keys(updatedGroup)
+        .filter((key) => key.includes("agent"))
+        .reduce((obj: Groups, key: string) => {
+          obj[key] = updatedGroup[key];
+          return obj;
+        }, {});
+      if (Object.keys(chatAgent).length > 0)
+        state.agents = { ...state.agents, ...chatAgent };
     },
     removeGroup: (state: any, action: PayloadAction<any>) => {
       const groupId = action.payload;
-      delete state.groups[groupId];
+      if (state.groups.hasOwnProperty(groupId)) delete state.groups[groupId];
+      if (state.agents.hasOwnProperty(groupId)) delete state.agents[groupId];
     },
     updateLatestSentMessage: (state: any, action: PayloadAction<Message>) => {
       const { target, id, groupId } = action.payload;
@@ -157,20 +194,8 @@ export const {
   setIsChatSubscriptionActive,
 } = messagesSlice.actions;
 
-export const userChatGroups = (state: any) =>
-  Object.keys(state.messages.groups)
-    .filter((key) => !key.includes("agent"))
-    .reduce((obj: Groups, key: string) => {
-      obj[key] = state.messages.groups[key];
-      return obj;
-    }, {});
-export const userChatAgents = (state: any) =>
-  Object.keys(state.messages.groups)
-    .filter((key) => key.includes("agent"))
-    .reduce((obj: Groups, key: string) => {
-      obj[key] = state.messages.groups[key];
-      return obj;
-    }, {});
+export const userChatGroups = (state: any) => state.messages.groups;
+export const userChatAgents = (state: any) => state.messages.agents;
 export const userChatGroupPagination = (state: any) =>
   state.messages.groupsPagination;
 

@@ -13,7 +13,7 @@ export const DeleteGroupPopup = ({
   const history = useHistory();
   const handleDelete = async () => {
     setProcessing(true);
-    const groupId = history.location.pathname.split("/")[3];
+    const groupId = history.location.pathname.split("/")[2];
     deleteGroup(groupId);
     setConfirmAction(false);
     amplitude.getInstance().logEvent("Delete group click", {});
