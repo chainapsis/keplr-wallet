@@ -26,7 +26,7 @@ export const SettingPage: FunctionComponent = observer(() => {
 
           <PageButton
             title="Advanced"
-            paragraph="Language, Currency.."
+            paragraph="Language, Currency..Language, Curren-cy..Language, Currency..."
             endIcon={<RightArrowIcon />}
           />
 
