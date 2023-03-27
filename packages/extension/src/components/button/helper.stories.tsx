@@ -7,7 +7,7 @@ import { H1 } from "../typography";
 import { MenuIcon } from "../icon";
 
 export const Template: ComponentStory<typeof Button> = (props: ButtonProps) => {
-  const colors: ButtonColor[] = ["primary", "secondary"];
+  const colors: ButtonColor[] = ["primary", "secondary", "danger"];
 
   return (
     <div
@@ -22,37 +22,47 @@ export const Template: ComponentStory<typeof Button> = (props: ButtonProps) => {
         })}
 
         <H1>Disabled</H1>
-        <Button text="Button" {...props} disabled />
-        <Button text="Button" {...props} disabled color="secondary" />
+        {colors.map((color) => {
+          return (
+            <Button
+              key={color}
+              text="Button"
+              {...props}
+              disabled
+              color={color}
+            />
+          );
+        })}
 
         <H1>Has Icon</H1>
-        <Button
-          text="Button"
-          {...props}
-          right={<MenuIcon width="12px" height="12px" />}
-        />
-        <Button
-          text="Button"
-          {...props}
-          right={<MenuIcon width="12px" height="12px" />}
-          color="secondary"
-        />
+        {colors.map((color) => {
+          return (
+            <Button
+              key={color}
+              text="Button"
+              {...props}
+              right={<MenuIcon width="12px" height="12px" />}
+              color={color}
+            />
+          );
+        })}
 
         <H1>Size</H1>
-        <Button text="extraSmall" {...props} size="extraSmall" />
-        <Button text="small" {...props} size="small" />
-        <Button text="medium" {...props} size="medium" />
-        <Button text="large" {...props} size="large" />
-
-        <Button
-          text="extraSmall"
-          {...props}
-          color="secondary"
-          size="extraSmall"
-        />
-        <Button text="small" {...props} color="secondary" size="small" />
-        <Button text="medium" {...props} color="secondary" size="medium" />
-        <Button text="large" {...props} color="secondary" size="large" />
+        {colors.map((color) => {
+          return (
+            <Stack key={color} gutter="0.5rem">
+              <Button
+                text="extraSmall"
+                {...props}
+                size="extraSmall"
+                color={color}
+              />
+              <Button text="small" {...props} size="small" color={color} />
+              <Button text="medium" {...props} size="medium" color={color} />
+              <Button text="large" {...props} size="large" color={color} />
+            </Stack>
+          );
+        })}
       </Stack>
     </div>
   );
