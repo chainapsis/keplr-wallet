@@ -565,10 +565,11 @@ export class KeyRingCosmosService {
     data: Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+
     const key = await this.getKey(vaultId, chainId);
-    const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
+    const bech32Prefix = chainInfo.bech32Config.bech32PrefixAccAddr;
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -588,7 +589,8 @@ export class KeyRingCosmosService {
       bech32Prefix,
       signDoc,
       Buffer.from(signature.pub_key.value, "base64"),
-      Buffer.from(signature.signature, "base64")
+      Buffer.from(signature.signature, "base64"),
+      isEthermintLike ? "ethsecp256k1" : "secp256k1"
     );
   }
 
