@@ -7,6 +7,7 @@ export const Styles = {
   Container: styled.div`
     position: relative;
   `,
+
   SelectedContainer: styled.div<{ isOpen: boolean }>`
     display: flex;
     flex-direction: column;
@@ -35,6 +36,8 @@ export const Styles = {
     position: absolute;
 
     width: 100%;
+    max-height: 13rem;
+    overflow: scroll;
 
     margin-top: 0.375rem;
 

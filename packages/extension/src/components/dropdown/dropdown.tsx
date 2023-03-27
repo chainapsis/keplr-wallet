@@ -29,7 +29,10 @@ export const DropDown: FunctionComponent<DropdownProps> = ({
       >
         <Columns sum={1}>
           <Styles.Text selectedItemKey={selectedItemKey}>
-            {selectedItemKey ? selectedItemKey : placeholder}
+            {selectedItemKey
+              ? items.find((item) => item.key === selectedItemKey)?.label ??
+                placeholder
+              : placeholder}
           </Styles.Text>
           <Column weight={1} />
           <ArrowDropDownIcon width="1.25rem" height="1.25rem" />
