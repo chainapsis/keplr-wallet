@@ -33,6 +33,7 @@ import { SettingGeneralPage } from "./pages/setting/general";
 import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
 import { SettingGeneralAuthZPage } from "./pages/setting/general/authz";
 import { SettingGeneralAuthZRevokePage } from "./pages/setting/general/authz/revoke";
+import { SettingAdvancedPage } from "./pages/setting/advanced";
 import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
 import { PermissionPage } from "./pages/permission";
@@ -158,6 +159,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               path="/setting/general/authz/revoke"
               element={<SettingGeneralAuthZRevokePage />}
             />
+            <Route path="/setting/advanced" element={<SettingAdvancedPage />} />
             <Route path="/setting/security" element={<SettingSecurityPage />} />
             <Route
               path="/setting/security/permission"
