@@ -84,6 +84,12 @@ export const AGENT_COMMANDS = [
     enabled: true,
   },
   {
+    command: "/tweet",
+    label: "tweet (Share your tweet)",
+    icon: require("@assets/icon/agent-tweet.svg"),
+    enabled: true,
+  },
+  {
     command: "/cancel",
     label: "cancel (Cancel Automation)",
     icon: closeIcon,
