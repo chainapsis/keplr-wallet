@@ -4,7 +4,14 @@ import { useStore } from "../../stores";
 import { HeaderLayout } from "../../layouts/header";
 import { ProfileButton } from "../../layouts/header/components";
 import { DenomHelper } from "@keplr-wallet/common";
-import { Buttons, ClaimAll, TokenItem, TokenTitleView } from "./components";
+import {
+  Buttons,
+  ClaimAll,
+  StringToggle,
+  TabStatus,
+  TokenItem,
+  TokenTitleView,
+} from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -109,6 +116,8 @@ export const MainPage: FunctionComponent = observer(() => {
     { title: "IBC Balance", balance: ibcBalances },
   ];
 
+  const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
+
   return (
     <HeaderLayout
       title="Wallet Name"
@@ -121,6 +130,7 @@ export const MainPage: FunctionComponent = observer(() => {
     >
       <Styles.Container>
         <Stack gutter="1rem">
+          <StringToggle tabStatus={tabStatus} setTabStatus={setTabStatus} />
           <Buttons />
           <ClaimAll viewTokens={claimBalances} />
           {TokenViewData.map(({ title, balance }) => {
