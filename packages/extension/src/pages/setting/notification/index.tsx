@@ -9,6 +9,7 @@ import { NotificationSetup } from "@notificationTypes";
 import { useSelector } from "react-redux";
 import { useStore } from "../../../stores";
 import { store } from "@chatStore/index";
+import amplitude from "amplitude-js";
 
 export const SettingNotifications: FunctionComponent = () => {
   const history = useHistory();
@@ -28,10 +29,20 @@ export const SettingNotifications: FunctionComponent = () => {
   const orgSuffix = orgInfo.length > 1 ? "s" : "";
 
   const handleOnChange = () => {
+    amplitude
+      .getInstance()
+      .logEvent(
+        notificationInfo.isNotificationOn
+          ? "Notification off"
+          : "Notification on",
+        {}
+      );
+
     localStorage.setItem(
       `turnNotifications-${accountInfo.bech32Address}`,
       notificationInfo.isNotificationOn ? "false" : "true"
     );
+
     /// Updating the notification status in redux
     store.dispatch(
       setNotifications({
