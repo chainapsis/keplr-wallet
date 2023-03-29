@@ -9,3 +9,4 @@ export * from "./right-arrow";
 export * from "./setting";
 export * from "./question";
 export * from "./menu";
+export * from "./information";
