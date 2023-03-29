@@ -18,7 +18,6 @@ export const Styles = {
               color: ${ColorPalette["yellow-400"]};
             }
           `;
-          break;
         case "danger":
           return css`
             background-color: rgba(91, 10, 26, 0.4);
@@ -26,7 +25,6 @@ export const Styles = {
               color: ${ColorPalette["red-400"]};
             }
           `;
-          break;
         default:
           return css`
             background-color: ${ColorPalette["gray-600"]};
