@@ -481,7 +481,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       need = new Coin(fee.denom, new Int(fee.amount));
     }
 
-    if (need.amount.gt(new Int(0))) {
+    if (need.amount.gt(new Int(0)) && !this.granter) {
       const bal = this.queriesStore
         .get(this.chainId)
         .queryBalances.getQueryBech32Address(this._sender)
