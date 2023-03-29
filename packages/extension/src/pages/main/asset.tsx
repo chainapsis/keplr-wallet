@@ -135,7 +135,7 @@ const EmptyState = ({
       </button>
       {chainId == "fetchhub-4" && (
         <a
-          href={"https://indacoin.io/buy-fetch.ai-with-card"}
+          href={"https://fetch.ai/get-fet/"}
           target="_blank"
           rel="noopener noreferrer"
           className={styleAsset.buyButton}

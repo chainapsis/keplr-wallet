@@ -7,6 +7,7 @@ import jazzicon from "@metamask/jazzicon";
 import { markDeliveryAsClicked } from "@utils/fetch-notification";
 import { useStore } from "../../../stores";
 import { FormattedMessage } from "react-intl";
+import amplitude from "amplitude-js";
 interface Props {
   elem: NotyphiNotification;
   onCrossClick: (deliveryId: string) => void;
@@ -27,6 +28,7 @@ export const NotificationItem: FunctionComponent<Props> = ({
 
   const handleFlag = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
+    amplitude.getInstance().logEvent("Notification flag click", {});
     if (!flag) {
       setFlag(true);
       const item = document.getElementById(delivery_id);
@@ -41,6 +43,8 @@ export const NotificationItem: FunctionComponent<Props> = ({
 
   const handleNavigateToUrl = () => {
     if (elem.cta_url != null) {
+      amplitude.getInstance().logEvent("Notification click", {});
+
       const localNotifications = JSON.parse(
         localStorage.getItem(`notifications-${accountInfo.bech32Address}`) ||
           JSON.stringify([])
@@ -69,6 +73,7 @@ export const NotificationItem: FunctionComponent<Props> = ({
 
   const handleRead = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
+    amplitude.getInstance().logEvent("Notification remove click", {});
     const item = document.getElementById(delivery_id);
     item?.classList.add(style.remove);
     onCrossClick(delivery_id);

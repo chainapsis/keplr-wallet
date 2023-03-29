@@ -120,7 +120,7 @@ export const DepositView: FunctionComponent = observer(() => {
             </div>
             <div style={{ flex: 1 }} />
             <a
-              href={"https://indacoin.io/buy-fetch.ai-with-card"}
+              href={"https://fetch.ai/get-fet/"}
               target="_blank"
               rel="noopener noreferrer"
             >

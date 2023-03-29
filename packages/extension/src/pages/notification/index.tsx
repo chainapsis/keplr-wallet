@@ -11,6 +11,7 @@ import { useStore } from "../../stores";
 import { store } from "@chatStore/index";
 import { Menu } from "../main/menu";
 import { NotificationSetup } from "@notificationTypes";
+import amplitude from "amplitude-js";
 export const NotificationPage: FunctionComponent = () => {
   const notificationInfo: NotificationSetup = useSelector(notificationsDetails);
   const history = useHistory();
@@ -23,6 +24,7 @@ export const NotificationPage: FunctionComponent = () => {
   };
 
   const handleClearAll = () => {
+    amplitude.getInstance().logEvent("Notification clear all click", {});
     localStorage.removeItem(`notifications-${accountInfo.bech32Address}`);
     store.dispatch(setNotifications({ allNotifications: [] }));
   };
