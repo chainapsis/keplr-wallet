@@ -9,7 +9,6 @@ import React, {
   useMemo,
 } from "react";
 import { VerticalResizeTransition } from "../vertical-size";
-import styled from "styled-components";
 import {
   animated,
   SpringConfig,
@@ -24,26 +23,6 @@ import {
   ScenePropsInternalTypes,
   SceneTransitionContextBase,
 } from "./internal";
-
-const Styles = {
-  Container: styled(animated.div).withConfig({
-    shouldForwardProp: (prop) => prop === "style" || prop === "children",
-  })<{
-    zIndex: number;
-    transitionAlign?: "top" | "bottom" | "center";
-  }>`
-    display: grid;
-    grid-template-columns: 1fr;
-
-    z-index: ${({ zIndex }) => zIndex};
-
-    width: 100%;
-  `,
-  Element: styled.div`
-    grid-row-start: 1;
-    grid-column-start: 1;
-  `,
-};
 
 // eslint-disable-next-line react/display-name
 export const SceneTransition = forwardRef<
@@ -282,67 +261,13 @@ const SceneComponent: FunctionComponent<{
     });
   }, [targetX, x]);
 
-  /*
-   Styling should satisfy below logic
-    const translateY = (() => {
-      if (top) {
-        return "0";
-      }
-
-      if (transitionAlign !== "center") {
-        return "0";
-      }
-
-      return "-50";
-    })();
-
-   ...(() => {
-      if (top) {
-        return;
-      }
-
-      switch (transitionAlign) {
-        case "center":
-          return {
-            top: "50%",
-          };
-        case "bottom":
-          return {
-            bottom: 0,
-          };
-        default:
-          return {
-            top: 0,
-          };
-      }
-    })(),
-
-    ${({ top }) => {
-      if (top) {
-        return css`
-          position: relative;
-          left: auto;
-          right: auto;
-
-          pointer-events: auto;
-        `;
-      } else {
-        return css`
-          position: absolute;
-          left: 0;
-          right: 0;
-
-          pointer-events: none;
-        `;
-      }
-    }}
-   */
-
   return (
-    <Styles.Container
-      zIndex={index + 1}
-      transitionAlign={transitionAlign}
+    <animated.div
       style={{
+        display: "grid",
+        gridTemplateColumns: "1fr",
+        zIndex: index + 1,
+        width: "100%",
         position: animTop.to((top) => {
           if (top) {
             return "relative";
@@ -414,7 +339,14 @@ const SceneComponent: FunctionComponent<{
         }),
       }}
     >
-      <Styles.Element>{children}</Styles.Element>
-    </Styles.Container>
+      <animated.div
+        style={{
+          gridRowStart: 1,
+          gridColumnStart: 1,
+        }}
+      >
+        {children}
+      </animated.div>
+    </animated.div>
   );
 };
