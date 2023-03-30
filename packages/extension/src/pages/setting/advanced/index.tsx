@@ -8,9 +8,12 @@ import { RightArrowIcon } from "../../../components/icon";
 import { Stack } from "../../../components/stack";
 import { Toggle } from "../../../components/toggle";
 import { useStore } from "../../../stores";
+import { useNavigate } from "react-router";
 
 export const SettingAdvancedPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
+
+  const navigate = useNavigate();
 
   return (
     <HeaderLayout title="Advanced" left={<BackButton />}>
@@ -28,7 +31,11 @@ export const SettingAdvancedPage: FunctionComponent = observer(() => {
             }
           />
 
-          <PageButton title="Endpoints" endIcon={<RightArrowIcon />} />
+          <PageButton
+            title="Endpoints"
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/advanced/endpoint")}
+          />
         </Stack>
       </Box>
     </HeaderLayout>

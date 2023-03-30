@@ -17,7 +17,9 @@ export interface ButtonProps {
   disabled?: boolean;
   text?: string;
   right?: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void | Promise<void>;
 
   // Native html element
   type?: ButtonType;
