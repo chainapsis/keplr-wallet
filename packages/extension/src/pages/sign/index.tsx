@@ -119,6 +119,12 @@ export const SignPage: FunctionComponent = observer(() => {
       feeConfig.setDisableBalanceCheck(
         !!data.data.signOptions.disableBalanceCheck
       );
+      if (
+        data.data.signDocWrapper.granter &&
+        data.data.signDocWrapper.granter !== data.data.signer
+      ) {
+        feeConfig.setDisableBalanceCheck(true);
+      }
       setSigner(data.data.signer);
     }
   }, [
