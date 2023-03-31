@@ -9,6 +9,7 @@ import { ToolTip } from "../../components/tooltip";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLanguage } from "../../languages";
 import { AppCurrency } from "@keplr-wallet/types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const LazyDoughnut = React.lazy(async () => {
   const module = await import(
@@ -127,7 +128,8 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
   );
   const balanceStakableQuery = balanceQuery.stakable;
 
-  const isNoble = chainStore.current.chainId === "noble-1";
+  const isNoble =
+    ChainIdHelper.parse(chainStore.current.chainId).identifier === "noble";
   const hasUSDC: AppCurrency = chainStore.current.currencies.find(
     (currency: AppCurrency) => currency.coinMinimalDenom === "uusdc"
   );
