@@ -130,7 +130,7 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
 
   const isNoble =
     ChainIdHelper.parse(chainStore.current.chainId).identifier === "noble";
-  const hasUSDC: AppCurrency = chainStore.current.currencies.find(
+  const hasUSDC = chainStore.current.currencies.find(
     (currency: AppCurrency) => currency.coinMinimalDenom === "uusdc"
   );
 
