@@ -2,6 +2,8 @@ import { ChainStore } from "./chain";
 import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
 import {
   AmplitudeApiKey,
+  CoinGeckoAPIEndPoint,
+  CoinGeckoGetPrice,
   EthereumEndpoint,
   FiatCurrencies,
   ICNSFrontendLink,
@@ -356,7 +358,11 @@ export class RootStore {
         obj[fiat.currency] = fiat;
         return obj;
       }, {}),
-      "usd"
+      "usd",
+      {
+        baseURL: CoinGeckoAPIEndPoint,
+        uri: CoinGeckoGetPrice,
+      }
     );
 
     this.tokensStore = new TokensStore(

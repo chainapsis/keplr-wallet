@@ -10,8 +10,11 @@ import {
   ADDITIONAL_INTL_MESSAGES,
 } from "alt-sign-in";
 
-export const CoinGeckoAPIEndPoint = "https://api.coingecko.com/api/v3";
-export const CoinGeckoGetPrice = "/simple/price";
+export const CoinGeckoAPIEndPoint =
+  process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] ||
+  "https://api.coingecko.com/api/v3";
+export const CoinGeckoGetPrice =
+  process.env["KEPLR_EXT_COINGECKO_GETPRICE"] || "/simple/price";
 export const AutoFetchingFiatValueInterval = 300 * 1000; // 5min
 
 export const AutoFetchingAssetsInterval = 15 * 1000; // 15sec
