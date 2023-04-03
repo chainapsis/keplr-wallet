@@ -1,11 +1,15 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
-import {
-  RegisterSceneBox,
-  RegisterSceneBoxHeader,
-} from "../components/register-scene-box";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { RegisterSceneBox } from "../components/register-scene-box";
 import { Stack } from "../../../components/stack";
 import { Button } from "../../../components/button";
 import {
+  useSceneEvents,
   useSceneTransition,
   VerticalResizeTransition,
 } from "../../../components/transition";
@@ -15,19 +19,59 @@ import { XAxis } from "../../../components/axis";
 import { Styles } from "./styles";
 import { Gutter } from "../../../components/gutter";
 import { Bleed } from "../../../components/bleed";
-import { HorizontalButtonGroup } from "../../../components/button-group";
 import { Box } from "../../../components/box";
 import { Mnemonic } from "@keplr-wallet/crypto";
-import { SetBip44PathCard, useBIP44PathState } from "../components/bip-44-path";
-import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { useBIP44PathState } from "../components/bip-44-path";
 import { observer } from "mobx-react-lite";
+import lottie from "lottie-web";
+import AnimSeed from "../../../public/assets/lottie/register/seed.json";
+import { useRegisterHeader } from "../components/header";
 
 type WordsType = "12words" | "24words";
 
 export const NewMnemonicScene: FunctionComponent = observer(() => {
+  const header = useRegisterHeader();
+  useSceneEvents({
+    onWillVisible: () => {
+      header.setHeader({
+        mode: "step",
+        title: "New Recovery Phrase",
+        stepCurrent: 1,
+        stepTotal: 6,
+      });
+    },
+  });
+
+  const animDivRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (animDivRef.current) {
+      lottie.loadAnimation({
+        container: animDivRef.current,
+        renderer: "canvas",
+        loop: true,
+        autoplay: true,
+        animationData: AnimSeed,
+      });
+    }
+  }, []);
+
+  const [policyDelayRemaining, setPolicyDelayRemaining] = useState(3000);
+  const [policyVerified, setPolicyVerified] = useState(false);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setPolicyDelayRemaining((v) => Math.max(v - 1000, 0));
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   const sceneTransition = useSceneTransition();
 
-  const [wordsType, setWordsType] = useState<WordsType>("12words");
+  const [wordsType, _setWordsType] = useState<WordsType>("12words");
 
   const [words, setWords] = useState<string[]>([]);
 
@@ -70,40 +114,16 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
   }, [words]);
 
   const bip44PathState = useBIP44PathState();
-  const [isBIP44CardOpen, setIsBIP44CardOpen] = useState(false);
+  const [_isBIP44CardOpen, _setIsBIP44CardOpen] = useState(false);
 
   return (
     <RegisterSceneBox>
-      <RegisterSceneBoxHeader>New mnemonic</RegisterSceneBoxHeader>
-      <Stack>
-        <Styles.WarningContainer>
-          <b>Backup your mnemonic seed securely.</b>
-          <ul>
-            <li>Anyone with your mnemonic seed can take your assets.</li>
-            <li>{`Lost mnemonic seed can't be recovered.`}</li>
-          </ul>
-        </Styles.WarningContainer>
-        <Gutter size="2rem" />
-        <Box alignX="center">
-          <HorizontalButtonGroup
-            buttons={[
-              {
-                key: "12words",
-                text: "12 words",
-              },
-              {
-                key: "24words",
-                text: "24 words",
-              },
-            ]}
-            selectedKey={wordsType}
-            onSelect={(key) => {
-              setWordsType(key as WordsType);
-            }}
-            buttonMinWidth="5.625rem"
-          />
-        </Box>
-        <Gutter size="2rem" />
+      <Box position="relative">
+        {!policyVerified ? (
+          <BlurBackdrop>
+            <div style={{ width: "10rem", height: "10rem" }} ref={animDivRef} />
+          </BlurBackdrop>
+        ) : null}
         <Bleed left="1rem">
           <VerticalResizeTransition
             springConfig={{
@@ -133,42 +153,61 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
             <Gutter size="1rem" />
           </VerticalResizeTransition>
         </Bleed>
-        <Gutter size="1rem" />
-        <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
-          <Box alignX="center">
-            <Button
-              size="small"
-              text="Set BIP Path"
-              onClick={() => {
-                setIsBIP44CardOpen(true);
-              }}
-            />
-          </Box>
-        </VerticalCollapseTransition>
-        <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
-          <SetBip44PathCard
-            state={bip44PathState}
-            onClose={() => {
-              setIsBIP44CardOpen(false);
+      </Box>
+      <Box paddingX="2.375rem">
+        {policyVerified ? (
+          <Button
+            text="Next"
+            size="large"
+            onClick={() => {
+              if (words.join(" ").trim() !== "") {
+                sceneTransition.push("verify-mnemonic", {
+                  mnemonic: words.join(" "),
+                  needVerifyMnemonic: true,
+                  bip44Path: bip44PathState.getPath(),
+                });
+              }
             }}
           />
-        </VerticalCollapseTransition>
-
-        <Gutter size="1rem" />
-        <Button
-          text="Next"
-          disabled={!bip44PathState.isValid()}
-          onClick={() => {
-            if (words.join(" ").trim() !== "") {
-              sceneTransition.push("verify-mnemonic", {
-                mnemonic: words.join(" "),
-                needVerifyMnemonic: true,
-                bip44Path: bip44PathState.getPath(),
-              });
-            }
-          }}
-        />
-      </Stack>
+        ) : (
+          <Button
+            text={`I understood. Show my phrase.${
+              policyDelayRemaining > 0
+                ? ` (${Math.ceil(policyDelayRemaining / 1000)})`
+                : ""
+            }`}
+            size="large"
+            disabled={policyDelayRemaining > 0}
+            onClick={() => {
+              setPolicyVerified(true);
+            }}
+          />
+        )}
+      </Box>
     </RegisterSceneBox>
   );
 });
+
+const BlurBackdrop: FunctionComponent = ({ children }) => {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: "-1.625rem",
+        bottom: 0,
+        left: "-1rem",
+        right: "-1rem",
+        background: "rgba(51, 51, 51, 0.5)",
+        borderRadius: "1rem",
+        backdropFilter: "blur(13.5px)",
+        zIndex: 1000,
+
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {children}
+    </div>
+  );
+};

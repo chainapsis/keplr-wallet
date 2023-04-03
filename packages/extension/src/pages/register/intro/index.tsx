@@ -2,52 +2,44 @@ import React, { FunctionComponent } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Stack } from "../../../components/stack";
 import { Button } from "../../../components/button";
-import { Gutter } from "../../../components/gutter";
-import styled from "styled-components";
-import { ColorPalette } from "../../../styles";
-import { XAxis, YAxis } from "../../../components/axis";
-import { useSceneTransition } from "../../../components/transition";
-
-const Styles = {
-  BrandingText: styled.div`
-    font-weight: 400;
-    font-size: 1.5rem;
-    line-height: 1;
-    letter-spacing: 1.17557px;
-    color: ${ColorPalette["black"]};
-  `,
-};
+import {
+  useSceneEvents,
+  useSceneTransition,
+} from "../../../components/transition";
+import { useRegisterHeader } from "../components/header";
 
 export const RegisterIntroScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
 
+  const header = useRegisterHeader();
+  useSceneEvents({
+    onWillVisible: () => {
+      header.setHeader({
+        mode: "intro",
+      });
+    },
+  });
+
   return (
     <RegisterSceneBox>
-      <Stack gutter="1rem">
-        <YAxis alignX="center">
-          {/* TODO: Add logo */}
-          <XAxis alignY="center">
-            <div>LOGO IMAGE</div>
-            <div>BRANDING TEXT IMAGE</div>
-          </XAxis>
-          <Gutter size="1.25rem" />
-          <Styles.BrandingText>Wallet for the Interchain</Styles.BrandingText>
-        </YAxis>
-        <Gutter size="3.25rem" />
+      <Stack gutter="1.25rem">
         <Button
-          text="Create new seed"
+          text="Create a new wallet"
+          size="large"
           onClick={() => {
-            sceneTransition.push("new-mnemonic");
+            sceneTransition.push("new-user");
           }}
         />
         <Button
-          text="Import Existing Account"
+          text="Import an existing wallet"
+          size="large"
           onClick={() => {
-            sceneTransition.push("recover-mnemonic");
+            sceneTransition.push("existing-user");
           }}
         />
         <Button
           text="Connect Hardware Wallet"
+          size="large"
           onClick={() => {
             // TODO
           }}

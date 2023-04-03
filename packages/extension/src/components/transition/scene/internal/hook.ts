@@ -1,5 +1,6 @@
-import { SceneTransitionContext, SceneTransitionContextBase } from "./internal";
+import { SceneTransitionContextBase } from "./context";
 import { useContext } from "react";
+import { SceneTransitionContext } from "./types";
 
 export const useSceneTransition = (): SceneTransitionContext => {
   const context = useContext(SceneTransitionContextBase);

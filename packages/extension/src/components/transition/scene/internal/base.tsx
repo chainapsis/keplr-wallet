@@ -22,11 +22,12 @@ import {
   SceneDescendantRegistryWrap,
 } from "./resize-registry";
 import {
+  SceneEvents,
   ScenePropsInternalTypes,
   SceneTransitionBaseProps,
   SceneTransitionRef,
 } from "./types";
-import { SceneTransitionContextBase } from "./context";
+import { SceneEventsContextBase, SceneTransitionContextBase } from "./context";
 
 export const useSceneTransitionBase = (
   props: SceneTransitionBaseProps,
@@ -85,6 +86,44 @@ export const useSceneTransitionBase = (
     });
   }, []);
 
+  const replace = useCallback((name: string, props?: Record<string, any>) => {
+    setStack((prevStack) => {
+      seq.current++;
+
+      const newStack = prevStack.slice();
+
+      const prevTop = newStack.find((s) => s.top);
+      if (prevTop) {
+        prevTop.top = false;
+        prevTop.animTop.set(false);
+        prevTop.targetX = 0;
+        prevTop.targetOpacity = 0;
+        prevTop.detached = true;
+      }
+
+      newStack.push({
+        name,
+        props: props,
+        id: seq.current.toString(),
+        top: true,
+        animTop: new SpringValue<boolean>(true),
+        initialX: 1,
+        targetX: 0,
+        initialOpacity: 0,
+        targetOpacity: 1,
+        detached: false,
+        // XXX: Remove prev scene here because prev scene's x axis animation doesn't start.
+        onAminEnd: () => {
+          setStack((prevStack) =>
+            prevStack.slice().filter((s) => s !== prevTop)
+          );
+        },
+      });
+
+      return newStack;
+    });
+  }, []);
+
   const pop = useCallback(() => {
     setStack((prevStack) => {
       const newStack = prevStack.slice();
@@ -131,6 +170,20 @@ export const useSceneTransitionBase = (
     });
   }, []);
 
+  const setCurrentSceneProps = useCallback((props: Record<string, any>) => {
+    setStack((stack) => {
+      const currentScenes = stack.filter((s) => !s.detached);
+      if (currentScenes.length > 0) {
+        const currentScene = currentScenes[currentScenes.length - 1];
+        currentScene.props = props;
+        // Force re-render
+        return stack.slice();
+      }
+
+      return stack;
+    });
+  }, []);
+
   const notDetachedStackNames = useMemo(() => {
     return stack.filter((s) => !s.detached).map((s) => s.name);
   }, [stack]);
@@ -140,9 +193,16 @@ export const useSceneTransitionBase = (
     () => ({
       push,
       pop,
+      replace,
+      setCurrentSceneProps,
+      canPop(): boolean {
+        return notDetachedStackNames.length > 1;
+      },
       get stack(): ReadonlyArray<string> {
         return notDetachedStackNames;
       },
+      currentScene:
+        notDetachedStackNames[notDetachedStackNames.length - 1] ?? "",
       addSceneChangeListener(listener: (stack: ReadonlyArray<string>) => void) {
         sceneChangeListeners.current.push(listener);
       },
@@ -154,7 +214,7 @@ export const useSceneTransitionBase = (
         );
       },
     }),
-    [notDetachedStackNames, pop, push]
+    [notDetachedStackNames, pop, push, replace, setCurrentSceneProps]
   );
 
   useEffect(() => {
@@ -174,6 +234,8 @@ export const useSceneTransitionBase = (
   return {
     push,
     pop,
+    replace,
+    setCurrentSceneProps,
     stack,
     topScene,
     notDetachedStackNames,
@@ -204,13 +266,26 @@ export const SceneTransitionBaseInner: FunctionComponent<
   springConfig,
   push,
   pop,
+  replace,
+  setCurrentSceneProps,
   stack,
   notDetachedStackNames,
   registry,
 }) => {
   return (
     <SceneTransitionContextBase.Provider
-      value={{ push, pop, stack: notDetachedStackNames }}
+      value={{
+        push,
+        pop,
+        replace,
+        setCurrentSceneProps,
+        canPop(): boolean {
+          return notDetachedStackNames.length > 1;
+        },
+        stack: notDetachedStackNames,
+        currentScene:
+          notDetachedStackNames[notDetachedStackNames.length - 1] ?? "",
+      }}
     >
       <VerticalResizeTransition
         width={width}
@@ -285,6 +360,8 @@ const SceneComponent: FunctionComponent<{
 
   springConfig,
 }) => {
+  const eventsRef = useRef<SceneEvents | null>(null);
+
   const opacity = useSpringValue<number>(initialOpacity);
   useEffect(() => {
     opacity.start(targetOpacity);
@@ -298,119 +375,145 @@ const SceneComponent: FunctionComponent<{
   onAnimEndRef.current = onAnimEnd;
 
   useEffect(() => {
+    if (targetX === 0) {
+      eventsRef.current?.onWillVisible?.();
+      // TODO: On initial scene, the animation doesn't start, thus `onDidVisible` is not called.
+      //       This is a bug. However, currently, it is fine because its feature is not used.
+      //       Fix it later.
+      //       And also, there is a similar problem to `replace`.
+    } else {
+      eventsRef.current?.onWillInvisible?.();
+    }
+
     x.start(targetX, {
-      onRest: onAnimEndRef.current,
+      onRest: () => {
+        onAnimEndRef.current?.();
+
+        if (targetX === 0) {
+          eventsRef.current?.onDidVisible?.();
+        } else {
+          eventsRef.current?.onDidInvisible?.();
+        }
+      },
     });
   }, [targetX, x]);
 
   return (
-    <animated.div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr",
-        zIndex: index + 1,
-        width: to([sceneWidth], (sceneWidth) => {
-          return sceneWidth || "100%";
-        }),
-        position: animTop.to((top) => {
-          if (top) {
-            return "relative";
-          } else {
-            return "absolute";
-          }
-        }),
-        top: animTop.to((top) => {
-          if (top) {
-            return "auto";
-          } else {
-            if (transitionAlign === "center") {
-              return "50%";
-            }
-            return "0";
-          }
-        }),
-        bottom: animTop.to((top) => {
-          if (top) {
-            return "auto";
-          } else {
-            if (transitionAlign === "bottom") {
-              return "0";
-            }
-            return "auto";
-          }
-        }),
-        left: to([animTop, x, sceneWidth], (top, x, sceneWidth) => {
-          if (sceneWidth) {
-            if (x != null && x > 0) {
-              x = (x as number) * 100;
-              return `${x}%`;
-            }
-            return "auto";
-          }
-
-          if (top) {
-            return "auto";
-          } else {
-            return "0";
-          }
-        }),
-        right: to([animTop, x, sceneWidth], (top, x, sceneWidth) => {
-          if (sceneWidth) {
-            if (x != null && x < 0) {
-              x = (x as number) * 100 * -1;
-              return `${x}%`;
-            }
-            return "auto";
-          }
-
-          if (top) {
-            return "auto";
-          } else {
-            return "0";
-          }
-        }),
-        pointerEvents: animTop.to((top) => {
-          if (top) {
-            return "auto";
-          } else {
-            return "none";
-          }
-        }),
-        opacity: opacity,
-        transform: to([x, animTop, sceneWidth], (...args) => {
-          let x = args[0] as number;
-          const top = args[1] as boolean;
-
-          x = x * 100;
-          x = Math.max(x, -100);
-          x = Math.min(x, 100);
-
-          let y = 0;
-
-          if (!top) {
-            if (transitionAlign !== "center") {
-              y = 0;
-            } else {
-              y = -50;
-            }
-          }
-
-          if (args[2]) {
-            return `translate(0%, ${y}%)`;
-          }
-
-          return `translate(${x}%, ${y}%)`;
-        }),
+    <SceneEventsContextBase.Provider
+      value={{
+        setEvents(events: SceneEvents) {
+          eventsRef.current = events;
+        },
       }}
     >
       <animated.div
         style={{
-          gridRowStart: 1,
-          gridColumnStart: 1,
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          zIndex: index + 1,
+          width: to([sceneWidth], (sceneWidth) => {
+            return sceneWidth || "100%";
+          }),
+          position: animTop.to((top) => {
+            if (top) {
+              return "relative";
+            } else {
+              return "absolute";
+            }
+          }),
+          top: animTop.to((top) => {
+            if (top) {
+              return "auto";
+            } else {
+              if (transitionAlign === "center") {
+                return "50%";
+              }
+              return "0";
+            }
+          }),
+          bottom: animTop.to((top) => {
+            if (top) {
+              return "auto";
+            } else {
+              if (transitionAlign === "bottom") {
+                return "0";
+              }
+              return "auto";
+            }
+          }),
+          left: to([animTop, x, sceneWidth], (top, x, sceneWidth) => {
+            if (sceneWidth) {
+              if (x != null && x > 0) {
+                x = (x as number) * 100;
+                return `${x}%`;
+              }
+              return "auto";
+            }
+
+            if (top) {
+              return "auto";
+            } else {
+              return "0";
+            }
+          }),
+          right: to([animTop, x, sceneWidth], (top, x, sceneWidth) => {
+            if (sceneWidth) {
+              if (x != null && x < 0) {
+                x = (x as number) * 100 * -1;
+                return `${x}%`;
+              }
+              return "auto";
+            }
+
+            if (top) {
+              return "auto";
+            } else {
+              return "0";
+            }
+          }),
+          pointerEvents: animTop.to((top) => {
+            if (top) {
+              return "auto";
+            } else {
+              return "none";
+            }
+          }),
+          opacity: opacity,
+          transform: to([x, animTop, sceneWidth], (...args) => {
+            let x = args[0] as number;
+            const top = args[1] as boolean;
+
+            x = x * 100;
+            x = Math.max(x, -100);
+            x = Math.min(x, 100);
+
+            let y = 0;
+
+            if (!top) {
+              if (transitionAlign !== "center") {
+                y = 0;
+              } else {
+                y = -50;
+              }
+            }
+
+            if (args[2]) {
+              return `translate(0%, ${y}%)`;
+            }
+
+            return `translate(${x}%, ${y}%)`;
+          }),
         }}
       >
-        {children}
+        <animated.div
+          style={{
+            gridRowStart: 1,
+            gridColumnStart: 1,
+          }}
+        >
+          {children}
+        </animated.div>
       </animated.div>
-    </animated.div>
+    </SceneEventsContextBase.Provider>
   );
 };

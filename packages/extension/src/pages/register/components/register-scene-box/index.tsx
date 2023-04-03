@@ -5,7 +5,7 @@ import { ColorPalette } from "../../../../styles";
 
 export const RegisterSceneBox: FunctionComponent = ({ children }) => {
   return (
-    <Box paddingX="5rem" paddingY="3.125rem">
+    <Box paddingX="3.25rem" paddingY="3rem">
       {children}
     </Box>
   );

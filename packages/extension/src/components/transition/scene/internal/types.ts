@@ -25,14 +25,22 @@ export interface SceneTransitionBaseProps<S extends Scene = Scene> {
 
 export interface SceneTransitionContext {
   push(name: string, props?: Record<string, any>): void;
+  replace(name: string, props?: Record<string, any>): void;
   pop(): void;
+  canPop(): boolean;
+  setCurrentSceneProps(props: Record<string, any>): void;
   readonly stack: ReadonlyArray<string>;
+  readonly currentScene: string;
 }
 
 export interface SceneTransitionRef {
   push(name: string, props?: Record<string, any>): void;
+  replace(name: string, props?: Record<string, any>): void;
   pop(): void;
+  canPop(): boolean;
+  setCurrentSceneProps(props: Record<string, any>): void;
   readonly stack: ReadonlyArray<string>;
+  readonly currentScene: string;
   addSceneChangeListener(
     listener: (stack: ReadonlyArray<string>) => void
   ): void;
@@ -49,4 +57,16 @@ export interface Scene {
 export interface SceneProps {
   name: string;
   props?: Record<string, any>;
+}
+
+export interface SceneEventsContext {
+  setEvents(events: SceneEvents): void;
+}
+
+export interface SceneEvents {
+  onWillVisible?: () => void;
+  onDidVisible?: () => void;
+
+  onWillInvisible?: () => void;
+  onDidInvisible?: () => void;
 }

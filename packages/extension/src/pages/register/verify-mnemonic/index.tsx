@@ -12,6 +12,8 @@ import { Styles } from "./styles";
 import { useForm } from "react-hook-form";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { useRegisterHeader } from "../components/header";
+import { useSceneEvents } from "../../../components/transition";
 
 interface FormData {
   name: string;
@@ -30,6 +32,18 @@ export const VerifyMnemonicScene: FunctionComponent<{
   if (!mnemonic || !bip44Path) {
     throw new Error("Mnemonic and bip44Path should be provided");
   }
+
+  const header = useRegisterHeader();
+  useSceneEvents({
+    onWillVisible: () => {
+      header.setHeader({
+        mode: "step",
+        title: "Verify Your Recovery Phrase",
+        stepCurrent: 2,
+        stepTotal: 6,
+      });
+    },
+  });
 
   const { keyRingStore } = useStore();
 
