@@ -7,7 +7,7 @@ export const VerticalResizeContainer = forwardRef<
   React.PropsWithChildren<{
     heightPx: SpringValue<number>;
 
-    width?: string;
+    width?: string | SpringValue<string>;
     transitionAlign?: "top" | "bottom" | "center";
   }>
 >(({ children, heightPx, width, transitionAlign }, ref) => {

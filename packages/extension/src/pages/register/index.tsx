@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { ColorPalette } from "../../styles";
 import { Card } from "../../components/card";
 import {
-  SceneTransition,
+  FixedWidthSceneTransition,
   SceneTransitionRef,
 } from "../../components/transition";
 import { RegisterIntroScene } from "./intro";
@@ -63,7 +63,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
 
   return (
     <Container>
-      <Box width="100%" maxWidth="34.25rem" position="relative">
+      <Box position="relative">
         <RegisterCardHeader
           collapsed={topHeaderCollapsed}
           onBackClick={() => {
@@ -73,24 +73,28 @@ export const RegisterPage: FunctionComponent = observer(() => {
           }}
         />
         <Card>
-          <SceneTransition
+          <FixedWidthSceneTransition
             ref={sceneRef}
             scenes={[
               {
                 name: "intro",
                 element: RegisterIntroScene,
+                width: "34.25rem",
               },
               {
                 name: "new-mnemonic",
                 element: NewMnemonicScene,
+                width: "50.25rem",
               },
               {
                 name: "verify-mnemonic",
                 element: VerifyMnemonicScene,
+                width: "35rem",
               },
               {
                 name: "recover-mnemonic",
                 element: RecoverMnemonicScene,
+                width: "25rem",
               },
             ]}
             initialSceneProps={{
