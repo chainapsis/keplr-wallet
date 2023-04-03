@@ -224,6 +224,8 @@ const extensionConfig = (env, args) => {
         "KEPLR_EXT_TRANSAK_API_KEY",
         "KEPLR_EXT_MOONPAY_API_KEY",
         "KEPLR_EXT_KADO_API_KEY",
+        "KEPLR_EXT_COINGECKO_ENDPOINT",
+        "KEPLR_EXT_COINGECKO_GETPRICE",
       ]),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",

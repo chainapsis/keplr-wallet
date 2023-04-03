@@ -107,6 +107,14 @@ export class SignDocWrapper {
     return this.aminoSignDoc.fee.amount;
   }
 
+  get granter(): string | undefined {
+    if (this.mode === "direct") {
+      return this.protoSignDoc.authInfo.fee?.granter;
+    }
+
+    return this.aminoSignDoc.fee.granter;
+  }
+
   get gas(): number {
     if (this.mode === "direct") {
       if (this.protoSignDoc.authInfo.fee?.gasLimit) {
