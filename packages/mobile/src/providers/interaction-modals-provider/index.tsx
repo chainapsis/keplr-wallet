@@ -20,6 +20,7 @@ export const InteractionModalsProivder: FunctionComponent = observer(
       permissionStore,
       signInteractionStore,
       walletConnectStore,
+      walletConnectV2Store,
       tokensStore,
     } = useStore();
 
@@ -28,6 +29,15 @@ export const InteractionModalsProivder: FunctionComponent = observer(
         BackHandler.exitApp();
       }
     }, [walletConnectStore.needGoBackToBrowser]);
+
+    useEffect(() => {
+      if (
+        walletConnectV2Store.needGoBackToBrowser &&
+        Platform.OS === "android"
+      ) {
+        BackHandler.exitApp();
+      }
+    }, [walletConnectV2Store.needGoBackToBrowser]);
 
     useEffect(() => {
       for (const data of permissionStore.waitingDatas) {
@@ -60,7 +70,24 @@ export const InteractionModalsProivder: FunctionComponent = observer(
             }}
           />
         ) : null}
+        {keyRingStore.status === KeyRingStatus.UNLOCKED &&
+        walletConnectV2Store.isPendingClientFromDeepLink ? (
+          <LoadingScreenModal
+            isOpen={true}
+            close={() => {
+              // noop
+            }}
+          />
+        ) : null}
         {walletConnectStore.needGoBackToBrowser && Platform.OS === "ios" ? (
+          <WCGoBackToBrowserModal
+            isOpen={walletConnectStore.needGoBackToBrowser}
+            close={() => {
+              walletConnectStore.clearNeedGoBackToBrowser();
+            }}
+          />
+        ) : null}
+        {walletConnectV2Store.needGoBackToBrowser && Platform.OS === "ios" ? (
           <WCGoBackToBrowserModal
             isOpen={walletConnectStore.needGoBackToBrowser}
             close={() => {

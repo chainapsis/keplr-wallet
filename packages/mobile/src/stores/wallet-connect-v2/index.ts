@@ -15,6 +15,7 @@ import { getRandomBytesAsync } from "../../common";
 import { KVStore } from "@keplr-wallet/common";
 import Long from "long";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { AppState, Linking } from "react-native";
 
 function noop(fn: () => void): void {
   fn();
@@ -28,6 +29,7 @@ export class WalletConnectV2Store {
   protected sessionProposalResolverMap = new Map<
     string,
     {
+      fromDeepLink?: boolean;
       resolve: () => void;
       reject: (e: Error) => void;
     }
@@ -50,6 +52,41 @@ export class WalletConnectV2Store {
   @observable
   protected _forceReaction: number = 0;
 
+  /*
+   Indicate that there is a pending client that was requested from the deep link.
+   Creating session take some time, but this store can't show the indicator.
+   Component can show the indicator on behalf of this store if needed.
+   */
+  @observable
+  protected _isPendingClientFromDeepLink: boolean = false;
+
+  @observable
+  protected _needGoBackToBrowser: boolean = false;
+
+  /*
+   XXX: Fairly hacky part.
+        In Android, it seems posible that JS works, but all views deleted.
+        This case seems to happen when the window size of the app is forcibly changed or the app is exited.
+        But there doesn't seem to be an API that can detect this.
+        The reason this is a problem is that the stores are all built with a singleton concept.
+        Even if the view is initialized and recreated, this store is not recreated.
+        In this case, the url handler of the deep link does not work and must be called through initialURL().
+        To solve this problem, we leave the detection of the activity state to another component.
+        If a component that cannot be unmounted is unmounted, it means the activity is killed.
+   */
+  protected _isAndroidActivityKilled = false;
+  /*
+   This means that how many wc call request is processing.
+   When the call requested, should increase this.
+   And when the requested call is completed, should decrease this.
+   This field is only needed on the handler side, so don't need to be observable.
+   */
+  protected wcCallCount: number = 0;
+  /*
+   Check that there is a wallet connect call from the client that was connected by deep link.
+   */
+  protected isPendingWcCallFromDeepLinkClient = false;
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly eventListener: {
@@ -63,6 +100,7 @@ export class WalletConnectV2Store {
     makeObservable(this);
 
     this.init();
+    this.initDeepLink();
   }
 
   protected async init(): Promise<void> {
@@ -98,6 +136,95 @@ export class WalletConnectV2Store {
       "keplr_keystorechange",
       this.accountMayChanged.bind(this)
     );
+  }
+
+  protected async initDeepLink() {
+    await this.checkInitialURL();
+
+    Linking.addEventListener("url", (e) => {
+      this.processDeepLinkURL(e.url);
+    });
+
+    AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        if (this._isAndroidActivityKilled) {
+          // If the android activity restored, the deep link url handler will not work.
+          // We should recheck the initial URL()
+          this.checkInitialURL();
+        }
+        this._isAndroidActivityKilled = false;
+      } else {
+        this.clearNeedGoBackToBrowser();
+      }
+    });
+  }
+
+  protected async checkInitialURL() {
+    const initialURL = await Linking.getInitialURL();
+    if (initialURL) {
+      await this.processDeepLinkURL(initialURL);
+    }
+  }
+
+  protected async processDeepLinkURL(_url: string) {
+    try {
+      const url = new URL(_url);
+      if (url.protocol === "keplrwallet:" && url.host === "wcV2") {
+        let params = url.search;
+        if (params) {
+          if (params.startsWith("?")) {
+            params = params.slice(1);
+          }
+
+          const topic = params;
+          if (this.sessionProposalResolverMap.has(topic)) {
+            // Already requested. Do nothing.
+            return;
+          }
+
+          runInAction(() => {
+            this._isPendingClientFromDeepLink = true;
+          });
+
+          try {
+            await this.pair(params, true);
+          } catch (e) {
+            console.log("Failed to init wallet connect v2 client", e);
+          } finally {
+            runInAction(() => {
+              this._isPendingClientFromDeepLink = false;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  get isPendingClientFromDeepLink(): boolean {
+    return this._isPendingClientFromDeepLink;
+  }
+
+  /**
+   needGoBackToBrowser indicates that all requests from the wallet connect are processed when the request is from the deep link.
+   This store doesn't show any indicator to user or close the app.
+   The other component (maybe provider) should act according to this field.
+   */
+  get needGoBackToBrowser(): boolean {
+    return this._needGoBackToBrowser;
+  }
+
+  /**
+   clearNeedGoBackToBrowser is used in the component to set the needGoBackToBrowser as false.
+   */
+  @action
+  clearNeedGoBackToBrowser() {
+    this._needGoBackToBrowser = false;
+  }
+
+  onAndroidActivityKilled() {
+    this._isAndroidActivityKilled = true;
   }
 
   async getSessionMetadata(
@@ -402,7 +529,7 @@ export class WalletConnectV2Store {
         },
       });
 
-      await this.saveTopic(randomId, ackTopic);
+      await this.saveTopic(randomId, ackTopic, resolver?.fromDeepLink ?? false);
 
       await acknowledged();
 
@@ -436,6 +563,8 @@ export class WalletConnectV2Store {
       return;
     }
 
+    this.wcCallCount++;
+
     try {
       let chainId = event.params.chainId as string;
       if (!chainId.startsWith("cosmos:")) {
@@ -446,6 +575,10 @@ export class WalletConnectV2Store {
       const reqId = await this.getRandomIdByTopic(topic);
       if (!reqId) {
         throw new Error("Unregistered topic");
+      }
+
+      if (await this.getFromDeepLinkByTopic(topic)) {
+        this.isPendingWcCallFromDeepLinkClient = true;
       }
 
       // Store permitted chains before processing request.
@@ -573,24 +706,27 @@ export class WalletConnectV2Store {
           },
         },
       });
+    } finally {
+      this.wcCallCount--;
+
+      if (this.wcCallCount === 0 && this.isPendingWcCallFromDeepLinkClient) {
+        this.isPendingWcCallFromDeepLinkClient = false;
+
+        if (AppState.currentState === "active") {
+          this.clearNeedGoBackToBrowser();
+        }
+      }
     }
   }
 
-  async pair(uri: string) {
-    const topic = (() => {
-      let str = uri.replace("wc:", "");
-      const i = str.indexOf("?");
-      if (i >= 0) {
-        str = str.slice(0, i);
-      }
-      str = str.replace("@2", "");
-      return str;
-    })();
+  async pair(uri: string, fromDeepLink?: boolean) {
+    const topic = this.getTopicFromURI(uri);
 
     const signClient = await this.ensureInit();
 
     return new Promise<void>((resolve, reject) => {
       this.sessionProposalResolverMap.set(topic, {
+        fromDeepLink,
         resolve,
         reject,
       });
@@ -603,6 +739,16 @@ export class WalletConnectV2Store {
         this.sessionProposalResolverMap.delete(topic);
       }, 10000);
     });
+  }
+
+  protected getTopicFromURI(uri: string): string {
+    let str = uri.replace("wc:", "");
+    const i = str.indexOf("?");
+    if (i >= 0) {
+      str = str.slice(0, i);
+    }
+    str = str.replace("@2", "");
+    return str;
   }
 
   protected async ensureInit(): Promise<SignClient> {
@@ -663,9 +809,14 @@ export class WalletConnectV2Store {
     );
   }
 
-  protected async saveTopic(randomId: string, ackTopic: string): Promise<void> {
+  protected async saveTopic(
+    randomId: string,
+    ackTopic: string,
+    fromDeepLink: boolean
+  ): Promise<void> {
     await this.kvStore.set(`id-to-topic:${randomId}`, ackTopic);
     await this.kvStore.set(`topic-to-id:${ackTopic}`, randomId);
+    await this.kvStore.set(`topic-to-from-deep-link:${ackTopic}`, fromDeepLink);
   }
 
   protected async getTopicByRandomId(
@@ -680,9 +831,18 @@ export class WalletConnectV2Store {
     return await this.kvStore.get(`topic-to-id:${topic}`);
   }
 
+  protected async getFromDeepLinkByTopic(
+    topic: string
+  ): Promise<boolean | undefined> {
+    // XXX: This value is added after deep link wc v2 updates.
+    //      Thus, it is possible that there is no value if client was made before the update.
+    return await this.kvStore.get(`topic-to-from-deep-link:${topic}`);
+  }
+
   protected async clearTopic(topic: string): Promise<void> {
     const randomId = await this.kvStore.get(`topic-to-id:${topic}`);
     await this.kvStore.set(`topic-to-id:${topic}`, null);
+    await this.kvStore.set(`topic-to-from-deep-link:${topic}`, null);
     if (randomId) {
       await this.kvStore.set(`id-to-topic:${randomId}`, null);
     }
@@ -693,6 +853,7 @@ export class WalletConnectV2Store {
     await this.kvStore.set(`id-to-topic:${randomId}`, null);
     if (topic) {
       await this.kvStore.set(`topic-to-id:${topic}`, null);
+      await this.kvStore.set(`topic-to-from-deep-link:${topic}`, null);
     }
   }
 

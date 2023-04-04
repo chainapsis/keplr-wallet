@@ -28,6 +28,7 @@ export const StoreProvider: FunctionComponent = ({ children }) => {
     return () => {
       // Check the comment of `_isAndroidActivityKilled` field on `WalletConnectStore`
       stores.walletConnectStore.onAndroidActivityKilled();
+      stores.walletConnectV2Store.onAndroidActivityKilled();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
