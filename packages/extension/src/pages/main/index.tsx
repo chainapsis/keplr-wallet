@@ -27,7 +27,7 @@ import { getWalletConfig } from "@graphQL/config-api";
 export const MainPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { keyRingStore, chainStore, accountStore, queriesStore } = useStore();
 
   const confirm = useConfirm();
 
@@ -84,6 +84,9 @@ export const MainPage: FunctionComponent = observer(() => {
 
   /// Fetching wallet config info
   useEffect(() => {
+    if (keyRingStore.keyRingType === "ledger") {
+      return;
+    }
     getJWT(chainStore.current.chainId, AUTH_SERVER).then((res) => {
       store.dispatch(setAccessToken(res));
       getWalletConfig()

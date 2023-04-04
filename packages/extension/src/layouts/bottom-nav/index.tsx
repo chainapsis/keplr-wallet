@@ -52,7 +52,7 @@ export const BottomNav = () => {
 
 const HomeTab = () => <Tab {...bottomNav[0]} />;
 const NotificationTab = () => {
-  const { accountStore, chainStore } = useStore();
+  const { keyRingStore, accountStore, chainStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const config: WalletConfig = useSelector(walletConfig);
@@ -60,12 +60,16 @@ const NotificationTab = () => {
   const [isComingSoon, setIsComingSoon] = useState<boolean>(true);
 
   useEffect(() => {
-    setIsComingSoon(
-      config.notiphyWhitelist === undefined
-        ? true
-        : config.notiphyWhitelist.length !== 0 &&
-            config.notiphyWhitelist.indexOf(accountInfo.bech32Address) === -1
-    );
+    if (keyRingStore.keyRingType === "ledger") {
+      setIsComingSoon(true);
+    } else {
+      setIsComingSoon(
+        config.notiphyWhitelist === undefined
+          ? true
+          : config.notiphyWhitelist.length !== 0 &&
+              config.notiphyWhitelist.indexOf(accountInfo.bech32Address) === -1
+      );
+    }
 
     const notificationFlag =
       localStorage.getItem(`turnNotifications-${accountInfo.bech32Address}`) ||
@@ -101,13 +105,19 @@ const NotificationTab = () => {
   );
 };
 const ChatTab = () => {
-  const { chainStore } = useStore();
+  const { keyRingStore, chainStore } = useStore();
   const { hasFET, enabledChainIds } = useSelector(userDetails);
   const config: WalletConfig = useSelector(walletConfig);
   const [chatTooltip, setChatTooltip] = useState("");
   const [chatDisabled, setChatDisabled] = useState(false);
 
   useEffect(() => {
+    if (keyRingStore.keyRingType === "ledger") {
+      setChatTooltip("Coming soon for ledger");
+      setChatDisabled(true);
+      return;
+    }
+
     if (config.requiredNative && !hasFET) {
       setChatTooltip("You need to have FET balance to use this feature");
       setChatDisabled(true);
