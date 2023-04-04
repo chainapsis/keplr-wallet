@@ -19,13 +19,7 @@ export default {
       control: false,
     },
   },
-  decorators: [
-    (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
 } as ComponentMeta<typeof FixedWidthSceneTransition>;
 
 const RandomHeightBoxes: FunctionComponent<{

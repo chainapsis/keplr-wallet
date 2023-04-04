@@ -8,13 +8,7 @@ import { H1 } from "../typography";
 export default {
   title: "Components/Toggle",
   component: CompToggle,
-  decorators: [
-    (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
 } as ComponentMeta<typeof CompToggle>;
 
 const Template: ComponentStory<typeof CompToggle> = (props: ToggleProps) => {

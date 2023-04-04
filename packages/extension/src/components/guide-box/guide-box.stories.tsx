@@ -9,13 +9,7 @@ import { ColorPalette } from "../../styles";
 export default {
   title: "Components/GuideBox",
   component: CompGuideBox,
-  decorators: [
-    (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
 } as ComponentMeta<typeof CompGuideBox>;
 
 const Template: ComponentStory<typeof CompGuideBox> = (
