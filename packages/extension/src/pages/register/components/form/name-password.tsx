@@ -1,0 +1,108 @@
+import React, { FunctionComponent } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
+import { TextInput } from "../../../../components/input";
+import { Gutter } from "../../../../components/gutter";
+import { Button } from "../../../../components/button";
+import { Stack } from "../../../../components/stack";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
+import { YAxis } from "../../../../components/axis";
+
+export interface FormDataNamePassword {
+  name: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export const useFormNamePassword = () => {
+  return useForm<FormDataNamePassword>({
+    defaultValues: {
+      name: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+};
+
+export const FormNamePassword: FunctionComponent<
+  UseFormReturn<FormDataNamePassword>
+> = observer(({ register, formState, getValues }) => {
+  const { keyRingStore } = useStore();
+
+  const needPassword = keyRingStore.keyInfos.length === 0;
+
+  return (
+    <Stack gutter="1rem">
+      {!needPassword ? (
+        <YAxis alignX="center">
+          <Gutter size="1rem" />
+          <AddWalletImg />
+          <Gutter size="1rem" />
+        </YAxis>
+      ) : null}
+      <TextInput
+        label="Wallet Name"
+        {...register("name", {
+          required: true,
+        })}
+        error={formState.errors.name?.message}
+      />
+      {needPassword ? (
+        <React.Fragment>
+          <TextInput
+            label="Create Keplr Password"
+            type="password"
+            {...register("password", {
+              required: true,
+              validate: (password: string): string | undefined => {
+                if (password.length < 8) {
+                  return "Too short password";
+                }
+              },
+            })}
+            error={formState.errors.password?.message}
+          />
+          <TextInput
+            label="Confirm Keplr Password"
+            type="password"
+            {...register("confirmPassword", {
+              required: true,
+              validate: (confirmPassword: string): string | undefined => {
+                if (confirmPassword !== getValues("password")) {
+                  return "Password should match";
+                }
+              },
+            })}
+            error={formState.errors.confirmPassword?.message}
+          />
+        </React.Fragment>
+      ) : null}
+      <Gutter size="2.5rem" />
+      <Button size="large" text="Next" type="submit" />
+    </Stack>
+  );
+});
+
+const AddWalletImg: FunctionComponent = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="93"
+      height="86"
+      fill="none"
+      viewBox="0 0 93 86"
+    >
+      <path
+        fill="#F6F6F9"
+        fillRule="evenodd"
+        d="M.118 11.704A19.986 19.986 0 0113.39 6.687h60.188c5.088 0 9.734 1.895 13.271 5.017C86.027 5.106 80.4 0 73.578 0H13.39C6.57 0 .94 5.106.118 11.704zm0 13.375a19.986 19.986 0 0113.272-5.017h60.188c5.088 0 9.734 1.895 13.271 5.017-.822-6.598-6.45-11.704-13.271-11.704H13.39C6.57 13.375.94 18.481.118 25.079zM.016 40.125c0-7.387 5.988-13.375 13.375-13.375h16.718a3.344 3.344 0 013.344 3.344c0 5.54 4.491 10.031 10.031 10.031 5.54 0 10.032-4.491 10.032-10.031a3.344 3.344 0 013.343-3.344h16.72c7.386 0 13.374 5.988 13.374 13.375v16.48a16.926 16.926 0 00-7.969-1.98c-9.388 0-17 7.611-17 17 0 3.148.856 6.097 2.348 8.625H13.39C6.004 80.25.016 74.262.016 66.875v-26.75z"
+        clipRule="evenodd"
+      />
+      <circle cx="78.984" cy="71.625" r="14" fill="#2C4BE2" />
+      <path
+        fill="#fff"
+        d="M77.986 76.625v-10h1.99v10h-1.99zm-4.002-4.009v-1.99h10v1.99h-10z"
+      />
+    </svg>
+  );
+};

@@ -3,6 +3,7 @@ import { TextInputProps } from "./types";
 import { Styles } from "./styles";
 import { Column, Columns } from "../../column";
 import { Box } from "../../box";
+import { VerticalResizeTransition } from "../../transition";
 
 // eslint-disable-next-line react/display-name
 export const TextInput = forwardRef<
@@ -59,11 +60,13 @@ export const TextInput = forwardRef<
           </Columns>
         </Styles.TextInputContainer>
 
-        {error || paragraph ? (
-          <Styles.SubText error={error} paragraph={paragraph}>
-            {error || paragraph}
-          </Styles.SubText>
-        ) : null}
+        <VerticalResizeTransition transitionAlign="top">
+          {error || paragraph ? (
+            <Styles.SubText error={error} paragraph={paragraph}>
+              {error || paragraph}
+            </Styles.SubText>
+          ) : null}
+        </VerticalResizeTransition>
       </Styles.Container>
     );
   }

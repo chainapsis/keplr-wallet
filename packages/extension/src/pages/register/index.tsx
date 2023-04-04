@@ -75,7 +75,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
               {
                 name: "recover-mnemonic",
                 element: RecoverMnemonicScene,
-                width: "25rem",
+                width: "33.75rem",
               },
             ]}
             initialSceneProps={{

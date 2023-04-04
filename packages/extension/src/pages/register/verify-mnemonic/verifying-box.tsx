@@ -1,23 +1,33 @@
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { Box } from "../../../components/box";
-import { TextInput } from "../../../components/input";
-import { XAxis } from "../../../components/axis";
+import {
+  TextInput,
+  Styles as TextInputStyles,
+} from "../../../components/input";
+import { XAxis, YAxis } from "../../../components/axis";
 import { ColorPalette } from "../../../styles";
 import styled from "styled-components";
 import { Gutter } from "../../../components/gutter";
 
 const Styles = {
   IndexText: styled.div`
-    font-weight: 700;
-    font-size: 1rem;
-    line-height: 1rem;
+    font-weight: 500;
+    font-size: 0.875rem;
     text-align: right;
-    color: ${ColorPalette["platinum-300"]};
+    color: ${ColorPalette["gray-100"]};
 
-    min-width: 1.5rem;
-    margin-right: 4px;
+    margin-right: 0.25rem;
   `,
 };
+
+const VerifyingWordInput = styled(TextInput)`
+  ${TextInputStyles.TextInputContainer} {
+    width: 6.625rem;
+  }
+  ${TextInputStyles.TextInput} {
+    height: 3rem;
+  }
+`;
 
 export interface VerifyingMnemonicBoxRef {
   validate: () => boolean;
@@ -55,42 +65,45 @@ export const VerifyingMnemonicBox = forwardRef<
 
   return (
     <Box
-      paddingX="3.875rem"
       paddingY="1.5rem"
-      backgroundColor={ColorPalette["gray-10"]}
+      backgroundColor={ColorPalette["gray-500"]}
       borderRadius="0.5rem"
     >
-      <XAxis alignY="center">
-        {words.map((word, i) => {
-          return (
-            <React.Fragment key={word.index}>
-              <XAxis alignY="center">
-                <Styles.IndexText>{word.index + 1}.</Styles.IndexText>
-                <TextInput
-                  value={inputs[word.index] ?? ""}
-                  onChange={(e) => {
-                    e.preventDefault();
+      <YAxis alignX="center">
+        <XAxis alignY="center">
+          {words.map((word, i) => {
+            return (
+              <React.Fragment key={word.index}>
+                <XAxis alignY="center">
+                  <Styles.IndexText>{`Word #${
+                    word.index + 1
+                  }.`}</Styles.IndexText>
+                  <VerifyingWordInput
+                    value={inputs[word.index] ?? ""}
+                    onChange={(e) => {
+                      e.preventDefault();
 
-                    setInputs({
-                      ...inputs,
-                      [word.index]: e.target.value,
-                    });
-                  }}
-                  errorBorder={(() => {
-                    if (validatingStarted) {
-                      return inputs[word.index]?.trim() !== word.word;
-                    }
-                    return false;
-                  })()}
-                />
-              </XAxis>
-              {i !== words.length - 1 ? (
-                <Gutter size="1.125rem" direction="horizontal" />
-              ) : null}
-            </React.Fragment>
-          );
-        })}
-      </XAxis>
+                      setInputs({
+                        ...inputs,
+                        [word.index]: e.target.value,
+                      });
+                    }}
+                    errorBorder={(() => {
+                      if (validatingStarted) {
+                        return inputs[word.index]?.trim() !== word.word;
+                      }
+                      return false;
+                    })()}
+                  />
+                </XAxis>
+                {i !== words.length - 1 ? (
+                  <Gutter size="1rem" direction="horizontal" />
+                ) : null}
+              </React.Fragment>
+            );
+          })}
+        </XAxis>
+      </YAxis>
     </Box>
   );
 });

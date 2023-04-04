@@ -205,21 +205,17 @@ const HeaderStep: FunctionComponent<{
             }
 
             return (
-              <ul>
-                {paragraphs.map((paragraph, i) => {
-                  return (
-                    <Body1
-                      key={i}
-                      as="li"
-                      style={{
-                        textAlign: "center",
-                      }}
-                    >
-                      {paragraph}
-                    </Body1>
-                  );
-                })}
-              </ul>
+              <YAxis alignX="center">
+                <ul>
+                  {paragraphs.map((paragraph, i) => {
+                    return (
+                      <Body1 key={i} as="li">
+                        {paragraph}
+                      </Body1>
+                    );
+                  })}
+                </ul>
+              </YAxis>
             );
           }
 
