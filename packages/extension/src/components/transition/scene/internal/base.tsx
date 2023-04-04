@@ -256,13 +256,14 @@ export const SceneTransitionBase = forwardRef<
 export const SceneTransitionBaseInner: FunctionComponent<
   Pick<
     SceneTransitionBaseProps,
-    "width" | "scenes" | "transitionAlign" | "springConfig"
+    "width" | "scenes" | "transitionAlign" | "transitionMode" | "springConfig"
   > &
     ReturnType<typeof useSceneTransitionBase>
 > = ({
   width,
   scenes,
   transitionAlign,
+  transitionMode,
   springConfig,
   push,
   pop,
@@ -319,6 +320,7 @@ export const SceneTransitionBaseInner: FunctionComponent<
                 targetOpacity={props.targetOpacity}
                 onAnimEnd={props.onAminEnd}
                 transitionAlign={transitionAlign}
+                transitionMode={transitionMode}
                 springConfig={springConfig}
                 sceneWidth={width}
               >
@@ -342,6 +344,7 @@ const SceneComponent: FunctionComponent<{
   targetOpacity: number;
   onAnimEnd?: () => void;
   transitionAlign?: "top" | "bottom" | "center";
+  transitionMode?: "x-axis" | "opacity";
 
   sceneWidth?: string | SpringValue<string>;
 
@@ -356,6 +359,7 @@ const SceneComponent: FunctionComponent<{
   targetOpacity,
   onAnimEnd,
   transitionAlign,
+  transitionMode = "a-axis",
   sceneWidth,
 
   springConfig,
@@ -364,8 +368,10 @@ const SceneComponent: FunctionComponent<{
 
   const opacity = useSpringValue<number>(initialOpacity);
   useEffect(() => {
-    opacity.start(targetOpacity);
-  }, [opacity, targetOpacity]);
+    opacity.start(targetOpacity, {
+      delay: transitionMode === "opacity" && targetOpacity === 1 ? 100 : 0,
+    });
+  }, [opacity, targetOpacity, transitionMode]);
 
   const x = useSpringValue<number>(initialX, {
     config: springConfig,
@@ -495,6 +501,10 @@ const SceneComponent: FunctionComponent<{
               } else {
                 y = -50;
               }
+            }
+
+            if (transitionMode !== "x-axis") {
+              return `translate(0%, ${y}%)`;
             }
 
             if (args[2]) {

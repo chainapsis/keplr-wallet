@@ -137,6 +137,7 @@ export const RegisterHeader: FunctionComponent<{
           },
         }}
         transitionAlign="center"
+        transitionMode="opacity"
       />
     </Box>
   );
