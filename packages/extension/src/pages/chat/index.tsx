@@ -44,6 +44,7 @@ import { AgentsHistory } from "./agent-history";
 import { GroupsHistory } from "./group-history";
 import style from "./style.module.scss";
 import { ToolTip } from "@components/tooltip";
+import { useLocation } from "react-router";
 
 const ChatView = () => {
   const userState = useSelector(userDetails);
@@ -65,18 +66,19 @@ const ChatView = () => {
     queries.queryBalances,
     EthereumEndpoint
   );
+  const location: any = useLocation();
+  const selectedTabState = location?.search;
 
   const [selectedChainId] = useState(
     ibcTransferConfigs.channelConfig?.channel
       ? ibcTransferConfigs.channelConfig.channel.counterpartyChainId
       : current.chainId
   );
-
   const [loadingChats, setLoadingChats] = useState(false);
   const [inputVal, setInputVal] = useState("");
   const [openDialog, setIsOpendialog] = useState(false);
   const [authFail, setAuthFail] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(1);
+  const [selectedTab, setSelectedTab] = useState(selectedTabState ? 2 : 1);
 
   const requester = new InExtensionMessageRequester();
 

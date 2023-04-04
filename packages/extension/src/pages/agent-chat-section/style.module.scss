@@ -128,10 +128,10 @@
     resize: none;
     border: 0px;
   }
+}
 
-  .inputArea:focus {
-    outline: solid #11b4ff 0.5px;
-  }
+.inputText:focus-within {
+  border: #3b82f6 1.5px solid;
 }
 
 .enterMessageIcon {

@@ -12,6 +12,7 @@ import { useStore } from "../../../stores";
 import { ChatAgent } from "./chat-agent";
 import style from "../style.module.scss";
 import { AgentInit } from "@components/agents/agent-init";
+import { AGENT_ADDRESS } from "../../../config.ui.var";
 
 export const AgentsHistory: React.FC<{
   chainId: string;
@@ -51,8 +52,9 @@ export const AgentsHistory: React.FC<{
 
   const filterGroups = (contact: string) => {
     const searchValue = searchString.trim().toLowerCase();
-    const contactAddressBookName = addresses[contact]?.toLowerCase();
-
+    let contactAddressBookName = addresses[contact]?.toLowerCase();
+    if (!contactAddressBookName && contact === AGENT_ADDRESS[chainId])
+      contactAddressBookName = "fetchbot";
     if (searchValue.length === 0) return true;
 
     /// PrivacySetting.Everybody

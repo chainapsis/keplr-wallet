@@ -67,6 +67,8 @@ export const ADR36SignDocDetailsTab: FunctionComponent<{
             padding: "20px",
             border: "1px solid #9092B6",
             borderRadius: "8px",
+            whiteSpace: "pre-wrap",
+            wordWrap: "break-word",
           }}
         >
           {signValue}

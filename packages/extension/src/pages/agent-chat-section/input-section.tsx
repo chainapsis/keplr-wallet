@@ -94,8 +94,8 @@ export const InputField = ({
       <ReactTextareaAutosize
         ref={messageInput}
         maxRows={3}
-        className={`${style.inputArea} ${style["send-message-inputArea"]}`}
-        placeholder={"Ask a question or type / for commands"}
+        className={`${style.inputArea}`}
+        placeholder={"Ask a question or type '/' for commands"}
         value={newMessage}
         onChange={handleChange}
         onKeyDown={handleKeydown}

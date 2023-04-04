@@ -41,7 +41,7 @@ export const UserNameSection = () => {
           className={style.backBtn}
           src={chevronLeft}
           onClick={() => {
-            history.goBack();
+            history.push("/chat?id=2");
           }}
         />
         <img

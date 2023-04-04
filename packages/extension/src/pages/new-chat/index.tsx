@@ -290,7 +290,7 @@ export const NewChat: FunctionComponent = observer(() => {
           </div>
           {addresses.length === 0 && (
             <div>
-              <div className={style.resultText} style={{ fontSize: "12px" }}>
+              <div className={style.resultText}>
                 No results in your contacts.
               </div>
               {user?.messagingPubKey.privacySetting ===
