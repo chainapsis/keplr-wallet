@@ -96,7 +96,7 @@ export const Styles = {
     color: ${ColorPalette["gray-50"]};
 
     ::placeholder {
-      color: ${ColorPalette["gray-300"]};
+      color: ${ColorPalette["gray-400"]};
     }
 
     ${({ disabled }) => {

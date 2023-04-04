@@ -1,4 +1,6 @@
 // Shim ------------
+import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
+
 require("setimmediate");
 // Shim ------------
 
@@ -38,6 +40,7 @@ import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
+import { SettingTokenAddPage } from "./pages/setting/token/add";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -160,10 +163,18 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               element={<SettingGeneralAuthZRevokePage />}
             />
             <Route path="/setting/advanced" element={<SettingAdvancedPage />} />
+            <Route
+              path="/setting/advanced/endpoint"
+              element={<SettingAdvancedEndpointPage />}
+            />
             <Route path="/setting/security" element={<SettingSecurityPage />} />
             <Route
               path="/setting/security/permission"
               element={<SettingSecurityPermissionPage />}
+            />
+            <Route
+              path="/setting/token/add"
+              element={<SettingTokenAddPage />}
             />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
