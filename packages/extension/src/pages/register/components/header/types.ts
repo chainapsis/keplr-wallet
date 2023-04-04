@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export type Header =
   | {
       mode: "intro";
@@ -9,6 +11,7 @@ export type Header =
   | {
       mode: "step";
       title: string;
+      paragraphs?: (string | ReactNode)[];
       stepCurrent: number;
       stepTotal: number;
     };
