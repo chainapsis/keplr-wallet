@@ -59,6 +59,8 @@ def main():
     cmd = ['zip', '-r', output_filename, 'prod/']
     subprocess.check_call(cmd, cwd=EXTENSION_ROOT)
 
+    cmd = ['zip', '-r', f"{output_filename}-firefox", '.']
+    subprocess.check_call(cmd, cwd= os.path.join(EXTENSION_ROOT, 'prod'))
 
 if __name__ == '__main__':
     main()
