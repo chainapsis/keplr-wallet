@@ -1565,7 +1565,7 @@ export class KeyRing {
     throw new KeplrError(
       "keyring",
       901,
-      "Please initialize ethereum app on ledger first"
+      "No Ethereum public key. Initialize Ethereum app on Ledger by selecting the chain in the extension"
     );
   }
 
