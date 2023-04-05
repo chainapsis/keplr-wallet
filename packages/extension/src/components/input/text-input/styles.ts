@@ -129,6 +129,9 @@ export const Styles = {
     width: 1.75rem;
     height: 1.75rem;
     border-radius: 2rem;
+
+    color: ${ColorPalette["gray-300"]};
+
     :hover {
       background-color: rgba(46, 46, 50, 0.5);
     }
