@@ -481,11 +481,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       need = new Coin(fee.denom, new Int(fee.amount));
     }
 
+    const hasFee = need.amount.gt(new Int(0));
     const canCoverFeeWithStake = this.chainGetter
       .getChain(this.chainId)
       .features?.includes("evmos-stake-fee");
 
-    if (!canCoverFeeWithStake && need.amount.gt(new Int(0))) {
+    if (hasFee && !canCoverFeeWithStake) {
       const bal = this.queriesStore
         .get(this.chainId)
         .queryBalances.getQueryBech32Address(this._sender)
