@@ -4,7 +4,7 @@ import {
   IntlMessages,
   LanguageToFiatCurrency as TypeLanguageToFiatCurrency,
 } from "./languages";
-import { FiatCurrency, Currency } from "@keplr-wallet/types";
+import { FiatCurrency } from "@keplr-wallet/types";
 import {
   ADDITIONAL_SIGN_IN_PREPEND,
   ADDITIONAL_INTL_MESSAGES,
@@ -121,103 +121,44 @@ export const ICNSInfo = {
 export const ICNSFrontendLink: string = "https://app.icns.xyz";
 
 export interface FiatOnRampServiceInfo {
-  serviceId: "moonpay" | "transak" | "kado";
-  serviceName: "MoonPay" | "Transak" | "Kado";
-  apiKey?: string;
+  serviceId: string;
+  serviceName: string;
   buyOrigin: string;
-  buySupportChainIds: string[];
-  buySupportCurrencies?: Currency[];
-  buySupportCurrenciesByChainId?: Record<string, Currency[] | undefined>;
+  buySupportCoinDenomsByChainId: Record<string, string[] | undefined>;
+  apiKey?: string;
 }
 
 export const FiatOnRampServiceInfos: FiatOnRampServiceInfo[] = [
   {
     serviceId: "kado",
     serviceName: "Kado",
-    apiKey: process.env["KEPLR_EXT_KADO_API_KEY"] || "",
     buyOrigin: "https://app.kado.money",
-    buySupportChainIds: [
-      "cosmoshub-4",
-      "osmosis-1",
-      "juno-1",
-      "phoenix-1",
-      "injective-1",
-    ],
-    buySupportCurrencies: [
-      {
-        coinDenom: "ATOM",
-        coinMinimalDenom: "uatom",
-        coinDecimals: 6,
-        coinGeckoId: "cosmos",
-      },
-      {
-        coinDenom: "USDC",
-        coinMinimalDenom: "uusdc",
-        coinDecimals: 6,
-        coinGeckoId: "usd-coin",
-      },
-      {
-        coinDenom: "USDT",
-        coinMinimalDenom: "uusdt",
-        coinDecimals: 6,
-        coinGeckoId: "tether",
-      },
-    ],
-    buySupportCurrenciesByChainId: {
-      "cosmoshub-4": [
-        {
-          coinDenom: "ATOM",
-          coinMinimalDenom: "uatom",
-          coinDecimals: 6,
-          coinGeckoId: "cosmos",
-        },
-      ],
-      "osmosis-1": [
-        {
-          coinDenom: "USDC",
-          coinMinimalDenom: "uusdc",
-          coinDecimals: 6,
-          coinGeckoId: "usd-coin",
-        },
-      ],
-      "juno-1": [
-        {
-          coinDenom: "USDC",
-          coinMinimalDenom: "uusdc",
-          coinDecimals: 6,
-          coinGeckoId: "usd-coin",
-        },
-      ],
-      "phoenix-1": [
-        {
-          coinDenom: "USDC",
-          coinMinimalDenom: "uusdc",
-          coinDecimals: 6,
-          coinGeckoId: "usd-coin",
-        },
-      ],
-      "injective-1": [
-        {
-          coinDenom: "USDT",
-          coinMinimalDenom: "uusdt",
-          coinDecimals: 6,
-          coinGeckoId: "tether",
-        },
-      ],
+    buySupportCoinDenomsByChainId: {
+      "osmosis-1": ["USDC"],
+      "juno-1": ["USDC"],
+      "phoenix-1": ["USDC"],
+      "cosmoshub-4": ["ATOM"],
+      "injective-1": ["USDT"],
     },
   },
   {
     serviceId: "transak",
     serviceName: "Transak",
-    apiKey: process.env["KEPLR_EXT_TRANSAK_API_KEY"] || "",
     buyOrigin: "https://global.transak.com",
-    buySupportChainIds: ["osmosis-1", "cosmoshub-4", "secret-4"],
+    buySupportCoinDenomsByChainId: {
+      "osmosis-1": ["OSMO"],
+      "cosmoshub-4": ["ATOM"],
+      "secret-4": ["SCRT"],
+      "injective-1": ["INJ"],
+    },
   },
   {
     serviceId: "moonpay",
-    serviceName: "MoonPay",
-    apiKey: process.env["KEPLR_EXT_MOONPAY_API_KEY"] || "",
+    serviceName: "Moonpay",
     buyOrigin: "https://buy.moonpay.com",
-    buySupportChainIds: ["cosmoshub-4", "kava_2222-10"],
+    buySupportCoinDenomsByChainId: {
+      "cosmoshub-4": ["ATOM"],
+      "kava_2222-10": ["KAVA"],
+    },
   },
 ];
