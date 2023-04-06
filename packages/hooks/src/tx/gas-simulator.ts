@@ -299,6 +299,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     // Even though the implementation is not intuitive, the goals are
     // - Every time the observable used in simulateGasFn is updated, the simulation is refreshed.
     // - The simulation is refreshed only when changing from zero fee to paying fee or vice versa.
+    // - The simulation is refreshed only when changing fee's denom
     this._disposers.push(
       autorun(() => {
         if (!this.enabled) {
@@ -332,7 +333,9 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
         if (
           GasSimulatorState.isZeroFee(state.stdFee?.amount) !==
-          GasSimulatorState.isZeroFee(fee.amount)
+            GasSimulatorState.isZeroFee(fee.amount) ||
+          state.stdFee?.amount.map((a) => a.denom).join(",") !==
+            fee.amount.map((a) => a.denom).join(",")
         ) {
           state.refreshStdFee(fee);
         }
