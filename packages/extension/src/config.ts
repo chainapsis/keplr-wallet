@@ -2265,6 +2265,17 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uusdc",
         coinDecimals: 6,
       },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/EF48E6B1A1A19F47ECAEA62F5670C37C0580E86A9E88498B7E393EB6F49F33C0",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.001,
+          high: 0.001,
+        },
+      },
     ],
     features: [],
   },
@@ -2279,6 +2290,5 @@ export const PrivilegedOrigins: string[] = [
 
 export const CommunityChainInfoRepo = {
   organizationName: "chainapsis",
-  repoName: "keplr-chain-registry",
   branchName: "main",
 };
