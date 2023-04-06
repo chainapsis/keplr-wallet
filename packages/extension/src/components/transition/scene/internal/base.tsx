@@ -299,9 +299,6 @@ export const SceneTransitionBaseInner: FunctionComponent<
             throw new Error(`Unknown scene: ${props.name}`);
           }
 
-          // TODO: Improve handling of width
-          const width: string | undefined = (scene as any).width;
-
           const { children, ...remaining } = props.props ?? {};
 
           return (
@@ -322,7 +319,7 @@ export const SceneTransitionBaseInner: FunctionComponent<
                 transitionAlign={transitionAlign}
                 transitionMode={transitionMode}
                 springConfig={springConfig}
-                sceneWidth={width}
+                sceneWidth={props.sceneWidth}
               >
                 <scene.element {...remaining}>{children}</scene.element>
               </SceneComponent>

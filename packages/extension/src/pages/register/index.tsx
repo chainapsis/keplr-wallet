@@ -18,6 +18,7 @@ import {
   useRegisterHeaderContext,
 } from "./components/header";
 import { RegisterIntroExistingUserScene } from "./intro-existing-user";
+import { RegisterNamePasswordScene } from "./name-password";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -76,6 +77,11 @@ export const RegisterPage: FunctionComponent = observer(() => {
                 name: "recover-mnemonic",
                 element: RecoverMnemonicScene,
                 width: "33.75rem",
+              },
+              {
+                name: "name-password",
+                element: RegisterNamePasswordScene,
+                width: "29rem",
               },
             ]}
             initialSceneProps={{

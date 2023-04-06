@@ -9,6 +9,8 @@ export interface ScenePropsInternalTypes extends SceneProps {
   targetX: number;
   initialOpacity: number;
   targetOpacity: number;
+  // TODO: Improve handling of scene width
+  sceneWidth?: string | SpringValue<string>;
   detached: boolean;
   onAminEnd?: () => void;
 }
@@ -70,4 +72,8 @@ export interface SceneEvents {
 
   onWillInvisible?: () => void;
   onDidInvisible?: () => void;
+}
+
+export interface FixedWidthSceneContext {
+  setWidth(width: string): void;
 }

@@ -2,6 +2,7 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Button } from "../../../components/button";
 import {
+  useFixedWidthScene,
   useSceneEvents,
   useSceneTransition,
   VerticalResizeTransition,
@@ -66,6 +67,15 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
   const sceneTransition = useSceneTransition();
 
   const [wordsType, setWordsType] = useState<WordsType>("12words");
+
+  const fixedWidthScene = useFixedWidthScene();
+  useEffect(() => {
+    if (wordsType === "24words") {
+      fixedWidthScene.setWidth("41.5rem");
+    } else {
+      fixedWidthScene.setWidth(undefined);
+    }
+  }, [fixedWidthScene, wordsType]);
 
   const [words, setWords] = useState<string[]>([]);
 
@@ -136,27 +146,29 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
         </Bleed>
       </Box>
       <Gutter size="2.875rem" />
-      <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
-        <Box alignX="center">
-          <Button
-            size="small"
-            color="secondary"
-            text="Advanced"
-            disabled={!policyVerified}
-            onClick={() => {
-              setIsBIP44CardOpen(true);
+      <Box width="27.25rem" marginX="auto">
+        <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
+          <Box alignX="center">
+            <Button
+              size="small"
+              color="secondary"
+              text="Advanced"
+              disabled={!policyVerified}
+              onClick={() => {
+                setIsBIP44CardOpen(true);
+              }}
+            />
+          </Box>
+        </VerticalCollapseTransition>
+        <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
+          <SetBip44PathCard
+            state={bip44PathState}
+            onClose={() => {
+              setIsBIP44CardOpen(false);
             }}
           />
-        </Box>
-      </VerticalCollapseTransition>
-      <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
-        <SetBip44PathCard
-          state={bip44PathState}
-          onClose={() => {
-            setIsBIP44CardOpen(false);
-          }}
-        />
-      </VerticalCollapseTransition>
+        </VerticalCollapseTransition>
+      </Box>
       <Gutter size="1.25rem" />
       <Box width="22.5rem" marginX="auto">
         {policyVerified ? (

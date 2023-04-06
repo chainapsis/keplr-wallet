@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  FixedWidthSceneContext,
   SceneEvents,
   SceneEventsContext,
   SceneTransitionContext,
@@ -12,10 +13,21 @@ export const SceneEventsContextBase =
   React.createContext<SceneEventsContext | null>(null);
 
 export const useSceneEvents = (events: SceneEvents) => {
-  const store = React.useContext(SceneEventsContextBase);
-  if (!store) {
+  const context = React.useContext(SceneEventsContextBase);
+  if (!context) {
     throw new Error("You have forgot to use SceneEventsProvider");
   }
   // Events should be ref
-  store.setEvents(events);
+  context.setEvents(events);
+};
+
+export const FixedWidthSceneContextBase =
+  React.createContext<FixedWidthSceneContext | null>(null);
+
+export const useFixedWidthScene = () => {
+  const context = React.useContext(FixedWidthSceneContextBase);
+  if (!context) {
+    throw new Error("You have forgot to use FixedWidthSceneProvider");
+  }
+  return context;
 };
