@@ -82,8 +82,8 @@ const ClaimTokenItem: FunctionComponent<{ viewToken: ViewToken }> = ({
   viewToken,
 }) => {
   return (
-    <Box paddingY="0.5rem">
-      <Columns sum={1} gutter="0.75rem" alignY="center">
+    <Box padding="1rem">
+      <Columns sum={1} alignY="center">
         {viewToken.token.currency.coinImageUrl && (
           <img
             width="32px"
