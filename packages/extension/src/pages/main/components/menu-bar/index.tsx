@@ -41,7 +41,11 @@ export const MenuBar: FunctionComponent<{
           <CloseIcon />
         </Box>
 
-        <Styles.MenuItem>Address Book</Styles.MenuItem>
+        <Styles.MenuItem
+          onClick={() => navigate("/setting/address-book/contacts")}
+        >
+          Address Book
+        </Styles.MenuItem>
 
         <Styles.MenuItem
           onClick={() => {

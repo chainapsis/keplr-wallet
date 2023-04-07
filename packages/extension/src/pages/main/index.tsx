@@ -123,7 +123,7 @@ export const MainPage: FunctionComponent = observer(() => {
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
-  const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(true);
+  const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
 
   return (
     <HeaderLayout

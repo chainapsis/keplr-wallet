@@ -1,5 +1,4 @@
 // Shim ------------
-import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
 
 require("setimmediate");
 // Shim ------------
@@ -41,6 +40,13 @@ import { SettingSecurityPermissionPage } from "./pages/setting/security/permissi
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
 import { SettingTokenAddPage } from "./pages/setting/token/add";
+import { SettingGeneralLanguagePage } from "./pages/setting/general/language";
+import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
+import { SettingGeneralLinkKeplrMobilePage } from "./pages/setting/general/link-keplr-mobile";
+import { SettingAddressBookContacts } from "./pages/setting/address-book/contacts";
+import { SettingAddressBookEdit } from "./pages/setting/address-book/edit";
+import { SettingAddressBookDelete } from "./pages/setting/address-book/delete";
+import { SendSelectAssetPage } from "./pages/send/select-asset";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -148,8 +154,16 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route path="/unlock" element={<UnlockPage />} />
              */}
             <Route path="/" element={<MainPage />} />
+            <Route
+              path="/send/select-asset"
+              element={<SendSelectAssetPage />}
+            />
             <Route path="/setting" element={<SettingPage />} />
             <Route path="/setting/general" element={<SettingGeneralPage />} />
+            <Route
+              path="/setting/general/language"
+              element={<SettingGeneralLanguagePage />}
+            />
             <Route
               path="/setting/general/fiat"
               element={<SettingGeneralFiatPage />}
@@ -161,6 +175,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/general/authz/revoke"
               element={<SettingGeneralAuthZRevokePage />}
+            />
+            <Route
+              path="/setting/general/link-keplr-mobile"
+              element={<SettingGeneralLinkKeplrMobilePage />}
             />
             <Route path="/setting/advanced" element={<SettingAdvancedPage />} />
             <Route
@@ -175,6 +193,18 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/token/add"
               element={<SettingTokenAddPage />}
+            />
+            <Route
+              path="/setting/address-book/contacts"
+              element={<SettingAddressBookContacts />}
+            />
+            <Route
+              path="/setting/address-book/edit"
+              element={<SettingAddressBookEdit />}
+            />
+            <Route
+              path="/setting/address-book/delete"
+              element={<SettingAddressBookDelete />}
             />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />

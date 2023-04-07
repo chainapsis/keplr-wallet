@@ -22,6 +22,7 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             title="Language"
             paragraph="Korean"
             endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/language")}
           />
 
           <PageButton
@@ -44,7 +45,11 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             onClick={() => navigate("/setting/general/authz")}
           />
 
-          <PageButton title="Link Keplr Mobile" endIcon={<RightArrowIcon />} />
+          <PageButton
+            title="Link Keplr Mobile"
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/link-keplr-mobile")}
+          />
         </Stack>
       </Box>
     </HeaderLayout>
