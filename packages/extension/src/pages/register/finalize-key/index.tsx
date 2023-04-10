@@ -88,6 +88,43 @@ export const FinalizeKeyScene: FunctionComponent<{
         throw new Error("Invalid props");
       }
 
+      let promises: Promise<unknown>[] = [];
+
+      const selectedKeyInfo = keyRingStore.selectedKeyInfo;
+      for (const chainInfo of chainStore.chainInfos) {
+        // If mnemonic is fresh, there is no way that additional coin type account has value to select.
+        if (selectedKeyInfo && selectedKeyInfo.type === "mnemonic") {
+          if (
+            keyRingStore.needMnemonicKeyCoinTypeFinalize(chainInfo) &&
+            mnemonic?.isFresh
+          ) {
+            promises.push(
+              (async () => {
+                await keyRingStore.finalizeMnemonicKeyCoinType(
+                  selectedKeyInfo.id,
+                  chainInfo.chainId,
+                  chainInfo.bip44.coinType
+                );
+              })()
+            );
+          }
+        }
+      }
+
+      await Promise.allSettled(promises);
+
+      promises = [];
+      for (const chainInfo of chainStore.chainInfos) {
+        const account = accountStore.getAccount(chainInfo.chainId);
+        promises.push(
+          (async () => {
+            await account.init();
+          })()
+        );
+      }
+
+      await Promise.allSettled(promises);
+
       setIsCreated(true);
     })();
   });
@@ -110,45 +147,8 @@ export const FinalizeKeyScene: FunctionComponent<{
     if (isCreated) {
       // Should call once.
       (async () => {
-        let promises: Promise<unknown>[] = [];
+        const promises: Promise<unknown>[] = [];
 
-        const selectedKeyInfo = keyRingStore.selectedKeyInfo;
-        for (const chainInfo of chainStore.chainInfos) {
-          // If the coin type can be determined, it is processed here. If it requires additional logic it will be handled in the "enable-chains" scene.
-          if (selectedKeyInfo && selectedKeyInfo.type === "mnemonic") {
-            if (
-              mnemonic?.isFresh ||
-              !chainInfo.alternativeBIP44s ||
-              chainInfo.alternativeBIP44s.length === 0
-            ) {
-              promises.push(
-                (async () => {
-                  await keyRingStore.finalizeMnemonicKeyCoinType(
-                    selectedKeyInfo.id,
-                    chainInfo.chainId,
-                    chainInfo.bip44.coinType
-                  );
-                })()
-              );
-            }
-          }
-        }
-
-        await Promise.allSettled(promises);
-
-        promises = [];
-        for (const chainInfo of chainStore.chainInfos) {
-          const account = accountStore.getAccount(chainInfo.chainId);
-          promises.push(
-            (async () => {
-              await account.init();
-            })()
-          );
-        }
-
-        await Promise.allSettled(promises);
-
-        promises = [];
         for (const chainInfo of chainStore.chainInfos) {
           const account = accountStore.getAccount(chainInfo.chainId);
           if (account.bech32Address) {

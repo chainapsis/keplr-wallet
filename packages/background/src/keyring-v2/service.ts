@@ -172,10 +172,26 @@ export class KeyRingService {
       bip44Path
     );
 
+    // Finalize coin type if only one coin type exists.
+    const coinTypes: Record<string, number | undefined> = {};
+    const chainInfos = this.chainsService.getChainInfos();
+    for (const chainInfo of chainInfos) {
+      if (
+        !chainInfo.alternativeBIP44s ||
+        chainInfo.alternativeBIP44s.length === 0
+      ) {
+        const coinTypeTag = `keyRing-${
+          ChainIdHelper.parse(chainInfo.chainId).identifier
+        }-coinType`;
+        coinTypes[coinTypeTag] = chainInfo.bip44.coinType;
+      }
+    }
+
     const id = this.vaultService.addVault(
       "keyRing",
       {
         ...vaultData.insensitive,
+        ...coinTypes,
         keyRingName: name,
         keyRingType: keyRing.supportedKeyRingType(),
       },

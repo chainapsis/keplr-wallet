@@ -2,6 +2,8 @@ import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 import { toGenerator } from "@keplr-wallet/common";
 import { KeyRingV2 } from "@keplr-wallet/background";
+import { ChainInfo } from "@keplr-wallet/types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class KeyRingStore {
   @observable
@@ -40,6 +42,23 @@ export class KeyRingStore {
 
   get isEmpty(): boolean {
     return this._status === "empty";
+  }
+
+  needMnemonicKeyCoinTypeFinalize(chainInfo: ChainInfo): boolean {
+    const keyInfo = this.selectedKeyInfo;
+    if (!keyInfo) {
+      return false;
+    }
+
+    if (keyInfo.type !== "mnemonic") {
+      return false;
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainInfo.chainId).identifier
+    }-coinType`;
+
+    return keyInfo.insensitive[coinTypeTag] == null;
   }
 
   @flow
