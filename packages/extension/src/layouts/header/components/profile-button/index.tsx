@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { Box } from "../../../../components/box";
-import { ProfileIcon } from "../../../../components/icon";
+import { ProfileCircleIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
 
 export const ProfileButton: FunctionComponent = () => {
@@ -14,7 +14,7 @@ export const ProfileButton: FunctionComponent = () => {
         navigate("/setting");
       }}
     >
-      <ProfileIcon />
+      <ProfileCircleIcon />
     </Box>
   );
 };
