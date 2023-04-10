@@ -110,6 +110,15 @@ export const Styles = {
 
     font-size: 0.875rem;
     font-weight: 400;
+
+    ::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    ::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
   `,
   Label: styled(Subtitle3)`
     margin-bottom: 0.375rem;
