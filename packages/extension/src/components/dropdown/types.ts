@@ -12,4 +12,5 @@ export interface DropdownProps {
   placeholder?: string;
   className?: string;
   style?: CSSProperties;
+  size?: "small" | "large";
 }

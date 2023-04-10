@@ -13,6 +13,7 @@ export const DropDown: FunctionComponent<DropdownProps> = ({
   items,
   selectedItemKey,
   onSelect,
+  size = "small",
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -27,6 +28,7 @@ export const DropDown: FunctionComponent<DropdownProps> = ({
         placeholder={placeholder}
         isOpen={isOpen}
         onClick={() => setIsOpen(!isOpen)}
+        size={size}
       >
         <Columns sum={1}>
           <Styles.Text selectedItemKey={selectedItemKey}>

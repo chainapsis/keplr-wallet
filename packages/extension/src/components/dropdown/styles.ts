@@ -8,7 +8,7 @@ export const Styles = {
     position: relative;
   `,
 
-  SelectedContainer: styled.div<{ isOpen: boolean }>`
+  SelectedContainer: styled.div<{ isOpen: boolean; size: string }>`
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -16,7 +16,7 @@ export const Styles = {
     position: relative;
 
     width: 100%;
-    height: 2.75rem;
+    height: ${({ size }) => (size === "small" ? "2.5rem" : "3.5rem")};
 
     padding: 0 1rem;
 
