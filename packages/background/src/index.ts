@@ -15,6 +15,7 @@ import * as Analytics from "./analytics/internal";
 import * as Vault from "./vault/internal";
 import * as KeyRingV2 from "./keyring-v2/internal";
 import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
+import * as KeyRingLedger from "./keyring-ledger/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 
@@ -124,7 +125,10 @@ export function init(
     chainsService,
     interactionService,
     vaultService,
-    [new KeyRingMnemonic.KeyRingMnemonicService(vaultService)]
+    [
+      new KeyRingMnemonic.KeyRingMnemonicService(vaultService),
+      new KeyRingLedger.KeyRingMnemonicService(),
+    ]
   );
   const keyRingCosmosService = new KeyRingCosmos.KeyRingCosmosService(
     chainsService,

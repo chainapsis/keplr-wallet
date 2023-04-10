@@ -76,6 +76,47 @@ export class NewMnemonicKeyMsg extends Message<{
   }
 }
 
+export class NewLedgerKeyMsg extends Message<{
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "new-ledger-key";
+  }
+
+  constructor(
+    public readonly pubKey: Uint8Array,
+    public readonly app: string,
+    public readonly bip44HDPath: BIP44HDPath,
+    public readonly name: string,
+    public readonly password?: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.pubKey || this.pubKey.length === 0) {
+      throw new Error("pub key not set");
+    }
+
+    if (!this.app) {
+      throw new Error("app not set");
+    }
+
+    if (!this.name) {
+      throw new Error("name not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return NewLedgerKeyMsg.type();
+  }
+}
+
 export class LockKeyRingMsg extends Message<{
   status: KeyRingStatus;
 }> {

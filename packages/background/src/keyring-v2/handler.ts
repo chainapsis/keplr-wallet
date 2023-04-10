@@ -8,6 +8,7 @@ import {
 import {
   GetKeyRingStatusMsg,
   LockKeyRingMsg,
+  NewLedgerKeyMsg,
   NewMnemonicKeyMsg,
   UnlockKeyRingMsg,
 } from "./messages";
@@ -29,6 +30,8 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleUnlockKeyRingMsg(service)(env, msg as UnlockKeyRingMsg);
       case NewMnemonicKeyMsg:
         return handleNewMnemonicKeyMsg(service)(env, msg as NewMnemonicKeyMsg);
+      case NewLedgerKeyMsg:
+        return handleNewLedgerKeyMsg(service)(env, msg as NewLedgerKeyMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -75,6 +78,25 @@ const handleNewMnemonicKeyMsg: (
     await service.createMnemonicKeyRing(
       env,
       msg.mnemonic,
+      msg.bip44HDPath,
+      msg.name,
+      msg.password
+    );
+    return {
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleNewLedgerKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<NewLedgerKeyMsg> = (service) => {
+  return async (env, msg) => {
+    await service.createLedgerKeyRing(
+      env,
+      msg.pubKey,
+      msg.app,
       msg.bip44HDPath,
       msg.name,
       msg.password

@@ -41,12 +41,14 @@ export const RegisterHeader: FunctionComponent<{
           if (headerSceneRef.current.currentScene !== "welcome") {
             headerSceneRef.current.replace("welcome", {
               sceneRef,
-              isUserBack: header.isUserBack,
+              title: header.title,
+              paragraph: header.paragraph,
             });
           } else {
             headerSceneRef.current.setCurrentSceneProps({
               sceneRef,
-              isUserBack: header.isUserBack,
+              title: header.title,
+              paragraph: header.paragraph,
             });
           }
           break;
@@ -155,18 +157,15 @@ const HeaderIntro: FunctionComponent<{
 
 const HeaderWelcome: FunctionComponent<{
   sceneRef: MutableRefObject<SceneTransitionRef | null>;
-  isUserBack: boolean;
-}> = ({ isUserBack }) => {
+  title: string;
+  paragraph: string;
+}> = ({ title, paragraph }) => {
   return (
     <Box position="relative">
       <YAxis alignX="center">
-        <H1>{!isUserBack ? "Welcome to Keplr" : "Welcome Back to Keplr"}</H1>
+        <H1>{title}</H1>
         <Gutter size="0.75rem" />
-        <H3>
-          {!isUserBack
-            ? "Select the way you want to create your wallet"
-            : "Glad you’re back!"}
-        </H3>
+        <H3>{paragraph}</H3>
       </YAxis>
     </Box>
   );

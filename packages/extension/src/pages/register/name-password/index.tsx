@@ -25,7 +25,7 @@ export const RegisterNamePasswordScene: FunctionComponent<{
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Import Existing Wallet",
+        title: "Set Up Your Wallet",
         stepCurrent: 3,
         stepTotal: 6,
       });

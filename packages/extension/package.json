@@ -107,6 +107,7 @@
     "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
+    "@ledgerhq/hw-transport-webusb": "^6",
     "mobx": "^6",
     "mobx-react-lite": "^3",
     "mobx-utils": "^6",

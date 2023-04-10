@@ -58,6 +58,28 @@ export class KeyRingStore {
   }
 
   @flow
+  *newLedgerKey(
+    pubKey: Uint8Array,
+    app: string,
+    bip44HDPath: KeyRingV2.BIP44HDPath,
+    name: string,
+    password: string | undefined
+  ) {
+    const msg = new KeyRingV2.NewLedgerKeyMsg(
+      pubKey,
+      app,
+      bip44HDPath,
+      name,
+      password
+    );
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+  }
+
+  @flow
   *lock() {
     const msg = new KeyRingV2.LockKeyRingMsg();
     const result = yield* toGenerator(

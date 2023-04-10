@@ -3,6 +3,7 @@ import { KeyRingService } from "./service";
 import {
   GetKeyRingStatusMsg,
   NewMnemonicKeyMsg,
+  NewLedgerKeyMsg,
   LockKeyRingMsg,
   UnlockKeyRingMsg,
 } from "./messages";
@@ -12,6 +13,7 @@ import { getHandler } from "./handler";
 export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(GetKeyRingStatusMsg);
   router.registerMessage(NewMnemonicKeyMsg);
+  router.registerMessage(NewLedgerKeyMsg);
   router.registerMessage(LockKeyRingMsg);
   router.registerMessage(UnlockKeyRingMsg);
 

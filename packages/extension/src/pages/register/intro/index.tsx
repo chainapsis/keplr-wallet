@@ -41,7 +41,7 @@ export const RegisterIntroScene: FunctionComponent = () => {
           text="Connect Hardware Wallet"
           size="large"
           onClick={() => {
-            // TODO
+            sceneTransition.push("connect-hardware-wallet");
           }}
         />
       </Stack>

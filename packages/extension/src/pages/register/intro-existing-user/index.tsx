@@ -22,7 +22,8 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
     onWillVisible: () => {
       header.setHeader({
         mode: "welcome",
-        isUserBack: true,
+        title: "Welcome Back to Keplr",
+        paragraph: "Glad you’re back!",
       });
     },
   });

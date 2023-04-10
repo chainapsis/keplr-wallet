@@ -6,7 +6,8 @@ export type Header =
     }
   | {
       mode: "welcome";
-      isUserBack: boolean;
+      title: string;
+      paragraph: string;
     }
   | {
       mode: "step";

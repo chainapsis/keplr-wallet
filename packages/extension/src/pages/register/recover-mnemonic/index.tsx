@@ -278,7 +278,9 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         </Box>
         <Gutter size="1.25rem" />
 
-        <Button text="Import" size="large" type="submit" />
+        <Box width="22.5rem" marginX="auto">
+          <Button text="Import" size="large" type="submit" />
+        </Box>
       </form>
     </RegisterSceneBox>
   );

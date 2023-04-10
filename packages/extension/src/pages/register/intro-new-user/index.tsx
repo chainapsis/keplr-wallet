@@ -22,7 +22,8 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
     onWillVisible: () => {
       header.setHeader({
         mode: "welcome",
-        isUserBack: false,
+        title: "Welcome to Keplr",
+        paragraph: "Select the way you want to create your wallet",
       });
     },
   });

@@ -19,6 +19,8 @@ import {
 } from "./components/header";
 import { RegisterIntroExistingUserScene } from "./intro-existing-user";
 import { RegisterNamePasswordScene } from "./name-password";
+import { ConnectHardwareWalletScene } from "./connect-hardware";
+import { ConnectLedgerScene } from "./connect-ledger";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -77,6 +79,16 @@ export const RegisterPage: FunctionComponent = observer(() => {
                 name: "recover-mnemonic",
                 element: RecoverMnemonicScene,
                 width: "33.75rem",
+              },
+              {
+                name: "connect-hardware-wallet",
+                element: ConnectHardwareWalletScene,
+                width: "31rem",
+              },
+              {
+                name: "connect-ledger",
+                element: ConnectLedgerScene,
+                width: "40rem",
               },
               {
                 name: "name-password",
