@@ -7,7 +7,7 @@ import { useState } from "react";
  * IBCRecipientConfig returns the recipient config for IBC transfer.
  * The recipient config's chain id should be the destination chain id for IBC.
  * But, actually, the recipient config's chain id would be set as the sending chain id if the channel not set.
- * So, you should remember that the recipient config's chain id is equalt to the sending chain id, if channel not set.
+ * So, you should remember that the recipient config's chain id is equal to the sending chain id, if channel not set.
  */
 export class IBCRecipientConfig extends RecipientConfig {
   constructor(

@@ -41,6 +41,7 @@ import { SettingSecurityPermissionPage } from "./pages/setting/security/permissi
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
 import { SettingTokenAddPage } from "./pages/setting/token/add";
+import { SendPage } from "./pages/send";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -148,6 +149,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route path="/unlock" element={<UnlockPage />} />
              */}
             <Route path="/" element={<MainPage />} />
+            <Route path="/send" element={<SendPage />} />
             <Route path="/setting" element={<SettingPage />} />
             <Route path="/setting/general" element={<SettingGeneralPage />} />
             <Route

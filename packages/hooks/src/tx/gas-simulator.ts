@@ -1,4 +1,4 @@
-import { IFeeConfig, IGasConfig, IGasSimulator } from "./types";
+import { IFeeConfig, IGasConfig, IGasSimulator, UIProperties } from "./types";
 import {
   action,
   autorun,
@@ -104,7 +104,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   protected _key: string;
 
   @observable
-  protected _gasAdjustmentRaw: string = "1.3";
+  protected _gasAdjustmentValue: string = "1.3";
 
   @observable
   protected _enabled: boolean = false;
@@ -230,11 +230,11 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   }
 
   get gasAdjustment(): number {
-    if (this._gasAdjustmentRaw === "") {
+    if (this._gasAdjustmentValue === "") {
       return 0;
     }
 
-    const num = parseFloat(this._gasAdjustmentRaw);
+    const num = parseFloat(this._gasAdjustmentValue);
     if (Number.isNaN(num) || num < 0) {
       return 0;
     }
@@ -242,28 +242,28 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     return num;
   }
 
-  get gasAdjustmentRaw(): string {
-    return this._gasAdjustmentRaw;
+  get gasAdjustmentValue(): string {
+    return this._gasAdjustmentValue;
   }
 
   @action
-  setGasAdjustment(gasAdjustment: string | number) {
+  setGasAdjustmentValue(gasAdjustment: string | number) {
     if (typeof gasAdjustment === "number") {
       if (gasAdjustment < 0 || gasAdjustment > 2) {
         return;
       }
 
-      this._gasAdjustmentRaw = gasAdjustment.toString();
+      this._gasAdjustmentValue = gasAdjustment.toString();
       return;
     }
 
     if (gasAdjustment === "") {
-      this._gasAdjustmentRaw = "";
+      this._gasAdjustmentValue = "";
       return;
     }
 
     if (gasAdjustment.startsWith(".")) {
-      this._gasAdjustmentRaw = "0" + gasAdjustment;
+      this._gasAdjustmentValue = "0" + gasAdjustment;
     }
 
     const num = parseFloat(gasAdjustment);
@@ -271,7 +271,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
       return;
     }
 
-    this._gasAdjustmentRaw = gasAdjustment;
+    this._gasAdjustmentValue = gasAdjustment;
   }
 
   protected init() {
@@ -403,7 +403,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     this._disposers.push(
       autorun(() => {
         if (this.enabled && this.gasEstimated != null) {
-          this.gasConfig.setGas(this.gasEstimated * this.gasAdjustment);
+          this.gasConfig.setValue(this.gasEstimated * this.gasAdjustment);
         }
       })
     );
@@ -413,6 +413,35 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     for (const disposer of this._disposers) {
       disposer();
     }
+  }
+
+  get uiProperties(): UIProperties {
+    const key = this.storeKey;
+    const state = this.getState(key);
+
+    return {
+      warning: (() => {
+        if (!this.enabled) {
+          return;
+        }
+
+        if (this.outdatedCosmosSdk) {
+          return new Error("Outdated Cosmos SDK");
+        }
+      })(),
+      loadingState: (() => {
+        if (!this.enabled) {
+          return;
+        }
+
+        if (this.isSimulating) {
+          // If there is no saved result of the last simulation, user interaction is blocked.
+          return state.initialGasEstimated == null
+            ? "loading-block"
+            : "loading";
+        }
+      })(),
+    };
   }
 
   protected getState(key: string): GasSimulatorState {
