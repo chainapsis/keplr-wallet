@@ -1,100 +1,101 @@
-import {
-  AppCurrency,
-  Currency,
-  FeeCurrency,
-  StdFee,
-} from "@keplr-wallet/types";
+import { AppCurrency, FeeCurrency, StdFee } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { CoinPrimitive } from "@keplr-wallet/stores";
 
 export interface ITxChainSetter {
   chainId: string;
   setChain(chainId: string): void;
 }
 
-export interface IMemoConfig extends ITxChainSetter {
-  memo: string;
-  setMemo(memo: string): void;
+export interface UIProperties {
+  // There is an error that cannot proceed the tx.
+  readonly error?: Error;
+  // Able to handle tx but prefer to show warning
+  readonly warning?: Error;
+  // Prefer that the loading UI is displayed.
+  // In the case of "loading-block", the UI should handle it so that the user cannot proceed until loading is completed.
+  readonly loadingState?: "loading" | "loading-block";
+}
 
-  error: Error | undefined;
+export interface IMemoConfig extends ITxChainSetter {
+  value: string;
+  setValue(value: string): void;
+
+  memo: string;
+
+  uiProperties: UIProperties;
 }
 
 export interface IGasConfig extends ITxChainSetter {
-  gas: number;
-  /*
-   The actual gas value from the input.
-   */
-  gasRaw: string;
-  setGas(gas: number | string): void;
+  value: string;
+  setValue(value: string | number): void;
 
-  error: Error | undefined;
+  gas: number;
+
+  uiProperties: UIProperties;
+}
+
+export interface ISenderConfig extends ITxChainSetter {
+  value: string;
+  setValue(value: string): void;
+
+  sender: string;
+
+  uiProperties: UIProperties;
 }
 
 export interface IFeeConfig extends ITxChainSetter {
-  sender: string;
-  setSender(sender: string): void;
-  feeType: FeeType | undefined;
-  setFeeType(feeType: FeeType | undefined): void;
-  setAutoFeeCoinMinimalDenom(denom: string | undefined): void;
-  feeCurrencies: Currency[];
-  feeCurrency: Currency | undefined;
+  type: FeeType | "manual";
+
+  setFee(
+    fee:
+      | {
+          type: FeeType;
+          currency: FeeCurrency;
+        }
+      | CoinPretty
+      | undefined
+  ): void;
+
+  selectableFeeCurrencies: FeeCurrency[];
+
   toStdFee(): StdFee;
-  fee: CoinPretty | undefined;
-  getFeeTypePretty(feeType: FeeType): CoinPretty;
+  fees: CoinPretty[];
+
   getFeeTypePrettyForFeeCurrency(
-    feeCurrency: FeeCurrency,
+    currency: FeeCurrency,
     feeType: FeeType
   ): CoinPretty;
-  getFeePrimitive(): CoinPrimitive | undefined;
-  isManual: boolean;
-  error: Error | undefined;
+
+  uiProperties: UIProperties;
 }
 
 export interface IRecipientConfig extends ITxChainSetter {
-  recipient: string;
-  rawRecipient: string;
-  setRawRecipient(recipient: string): void;
+  value: string;
+  setValue(value: string): void;
 
-  error: Error | undefined;
+  recipient: string;
+
+  uiProperties: UIProperties;
 }
 
 export interface IRecipientConfigWithICNS extends IRecipientConfig {
   readonly isICNSEnabled: boolean;
   readonly isICNSName: boolean;
-  readonly isICNSFetching: boolean;
   readonly icnsExpectedBech32Prefix: string;
 }
 
-export interface IAmountConfig extends ITxChainSetter {
-  amount: string;
-  setAmount(amount: string): void;
-  getAmountPrimitive(): CoinPrimitive;
-  sendCurrency: AppCurrency;
-  setSendCurrency(currency: AppCurrency | undefined): void;
-  sendableCurrencies: AppCurrency[];
-  sender: string;
-  setSender(sender: string): void;
+export interface IBaseAmountConfig extends ITxChainSetter {
+  amount: CoinPretty[];
 
-  /**
-   * @deprecated Use `setFraction(1)`
-   * @param isMax
-   */
-  setIsMax(isMax: boolean): void;
+  uiProperties: UIProperties;
+}
 
-  /**
-   * @deprecated
-   */
-  toggleIsMax(): void;
+export interface IAmountConfig extends IBaseAmountConfig {
+  value: string;
+  setValue(value: string): void;
 
-  /**
-   * @deprecated Use `fraction === 1`
-   */
-  isMax: boolean;
-
-  fraction: number | undefined;
-  setFraction(value: number | undefined): void;
-
-  error: Error | undefined;
+  setCurrency(currency: AppCurrency | undefined): void;
+  selectableCurrencies: AppCurrency[];
 }
 
 export const DefaultGasPriceStep: {
@@ -117,6 +118,9 @@ export interface IGasSimulator {
 
   gasEstimated: number | undefined;
   gasAdjustment: number;
-  gasAdjustmentRaw: string;
-  setGasAdjustment(gasAdjustment: string | number): void;
+
+  gasAdjustmentValue: string;
+  setGasAdjustmentValue(gasAdjustment: string | number): void;
+
+  uiProperties: UIProperties;
 }

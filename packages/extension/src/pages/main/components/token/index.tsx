@@ -14,6 +14,7 @@ import {
 import { ColorPalette } from "../../../../styles";
 import { QuestionIcon } from "../../../../components/icon";
 import styled from "styled-components";
+import { useNavigate } from "react-router";
 
 const Styles = {
   Container: styled.div`
@@ -45,8 +46,18 @@ export const TokenItem: FunctionComponent<{ viewToken: ViewToken }> = observer(
   ({ viewToken }) => {
     const { priceStore } = useStore();
 
+    const navigate = useNavigate();
+
     return (
-      <Styles.Container>
+      <Styles.Container
+        onClick={(e) => {
+          e.preventDefault();
+
+          navigate(
+            `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
+          );
+        }}
+      >
         <Columns sum={1} gutter="0.5rem" alignY="center">
           {viewToken.token.currency.coinImageUrl && (
             <img
