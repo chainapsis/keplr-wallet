@@ -1,5 +1,4 @@
 // Shim ------------
-
 require("setimmediate");
 // Shim ------------
 
@@ -46,6 +45,7 @@ import { SettingGeneralLinkKeplrMobilePage } from "./pages/setting/general/link-
 import { SettingAddressBookContacts } from "./pages/setting/address-book/contacts";
 import { SettingAddressBookEdit } from "./pages/setting/address-book/edit";
 import { SettingAddressBookDelete } from "./pages/setting/address-book/delete";
+import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
 
 configure({
@@ -154,6 +154,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route path="/unlock" element={<UnlockPage />} />
              */}
             <Route path="/" element={<MainPage />} />
+            <Route path="/send" element={<SendAmountPage />} />
             <Route
               path="/send/select-asset"
               element={<SendSelectAssetPage />}
