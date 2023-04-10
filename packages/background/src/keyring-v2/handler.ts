@@ -6,6 +6,7 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import {
+  FinalizeMnemonicKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
   LockKeyRingMsg,
   NewLedgerKeyMsg,
@@ -28,6 +29,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleLockKeyRingMsg(service)(env, msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
         return handleUnlockKeyRingMsg(service)(env, msg as UnlockKeyRingMsg);
+      case FinalizeMnemonicKeyCoinTypeMsg:
+        return handleFinalizeMnemonicKeyCoinTypeMsg(service)(
+          env,
+          msg as FinalizeMnemonicKeyCoinTypeMsg
+        );
       case NewMnemonicKeyMsg:
         return handleNewMnemonicKeyMsg(service)(env, msg as NewMnemonicKeyMsg);
       case NewLedgerKeyMsg:
@@ -67,6 +73,18 @@ const handleUnlockKeyRingMsg: (
     await service.unlockKeyRing(msg.password);
     return {
       status: service.keyRingStatus,
+    };
+  };
+};
+
+const handleFinalizeMnemonicKeyCoinTypeMsg: (
+  service: KeyRingService
+) => InternalHandler<FinalizeMnemonicKeyCoinTypeMsg> = (service) => {
+  return (_, msg) => {
+    service.finalizeMnemonicKeyCoinType(msg.id, msg.chainId, msg.coinType);
+    return {
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
     };
   };
 };

@@ -29,6 +29,7 @@ export interface SceneTransitionBaseProps<S extends Scene = Scene> {
 export interface SceneTransitionContext {
   push(name: string, props?: Record<string, any>): void;
   replace(name: string, props?: Record<string, any>): void;
+  replaceAll(name: string, props?: Record<string, any>): void;
   pop(): void;
   canPop(): boolean;
   setCurrentSceneProps(props: Record<string, any>): void;
@@ -39,6 +40,7 @@ export interface SceneTransitionContext {
 export interface SceneTransitionRef {
   push(name: string, props?: Record<string, any>): void;
   replace(name: string, props?: Record<string, any>): void;
+  replaceAll(name: string, props?: Record<string, any>): void;
   pop(): void;
   canPop(): boolean;
   setCurrentSceneProps(props: Record<string, any>): void;

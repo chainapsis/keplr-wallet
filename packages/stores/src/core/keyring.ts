@@ -1,5 +1,5 @@
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import { flow, makeObservable, observable, runInAction } from "mobx";
+import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 import { toGenerator } from "@keplr-wallet/common";
 import { KeyRingV2 } from "@keplr-wallet/background";
 
@@ -33,8 +33,31 @@ export class KeyRingStore {
     return this._keyInfos;
   }
 
+  @computed
+  get selectedKeyInfo(): KeyRingV2.KeyInfo | undefined {
+    return this._keyInfos.find((keyInfo) => keyInfo.isSelected);
+  }
+
   get isEmpty(): boolean {
     return this._status === "empty";
+  }
+
+  @flow
+  *finalizeMnemonicKeyCoinType(
+    vaultId: string,
+    chainId: string,
+    coinType: number
+  ) {
+    const msg = new KeyRingV2.FinalizeMnemonicKeyCoinTypeMsg(
+      vaultId,
+      chainId,
+      coinType
+    );
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
   }
 
   @flow

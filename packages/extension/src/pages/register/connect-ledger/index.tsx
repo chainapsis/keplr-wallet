@@ -1,6 +1,9 @@
 import React, { FunctionComponent, useState } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
-import { useSceneEvents } from "../../../components/transition";
+import {
+  useSceneEvents,
+  useSceneTransition,
+} from "../../../components/transition";
 import { useRegisterHeader } from "../components/header";
 import { Gutter } from "../../../components/gutter";
 import { Box } from "../../../components/box";
@@ -12,12 +15,24 @@ import { Button } from "../../../components/button";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
 
 type Step = "unknown" | "connected" | "app";
 
-export const ConnectLedgerScene: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+export const ConnectLedgerScene: FunctionComponent<{
+  name: string;
+  password: string;
+  app: string;
+  bip44Path: {
+    account: number;
+    change: number;
+    addressIndex: number;
+  };
+}> = observer(({ name, password, app: propApp, bip44Path }) => {
+  if (propApp !== "Cosmos" && propApp !== "Terra") {
+    throw new Error(`Unsupported app: ${propApp}`);
+  }
+
+  const sceneTransition = useSceneTransition();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -39,7 +54,7 @@ export const ConnectLedgerScene: FunctionComponent = observer(() => {
 
   const connectLedger = async () => {
     let transport = await TransportWebUSB.create();
-    let app = new CosmosApp("Cosmos", transport);
+    let app = new CosmosApp(propApp, transport);
 
     try {
       const version = await app.getVersion();
@@ -63,7 +78,7 @@ export const ConnectLedgerScene: FunctionComponent = observer(() => {
       const appInfo = await app.getAppInfo();
       if (
         appInfo.error_message === "No errors" &&
-        appInfo.app_name === "Cosmos"
+        appInfo.app_name === propApp
       ) {
         isAppOpened = true;
       }
@@ -74,7 +89,7 @@ export const ConnectLedgerScene: FunctionComponent = observer(() => {
 
     try {
       if (!isAppOpened) {
-        await CosmosApp.openApp(transport, "Cosmos");
+        await CosmosApp.openApp(transport, propApp);
 
         const maxRetry = 25;
         let i = 0;
@@ -82,12 +97,12 @@ export const ConnectLedgerScene: FunctionComponent = observer(() => {
           // Reinstantiate the app with the new transport.
           // This is needed because the connection can be closed if app opened. (Maybe ledger's permission system handles dashboard, and each app differently.)
           transport = await TransportWebUSB.create();
-          app = new CosmosApp("Cosmos", transport);
+          app = new CosmosApp(propApp, transport);
 
           const appInfo = await app.getAppInfo();
           if (
             appInfo.error_message === "No errors" &&
-            appInfo.app_name === "Cosmos"
+            appInfo.app_name === propApp
           ) {
             break;
           }
@@ -101,24 +116,23 @@ export const ConnectLedgerScene: FunctionComponent = observer(() => {
     }
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    const res = await app.getPublicKey(0, 0, 0);
+    const res = await app.getPublicKey(
+      bip44Path.account,
+      bip44Path.change,
+      bip44Path.addressIndex
+    );
     if (res.error_message === "No errors") {
       setStep("app");
 
-      await keyRingStore.newLedgerKey(
-        res.compressed_pk,
-        "Cosmos",
-        {
-          account: 0,
-          change: 0,
-          addressIndex: 0,
+      sceneTransition.replaceAll("finalize-key", {
+        name,
+        password,
+        ledger: {
+          pubKey: res.compressed_pk,
+          app: propApp,
+          bip44Path,
         },
-        "TODO",
-        ""
-      );
-
-      alert("TODO");
-      window.close();
+      });
     } else {
       setStep("connected");
     }

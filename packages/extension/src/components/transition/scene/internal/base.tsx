@@ -124,6 +124,55 @@ export const useSceneTransitionBase = (
     });
   }, []);
 
+  const replaceAll = useCallback(
+    (name: string, props?: Record<string, any>) => {
+      setStack((prevStack) => {
+        seq.current++;
+
+        const newStack = prevStack.slice();
+
+        const prevIdMap = new Map<string, true>();
+        for (const prev of newStack) {
+          prevIdMap.set(prev.id, true);
+
+          prev.detached = true;
+        }
+
+        const prevTop = newStack.find((s) => s.top);
+        if (prevTop) {
+          prevTop.top = false;
+          prevTop.animTop.set(false);
+          // `replaceAll` has same transition as `push`.
+          // This is intentional.
+          prevTop.targetX = -1;
+          prevTop.targetOpacity = 0;
+        }
+
+        newStack.push({
+          name,
+          props: props,
+          id: seq.current.toString(),
+          top: true,
+          animTop: new SpringValue<boolean>(true),
+          initialX: 1,
+          targetX: 0,
+          initialOpacity: 0,
+          targetOpacity: 1,
+          detached: false,
+          // XXX: Remove prev scene here because prev scene's x axis animation doesn't start.
+          onAminEnd: () => {
+            setStack((prevStack) =>
+              prevStack.slice().filter((s) => !prevIdMap.get(s.id))
+            );
+          },
+        });
+
+        return newStack;
+      });
+    },
+    []
+  );
+
   const pop = useCallback(() => {
     setStack((prevStack) => {
       const newStack = prevStack.slice();
@@ -194,6 +243,7 @@ export const useSceneTransitionBase = (
       push,
       pop,
       replace,
+      replaceAll,
       setCurrentSceneProps,
       canPop(): boolean {
         return notDetachedStackNames.length > 1;
@@ -214,7 +264,14 @@ export const useSceneTransitionBase = (
         );
       },
     }),
-    [notDetachedStackNames, pop, push, replace, setCurrentSceneProps]
+    [
+      notDetachedStackNames,
+      pop,
+      push,
+      replace,
+      replaceAll,
+      setCurrentSceneProps,
+    ]
   );
 
   useEffect(() => {
@@ -235,6 +292,7 @@ export const useSceneTransitionBase = (
     push,
     pop,
     replace,
+    replaceAll,
     setCurrentSceneProps,
     stack,
     topScene,
@@ -268,6 +326,7 @@ export const SceneTransitionBaseInner: FunctionComponent<
   push,
   pop,
   replace,
+  replaceAll,
   setCurrentSceneProps,
   stack,
   notDetachedStackNames,
@@ -279,6 +338,7 @@ export const SceneTransitionBaseInner: FunctionComponent<
         push,
         pop,
         replace,
+        replaceAll,
         setCurrentSceneProps,
         canPop(): boolean {
           return notDetachedStackNames.length > 1;

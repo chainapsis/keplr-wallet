@@ -195,8 +195,7 @@ export class AccountSetBase {
       return;
     }
 
-    // No need to wait for the result.
-    this.sharedContext.getKey(this.chainId, (res) => {
+    yield this.sharedContext.getKey(this.chainId, (res) => {
       if (res.status === "fulfilled") {
         const key = res.value;
         this._bech32Address = key.bech32Address;

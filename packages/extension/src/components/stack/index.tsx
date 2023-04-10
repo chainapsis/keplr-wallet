@@ -39,17 +39,17 @@ export const Stack: FunctionComponent<StackProps> = ({
     <Styles.Container {...otherProps}>
       {array.map((child, i) => {
         if (isValidElement(child) && child.type === Gutter) {
-          return child;
+          return <React.Fragment key={i}>{child}</React.Fragment>;
         }
 
         if (!gutter || i === array.length - 1) {
-          return child;
+          return <React.Fragment key={i}>{child}</React.Fragment>;
         }
 
         if (i + 1 < array.length) {
           const next = array[i + 1];
           if (isValidElement(next) && next.type === Gutter) {
-            return child;
+            return <React.Fragment key={i}>{child}</React.Fragment>;
           }
         }
 

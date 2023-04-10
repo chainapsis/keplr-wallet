@@ -7,6 +7,7 @@ import { Stack } from "../../../../components/stack";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { YAxis } from "../../../../components/axis";
+import { Box } from "../../../../components/box";
 
 export interface FormDataNamePassword {
   name: string;
@@ -26,7 +27,7 @@ export const useFormNamePassword = () => {
 
 export const FormNamePassword: FunctionComponent<
   UseFormReturn<FormDataNamePassword>
-> = observer(({ register, formState, getValues }) => {
+> = observer(({ children, register, formState, getValues }) => {
   const { keyRingStore } = useStore();
 
   const needPassword = keyRingStore.keyInfos.length === 0;
@@ -77,7 +78,15 @@ export const FormNamePassword: FunctionComponent<
           />
         </React.Fragment>
       ) : null}
-      <Gutter size="2.5rem" />
+      {children ? (
+        <React.Fragment>
+          <Gutter size="0" />
+          <Box>{children}</Box>
+          <Gutter size="0" />
+        </React.Fragment>
+      ) : (
+        <Gutter size="2.5rem" />
+      )}
       <Button size="large" text="Next" type="submit" />
     </Stack>
   );

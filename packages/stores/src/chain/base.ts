@@ -102,6 +102,11 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   }
 
   @computed
+  get chainIdentifier(): string {
+    return ChainIdHelper.parse(this.chainId).identifier;
+  }
+
+  @computed
   get currencies(): AppCurrency[] {
     return this._embedded.currencies.concat(this.registeredCurrencies);
   }

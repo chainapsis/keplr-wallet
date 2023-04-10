@@ -41,7 +41,9 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           size="large"
           color="secondary"
           onClick={() => {
-            sceneTransition.push("connect-ledger");
+            sceneTransition.push("name-password-hardware", {
+              type: "ledger",
+            });
           }}
         />
         <Button

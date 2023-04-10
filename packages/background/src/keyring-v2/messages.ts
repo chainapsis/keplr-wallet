@@ -29,6 +29,41 @@ export class GetKeyRingStatusMsg extends Message<{
   }
 }
 
+export class FinalizeMnemonicKeyCoinTypeMsg extends Message<{
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "finalize-mnemonic-key-coin-type";
+  }
+
+  constructor(
+    public readonly id: string,
+    public readonly chainId: string,
+    public readonly coinType: number
+  ) {
+    super();
+  }
+
+  validateBasic() {
+    if (!this.id) {
+      throw new Error("id not set");
+    }
+
+    if (!this.chainId) {
+      throw new Error("chainId not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return FinalizeMnemonicKeyCoinTypeMsg.type();
+  }
+}
+
 export class NewMnemonicKeyMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];

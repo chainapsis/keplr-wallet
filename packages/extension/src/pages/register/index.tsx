@@ -21,6 +21,9 @@ import { RegisterIntroExistingUserScene } from "./intro-existing-user";
 import { RegisterNamePasswordScene } from "./name-password";
 import { ConnectHardwareWalletScene } from "./connect-hardware";
 import { ConnectLedgerScene } from "./connect-ledger";
+import { RegisterNamePasswordHardwareScene } from "./name-password-hardware";
+import { FinalizeKeyScene } from "./finalize-key";
+import { EnableChainsScene } from "./enable-chains";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -94,6 +97,21 @@ export const RegisterPage: FunctionComponent = observer(() => {
                 name: "name-password",
                 element: RegisterNamePasswordScene,
                 width: "29rem",
+              },
+              {
+                name: "name-password-hardware",
+                element: RegisterNamePasswordHardwareScene,
+                width: "29rem",
+              },
+              {
+                name: "finalize-key",
+                element: FinalizeKeyScene,
+                width: "16rem",
+              },
+              {
+                name: "enable-chains",
+                element: EnableChainsScene,
+                width: "34.5rem",
               },
             ]}
             initialSceneProps={{

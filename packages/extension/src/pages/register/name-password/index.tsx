@@ -1,10 +1,11 @@
 import React, { FunctionComponent } from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
-import { Box } from "../../../components/box";
 import { FormNamePassword, useFormNamePassword } from "../components/form";
 import { useRegisterHeader } from "../components/header";
-import { useSceneEvents } from "../../../components/transition";
-import { useStore } from "../../../stores";
+import {
+  useSceneEvents,
+  useSceneTransition,
+} from "../../../components/transition";
 import { observer } from "mobx-react-lite";
 
 export const RegisterNamePasswordScene: FunctionComponent<{
@@ -16,9 +17,7 @@ export const RegisterNamePasswordScene: FunctionComponent<{
     addressIndex: number;
   };
 }> = observer(({ mnemonic, privateKey, bip44Path }) => {
-  // TODO: Validate props?
-
-  const { keyRingStore } = useStore();
+  const sceneTransition = useSceneTransition();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -37,7 +36,7 @@ export const RegisterNamePasswordScene: FunctionComponent<{
   return (
     <RegisterSceneBox>
       <form
-        onSubmit={form.handleSubmit(async (data) => {
+        onSubmit={form.handleSubmit((data) => {
           if (mnemonic && privateKey) {
             throw new Error("Both mnemonic and private key are provided");
           }
@@ -47,21 +46,18 @@ export const RegisterNamePasswordScene: FunctionComponent<{
               throw new Error("BIP44 path should be provided");
             }
 
-            await keyRingStore.newMnemonicKey(
-              mnemonic,
-              bip44Path,
-              data.name,
-              data.password
-            );
+            sceneTransition.replaceAll("finalize-key", {
+              name: data.name,
+              password: data.password,
+              mnemonic: {
+                value: mnemonic,
+                bip44Path,
+              },
+            });
           }
-
-          alert("TODO: Next page");
-          window.close();
         })}
       >
-        <Box width="22.5rem" marginX="auto">
-          <FormNamePassword {...form} />
-        </Box>
+        <FormNamePassword {...form} />
       </form>
     </RegisterSceneBox>
   );

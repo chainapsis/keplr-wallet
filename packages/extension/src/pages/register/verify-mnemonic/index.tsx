@@ -3,9 +3,11 @@ import { RegisterSceneBox } from "../components/register-scene-box";
 import { Gutter } from "../../../components/gutter";
 import { VerifyingMnemonicBox, VerifyingMnemonicBoxRef } from "./verifying-box";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
 import { useRegisterHeader } from "../components/header";
-import { useSceneEvents } from "../../../components/transition";
+import {
+  useSceneEvents,
+  useSceneTransition,
+} from "../../../components/transition";
 import { Box } from "../../../components/box";
 import { FormNamePassword, useFormNamePassword } from "../components/form";
 
@@ -20,6 +22,8 @@ export const VerifyMnemonicScene: FunctionComponent<{
   if (!mnemonic || !bip44Path) {
     throw new Error("Mnemonic and bip44Path should be provided");
   }
+
+  const sceneTransition = useSceneTransition();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -39,8 +43,6 @@ export const VerifyMnemonicScene: FunctionComponent<{
       });
     },
   });
-
-  const { keyRingStore } = useStore();
 
   const verifyingWords = useMemo(() => {
     if (mnemonic.trim() === "") {
@@ -79,21 +81,21 @@ export const VerifyMnemonicScene: FunctionComponent<{
   return (
     <RegisterSceneBox>
       <form
-        onSubmit={form.handleSubmit(async (data) => {
+        onSubmit={form.handleSubmit((data) => {
           if (!verifyingBoxRef.current) {
             throw new Error("Ref of verify box is null");
           }
 
           if (verifyingBoxRef.current.validate()) {
-            await keyRingStore.newMnemonicKey(
-              mnemonic,
-              bip44Path,
-              data.name,
-              data.password
-            );
-
-            alert("TODO: Next page");
-            window.close();
+            sceneTransition.replaceAll("finalize-key", {
+              name: data.name,
+              password: data.password,
+              mnemonic: {
+                value: mnemonic,
+                bip44Path,
+                isFresh: true,
+              },
+            });
           }
         })}
       >
