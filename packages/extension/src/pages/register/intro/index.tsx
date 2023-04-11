@@ -51,7 +51,7 @@ export const RegisterIntroScene: FunctionComponent = () => {
         while (!unmounted) {
           const anim = lottie.loadAnimation({
             container: container,
-            renderer: "canvas",
+            renderer: "svg",
             loop: false,
             autoplay: false,
             animationData: AnimIntros[i],

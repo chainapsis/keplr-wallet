@@ -43,7 +43,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
     if (animDivRef.current) {
       const anim = lottie.loadAnimation({
         container: animDivRef.current,
-        renderer: "canvas",
+        renderer: "svg",
         loop: true,
         autoplay: true,
         animationData: AnimSeed,
