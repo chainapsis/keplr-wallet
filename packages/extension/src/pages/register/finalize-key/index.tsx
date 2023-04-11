@@ -67,16 +67,22 @@ export const FinalizeKeyScene: FunctionComponent<{
   const [candidateAddresses, setCandidateAddresses] = useState<
     {
       chainId: string;
-      bech32Addresses: string[];
+      bech32Addresses: {
+        coinType: number;
+        address: string;
+      }[];
     }[]
   >([]);
+  const [vaultId, setVaultId] = useState("");
   const [allQueriesSettled, setAllQueriesSettled] = useState(false);
   const [isQueriesTimeout, setIsQueriesTimeout] = useState(false);
 
   useEffectOnce(() => {
     (async () => {
+      let vaultId: unknown;
+
       if (mnemonic) {
-        await keyRingStore.newMnemonicKey(
+        vaultId = await keyRingStore.newMnemonicKey(
           mnemonic.value,
           mnemonic.bip44Path,
           name,
@@ -85,7 +91,7 @@ export const FinalizeKeyScene: FunctionComponent<{
       } else if (privateKey) {
         throw new Error("TODO");
       } else if (ledger) {
-        await keyRingStore.newLedgerKey(
+        vaultId = await keyRingStore.newLedgerKey(
           ledger.pubKey,
           ledger.app,
           ledger.bip44Path,
@@ -96,20 +102,23 @@ export const FinalizeKeyScene: FunctionComponent<{
         throw new Error("Invalid props");
       }
 
+      if (typeof vaultId !== "string") {
+        throw new Error("Unknown error");
+      }
+
       let promises: Promise<unknown>[] = [];
 
-      const selectedKeyInfo = keyRingStore.selectedKeyInfo;
       for (const chainInfo of chainStore.chainInfos) {
         // If mnemonic is fresh, there is no way that additional coin type account has value to select.
-        if (selectedKeyInfo && selectedKeyInfo.type === "mnemonic") {
+        if (mnemonic) {
           if (
-            keyRingStore.needMnemonicKeyCoinTypeFinalize(chainInfo) &&
+            keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo) &&
             mnemonic?.isFresh
           ) {
             promises.push(
               (async () => {
                 await keyRingStore.finalizeMnemonicKeyCoinType(
-                  selectedKeyInfo.id,
+                  vaultId,
                   chainInfo.chainId,
                   chainInfo.bip44.coinType
                 );
@@ -123,26 +132,34 @@ export const FinalizeKeyScene: FunctionComponent<{
 
       const candidateAddresses: {
         chainId: string;
-        bech32Addresses: string[];
+        bech32Addresses: {
+          coinType: number;
+          address: string;
+        }[];
       }[] = [];
 
       promises = [];
       for (const chainInfo of chainStore.chainInfos) {
         if (
-          selectedKeyInfo &&
-          keyRingStore.needMnemonicKeyCoinTypeFinalize(chainInfo)
+          mnemonic &&
+          keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
         ) {
           promises.push(
             (async () => {
               const res =
                 await keyRingStore.computeNotFinalizedMnemonicKeyAddresses(
-                  selectedKeyInfo.id,
+                  vaultId,
                   chainInfo.chainId
                 );
 
               candidateAddresses.push({
                 chainId: chainInfo.chainId,
-                bech32Addresses: res.map((res) => res.bech32Address),
+                bech32Addresses: res.map((res) => {
+                  return {
+                    coinType: res.coinType,
+                    address: res.bech32Address,
+                  };
+                }),
               });
             })()
           );
@@ -157,7 +174,12 @@ export const FinalizeKeyScene: FunctionComponent<{
               if (account.bech32Address) {
                 candidateAddresses.push({
                   chainId: chainInfo.chainId,
-                  bech32Addresses: [account.bech32Address],
+                  bech32Addresses: [
+                    {
+                      coinType: chainInfo.bip44.coinType,
+                      address: account.bech32Address,
+                    },
+                  ],
                 });
               }
             })()
@@ -167,6 +189,7 @@ export const FinalizeKeyScene: FunctionComponent<{
 
       await Promise.allSettled(promises);
 
+      setVaultId(vaultId);
       setCandidateAddresses(candidateAddresses);
     })();
   });
@@ -197,12 +220,12 @@ export const FinalizeKeyScene: FunctionComponent<{
             // Prepare queries state to avoid UI flicker on next scene.
             promises.push(
               queries.queryBalances
-                .getQueryBech32Address(bech32Address)
+                .getQueryBech32Address(bech32Address.address)
                 .stakable.waitFreshResponse()
             );
             promises.push(
               queries.cosmos.queryAccount
-                .getQueryBech32Address(bech32Address)
+                .getQueryBech32Address(bech32Address.address)
                 .waitFreshResponse()
             );
           }
@@ -231,9 +254,18 @@ export const FinalizeKeyScene: FunctionComponent<{
   useEffect(() => {
     if (!onceRef.current && (isQueriesTimeout || allQueriesSettled)) {
       onceRef.current = true;
-      sceneTransition.replace("enable-chains");
+      sceneTransition.replace("enable-chains", {
+        vaultId,
+        candidateAddresses,
+      });
     }
-  }, [allQueriesSettled, isQueriesTimeout, sceneTransition]);
+  }, [
+    allQueriesSettled,
+    candidateAddresses,
+    isQueriesTimeout,
+    sceneTransition,
+    vaultId,
+  ]);
 
   return (
     <RegisterSceneBox>

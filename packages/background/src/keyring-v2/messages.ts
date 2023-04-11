@@ -65,6 +65,7 @@ export class FinalizeMnemonicKeyCoinTypeMsg extends Message<{
 }
 
 export class NewMnemonicKeyMsg extends Message<{
+  vaultId: string;
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
 }> {
@@ -112,6 +113,7 @@ export class NewMnemonicKeyMsg extends Message<{
 }
 
 export class NewLedgerKeyMsg extends Message<{
+  vaultId: string;
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
 }> {

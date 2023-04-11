@@ -93,7 +93,7 @@ const handleNewMnemonicKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<NewMnemonicKeyMsg> = (service) => {
   return async (env, msg) => {
-    await service.createMnemonicKeyRing(
+    const vaultId = await service.createMnemonicKeyRing(
       env,
       msg.mnemonic,
       msg.bip44HDPath,
@@ -101,6 +101,7 @@ const handleNewMnemonicKeyMsg: (
       msg.password
     );
     return {
+      vaultId,
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
     };
@@ -111,7 +112,7 @@ const handleNewLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<NewLedgerKeyMsg> = (service) => {
   return async (env, msg) => {
-    await service.createLedgerKeyRing(
+    const vaultId = await service.createLedgerKeyRing(
       env,
       msg.pubKey,
       msg.app,
@@ -120,6 +121,7 @@ const handleNewLedgerKeyMsg: (
       msg.password
     );
     return {
+      vaultId,
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
     };

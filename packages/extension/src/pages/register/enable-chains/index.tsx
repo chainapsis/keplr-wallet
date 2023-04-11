@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, {
+  EffectCallback,
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { RegisterSceneBox } from "../components/register-scene-box";
@@ -15,8 +21,17 @@ import { TextInput } from "../../../components/input";
 import { Subtitle3 } from "../../../components/typography";
 import { Button } from "../../../components/button";
 
-export const EnableChainsScene: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+export const EnableChainsScene: FunctionComponent<{
+  vaultId: string;
+  candidateAddresses: {
+    chainId: string;
+    bech32Addresses: {
+      coinType: number;
+      address: string;
+    }[];
+  }[];
+}> = observer(({ vaultId, candidateAddresses }) => {
+  const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -28,6 +43,73 @@ export const EnableChainsScene: FunctionComponent = observer(() => {
         stepTotal: 6,
       });
     },
+  });
+
+  useEffectOnce(() => {
+    for (const candidateAddress of candidateAddresses) {
+      const queries = queriesStore.get(candidateAddress.chainId);
+      const chainInfo = chainStore.getChain(candidateAddress.chainId);
+
+      if (
+        candidateAddress.bech32Addresses.length >= 2 &&
+        keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
+      ) {
+        (async () => {
+          const promises: Promise<unknown>[] = [];
+
+          for (const bech32Address of candidateAddress.bech32Addresses) {
+            const queryAccount =
+              queries.cosmos.queryAccount.getQueryBech32Address(
+                bech32Address.address
+              );
+
+            promises.push(queryAccount.waitResponse());
+          }
+
+          await Promise.allSettled(promises);
+
+          const mainAddress = candidateAddress.bech32Addresses.find(
+            (a) => a.coinType === chainInfo.bip44.coinType
+          );
+          const otherAddresses = candidateAddress.bech32Addresses.filter(
+            (a) => a.coinType !== chainInfo.bip44.coinType
+          );
+
+          let otherIsSelectable = false;
+          if (mainAddress && otherAddresses.length > 0) {
+            for (const otherAddress of otherAddresses) {
+              const bech32Address = otherAddress.address;
+              const queryAccount =
+                queries.cosmos.queryAccount.getQueryBech32Address(
+                  bech32Address
+                );
+
+              // Check that the account exist on chain.
+              // With stargate implementation, querying account fails with 404 status if account not exists.
+              // But, if account receives some native tokens, the account would be created and it may deserve to be chosen.
+              if (queryAccount.response?.data && queryAccount.error == null) {
+                otherIsSelectable = true;
+                break;
+              }
+            }
+          }
+
+          if (!otherIsSelectable && mainAddress) {
+            console.log(
+              "Finalize mnemonic key coin type",
+              vaultId,
+              chainInfo.chainId,
+              mainAddress.coinType
+            );
+            keyRingStore.finalizeMnemonicKeyCoinType(
+              vaultId,
+              chainInfo.chainId,
+              mainAddress.coinType
+            );
+          }
+        })();
+      }
+    }
   });
 
   const [search, setSearch] = useState<string>("");
@@ -131,4 +213,9 @@ const ChainItem: FunctionComponent<{
       </Columns>
     </Box>
   );
+};
+
+const useEffectOnce = (effect: EffectCallback) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(effect, []);
 };

@@ -47,8 +47,11 @@ export class KeyRingStore {
     return this._status === "empty";
   }
 
-  needMnemonicKeyCoinTypeFinalize(chainInfo: ChainInfo): boolean {
-    const keyInfo = this.selectedKeyInfo;
+  needMnemonicKeyCoinTypeFinalize(
+    vaultId: string,
+    chainInfo: ChainInfo
+  ): boolean {
+    const keyInfo = this.keyInfos.find((keyInfo) => keyInfo.id === vaultId);
     if (!keyInfo) {
       return false;
     }
@@ -117,6 +120,8 @@ export class KeyRingStore {
     );
     this._status = result.status;
     this._keyInfos = result.keyInfos;
+
+    return result.vaultId;
   }
 
   @flow
@@ -139,6 +144,8 @@ export class KeyRingStore {
     );
     this._status = result.status;
     this._keyInfos = result.keyInfos;
+
+    return result.vaultId;
   }
 
   @flow
