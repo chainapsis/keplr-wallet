@@ -1,6 +1,7 @@
 import { MessageRequester, Router } from "@keplr-wallet/router";
 
 import * as Chains from "./chains/internal";
+import * as ChainsUI from "./chains-ui/internal";
 import * as Ledger from "./ledger/internal";
 import * as Keystone from "./keystone/internal";
 import * as KeyRing from "./keyring/internal";
@@ -20,6 +21,7 @@ import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 
 export * from "./chains";
+export * from "./chains-ui";
 export * from "./ledger";
 export * from "./keystone";
 export * from "./keyring";
@@ -72,6 +74,11 @@ export function init(
     storeCreator("chains"),
     embedChainInfos,
     communityChainInfoRepo
+  );
+
+  const chainsUIService = new ChainsUI.ChainsUIService(
+    storeCreator("chains-ui"),
+    chainsService
   );
 
   const permissionService = new Permission.PermissionService(
@@ -149,6 +156,7 @@ export function init(
   Permission.init(router, permissionService);
   Tokens.init(router, tokensService);
   Chains.init(router, chainsService);
+  ChainsUI.init(router, chainsUIService);
   Ledger.init(router, ledgerService);
   KeyRing.init(router, keyRingService);
   SecretWasm.init(router, secretWasmService);
@@ -167,6 +175,7 @@ export function init(
   return {
     initFn: async () => {
       await chainsService.init();
+      await chainsUIService.init();
       await vaultService.init();
       await keyRingV2Service.init();
       await keyRingCosmosService.init();
