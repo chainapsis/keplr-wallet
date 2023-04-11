@@ -20,6 +20,7 @@ import { Gutter } from "../../../components/gutter";
 import { TextInput } from "../../../components/input";
 import { Subtitle3 } from "../../../components/typography";
 import { Button } from "../../../components/button";
+import { ColorPalette } from "../../../styles";
 
 export const EnableChainsScene: FunctionComponent<{
   vaultId: string;
@@ -45,6 +46,13 @@ export const EnableChainsScene: FunctionComponent<{
     },
   });
 
+  // Allowing to disable makes user confusing.
+  // So, we should block to turn off initially enabled chains.
+  const [initialEnabledChainIdentifiers] = useState(
+    chainStore.enabledChainIdentifiers
+  );
+
+  // Handle coin type selection.
   useEffectOnce(() => {
     for (const candidateAddress of candidateAddresses) {
       const queries = queriesStore.get(candidateAddress.chainId);
@@ -112,6 +120,42 @@ export const EnableChainsScene: FunctionComponent<{
     }
   });
 
+  // Handle auto turn on chains.
+  // Assume that states from queries store are already initialized.
+  useEffectOnce(() => {
+    const enableChainIds: string[] = [];
+
+    for (const candidateAddress of candidateAddresses) {
+      const queries = queriesStore.get(candidateAddress.chainId);
+      const chainInfo = chainStore.getChain(candidateAddress.chainId);
+
+      // If the chain is already enabled, skip.
+      if (chainStore.isEnabledChain(candidateAddress.chainId)) {
+        continue;
+      }
+
+      // If the chain is not enabled, check that the account exists.
+      // If the account exists, turn on the chain.
+      for (const bech32Address of candidateAddress.bech32Addresses) {
+        const queryAccount = queries.cosmos.queryAccount.getQueryBech32Address(
+          bech32Address.address
+        );
+
+        // Check that the account exist on chain.
+        // With stargate implementation, querying account fails with 404 status if account not exists.
+        // But, if account receives some native tokens, the account would be created and it may deserve to be chosen.
+        if (queryAccount.response?.data) {
+          enableChainIds.push(chainInfo.chainId);
+          break;
+        }
+      }
+    }
+
+    if (enableChainIds.length > 0) {
+      chainStore.enableChainInfoInUI(...enableChainIds);
+    }
+  });
+
   const [search, setSearch] = useState<string>("");
 
   const chainInfos = useMemo(() => {
@@ -146,7 +190,7 @@ export const EnableChainsScene: FunctionComponent<{
           textAlign: "center",
         }}
       >
-        3 chain(s) selected
+        {chainStore.enabledChainIdentifiers.length} chain(s) selected
       </Subtitle3>
       <Gutter size="0.75rem" />
       <Box
@@ -168,11 +212,20 @@ export const EnableChainsScene: FunctionComponent<{
               account.bech32Address
             ).stakable.balance;
 
+            const blockInteraction = initialEnabledChainIdentifiers.includes(
+              chainInfo.chainIdentifier
+            );
+
             return (
               <ChainItem
                 key={chainInfo.chainId}
                 chainInfo={chainInfo}
                 balance={balance}
+                enabled={chainStore.isEnabledChain(chainInfo.chainId)}
+                blockInteraction={blockInteraction}
+                onClick={() => {
+                  chainStore.toggleChainInfoInUI(chainInfo.chainId);
+                }}
               />
             );
           })}
@@ -190,9 +243,28 @@ export const EnableChainsScene: FunctionComponent<{
 const ChainItem: FunctionComponent<{
   chainInfo: ChainInfo;
   balance: CoinPretty;
-}> = ({ chainInfo, balance }) => {
+
+  enabled: boolean;
+  blockInteraction: boolean;
+
+  onClick: () => void;
+}> = ({ chainInfo, balance, enabled, blockInteraction, onClick }) => {
   return (
-    <Box borderRadius="0.375rem" paddingX="1rem" paddingY="0.75rem">
+    <Box
+      borderRadius="0.375rem"
+      paddingX="1rem"
+      paddingY="0.75rem"
+      backgroundColor={
+        // TODO: Add alpha if needed.
+        enabled ? ColorPalette["gray-500"] : ColorPalette["gray-600"]
+      }
+      cursor={blockInteraction ? "not-allowed" : "pointer"}
+      onClick={() => {
+        if (!blockInteraction) {
+          onClick();
+        }
+      }}
+    >
       <Columns sum={1}>
         <XAxis alignY="center">
           <div>TODO: Chain Icon</div>
@@ -207,7 +279,7 @@ const ChainItem: FunctionComponent<{
           <YAxis>
             <div>{balance.maxDecimals(6).shrink(true).toString()}</div>
             <Gutter size="0.25rem" />
-            <div>ㅅㅂ</div>
+            <div>TODO: ㅅㅂ</div>
           </YAxis>
         </XAxis>
       </Columns>

@@ -1,10 +1,15 @@
 import { computed, flow, makeObservable, observable } from "mobx";
 
-import { ChainStore as BaseChainStore } from "@keplr-wallet/stores";
+import {
+  ChainStore as BaseChainStore,
+  IChainInfoImpl,
+} from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithCoreTypes,
+  DisableChainsMsg,
+  EnableChainsMsg,
   GetChainInfosWithCoreTypesMsg,
   GetEnabledChainIdentifiersMsg,
   RemoveSuggestedChainInfoMsg,
@@ -22,7 +27,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected _enabledChainIdentifiers: string[] = [];
 
   constructor(
-    embedChainInfos: ChainInfo[],
+    protected readonly embedChainInfos: ChainInfo[],
     protected readonly requester: MessageRequester
   ) {
     super(
@@ -59,6 +64,35 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @computed
+  override get chainInfos(): IChainInfoImpl<ChainInfoWithCoreTypes>[] {
+    // Sort by chain name.
+    // The first chain has priority to be the first.
+    return super.chainInfos.sort((a, b) => {
+      const aChainIdentifier = ChainIdHelper.parse(a.chainId).identifier;
+      const bChainIdentifier = ChainIdHelper.parse(b.chainId).identifier;
+
+      if (
+        aChainIdentifier ===
+        ChainIdHelper.parse(this.embedChainInfos[0].chainId).identifier
+      ) {
+        return -1;
+      }
+      if (
+        bChainIdentifier ===
+        ChainIdHelper.parse(this.embedChainInfos[0].chainId).identifier
+      ) {
+        return 1;
+      }
+
+      return a.chainName.trim().localeCompare(b.chainName.trim());
+    });
+  }
+
+  get enabledChainIdentifiers(): string[] {
+    return this._enabledChainIdentifiers;
+  }
+
+  @computed
   get chainInfosInUI() {
     return this.chainInfos.filter((chainInfo) => {
       const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
@@ -66,9 +100,30 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
   }
 
+  isEnabledChain(chainId: string): boolean {
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    return this.enabledChainIdentifiesMap.get(chainIdentifier) === true;
+  }
+
   @flow
-  *toggleChainInfoInUI(chainId: string) {
-    const msg = new ToggleChainsMsg([chainId]);
+  *toggleChainInfoInUI(...chainIds: string[]) {
+    const msg = new ToggleChainsMsg(chainIds);
+    this._enabledChainIdentifiers = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+  }
+
+  @flow
+  *enableChainInfoInUI(...chainIds: string[]) {
+    const msg = new EnableChainsMsg(chainIds);
+    this._enabledChainIdentifiers = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+  }
+
+  @flow
+  *disableChainInfoInUI(...chainIds: string[]) {
+    const msg = new DisableChainsMsg(chainIds);
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );

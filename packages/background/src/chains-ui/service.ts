@@ -13,7 +13,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class ChainsUIService {
   @observable.ref
-  protected _enabledChainIdentifies: string[] = [];
+  protected _enabledChainIdentifies: ReadonlyArray<string> = [];
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -60,7 +60,8 @@ export class ChainsUIService {
       if (!this.enabledChainIdentifiesMap.get(identifier)) {
         this.chainsService.getChainInfoOrThrow(chainId);
 
-        this._enabledChainIdentifies.push(identifier);
+        this._enabledChainIdentifies =
+          this._enabledChainIdentifies.concat(identifier);
       }
     }
   }
