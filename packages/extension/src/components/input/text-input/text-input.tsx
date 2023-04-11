@@ -19,6 +19,7 @@ export const TextInput = forwardRef<
       rightLabel,
       left,
       right,
+      rightClick,
       ...props
     },
     ref
@@ -52,7 +53,7 @@ export const TextInput = forwardRef<
               />
             </Column>
             {right ? (
-              <Box alignY="center" marginRight="1rem">
+              <Box alignY="center" marginRight="1rem" onClick={rightClick}>
                 <Styles.Icon>{right}</Styles.Icon>
               </Box>
             ) : null}

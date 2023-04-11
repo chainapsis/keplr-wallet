@@ -22,12 +22,14 @@ export const RecipientInput: FunctionComponent<{
         }}
         right={
           <Box
-            style={{ color: ColorPalette["gray-50"] }}
-            onClick={() => setIsModalOpen(true)}
+            style={{
+              color: ColorPalette["gray-50"],
+            }}
           >
             <ProfileIcon width="1rem" height="1rem" />
           </Box>
         }
+        rightClick={() => setIsModalOpen(true)}
         value={recipientConfig.value}
         error={(() => {
           const uiProperties = recipientConfig.uiProperties;
