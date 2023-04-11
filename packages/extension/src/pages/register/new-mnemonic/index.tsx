@@ -41,13 +41,17 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (animDivRef.current) {
-      lottie.loadAnimation({
+      const anim = lottie.loadAnimation({
         container: animDivRef.current,
         renderer: "canvas",
         loop: true,
         autoplay: true,
         animationData: AnimSeed,
       });
+
+      return () => {
+        anim.destroy();
+      };
     }
   }, []);
 
