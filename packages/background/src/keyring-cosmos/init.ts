@@ -6,6 +6,7 @@ import {
   RequestCosmosSignAminoADR36Msg,
   RequestCosmosSignAminoMsg,
   VerifyCosmosSignAminoADR36Msg,
+  ComputeNotFinalizedMnemonicKeyAddressesMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -21,6 +22,7 @@ export function init(
   router.registerMessage(RequestCosmosSignAminoMsg);
   router.registerMessage(RequestCosmosSignAminoADR36Msg);
   router.registerMessage(VerifyCosmosSignAminoADR36Msg);
+  router.registerMessage(ComputeNotFinalizedMnemonicKeyAddressesMsg);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

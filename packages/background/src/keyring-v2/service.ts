@@ -120,7 +120,7 @@ export class KeyRingService {
     if (
       chainInfo.bip44.coinType !== coinType &&
       !(chainInfo.alternativeBIP44s ?? []).find(
-        (path) => path.coinType !== coinType
+        (path) => path.coinType === coinType
       )
     ) {
       throw new Error("Coin type is not associated to chain");
@@ -299,6 +299,47 @@ export class KeyRingService {
 
       return chainInfo.bip44.coinType;
     })();
+
+    return this.getPubKeyWithVault(env, vault, coinType, chainInfo);
+  }
+
+  getPubKeyWithNotFinalizedCoinType(
+    env: Env,
+    chainId: string,
+    vaultId: string,
+    coinType: number
+  ): Promise<PubKeySecp256k1> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+    if (
+      chainInfo.bip44.coinType !== coinType &&
+      !(chainInfo.alternativeBIP44s ?? []).find(
+        (path) => path.coinType === coinType
+      )
+    ) {
+      throw new Error("Coin type is not associated to chain");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "mnemonic") {
+      throw new Error("Key is not from mnemonic");
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    if (vault.insensitive[coinTypeTag]) {
+      throw new Error("Coin type is already finalized");
+    }
 
     return this.getPubKeyWithVault(env, vault, coinType, chainInfo);
   }

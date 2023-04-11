@@ -1,7 +1,10 @@
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 import { toGenerator } from "@keplr-wallet/common";
-import { KeyRingV2 } from "@keplr-wallet/background";
+import {
+  ComputeNotFinalizedMnemonicKeyAddressesMsg,
+  KeyRingV2,
+} from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
@@ -59,6 +62,23 @@ export class KeyRingStore {
     }-coinType`;
 
     return keyInfo.insensitive[coinTypeTag] == null;
+  }
+
+  async computeNotFinalizedMnemonicKeyAddresses(
+    vaultId: string,
+    chainId: string
+  ): Promise<
+    {
+      coinType: number;
+      bech32Address: string;
+    }[]
+  > {
+    const msg = new ComputeNotFinalizedMnemonicKeyAddressesMsg(
+      vaultId,
+      chainId
+    );
+
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   @flow

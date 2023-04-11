@@ -13,6 +13,7 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../components/transition";
+import { WalletStatus } from "@keplr-wallet/stores";
 
 /**
  * FinalizeKeyScene is used to create the key (account).
@@ -61,7 +62,14 @@ export const FinalizeKeyScene: FunctionComponent<{
     },
   });
 
-  const [isCreated, setIsCreated] = useState(false);
+  // Effects depends on below state and these should be called once if length > 0.
+  // Thus, you should set below state only once.
+  const [candidateAddresses, setCandidateAddresses] = useState<
+    {
+      chainId: string;
+      bech32Addresses: string[];
+    }[]
+  >([]);
   const [allQueriesSettled, setAllQueriesSettled] = useState(false);
   const [isQueriesTimeout, setIsQueriesTimeout] = useState(false);
 
@@ -113,24 +121,58 @@ export const FinalizeKeyScene: FunctionComponent<{
 
       await Promise.allSettled(promises);
 
+      const candidateAddresses: {
+        chainId: string;
+        bech32Addresses: string[];
+      }[] = [];
+
       promises = [];
       for (const chainInfo of chainStore.chainInfos) {
-        const account = accountStore.getAccount(chainInfo.chainId);
-        promises.push(
-          (async () => {
-            await account.init();
-          })()
-        );
+        if (
+          selectedKeyInfo &&
+          keyRingStore.needMnemonicKeyCoinTypeFinalize(chainInfo)
+        ) {
+          promises.push(
+            (async () => {
+              const res =
+                await keyRingStore.computeNotFinalizedMnemonicKeyAddresses(
+                  selectedKeyInfo.id,
+                  chainInfo.chainId
+                );
+
+              candidateAddresses.push({
+                chainId: chainInfo.chainId,
+                bech32Addresses: res.map((res) => res.bech32Address),
+              });
+            })()
+          );
+        } else {
+          const account = accountStore.getAccount(chainInfo.chainId);
+          promises.push(
+            (async () => {
+              if (account.walletStatus !== WalletStatus.Loaded) {
+                await account.init();
+              }
+
+              if (account.bech32Address) {
+                candidateAddresses.push({
+                  chainId: chainInfo.chainId,
+                  bech32Addresses: [account.bech32Address],
+                });
+              }
+            })()
+          );
+        }
       }
 
       await Promise.allSettled(promises);
 
-      setIsCreated(true);
+      setCandidateAddresses(candidateAddresses);
     })();
   });
 
   useEffect(() => {
-    if (isCreated) {
+    if (candidateAddresses.length > 0) {
       const timeoutId = setTimeout(() => {
         setIsQueriesTimeout(true);
       }, 3000);
@@ -139,29 +181,28 @@ export const FinalizeKeyScene: FunctionComponent<{
         clearTimeout(timeoutId);
       };
     }
-  }, [isCreated]);
+  }, [candidateAddresses]);
 
   useEffect(() => {
     let unmounted = false;
 
-    if (isCreated) {
+    if (candidateAddresses.length > 0) {
       // Should call once.
       (async () => {
         const promises: Promise<unknown>[] = [];
 
-        for (const chainInfo of chainStore.chainInfos) {
-          const account = accountStore.getAccount(chainInfo.chainId);
-          if (account.bech32Address) {
-            const queries = queriesStore.get(chainInfo.chainId);
+        for (const candidateAddress of candidateAddresses) {
+          const queries = queriesStore.get(candidateAddress.chainId);
+          for (const bech32Address of candidateAddress.bech32Addresses) {
             // Prepare queries state to avoid UI flicker on next scene.
             promises.push(
               queries.queryBalances
-                .getQueryBech32Address(account.bech32Address)
+                .getQueryBech32Address(bech32Address)
                 .stakable.waitFreshResponse()
             );
             promises.push(
               queries.cosmos.queryAccount
-                .getQueryBech32Address(account.bech32Address)
+                .getQueryBech32Address(bech32Address)
                 .waitFreshResponse()
             );
           }
@@ -180,7 +221,7 @@ export const FinalizeKeyScene: FunctionComponent<{
     };
     // Make sure to this effect called once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCreated]);
+  }, [candidateAddresses]);
 
   // XXX: sceneTransition은 method마다 ref이 변한다.
   //      onceRef이 없으면 무한루프에 빠진다.

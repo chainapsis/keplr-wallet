@@ -11,6 +11,7 @@ import {
   RequestCosmosSignAminoMsg,
   RequestCosmosSignAminoADR36Msg,
   VerifyCosmosSignAminoADR36Msg,
+  ComputeNotFinalizedMnemonicKeyAddressesMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -49,6 +50,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as VerifyCosmosSignAminoADR36Msg);
+      case ComputeNotFinalizedMnemonicKeyAddressesMsg:
+        return handleComputeNotFinalizedMnemonicKeyAddressesMsg(service)(
+          env,
+          msg as ComputeNotFinalizedMnemonicKeyAddressesMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -165,6 +171,20 @@ const handleVerifyCosmosSignAminoADR36Msg: (
       msg.signer,
       msg.data,
       msg.signature
+    );
+  };
+};
+
+const handleComputeNotFinalizedMnemonicKeyAddressesMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<ComputeNotFinalizedMnemonicKeyAddressesMsg> = (
+  service
+) => {
+  return async (env, msg) => {
+    return await service.computeNotFinalizedMnemonicKeyAddresses(
+      env,
+      msg.id,
+      msg.chainId
     );
   };
 };
