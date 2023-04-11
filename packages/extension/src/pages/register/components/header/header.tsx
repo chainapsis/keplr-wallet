@@ -185,42 +185,46 @@ const HeaderStep: FunctionComponent<{
         <Gutter size="0.75rem" />
         <H3>{title}</H3>
       </YAxis>
-      <VerticalResizeTransition>
-        {paragraphs && paragraphs.length > 0 ? <Gutter size="1.25rem" /> : null}
-      </VerticalResizeTransition>
-      <VerticalResizeTransition transitionAlign="top">
-        {(() => {
-          if (paragraphs && paragraphs.length > 0) {
-            if (paragraphs.length === 1) {
+      <Box width="29.5rem" marginX="auto">
+        <VerticalResizeTransition>
+          {paragraphs && paragraphs.length > 0 ? (
+            <Gutter size="1.25rem" />
+          ) : null}
+        </VerticalResizeTransition>
+        <VerticalResizeTransition transitionAlign="top">
+          {(() => {
+            if (paragraphs && paragraphs.length > 0) {
+              if (paragraphs.length === 1) {
+                return (
+                  <Body1
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    {paragraphs[0]}
+                  </Body1>
+                );
+              }
+
               return (
-                <Body1
-                  style={{
-                    textAlign: "center",
-                  }}
-                >
-                  {paragraphs[0]}
-                </Body1>
+                <YAxis alignX="center">
+                  <ul>
+                    {paragraphs.map((paragraph, i) => {
+                      return (
+                        <Body1 key={i} as="li">
+                          {paragraph}
+                        </Body1>
+                      );
+                    })}
+                  </ul>
+                </YAxis>
               );
             }
 
-            return (
-              <YAxis alignX="center">
-                <ul>
-                  {paragraphs.map((paragraph, i) => {
-                    return (
-                      <Body1 key={i} as="li">
-                        {paragraph}
-                      </Body1>
-                    );
-                  })}
-                </ul>
-              </YAxis>
-            );
-          }
-
-          return null;
-        })()}
-      </VerticalResizeTransition>
+            return null;
+          })()}
+        </VerticalResizeTransition>
+      </Box>
     </Box>
   );
 };
