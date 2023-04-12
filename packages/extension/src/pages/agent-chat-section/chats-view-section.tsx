@@ -22,11 +22,12 @@ import {
   CHAT_PAGE_COUNT,
   TRANSACTION_FAILED,
   AGENT_ADDRESS,
+  TRANSACTION_SIGNED,
 } from "../../config.ui.var";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
 import { AgentDisclaimer } from "@components/agents/agents-disclaimer";
-import { executeTxn } from "@utils/sign-transaction";
+import { signTransaction } from "@utils/sign-transaction";
 import { useNotification } from "@components/notification";
 import {
   InactiveAgentMessage,
@@ -239,7 +240,22 @@ export const ChatsViewSection = ({
       targetAddress,
     };
     try {
-      await executeTxn(accountInfo, notification, payload, messagePayload);
+      const signResult = await signTransaction(
+        data,
+        messagePayload.chainId,
+        accountInfo.bech32Address
+      );
+      deliverMessages(
+        messagePayload.accessToken,
+        messagePayload.chainId,
+        {
+          message: TRANSACTION_SIGNED,
+          signedTx: Buffer.from(signResult.signedTx).toString("base64"),
+          signature: signResult.signature.signature,
+        },
+        accountInfo.bech32Address,
+        messagePayload.targetAddress
+      );
       history.goBack();
     } catch (e) {
       console.log(e);
