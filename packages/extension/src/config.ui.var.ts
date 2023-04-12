@@ -72,10 +72,10 @@ export const AGENT_COMMANDS = [
     enabled: false,
   },
   {
-    command: "/autoCompound",
-    label: "autoCompound (Auto-Compound Rewards)",
+    command: "/autocompound",
+    label: "autocompound (Auto-Compound Rewards)",
     icon: autoCompoundIcon,
-    enabled: false,
+    enabled: true,
   },
   {
     command: "/redeemFET",
