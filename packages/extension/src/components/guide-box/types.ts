@@ -4,7 +4,7 @@ export type GuideBoxColor = "default" | "warning" | "danger";
 
 export interface GuideBoxProps {
   title: string;
-  paragraph?: string;
+  paragraph?: string | React.ReactNode;
   bottom?: React.ReactNode;
   color?: GuideBoxColor;
 }

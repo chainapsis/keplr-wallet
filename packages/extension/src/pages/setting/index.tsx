@@ -4,7 +4,12 @@ import { BackButton } from "../../layouts/header/components";
 import { HeaderLayout } from "../../layouts/header";
 import { Stack } from "../../components/stack";
 import { PageButton } from "./components";
-import { SettingIcon, RightArrowIcon } from "../../components/icon";
+import {
+  SettingIcon,
+  RightArrowIcon,
+  RocketLaunchIcon,
+  KeyIcon,
+} from "../../components/icon";
 import { useNavigate } from "react-router";
 import { XAxis } from "../../components/axis";
 import { Box } from "../../components/box";
@@ -18,7 +23,7 @@ export const SettingPage: FunctionComponent = observer(() => {
         <Stack gutter="0.5rem">
           <PageButton
             title={<XAxis alignY="center">General</XAxis>}
-            paragraph="Language, Currency.."
+            paragraph="Language, Currency, Address book..."
             startIcon={<SettingIcon width="1rem" height="1rem" />}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general")}
@@ -26,16 +31,25 @@ export const SettingPage: FunctionComponent = observer(() => {
 
           <PageButton
             title="Advanced"
-            paragraph="Developer Mode, Endpoints"
+            paragraph="Developer Mode, Change Endpoints..."
+            startIcon={<RocketLaunchIcon width="1rem" height="1rem" />}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/advanced")}
           />
 
           <PageButton
             title="Security & Privacy"
-            paragraph="Language, Currency.."
+            paragraph="Connected Websites, Auto-Lock"
+            startIcon={<KeyIcon width="1rem" height="1rem" />}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security")}
+          />
+
+          <PageButton
+            title="Manage Token List "
+            paragraph="Only for tokens added manually via contract addresses"
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/")}
           />
         </Stack>
       </Box>

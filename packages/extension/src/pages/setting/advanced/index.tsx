@@ -21,6 +21,7 @@ export const SettingAdvancedPage: FunctionComponent = observer(() => {
         <Stack gutter="0.5rem">
           <PageButton
             title="Developer Mode"
+            paragraph="Feeling techie today? :)"
             endIcon={
               <Toggle
                 isOpen={uiConfigStore.isDeveloper}
@@ -32,7 +33,7 @@ export const SettingAdvancedPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Endpoints"
+            title="Change Endpoints"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/advanced/endpoint")}
           />

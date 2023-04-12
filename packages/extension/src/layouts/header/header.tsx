@@ -7,14 +7,14 @@ const Styles = {
   Container: styled.div``,
 
   HeaderContainer: styled.div`
-    height: 4rem;
+    height: 3.75rem;
     top: 0;
     left: 0;
     right: 0;
   `,
 
   HeaderTitle: styled.div`
-    height: 4rem;
+    height: 3.75rem;
     position: absolute;
 
     top: 0;
@@ -26,7 +26,7 @@ const Styles = {
     align-items: center;
   `,
   HeaderLeft: styled.div`
-    height: 4rem;
+    height: 3.75rem;
     position: absolute;
 
     top: 0;
@@ -40,7 +40,7 @@ const Styles = {
   `,
 
   HeaderRight: styled.div`
-    height: 4rem;
+    height: 3.75rem;
     position: absolute;
 
     top: 0;

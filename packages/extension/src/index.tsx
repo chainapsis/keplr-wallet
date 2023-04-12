@@ -1,6 +1,4 @@
 // Shim ------------
-import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
-
 require("setimmediate");
 // Shim ------------
 
@@ -41,7 +39,14 @@ import { SettingSecurityPermissionPage } from "./pages/setting/security/permissi
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
 import { SettingTokenAddPage } from "./pages/setting/token/add";
-import { SendPage } from "./pages/send";
+import { SettingGeneralLanguagePage } from "./pages/setting/general/language";
+import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
+import { SettingGeneralLinkKeplrMobilePage } from "./pages/setting/general/link-keplr-mobile";
+import { SettingContactsList } from "./pages/setting/contacts/list";
+import { SettingContactsEdit } from "./pages/setting/contacts/edit";
+import { SettingContactsDelete } from "./pages/setting/contacts/delete";
+import { SendAmountPage } from "./pages/send/amount";
+import { SendSelectAssetPage } from "./pages/send/select-asset";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -149,9 +154,17 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route path="/unlock" element={<UnlockPage />} />
              */}
             <Route path="/" element={<MainPage />} />
-            <Route path="/send" element={<SendPage />} />
+            <Route path="/send" element={<SendAmountPage />} />
+            <Route
+              path="/send/select-asset"
+              element={<SendSelectAssetPage />}
+            />
             <Route path="/setting" element={<SettingPage />} />
             <Route path="/setting/general" element={<SettingGeneralPage />} />
+            <Route
+              path="/setting/general/language"
+              element={<SettingGeneralLanguagePage />}
+            />
             <Route
               path="/setting/general/fiat"
               element={<SettingGeneralFiatPage />}
@@ -163,6 +176,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/general/authz/revoke"
               element={<SettingGeneralAuthZRevokePage />}
+            />
+            <Route
+              path="/setting/general/link-keplr-mobile"
+              element={<SettingGeneralLinkKeplrMobilePage />}
             />
             <Route path="/setting/advanced" element={<SettingAdvancedPage />} />
             <Route
@@ -177,6 +194,18 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/token/add"
               element={<SettingTokenAddPage />}
+            />
+            <Route
+              path="/setting/contacts/list"
+              element={<SettingContactsList />}
+            />
+            <Route
+              path="/setting/contacts/edit"
+              element={<SettingContactsEdit />}
+            />
+            <Route
+              path="/setting/contacts/delete"
+              element={<SettingContactsDelete />}
             />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />

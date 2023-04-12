@@ -7,10 +7,13 @@ import { DenomHelper } from "@keplr-wallet/common";
 import {
   Buttons,
   ClaimAll,
+  MenuBar,
   StringToggle,
   TabStatus,
   TokenItem,
   TokenTitleView,
+  CopyAddress,
+  CopyAddressModal,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty } from "@keplr-wallet/unit";
@@ -19,6 +22,7 @@ import styled from "styled-components";
 import { MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { CollapsibleList } from "../../components/collapsible-list";
+import { Modal } from "../../components/modal";
 
 const Styles = {
   Container: styled.div`
@@ -118,11 +122,18 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
+  const [isOpenMenu, setIsOpenMenu] = React.useState(false);
+  const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
+
   return (
     <HeaderLayout
       title="Wallet Name"
       left={
-        <Box paddingLeft="1rem">
+        <Box
+          paddingLeft="1rem"
+          onClick={() => setIsOpenMenu(true)}
+          cursor="pointer"
+        >
           <MenuIcon />
         </Box>
       }
@@ -131,6 +142,7 @@ export const MainPage: FunctionComponent = observer(() => {
       <Styles.Container>
         <Stack gutter="1rem">
           <StringToggle tabStatus={tabStatus} setTabStatus={setTabStatus} />
+          <CopyAddress onClick={() => setIsOpenCopyAddress(true)} />
           <Buttons />
           <ClaimAll viewTokens={claimBalances} />
           {TokenViewData.map(({ title, balance }) => {
@@ -156,6 +168,14 @@ export const MainPage: FunctionComponent = observer(() => {
           })}
         </Stack>
       </Styles.Container>
+
+      <Modal isOpen={isOpenMenu} height="100%">
+        <MenuBar setIsOpen={setIsOpenMenu} />
+      </Modal>
+
+      <Modal isOpen={isOpenCopyAddress}>
+        <CopyAddressModal setIsOpen={setIsOpenCopyAddress} />
+      </Modal>
     </HeaderLayout>
   );
 });

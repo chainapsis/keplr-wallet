@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { ToggleProps } from "./types";
 import { Styles } from "./styles";
-import { CheckToggleIcon } from "../icon/check-toggle";
+import { CheckToggleIcon } from "../icon";
 
 export const Toggle: FunctionComponent<ToggleProps> = ({
   isOpen,
