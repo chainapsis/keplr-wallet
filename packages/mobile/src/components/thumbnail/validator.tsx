@@ -40,6 +40,7 @@ export const ValidatorThumbnail: FunctionComponent<{
           }}
           source={{
             uri: url,
+            cache: FastImage.cacheControl.web,
           }}
           resizeMode={FastImage.resizeMode.contain}
         />

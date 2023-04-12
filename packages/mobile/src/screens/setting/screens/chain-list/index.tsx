@@ -225,6 +225,7 @@ export const SettingChainListScreenElement: FunctionComponent<{
               resizeMode={FastImage.resizeMode.contain}
               source={{
                 uri: chainSymbolImageUrl,
+                cache: FastImage.cacheControl.web,
               }}
             />
           ) : (

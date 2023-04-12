@@ -142,6 +142,7 @@ export const DrawerContent: FunctionComponent<DrawerContentProps> = observer(
                       resizeMode={FastImage.resizeMode.contain}
                       source={{
                         uri: chainInfo.raw.chainSymbolImageUrl,
+                        cache: FastImage.cacheControl.web,
                       }}
                     />
                   ) : (
