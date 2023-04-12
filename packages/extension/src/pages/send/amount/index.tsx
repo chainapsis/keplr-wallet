@@ -20,6 +20,7 @@ import { TokenItem } from "../../main/components";
 import { Button } from "../../../components/button";
 import { Subtitle3 } from "../../../components/typography";
 import { TransactionFee } from "../../../components/transaction-fee";
+import { Box } from "../../../components/box";
 
 const Styles = {
   Container: styled(Stack)`
@@ -97,7 +98,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
         <Styles.Flex1 />
 
-        <TransactionFee />
+        <Box marginBottom="4.75rem">
+          <TransactionFee />
+        </Box>
 
         <Styles.BottomButton>
           <Button text="Go to Sign" color="primary" size="large" />
