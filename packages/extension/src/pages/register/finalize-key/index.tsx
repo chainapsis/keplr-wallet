@@ -14,6 +14,8 @@ import {
   useSceneTransition,
 } from "../../../components/transition";
 import { WalletStatus } from "@keplr-wallet/stores";
+import AnimCreating from "../../../public/assets/lottie/register/creating.json";
+import lottie from "lottie-web";
 
 /**
  * FinalizeKeyScene is used to create the key (account).
@@ -267,9 +269,32 @@ export const FinalizeKeyScene: FunctionComponent<{
     vaultId,
   ]);
 
+  const animContainerRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (animContainerRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animContainerRef.current,
+        renderer: "svg",
+        loop: false,
+        autoplay: true,
+        animationData: AnimCreating,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
+  }, []);
+
   return (
     <RegisterSceneBox>
-      <div>TODO</div>
+      <div
+        ref={animContainerRef}
+        style={{
+          width: "10rem",
+          height: "10rem",
+        }}
+      />
     </RegisterSceneBox>
   );
 });
