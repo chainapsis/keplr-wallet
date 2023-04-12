@@ -3,9 +3,11 @@ import { Box } from "../../../../components/box";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 
-export const RegisterSceneBox: FunctionComponent = ({ children }) => {
+export const RegisterSceneBox: FunctionComponent<{
+  style?: React.CSSProperties;
+}> = ({ children, style }) => {
   return (
-    <Box paddingX="3.25rem" paddingY="3rem">
+    <Box paddingX="3.25rem" paddingY="3rem" style={style}>
       {children}
     </Box>
   );

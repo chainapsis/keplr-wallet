@@ -287,12 +287,17 @@ export const FinalizeKeyScene: FunctionComponent<{
   }, []);
 
   return (
-    <RegisterSceneBox>
+    <RegisterSceneBox
+      style={{
+        padding: 0,
+        overflow: "hidden",
+      }}
+    >
       <div
         ref={animContainerRef}
         style={{
-          width: "10rem",
-          height: "10rem",
+          width: "17.5rem",
+          height: "17.5rem",
         }}
       />
     </RegisterSceneBox>
