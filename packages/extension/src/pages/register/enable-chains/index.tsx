@@ -234,7 +234,16 @@ export const EnableChainsScene: FunctionComponent<{
 
       <Gutter size="1.25rem" />
       <Box width="22.5rem" marginX="auto">
-        <Button text="Import" size="large" />
+        <Button
+          text="Import"
+          size="large"
+          onClick={() => {
+            // TODO
+            alert("TODO");
+
+            window.close();
+          }}
+        />
       </Box>
     </RegisterSceneBox>
   );
