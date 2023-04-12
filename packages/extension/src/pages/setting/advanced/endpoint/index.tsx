@@ -20,6 +20,8 @@ import { useNavigate } from "react-router";
 
 const Styles = {
   Container: styled(Stack)`
+    height: 29.75rem;
+
     padding: 0 0.75rem;
   `,
   BottomButton: styled.div`
@@ -28,6 +30,9 @@ const Styles = {
     right: 0;
     bottom: 0;
     padding: 1rem;
+  `,
+  Flex1: styled.div`
+    flex: 1;
   `,
 };
 
@@ -82,7 +87,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
   };
 
   return (
-    <HeaderLayout title="Endpoints" left={<BackButton />}>
+    <HeaderLayout title="Change Endpoints" left={<BackButton />}>
       <form
         onSubmit={handleSubmit(async (data) => {
           try {
@@ -105,11 +110,6 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
         })}
       >
         <Styles.Container gutter="1rem">
-          <GuideBox
-            title="Experimental Feature"
-            paragraph="For the brave-hearted cosmonaauts"
-          />
-
           <Columns sum={1} alignY="bottom">
             <Box width="13rem">
               <DropDown
@@ -132,6 +132,11 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
           <TextInput label="LCD" {...register("lcd")} />
 
+          <Styles.Flex1 />
+          <GuideBox
+            title="Experimental Feature"
+            paragraph="For the brave-hearted cosmonaauts"
+          />
           <Styles.BottomButton>
             <Button
               text="Confirm"

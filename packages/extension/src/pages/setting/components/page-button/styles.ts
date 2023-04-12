@@ -4,6 +4,11 @@ import { Body2, Subtitle2 } from "../../../../components/typography";
 
 export const Styles = {
   Container: styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    min-height: 4.625rem;
     background-color: ${ColorPalette["gray-600"]};
     padding: 1rem;
     border-radius: 0.375rem;

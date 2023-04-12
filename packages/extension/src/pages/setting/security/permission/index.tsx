@@ -37,7 +37,7 @@ export const SettingSecurityPermissionPage: FunctionComponent = observer(() => {
 
   // TODO: Handle global permission
   return (
-    <HeaderLayout title="Permissions" left={<BackButton />}>
+    <HeaderLayout title="Connected Websites" left={<BackButton />}>
       <Styles.Container gutter="0.5rem">
         <TextInput
           placeholder="Search"
@@ -45,7 +45,7 @@ export const SettingSecurityPermissionPage: FunctionComponent = observer(() => {
         />
         <Styles.Disconnect>
           <Button
-            text="All Disconnect"
+            text="Disconnect All"
             color="secondary"
             size="extraSmall"
             onClick={async () => {
@@ -70,6 +70,9 @@ const OriginStyle = {
     gap: 0.75rem;
 
     border-radius: 0.375rem;
+  `,
+  All: styled.div`
+    color: ${ColorPalette["gray-300"]};
   `,
   Item: styled(Box)`
     padding: 0.625rem;
@@ -113,10 +116,12 @@ const OriginView: FunctionComponent<{
                 await permissionManagerStore.clearOrigin(origin);
               }}
             >
-              <Columns sum={1} gutter="0.125rem">
-                <Button2>All</Button2>
-                <CloseIcon width="1rem" height="1rem" />
-              </Columns>
+              <OriginStyle.All>
+                <Columns sum={1} gutter="0.125rem">
+                  <Button2>All</Button2>
+                  <CloseIcon width="1rem" height="1rem" />
+                </Columns>
+              </OriginStyle.All>
             </Box>
           </Columns>
         </OriginStyle.Item>
@@ -155,8 +160,13 @@ const OriginView: FunctionComponent<{
                   }}
                 >
                   <Columns sum={1} gutter="0.75rem" alignY="center">
-                    <Body2>{permission.chainIdentifier}</Body2>
-                    <Box cursor="pointer">
+                    <Body2 style={{ color: ColorPalette["gray-100"] }}>
+                      {permission.chainIdentifier}
+                    </Body2>
+                    <Box
+                      cursor="pointer"
+                      style={{ color: ColorPalette["gray-300"] }}
+                    >
                       <CloseIcon width="1rem" height="1rem" />
                     </Box>
                   </Columns>

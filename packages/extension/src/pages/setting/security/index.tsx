@@ -15,8 +15,8 @@ export const SettingSecurityPage: FunctionComponent = () => {
       <Box paddingX="0.75rem">
         <Stack gutter="1rem">
           <PageButton
-            title="Permissions"
-            paragraph="Websites that can access address/signing"
+            title="Connected Websites"
+            paragraph="Websites that can view your address and make requests for signing"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/permission")}
           />

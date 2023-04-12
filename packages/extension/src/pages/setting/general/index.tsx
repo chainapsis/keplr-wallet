@@ -40,7 +40,14 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="AuthZ"
+            title="Contacts"
+            paragraph="4"
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/contacts/list")}
+          />
+
+          <PageButton
+            title="Manage AuthZ"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/authz")}
           />
