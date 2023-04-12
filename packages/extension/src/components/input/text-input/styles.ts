@@ -116,6 +116,7 @@ export const Styles = {
     color: ${ColorPalette["gray-100"]};
   `,
   SubText: styled(Caption2)<Pick<TextInputProps, "error" | "paragraph">>`
+    margin-top: 4px;
     ${({ error, paragraph }) =>
       getSubTextStyleForErrorOrParagraph(error, paragraph)}
   `,

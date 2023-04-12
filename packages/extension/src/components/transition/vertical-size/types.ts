@@ -1,8 +1,8 @@
-import { SpringConfig } from "@react-spring/web";
+import { SpringConfig, SpringValue } from "@react-spring/web";
 import { IDescendantRegistry } from "./internal";
 
 export interface VerticalResizeTransitionProps {
-  width?: string;
+  width?: string | SpringValue<string>;
   transitionAlign?: "top" | "bottom" | "center";
 
   springConfig?: SpringConfig;

@@ -1,18 +1,5 @@
 import React, { forwardRef } from "react";
-import styled from "styled-components";
 import { animated, SpringValue } from "@react-spring/web";
-
-export const Styles = {
-  Container: styled(animated.div).withConfig({
-    shouldForwardProp: (prop) => prop === "style" || prop === "children",
-  })<{
-    width?: string;
-  }>`
-    position: relative;
-    overflow: hidden;
-    width: ${({ width }) => width};
-  `,
-};
 
 // eslint-disable-next-line react/display-name
 export const VerticalResizeContainer = forwardRef<
@@ -20,37 +7,16 @@ export const VerticalResizeContainer = forwardRef<
   React.PropsWithChildren<{
     heightPx: SpringValue<number>;
 
-    width?: string;
+    width?: string | SpringValue<string>;
     transitionAlign?: "top" | "bottom" | "center";
   }>
 >(({ children, heightPx, width, transitionAlign }, ref) => {
-  // Styling should satisfy below styles.
-  // if (!heightInited) {
-  //   return {
-  //     top: 0,
-  //   };
-  // }
-  //
-  // switch (transitionAlign) {
-  //   case "center":
-  //     return {
-  //       top: "50%",
-  //       transform: "translateY(-50%)",
-  //     };
-  //   case "bottom":
-  //     return {
-  //       bottom: 0,
-  //     };
-  //   default:
-  //     return {
-  //       top: 0,
-  //     };
-  // }
-
   return (
-    <Styles.Container
-      width={width}
+    <animated.div
       style={{
+        position: "relative",
+        overflow: "hidden",
+        width,
         height: heightPx.to((heightPx) =>
           heightPx < 0 ? "auto" : `${heightPx}px`
         ),
@@ -59,7 +25,6 @@ export const VerticalResizeContainer = forwardRef<
       <animated.div
         ref={ref}
         style={{
-          // Check above comment
           top: heightPx.to((heightPx) => {
             if (heightPx < 0) {
               return 0;
@@ -107,6 +72,6 @@ export const VerticalResizeContainer = forwardRef<
       >
         {children}
       </animated.div>
-    </Styles.Container>
+    </animated.div>
   );
 });

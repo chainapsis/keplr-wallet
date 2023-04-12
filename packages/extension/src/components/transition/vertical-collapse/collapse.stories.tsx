@@ -9,13 +9,7 @@ import { Box } from "../../box";
 export default {
   title: "Transitions/Collapse",
   component: VerticalCollapseTransition,
-  decorators: [
-    (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
 } as ComponentMeta<typeof VerticalCollapseTransition>;
 
 const Template: ComponentStory<typeof VerticalCollapseTransition> = (

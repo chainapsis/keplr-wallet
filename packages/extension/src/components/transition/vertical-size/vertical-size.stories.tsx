@@ -10,13 +10,7 @@ import { Stack } from "../../stack";
 export default {
   title: "Transitions/Resize",
   component: VerticalResizeTransition,
-  decorators: [
-    (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
 } as ComponentMeta<typeof VerticalResizeTransition>;
 
 const RandomHeightBoxes: FunctionComponent<{

@@ -17,13 +17,7 @@ export default {
       control: false,
     },
   },
-  decorators: [
-    (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
 } as ComponentMeta<typeof CompTextInput>;
 
 const Template: ComponentStory<typeof CompTextInput> = (

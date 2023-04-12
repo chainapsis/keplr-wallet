@@ -6,8 +6,10 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import {
+  FinalizeMnemonicKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
   LockKeyRingMsg,
+  NewLedgerKeyMsg,
   NewMnemonicKeyMsg,
   UnlockKeyRingMsg,
 } from "./messages";
@@ -27,8 +29,15 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleLockKeyRingMsg(service)(env, msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
         return handleUnlockKeyRingMsg(service)(env, msg as UnlockKeyRingMsg);
+      case FinalizeMnemonicKeyCoinTypeMsg:
+        return handleFinalizeMnemonicKeyCoinTypeMsg(service)(
+          env,
+          msg as FinalizeMnemonicKeyCoinTypeMsg
+        );
       case NewMnemonicKeyMsg:
         return handleNewMnemonicKeyMsg(service)(env, msg as NewMnemonicKeyMsg);
+      case NewLedgerKeyMsg:
+        return handleNewLedgerKeyMsg(service)(env, msg as NewLedgerKeyMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -68,11 +77,23 @@ const handleUnlockKeyRingMsg: (
   };
 };
 
+const handleFinalizeMnemonicKeyCoinTypeMsg: (
+  service: KeyRingService
+) => InternalHandler<FinalizeMnemonicKeyCoinTypeMsg> = (service) => {
+  return (_, msg) => {
+    service.finalizeMnemonicKeyCoinType(msg.id, msg.chainId, msg.coinType);
+    return {
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
 const handleNewMnemonicKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<NewMnemonicKeyMsg> = (service) => {
   return async (env, msg) => {
-    await service.createMnemonicKeyRing(
+    const vaultId = await service.createMnemonicKeyRing(
       env,
       msg.mnemonic,
       msg.bip44HDPath,
@@ -80,6 +101,27 @@ const handleNewMnemonicKeyMsg: (
       msg.password
     );
     return {
+      vaultId,
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleNewLedgerKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<NewLedgerKeyMsg> = (service) => {
+  return async (env, msg) => {
+    const vaultId = await service.createLedgerKeyRing(
+      env,
+      msg.pubKey,
+      msg.app,
+      msg.bip44HDPath,
+      msg.name,
+      msg.password
+    );
+    return {
+      vaultId,
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
     };

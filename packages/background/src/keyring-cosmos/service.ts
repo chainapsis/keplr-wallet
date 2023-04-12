@@ -68,6 +68,60 @@ export class KeyRingCosmosService {
     };
   }
 
+  async computeNotFinalizedMnemonicKeyAddresses(
+    env: Env,
+    vaultId: string,
+    chainId: string
+  ): Promise<
+    {
+      coinType: number;
+      bech32Address: string;
+    }[]
+  > {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const coinTypes = [chainInfo.bip44.coinType];
+
+    if (chainInfo.alternativeBIP44s) {
+      coinTypes.push(...chainInfo.alternativeBIP44s.map((alt) => alt.coinType));
+    }
+
+    const isEthermintLike = this.isEthermintLike(chainInfo);
+
+    const res: {
+      coinType: number;
+      bech32Address: string;
+    }[] = [];
+
+    for (const coinType of coinTypes) {
+      const pubKey =
+        await this.keyRingService.getPubKeyWithNotFinalizedCoinType(
+          env,
+          chainId,
+          vaultId,
+          coinType
+        );
+
+      const address = (() => {
+        if (isEthermintLike) {
+          return pubKey.getEthAddress();
+        }
+
+        return pubKey.getCosmosAddress();
+      })();
+
+      const bech32Address = new Bech32Address(address);
+
+      res.push({
+        coinType,
+        bech32Address: bech32Address.toBech32(
+          chainInfo.bech32Config.bech32PrefixAccAddr
+        ),
+      });
+    }
+
+    return res;
+  }
+
   async signAminoSelected(
     env: Env,
     origin: string,

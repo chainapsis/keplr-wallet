@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { HorizontalButtonGroup, ButtonGroupProps } from "./index";
+import { HorizontalRadioGroup, RadioGroupProps } from "./index";
 import { Box } from "../box";
 import { Gutter } from "../gutter";
 
 export default {
-  title: "Components/ButtonGroup",
-  component: HorizontalButtonGroup,
+  title: "Components/RadioGroup/Horizontal",
+  component: HorizontalRadioGroup,
   argTypes: {
     className: {
       control: false,
@@ -23,15 +23,15 @@ export default {
   },
   decorators: [
     (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
+      <div style={{ padding: "3em", backgroundColor: "#2B2B2B" }}>
+        {Story()}
       </div>
     ),
   ],
-} as ComponentMeta<typeof HorizontalButtonGroup>;
+} as ComponentMeta<typeof HorizontalRadioGroup>;
 
-const Template: ComponentStory<typeof HorizontalButtonGroup> = (
-  props: ButtonGroupProps
+const Template: ComponentStory<typeof HorizontalRadioGroup> = (
+  props: RadioGroupProps
 ) => {
   const [key, setKey] = useState("button1");
 
@@ -41,9 +41,9 @@ const Template: ComponentStory<typeof HorizontalButtonGroup> = (
         maxWidth: "30rem",
       }}
     >
-      <div>Button group in full width</div>
+      <div>Radio group in full width</div>
       <Box>
-        <HorizontalButtonGroup
+        <HorizontalRadioGroup
           {...props}
           key={key}
           onSelect={(key) => {
@@ -54,8 +54,8 @@ const Template: ComponentStory<typeof HorizontalButtonGroup> = (
       </Box>
       <Gutter size="1rem" />
       <Box alignX="center">
-        <div>Button group with element width</div>
-        <HorizontalButtonGroup
+        <div>Radio group with element width</div>
+        <HorizontalRadioGroup
           {...props}
           key={key}
           onSelect={(key) => {
@@ -66,17 +66,16 @@ const Template: ComponentStory<typeof HorizontalButtonGroup> = (
       </Box>
       <Gutter size="1rem" />
       <Box alignX="center">
-        <div>Button group should overflow</div>
-        <Box maxWidth="0.1rem">
-          <HorizontalButtonGroup
-            {...props}
-            key={key}
-            onSelect={(key) => {
-              setKey(key);
-            }}
-            selectedKey={key}
-          />
-        </Box>
+        <div>Radio group with element min width (3rem)</div>
+        <HorizontalRadioGroup
+          {...props}
+          key={key}
+          onSelect={(key) => {
+            setKey(key);
+          }}
+          selectedKey={key}
+          itemMinWidth="3rem"
+        />
       </Box>
     </div>
   );
@@ -84,7 +83,7 @@ const Template: ComponentStory<typeof HorizontalButtonGroup> = (
 
 export const Horizontal = Template.bind({});
 Horizontal.args = {
-  buttons: [
+  items: [
     {
       key: "button1",
       text: "Alice",

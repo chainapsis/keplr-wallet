@@ -7,13 +7,7 @@ import { Box } from "../box";
 export default {
   title: "Components/Columns",
   component: Columns,
-  decorators: [
-    (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
 } as ComponentMeta<typeof Columns>;
 
 const Template: ComponentStory<typeof Columns> = (props: ColumnsProps) => {

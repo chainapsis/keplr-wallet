@@ -22,8 +22,8 @@ const CloseSvg: FunctionComponent<{ size: number | string; color: string }> = ({
         stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="2"
-        d="M18 6L6 18m12 0L6 6"
+        strokeWidth="2.5"
+        d="M6 18L18 6M6 6l12 12"
       />
     </svg>
   );
@@ -38,27 +38,25 @@ export const SetBip44PathCard: FunctionComponent<{
 }> = observer(({ coinType, state, onClose }) => {
   return (
     <Styles.Container>
-      <Styles.Title>Set the BIP Path</Styles.Title>
+      <Styles.Title>Set Custom Derivation Path</Styles.Title>
       <Styles.CloseContainer
         onClick={(e) => {
           e.preventDefault();
 
+          // TODO: Add alert saying that the setup will be reset.
           state.reset();
           onClose();
         }}
       >
-        <CloseSvg size="1.5rem" color={ColorPalette["platinum-200"]} />
+        <CloseSvg size="1.5rem" color={ColorPalette["gray-300"]} />
       </Styles.CloseContainer>
       <Gutter size="1.125rem" />
       <ul>
-        <li>You can create multiple addresses from one mnemonic.</li>
+        <li>You can create multiple addresses from one recovery phrase</li>
+        <li>A lost path cannot be recovered</li>
         <li>
-          You may not be able to recover account if you lose the values you
-          entered.
-        </li>
-        <li>
-          If you are not familiar with the feature, please skip this step. For
-          cancelling the setup, please go to RESET SETTINGS.
+          If you{`'`}re unfamiliar with this feature, skip or undo this step{" "}
+          {`->`} Reset Settings
         </li>
       </ul>
       <Gutter size="1.5rem" />

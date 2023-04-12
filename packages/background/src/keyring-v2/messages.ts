@@ -29,7 +29,43 @@ export class GetKeyRingStatusMsg extends Message<{
   }
 }
 
+export class FinalizeMnemonicKeyCoinTypeMsg extends Message<{
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "finalize-mnemonic-key-coin-type";
+  }
+
+  constructor(
+    public readonly id: string,
+    public readonly chainId: string,
+    public readonly coinType: number
+  ) {
+    super();
+  }
+
+  validateBasic() {
+    if (!this.id) {
+      throw new Error("id not set");
+    }
+
+    if (!this.chainId) {
+      throw new Error("chainId not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return FinalizeMnemonicKeyCoinTypeMsg.type();
+  }
+}
+
 export class NewMnemonicKeyMsg extends Message<{
+  vaultId: string;
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
 }> {
@@ -73,6 +109,48 @@ export class NewMnemonicKeyMsg extends Message<{
 
   type(): string {
     return NewMnemonicKeyMsg.type();
+  }
+}
+
+export class NewLedgerKeyMsg extends Message<{
+  vaultId: string;
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "new-ledger-key";
+  }
+
+  constructor(
+    public readonly pubKey: Uint8Array,
+    public readonly app: string,
+    public readonly bip44HDPath: BIP44HDPath,
+    public readonly name: string,
+    public readonly password?: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.pubKey || this.pubKey.length === 0) {
+      throw new Error("pub key not set");
+    }
+
+    if (!this.app) {
+      throw new Error("app not set");
+    }
+
+    if (!this.name) {
+      throw new Error("name not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return NewLedgerKeyMsg.type();
   }
 }
 

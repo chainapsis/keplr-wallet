@@ -1,7 +1,12 @@
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import { flow, makeObservable, observable, runInAction } from "mobx";
+import { computed, flow, makeObservable, observable, runInAction } from "mobx";
 import { toGenerator } from "@keplr-wallet/common";
-import { KeyRingV2 } from "@keplr-wallet/background";
+import {
+  ComputeNotFinalizedMnemonicKeyAddressesMsg,
+  KeyRingV2,
+} from "@keplr-wallet/background";
+import { ChainInfo } from "@keplr-wallet/types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class KeyRingStore {
   @observable
@@ -33,8 +38,68 @@ export class KeyRingStore {
     return this._keyInfos;
   }
 
+  @computed
+  get selectedKeyInfo(): KeyRingV2.KeyInfo | undefined {
+    return this._keyInfos.find((keyInfo) => keyInfo.isSelected);
+  }
+
   get isEmpty(): boolean {
     return this._status === "empty";
+  }
+
+  needMnemonicKeyCoinTypeFinalize(
+    vaultId: string,
+    chainInfo: ChainInfo
+  ): boolean {
+    const keyInfo = this.keyInfos.find((keyInfo) => keyInfo.id === vaultId);
+    if (!keyInfo) {
+      return false;
+    }
+
+    if (keyInfo.type !== "mnemonic") {
+      return false;
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainInfo.chainId).identifier
+    }-coinType`;
+
+    return keyInfo.insensitive[coinTypeTag] == null;
+  }
+
+  async computeNotFinalizedMnemonicKeyAddresses(
+    vaultId: string,
+    chainId: string
+  ): Promise<
+    {
+      coinType: number;
+      bech32Address: string;
+    }[]
+  > {
+    const msg = new ComputeNotFinalizedMnemonicKeyAddressesMsg(
+      vaultId,
+      chainId
+    );
+
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  @flow
+  *finalizeMnemonicKeyCoinType(
+    vaultId: string,
+    chainId: string,
+    coinType: number
+  ) {
+    const msg = new KeyRingV2.FinalizeMnemonicKeyCoinTypeMsg(
+      vaultId,
+      chainId,
+      coinType
+    );
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
   }
 
   @flow
@@ -55,6 +120,32 @@ export class KeyRingStore {
     );
     this._status = result.status;
     this._keyInfos = result.keyInfos;
+
+    return result.vaultId;
+  }
+
+  @flow
+  *newLedgerKey(
+    pubKey: Uint8Array,
+    app: string,
+    bip44HDPath: KeyRingV2.BIP44HDPath,
+    name: string,
+    password: string | undefined
+  ) {
+    const msg = new KeyRingV2.NewLedgerKeyMsg(
+      pubKey,
+      app,
+      bip44HDPath,
+      name,
+      password
+    );
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    return result.vaultId;
   }
 
   @flow

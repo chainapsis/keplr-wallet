@@ -226,3 +226,36 @@ export class VerifyCosmosSignAminoADR36Msg extends Message<boolean> {
     return VerifyCosmosSignAminoADR36Msg.type();
   }
 }
+
+export class ComputeNotFinalizedMnemonicKeyAddressesMsg extends Message<
+  {
+    coinType: number;
+    bech32Address: string;
+  }[]
+> {
+  public static type() {
+    return "compute-not-finalized-mnemonic-key-addresses";
+  }
+
+  constructor(public readonly id: string, public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.id) {
+      throw new Error("id not set");
+    }
+
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ComputeNotFinalizedMnemonicKeyAddressesMsg.type();
+  }
+}

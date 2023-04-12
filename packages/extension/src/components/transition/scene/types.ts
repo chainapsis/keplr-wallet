@@ -1,40 +1,14 @@
-import { SpringConfig } from "@react-spring/web";
-import { ElementType } from "react";
+import { Scene, SceneTransitionBaseProps } from "./internal";
 
-export interface SceneTransitionContext {
-  push(name: string, props?: Record<string, any>): void;
-  pop(): void;
-  readonly stack: ReadonlyArray<string>;
-}
-
-export interface SceneTransitionRef {
-  push(name: string, props?: Record<string, any>): void;
-  pop(): void;
-  readonly stack: ReadonlyArray<string>;
-  addSceneChangeListener(
-    listener: (stack: ReadonlyArray<string>) => void
-  ): void;
-  removeSceneChangeListener(
-    listener: (stack: ReadonlyArray<string>) => void
-  ): void;
-}
-
-export interface SceneTransitionProps {
-  scenes: Scene[];
-  initialSceneProps: SceneProps;
-
+export type SceneTransitionProps = {
   width?: string;
-  transitionAlign?: "top" | "bottom" | "center";
+} & Omit<SceneTransitionBaseProps, "width">;
 
-  springConfig?: SpringConfig;
+export interface FixedWidthScene extends Scene {
+  width: string;
 }
 
-export interface Scene {
-  name: string;
-  element: ElementType;
-}
-
-export interface SceneProps {
-  name: string;
-  props?: Record<string, any>;
-}
+export type FixedWidthSceneTransitionProps = Omit<
+  SceneTransitionBaseProps<FixedWidthScene>,
+  "width"
+>;

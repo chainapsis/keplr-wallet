@@ -8,13 +8,7 @@ import { H1 } from "../typography";
 export default {
   title: "Components/DropDown",
   component: CompDropDown,
-  decorators: [
-    (Story) => (
-      <div style={{ margin: "3em" }}>
-        <Story />
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
 } as ComponentMeta<typeof CompDropDown>;
 
 const Template: ComponentStory<typeof CompDropDown> = (

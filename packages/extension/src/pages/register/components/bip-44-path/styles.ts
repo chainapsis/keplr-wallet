@@ -7,10 +7,10 @@ export const Styles = {
 
     padding: 1.5rem 1.75rem 1.25rem;
 
-    background-color: ${ColorPalette["platinum-50"]};
+    background-color: ${ColorPalette["gray-500"]};
     border-radius: 1rem;
 
-    color: ${ColorPalette["platinum-300"]};
+    color: ${ColorPalette["gray-100"]};
     font-size: 0.875rem;
 
     ul {
@@ -21,7 +21,7 @@ export const Styles = {
     }
   `,
   Title: styled.div`
-    color: ${ColorPalette["blue-400"]};
+    color: ${ColorPalette["white"]};
 
     font-size: 0.875rem;
     line-height: 1.125rem;
@@ -37,11 +37,11 @@ export const Styles = {
     cursor: pointer;
   `,
   SubTitle: styled.div`
-    color: ${ColorPalette["platinum-300"]};
+    color: ${ColorPalette["gray-100"]};
 
     font-size: 0.875rem;
-    line-height: 0.875rem;
-    font-weight: 700;
+    line-height: 1.05rem;
+    font-weight: 500;
   `,
   InputsContainer: styled.div`
     display: flex;
@@ -51,12 +51,12 @@ export const Styles = {
     font-size: 1rem;
     line-height: 1.2;
     letter-spacing: 0.2px;
-    color: ${ColorPalette["platinum-500"]};
+    color: ${ColorPalette["gray-100"]};
   `,
   InputContainer: styled.div`
     flex: 1;
   `,
   LightText: styled.div`
-    color: ${ColorPalette["platinum-100"]};
+    color: ${ColorPalette["gray-100"]};
   `,
 };

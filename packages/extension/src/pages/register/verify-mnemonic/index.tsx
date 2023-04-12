@@ -1,23 +1,15 @@
 import React, { FunctionComponent, useMemo, useRef } from "react";
-import {
-  RegisterSceneBox,
-  RegisterSceneBoxHeader,
-} from "../components/register-scene-box";
-import { Stack } from "../../../components/stack";
-import { TextInput } from "../../../components/input";
-import { Button } from "../../../components/button";
+import { RegisterSceneBox } from "../components/register-scene-box";
 import { Gutter } from "../../../components/gutter";
 import { VerifyingMnemonicBox, VerifyingMnemonicBoxRef } from "./verifying-box";
-import { Styles } from "./styles";
-import { useForm } from "react-hook-form";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../stores";
-
-interface FormData {
-  name: string;
-  password: string;
-  confirmPassword: string;
-}
+import { useRegisterHeader } from "../components/header";
+import {
+  useSceneEvents,
+  useSceneTransition,
+} from "../../../components/transition";
+import { Box } from "../../../components/box";
+import { FormNamePassword, useFormNamePassword } from "../components/form";
 
 export const VerifyMnemonicScene: FunctionComponent<{
   mnemonic?: string;
@@ -31,7 +23,26 @@ export const VerifyMnemonicScene: FunctionComponent<{
     throw new Error("Mnemonic and bip44Path should be provided");
   }
 
-  const { keyRingStore } = useStore();
+  const sceneTransition = useSceneTransition();
+
+  const header = useRegisterHeader();
+  useSceneEvents({
+    onWillVisible: () => {
+      header.setHeader({
+        mode: "step",
+        title: "Verify Your Recovery Phrase",
+        paragraphs: [
+          <React.Fragment key="1">
+            Fill out the words according to their numbers to
+            <br />
+            verify that you have stored your phrase safely.
+          </React.Fragment>,
+        ],
+        stepCurrent: 2,
+        stepTotal: 6,
+      });
+    },
+  });
 
   const verifyingWords = useMemo(() => {
     if (mnemonic.trim() === "") {
@@ -65,76 +76,34 @@ export const VerifyMnemonicScene: FunctionComponent<{
 
   const verifyingBoxRef = useRef<VerifyingMnemonicBoxRef | null>(null);
 
-  const form = useForm<FormData>({
-    defaultValues: {
-      name: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
+  const form = useFormNamePassword();
 
   return (
     <RegisterSceneBox>
-      <RegisterSceneBoxHeader>Back Up Your Mnemonic</RegisterSceneBoxHeader>
       <form
-        onSubmit={form.handleSubmit(async (data) => {
+        onSubmit={form.handleSubmit((data) => {
           if (!verifyingBoxRef.current) {
             throw new Error("Ref of verify box is null");
           }
 
           if (verifyingBoxRef.current.validate()) {
-            await keyRingStore.newMnemonicKey(
-              mnemonic,
-              bip44Path,
-              data.name,
-              data.password
-            );
-
-            alert("TODO: Next page");
-            window.close();
+            sceneTransition.replaceAll("finalize-key", {
+              name: data.name,
+              password: data.password,
+              mnemonic: {
+                value: mnemonic,
+                bip44Path,
+                isFresh: true,
+              },
+            });
           }
         })}
       >
-        <Styles.VerifyInfoText>
-          Confirm your mnemonic by filling in the words according to their
-          number.
-        </Styles.VerifyInfoText>
-        <Gutter size="0.75rem" />
         <VerifyingMnemonicBox ref={verifyingBoxRef} words={verifyingWords} />
-        <Gutter size="1.75rem" />
-        <Stack>
-          <TextInput
-            label="Name"
-            {...form.register("name", {
-              required: true,
-            })}
-            error={
-              form.formState.errors.name && form.formState.errors.name.message
-            }
-          />
-          <TextInput
-            label="Password"
-            {...form.register("password", {
-              required: true,
-            })}
-            error={
-              form.formState.errors.password &&
-              form.formState.errors.password.message
-            }
-          />
-          <TextInput
-            label="Verify password"
-            {...form.register("confirmPassword", {
-              required: true,
-            })}
-            error={
-              form.formState.errors.confirmPassword &&
-              form.formState.errors.confirmPassword.message
-            }
-          />
-          <Gutter size="1rem" />
-          <Button text="Next" type="submit" />
-        </Stack>
+        <Gutter size="1.25rem" />
+        <Box width="22.5rem" marginX="auto">
+          <FormNamePassword {...form} />
+        </Box>
       </form>
     </RegisterSceneBox>
   );

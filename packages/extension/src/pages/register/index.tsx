@@ -1,20 +1,29 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, { FunctionComponent, useRef } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
-import { Card } from "../../components/card";
 import {
-  SceneTransition,
+  FixedWidthSceneTransition,
   SceneTransitionRef,
 } from "../../components/transition";
 import { RegisterIntroScene } from "./intro";
 import { NewMnemonicScene } from "./new-mnemonic";
-import { Gutter } from "../../components/gutter";
-import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
 import { Box } from "../../components/box";
 import { VerifyMnemonicScene } from "./verify-mnemonic";
-import { RegisterCardHeader } from "./card-top-header";
 import { RecoverMnemonicScene } from "./recover-mnemonic";
+import { RegisterIntroNewUserScene } from "./intro-new-user";
+import {
+  RegisterHeader,
+  RegisterHeaderProvider,
+  useRegisterHeaderContext,
+} from "./components/header";
+import { RegisterIntroExistingUserScene } from "./intro-existing-user";
+import { RegisterNamePasswordScene } from "./name-password";
+import { ConnectHardwareWalletScene } from "./connect-hardware";
+import { ConnectLedgerScene } from "./connect-ledger";
+import { RegisterNamePasswordHardwareScene } from "./name-password-hardware";
+import { FinalizeKeyScene } from "./finalize-key";
+import { EnableChainsScene } from "./enable-chains";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -22,75 +31,87 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  background: linear-gradient(90deg, #fbf8ff 0%, #f7f8ff 100%);
-`;
-
-const NoticeText = styled.span`
-  font-weight: 400;
-  font-size: 1rem;
-  line-height: 1.375;
-  letter-spacing: -0.1px;
-  color: ${ColorPalette["platinum-200"]};
 `;
 
 export const RegisterPage: FunctionComponent = observer(() => {
   const sceneRef = useRef<SceneTransitionRef | null>(null);
 
-  const [topHeaderCollapsed, setTopHeaderCollapsed] = useState(true);
-
-  const [bottomIntroCollapsed, setBottomIntroCollpased] = useState(false);
-
-  useEffect(() => {
-    const onSceneChanged = (stack: ReadonlyArray<string>) => {
-      if (stack.length === 0) {
-        throw new Error("Can't happen");
-      }
-
-      setTopHeaderCollapsed(stack.length <= 1);
-      setBottomIntroCollpased(stack[stack.length - 1] !== "intro");
-    };
-
-    if (sceneRef.current) {
-      const scene = sceneRef.current;
-
-      scene.addSceneChangeListener(onSceneChanged);
-      return () => {
-        scene.removeSceneChangeListener(onSceneChanged);
-      };
-    }
-  }, []);
+  const headerContext = useRegisterHeaderContext({
+    mode: "intro",
+  });
 
   return (
     <Container>
-      <Box width="100%" maxWidth="34.25rem" position="relative">
-        <RegisterCardHeader
-          collapsed={topHeaderCollapsed}
-          onBackClick={() => {
-            if (sceneRef.current && sceneRef.current.stack.length > 1) {
-              sceneRef.current.pop();
-            }
-          }}
-        />
-        <Card>
-          <SceneTransition
+      <RegisterHeaderProvider {...headerContext}>
+        <RegisterHeader sceneRef={sceneRef} />
+        <Box
+          position="relative"
+          marginX="auto"
+          backgroundColor={ColorPalette["gray-600"]}
+          borderRadius="1.5rem"
+        >
+          <FixedWidthSceneTransition
             ref={sceneRef}
             scenes={[
               {
                 name: "intro",
                 element: RegisterIntroScene,
+                width: "31rem",
+              },
+              {
+                name: "new-user",
+                element: RegisterIntroNewUserScene,
+                width: "47.8rem",
+              },
+              {
+                name: "existing-user",
+                element: RegisterIntroExistingUserScene,
+                width: "47.8rem",
               },
               {
                 name: "new-mnemonic",
                 element: NewMnemonicScene,
+                width: "33.75rem",
               },
               {
                 name: "verify-mnemonic",
                 element: VerifyMnemonicScene,
+                width: "35rem",
               },
               {
                 name: "recover-mnemonic",
                 element: RecoverMnemonicScene,
+                width: "33.75rem",
+              },
+              {
+                name: "connect-hardware-wallet",
+                element: ConnectHardwareWalletScene,
+                width: "31rem",
+              },
+              {
+                name: "connect-ledger",
+                element: ConnectLedgerScene,
+                width: "40rem",
+              },
+              {
+                name: "name-password",
+                element: RegisterNamePasswordScene,
+                width: "29rem",
+              },
+              {
+                name: "name-password-hardware",
+                element: RegisterNamePasswordHardwareScene,
+                width: "29rem",
+              },
+              {
+                name: "finalize-key",
+                element: FinalizeKeyScene,
+                width: "17.5rem",
+              },
+              {
+                name: "enable-chains",
+                element: EnableChainsScene,
+                width: "34.5rem",
               },
             ]}
             initialSceneProps={{
@@ -98,36 +119,8 @@ export const RegisterPage: FunctionComponent = observer(() => {
             }}
             transitionAlign="center"
           />
-        </Card>
-        <BottomIntroParagraph collapsed={bottomIntroCollapsed} />
-      </Box>
+        </Box>
+      </RegisterHeaderProvider>
     </Container>
   );
 });
-
-const BottomIntroParagraph: FunctionComponent<{
-  collapsed: boolean;
-}> = ({ collapsed }) => {
-  return (
-    <Box position="relative">
-      <Box position="absolute" style={{ left: 0, right: 0 }}>
-        <VerticalCollapseTransition collapsed={collapsed}>
-          <Gutter size="1.625rem" />
-        </VerticalCollapseTransition>
-        <VerticalCollapseTransition
-          collapsed={collapsed}
-          transitionAlign="bottom"
-        >
-          <Gutter size="0.5rem" />
-          <Box alignX="center">
-            <NoticeText>
-              All sensitive information is stored only on your device.
-              <br />
-              This process does not require an internet connection.
-            </NoticeText>
-          </Box>
-        </VerticalCollapseTransition>
-      </Box>
-    </Box>
-  );
-};

@@ -1,14 +1,16 @@
 import { CSSProperties } from "react";
 
-export interface ButtonGroupProps {
+export interface RadioGroupProps {
+  size?: "default" | "large";
+
   selectedKey?: string;
-  buttons: {
+  items: {
     key: string;
     text: string;
   }[];
   onSelect: (key: string) => void;
 
-  buttonMinWidth?: string;
+  itemMinWidth?: string;
 
   className?: string;
   style?: CSSProperties;
