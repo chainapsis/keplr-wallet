@@ -11,8 +11,6 @@ import { Modal } from "../modal";
 const Styles = {
   Container: styled.div`
     padding: 0.875rem 0.25rem 0.875rem 1rem;
-    margin-bottom: 5.25rem;
-
     background-color: ${ColorPalette["gray-600"]};
 
     border: 1.5px solid rgba(44, 75, 226, 0.5);
