@@ -24,7 +24,7 @@ const Styles = {
   `,
 };
 
-export const SettingAddressBookContacts: FunctionComponent = observer(() => {
+export const SettingContactsList: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
   const [chainId, setChainId] = useState<string>(
     chainStore.chainInfos[0].chainId
@@ -114,11 +114,11 @@ const AddressItemView: FunctionComponent = () => {
           <Menu isOpen={isOpen} setIsOpen={setIsOpen} ratio={1.7}>
             <MenuItem
               label="Change Account Name"
-              onClick={() => navigate("/setting/address-book/edit")}
+              onClick={() => navigate("/setting/contacts/edit")}
             />
             <MenuItem
               label="Delete Account"
-              onClick={() => navigate("/setting/address-book/delete")}
+              onClick={() => navigate("/setting/contacts/delete")}
             />
             <MenuItem label="View Mnemonic Seed" onClick={() => {}} />
           </Menu>

@@ -20,7 +20,7 @@ const Styles = {
   `,
 };
 
-export const SettingAddressBookEdit: FunctionComponent = observer(() => {
+export const SettingContactsEdit: FunctionComponent = observer(() => {
   return (
     <HeaderLayout title="Edit Address" left={<BackButton />}>
       <Styles.Container gutter="1rem">

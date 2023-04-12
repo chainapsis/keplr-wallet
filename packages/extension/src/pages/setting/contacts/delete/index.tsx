@@ -31,7 +31,7 @@ const Styles = {
   `,
 };
 
-export const SettingAddressBookDelete: FunctionComponent = observer(() => {
+export const SettingContactsDelete: FunctionComponent = observer(() => {
   return (
     <HeaderLayout title="Delete Address" left={<BackButton />}>
       <Styles.Container gutter="1rem">

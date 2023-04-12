@@ -42,9 +42,9 @@ import { SettingTokenAddPage } from "./pages/setting/token/add";
 import { SettingGeneralLanguagePage } from "./pages/setting/general/language";
 import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
 import { SettingGeneralLinkKeplrMobilePage } from "./pages/setting/general/link-keplr-mobile";
-import { SettingAddressBookContacts } from "./pages/setting/address-book/contacts";
-import { SettingAddressBookEdit } from "./pages/setting/address-book/edit";
-import { SettingAddressBookDelete } from "./pages/setting/address-book/delete";
+import { SettingContactsList } from "./pages/setting/contacts/list";
+import { SettingContactsEdit } from "./pages/setting/contacts/edit";
+import { SettingContactsDelete } from "./pages/setting/contacts/delete";
 import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
 
@@ -196,16 +196,16 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               element={<SettingTokenAddPage />}
             />
             <Route
-              path="/setting/address-book/contacts"
-              element={<SettingAddressBookContacts />}
+              path="/setting/contacts/list"
+              element={<SettingContactsList />}
             />
             <Route
-              path="/setting/address-book/edit"
-              element={<SettingAddressBookEdit />}
+              path="/setting/contacts/edit"
+              element={<SettingContactsEdit />}
             />
             <Route
-              path="/setting/address-book/delete"
-              element={<SettingAddressBookDelete />}
+              path="/setting/contacts/delete"
+              element={<SettingContactsDelete />}
             />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
