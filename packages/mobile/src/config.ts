@@ -844,7 +844,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
       coinMinimalDenom: "uaxl",
       coinDecimals: 6,
       coinGeckoId: "axelar",
-      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar_new.png",
+      coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
     },
     bip44: {
       coinType: 118,
@@ -856,8 +856,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
         coinGeckoId: "axelar",
-        coinImageUrl:
-          "https://dhj8dql1kzq2v.cloudfront.net/white/axelar_new.png",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
       },
       {
         coinDenom: "WETH",
@@ -896,8 +895,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
         coinMinimalDenom: "uaxl",
         coinDecimals: 6,
         coinGeckoId: "axelar",
-        coinImageUrl:
-          "https://dhj8dql1kzq2v.cloudfront.net/white/axelar_new.png",
+        coinImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
         gasPriceStep: {
           low: 0.007,
           average: 0.007,
@@ -907,7 +905,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     ],
     features: ["ibc-transfer", "ibc-go"],
     chainSymbolImageUrl:
-      "https://dhj8dql1kzq2v.cloudfront.net/white/axelar_new.png",
+      "https://dhj8dql1kzq2v.cloudfront.net/white/axelar.png",
   },
   {
     rpc: "https://rpc-sommelier.keplr.app",
