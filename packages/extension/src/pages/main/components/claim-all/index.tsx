@@ -308,7 +308,12 @@ const ClaimTokenItem: FunctionComponent<{ viewToken: ViewToken }> = observer(
                 {viewToken.token.currency.coinDenom}
               </Subtitle3>
               <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
-                {viewToken.token.hideDenom(true).toString()}
+                {viewToken.token
+                  .maxDecimals(6)
+                  .shrink(true)
+                  .inequalitySymbol(true)
+                  .hideDenom(true)
+                  .toString()}
               </Subtitle2>
             </Stack>
           </Column>
