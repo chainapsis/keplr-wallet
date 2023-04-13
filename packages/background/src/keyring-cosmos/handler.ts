@@ -12,6 +12,7 @@ import {
   RequestCosmosSignAminoADR36Msg,
   VerifyCosmosSignAminoADR36Msg,
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
+  PrivilegeCosmosSignAminoWithdrawRewardsMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -54,6 +55,11 @@ export const getHandler: (
         return handleComputeNotFinalizedMnemonicKeyAddressesMsg(service)(
           env,
           msg as ComputeNotFinalizedMnemonicKeyAddressesMsg
+        );
+      case PrivilegeCosmosSignAminoWithdrawRewardsMsg:
+        return handlePrivilegeCosmosSignAminoWithdrawRewardsMsg(service)(
+          env,
+          msg as PrivilegeCosmosSignAminoWithdrawRewardsMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -185,6 +191,21 @@ const handleComputeNotFinalizedMnemonicKeyAddressesMsg: (
       env,
       msg.id,
       msg.chainId
+    );
+  };
+};
+
+const handlePrivilegeCosmosSignAminoWithdrawRewardsMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<PrivilegeCosmosSignAminoWithdrawRewardsMsg> = (
+  service
+) => {
+  return async (env, msg) => {
+    return await service.privilegeSignAminoWithdrawRewards(
+      env,
+      msg.chainId,
+      msg.signer,
+      msg.signDoc
     );
   };
 };

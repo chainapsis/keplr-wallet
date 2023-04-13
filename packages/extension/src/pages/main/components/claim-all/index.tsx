@@ -12,6 +12,10 @@ import { ArrowDownIcon, ArrowUpIcon } from "../../../../components/icon";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Dec, Int, PricePretty } from "@keplr-wallet/unit";
+import { AminoSignResponse, StdSignDoc } from "@keplr-wallet/types";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { PrivilegeCosmosSignAminoWithdrawRewardsMsg } from "@keplr-wallet/background";
 
 const Styles = {
   Container: styled.div`
@@ -155,7 +159,24 @@ export const ClaimAll: FunctionComponent = observer(() => {
                 amount: [fee],
               },
               "",
-              {},
+              {
+                signAmino: async (
+                  chainId: string,
+                  signer: string,
+                  signDoc: StdSignDoc
+                ): Promise<AminoSignResponse> => {
+                  const requester = new InExtensionMessageRequester();
+
+                  return await requester.sendMessage(
+                    BACKGROUND_PORT,
+                    new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
+                      chainId,
+                      signer,
+                      signDoc
+                    )
+                  );
+                },
+              },
               {
                 onFulfill: (tx: any) => {
                   console.log(tx.code, tx);

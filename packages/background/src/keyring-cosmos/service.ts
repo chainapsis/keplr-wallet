@@ -229,6 +229,77 @@ export class KeyRingCosmosService {
     }
   }
 
+  async privilegeSignAminoWithdrawRewards(
+    env: Env,
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ) {
+    // TODO: Handle ethermint
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const isEthermintLike = this.isEthermintLike(chainInfo);
+
+    const vaultId = this.keyRingService.selectedVaultId;
+
+    signDoc = {
+      ...signDoc,
+      memo: escapeHTML(signDoc.memo),
+    };
+
+    signDoc = trimAminoSignDoc(signDoc);
+    signDoc = sortObjectByKey(signDoc);
+
+    const key = await this.getKey(env, vaultId, chainId);
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        .bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
+      signDoc,
+      bech32Prefix
+    );
+    if (isADR36SignDoc) {
+      throw new Error("Can't use ADR-36 sign doc");
+    }
+
+    if (!signDoc.msgs || signDoc.msgs.length === 0) {
+      throw new Error("No msgs");
+    }
+
+    for (const msg of signDoc.msgs) {
+      // Some chains modify types for obscure reasons. For now, treat it like this:
+      const i = msg.type.indexOf("/");
+      if (i < 0) {
+        throw new Error("Invalid msg type");
+      }
+      const action = msg.type.slice(i + 1);
+      if (action !== "MsgWithdrawDelegationReward") {
+        throw new Error("Invalid msg type");
+      }
+    }
+
+    try {
+      const signature = await this.keyRingService.sign(
+        env,
+        chainId,
+        vaultId,
+        serializeSignDoc(signDoc),
+        isEthermintLike ? "keccak256" : "sha256"
+      );
+
+      return {
+        signed: signDoc,
+        signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
+    }
+  }
+
   async signAminoADR36Selected(
     env: Env,
     origin: string,

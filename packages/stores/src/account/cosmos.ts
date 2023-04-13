@@ -44,7 +44,11 @@ import { DeepPartial, DeepReadonly, Mutable } from "utility-types";
 import { ChainGetter } from "../chain";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";
-import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
+import {
+  KeplrSignOptionsWithAltSignMethods,
+  MakeTxResponse,
+  ProtoMsgsOrWithAminoMsgs,
+} from "./types";
 import {
   getEip712TypedDataBasedOnChainId,
   txEventsWithPreOnFulfill,
@@ -349,7 +353,7 @@ export class CosmosAccountImpl {
       | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
     memo: string = "",
     fee: StdFee,
-    signOptions?: KeplrSignOptions,
+    signOptions?: KeplrSignOptionsWithAltSignMethods,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -458,7 +462,7 @@ export class CosmosAccountImpl {
     msgs: ProtoMsgsOrWithAminoMsgs,
     fee: StdFee,
     memo: string = "",
-    signOptions?: KeplrSignOptions,
+    signOptions?: KeplrSignOptionsWithAltSignMethods,
     mode: "block" | "async" | "sync" = "async"
   ): Promise<{
     txHash: Uint8Array;
@@ -535,7 +539,12 @@ export class CosmosAccountImpl {
 
     const signResponse: AminoSignResponse = await (async () => {
       if (!eip712Signing) {
-        return await keplr.signAmino(
+        let signAmino = keplr.signAmino;
+        if (signOptions?.signAmino) {
+          signAmino = signOptions.signAmino;
+        }
+
+        return await signAmino(
           this.chainId,
           this.base.bech32Address,
           signDoc,
@@ -543,7 +552,14 @@ export class CosmosAccountImpl {
         );
       }
 
-      return await keplr.experimentalSignEIP712CosmosTx_v0(
+      let experimentalSignEIP712CosmosTx_v0 =
+        keplr.experimentalSignEIP712CosmosTx_v0;
+      if (signOptions?.experimentalSignEIP712CosmosTx_v0) {
+        experimentalSignEIP712CosmosTx_v0 =
+          signOptions.experimentalSignEIP712CosmosTx_v0;
+      }
+
+      return await experimentalSignEIP712CosmosTx_v0(
         this.chainId,
         this.base.bech32Address,
         getEip712TypedDataBasedOnChainId(this.chainId, msgs),
@@ -766,7 +782,7 @@ export class CosmosAccountImpl {
         };
       },
       memo: string = "",
-      signOptions?: KeplrSignOptions,
+      signOptions?: KeplrSignOptionsWithAltSignMethods,
       onTxEvents?:
         | ((tx: any) => void)
         | {
@@ -821,7 +837,7 @@ export class CosmosAccountImpl {
           };
         },
         memo: string = "",
-        signOptions?: KeplrSignOptions,
+        signOptions?: KeplrSignOptionsWithAltSignMethods,
         onTxEvents?:
           | ((tx: any) => void)
           | {
@@ -858,7 +874,7 @@ export class CosmosAccountImpl {
       send: async (
         fee: StdFee,
         memo: string = "",
-        signOptions?: KeplrSignOptions,
+        signOptions?: KeplrSignOptionsWithAltSignMethods,
         onTxEvents?:
           | ((tx: any) => void)
           | {
