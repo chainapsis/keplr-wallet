@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
 
-export const CopyIcon: FunctionComponent<IconProps> = ({
+export const CopyOutlineIcon: FunctionComponent<IconProps> = ({
   width = 24,
   height = 24,
 }) => {
