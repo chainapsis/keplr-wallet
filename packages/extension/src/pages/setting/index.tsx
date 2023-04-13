@@ -23,7 +23,7 @@ export const SettingPage: FunctionComponent = observer(() => {
         <Stack gutter="0.5rem">
           <PageButton
             title={<XAxis alignY="center">General</XAxis>}
-            paragraph="Language, Currency, Address book..."
+            paragraph="Language, Currency, Contacts..."
             startIcon={<SettingIcon width="1rem" height="1rem" />}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general")}
@@ -46,10 +46,10 @@ export const SettingPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Manage Token List "
-            paragraph="Only for tokens added manually via contract addresses"
+            title="Manage Token List"
+            paragraph="Only for the tokens that are added manually via contract addresses"
             endIcon={<RightArrowIcon />}
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/setting/token/list")}
           />
         </Stack>
       </Box>

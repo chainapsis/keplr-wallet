@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Caption1 } from "../../../../components/typography";
-import { CopyIcon } from "../../../../components/icon";
+import { CopyOutlineIcon } from "../../../../components/icon";
 import { Columns } from "../../../../components/column";
 
 const Styles = {
@@ -41,7 +41,7 @@ export const CopyAddress: FunctionComponent<{ onClick: () => void }> = ({
         <Caption1 style={{ color: ColorPalette["gray-300"] }}>
           Copy Address
         </Caption1>
-        <CopyIcon width="1rem" height="1rem" />
+        <CopyOutlineIcon width="1rem" height="1rem" />
       </Styles.Container>
     </Columns>
   );

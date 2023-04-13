@@ -129,7 +129,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           <Styles.Flex1 />
           <GuideBox
             title="Experimental Feature"
-            paragraph="For the brave-hearted cosmonaauts"
+            paragraph="The uptime and stability of custom endpoints are managed by the responsible service providers. Close and reopen Keplr extension to apply the changes."
           />
           <Styles.BottomButton>
             <Button

@@ -38,12 +38,13 @@ import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
+import { SettingTokenListPage } from "./pages/setting/token/manage";
 import { SettingTokenAddPage } from "./pages/setting/token/add";
 import { SettingGeneralLanguagePage } from "./pages/setting/general/language";
 import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
 import { SettingGeneralLinkKeplrMobilePage } from "./pages/setting/general/link-keplr-mobile";
 import { SettingContactsList } from "./pages/setting/contacts/list";
-import { SettingContactsEdit } from "./pages/setting/contacts/edit";
+import { SettingContactsAdd } from "./pages/setting/contacts/add";
 import { SettingContactsDelete } from "./pages/setting/contacts/delete";
 import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
@@ -193,6 +194,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               element={<SettingSecurityPermissionPage />}
             />
             <Route
+              path="/setting/token/list"
+              element={<SettingTokenListPage />}
+            />
+            <Route
               path="/setting/token/add"
               element={<SettingTokenAddPage />}
             />
@@ -201,8 +206,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               element={<SettingContactsList />}
             />
             <Route
-              path="/setting/contacts/edit"
-              element={<SettingContactsEdit />}
+              path="/setting/contacts/add"
+              element={<SettingContactsAdd />}
             />
             <Route
               path="/setting/contacts/delete"
