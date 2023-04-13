@@ -14,6 +14,8 @@ import { Body2, H5 } from "../../../../components/typography";
 import { EllipsisIcon } from "../../../../components/icon";
 import { Menu, MenuItem } from "../../../../components/menu";
 import { useNavigate } from "react-router";
+import { Modal } from "../../../../components/modal";
+import { ContactDeleteModal } from "../delete-modal";
 
 const Styles = {
   Container: styled(Stack)`
@@ -26,6 +28,8 @@ const Styles = {
 
 export const SettingContactsList: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
+  const navigate = useNavigate();
+
   const [chainId, setChainId] = useState<string>(
     chainStore.chainInfos[0].chainId
   );
@@ -51,7 +55,12 @@ export const SettingContactsList: FunctionComponent = observer(() => {
 
           <Column weight={1} />
 
-          <Button color="secondary" size="extraSmall" text="Add New" />
+          <Button
+            color="secondary"
+            size="extraSmall"
+            text="Add New"
+            onClick={() => navigate("/setting/contacts/add")}
+          />
         </Columns>
 
         <Styles.ItemList gutter="0.5rem">
@@ -87,7 +96,8 @@ const ItemStyles = {
 };
 
 const AddressItemView: FunctionComponent = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
 
   return (
@@ -107,21 +117,28 @@ const AddressItemView: FunctionComponent = () => {
         <Column weight={1} />
 
         <ItemStyles.IconButton>
-          <Box onClick={() => setIsOpen(!isOpen)}>
+          <Box onClick={() => setIsMenuOpen(!isMenuOpen)}>
             <EllipsisIcon width="1.25rem" height="1.25rem" />
           </Box>
 
-          <Menu isOpen={isOpen} setIsOpen={setIsOpen} ratio={1.7}>
+          <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} ratio={1.7}>
             <MenuItem
-              label="Change Account Name"
-              onClick={() => navigate("/setting/contacts/edit")}
+              label="Change Contact Label"
+              onClick={() =>
+                navigate(
+                  `/setting/contacts/add?name=WangWang&address=cosmos1hjyde2kfgtl78t...rt649nn8j5`
+                )
+              }
             />
             <MenuItem
-              label="Delete Account"
-              onClick={() => navigate("/setting/contacts/delete")}
+              label="Delete Contact"
+              onClick={() => setIsDeleteModalOpen(true)}
             />
-            <MenuItem label="View Mnemonic Seed" onClick={() => {}} />
           </Menu>
+
+          <Modal isOpen={isDeleteModalOpen} yAlign="center">
+            <ContactDeleteModal setIsOpen={setIsDeleteModalOpen} />
+          </Modal>
         </ItemStyles.IconButton>
       </Columns>
     </ItemStyles.Container>
