@@ -9,8 +9,8 @@ import { Box } from "../../../../../components/box";
 import styled from "styled-components";
 import { Stack } from "../../../../../components/stack";
 import { ColorPalette } from "../../../../../styles";
-import { Body3, Subtitle3 } from "../../../../../components/typography";
-import { CopyIcon } from "../../../../../components/icon";
+import { Body3, H4, Subtitle3 } from "../../../../../components/typography";
+import { CopyOutlineIcon } from "../../../../../components/icon";
 import { Columns } from "../../../../../components/column";
 import { FormattedDate } from "react-intl";
 import { Button } from "../../../../../components/button";
@@ -135,14 +135,15 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
   };
 
   return (
-    <HeaderLayout title={state.title} left={<BackButton />}>
+    <HeaderLayout title="Authz Details" left={<BackButton />}>
       <Box paddingX="0.75rem">
         <Stack gutter="0.5rem">
+          <H4 style={{ color: ColorPalette["gray-50"] }}>{state.title}</H4>
           <Styles.Card gutter="0.5rem">
             <Styles.Title>Grantee Address</Styles.Title>
             <Styles.Paragraph>
               {state.grant.grantee}
-              <CopyIcon width="0.875rem" height="0.875rem" />
+              <CopyOutlineIcon width="0.875rem" height="0.875rem" />
             </Styles.Paragraph>
           </Styles.Card>
 

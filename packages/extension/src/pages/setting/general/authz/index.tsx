@@ -15,6 +15,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FormattedDate } from "react-intl";
 import { Columns } from "../../../../components/column";
 import { useNavigate } from "react-router";
+import { EmptyView } from "../../../../components/empty-view";
 
 type grantListType = Record<string, AuthZ.Grant[]>;
 
@@ -201,6 +202,11 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
             : null}
         </Stack>
       </Box>
+
+      {Object.entries(grantList).every(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([_, grants]) => grants.length === 0
+      ) && <EmptyView subject="Authz" />}
     </HeaderLayout>
   );
 });
