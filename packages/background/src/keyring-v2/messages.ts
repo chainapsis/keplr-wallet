@@ -29,6 +29,33 @@ export class GetKeyRingStatusMsg extends Message<{
   }
 }
 
+export class SelectKeyRingMsg extends Message<{
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "select-keyring";
+  }
+
+  constructor(public readonly vaultId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.vaultId) {
+      throw new Error("Vault id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SelectKeyRingMsg.type();
+  }
+}
+
 export class FinalizeMnemonicKeyCoinTypeMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
@@ -201,5 +228,71 @@ export class UnlockKeyRingMsg extends Message<{
 
   type(): string {
     return UnlockKeyRingMsg.type();
+  }
+}
+
+export class ChangeKeyRingNameMsg extends Message<{
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "change-keyring-name";
+  }
+
+  constructor(public readonly vaultId: string, public readonly name: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.vaultId) {
+      throw new Error("vaultId not set");
+    }
+
+    if (!this.name) {
+      throw new Error("name not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ChangeKeyRingNameMsg.type();
+  }
+}
+
+export class DeleteKeyRingMsg extends Message<{
+  wasSelected: boolean;
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "v2/delete-keyring";
+  }
+
+  constructor(
+    public readonly vaultId: string,
+    public readonly password: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.vaultId) {
+      throw new Error("vaultId not set");
+    }
+
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return DeleteKeyRingMsg.type();
   }
 }

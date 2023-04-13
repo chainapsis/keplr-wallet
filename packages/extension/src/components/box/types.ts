@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { CSSProperties, MouseEventHandler } from "react";
 
 export type BoxAlignX = "left" | "right" | "center";
 export type BoxAlignY = "top" | "bottom" | "center";
@@ -38,5 +38,5 @@ export interface BoxProps {
   className?: string;
   style?: CSSProperties;
 
-  onClick?: () => void;
+  onClick?: MouseEventHandler<HTMLDivElement>;
 }

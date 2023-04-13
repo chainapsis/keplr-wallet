@@ -15,7 +15,12 @@ export class KeyRingStore {
   @observable.ref
   protected _keyInfos: KeyRingV2.KeyInfo[] = [];
 
-  constructor(protected readonly requester: MessageRequester) {
+  constructor(
+    protected readonly eventDispatcher: {
+      dispatchEvent: (type: string) => void;
+    },
+    protected readonly requester: MessageRequester
+  ) {
     makeObservable(this);
 
     this.init();
@@ -45,6 +50,18 @@ export class KeyRingStore {
 
   get isEmpty(): boolean {
     return this._status === "empty";
+  }
+
+  @flow
+  *selectKeyRing(vaultId: string) {
+    const msg = new KeyRingV2.SelectKeyRingMsg(vaultId);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
   }
 
   needMnemonicKeyCoinTypeFinalize(
@@ -100,6 +117,8 @@ export class KeyRingStore {
     );
     this._status = result.status;
     this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
   }
 
   @flow
@@ -120,6 +139,8 @@ export class KeyRingStore {
     );
     this._status = result.status;
     this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
 
     return result.vaultId;
   }
@@ -145,6 +166,8 @@ export class KeyRingStore {
     this._status = result.status;
     this._keyInfos = result.keyInfos;
 
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+
     return result.vaultId;
   }
 
@@ -164,5 +187,31 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this._status = result.status;
+  }
+
+  @flow
+  *changeKeyRingName(vaultId: string, name: string) {
+    const msg = new KeyRingV2.ChangeKeyRingNameMsg(vaultId, name);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+  }
+
+  @flow
+  *deleteKeyRing(vaultId: string, password: string) {
+    const msg = new KeyRingV2.DeleteKeyRingMsg(vaultId, password);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    if (result.wasSelected && result.status === "unlocked") {
+      this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+    }
   }
 }

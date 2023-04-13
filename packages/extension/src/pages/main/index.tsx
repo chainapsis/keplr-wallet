@@ -37,7 +37,7 @@ export interface ViewToken {
 }
 
 export const MainPage: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
 
   const allBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
     (chainInfo) => {
@@ -127,7 +127,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Wallet Name"
+      title={keyRingStore.selectedKeyInfo?.name || "Keplr Account"}
       left={
         <Box
           paddingLeft="1rem"

@@ -3,7 +3,7 @@ import { BIP44HDPath, KeyInfo, KeyRing, KeyRingStatus } from "./types";
 import { Env } from "@keplr-wallet/router";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
-import { autorun, makeObservable, observable, runInAction } from "mobx";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
@@ -59,6 +59,19 @@ export class KeyRingService {
 
   async unlockKeyRing(password: string): Promise<void> {
     await this.vaultService.unlock(password);
+  }
+
+  @action
+  selectKeyRing(vaultId: string): void {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    if (!this.vaultService.getVault("keyRing", vaultId)) {
+      throw new Error("Unknown vault");
+    }
+
+    this._selectedVaultId = vaultId;
   }
 
   get keyRingStatus(): KeyRingStatus {
@@ -261,6 +274,51 @@ export class KeyRingService {
     }
 
     return (vault.insensitive["keyRingName"] as string) || "Keplr Account";
+  }
+
+  @action
+  changeKeyRingName(vaultId: string, name: string) {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
+      keyRingName: name,
+    });
+  }
+
+  @action
+  async deleteKeyRing(vaultId: string, password: string) {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    await this.vaultService.checkUserPassword(password);
+
+    const wasSelected = this.selectedVaultId === vaultId;
+
+    this.vaultService.removeVault("keyRing", vaultId);
+
+    if (wasSelected) {
+      const keyInfos = this.getKeyInfos();
+      if (keyInfos.length > 0) {
+        this._selectedVaultId = keyInfos[0].id;
+      } else {
+        this._selectedVaultId = undefined;
+      }
+    }
+
+    return wasSelected;
   }
 
   signSelected(

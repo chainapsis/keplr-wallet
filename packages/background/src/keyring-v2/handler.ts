@@ -6,11 +6,14 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import {
+  ChangeKeyRingNameMsg,
+  DeleteKeyRingMsg,
   FinalizeMnemonicKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
   LockKeyRingMsg,
   NewLedgerKeyMsg,
   NewMnemonicKeyMsg,
+  SelectKeyRingMsg,
   UnlockKeyRingMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
@@ -25,6 +28,8 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as GetKeyRingStatusMsg
         );
+      case SelectKeyRingMsg:
+        return handleSelectKeyRingMsg(service)(env, msg as SelectKeyRingMsg);
       case LockKeyRingMsg:
         return handleLockKeyRingMsg(service)(env, msg as LockKeyRingMsg);
       case UnlockKeyRingMsg:
@@ -38,6 +43,13 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleNewMnemonicKeyMsg(service)(env, msg as NewMnemonicKeyMsg);
       case NewLedgerKeyMsg:
         return handleNewLedgerKeyMsg(service)(env, msg as NewLedgerKeyMsg);
+      case ChangeKeyRingNameMsg:
+        return handleChangeKeyRingNameMsg(service)(
+          env,
+          msg as ChangeKeyRingNameMsg
+        );
+      case DeleteKeyRingMsg:
+        return handleDeleteKeyRingMsg(service)(env, msg as DeleteKeyRingMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -48,6 +60,18 @@ const handleGetKeyRingStatusMsg: (
   service: KeyRingService
 ) => InternalHandler<GetKeyRingStatusMsg> = (service) => {
   return () => {
+    return {
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleSelectKeyRingMsg: (
+  service: KeyRingService
+) => InternalHandler<SelectKeyRingMsg> = (service) => {
+  return (_, msg) => {
+    service.selectKeyRing(msg.vaultId);
     return {
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
@@ -122,6 +146,31 @@ const handleNewLedgerKeyMsg: (
     );
     return {
       vaultId,
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleChangeKeyRingNameMsg: (
+  service: KeyRingService
+) => InternalHandler<ChangeKeyRingNameMsg> = (service) => {
+  return (_env, msg) => {
+    service.changeKeyRingName(msg.vaultId, msg.name);
+    return {
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleDeleteKeyRingMsg: (
+  service: KeyRingService
+) => InternalHandler<DeleteKeyRingMsg> = (service) => {
+  return async (_env, msg) => {
+    const wasSelected = await service.deleteKeyRing(msg.vaultId, msg.password);
+    return {
+      wasSelected,
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
     };

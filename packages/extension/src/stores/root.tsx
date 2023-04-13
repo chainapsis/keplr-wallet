@@ -136,7 +136,14 @@ export class RootStore {
       new InExtensionMessageRequester()
     );
 
-    this.keyRingStore = new KeyRingStore(new InExtensionMessageRequester());
+    this.keyRingStore = new KeyRingStore(
+      {
+        dispatchEvent: (type: string) => {
+          window.dispatchEvent(new Event(type));
+        },
+      },
+      new InExtensionMessageRequester()
+    );
 
     this.ibcChannelStore = new IBCChannelStore(
       new ExtensionKVStore("store_ibc_channel")
