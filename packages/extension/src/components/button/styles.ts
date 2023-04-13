@@ -116,15 +116,42 @@ const buttonStyleFromColorAndMode: Record<
       `,
     },
   },
+  text: {
+    fill: {
+      enabled: css`
+        background-color: transparent;
+
+        ${makeTextAndSvgColor(ColorPalette["gray-50"])}
+
+        :hover {
+          color: rgba(198, 198, 204, 0.95);
+        }
+
+        :active {
+          color: ${ColorPalette["gray-200"]};
+        }
+      `,
+      disabled: css`
+        background-color: transparent;
+
+        ::after {
+          color: ${ColorPalette["gray-200"]};
+        }
+
+        ${makeTextAndSvgColor(ColorPalette["red-200"])}
+      `,
+    },
+  },
 };
 
 export const Styles = {
   Container: styled.div<Pick<ButtonProps, "mode">>`
     // Used for making button fill parent horizontally.
-
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    min-width: 4.875rem;
   `,
 
   // "onClick" field should be omitted because "onClick" prop already exists on html button component.
