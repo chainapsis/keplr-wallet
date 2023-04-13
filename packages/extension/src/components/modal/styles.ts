@@ -19,7 +19,7 @@ export const Styles = {
     position: fixed;
     inset: 0;
 
-    background-color: rgba(2, 2, 2, 0.56);
+    background-color: rgba(9, 9, 10, 0.8);
     z-index: 100;
   `,
   Children: styled.div<Pick<ModalProps, "height">>`
