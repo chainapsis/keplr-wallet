@@ -15,6 +15,10 @@ export const Styles = {
   Item: styled.li`
     padding: 0.75rem;
 
+    :not(:first-child) {
+      border-top: 1px solid rgba(114, 116, 123, 0.2);
+    }
+
     :hover {
       color: ${ColorPalette["gray-200"]};
     }
