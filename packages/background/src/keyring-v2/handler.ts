@@ -14,6 +14,7 @@ import {
   NewLedgerKeyMsg,
   NewMnemonicKeyMsg,
   SelectKeyRingMsg,
+  ShowSensitiveKeyRingDataMsg,
   UnlockKeyRingMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
@@ -50,6 +51,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         );
       case DeleteKeyRingMsg:
         return handleDeleteKeyRingMsg(service)(env, msg as DeleteKeyRingMsg);
+      case ShowSensitiveKeyRingDataMsg:
+        return handleShowSensitiveKeyRingDataMsg(service)(
+          env,
+          msg as ShowSensitiveKeyRingDataMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -174,5 +180,13 @@ const handleDeleteKeyRingMsg: (
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
     };
+  };
+};
+
+const handleShowSensitiveKeyRingDataMsg: (
+  service: KeyRingService
+) => InternalHandler<ShowSensitiveKeyRingDataMsg> = (service) => {
+  return async (_env, msg) => {
+    return await service.showSensitiveKeyRingData(msg.vaultId, msg.password);
   };
 };

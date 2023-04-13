@@ -296,3 +296,34 @@ export class DeleteKeyRingMsg extends Message<{
     return DeleteKeyRingMsg.type();
   }
 }
+
+export class ShowSensitiveKeyRingDataMsg extends Message<string> {
+  public static type() {
+    return "show-sensitive-keyring-data";
+  }
+
+  constructor(
+    public readonly vaultId: string,
+    public readonly password: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.vaultId) {
+      throw new Error("vaultId not set");
+    }
+
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ShowSensitiveKeyRingDataMsg.type();
+  }
+}

@@ -10,6 +10,7 @@ import {
   SelectKeyRingMsg,
   ChangeKeyRingNameMsg,
   DeleteKeyRingMsg,
+  ShowSensitiveKeyRingDataMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -24,6 +25,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(UnlockKeyRingMsg);
   router.registerMessage(ChangeKeyRingNameMsg);
   router.registerMessage(DeleteKeyRingMsg);
+  router.registerMessage(ShowSensitiveKeyRingDataMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

@@ -482,6 +482,32 @@ export class KeyRingService {
     );
   }
 
+  async showSensitiveKeyRingData(
+    vaultId: string,
+    password: string
+  ): Promise<string> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    await this.vaultService.checkUserPassword(password);
+
+    switch (vault.insensitive["keyRingType"]) {
+      case "mnemonic": {
+        const sensitive = this.vaultService.decrypt(vault.sensitive);
+        return sensitive["mnemonic"] as string;
+      }
+      default: {
+        throw new Error("Unsupported keyRing type to show sensitive data");
+      }
+    }
+  }
+
   protected getVaultKeyRing(vault: Vault): KeyRing {
     for (const keyRing of this.keyRings) {
       if (vault.insensitive["keyRingType"] === keyRing.supportedKeyRingType()) {
