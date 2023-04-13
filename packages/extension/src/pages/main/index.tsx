@@ -99,21 +99,6 @@ export const MainPage: FunctionComponent = observer(() => {
     );
   });
 
-  const claimBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
-    (chainInfo) => {
-      const chainId = chainInfo.chainId;
-      const accountAddress = accountStore.getAccount(chainId).bech32Address;
-      const queries = queriesStore.get(chainId);
-
-      return {
-        token:
-          queries.cosmos.queryRewards.getQueryBech32Address(accountAddress)
-            .stakableReward,
-        chainInfo,
-      };
-    }
-  );
-
   const TokenViewData: { title: string; balance: ViewToken[] }[] = [
     { title: "Balance", balance: stakableBalances },
     { title: "Token Balance", balance: tokenBalances },
@@ -144,7 +129,7 @@ export const MainPage: FunctionComponent = observer(() => {
           <StringToggle tabStatus={tabStatus} setTabStatus={setTabStatus} />
           <CopyAddress onClick={() => setIsOpenCopyAddress(true)} />
           <Buttons />
-          <ClaimAll viewTokens={claimBalances} />
+          <ClaimAll />
           {TokenViewData.map(({ title, balance }) => {
             return (
               <CollapsibleList

@@ -6,8 +6,7 @@ import {
 import { ChainGetter } from "../../../chain";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
-import { Currency } from "@keplr-wallet/types";
-import { QuerySharedContext, StoreUtils } from "../../../common";
+import { CoinPrimitive, QuerySharedContext, StoreUtils } from "../../../common";
 import { computedFn } from "mobx-utils";
 
 export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
@@ -39,44 +38,64 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   get rewards(): CoinPretty[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
-    const currenciesMap = chainInfo.currencies.reduce<{
-      [denom: string]: Currency;
-    }>((obj, currency) => {
-      // TODO: Handle the contract tokens.
-      if (!("type" in currency)) {
-        obj[currency.coinMinimalDenom] = currency;
-      }
-      return obj;
-    }, {});
+    if (!this.response || !this.response.data.rewards) {
+      return [];
+    }
 
-    return StoreUtils.getBalancesFromCurrencies(
-      currenciesMap,
-      this.response?.data.total ?? []
-    );
+    const map = new Map<string, CoinPrimitive>();
+    for (const valRewards of this.response.data.rewards) {
+      for (const coin of valRewards.reward ?? []) {
+        const amount = new Dec(coin.amount).truncate();
+        if (!amount.gt(new Int(0))) {
+          continue;
+        }
+
+        const existing = map.get(coin.denom);
+        if (existing) {
+          existing.amount = new Int(existing.amount).add(amount).toString();
+        } else {
+          map.set(coin.denom, {
+            denom: coin.denom,
+            amount: amount.toString(),
+          });
+        }
+      }
+    }
+
+    return StoreUtils.toCoinPretties(chainInfo, Array.from(map.values()));
   }
 
   readonly getRewardsOf = computedFn(
     (validatorAddress: string): CoinPretty[] => {
       const chainInfo = this.chainGetter.getChain(this.chainId);
 
-      const currenciesMap = chainInfo.currencies.reduce<{
-        [denom: string]: Currency;
-      }>((obj, currency) => {
-        // TODO: Handle the contract tokens.
-        if (!("type" in currency)) {
-          obj[currency.coinMinimalDenom] = currency;
-        }
-        return obj;
-      }, {});
-
-      const reward = this.response?.data.rewards?.find((r) => {
+      const rewards = this.response?.data.rewards?.find((r) => {
         return r.validator_address === validatorAddress;
       });
 
-      return StoreUtils.getBalancesFromCurrencies(
-        currenciesMap,
-        reward?.reward ?? []
-      );
+      if (!rewards || !rewards.reward) {
+        return [];
+      }
+
+      const map = new Map<string, CoinPrimitive>();
+      for (const coin of rewards.reward) {
+        const amount = new Dec(coin.amount).truncate();
+        if (!amount.gt(new Int(0))) {
+          continue;
+        }
+
+        const existing = map.get(coin.denom);
+        if (existing) {
+          existing.amount = new Int(existing.amount).add(amount).toString();
+        } else {
+          map.set(coin.denom, {
+            denom: coin.denom,
+            amount: amount.toString(),
+          });
+        }
+      }
+
+      return StoreUtils.toCoinPretties(chainInfo, Array.from(map.values()));
     }
   );
 
@@ -84,24 +103,28 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   get stakableReward(): CoinPretty {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
-    return StoreUtils.getBalanceFromCurrency(
-      chainInfo.stakeCurrency,
-      this.response?.data.total ?? []
-    );
+    const r = this.rewards.find((r) => {
+      return (
+        r.currency.coinMinimalDenom === chainInfo.stakeCurrency.coinMinimalDenom
+      );
+    });
+
+    return r ?? new CoinPretty(chainInfo.stakeCurrency, new Int(0));
   }
 
   readonly getStakableRewardOf = computedFn(
     (validatorAddress: string): CoinPretty => {
       const chainInfo = this.chainGetter.getChain(this.chainId);
 
-      const reward = this.response?.data.rewards?.find((r) => {
-        return r.validator_address === validatorAddress;
+      const valRewards = this.getRewardsOf(validatorAddress);
+      const r = valRewards.find((r) => {
+        return (
+          r.currency.coinMinimalDenom ===
+          chainInfo.stakeCurrency.coinMinimalDenom
+        );
       });
 
-      return StoreUtils.getBalanceFromCurrency(
-        chainInfo.stakeCurrency,
-        reward?.reward ?? []
-      );
+      return r ?? new CoinPretty(chainInfo.stakeCurrency, new Int(0));
     }
   );
 
@@ -109,50 +132,21 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
   get unstakableRewards(): CoinPretty[] {
     const chainInfo = this.chainGetter.getChain(this.chainId);
 
-    const currenciesMap = chainInfo.currencies.reduce<{
-      [denom: string]: Currency;
-    }>((obj, currency) => {
-      // TODO: Handle the contract tokens.
-      if (
-        !("type" in currency) &&
-        currency.coinMinimalDenom !== chainInfo.stakeCurrency.coinMinimalDenom
-      ) {
-        obj[currency.coinMinimalDenom] = currency;
-      }
-      return obj;
-    }, {});
-
-    return StoreUtils.getBalancesFromCurrencies(
-      currenciesMap,
-      this.response?.data.total ?? []
-    );
+    return this.rewards.filter((r) => {
+      return (
+        r.currency.coinMinimalDenom !== chainInfo.stakeCurrency.coinMinimalDenom
+      );
+    });
   }
 
   readonly getUnstakableRewardsOf = computedFn(
     (validatorAddress: string): CoinPretty[] => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-
-      const currenciesMap = chainInfo.currencies.reduce<{
-        [denom: string]: Currency;
-      }>((obj, currency) => {
-        // TODO: Handle the contract tokens.
-        if (
-          !("type" in currency) &&
-          currency.coinMinimalDenom !== chainInfo.stakeCurrency.coinMinimalDenom
-        ) {
-          obj[currency.coinMinimalDenom] = currency;
-        }
-        return obj;
-      }, {});
-
-      const reward = this.response?.data.rewards?.find((r) => {
-        return r.validator_address === validatorAddress;
+      return this.getRewardsOf(validatorAddress).filter((r) => {
+        return (
+          r.currency.coinMinimalDenom !==
+          this.chainGetter.getChain(this.chainId).stakeCurrency.coinMinimalDenom
+        );
       });
-
-      return StoreUtils.getBalancesFromCurrencies(
-        currenciesMap,
-        reward?.reward ?? []
-      );
     }
   );
 
