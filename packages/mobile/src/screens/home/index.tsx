@@ -144,9 +144,11 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <StakingInfoCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}
       />
-      <GovernanceCard
-        containerStyle={style.flatten(["margin-bottom-card-gap"])}
-      />
+      {!chainStore.current.chainId.startsWith("quicksilver") ? (
+        <GovernanceCard
+          containerStyle={style.flatten(["margin-bottom-card-gap"])}
+        />
+      ) : null}
     </PageWithScrollViewInBottomTabView>
   );
 });

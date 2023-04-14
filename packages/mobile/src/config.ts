@@ -2108,6 +2108,59 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://asset-icons.s3.us-west-2.amazonaws.com/white/quasar.png",
   },
+  {
+    rpc: "https://rpc-quicksilver.keplr.app",
+    rest: "https://lcd-quicksilver.keplr.app",
+    chainId: "quicksilver-2",
+    chainName: "Quicksilver",
+    stakeCurrency: {
+      coinDenom: "QCK",
+      coinMinimalDenom: "uqck",
+      coinDecimals: 6,
+      coinGeckoId: "quicksilver",
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/quicksilver.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "quick",
+      bech32PrefixAccPub: "quickpub",
+      bech32PrefixValAddr: "quickvaloper",
+      bech32PrefixValPub: "quickvaloperpub",
+      bech32PrefixConsAddr: "quickvalcons",
+      bech32PrefixConsPub: "quickvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "QCK",
+        coinMinimalDenom: "uqck",
+        coinDecimals: 6,
+        coinGeckoId: "quicksilver",
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/quicksilver.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "QCK",
+        coinMinimalDenom: "uqck",
+        coinDecimals: 6,
+        coinGeckoId: "quicksilver",
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/quicksilver.png",
+        gasPriceStep: {
+          low: 0.0001,
+          average: 0.0001,
+          high: 0.00025,
+        },
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/quicksilver.png",
+  },
 ];
 
 export const LegacyAmplitudeApiKey =
