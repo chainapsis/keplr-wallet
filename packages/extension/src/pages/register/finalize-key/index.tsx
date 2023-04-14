@@ -76,8 +76,7 @@ export const FinalizeKeyScene: FunctionComponent<{
     }[]
   >([]);
   const [vaultId, setVaultId] = useState("");
-  const [allQueriesSettled, setAllQueriesSettled] = useState(false);
-  const [isQueriesTimeout, setIsQueriesTimeout] = useState(false);
+  const [isAnimEnded, setIsAnimEnded] = useState(false);
 
   useEffectOnce(() => {
     (async () => {
@@ -198,20 +197,6 @@ export const FinalizeKeyScene: FunctionComponent<{
 
   useEffect(() => {
     if (candidateAddresses.length > 0) {
-      const timeoutId = setTimeout(() => {
-        setIsQueriesTimeout(true);
-      }, 3000);
-
-      return () => {
-        clearTimeout(timeoutId);
-      };
-    }
-  }, [candidateAddresses]);
-
-  useEffect(() => {
-    let unmounted = false;
-
-    if (candidateAddresses.length > 0) {
       // Should call once.
       (async () => {
         const promises: Promise<unknown>[] = [];
@@ -234,16 +219,8 @@ export const FinalizeKeyScene: FunctionComponent<{
         }
 
         await Promise.allSettled(promises);
-
-        if (!unmounted) {
-          setAllQueriesSettled(true);
-        }
       })();
     }
-
-    return () => {
-      unmounted = true;
-    };
     // Make sure to this effect called once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [candidateAddresses]);
@@ -254,20 +231,19 @@ export const FinalizeKeyScene: FunctionComponent<{
   //      수정할 시간이 없으니 일단 대충 처리한다.
   const onceRef = useRef<boolean>(false);
   useEffect(() => {
-    if (!onceRef.current && (isQueriesTimeout || allQueriesSettled)) {
+    if (
+      !onceRef.current &&
+      candidateAddresses.length > 0 &&
+      vaultId &&
+      isAnimEnded
+    ) {
       onceRef.current = true;
       sceneTransition.replace("enable-chains", {
         vaultId,
         candidateAddresses,
       });
     }
-  }, [
-    allQueriesSettled,
-    candidateAddresses,
-    isQueriesTimeout,
-    sceneTransition,
-    vaultId,
-  ]);
+  }, [candidateAddresses, isAnimEnded, sceneTransition, vaultId]);
 
   const animContainerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -278,6 +254,12 @@ export const FinalizeKeyScene: FunctionComponent<{
         loop: false,
         autoplay: true,
         animationData: AnimCreating,
+      });
+
+      // When anim ends, the scene will be replaced with next scene.
+      // Animation time helps prepare queries state to avoid UI flicker on next scene.
+      anim.addEventListener("complete", () => {
+        setIsAnimEnded(true);
       });
 
       return () => {
