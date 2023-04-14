@@ -119,7 +119,9 @@ export class ChainUpdaterService {
       let repoUpdated = false;
 
       try {
-        const originChainInfo = await this.chainsService.getChainInfo(chainId);
+        const originChainInfo =
+          this.chainsService.getEmbedChainInfo(chainId) ??
+          (await this.chainsService.getChainInfo(chainId));
 
         const res = await Axios.get<ChainInfo>(
           `/cosmos/${chainIdentifier}.json`,

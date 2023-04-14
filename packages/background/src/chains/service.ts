@@ -113,6 +113,15 @@ export class ChainsService {
     return result;
   });
 
+  getEmbedChainInfo(chainId: string): ChainInfo | undefined {
+    return this.embedChainInfos.find((chainInfo) => {
+      return (
+        ChainIdHelper.parse(chainInfo.chainId).identifier ===
+        ChainIdHelper.parse(chainId).identifier
+      );
+    });
+  }
+
   async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
     return (await this.getChainInfos()).map<ChainInfoWithoutEndpoints>(
       (chainInfo) => {
