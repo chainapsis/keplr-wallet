@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { Stack } from "../../../../components/stack";
-import { Caption1, Subtitle2 } from "../../../../components/typography";
+import { Body2, Caption1, Subtitle2 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 
 export const Styles = {
@@ -28,12 +28,36 @@ export const Styles = {
 
     background-color: ${ColorPalette["gray-600"]};
   `,
+  ViewData: styled.pre`
+    overflow: scroll;
+    background-color: ${ColorPalette["gray-600"]};
+  `,
+  TokenItem: styled(Stack)`
+    min-width: 8rem;
+    width: 0;
+  `,
   Text: styled(Caption1)`
     color: ${ColorPalette["gray-300"]};
   `,
+  Address: styled(Body2)`
+    word-break: break-word;
+  `,
   Divider: styled.div`
     margin-top: 0.5rem;
-    margin-bottom 0.5rem;
+    margin-bottom: 0.5rem;
     border: 1px solid ${ColorPalette["gray-500"]};
+  `,
+  Arrow: styled.div`
+    width: 2rem;
+    height: 2rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 3.15rem 0.5rem 0 0.5rem;
+
+    border-radius: 50%;
+    background-color: ${ColorPalette["gray-400"]};
   `,
 };

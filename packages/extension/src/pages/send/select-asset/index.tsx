@@ -9,7 +9,10 @@ import { SearchIcon } from "../../../components/icon";
 import { useStore } from "../../../stores";
 import { ViewToken } from "../../main";
 import { TokenItem } from "../../main/components";
-import { Box } from "../../../components/box";
+import { Column, Columns } from "../../../components/column";
+import { Body2 } from "../../../components/typography";
+import { Checkbox } from "../../../components/checkbox";
+import { ColorPalette } from "../../../styles";
 
 const Styles = {
   Container: styled(Stack)`
@@ -37,24 +40,29 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout title="Select Asset" left={<BackButton />}>
-      <Styles.Container>
+      <Styles.Container gutter="0.5rem">
         <TextInput
           placeholder="Search for a chain"
           left={<SearchIcon width="1.25rem" height="1.25rem" />}
         />
 
-        <Box marginTop="0.5rem">
-          <Stack gutter="0.5rem">
-            {stakableBalances.map((viewToken) => {
-              return (
-                <TokenItem
-                  viewToken={viewToken}
-                  key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                />
-              );
-            })}
-          </Stack>
-        </Box>
+        <Columns sum={1} gutter="0.25rem">
+          <Column weight={1} />
+
+          <Body2 style={{ color: ColorPalette["gray-300"] }}>
+            Hide IBC token
+          </Body2>
+          <Checkbox size="small" />
+        </Columns>
+
+        {stakableBalances.map((viewToken) => {
+          return (
+            <TokenItem
+              viewToken={viewToken}
+              key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+            />
+          );
+        })}
       </Styles.Container>
     </HeaderLayout>
   );

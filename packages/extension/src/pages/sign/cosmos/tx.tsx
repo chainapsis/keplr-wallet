@@ -18,6 +18,8 @@ import { MessageTitle } from "../components/message-title";
 
 const Styles = {
   Container: styled(Stack)`
+    height: 100%;
+    overflow: scroll;
     padding: 0.75rem;
   `,
   MinHeight: styled.div`

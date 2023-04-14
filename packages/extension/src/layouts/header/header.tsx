@@ -91,15 +91,15 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   const [height, setHeight] = React.useState(0);
 
   useLayoutEffect(() => {
-    const initialHeight = bottom ? 476 : 540;
+    const initialHeight = window.visualViewport?.height ?? 540;
 
     function handleResize() {
       if (height !== window.visualViewport?.height) {
-        setHeight(window.visualViewport?.height ?? initialHeight);
+        setHeight(initialHeight);
       }
     }
 
-    setHeight(window.visualViewport?.height ?? initialHeight);
+    setHeight(initialHeight);
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
