@@ -33,7 +33,7 @@ export const TokenDeleteModal: FunctionComponent<{
     <Styles.Container ref={wrapperRef}>
       <Styles.Paragraph>
         Are you sure you’d like to disable this token? You will not be able to
-        see your balance or transfer until you register again.
+        see your balance or transfer until you add it again.
       </Styles.Paragraph>
 
       <Columns sum={1} gutter="0.75rem">

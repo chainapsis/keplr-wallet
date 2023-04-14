@@ -47,7 +47,7 @@ export const SettingPage: FunctionComponent = observer(() => {
 
           <PageButton
             title="Manage Token List"
-            paragraph="Only for the tokens that are added manually via contract addresses"
+            paragraph="Only for the tokens that can be added manually via contract addresses"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/token/list")}
           />
