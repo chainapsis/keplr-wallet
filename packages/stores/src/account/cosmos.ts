@@ -537,26 +537,28 @@ export class CosmosAccountImpl {
 
     const signDoc = sortObjectByKey(signDocRaw);
 
+    // Should use bind to avoid "this" problem
+    let signAmino = keplr.signAmino.bind(keplr);
+    if (signOptions?.signAmino) {
+      signAmino = signOptions.signAmino;
+    }
+
+    // Should use bind to avoid "this" problem
+    let experimentalSignEIP712CosmosTx_v0 =
+      keplr.experimentalSignEIP712CosmosTx_v0.bind(keplr);
+    if (signOptions?.experimentalSignEIP712CosmosTx_v0) {
+      experimentalSignEIP712CosmosTx_v0 =
+        signOptions.experimentalSignEIP712CosmosTx_v0;
+    }
+
     const signResponse: AminoSignResponse = await (async () => {
       if (!eip712Signing) {
-        let signAmino = keplr.signAmino;
-        if (signOptions?.signAmino) {
-          signAmino = signOptions.signAmino;
-        }
-
         return await signAmino(
           this.chainId,
           this.base.bech32Address,
           signDoc,
           signOptions
         );
-      }
-
-      let experimentalSignEIP712CosmosTx_v0 =
-        keplr.experimentalSignEIP712CosmosTx_v0;
-      if (signOptions?.experimentalSignEIP712CosmosTx_v0) {
-        experimentalSignEIP712CosmosTx_v0 =
-          signOptions.experimentalSignEIP712CosmosTx_v0;
       }
 
       return await experimentalSignEIP712CosmosTx_v0(
