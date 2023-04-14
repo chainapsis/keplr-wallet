@@ -1,16 +1,17 @@
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
+import { CheckBoxProps } from "./types";
 
 export const Styles = {
-  CheckBoxContainer: styled.div<{ checked: boolean; disabled: boolean }>`
+  CheckBoxContainer: styled.div<CheckBoxProps>`
     display: flex;
     flex-direction: column;
 
     align-items: center;
     justify-content: center;
 
-    width: 1.5rem;
-    height: 1.5rem;
+    width: ${({ size }) => (size === "small" ? "1rem" : "1.5rem")};
+    height: ${({ size }) => (size === "small" ? "1rem" : "1.5rem")};
 
     color: ${({ disabled }) => {
       if (disabled) {
@@ -25,7 +26,7 @@ export const Styles = {
         : checked
         ? ColorPalette["blue-400"]
         : ColorPalette["gray-400"]};
-    border-radius: 0.4rem;
+    border-radius: ${({ size }) => (size === "small" ? "0.25rem" : "0.4rem")};
   `,
   HiddenCheckBox: styled.input.attrs({ type: "checkbox" })`
     border: 0;
