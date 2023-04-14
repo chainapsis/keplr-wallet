@@ -44,7 +44,11 @@ import { DeepPartial, DeepReadonly, Mutable } from "utility-types";
 import { ChainGetter } from "../chain";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";
-import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
+import {
+  KeplrSignOptionsWithAltSignMethods,
+  MakeTxResponse,
+  ProtoMsgsOrWithAminoMsgs,
+} from "./types";
 import {
   getEip712TypedDataBasedOnChainId,
   txEventsWithPreOnFulfill,
@@ -349,7 +353,7 @@ export class CosmosAccountImpl {
       | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
     memo: string = "",
     fee: StdFee,
-    signOptions?: KeplrSignOptions,
+    signOptions?: KeplrSignOptionsWithAltSignMethods,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -458,7 +462,7 @@ export class CosmosAccountImpl {
     msgs: ProtoMsgsOrWithAminoMsgs,
     fee: StdFee,
     memo: string = "",
-    signOptions?: KeplrSignOptions,
+    signOptions?: KeplrSignOptionsWithAltSignMethods,
     mode: "block" | "async" | "sync" = "async"
   ): Promise<{
     txHash: Uint8Array;
@@ -533,9 +537,23 @@ export class CosmosAccountImpl {
 
     const signDoc = sortObjectByKey(signDocRaw);
 
+    // Should use bind to avoid "this" problem
+    let signAmino = keplr.signAmino.bind(keplr);
+    if (signOptions?.signAmino) {
+      signAmino = signOptions.signAmino;
+    }
+
+    // Should use bind to avoid "this" problem
+    let experimentalSignEIP712CosmosTx_v0 =
+      keplr.experimentalSignEIP712CosmosTx_v0.bind(keplr);
+    if (signOptions?.experimentalSignEIP712CosmosTx_v0) {
+      experimentalSignEIP712CosmosTx_v0 =
+        signOptions.experimentalSignEIP712CosmosTx_v0;
+    }
+
     const signResponse: AminoSignResponse = await (async () => {
       if (!eip712Signing) {
-        return await keplr.signAmino(
+        return await signAmino(
           this.chainId,
           this.base.bech32Address,
           signDoc,
@@ -543,7 +561,7 @@ export class CosmosAccountImpl {
         );
       }
 
-      return await keplr.experimentalSignEIP712CosmosTx_v0(
+      return await experimentalSignEIP712CosmosTx_v0(
         this.chainId,
         this.base.bech32Address,
         getEip712TypedDataBasedOnChainId(this.chainId, msgs),
@@ -712,6 +730,9 @@ export class CosmosAccountImpl {
       "/cosmos/tx/v1beta1/simulate",
       {
         method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
         body: JSON.stringify({
           tx_bytes: Buffer.from(unsignedTx).toString("base64"),
         }),
@@ -766,7 +787,7 @@ export class CosmosAccountImpl {
         };
       },
       memo: string = "",
-      signOptions?: KeplrSignOptions,
+      signOptions?: KeplrSignOptionsWithAltSignMethods,
       onTxEvents?:
         | ((tx: any) => void)
         | {
@@ -821,7 +842,7 @@ export class CosmosAccountImpl {
           };
         },
         memo: string = "",
-        signOptions?: KeplrSignOptions,
+        signOptions?: KeplrSignOptionsWithAltSignMethods,
         onTxEvents?:
           | ((tx: any) => void)
           | {
@@ -858,7 +879,7 @@ export class CosmosAccountImpl {
       send: async (
         fee: StdFee,
         memo: string = "",
-        signOptions?: KeplrSignOptions,
+        signOptions?: KeplrSignOptionsWithAltSignMethods,
         onTxEvents?:
           | ((tx: any) => void)
           | {
