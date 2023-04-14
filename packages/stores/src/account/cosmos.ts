@@ -728,6 +728,9 @@ export class CosmosAccountImpl {
       "/cosmos/tx/v1beta1/simulate",
       {
         method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
         body: JSON.stringify({
           tx_bytes: Buffer.from(unsignedTx).toString("base64"),
         }),
