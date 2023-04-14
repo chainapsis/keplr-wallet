@@ -20,16 +20,11 @@ import { useNavigate } from "react-router";
 
 const Styles = {
   Container: styled(Stack)`
-    height: 29.75rem;
-
+    height: 100%;
     padding: 0 0.75rem;
   `,
   BottomButton: styled.div`
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem;
   `,
   Flex1: styled.div`
     flex: 1;
@@ -84,8 +79,25 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
   };
 
   return (
-    <HeaderLayout title="Change Endpoints" left={<BackButton />}>
+    <HeaderLayout
+      title="Change Endpoints"
+      left={<BackButton />}
+      bottom={
+        <Styles.BottomButton>
+          <Button
+            text="Confirm"
+            color="secondary"
+            size="large"
+            disabled={
+              chainStore.getChain(chainId).rpc === watch("rpc") &&
+              chainStore.getChain(chainId).rest === watch("lcd")
+            }
+          />
+        </Styles.BottomButton>
+      }
+    >
       <form
+        style={{ height: "100%" }}
         onSubmit={handleSubmit(async (data) => {
           try {
             try {
@@ -127,20 +139,11 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           <TextInput label="LCD" {...register("lcd")} />
 
           <Styles.Flex1 />
+
           <GuideBox
             title="Experimental Feature"
             paragraph="The uptime and stability of custom endpoints are managed by the responsible service providers. Close and reopen Keplr extension to apply the changes."
           />
-          <Styles.BottomButton>
-            <Button
-              text="Confirm"
-              color="secondary"
-              disabled={
-                chainStore.getChain(chainId).rpc === watch("rpc") &&
-                chainStore.getChain(chainId).rest === watch("lcd")
-              }
-            />
-          </Styles.BottomButton>
         </Styles.Container>
       </form>
     </HeaderLayout>

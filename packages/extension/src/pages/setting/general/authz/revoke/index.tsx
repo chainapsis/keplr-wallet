@@ -34,11 +34,7 @@ const Styles = {
     white-space: pre-wrap;
   `,
   BottomButton: styled.div`
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem;
   `,
 };
 
@@ -135,7 +131,20 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
   };
 
   return (
-    <HeaderLayout title="Authz Details" left={<BackButton />}>
+    <HeaderLayout
+      title="Authz Details"
+      left={<BackButton />}
+      bottom={
+        <Styles.BottomButton>
+          <Button
+            text="Revoke"
+            color="danger"
+            size="large"
+            onClick={() => onClickRevokeButton(state.grant)}
+          />
+        </Styles.BottomButton>
+      }
+    >
       <Box paddingX="0.75rem">
         <Stack gutter="0.5rem">
           <H4 style={{ color: ColorPalette["gray-50"] }}>{state.title}</H4>
@@ -177,14 +186,6 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
               </Styles.JSON>
             </Styles.Paragraph>
           </Styles.Card>
-
-          <Styles.BottomButton>
-            <Button
-              text="Revoke"
-              color="danger"
-              onClick={() => onClickRevokeButton(state.grant)}
-            />
-          </Styles.BottomButton>
         </Stack>
       </Box>
     </HeaderLayout>

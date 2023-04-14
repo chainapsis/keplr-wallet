@@ -23,17 +23,21 @@ const Styles = {
     color: ${ColorPalette["gray-200"]};
   `,
   BottomButton: styled.div`
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem;
   `,
 };
 
 export const SettingContactsDelete: FunctionComponent = observer(() => {
   return (
-    <HeaderLayout title="Delete Address" left={<BackButton />}>
+    <HeaderLayout
+      title="Delete Address"
+      left={<BackButton />}
+      bottom={
+        <Styles.BottomButton>
+          <Button text="Confirm" color="secondary" />
+        </Styles.BottomButton>
+      }
+    >
       <Styles.Container gutter="1rem">
         <GuideBox
           title="Mnemonic"
@@ -50,10 +54,6 @@ export const SettingContactsDelete: FunctionComponent = observer(() => {
         </Styles.Paragraph>
         <TextInput label="Password" type="password" />
       </Styles.Container>
-
-      <Styles.BottomButton>
-        <Button text="Confirm" color="secondary" />
-      </Styles.BottomButton>
     </HeaderLayout>
   );
 });

@@ -27,11 +27,7 @@ const Styles = {
     padding: 0.75rem;
   `,
   BottomButton: styled.div`
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem;
   `,
   Flex1: styled.div`
     flex: 1;
@@ -74,7 +70,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   );
 
   return (
-    <HeaderLayout title="Send" left={<BackButton />}>
+    <HeaderLayout
+      title="Send"
+      left={<BackButton />}
+      bottom={
+        <Styles.BottomButton>
+          <Button text="Go to Sign" color="primary" size="large" />
+        </Styles.BottomButton>
+      }
+    >
       <Styles.Container gutter="0.75rem">
         <Stack gutter="0.375rem">
           <Subtitle3>Asset</Subtitle3>
@@ -101,10 +105,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         <Box marginBottom="4.75rem">
           <TransactionFee />
         </Box>
-
-        <Styles.BottomButton>
-          <Button text="Go to Sign" color="primary" size="large" />
-        </Styles.BottomButton>
       </Styles.Container>
     </HeaderLayout>
   );

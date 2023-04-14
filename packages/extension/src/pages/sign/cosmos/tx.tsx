@@ -40,11 +40,7 @@ const Styles = {
   `,
 
   BottomButton: styled.div`
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem;
   `,
 };
 
@@ -63,7 +59,33 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
   // }
 
   return (
-    <HeaderLayout title="Confirm Transaction" left={<BackButton />}>
+    <HeaderLayout
+      title="Confirm Transaction"
+      left={<BackButton />}
+      bottom={
+        <Styles.BottomButton>
+          <Button
+            text="Approve"
+            color="primary"
+            size="large"
+            onClick={async () => {
+              if (signInteractionStore.waitingData) {
+                await signInteractionStore.approveAndWaitEnd(
+                  signInteractionStore.waitingData.data.signDocWrapper
+                );
+
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  window.close();
+                }
+              }
+            }}
+          />
+        </Styles.BottomButton>
+      }
+    >
       <Styles.Container>
         {isIBCTransfer ? (
           <IBCTransferView />
@@ -110,28 +132,6 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
 
           <TransactionFee />
         </Stack>
-
-        <Styles.BottomButton>
-          <Button
-            text="Approve"
-            color="primary"
-            size="large"
-            onClick={async () => {
-              if (signInteractionStore.waitingData) {
-                await signInteractionStore.approveAndWaitEnd(
-                  signInteractionStore.waitingData.data.signDocWrapper
-                );
-
-                if (
-                  interactionInfo.interaction &&
-                  !interactionInfo.interactionInternal
-                ) {
-                  window.close();
-                }
-              }
-            }}
-          />
-        </Styles.BottomButton>
       </Styles.Container>
     </HeaderLayout>
   );

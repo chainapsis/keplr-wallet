@@ -13,11 +13,7 @@ const Styles = {
     padding: 0.75rem;
   `,
   BottomButton: styled.div`
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem;
   `,
 };
 
@@ -30,6 +26,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     <HeaderLayout
       title={`${isAdd ? "Add" : "Edit"} Address`}
       left={<BackButton />}
+      bottom={
+        <Styles.BottomButton>
+          <Button text="Confirm" color="secondary" size="large" />
+        </Styles.BottomButton>
+      }
     >
       <form>
         <Styles.Container gutter="1rem">
@@ -49,10 +50,6 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
             onChange={() => {}}
           />
         </Styles.Container>
-
-        <Styles.BottomButton>
-          <Button text="Confirm" color="secondary" />
-        </Styles.BottomButton>
       </form>
     </HeaderLayout>
   );

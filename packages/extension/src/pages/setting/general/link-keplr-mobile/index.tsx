@@ -24,11 +24,7 @@ const Styles = {
     padding: 0 0.625rem;
   `,
   BottomButton: styled.div`
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem;
   `,
 };
 
@@ -47,7 +43,20 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
 const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
   ({ onClick }) => {
     return (
-      <HeaderLayout title="Link Keplr Mobile" left={<BackButton />}>
+      <HeaderLayout
+        title="Link Keplr Mobile"
+        left={<BackButton />}
+        bottom={
+          <Styles.BottomButton>
+            <Button
+              color="secondary"
+              text="Confirm"
+              size="large"
+              onClick={onClick}
+            />
+          </Styles.BottomButton>
+        }
+      >
         <Styles.Container>
           <GuideBox
             title="Only scan on Keplr Mobile"
@@ -64,10 +73,6 @@ const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
           </Styles.Paragraph>
 
           <TextInput label="Password" type="password" />
-
-          <Styles.BottomButton>
-            <Button color="secondary" text="Confirm" onClick={onClick} />
-          </Styles.BottomButton>
         </Styles.Container>
       </HeaderLayout>
     );

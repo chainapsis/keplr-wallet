@@ -15,11 +15,7 @@ const Styles = {
     padding: 0 0.75rem;
   `,
   BottomButton: styled.div`
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem;
   `,
 };
 
@@ -37,7 +33,15 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   });
 
   return (
-    <HeaderLayout title="Add Token" left={<BackButton />}>
+    <HeaderLayout
+      title="Add Token Manually"
+      left={<BackButton />}
+      bottom={
+        <Styles.BottomButton>
+          <Button text="Confirm" color="secondary" size="large" />
+        </Styles.BottomButton>
+      }
+    >
       <form>
         <Styles.Container gutter="1rem">
           <Box width="13rem">
@@ -52,10 +56,6 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           <TextInput label="Name" value="-" disabled />
           <TextInput label="Symbol" value="-" disabled />
           <TextInput label="Decimals" value="-" disabled />
-
-          <Styles.BottomButton>
-            <Button text="Confirm" color="secondary" size="large" />
-          </Styles.BottomButton>
         </Styles.Container>
       </form>
     </HeaderLayout>
