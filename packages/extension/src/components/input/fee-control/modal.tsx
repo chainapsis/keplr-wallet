@@ -7,8 +7,10 @@ import { Stack } from "../../stack";
 import { DropDown } from "../../dropdown";
 import { Column, Columns } from "../../column";
 import { Toggle } from "../../toggle";
-import { TextInput } from "../../input";
+import { TextInput } from "..";
 import { Button } from "../../button";
+import { observer } from "mobx-react-lite";
+import { IFeeConfig, IGasConfig } from "@keplr-wallet/hooks";
 
 const Styles = {
   Container: styled.div`
@@ -28,11 +30,14 @@ const Styles = {
 };
 
 export const TransactionFeeModal: FunctionComponent<{
-  setIsOpen: (isOpen: boolean) => void;
-}> = ({ setIsOpen }) => {
+  close: () => void;
+
+  feeConfig: IFeeConfig;
+  gasConfig: IGasConfig;
+}> = observer(({ close, feeConfig, gasConfig }) => {
   const [isAuto, setIsAuto] = useState<boolean>(true);
   const wrapperRef = useRef<HTMLInputElement>(null);
-  useClickOutside(wrapperRef, () => setIsOpen(false));
+  useClickOutside(wrapperRef, close);
 
   return (
     <Styles.Container ref={wrapperRef}>
@@ -41,18 +46,32 @@ export const TransactionFeeModal: FunctionComponent<{
       <Stack gutter="0.75rem">
         <Stack gutter="0.375rem">
           <Subtitle3>Fee</Subtitle3>
-          <FeeSelector />
+          <FeeSelector feeConfig={feeConfig} />
         </Stack>
 
         <Stack gutter="0.375rem">
           <Subtitle3>Fee Token</Subtitle3>
           <DropDown
-            items={[
-              { key: "0", label: "Atom" },
-              { key: "1", label: "Osmo" },
-            ]}
-            selectedItemKey={"0"}
-            onSelect={() => {}}
+            items={feeConfig.selectableFeeCurrencies.map((cur) => {
+              return {
+                key: cur.coinMinimalDenom,
+                label: cur.coinDenom,
+              };
+            })}
+            selectedItemKey={feeConfig.fees[0]?.currency.coinMinimalDenom}
+            onSelect={(key) => {
+              const currency = feeConfig.selectableFeeCurrencies.find(
+                (cur) => cur.coinMinimalDenom === key
+              );
+              if (currency) {
+                if (feeConfig.type !== "manual") {
+                  feeConfig.setFee({
+                    type: feeConfig.type,
+                    currency: currency,
+                  });
+                }
+              }
+            }}
             size="large"
           />
         </Stack>
@@ -70,15 +89,22 @@ export const TransactionFeeModal: FunctionComponent<{
           </Columns>
         </Columns>
 
-        <TextInput label="Gas Amount" />
+        <TextInput
+          label="Gas Amount"
+          value={gasConfig.value}
+          onChange={(e) => {
+            e.preventDefault();
+
+            gasConfig.setValue(e.target.value);
+          }}
+        />
 
         <Button text="Confirm" color="secondary" size="large" />
       </Stack>
     </Styles.Container>
   );
-};
+});
 
-type FeeType = "low" | "average" | "high";
 const FeeSelectorStyle = {
   Item: styled.div<{ selected: boolean }>`
     display: flex;
@@ -105,8 +131,17 @@ const FeeSelectorStyle = {
   `,
 };
 
-const FeeSelector: FunctionComponent = () => {
-  const [selected, setSelected] = useState<FeeType>("average");
+const FeeSelector: FunctionComponent<{
+  feeConfig: IFeeConfig;
+}> = observer(({ feeConfig }) => {
+  const feeCurrency =
+    feeConfig.fees.length > 0
+      ? feeConfig.fees[0].currency
+      : feeConfig.selectableFeeCurrencies[0];
+
+  if (!feeCurrency) {
+    return null;
+  }
 
   return (
     <Columns sum={3}>
@@ -116,34 +151,54 @@ const FeeSelector: FunctionComponent = () => {
             borderRadius: "0.5rem 0 0 0.5rem",
             borderRight: `1px solid ${ColorPalette["gray-400"]}`,
           }}
-          onClick={() => setSelected("low")}
-          selected={selected === "low"}
+          onClick={() => {
+            feeConfig.setFee({
+              type: "low",
+              currency: feeCurrency,
+            });
+          }}
+          selected={feeConfig.type === "low"}
         >
-          <FeeSelectorStyle.Title selected={selected === "low"}>
+          <FeeSelectorStyle.Title selected={feeConfig.type === "low"}>
             Low
           </FeeSelectorStyle.Title>
-          <FeeSelectorStyle.Price selected={selected === "low"}>
-            $0.0097
+          <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
+            $TODO
           </FeeSelectorStyle.Price>
-          <FeeSelectorStyle.Amount selected={selected === "low"}>
-            0.002ATOM
+          <FeeSelectorStyle.Amount selected={feeConfig.type === "low"}>
+            {feeConfig
+              .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+              .maxDecimals(6)
+              .inequalitySymbol(true)
+              .trim(true)
+              .toString()}
           </FeeSelectorStyle.Amount>
         </FeeSelectorStyle.Item>
       </Column>
 
       <Column weight={1}>
         <FeeSelectorStyle.Item
-          onClick={() => setSelected("average")}
-          selected={selected === "average"}
+          onClick={() => {
+            feeConfig.setFee({
+              type: "average",
+              currency: feeCurrency,
+            });
+          }}
+          selected={feeConfig.type === "average"}
         >
-          <FeeSelectorStyle.Title selected={selected === "average"}>
+          <FeeSelectorStyle.Title selected={feeConfig.type === "average"}>
             Average
           </FeeSelectorStyle.Title>
-          <FeeSelectorStyle.Price selected={selected === "average"}>
-            $0.0097
+          <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
+            $TODO
           </FeeSelectorStyle.Price>
-          <FeeSelectorStyle.Amount selected={selected === "average"}>
-            0.002ATOM
+          <FeeSelectorStyle.Amount selected={feeConfig.type === "average"}>
+            {feeConfig
+              .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
+              .maxDecimals(6)
+              .inequalitySymbol(true)
+              .trim(true)
+              .toString()}
           </FeeSelectorStyle.Amount>
         </FeeSelectorStyle.Item>
       </Column>
@@ -154,20 +209,30 @@ const FeeSelector: FunctionComponent = () => {
             borderRadius: "0 0.5rem 0.5rem 0",
             borderLeft: `1px solid ${ColorPalette["gray-400"]}`,
           }}
-          onClick={() => setSelected("high")}
-          selected={selected === "high"}
+          onClick={() => {
+            feeConfig.setFee({
+              type: "high",
+              currency: feeCurrency,
+            });
+          }}
+          selected={feeConfig.type === "high"}
         >
-          <FeeSelectorStyle.Title selected={selected === "high"}>
+          <FeeSelectorStyle.Title selected={feeConfig.type === "high"}>
             High
           </FeeSelectorStyle.Title>
-          <FeeSelectorStyle.Price selected={selected === "high"}>
-            $0.0097
+          <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>
+            $TODO
           </FeeSelectorStyle.Price>
-          <FeeSelectorStyle.Amount selected={selected === "high"}>
-            0.002ATOM
+          <FeeSelectorStyle.Amount selected={feeConfig.type === "high"}>
+            {feeConfig
+              .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
+              .maxDecimals(6)
+              .inequalitySymbol(true)
+              .trim(true)
+              .toString()}
           </FeeSelectorStyle.Amount>
         </FeeSelectorStyle.Item>
       </Column>
     </Columns>
   );
-};
+});

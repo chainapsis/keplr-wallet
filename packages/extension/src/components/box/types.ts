@@ -38,5 +38,7 @@ export interface BoxProps {
   className?: string;
   style?: CSSProperties;
 
+  as?: React.ElementType;
+
   onClick?: MouseEventHandler<HTMLDivElement>;
 }

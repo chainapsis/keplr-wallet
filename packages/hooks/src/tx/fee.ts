@@ -24,7 +24,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         type: FeeType;
         currency: Currency;
       }
-    | CoinPretty
+    | CoinPretty[]
     | undefined = undefined;
 
   /**
@@ -100,6 +100,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           currency: Currency;
         }
       | CoinPretty
+      | CoinPretty[]
       | undefined
   ): void {
     if (fee && "type" in fee) {
@@ -107,8 +108,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       this._fee = {
         ...fee,
       };
+    } else if (fee) {
+      if ("length" in fee) {
+        this._fee = fee;
+      } else {
+        this._fee = [fee];
+      }
     } else {
-      this._fee = fee;
+      this._fee = undefined;
     }
   }
 
@@ -229,12 +236,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       ];
     }
 
-    return [
-      {
-        amount: this._fee.toCoin().amount,
-        currency: this._fee.currency,
-      },
-    ];
+    return this._fee.map((fee) => {
+      return {
+        amount: fee.toCoin().amount,
+        currency: fee.currency,
+      };
+    });
   }
 
   protected canOsmosisTxFeesAndReady(): boolean {

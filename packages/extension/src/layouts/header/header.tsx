@@ -1,4 +1,9 @@
-import React, { FunctionComponent, ReactNode, useLayoutEffect } from "react";
+import React, {
+  FunctionComponent,
+  ReactNode,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import styled from "styled-components";
 import { HeaderProps } from "./types";
 import { Subtitle1 } from "../../components/typography";
@@ -88,18 +93,24 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   bottom,
   children,
 }) => {
-  const [height, setHeight] = React.useState(0);
+  const [height, setHeight] = React.useState(600);
+  const lastSetHeight = useRef(0);
 
   useLayoutEffect(() => {
-    const initialHeight = window.visualViewport?.height ?? 540;
+    // TODO: Use as rem unit?
 
     function handleResize() {
-      if (height !== window.visualViewport?.height) {
-        setHeight(initialHeight);
+      if (window.visualViewport) {
+        if (lastSetHeight.current !== window.visualViewport.height) {
+          setHeight(window.visualViewport.height);
+          lastSetHeight.current = window.visualViewport.height;
+        }
       }
     }
 
-    setHeight(initialHeight);
+    if (window.visualViewport) {
+      setHeight(window.visualViewport.height);
+    }
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);

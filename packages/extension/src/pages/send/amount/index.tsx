@@ -19,7 +19,6 @@ import {
 import { TokenItem } from "../../main/components";
 import { Button } from "../../../components/button";
 import { Subtitle3 } from "../../../components/typography";
-import { TransactionFee } from "../../../components/transaction-fee";
 import { Box } from "../../../components/box";
 
 const Styles = {
@@ -102,9 +101,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
         <Styles.Flex1 />
 
-        <Box marginBottom="4.75rem">
-          <TransactionFee />
-        </Box>
+        <Box marginBottom="4.75rem" />
       </Styles.Container>
     </HeaderLayout>
   );
