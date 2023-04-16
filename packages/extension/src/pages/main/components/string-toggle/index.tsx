@@ -12,6 +12,8 @@ const Styles = {
 
     height: 1.875rem;
     width: 11.75rem;
+
+    padding: 0 0.125rem;
     border-radius: 12rem;
 
     background-color: ${ColorPalette["gray-600"]};

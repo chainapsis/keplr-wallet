@@ -11,7 +11,7 @@ export const ProfileButton: FunctionComponent = () => {
       paddingRight="1rem"
       cursor="pointer"
       onClick={() => {
-        navigate("/select-wallet");
+        navigate("/wallet/select");
       }}
     >
       <ProfileCircleIcon />

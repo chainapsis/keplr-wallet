@@ -48,7 +48,12 @@ import { SettingContactsAdd } from "./pages/setting/contacts/add";
 import { SettingContactsDelete } from "./pages/setting/contacts/delete";
 import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
-import { SelectWalletPage } from "./pages/select-wallet";
+import {
+  WalletSelectPage,
+  WalletChangeNamePage,
+  WalletDeletePage,
+  WalletRecoveryPhrasePage,
+} from "./pages/wallet";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -219,7 +224,16 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               path="/sign-cosmos-adr36"
               element={<SignCosmosADR36Page />}
             />
-            <Route path="/select-wallet" element={<SelectWalletPage />} />
+            <Route path="/wallet/select" element={<WalletSelectPage />} />
+            <Route path="/wallet/delete" element={<WalletDeletePage />} />
+            <Route
+              path="/wallet/change-name"
+              element={<WalletChangeNamePage />}
+            />
+            <Route
+              path="/wallet/recovery-phrase"
+              element={<WalletRecoveryPhrasePage />}
+            />
           </Routes>
         )
       ) : (

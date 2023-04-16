@@ -7,6 +7,7 @@ import {
 } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ShowSensitiveKeyRingDataMsg } from "@keplr-wallet/background/build/keyring-v2";
 
 export class KeyRingStore {
   @observable
@@ -98,6 +99,11 @@ export class KeyRingStore {
       chainId
     );
 
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async showKeyRing(vaultId: string, password: string) {
+    const msg = new ShowSensitiveKeyRingDataMsg(vaultId, password);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
