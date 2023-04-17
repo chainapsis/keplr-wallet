@@ -13,8 +13,7 @@ import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
 import { CopyFillIcon, KeyIcon, TrashIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
-import { Modal } from "../../../../components/modal";
-import { TokenDeleteModal } from "../delete-modal";
+import { Dialog } from "../../../../components/dialog";
 
 const Styles = {
   Container: styled(Stack)`
@@ -74,9 +73,14 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
         <TokenItem />
         <TokenItem />
 
-        <Modal isOpen={isOpenDeleteModal} yAlign="center">
-          <TokenDeleteModal setIsOpen={setIsOpenDeleteModal} />
-        </Modal>
+        <Dialog
+          isOpen={isOpenDeleteModal}
+          setIsOpen={setIsOpenDeleteModal}
+          paragraph="Are you sure you’d like to disable this token? You will not be able to
+        see your balance or transfer until you add it again."
+          onClickYes={() => {}}
+          onClickCancel={() => {}}
+        />
       </Styles.Container>
     </HeaderLayout>
   );

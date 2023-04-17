@@ -14,8 +14,7 @@ import { Body2, H5 } from "../../../../components/typography";
 import { EllipsisIcon } from "../../../../components/icon";
 import { Menu, MenuItem } from "../../../../components/menu";
 import { useNavigate } from "react-router";
-import { Modal } from "../../../../components/modal";
-import { ContactDeleteModal } from "../delete-modal";
+import { Dialog } from "../../../../components/dialog";
 
 const Styles = {
   Container: styled(Stack)`
@@ -136,9 +135,14 @@ const AddressItemView: FunctionComponent = () => {
             />
           </Menu>
 
-          <Modal isOpen={isDeleteModalOpen} yAlign="center">
-            <ContactDeleteModal setIsOpen={setIsDeleteModalOpen} />
-          </Modal>
+          <Dialog
+            isOpen={isDeleteModalOpen}
+            setIsOpen={setIsDeleteModalOpen}
+            title="Delete Address"
+            paragraph="Are you sure you want to delete this account?"
+            onClickYes={() => {}}
+            onClickCancel={() => {}}
+          />
         </ItemStyles.IconButton>
       </Columns>
     </ItemStyles.Container>
