@@ -127,7 +127,7 @@ export const MainPage: FunctionComponent = observer(() => {
       }
       right={<ProfileButton />}
     >
-      <ModalV2 isOpen={t} alignY="bottom">
+      <ModalV2 isOpen={t} alignY="bottom" close={() => setT(false)}>
         <div
           style={{
             background: "red",

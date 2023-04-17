@@ -13,12 +13,14 @@ import {
 } from "tua-body-scroll-lock";
 import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../styles/spring";
+import { ModalProps } from "./types";
 
-export const Modal: FunctionComponent<{
-  isOpen: boolean;
-
-  alignY: "center" | "bottom";
-}> = ({ isOpen, alignY, children }) => {
+export const Modal: FunctionComponent<ModalProps> = ({
+  isOpen,
+  close,
+  alignY,
+  children,
+}) => {
   const modalRoot = useModalRoot(isOpen);
 
   // For transition during close.
@@ -65,6 +67,7 @@ export const Modal: FunctionComponent<{
     <div>
       <ModalChild
         isOpen={isOpen}
+        close={close}
         alignY={alignY}
         onCloseTransitionEnd={() => {
           setForceNotDetach(false);
@@ -79,10 +82,11 @@ export const Modal: FunctionComponent<{
 
 const ModalChild: FunctionComponent<{
   isOpen: boolean;
+  close: () => void;
   alignY: "center" | "bottom";
 
   onCloseTransitionEnd: () => void;
-}> = ({ children, alignY, isOpen, onCloseTransitionEnd }) => {
+}> = ({ children, alignY, isOpen, close, onCloseTransitionEnd }) => {
   const transition = useSpringValue(0, {
     config: defaultSpringConfig,
   });
@@ -112,6 +116,14 @@ const ModalChild: FunctionComponent<{
         flexDirection: "column",
 
         justifyContent: alignY === "center" ? "center" : "flex-end",
+      }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (isOpen) {
+          close();
+        }
       }}
     >
       <animated.div
