@@ -53,6 +53,7 @@ export interface IFeeConfig extends ITxChainSetter {
           currency: FeeCurrency;
         }
       | CoinPretty
+      | CoinPretty[]
       | undefined
   ): void;
 

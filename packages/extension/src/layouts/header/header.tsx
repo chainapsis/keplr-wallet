@@ -1,4 +1,9 @@
-import React, { FunctionComponent, ReactNode, useLayoutEffect } from "react";
+import React, {
+  FunctionComponent,
+  ReactNode,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import styled from "styled-components";
 import { HeaderProps } from "./types";
 import { Subtitle1 } from "../../components/typography";
@@ -60,14 +65,13 @@ const Styles = {
     align-items: center;
   `,
   ContentContainer: styled.div<{
-    height: number;
+    layoutHeight: number;
     bottom: ReactNode | null;
   }>`
     padding-top: 3.75rem;
     padding-bottom: ${({ bottom }) => (bottom ? "4.75rem" : "0")};
 
-    min-height: ${({ height }) => `${height}px`};
-    height: 0;
+    min-height: ${({ layoutHeight }) => `${layoutHeight}px`};
   `,
   BottomContainer: styled.div`
     height: 4.75rem;
@@ -88,18 +92,24 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   bottom,
   children,
 }) => {
-  const [height, setHeight] = React.useState(0);
+  const [height, setHeight] = React.useState(600);
+  const lastSetHeight = useRef(0);
 
   useLayoutEffect(() => {
-    const initialHeight = window.visualViewport?.height ?? 540;
+    // TODO: Use as rem unit?
 
     function handleResize() {
-      if (height !== window.visualViewport?.height) {
-        setHeight(initialHeight);
+      if (window.visualViewport) {
+        if (lastSetHeight.current !== window.visualViewport.height) {
+          setHeight(window.visualViewport.height);
+          lastSetHeight.current = window.visualViewport.height;
+        }
       }
     }
 
-    setHeight(initialHeight);
+    if (window.visualViewport) {
+      setHeight(window.visualViewport.height);
+    }
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -115,7 +125,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
         {right && <Styles.HeaderRight>{right}</Styles.HeaderRight>}
       </Styles.HeaderContainer>
 
-      <Styles.ContentContainer height={height} bottom={bottom}>
+      <Styles.ContentContainer layoutHeight={height} bottom={bottom}>
         {children}
       </Styles.ContentContainer>
 

@@ -1,4 +1,4 @@
-import { SpringConfig, SpringValue } from "@react-spring/web";
+import { SpringValue } from "@react-spring/web";
 import { ElementType } from "react";
 
 export interface ScenePropsInternalTypes extends SceneProps {
@@ -22,8 +22,6 @@ export interface SceneTransitionBaseProps<S extends Scene = Scene> {
   width?: string | SpringValue<string>;
   transitionAlign?: "top" | "bottom" | "center";
   transitionMode?: "x-axis" | "opacity"; // Default: x-axis
-
-  springConfig?: SpringConfig;
 }
 
 export interface SceneTransitionContext {

@@ -58,6 +58,7 @@ export const RegisterIntroScene: FunctionComponent = () => {
           });
 
           anim.play();
+          anim.setSpeed(2);
 
           let resolver: () => void;
 

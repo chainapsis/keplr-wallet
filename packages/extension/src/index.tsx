@@ -54,6 +54,7 @@ import {
   WalletDeletePage,
   WalletRecoveryPhrasePage,
 } from "./pages/wallet";
+import { ModalRootProvider } from "./components/modal/v2";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -246,11 +247,13 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
-      <IntlProvider locale={navigator.language}>
-        <GlobalStyle />
-        <GlobalPopupStyle />
-        <RoutesAfterReady />
-      </IntlProvider>
+      <ModalRootProvider>
+        <IntlProvider locale={navigator.language}>
+          <GlobalStyle />
+          <GlobalPopupStyle />
+          <RoutesAfterReady />
+        </IntlProvider>
+      </ModalRootProvider>
     </StoreProvider>
   );
 };

@@ -220,11 +220,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         <Gutter size="1rem" />
 
         <Bleed left="1rem">
-          <VerticalResizeTransition
-            springConfig={{
-              precision: 1,
-            }}
-          >
+          <VerticalResizeTransition>
             <Styles.WordsGridContainer columns={words.length > 12 ? 4 : 3}>
               {words.map((word, i) => {
                 return (

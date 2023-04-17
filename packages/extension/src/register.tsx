@@ -12,6 +12,7 @@ import { Keplr } from "@keplr-wallet/provider";
 import manifest from "./manifest.json";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { configure } from "mobx";
+import { ModalRootProvider } from "./components/modal/v2";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -26,12 +27,14 @@ window.keplr = new Keplr(
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
-      <GlobalStyle />
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={<RegisterPage />} />
-        </Routes>
-      </HashRouter>
+      <ModalRootProvider>
+        <GlobalStyle />
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<RegisterPage />} />
+          </Routes>
+        </HashRouter>
+      </ModalRootProvider>
     </StoreProvider>
   );
 };

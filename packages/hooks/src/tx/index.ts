@@ -9,3 +9,4 @@ export * from "./sender";
 export * from "./send-tx";
 export * from "./chain";
 export * from "./gas-simulator";
+export * from "./validate";
