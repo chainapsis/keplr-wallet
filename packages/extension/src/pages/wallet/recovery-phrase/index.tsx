@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import { Stack } from "../../../components/stack";
 import { ColorPalette } from "../../../styles";
-import { Subtitle1, Subtitle3 } from "../../../components/typography";
+import { Subtitle2, Subtitle3 } from "../../../components/typography";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
 import { Button } from "../../../components/button";
@@ -38,7 +38,7 @@ const Styles = {
     right: 0;
     bottom: 0;
   `,
-  RecoveryPhrase: styled(Subtitle1)`
+  RecoveryPhrase: styled(Subtitle2)`
     color: ${ColorPalette["gray-50"]};
     background-color: ${ColorPalette["gray-600"]};
 

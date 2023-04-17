@@ -15,6 +15,21 @@ import { useNavigate } from "react-router";
 import { EllipsisIcon } from "../../../components/icon";
 import { Menu, MenuItem } from "../../../components/menu";
 import { Button } from "../../../components/button";
+import styled from "styled-components";
+
+const Styles = {
+  Container: styled(Stack)`
+    padding: 0.75rem;
+  `,
+  AddButton: styled.div`
+    position: absolute;
+    top: 4.625rem;
+    right: 0.75rem;
+  `,
+  Content: styled(Stack)`
+    margin-top: 1.125rem;
+  `,
+};
 
 export const WalletSelectPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
@@ -42,30 +57,33 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout title="Select Wallet" left={<BackButton />}>
-      <YAxis alignX="right">
-        <Button
-          text="Add Wallet"
-          size="small"
-          color="secondary"
-          onClick={async () => {
-            await browser.tabs.create({
-              url: "/register.html",
-            });
-          }}
-        />
-      </YAxis>
-      <Box paddingX="0.75rem">
-        {mnemonicKeys.length > 0 ? (
-          <KeyInfoList title="Recovery Phrase" keyInfos={mnemonicKeys} />
-        ) : null}
-        {ledgerKeys.length > 0 ? (
-          <KeyInfoList title="Ledger" keyInfos={ledgerKeys} />
-        ) : null}
+      <Styles.Container>
+        <Styles.AddButton>
+          <Button
+            text="Add Wallet"
+            size="extraSmall"
+            color="secondary"
+            onClick={async () => {
+              await browser.tabs.create({
+                url: "/register.html",
+              });
+            }}
+          />
+        </Styles.AddButton>
 
-        {unknownKeys.length > 0 ? (
-          <KeyInfoList title="Unknown" keyInfos={unknownKeys} />
-        ) : null}
-      </Box>
+        <Styles.Content gutter="1.25rem">
+          {mnemonicKeys.length > 0 ? (
+            <KeyInfoList title="Recovery Phrase" keyInfos={mnemonicKeys} />
+          ) : null}
+          {ledgerKeys.length > 0 ? (
+            <KeyInfoList title="Ledger" keyInfos={ledgerKeys} />
+          ) : null}
+
+          {unknownKeys.length > 0 ? (
+            <KeyInfoList title="Unknown" keyInfos={unknownKeys} />
+          ) : null}
+        </Styles.Content>
+      </Styles.Container>
     </HeaderLayout>
   );
 });
