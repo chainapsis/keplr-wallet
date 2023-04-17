@@ -2197,9 +2197,132 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     feeCurrencies: [
       {
-        coinDenom: "QSR",
-        coinMinimalDenom: "uqsr",
+        coinDenom: "OSMO",
+        coinMinimalDenom:
+          "ibc/0471F1C4E7AFD3F07702BEF6DC365268D64570F7C1FDC98EA6098DD6DE59817B",
         coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.02,
+        },
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/FA0006F056DB6719B8C16C551FC392B62F5729978FC0B125AC9A432DBB2AA1A5",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.02,
+        },
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom:
+          "ibc/FA7775734CC73176B7425910DE001A1D2AD9B6D9E93129A5D0750EAD13E4E63A",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.02,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-noble.keplr.app",
+    rest: "https://lcd-noble.keplr.app",
+    chainId: "noble-1",
+    chainName: "Noble",
+    stakeCurrency: {
+      coinDenom: "STAKE",
+      coinMinimalDenom: "ustake",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "noble",
+      bech32PrefixAccPub: "noblepub",
+      bech32PrefixValAddr: "noblevaloper",
+      bech32PrefixValPub: "noblevaloperpub",
+      bech32PrefixConsAddr: "noblevalcons",
+      bech32PrefixConsPub: "noblevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "STAKE",
+        coinMinimalDenom: "ustake",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/EF48E6B1A1A19F47ECAEA62F5670C37C0580E86A9E88498B7E393EB6F49F33C0",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.001,
+          high: 0.001,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-omniflixhub.keplr.app",
+    rest: "https://lcd-omniflixhub.keplr.app",
+    chainId: "omniflixhub-1",
+    chainName: "OmniFlix Hub",
+    stakeCurrency: {
+      coinDenom: "FLIX",
+      coinMinimalDenom: "uflix",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "omniflix",
+      bech32PrefixAccPub: "omniflixpub",
+      bech32PrefixValAddr: "omniflixvaloper",
+      bech32PrefixValPub: "omniflixvaloperpub",
+      bech32PrefixConsAddr: "omniflixvalcons",
+      bech32PrefixConsPub: "omniflixvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "FLIX",
+        coinMinimalDenom: "uflix",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "FLIX",
+        coinMinimalDenom: "uflix",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.0025,
+          high: 0.025,
+        },
       },
     ],
     features: [],

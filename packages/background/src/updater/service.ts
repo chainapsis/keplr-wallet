@@ -282,16 +282,27 @@ export class ChainUpdaterService {
   }
 
   protected async checkChainIdFromRPC(rpc: string): Promise<string> {
-    const statusResponse = await Axios.get<{
-      result: {
-        node_info: {
-          network: string;
-        };
-      };
-    }>("/status", {
+    const statusResponse = await Axios.get<
+      | {
+          result: {
+            node_info: {
+              network: string;
+            };
+          };
+        }
+      | {
+          node_info: {
+            network: string;
+          };
+        }
+    >("/status", {
       baseURL: rpc,
     });
 
-    return statusResponse.data.result.node_info.network;
+    if ("result" in statusResponse.data) {
+      return statusResponse.data.result.node_info.network;
+    }
+
+    return statusResponse.data.node_info.network;
   }
 }

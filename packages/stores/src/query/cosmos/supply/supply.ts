@@ -42,7 +42,7 @@ export class ObservableQuerySupplyTotal extends ObservableChainQueryMap<SupplyTo
     return this.get(denom);
   }
 
-  // Somewhat strange. Only used for umee.
+  // cosmos-sdk v0.46.0+ has changed the API to use query string.
   getQueryDenomByQueryString(denom: string): ObservableChainQuerySupplyTotal {
     return this.get(`by_denom?denom=${denom}`);
   }

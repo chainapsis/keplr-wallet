@@ -42,31 +42,28 @@ export const TxButtonView: FunctionComponent = observer(() => {
   const sendBtnRef = useRef<HTMLButtonElement>(null);
   const buyBtnRef = useRef<HTMLButtonElement>(null);
 
-  const { isSupportChain, buySupportServiceInfos } = useBuy();
-  const isCurrentChainSupportBuy = buySupportServiceInfos.length > 0;
+  const { isBuySupportChain, buySupportServiceInfos } = useBuy();
 
   return (
     <div className={styleTxButton.containerTxButton}>
-      {isCurrentChainSupportBuy && (
-        <Button
-          innerRef={buyBtnRef}
-          className={classnames(styleTxButton.button, {
-            disabled: !isSupportChain,
-          })}
-          color="primary"
-          outline
-          onClick={(e) => {
-            e.preventDefault();
+      <Button
+        innerRef={buyBtnRef}
+        className={classnames(styleTxButton.button, {
+          disabled: !isBuySupportChain,
+        })}
+        color="primary"
+        outline
+        onClick={(e) => {
+          e.preventDefault();
 
-            if (isSupportChain) {
-              setIsBuyModalOpen(true);
-            }
-          }}
-        >
-          <FormattedMessage id="main.account.button.buy" />
-        </Button>
-      )}
-      {!isSupportChain ? (
+          if (isBuySupportChain) {
+            setIsBuyModalOpen(true);
+          }
+        }}
+      >
+        <FormattedMessage id="main.account.button.buy" />
+      </Button>
+      {!isBuySupportChain ? (
         <Tooltip
           placement="bottom"
           isOpen={buyTooltipOpen}

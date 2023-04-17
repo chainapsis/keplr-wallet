@@ -1,6 +1,6 @@
 import { PubKey, StdSignature, StdSignDoc } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
-import { sortedJsonByKeyStringify } from "@keplr-wallet/common";
+import { escapeHTML, sortedJsonByKeyStringify } from "@keplr-wallet/common";
 
 export function encodeSecp256k1Pubkey(pubkey: Uint8Array): PubKey {
   if (pubkey.length !== 33 || (pubkey[0] !== 0x02 && pubkey[0] !== 0x03)) {
@@ -31,5 +31,5 @@ export function encodeSecp256k1Signature(
 }
 
 export function serializeSignDoc(signDoc: StdSignDoc): Uint8Array {
-  return Buffer.from(sortedJsonByKeyStringify(signDoc));
+  return Buffer.from(escapeHTML(sortedJsonByKeyStringify(signDoc)));
 }

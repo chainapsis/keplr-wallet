@@ -1,10 +1,3 @@
-import {
-  AccountSetBase,
-  CosmosAccount,
-  CosmwasmAccount,
-  SecretAccount,
-} from "@keplr-wallet/stores";
-import { ChainInfo } from "@keplr-wallet/types";
 import Axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -12,113 +5,88 @@ import { FiatOnRampServiceInfo, FiatOnRampServiceInfos } from "../config.ui";
 import { useStore } from "../stores";
 
 export interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
-  buySupportChainAccounts?: (AccountSetBase &
-    CosmosAccount &
-    CosmwasmAccount &
-    SecretAccount)[];
-  buySupportChainInfos?: ChainInfo[];
+  // If the service doesn't support the current chain, it will be undefined.
   buyUrl?: string;
 }
 
 export const useBuy = () => {
   const { chainStore, accountStore } = useStore();
 
+  const [fiatOnRampServiceInfos, setFiatOnRampServiceInfos] = useState(
+    FiatOnRampServiceInfos
+  );
+
   const currentChainId = chainStore.current.chainId;
   const currentChainAccount = accountStore.getAccount(currentChainId);
   const currentChainInfo = chainStore.current;
 
-  const buySupportServiceInfos: BuySupportServiceInfo[] = FiatOnRampServiceInfos.map(
+  useEffect(() => {
+    (async () => {
+      const { data } = await Axios.get<{
+        list: FiatOnRampServiceInfo[];
+      }>(
+        "https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json"
+      );
+      const fetchedFiatOnRampServiceInfos = data.list;
+      setFiatOnRampServiceInfos(fetchedFiatOnRampServiceInfos);
+    })();
+  }, []);
+
+  const buySupportServiceInfos: BuySupportServiceInfo[] = fiatOnRampServiceInfos.map(
     (serviceInfo) => {
-      if (!serviceInfo.buySupportChainIds.includes(currentChainId)) {
+      if (
+        !Object.keys(serviceInfo.buySupportCoinDenomsByChainId).includes(
+          currentChainId
+        )
+      ) {
         return serviceInfo;
       }
-
-      const buySupportChainAccounts = serviceInfo.buySupportChainIds.map(
-        (buySupportChainId) => accountStore.getAccount(buySupportChainId)
-      );
-      const buySupportChainInfos = serviceInfo.buySupportChainIds.map(
-        (buySupportChainId) => chainStore.getChain(buySupportChainId)
-      );
 
       const buyUrlParams = (() => {
         switch (serviceInfo.serviceId) {
           case "moonpay":
             return {
-              apiKey: serviceInfo.apiKey,
+              apiKey:
+                process.env["KEPLR_EXT_MOONPAY_API_KEY"] ?? serviceInfo.apiKey,
               showWalletAddressForm: "true",
-              ...(currentChainInfo && currentChainAccount
-                ? {
-                    walletAddress: encodeURIComponent(
-                      JSON.stringify({
-                        [currentChainInfo.stakeCurrency.coinDenom.toLowerCase()]: currentChainAccount?.bech32Address,
-                      })
-                    ),
-                    currencyCode: currentChainInfo.stakeCurrency.coinDenom.toLowerCase(),
-                  }
-                : {
-                    walletAddresses: encodeURIComponent(
-                      JSON.stringify(
-                        buySupportChainInfos.reduce((acc, cur) => {
-                          const chainAccount = accountStore.getAccount(
-                            cur.chainId
-                          );
-                          return {
-                            ...acc,
-                            [cur.stakeCurrency.coinDenom.toLowerCase()]: chainAccount.bech32Address,
-                          };
-                        }, {})
-                      )
-                    ),
-                  }),
+              walletAddress: encodeURIComponent(
+                JSON.stringify({
+                  [currentChainInfo.stakeCurrency.coinDenom.toLowerCase()]: currentChainAccount?.bech32Address,
+                })
+              ),
+              currencyCode: currentChainInfo.stakeCurrency.coinDenom.toLowerCase(),
             };
           case "transak":
             return {
-              apiKey: serviceInfo.apiKey,
+              apiKey:
+                process.env["KEPLR_EXT_TRANSAK_API_KEY"] ?? serviceInfo.apiKey,
               hideMenu: "true",
-              ...(currentChainInfo && currentChainAccount
-                ? {
-                    walletAddress: currentChainAccount.bech32Address ?? "",
-                    cryptoCurrencyCode:
-                      currentChainInfo.stakeCurrency.coinDenom,
-                  }
-                : {
-                    walletAddressesData: encodeURIComponent(
-                      JSON.stringify({
-                        coins: buySupportChainInfos.reduce((acc, cur) => {
-                          const chainAccount = accountStore.getAccount(
-                            cur.chainId
-                          );
-                          return {
-                            ...acc,
-                            [cur.stakeCurrency.coinDenom.toLowerCase()]: chainAccount.bech32Address,
-                          };
-                        }, {}),
-                      })
-                    ),
-                    cryptoCurrencyList: buySupportChainInfos
-                      .map((chainInfo) => chainInfo.stakeCurrency.coinDenom)
-                      .join(","),
-                  }),
+              walletAddress: currentChainAccount.bech32Address ?? "",
+              cryptoCurrencyCode: currentChainInfo.stakeCurrency.coinDenom,
             };
           case "kado":
             return {
-              apiKey: serviceInfo.apiKey,
+              apiKey:
+                process.env["KEPLR_EXT_KADO_API_KEY"] ?? serviceInfo.apiKey,
               product: "BUY",
-              networkList: buySupportChainInfos.map((chainInfo) =>
-                chainInfo.chainName.toUpperCase()
-              ),
-              cryptoList: serviceInfo.buySupportCurrencies?.map(
-                (currency) => currency.coinDenom
-              ),
-              ...(currentChainInfo &&
-                currentChainAccount && {
-                  onToAddress: currentChainAccount.bech32Address,
-                  onRevCurrency:
-                    serviceInfo.buySupportCurrenciesByChainId?.[
-                      currentChainId
-                    ]?.[0].coinDenom,
-                  network: currentChainInfo.chainName.toUpperCase(),
-                }),
+              networkList: chainStore.chainInfos
+                .filter((chainInfo) =>
+                  Object.keys(
+                    serviceInfo.buySupportCoinDenomsByChainId
+                  ).includes(chainInfo.chainId)
+                )
+                .map(({ chainName }) => chainName.toUpperCase()),
+              cryptoList: [
+                ...new Set(
+                  Object.values(
+                    serviceInfo.buySupportCoinDenomsByChainId
+                  ).flat()
+                ),
+              ],
+              onToAddress: currentChainAccount.bech32Address,
+              onRevCurrency:
+                serviceInfo.buySupportCoinDenomsByChainId[currentChainId],
+              network: currentChainInfo.chainName.toUpperCase(),
             };
           default:
             return;
@@ -132,8 +100,6 @@ export const useBuy = () => {
 
       return {
         ...serviceInfo,
-        buySupportChainAccounts,
-        buySupportChainInfos,
         buyUrl,
       };
     }
@@ -177,13 +143,13 @@ export const useBuy = () => {
     })
   );
 
-  const isSupportChain =
+  const isBuySupportChain =
     buySupportServiceInfos.filter((info) =>
-      info.buySupportChainIds.includes(chainStore.current.chainId)
+      Object.keys(info.buySupportCoinDenomsByChainId).includes(currentChainId)
     ).length > 0;
 
   return {
     buySupportServiceInfos: newBuySupportServiceInfos,
-    isSupportChain,
+    isBuySupportChain,
   };
 };

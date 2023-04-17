@@ -173,7 +173,13 @@ export class ObservableQueryInflation {
             return DecUtils.getPrecisionDec(8 + 6).toString();
           }
 
-          if (chainInfo.chainId.startsWith("umee")) {
+          if (
+            chainInfo.chainId.startsWith("umee") ||
+            chainInfo.chainId.startsWith("quasar") ||
+            chainInfo.chainId.startsWith("crypto-org-chain-mainnet") ||
+            chainInfo.chainId.startsWith("quicksilver") ||
+            chainInfo.chainId.startsWith("regen")
+          ) {
             const supplyTotalRes = this._querySupplyTotal.getQueryDenomByQueryString(
               chainInfo.stakeCurrency.coinMinimalDenom
             ).response;
