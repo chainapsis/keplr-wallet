@@ -10,8 +10,9 @@ export interface ModalRoot {
   generateId(): number;
 
   // root element should be immoral during lifecycle.
-  getRootElement(): HTMLDivElement;
-  releaseRootElement(): void;
+  registerRootElement(): string;
+  releaseRootElement(id: string): void;
+  getRootElement(id: string): HTMLDivElement | null;
 }
 
 export const ModalRootContext = createContext<ModalRoot | null>(null);
@@ -25,20 +26,17 @@ export const ModalRootProvider: FunctionComponent = ({ children }) => {
   });
 
   const [rootElmFns] = useState(() => {
-    let count = 0;
+    let seq = 0;
 
-    let rootElement: HTMLDivElement | null = null;
+    const rootElementMap = new Map<string, HTMLDivElement>();
 
     return {
-      getRootElement: () => {
-        count++;
-
-        if (rootElement) {
-          return rootElement;
-        }
+      registerRootElement: (): string => {
+        seq = seq + 1;
+        const id = seq.toString();
 
         const root = document.createElement("div");
-        root.setAttribute("id", "modal-root");
+        root.setAttribute("id", `modal-root-${id}`);
         document.body.appendChild(root);
 
         root.style.position = "fixed";
@@ -48,21 +46,26 @@ export const ModalRootProvider: FunctionComponent = ({ children }) => {
         root.style.right = "0";
         root.style.zIndex = "9999999";
 
-        rootElement = root;
-        return rootElement;
-      },
-      releaseRootElement: () => {
-        if (count > 0) {
-          count = count - 1;
-          if (count === 0) {
-            const root = document.body.querySelector("#modal-root");
-            if (root) {
-              document.body.removeChild(root);
-            }
+        rootElementMap.set(id, root);
 
-            rootElement = null;
+        return id;
+      },
+      releaseRootElement: (id: string) => {
+        if (rootElementMap.has(id)) {
+          const element = document.body.querySelector(`#modal-root-${id}`);
+          if (element) {
+            document.body.removeChild(element);
           }
+
+          rootElementMap.delete(id);
         }
+      },
+      getRootElement: (id: string): HTMLDivElement | null => {
+        const root = rootElementMap.get(id);
+        if (root) {
+          return root;
+        }
+        return null;
       },
     };
   });
@@ -82,12 +85,7 @@ export const ModalRootProvider: FunctionComponent = ({ children }) => {
       value={useMemo(() => {
         return {
           generateId,
-          getRootElement(): HTMLDivElement {
-            return rootElmFns.getRootElement();
-          },
-          releaseRootElement(): void {
-            return rootElmFns.releaseRootElement();
-          },
+          ...rootElmFns,
         };
       }, [generateId, rootElmFns])}
     >

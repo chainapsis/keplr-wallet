@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { HeaderLayout } from "../../layouts/header";
@@ -23,7 +23,6 @@ import { MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Modal } from "../../components/modal";
-import { Modal as ModalV2 } from "../../components/modal/v2";
 
 const Styles = {
   Container: styled.div`
@@ -111,8 +110,6 @@ export const MainPage: FunctionComponent = observer(() => {
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
   const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
 
-  const [t, setT] = useState(false);
-
   return (
     <HeaderLayout
       title={keyRingStore.selectedKeyInfo?.name || "Keplr Account"}
@@ -127,25 +124,10 @@ export const MainPage: FunctionComponent = observer(() => {
       }
       right={<ProfileButton />}
     >
-      <ModalV2 isOpen={t} alignY="bottom" close={() => setT(false)}>
-        <div
-          style={{
-            background: "red",
-            height: "200px",
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            setT(false);
-          }}
-        >
-          test
-        </div>
-        <Test />
-      </ModalV2>
       <Styles.Container>
         <Stack gutter="1rem">
           <StringToggle tabStatus={tabStatus} setTabStatus={setTabStatus} />
-          <CopyAddress onClick={() => setT(true)} />
+          <CopyAddress onClick={() => setIsOpenCopyAddress(true)} />
           <Buttons />
           <ClaimAll />
           {TokenViewData.map(({ title, balance }) => {
@@ -182,14 +164,3 @@ export const MainPage: FunctionComponent = observer(() => {
     </HeaderLayout>
   );
 });
-
-const Test: FunctionComponent = () => {
-  useEffect(() => {
-    console.log("mount");
-    return () => {
-      console.log("unmount");
-    };
-  }, []);
-
-  return <div>scsaocksaopckaopcs</div>;
-};
