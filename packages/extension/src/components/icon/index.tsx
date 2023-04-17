@@ -15,6 +15,7 @@ export * from "./ellipsis";
 export * from "./information";
 export * from "./key";
 export * from "./menu";
+export * from "./plus";
 export * from "./profile";
 export * from "./profile-circle";
 export * from "./question";
