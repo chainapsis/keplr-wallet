@@ -3,18 +3,18 @@ import { createGlobalStyle } from "styled-components";
 // Max: 800
 const width = 360;
 // Max: 600
-const height = 600;
+const initialHeight = 600;
 
 export const GlobalPopupStyle = createGlobalStyle`
   html {
     width: ${Math.min(width, 800)}px;
-    height: ${Math.min(height, 600)}px;
+    min-height: ${Math.min(initialHeight, 600)}px;
   }
   
   body {
     width: 100vw;
-    height: 100vh;
-
+    min-height: ${Math.min(initialHeight, 600)}px;
+    
     display: flex;
     flex-direction: column;
     align-items: center;

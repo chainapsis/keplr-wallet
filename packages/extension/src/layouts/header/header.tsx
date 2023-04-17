@@ -65,14 +65,13 @@ const Styles = {
     align-items: center;
   `,
   ContentContainer: styled.div<{
-    height: number;
+    layoutHeight: number;
     bottom: ReactNode | null;
   }>`
     padding-top: 3.75rem;
     padding-bottom: ${({ bottom }) => (bottom ? "4.75rem" : "0")};
 
-    min-height: ${({ height }) => `${height}px`};
-    height: 0;
+    min-height: ${({ layoutHeight }) => `${layoutHeight}px`};
   `,
   BottomContainer: styled.div`
     height: 4.75rem;
@@ -126,7 +125,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
         {right && <Styles.HeaderRight>{right}</Styles.HeaderRight>}
       </Styles.HeaderContainer>
 
-      <Styles.ContentContainer height={height} bottom={bottom}>
+      <Styles.ContentContainer layoutHeight={height} bottom={bottom}>
         {children}
       </Styles.ContentContainer>
 

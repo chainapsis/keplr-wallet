@@ -5373,6 +5373,7 @@ __metadata:
     styled-normalize: ^8.0.7
     swiper: ^8.4.4
     ts-loader: ^9.4.2
+    tua-body-scroll-lock: ^1.2.1
     utility-types: ^3.10.0
     webextension-polyfill: ^0.10.0
     webpack: ^5.74.0
@@ -30307,6 +30308,13 @@ __metadata:
   version: 0.0.0
   resolution: "tty-browserify@npm:0.0.0"
   checksum: a06f746acc419cb2527ba19b6f3bd97b4a208c03823bfb37b2982629d2effe30ebd17eaed0d7e2fc741f3c4f2a0c43455bd5fb4194354b378e78cfb7ca687f59
+  languageName: node
+  linkType: hard
+
+"tua-body-scroll-lock@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "tua-body-scroll-lock@npm:1.2.1"
+  checksum: 695d367f0d6facea4c14ed31b5d6e4ec70c4f92e7151c30ac639adb9030c3f1bf49a84ed623b012911d5d2212c4c178f1f073174d03d7a0f76feb2c624869884
   languageName: node
   linkType: hard
 

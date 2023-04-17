@@ -49,6 +49,7 @@ import { SettingContactsDelete } from "./pages/setting/contacts/delete";
 import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
 import { SelectWalletPage } from "./pages/select-wallet";
+import { ModalRootProvider } from "./components/modal/v2";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -232,11 +233,13 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
-      <IntlProvider locale={navigator.language}>
-        <GlobalStyle />
-        <GlobalPopupStyle />
-        <RoutesAfterReady />
-      </IntlProvider>
+      <ModalRootProvider>
+        <IntlProvider locale={navigator.language}>
+          <GlobalStyle />
+          <GlobalPopupStyle />
+          <RoutesAfterReady />
+        </IntlProvider>
+      </ModalRootProvider>
     </StoreProvider>
   );
 };
