@@ -1,5 +1,8 @@
 import { NotyphiNotifications, NotyphiNotification } from "@notificationTypes";
-import { fetchAllNotifications } from "@utils/fetch-notification";
+import {
+  fetchAllNotifications,
+  markDeliveryAsRead,
+} from "@utils/fetch-notification";
 import { store } from "../stores/chats";
 import { setNotifications } from "../stores/chats/user-slice";
 
@@ -12,7 +15,7 @@ export const fetchAndPopulateNotifications = async (walletAddress: string) => {
     localStorage.getItem(`notifications-${walletAddress}`) ?? JSON.stringify([])
   );
 
-  notificationData.map((element: NotyphiNotification) => {
+  notificationData?.map((element: NotyphiNotification) => {
     notifications[element.delivery_id] = element;
   });
   localNotifications.map((element) => {
@@ -30,4 +33,9 @@ export const fetchAndPopulateNotifications = async (walletAddress: string) => {
       allNotifications: Object.values(notifications),
     })
   );
+
+  ///Read all notification when delivered
+  notificationData?.map((element: NotyphiNotification) => {
+    markDeliveryAsRead(element.delivery_id, walletAddress);
+  });
 };

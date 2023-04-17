@@ -7,6 +7,7 @@
     border-radius: 2px;
     margin: auto 0;
     opacity: 40%;
+    cursor: pointer;
     &:checked {
       opacity: 100%;
     }
@@ -45,5 +46,10 @@
 
   .selectedName {
     font-weight: 700;
+  }
+  .newOrgName {
+    color: #d43bf6;
+    font-weight: 400;
+    margin-left: 6px;
   }
 }

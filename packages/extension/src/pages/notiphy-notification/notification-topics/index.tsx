@@ -119,8 +119,13 @@ export const NotificationTopics: FunctionComponent = () => {
             {!topicsList.length && (
               <div className={style.resultText}>
                 <p>
-                  No results found. <br />
-                  Please refine your search.
+                  No results found.
+                  {inputVal !== "" && (
+                    <>
+                      <br />
+                      Please refine your search.
+                    </>
+                  )}
                 </p>
               </div>
             )}

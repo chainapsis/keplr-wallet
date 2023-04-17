@@ -29,8 +29,13 @@ const pageOptions = {
 };
 
 export const NotificationOrganizations: FunctionComponent = observer(() => {
+  // Getting page type edit or add
   const { type } = useParams<{ type?: string }>();
+
   const history = useHistory();
+  // Extracting org id from url
+  const newOrg = history.location.search.split("?")[1]?.split("&");
+
   const { chainStore, accountStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
@@ -179,20 +184,32 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
             {!orgList.length && (
               <div className={style.resultText}>
                 <p>
-                  No results found. <br /> Please refine your search.
+                  No results found.
+                  {inputVal !== "" && (
+                    <>
+                      <br />
+                      Please refine your search.
+                    </>
+                  )}
                 </p>
               </div>
             )}
-            {orgList.map((elem: NotyphiOrganisation, index: number) => (
-              <NotificationOrg
-                handleCheck={(isChecked) => handleCheck(isChecked, index)}
-                isChecked={
-                  selectedOrg.find((item) => item.id === elem.id) ? true : false
-                }
-                elem={elem}
-                key={elem.id}
-              />
-            ))}
+
+            {orgList.map((elem: NotyphiOrganisation, index: number) => {
+              return (
+                <NotificationOrg
+                  handleCheck={(isChecked) => handleCheck(isChecked, index)}
+                  isChecked={
+                    selectedOrg.find((item) => item.id === elem.id)
+                      ? true
+                      : false
+                  }
+                  elem={elem}
+                  key={elem.id}
+                  isNew={newOrg && newOrg.indexOf(elem.id) != -1}
+                />
+              );
+            })}
           </>
         )}
       </div>

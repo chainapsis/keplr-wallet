@@ -9,10 +9,11 @@ interface Props {
   elem: NotyphiOrganisation;
   handleCheck: (isChecked: boolean) => void;
   isChecked: boolean;
+  isNew: boolean;
 }
 
 export const NotificationOrg: FunctionComponent<Props> = (props) => {
-  const { elem, handleCheck, isChecked } = props;
+  const { elem, handleCheck, isChecked, isNew } = props;
 
   return (
     <div className={style.listItem}>
@@ -39,6 +40,9 @@ export const NotificationOrg: FunctionComponent<Props> = (props) => {
       >
         {elem.name}
       </p>
+      {isNew && (
+        <p className={classnames(style.name, style.newOrgName)}>(new)</p>
+      )}
     </div>
   );
 };

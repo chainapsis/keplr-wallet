@@ -3,10 +3,7 @@ import { useHistory } from "react-router";
 import style from "./style.module.scss";
 import { Button } from "reactstrap";
 import { NotificationItem } from "@components/notification-messages/notification-item/index";
-import {
-  markDeliveryAsRead,
-  markDeliveryAsRejected,
-} from "@utils/fetch-notification";
+import { markDeliveryAsRejected } from "@utils/fetch-notification";
 import { useStore } from "../../stores";
 import { NotificationSetup, NotyphiNotification } from "@notificationTypes";
 import { store } from "@chatStore/index";
@@ -49,7 +46,7 @@ export const NotificationModal: FunctionComponent = () => {
 
   const handleClick = () => {
     if (notificationPayload?.modalType === NotificationModalType.initial) {
-      history.push("notification/organizations/add");
+      history.push("notification/organisations/add");
     } else if (
       notificationPayload?.modalType === NotificationModalType.notificationOff
     ) {
@@ -136,22 +133,20 @@ export const NotificationModal: FunctionComponent = () => {
   ]);
 
   const onCrossClick = (deliveryId: string) => {
-    markDeliveryAsRead(deliveryId, accountInfo.bech32Address).finally(() => {
-      if (notificationPayload?.notificationList) {
-        const unreadNotifications = notificationPayload?.notificationList.filter(
-          (notification: NotyphiNotification) =>
-            notification.delivery_id !== deliveryId
-        );
+    if (notificationPayload?.notificationList) {
+      const unreadNotifications = notificationPayload?.notificationList.filter(
+        (notification: NotyphiNotification) =>
+          notification.delivery_id !== deliveryId
+      );
 
-        store.dispatch(
-          setNotifications({ allNotifications: unreadNotifications })
-        );
-        localStorage.setItem(
-          `notifications-${accountInfo.bech32Address}`,
-          JSON.stringify(unreadNotifications)
-        );
-      }
-    });
+      store.dispatch(
+        setNotifications({ allNotifications: unreadNotifications })
+      );
+      localStorage.setItem(
+        `notifications-${accountInfo.bech32Address}`,
+        JSON.stringify(unreadNotifications)
+      );
+    }
   };
 
   const onFlagClick = (deliveryId: string) => {
@@ -168,13 +163,15 @@ export const NotificationModal: FunctionComponent = () => {
             notification.delivery_id !== deliveryId
         );
 
-        store.dispatch(
-          setNotifications({ allNotifications: newLocalNotifications })
-        );
-        localStorage.setItem(
-          `notifications-${accountInfo.bech32Address}`,
-          JSON.stringify(newLocalNotifications)
-        );
+        setTimeout(() => {
+          store.dispatch(
+            setNotifications({ allNotifications: newLocalNotifications })
+          );
+          localStorage.setItem(
+            `notifications-${accountInfo.bech32Address}`,
+            JSON.stringify(newLocalNotifications)
+          );
+        }, 300);
       }
     );
   };

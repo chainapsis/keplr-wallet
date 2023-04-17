@@ -87,7 +87,7 @@ export const SettingNotifications: FunctionComponent = () => {
               paragraph={`${orgInfo.length} organisation${orgSuffix} followed`}
               icons={icon}
               onClick={() => {
-                history.push("/notification/organizations/edit");
+                history.push("/notification/organisations/edit");
               }}
             />
 

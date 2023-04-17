@@ -4,10 +4,11 @@ import React, { FunctionComponent, useState } from "react";
 import style from "./style.module.scss";
 import ReactHtmlParser from "react-html-parser";
 import jazzicon from "@metamask/jazzicon";
-import { markDeliveryAsClicked } from "@utils/fetch-notification";
 import { useStore } from "../../../stores";
 import { FormattedMessage } from "react-intl";
 import amplitude from "amplitude-js";
+import { markDeliveryAsClicked } from "@utils/fetch-notification";
+import { useHistory } from "react-router";
 interface Props {
   elem: NotyphiNotification;
   onCrossClick: (deliveryId: string) => void;
@@ -22,10 +23,10 @@ export const NotificationItem: FunctionComponent<Props> = ({
   const { chainStore, accountStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
-  const { delivery_id, delivered_at } = elem;
+  const { delivery_id, delivered_at, cta_url } = elem;
   const elemDate = new Date(delivered_at);
   const time = timeSince(elemDate);
-
+  const history = useHistory();
   const handleFlag = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     amplitude.getInstance().logEvent("Notification flag click", {});
@@ -42,7 +43,7 @@ export const NotificationItem: FunctionComponent<Props> = ({
   };
 
   const handleNavigateToUrl = () => {
-    if (elem.cta_url != null) {
+    if (cta_url != null) {
       amplitude.getInstance().logEvent("Notification click", {});
 
       const localNotifications = JSON.parse(
@@ -61,11 +62,13 @@ export const NotificationItem: FunctionComponent<Props> = ({
             `notifications-${accountInfo.bech32Address}`,
             JSON.stringify(unclickedNotifications)
           );
-          window.open(
-            elem.cta_url.startsWith("http")
-              ? elem.cta_url
-              : `https:${elem.cta_url}`
-          );
+
+          /// Handling a url and internal page navigation
+          if (cta_url.startsWith("http")) {
+            window.open(cta_url);
+          } else if (cta_url.startsWith("/")) {
+            history.push(cta_url);
+          }
         }
       );
     }
@@ -76,7 +79,10 @@ export const NotificationItem: FunctionComponent<Props> = ({
     amplitude.getInstance().logEvent("Notification remove click", {});
     const item = document.getElementById(delivery_id);
     item?.classList.add(style.remove);
-    onCrossClick(delivery_id);
+
+    setTimeout(() => {
+      onCrossClick(delivery_id);
+    }, 500);
   };
 
   return (

@@ -1,4 +1,4 @@
-import { NotyphiTopic } from "@notificationTypes";
+import { NotyphiNotification, NotyphiTopic } from "@notificationTypes";
 import axios from "axios";
 import { NOTYPHI_BASE_URL } from "../config.ui.var";
 
@@ -60,7 +60,9 @@ export const fetchTopics = async () => {
     .catch((err) => console.log(err));
 };
 
-export const fetchAllNotifications = async (walletAddress: string) => {
+export const fetchAllNotifications = async (
+  walletAddress: string
+): Promise<NotyphiNotification[]> => {
   const headers = {
     "x-wallet-address": walletAddress,
   };
