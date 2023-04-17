@@ -16,6 +16,7 @@ import {
   useSenderConfig,
   useSignDocAmountConfig,
   useSignDocHelper,
+  useTxConfigsValidate,
   useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { unescapeHTML } from "@keplr-wallet/common";
@@ -150,6 +151,14 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
     signInteractionStore.rejectAll();
   });
 
+  const txConfigsValidate = useTxConfigsValidate({
+    senderConfig,
+    gasConfig,
+    amountConfig,
+    feeConfig,
+    memoConfig,
+  });
+
   return (
     <HeaderLayout
       title="Confirm Transaction"
@@ -160,27 +169,7 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
             text="Approve"
             color="primary"
             size="large"
-            disabled={(() => {
-              if (
-                senderConfig.uiProperties.error ||
-                gasConfig.uiProperties.error ||
-                amountConfig.uiProperties.error ||
-                feeConfig.uiProperties.error ||
-                memoConfig.uiProperties.error
-              ) {
-                return true;
-              }
-
-              if (
-                senderConfig.uiProperties.loadingState === "loading-block" ||
-                gasConfig.uiProperties.loadingState === "loading-block" ||
-                amountConfig.uiProperties.loadingState === "loading-block" ||
-                feeConfig.uiProperties.loadingState === "loading-block" ||
-                memoConfig.uiProperties.loadingState === "loading-block"
-              ) {
-                return true;
-              }
-            })()}
+            disabled={txConfigsValidate.interactionBlocked}
             onClick={async () => {
               if (signInteractionStore.waitingData) {
                 await signInteractionStore.approveAndWaitEnd(

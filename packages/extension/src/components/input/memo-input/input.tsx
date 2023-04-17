@@ -6,7 +6,18 @@ import { Box } from "../../box";
 
 export const MemoInput: FunctionComponent<{
   memoConfig: IMemoConfig;
-}> = observer(({ memoConfig }) => {
+
+  label?: string;
+  rightLabel?: React.ReactNode;
+
+  paragraph?: string;
+  error?: string;
+  errorBorder?: boolean;
+
+  placeholder?: string;
+
+  disabled?: boolean;
+}> = observer(({ memoConfig, ...others }) => {
   return (
     <Box>
       <TextInput
@@ -24,6 +35,7 @@ export const MemoInput: FunctionComponent<{
             return err.message || err.toString();
           }
         })()}
+        {...others}
       />
     </Box>
   );

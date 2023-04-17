@@ -9,17 +9,14 @@ import styled from "styled-components";
 import { useSearchParams } from "react-router-dom";
 
 import { useStore } from "../../../stores";
-import { useSendTxConfig } from "@keplr-wallet/hooks";
+import { useSendTxConfig, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
-import {
-  AmountInput,
-  RecipientInput,
-  TextInput,
-} from "../../../components/input";
+import { AmountInput, RecipientInput } from "../../../components/input";
 import { TokenItem } from "../../main/components";
 import { Button } from "../../../components/button";
 import { Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
+import { MemoInput } from "../../../components/input/memo-input";
 
 const Styles = {
   Container: styled(Stack)`
@@ -68,13 +65,34 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     300000
   );
 
+  const txConfigsValidate = useTxConfigsValidate(sendConfigs);
+
   return (
     <HeaderLayout
       title="Send"
       left={<BackButton />}
       bottom={
         <Styles.BottomButton>
-          <Button text="Go to Sign" color="primary" size="large" />
+          <Button
+            disabled={txConfigsValidate.interactionBlocked}
+            text="Go to Sign"
+            color="primary"
+            size="large"
+            // TODO: Move to "onSubmit" under form
+            onClick={() => {
+              accountStore
+                .getAccount(chainId)
+                .makeSendTokenTx(
+                  sendConfigs.amountConfig.amount[0].toDec().toString(),
+                  sendConfigs.amountConfig.amount[0].currency,
+                  sendConfigs.recipientConfig.recipient
+                )
+                .send(
+                  sendConfigs.feeConfig.toStdFee(),
+                  sendConfigs.memoConfig.memo
+                );
+            }}
+          />
         </Styles.BottomButton>
       }
     >
@@ -94,8 +112,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
         <AmountInput amountConfig={sendConfigs.amountConfig} />
 
-        <TextInput
-          label="Memo"
+        <MemoInput
+          memoConfig={sendConfigs.memoConfig}
           placeholder="Required for sending to centralized exchanges"
         />
 
