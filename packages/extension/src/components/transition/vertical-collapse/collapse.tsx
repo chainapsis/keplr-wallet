@@ -18,12 +18,13 @@ import {
   useVerticalSizeInternalContext,
   _VerticalSizeInternalContext,
 } from "../vertical-size/internal";
+import { defaultSpringConfig } from "../../../styles/spring";
 
 export const VerticalCollapseTransition: FunctionComponent<
   VerticalCollapseTransitionProps
-> = ({ children, collapsed, width, transitionAlign, springConfig }) => {
+> = ({ children, collapsed, width, transitionAlign }) => {
   const heightPx = useSpringValue(collapsed ? 0 : -1, {
-    config: springConfig,
+    config: defaultSpringConfig,
   });
 
   const [registry] = useState<IDescendantRegistry>(
@@ -49,7 +50,9 @@ export const VerticalCollapseTransition: FunctionComponent<
     }
   });
 
-  const opacity = useSpringValue(collapsed ? 0.1 : 1);
+  const opacity = useSpringValue(collapsed ? 0.1 : 1, {
+    config: defaultSpringConfig,
+  });
 
   useEffect(() => {
     if (collapsed) {

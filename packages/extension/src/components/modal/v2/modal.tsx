@@ -12,6 +12,7 @@ import {
   unlock as unlockScroll,
 } from "tua-body-scroll-lock";
 import { animated, useSpringValue } from "@react-spring/web";
+import { defaultSpringConfig } from "../../../styles/spring";
 
 export const Modal: FunctionComponent<{
   isOpen: boolean;
@@ -82,7 +83,9 @@ const ModalChild: FunctionComponent<{
 
   onCloseTransitionEnd: () => void;
 }> = ({ children, alignY, isOpen, onCloseTransitionEnd }) => {
-  const transition = useSpringValue(0);
+  const transition = useSpringValue(0, {
+    config: defaultSpringConfig,
+  });
 
   const onCloseTransitionEndRef = useRef(onCloseTransitionEnd);
   onCloseTransitionEndRef.current = onCloseTransitionEnd;

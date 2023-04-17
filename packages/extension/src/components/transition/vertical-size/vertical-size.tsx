@@ -17,19 +17,14 @@ import {
   IDescendantRegistry,
   useVerticalSizeInternalContext,
 } from "./internal";
+import { defaultSpringConfig } from "../../../styles/spring";
 
 export const VerticalResizeTransition: FunctionComponent<
   VerticalResizeTransitionProps
-> = ({
-  children,
-  width,
-  transitionAlign,
-  springConfig,
-  registry: altRegistry,
-}) => {
+> = ({ children, width, transitionAlign, registry: altRegistry }) => {
   // if -1, it means not initialized yet.
   const heightPx = useSpringValue<number>(-1, {
-    config: springConfig,
+    config: defaultSpringConfig,
   });
 
   const [_registry] = useState<IDescendantRegistry>(

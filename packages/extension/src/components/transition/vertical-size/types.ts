@@ -1,11 +1,9 @@
-import { SpringConfig, SpringValue } from "@react-spring/web";
+import { SpringValue } from "@react-spring/web";
 import { IDescendantRegistry } from "./internal";
 
 export interface VerticalResizeTransitionProps {
   width?: string | SpringValue<string>;
   transitionAlign?: "top" | "bottom" | "center";
-
-  springConfig?: SpringConfig;
 
   // nested vertical resize를 다룰때 사용된다.
   // 근데 사실 scene transition에서 필요해서 만들어진 prop이라 다른 경우에는 쓸모가 없다.

@@ -10,13 +10,7 @@ import React, {
   Ref,
 } from "react";
 import { VerticalResizeTransition } from "../../vertical-size";
-import {
-  animated,
-  SpringConfig,
-  SpringValue,
-  to,
-  useSpringValue,
-} from "@react-spring/web";
+import { animated, SpringValue, to, useSpringValue } from "@react-spring/web";
 import {
   SceneDescendantRegistry,
   SceneDescendantRegistryWrap,
@@ -28,6 +22,7 @@ import {
   SceneTransitionRef,
 } from "./types";
 import { SceneEventsContextBase, SceneTransitionContextBase } from "./context";
+import { defaultSpringConfig } from "../../../../styles/spring";
 
 export const useSceneTransitionBase = (
   props: SceneTransitionBaseProps,
@@ -314,7 +309,7 @@ export const SceneTransitionBase = forwardRef<
 export const SceneTransitionBaseInner: FunctionComponent<
   Pick<
     SceneTransitionBaseProps,
-    "width" | "scenes" | "transitionAlign" | "transitionMode" | "springConfig"
+    "width" | "scenes" | "transitionAlign" | "transitionMode"
   > &
     ReturnType<typeof useSceneTransitionBase>
 > = ({
@@ -322,7 +317,6 @@ export const SceneTransitionBaseInner: FunctionComponent<
   scenes,
   transitionAlign,
   transitionMode,
-  springConfig,
   push,
   pop,
   replace,
@@ -378,7 +372,6 @@ export const SceneTransitionBaseInner: FunctionComponent<
                 onAnimEnd={props.onAminEnd}
                 transitionAlign={transitionAlign}
                 transitionMode={transitionMode}
-                springConfig={springConfig}
                 sceneWidth={props.sceneWidth}
               >
                 <scene.element {...remaining}>{children}</scene.element>
@@ -404,8 +397,6 @@ const SceneComponent: FunctionComponent<{
   transitionMode?: "x-axis" | "opacity";
 
   sceneWidth?: string | SpringValue<string>;
-
-  springConfig?: SpringConfig;
 }> = ({
   children,
   animTop,
@@ -418,12 +409,12 @@ const SceneComponent: FunctionComponent<{
   transitionAlign,
   transitionMode = "a-axis",
   sceneWidth,
-
-  springConfig,
 }) => {
   const eventsRef = useRef<SceneEvents | null>(null);
 
-  const opacity = useSpringValue<number>(initialOpacity);
+  const opacity = useSpringValue<number>(initialOpacity, {
+    config: defaultSpringConfig,
+  });
   useEffect(() => {
     opacity.start(targetOpacity, {
       delay: transitionMode === "opacity" && targetOpacity === 1 ? 100 : 0,
@@ -431,7 +422,7 @@ const SceneComponent: FunctionComponent<{
   }, [opacity, targetOpacity, transitionMode]);
 
   const x = useSpringValue<number>(initialX, {
-    config: springConfig,
+    config: defaultSpringConfig,
   });
 
   const onAnimEndRef = useRef(onAnimEnd);

@@ -6,6 +6,7 @@ import {
   SceneTransitionBaseInner,
 } from "./internal";
 import { SpringValue, useSpringValue } from "@react-spring/web";
+import { defaultSpringConfig } from "../../../styles/spring";
 
 export interface FixedWidthSceneContext {
   setWidth(width: string | undefined): void;
@@ -84,7 +85,7 @@ export const FixedWidthSceneTransition = forwardRef<
 
   const lastSceneWidthRef = useRef<string>(topSceneWidth);
   const animWidth = useSpringValue(topSceneWidth, {
-    config: props.springConfig,
+    config: defaultSpringConfig,
   });
 
   useEffect(() => {
@@ -183,7 +184,9 @@ export const FixedWidthSceneTransition = forwardRef<
           return;
         }
       } else {
-        const anim = new SpringValue(topSceneWidth);
+        const anim = new SpringValue(topSceneWidth, {
+          config: defaultSpringConfig,
+        });
         setSceneAnimWidthRecord((prev) => {
           const next = { ...prev };
           next[topSceneId] = {
