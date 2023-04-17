@@ -14,6 +14,7 @@ import {
 import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../styles/spring";
 import { ModalProps } from "./types";
+import Color from "color";
 
 export const Modal: FunctionComponent<ModalProps> = ({
   isOpen,
@@ -104,7 +105,7 @@ const ModalChild: FunctionComponent<{
   }, [transition, isOpen]);
 
   return (
-    <div
+    <animated.div
       style={{
         position: "absolute",
         top: 0,
@@ -116,6 +117,12 @@ const ModalChild: FunctionComponent<{
         flexDirection: "column",
 
         justifyContent: alignY === "center" ? "center" : "flex-end",
+
+        backgroundColor: transition.to((t) =>
+          Color("#000000")
+            .alpha(t * 0.55)
+            .string()
+        ),
       }}
       onClick={(e) => {
         e.preventDefault();
@@ -149,6 +156,6 @@ const ModalChild: FunctionComponent<{
       >
         {children}
       </animated.div>
-    </div>
+    </animated.div>
   );
 };

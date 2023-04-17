@@ -5328,6 +5328,7 @@ __metadata:
     "@types/amplitude-js": ^8.0.1
     "@types/chrome": 0.0.88
     "@types/classnames": ^2.3.1
+    "@types/color": ^3.0.3
     "@types/firefox-webext-browser": ^70.0.1
     "@types/react-is": ^16.7.2
     "@types/resize-observer-browser": ^0.1.7
@@ -5342,6 +5343,7 @@ __metadata:
     buffer: ^6.0.3
     chromatic: ^6.11.4
     classnames: ^2.3.2
+    color: ^4.2.3
     copy-webpack-plugin: ^11.0.0
     crypto-browserify: ^3.12.0
     deepmerge: ^4.2.2
@@ -8923,6 +8925,31 @@ __metadata:
   dependencies:
     classnames: "*"
   checksum: 09a17ea08fcb83380921efdfdac94cfa162f87025cae0bf6f4ba508c2fa5f436459ce7612905a3f968fdddb68c03b8e6ff08e762ed2d0c110c5c4fceb244dc55
+  languageName: node
+  linkType: hard
+
+"@types/color-convert@npm:*":
+  version: 2.0.0
+  resolution: "@types/color-convert@npm:2.0.0"
+  dependencies:
+    "@types/color-name": "*"
+  checksum: 027b68665dc2278cc2d83e796ada0a05a08aa5a11297e227c48c7f9f6eac518dec98578ab0072bd211963d3e4b431da70b20ea28d6c3136d0badfd3f9913baee
+  languageName: node
+  linkType: hard
+
+"@types/color-name@npm:*":
+  version: 1.1.1
+  resolution: "@types/color-name@npm:1.1.1"
+  checksum: b71fcad728cc68abcba1d405742134410c8f8eb3c2ef18113b047afca158ad23a4f2c229bcf71a38f4a818dead375c45b20db121d0e69259c2d81e97a740daa6
+  languageName: node
+  linkType: hard
+
+"@types/color@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "@types/color@npm:3.0.3"
+  dependencies:
+    "@types/color-convert": "*"
+  checksum: 4a54a6eca687b1f19d393c6c44e292009e913fa2377b5b815d1cd04470131087d7a799718d9e66a970f43e6ba16e7056a5b40b49d2d0d1d0f1530aff23864528
   languageName: node
   linkType: hard
 
@@ -13270,6 +13297,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"color-string@npm:^1.9.0":
+  version: 1.9.1
+  resolution: "color-string@npm:1.9.1"
+  dependencies:
+    color-name: ^1.0.0
+    simple-swizzle: ^0.2.2
+  checksum: c13fe7cff7885f603f49105827d621ce87f4571d78ba28ef4a3f1a104304748f620615e6bf065ecd2145d0d9dad83a3553f52bb25ede7239d18e9f81622f1cc5
+  languageName: node
+  linkType: hard
+
 "color-support@npm:^1.1.2, color-support@npm:^1.1.3":
   version: 1.1.3
   resolution: "color-support@npm:1.1.3"
@@ -13286,6 +13323,16 @@ __metadata:
     color-convert: ^1.9.1
     color-string: ^1.5.4
   checksum: d52a77ae239e1cdb55d9920e73d730df69a05cec9cb5d9b83a3e311b23009fd4053f4a88e7f6152207db498838f10e3ba4b1661a64a3acb41a50b14944214f26
+  languageName: node
+  linkType: hard
+
+"color@npm:^4.2.3":
+  version: 4.2.3
+  resolution: "color@npm:4.2.3"
+  dependencies:
+    color-convert: ^2.0.1
+    color-string: ^1.9.0
+  checksum: 0579629c02c631b426780038da929cca8e8d80a40158b09811a0112a107c62e10e4aad719843b791b1e658ab4e800558f2e87ca4522c8b32349d497ecb6adeb4
   languageName: node
   linkType: hard
 
