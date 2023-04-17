@@ -14,6 +14,7 @@ import {
   TokenTitleView,
   CopyAddress,
   CopyAddressModal,
+  InternalLinkView,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty } from "@keplr-wallet/unit";
@@ -130,6 +131,7 @@ export const MainPage: FunctionComponent = observer(() => {
           <CopyAddress onClick={() => setIsOpenCopyAddress(true)} />
           <Buttons />
           <ClaimAll />
+          <InternalLinkView />
           {TokenViewData.map(({ title, balance }) => {
             return (
               <CollapsibleList
