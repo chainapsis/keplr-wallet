@@ -1,18 +1,9 @@
 import React, { CSSProperties } from "react";
 
-export type ButtonColor = "primary" | "secondary" | "danger";
-export type ButtonMode = "fill";
 export type ButtonType = "button" | "submit" | "reset";
-export type ButtonSize =
-  | "default"
-  | "extraSmall"
-  | "small"
-  | "medium"
-  | "large";
+export type ButtonSize = "small" | "large";
 
-export interface ButtonProps {
-  color?: ButtonColor;
-  mode?: ButtonMode;
+export interface TextButtonProps {
   size?: ButtonSize;
   disabled?: boolean;
   text?: string;

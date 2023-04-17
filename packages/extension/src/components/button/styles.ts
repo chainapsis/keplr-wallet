@@ -116,32 +116,6 @@ const buttonStyleFromColorAndMode: Record<
       `,
     },
   },
-  text: {
-    fill: {
-      enabled: css`
-        background-color: transparent;
-
-        ${makeTextAndSvgColor(ColorPalette["gray-50"])}
-
-        :hover {
-          color: rgba(198, 198, 204, 0.95);
-        }
-
-        :active {
-          color: ${ColorPalette["gray-200"]};
-        }
-      `,
-      disabled: css`
-        background-color: transparent;
-
-        ::after {
-          color: ${ColorPalette["gray-200"]};
-        }
-
-        ${makeTextAndSvgColor(ColorPalette["red-200"])}
-      `,
-    },
-  },
 };
 
 export const Styles = {
