@@ -15,6 +15,7 @@ import { ColorPalette } from "../../../../styles";
 import { ArrowRightIcon, QuestionIcon } from "../../../../components/icon";
 import styled from "styled-components";
 import { useNavigate } from "react-router";
+import { ChainImageFallback } from "../../../../components/image";
 
 const Styles = {
   Container: styled.div<{ forChange: boolean | undefined }>`
@@ -70,13 +71,14 @@ export const TokenItem: FunctionComponent<{
       }}
     >
       <Columns sum={1} gutter="0.5rem" alignY="center">
-        {viewToken.token.currency.coinImageUrl && (
-          <img
-            width="36px"
-            height="36px"
-            src={viewToken.token.currency.coinImageUrl}
-          />
-        )}
+        <ChainImageFallback
+          style={{
+            width: "2rem",
+            height: "2rem",
+          }}
+          src={viewToken.token.currency.coinImageUrl}
+          alt={viewToken.token.currency.coinDenom}
+        />
         <Stack gutter="0.25rem">
           <Subtitle2>{viewToken.token.currency.coinDenom}</Subtitle2>
           <Caption1 style={{ color: ColorPalette["gray-300"] }}>
