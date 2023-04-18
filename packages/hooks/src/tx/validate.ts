@@ -3,12 +3,14 @@ import {
   IFeeConfig,
   IGasConfig,
   IMemoConfig,
+  IRecipientConfig,
   ISenderConfig,
 } from "./types";
 
 // CONTRACT: Use with `observer`
 export const useTxConfigsValidate = (configs: {
   senderConfig?: ISenderConfig;
+  recipientConfig?: IRecipientConfig;
   gasConfig?: IGasConfig;
   amountConfig?: IBaseAmountConfig;
   feeConfig?: IFeeConfig;
@@ -17,6 +19,7 @@ export const useTxConfigsValidate = (configs: {
   const interactionBlocked = (() => {
     if (
       configs.senderConfig?.uiProperties.error ||
+      configs.recipientConfig?.uiProperties.error ||
       configs.gasConfig?.uiProperties.error ||
       configs.amountConfig?.uiProperties.error ||
       configs.feeConfig?.uiProperties.error ||
@@ -27,6 +30,7 @@ export const useTxConfigsValidate = (configs: {
 
     if (
       configs.senderConfig?.uiProperties.loadingState === "loading-block" ||
+      configs.recipientConfig?.uiProperties.loadingState === "loading-block" ||
       configs.gasConfig?.uiProperties.loadingState === "loading-block" ||
       configs.amountConfig?.uiProperties.loadingState === "loading-block" ||
       configs.feeConfig?.uiProperties.loadingState === "loading-block" ||

@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { TextInput } from "../text-input";
 import { observer } from "mobx-react-lite";
-import { IRecipientConfig } from "@keplr-wallet/hooks";
+import { EmptyAddressError, IRecipientConfig } from "@keplr-wallet/hooks";
 import { ProfileIcon } from "../../icon";
 import { Box } from "../../box";
 import { ColorPalette } from "../../../styles";
@@ -35,6 +35,11 @@ export const RecipientInput: FunctionComponent<{
           const uiProperties = recipientConfig.uiProperties;
 
           const err = uiProperties.error || uiProperties.warning;
+
+          if (err instanceof EmptyAddressError) {
+            return;
+          }
+
           if (err) {
             return err.message || err.toString();
           }

@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import { IAmountConfig } from "@keplr-wallet/hooks";
+import { EmptyAmountError, IAmountConfig } from "@keplr-wallet/hooks";
 import { TextInput } from "../text-input";
 import { Subtitle3 } from "../../typography";
 import { Box } from "../../box";
@@ -42,6 +42,11 @@ export const AmountInput: FunctionComponent<{
         const uiProperties = amountConfig.uiProperties;
 
         const err = uiProperties.error || uiProperties.warning;
+
+        if (err instanceof EmptyAmountError) {
+          return;
+        }
+
         if (err) {
           return err.message || err.toString();
         }
