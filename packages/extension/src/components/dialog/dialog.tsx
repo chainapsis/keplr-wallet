@@ -1,5 +1,4 @@
-import React, { FunctionComponent, useRef } from "react";
-import { useClickOutside } from "../../hooks";
+import React, { FunctionComponent } from "react";
 import { DialogProps } from "./types";
 import { Styles } from "./styles";
 
@@ -16,12 +15,9 @@ export const Dialog: FunctionComponent<DialogProps> = ({
   onClickCancel,
   onClickYes,
 }) => {
-  const wrapperRef = useRef<HTMLInputElement>(null);
-  useClickOutside(wrapperRef, () => setIsOpen(false));
-
   return (
     <Modal isOpen={isOpen} align="center" close={() => setIsOpen(false)}>
-      <Styles.Container ref={wrapperRef}>
+      <Styles.Container>
         {title ? <Styles.Title>{title}</Styles.Title> : null}
         {paragraph ? <Styles.Paragraph>{paragraph}</Styles.Paragraph> : null}
 
