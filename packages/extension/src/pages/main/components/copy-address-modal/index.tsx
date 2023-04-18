@@ -108,7 +108,7 @@ export const CopyAddressModal: FunctionComponent<{
       <Gutter size="0.75rem" />
 
       <Box
-        height="20.5rem"
+        height="21.5rem"
         style={{
           overflowY: "scroll",
         }}
