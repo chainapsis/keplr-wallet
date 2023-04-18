@@ -3,6 +3,7 @@ import { Int } from "./int";
 import { Dec } from "./decimal";
 import { DecUtils } from "./dec-utils";
 import { Currency } from "@keplr-wallet/types";
+import { integerStringToUSLocaleString } from "./utils";
 
 export class CoinUtils {
   static createCoinsFromPrimitives(
@@ -148,30 +149,7 @@ export class CoinUtils {
     );
   }
 
-  /**
-   * Change the non-locale integer string to locale string.
-   * Only support en-US format.
-   * This method uses the BigInt if the environment supports the BigInt.
-   * @param numberStr
-   */
-  static integerStringToUSLocaleString(numberStr: string): string {
-    if (numberStr.indexOf(".") >= 0) {
-      throw new Error(`${numberStr} is not integer`);
-    }
-
-    if (typeof BigInt !== "undefined") {
-      return BigInt(numberStr).toLocaleString("en-US");
-    }
-
-    const integer = numberStr;
-
-    const chunks: string[] = [];
-    for (let i = integer.length; i > 0; i -= 3) {
-      chunks.push(integer.slice(Math.max(0, i - 3), i));
-    }
-
-    return chunks.reverse().join(",");
-  }
+  static integerStringToUSLocaleString = integerStringToUSLocaleString;
 
   static coinToTrimmedString(
     coin: Coin,

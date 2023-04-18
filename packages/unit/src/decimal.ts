@@ -1,11 +1,11 @@
 import bigInteger from "big-integer";
-import { Int } from "./int";
-import { CoinUtils } from "./coin-utils";
+import { Uint, Int } from "./int";
 import {
   exponentDecStringToDecString,
   isExponentDecString,
   isValidDecimalString,
 } from "./etc";
+import { integerStringToUSLocaleString } from "./utils";
 
 export class Dec {
   public static readonly precision = 18;
@@ -376,9 +376,7 @@ export class Dec {
       !(integer.eq(bigInteger(0)) && fractionStr.length === 0);
 
     const integerStr = locale
-      ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        CoinUtils.integerStringToUSLocaleString(integer.toString())
+      ? integerStringToUSLocaleString(integer.toString())
       : integer.toString();
 
     return `${isNegative ? "-" : ""}${integerStr}${
@@ -410,3 +408,11 @@ export class Dec {
     return new Dec(this.chopPrecisionAndTruncate(), 0);
   }
 }
+
+Int.prototype.toDec = function (): Dec {
+  return new Dec(new Int(this.toString()));
+};
+
+Uint.prototype.toDec = function (): Dec {
+  return new Dec(new Int(this.toString()));
+};

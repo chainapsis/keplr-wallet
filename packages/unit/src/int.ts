@@ -1,5 +1,5 @@
 import bigInteger from "big-integer";
-import { Dec } from "./decimal";
+import type { Dec } from "./decimal";
 import {
   exponentDecStringToDecString,
   isExponentDecString,
@@ -13,6 +13,8 @@ export class Int {
   );
 
   protected int: bigInteger.BigInteger;
+
+  declare toDec: () => Dec;
 
   /**
    * @param int - Parse a number | bigInteger | string into a bigInt.
@@ -119,10 +121,6 @@ export class Int {
     return new Int(this.int.pow(i.toBigNumber()));
   }
 
-  public toDec(): Dec {
-    return new Dec(this);
-  }
-
   public toBigNumber(): bigInteger.BigInteger {
     return this.int;
   }
@@ -130,6 +128,8 @@ export class Int {
 
 export class Uint {
   protected uint: bigInteger.BigInteger;
+
+  declare toDec: () => Dec;
 
   /**
    * @param uint - Parse a number | bigInteger | string into a bigUint.
@@ -218,10 +218,6 @@ export class Uint {
 
   public pow(i: Uint): Uint {
     return new Uint(this.uint.pow(i.toBigNumber()));
-  }
-
-  public toDec(): Dec {
-    return new Dec(new Int(this.toString()));
   }
 
   public toBigNumber(): bigInteger.BigInteger {
