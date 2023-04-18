@@ -74,8 +74,11 @@ export const CopyAddressModal: FunctionComponent<{
       if (address.chainInfo.chainName.includes(s)) {
         return true;
       }
-      if (address.bech32Address.includes(s)) {
-        return true;
+      const bech32Split = address.bech32Address.split("1");
+      if (bech32Split.length > 0) {
+        if (bech32Split[0].includes(s)) {
+          return true;
+        }
       }
     });
 
