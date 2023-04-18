@@ -15,6 +15,7 @@ import {
   CopyAddress,
   CopyAddressModal,
   InternalLinkView,
+  BuyCryptoModal,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
@@ -132,6 +133,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
   const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
+  const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
   return (
     <HeaderLayout
@@ -151,7 +153,10 @@ export const MainPage: FunctionComponent = observer(() => {
         <Stack gutter="1rem">
           <StringToggle tabStatus={tabStatus} setTabStatus={setTabStatus} />
           <CopyAddress onClick={() => setIsOpenCopyAddress(true)} />
-          <Buttons />
+          <Buttons
+            onClickDeposit={() => setIsOpenCopyAddress(true)}
+            onClickBuy={() => setIsOpenBuy(true)}
+          />
           <ClaimAll />
           <InternalLinkView />
           {TokenViewData.map(({ title, balance, lenAlwaysShown }) => {
@@ -190,6 +195,14 @@ export const MainPage: FunctionComponent = observer(() => {
         close={() => setIsOpenCopyAddress(false)}
       >
         <CopyAddressModal close={() => setIsOpenCopyAddress(false)} />
+      </Modal>
+
+      <Modal
+        isOpen={isOpenBuy}
+        align="bottom"
+        close={() => setIsOpenBuy(false)}
+      >
+        <BuyCryptoModal close={() => setIsOpenBuy(false)} />
       </Modal>
     </HeaderLayout>
   );
