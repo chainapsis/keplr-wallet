@@ -36,7 +36,7 @@ export const TokenTitleView: FunctionComponent<{ title: string }> = ({
   return (
     <Columns sum={1} alignY="center">
       <Subtitle4 style={{ color: ColorPalette["gray-200"] }}>{title}</Subtitle4>
-      <Box paddingLeft="0.375rem" paddingY="0.5rem">
+      <Box marginLeft="0.25rem">
         <QuestionIcon
           width="1rem"
           height="1rem"

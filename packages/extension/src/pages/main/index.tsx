@@ -24,6 +24,7 @@ import { MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Modal } from "../../components/modal/v2";
+import { DualChart } from "./components/chart";
 
 const Styles = {
   Container: styled.div`
@@ -148,9 +149,18 @@ export const MainPage: FunctionComponent = observer(() => {
       right={<ProfileButton />}
     >
       <Styles.Container>
-        <Stack gutter="1rem">
+        <Stack gutter="0.75rem">
           <StringToggle tabStatus={tabStatus} setTabStatus={setTabStatus} />
           <CopyAddress onClick={() => setIsOpenCopyAddress(true)} />
+          <DualChart
+            first={{
+              weight: 2,
+            }}
+            second={{
+              weight: 1,
+            }}
+            highlight={tabStatus === "available" ? "first" : "second"}
+          />
           <Buttons />
           <ClaimAll />
           <InternalLinkView />
