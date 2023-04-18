@@ -1,17 +1,19 @@
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { CloseIcon } from "../../../../components/icon";
 import { Box } from "../../../../components/box";
 import { Stack } from "../../../../components/stack";
-import { useClickOutside } from "../../../../hooks";
 import { useNavigate } from "react-router";
 
 const Styles = {
   Container: styled.div`
+    height: 100%;
+    width: 70%;
+    max-width: 20rem;
+
     display: flex;
 
-    min-width: 15rem;
     background-color: ${ColorPalette["gray-600"]};
 
     padding: 2rem;
@@ -28,16 +30,14 @@ const Styles = {
 };
 
 export const MenuBar: FunctionComponent<{
-  setIsOpen: (isOpen: boolean) => void;
-}> = ({ setIsOpen }) => {
+  close: () => void;
+}> = ({ close }) => {
   const navigate = useNavigate();
-  const wrapperRef = useRef<HTMLInputElement>(null);
-  useClickOutside(wrapperRef, () => setIsOpen(false));
 
   return (
-    <Styles.Container ref={wrapperRef}>
+    <Styles.Container>
       <Stack gutter="1.75rem">
-        <Box onClick={() => setIsOpen(false)} cursor="pointer">
+        <Box onClick={close} cursor="pointer">
           <CloseIcon />
         </Box>
 

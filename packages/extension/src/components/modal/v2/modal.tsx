@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -50,6 +51,16 @@ export const Modal: FunctionComponent<ModalProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needRootElement]);
+
+  useEffect(() => {
+    return () => {
+      if (rootElementIdRef.current) {
+        modalRoot.releaseRootElement(rootElementIdRef.current);
+        rootElementIdRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useLayoutEffect(() => {
     if (isOpen) {

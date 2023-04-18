@@ -23,7 +23,7 @@ import styled from "styled-components";
 import { MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { CollapsibleList } from "../../components/collapsible-list";
-import { Modal } from "../../components/modal";
+import { Modal } from "../../components/modal/v2";
 
 const Styles = {
   Container: styled.div`
@@ -156,11 +156,19 @@ export const MainPage: FunctionComponent = observer(() => {
         </Stack>
       </Styles.Container>
 
-      <Modal isOpen={isOpenMenu} height="100%">
-        <MenuBar setIsOpen={setIsOpenMenu} />
+      <Modal
+        isOpen={isOpenMenu}
+        align="left"
+        close={() => setIsOpenMenu(false)}
+      >
+        <MenuBar close={() => setIsOpenMenu(false)} />
       </Modal>
 
-      <Modal isOpen={isOpenCopyAddress}>
+      <Modal
+        isOpen={isOpenCopyAddress}
+        align="bottom"
+        close={() => setIsOpenCopyAddress(false)}
+      >
         <CopyAddressModal setIsOpen={setIsOpenCopyAddress} />
       </Modal>
     </HeaderLayout>
