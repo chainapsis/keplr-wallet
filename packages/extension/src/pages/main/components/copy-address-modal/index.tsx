@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import {
@@ -11,7 +11,12 @@ import { TextInput } from "../../../../components/input";
 import { Column, Columns } from "../../../../components/column";
 import { SearchIcon, StarIcon } from "../../../../components/icon";
 import { Box } from "../../../../components/box";
-import { Stack } from "../../../../components/stack";
+import { Gutter } from "../../../../components/gutter";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
+import { ChainInfo } from "@keplr-wallet/types";
+import { YAxis } from "../../../../components/axis";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 const Styles = {
   Container: styled.div`
@@ -20,30 +25,73 @@ const Styles = {
 
     width: 100%;
 
-    padding: 1.25rem;
-    gap: 0.75rem;
+    padding: 1.25rem 0.75rem 0 0.75rem;
 
     background-color: ${ColorPalette["gray-600"]};
 
-    height: 100px;
     overflow-y: scroll;
   `,
   ItemContainer: styled.div`
     padding: 0.875rem 0.5rem 0.875rem 1rem;
   `,
-  Favorite: styled.div``,
   TextButton: styled(Button2)`
     cursor: pointer;
     padding: 0.5rem 1rem;
   `,
 };
 
-export const CopyAddressModal: FunctionComponent = () => {
+export const CopyAddressModal: FunctionComponent<{
+  close: () => void;
+}> = observer(({ close }) => {
+  const { chainStore, accountStore } = useStore();
+
+  const [search, setSearch] = useState("");
+
+  const addresses = chainStore.chainInfosInUI
+    .map((chainInfo) => {
+      const bech32Address = accountStore.getAccount(
+        chainInfo.chainId
+      ).bech32Address;
+      return {
+        chainInfo,
+        bech32Address,
+      };
+    })
+    .filter((address) => {
+      if (address.bech32Address.length === 0) {
+        return false;
+      }
+
+      const s = search.trim();
+      if (s.length === 0) {
+        return true;
+      }
+
+      if (address.chainInfo.chainId.includes(s)) {
+        return true;
+      }
+      if (address.chainInfo.chainName.includes(s)) {
+        return true;
+      }
+      if (address.bech32Address.includes(s)) {
+        return true;
+      }
+    });
+
   return (
     <Styles.Container>
-      <Subtitle1 style={{ textAlign: "center" }}>Copy Address</Subtitle1>
+      <Subtitle1 style={{ color: ColorPalette["white"], textAlign: "center" }}>
+        Copy Address
+      </Subtitle1>
 
+      <Gutter size="0.75rem" />
       <TextInput
+        value={search}
+        onChange={(e) => {
+          e.preventDefault();
+
+          setSearch(e.target.value);
+        }}
         placeholder="Search for a chain"
         left={
           <SearchIcon
@@ -53,37 +101,72 @@ export const CopyAddressModal: FunctionComponent = () => {
           />
         }
       />
+      <Gutter size="0.75rem" />
 
-      <ChainAddressItem />
-      <ChainAddressItem />
-      <ChainAddressItem />
+      <Box
+        height="20.5rem"
+        style={{
+          overflowY: "scroll",
+        }}
+      >
+        {addresses.map((address) => {
+          return (
+            <ChainAddressItem
+              key={address.chainInfo.chainId}
+              chainInfo={address.chainInfo}
+              bech32Address={address.bech32Address}
+              close={close}
+            />
+          );
+        })}
+      </Box>
     </Styles.Container>
   );
-};
+});
 
-export const ChainAddressItem: FunctionComponent = () => {
+export const ChainAddressItem: FunctionComponent<{
+  chainInfo: ChainInfo;
+  bech32Address: string;
+
+  close: () => void;
+}> = ({ chainInfo, bech32Address, close }) => {
   return (
     <Styles.ItemContainer>
       <Columns sum={1} alignY="center" gutter="0.5rem">
-        <Styles.Favorite>
-          <StarIcon width="1.25rem" height="1.25rem" />
-        </Styles.Favorite>
+        <StarIcon width="1.25rem" height="1.25rem" />
 
         <Box>
           <img
-            width="36px"
-            height="36px"
+            style={{
+              width: "2.25rem",
+              height: "2.25rem",
+            }}
             src="https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/chain.png"
+            alt="chain icon"
           />
         </Box>
-        <Stack>
-          <Subtitle3 color={ColorPalette["gray-10"]}>Cosmos</Subtitle3>
+        <YAxis>
+          <Subtitle3 color={ColorPalette["gray-10"]}>
+            {chainInfo.chainName}
+          </Subtitle3>
+          <Gutter size="0.25rem" />
           <Caption1 color={ColorPalette["gray-300"]}>
-            juno1abcd....zkme (118)
+            {Bech32Address.shortenAddress(bech32Address, 20)}
           </Caption1>
-        </Stack>
+        </YAxis>
         <Column weight={1} />
-        <Styles.TextButton>Copy</Styles.TextButton>
+        {/* TODO: Copy 버튼이 눌린 직후의 action을 어케할지 아직 안 정해짐 */}
+        <Styles.TextButton
+          onClick={async (e) => {
+            e.preventDefault();
+
+            await navigator.clipboard.writeText(bech32Address);
+
+            close();
+          }}
+        >
+          Copy
+        </Styles.TextButton>
       </Columns>
     </Styles.ItemContainer>
   );

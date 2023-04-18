@@ -169,7 +169,7 @@ export const MainPage: FunctionComponent = observer(() => {
         align="bottom"
         close={() => setIsOpenCopyAddress(false)}
       >
-        <CopyAddressModal />
+        <CopyAddressModal close={() => setIsOpenCopyAddress(false)} />
       </Modal>
     </HeaderLayout>
   );
