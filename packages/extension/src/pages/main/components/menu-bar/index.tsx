@@ -5,22 +5,13 @@ import { CloseIcon } from "../../../../components/icon";
 import { Box } from "../../../../components/box";
 import { Stack } from "../../../../components/stack";
 import { useNavigate } from "react-router";
+import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
-  Container: styled.div`
-    height: 100%;
-    width: 70%;
-    max-width: 20rem;
-
-    display: flex;
-
-    background-color: ${ColorPalette["gray-600"]};
-
-    padding: 2rem;
-  `,
   MenuItem: styled(Box)`
     font-weight: 500;
     font-size: 1.5rem;
+    color: ${ColorPalette["white"]};
 
     cursor: pointer;
   `,
@@ -35,12 +26,22 @@ export const MenuBar: FunctionComponent<{
   const navigate = useNavigate();
 
   return (
-    <Styles.Container>
+    <Box
+      height="100%"
+      width="70%"
+      maxWidth="20rem"
+      backgroundColor={ColorPalette["gray-600"]}
+      padding="2rem"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Box onClick={close} cursor="pointer" maxWidth="2.5rem">
+        <CloseIcon width="2rem" height="2rem" />
+      </Box>
+      <Gutter size="1.25rem" />
       <Stack gutter="1.75rem">
-        <Box onClick={close} cursor="pointer">
-          <CloseIcon />
-        </Box>
-
         <Styles.MenuItem onClick={() => navigate("/setting/contacts/list")}>
           Address Book
         </Styles.MenuItem>
@@ -52,11 +53,11 @@ export const MenuBar: FunctionComponent<{
         >
           Settings
         </Styles.MenuItem>
-
-        <Styles.Flex1 />
-
-        <Styles.MenuItem>Lock Wallet</Styles.MenuItem>
       </Stack>
-    </Styles.Container>
+
+      <Styles.Flex1 />
+
+      <Styles.MenuItem>Lock Wallet</Styles.MenuItem>
+    </Box>
   );
 };
