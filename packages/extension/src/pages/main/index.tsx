@@ -40,8 +40,8 @@ export interface ViewToken {
 export const MainPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
 
-  const stakableBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
-    (chainInfo) => {
+  const stakableBalances: ViewToken[] = chainStore.chainInfosInUI
+    .flatMap((chainInfo) => {
       const chainId = chainInfo.chainId;
       const accountAddress = accountStore.getAccount(chainId).bech32Address;
       const queries = queriesStore.get(chainId);
@@ -52,8 +52,24 @@ export const MainPage: FunctionComponent = observer(() => {
             .balance,
         chainInfo,
       };
-    }
-  );
+    })
+    .sort((a, b) => {
+      // Move zeros to last
+      const aIsZero = a.token.toDec().lte(new Dec(0));
+      const bIsZero = b.token.toDec().lte(new Dec(0));
+
+      if (aIsZero && bIsZero) {
+        return 0;
+      }
+      if (aIsZero) {
+        return 1;
+      }
+      if (bIsZero) {
+        return -1;
+      }
+
+      return 0;
+    });
 
   const allBalances: ViewToken[] = chainStore.chainInfosInUI
     .flatMap((chainInfo) => {
