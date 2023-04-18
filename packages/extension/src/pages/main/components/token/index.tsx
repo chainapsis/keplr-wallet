@@ -55,6 +55,8 @@ export const TokenItem: FunctionComponent<{
 
   const navigate = useNavigate();
 
+  const pricePretty = priceStore.calculatePrice(viewToken.token);
+
   return (
     <Styles.Container
       forChange={forChange}
@@ -90,14 +92,18 @@ export const TokenItem: FunctionComponent<{
 
         <Columns sum={1} gutter="0.25rem" alignY="center">
           <Stack gutter="0.25rem" alignX="right">
-            <Subtitle3>{viewToken.token.hideDenom(true).toString()}</Subtitle3>
+            <Subtitle3>
+              {viewToken.token
+                .hideDenom(true)
+                .maxDecimals(6)
+                .inequalitySymbol(true)
+                .shrink(true)
+                .toString()}
+            </Subtitle3>
             <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
-              {parseFloat(
-                priceStore
-                  .calculatePrice(viewToken.token)
-                  ?.toDec()
-                  .toString() ?? "0"
-              )}
+              {pricePretty
+                ? pricePretty.inequalitySymbol(true).toString()
+                : "-"}
             </Subtitle3>
           </Stack>
 

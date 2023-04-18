@@ -17,7 +17,7 @@ import {
   InternalLinkView,
 } from "./components";
 import { Stack } from "../../components/stack";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ChainInfo } from "@keplr-wallet/types";
 import styled from "styled-components";
 import { MenuIcon } from "../../components/icon";
@@ -40,8 +40,23 @@ export interface ViewToken {
 export const MainPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
 
-  const allBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
+  const stakableBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
     (chainInfo) => {
+      const chainId = chainInfo.chainId;
+      const accountAddress = accountStore.getAccount(chainId).bech32Address;
+      const queries = queriesStore.get(chainId);
+
+      return {
+        token:
+          queries.queryBalances.getQueryBech32Address(accountAddress).stakable
+            .balance,
+        chainInfo,
+      };
+    }
+  );
+
+  const allBalances: ViewToken[] = chainStore.chainInfosInUI
+    .flatMap((chainInfo) => {
       const chainId = chainInfo.chainId;
       const accountAddress = accountStore.getAccount(chainId).bech32Address;
       const queries = queriesStore.get(chainId);
@@ -59,23 +74,10 @@ export const MainPage: FunctionComponent = observer(() => {
           chainInfo,
         };
       });
-    }
-  );
-
-  const stakableBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
-    (chainInfo) => {
-      const chainId = chainInfo.chainId;
-      const accountAddress = accountStore.getAccount(chainId).bech32Address;
-      const queries = queriesStore.get(chainId);
-
-      return {
-        token:
-          queries.queryBalances.getQueryBech32Address(accountAddress).stakable
-            .balance,
-        chainInfo,
-      };
-    }
-  );
+    })
+    .filter((token) => {
+      return token.token.toDec().gt(new Dec(0));
+    });
 
   const ibcBalances = allBalances.filter((balance) => {
     const denomHelper = new DenomHelper(
@@ -100,10 +102,14 @@ export const MainPage: FunctionComponent = observer(() => {
     );
   });
 
-  const TokenViewData: { title: string; balance: ViewToken[] }[] = [
-    { title: "Balance", balance: stakableBalances },
-    { title: "Token Balance", balance: tokenBalances },
-    { title: "IBC Balance", balance: ibcBalances },
+  const TokenViewData: {
+    title: string;
+    balance: ViewToken[];
+    lenAlwaysShown: number;
+  }[] = [
+    { title: "Balance", balance: stakableBalances, lenAlwaysShown: 5 },
+    { title: "Token Balance", balance: tokenBalances, lenAlwaysShown: 3 },
+    { title: "IBC Balance", balance: ibcBalances, lenAlwaysShown: 3 },
   ];
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
@@ -132,24 +138,22 @@ export const MainPage: FunctionComponent = observer(() => {
           <Buttons />
           <ClaimAll />
           <InternalLinkView />
-          {TokenViewData.map(({ title, balance }) => {
+          {TokenViewData.map(({ title, balance, lenAlwaysShown }) => {
+            if (balance.length === 0) {
+              return null;
+            }
+
             return (
               <CollapsibleList
                 key={title}
                 title={<TokenTitleView title={title} />}
-                items={balance.slice(2).map((viewToken) => (
+                lenAlwaysShown={lenAlwaysShown}
+                items={balance.map((viewToken) => (
                   <TokenItem
                     viewToken={viewToken}
                     key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                   />
                 ))}
-                alwaysShown={balance.slice(0, 2).map((viewToken) => (
-                  <TokenItem
-                    viewToken={viewToken}
-                    key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                  />
-                ))}
-                right={balance.length}
               />
             );
           })}

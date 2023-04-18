@@ -181,21 +181,14 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
                   <CollapsibleList
                     key={title}
                     title={<H4>{title}</H4>}
-                    items={grants.slice(2).map((grant) => (
+                    lenAlwaysShown={2}
+                    items={grants.map((grant) => (
                       <GrantView
                         key={`${grant.authorization}-${grant.grantee}-${grant.expiration}`}
                         grant={grant}
                         onClick={() => onClickAuthZItem(title, grant)}
                       />
                     ))}
-                    alwaysShown={grants.slice(0, 2).map((grant) => (
-                      <GrantView
-                        key={`${grant.authorization}-${grant.grantee}-${grant.expiration}`}
-                        grant={grant}
-                        onClick={() => onClickAuthZItem(title, grant)}
-                      />
-                    ))}
-                    right={grants.length}
                   />
                 );
               })

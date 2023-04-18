@@ -1,6 +1,8 @@
+import React from "react";
+
 export interface CollapsibleListProps {
   title: React.ReactNode;
-  items: React.ReactNode;
-  alwaysShown?: React.ReactNode;
-  right?: React.ReactNode;
+  items: React.ReactNode[];
+
+  lenAlwaysShown?: number;
 }

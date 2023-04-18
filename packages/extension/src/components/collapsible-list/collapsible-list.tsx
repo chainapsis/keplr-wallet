@@ -2,7 +2,6 @@ import React, { FunctionComponent, useState } from "react";
 import { CollapsibleListProps } from "./types";
 import { Stack } from "../stack";
 import { Box } from "../box";
-import { Styles } from "./styles";
 import { Subtitle4 } from "../typography";
 import { ColorPalette } from "../../styles";
 import { ArrowDownIcon, ArrowUpIcon } from "../icon";
@@ -11,16 +10,26 @@ import { VerticalCollapseTransition } from "../transition/vertical-collapse";
 
 export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   title,
-  right,
-  alwaysShown,
   items,
+  lenAlwaysShown,
 }) => {
+  if (!lenAlwaysShown || lenAlwaysShown < 0) {
+    lenAlwaysShown = items.length;
+  }
+
   const [isExpanded, setIsExpanded] = useState(true);
+
+  const alwaysShown = items.slice(0, lenAlwaysShown);
+  const hidden = items.slice(lenAlwaysShown);
 
   return (
     <Stack>
-      <Styles.Title
-        onClick={() => {
+      <Box
+        cursor={hidden.length > 0 ? "pointer" : undefined}
+        marginBottom="0.5rem"
+        onClick={(e) => {
+          e.preventDefault();
+
           setIsExpanded(!isExpanded);
         }}
       >
@@ -29,37 +38,38 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
 
           <Column weight={1} />
 
-          {right ? (
-            <Subtitle4 style={{ color: ColorPalette["gray-300"] }}>
-              {right}
-            </Subtitle4>
+          {hidden.length > 0 ? (
+            <React.Fragment>
+              <Subtitle4 style={{ color: ColorPalette["gray-300"] }}>
+                {items.length}
+              </Subtitle4>
+              <Box paddingLeft="0.25rem">
+                {isExpanded ? (
+                  <ArrowDownIcon
+                    width="1rem"
+                    height="1rem"
+                    color={ColorPalette["gray-300"]}
+                  />
+                ) : (
+                  <ArrowUpIcon
+                    width="1rem"
+                    height="1rem"
+                    color={ColorPalette["gray-300"]}
+                  />
+                )}
+              </Box>
+            </React.Fragment>
           ) : null}
-
-          <Box paddingLeft="0.25rem">
-            {isExpanded ? (
-              <ArrowDownIcon
-                width="1rem"
-                height="1rem"
-                color={ColorPalette["gray-300"]}
-              />
-            ) : (
-              <ArrowUpIcon
-                width="1rem"
-                height="1rem"
-                color={ColorPalette["gray-300"]}
-              />
-            )}
-          </Box>
         </Columns>
-      </Styles.Title>
+      </Box>
 
-      {alwaysShown ? <Stack gutter="0.5rem">{alwaysShown}</Stack> : null}
+      <Stack gutter="0.5rem">{alwaysShown}</Stack>
 
-      <Styles.Items>
+      <Box marginTop="0.5rem">
         <VerticalCollapseTransition collapsed={isExpanded}>
-          <Stack gutter="0.5rem">{items}</Stack>
+          <Stack gutter="0.5rem">{hidden}</Stack>
         </VerticalCollapseTransition>
-      </Styles.Items>
+      </Box>
     </Stack>
   );
 };
