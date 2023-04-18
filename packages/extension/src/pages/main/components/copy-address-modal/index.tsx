@@ -17,6 +17,7 @@ import { useStore } from "../../../../stores";
 import { ChainInfo } from "@keplr-wallet/types";
 import { YAxis } from "../../../../components/axis";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { ChainImageFallback } from "../../../../components/image";
 
 const Styles = {
   Container: styled.div`
@@ -136,12 +137,12 @@ export const ChainAddressItem: FunctionComponent<{
         <StarIcon width="1.25rem" height="1.25rem" />
 
         <Box>
-          <img
+          <ChainImageFallback
             style={{
               width: "2.25rem",
               height: "2.25rem",
             }}
-            src="https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/chain.png"
+            src={chainInfo.chainSymbolImageUrl}
             alt="chain icon"
           />
         </Box>
