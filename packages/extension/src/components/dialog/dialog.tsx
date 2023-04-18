@@ -2,10 +2,11 @@ import React, { FunctionComponent, useRef } from "react";
 import { useClickOutside } from "../../hooks";
 import { DialogProps } from "./types";
 import { Styles } from "./styles";
-import { Modal } from "../modal";
+
 import { Column, Columns } from "../column";
 import { Button } from "../button";
 import { TextButton } from "../button-text";
+import { Modal } from "../modal/v2";
 
 export const Dialog: FunctionComponent<DialogProps> = ({
   isOpen,
@@ -19,7 +20,7 @@ export const Dialog: FunctionComponent<DialogProps> = ({
   useClickOutside(wrapperRef, () => setIsOpen(false));
 
   return (
-    <Modal isOpen={isOpen} yAlign="center">
+    <Modal isOpen={isOpen} align="center" close={() => setIsOpen(false)}>
       <Styles.Container ref={wrapperRef}>
         {title ? <Styles.Title>{title}</Styles.Title> : null}
         {paragraph ? <Styles.Paragraph>{paragraph}</Styles.Paragraph> : null}
