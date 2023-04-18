@@ -139,9 +139,9 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
   const preferNoSetFee =
     signInteractionStore.waitingData?.data.signOptions.preferNoSetFee ===
       true || isProcessing;
-  const preferNoSetMemo =
-    signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo ===
-      true || isProcessing;
+  // const preferNoSetMemo =
+  //   signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo ===
+  //     true || isProcessing;
 
   const interactionInfo = useInteractionInfo(() => {
     if (needSetIsProcessing) {
