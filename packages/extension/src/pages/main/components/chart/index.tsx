@@ -1,6 +1,8 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useLayoutEffect } from "react";
 import { YAxis } from "../../../../components/axis";
 import { ColorPalette } from "../../../../styles";
+import { animated, to, useSpringValue } from "@react-spring/web";
+import { defaultSpringConfig } from "../../../../styles/spring";
 
 export const DualChart: FunctionComponent<{
   first: {
@@ -24,26 +26,18 @@ export const DualChart: FunctionComponent<{
   const endAngle = 180 - angle / 2 + 90 + angle;
 
   const firstArcVisibility = (() => {
-    if (first.weight < 0 && second.weight < 0) {
+    if (first.weight <= 0 && second.weight <= 0) {
       return false;
     }
 
-    if (highlight !== "first") {
-      return false;
-    }
-
-    return first.weight > 0;
+    return highlight === "first";
   })();
   const secondArcVisibility = (() => {
-    if (first.weight < 0 && second.weight < 0) {
+    if (first.weight <= 0 && second.weight <= 0) {
       return false;
     }
 
-    if (highlight !== "second") {
-      return false;
-    }
-
-    return second.weight > 0;
+    return highlight === "second";
   })();
 
   const firstArcEndAngle = (() => {
@@ -54,14 +48,62 @@ export const DualChart: FunctionComponent<{
       return startAngle;
     }
   })();
-  const secondArcEndAngle = (() => {
-    const fullWeight = first.weight + second.weight;
-    if (fullWeight > 0) {
-      return firstArcEndAngle + (second.weight / fullWeight) * angle;
-    } else {
-      return firstArcEndAngle;
+
+  const arcStartAngle = useSpringValue(
+    (() => {
+      if (!firstArcVisibility && !secondArcVisibility) {
+        return 0;
+      }
+
+      if (firstArcVisibility) {
+        return startAngle;
+      } else {
+        return firstArcEndAngle;
+      }
+    })(),
+    {
+      config: defaultSpringConfig,
     }
-  })();
+  );
+  const arcEndAngle = useSpringValue(
+    (() => {
+      if (!firstArcVisibility && !secondArcVisibility) {
+        return 0;
+      }
+
+      if (firstArcVisibility) {
+        return firstArcEndAngle;
+      } else {
+        return endAngle;
+      }
+    })(),
+    {
+      config: defaultSpringConfig,
+    }
+  );
+
+  useLayoutEffect(() => {
+    if (!firstArcVisibility && !secondArcVisibility) {
+      arcStartAngle.start(0);
+      arcEndAngle.start(0);
+    } else {
+      if (firstArcVisibility) {
+        arcStartAngle.start(startAngle);
+        arcEndAngle.start(firstArcEndAngle);
+      } else {
+        arcStartAngle.start(firstArcEndAngle);
+        arcEndAngle.start(endAngle);
+      }
+    }
+  }, [
+    arcEndAngle,
+    arcStartAngle,
+    endAngle,
+    firstArcEndAngle,
+    firstArcVisibility,
+    secondArcVisibility,
+    startAngle,
+  ]);
 
   return (
     <YAxis alignX="center">
@@ -93,16 +135,22 @@ export const DualChart: FunctionComponent<{
           strokeLinecap="round"
         />
 
-        {firstArcVisibility ? (
+        {firstArcVisibility || secondArcVisibility ? (
           <React.Fragment>
-            <mask id="arc1-mask">
-              <path
-                d={getArcPath({
-                  x,
-                  y,
-                  radius,
-                  startAngle,
-                  endAngle: firstArcEndAngle,
+            <mask id="arc-mask">
+              <animated.path
+                d={to([arcStartAngle, arcEndAngle], (startAngle, endAngle) => {
+                  if (Math.abs(startAngle - endAngle) <= 0.05) {
+                    return "";
+                  }
+
+                  return getArcPath({
+                    x,
+                    y,
+                    radius,
+                    startAngle,
+                    endAngle,
+                  });
                 })}
                 stroke="white"
                 strokeWidth={stroke}
@@ -110,40 +158,13 @@ export const DualChart: FunctionComponent<{
               />
             </mask>
             <rect
-              id="arc1-fill"
+              id="arc-fill"
               x={0}
               y={0}
               width={width}
               height={height}
               fill="url(#linear)"
-              mask="url(#arc1-mask)"
-            />
-          </React.Fragment>
-        ) : null}
-        {secondArcVisibility ? (
-          <React.Fragment>
-            <mask id="arc2-mask">
-              <path
-                d={getArcPath({
-                  x,
-                  y,
-                  radius,
-                  startAngle: firstArcEndAngle,
-                  endAngle: secondArcEndAngle,
-                })}
-                stroke="white"
-                strokeWidth={stroke}
-                strokeLinecap="round"
-              />
-            </mask>
-            <rect
-              id="arc2-fill"
-              x={0}
-              y={0}
-              width={width}
-              height={height}
-              fill="url(#linear)"
-              mask="url(#arc2-mask)"
+              mask="url(#arc-mask)"
             />
           </React.Fragment>
         ) : null}
