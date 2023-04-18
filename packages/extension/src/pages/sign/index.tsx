@@ -119,10 +119,15 @@ export const SignPage: FunctionComponent = observer(() => {
       feeConfig.setDisableBalanceCheck(
         !!data.data.signOptions.disableBalanceCheck
       );
-      if (
+
+      const signerIsNotFeePayer =
         data.data.signDocWrapper.granter &&
-        data.data.signDocWrapper.granter !== data.data.signer
-      ) {
+        data.data.signDocWrapper.granter !== data.data.signer;
+      // evmos will cover fees from staking rewards if the balance
+      // is insufficient
+      const useStakeForFees = current.features?.includes("evmos-stake-fee");
+
+      if (signerIsNotFeePayer || useStakeForFees) {
         feeConfig.setDisableBalanceCheck(true);
       }
       setSigner(data.data.signer);
