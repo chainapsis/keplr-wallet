@@ -25,6 +25,9 @@ import { Box } from "../../components/box";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Modal } from "../../components/modal/v2";
 import { DualChart } from "./components/chart";
+import { Gutter } from "../../components/gutter";
+import { H1, Subtitle3 } from "../../components/typography";
+import { ColorPalette } from "../../styles";
 
 const Styles = {
   Container: styled.div`
@@ -152,15 +155,48 @@ export const MainPage: FunctionComponent = observer(() => {
         <Stack gutter="0.75rem">
           <StringToggle tabStatus={tabStatus} setTabStatus={setTabStatus} />
           <CopyAddress onClick={() => setIsOpenCopyAddress(true)} />
-          <DualChart
-            first={{
-              weight: 2,
-            }}
-            second={{
-              weight: 1,
-            }}
-            highlight={tabStatus === "available" ? "first" : "second"}
-          />
+          <Box position="relative">
+            <DualChart
+              first={{
+                weight: 2,
+              }}
+              second={{
+                weight: 1,
+              }}
+              highlight={tabStatus === "available" ? "first" : "second"}
+            />
+            <Box
+              position="absolute"
+              style={{
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Gutter size="2rem" />
+              <Subtitle3
+                style={{
+                  color: ColorPalette["gray-300"],
+                }}
+              >
+                {tabStatus === "available" ? "Total Available" : "Total Staked"}
+              </Subtitle3>
+              <Gutter size="0.5rem" />
+              <H1
+                style={{
+                  color: ColorPalette["gray-10"],
+                }}
+              >
+                $12,123.45
+              </H1>
+            </Box>
+          </Box>
           <Buttons />
           <ClaimAll />
           <InternalLinkView />
