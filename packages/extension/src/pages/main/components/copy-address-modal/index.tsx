@@ -1,6 +1,5 @@
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent } from "react";
 import styled from "styled-components";
-import { useClickOutside } from "../../../../hooks";
 import { ColorPalette } from "../../../../styles";
 import {
   Subtitle1,
@@ -25,6 +24,9 @@ const Styles = {
     gap: 0.75rem;
 
     background-color: ${ColorPalette["gray-600"]};
+
+    height: 100px;
+    overflow-y: scroll;
   `,
   ItemContainer: styled.div`
     padding: 0.875rem 0.5rem 0.875rem 1rem;
@@ -36,14 +38,9 @@ const Styles = {
   `,
 };
 
-export const CopyAddressModal: FunctionComponent<{
-  setIsOpen: (isOpen: boolean) => void;
-}> = ({ setIsOpen }) => {
-  const wrapperRef = useRef<HTMLInputElement>(null);
-  useClickOutside(wrapperRef, () => setIsOpen(false));
-
+export const CopyAddressModal: FunctionComponent = () => {
   return (
-    <Styles.Container ref={wrapperRef}>
+    <Styles.Container>
       <Subtitle1 style={{ textAlign: "center" }}>Copy Address</Subtitle1>
 
       <TextInput
