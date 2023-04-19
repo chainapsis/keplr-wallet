@@ -6,7 +6,7 @@ import {
   IChainInfoImpl,
   IQueriesStore,
 } from "@keplr-wallet/stores";
-import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
 
@@ -22,6 +22,8 @@ interface ViewToken {
  * 메인 페이지말고 다른 곳에서 이거 임포트해서 쓰면 안됨
  */
 export class MainQueryState {
+  protected static zeroDec = new Dec(0);
+
   constructor(
     protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
@@ -84,6 +86,23 @@ export class MainQueryState {
     return Array.from(this.allKnownBalancesMap.values());
   }
 
+  protected sortByPrice = (a: ViewToken, b: ViewToken) => {
+    const aPrice =
+      this.priceStore.calculatePrice(a.token)?.toDec() ??
+      MainQueryState.zeroDec;
+    const bPrice =
+      this.priceStore.calculatePrice(b.token)?.toDec() ??
+      MainQueryState.zeroDec;
+
+    if (aPrice.equals(bPrice)) {
+      return 0;
+    } else if (aPrice.gt(bPrice)) {
+      return -1;
+    } else {
+      return 1;
+    }
+  };
+
   @computed
   get stakables(): ViewToken[] {
     const res: ViewToken[] = [];
@@ -94,7 +113,7 @@ export class MainQueryState {
         res.push(viewToken);
       }
     }
-    return res;
+    return res.sort(this.sortByPrice);
   }
 
   @computed
@@ -122,7 +141,7 @@ export class MainQueryState {
         }
       }
     }
-    return res;
+    return res.sort(this.sortByPrice);
   }
 
   @computed
@@ -143,7 +162,7 @@ export class MainQueryState {
         }
       }
     }
-    return res;
+    return res.sort(this.sortByPrice);
   }
 
   @computed
@@ -166,7 +185,7 @@ export class MainQueryState {
         price: this.priceStore.calculatePrice(queryDelegation.total),
       });
     }
-    return res;
+    return res.sort(this.sortByPrice);
   }
 
   @computed
@@ -189,6 +208,6 @@ export class MainQueryState {
         price: this.priceStore.calculatePrice(queryUnbonding.total),
       });
     }
-    return res;
+    return res.sort(this.sortByPrice);
   }
 }

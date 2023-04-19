@@ -9,23 +9,7 @@ import { MainQueryState } from "./query";
 export const AvailableTabView: FunctionComponent<{
   queryState: MainQueryState;
 }> = observer(({ queryState }) => {
-  const stakableBalances: ViewToken[] = queryState.stakables.sort((a, b) => {
-    // Move zeros to last
-    const aIsZero = a.token.toDec().lte(new Dec(0));
-    const bIsZero = b.token.toDec().lte(new Dec(0));
-
-    if (aIsZero && bIsZero) {
-      return 0;
-    }
-    if (aIsZero) {
-      return 1;
-    }
-    if (bIsZero) {
-      return -1;
-    }
-
-    return 0;
-  });
+  const stakableBalances: ViewToken[] = queryState.stakables;
 
   const tokenBalances = queryState.notStakbles.filter((token) => {
     return token.token.toDec().gt(new Dec(0));
