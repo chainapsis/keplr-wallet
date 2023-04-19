@@ -52,7 +52,11 @@ export const DualChart: FunctionComponent<{
   const arcStartAngle = useSpringValue(
     (() => {
       if (!firstArcVisibility && !secondArcVisibility) {
-        return 0;
+        if (highlight === "first") {
+          return startAngle;
+        } else {
+          return endAngle;
+        }
       }
 
       if (firstArcVisibility) {
@@ -68,7 +72,11 @@ export const DualChart: FunctionComponent<{
   const arcEndAngle = useSpringValue(
     (() => {
       if (!firstArcVisibility && !secondArcVisibility) {
-        return 0;
+        if (highlight === "first") {
+          return startAngle;
+        } else {
+          return endAngle;
+        }
       }
 
       if (firstArcVisibility) {
@@ -84,8 +92,13 @@ export const DualChart: FunctionComponent<{
 
   useLayoutEffect(() => {
     if (!firstArcVisibility && !secondArcVisibility) {
-      arcStartAngle.start(0);
-      arcEndAngle.start(0);
+      if (highlight === "first") {
+        arcStartAngle.start(startAngle);
+        arcEndAngle.start(startAngle);
+      } else {
+        arcStartAngle.start(endAngle);
+        arcEndAngle.start(endAngle);
+      }
     } else {
       if (firstArcVisibility) {
         arcStartAngle.start(startAngle);
@@ -101,6 +114,7 @@ export const DualChart: FunctionComponent<{
     endAngle,
     firstArcEndAngle,
     firstArcVisibility,
+    highlight,
     secondArcVisibility,
     startAngle,
   ]);
