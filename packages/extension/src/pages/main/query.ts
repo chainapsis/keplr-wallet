@@ -80,6 +80,11 @@ export class MainQueryState {
   }
 
   @computed
+  get allKnownBalances(): ViewToken[] {
+    return Array.from(this.allKnownBalancesMap.values());
+  }
+
+  @computed
   get stakables(): ViewToken[] {
     const res: ViewToken[] = [];
     for (const chainInfo of this.chainStore.chainInfosInUI) {

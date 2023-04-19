@@ -14,7 +14,7 @@ import {
   InternalLinkView,
 } from "./components";
 import { Stack } from "../../components/stack";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 import { ChainInfo } from "@keplr-wallet/types";
 import { MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
@@ -42,6 +42,48 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
+  const availableTotalPrice = (() => {
+    let result: PricePretty | undefined;
+    for (const bal of queryState.allKnownBalances) {
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    return result;
+  })();
+  const availableChartWeight = availableTotalPrice
+    ? Number.parseFloat(availableTotalPrice.toDec().toString())
+    : 0;
+  const stakedTotalPrice = (() => {
+    let result: PricePretty | undefined;
+    for (const bal of queryState.delegations) {
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    for (const bal of queryState.unbondings) {
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
+    }
+    return result;
+  })();
+  const stakedChartWeight = stakedTotalPrice
+    ? Number.parseFloat(stakedTotalPrice.toDec().toString())
+    : 0;
+
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
   const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
 
@@ -66,10 +108,10 @@ export const MainPage: FunctionComponent = observer(() => {
           <Box position="relative">
             <DualChart
               first={{
-                weight: 2,
+                weight: availableChartWeight,
               }}
               second={{
-                weight: 1,
+                weight: stakedChartWeight,
               }}
               highlight={tabStatus === "available" ? "first" : "second"}
             />
@@ -101,7 +143,9 @@ export const MainPage: FunctionComponent = observer(() => {
                   color: ColorPalette["gray-10"],
                 }}
               >
-                $12,123.45
+                {tabStatus === "available"
+                  ? availableTotalPrice?.toString() || "-"
+                  : stakedTotalPrice?.toString() || "-"}
               </H1>
             </Box>
           </Box>
