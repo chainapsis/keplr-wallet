@@ -36,7 +36,6 @@ const Styles = {
     padding: 0.875rem 0.5rem 0.875rem 1rem;
   `,
   TextButton: styled(Button2)`
-    cursor: pointer;
     padding: 0.5rem 1rem;
   `,
 };
@@ -124,6 +123,8 @@ export const CopyAddressModal: FunctionComponent<{
       return 0;
     });
 
+  const [hasCopied, setHasCopied] = useState(false);
+
   return (
     <Styles.Container>
       <Subtitle1 style={{ color: ColorPalette["white"], textAlign: "center" }}>
@@ -189,7 +190,14 @@ export const CopyAddressModal: FunctionComponent<{
                   }
                 }
               }}
-              close={close}
+              blockInteraction={hasCopied}
+              afterCopied={() => {
+                setHasCopied(true);
+
+                setTimeout(() => {
+                  close();
+                }, 500);
+              }}
             />
           );
         })}
@@ -205,13 +213,27 @@ export const ChainAddressItem: FunctionComponent<{
   isBookmarked: boolean;
   setBookmarked: (isBookmarked: boolean) => void;
 
-  close: () => void;
-}> = ({ chainInfo, bech32Address, isBookmarked, setBookmarked, close }) => {
+  // Copy하고 나면 Copy됐다는 걸 표시해준다음에
+  // 약간 시간차를 두고 modal을 닫도록 한다.
+  // 이걸 위해서 존재하는 prop들이다.
+  // blockInteraction이 true면 click 액션 등을 막으면 된다.
+  blockInteraction: boolean;
+  afterCopied: () => void;
+}> = ({
+  chainInfo,
+  bech32Address,
+  isBookmarked,
+  setBookmarked,
+  blockInteraction,
+  afterCopied,
+}) => {
+  const [hasCopied, setHasCopied] = useState(false);
+
   return (
     <Styles.ItemContainer>
       <Columns sum={1} alignY="center" gutter="0.5rem">
         <Box
-          cursor="pointer"
+          cursor={blockInteraction ? undefined : "pointer"}
           style={{
             color: isBookmarked
               ? ColorPalette["blue-400"]
@@ -219,6 +241,10 @@ export const ChainAddressItem: FunctionComponent<{
           }}
           onClick={(e) => {
             e.preventDefault();
+
+            if (blockInteraction) {
+              return;
+            }
 
             setBookmarked(!isBookmarked);
           }}
@@ -248,15 +274,26 @@ export const ChainAddressItem: FunctionComponent<{
         <Column weight={1} />
         {/* TODO: Copy 버튼이 눌린 직후의 action을 어케할지 아직 안 정해짐 */}
         <Styles.TextButton
+          style={{
+            cursor: blockInteraction ? "auto" : "pointer",
+            color: hasCopied
+              ? ColorPalette["green-400"]
+              : ColorPalette["gray-10"],
+          }}
           onClick={async (e) => {
             e.preventDefault();
 
-            await navigator.clipboard.writeText(bech32Address);
+            if (blockInteraction) {
+              return;
+            }
 
-            close();
+            await navigator.clipboard.writeText(bech32Address);
+            setHasCopied(true);
+
+            afterCopied();
           }}
         >
-          Copy
+          {hasCopied ? "Copied" : "Copy"}
         </Styles.TextButton>
       </Columns>
     </Styles.ItemContainer>
