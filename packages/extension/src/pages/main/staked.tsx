@@ -5,6 +5,7 @@ import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { MainQueryState } from "./query";
+import { Stack } from "../../components/stack";
 
 export const StakedTabView: FunctionComponent<{
   queryState: MainQueryState;
@@ -28,25 +29,27 @@ export const StakedTabView: FunctionComponent<{
 
   return (
     <React.Fragment>
-      {TokenViewData.map(({ title, balance, lenAlwaysShown }) => {
-        if (balance.length === 0) {
-          return null;
-        }
+      <Stack gutter="0.5rem">
+        {TokenViewData.map(({ title, balance, lenAlwaysShown }) => {
+          if (balance.length === 0) {
+            return null;
+          }
 
-        return (
-          <CollapsibleList
-            key={title}
-            title={<TokenTitleView title={title} />}
-            lenAlwaysShown={lenAlwaysShown}
-            items={balance.map((viewToken) => (
-              <TokenItem
-                viewToken={viewToken}
-                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-              />
-            ))}
-          />
-        );
-      })}
+          return (
+            <CollapsibleList
+              key={title}
+              title={<TokenTitleView title={title} />}
+              lenAlwaysShown={lenAlwaysShown}
+              items={balance.map((viewToken) => (
+                <TokenItem
+                  viewToken={viewToken}
+                  key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                />
+              ))}
+            />
+          );
+        })}
+      </Stack>
     </React.Fragment>
   );
 });

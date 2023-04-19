@@ -7,6 +7,7 @@ import { ColorPalette } from "../../styles";
 import { ArrowDownIcon, ArrowUpIcon } from "../icon";
 import { Column, Columns } from "../column";
 import { VerticalCollapseTransition } from "../transition/vertical-collapse";
+import { Gutter } from "../gutter";
 
 export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   title,
@@ -65,11 +66,10 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
 
       <Stack gutter="0.5rem">{alwaysShown}</Stack>
 
-      <Box marginTop="0.5rem">
-        <VerticalCollapseTransition collapsed={isExpanded}>
-          <Stack gutter="0.5rem">{hidden}</Stack>
-        </VerticalCollapseTransition>
-      </Box>
+      <VerticalCollapseTransition collapsed={isExpanded}>
+        <Gutter size="0.5rem" />
+        <Stack gutter="0.5rem">{hidden}</Stack>
+      </VerticalCollapseTransition>
     </Stack>
   );
 };
