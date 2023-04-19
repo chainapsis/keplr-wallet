@@ -16,7 +16,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { ChainInfo } from "@keplr-wallet/types";
 import { YAxis } from "../../../../components/axis";
-import { Bech32Address } from "@keplr-wallet/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainImageFallback } from "../../../../components/image";
 
 const Styles = {
@@ -36,7 +36,6 @@ const Styles = {
     padding: 0.875rem 0.5rem 0.875rem 1rem;
   `,
   TextButton: styled(Button2)`
-    cursor: pointer;
     padding: 0.5rem 1rem;
   `,
 };
@@ -44,9 +43,36 @@ const Styles = {
 export const CopyAddressModal: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, keyRingStore, uiConfigStore } = useStore();
 
   const [search, setSearch] = useState("");
+
+  // 북마크된 체인과 sorting을 위한 state는 분리되어있다.
+  // 이걸 분리하지 않고 북마크된 체인은 무조건 올린다고 가정하면
+  // 유저 입장에서 북마크 버튼을 누르는 순간 그 체인은 위로 올라가게 되고
+  // 아래에 있던 체인의 경우는 유저가 보기에 갑자기 사라진 것처럼 보일 수 있고
+  // 그게 아니더라도 추가적인 인터렉션을 위해서 스크롤이 필요해진다.
+  // 이 문제를 해결하기 위해서 state가 분리되어있다.
+  // 처음 시자할때는 북마크된 체인 기준으로 하고 이후에 북마크가 해제된 체인의 경우만 정렬 우선순위에서 뺀다.
+  const [sortPriorities, setSortPriorities] = useState<
+    Record<string, true | undefined>
+  >(() => {
+    if (!keyRingStore.selectedKeyInfo) {
+      return {};
+    }
+    const res: Record<string, true | undefined> = {};
+    for (const chainInfo of chainStore.chainInfosInUI) {
+      if (
+        uiConfigStore.copyAddressConfig.isBookmarkedChain(
+          keyRingStore.selectedKeyInfo.id,
+          chainInfo.chainId
+        )
+      ) {
+        res[chainInfo.chainIdentifier] = true;
+      }
+    }
+    return res;
+  });
 
   const addresses = chainStore.chainInfosInUI
     .map((chainInfo) => {
@@ -80,7 +106,24 @@ export const CopyAddressModal: FunctionComponent<{
           return true;
         }
       }
+    })
+    .sort((a, b) => {
+      const aPriority = sortPriorities[a.chainInfo.chainIdentifier];
+      const bPriority = sortPriorities[b.chainInfo.chainIdentifier];
+
+      if (aPriority && bPriority) {
+        return 0;
+      }
+      if (aPriority) {
+        return -1;
+      }
+      if (bPriority) {
+        return 1;
+      }
+      return 0;
     });
+
+  const [hasCopied, setHasCopied] = useState(false);
 
   return (
     <Styles.Container>
@@ -97,13 +140,7 @@ export const CopyAddressModal: FunctionComponent<{
           setSearch(e.target.value);
         }}
         placeholder="Search for a chain"
-        left={
-          <SearchIcon
-            width="1.25rem"
-            height="1.25rem"
-            color={ColorPalette["gray-300"]}
-          />
-        }
+        left={<SearchIcon width="1.25rem" height="1.25rem" />}
       />
       <Gutter size="0.75rem" />
 
@@ -119,7 +156,48 @@ export const CopyAddressModal: FunctionComponent<{
               key={address.chainInfo.chainId}
               chainInfo={address.chainInfo}
               bech32Address={address.bech32Address}
-              close={close}
+              isBookmarked={
+                keyRingStore.selectedKeyInfo
+                  ? uiConfigStore.copyAddressConfig.isBookmarkedChain(
+                      keyRingStore.selectedKeyInfo.id,
+                      address.chainInfo.chainId
+                    )
+                  : false
+              }
+              setBookmarked={(value) => {
+                if (keyRingStore.selectedKeyInfo) {
+                  if (value) {
+                    uiConfigStore.copyAddressConfig.bookmarkChain(
+                      keyRingStore.selectedKeyInfo.id,
+                      address.chainInfo.chainId
+                    );
+                  } else {
+                    uiConfigStore.copyAddressConfig.unbookmarkChain(
+                      keyRingStore.selectedKeyInfo.id,
+                      address.chainInfo.chainId
+                    );
+
+                    setSortPriorities((priorities) => {
+                      const identifier = ChainIdHelper.parse(
+                        address.chainInfo.chainId
+                      ).identifier;
+                      const newPriorities = { ...priorities };
+                      if (newPriorities[identifier]) {
+                        delete newPriorities[identifier];
+                      }
+                      return newPriorities;
+                    });
+                  }
+                }
+              }}
+              blockInteraction={hasCopied}
+              afterCopied={() => {
+                setHasCopied(true);
+
+                setTimeout(() => {
+                  close();
+                }, 500);
+              }}
             />
           );
         })}
@@ -132,12 +210,47 @@ export const ChainAddressItem: FunctionComponent<{
   chainInfo: ChainInfo;
   bech32Address: string;
 
-  close: () => void;
-}> = ({ chainInfo, bech32Address, close }) => {
+  isBookmarked: boolean;
+  setBookmarked: (isBookmarked: boolean) => void;
+
+  // Copy하고 나면 Copy됐다는 걸 표시해준다음에
+  // 약간 시간차를 두고 modal을 닫도록 한다.
+  // 이걸 위해서 존재하는 prop들이다.
+  // blockInteraction이 true면 click 액션 등을 막으면 된다.
+  blockInteraction: boolean;
+  afterCopied: () => void;
+}> = ({
+  chainInfo,
+  bech32Address,
+  isBookmarked,
+  setBookmarked,
+  blockInteraction,
+  afterCopied,
+}) => {
+  const [hasCopied, setHasCopied] = useState(false);
+
   return (
     <Styles.ItemContainer>
       <Columns sum={1} alignY="center" gutter="0.5rem">
-        <StarIcon width="1.25rem" height="1.25rem" />
+        <Box
+          cursor={blockInteraction ? undefined : "pointer"}
+          style={{
+            color: isBookmarked
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-300"],
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+
+            if (blockInteraction) {
+              return;
+            }
+
+            setBookmarked(!isBookmarked);
+          }}
+        >
+          <StarIcon width="1.25rem" height="1.25rem" />
+        </Box>
 
         <Box>
           <ChainImageFallback
@@ -161,15 +274,26 @@ export const ChainAddressItem: FunctionComponent<{
         <Column weight={1} />
         {/* TODO: Copy 버튼이 눌린 직후의 action을 어케할지 아직 안 정해짐 */}
         <Styles.TextButton
+          style={{
+            cursor: blockInteraction ? "auto" : "pointer",
+            color: hasCopied
+              ? ColorPalette["green-400"]
+              : ColorPalette["gray-10"],
+          }}
           onClick={async (e) => {
             e.preventDefault();
 
-            await navigator.clipboard.writeText(bech32Address);
+            if (blockInteraction) {
+              return;
+            }
 
-            close();
+            await navigator.clipboard.writeText(bech32Address);
+            setHasCopied(true);
+
+            afterCopied();
           }}
         >
-          Copy
+          {hasCopied ? "Copied" : "Copy"}
         </Styles.TextButton>
       </Columns>
     </Styles.ItemContainer>

@@ -15,12 +15,16 @@ import { computedFn } from "mobx-utils";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
 import { FiatCurrency } from "@keplr-wallet/types";
+import { CopyAddressConfig } from "./copy-address";
+import { ChainStore } from "../chain";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
 }
 
 export class UIConfigStore {
+  public readonly copyAddressConfig: CopyAddressConfig;
+
   @observable
   protected _isInitialized: boolean = false;
 
@@ -54,6 +58,7 @@ export class UIConfigStore {
 
   constructor(
     protected readonly kvStore: KVStore,
+    protected readonly chainStore: ChainStore,
     protected readonly priceStore: CoinGeckoPriceStore,
     _icnsInfo?: {
       readonly chainId: string;
@@ -61,6 +66,8 @@ export class UIConfigStore {
     },
     _icnsFrontendLink?: string
   ) {
+    this.copyAddressConfig = new CopyAddressConfig(kvStore, chainStore);
+
     this._isBeta = navigator.userAgent.includes("Firefox");
     this._platform = navigator.userAgent.includes("Firefox")
       ? "firefox"
@@ -110,6 +117,8 @@ export class UIConfigStore {
         ...data,
       };
     });
+
+    await this.copyAddressConfig.init();
 
     runInAction(() => {
       this._isInitialized = true;
