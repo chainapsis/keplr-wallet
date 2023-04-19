@@ -15,6 +15,13 @@ import { EllipsisIcon } from "../../../../components/icon";
 import { Menu, MenuItem } from "../../../../components/menu";
 import { useNavigate } from "react-router";
 import { Dialog } from "../../../../components/dialog";
+import {
+  AddressBookConfig,
+  AddressBookData,
+  useAddressBookConfig,
+} from "@keplr-wallet/hooks";
+import { ExtensionKVStore } from "@keplr-wallet/common";
+import { EmptyView } from "../../../../components/empty-view";
 
 const Styles = {
   Container: styled(Stack)`
@@ -40,6 +47,20 @@ export const SettingContactsList: FunctionComponent = observer(() => {
     };
   });
 
+  const addressBookConfig = useAddressBookConfig(
+    new ExtensionKVStore("address-book"),
+    chainStore,
+    chainId,
+    {
+      setRecipient: (): void => {
+        // noop
+      },
+      setMemo: (): void => {
+        // noop
+      },
+    }
+  );
+
   return (
     <HeaderLayout title="General" left={<BackButton />}>
       <Styles.Container>
@@ -58,15 +79,29 @@ export const SettingContactsList: FunctionComponent = observer(() => {
             color="secondary"
             size="extraSmall"
             text="Add New"
-            onClick={() => navigate("/setting/contacts/add")}
+            onClick={() => navigate(`/setting/contacts/add?chainId=${chainId}`)}
           />
         </Columns>
 
-        <Styles.ItemList gutter="0.5rem">
-          <AddressItemView />
-          <AddressItemView />
-          <AddressItemView />
-        </Styles.ItemList>
+        {addressBookConfig.addressBookDatas.length === 0 ? (
+          <EmptyView subject={"Contacts"} />
+        ) : (
+          <Styles.ItemList gutter="0.5rem">
+            {addressBookConfig.addressBookDatas.map(
+              (addressBookData, index) => {
+                return (
+                  <AddressItemView
+                    key={index}
+                    chainId={chainId}
+                    addressBookConfig={addressBookConfig}
+                    addressBookData={addressBookData}
+                    index={index}
+                  />
+                );
+              }
+            )}
+          </Styles.ItemList>
+        )}
       </Styles.Container>
     </HeaderLayout>
   );
@@ -94,7 +129,12 @@ const ItemStyles = {
   `,
 };
 
-const AddressItemView: FunctionComponent = () => {
+const AddressItemView: FunctionComponent<{
+  addressBookData: AddressBookData;
+  addressBookConfig: AddressBookConfig;
+  chainId: string;
+  index: number;
+}> = ({ addressBookData, addressBookConfig, chainId, index }) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -103,14 +143,18 @@ const AddressItemView: FunctionComponent = () => {
     <ItemStyles.Container>
       <Columns sum={1} alignY="center">
         <Stack gutter="0.25rem">
-          <H5 style={{ color: ColorPalette["gray-10"] }}>WangWang</H5>
+          <H5 style={{ color: ColorPalette["gray-10"] }}>
+            {addressBookData.name}
+          </H5>
           <Body2 style={{ color: ColorPalette["gray-200"] }}>
-            cosmos1hjyde2kfgtl78t...rt649nn8j5
+            {addressBookData.address}
           </Body2>
 
-          <Body2 style={{ color: ColorPalette["gray-200"] }}>
-            cosmos1hjyde2
-          </Body2>
+          {addressBookData.memo ? (
+            <Body2 style={{ color: ColorPalette["gray-200"] }}>
+              {addressBookData.memo}
+            </Body2>
+          ) : null}
         </Stack>
 
         <Column weight={1} />
@@ -125,7 +169,7 @@ const AddressItemView: FunctionComponent = () => {
               label="Change Contact Label"
               onClick={() =>
                 navigate(
-                  `/setting/contacts/add?name=WangWang&address=cosmos1hjyde2kfgtl78t...rt649nn8j5`
+                  `/setting/contacts/add?name=${addressBookData.name}&address=${addressBookData.address}&memo=${addressBookData.memo}&chainId=${chainId}&index=${index}`
                 )
               }
             />
@@ -140,8 +184,12 @@ const AddressItemView: FunctionComponent = () => {
             setIsOpen={setIsDeleteModalOpen}
             title="Delete Address"
             paragraph="Are you sure you want to delete this account?"
-            onClickYes={() => {}}
-            onClickCancel={() => {}}
+            onClickYes={async () => {
+              setIsDeleteModalOpen(false);
+
+              await addressBookConfig.removeAddressBook(index);
+            }}
+            onClickCancel={() => setIsDeleteModalOpen(false)}
           />
         </ItemStyles.IconButton>
       </Columns>
