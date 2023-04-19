@@ -382,41 +382,13 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
     if (!this._response) {
       this._isFetching = true;
 
-      const handleStaledResponse = (
-        staledResponse: QueryResponse<T> | undefined
-      ) => {
-        if (staledResponse && !this._response) {
-          if (
-            this.options.cacheMaxAge <= 0 ||
-            staledResponse.timestamp > Date.now() - this.options.cacheMaxAge
-          ) {
-            const response = {
-              ...staledResponse,
-              staled: true,
-              local: true,
-            };
-            this.onReceiveResponse(response);
-            this.setResponse(response);
-            return true;
-          }
-        }
-        return false;
-      };
-
       let satisfyCache = false;
 
       // When first load, try to load the last response from disk.
       // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
-      const promise = this.sharedContext.loadStore<QueryResponse<T>>(
-        this.getCacheKey(),
-        (res) => {
-          if (res.status === "rejected") {
-            console.warn("Failed to get the last response from disk.");
-          } else {
-            satisfyCache = handleStaledResponse(res.value);
-          }
-        }
-      );
+      const promise = this.loadStabledResponse().then((value) => {
+        satisfyCache = value;
+      });
       if (this.options.cacheMaxAge <= 0) {
         // To improve performance, don't wait the loading to proceed if cache age not set.
       } else {
@@ -633,6 +605,41 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
 
   public get error() {
     return this._error;
+  }
+
+  protected loadStabledResponse(): Promise<boolean> {
+    // When first load, try to load the last response from disk.
+    // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
+    return new Promise<boolean>((resolve) => {
+      this.sharedContext.loadStore<QueryResponse<T>>(
+        this.getCacheKey(),
+        (res) => {
+          if (res.status === "rejected") {
+            console.warn("Failed to get the last response from disk.");
+            resolve(false);
+          } else {
+            const staledResponse = res.value;
+            if (staledResponse && !this._response) {
+              if (
+                this.options.cacheMaxAge <= 0 ||
+                staledResponse.timestamp > Date.now() - this.options.cacheMaxAge
+              ) {
+                const response = {
+                  ...staledResponse,
+                  staled: true,
+                  local: true,
+                };
+                this.onReceiveResponse(response);
+                this.setResponse(response);
+                resolve(true);
+                return;
+              }
+            }
+            resolve(false);
+          }
+        }
+      );
+    });
   }
 
   @action

@@ -72,6 +72,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     accountStore,
     keyRingStore,
     ibcCurrencyRegistrar,
+    priceStore,
     uiConfigStore,
   } = useStore();
 
@@ -135,6 +136,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (!priceStore.isInitialized) {
+      return false;
+    }
+
     if (!uiConfigStore.isInitialized) {
       return false;
     }
@@ -147,6 +152,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     ibcCurrencyRegistrar.isInitialized,
     uiConfigStore.isInitialized,
     keyRingStore.status,
+    priceStore.isInitialized,
   ]);
 
   return (

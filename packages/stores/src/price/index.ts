@@ -5,7 +5,7 @@ import { Dec, CoinPretty, Int, PricePretty } from "@keplr-wallet/unit";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { DeepReadonly } from "utility-types";
 import deepmerge from "deepmerge";
-import { action, makeObservable, observable } from "mobx";
+import { action, autorun, makeObservable, observable } from "mobx";
 import { makeURL } from "@keplr-wallet/simple-fetch";
 
 class Throttler {
@@ -152,7 +152,7 @@ class SortedSetStorage {
 }
 
 export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
-  protected isInitialized: boolean;
+  protected _isInitialized: boolean;
 
   private _coinIds: SortedSetStorage;
   private _vsCurrencies: SortedSetStorage;
@@ -187,7 +187,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
       "/simple/price"
     );
 
-    this.isInitialized = false;
+    this._isInitialized = false;
 
     const throttleDuration = options.throttleDuration ?? 250;
 
@@ -208,18 +208,23 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     this._throttler = new Throttler(throttleDuration);
 
     makeObservable(this);
+
+    this.init();
   }
 
   protected override onStart(): Promise<void> {
     super.onStart();
 
-    return this.init();
+    return this.waitUntilInitialized();
   }
 
   async init() {
-    if (this.isInitialized) {
+    if (this._isInitialized) {
       return;
     }
+
+    // Prefetch staled response
+    await this.loadStabledResponse();
 
     await Promise.all([this._coinIds.restore(), this._vsCurrencies.restore()]);
 
@@ -229,7 +234,29 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
 
     this.updateURL([], [], true);
 
-    this.isInitialized = true;
+    this._isInitialized = true;
+  }
+
+  protected async waitUntilInitialized(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    return new Promise((resolve) => {
+      const disposal = autorun(() => {
+        if (this.isInitialized) {
+          resolve();
+
+          if (disposal) {
+            disposal();
+          }
+        }
+      });
+    });
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
   }
 
   get defaultVsCurrency(): string {
@@ -283,7 +310,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
         ","
       )}&vs_currencies=${this._vsCurrencies.values.join(",")}`;
 
-      if (!this.isInitialized) {
+      if (!this._isInitialized) {
         this.setUrl(url);
       } else {
         this._throttler.call(() => this.setUrl(url));
