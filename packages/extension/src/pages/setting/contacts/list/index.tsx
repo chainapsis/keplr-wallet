@@ -22,6 +22,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { EmptyView } from "../../../../components/empty-view";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 const Styles = {
   Container: styled(Stack)`
@@ -134,7 +135,8 @@ const AddressItemView: FunctionComponent<{
   addressBookConfig: AddressBookConfig;
   chainId: string;
   index: number;
-}> = ({ addressBookData, addressBookConfig, chainId, index }) => {
+}> = observer(({ addressBookData, addressBookConfig, chainId, index }) => {
+  const { chainStore } = useStore();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -147,7 +149,11 @@ const AddressItemView: FunctionComponent<{
             {addressBookData.name}
           </H5>
           <Body2 style={{ color: ColorPalette["gray-200"] }}>
-            {addressBookData.address}
+            {addressBookData.address.indexOf(
+              chainStore.getChain(chainId).bech32Config.bech32PrefixAccAddr
+            ) === 0
+              ? Bech32Address.shortenAddress(addressBookData.address, 34)
+              : addressBookData.address}
           </Body2>
 
           {addressBookData.memo ? (
@@ -195,4 +201,4 @@ const AddressItemView: FunctionComponent<{
       </Columns>
     </ItemStyles.Container>
   );
-};
+});
