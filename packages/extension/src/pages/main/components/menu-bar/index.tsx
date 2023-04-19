@@ -6,6 +6,8 @@ import { Box } from "../../../../components/box";
 import { Stack } from "../../../../components/stack";
 import { useNavigate } from "react-router";
 import { Gutter } from "../../../../components/gutter";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
 
 const Styles = {
   MenuItem: styled(Box)`
@@ -22,7 +24,9 @@ const Styles = {
 
 export const MenuBar: FunctionComponent<{
   close: () => void;
-}> = ({ close }) => {
+}> = observer(({ close }) => {
+  const { keyRingStore } = useStore();
+
   const navigate = useNavigate();
 
   return (
@@ -57,7 +61,15 @@ export const MenuBar: FunctionComponent<{
 
       <Styles.Flex1 />
 
-      <Styles.MenuItem>Lock Wallet</Styles.MenuItem>
+      <Styles.MenuItem
+        onClick={(e) => {
+          e.preventDefault();
+
+          keyRingStore.lock();
+        }}
+      >
+        Lock Wallet
+      </Styles.MenuItem>
     </Box>
   );
-};
+});
