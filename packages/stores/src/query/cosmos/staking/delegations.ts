@@ -4,7 +4,7 @@ import {
 } from "../../chain-query";
 import { Delegation, Delegations } from "./types";
 import { ChainGetter } from "../../../chain";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { computedFn } from "mobx-utils";
 import { QuerySharedContext } from "../../../common";
@@ -44,7 +44,10 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
 
     let totalBalance = new Int(0);
     for (const delegation of this.response.data.delegation_responses) {
-      totalBalance = totalBalance.add(new Int(delegation.balance.amount));
+      const amount = new Int(delegation.balance.amount);
+      if (amount.gt(new Int(0))) {
+        totalBalance = totalBalance.add(amount);
+      }
     }
 
     return new CoinPretty(stakeCurrency, totalBalance);
@@ -64,13 +67,16 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
     const result = [];
 
     for (const delegation of this.response.data.delegation_responses) {
-      result.push({
-        validatorAddress: delegation.delegation.validator_address,
-        balance: new CoinPretty(
-          stakeCurrency,
-          new Int(delegation.balance.amount)
-        ),
-      });
+      const balance = new CoinPretty(
+        stakeCurrency,
+        new Int(delegation.balance.amount)
+      );
+      if (balance.toDec().gt(new Dec(0))) {
+        result.push({
+          validatorAddress: delegation.delegation.validator_address,
+          balance,
+        });
+      }
     }
 
     return result;

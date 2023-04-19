@@ -4,7 +4,7 @@ import {
 } from "../../chain-query";
 import { UnbondingDelegation, UnbondingDelegations } from "./types";
 import { ChainGetter } from "../../../chain";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Int, Dec } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { QuerySharedContext } from "../../../common";
 
@@ -44,7 +44,10 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
     let totalBalance = new Int(0);
     for (const unbondingDelegation of this.response.data.unbonding_responses) {
       for (const entry of unbondingDelegation.entries) {
-        totalBalance = totalBalance.add(new Int(entry.balance));
+        const amount = new Int(entry.balance);
+        if (amount.gt(new Int(0))) {
+          totalBalance = totalBalance.add(amount);
+        }
       }
     }
 
@@ -68,17 +71,22 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
     for (const unbonding of unbondings) {
       const entries = [];
       for (const entry of unbonding.entries) {
-        entries.push({
-          creationHeight: new Int(entry.creation_height),
-          completionTime: entry.completion_time,
-          balance: new CoinPretty(stakeCurrency, new Int(entry.balance)),
-        });
+        const balance = new CoinPretty(stakeCurrency, new Int(entry.balance));
+        if (balance.toDec().gt(new Dec(0))) {
+          entries.push({
+            creationHeight: new Int(entry.creation_height),
+            completionTime: entry.completion_time,
+            balance,
+          });
+        }
       }
 
-      result.push({
-        validatorAddress: unbonding.validator_address,
-        entries,
-      });
+      if (entries.length > 0) {
+        result.push({
+          validatorAddress: unbonding.validator_address,
+          entries,
+        });
+      }
     }
 
     return result;
