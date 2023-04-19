@@ -1,4 +1,4 @@
-import { computed, flow, makeObservable, observable } from "mobx";
+import { autorun, computed, flow, makeObservable, observable } from "mobx";
 
 import {
   ChainStore as BaseChainStore,
@@ -52,6 +52,24 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   get isInitializing(): boolean {
     return this._isInitializing;
+  }
+
+  async waitUntilInitialized(): Promise<void> {
+    if (!this.isInitializing) {
+      return;
+    }
+
+    return new Promise((resolve) => {
+      const disposal = autorun(() => {
+        if (!this.isInitializing) {
+          resolve();
+
+          if (disposal) {
+            disposal();
+          }
+        }
+      });
+    });
   }
 
   @computed

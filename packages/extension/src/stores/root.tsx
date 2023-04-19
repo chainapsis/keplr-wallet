@@ -326,6 +326,7 @@ export class RootStore {
 
     this.uiConfigStore = new UIConfigStore(
       new ExtensionKVStore("store_ui_config"),
+      this.chainStore,
       this.priceStore,
       ICNSInfo,
       ICNSFrontendLink
