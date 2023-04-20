@@ -4,14 +4,15 @@ import { observer } from "mobx-react-lite";
 import { EmptyAddressError, IRecipientConfig } from "@keplr-wallet/hooks";
 import { ProfileIcon } from "../../icon";
 import { Box } from "../../box";
-import { ColorPalette } from "../../../styles";
-import { Modal } from "../../modal";
-import { AddressListModal } from "../../../pages/send/amount/address-list-modal";
+import { AddressBookModal } from "../../address-book-modal";
+import { IconButton } from "../../icon-button";
 
 export const RecipientInput: FunctionComponent<{
   recipientConfig: IRecipientConfig;
 }> = observer(({ recipientConfig }) => {
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
+    React.useState(false);
+
   return (
     <Box>
       <TextInput
@@ -21,15 +22,10 @@ export const RecipientInput: FunctionComponent<{
           recipientConfig.setValue(e.target.value);
         }}
         right={
-          <Box
-            style={{
-              color: ColorPalette["gray-50"],
-            }}
-          >
-            <ProfileIcon width="1rem" height="1rem" />
-          </Box>
+          <IconButton onClick={() => setIsAddressBookModalOpen(true)}>
+            <ProfileIcon width="1.75rem" height="1.75rem" />
+          </IconButton>
         }
-        rightClick={() => setIsModalOpen(true)}
         value={recipientConfig.value}
         error={(() => {
           const uiProperties = recipientConfig.uiProperties;
@@ -46,9 +42,10 @@ export const RecipientInput: FunctionComponent<{
         })()}
       />
 
-      <Modal isOpen={isModalOpen}>
-        <AddressListModal setIsOpen={setIsModalOpen} />
-      </Modal>
+      <AddressBookModal
+        isOpen={isAddressBookModalOpen}
+        close={() => setIsAddressBookModalOpen(false)}
+      />
     </Box>
   );
 });

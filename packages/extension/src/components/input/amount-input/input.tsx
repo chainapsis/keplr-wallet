@@ -3,9 +3,8 @@ import { observer } from "mobx-react-lite";
 import { EmptyAmountError, IAmountConfig } from "@keplr-wallet/hooks";
 import { TextInput } from "../text-input";
 import { Subtitle3 } from "../../typography";
-import { Box } from "../../box";
-import { ColorPalette } from "../../../styles";
 import { ArrowAcrossIcon } from "../../icon";
+import { IconButton } from "../../icon-button";
 
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
@@ -34,9 +33,9 @@ export const AmountInput: FunctionComponent<{
         amountConfig.setValue(e.target.value);
       }}
       right={
-        <Box style={{ color: ColorPalette["gray-50"] }}>
-          <ArrowAcrossIcon width="1rem" height="1rem" />
-        </Box>
+        <IconButton onClick={() => console.log("TODO")}>
+          <ArrowAcrossIcon width="1.75rem" height="1.75rem" />
+        </IconButton>
       }
       error={(() => {
         const uiProperties = amountConfig.uiProperties;
