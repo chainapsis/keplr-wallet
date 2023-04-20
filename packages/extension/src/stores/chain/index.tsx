@@ -3,6 +3,7 @@ import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
+  KeyRingStore,
 } from "@keplr-wallet/stores";
 
 import { ChainInfo } from "@keplr-wallet/types";
@@ -23,11 +24,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable
   protected _isInitializing: boolean = false;
 
+  @observable
+  protected _lastSyncedEnabledChainsVaultId: string = "";
   @observable.ref
   protected _enabledChainIdentifiers: string[] = [];
 
   constructor(
     protected readonly embedChainInfos: ChainInfo[],
+    protected readonly keyRingStore: KeyRingStore,
     protected readonly requester: MessageRequester
   ) {
     super(
@@ -41,6 +45,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       })
     );
 
+    // Should be enabled at least one chain.
     this._enabledChainIdentifiers = [
       ChainIdHelper.parse(embedChainInfos[0].chainId).identifier,
     ];
@@ -74,6 +79,16 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @computed
   protected get enabledChainIdentifiesMap(): Map<string, true> {
+    if (this._enabledChainIdentifiers.length === 0) {
+      // Should be enabled at least one chain.
+      const map = new Map<string, true>();
+      map.set(
+        ChainIdHelper.parse(this.embedChainInfos[0].chainId).identifier,
+        true
+      );
+      return map;
+    }
+
     const map = new Map<string, true>();
     for (const chainIdentifier of this._enabledChainIdentifiers) {
       map.set(chainIdentifier, true);
@@ -125,7 +140,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @flow
   *toggleChainInfoInUI(...chainIds: string[]) {
-    const msg = new ToggleChainsMsg(chainIds);
+    if (!this.keyRingStore.selectedKeyInfo) {
+      return;
+    }
+
+    const msg = new ToggleChainsMsg(
+      this.keyRingStore.selectedKeyInfo.id,
+      chainIds
+    );
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -133,7 +155,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @flow
   *enableChainInfoInUI(...chainIds: string[]) {
-    const msg = new EnableChainsMsg(chainIds);
+    if (!this.keyRingStore.selectedKeyInfo) {
+      return;
+    }
+
+    const msg = new EnableChainsMsg(
+      this.keyRingStore.selectedKeyInfo.id,
+      chainIds
+    );
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -141,7 +170,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @flow
   *disableChainInfoInUI(...chainIds: string[]) {
-    const msg = new DisableChainsMsg(chainIds);
+    if (!this.keyRingStore.selectedKeyInfo) {
+      return;
+    }
+
+    const msg = new DisableChainsMsg(
+      this.keyRingStore.selectedKeyInfo.id,
+      chainIds
+    );
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -155,6 +191,13 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.updateChainInfosFromBackground(),
       this.updateEnabledChainIdentifiersFromBackground(),
     ]);
+
+    autorun(() => {
+      // Change the enabled chain identifiers when the selected key info is changed.
+      if (this.keyRingStore.selectedKeyInfo) {
+        this.updateEnabledChainIdentifiersFromBackground();
+      }
+    });
 
     this._isInitializing = false;
   }
@@ -170,10 +213,46 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @flow
   protected *updateEnabledChainIdentifiersFromBackground() {
-    const msg = new GetEnabledChainIdentifiersMsg();
+    if (!this.keyRingStore.selectedKeyInfo) {
+      this._lastSyncedEnabledChainsVaultId = "";
+      return;
+    }
+
+    const id = this.keyRingStore.selectedKeyInfo.id;
+    const msg = new GetEnabledChainIdentifiersMsg(id);
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
+    this._lastSyncedEnabledChainsVaultId = id;
+  }
+
+  // Enabled chains depends on the selected key info.
+  // This process is automatically done when the selected key info is changed. (see init())
+  // But, if you want to wait until the enabled chains are synced, you can use this method.
+  async waitSyncedEnabledChains(): Promise<void> {
+    if (
+      this.keyRingStore.selectedKeyInfo &&
+      this.keyRingStore.selectedKeyInfo.id ===
+        this._lastSyncedEnabledChainsVaultId
+    ) {
+      return;
+    }
+
+    return new Promise((resolve) => {
+      const disposal = autorun(() => {
+        if (
+          this.keyRingStore.selectedKeyInfo &&
+          this.keyRingStore.selectedKeyInfo.id ===
+            this._lastSyncedEnabledChainsVaultId
+        ) {
+          resolve();
+
+          if (disposal) {
+            disposal();
+          }
+        }
+      });
+    });
   }
 
   @flow

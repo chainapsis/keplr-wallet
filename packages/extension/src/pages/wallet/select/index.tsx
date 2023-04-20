@@ -92,7 +92,7 @@ const KeyInfoList: FunctionComponent<{
   title: string;
   keyInfos: KeyRingV2.KeyInfo[];
 }> = observer(({ title, keyInfos }) => {
-  const { keyRingStore } = useStore();
+  const { chainStore, keyRingStore } = useStore();
 
   const navigate = useNavigate();
 
@@ -118,6 +118,7 @@ const KeyInfoList: FunctionComponent<{
                 cursor="pointer"
                 onClick={async () => {
                   await keyRingStore.selectKeyRing(keyInfo.id);
+                  await chainStore.waitSyncedEnabledChains();
 
                   navigate(-1);
                 }}
