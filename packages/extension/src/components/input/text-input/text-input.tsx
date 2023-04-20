@@ -20,14 +20,13 @@ export const TextInput = forwardRef<
       rightLabel,
       left,
       right,
-      rightClick,
       ...props
     },
     ref
   ) => {
     return (
       <Styles.Container className={className} style={style}>
-        <Columns sum={1}>
+        <Columns sum={1} alignY="center">
           {label ? <Styles.Label>{label}</Styles.Label> : null}
           <Column weight={1} />
           {rightLabel ? <Box>{rightLabel}</Box> : null}
@@ -41,7 +40,9 @@ export const TextInput = forwardRef<
           <Columns sum={1}>
             {left ? (
               <Box alignY="center" marginLeft="1rem">
-                <Styles.Icon>{left}</Styles.Icon>
+                <Styles.Icon>
+                  <Box>{left}</Box>
+                </Styles.Icon>
               </Box>
             ) : null}
 
@@ -54,8 +55,10 @@ export const TextInput = forwardRef<
               />
             </Column>
             {right ? (
-              <Box alignY="center" marginRight="1rem" onClick={rightClick}>
-                <Styles.Icon>{right}</Styles.Icon>
+              <Box alignY="center" marginRight="1rem">
+                <Styles.Icon>
+                  <Box>{right}</Box>
+                </Styles.Icon>
               </Box>
             ) : null}
           </Columns>

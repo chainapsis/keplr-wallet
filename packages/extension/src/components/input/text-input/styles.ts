@@ -131,22 +131,11 @@ export const Styles = {
   `,
   Icon: styled.div`
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
 
-    cursor: pointer;
+    height: 1px;
 
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 2rem;
-
-    color: ${ColorPalette["gray-300"]};
-
-    :hover {
-      background-color: rgba(46, 46, 50, 0.5);
-    }
-    :active {
-      background-color: ${ColorPalette["gray-500"]};
-    }
+    color: ${ColorPalette["gray-400"]};
   `,
 };
