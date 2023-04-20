@@ -308,3 +308,50 @@ export class ComputeNotFinalizedMnemonicKeyAddressesMsg extends Message<
     return ComputeNotFinalizedMnemonicKeyAddressesMsg.type();
   }
 }
+
+export class GetCosmosKeysForEachVaultSettledMsg extends Message<
+  SettledResponses<
+    Key & {
+      vaultId: string;
+    }
+  >
+> {
+  public static type() {
+    return "GetCosmosKeysForEachVaultSettledMsg";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly vaultIds: string[]
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.vaultIds || this.vaultIds.length === 0) {
+      throw new Error("vaultIds are not set");
+    }
+
+    const seen = new Map<string, boolean>();
+
+    for (const vaultId of this.vaultIds) {
+      if (seen.get(vaultId)) {
+        throw new Error(`vaultId ${vaultId} is duplicated`);
+      }
+
+      seen.set(vaultId, true);
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetCosmosKeysForEachVaultSettledMsg.type();
+  }
+}
