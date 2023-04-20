@@ -83,7 +83,7 @@ export class Dec {
    * If int is string and contains dot(.), prec is ignored and automatically calculated.
    * @param prec - Precision
    */
-  constructor(int: bigInteger.BigNumber | Int, prec: number = 0) {
+  constructor(int: bigInteger.BigNumber | Int | Uint, prec: number = 0) {
     if (typeof int === "number") {
       int = int.toString();
     }
@@ -114,6 +114,8 @@ export class Dec {
       }
       this.int = bigInteger(int);
     } else if (int instanceof Int) {
+      this.int = bigInteger(int.toString());
+    } else if (int instanceof Uint) {
       this.int = bigInteger(int.toString());
     } else if (typeof int === "bigint") {
       this.int = bigInteger(int);
@@ -410,9 +412,9 @@ export class Dec {
 }
 
 Int.prototype.toDec = function (): Dec {
-  return new Dec(new Int(this.toString()));
+  return new Dec(this);
 };
 
 Uint.prototype.toDec = function (): Dec {
-  return new Dec(new Int(this.toString()));
+  return new Dec(this);
 };
