@@ -2160,6 +2160,64 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: [],
     chainSymbolImageUrl:
       "https://asset-icons.s3.us-west-2.amazonaws.com/white/quicksilver.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/quicksilver/txs/{txHash}",
+    },
+  },
+  {
+    rpc: "https://rpc-omniflixhub.keplr.app",
+    rest: "https://lcd-omniflixhub.keplr.app",
+    chainId: "omniflixhub-1",
+    chainName: "OmniFlix Hub",
+    stakeCurrency: {
+      coinDenom: "FLIX",
+      coinMinimalDenom: "uflix",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/omniflixhub.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "omniflix",
+      bech32PrefixAccPub: "omniflixpub",
+      bech32PrefixValAddr: "omniflixvaloper",
+      bech32PrefixValPub: "omniflixvaloperpub",
+      bech32PrefixConsAddr: "omniflixvalcons",
+      bech32PrefixConsPub: "omniflixvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "FLIX",
+        coinMinimalDenom: "uflix",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/omniflixhub.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "FLIX",
+        coinMinimalDenom: "uflix",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/omniflixhub.png",
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.0025,
+          high: 0.025,
+        },
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/omniflixhub.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/omniflix/txs/{txHash}",
+    },
   },
 ];
 
