@@ -103,9 +103,9 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   title,
   left,
   right,
-  bottom,
   bottomButton,
   fixedHeight,
+  onSubmit,
   children,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
@@ -131,9 +131,6 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 
   const bottomPadding = (() => {
     if (!bottomButton) {
-      if (bottom) {
-        return "4.75rem";
-      }
       return "0";
     }
 
@@ -142,7 +139,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
     );
   })();
 
-  return (
+  const Content = (
     <Styles.Container>
       <Styles.HeaderContainer>
         {left && <Styles.HeaderLeft>{left}</Styles.HeaderLeft>}
@@ -173,9 +170,8 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
           <Button {...bottomButton} />
         </Box>
       ) : null}
-      {!bottomButton && bottom ? (
-        <Styles.BottomContainer>{bottom}</Styles.BottomContainer>
-      ) : null}
     </Styles.Container>
   );
+
+  return onSubmit ? <form onSubmit={onSubmit}>{Content}</form> : Content;
 };

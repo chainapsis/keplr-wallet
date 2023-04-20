@@ -13,16 +13,12 @@ import { useSendTxConfig, useTxConfigsValidate } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
 import { AmountInput, RecipientInput } from "../../../components/input";
 import { TokenItem } from "../../main/components";
-import { Button } from "../../../components/button";
 import { Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { MemoInput } from "../../../components/input/memo-input";
 
 const Styles = {
   Container: styled(Stack)`
-    padding: 0.75rem;
-  `,
-  BottomButton: styled.div`
     padding: 0.75rem;
   `,
   Flex1: styled.div`
@@ -71,30 +67,26 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title="Send"
       left={<BackButton />}
-      bottom={
-        <Styles.BottomButton>
-          <Button
-            disabled={txConfigsValidate.interactionBlocked}
-            text="Go to Sign"
-            color="primary"
-            size="large"
-            // TODO: Move to "onSubmit" under form
-            onClick={() => {
-              accountStore
-                .getAccount(chainId)
-                .makeSendTokenTx(
-                  sendConfigs.amountConfig.amount[0].toDec().toString(),
-                  sendConfigs.amountConfig.amount[0].currency,
-                  sendConfigs.recipientConfig.recipient
-                )
-                .send(
-                  sendConfigs.feeConfig.toStdFee(),
-                  sendConfigs.memoConfig.memo
-                );
-            }}
-          />
-        </Styles.BottomButton>
-      }
+      bottomButton={{
+        disabled: txConfigsValidate.interactionBlocked,
+        text: "Go to Sign",
+        color: "primary",
+        size: "large",
+        // TODO: Move to "onSubmit" under form
+        onClick: () => {
+          accountStore
+            .getAccount(chainId)
+            .makeSendTokenTx(
+              sendConfigs.amountConfig.amount[0].toDec().toString(),
+              sendConfigs.amountConfig.amount[0].currency,
+              sendConfigs.recipientConfig.recipient
+            )
+            .send(
+              sendConfigs.feeConfig.toStdFee(),
+              sendConfigs.memoConfig.memo
+            );
+        },
+      }}
     >
       <Styles.Container gutter="0.75rem">
         <Stack gutter="0.375rem">

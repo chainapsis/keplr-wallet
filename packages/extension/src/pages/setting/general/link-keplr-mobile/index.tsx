@@ -8,7 +8,6 @@ import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle3 } from "../../../../components/typography";
 import { TextInput } from "../../../../components/input";
-import { Button } from "../../../../components/button";
 
 const Styles = {
   Container: styled(Stack)`
@@ -22,9 +21,6 @@ const Styles = {
     text-align: center;
     color: ${ColorPalette["gray-200"]};
     padding: 0 0.625rem;
-  `,
-  BottomButton: styled.div`
-    padding: 0.75rem;
   `,
 };
 
@@ -46,16 +42,12 @@ const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
       <HeaderLayout
         title="Link Keplr Mobile"
         left={<BackButton />}
-        bottom={
-          <Styles.BottomButton>
-            <Button
-              color="secondary"
-              text="Confirm"
-              size="large"
-              onClick={onClick}
-            />
-          </Styles.BottomButton>
-        }
+        bottomButton={{
+          color: "secondary",
+          text: "Confirm",
+          size: "large",
+          onClick,
+        }}
       >
         <Styles.Container>
           <GuideBox

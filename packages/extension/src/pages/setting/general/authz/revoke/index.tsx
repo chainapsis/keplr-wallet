@@ -13,7 +13,6 @@ import { Body3, H4, Subtitle3 } from "../../../../../components/typography";
 import { CopyOutlineIcon } from "../../../../../components/icon";
 import { Columns } from "../../../../../components/column";
 import { FormattedDate } from "react-intl";
-import { Button } from "../../../../../components/button";
 import { useNavigate } from "react-router";
 
 const Styles = {
@@ -32,9 +31,6 @@ const Styles = {
   JSON: styled.pre`
     overflow: auto;
     white-space: pre-wrap;
-  `,
-  BottomButton: styled.div`
-    padding: 0.75rem;
   `,
 };
 
@@ -134,16 +130,12 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
     <HeaderLayout
       title="Authz Details"
       left={<BackButton />}
-      bottom={
-        <Styles.BottomButton>
-          <Button
-            text="Revoke"
-            color="danger"
-            size="large"
-            onClick={() => onClickRevokeButton(state.grant)}
-          />
-        </Styles.BottomButton>
-      }
+      bottomButton={{
+        text: "Revoke",
+        color: "danger",
+        size: "large",
+        onClick: () => onClickRevokeButton(state.grant),
+      }}
     >
       <Box paddingX="0.75rem">
         <Stack gutter="0.5rem">
