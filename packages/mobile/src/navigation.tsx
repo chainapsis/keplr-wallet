@@ -123,6 +123,7 @@ import {
   MarsWebpageScreen,
   InjectiveWebpageScreen,
   PStakeWebpageScreen,
+  StreamSwapScreen,
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
@@ -280,6 +281,9 @@ const {
       upperScreenName: "Web",
     },
     "Web.PStake": {
+      upperScreenName: "Web",
+    },
+    "Web.StreamSwap": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -894,6 +898,7 @@ export const WebNavigation: FunctionComponent = () => {
       <Stack.Screen name="Web.Mars" component={MarsWebpageScreen} />
       <Stack.Screen name="Web.Injective" component={InjectiveWebpageScreen} />
       <Stack.Screen name="Web.PStake" component={PStakeWebpageScreen} />
+      <Stack.Screen name="Web.StreamSwap" component={StreamSwapScreen} />
     </Stack.Navigator>
   );
 };

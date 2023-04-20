@@ -17,6 +17,7 @@ import {
   UmeeItem,
   WYNDDaoItem,
   PStakeItem,
+  StreamSwapItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 
@@ -38,6 +39,7 @@ const WebpagesPerLabel: {
       StrideItem,
       PStakeItem,
       RegenItem,
+      StreamSwapItem,
     ],
   },
   {
@@ -51,6 +53,7 @@ const WebpagesPerLabel: {
       UmeeItem,
       StrideItem,
       PStakeItem,
+      StreamSwapItem,
     ],
   },
   {

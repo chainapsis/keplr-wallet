@@ -35,6 +35,7 @@ init(
     "https://osmosis.marsprotocol.io",
     "https://hub.injective.network",
     "https://cosmos.pstake.finance",
+    "https://app.streamswap.io",
   ],
   ["https://wallet.keplr.app"],
   CommunityChainInfoRepo,

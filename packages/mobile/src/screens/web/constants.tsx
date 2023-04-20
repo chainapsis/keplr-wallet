@@ -237,3 +237,22 @@ export const PStakeItem: Item = {
   key: "pstake",
   component: PStakeImage,
 };
+
+const StreamSwapImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="StreamSwap"
+      source={require("../../assets/image/webpage/streamswap.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.StreamSwap", {});
+      }}
+    />
+  );
+};
+
+export const StreamSwapItem: Item = {
+  key: "streamswap",
+  component: StreamSwapImage,
+};
