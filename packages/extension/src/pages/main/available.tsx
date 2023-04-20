@@ -1,11 +1,12 @@
 import React, { FunctionComponent } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
-import { TokenItem, TokenTitleView } from "./components";
+import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { MainQueryState } from "./query";
 import { Stack } from "../../components/stack";
+import { Button } from "../../components/button";
 
 export const AvailableTabView: FunctionComponent<{
   queryState: MainQueryState;
@@ -47,6 +48,14 @@ export const AvailableTabView: FunctionComponent<{
     },
   ];
 
+  const countFilter = (viewToken: ViewToken) =>
+    viewToken.token.toDec().gt(new Dec(0));
+
+  const isFisrtTime =
+    stakableBalances.filter(countFilter).length === 0 &&
+    tokenBalances.filter(countFilter).length === 0 &&
+    ibcBalances.filter(countFilter).length === 0;
+
   return (
     <React.Fragment>
       <Stack gutter="0.5rem">
@@ -70,6 +79,20 @@ export const AvailableTabView: FunctionComponent<{
           );
         })}
       </Stack>
+
+      {isFisrtTime ? (
+        <MainEmptyView
+          image={
+            <img
+              src={require("../../public/assets/img/empty-balance.png")}
+              alt="empty balance image"
+            />
+          }
+          paragraph="Gear up yourself by topping up your wallet! "
+          title="Ready to Explore the Interchain?"
+          button={<Button text="Get Started" color="primary" size="small" />}
+        />
+      ) : null}
     </React.Fragment>
   );
 });
