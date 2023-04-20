@@ -3,13 +3,11 @@ import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import { Stack } from "../../../components/stack";
 import { BackButton } from "../../../layouts/header/components";
-import { Button } from "../../../components/button";
 import { TextInput } from "../../../components/input";
 import { HeaderLayout } from "../../../layouts/header";
 import { useForm } from "react-hook-form";
 import { useStore } from "../../../stores";
 import { useSearchParams } from "react-router-dom";
-import { ColorPalette } from "../../../styles";
 import { useNavigate } from "react-router";
 
 const Styles = {
@@ -21,18 +19,6 @@ const Styles = {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-  `,
-  BottomButton: styled.div`
-    padding: 0.75rem;
-
-    height: 4.75rem;
-
-    background-color: ${ColorPalette["gray-700"]};
-
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
   `,
 };
 
@@ -66,43 +52,40 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
   }, [setFocus]);
 
   return (
-    <HeaderLayout title="Change Wallet Name" left={<BackButton />}>
-      <form
-        onSubmit={handleSubmit(async (data) => {
-          console.log("submit: " + data.name);
-          try {
-            if (vaultId) {
-              await keyRingStore.changeKeyRingName(vaultId, data.name);
+    <HeaderLayout
+      title="Change Wallet Name"
+      left={<BackButton />}
+      bottomButton={{ text: "Save", color: "secondary", type: "submit" }}
+      onSubmit={handleSubmit(async (data) => {
+        console.log("submit: " + data.name);
+        try {
+          if (vaultId) {
+            await keyRingStore.changeKeyRingName(vaultId, data.name);
 
-              navigate(-1);
-            }
-          } catch (e) {
-            console.log("Fail to decrypt: " + e.message);
-            setError("name", {
-              type: "custom",
-              message: "Account name is required",
-            });
+            navigate(-1);
           }
-        })}
-      >
-        <Styles.Container>
-          <TextInput
-            label="Previous Wallet Name"
-            disabled
-            value={walletName?.name}
-          />
+        } catch (e) {
+          console.log("Fail to decrypt: " + e.message);
+          setError("name", {
+            type: "custom",
+            message: "Account name is required",
+          });
+        }
+      })}
+    >
+      <Styles.Container>
+        <TextInput
+          label="Previous Wallet Name"
+          disabled
+          value={walletName?.name}
+        />
 
-          <TextInput
-            label="New Wallet Name"
-            error={errors.name && errors.name.message}
-            {...register("name", { required: true })}
-          />
-        </Styles.Container>
-
-        <Styles.BottomButton>
-          <Button text="Save" color="secondary" type="submit" />
-        </Styles.BottomButton>
-      </form>
+        <TextInput
+          label="New Wallet Name"
+          error={errors.name && errors.name.message}
+          {...register("name", { required: true })}
+        />
+      </Styles.Container>
     </HeaderLayout>
   );
 });

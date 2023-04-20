@@ -5,14 +5,10 @@ import { Stack } from "../../../../components/stack";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { TextInput } from "../../../../components/input";
-import { Button } from "../../../../components/button";
 import { useSearchParams } from "react-router-dom";
 
 const Styles = {
   Container: styled(Stack)`
-    padding: 0.75rem;
-  `,
-  BottomButton: styled.div`
     padding: 0.75rem;
   `,
 };
@@ -26,31 +22,25 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     <HeaderLayout
       title={`${isAdd ? "Add" : "Edit"} Address`}
       left={<BackButton />}
-      bottom={
-        <Styles.BottomButton>
-          <Button text="Confirm" color="secondary" size="large" />
-        </Styles.BottomButton>
-      }
+      bottomButton={{ text: "Confirm", color: "secondary", size: "large" }}
     >
-      <form>
-        <Styles.Container gutter="1rem">
-          <TextInput
-            label="Name"
-            value={searchParams.get("name") ?? ""}
-            onChange={() => {}}
-          />
-          <TextInput
-            label="Address"
-            value={searchParams.get("address") ?? ""}
-            onChange={() => {}}
-          />
-          <TextInput
-            label="Memo(Option)"
-            value={searchParams.get("memo") ?? ""}
-            onChange={() => {}}
-          />
-        </Styles.Container>
-      </form>
+      <Styles.Container gutter="1rem">
+        <TextInput
+          label="Name"
+          value={searchParams.get("name") ?? ""}
+          onChange={() => {}}
+        />
+        <TextInput
+          label="Address"
+          value={searchParams.get("address") ?? ""}
+          onChange={() => {}}
+        />
+        <TextInput
+          label="Memo(Option)"
+          value={searchParams.get("memo") ?? ""}
+          onChange={() => {}}
+        />
+      </Styles.Container>
     </HeaderLayout>
   );
 });

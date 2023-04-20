@@ -8,14 +8,10 @@ import { TextInput } from "../../../../components/input";
 import { useStore } from "../../../../stores";
 import { DropDown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
-import { Button } from "../../../../components/button";
 
 const Styles = {
   Container: styled(Stack)`
     padding: 0 0.75rem;
-  `,
-  BottomButton: styled.div`
-    padding: 0.75rem;
   `,
 };
 
@@ -36,28 +32,26 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title="Add Token Manually"
       left={<BackButton />}
-      bottom={
-        <Styles.BottomButton>
-          <Button text="Confirm" color="secondary" size="large" />
-        </Styles.BottomButton>
-      }
+      bottomButton={{
+        text: "Confirm",
+        color: "secondary",
+        size: "large",
+      }}
     >
-      <form>
-        <Styles.Container gutter="1rem">
-          <Box width="13rem">
-            <DropDown
-              items={items}
-              selectedItemKey={chainId}
-              onSelect={setChainId}
-            />
-          </Box>
+      <Styles.Container gutter="1rem">
+        <Box width="13rem">
+          <DropDown
+            items={items}
+            selectedItemKey={chainId}
+            onSelect={setChainId}
+          />
+        </Box>
 
-          <TextInput label="Contract Address" />
-          <TextInput label="Name" value="-" disabled />
-          <TextInput label="Symbol" value="-" disabled />
-          <TextInput label="Decimals" value="-" disabled />
-        </Styles.Container>
-      </form>
+        <TextInput label="Contract Address" />
+        <TextInput label="Name" value="-" disabled />
+        <TextInput label="Symbol" value="-" disabled />
+        <TextInput label="Decimals" value="-" disabled />
+      </Styles.Container>
     </HeaderLayout>
   );
 });

@@ -23,9 +23,6 @@ const Styles = {
     height: 100%;
     padding: 0 0.75rem;
   `,
-  BottomButton: styled.div`
-    padding: 0.75rem;
-  `,
   Flex1: styled.div`
     flex: 1;
   `,
@@ -82,70 +79,61 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title="Change Endpoints"
       left={<BackButton />}
-      bottom={
-        <Styles.BottomButton>
-          <Button
-            text="Confirm"
-            color="secondary"
-            size="large"
-            disabled={
-              chainStore.getChain(chainId).rpc === watch("rpc") &&
-              chainStore.getChain(chainId).rest === watch("lcd")
-            }
-          />
-        </Styles.BottomButton>
-      }
-    >
-      <form
-        style={{ height: "100%" }}
-        onSubmit={handleSubmit(async (data) => {
+      bottomButton={{
+        text: "Confirm",
+        color: "secondary",
+        size: "large",
+        disabled:
+          chainStore.getChain(chainId).rpc === watch("rpc") &&
+          chainStore.getChain(chainId).rest === watch("lcd"),
+      }}
+      onSubmit={handleSubmit(async (data) => {
+        try {
           try {
-            try {
-              await checkRPCConnectivity(chainId, data.rpc);
-              await checkRestConnectivity(chainId, data.lcd);
-            } catch (e) {
-              console.error(e);
-            }
-
-            chainStore.setChainEndpoints(chainId, data.rpc, data.lcd);
-
-            navigate("/");
+            await checkRPCConnectivity(chainId, data.rpc);
+            await checkRestConnectivity(chainId, data.lcd);
           } catch (e) {
             console.error(e);
           }
-        })}
-      >
-        <Styles.Container gutter="1rem">
-          <Columns sum={1} alignY="bottom">
-            <Box width="13rem">
-              <DropDown
-                items={chainList}
-                selectedItemKey={chainId}
-                onSelect={setChainId}
-              />
-            </Box>
 
-            <Column weight={1} />
-            <Button
-              size="extraSmall"
-              text="Reset"
-              color="secondary"
-              onClick={onClickResetButton}
+          chainStore.setChainEndpoints(chainId, data.rpc, data.lcd);
+
+          navigate("/");
+        } catch (e) {
+          console.error(e);
+        }
+      })}
+    >
+      <Styles.Container gutter="1rem">
+        <Columns sum={1} alignY="bottom">
+          <Box width="13rem">
+            <DropDown
+              items={chainList}
+              selectedItemKey={chainId}
+              onSelect={setChainId}
             />
-          </Columns>
+          </Box>
 
-          <TextInput label="RPC" {...register("rpc")} />
-
-          <TextInput label="LCD" {...register("lcd")} />
-
-          <Styles.Flex1 />
-
-          <GuideBox
-            title="Experimental Feature"
-            paragraph="The uptime and stability of custom endpoints are managed by the responsible service providers. Close and reopen Keplr extension to apply the changes."
+          <Column weight={1} />
+          <Button
+            size="extraSmall"
+            text="Reset"
+            color="secondary"
+            onClick={onClickResetButton}
           />
-        </Styles.Container>
-      </form>
+        </Columns>
+
+        <TextInput label="RPC" {...register("rpc")} />
+
+        <TextInput label="LCD" {...register("lcd")} />
+
+        <Styles.Flex1 />
+
+        <GuideBox
+          title="Experimental Feature"
+          paragraph="The uptime and stability of custom endpoints are managed by the responsible service providers. Close and reopen Keplr extension to apply the changes."
+        />
+      </Styles.Container>
     </HeaderLayout>
   );
 });
