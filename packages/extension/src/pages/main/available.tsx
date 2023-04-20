@@ -24,16 +24,33 @@ export const AvailableTabView: FunctionComponent<{
     title: string;
     balance: ViewToken[];
     lenAlwaysShown: number;
+    tooltip?: string | React.ReactElement;
   }[] = [
-    { title: "Balance", balance: stakableBalances, lenAlwaysShown: 5 },
-    { title: "Token Balance", balance: tokenBalances, lenAlwaysShown: 3 },
-    { title: "IBC Balance", balance: ibcBalances, lenAlwaysShown: 3 },
+    {
+      title: "Balance",
+      balance: stakableBalances,
+      lenAlwaysShown: 5,
+      tooltip: "TODO: Lorem ipsum dolor sit amet",
+    },
+    {
+      title: "Token Balance",
+      balance: tokenBalances,
+      lenAlwaysShown: 3,
+      tooltip: "TODO: Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+    },
+    {
+      title: "IBC Balance",
+      balance: ibcBalances,
+      lenAlwaysShown: 3,
+      tooltip:
+        "TODO: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    },
   ];
 
   return (
     <React.Fragment>
       <Stack gutter="0.5rem">
-        {TokenViewData.map(({ title, balance, lenAlwaysShown }) => {
+        {TokenViewData.map(({ title, balance, lenAlwaysShown, tooltip }) => {
           if (balance.length === 0) {
             return null;
           }
@@ -41,7 +58,7 @@ export const AvailableTabView: FunctionComponent<{
           return (
             <CollapsibleList
               key={title}
-              title={<TokenTitleView title={title} />}
+              title={<TokenTitleView title={title} tooltip={tooltip} />}
               lenAlwaysShown={lenAlwaysShown}
               items={balance.map((viewToken) => (
                 <TokenItem
