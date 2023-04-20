@@ -58,6 +58,10 @@ export const StakedTabView: FunctionComponent<{
           image={
             <img
               src={require("../../public/assets/img/empty-staking.png")}
+              style={{
+                width: "6.25rem",
+                height: "6.25rem",
+              }}
               alt="empty staking image"
             />
           }

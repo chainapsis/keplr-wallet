@@ -21,6 +21,13 @@ export const AvailableTabView: FunctionComponent<{
     return token.token.toDec().gt(new Dec(0));
   });
 
+  const isFirstTime =
+    stakableBalances.filter((token) => {
+      return token.token.toDec().gt(new Dec(0));
+    }).length === 0 &&
+    tokenBalances.length === 0 &&
+    ibcBalances.length === 0;
+
   const TokenViewData: {
     title: string;
     balance: ViewToken[];
@@ -29,7 +36,7 @@ export const AvailableTabView: FunctionComponent<{
   }[] = [
     {
       title: "Balance",
-      balance: stakableBalances,
+      balance: isFirstTime ? [] : stakableBalances,
       lenAlwaysShown: 5,
       tooltip: "TODO: Lorem ipsum dolor sit amet",
     },
@@ -47,14 +54,6 @@ export const AvailableTabView: FunctionComponent<{
         "TODO: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     },
   ];
-
-  const countFilter = (viewToken: ViewToken) =>
-    viewToken.token.toDec().gt(new Dec(0));
-
-  const isFisrtTime =
-    stakableBalances.filter(countFilter).length === 0 &&
-    tokenBalances.filter(countFilter).length === 0 &&
-    ibcBalances.filter(countFilter).length === 0;
 
   return (
     <React.Fragment>
@@ -80,11 +79,15 @@ export const AvailableTabView: FunctionComponent<{
         })}
       </Stack>
 
-      {isFisrtTime ? (
+      {isFirstTime ? (
         <MainEmptyView
           image={
             <img
               src={require("../../public/assets/img/empty-balance.png")}
+              style={{
+                width: "6.25rem",
+                height: "6.25rem",
+              }}
               alt="empty balance image"
             />
           }
