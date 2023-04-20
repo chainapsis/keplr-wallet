@@ -9,7 +9,7 @@ export class CopyAddressConfig {
 
   // Key: vault id, value: array of chain identifiers
   @observable
-  protected vaultToConfigMap = new Map<string, string[]>();
+  protected readonly vaultToConfigMap = new Map<string, string[]>();
 
   constructor(kvStore: KVStore, protected readonly chainStore: ChainStore) {
     this.kvStore = new PrefixKVStore(kvStore, "copy-address");

@@ -325,7 +325,10 @@ export class RootStore {
     );
 
     this.uiConfigStore = new UIConfigStore(
-      new ExtensionKVStore("store_ui_config"),
+      {
+        kvStore: new ExtensionKVStore("store_ui_config"),
+        addressBookKVStore: new ExtensionKVStore("address-book"),
+      },
       this.chainStore,
       this.priceStore,
       ICNSInfo,

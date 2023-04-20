@@ -10,6 +10,8 @@ import { YAxis } from "../axis";
 import { Stack } from "../stack";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import Color from "color";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../stores";
 
 const Styles = {
   Container: styled.div`
@@ -34,7 +36,9 @@ type Type = "recent" | "contacts" | "accounts";
 export const AddressBookModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
-}> = ({ isOpen, close }) => {
+}> = observer(({ isOpen, close }) => {
+  const { uiConfigStore } = useStore();
+
   const [type, setType] = useState<Type>("recent");
 
   return (
@@ -85,30 +89,27 @@ export const AddressBookModal: FunctionComponent<{
 
         <Styles.ListContainer>
           <Stack gutter="0.75rem">
-            <AddressItem
-              name="test"
-              address="cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k"
-            />
-            <AddressItem
-              name="test2"
-              address="cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k"
-              memo="test memo"
-            />
-            <AddressItem
-              name="test2"
-              address="cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k"
-              memo="test memo"
-            />
-            <AddressItem
-              name="test2"
-              address="cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k"
-              memo="test memo"
-            />
-            <AddressItem
-              name="test2"
-              address="cosmos1vv6hruquzpty4xpks9znkw8gys5x4nsnqw9f4k"
-              memo="test memo"
-            />
+            {(() => {
+              switch (type) {
+                case "contacts": {
+                  return uiConfigStore.addressBookConfig
+                    .getAddressBook("cosmoshub")
+                    .map((addressData, i) => {
+                      return (
+                        <AddressItem
+                          key={`contacts-${i}`}
+                          name={addressData.name}
+                          address={addressData.address}
+                          memo={addressData.memo}
+                        />
+                      );
+                    });
+                }
+                default: {
+                  return null;
+                }
+              }
+            })()}
 
             <Gutter size="0.75rem" />
           </Stack>
@@ -116,7 +117,7 @@ export const AddressBookModal: FunctionComponent<{
       </Box>
     </Modal>
   );
-};
+});
 
 const AddressItem: FunctionComponent<{
   name: string;

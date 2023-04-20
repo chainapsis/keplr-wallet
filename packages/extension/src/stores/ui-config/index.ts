@@ -11,19 +11,21 @@ import {
   toJS,
 } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { computedFn } from "mobx-utils";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { CopyAddressConfig } from "./copy-address";
 import { ChainStore } from "../chain";
+import { AddressBookConfig } from "./address-book";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
 }
 
 export class UIConfigStore {
+  protected readonly kvStore: KVStore;
+
   public readonly copyAddressConfig: CopyAddressConfig;
+  public readonly addressBookConfig: AddressBookConfig;
 
   @observable
   protected _isInitialized: boolean = false;
@@ -45,19 +47,16 @@ export class UIConfigStore {
       }
     | undefined = undefined;
 
-  @observable
-  protected _icnsFrontendLink: string = "";
-
-  @observable
-  protected _icnsFrontendAllowlistChains: string = "";
-
   // undefined means "automatic"
   // If this value is undefined, the actual `fiatCurrency` getter should determine the fiat currency.
   @observable
   protected _fiatCurrency: string | undefined = undefined;
 
   constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly kvStores: {
+      kvStore: KVStore;
+      addressBookKVStore: KVStore;
+    },
     protected readonly chainStore: ChainStore,
     protected readonly priceStore: CoinGeckoPriceStore,
     _icnsInfo?: {
@@ -66,7 +65,15 @@ export class UIConfigStore {
     },
     _icnsFrontendLink?: string
   ) {
-    this.copyAddressConfig = new CopyAddressConfig(kvStore, chainStore);
+    this.kvStore = kvStores.kvStore;
+    this.copyAddressConfig = new CopyAddressConfig(
+      kvStores.kvStore,
+      chainStore
+    );
+    this.addressBookConfig = new AddressBookConfig(
+      kvStores.addressBookKVStore,
+      chainStore
+    );
 
     this._isBeta = navigator.userAgent.includes("Firefox");
     this._platform = navigator.userAgent.includes("Firefox")
@@ -74,7 +81,6 @@ export class UIConfigStore {
       : "chrome";
 
     this._icnsInfo = _icnsInfo;
-    this._icnsFrontendLink = _icnsFrontendLink || "";
 
     makeObservable(this);
 
@@ -118,39 +124,14 @@ export class UIConfigStore {
       };
     });
 
-    await this.copyAddressConfig.init();
+    await Promise.all([
+      this.copyAddressConfig.init(),
+      this.addressBookConfig.init(),
+    ]);
 
     runInAction(() => {
       this._isInitialized = true;
     });
-    // XXX: Below logic has fetching logic, so it should not be included in initialization logic.
-
-    if (this.icnsFrontendLink) {
-      try {
-        const prev = await this.kvStore.get<string>("______icns___allowlist");
-        if (prev) {
-          runInAction(() => {
-            this._icnsFrontendAllowlistChains = prev;
-          });
-        }
-
-        const icnsAllowlistRes = await fetch(
-          new URL("/api/allowlist", this.icnsFrontendLink).toString()
-        );
-
-        if (icnsAllowlistRes.ok && icnsAllowlistRes.status === 200) {
-          const res = await icnsAllowlistRes.json();
-          const chains = res?.chains || "";
-
-          runInAction(() => {
-            this._icnsFrontendAllowlistChains = chains;
-          });
-          await this.kvStore.set("______icns___allowlist", chains);
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    }
   }
 
   get isBeta(): boolean {
@@ -212,40 +193,6 @@ export class UIConfigStore {
   get icnsInfo() {
     return this._icnsInfo;
   }
-
-  get icnsFrontendLink(): string {
-    return this._icnsFrontendLink;
-  }
-
-  needShowICNSFrontendLink = computedFn((chainId: string): boolean => {
-    if (!this.icnsFrontendLink) {
-      return false;
-    }
-
-    if (!this._icnsFrontendAllowlistChains) {
-      return true;
-    }
-
-    try {
-      const allowIdentifiers = this._icnsFrontendAllowlistChains
-        .split(",")
-        .map((str) => str.trim())
-        .filter((str) => str.length > 0)
-        .map((chainId) => ChainIdHelper.parse(chainId).identifier);
-
-      const allowIdentifierMap = new Map<string, boolean | undefined>();
-      for (const identifier of allowIdentifiers) {
-        allowIdentifierMap.set(identifier, true);
-      }
-
-      return (
-        allowIdentifierMap.get(ChainIdHelper.parse(chainId).identifier) === true
-      );
-    } catch (e) {
-      console.log(e);
-      return false;
-    }
-  });
 
   async save() {
     const data = toJS(this.options);

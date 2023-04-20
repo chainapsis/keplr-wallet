@@ -1,4 +1,3 @@
 export * from "./tx";
-export * from "./address-book";
 export * from "./sign-doc";
 export * from "./ibc";
