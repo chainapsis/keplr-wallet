@@ -1,6 +1,6 @@
 import styled, { css, FlattenSimpleInterpolation } from "styled-components";
 import { ColorPalette } from "../../styles";
-import { ButtonProps, ButtonColor, ButtonMode } from "./types";
+import { ButtonProps, ButtonColor, ButtonMode, ButtonSize } from "./types";
 
 const makeTextAndSvgColor = (color: string) => {
   return css`
@@ -10,6 +10,19 @@ const makeTextAndSvgColor = (color: string) => {
       stroke: ${color};
     }
   `;
+};
+
+export const getButtonHeightRem = (size: ButtonSize | undefined): number => {
+  switch (size) {
+    case "extraSmall":
+      return 2;
+    case "small":
+      return 2.25;
+    case "large":
+      return 3.25;
+    default:
+      return 2.75;
+  }
 };
 
 const buttonStyleFromColorAndMode: Record<
@@ -132,18 +145,7 @@ export const Styles = {
   // If not omitted, they are intersected with each other.
   Button: styled.button<Omit<ButtonProps, "onClick">>`
     width: 100%;
-    height: ${({ size }) => {
-      switch (size) {
-        case "extraSmall":
-          return "2rem";
-        case "small":
-          return "2.25rem";
-        case "large":
-          return "3.25rem";
-        default:
-          return "2.75rem";
-      }
-    }};
+    height: ${({ size }) => `${getButtonHeightRem(size)}rem`};
     display: flex;
     justify-content: center;
     align-items: center;

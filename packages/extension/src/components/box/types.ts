@@ -4,7 +4,7 @@ export type BoxAlignX = "left" | "right" | "center";
 export type BoxAlignY = "top" | "bottom" | "center";
 
 export interface BoxProps {
-  position?: "relative" | "absolute";
+  position?: "relative" | "absolute" | "fixed";
   width?: string;
   minWidth?: string;
   maxWidth?: string;

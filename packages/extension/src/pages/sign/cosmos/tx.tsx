@@ -1,12 +1,10 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import styled from "styled-components";
 import { Stack } from "../../../components/stack";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import { ColorPalette } from "../../../styles";
 import { Box } from "../../../components/box";
-import { Button } from "../../../components/button";
 import { useStore } from "../../../stores";
 import { useInteractionInfo } from "../../../hooks";
 import { MessageItem } from "../components/message-item";
@@ -26,12 +24,6 @@ import { XAxis } from "../../../components/axis";
 import { H5 } from "../../../components/typography";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { FeeControl } from "../../../components/input/fee-control";
-
-const Styles = {
-  BottomButton: styled.div`
-    padding: 0.75rem;
-  `,
-};
 
 export const SignCosmosTxPage: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, queriesStore } = useStore();
@@ -162,31 +154,28 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title="Confirm Transaction"
+      fixedHeight={true}
       left={<BackButton />}
-      bottom={
-        <Styles.BottomButton>
-          <Button
-            text="Approve"
-            color="primary"
-            size="large"
-            disabled={txConfigsValidate.interactionBlocked}
-            onClick={async () => {
-              if (signInteractionStore.waitingData) {
-                await signInteractionStore.approveAndWaitEnd(
-                  signInteractionStore.waitingData.data.signDocWrapper
-                );
+      bottomButton={{
+        text: "Approve",
+        color: "primary",
+        size: "large",
+        disabled: txConfigsValidate.interactionBlocked,
+        onClick: async () => {
+          if (signInteractionStore.waitingData) {
+            await signInteractionStore.approveAndWaitEnd(
+              signInteractionStore.waitingData.data.signDocWrapper
+            );
 
-                if (
-                  interactionInfo.interaction &&
-                  !interactionInfo.interactionInternal
-                ) {
-                  window.close();
-                }
-              }
-            }}
-          />
-        </Styles.BottomButton>
-      }
+            if (
+              interactionInfo.interaction &&
+              !interactionInfo.interactionInternal
+            ) {
+              window.close();
+            }
+          }
+        },
+      }}
     >
       <Box
         height="100%"

@@ -1,13 +1,16 @@
-import React, {
-  FunctionComponent,
-  ReactNode,
-  useLayoutEffect,
-  useRef,
-} from "react";
-import styled from "styled-components";
+import React, { FunctionComponent, useLayoutEffect, useRef } from "react";
+import styled, { css } from "styled-components";
 import { HeaderProps } from "./types";
 import { Subtitle1 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
+import { Box } from "../../components/box";
+import { Button, getButtonHeightRem } from "../../components/button";
+
+const pxToRem = (px: number) => {
+  const base = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  return px / base;
+};
+const bottomButtonPaddingRem = 0.75;
 
 const Styles = {
   Container: styled.div``,
@@ -66,12 +69,23 @@ const Styles = {
   `,
   ContentContainer: styled.div<{
     layoutHeight: number;
-    bottom: ReactNode | null;
+    bottomPadding: string;
+    fixedHeight: boolean;
   }>`
     padding-top: 3.75rem;
-    padding-bottom: ${({ bottom }) => (bottom ? "4.75rem" : "0")};
+    padding-bottom: ${({ bottomPadding }) => bottomPadding};
 
-    min-height: ${({ layoutHeight }) => `${layoutHeight}px`};
+    ${({ layoutHeight, fixedHeight }) => {
+      if (!fixedHeight) {
+        return css`
+          min-height: ${layoutHeight}rem;
+        `;
+      } else {
+        return css`
+          height: ${layoutHeight}rem;
+        `;
+      }
+    }};
   `,
   BottomContainer: styled.div`
     height: 4.75rem;
@@ -90,30 +104,43 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   left,
   right,
   bottom,
+  bottomButton,
+  fixedHeight,
   children,
 }) => {
-  const [height, setHeight] = React.useState(600);
+  const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(0);
 
   useLayoutEffect(() => {
-    // TODO: Use as rem unit?
-
     function handleResize() {
       if (window.visualViewport) {
         if (lastSetHeight.current !== window.visualViewport.height) {
           setHeight(window.visualViewport.height);
-          lastSetHeight.current = window.visualViewport.height;
+          lastSetHeight.current = pxToRem(window.visualViewport.height);
         }
       }
     }
 
     if (window.visualViewport) {
-      setHeight(window.visualViewport.height);
+      setHeight(pxToRem(window.visualViewport.height));
     }
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const bottomPadding = (() => {
+    if (!bottomButton) {
+      if (bottom) {
+        return "4.75rem";
+      }
+      return "0";
+    }
+
+    return (
+      bottomButtonPaddingRem * 2 + getButtonHeightRem(bottomButton.size) + "rem"
+    );
+  })();
 
   return (
     <Styles.Container>
@@ -125,11 +152,28 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
         {right && <Styles.HeaderRight>{right}</Styles.HeaderRight>}
       </Styles.HeaderContainer>
 
-      <Styles.ContentContainer layoutHeight={height} bottom={bottom}>
+      <Styles.ContentContainer
+        layoutHeight={height}
+        fixedHeight={fixedHeight || false}
+        bottomPadding={bottomPadding}
+      >
         {children}
       </Styles.ContentContainer>
 
-      {bottom ? (
+      {bottomButton ? (
+        <Box
+          padding={bottomButtonPaddingRem + "rem"}
+          position="fixed"
+          style={{
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        >
+          <Button {...bottomButton} />
+        </Box>
+      ) : null}
+      {!bottomButton && bottom ? (
         <Styles.BottomContainer>{bottom}</Styles.BottomContainer>
       ) : null}
     </Styles.Container>
