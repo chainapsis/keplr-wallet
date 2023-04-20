@@ -430,7 +430,24 @@ export class ChainStore extends BaseChainStore<
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.setChainInfos(result.chainInfos);
+    const embedChainInfoMap = new Map<string, AppChainInfo>();
+    for (const embedChainInfo of this.embedChainInfos) {
+      embedChainInfoMap.set(
+        ChainIdHelper.parse(embedChainInfo.chainId).identifier,
+        embedChainInfo
+      );
+    }
+    this.setChainInfos(
+      result.chainInfos.map((chainInfo) => {
+        const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId)
+          .identifier;
+        const embedChainInfo = embedChainInfoMap.get(chainIdentifier);
+        return {
+          ...chainInfo,
+          txExplorer: embedChainInfo?.txExplorer,
+        };
+      })
+    );
   }
 
   @flow
