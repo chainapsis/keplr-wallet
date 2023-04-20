@@ -1,11 +1,12 @@
 import React, { FunctionComponent } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
-import { TokenItem, TokenTitleView } from "./components";
+import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { MainQueryState } from "./query";
 import { Stack } from "../../components/stack";
+import { Button } from "../../components/button";
 
 export const StakedTabView: FunctionComponent<{
   queryState: MainQueryState;
@@ -50,6 +51,22 @@ export const StakedTabView: FunctionComponent<{
           );
         })}
       </Stack>
+
+      {delegations.length === 0 && unbondings.length === 0 ? (
+        <MainEmptyView
+          image={
+            <img
+              src={require("../../public/assets/img/empty-staking.png")}
+              alt="empty staking image"
+            />
+          }
+          title="Ready to Start Staking?"
+          paragraph="Stake your assets to earn rewards and contribute to maintaining the networks!"
+          button={
+            <Button text="Go to Dashboard" color="primary" size="small" />
+          }
+        />
+      ) : null}
     </React.Fragment>
   );
 });

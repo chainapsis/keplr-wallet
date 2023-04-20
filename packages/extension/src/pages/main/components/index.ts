@@ -5,4 +5,5 @@ export * from "./string-toggle";
 export * from "./menu-bar";
 export * from "./copy-address";
 export * from "./copy-address-modal";
+export * from "./empty-view";
 export * from "./internal-link-view";
