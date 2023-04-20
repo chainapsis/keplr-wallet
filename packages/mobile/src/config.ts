@@ -2169,7 +2169,7 @@ export const EmbedChainInfos: AppChainInfo[] = [
     rpc: "https://rpc-omniflixhub.keplr.app",
     rest: "https://lcd-omniflixhub.keplr.app",
     chainId: "omniflixhub-1",
-    chainName: "OmniFlix Hub",
+    chainName: "OmniFlix",
     stakeCurrency: {
       coinDenom: "FLIX",
       coinMinimalDenom: "uflix",
