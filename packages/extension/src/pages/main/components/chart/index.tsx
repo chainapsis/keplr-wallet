@@ -149,39 +149,35 @@ export const DualChart: FunctionComponent<{
           strokeLinecap="round"
         />
 
-        {firstArcVisibility || secondArcVisibility ? (
-          <React.Fragment>
-            <mask id="arc-mask">
-              <animated.path
-                d={to([arcStartAngle, arcEndAngle], (startAngle, endAngle) => {
-                  if (Math.abs(startAngle - endAngle) <= 0.05) {
-                    return "";
-                  }
+        <mask id="arc-mask">
+          <animated.path
+            d={to([arcStartAngle, arcEndAngle], (startAngle, endAngle) => {
+              if (Math.abs(startAngle - endAngle) <= 0.05) {
+                return "";
+              }
 
-                  return getArcPath({
-                    x,
-                    y,
-                    radius,
-                    startAngle,
-                    endAngle,
-                  });
-                })}
-                stroke="white"
-                strokeWidth={stroke}
-                strokeLinecap="round"
-              />
-            </mask>
-            <rect
-              id="arc-fill"
-              x={0}
-              y={0}
-              width={width}
-              height={height}
-              fill="url(#linear)"
-              mask="url(#arc-mask)"
-            />
-          </React.Fragment>
-        ) : null}
+              return getArcPath({
+                x,
+                y,
+                radius,
+                startAngle,
+                endAngle,
+              });
+            })}
+            stroke="white"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+          />
+        </mask>
+        <rect
+          id="arc-fill"
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fill="url(#linear)"
+          mask="url(#arc-mask)"
+        />
       </svg>
     </YAxis>
   );
