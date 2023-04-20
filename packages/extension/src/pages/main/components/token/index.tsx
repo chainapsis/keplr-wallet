@@ -16,6 +16,7 @@ import { ArrowRightIcon, QuestionIcon } from "../../../../components/icon";
 import styled from "styled-components";
 import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../../components/image";
+import { Tooltip } from "../../../../components/tooltip";
 
 const Styles = {
   Container: styled.div<{ forChange: boolean | undefined }>`
@@ -30,19 +31,24 @@ const Styles = {
   `,
 };
 
-export const TokenTitleView: FunctionComponent<{ title: string }> = ({
-  title,
-}) => {
+export const TokenTitleView: FunctionComponent<{
+  title: string;
+  tooltip?: string | React.ReactElement;
+}> = ({ title, tooltip }) => {
   return (
     <Columns sum={1} alignY="center">
       <Subtitle4 style={{ color: ColorPalette["gray-200"] }}>{title}</Subtitle4>
-      <Box marginLeft="0.25rem">
-        <QuestionIcon
-          width="1rem"
-          height="1rem"
-          color={ColorPalette["gray-300"]}
-        />
-      </Box>
+      {tooltip ? (
+        <Box marginLeft="0.25rem">
+          <Tooltip content={tooltip}>
+            <QuestionIcon
+              width="1rem"
+              height="1rem"
+              color={ColorPalette["gray-300"]}
+            />
+          </Tooltip>
+        </Box>
+      ) : null}
     </Columns>
   );
 };

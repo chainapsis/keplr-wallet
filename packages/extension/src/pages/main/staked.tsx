@@ -22,6 +22,7 @@ export const StakedTabView: FunctionComponent<{
     title: string;
     balance: ViewToken[];
     lenAlwaysShown: number;
+    tooltip?: string | React.ReactElement;
   }[] = [
     { title: "Staked Balance", balance: delegations, lenAlwaysShown: 5 },
     { title: "Unstaking Balance", balance: unbondings, lenAlwaysShown: 3 },
@@ -30,7 +31,7 @@ export const StakedTabView: FunctionComponent<{
   return (
     <React.Fragment>
       <Stack gutter="0.5rem">
-        {TokenViewData.map(({ title, balance, lenAlwaysShown }) => {
+        {TokenViewData.map(({ title, balance, lenAlwaysShown, tooltip }) => {
           if (balance.length === 0) {
             return null;
           }
@@ -38,7 +39,7 @@ export const StakedTabView: FunctionComponent<{
           return (
             <CollapsibleList
               key={title}
-              title={<TokenTitleView title={title} />}
+              title={<TokenTitleView title={title} tooltip={tooltip} />}
               lenAlwaysShown={lenAlwaysShown}
               items={balance.map((viewToken) => (
                 <TokenItem
