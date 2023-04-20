@@ -139,8 +139,8 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
     );
   })();
 
-  const Content = (
-    <Styles.Container>
+  return (
+    <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
       <Styles.HeaderContainer>
         {left && <Styles.HeaderLeft>{left}</Styles.HeaderLeft>}
         <Styles.HeaderTitle>
@@ -172,6 +172,4 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
       ) : null}
     </Styles.Container>
   );
-
-  return onSubmit ? <form onSubmit={onSubmit}>{Content}</form> : Content;
 };

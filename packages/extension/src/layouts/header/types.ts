@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { ButtonProps } from "../../components/button";
 
 export interface HeaderProps {
@@ -11,5 +11,5 @@ export interface HeaderProps {
 
   fixedHeight?: boolean;
 
-  onSubmit?: () => void;
+  onSubmit?: React.FormEventHandler<HTMLFormElement>;
 }
