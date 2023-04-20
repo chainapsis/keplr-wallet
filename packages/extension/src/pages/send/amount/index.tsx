@@ -18,9 +18,6 @@ import { Box } from "../../../components/box";
 import { MemoInput } from "../../../components/input/memo-input";
 
 const Styles = {
-  Container: styled(Stack)`
-    padding: 0.75rem;
-  `,
   Flex1: styled.div`
     flex: 1;
   `,
@@ -88,31 +85,33 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         },
       }}
     >
-      <Styles.Container gutter="0.75rem">
-        <Stack gutter="0.375rem">
-          <Subtitle3>Asset</Subtitle3>
-          <TokenItem
-            viewToken={{
-              token: balance,
-              chainInfo: chainStore.getChain(chainId),
-            }}
-            forChange
+      <Box paddingX="0.75rem">
+        <Stack gutter="0.75rem">
+          <Stack gutter="0.375rem">
+            <Subtitle3>Asset</Subtitle3>
+            <TokenItem
+              viewToken={{
+                token: balance,
+                chainInfo: chainStore.getChain(chainId),
+              }}
+              forChange
+            />
+          </Stack>
+
+          <RecipientInput recipientConfig={sendConfigs.recipientConfig} />
+
+          <AmountInput amountConfig={sendConfigs.amountConfig} />
+
+          <MemoInput
+            memoConfig={sendConfigs.memoConfig}
+            placeholder="Required for sending to centralized exchanges"
           />
+
+          <Styles.Flex1 />
+
+          <Box marginBottom="4.75rem" />
         </Stack>
-
-        <RecipientInput recipientConfig={sendConfigs.recipientConfig} />
-
-        <AmountInput amountConfig={sendConfigs.amountConfig} />
-
-        <MemoInput
-          memoConfig={sendConfigs.memoConfig}
-          placeholder="Required for sending to centralized exchanges"
-        />
-
-        <Styles.Flex1 />
-
-        <Box marginBottom="4.75rem" />
-      </Styles.Container>
+      </Box>
     </HeaderLayout>
   );
 });
