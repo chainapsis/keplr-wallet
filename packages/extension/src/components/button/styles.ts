@@ -137,8 +137,6 @@ export const Styles = {
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    min-width: 4.875rem;
   `,
 
   // "onClick" field should be omitted because "onClick" prop already exists on html button component.
