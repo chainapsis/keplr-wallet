@@ -12,6 +12,8 @@ const phishings = [
   "app-keplr-vvallet.host",
 ];
 
+const subdomains = ["scam1.service.com", "scam2.service.com"];
+
 const createMockServer = () => {
   let queryCount = 0;
 
@@ -52,9 +54,6 @@ const createMockServer = () => {
           case 5:
             phishing = phishing + " ,  ";
             break;
-          case 6:
-            phishing = "third-domain." + phishing;
-            break;
           default:
             phishing = `  ${phishing} `;
         }
@@ -65,7 +64,6 @@ const createMockServer = () => {
       return;
     }
 
-    // Even if an invalid endpoint exists, only that endpoint should be ignored and proceeded.
     // When second fetch, add other domain to test fetching interval.
     if (req.url === "/list3") {
       resp.writeHead(200);
@@ -92,8 +90,47 @@ const createMockServer = () => {
           case 5:
             phishing = phishing + "?test\n";
             break;
-          case 6:
-            phishing = "third-domain." + phishing + "\n";
+          default:
+            phishing = `  ${phishing} `;
+        }
+
+        str += phishing;
+      }
+      str += ";invalid";
+
+      if (queryCount === 2) {
+        str += ";added.domain";
+      }
+
+      resp.end(str);
+      return;
+    }
+
+    if (req.url === "/subdomains") {
+      resp.writeHead(200);
+      const list = phishings.concat(subdomains);
+      let str = "";
+      for (let i = 0; i < list.length; i++) {
+        let phishing = list[i];
+
+        switch (i) {
+          case 0:
+            phishing = phishing + "\n";
+            break;
+          case 1:
+            phishing = phishing + ".\n";
+            break;
+          case 2:
+            phishing = "." + phishing + "\r\n";
+            break;
+          case 3:
+            phishing = "invalid;.." + phishing + "..;";
+            break;
+          case 4:
+            phishing = phishing + "/,";
+            break;
+          case 5:
+            phishing = phishing + "?test\n";
             break;
           default:
             phishing = `  ${phishing} `;
@@ -421,7 +458,6 @@ describe("Test phishing list service", () => {
     // allow temp Url
     service.allowUrlTemp("https://" + phishing);
     expect(service.checkURLIsPhishing("https://" + phishing)).toBe(false);
-    expect(service.checkURLIsPhishing("https://test." + phishing)).toBe(false);
     // but another url still blocked
     expect(service.checkURLIsPhishing("https://" + anotherPhishing)).toBe(true);
     expect(service.checkURLIsPhishing("https://test." + anotherPhishing)).toBe(
@@ -437,5 +473,34 @@ describe("Test phishing list service", () => {
     expect(service.checkURLIsPhishing("https://test." + anotherPhishing)).toBe(
       true
     );
+  });
+
+  test("Test subdomains", async () => {
+    const service = new PhishingListService({
+      blockListUrl: `http://127.0.0.1:${port}/subdomains`,
+      fetchingIntervalMs: 200,
+      retryIntervalMs: 100,
+      allowTimeoutMs: 100,
+    });
+    eachService = service;
+
+    service.init();
+
+    await waitServiceInit(service);
+
+    testCheckURLIsPhishing(service);
+
+    expect(service.checkURLIsPhishing("https://service.com")).toBe(false);
+    expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(true);
+    expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
+
+    // allow temp Url
+    service.allowUrlTemp("https://service.com");
+    expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(true);
+    expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
+    // allow temp Url
+    service.allowUrlTemp("https://scam1.service.com");
+    expect(service.checkURLIsPhishing("https://scam1.service.com")).toBe(false);
+    expect(service.checkURLIsPhishing("https://scam2.service.com")).toBe(true);
   });
 });
