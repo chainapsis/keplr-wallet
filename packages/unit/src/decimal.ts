@@ -1,11 +1,11 @@
 import bigInteger from "big-integer";
-import { Int } from "./int";
-import { CoinUtils } from "./coin-utils";
+import { Uint, Int } from "./int";
 import {
   exponentDecStringToDecString,
   isExponentDecString,
   isValidDecimalString,
 } from "./etc";
+import { integerStringToUSLocaleString } from "./utils";
 
 export class Dec {
   public static readonly precision = 18;
@@ -83,7 +83,7 @@ export class Dec {
    * If int is string and contains dot(.), prec is ignored and automatically calculated.
    * @param prec - Precision
    */
-  constructor(int: bigInteger.BigNumber | Int, prec: number = 0) {
+  constructor(int: bigInteger.BigNumber | Int | Uint, prec: number = 0) {
     if (typeof int === "number") {
       int = int.toString();
     }
@@ -114,6 +114,8 @@ export class Dec {
       }
       this.int = bigInteger(int);
     } else if (int instanceof Int) {
+      this.int = bigInteger(int.toString());
+    } else if (int instanceof Uint) {
       this.int = bigInteger(int.toString());
     } else if (typeof int === "bigint") {
       this.int = bigInteger(int);
@@ -376,9 +378,7 @@ export class Dec {
       !(integer.eq(bigInteger(0)) && fractionStr.length === 0);
 
     const integerStr = locale
-      ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        CoinUtils.integerStringToUSLocaleString(integer.toString())
+      ? integerStringToUSLocaleString(integer.toString())
       : integer.toString();
 
     return `${isNegative ? "-" : ""}${integerStr}${
@@ -410,3 +410,11 @@ export class Dec {
     return new Dec(this.chopPrecisionAndTruncate(), 0);
   }
 }
+
+Int.prototype.toDec = function (): Dec {
+  return new Dec(this);
+};
+
+Uint.prototype.toDec = function (): Dec {
+  return new Dec(this);
+};

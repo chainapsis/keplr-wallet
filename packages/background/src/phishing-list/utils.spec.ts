@@ -1,7 +1,7 @@
-import { parseDomainUntilSecondLevel } from "./utils";
+import { parseDomain } from "./utils";
 
 describe("Test phishing list service utils", () => {
-  test("Test parseDomainUntilSecondLevel", () => {
+  test("Test parseDomain", () => {
     const tests: ({
       url: string;
     } & ({ expect: string } | { invalid: true }))[] = [
@@ -55,11 +55,11 @@ describe("Test phishing list service utils", () => {
       },
       {
         url: "asd.test.com.",
-        expect: "test.com",
+        expect: "asd.test.com",
       },
       {
         url: "asd..test.com.",
-        expect: "test.com",
+        expect: "asd.test.com",
       },
       {
         url: "http://",
@@ -107,15 +107,15 @@ describe("Test phishing list service utils", () => {
       },
       {
         url: "https://asd.test.com.",
-        expect: "test.com",
+        expect: "asd.test.com",
       },
       {
         url: "https://asd..test.com.",
-        expect: "test.com",
+        expect: "asd.test.com",
       },
       {
         url: "https://asd..test.com:999.",
-        expect: "test.com",
+        expect: "asd.test.com",
       },
       {
         url:
@@ -143,9 +143,9 @@ describe("Test phishing list service utils", () => {
 
     for (const test of tests) {
       if ("invalid" in test) {
-        expect(() => parseDomainUntilSecondLevel(test.url)).toThrow();
+        expect(() => parseDomain(test.url)).toThrow();
       } else {
-        expect(parseDomainUntilSecondLevel(test.url)).toBe(test.expect);
+        expect(parseDomain(test.url).join(".")).toBe(test.expect);
       }
     }
   });
