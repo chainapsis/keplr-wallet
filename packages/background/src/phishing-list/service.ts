@@ -1,5 +1,5 @@
 import Axios, { AxiosResponse } from "axios";
-import { parseDomainUntilSecondLevel } from "./utils";
+import { parseDomain } from "./utils";
 
 class IntervalFetcher<R> {
   protected _hasInited: boolean = false;
@@ -66,6 +66,11 @@ class IntervalFetcher<R> {
 }
 
 export class PhishingListService {
+  // If blocked urls is "scam1.com", "scam2.service.com",
+  // "scam1.com" and "**.scam1.com" should be blocked.
+  // and "scam2.service.com" and "**.scam2.service.com" should be blocked.
+  // and "service.com" should be allowed.
+  // urls which blocked.
   protected urlMap: Map<string, boolean> = new Map();
   protected readonly allowedUrlMap: Map<string, number> = new Map();
 
@@ -101,7 +106,7 @@ export class PhishingListService {
 
         for (const domain of domains) {
           try {
-            map.set(parseDomainUntilSecondLevel(domain), true);
+            map.set(parseDomain(domain).join("."), true);
           } catch (e) {
             console.log(e);
           }
@@ -159,25 +164,32 @@ export class PhishingListService {
   }
 
   checkURLIsPhishing(url: string): boolean {
-    const parsed = parseDomainUntilSecondLevel(new URL(url).origin);
-    if (this.urlMap.get(parsed) === true) {
-      const allowed = this.allowedUrlMap.get(parsed);
-      if (
-        allowed &&
-        allowed + this.opts.allowTimeoutMs >= new Date().getTime()
-      ) {
-        return false;
+    const origin = new URL(url).origin;
+    const parsed = parseDomain(origin);
+    while (parsed.length >= 2) {
+      const domain = parsed.join(".");
+      if (this.urlMap.get(domain) === true) {
+        // Allowing url should not be based on subdomain but only allow specific domain.
+        const allowed = this.allowedUrlMap.get(parseDomain(origin).join("."));
+        if (
+          allowed &&
+          allowed + this.opts.allowTimeoutMs >= new Date().getTime()
+        ) {
+          // noop: This url is allowed temporarily
+        } else {
+          return true;
+        }
       }
-      return true;
-    } else {
-      return false;
+
+      parsed.shift();
     }
+    return false;
   }
 
   allowUrlTemp(url: string): void {
     const parsed = new URL(url);
     this.allowedUrlMap.set(
-      parseDomainUntilSecondLevel(parsed.origin),
+      parseDomain(parsed.origin).join("."),
       new Date().getTime()
     );
   }

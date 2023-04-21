@@ -1,4 +1,4 @@
-export function parseDomainUntilSecondLevel(param: string): string {
+export function parseDomain(param: string): string[] {
   let domain = param;
 
   if (domain.match(/^[a-zA-Z0-9-]+:\/\/.+$/)) {
@@ -28,5 +28,5 @@ export function parseDomainUntilSecondLevel(param: string): string {
     split[split.length - 1] = split[split.length - 1].slice(0, i);
   }
 
-  return split[split.length - 2] + "." + split[split.length - 1];
+  return split;
 }
