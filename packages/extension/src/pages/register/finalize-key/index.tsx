@@ -216,7 +216,7 @@ export const FinalizeKeyScene: FunctionComponent<{
                 .stakable.waitFreshResponse()
             );
             promises.push(
-              queries.cosmos.queryAccount
+              queries.cosmos.queryDelegations
                 .getQueryBech32Address(bech32Address.address)
                 .waitFreshResponse()
             );

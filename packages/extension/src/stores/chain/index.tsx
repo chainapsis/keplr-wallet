@@ -169,6 +169,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @flow
+  *enableChainInfoInUIWithVaultId(vaultId: string, ...chainIds: string[]) {
+    const msg = new EnableChainsMsg(vaultId, chainIds);
+    this._enabledChainIdentifiers = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+  }
+
+  @flow
   *disableChainInfoInUI(...chainIds: string[]) {
     if (!this.keyRingStore.selectedKeyInfo) {
       return;
@@ -178,6 +186,14 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.keyRingStore.selectedKeyInfo.id,
       chainIds
     );
+    this._enabledChainIdentifiers = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+  }
+
+  @flow
+  *disableChainInfoInUIWithVaultId(vaultId: string, ...chainIds: string[]) {
+    const msg = new DisableChainsMsg(vaultId, chainIds);
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
