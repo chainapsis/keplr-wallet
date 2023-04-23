@@ -4,9 +4,9 @@ import { Styles } from "./styles";
 
 export const Checkbox: FunctionComponent<CheckBoxProps> = ({
   size = "large",
-  checked = false,
+  checked,
+  onChange,
   disabled = false,
-  onClick,
 }) => {
   const iconSize = size === "small" ? "0.625rem" : "1rem";
 
@@ -15,7 +15,13 @@ export const Checkbox: FunctionComponent<CheckBoxProps> = ({
       size={size}
       checked={checked}
       disabled={disabled}
-      onClick={onClick}
+      onClick={(e) => {
+        e.preventDefault();
+
+        if (!disabled) {
+          onChange(!checked);
+        }
+      }}
     >
       <Styles.HiddenCheckBox checked={checked} disabled={disabled} />
       {checked ? (

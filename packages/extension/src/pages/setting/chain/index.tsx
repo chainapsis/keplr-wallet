@@ -92,12 +92,7 @@ const ChainItem: FunctionComponent<{
           <CloseIcon />
         </Box>
 
-        <Checkbox
-          checked={checked}
-          onClick={() => {
-            setChecked(!checked);
-          }}
-        />
+        <Checkbox checked={checked} onChange={setChecked} />
       </Columns>
     </ItemStyles.Container>
   );

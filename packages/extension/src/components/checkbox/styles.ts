@@ -3,7 +3,7 @@ import { ColorPalette } from "../../styles";
 import { CheckBoxProps } from "./types";
 
 export const Styles = {
-  CheckBoxContainer: styled.div<CheckBoxProps>`
+  CheckBoxContainer: styled.div<Omit<CheckBoxProps, "onChange">>`
     display: flex;
     flex-direction: column;
 

@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
@@ -22,6 +22,8 @@ const Styles = {
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
+
+  const [allowIBCToken, setAllowIBCToken] = useState(false);
 
   const stakableBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
     (chainInfo) => {
@@ -52,7 +54,11 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           <Body2 style={{ color: ColorPalette["gray-300"] }}>
             Hide IBC token
           </Body2>
-          <Checkbox size="small" />
+          <Checkbox
+            size="small"
+            checked={allowIBCToken}
+            onChange={setAllowIBCToken}
+          />
         </Columns>
 
         {stakableBalances.map((viewToken) => {

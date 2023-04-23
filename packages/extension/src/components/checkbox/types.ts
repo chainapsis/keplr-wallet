@@ -1,6 +1,7 @@
 export interface CheckBoxProps {
   size?: "small" | "large";
-  checked?: boolean;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+
   disabled?: boolean;
-  onClick?: () => void;
 }
