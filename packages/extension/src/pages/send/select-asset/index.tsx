@@ -12,6 +12,7 @@ import { Column, Columns } from "../../../components/column";
 import { Body2 } from "../../../components/typography";
 import { Checkbox } from "../../../components/checkbox";
 import { ColorPalette } from "../../../styles";
+import { Dec } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled(Stack)`
@@ -28,18 +29,23 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const tokens = hugeQueriesStore.getAllBalances(!hideIBCToken);
 
   const filteredTokens = useMemo(() => {
+    const zeroDec = new Dec(0);
+    const newTokens = tokens.filter((token) => {
+      return token.token.toDec().gt(zeroDec);
+    });
+
     const trimSearch = search.trim();
 
     if (!trimSearch) {
-      return tokens;
+      return newTokens;
     }
 
-    return tokens.filter((viewToken) => {
+    return newTokens.filter((token) => {
       return (
-        viewToken.chainInfo.chainName
+        token.chainInfo.chainName
           .toLowerCase()
           .includes(trimSearch.toLowerCase()) ||
-        viewToken.token.currency.coinDenom
+        token.token.currency.coinDenom
           .toLowerCase()
           .includes(trimSearch.toLowerCase())
       );
