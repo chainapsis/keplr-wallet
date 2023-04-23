@@ -1,5 +1,10 @@
 import React, { FunctionComponent, useEffect, useRef } from "react";
-import { offset, size, useFloating } from "@floating-ui/react";
+import {
+  autoUpdate,
+  limitShift,
+  offset,
+  useFloating,
+} from "@floating-ui/react";
 import { autoPlacement, shift } from "@floating-ui/react-dom";
 import { ColorPalette } from "../../../styles";
 import { Box } from "../../box";
@@ -28,7 +33,6 @@ export const FloatingDropdown: FunctionComponent<FloatingDropdownProps> = ({
   const { x, y, strategy, refs } = useFloating({
     middleware: [
       autoPlacement({
-        crossAxis: true,
         allowedPlacements: ["left", "right"],
       }),
       offset(({ rects }) => {
@@ -39,17 +43,18 @@ export const FloatingDropdown: FunctionComponent<FloatingDropdownProps> = ({
       }),
       shift({
         padding: 10,
-      }),
-      size({
-        padding: 10,
-        apply(size) {
-          // Do things with the data, e.g.
-          Object.assign(size.elements.floating.style, {
-            maxWidth: `${size.availableWidth}px`,
-          });
-        },
+        limiter: limitShift({
+          // or a function which returns one
+          offset: ({ rects }) => {
+            return {
+              mainAxis: rects.reference.height,
+              crossAxis: rects.reference.width,
+            };
+          },
+        }),
       }),
     ],
+    whileElementsMounted: autoUpdate,
     open: isOpen,
   });
 
