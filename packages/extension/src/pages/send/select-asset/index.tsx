@@ -30,6 +30,10 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const filteredTokens = useMemo(() => {
     const trimSearch = search.trim();
 
+    if (!trimSearch) {
+      return tokens;
+    }
+
     return tokens.filter((viewToken) => {
       return (
         viewToken.chainInfo.chainName
