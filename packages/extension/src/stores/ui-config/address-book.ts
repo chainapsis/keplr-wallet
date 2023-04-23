@@ -2,6 +2,9 @@ import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { ChainStore } from "../chain";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Key, SettledResponses } from "@keplr-wallet/types";
+import { GetCosmosKeysForEachVaultSettledMsg } from "@keplr-wallet/background";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 
 export interface AddressBookData {
   name: string;
@@ -16,7 +19,11 @@ export class AddressBookConfig {
   @observable
   protected readonly addressBookMap = new Map<string, AddressBookData[]>();
 
-  constructor(kvStore: KVStore, protected readonly chainStore: ChainStore) {
+  constructor(
+    kvStore: KVStore,
+    protected readonly messageRequester: MessageRequester,
+    protected readonly chainStore: ChainStore
+  ) {
     makeObservable(this);
 
     this.legacyKVStore = kvStore;
@@ -100,6 +107,20 @@ export class AddressBookConfig {
       return;
     }
     addressBook.splice(index, 1);
+  }
+
+  async getVaultCosmosKeysSettled(
+    chainId: string,
+    vaultIds: string[]
+  ): Promise<
+    SettledResponses<
+      Key & {
+        vaultId: string;
+      }
+    >
+  > {
+    const msg = new GetCosmosKeysForEachVaultSettledMsg(chainId, vaultIds);
+    return await this.messageRequester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   protected async migrateLegacy(): Promise<void> {

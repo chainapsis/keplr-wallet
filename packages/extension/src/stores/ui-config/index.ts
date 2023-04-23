@@ -16,6 +16,7 @@ import { FiatCurrency } from "@keplr-wallet/types";
 import { CopyAddressConfig } from "./copy-address";
 import { ChainStore } from "../chain";
 import { AddressBookConfig } from "./address-book";
+import { MessageRequester } from "@keplr-wallet/router";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -57,6 +58,7 @@ export class UIConfigStore {
       kvStore: KVStore;
       addressBookKVStore: KVStore;
     },
+    protected readonly messageRequester: MessageRequester,
     protected readonly chainStore: ChainStore,
     protected readonly priceStore: CoinGeckoPriceStore,
     _icnsInfo?: {
@@ -72,6 +74,7 @@ export class UIConfigStore {
     );
     this.addressBookConfig = new AddressBookConfig(
       kvStores.addressBookKVStore,
+      messageRequester,
       chainStore
     );
 

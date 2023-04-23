@@ -54,7 +54,7 @@ export class KeyRingCosmosService {
     const bech32Address = new Bech32Address(address);
 
     return {
-      name: this.keyRingService.getKeyRingNameSelected(),
+      name: this.keyRingService.getKeyRingName(vaultId),
       algo: isEthermintLike ? "ethsecp256k1" : "secp256k1",
       // TODO: Not sure we should return uncompressed pub key if ethermint.
       pubKey: pubKey.toBytes(),

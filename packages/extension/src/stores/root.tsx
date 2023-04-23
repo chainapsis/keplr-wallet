@@ -330,6 +330,7 @@ export class RootStore {
         kvStore: new ExtensionKVStore("store_ui_config"),
         addressBookKVStore: new ExtensionKVStore("address-book"),
       },
+      new InExtensionMessageRequester(),
       this.chainStore,
       this.priceStore,
       ICNSInfo,

@@ -118,8 +118,10 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
             setName(e.target.value);
           }}
         />
-        {/* TODO: Address book 버튼을 안보이게 하는 prop 추가하기 */}
-        <RecipientInput recipientConfig={recipientConfig} />
+        <RecipientInput
+          recipientConfig={recipientConfig}
+          hideAddressBookButton={true}
+        />
         <MemoInput memoConfig={memoConfig} />
       </Styles.Container>
     </HeaderLayout>

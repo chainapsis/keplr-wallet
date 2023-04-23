@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useLayoutEffect, useState } from "react";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import styled from "styled-components";
@@ -16,6 +16,7 @@ import { Menu, MenuItem } from "../../../../components/menu";
 import { useNavigate } from "react-router";
 import { Dialog } from "../../../../components/dialog";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { useSearchParams } from "react-router-dom";
 
 const Styles = {
   Container: styled(Stack)`
@@ -30,11 +31,24 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   const { chainStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
 
-  const [chainId, setChainId] = useState<string>(
-    chainStore.chainInfosInUI[0].chainId
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Handle "chainId" state by search params to persist the state between page changes.
+  const paramChainId = searchParams.get("chainId");
 
-  const items = chainStore.chainInfosInUI.map((chainInfo) => {
+  const chainId = paramChainId || chainStore.chainInfos[0].chainId;
+
+  useLayoutEffect(() => {
+    if (!paramChainId) {
+      setSearchParams(
+        { chainId: chainStore.chainInfos[0].chainId },
+        {
+          replace: true,
+        }
+      );
+    }
+  }, [chainStore.chainInfos, paramChainId, setSearchParams]);
+
+  const items = chainStore.chainInfos.map((chainInfo) => {
     return {
       key: chainInfo.chainId,
       label: chainInfo.chainName,
@@ -49,7 +63,14 @@ export const SettingContactsList: FunctionComponent = observer(() => {
             <DropDown
               items={items}
               selectedItemKey={chainId}
-              onSelect={setChainId}
+              onSelect={(key) => {
+                setSearchParams(
+                  { chainId: key },
+                  {
+                    replace: true,
+                  }
+                );
+              }}
             />
           </Box>
 
