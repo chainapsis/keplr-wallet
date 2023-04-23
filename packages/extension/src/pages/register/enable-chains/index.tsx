@@ -175,15 +175,19 @@ export const EnableChainsScene: FunctionComponent<{
   const [search, setSearch] = useState<string>("");
 
   const chainInfos = useMemo(() => {
-    if (!search) {
+    const trimSearch = search.trim();
+
+    if (!trimSearch) {
       return chainStore.chainInfos;
     } else {
       return chainStore.chainInfos.filter((chainInfo) => {
         return (
-          chainInfo.chainName.toLowerCase().includes(search.toLowerCase()) ||
+          chainInfo.chainName
+            .toLowerCase()
+            .includes(trimSearch.toLowerCase()) ||
           chainInfo.stakeCurrency.coinDenom
             .toLowerCase()
-            .includes(search.toLowerCase())
+            .includes(trimSearch.toLowerCase())
         );
       });
     }

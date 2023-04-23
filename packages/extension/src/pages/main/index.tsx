@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { HeaderLayout } from "../../layouts/header";
@@ -23,7 +23,6 @@ import { DualChart } from "./components/chart";
 import { Gutter } from "../../components/gutter";
 import { H1, Subtitle3 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
-import { MainQueryState } from "./query";
 import { AvailableTabView } from "./available";
 import { StakedTabView } from "./staked";
 
@@ -33,18 +32,13 @@ export interface ViewToken {
 }
 
 export const MainPage: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore, keyRingStore, priceStore } =
-    useStore();
-
-  const [queryState] = useState(
-    () => new MainQueryState(chainStore, queriesStore, accountStore, priceStore)
-  );
+  const { keyRingStore, hugeQueriesStore } = useStore();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
   const availableTotalPrice = (() => {
     let result: PricePretty | undefined;
-    for (const bal of queryState.allKnownBalances) {
+    for (const bal of hugeQueriesStore.allKnownBalances) {
       if (bal.price) {
         if (!result) {
           result = bal.price;
@@ -60,7 +54,7 @@ export const MainPage: FunctionComponent = observer(() => {
     : 0;
   const stakedTotalPrice = (() => {
     let result: PricePretty | undefined;
-    for (const bal of queryState.delegations) {
+    for (const bal of hugeQueriesStore.delegations) {
       if (bal.price) {
         if (!result) {
           result = bal.price;
@@ -69,7 +63,7 @@ export const MainPage: FunctionComponent = observer(() => {
         }
       }
     }
-    for (const bal of queryState.unbondings) {
+    for (const bal of hugeQueriesStore.unbondings) {
       if (bal.price) {
         if (!result) {
           result = bal.price;
@@ -156,11 +150,7 @@ export const MainPage: FunctionComponent = observer(() => {
             AvailableTabView, StakedTabView가 컴포넌트로 빠지면서 밑의 얘들의 각각의 item들에는 stack이 안먹힌다는 걸 주의
             각 컴포넌트에서 알아서 gutter를 처리해야한다.
            */}
-          {tabStatus === "available" ? (
-            <AvailableTabView queryState={queryState} />
-          ) : (
-            <StakedTabView queryState={queryState} />
-          )}
+          {tabStatus === "available" ? <AvailableTabView /> : <StakedTabView />}
         </Stack>
       </Box>
 

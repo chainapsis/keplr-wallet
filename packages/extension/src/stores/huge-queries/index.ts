@@ -1,4 +1,4 @@
-import { ChainStore } from "../../stores";
+import { ChainStore } from "../chain";
 import {
   CoinGeckoPriceStore,
   CosmosQueries,
@@ -9,6 +9,7 @@ import {
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { DenomHelper } from "@keplr-wallet/common";
+import { computedFn } from "mobx-utils";
 
 interface ViewToken {
   chainInfo: IChainInfoImpl;
@@ -17,11 +18,13 @@ interface ViewToken {
 }
 
 /**
- * 메인 페이지에 쿼리가 넘 많아서 좀 더 간단하게 하려고 만듬
- * 얘는 사용하는 순간 많은 쿼리를 만들기 때문에
- * 메인 페이지말고 다른 곳에서 이거 임포트해서 쓰면 안됨
+ * 거대한 쿼리를 만든다.
+ * 거대하기 때문에 로직을 분리하기 위해서 따로 만들었다.
+ * 근데 이름그대로 거대한 쿼리를 만들기 때문에 꼭 필요할때만 써야한다.
+ * 특정 밸런스가 필요하다고 여기서 balance를 다 가져와서 그 중에 한개만 찾아서 쓰고 그러면 안된다.
+ * 꼭 필요할때만 쓰자
  */
-export class MainQueryState {
+export class HugeQueriesStore {
   protected static zeroDec = new Dec(0);
 
   constructor(
@@ -89,10 +92,10 @@ export class MainQueryState {
   protected sortByPrice = (a: ViewToken, b: ViewToken) => {
     const aPrice =
       this.priceStore.calculatePrice(a.token)?.toDec() ??
-      MainQueryState.zeroDec;
+      HugeQueriesStore.zeroDec;
     const bPrice =
       this.priceStore.calculatePrice(b.token)?.toDec() ??
-      MainQueryState.zeroDec;
+      HugeQueriesStore.zeroDec;
 
     if (aPrice.equals(bPrice)) {
       return 0;
@@ -102,6 +105,29 @@ export class MainQueryState {
       return 1;
     }
   };
+
+  getAllBalances = computedFn((allowIBCToken: boolean): ViewToken[] => {
+    const res: ViewToken[] = [];
+    for (const chainInfo of this.chainStore.chainInfosInUI) {
+      for (const currency of chainInfo.currencies) {
+        const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+        if (
+          !allowIBCToken &&
+          denomHelper.type === "native" &&
+          denomHelper.denom.startsWith("ibc/")
+        ) {
+          continue;
+        }
+
+        const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
+        const viewToken = this.allKnownBalancesMap.get(key);
+        if (viewToken) {
+          res.push(viewToken);
+        }
+      }
+    }
+    return res.sort(this.sortByPrice);
+  });
 
   @computed
   get stakables(): ViewToken[] {

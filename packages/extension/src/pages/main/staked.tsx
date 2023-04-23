@@ -4,20 +4,24 @@ import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
-import { MainQueryState } from "./query";
 import { Stack } from "../../components/stack";
 import { Button } from "../../components/button";
+import { useStore } from "../../stores";
 
-export const StakedTabView: FunctionComponent<{
-  queryState: MainQueryState;
-}> = observer(({ queryState }) => {
-  const delegations: ViewToken[] = queryState.delegations.filter((token) => {
-    return token.token.toDec().gt(new Dec(0));
-  });
+export const StakedTabView: FunctionComponent = observer(() => {
+  const { hugeQueriesStore } = useStore();
 
-  const unbondings: ViewToken[] = queryState.unbondings.filter((token) => {
-    return token.token.toDec().gt(new Dec(0));
-  });
+  const delegations: ViewToken[] = hugeQueriesStore.delegations.filter(
+    (token) => {
+      return token.token.toDec().gt(new Dec(0));
+    }
+  );
+
+  const unbondings: ViewToken[] = hugeQueriesStore.unbondings.filter(
+    (token) => {
+      return token.token.toDec().gt(new Dec(0));
+    }
+  );
 
   const TokenViewData: {
     title: string;

@@ -4,20 +4,20 @@ import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
-import { MainQueryState } from "./query";
 import { Stack } from "../../components/stack";
 import { Button } from "../../components/button";
+import { useStore } from "../../stores";
 
-export const AvailableTabView: FunctionComponent<{
-  queryState: MainQueryState;
-}> = observer(({ queryState }) => {
-  const stakableBalances: ViewToken[] = queryState.stakables;
+export const AvailableTabView: FunctionComponent = observer(() => {
+  const { hugeQueriesStore } = useStore();
 
-  const tokenBalances = queryState.notStakbles.filter((token) => {
+  const stakableBalances: ViewToken[] = hugeQueriesStore.stakables;
+
+  const tokenBalances = hugeQueriesStore.notStakbles.filter((token) => {
     return token.token.toDec().gt(new Dec(0));
   });
 
-  const ibcBalances = queryState.ibcTokens.filter((token) => {
+  const ibcBalances = hugeQueriesStore.ibcTokens.filter((token) => {
     return token.token.toDec().gt(new Dec(0));
   });
 

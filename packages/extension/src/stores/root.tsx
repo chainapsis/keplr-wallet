@@ -54,6 +54,7 @@ import { FeeType } from "@keplr-wallet/hooks";
 import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import Amplitude from "amplitude-js";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { HugeQueriesStore } from "./huge-queries";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -86,6 +87,8 @@ export class RootStore {
     [CosmosAccount, CosmwasmAccount, SecretAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
+  public readonly hugeQueriesStore: HugeQueriesStore;
+
   public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
@@ -323,6 +326,13 @@ export class RootStore {
         return obj;
       }, {}),
       "usd"
+    );
+
+    this.hugeQueriesStore = new HugeQueriesStore(
+      this.chainStore,
+      this.queriesStore,
+      this.accountStore,
+      this.priceStore
     );
 
     this.uiConfigStore = new UIConfigStore(

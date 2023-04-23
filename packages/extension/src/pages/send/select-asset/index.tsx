@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
@@ -7,7 +7,6 @@ import { Stack } from "../../../components/stack";
 import { TextInput } from "../../../components/input";
 import { SearchIcon } from "../../../components/icon";
 import { useStore } from "../../../stores";
-import { ViewToken } from "../../main";
 import { TokenItem } from "../../main/components";
 import { Column, Columns } from "../../../components/column";
 import { Body2 } from "../../../components/typography";
@@ -21,24 +20,22 @@ const Styles = {
 };
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { hugeQueriesStore } = useStore();
 
-  const [allowIBCToken, setAllowIBCToken] = useState(false);
+  const [search, setSearch] = useState("");
+  const [hideIBCToken, setHideIBCToken] = useState(true);
 
-  const stakableBalances: ViewToken[] = chainStore.chainInfosInUI.flatMap(
-    (chainInfo) => {
-      const chainId = chainInfo.chainId;
-      const accountAddress = accountStore.getAccount(chainId).bech32Address;
-      const queries = queriesStore.get(chainId);
+  const tokens = hugeQueriesStore.getAllBalances(!hideIBCToken);
 
-      return {
-        token:
-          queries.queryBalances.getQueryBech32Address(accountAddress).stakable
-            .balance,
-        chainInfo,
-      };
-    }
-  );
+  const filteredTokens = useMemo(() => {
+    const trimSearch = search.trim();
+
+    return tokens.filter((viewToken) => {
+      return viewToken.token.currency.coinDenom
+        .toLowerCase()
+        .includes(trimSearch.toLowerCase());
+    });
+  }, [search, tokens]);
 
   return (
     <HeaderLayout title="Select Asset" left={<BackButton />}>
@@ -46,6 +43,12 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
         <TextInput
           placeholder="Search for a chain"
           left={<SearchIcon width="1.25rem" height="1.25rem" />}
+          value={search}
+          onChange={(e) => {
+            e.preventDefault();
+
+            setSearch(e.target.value);
+          }}
         />
 
         <Columns sum={1} gutter="0.25rem">
@@ -56,12 +59,12 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           </Body2>
           <Checkbox
             size="small"
-            checked={allowIBCToken}
-            onChange={setAllowIBCToken}
+            checked={hideIBCToken}
+            onChange={setHideIBCToken}
           />
         </Columns>
 
-        {stakableBalances.map((viewToken) => {
+        {filteredTokens.map((viewToken) => {
           return (
             <TokenItem
               viewToken={viewToken}
