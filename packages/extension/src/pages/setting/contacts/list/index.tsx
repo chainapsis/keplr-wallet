@@ -14,9 +14,9 @@ import { Body2, H5 } from "../../../../components/typography";
 import { EllipsisIcon } from "../../../../components/icon";
 import { Menu, MenuItem } from "../../../../components/menu";
 import { useNavigate } from "react-router";
-import { Dialog } from "../../../../components/dialog";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useSearchParams } from "react-router-dom";
+import { useConfirm } from "../../../../hooks/confirm";
 
 const Styles = {
   Container: styled(Stack)`
@@ -133,10 +133,13 @@ const AddressItemView: FunctionComponent<{
   address: string;
   memo: string;
   index: number;
-}> = ({ chainId, name, address, memo, index }) => {
+}> = observer(({ chainId, name, address, memo, index }) => {
+  const { uiConfigStore } = useStore();
+
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  const confirm = useConfirm();
 
   return (
     <ItemStyles.Container>
@@ -168,20 +171,23 @@ const AddressItemView: FunctionComponent<{
             />
             <MenuItem
               label="Delete Contact"
-              onClick={() => setIsDeleteModalOpen(true)}
+              onClick={async () => {
+                if (
+                  await confirm.confirm(
+                    "Delete Address",
+                    "Are you sure you want to delete this account?"
+                  )
+                ) {
+                  uiConfigStore.addressBookConfig.removeAddressBookAt(
+                    chainId,
+                    index
+                  );
+                }
+              }}
             />
           </Menu>
-
-          <Dialog
-            isOpen={isDeleteModalOpen}
-            setIsOpen={setIsDeleteModalOpen}
-            title="Delete Address"
-            paragraph="Are you sure you want to delete this account?"
-            onClickYes={() => {}}
-            onClickCancel={() => {}}
-          />
         </ItemStyles.IconButton>
       </Columns>
     </ItemStyles.Container>
   );
-};
+});
