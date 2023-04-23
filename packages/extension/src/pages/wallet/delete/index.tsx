@@ -64,6 +64,7 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title="Delete Wallet"
+      fixedHeight={true}
       left={<BackButton />}
       bottomButton={{ text: "Confirm", color: "secondary" }}
       onSubmit={handleSubmit(async (data) => {
