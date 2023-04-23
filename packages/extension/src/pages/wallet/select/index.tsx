@@ -13,9 +13,9 @@ import { Stack } from "../../../components/stack";
 import { Column, Columns } from "../../../components/column";
 import { useNavigate } from "react-router";
 import { EllipsisIcon } from "../../../components/icon";
-import { Menu, MenuItem } from "../../../components/menu";
 import { Button } from "../../../components/button";
 import styled from "styled-components";
+import { FloatingDropdown } from "../../../components/dropdown";
 
 const Styles = {
   Container: styled(Stack)`
@@ -92,10 +92,6 @@ const KeyInfoList: FunctionComponent<{
   title: string;
   keyInfos: KeyRingV2.KeyInfo[];
 }> = observer(({ title, keyInfos }) => {
-  const { chainStore, keyRingStore } = useStore();
-
-  const navigate = useNavigate();
-
   return (
     <Box>
       <YAxis>
@@ -109,58 +105,7 @@ const KeyInfoList: FunctionComponent<{
         <Gutter size="0.5rem" />
         <Stack gutter="0.5rem">
           {keyInfos.map((keyInfo) => {
-            return (
-              <Box
-                key={keyInfo.id}
-                padding="1rem"
-                backgroundColor={ColorPalette["gray-600"]}
-                borderRadius="0.375rem"
-                cursor="pointer"
-                onClick={async () => {
-                  await keyRingStore.selectKeyRing(keyInfo.id);
-                  await chainStore.waitSyncedEnabledChains();
-
-                  navigate(-1);
-                }}
-              >
-                <Columns sum={1}>
-                  <YAxis>
-                    <Subtitle2
-                      style={{
-                        color: ColorPalette["gray-10"],
-                      }}
-                    >
-                      {keyInfo.name}
-                      {keyRingStore.selectedKeyInfo?.id === keyInfo.id
-                        ? " (Selected)"
-                        : ""}
-                    </Subtitle2>
-                    <Gutter size="0.375rem" />
-                    <Body2
-                      style={{
-                        color: ColorPalette["gray-300"],
-                      }}
-                    >
-                      TEST
-                    </Body2>
-                  </YAxis>
-                  <Column weight={1} />
-                  <XAxis alignY="center">
-                    <Box
-                      position="relative"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        console.log("!!!");
-                      }}
-                    >
-                      <KeyringMenu vaultId={keyInfo.id} />
-                    </Box>
-                  </XAxis>
-                </Columns>
-              </Box>
-            );
+            return <KeyringItem key={keyInfo.id} keyInfo={keyInfo} />;
           })}
         </Stack>
       </YAxis>
@@ -168,34 +113,90 @@ const KeyInfoList: FunctionComponent<{
   );
 });
 
-const KeyringMenu: FunctionComponent<{ vaultId: string }> = ({ vaultId }) => {
+const KeyringItem: FunctionComponent<{
+  keyInfo: KeyRingV2.KeyInfo;
+}> = observer(({ keyInfo }) => {
+  const { chainStore, keyRingStore } = useStore();
+
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   return (
-    <Box>
-      <Box
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        style={{ color: ColorPalette["gray-10"] }}
-      >
-        <EllipsisIcon width="1.25rem" height="1.25rem" />
-      </Box>
+    <Box
+      padding="1rem"
+      backgroundColor={ColorPalette["gray-600"]}
+      borderRadius="0.375rem"
+      cursor="pointer"
+      onClick={async () => {
+        await keyRingStore.selectKeyRing(keyInfo.id);
+        await chainStore.waitSyncedEnabledChains();
 
-      <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} ratio={1.7}>
-        <MenuItem
-          label="View Recovery Phrase"
-          onClick={() => navigate(`/wallet/recovery-phrase?id=${vaultId}`)}
-        />
-        <MenuItem
-          label="Change Wallet Name"
-          onClick={() => navigate(`/wallet/change-name?id=${vaultId}`)}
-        />
-        <MenuItem
-          label="Delete Wallet"
-          onClick={() => navigate(`/wallet/delete?id=${vaultId}`)}
-        />
-      </Menu>
+        navigate(-1);
+      }}
+    >
+      <Columns sum={1}>
+        <YAxis>
+          <Subtitle2
+            style={{
+              color: ColorPalette["gray-10"],
+            }}
+          >
+            {keyInfo.name}
+            {keyRingStore.selectedKeyInfo?.id === keyInfo.id
+              ? " (Selected)"
+              : ""}
+          </Subtitle2>
+          <Gutter size="0.375rem" />
+          <Body2
+            style={{
+              color: ColorPalette["gray-300"],
+            }}
+          >
+            TEST
+          </Body2>
+        </YAxis>
+        <Column weight={1} />
+        <XAxis alignY="center">
+          <Box
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <FloatingDropdown
+              isOpen={isMenuOpen}
+              close={() => setIsMenuOpen(false)}
+              items={[
+                {
+                  key: "view-recovery-phrase",
+                  label: "View Recovery Phrase",
+                  onSelect: () =>
+                    navigate(`/wallet/recovery-phrase?id=${keyInfo.id}`),
+                },
+                {
+                  key: "change-wallet-name",
+                  label: "Change Wallet Name",
+                  onSelect: () =>
+                    navigate(`/wallet/change-name?id=${keyInfo.id}`),
+                },
+                {
+                  key: "delete-wallet",
+                  label: "Delete Wallet",
+                  onSelect: () => navigate(`/wallet/delete?id=${keyInfo.id}`),
+                },
+              ]}
+            >
+              <Box
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                style={{ color: ColorPalette["gray-10"] }}
+              >
+                <EllipsisIcon width="1.25rem" height="1.25rem" />
+              </Box>
+            </FloatingDropdown>
+          </Box>
+        </XAxis>
+      </Columns>
     </Box>
   );
-};
+});
