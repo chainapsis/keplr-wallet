@@ -22,8 +22,8 @@ export const Styles = {
         }
         default: {
           return css`
-            height: 2rem;
-            border-radius: 1rem;
+            height: 2.25rem;
+            border-radius: 1.125rem;
           `;
         }
       }
@@ -72,11 +72,11 @@ export const Styles = {
         }
         default: {
           return css`
-            height: 1.5rem;
-            border-radius: 0.75rem;
+            height: 1.75rem;
+            border-radius: 0.875rem;
             font-size: 0.75rem;
 
-            padding: 0 0.5rem;
+            padding: 0 0.625rem;
           `;
         }
       }

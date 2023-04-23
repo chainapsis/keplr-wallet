@@ -55,6 +55,7 @@ import {
   WalletRecoveryPhrasePage,
 } from "./pages/wallet";
 import { ModalRootProvider } from "./components/modal/v2";
+import { ConfirmProvider } from "./hooks/confirm";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -259,11 +260,13 @@ const App: FunctionComponent = () => {
   return (
     <StoreProvider>
       <ModalRootProvider>
-        <IntlProvider locale={navigator.language}>
-          <GlobalStyle />
-          <GlobalPopupStyle />
-          <RoutesAfterReady />
-        </IntlProvider>
+        <ConfirmProvider>
+          <IntlProvider locale={navigator.language}>
+            <GlobalStyle />
+            <GlobalPopupStyle />
+            <RoutesAfterReady />
+          </IntlProvider>
+        </ConfirmProvider>
       </ModalRootProvider>
     </StoreProvider>
   );

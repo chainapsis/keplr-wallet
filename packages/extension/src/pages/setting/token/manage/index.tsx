@@ -13,7 +13,6 @@ import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
 import { CopyFillIcon, KeyIcon, TrashIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
-import { Dialog } from "../../../../components/dialog";
 
 const Styles = {
   Container: styled(Stack)`
@@ -29,8 +28,6 @@ const Styles = {
 export const SettingTokenListPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const { chainStore } = useStore();
-
-  const [isOpenDeleteModal, setIsOpenDeleteModal] = React.useState(true);
 
   const [chainId, setChainId] = useState<string>(
     chainStore.chainInfos[0].chainId
@@ -72,15 +69,6 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
         <TokenItem />
         <TokenItem />
         <TokenItem />
-
-        <Dialog
-          isOpen={isOpenDeleteModal}
-          setIsOpen={setIsOpenDeleteModal}
-          paragraph="Are you sure you’d like to disable this token? You will not be able to
-        see your balance or transfer until you add it again."
-          onClickYes={() => {}}
-          onClickCancel={() => {}}
-        />
       </Styles.Container>
     </HeaderLayout>
   );

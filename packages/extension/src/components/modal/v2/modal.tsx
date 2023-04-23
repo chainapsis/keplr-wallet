@@ -21,6 +21,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
   isOpen,
   close,
   align,
+  onCloseTransitionEnd,
   children,
 }) => {
   const modalRoot = useModalRoot(isOpen);
@@ -90,6 +91,10 @@ export const Modal: FunctionComponent<ModalProps> = ({
         align={align}
         onCloseTransitionEnd={() => {
           setForceNotDetach(false);
+
+          if (onCloseTransitionEnd) {
+            onCloseTransitionEnd();
+          }
         }}
       >
         {children}

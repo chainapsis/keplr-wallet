@@ -98,7 +98,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           </Stack>
 
-          <RecipientInput recipientConfig={sendConfigs.recipientConfig} />
+          <RecipientInput
+            recipientConfig={sendConfigs.recipientConfig}
+            memoConfig={sendConfigs.memoConfig}
+          />
 
           <AmountInput amountConfig={sendConfigs.amountConfig} />
 

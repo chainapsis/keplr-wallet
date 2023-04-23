@@ -14,5 +14,4 @@ export interface TextInputProps {
   style?: CSSProperties;
   left?: React.ReactNode;
   right?: React.ReactNode;
-  rightClick?: () => void;
 }

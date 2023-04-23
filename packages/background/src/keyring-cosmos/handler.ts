@@ -13,6 +13,7 @@ import {
   VerifyCosmosSignAminoADR36Msg,
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
+  GetCosmosKeysForEachVaultSettledMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -60,6 +61,11 @@ export const getHandler: (
         return handlePrivilegeCosmosSignAminoWithdrawRewardsMsg(service)(
           env,
           msg as PrivilegeCosmosSignAminoWithdrawRewardsMsg
+        );
+      case GetCosmosKeysForEachVaultSettledMsg:
+        return handleGetCosmosKeysForEachVaultSettledMsg(service)(
+          env,
+          msg as GetCosmosKeysForEachVaultSettledMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -206,6 +212,24 @@ const handlePrivilegeCosmosSignAminoWithdrawRewardsMsg: (
       msg.chainId,
       msg.signer,
       msg.signDoc
+    );
+  };
+};
+
+const handleGetCosmosKeysForEachVaultSettledMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<GetCosmosKeysForEachVaultSettledMsg> = (service) => {
+  return async (env, msg) => {
+    return await Promise.allSettled(
+      msg.vaultIds.map((vaultId) =>
+        (async () => {
+          const key = await service.getKey(env, vaultId, msg.chainId);
+          return {
+            vaultId,
+            ...key,
+          };
+        })()
+      )
     );
   };
 };
