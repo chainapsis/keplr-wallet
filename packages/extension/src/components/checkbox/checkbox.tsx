@@ -23,7 +23,7 @@ export const Checkbox: FunctionComponent<CheckBoxProps> = ({
         }
       }}
     >
-      <Styles.HiddenCheckBox checked={checked} disabled={disabled} />
+      <Styles.HiddenCheckBox defaultChecked={checked} disabled={disabled} />
       {checked ? (
         <CheckIcon width={iconSize} height={iconSize} />
       ) : disabled ? (
