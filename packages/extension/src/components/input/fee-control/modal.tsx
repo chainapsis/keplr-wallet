@@ -4,7 +4,7 @@ import { Caption1, Caption2, H5, Subtitle1, Subtitle3 } from "../../typography";
 import { ColorPalette } from "../../../styles";
 import styled from "styled-components";
 import { Stack } from "../../stack";
-import { DropDown } from "../../dropdown";
+import { Dropdown } from "../../dropdown";
 import { Column, Columns } from "../../column";
 import { Toggle } from "../../toggle";
 import { TextInput } from "..";
@@ -51,7 +51,7 @@ export const TransactionFeeModal: FunctionComponent<{
 
         <Stack gutter="0.375rem">
           <Subtitle3>Fee Token</Subtitle3>
-          <DropDown
+          <Dropdown
             items={feeConfig.selectableFeeCurrencies.map((cur) => {
               return {
                 key: cur.coinMinimalDenom,

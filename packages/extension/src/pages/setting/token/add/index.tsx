@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { Stack } from "../../../../components/stack";
 import { TextInput } from "../../../../components/input";
 import { useStore } from "../../../../stores";
-import { DropDown } from "../../../../components/dropdown";
+import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 
 const Styles = {
@@ -40,7 +40,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     >
       <Styles.Container gutter="1rem">
         <Box width="13rem">
-          <DropDown
+          <Dropdown
             items={items}
             selectedItemKey={chainId}
             onSelect={setChainId}

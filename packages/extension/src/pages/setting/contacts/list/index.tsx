@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { Stack } from "../../../../components/stack";
 import { useStore } from "../../../../stores";
 import { Column, Columns } from "../../../../components/column";
-import { DropDown } from "../../../../components/dropdown";
+import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
 import { ColorPalette } from "../../../../styles";
@@ -60,7 +60,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
       <Styles.Container>
         <Columns sum={1} alignY="bottom">
           <Box width="13rem">
-            <DropDown
+            <Dropdown
               items={items}
               selectedItemKey={chainId}
               onSelect={(key) => {

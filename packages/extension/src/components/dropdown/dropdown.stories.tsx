@@ -1,17 +1,17 @@
 import React from "react";
-import { DropDown as CompDropDown } from "./dropdown";
+import { Dropdown as CompDropdown } from "./dropdown";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { DropdownItemProps, DropdownProps } from "./types";
 import { Stack } from "../stack";
 import { H1 } from "../typography";
 
 export default {
-  title: "Components/DropDown",
-  component: CompDropDown,
+  title: "Components/Dropdown",
+  component: CompDropdown,
   decorators: [(Story) => <div style={{ margin: "3em" }}>{Story()}</div>],
-} as ComponentMeta<typeof CompDropDown>;
+} as ComponentMeta<typeof CompDropdown>;
 
-const Template: ComponentStory<typeof CompDropDown> = (
+const Template: ComponentStory<typeof CompDropdown> = (
   props: DropdownProps
 ) => {
   const [selected1, setSelected1] = React.useState("");
@@ -25,7 +25,7 @@ const Template: ComponentStory<typeof CompDropDown> = (
   return (
     <Stack gutter="1rem">
       <H1>Default</H1>
-      <CompDropDown
+      <CompDropdown
         {...props}
         items={items}
         selectedItemKey={selected1}
@@ -33,7 +33,7 @@ const Template: ComponentStory<typeof CompDropDown> = (
       />
 
       <H1>Placeholder</H1>
-      <CompDropDown
+      <CompDropdown
         {...props}
         items={items}
         selectedItemKey={selected2}

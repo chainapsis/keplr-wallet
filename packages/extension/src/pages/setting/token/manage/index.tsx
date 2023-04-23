@@ -8,7 +8,7 @@ import { Body2, H5 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { useStore } from "../../../../stores";
 import { Column, Columns } from "../../../../components/column";
-import { DropDown } from "../../../../components/dropdown";
+import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
 import { CopyFillIcon, KeyIcon, TrashIcon } from "../../../../components/icon";
@@ -49,7 +49,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
 
         <Columns sum={1} alignY="bottom">
           <Box width="13rem">
-            <DropDown
+            <Dropdown
               items={items}
               selectedItemKey={chainId}
               onSelect={setChainId}

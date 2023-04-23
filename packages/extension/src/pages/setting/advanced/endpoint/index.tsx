@@ -7,7 +7,7 @@ import { Stack } from "../../../../components/stack";
 import { GuideBox } from "../../../../components/guide-box";
 import { useStore } from "../../../../stores";
 import { Column, Columns } from "../../../../components/column";
-import { DropDown } from "../../../../components/dropdown";
+import { Dropdown } from "../../../../components/dropdown";
 import { Button } from "../../../../components/button";
 import { Box } from "../../../../components/box";
 import { TextInput } from "../../../../components/input";
@@ -107,7 +107,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
       <Styles.Container gutter="1rem">
         <Columns sum={1} alignY="bottom">
           <Box width="13rem">
-            <DropDown
+            <Dropdown
               items={chainList}
               selectedItemKey={chainId}
               onSelect={setChainId}

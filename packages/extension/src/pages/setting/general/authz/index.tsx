@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
-import { DropDown } from "../../../../components/dropdown";
+import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { CollapsibleList } from "../../../../components/collapsible-list";
 import { Body3, H4, Subtitle3 } from "../../../../components/typography";
@@ -163,7 +163,7 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
     <HeaderLayout title="AuthZ List" left={<BackButton />}>
       <Box paddingX="0.75rem">
         <Box width="13rem" marginBottom="0.5rem">
-          <DropDown
+          <Dropdown
             items={items}
             selectedItemKey={chainId}
             onSelect={setChainId}

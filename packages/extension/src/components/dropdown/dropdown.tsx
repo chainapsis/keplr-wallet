@@ -6,7 +6,7 @@ import { ArrowDropDownIcon } from "../icon";
 import { useClickOutside } from "../../hooks";
 
 // eslint-disable-next-line react/display-name
-export const DropDown: FunctionComponent<DropdownProps> = ({
+export const Dropdown: FunctionComponent<DropdownProps> = ({
   className,
   style,
   placeholder,
