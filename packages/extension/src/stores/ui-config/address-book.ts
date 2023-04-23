@@ -80,6 +80,19 @@ export class AddressBookConfig {
     }
   }
 
+  setAddressBookAt(chainId: string, index: number, data: AddressBookData) {
+    const identifier = ChainIdHelper.parse(chainId).identifier;
+    const addressBook = this.addressBookMap.get(identifier);
+    // TODO: 오류를 던져야하나?
+    if (!addressBook) {
+      return;
+    }
+    if (addressBook.length <= index) {
+      return;
+    }
+    addressBook[index] = data;
+  }
+
   removeAddressBookAt(chainId: string, index: number) {
     const identifier = ChainIdHelper.parse(chainId).identifier;
     const addressBook = this.addressBookMap.get(identifier);

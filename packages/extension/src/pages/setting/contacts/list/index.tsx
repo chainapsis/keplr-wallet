@@ -15,6 +15,7 @@ import { EllipsisIcon } from "../../../../components/icon";
 import { Menu, MenuItem } from "../../../../components/menu";
 import { useNavigate } from "react-router";
 import { Dialog } from "../../../../components/dialog";
+import { Bech32Address } from "@keplr-wallet/cosmos";
 
 const Styles = {
   Container: styled(Stack)`
@@ -26,11 +27,11 @@ const Styles = {
 };
 
 export const SettingContactsList: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
+  const { chainStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
 
   const [chainId, setChainId] = useState<string>(
-    chainStore.chainInfos[0].chainId
+    chainStore.chainInfosInUI[0].chainId
   );
 
   const items = chainStore.chainInfosInUI.map((chainInfo) => {
@@ -58,14 +59,25 @@ export const SettingContactsList: FunctionComponent = observer(() => {
             color="secondary"
             size="extraSmall"
             text="Add New"
-            onClick={() => navigate("/setting/contacts/add")}
+            onClick={() => navigate(`/setting/contacts/add?chainId=${chainId}`)}
           />
         </Columns>
 
         <Styles.ItemList gutter="0.5rem">
-          <AddressItemView />
-          <AddressItemView />
-          <AddressItemView />
+          {uiConfigStore.addressBookConfig
+            .getAddressBook(chainId)
+            .map((data, i) => {
+              return (
+                <AddressItemView
+                  key={i}
+                  chainId={chainId}
+                  name={data.name}
+                  address={data.address}
+                  memo={data.memo}
+                  index={i}
+                />
+              );
+            })}
         </Styles.ItemList>
       </Styles.Container>
     </HeaderLayout>
@@ -94,7 +106,13 @@ const ItemStyles = {
   `,
 };
 
-const AddressItemView: FunctionComponent = () => {
+const AddressItemView: FunctionComponent<{
+  chainId: string;
+  name: string;
+  address: string;
+  memo: string;
+  index: number;
+}> = ({ chainId, name, address, memo, index }) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -103,14 +121,12 @@ const AddressItemView: FunctionComponent = () => {
     <ItemStyles.Container>
       <Columns sum={1} alignY="center">
         <Stack gutter="0.25rem">
-          <H5 style={{ color: ColorPalette["gray-10"] }}>WangWang</H5>
+          <H5 style={{ color: ColorPalette["gray-10"] }}>{name}</H5>
           <Body2 style={{ color: ColorPalette["gray-200"] }}>
-            cosmos1hjyde2kfgtl78t...rt649nn8j5
+            {Bech32Address.shortenAddress(address, 30)}
           </Body2>
 
-          <Body2 style={{ color: ColorPalette["gray-200"] }}>
-            cosmos1hjyde2
-          </Body2>
+          <Body2 style={{ color: ColorPalette["gray-200"] }}>{memo}</Body2>
         </Stack>
 
         <Column weight={1} />
@@ -125,7 +141,7 @@ const AddressItemView: FunctionComponent = () => {
               label="Change Contact Label"
               onClick={() =>
                 navigate(
-                  `/setting/contacts/add?name=WangWang&address=cosmos1hjyde2kfgtl78t...rt649nn8j5`
+                  `/setting/contacts/add?chainId=${chainId}&editIndex=${index}`
                 )
               }
             />

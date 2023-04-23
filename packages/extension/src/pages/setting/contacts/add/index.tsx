@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import { Stack } from "../../../../components/stack";
@@ -13,6 +13,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../../../stores";
 import { MemoInput } from "../../../../components/input/memo-input";
+import { useNavigate } from "react-router";
 
 const Styles = {
   Container: styled(Stack)`
@@ -22,20 +23,55 @@ const Styles = {
 
 export const SettingContactsAdd: FunctionComponent = observer(() => {
   const { chainStore, uiConfigStore } = useStore();
+  const navigate = useNavigate();
 
-  // TODO: Edit에 대해서도 처리하기
-  const [searchParams] = useSearchParams();
-  const isAdd =
-    searchParams.get("name") === null && searchParams.get("address") === null;
+  const [chainId, setChainId] = useState(chainStore.chainInfosInUI[0].chainId);
+  // If edit mode, this will be equal or greater than 0.
+  const [editIndex, setEditIndex] = useState(-1);
 
   const [name, setName] = useState("");
 
-  // TODO: 여기서 체인 선택이 들어가야한다.
-  const recipientConfig = useRecipientConfig(chainStore, "cosmoshub", {
+  const recipientConfig = useRecipientConfig(chainStore, chainId, {
     allowHexAddressOnEthermint: true,
     icns: uiConfigStore.icnsInfo,
   });
-  const memoConfig = useMemoConfig(chainStore, "cosmoshub");
+  const memoConfig = useMemoConfig(chainStore, chainId);
+
+  const [searchParams] = useSearchParams();
+  // Param "chainId" is required.
+  const paramChainId = searchParams.get("chainId");
+  const paramEditIndex = searchParams.get("editIndex");
+  useEffect(() => {
+    if (!paramChainId) {
+      throw new Error(`Param "chainId" is required`);
+    }
+
+    setChainId(paramChainId);
+    recipientConfig.setChain(paramChainId);
+    memoConfig.setChain(paramChainId);
+
+    if (paramEditIndex) {
+      const index = Number.parseInt(paramEditIndex);
+      const addressBook =
+        uiConfigStore.addressBookConfig.getAddressBook(paramChainId);
+      if (addressBook.length > index) {
+        setEditIndex(index);
+        const data = addressBook[index];
+        setName(data.name);
+        recipientConfig.setValue(data.address);
+        memoConfig.setValue(data.memo);
+        return;
+      }
+    }
+
+    setEditIndex(-1);
+  }, [
+    memoConfig,
+    paramChainId,
+    paramEditIndex,
+    recipientConfig,
+    uiConfigStore.addressBookConfig,
+  ]);
 
   const txConfigsValidate = useTxConfigsValidate({
     recipientConfig,
@@ -44,17 +80,26 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={`${isAdd ? "Add" : "Edit"} Address`}
+      title={`${editIndex < 0 ? "Add" : "Edit"} Address`}
       left={<BackButton />}
       onSubmit={(e) => {
         e.preventDefault();
 
-        // TODO: 이거 하고 나서 어디 페이지로 보내든지 해야한다.
-        uiConfigStore.addressBookConfig.addAddressBook("cosmoshub", {
-          name,
-          address: recipientConfig.value,
-          memo: memoConfig.value,
-        });
+        if (editIndex < 0) {
+          uiConfigStore.addressBookConfig.addAddressBook(chainId, {
+            name,
+            address: recipientConfig.value,
+            memo: memoConfig.value,
+          });
+        } else {
+          uiConfigStore.addressBookConfig.setAddressBookAt(chainId, editIndex, {
+            name,
+            address: recipientConfig.value,
+            memo: memoConfig.value,
+          });
+        }
+
+        navigate(-1);
       }}
       bottomButton={{
         text: "Confirm",
