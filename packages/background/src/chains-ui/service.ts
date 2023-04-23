@@ -1,124 +1,194 @@
-import { ChainInfoWithCoreTypes, ChainsService } from "../chains";
+import { ChainsService } from "../chains";
 import {
   action,
   autorun,
-  computed,
   makeObservable,
   observable,
   runInAction,
+  toJS,
 } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { computedFn } from "mobx-utils";
+import { VaultService } from "../vault";
 
 export class ChainsUIService {
-  @observable.ref
-  protected _enabledChainIdentifies: ReadonlyArray<string> = [];
+  // Key: vault id
+  @observable
+  protected enabledChainIdentifiersMap = new Map<string, string[]>();
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly chainsService: ChainsService
+    protected readonly chainsService: ChainsService,
+    protected readonly vaultService: VaultService
   ) {
     makeObservable(this);
   }
 
   async init(): Promise<void> {
-    const saved = await this.kvStore.get<string[]>("enabledChainIdentifies");
-    if (saved && saved.length > 0) {
+    const saved = await this.kvStore.get<Record<string, string[]>>(
+      "enabledChainIdentifiesMap"
+    );
+    if (saved) {
       runInAction(() => {
-        this._enabledChainIdentifies = saved;
+        for (const [key, value] of Object.entries(saved)) {
+          this.enabledChainIdentifiersMap.set(key, value);
+        }
       });
-    } else {
-      this._enabledChainIdentifies = [
-        ChainIdHelper.parse(this.chainsService.getChainInfos()[0].chainId)
-          .identifier,
-      ];
     }
     autorun(() => {
-      this.kvStore.set("enabledChainIdentifies", this._enabledChainIdentifies);
+      const js = toJS(this.enabledChainIdentifiersMap);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set("enabledChainIdentifiesMap", obj);
     });
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
+    this.vaultService.addVaultRemovedHandler(this.onVaultRemoved);
   }
 
-  @action
-  toggleChain(...chainIds: string[]) {
-    for (const chainId of chainIds) {
-      const identifier = ChainIdHelper.parse(chainId).identifier;
-      if (this.enabledChainIdentifiesMap.get(identifier)) {
-        this.disableChain(chainId);
-      } else {
-        this.enableChain(chainId);
-      }
-    }
-  }
-
-  @action
-  enableChain(...chainIds: string[]) {
-    for (const chainId of chainIds) {
-      const identifier = ChainIdHelper.parse(chainId).identifier;
-      if (!this.enabledChainIdentifiesMap.get(identifier)) {
-        this.chainsService.getChainInfoOrThrow(chainId);
-
-        this._enabledChainIdentifies =
-          this._enabledChainIdentifies.concat(identifier);
-      }
-    }
-  }
-
-  @action
-  disableChain(...chainIds: string[]) {
-    for (const chainId of chainIds) {
-      const identifier = ChainIdHelper.parse(chainId).identifier;
-      if (this.enabledChainIdentifiesMap.get(identifier)) {
-        this._enabledChainIdentifies = this._enabledChainIdentifies.filter(
-          (chainIdentifier) => chainIdentifier !== identifier
-        );
-      }
-    }
-  }
-
-  @computed({
-    keepAlive: true,
-  })
-  get enabledChainIdentifies(): string[] {
-    return this._enabledChainIdentifies.slice().filter((chainIdentifier) => {
-      return this.chainsService.hasChainInfo(chainIdentifier);
-    });
-  }
-
-  @computed({
-    keepAlive: true,
-  })
-  get enabledChainInfos(): ChainInfoWithCoreTypes[] {
-    return this.chainsService
-      .getChainInfosWithCoreTypes()
-      .filter((chainInfo) => {
-        return this.enabledChainIdentifiesMap.get(
-          ChainIdHelper.parse(chainInfo.chainId).identifier
-        );
+  readonly enabledChainIdentifiersForVault = computedFn(
+    (vaultId: string): string[] => {
+      const chainIdentifiers = (
+        this.enabledChainIdentifiersMap.get(vaultId) ?? []
+      ).filter((chainIdentifier) => {
+        return this.chainsService.hasChainInfo(chainIdentifier);
       });
+      if (chainIdentifiers.length === 0) {
+        // Should be enabled at least one chain.
+        return [
+          ChainIdHelper.parse(this.chainsService.getChainInfos()[0].chainId)
+            .identifier,
+        ];
+      } else {
+        return chainIdentifiers;
+      }
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
+  protected readonly enabledChainIdentifierMapForVault = computedFn(
+    (vaultId: string): Map<string, boolean> => {
+      const chainIdentifiers = this.enabledChainIdentifiersForVault(vaultId);
+
+      const res = new Map<string, boolean>();
+      for (const chainIdentifier of chainIdentifiers) {
+        res.set(chainIdentifier, true);
+      }
+      return res;
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
+  @action
+  toggleChain(vaultId: string, ...chainIds: string[]) {
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    const paramChainIdentifiers = chainIds
+      .map((chainId) => {
+        return ChainIdHelper.parse(chainId).identifier;
+      })
+      .filter((chainIdentifier) => {
+        return this.chainsService.hasChainInfo(chainIdentifier);
+      });
+
+    const identifierMap = this.enabledChainIdentifierMapForVault(vaultId);
+
+    for (const param of paramChainIdentifiers) {
+      if (!identifierMap.get(param)) {
+        this.enableChain(vaultId, param);
+      } else {
+        this.disableChain(vaultId, param);
+      }
+    }
   }
 
-  @computed({
-    keepAlive: true,
-  })
-  protected get enabledChainIdentifiesMap(): Map<string, true> {
-    const map = new Map<string, true>();
-    for (const chainIdentifier of this.enabledChainIdentifies) {
-      map.set(chainIdentifier, true);
+  @action
+  enableChain(vaultId: string, ...chainIds: string[]) {
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
     }
-    return map;
+
+    const paramChainIdentifiers = chainIds
+      .map((chainId) => {
+        return ChainIdHelper.parse(chainId).identifier;
+      })
+      .filter((chainIdentifier) => {
+        return this.chainsService.hasChainInfo(chainIdentifier);
+      });
+
+    const identifierMap = this.enabledChainIdentifierMapForVault(vaultId);
+
+    for (const param of paramChainIdentifiers) {
+      if (!identifierMap.get(param)) {
+        const arr = this.enabledChainIdentifiersMap.get(vaultId) ?? [];
+        arr.push(param);
+
+        this.enabledChainIdentifiersMap.set(vaultId, arr);
+      }
+    }
+  }
+
+  @action
+  disableChain(vaultId: string, ...chainIds: string[]) {
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    const paramChainIdentifiers = chainIds
+      .map((chainId) => {
+        return ChainIdHelper.parse(chainId).identifier;
+      })
+      .filter((chainIdentifier) => {
+        return this.chainsService.hasChainInfo(chainIdentifier);
+      });
+
+    const identifierMap = this.enabledChainIdentifierMapForVault(vaultId);
+
+    for (const param of paramChainIdentifiers) {
+      if (identifierMap.get(param)) {
+        const arr = this.enabledChainIdentifiersMap.get(vaultId) ?? [];
+        const i = arr.findIndex((chainIdentifier) => chainIdentifier === param);
+        if (i >= 0) {
+          arr.splice(i, 1);
+        }
+        this.enabledChainIdentifiersMap.set(vaultId, arr);
+      }
+    }
   }
 
   protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
-    const identifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
-    if (this.enabledChainIdentifiesMap.get(identifier)) {
-      runInAction(() => {
-        this._enabledChainIdentifies = this._enabledChainIdentifies.filter(
-          (chainIdentifier) => chainIdentifier !== identifier
-        );
-      });
-    }
+    runInAction(() => {
+      const identifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
+      const vaultIds = this.enabledChainIdentifiersMap.keys();
+      for (const vaultId of vaultIds) {
+        const map = this.enabledChainIdentifierMapForVault(vaultId);
+        if (map.get(identifier)) {
+          const arr = this.enabledChainIdentifiersMap.get(vaultId) ?? [];
+          const i = arr.findIndex(
+            (chainIdentifier) => chainIdentifier === identifier
+          );
+          arr.splice(i, 1);
+          this.enabledChainIdentifiersMap.set(vaultId, arr);
+        }
+      }
+    });
+  };
+
+  protected readonly onVaultRemoved = (type: string, id: string) => {
+    runInAction(() => {
+      if (type === "keyRing") {
+        this.enabledChainIdentifiersMap.delete(id);
+      }
+    });
   };
 }

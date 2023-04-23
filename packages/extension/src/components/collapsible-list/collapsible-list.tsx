@@ -31,7 +31,9 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         onClick={(e) => {
           e.preventDefault();
 
-          setIsExpanded(!isExpanded);
+          if (hidden.length > 0) {
+            setIsExpanded(!isExpanded);
+          }
         }}
       >
         <Columns sum={1} alignY="center">

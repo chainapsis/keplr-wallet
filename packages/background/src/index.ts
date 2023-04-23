@@ -76,11 +76,6 @@ export function init(
     communityChainInfoRepo
   );
 
-  const chainsUIService = new ChainsUI.ChainsUIService(
-    storeCreator("chains-ui"),
-    chainsService
-  );
-
   const permissionService = new Permission.PermissionService(
     storeCreator("permission"),
     privilegedOrigins,
@@ -152,11 +147,16 @@ export function init(
       keyRingV2Service
     );
 
+  const chainsUIService = new ChainsUI.ChainsUIService(
+    storeCreator("chains-ui"),
+    chainsService,
+    vaultService
+  );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Tokens.init(router, tokensService);
   Chains.init(router, chainsService);
-  ChainsUI.init(router, chainsUIService);
   Ledger.init(router, ledgerService);
   KeyRing.init(router, keyRingService);
   SecretWasm.init(router, secretWasmService);
@@ -171,6 +171,7 @@ export function init(
     permissionInteractiveService
   );
   PermissionInteractive.init(router, permissionInteractiveService);
+  ChainsUI.init(router, chainsUIService);
 
   return {
     initFn: async () => {

@@ -1,10 +1,4 @@
-import React, {
-  EffectCallback,
-  FunctionComponent,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { RegisterSceneBox } from "../components/register-scene-box";
@@ -21,6 +15,7 @@ import { TextInput } from "../../../components/input";
 import { Subtitle3 } from "../../../components/typography";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
+import { useEffectOnce } from "../../../hooks/use-effect-once";
 
 export const EnableChainsScene: FunctionComponent<{
   vaultId: string;
@@ -45,12 +40,6 @@ export const EnableChainsScene: FunctionComponent<{
       });
     },
   });
-
-  // Allowing to disable makes user confusing.
-  // So, we should block to turn off initially enabled chains.
-  const [initialEnabledChainIdentifiers] = useState(
-    chainStore.enabledChainIdentifiers
-  );
 
   // Handle coin type selection.
   useEffectOnce(() => {
@@ -120,10 +109,12 @@ export const EnableChainsScene: FunctionComponent<{
     }
   });
 
-  // Handle auto turn on chains.
-  // Assume that states from queries store are already initialized.
-  useEffectOnce(() => {
-    const enableChainIds: string[] = [];
+  const [enabledChainIdentifiers, setEnabledChainIdentifiers] = useState(() => {
+    // We assume that the chain store can be already initialized.
+    // See FinalizeKeyScene
+    // However, if the chain store is not initialized, we should handle these case too.
+    const enabledChainIdentifiers: string[] =
+      chainStore.enabledChainIdentifiers;
 
     for (const candidateAddress of candidateAddresses) {
       const queries = queriesStore.get(candidateAddress.chainId);
@@ -137,24 +128,49 @@ export const EnableChainsScene: FunctionComponent<{
       // If the chain is not enabled, check that the account exists.
       // If the account exists, turn on the chain.
       for (const bech32Address of candidateAddress.bech32Addresses) {
-        const queryAccount = queries.cosmos.queryAccount.getQueryBech32Address(
+        // Check that the account has some assets or delegations.
+        // If so, enable it by default
+        const queryBalance = queries.queryBalances.getQueryBech32Address(
           bech32Address.address
-        );
+        ).stakable;
 
-        // Check that the account exist on chain.
-        // With stargate implementation, querying account fails with 404 status if account not exists.
-        // But, if account receives some native tokens, the account would be created and it may deserve to be chosen.
-        if (queryAccount.response?.data) {
-          enableChainIds.push(chainInfo.chainId);
+        if (queryBalance.response?.data) {
+          // A bit tricky. The stake coin is currently only native, and in this case,
+          // we can check whether the asset exists or not by checking the response.
+          const data = queryBalance.response.data as any;
+          if (
+            data.balances &&
+            Array.isArray(data.balances) &&
+            data.balances.length > 0
+          ) {
+            enabledChainIdentifiers.push(chainInfo.chainIdentifier);
+            break;
+          }
+        }
+
+        const queryDelegations =
+          queries.cosmos.queryDelegations.getQueryBech32Address(
+            bech32Address.address
+          );
+        if (queryDelegations.delegationBalances.length > 0) {
+          enabledChainIdentifiers.push(chainInfo.chainIdentifier);
           break;
         }
       }
     }
 
-    if (enableChainIds.length > 0) {
-      chainStore.enableChainInfoInUI(...enableChainIds);
-    }
+    return enabledChainIdentifiers;
   });
+
+  const enabledChainIdentifierMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+
+    for (const enabledChainIdentifier of enabledChainIdentifiers) {
+      map.set(enabledChainIdentifier, true);
+    }
+
+    return map;
+  }, [enabledChainIdentifiers]);
 
   const [search, setSearch] = useState<string>("");
 
@@ -190,7 +206,7 @@ export const EnableChainsScene: FunctionComponent<{
           textAlign: "center",
         }}
       >
-        {chainStore.enabledChainIdentifiers.length} chain(s) selected
+        {enabledChainIdentifiers.length} chain(s) selected
       </Subtitle3>
       <Gutter size="0.75rem" />
       <Box
@@ -212,19 +228,36 @@ export const EnableChainsScene: FunctionComponent<{
               account.bech32Address
             ).stakable.balance;
 
-            const blockInteraction = initialEnabledChainIdentifiers.includes(
-              chainInfo.chainIdentifier
-            );
+            const enabled =
+              enabledChainIdentifierMap.get(chainInfo.chainIdentifier) || false;
+
+            // At least, one chain should be enabled.
+            const blockInteraction =
+              enabledChainIdentifiers.length <= 1 && enabled;
 
             return (
               <ChainItem
                 key={chainInfo.chainId}
                 chainInfo={chainInfo}
                 balance={balance}
-                enabled={chainStore.isEnabledChain(chainInfo.chainId)}
+                enabled={enabled}
                 blockInteraction={blockInteraction}
                 onClick={() => {
-                  chainStore.toggleChainInfoInUI(chainInfo.chainId);
+                  if (
+                    enabledChainIdentifierMap.get(chainInfo.chainIdentifier)
+                  ) {
+                    setEnabledChainIdentifiers(
+                      enabledChainIdentifiers.filter(
+                        (chainIdentifier) =>
+                          chainIdentifier !== chainInfo.chainIdentifier
+                      )
+                    );
+                  } else {
+                    setEnabledChainIdentifiers([
+                      ...enabledChainIdentifiers,
+                      chainInfo.chainIdentifier,
+                    ]);
+                  }
                 }}
               />
             );
@@ -237,7 +270,41 @@ export const EnableChainsScene: FunctionComponent<{
         <Button
           text="Import"
           size="large"
-          onClick={() => {
+          onClick={async () => {
+            const enables: string[] = [];
+            const disables: string[] = [];
+
+            for (const chainInfo of chainStore.chainInfos) {
+              const enabled =
+                enabledChainIdentifierMap.get(chainInfo.chainIdentifier) ||
+                false;
+
+              if (enabled) {
+                enables.push(chainInfo.chainIdentifier);
+              } else {
+                disables.push(chainInfo.chainIdentifier);
+              }
+            }
+
+            await Promise.all([
+              (async () => {
+                if (enables.length > 0) {
+                  await chainStore.enableChainInfoInUIWithVaultId(
+                    vaultId,
+                    ...enables
+                  );
+                }
+              })(),
+              (async () => {
+                if (disables.length > 0) {
+                  await chainStore.disableChainInfoInUIWithVaultId(
+                    vaultId,
+                    ...disables
+                  );
+                }
+              })(),
+            ]);
+
             // TODO
             alert("TODO");
 
@@ -257,7 +324,11 @@ const ChainItem: FunctionComponent<{
   blockInteraction: boolean;
 
   onClick: () => void;
-}> = ({ chainInfo, balance, enabled, blockInteraction, onClick }) => {
+}> = observer(({ chainInfo, balance, enabled, blockInteraction, onClick }) => {
+  const { priceStore } = useStore();
+
+  const price = priceStore.calculatePrice(balance);
+
   return (
     <Box
       borderRadius="0.375rem"
@@ -288,15 +359,10 @@ const ChainItem: FunctionComponent<{
           <YAxis>
             <div>{balance.maxDecimals(6).shrink(true).toString()}</div>
             <Gutter size="0.25rem" />
-            <div>TODO: ㅅㅂ</div>
+            <div>{price ? price.toString() : "-"}</div>
           </YAxis>
         </XAxis>
       </Columns>
     </Box>
   );
-};
-
-const useEffectOnce = (effect: EffectCallback) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(effect, []);
-};
+});

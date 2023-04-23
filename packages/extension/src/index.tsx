@@ -12,7 +12,7 @@ require("./public/assets/icon/icon-beta-16.png");
 require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 
-import React, { FunctionComponent, useEffect, useMemo } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { IntlProvider } from "react-intl";
@@ -96,19 +96,24 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     }
   }, [keyRingStore.status]);
 
+  const openRegisterOnce = useRef(false);
+
   const isReady = useMemo(() => {
     if (keyRingStore.status === "not-loaded") {
       return false;
     }
 
     if (keyRingStore.status === "empty") {
-      browser.tabs
-        .create({
-          url: "/register.html#",
-        })
-        .then(() => {
-          window.close();
-        });
+      if (!openRegisterOnce.current) {
+        openRegisterOnce.current = true;
+        browser.tabs
+          .create({
+            url: "/register.html#",
+          })
+          .then(() => {
+            window.close();
+          });
+      }
 
       return false;
     }
