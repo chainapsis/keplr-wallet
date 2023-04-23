@@ -31,9 +31,14 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
     const trimSearch = search.trim();
 
     return tokens.filter((viewToken) => {
-      return viewToken.token.currency.coinDenom
-        .toLowerCase()
-        .includes(trimSearch.toLowerCase());
+      return (
+        viewToken.chainInfo.chainName
+          .toLowerCase()
+          .includes(trimSearch.toLowerCase()) ||
+        viewToken.token.currency.coinDenom
+          .toLowerCase()
+          .includes(trimSearch.toLowerCase())
+      );
     });
   }, [search, tokens]);
 
