@@ -80,6 +80,9 @@ export const FinalizeKeyScene: FunctionComponent<{
 
   useEffectOnce(() => {
     (async () => {
+      // Chain store should be initialized before creating the key.
+      await chainStore.waitUntilInitialized();
+
       let vaultId: unknown;
 
       if (mnemonic) {
@@ -106,6 +109,8 @@ export const FinalizeKeyScene: FunctionComponent<{
       if (typeof vaultId !== "string") {
         throw new Error("Unknown error");
       }
+
+      await chainStore.waitSyncedEnabledChains();
 
       let promises: Promise<unknown>[] = [];
 
@@ -211,7 +216,7 @@ export const FinalizeKeyScene: FunctionComponent<{
                 .stakable.waitFreshResponse()
             );
             promises.push(
-              queries.cosmos.queryAccount
+              queries.cosmos.queryDelegations
                 .getQueryBech32Address(bech32Address.address)
                 .waitFreshResponse()
             );

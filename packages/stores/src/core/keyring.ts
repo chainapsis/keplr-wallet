@@ -1,5 +1,12 @@
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import { computed, flow, makeObservable, observable, runInAction } from "mobx";
+import {
+  autorun,
+  computed,
+  flow,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import { toGenerator } from "@keplr-wallet/common";
 import {
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
@@ -9,6 +16,9 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class KeyRingStore {
+  @observable
+  protected _isInitialized: boolean = false;
+
   @observable
   protected _status: KeyRingV2.KeyRingStatus | "not-loaded" = "not-loaded";
 
@@ -32,6 +42,30 @@ export class KeyRingStore {
     runInAction(() => {
       this._status = result.status;
       this._keyInfos = result.keyInfos;
+
+      this._isInitialized = true;
+    });
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
+
+  async waitUntilInitialized(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    return new Promise((resolve) => {
+      const disposal = autorun(() => {
+        if (this.isInitialized) {
+          resolve();
+
+          if (disposal) {
+            disposal();
+          }
+        }
+      });
     });
   }
 

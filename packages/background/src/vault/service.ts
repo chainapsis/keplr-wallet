@@ -14,9 +14,13 @@ import pbkdf2 from "pbkdf2";
 import { Hash } from "@keplr-wallet/crypto";
 import { PlainObject, Vault } from "./types";
 
+type VaultRemovedHandler = (type: string, vaultId: string) => void;
+
 export class VaultService {
   @observable
   protected vaultMap: Map<string, Vault[]> = new Map();
+
+  protected onVaultRemovedHandlers: VaultRemovedHandler[] = [];
 
   protected _isSignedUp: boolean = false;
 
@@ -254,6 +258,10 @@ export class VaultService {
 
     const newVaults = vaults.filter((v) => v.id !== id);
     this.vaultMap.set(type, newVaults);
+
+    for (const handler of this.onVaultRemovedHandlers) {
+      handler(type, id);
+    }
   }
 
   protected encrypt(sensitive: PlainObject): Uint8Array {
@@ -432,5 +440,9 @@ export class VaultService {
     }
 
     return VaultService.aesDecrypt(derivedKey, salt, cipher);
+  }
+
+  addVaultRemovedHandler(handler: VaultRemovedHandler) {
+    this.onVaultRemovedHandlers.push(handler);
   }
 }

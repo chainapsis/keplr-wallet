@@ -58,8 +58,8 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
 
-  public readonly chainStore: ChainStore;
   public readonly keyRingStore: KeyRingStore;
+  public readonly chainStore: ChainStore;
   public readonly ibcChannelStore: IBCChannelStore;
 
   public readonly permissionManagerStore: PermissionManagerStore;
@@ -131,17 +131,18 @@ export class RootStore {
       new InExtensionMessageRequester()
     );
 
-    this.chainStore = new ChainStore(
-      EmbedChainInfos,
-      new InExtensionMessageRequester()
-    );
-
     this.keyRingStore = new KeyRingStore(
       {
         dispatchEvent: (type: string) => {
           window.dispatchEvent(new Event(type));
         },
       },
+      new InExtensionMessageRequester()
+    );
+
+    this.chainStore = new ChainStore(
+      EmbedChainInfos,
+      this.keyRingStore,
       new InExtensionMessageRequester()
     );
 
