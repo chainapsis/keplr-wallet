@@ -55,7 +55,12 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
     <HeaderLayout
       title="Change Wallet Name"
       left={<BackButton />}
-      bottomButton={{ text: "Save", color: "secondary", type: "submit" }}
+      bottomButton={{
+        text: "Save",
+        color: "secondary",
+        size: "large",
+        type: "submit",
+      }}
       onSubmit={handleSubmit(async (data) => {
         console.log("submit: " + data.name);
         try {
