@@ -17,9 +17,7 @@ export const MessageItem: FunctionComponent<{ paragraph: string }> = ({
 
   useLayoutEffect(() => {
     setHeight(ref.current ? ref.current.offsetHeight : 0);
-  }, [ref.current]);
-
-  console.log(height);
+  }, []);
 
   return (
     <Styles.Container ref={ref}>
