@@ -41,6 +41,13 @@ export class CopyAddressConfig {
       for (const chainInfo of this.chainStore.chainInfosInUI) {
         chainIdentifierMap.set(chainInfo.chainIdentifier, true);
       }
+
+      // 이 로직이 위에 로직보다 밑에 있어야함.
+      // this.chainStore.chainInfosInUI가 observed되는 걸 명확하게 하기 위해서임.
+      if (!this.chainStore.isEnabledChainsSynced) {
+        return;
+      }
+
       runInAction(() => {
         for (const [_, chainIdentifiers] of this.vaultToConfigMap) {
           for (let i = 0; i < chainIdentifiers.length; i++) {
