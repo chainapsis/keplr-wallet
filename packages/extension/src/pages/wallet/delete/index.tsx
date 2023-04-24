@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -12,6 +12,9 @@ import { useStore } from "../../../stores";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
+import lottie from "lottie-web";
+import AnimSeed from "../../../public/assets/lottie/wallet/delete.json";
+import { YAxis } from "../../../components/axis";
 
 const Styles = {
   Container: styled(Stack)`
@@ -57,8 +60,24 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
     },
   });
 
+  const animDivRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     setFocus("password");
+
+    if (animDivRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animDivRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: AnimSeed,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
   }, [setFocus]);
 
   return (
@@ -90,6 +109,16 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
           paragraph="Make sure that you’ve backed up your recovery phrase and private key."
           bottom={<Styles.BackUp>Back Up My Wallet</Styles.BackUp>}
         />
+
+        <YAxis alignX="center">
+          <div
+            ref={animDivRef}
+            style={{
+              width: "10.5rem",
+              height: "10.5rem",
+            }}
+          />
+        </YAxis>
 
         <Styles.Paragraph>
           After deletion, you will be required to import your wallet to restore

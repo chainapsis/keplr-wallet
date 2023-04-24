@@ -10,6 +10,9 @@ import { TextInput } from "../../../components/input";
 import { useForm } from "react-hook-form";
 import { useStore } from "../../../stores";
 import { useSearchParams } from "react-router-dom";
+import { Box } from "../../../components/box";
+import { YAxis } from "../../../components/axis";
+import { Gutter } from "../../../components/gutter";
 
 const Styles = {
   Container: styled(Stack)`
@@ -31,6 +34,8 @@ const Styles = {
 
     padding: 1.25rem 1.875rem;
     border-radius: 0.5rem;
+
+    text-align: center;
   `,
 };
 
@@ -66,6 +71,7 @@ export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
     <HeaderLayout
       title="View Recovery Phrase"
       left={<BackButton />}
+      fixedHeight={true}
       bottomButton={
         keyRing === ""
           ? {
@@ -100,6 +106,18 @@ export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
     >
       {keyRing === "" ? (
         <Styles.Container>
+          <Gutter size="5.875rem" />
+
+          <YAxis alignX="center">
+            <Box
+              width="8.5rem"
+              height="8.5rem"
+              backgroundColor={ColorPalette["gray-200"]}
+            />
+          </YAxis>
+
+          <Gutter size="2rem" />
+
           <Styles.Paragraph>
             Please type in your password to proceed
           </Styles.Paragraph>

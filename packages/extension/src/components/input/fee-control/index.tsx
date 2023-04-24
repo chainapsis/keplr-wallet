@@ -7,7 +7,7 @@ import { Column, Columns } from "../../column";
 import { Subtitle3, Subtitle4 } from "../../typography";
 import { ArrowRightIcon, SettingIcon } from "../../icon";
 import { Stack } from "../../stack";
-import { Modal } from "../../modal";
+import { Modal } from "../../modal/v2";
 import { TransactionFeeModal } from "./modal";
 import { useStore } from "../../../stores";
 import { autorun } from "mobx";
@@ -175,12 +175,12 @@ export const FeeControl: FunctionComponent<{
           </Columns>
         </Columns>
 
-        <Modal isOpen={isModalOpen}>
-          <TransactionFeeModal
-            close={() => setIsModalOpen(false)}
-            feeConfig={feeConfig}
-            gasConfig={gasConfig}
-          />
+        <Modal
+          isOpen={isModalOpen}
+          align="bottom"
+          close={() => setIsModalOpen(false)}
+        >
+          <TransactionFeeModal feeConfig={feeConfig} gasConfig={gasConfig} />
         </Modal>
       </Styles.Container>
     );
