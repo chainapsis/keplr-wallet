@@ -54,6 +54,7 @@ import {
   WalletDeletePage,
   WalletRecoveryPhrasePage,
 } from "./pages/wallet";
+import { SuggestChainPage } from "./pages/suggest-chain";
 import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
 
@@ -247,6 +248,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               path="/wallet/recovery-phrase"
               element={<WalletRecoveryPhrasePage />}
             />
+            <Route path="/suggest-chain" element={<SuggestChainPage />} />
           </Routes>
         )
       ) : (
