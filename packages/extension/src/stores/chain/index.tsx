@@ -15,6 +15,7 @@ import {
   GetEnabledChainIdentifiersMsg,
   RemoveSuggestedChainInfoMsg,
   ToggleChainsMsg,
+  TryUpdateEnabledChainInfosMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { toGenerator } from "@keplr-wallet/common";
@@ -216,6 +217,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
 
     this._isInitializing = false;
+
+    // Must not wait!!
+    this.tryUpdateEnabledChainInfos();
+  }
+
+  async tryUpdateEnabledChainInfos(): Promise<void> {
+    const msg = new TryUpdateEnabledChainInfosMsg();
+    const updated = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    if (updated) {
+      await this.updateChainInfosFromBackground();
+    }
   }
 
   @flow

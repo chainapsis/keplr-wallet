@@ -2,6 +2,7 @@ import { ChainsService } from "../chains";
 import {
   action,
   autorun,
+  computed,
   makeObservable,
   observable,
   runInAction,
@@ -164,6 +165,19 @@ export class ChainsUIService {
         this.enabledChainIdentifiersMap.set(vaultId, arr);
       }
     }
+  }
+
+  @computed
+  get allEnabledChainIdentifiers(): string[] {
+    const set = new Set<string>();
+    for (const arr of this.enabledChainIdentifiersMap.values()) {
+      for (const chainIdentifier of arr) {
+        set.add(chainIdentifier);
+      }
+    }
+    return Array.from(set).filter((chainIdentifier) => {
+      return this.chainsService.hasChainInfo(chainIdentifier);
+    });
   }
 
   protected readonly onChainRemoved = (chainInfo: ChainInfo) => {

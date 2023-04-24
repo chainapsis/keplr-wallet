@@ -219,7 +219,6 @@ export class ChainsService {
       `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
       `/cosmos/${chainIdentifier}.json`
     );
-
     let chainInfo: ChainInfo = res.data;
 
     const fetchedChainIdentifier = ChainIdHelper.parse(
@@ -331,7 +330,14 @@ export class ChainsService {
 
       this.updatedChainInfos = newChainInfos;
     } else {
-      throw new Error(`There is no updated chain info for ${chainId}`);
+      const original = this.getChainInfoOrThrow(chainId);
+      const newChainInfos = this.updatedChainInfos.slice();
+      newChainInfos.push({
+        chainId: chainInfo.chainId || original.chainId,
+        features: chainInfo.features || original.features,
+      });
+
+      this.updatedChainInfos = newChainInfos;
     }
   }
 
