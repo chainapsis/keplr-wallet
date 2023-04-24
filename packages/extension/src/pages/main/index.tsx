@@ -18,7 +18,7 @@ import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 import { ChainInfo } from "@keplr-wallet/types";
 import { MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
-import { Modal } from "../../components/modal/v2";
+import { Modal } from "../../components/modal";
 import { DualChart } from "./components/chart";
 import { Gutter } from "../../components/gutter";
 import { H1, Subtitle3 } from "../../components/typography";

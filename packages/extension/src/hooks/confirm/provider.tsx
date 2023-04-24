@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo, useRef, useState } from "react";
 import { ConfirmContext } from "./internal";
-import { Modal } from "../../components/modal/v2";
+import { Modal } from "../../components/modal";
 import { XAxis, YAxis } from "../../components/axis";
 import { Box } from "../../components/box";
 import { ColorPalette } from "../../styles";

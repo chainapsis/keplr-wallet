@@ -12,7 +12,7 @@ import { Keplr } from "@keplr-wallet/provider";
 import manifest from "./manifest.json";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { configure } from "mobx";
-import { ModalRootProvider } from "./components/modal/v2";
+import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
 
 configure({

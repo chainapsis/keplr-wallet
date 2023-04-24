@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { Modal } from "../modal/v2";
+import { Modal } from "../modal";
 import { Box } from "../box";
 import { ColorPalette } from "../../styles";
 import styled from "styled-components";

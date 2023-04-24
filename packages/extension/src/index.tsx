@@ -54,7 +54,7 @@ import {
   WalletDeletePage,
   WalletRecoveryPhrasePage,
 } from "./pages/wallet";
-import { ModalRootProvider } from "./components/modal/v2";
+import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
 
 configure({

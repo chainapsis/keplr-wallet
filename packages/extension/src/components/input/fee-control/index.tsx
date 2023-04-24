@@ -7,7 +7,7 @@ import { Column, Columns } from "../../column";
 import { Subtitle3, Subtitle4 } from "../../typography";
 import { ArrowRightIcon, SettingIcon } from "../../icon";
 import { Stack } from "../../stack";
-import { Modal } from "../../modal/v2";
+import { Modal } from "../../modal";
 import { TransactionFeeModal } from "./modal";
 import { useStore } from "../../../stores";
 import { autorun } from "mobx";
