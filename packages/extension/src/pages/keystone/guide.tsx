@@ -21,7 +21,7 @@ export function Guide({ onScan }: { onScan(): void }) {
           modules={[Navigation, Pagination]}
           onActiveIndexChange={onActiveIndexChange}
         >
-          {[1, 2, 3, 4].map((e: number) => (
+          {[1, 2, 3].map((e: number) => (
             <SwiperSlide className={style.item} key={e}>
               <img
                 src={require(`../../public/assets/img/keystone/tutorial${e}.png`)}
@@ -67,28 +67,27 @@ export function Guide({ onScan }: { onScan(): void }) {
         <div id="swiper-pagination" className={style.pagination} />
         {stepIndex === 0 && (
           <div className={style["swiper-title"]}>
-            Select the <em>Cosmos</em> option in the “Software Wallet” menu
-            available in your Keystone
+            Tap <em>“Connect Software Wallet”</em> at the bottom left corner on
+            the Keystone device.
           </div>
         )}
         {stepIndex === 1 && (
           <div className={style["swiper-title"]}>
-            Tap the icon “ <em>…</em> ” on the top right corner
+            Select <em>“Keplr”</em> wallet.
           </div>
         )}
         {stepIndex === 2 && (
           <div className={style["swiper-title"]}>
-            Select <em>Connect Software Wallet</em>
-          </div>
-        )}
-        {stepIndex === 3 && (
-          <div className={style["swiper-title"]}>
-            Click <em>Scan</em> button below and scan the QR code on the
-            Keystone device
+            Click on the <em>“Scan the QR code”</em> button below to scan the QR
+            code displayed on the Keystone device.
           </div>
         )}
         <div className={style.more}>
-          <a href="https://keyst.one/t/keplr" target="_blank" rel="noreferrer">
+          <a
+            href="https://support.keyst.one/3rd-party-wallets/cosmos-wallets/keplr-extension?utm_source=keplr&utm_medium=moredetails&utm_id=20230419"
+            target="_blank"
+            rel="noreferrer"
+          >
             More Details
           </a>
         </div>

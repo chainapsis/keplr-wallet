@@ -62,7 +62,7 @@ function Introduction({
           }}
         >
           <a
-            href="https://keyst.one/"
+            href="https://keyst.one/?utm_source=keplr&utm_medium=learnmore&utm_id=20230419"
             target="_blank"
             rel="noreferrer"
             style={{

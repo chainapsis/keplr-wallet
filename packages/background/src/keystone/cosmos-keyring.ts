@@ -53,7 +53,11 @@ export class KeystoneCosmosInteractionProvider implements InteractionProvider {
 
   public readCryptoMultiAccounts = async () => {
     const result = await this.readUR();
-    return CryptoMultiAccounts.fromCBOR(Buffer.from(result.cbor, "hex"));
+    const accounts = CryptoMultiAccounts.fromCBOR(
+      Buffer.from(result.cbor, "hex")
+    );
+    accounts.getDevice = () => "Keplr Extension";
+    return accounts;
   };
 
   public requestSignature = async (
@@ -98,7 +102,7 @@ export class KeystoneCosmosKeyring extends BaseKeyring {
   getKeyringData(): KeystoneKeyringData {
     return {
       xfp: this.xfp,
-      device: this.device,
+      device: "Keplr Extension",
       name: this.name,
       keys: this.getPubKeys().map((e) => {
         const path = parseHDPath(`m/${e.hdPath}`);
