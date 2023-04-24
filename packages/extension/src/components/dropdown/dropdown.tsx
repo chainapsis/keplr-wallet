@@ -1,9 +1,8 @@
-import React, { FunctionComponent, useRef } from "react";
+import React, { FunctionComponent, useEffect, useRef } from "react";
 import { Styles } from "./styles";
 import { DropdownProps } from "./types";
 import { Column, Columns } from "../column";
 import { ArrowDropDownIcon } from "../icon";
-import { useClickOutside } from "../../hooks";
 
 // eslint-disable-next-line react/display-name
 export const Dropdown: FunctionComponent<DropdownProps> = ({
@@ -16,9 +15,26 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   size = "small",
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-
   const wrapperRef = useRef<HTMLInputElement>(null);
-  useClickOutside(wrapperRef, () => setIsOpen(false));
+
+  const callbackRef = useRef(() => setIsOpen(false));
+  callbackRef.current = () => setIsOpen(false);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
+        callbackRef.current();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [wrapperRef]);
 
   return (
     <Styles.Container ref={wrapperRef}>

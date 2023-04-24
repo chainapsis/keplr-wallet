@@ -1,5 +1,4 @@
-import React, { FunctionComponent, useRef, useState } from "react";
-import { useClickOutside } from "../../../hooks";
+import React, { FunctionComponent, useState } from "react";
 import { Caption1, Caption2, H5, Subtitle1, Subtitle3 } from "../../typography";
 import { ColorPalette } from "../../../styles";
 import styled from "styled-components";
@@ -30,17 +29,13 @@ const Styles = {
 };
 
 export const TransactionFeeModal: FunctionComponent<{
-  close: () => void;
-
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
-}> = observer(({ close, feeConfig, gasConfig }) => {
+}> = observer(({ feeConfig, gasConfig }) => {
   const [isAuto, setIsAuto] = useState<boolean>(true);
-  const wrapperRef = useRef<HTMLInputElement>(null);
-  useClickOutside(wrapperRef, close);
 
   return (
-    <Styles.Container ref={wrapperRef}>
+    <Styles.Container>
       <Subtitle1 style={{ marginBottom: "1.5rem" }}>Fee Set</Subtitle1>
 
       <Stack gutter="0.75rem">
