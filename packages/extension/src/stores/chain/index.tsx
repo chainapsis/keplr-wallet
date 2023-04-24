@@ -266,6 +266,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     );
   }
 
+  get lastSyncedEnabledChainsVaultId(): string {
+    return this._lastSyncedEnabledChainsVaultId;
+  }
+
   // Enabled chains depends on the selected key info.
   // This process is automatically done when the selected key info is changed. (see init())
   // But, if you want to wait until the enabled chains are synced, you can use this method.

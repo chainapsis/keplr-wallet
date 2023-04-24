@@ -35,7 +35,28 @@ export class CopyAddressConfig {
     });
 
     await this.chainStore.waitUntilInitialized();
-    // Sync and clear the config if the chain is removed or hidden.
+
+    // Sync and clear the config if the chain is removed.
+    autorun(() => {
+      const chainIdentifierMap = new Map<string, boolean>();
+      for (const chainInfo of this.chainStore.chainInfos) {
+        chainIdentifierMap.set(chainInfo.chainIdentifier, true);
+      }
+
+      runInAction(() => {
+        for (const [_, chainIdentifiers] of this.vaultToConfigMap) {
+          for (let i = 0; i < chainIdentifiers.length; i++) {
+            const chainIdentifier = chainIdentifiers[i];
+            if (!chainIdentifierMap.has(chainIdentifier)) {
+              chainIdentifiers.splice(i, 1);
+              i--;
+            }
+          }
+        }
+      });
+    });
+
+    // Sync and clear the config if the chain is hidden.
     autorun(() => {
       const chainIdentifierMap = new Map<string, boolean>();
       for (const chainInfo of this.chainStore.chainInfosInUI) {
@@ -49,7 +70,10 @@ export class CopyAddressConfig {
       }
 
       runInAction(() => {
-        for (const [_, chainIdentifiers] of this.vaultToConfigMap) {
+        const chainIdentifiers = this.vaultToConfigMap.get(
+          this.chainStore.lastSyncedEnabledChainsVaultId
+        );
+        if (chainIdentifiers) {
           for (let i = 0; i < chainIdentifiers.length; i++) {
             const chainIdentifier = chainIdentifiers[i];
             if (!chainIdentifierMap.has(chainIdentifier)) {
