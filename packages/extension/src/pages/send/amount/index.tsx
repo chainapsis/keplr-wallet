@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -16,6 +16,9 @@ import { TokenItem } from "../../main/components";
 import { Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { MemoInput } from "../../../components/input/memo-input";
+import { YAxis } from "../../../components/axis";
+import { Gutter } from "../../../components/gutter";
+import { FeeControl } from "../../../components/input/fee-control";
 
 const Styles = {
   Flex1: styled.div`
@@ -28,13 +31,19 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const coinMinimalDenom = searchParams.get("coinMinimalDenom");
-  const chainId = searchParams.get("chainId");
+  const paramChainId = searchParams.get("chainId");
+  const paramCoinMinimalDenom = searchParams.get("coinMinimalDenom");
 
-  if (!coinMinimalDenom || !chainId) {
-    navigate("/send/select-asset");
-    return null;
-  }
+  const chainId = paramChainId || chainStore.chainInfosInUI[0].chainId;
+  const coinMinimalDenom =
+    paramCoinMinimalDenom ||
+    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+
+  useEffect(() => {
+    if (!paramChainId || !paramCoinMinimalDenom) {
+      navigate("/send/select-asset");
+    }
+  }, [navigate, paramChainId, paramCoinMinimalDenom]);
 
   const sender = accountStore.getAccount(
     chainStore.getChain(chainId).chainId
@@ -85,10 +94,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         },
       }}
     >
-      <Box paddingX="0.75rem">
+      <Box paddingX="0.75rem" paddingBottom="0.75rem">
         <Stack gutter="0.75rem">
-          <Stack gutter="0.375rem">
+          <YAxis>
             <Subtitle3>Asset</Subtitle3>
+            <Gutter size="0.375rem" />
             <TokenItem
               viewToken={{
                 token: balance,
@@ -96,7 +106,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               }}
               forChange
             />
-          </Stack>
+          </YAxis>
 
           <RecipientInput
             recipientConfig={sendConfigs.recipientConfig}
@@ -112,7 +122,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <Styles.Flex1 />
 
-          <Box marginBottom="4.75rem" />
+          <FeeControl
+            senderConfig={sendConfigs.senderConfig}
+            feeConfig={sendConfigs.feeConfig}
+            gasConfig={sendConfigs.gasConfig}
+          />
         </Stack>
       </Box>
     </HeaderLayout>
