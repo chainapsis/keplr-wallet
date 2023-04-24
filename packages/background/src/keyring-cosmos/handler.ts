@@ -9,6 +9,7 @@ import {
   GetCosmosKeyMsg,
   GetCosmosKeysSettledMsg,
   RequestCosmosSignAminoMsg,
+  RequestCosmosSignDirectMsg,
   RequestCosmosSignAminoADR36Msg,
   VerifyCosmosSignAminoADR36Msg,
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
@@ -17,6 +18,7 @@ import {
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export const getHandler: (
   service: KeyRingCosmosService,
@@ -42,6 +44,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestCosmosSignAminoMsg);
+      case RequestCosmosSignDirectMsg:
+        return handleRequestCosmosSignDirectMsg(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestCosmosSignDirectMsg);
       case RequestCosmosSignAminoADR36Msg:
         return handleRequestCosmosSignAminoADR36Msg(
           service,
@@ -133,6 +140,48 @@ const handleRequestCosmosSignAminoMsg: (
       msg.signDoc,
       msg.signOptions
     );
+  };
+};
+
+const handleRequestCosmosSignDirectMsg: (
+  service: KeyRingCosmosService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestCosmosSignDirectMsg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    const signDoc = SignDoc.fromPartial({
+      bodyBytes: msg.signDoc.bodyBytes,
+      authInfoBytes: msg.signDoc.authInfoBytes,
+      chainId: msg.signDoc.chainId,
+      accountNumber: msg.signDoc.accountNumber,
+    });
+
+    const response = await service.signDirectSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      signDoc,
+      msg.signOptions
+    );
+
+    return {
+      signed: {
+        bodyBytes: response.signed.bodyBytes,
+        authInfoBytes: response.signed.authInfoBytes,
+        chainId: response.signed.chainId,
+        accountNumber: response.signed.accountNumber.toString(),
+      },
+      signature: response.signature,
+    };
   };
 };
 

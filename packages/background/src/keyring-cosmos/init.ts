@@ -5,6 +5,7 @@ import {
   GetCosmosKeysSettledMsg,
   RequestCosmosSignAminoADR36Msg,
   RequestCosmosSignAminoMsg,
+  RequestCosmosSignDirectMsg,
   VerifyCosmosSignAminoADR36Msg,
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
@@ -23,6 +24,7 @@ export function init(
   router.registerMessage(GetCosmosKeysSettledMsg);
   router.registerMessage(RequestCosmosSignAminoMsg);
   router.registerMessage(RequestCosmosSignAminoADR36Msg);
+  router.registerMessage(RequestCosmosSignDirectMsg);
   router.registerMessage(VerifyCosmosSignAminoADR36Msg);
   router.registerMessage(ComputeNotFinalizedMnemonicKeyAddressesMsg);
   router.registerMessage(PrivilegeCosmosSignAminoWithdrawRewardsMsg);

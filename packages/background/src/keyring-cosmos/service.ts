@@ -3,6 +3,7 @@ import { KeyRingService } from "../keyring-v2";
 import {
   AminoSignResponse,
   ChainInfo,
+  DirectSignResponse,
   KeplrSignOptions,
   Key,
   StdSignature,
@@ -21,6 +22,8 @@ import { escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
 import { trimAminoSignDoc } from "../keyring/amino-sign-doc";
 import { InteractionService } from "../interaction";
 import { Buffer } from "buffer/";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import Long from "long";
 
 export class KeyRingCosmosService {
   constructor(
@@ -235,7 +238,6 @@ export class KeyRingCosmosService {
     signer: string,
     signDoc: StdSignDoc
   ) {
-    // TODO: Handle ethermint
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
     const isEthermintLike = this.isEthermintLike(chainInfo);
 
@@ -382,6 +384,83 @@ export class KeyRingCosmosService {
     } finally {
       this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
     }
+  }
+
+  async signDirect(
+    env: Env,
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    signer: string,
+    signDoc: SignDoc,
+    signOptions: KeplrSignOptions
+  ): Promise<DirectSignResponse> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const isEthermintLike = this.isEthermintLike(chainInfo);
+
+    const key = await this.getKey(env, vaultId, chainId);
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        .bech32PrefixAccAddr;
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    const newSignDocBytes = (await this.interactionService.waitApprove(
+      env,
+      "/sign-cosmos",
+      "request-sign-cosmos",
+      {
+        origin,
+        chainId,
+        mode: "direct",
+        signDocBytes: SignDoc.encode(signDoc).finish(),
+        signer,
+        signOptions,
+      }
+    )) as Uint8Array;
+
+    const newSignDoc = SignDoc.decode(newSignDocBytes);
+
+    try {
+      const signature = await this.keyRingService.sign(
+        env,
+        chainId,
+        vaultId,
+        newSignDocBytes,
+        isEthermintLike ? "keccak256" : "sha256"
+      );
+
+      return {
+        signed: {
+          ...newSignDoc,
+          accountNumber: Long.fromString(newSignDoc.accountNumber),
+        },
+        signature: encodeSecp256k1Signature(key.pubKey, signature),
+      };
+    } finally {
+      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
+    }
+  }
+
+  async signDirectSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    signer: string,
+    signDoc: SignDoc,
+    signOptions: KeplrSignOptions
+  ): Promise<DirectSignResponse> {
+    return await this.signDirect(
+      env,
+      origin,
+      this.keyRingService.selectedVaultId,
+      chainId,
+      signer,
+      signDoc,
+      signOptions
+    );
   }
 
   async verifyAminoADR36Selected(

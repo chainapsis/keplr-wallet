@@ -29,7 +29,6 @@ import {
   SuggestTokenMsg,
   SendTxMsg,
   GetSecret20ViewingKey,
-  RequestSignDirectMsg,
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
@@ -206,20 +205,25 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    const msg = new RequestSignDirectMsg(
-      chainId,
-      signer,
+    const response = await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-cosmos-sign-direct",
       {
-        bodyBytes: signDoc.bodyBytes,
-        authInfoBytes: signDoc.authInfoBytes,
-        chainId: signDoc.chainId,
-        accountNumber: signDoc.accountNumber
-          ? signDoc.accountNumber.toString()
-          : null,
-      },
-      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+        chainId,
+        signer,
+        signDoc: {
+          bodyBytes: signDoc.bodyBytes,
+          authInfoBytes: signDoc.authInfoBytes,
+          chainId: signDoc.chainId,
+          accountNumber: signDoc.accountNumber
+            ? signDoc.accountNumber.toString()
+            : null,
+        },
+        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+      }
     );
-    const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
 
     return {
       signed: {

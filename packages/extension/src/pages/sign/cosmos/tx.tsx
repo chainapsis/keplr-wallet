@@ -24,11 +24,12 @@ import { XAxis } from "../../../components/axis";
 import { H5 } from "../../../components/typography";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { FeeControl } from "../../../components/input/fee-control";
+import { ViewDataButton } from "../components/view-data-button";
 
 export const SignCosmosTxPage: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, queriesStore } = useStore();
 
-  const [isRawData, setIsRawData] = useState(false);
+  const [isViewData, setIsViewData] = useState(false);
 
   const chainId = (() => {
     if (signInteractionStore.waitingData?.data) {
@@ -36,7 +37,12 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
     }
     return chainStore.chainInfos[0].chainId;
   })();
-  const [signer, setSigner] = useState("");
+  const signer = (() => {
+    if (signInteractionStore.waitingData?.data) {
+      return signInteractionStore.waitingData.data.signer;
+    }
+    return "";
+  })();
 
   const senderConfig = useSenderConfig(chainStore, chainId, signer);
   // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
@@ -100,7 +106,6 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
       // ) {
       //   feeConfig.setDisableBalanceCheck(true);
       // }
-      setSigner(data.data.signer);
     }
   }, [
     amountConfig,
@@ -182,7 +187,6 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
         padding="0.75rem"
         paddingBottom="0"
         style={{
-          display: "flex",
           overflow: "scroll",
         }}
       >
@@ -206,14 +210,10 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
               </H5>
             </XAxis>
             <Column weight={1} />
-            <Box
-              onClick={() => {
-                setIsRawData((v) => !v);
-              }}
-              cursor="pointer"
-            >
-              View data
-            </Box>
+            <ViewDataButton
+              isViewData={isViewData}
+              setIsViewData={setIsViewData}
+            />
           </Columns>
         </Box>
 
@@ -225,7 +225,7 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
           }}
         >
           <Box>
-            {isRawData ? (
+            {isViewData ? (
               <Box
                 as={"pre"}
                 backgroundColor={ColorPalette["gray-600"]}

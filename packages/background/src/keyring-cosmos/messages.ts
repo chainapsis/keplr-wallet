@@ -12,6 +12,7 @@ import {
   Bech32Address,
   checkAndValidateADR36AminoSignDoc,
 } from "@keplr-wallet/cosmos";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export class GetCosmosKeyMsg extends Message<Key> {
   public static type() {
@@ -136,6 +137,78 @@ export class RequestCosmosSignAminoMsg extends Message<AminoSignResponse> {
 
   type(): string {
     return RequestCosmosSignAminoMsg.type();
+  }
+}
+
+export class RequestCosmosSignDirectMsg extends Message<{
+  readonly signed: {
+    bodyBytes: Uint8Array;
+    authInfoBytes: Uint8Array;
+    chainId: string;
+    accountNumber: string;
+  };
+  readonly signature: StdSignature;
+}> {
+  public static type() {
+    return "request-cosmos-sign-direct";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly signDoc: {
+      bodyBytes?: Uint8Array;
+      authInfoBytes?: Uint8Array;
+      chainId?: string;
+      accountNumber?: string;
+    },
+    public readonly signOptions: KeplrSignOptions = {}
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new KeplrError("keyring", 270, "chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new KeplrError("keyring", 230, "signer not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.signer);
+
+    const signDoc = SignDoc.fromPartial({
+      bodyBytes: this.signDoc.bodyBytes,
+      authInfoBytes: this.signDoc.authInfoBytes,
+      chainId: this.signDoc.chainId,
+      accountNumber: this.signDoc.accountNumber,
+    });
+
+    if (signDoc.chainId !== this.chainId) {
+      throw new KeplrError(
+        "keyring",
+        234,
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
+
+    if (!this.signOptions) {
+      throw new KeplrError("keyring", 235, "Sign options are null");
+    }
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestCosmosSignDirectMsg.type();
   }
 }
 
