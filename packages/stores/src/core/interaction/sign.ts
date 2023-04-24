@@ -2,7 +2,27 @@ import { InteractionStore } from "./interaction";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
-import { EthSignType, KeplrSignOptions, StdSignDoc } from "@keplr-wallet/types";
+import { KeplrSignOptions, StdSignDoc } from "@keplr-wallet/types";
+
+export type SignInteractionData =
+  | {
+      origin: string;
+      chainId: string;
+      mode: "amino";
+      signer: string;
+      signDoc: StdSignDoc;
+      signOptions: KeplrSignOptions & {
+        isADR36WithString?: boolean;
+      };
+    }
+  | {
+      origin: string;
+      chainId: string;
+      mode: "direct";
+      signer: string;
+      signDocBytes: Uint8Array;
+      signOptions: KeplrSignOptions;
+    };
 
 export class SignInteractionStore {
   @observable
@@ -24,40 +44,16 @@ export class SignInteractionStore {
   }
 
   protected get waitingDatas() {
-    return this.interactionStore.getDatas<
-      | {
-          msgOrigin: string;
-          chainId: string;
-          mode: "amino";
-          signer: string;
-          signDoc: StdSignDoc;
-          signOptions: KeplrSignOptions;
-          isADR36SignDoc: boolean;
-          isADR36WithString?: boolean;
-          ethSignType?: EthSignType;
-        }
-      | {
-          msgOrigin: string;
-          chainId: string;
-          mode: "direct";
-          signer: string;
-          signDocBytes: Uint8Array;
-          signOptions: KeplrSignOptions;
-        }
-    >("request-sign-cosmos");
+    return this.interactionStore.getDatas<SignInteractionData>(
+      "request-sign-cosmos"
+    );
   }
 
   @computed
   get waitingData():
-    | InteractionWaitingData<{
-        chainId: string;
-        msgOrigin: string;
-        signer: string;
-        signDocWrapper: SignDocWrapper;
-        signOptions: KeplrSignOptions;
-        isADR36WithString?: boolean;
-        ethSignType?: EthSignType;
-      }>
+    | InteractionWaitingData<
+        SignInteractionData & { signDocWrapper: SignDocWrapper }
+      >
     | undefined {
     const datas = this.waitingDatas;
 
@@ -76,17 +72,8 @@ export class SignInteractionStore {
       type: data.type,
       isInternal: data.isInternal,
       data: {
-        chainId: data.data.chainId,
-        msgOrigin: data.data.msgOrigin,
-        signer: data.data.signer,
+        ...data.data,
         signDocWrapper: wrapper,
-        signOptions: data.data.signOptions,
-        isADR36WithString:
-          "isADR36WithString" in data.data
-            ? data.data.isADR36WithString
-            : undefined,
-        ethSignType:
-          "ethSignType" in data.data ? data.data.ethSignType : undefined,
       },
     };
   }

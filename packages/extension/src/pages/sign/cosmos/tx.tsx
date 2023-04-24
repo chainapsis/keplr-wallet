@@ -182,7 +182,6 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
         padding="0.75rem"
         paddingBottom="0"
         style={{
-          display: "flex",
           overflow: "scroll",
         }}
       >
