@@ -73,8 +73,6 @@ export async function simpleFetch<R>(
   const contentType = fetched.headers.get("content-type") || "";
   if (contentType.startsWith("application/json")) {
     data = await fetched.json();
-  } else if (contentType.startsWith("text/plain")) {
-    data = (await fetched.text()) as any;
   } else {
     const r = await fetched.text();
     const trim = r.trim();
