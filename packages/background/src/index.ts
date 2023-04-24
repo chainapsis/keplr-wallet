@@ -180,6 +180,7 @@ export function init(
   );
   PermissionInteractive.init(router, permissionInteractiveService);
   ChainsUI.init(router, chainsUIService);
+  ChainsUpdate.init(router, chainsUpdateService);
 
   return {
     initFn: async () => {

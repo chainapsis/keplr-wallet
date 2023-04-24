@@ -19,7 +19,7 @@ export const getHandler: (service: ChainsUpdateService) => Handler = (
           msg as TryUpdateEnabledChainInfosMsg
         );
       default:
-        throw new KeplrError("chains", 110, "Unknown msg type");
+        throw new KeplrError("chains-update", 110, "Unknown msg type");
     }
   };
 };
