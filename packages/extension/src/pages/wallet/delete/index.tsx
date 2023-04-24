@@ -85,7 +85,12 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
       title="Delete Wallet"
       fixedHeight={true}
       left={<BackButton />}
-      bottomButton={{ text: "Confirm", color: "secondary", size: "large" }}
+      bottomButton={{
+        text: "Confirm",
+        color: "secondary",
+        size: "large",
+        type: "submit",
+      }}
       onSubmit={handleSubmit(async (data) => {
         try {
           if (vaultId) {
