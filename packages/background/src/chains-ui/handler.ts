@@ -37,7 +37,7 @@ const handleGetEnabledChainIdentifiersMsg: (
   service: ChainsUIService
 ) => InternalHandler<GetEnabledChainIdentifiersMsg> = (service) => {
   return (_, msg) => {
-    return service.enabledChainIdentifiersForVault(msg.vaultId);
+    return service.enabledChainIdentifiersForVault(msg.vaultId) as string[];
   };
 };
 
@@ -46,7 +46,7 @@ const handleToggleChainsMsg: (
 ) => InternalHandler<ToggleChainsMsg> = (service) => {
   return (_, msg) => {
     service.toggleChain(msg.vaultId, ...msg.chainIds);
-    return service.enabledChainIdentifiersForVault(msg.vaultId);
+    return service.enabledChainIdentifiersForVault(msg.vaultId) as string[];
   };
 };
 
@@ -55,7 +55,7 @@ const handleEnableChainsMsg: (
 ) => InternalHandler<EnableChainsMsg> = (service) => {
   return (_, msg) => {
     service.enableChain(msg.vaultId, ...msg.chainIds);
-    return service.enabledChainIdentifiersForVault(msg.vaultId);
+    return service.enabledChainIdentifiersForVault(msg.vaultId) as string[];
   };
 };
 
@@ -64,6 +64,6 @@ const handleDisableChainsMsg: (
 ) => InternalHandler<DisableChainsMsg> = (service) => {
   return (_, msg) => {
     service.disableChain(msg.vaultId, ...msg.chainIds);
-    return service.enabledChainIdentifiersForVault(msg.vaultId);
+    return service.enabledChainIdentifiersForVault(msg.vaultId) as string[];
   };
 };
