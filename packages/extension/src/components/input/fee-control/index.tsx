@@ -11,6 +11,7 @@ import { Modal } from "../../modal";
 import { TransactionFeeModal } from "./modal";
 import { useStore } from "../../../stores";
 import { autorun } from "mobx";
+import { PricePretty } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled.div`
@@ -35,7 +36,7 @@ export const FeeControl: FunctionComponent<{
   disableAutomaticFeeSet?: boolean;
 }> = observer(
   ({ senderConfig, feeConfig, gasConfig, disableAutomaticFeeSet }) => {
-    const { queriesStore } = useStore();
+    const { queriesStore, priceStore } = useStore();
 
     useEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -160,12 +161,40 @@ export const FeeControl: FunctionComponent<{
               <Subtitle3>
                 {feeConfig.fees
                   .map((fee) => {
-                    return fee.maxDecimals(6).inequalitySymbol(true).toString();
+                    return fee
+                      .maxDecimals(6)
+                      .inequalitySymbol(true)
+                      .trim(true)
+                      .shrink(true)
+                      .toString();
                   })
                   .join(",")}
               </Subtitle3>
               <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
-                $153.50 (TODO)
+                {(() => {
+                  let total: PricePretty | undefined;
+                  let hasUnknown = false;
+                  for (const fee of feeConfig.fees) {
+                    if (!fee.currency.coinGeckoId) {
+                      hasUnknown = true;
+                      break;
+                    } else {
+                      const price = priceStore.calculatePrice(fee);
+                      if (price) {
+                        if (!total) {
+                          total = price;
+                        } else {
+                          total = total.add(price);
+                        }
+                      }
+                    }
+                  }
+
+                  if (hasUnknown || !total) {
+                    return "-";
+                  }
+                  return total.toString();
+                })()}
               </Subtitle3>
             </Stack>
 
