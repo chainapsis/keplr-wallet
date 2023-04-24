@@ -17,16 +17,13 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   const [isOpen, setIsOpen] = React.useState(false);
   const wrapperRef = useRef<HTMLInputElement>(null);
 
-  const callbackRef = useRef(() => setIsOpen(false));
-  callbackRef.current = () => setIsOpen(false);
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         wrapperRef.current &&
         !wrapperRef.current.contains(event.target as Node)
       ) {
-        callbackRef.current();
+        setIsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -34,7 +31,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [wrapperRef]);
+  }, []);
 
   return (
     <Styles.Container ref={wrapperRef}>
