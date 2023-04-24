@@ -6,13 +6,12 @@ import styled from "styled-components";
 import { Stack } from "../../../../components/stack";
 import { useStore } from "../../../../stores";
 import { Column, Columns } from "../../../../components/column";
-import { Dropdown } from "../../../../components/dropdown";
+import { Dropdown, FloatingDropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
 import { ColorPalette } from "../../../../styles";
 import { Body2, H5 } from "../../../../components/typography";
 import { EllipsisIcon } from "../../../../components/icon";
-import { Menu, MenuItem } from "../../../../components/menu";
 import { useNavigate } from "react-router";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useSearchParams } from "react-router-dom";
@@ -105,28 +104,6 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   );
 });
 
-const ItemStyles = {
-  Container: styled.div`
-    padding: 0.75rem 1rem;
-    background-color: ${ColorPalette["gray-600"]};
-    border-radius: 0.375rem;
-  `,
-  IconButton: styled.div`
-    cursor: pointer;
-  `,
-  Menu: styled.ul<{ width: number }>`
-    margin: ${(props) => `0 0 0 -${props.width * 0.8}px`};
-    padding: 0;
-    position: absolute;
-    list-style: none;
-    background-color: ${ColorPalette["gray-400"]};
-    border-radius: 0.5rem;
-  `,
-  MenuItem: styled.li`
-    padding: 0.75rem;
-  `,
-};
-
 const AddressItemView: FunctionComponent<{
   chainId: string;
   name: string;
@@ -142,7 +119,11 @@ const AddressItemView: FunctionComponent<{
   const confirm = useConfirm();
 
   return (
-    <ItemStyles.Container>
+    <Box
+      padding="0.75rem 1rem"
+      backgroundColor={ColorPalette["gray-600"]}
+      borderRadius="0.375rem"
+    >
       <Columns sum={1} alignY="center">
         <Stack gutter="0.25rem">
           <H5 style={{ color: ColorPalette["gray-10"] }}>{name}</H5>
@@ -155,23 +136,22 @@ const AddressItemView: FunctionComponent<{
 
         <Column weight={1} />
 
-        <ItemStyles.IconButton>
-          <Box onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            <EllipsisIcon width="1.25rem" height="1.25rem" />
-          </Box>
-
-          <Menu isOpen={isMenuOpen} setIsOpen={setIsMenuOpen} ratio={1.7}>
-            <MenuItem
-              label="Change Contact Label"
-              onClick={() =>
+        <FloatingDropdown
+          isOpen={isMenuOpen}
+          close={() => setIsMenuOpen(false)}
+          items={[
+            {
+              key: "change-contact-label",
+              label: "Change Contact Label",
+              onSelect: () =>
                 navigate(
                   `/setting/contacts/add?chainId=${chainId}&editIndex=${index}`
-                )
-              }
-            />
-            <MenuItem
-              label="Delete Contact"
-              onClick={async () => {
+                ),
+            },
+            {
+              key: "delete-wallet",
+              label: "Delete Wallet",
+              onSelect: async () => {
                 if (
                   await confirm.confirm(
                     "Delete Address",
@@ -183,11 +163,18 @@ const AddressItemView: FunctionComponent<{
                     index
                   );
                 }
-              }}
-            />
-          </Menu>
-        </ItemStyles.IconButton>
+              },
+            },
+          ]}
+        >
+          <Box
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            style={{ color: ColorPalette["gray-10"] }}
+          >
+            <EllipsisIcon width="1.25rem" height="1.25rem" />
+          </Box>
+        </FloatingDropdown>
       </Columns>
-    </ItemStyles.Container>
+    </Box>
   );
 });
