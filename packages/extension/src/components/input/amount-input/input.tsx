@@ -34,7 +34,7 @@ export const AmountInput: FunctionComponent<{
       }}
       right={
         <IconButton onClick={() => console.log("TODO")}>
-          <ArrowAcrossIcon width="1.75rem" height="1.75rem" />
+          <ArrowAcrossIcon width="1.5rem" height="1.5rem" />
         </IconButton>
       }
       error={(() => {
