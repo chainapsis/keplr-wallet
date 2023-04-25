@@ -24,4 +24,6 @@ export interface ButtonProps {
 
   className?: string;
   style?: CSSProperties;
+
+  isLoading?: boolean;
 }

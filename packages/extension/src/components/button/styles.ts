@@ -25,6 +25,21 @@ export const getButtonHeightRem = (size: ButtonSize | undefined): number => {
   }
 };
 
+export const getLoadingColor = (
+  buttonColor: ButtonColor | undefined
+): string => {
+  switch (buttonColor) {
+    case "primary":
+      return ColorPalette["blue-200"];
+    case "secondary":
+      return ColorPalette["gray-200"];
+    case "danger":
+      return ColorPalette["red-400"];
+    default:
+      return ColorPalette["blue-200"];
+  }
+};
+
 const buttonStyleFromColorAndMode: Record<
   ButtonColor,
   Record<ButtonMode, Record<"enabled" | "disabled", FlattenSimpleInterpolation>>
@@ -195,5 +210,8 @@ export const Styles = {
     display: flex;
     align-items: center;
     margin-left: 0.25rem;
+  `,
+  Loading: styled.div<{ buttonColor: ButtonColor | undefined }>`
+    color: ${({ buttonColor }) => getLoadingColor(buttonColor)};
   `,
 };
