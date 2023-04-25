@@ -11,12 +11,12 @@ export const ProfileIcon: FunctionComponent<IconProps> = ({
       width={width}
       height={height}
       fill="none"
-      viewBox="0 0 28 28"
+      viewBox="0 0 24 24"
     >
       <path
         fill="currentColor"
         fillRule="evenodd"
-        d="M10.25 9a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM7.126 20.754a6.875 6.875 0 0113.748 0 .625.625 0 01-.364.58A15.57 15.57 0 0114 22.75a15.57 15.57 0 01-6.51-1.417.625.625 0 01-.364-.579z"
+        d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.432-.608-7.812-1.7a.75.75 0 01-.437-.695z"
         clipRule="evenodd"
       />
     </svg>
