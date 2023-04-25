@@ -63,46 +63,6 @@ export class SuggestTokenMsg extends Message<void> {
   }
 }
 
-// Return the tx hash
-export class SendTxMsg extends Message<Uint8Array> {
-  public static type() {
-    return "send-tx-to-background";
-  }
-
-  constructor(
-    public readonly chainId: string,
-    public readonly tx: unknown,
-    public readonly mode: "async" | "sync" | "block"
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id is empty");
-    }
-
-    if (!this.tx) {
-      throw new Error("tx is empty");
-    }
-
-    if (
-      !this.mode ||
-      (this.mode !== "sync" && this.mode !== "async" && this.mode !== "block")
-    ) {
-      throw new Error("invalid mode");
-    }
-  }
-
-  route(): string {
-    return "background-tx";
-  }
-
-  type(): string {
-    return SendTxMsg.type();
-  }
-}
-
 export class GetSecret20ViewingKey extends Message<string> {
   public static type() {
     return "get-secret20-viewing-key";

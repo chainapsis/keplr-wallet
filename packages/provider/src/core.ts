@@ -27,7 +27,6 @@ import {
 import {
   SuggestChainInfoMsg,
   SuggestTokenMsg,
-  SendTxMsg,
   GetSecret20ViewingKey,
   GetPubkeyMsg,
   ReqeustEncryptMsg,
@@ -170,8 +169,17 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
-    const msg = new SendTxMsg(chainId, tx, mode);
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "background-tx",
+      "send-tx-to-background",
+      {
+        chainId,
+        tx,
+        mode,
+      }
+    );
   }
 
   async signAmino(

@@ -32,7 +32,8 @@ export class BackgroundTxService {
   async sendTx(
     chainId: string,
     tx: unknown,
-    mode: "async" | "sync" | "block"
+    mode: "async" | "sync" | "block",
+    slient: boolean
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
@@ -89,13 +90,20 @@ export class BackgroundTxService {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
       txTracer.traceTx(txHash).then((tx) => {
         txTracer.close();
-        BackgroundTxService.processTxResultNotification(this.notification, tx);
+        if (!slient) {
+          BackgroundTxService.processTxResultNotification(
+            this.notification,
+            tx
+          );
+        }
       });
 
       return txHash;
     } catch (e) {
       console.log(e);
-      BackgroundTxService.processTxErrorNotification(this.notification, e);
+      if (!slient) {
+        BackgroundTxService.processTxErrorNotification(this.notification, e);
+      }
       throw e;
     }
   }

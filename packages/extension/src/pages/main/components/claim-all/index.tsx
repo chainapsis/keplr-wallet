@@ -16,10 +16,17 @@ import {
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Dec, Int, PricePretty } from "@keplr-wallet/unit";
-import { AminoSignResponse, StdSignDoc } from "@keplr-wallet/types";
+import {
+  AminoSignResponse,
+  BroadcastMode,
+  StdSignDoc,
+} from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { PrivilegeCosmosSignAminoWithdrawRewardsMsg } from "@keplr-wallet/background";
+import {
+  PrivilegeCosmosSignAminoWithdrawRewardsMsg,
+  SendTxMsg,
+} from "@keplr-wallet/background";
 import { action, makeObservable, observable } from "mobx";
 import { Tooltip } from "../../../../components/tooltip";
 
@@ -235,6 +242,18 @@ export const ClaimAll: FunctionComponent = observer(() => {
                       signer,
                       signDoc
                     )
+                  );
+                },
+                sendTx: async (
+                  chainId: string,
+                  tx: Uint8Array,
+                  mode: BroadcastMode
+                ): Promise<Uint8Array> => {
+                  const requester = new InExtensionMessageRequester();
+
+                  return await requester.sendMessage(
+                    BACKGROUND_PORT,
+                    new SendTxMsg(chainId, tx, mode, true)
                   );
                 },
               },

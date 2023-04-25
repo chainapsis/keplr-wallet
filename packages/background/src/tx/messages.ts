@@ -10,7 +10,8 @@ export class SendTxMsg extends Message<Uint8Array> {
   constructor(
     public readonly chainId: string,
     public readonly tx: unknown,
-    public readonly mode: "async" | "sync" | "block"
+    public readonly mode: "async" | "sync" | "block",
+    public readonly silent?: boolean
   ) {
     super();
   }
@@ -33,7 +34,8 @@ export class SendTxMsg extends Message<Uint8Array> {
   }
 
   override approveExternal(): boolean {
-    return true;
+    // Silent mode is only allowed for the internal txs.
+    return !this.silent;
   }
 
   route(): string {
