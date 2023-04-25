@@ -27,3 +27,4 @@ export * from "./setting";
 export * from "./star";
 export * from "./trash";
 export * from "./tree";
+export * from "./warning";

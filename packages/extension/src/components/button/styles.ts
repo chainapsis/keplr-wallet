@@ -212,6 +212,13 @@ export const Styles = {
     margin-left: 0.25rem;
   `,
   Loading: styled.div<{ buttonColor: ButtonColor | undefined }>`
+    position: absolute;
     color: ${({ buttonColor }) => getLoadingColor(buttonColor)};
+  `,
+  TextOverrideIcon: styled.div`
+    position: absolute;
+    svg {
+      fill: none;
+    }
   `,
 };

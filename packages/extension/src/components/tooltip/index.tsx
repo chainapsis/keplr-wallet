@@ -14,7 +14,7 @@ import { autoPlacement, shift } from "@floating-ui/react-dom";
 
 export const Tooltip: FunctionComponent<{
   enabled?: boolean;
-  content: string | React.ReactElement;
+  content?: string | React.ReactElement;
 }> = ({ enabled, content, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -66,7 +66,7 @@ export const Tooltip: FunctionComponent<{
       >
         {children}
       </div>
-      {isOpen && (
+      {(enabled == null || enabled) && content && isOpen && (
         <div
           ref={refs.setFloating}
           style={{

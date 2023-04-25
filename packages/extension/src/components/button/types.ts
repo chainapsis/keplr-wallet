@@ -26,4 +26,5 @@ export interface ButtonProps {
   style?: CSSProperties;
 
   isLoading?: boolean;
+  textOverrideIcon?: React.ReactNode;
 }
