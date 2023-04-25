@@ -4971,10 +4971,10 @@
     hdkey "^2.0.1"
     uuid "^8.3.2"
 
-"@keystonehq/bc-ur-registry-cosmos@^0.1.4":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry-cosmos/-/bc-ur-registry-cosmos-0.1.6.tgz#5da37dae6144796bb02c7f5a8bb033abdbaf58ee"
-  integrity sha512-n/yJLs2oAPT9VTIHhHVbszpUJh7uqI7+CWTOT+RvcbxClqhVOhsb0KKv3qbdR9a6XohpF6+HZbHGaRciWl3ysQ==
+"@keystonehq/bc-ur-registry-cosmos@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry-cosmos/-/bc-ur-registry-cosmos-0.3.0.tgz#9862ed29da840770af8e2467d87de36546dbe362"
+  integrity sha512-NbUFleYPSGDKapIWrh4jGQoSyRRjKUEhr4RSGQhNQI298w7u3UWeOJN4xL+ubNL1WYjdkNnB8rVO/o4dQKrEgg==
   dependencies:
     "@keystonehq/bc-ur-registry" "0.5.4"
     bs58check "^2.1.2"
@@ -5000,16 +5000,16 @@
     hdkey "^2.0.1"
     uuid "^8.3.2"
 
-"@keystonehq/bc-ur-registry-evm@^0.1.1-alpha.0":
-  version "0.1.1-alpha.0"
-  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry-evm/-/bc-ur-registry-evm-0.1.1-alpha.0.tgz#4376cae15a07fb312835cd1f413ec005f5e6625e"
-  integrity sha512-jIl3/qc1ebn2T0guwu6Jp+tI7dMiSKe31x8gNFCwPnLmmQFP9FRD208xK3llDrQ6VW/Fbin7NJrzfjM13XhxDg==
+"@keystonehq/bc-ur-registry-evm@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry-evm/-/bc-ur-registry-evm-0.3.0.tgz#68ae50da1901cc0fa7d10a4e2c7673957f26fb41"
+  integrity sha512-ABT5it1MqEM2bWVZ9gRhivajEjP5ceWbrauFKumnd7sfNAVxhx8sn3sY0WgHkk4GW23B7wI2pTWQHDy4RodHIA==
   dependencies:
     "@keystonehq/bc-ur-registry" "0.5.4"
     bs58check "^2.1.2"
     uuid "^9.0.0"
 
-"@keystonehq/bc-ur-registry@0.5.4":
+"@keystonehq/bc-ur-registry@0.5.4", "@keystonehq/bc-ur-registry@^0.5.0", "@keystonehq/bc-ur-registry@^0.5.0-alpha.5", "@keystonehq/bc-ur-registry@^0.5.4":
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry/-/bc-ur-registry-0.5.4.tgz#5802486a29f5d772520d15579d40fba02860e27f"
   integrity sha512-z7bZe10I5k0zz9znmDTXh+o3Rzb5XsRVpwAzexubOaLxVdZ0F7aMbe2LoEsw766Hpox/7zARi7UGmLz5C8BAzA==
@@ -5027,50 +5027,30 @@
     base58check "^2.0.0"
     tslib "^2.3.0"
 
-"@keystonehq/bc-ur-registry@^0.5.0", "@keystonehq/bc-ur-registry@^0.5.0-alpha.5", "@keystonehq/bc-ur-registry@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@keystonehq/bc-ur-registry/-/bc-ur-registry-0.5.1.tgz#30be92a6148758bc690bbe50fe928d7ffbb8f3f1"
-  integrity sha512-PR7vOhuPBTfCJb5vVoLtTk/JGIFh3U2RbtyArkF3gQmCUYoKCwIo2LARgwJzL+eSPKofqGRQGEGN7yBkQlWIGw==
-  dependencies:
-    "@ngraveio/bc-ur" "^1.1.5"
-    base58check "^2.0.0"
-    tslib "^2.3.0"
-
-"@keystonehq/cosmos-keyring@^0.1.3-alpha.2":
-  version "0.1.3-alpha.2"
-  resolved "https://registry.yarnpkg.com/@keystonehq/cosmos-keyring/-/cosmos-keyring-0.1.3-alpha.2.tgz#70adb50bffde5c0ed917d89de8223ec147943b98"
-  integrity sha512-rR+CzfyKCg+OpcjdeLeLludSQuTYkuKlFcnZHlXJALVT1oxx/bsATkIkiL5dhoX8OIlArjswimekrtPS2k9pyg==
+"@keystonehq/cosmos-keyring@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@keystonehq/cosmos-keyring/-/cosmos-keyring-0.2.0.tgz#0b51fb35eedff43c556663bf5438a420f3c6595d"
+  integrity sha512-dVkyk98Yc9BcSwhq4oyGL6OFxuhNOqUuaxfOwCuU6Zh3gB/dhBiP3lvU5VX3BJ6ePae3vBlb5vQG5EwOMs1KDg==
   dependencies:
     "@keystonehq/bc-ur-registry" "^0.5.0"
-    "@keystonehq/bc-ur-registry-cosmos" "^0.1.4"
-    "@keystonehq/sdk" "^0.15.5"
+    "@keystonehq/bc-ur-registry-cosmos" "^0.3.0"
+    "@keystonehq/sdk" "^0.17.0"
     uuid "^8.3.2"
 
-"@keystonehq/evm-keyring@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@keystonehq/evm-keyring/-/evm-keyring-0.1.1.tgz#41b8ca9bf92d0eaa0afa47456c33bc5e3198226b"
-  integrity sha512-/oOBEd6DYz+GMDhUwuof5AMxVh/BZlViOQ3WEAVBGxnhgfaZRPi9JSxz6ay7zGM6CL384ilVmqfzM6abS4clXA==
+"@keystonehq/evm-keyring@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@keystonehq/evm-keyring/-/evm-keyring-0.3.0.tgz#f4806b6016459cae2e604f116b0ecbcda5030b72"
+  integrity sha512-TKhUt6NxHhmlKnYwbfNnMOzy9+5eGPE41+fhdhIDOdrl9YagSXTNljFYB/SQX8jBOisFJgn5+iLiJXeCgLOFiA==
   dependencies:
     "@keystonehq/bc-ur-registry" "^0.5.0"
-    "@keystonehq/bc-ur-registry-evm" "^0.1.1-alpha.0"
-    "@keystonehq/sdk" "^0.15.6"
+    "@keystonehq/bc-ur-registry-evm" "^0.3.0"
+    "@keystonehq/sdk" "^0.17.0"
     uuid "^9.0.0"
 
-"@keystonehq/sdk@^0.15.5":
-  version "0.15.7"
-  resolved "https://registry.yarnpkg.com/@keystonehq/sdk/-/sdk-0.15.7.tgz#bf33bad9bb6b808cb4297120b6e6d6bd177ad0b6"
-  integrity sha512-jy3DBFaNOgbjAyVG08foM+Si7xItYkLtCi51L1iOyq95IrfhmyxpUWfjFW5K+YznfOT21TwYcJ/uktli6jqOZg==
-  dependencies:
-    "@ngraveio/bc-ur" "^1.0.0"
-    qrcode.react "^1.0.1"
-    react-modal "^3.12.1"
-    react-qr-reader "^2.2.1"
-    rxjs "^6.6.3"
-
-"@keystonehq/sdk@^0.15.6":
-  version "0.15.6"
-  resolved "https://registry.yarnpkg.com/@keystonehq/sdk/-/sdk-0.15.6.tgz#a09952a90b5f1638366c8f3e0ee2315701a17571"
-  integrity sha512-2j6VrDUm8qKHe3OpEnFwoLjwNMxeEWCNpyDUPX1en1RzFz6+EFyCK49HIFYBYeLi9Ikwg/UWyYnEiOijO3Z+zw==
+"@keystonehq/sdk@^0.17.0":
+  version "0.17.0"
+  resolved "https://registry.yarnpkg.com/@keystonehq/sdk/-/sdk-0.17.0.tgz#88b450fbf68045587b05c7ea1cb41788d0e1ac0d"
+  integrity sha512-Igwm7c6OoKFht6vAPWyedgKZQb8AD67ujXyF99Nn32WHgyc9M4d0gT+3is4QxDYYQm6mzdAiZ+PXn+AnAxLQ0g==
   dependencies:
     "@ngraveio/bc-ur" "^1.0.0"
     qrcode.react "^1.0.1"
