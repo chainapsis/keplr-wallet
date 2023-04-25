@@ -36,6 +36,7 @@
     "@keplr-wallet/provider": "0.11.41",
     "@keplr-wallet/router": "0.11.41",
     "@keplr-wallet/router-extension": "0.11.41",
+    "@keplr-wallet/simple-fetch": "0.11.41",
     "@keplr-wallet/stores": "0.11.41",
     "@keplr-wallet/stores-etc": "0.11.41",
     "@keplr-wallet/types": "0.11.41",

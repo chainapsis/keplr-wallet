@@ -29,6 +29,7 @@ import {
 } from "@keplr-wallet/background";
 import { action, makeObservable, observable } from "mobx";
 import { Tooltip } from "../../../../components/tooltip";
+import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 
 const Styles = {
   Container: styled.div`
@@ -268,6 +269,21 @@ export const ClaimAll: FunctionComponent = observer(() => {
               }
             );
           } catch (e) {
+            if (isSimpleFetchError(e) && e.response) {
+              const response = e.response;
+              if (
+                response.status === 400 &&
+                response.data?.message &&
+                typeof response.data.message === "string" &&
+                response.data.message.includes("invalid empty tx")
+              ) {
+                state.setFailedReason(
+                  new Error("cosmos-sdk 버전이 오래되서 지원되지 않음")
+                );
+                return;
+              }
+            }
+
             state.setFailedReason(e);
             console.log(e);
             return;
