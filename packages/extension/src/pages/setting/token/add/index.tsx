@@ -11,6 +11,8 @@ import { Box } from "../../../../components/box";
 import { autorun } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { AppCurrency } from "@keplr-wallet/types";
+import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 const Styles = {
   Container: styled(Stack)`
@@ -20,6 +22,10 @@ const Styles = {
 
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const paramChainId = searchParams.get("chainId");
 
   const supportedChainInfos = useMemo(() => {
     return chainStore.chainInfos.filter((chainInfo) => {
@@ -31,6 +37,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   }, [chainStore.chainInfos]);
 
   const [chainId, setChainId] = useState<string>(() => {
+    if (paramChainId) {
+      return paramChainId;
+    }
+
     if (supportedChainInfos.length > 0) {
       return supportedChainInfos[0].chainId;
     } else {
@@ -107,6 +117,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             }
           })();
           await tokensStore.addToken(chainId, currency);
+          navigate("/");
         }
       }}
     >

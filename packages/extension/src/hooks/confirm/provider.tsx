@@ -109,14 +109,19 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
                 borderRadius="0.5rem"
               >
                 <YAxis>
-                  <Subtitle1
-                    style={{
-                      color: ColorPalette["gray-10"],
-                    }}
-                  >
-                    {confirm.title}
-                  </Subtitle1>
-                  <Gutter size="0.5rem" />
+                  {confirm.title ? (
+                    <React.Fragment>
+                      <Subtitle1
+                        style={{
+                          color: ColorPalette["gray-10"],
+                        }}
+                      >
+                        {confirm.title}
+                      </Subtitle1>
+                      <Gutter size="0.5rem" />
+                    </React.Fragment>
+                  ) : null}
+
                   <Body2
                     style={{
                       color: ColorPalette["gray-200"],

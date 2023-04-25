@@ -13,7 +13,14 @@ import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
 import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { InteractionService } from "../interaction";
-import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
+import {
+  action,
+  autorun,
+  makeObservable,
+  observable,
+  runInAction,
+  toJS,
+} from "mobx";
 import { computedFn } from "mobx-utils";
 import { TokenInfo } from "./types";
 import { Buffer } from "buffer/";
@@ -289,13 +296,16 @@ export class TokenCW20Service {
     });
   }
 
+  @action
   removeToken(
     chainId: string,
     contractAddress: string,
     // Should be hex encoded. (not bech32)
     associatedAccountAddress: string
   ) {
-    this.validateAssociatedAccountAddress(associatedAccountAddress);
+    // 얘는 associatedAccountAddress가 empty string이더라도 허용된다.
+    // tokenInfo 안에 contract address와 associatedAccountAddress가 존재하므로
+    // 프론트에서 계정 초기화없이 token info만 보고 remove를 가능하게 하도록 하기 위함임.
 
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
     const tokens = this.tokenMap.get(chainIdentifier);
@@ -316,11 +326,9 @@ export class TokenCW20Service {
       return false;
     });
 
-    runInAction(() => {
-      if (findIndex >= 0) {
-        tokens.splice(findIndex, 1);
-      }
-    });
+    if (findIndex >= 0) {
+      tokens.splice(findIndex, 1);
+    }
   }
 
   getSecret20ViewingKey(

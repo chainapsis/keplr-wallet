@@ -146,7 +146,30 @@ export class TokensStore {
   }
 
   getTokens(chainId: string): ReadonlyArray<TokenInfo> {
-    return this.tokenMap.get(ChainIdHelper.parse(chainId).identifier) ?? [];
+    const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
+    const chainInfo = this.chainStore.getChain(chainId);
+    const associatedAccountAddress = bech32Address
+      ? Buffer.from(
+          Bech32Address.fromBech32(
+            bech32Address,
+            chainInfo.bech32Config.bech32PrefixAccAddr
+          ).address
+        ).toString("hex")
+      : "";
+
+    const tokens =
+      this.tokenMap.get(ChainIdHelper.parse(chainId).identifier) ?? [];
+
+    return tokens.filter((token) => {
+      if (
+        token.associatedAccountAddress &&
+        token.associatedAccountAddress !== associatedAccountAddress
+      ) {
+        return false;
+      }
+
+      return true;
+    });
   }
 
   async addToken(chainId: string, currency: AppCurrency): Promise<void> {
@@ -175,26 +198,26 @@ export class TokensStore {
     });
   }
 
-  async removeToken(chainId: string, contractAddress: string): Promise<void> {
-    const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
-    if (!bech32Address) {
-      throw new Error("Account not initialized");
-    }
-    const chainInfo = this.chainStore.getChain(chainId);
-    const associatedAccountAddress = Buffer.from(
-      Bech32Address.fromBech32(
-        bech32Address,
-        chainInfo.bech32Config.bech32PrefixAccAddr
-      ).address
-    ).toString("hex");
+  async removeToken(chainId: string, tokenInfo: TokenInfo): Promise<void> {
+    const contractAddress = (() => {
+      if ("contractAddress" in tokenInfo.currency) {
+        return tokenInfo.currency.contractAddress;
+      }
+
+      throw new Error("Token info is not for contract");
+    })();
 
     const msg = new RemoveTokenMsg(
       chainId,
-      associatedAccountAddress,
+      tokenInfo.associatedAccountAddress ?? "",
       contractAddress
     );
     const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
     runInAction(() => {
+      // Remove 이후에는 지워진 토큰에 대한 싱크를 맞추기 위해서 clearTokensFromChainInfos를 호출한다.
+      // 그냥 다 지우고 다시 다 설정하는 방식임.
+      this.clearTokensFromChainInfos();
+
       const map = new Map<string, TokenInfo[]>();
       for (const [key, value] of Object.entries(res)) {
         if (value) {
