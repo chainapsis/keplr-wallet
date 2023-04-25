@@ -8,7 +8,11 @@ import { Body2, Subtitle2, Subtitle3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { ViewToken } from "../../index";
 import styled from "styled-components";
-import { ArrowDownIcon, ArrowUpIcon } from "../../../../components/icon";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  WarningIcon,
+} from "../../../../components/icon";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Dec, Int, PricePretty } from "@keplr-wallet/unit";
@@ -17,6 +21,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { PrivilegeCosmosSignAminoWithdrawRewardsMsg } from "@keplr-wallet/background";
 import { action, makeObservable, observable } from "mobx";
+import { Tooltip } from "../../../../components/tooltip";
 
 const Styles = {
   Container: styled.div`
@@ -333,6 +338,10 @@ const ClaimTokenItem: FunctionComponent<{
   const defaultGasPerDelegation = 140000;
 
   const claim = async () => {
+    if (state.failedReason) {
+      state.setFailedReason(undefined);
+      return;
+    }
     const chainId = viewToken.chainInfo.chainId;
     const account = accountStore.getAccount(chainId);
 
@@ -410,18 +419,31 @@ const ClaimTokenItem: FunctionComponent<{
           </Stack>
         </Column>
 
-        <Button
-          text={isLoading ? "Loading" : "Claim"}
-          size="small"
-          color="secondary"
-          disabled={viewToken.token.toDec().lte(new Dec(0))}
-          onClick={claim}
-        />
+        <Tooltip
+          enabled={!!state.failedReason}
+          content={
+            state.failedReason?.message || state.failedReason?.toString()
+          }
+        >
+          <Button
+            text="Claim"
+            size="small"
+            color="secondary"
+            isLoading={isLoading}
+            disabled={viewToken.token.toDec().lte(new Dec(0))}
+            textOverrideIcon={
+              state.failedReason ? (
+                <WarningIcon
+                  width="1rem"
+                  height="1rem"
+                  color={ColorPalette["gray-200"]}
+                />
+              ) : undefined
+            }
+            onClick={claim}
+          />
+        </Tooltip>
       </Columns>
-
-      {state.failedReason ? (
-        <div>{state.failedReason.message || state.failedReason.toString()}</div>
-      ) : null}
     </Box>
   );
 });

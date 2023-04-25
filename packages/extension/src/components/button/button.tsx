@@ -2,6 +2,7 @@ import React, { FunctionComponent } from "react";
 import { ButtonProps } from "./types";
 import { Styles } from "./styles";
 import { LoadingIcon } from "../icon";
+import { Box } from "../box";
 
 export const Button: FunctionComponent<ButtonProps> = ({
   onClick,
@@ -10,6 +11,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
   text,
   right,
   isLoading,
+  textOverrideIcon,
   ...otherProps
 }) => {
   return (
@@ -24,7 +26,9 @@ export const Button: FunctionComponent<ButtonProps> = ({
           if (onClick) {
             e.preventDefault();
 
-            onClick();
+            if (!isLoading) {
+              onClick();
+            }
           }
         }}
       >
@@ -32,9 +36,15 @@ export const Button: FunctionComponent<ButtonProps> = ({
           <Styles.Loading buttonColor={otherProps.color}>
             <LoadingIcon width="1rem" height="1rem" />
           </Styles.Loading>
-        ) : (
-          text
-        )}
+        ) : null}
+
+        {!isLoading && textOverrideIcon ? (
+          <Styles.TextOverrideIcon>{textOverrideIcon}</Styles.TextOverrideIcon>
+        ) : null}
+
+        <Box style={{ opacity: isLoading || textOverrideIcon ? 0 : 1 }}>
+          {text}
+        </Box>
 
         {right ? <Styles.Right>{right}</Styles.Right> : null}
       </Styles.Button>
