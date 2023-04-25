@@ -24,6 +24,7 @@ import { ConnectLedgerScene } from "./connect-ledger";
 import { RegisterNamePasswordHardwareScene } from "./name-password-hardware";
 import { FinalizeKeyScene } from "./finalize-key";
 import { EnableChainsScene } from "./enable-chains";
+import { SelectDerivationPathScene } from "./select-derivation-path";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -112,6 +113,11 @@ export const RegisterPage: FunctionComponent = observer(() => {
                 name: "enable-chains",
                 element: EnableChainsScene,
                 width: "34.5rem",
+              },
+              {
+                name: "select-derivation-path",
+                element: SelectDerivationPathScene,
+                width: "40rem",
               },
             ]}
             initialSceneProps={{
