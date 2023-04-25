@@ -2321,6 +2321,48 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-kyve.keplr.app",
+    rest: "https://lcd-kyve.keplr.app",
+    chainId: "kyve-1",
+    chainName: "KYVE",
+    stakeCurrency: {
+      coinDenom: "KYVE",
+      coinMinimalDenom: "ukyve",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "kyve",
+      bech32PrefixAccPub: "kyvepub",
+      bech32PrefixValAddr: "kyvevaloper",
+      bech32PrefixValPub: "kyvevaloperpub",
+      bech32PrefixConsAddr: "kyvevalcons",
+      bech32PrefixConsPub: "kyvevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "KYVE",
+        coinMinimalDenom: "ukyve",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "KYVE",
+        coinMinimalDenom: "ukyve",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.02,
+          average: 0.03,
+          high: 0.06,
+        },
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
