@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { ButtonProps } from "./types";
 import { Styles } from "./styles";
+import { LoadingIcon } from "../icon";
 
 export const Button: FunctionComponent<ButtonProps> = ({
   onClick,
@@ -8,6 +9,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
   className,
   text,
   right,
+  isLoading,
   ...otherProps
 }) => {
   return (
@@ -26,7 +28,14 @@ export const Button: FunctionComponent<ButtonProps> = ({
           }
         }}
       >
-        {text}
+        {isLoading ? (
+          <Styles.Loading buttonColor={otherProps.color}>
+            <LoadingIcon width="1rem" height="1rem" />
+          </Styles.Loading>
+        ) : (
+          text
+        )}
+
         {right ? <Styles.Right>{right}</Styles.Right> : null}
       </Styles.Button>
     </Styles.Container>

@@ -4,6 +4,8 @@ import { Styles } from "./styles";
 import { Column, Columns } from "../../column";
 import { Box } from "../../box";
 import { VerticalResizeTransition } from "../../transition";
+import { LoadingIcon } from "../../icon";
+import { ColorPalette } from "../../../styles";
 
 // eslint-disable-next-line react/display-name
 export const TextInput = forwardRef<
@@ -20,6 +22,7 @@ export const TextInput = forwardRef<
       rightLabel,
       left,
       right,
+      isLoading,
       ...props
     },
     ref
@@ -27,7 +30,18 @@ export const TextInput = forwardRef<
     return (
       <Styles.Container className={className} style={style}>
         <Columns sum={1} alignY="center">
-          {label ? <Styles.Label>{label}</Styles.Label> : null}
+          {label ? (
+            <Columns sum={1} gutter="0.25rem">
+              <Styles.Label>{label}</Styles.Label>
+              {isLoading ? (
+                <LoadingIcon
+                  width="1rem"
+                  height="1rem"
+                  color={ColorPalette["gray-300"]}
+                />
+              ) : null}
+            </Columns>
+          ) : null}
           <Column weight={1} />
           {rightLabel ? <Box>{rightLabel}</Box> : null}
         </Columns>

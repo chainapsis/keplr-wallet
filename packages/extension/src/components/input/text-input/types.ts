@@ -7,6 +7,7 @@ export interface TextInputProps {
   paragraph?: string;
   error?: string;
   errorBorder?: boolean;
+  isLoading?: boolean;
 
   className?: string;
 
