@@ -14,6 +14,7 @@ export * from "./copy-outline";
 export * from "./ellipsis";
 export * from "./information";
 export * from "./key";
+export * from "./loading";
 export * from "./menu";
 export * from "./plus";
 export * from "./profile";
