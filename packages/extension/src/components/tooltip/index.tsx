@@ -77,6 +77,8 @@ export const Tooltip: FunctionComponent<{
             backgroundColor: ColorPalette["gray-400"],
             padding: "0.625rem",
             borderRadius: "0.375rem",
+
+            zIndex: 9999999,
           }}
           {...getFloatingProps()}
         >
