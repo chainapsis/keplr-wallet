@@ -18,15 +18,21 @@ const defaultOptions: DefaultOptions = {
 };
 // export const MESSAGING_SERVER =
 //   "https://messaging-server.sandbox-london-b.fetch-ai.com/graphql";
-export const MESSAGING_SERVER = "https://messaging.fetch-ai.network/graphql";
+// export const MESSAGING_SERVER = "https://messaging.fetch-ai.network/graphql";
 // export const MESSAGING_SERVER = "http://localhost:4000/graphql";
-const client = new ApolloClient({
-  uri: MESSAGING_SERVER,
-  cache: new InMemoryCache(),
-  defaultOptions,
-});
+
+const inMemCache = new InMemoryCache();
+
+const getClient = (memorandumUrl: string) => {
+  return new ApolloClient({
+    uri: memorandumUrl,
+    cache: inMemCache,
+    defaultOptions,
+  });
+};
 
 export const registerPubKey = async (
+  memorandumURl: string,
   accessToken: string,
   messagingPubKey: string,
   walletAddress: string,
@@ -39,6 +45,7 @@ export const registerPubKey = async (
   signedObjBase64?: string
 ): Promise<void> => {
   try {
+    const client = getClient(memorandumURl);
     await client.mutate({
       mutation: gql(`mutation Mutation($publicKeyDetails: InputPublicKey!) {
         updatePublicKey(publicKeyDetails: $publicKeyDetails) {
@@ -73,12 +80,14 @@ export const registerPubKey = async (
 };
 
 export const getPubKey = async (
+  memorandumURl: string,
   accessToken: string,
   targetAddress: string,
   channelId: string,
   chainId: string
 ): Promise<PubKey> => {
   try {
+    const client = getClient(memorandumURl);
     const { data } = await client.query({
       query: gql(`query Query($address: String!, $chainId: String!  $channelId: ChannelId!) {
         publicKey(address: $address, chainId: $chainId, channelId: $channelId) {

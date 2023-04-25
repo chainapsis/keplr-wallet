@@ -15,6 +15,7 @@ import { PageButton } from "../../page-button";
 import { useStore } from "../../../../stores";
 import style from "./style.module.scss";
 import amplitude from "amplitude-js";
+import { GRAPHQL_URL } from "../../../../config.ui.var";
 
 export const ReadRecipt: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -45,6 +46,7 @@ export const ReadRecipt: FunctionComponent = observer(() => {
       const messagingPubKey = await requester.sendMessage(
         BACKGROUND_PORT,
         new RegisterPublicKey(
+          GRAPHQL_URL.MESSAGING_SERVER,
           chainStore.current.chainId,
           userState.accessToken,
           walletAddress,

@@ -7,6 +7,7 @@ import {
   SignMessagingPayload,
 } from "@keplr-wallet/background/build/messaging";
 import { MESSAGE_CHANNEL_ID } from "@keplr-wallet/background/build/messaging/constants";
+import { GRAPHQL_URL } from "../config.ui.var";
 
 export interface MessageEnvelope {
   data: string; // base64 encoded
@@ -70,12 +71,22 @@ export async function encryptToEnvelope(
   // lookup both our (sender) and target public keys
   const senderPublicKey = await requester.sendMessage(
     BACKGROUND_PORT,
-    new GetMessagingPublicKey(chainId, accessToken, senderAddress)
+    new GetMessagingPublicKey(
+      GRAPHQL_URL.MESSAGING_SERVER,
+      chainId,
+      accessToken,
+      senderAddress
+    )
   );
 
   const targetPublicKey = await requester.sendMessage(
     BACKGROUND_PORT,
-    new GetMessagingPublicKey(chainId, accessToken, targetAddress)
+    new GetMessagingPublicKey(
+      GRAPHQL_URL.MESSAGING_SERVER,
+      chainId,
+      accessToken,
+      targetAddress
+    )
   );
 
   if (!senderPublicKey.publicKey || !targetPublicKey.publicKey) {
@@ -99,6 +110,7 @@ export async function encryptToEnvelope(
   const senderCipher = await requester.sendMessage(
     BACKGROUND_PORT,
     new EncryptMessagingMessage(
+      GRAPHQL_URL.MESSAGING_SERVER,
       chainId,
       senderAddress,
       toBase64(toUtf8(JSON.stringify(message))),
@@ -110,6 +122,7 @@ export async function encryptToEnvelope(
   const targetCipher = await requester.sendMessage(
     BACKGROUND_PORT,
     new EncryptMessagingMessage(
+      GRAPHQL_URL.MESSAGING_SERVER,
       chainId,
       targetAddress,
       toBase64(toUtf8(JSON.stringify(message))),

@@ -31,6 +31,7 @@ export class MessagingService {
    */
   public async getPublicKey(
     env: Env,
+    memorandumUrl: string,
     chainId: string,
     targetAddress: string | null,
     accessToken: string
@@ -44,7 +45,12 @@ export class MessagingService {
         chatReadReceiptSetting: true,
       };
     } else {
-      return await this.lookupPublicKey(accessToken, targetAddress, chainId);
+      return await this.lookupPublicKey(
+        memorandumUrl,
+        accessToken,
+        targetAddress,
+        chainId
+      );
     }
   }
 
@@ -59,6 +65,7 @@ export class MessagingService {
    */
   public async registerPublicKey(
     env: Env,
+    memorandumUrl: string,
     chainId: string,
     address: string,
     accessToken: string,
@@ -69,7 +76,12 @@ export class MessagingService {
     const privateKey = new PrivateKey(Buffer.from(sk));
     const pubKey = toHex(privateKey.publicKey.compressed);
 
-    const regPubKey = await this.lookupPublicKey(accessToken, address, chainId);
+    const regPubKey = await this.lookupPublicKey(
+      memorandumUrl,
+      accessToken,
+      address,
+      chainId
+    );
     if (
       !regPubKey.privacySetting ||
       !regPubKey.publicKey ||
@@ -117,6 +129,7 @@ export class MessagingService {
       }
 
       await registerPubKey(
+        memorandumUrl,
         accessToken,
         pubKey,
         address,
@@ -177,6 +190,7 @@ export class MessagingService {
    */
   async encryptMessage(
     _env: Env,
+    memorandumUrl: string,
     _chainId: string,
     targetAddress: string,
     message: string,
@@ -185,6 +199,7 @@ export class MessagingService {
     const rawMessage = Buffer.from(fromBase64(message));
 
     const targetPublicKey = await this.lookupPublicKey(
+      memorandumUrl,
       accessToken,
       targetAddress,
       _chainId
@@ -231,6 +246,7 @@ export class MessagingService {
    * @protected
    */
   protected async lookupPublicKey(
+    memorandumUrl: string,
     accessToken: string,
     targetAddress: string,
     chainId: string
@@ -247,6 +263,7 @@ export class MessagingService {
     // Step 2. Cache miss, fetch the public key from the memorandum service and
     //         update the cache
     targetPublicKey = await getPubKey(
+      memorandumUrl,
       accessToken,
       targetAddress,
       MESSAGE_CHANNEL_ID,

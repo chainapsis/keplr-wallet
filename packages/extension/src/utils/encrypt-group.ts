@@ -11,6 +11,7 @@ import {
   decryptEncryptedSymmetricKey,
   encryptGroupData,
 } from "./symmetric-key";
+import { GRAPHQL_URL } from "../config.ui.var";
 
 export interface GroupTimestampUpdateEnvelope {
   data: string; // base64 encoded
@@ -78,12 +79,22 @@ export async function encryptGroupTimestampToEnvelope(
   // lookup both our (sender) and target public keys
   const senderPublicKey = await requester.sendMessage(
     BACKGROUND_PORT,
-    new GetMessagingPublicKey(chainId, accessToken, senderAddress)
+    new GetMessagingPublicKey(
+      GRAPHQL_URL.MESSAGING_SERVER,
+      chainId,
+      accessToken,
+      senderAddress
+    )
   );
 
   const targetPublicKey = await requester.sendMessage(
     BACKGROUND_PORT,
-    new GetMessagingPublicKey(chainId, accessToken, targetAddress)
+    new GetMessagingPublicKey(
+      GRAPHQL_URL.MESSAGING_SERVER,
+      chainId,
+      accessToken,
+      targetAddress
+    )
   );
 
   if (!senderPublicKey.publicKey || !targetPublicKey.publicKey) {
@@ -100,6 +111,7 @@ export async function encryptGroupTimestampToEnvelope(
   const senderCipher = await requester.sendMessage(
     BACKGROUND_PORT,
     new EncryptMessagingMessage(
+      GRAPHQL_URL.MESSAGING_SERVER,
       chainId,
       senderAddress,
       toBase64(toUtf8(JSON.stringify(message))),
@@ -111,6 +123,7 @@ export async function encryptGroupTimestampToEnvelope(
   const targetCipher = await requester.sendMessage(
     BACKGROUND_PORT,
     new EncryptMessagingMessage(
+      GRAPHQL_URL.MESSAGING_SERVER,
       chainId,
       targetAddress,
       toBase64(toUtf8(JSON.stringify(message))),
@@ -175,7 +188,12 @@ export async function encryptGroupMessageToEnvelope(
   // lookup both our (sender) and target public keys
   const senderPublicKey = await requester.sendMessage(
     BACKGROUND_PORT,
-    new GetMessagingPublicKey(chainId, accessToken, senderAddress)
+    new GetMessagingPublicKey(
+      GRAPHQL_URL.MESSAGING_SERVER,
+      chainId,
+      accessToken,
+      senderAddress
+    )
   );
 
   if (!senderPublicKey.publicKey) {

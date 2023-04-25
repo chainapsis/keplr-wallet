@@ -5,6 +5,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import crypto from "crypto";
 import { GroupMembers } from "@chatTypes";
 import { decryptMessageContent } from "./decrypt-message";
+import { GRAPHQL_URL } from "../config.ui.var";
 
 function generateSymmetricKey() {
   const secret = "fetchwallet";
@@ -34,6 +35,7 @@ export async function encryptSymmetricKey(
 ) {
   const requester = new InExtensionMessageRequester();
   const encryptMsg = new EncryptMessagingMessage(
+    GRAPHQL_URL.MESSAGING_SERVER,
     chainId,
     address,
     toBase64(toUtf8(JSON.stringify(symmetricKey))),

@@ -49,6 +49,7 @@ const handleGetMessagingPublicKey: (
   return async (env, msg) => {
     const pubKey = await service.getPublicKey(
       env,
+      msg.memorendumUrl,
       msg.chainId,
       msg.targetAddress,
       msg.accessToken
@@ -63,6 +64,7 @@ const handleRegisterPublicKey: (
   return async (env, msg) => {
     return await service.registerPublicKey(
       env,
+      msg.memorendumUrl,
       msg.chainId,
       msg.address,
       msg.accessToken,
@@ -80,6 +82,7 @@ const handleEncryptMessagingMessage: (
 
     return await service.encryptMessage(
       env,
+      msg.memorendumUrl,
       msg.chainId,
       msg.targetAddress,
       msg.message,

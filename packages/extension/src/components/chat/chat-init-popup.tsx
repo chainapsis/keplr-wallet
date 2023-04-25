@@ -15,6 +15,7 @@ import {
 import privacyIcon from "@assets/hello.png";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
+import { GRAPHQL_URL } from "../../config.ui.var";
 
 export const ChatInitPopup = ({
   openDialog,
@@ -52,6 +53,7 @@ export const ChatInitPopup = ({
       const messagingPubKey = await requester.sendMessage(
         BACKGROUND_PORT,
         new RegisterPublicKey(
+          GRAPHQL_URL.MESSAGING_SERVER,
           current.chainId,
           userState.accessToken,
           walletAddress,

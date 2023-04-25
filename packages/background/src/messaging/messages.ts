@@ -8,6 +8,7 @@ export class GetMessagingPublicKey extends Message<PubKey> {
   }
 
   constructor(
+    public readonly memorendumUrl: string,
     public readonly chainId: string,
     public readonly accessToken: string,
     public readonly targetAddress: string | null
@@ -36,6 +37,7 @@ export class RegisterPublicKey extends Message<PubKey> {
   }
 
   constructor(
+    public readonly memorendumUrl: string,
     public readonly chainId: string,
     public readonly accessToken: string,
     public readonly address: string,
@@ -66,6 +68,7 @@ export class EncryptMessagingMessage extends Message<string> {
   }
 
   constructor(
+    public readonly memorendumUrl: string,
     public readonly chainId: string,
     public readonly targetAddress: string,
     public readonly message: string,

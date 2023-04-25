@@ -10,6 +10,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
 import { toBase64, Bech32, fromHex } from "@cosmjs/encoding";
 import { serializeSignDoc } from "@cosmjs/launchpad";
+import { GRAPHQL_URL } from "../config.ui.var";
 
 declare let window: Window;
 
@@ -86,7 +87,7 @@ export const getJWT = async (chainId: string, url: string) => {
 
   const pubKey = await requester.sendMessage(
     BACKGROUND_PORT,
-    new GetMessagingPublicKey(chainId, "", null)
+    new GetMessagingPublicKey(GRAPHQL_URL.MESSAGING_SERVER, chainId, "", null)
   );
 
   if (!pubKey.publicKey) throw new Error("public key not found");
