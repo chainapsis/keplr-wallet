@@ -230,7 +230,23 @@ export const ChainAddressItem: FunctionComponent<{
   const [hasCopied, setHasCopied] = useState(false);
 
   return (
-    <Styles.ItemContainer>
+    <Styles.ItemContainer
+      style={{
+        cursor: blockInteraction ? "auto" : "pointer",
+      }}
+      onClick={async (e) => {
+        e.preventDefault();
+
+        if (blockInteraction) {
+          return;
+        }
+
+        await navigator.clipboard.writeText(bech32Address);
+        setHasCopied(true);
+
+        afterCopied();
+      }}
+    >
       <Columns sum={1} alignY="center" gutter="0.5rem">
         <Box
           cursor={blockInteraction ? undefined : "pointer"}
@@ -241,6 +257,8 @@ export const ChainAddressItem: FunctionComponent<{
           }}
           onClick={(e) => {
             e.preventDefault();
+            // 컨테이너로의 전파를 막아야함
+            e.stopPropagation();
 
             if (blockInteraction) {
               return;
@@ -275,22 +293,9 @@ export const ChainAddressItem: FunctionComponent<{
         {/* TODO: Copy 버튼이 눌린 직후의 action을 어케할지 아직 안 정해짐 */}
         <Styles.TextButton
           style={{
-            cursor: blockInteraction ? "auto" : "pointer",
             color: hasCopied
               ? ColorPalette["green-400"]
               : ColorPalette["gray-10"],
-          }}
-          onClick={async (e) => {
-            e.preventDefault();
-
-            if (blockInteraction) {
-              return;
-            }
-
-            await navigator.clipboard.writeText(bech32Address);
-            setHasCopied(true);
-
-            afterCopied();
           }}
         >
           {hasCopied ? "Copied" : "Copy"}
