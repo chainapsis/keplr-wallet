@@ -37,11 +37,13 @@ export class BackgroundTxService {
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
-    this.notification.create({
-      iconRelativeUrl: "assets/logo-256.png",
-      title: "Tx is pending...",
-      message: "Wait a second",
-    });
+    if (!slient) {
+      this.notification.create({
+        iconRelativeUrl: "assets/logo-256.png",
+        title: "Tx is pending...",
+        message: "Wait a second",
+      });
+    }
 
     const isProtoTx = Buffer.isBuffer(tx) || tx instanceof Uint8Array;
 
