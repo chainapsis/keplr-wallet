@@ -1,136 +1,216 @@
-import { HasMapStore } from "../common";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   AddTokenMsg,
-  GetTokensMsg,
+  GetAllTokenInfosMsg,
   RemoveTokenMsg,
   SuggestTokenMsg,
+  TokenInfo,
 } from "@keplr-wallet/background";
-import { autorun, flow, makeObservable, observable } from "mobx";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import { DeepReadonly } from "utility-types";
-import { ChainStore } from "../chain";
+import {
+  action,
+  autorun,
+  flow,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
+import { AppCurrency } from "@keplr-wallet/types";
+import { IChainStore } from "../chain";
 import { InteractionStore } from "./interaction";
-import { toGenerator } from "@keplr-wallet/common";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Buffer } from "buffer/";
+import { IAccountStore } from "../account";
 
-export class TokensStoreInner {
+export class TokensStore {
+  @observable
+  protected _isInitialized: boolean = false;
+
   @observable.ref
-  protected _tokens: AppCurrency[] = [];
+  protected tokenMap: ReadonlyMap<string, ReadonlyArray<TokenInfo>> = new Map();
+  // No need to be observable.
+  protected prevTokenMap: ReadonlyMap<string, ReadonlyArray<TokenInfo>> =
+    new Map();
 
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly chainStore: ChainStore,
-    protected readonly chainId: string,
-    protected readonly requester: MessageRequester
+    protected readonly requester: MessageRequester,
+    protected readonly chainStore: IChainStore,
+    protected readonly accountStore: IAccountStore,
+    protected readonly interactionStore: InteractionStore
   ) {
     makeObservable(this);
 
-    this.refreshTokens();
+    this.init();
+  }
 
-    // If key store in the keplr extension is unlocked, this event will be dispatched.
-    // This is needed becuase the token such as secret20 exists according to the account.
-    this.eventListener.addEventListener("keplr_keystoreunlock", () => {
-      this.refreshTokens();
-    });
+  async init(): Promise<void> {
+    await this.refreshTokens();
 
     // If key store in the keplr extension is changed, this event will be dispatched.
     // This is needed becuase the token such as secret20 exists according to the account.
     this.eventListener.addEventListener("keplr_keystorechange", () => {
+      this.clearTokensFromChainInfos();
       this.refreshTokens();
+    });
+
+    autorun(() => {
+      // Account가 변경되었을때, 체인 정보가 변경되었을때 등에 반응해야하기 때문에 autorun 안에 넣는다.
+      this.updateChainInfos();
+    });
+
+    runInAction(() => {
+      this._isInitialized = true;
     });
   }
 
-  get tokens(): DeepReadonly<AppCurrency[]> {
-    return this._tokens;
+  protected async refreshTokens() {
+    const msg = new GetAllTokenInfosMsg();
+    const tokens = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    runInAction(() => {
+      const map = new Map<string, TokenInfo[]>();
+      for (const [key, value] of Object.entries(tokens)) {
+        if (value) {
+          map.set(key, value);
+        }
+      }
+      this.tokenMap = map;
+    });
   }
 
-  @flow
-  *refreshTokens() {
-    const chainInfo = this.chainStore.getChain(this.chainId);
+  @action
+  protected clearTokensFromChainInfos() {
+    const chainInfos = this.chainStore.chainInfos;
+    for (const chainInfo of chainInfos) {
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
 
-    if (
-      chainInfo.features &&
-      // Tokens service is only needed for secretwasm and cosmwasm,
-      // so, there is no need to fetch the registered token if the chain doesn't support the secretwasm and cosmwasm.
-      (chainInfo.features.includes("secretwasm") ||
-        chainInfo.features.includes("cosmwasm"))
-    ) {
-      const msg = new GetTokensMsg(this.chainId);
-      this._tokens = yield* toGenerator(
-        this.requester.sendMessage(BACKGROUND_PORT, msg)
+      // Tokens should be changed whenever the account changed.
+      // But, the added currencies are not removed automatically.
+      // So, we should remove the prev token currencies from the chain info.
+      const prevTokens =
+        this.prevTokenMap.get(chainIdentifier.identifier) ?? [];
+      chainInfo.removeCurrencies(
+        ...prevTokens.map((token) => token.currency.coinMinimalDenom)
       );
-    } else {
-      this._tokens = [];
     }
   }
 
-  @flow
-  *addToken(currency: AppCurrency) {
-    const msg = new AddTokenMsg(this.chainId, currency);
-    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
-    yield this.refreshTokens();
-  }
+  @action
+  protected updateChainInfos() {
+    const chainInfos = this.chainStore.chainInfos;
+    for (const chainInfo of chainInfos) {
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
 
-  @flow
-  *removeToken(currency: AppCurrency) {
-    const msg = new RemoveTokenMsg(this.chainId, currency);
-    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
-    yield this.refreshTokens();
-  }
-}
+      const tokens = this.tokenMap.get(chainIdentifier.identifier) ?? [];
 
-export class TokensStore<
-  C extends ChainInfo = ChainInfo
-> extends HasMapStore<TokensStoreInner> {
-  protected prevTokens: Map<string, AppCurrency[]> = new Map();
+      const adds: AppCurrency[] = [];
 
-  constructor(
-    protected readonly eventListener: {
-      addEventListener: (type: string, fn: () => unknown) => void;
-    },
-    protected readonly chainStore: ChainStore<C>,
-    protected readonly requester: MessageRequester,
-    protected readonly interactionStore: InteractionStore
-  ) {
-    super((chainId: string) => {
-      return new TokensStoreInner(
-        this.eventListener,
-        this.chainStore,
-        chainId,
-        this.requester
-      );
-    });
-    makeObservable(this);
-
-    autorun(() => {
-      const chainInfos = this.chainStore.chainInfos;
-      for (const chainInfo of chainInfos) {
-        const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
-
-        // Tokens should be changed whenever the account changed.
-        // But, the added currencies are not removed automatically.
-        // So, we should remove the prev token currencies from the chain info.
-        const prevToken = this.prevTokens.get(chainIdentifier.identifier) ?? [];
-        chainInfo.removeCurrencies(
-          ...prevToken.map((token) => token.coinMinimalDenom)
-        );
-
-        const inner = this.getTokensOf(chainInfo.chainId);
-        chainInfo.addCurrencies(...inner.tokens);
-
-        this.prevTokens.set(
-          chainIdentifier.identifier,
-          inner.tokens as AppCurrency[]
-        );
+      for (const token of tokens) {
+        if (!token.associatedAccountAddress) {
+          adds.push(token.currency);
+        } else if (
+          this.accountStore.getAccount(chainInfo.chainId).bech32Address ===
+          token.associatedAccountAddress
+        ) {
+          adds.push(token.currency);
+        }
       }
+
+      chainInfo.addCurrencies(...adds);
+    }
+
+    this.prevTokenMap = this.tokenMap;
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
+
+  async waitUntilInitialized(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    return new Promise((resolve) => {
+      const disposal = autorun(() => {
+        if (this.isInitialized) {
+          resolve();
+
+          if (disposal) {
+            disposal();
+          }
+        }
+      });
     });
   }
 
-  getTokensOf(chainId: string) {
-    return this.get(ChainIdHelper.parse(chainId).identifier);
+  getTokens(chainId: string): ReadonlyArray<TokenInfo> {
+    return this.tokenMap.get(ChainIdHelper.parse(chainId).identifier) ?? [];
+  }
+
+  async addToken(
+    chainId: string,
+    accountBech32Address: string,
+    currency: AppCurrency
+  ): Promise<void> {
+    const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
+    if (!bech32Address) {
+      throw new Error("Account not initialized");
+    }
+    const chainInfo = this.chainStore.getChain(chainId);
+    const associatedAccountAddress = Buffer.from(
+      Bech32Address.fromBech32(
+        accountBech32Address,
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      ).address
+    ).toString("hex");
+
+    const msg = new AddTokenMsg(chainId, associatedAccountAddress, currency);
+    const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    runInAction(() => {
+      const map = new Map<string, TokenInfo[]>();
+      for (const [key, value] of Object.entries(res)) {
+        if (value) {
+          map.set(key, value);
+        }
+      }
+      this.tokenMap = map;
+    });
+  }
+
+  async removeToken(
+    chainId: string,
+    accountBech32Address: string,
+    contractAddress: string
+  ): Promise<void> {
+    const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
+    if (!bech32Address) {
+      throw new Error("Account not initialized");
+    }
+    const chainInfo = this.chainStore.getChain(chainId);
+    const associatedAccountAddress = Buffer.from(
+      Bech32Address.fromBech32(
+        accountBech32Address,
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      ).address
+    ).toString("hex");
+
+    const msg = new RemoveTokenMsg(
+      chainId,
+      associatedAccountAddress,
+      contractAddress
+    );
+    const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    runInAction(() => {
+      const map = new Map<string, TokenInfo[]>();
+      for (const [key, value] of Object.entries(res)) {
+        if (value) {
+          map.set(key, value);
+        }
+      }
+      this.tokenMap = map;
+    });
   }
 
   get waitingSuggestedToken() {
@@ -138,7 +218,7 @@ export class TokensStore<
       chainId: string;
       contractAddress: string;
       viewingKey?: string;
-    }>(SuggestTokenMsg.type());
+    }>("suggest-token-cw20");
 
     if (datas.length > 0) {
       return datas[0];
@@ -155,7 +235,7 @@ export class TokensStore<
         appCurrency
       );
 
-      yield this.getTokensOf(data.data.chainId).refreshTokens();
+      yield this.refreshTokens();
     }
   }
 

@@ -47,7 +47,6 @@ import {
   InteractionAddon,
 } from "@keplr-wallet/router-extension";
 import { APP_PORT } from "@keplr-wallet/router";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
 import { FeeType } from "@keplr-wallet/hooks";
@@ -89,7 +88,7 @@ export class RootStore {
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
 
-  public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
+  public readonly tokensStore: TokensStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
   protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
@@ -349,8 +348,9 @@ export class RootStore {
 
     this.tokensStore = new TokensStore(
       window,
-      this.chainStore,
       new InExtensionMessageRequester(),
+      this.chainStore,
+      this.accountStore,
       this.interactionStore
     );
 
