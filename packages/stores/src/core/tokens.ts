@@ -149,11 +149,7 @@ export class TokensStore {
     return this.tokenMap.get(ChainIdHelper.parse(chainId).identifier) ?? [];
   }
 
-  async addToken(
-    chainId: string,
-    accountBech32Address: string,
-    currency: AppCurrency
-  ): Promise<void> {
+  async addToken(chainId: string, currency: AppCurrency): Promise<void> {
     const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
     if (!bech32Address) {
       throw new Error("Account not initialized");
@@ -161,7 +157,7 @@ export class TokensStore {
     const chainInfo = this.chainStore.getChain(chainId);
     const associatedAccountAddress = Buffer.from(
       Bech32Address.fromBech32(
-        accountBech32Address,
+        bech32Address,
         chainInfo.bech32Config.bech32PrefixAccAddr
       ).address
     ).toString("hex");
@@ -179,11 +175,7 @@ export class TokensStore {
     });
   }
 
-  async removeToken(
-    chainId: string,
-    accountBech32Address: string,
-    contractAddress: string
-  ): Promise<void> {
+  async removeToken(chainId: string, contractAddress: string): Promise<void> {
     const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
     if (!bech32Address) {
       throw new Error("Account not initialized");
@@ -191,7 +183,7 @@ export class TokensStore {
     const chainInfo = this.chainStore.getChain(chainId);
     const associatedAccountAddress = Buffer.from(
       Bech32Address.fromBech32(
-        accountBech32Address,
+        bech32Address,
         chainInfo.bech32Config.bech32PrefixAccAddr
       ).address
     ).toString("hex");

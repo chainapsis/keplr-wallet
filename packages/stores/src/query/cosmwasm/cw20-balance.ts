@@ -19,7 +19,7 @@ export class ObservableQueryCw20BalanceImpl
     protected readonly denomHelper: DenomHelper,
     protected readonly bech32Address: string
   ) {
-    if (denomHelper.type === "cw20") {
+    if (denomHelper.type !== "cw20") {
       throw new Error(`Denom helper must be cw20: ${denomHelper.denom}`);
     }
     super(sharedContext, chainId, chainGetter, denomHelper.contractAddress, {

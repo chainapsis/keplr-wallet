@@ -29,7 +29,7 @@ export class ObservableQuerySecret20BalanceImpl
     protected readonly bech32Address: string,
     querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
-    if (denomHelper.type === "secret20") {
+    if (denomHelper.type !== "secret20") {
       throw new Error(`Denom helper must be secret20: ${denomHelper.denom}`);
     }
     const currency = chainGetter
