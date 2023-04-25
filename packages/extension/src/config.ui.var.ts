@@ -49,11 +49,23 @@ if (process.env.NODE_ENV === "production") {
 
 export const GRAPHQL_URL = { SUBSCRIPTION_SERVER, MESSAGING_SERVER };
 
+let FETCHHUB_AGENT, DORADO_AGENT;
+
+if (process.env.NODE_ENV === "production") {
+  FETCHHUB_AGENT =
+    "agent1qvmfez9k6fycllzqc6p7telhwyzzj709n32sc5x2q0ss62ehqc3e52qgna7";
+  DORADO_AGENT =
+    "agent1qdhydny2mmdntqn6dx3d3wpyukaq855j2yexl2f0z07d5esl76932mctpvf";
+} else {
+  FETCHHUB_AGENT =
+    "agent1qv5rmumv0xe0fqlmm3k4lxu4mhmz9aluy07tgp5lmzr2z0mccttcyjksf7r";
+  DORADO_AGENT =
+    "agent1qtvyuq8gkywtymym00n83llwcj6dscwfaz9dgdhm2dw0e9tqmkzq7tesse9";
+}
+
 export const AGENT_ADDRESS: { [key: string]: string } = {
-  [CHAIN_ID_FETCHHUB]:
-    "agent1qvmfez9k6fycllzqc6p7telhwyzzj709n32sc5x2q0ss62ehqc3e52qgna7",
-  [CHAIN_ID_DORADO]:
-    "agent1qdhydny2mmdntqn6dx3d3wpyukaq855j2yexl2f0z07d5esl76932mctpvf",
+  [CHAIN_ID_FETCHHUB]: FETCHHUB_AGENT,
+  [CHAIN_ID_DORADO]: DORADO_AGENT,
 };
 // export const AGENT_ADDRESS =
 //   "agent1qdh7x8k7se255j44dmt2yrpnxqdyn9qqt3dvcn4zy3dwq5qthl577v7njct";
@@ -66,10 +78,16 @@ export const AGENT_COMMANDS = [
     enabled: true,
   },
   {
-    command: "/sendToken",
-    label: "sendToken (Send Token)",
+    command: "/sendAsset",
+    label: "sendAsset (Send a native or CW20 Asset)",
     icon: sendTokenIcon,
-    enabled: false,
+    enabled: true,
+  },
+  {
+    command: "/ibcTransfer",
+    label: "IBC Transfer (Transfer IBC assets cross chain)",
+    icon: sendTokenIcon,
+    enabled: true,
   },
   {
     command: "/autocompound",

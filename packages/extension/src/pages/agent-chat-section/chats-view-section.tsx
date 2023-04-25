@@ -2,11 +2,12 @@
 import { userChatAgents, userMessages } from "@chatStore/messages-slice";
 import { userDetails } from "@chatStore/user-slice";
 import { Chats, Groups } from "@chatTypes";
+import { AgentDisclaimer } from "@components/agents/agents-disclaimer";
 import { ChatMessage } from "@components/chat-message";
+import { useNotification } from "@components/notification";
 import { deliverMessages } from "@graphQL/messages-api";
 import { recieveGroups, recieveMessages } from "@graphQL/recieve-messages";
 import { useOnScreen } from "@hooks/use-on-screen";
-
 import React, {
   createRef,
   useCallback,
@@ -17,18 +18,9 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import {
-  AGENT_COMMANDS,
-  CHAT_PAGE_COUNT,
-  TRANSACTION_FAILED,
-  AGENT_ADDRESS,
-  TRANSACTION_SIGNED,
-} from "../../config.ui.var";
+import { AGENT_COMMANDS, CHAT_PAGE_COUNT } from "../../config.ui.var";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
-import { AgentDisclaimer } from "@components/agents/agents-disclaimer";
-import { signTransaction } from "@utils/sign-transaction";
-import { useNotification } from "@components/notification";
 import {
   InactiveAgentMessage,
   InputField,
@@ -231,55 +223,6 @@ export const ChatsViewSection = ({
     }
   }, [processingLastMessage]);
 
-  const signTxn = async (data: string) => {
-    const payload = JSON.parse(data);
-    console.log(payload);
-    const messagePayload = {
-      chainId: current.chainId,
-      accessToken: user.accessToken,
-      targetAddress,
-    };
-    try {
-      const signResult = await signTransaction(
-        data,
-        messagePayload.chainId,
-        accountInfo.bech32Address
-      );
-      deliverMessages(
-        messagePayload.accessToken,
-        messagePayload.chainId,
-        {
-          message: TRANSACTION_SIGNED,
-          signedTx: Buffer.from(signResult.signedTx).toString("base64"),
-          signature: signResult.signature.signature,
-        },
-        accountInfo.bech32Address,
-        messagePayload.targetAddress
-      );
-      history.goBack();
-    } catch (e) {
-      console.log(e);
-      notification.push({
-        type: "warning",
-        placement: "top-center",
-        duration: 5,
-        content: `Failed to execute Transaction`,
-        canDelete: true,
-        transition: {
-          duration: 0.25,
-        },
-      });
-      await deliverMessages(
-        user.accessToken,
-        current.chainId,
-        TRANSACTION_FAILED,
-        accountInfo.bech32Address,
-        targetAddress
-      );
-      history.push(`/chat/agent/${AGENT_ADDRESS[current.chainId]}`);
-    }
-  };
-
   return (
     <div className={style.chatArea}>
       <AgentDisclaimer />
@@ -310,9 +253,7 @@ export const ChatsViewSection = ({
                   isSender={message?.sender === accountInfo.bech32Address} // if I am the sender of this message
                   timestamp={message?.commitTimestamp || 1549312452}
                   groupLastSeenTimestamp={0}
-                  onClickSignTxn={
-                    messages.length - 1 > index ? undefined : signTxn
-                  }
+                  disabled={messages.length - 1 > index}
                 />
               }
               {index === CHAT_PAGE_COUNT && <div ref={messagesScrollRef} />}

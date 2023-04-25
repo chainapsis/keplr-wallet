@@ -27,6 +27,7 @@ export interface MessagePrimitive {
   content: {
     text: string;
   };
+  method?: string;
 }
 
 export const encryptAllData = async (

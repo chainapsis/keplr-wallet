@@ -345,6 +345,7 @@ export const ChatsViewSection = ({
                       ? new Date(receiver.groupLastSeenTimestamp).getTime()
                       : 0
                   }
+                  disabled={true}
                 />
               )}
               {index === CHAT_PAGE_COUNT && <div ref={messagesScrollRef} />}

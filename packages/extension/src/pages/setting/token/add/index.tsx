@@ -172,6 +172,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
                   ) {
                     window.close();
                   } else {
+                    if (history.location.hash === "#agent") history.goBack();
                     history.push({
                       pathname: "/",
                     });
@@ -219,6 +220,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
             ) {
               window.close();
             } else {
+              if (history.location.hash === "#agent") history.goBack();
               history.push({
                 pathname: "/",
               });
