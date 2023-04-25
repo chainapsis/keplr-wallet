@@ -26,7 +26,9 @@ export const Button: FunctionComponent<ButtonProps> = ({
           if (onClick) {
             e.preventDefault();
 
-            onClick();
+            if (!isLoading) {
+              onClick();
+            }
           }
         }}
       >
