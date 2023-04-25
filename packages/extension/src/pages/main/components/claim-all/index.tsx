@@ -392,9 +392,6 @@ const ClaimTokenItem: FunctionComponent<{
     accountStore.getAccount(viewToken.chainInfo.chainId).isSendingMsg ===
       "withdrawRewards" || state.isLoading;
 
-  console.log("state.failedReason", state.failedReason);
-  console.log("!!state.failedReason", !!state.failedReason);
-
   // TODO: Add loading state.
   return (
     <Box padding="1rem">
