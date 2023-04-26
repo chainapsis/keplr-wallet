@@ -64,7 +64,7 @@ export const ChatsViewSection = ({
   );
 
   const [loadingMessages, setLoadingMessages] = useState(false);
-
+  const [isInputType2, setIsInputType2] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [isCommand, setIsCommand] = useState(false);
   const [processingLastMessage, setProcessingLastMessage] = useState(false);
@@ -254,6 +254,7 @@ export const ChatsViewSection = ({
                   timestamp={message?.commitTimestamp || 1549312452}
                   groupLastSeenTimestamp={0}
                   disabled={messages.length - 1 > index}
+                  setIsInputType2={setIsInputType2}
                 />
               }
               {index === CHAT_PAGE_COUNT && <div ref={messagesScrollRef} />}
@@ -272,6 +273,7 @@ export const ChatsViewSection = ({
           setNewMessage={setNewMessage}
           setIsCommand={setIsCommand}
           handleSendMessage={handleSendMessage}
+          disabled={isInputType2}
         />
       )}
     </div>

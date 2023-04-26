@@ -43,11 +43,13 @@ export const InputField = ({
   setNewMessage,
   setIsCommand,
   handleSendMessage,
+  disabled,
 }: {
   newMessage: string;
   setNewMessage: any;
   setIsCommand: any;
   handleSendMessage: any;
+  disabled?: boolean;
 }) => {
   let enterKeyCount = 0;
   const [showCommandDropdown, setShowCommandDropdown] = useState(false);
@@ -99,6 +101,7 @@ export const InputField = ({
         value={newMessage}
         onChange={handleChange}
         onKeyDown={handleKeydown}
+        disabled={disabled}
       />
       <div className={style["send-message-icon"]}>
         {newMessage?.length && newMessage.trim() !== "" ? (
@@ -117,7 +120,9 @@ export const InputField = ({
             src={agentCommandIcon}
             alt=""
             draggable="false"
-            onClick={() => setShowCommandDropdown(!showCommandDropdown)}
+            onClick={() =>
+              setShowCommandDropdown(!showCommandDropdown && !disabled)
+            }
           />
         )}
       </div>

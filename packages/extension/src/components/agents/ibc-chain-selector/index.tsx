@@ -96,6 +96,30 @@ export const IBCChainSelector: FunctionComponent<{
     }
   };
 
+  const cancel = async () => {
+    try {
+      await deliverMessages(
+        user.accessToken,
+        current.chainId,
+        "/cancel",
+        accountInfo.bech32Address,
+        targetAddress
+      );
+    } catch (e) {
+      console.log(e);
+      notification.push({
+        type: "warning",
+        placement: "top-center",
+        duration: 5,
+        content: `Failed to cancel Operation`,
+        canDelete: true,
+        transition: {
+          duration: 0.25,
+        },
+      });
+    }
+  };
+
   const setChannel = async (
     channel: Channel,
     chainInfo: ChainInfoInner<ChainInfoWithEmbed>
@@ -134,7 +158,7 @@ export const IBCChainSelector: FunctionComponent<{
         toggle={() => setIsIBCregisterModalOpen((value) => !value)}
       />
       <FormGroup>
-        <Label for={selectorId} className="form-control-label">
+        <Label for={selectorId} style={{ width: "100%" }}>
           {label || (
             <FormattedMessage id="component.ibc.channel-registrar.chain-selector.label" />
           )}
@@ -198,6 +222,16 @@ export const IBCChainSelector: FunctionComponent<{
           onClick={() => sendChannelDetails()}
         >
           Proceed
+        </Button>
+        <Button
+          type="button"
+          color="secondary"
+          size="small"
+          style={{ marginTop: "15px" }}
+          disabled={disabled || !selectedChannel}
+          onClick={() => cancel()}
+        >
+          Cancel
         </Button>
       </FormGroup>
     </React.Fragment>

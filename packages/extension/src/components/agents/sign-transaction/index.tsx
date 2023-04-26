@@ -12,6 +12,7 @@ import {
 } from "../../../config.ui.var";
 import { useStore } from "../../../stores";
 import style from "./style.module.scss";
+import { Button } from "reactstrap";
 
 export const SignTransaction = ({
   rawText,
@@ -72,6 +73,30 @@ export const SignTransaction = ({
     }
   };
 
+  const cancel = async () => {
+    try {
+      await deliverMessages(
+        user.accessToken,
+        current.chainId,
+        "/cancel",
+        accountInfo.bech32Address,
+        targetAddress
+      );
+    } catch (e) {
+      console.log(e);
+      notification.push({
+        type: "warning",
+        placement: "top-center",
+        duration: 5,
+        content: `Failed to cancel Operation`,
+        canDelete: true,
+        transition: {
+          duration: 0.25,
+        },
+      });
+    }
+  };
+
   return (
     <div className={style.message}>
       Please recheck parameters of the transaction in Data Tab before approving
@@ -85,6 +110,15 @@ export const SignTransaction = ({
       >
         Sign transaction
       </button>
+      <Button
+        type="button"
+        color="secondary"
+        size="small"
+        disabled={disabled}
+        onClick={() => cancel()}
+      >
+        Cancel
+      </Button>
     </div>
   );
 };
