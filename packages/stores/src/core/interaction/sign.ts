@@ -72,11 +72,12 @@ export class SignInteractionStore {
     newSignDocWrapper: SignDocWrapper,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    await this.interactionStore.approveWithProceedNext(
-      id,
-      newSignDocWrapper,
-      afterFn
-    );
+    const newSignDoc =
+      newSignDocWrapper.mode === "amino"
+        ? newSignDocWrapper.aminoSignDoc
+        : newSignDocWrapper.protoSignDoc.toBytes();
+
+    await this.interactionStore.approveWithProceedNext(id, newSignDoc, afterFn);
   }
 
   async rejectWithProceedNext(
