@@ -5,12 +5,13 @@ import { setNotifications } from "@chatStore/user-slice";
 import { NotyphiOrganisation } from "@notificationTypes";
 import {
   fetchFollowedOrganisations,
+  fetchOrganisations,
+  fetchTopics,
   followOrganisation,
 } from "@utils/fetch-notification";
 import { store } from "@chatStore/index";
 import { fetchAndPopulateNotifications } from "@utils/populate-notifications";
 import { observer } from "mobx-react-lite";
-import { NOTYPHI_FETCH_ORG_ID } from "../../config.ui.var";
 
 export const ChatStoreProvider: FunctionComponent = observer((props) => {
   const { children } = props;
@@ -23,7 +24,7 @@ export const ChatStoreProvider: FunctionComponent = observer((props) => {
       return;
     }
 
-    const fetchOrganisation = async () => {
+    const setOrganisations = async () => {
       const followOrganisationList: NotyphiOrganisation[] = await fetchFollowedOrganisations(
         accountInfo.bech32Address
       );
@@ -35,20 +36,23 @@ export const ChatStoreProvider: FunctionComponent = observer((props) => {
           })
         );
       } else {
-        /// Follow fetch org and tag by default for new user
-        followOrganisation(
-          accountInfo.bech32Address,
-          NOTYPHI_FETCH_ORG_ID
-        ).then((_) => {
-          localStorage.setItem(
-            `topics-${accountInfo.bech32Address}`,
-            JSON.stringify([{ name: "fetch.ai" }])
-          );
-          fetchOrganisation();
+        // Auto followed all org and tags by default for new user
+
+        fetchOrganisations().then((res) => {
+          res.items.map((org: NotyphiOrganisation) => {
+            followOrganisation(accountInfo.bech32Address, org.id);
+          });
+          fetchTopics().then((res) => {
+            localStorage.setItem(
+              `topics-${accountInfo.bech32Address}`,
+              JSON.stringify(res.items)
+            );
+          });
+          setOrganisations();
         });
       }
     };
-    fetchOrganisation();
+    setOrganisations();
     fetchAndPopulateNotifications(accountInfo.bech32Address);
     const intervalCall = setInterval(() => {
       fetchAndPopulateNotifications(accountInfo.bech32Address);

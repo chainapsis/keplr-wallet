@@ -31,20 +31,17 @@ export const CHAT_PAGE_COUNT = 30;
 
 let SUBSCRIPTION_SERVER, MESSAGING_SERVER;
 export let NOTYPHI_BASE_URL: string;
-export let NOTYPHI_FETCH_ORG_ID: string;
 
 if (process.env.NODE_ENV === "production") {
   SUBSCRIPTION_SERVER = "wss://messaging.fetch-ai.network/subscription";
   MESSAGING_SERVER = "https://messaging.fetch-ai.network/graphql";
   NOTYPHI_BASE_URL = "https://api.notyphi.com/v1";
-  NOTYPHI_FETCH_ORG_ID = "a6063034-b56c-4a50-b5fc-6e179e05e931";
 } else {
   SUBSCRIPTION_SERVER =
     "wss://messaging-server.sandbox-london-b.fetch-ai.com/subscription";
   MESSAGING_SERVER =
     "https://messaging-server.sandbox-london-b.fetch-ai.com/graphql";
   NOTYPHI_BASE_URL = "https://api-staging.notyphi.com/v1";
-  NOTYPHI_FETCH_ORG_ID = "b0396fe9-4cc6-4a7f-8b27-7e406f56b40a";
 }
 
 export const GRAPHQL_URL = { SUBSCRIPTION_SERVER, MESSAGING_SERVER };

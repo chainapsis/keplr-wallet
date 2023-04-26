@@ -111,21 +111,8 @@ export const NotificationModal: FunctionComponent = () => {
       return;
     }
 
-    if (Object.values(notificationInfo.organisations).length === 0) {
-      setIsLoading(false);
-      setNotificationPayload({
-        modalType: NotificationModalType.initial,
-        heading: "We’ve just added Notifications!",
-        paragraph:
-          "Now you can get the latest news from your favourite organisations.",
-        buttonLabel: "Get started",
-        headingColor: "#3b82f6",
-        image: "initial-bell-icon.svg",
-      });
-    } else {
-      setNotificationPayloadHelper(notificationInfo.allNotifications);
-      setIsLoading(false);
-    }
+    setNotificationPayloadHelper(notificationInfo.allNotifications);
+    setIsLoading(false);
   }, [
     accountInfo.bech32Address,
     notificationInfo.isNotificationOn,

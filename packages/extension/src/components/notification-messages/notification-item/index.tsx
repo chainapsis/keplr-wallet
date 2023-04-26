@@ -66,6 +66,8 @@ export const NotificationItem: FunctionComponent<Props> = ({
           /// Handling a url and internal page navigation
           if (cta_url.startsWith("http")) {
             window.open(cta_url);
+          } else if (cta_url.startsWith("www")) {
+            window.open(`https:${cta_url}`);
           } else if (cta_url.startsWith("/")) {
             history.push(cta_url);
           }
