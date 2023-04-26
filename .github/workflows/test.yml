@@ -16,7 +16,7 @@ on:
 jobs:
   test:
     name: Test code base
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
