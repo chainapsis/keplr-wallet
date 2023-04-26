@@ -10,6 +10,7 @@ import { TextInput } from "..";
 import { Button } from "../../button";
 import { observer } from "mobx-react-lite";
 import { IFeeConfig, IGasConfig } from "@keplr-wallet/hooks";
+import { useStore } from "../../../stores";
 
 const Styles = {
   Container: styled.div`
@@ -109,8 +110,10 @@ const FeeSelectorStyle = {
 
     gap: 0.125rem;
 
+    cursor: pointer;
+
     background-color: ${({ selected }) =>
-      selected ? ColorPalette["blue-400"] : ColorPalette["gray-500"]}};
+      selected ? ColorPalette["blue-400"] : ColorPalette["gray-500"]};
   `,
   Title: styled(H5)<{ selected: boolean }>`
     color: ${({ selected }) =>
@@ -129,6 +132,8 @@ const FeeSelectorStyle = {
 const FeeSelector: FunctionComponent<{
   feeConfig: IFeeConfig;
 }> = observer(({ feeConfig }) => {
+  const { priceStore } = useStore();
+
   const feeCurrency =
     feeConfig.fees.length > 0
       ? feeConfig.fees[0].currency
@@ -157,9 +162,15 @@ const FeeSelector: FunctionComponent<{
           <FeeSelectorStyle.Title selected={feeConfig.type === "low"}>
             Low
           </FeeSelectorStyle.Title>
-          <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
-            $TODO
-          </FeeSelectorStyle.Price>
+          {feeCurrency.coinGeckoId ? (
+            <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
+              {priceStore
+                .calculatePrice(
+                  feeConfig.getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+                )
+                ?.toString() || "-"}
+            </FeeSelectorStyle.Price>
+          ) : null}
           <FeeSelectorStyle.Amount selected={feeConfig.type === "low"}>
             {feeConfig
               .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
@@ -184,9 +195,18 @@ const FeeSelector: FunctionComponent<{
           <FeeSelectorStyle.Title selected={feeConfig.type === "average"}>
             Average
           </FeeSelectorStyle.Title>
-          <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
-            $TODO
-          </FeeSelectorStyle.Price>
+          {feeCurrency.coinGeckoId ? (
+            <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
+              {priceStore
+                .calculatePrice(
+                  feeConfig.getFeeTypePrettyForFeeCurrency(
+                    feeCurrency,
+                    "average"
+                  )
+                )
+                ?.toString() || "-"}
+            </FeeSelectorStyle.Price>
+          ) : null}
           <FeeSelectorStyle.Amount selected={feeConfig.type === "average"}>
             {feeConfig
               .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
@@ -215,9 +235,15 @@ const FeeSelector: FunctionComponent<{
           <FeeSelectorStyle.Title selected={feeConfig.type === "high"}>
             High
           </FeeSelectorStyle.Title>
-          <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>
-            $TODO
-          </FeeSelectorStyle.Price>
+          {feeCurrency.coinGeckoId ? (
+            <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>
+              {priceStore
+                .calculatePrice(
+                  feeConfig.getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
+                )
+                ?.toString() || "-"}
+            </FeeSelectorStyle.Price>
+          ) : null}
           <FeeSelectorStyle.Amount selected={feeConfig.type === "high"}>
             {feeConfig
               .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
