@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { TextInput } from "../../components/input";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -14,12 +14,18 @@ export const UnlockPage: FunctionComponent = observer(() => {
   });
   const [password, setPassword] = useState("");
 
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      // Focus the input element at start.
+      inputRef.current.focus();
+    }
+  }, []);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
 
-  // TODO: Split usage of interaction store to other store?
-  // TODO: Use "form"
-  // TODO: Add loading indicator
   return (
     <form
       style={{
@@ -85,6 +91,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
         }}
       />
       <TextInput
+        ref={inputRef}
         type="password"
         value={password}
         onChange={(e) => {
@@ -101,6 +108,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
       <Button
         type="submit"
         text="Unlock"
+        disabled={password.length === 0}
         isLoading={
           isLoading ||
           (() => {
