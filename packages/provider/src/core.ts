@@ -26,7 +26,6 @@ import {
 } from "@keplr-wallet/router";
 import {
   SuggestChainInfoMsg,
-  SuggestTokenMsg,
   SendTxMsg,
   GetSecret20ViewingKey,
   GetPubkeyMsg,
@@ -332,8 +331,17 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     contractAddress: string,
     viewingKey?: string
   ): Promise<void> {
-    const msg = new SuggestTokenMsg(chainId, contractAddress, viewingKey);
-    await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "token-cw20",
+      "SuggestTokenMsg",
+      {
+        chainId,
+        contractAddress,
+        viewingKey,
+      }
+    );
   }
 
   async getSecret20ViewingKey(

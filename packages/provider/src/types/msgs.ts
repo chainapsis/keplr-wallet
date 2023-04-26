@@ -31,38 +31,6 @@ export class SuggestChainInfoMsg extends Message<void> {
   }
 }
 
-export class SuggestTokenMsg extends Message<void> {
-  public static type() {
-    return "suggest-token";
-  }
-
-  constructor(
-    public readonly chainId: string,
-    public readonly contractAddress: string,
-    public readonly viewingKey?: string
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("Chain id is empty");
-    }
-
-    if (!this.contractAddress) {
-      throw new Error("Contract address is empty");
-    }
-  }
-
-  route(): string {
-    return "tokens";
-  }
-
-  type(): string {
-    return SuggestTokenMsg.type();
-  }
-}
-
 // Return the tx hash
 export class SendTxMsg extends Message<Uint8Array> {
   public static type() {
