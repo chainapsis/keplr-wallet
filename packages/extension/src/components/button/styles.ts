@@ -163,7 +163,8 @@ export const Styles = {
     justify-content: center;
     align-items: center;
     border-radius: 0.375rem;
-    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+    cursor: ${({ disabled, isLoading }) =>
+      disabled ? "not-allowed" : isLoading ? "wait" : "pointer"};
     overflow: hidden;
 
     // Default font style.
@@ -212,10 +213,16 @@ export const Styles = {
     margin-left: 0.25rem;
   `,
   Loading: styled.div<{ buttonColor: ButtonColor | undefined }>`
+    display: flex;
+    align-items: center;
+
     position: absolute;
     color: ${({ buttonColor }) => getLoadingColor(buttonColor)};
   `,
   TextOverrideIcon: styled.div`
+    display: flex;
+    align-items: center;
+
     position: absolute;
     svg {
       fill: none;

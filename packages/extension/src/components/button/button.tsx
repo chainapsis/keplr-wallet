@@ -21,6 +21,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
       mode={otherProps.mode}
     >
       <Styles.Button
+        isLoading={isLoading}
         {...otherProps}
         onClick={(e) => {
           if (onClick) {

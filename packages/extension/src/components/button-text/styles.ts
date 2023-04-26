@@ -21,7 +21,7 @@ export const Styles = {
 
     // Default font style.
     // Override these in "buttonStyleFromColorAndMode" if needed.
-    font-weight: 600;
+    font-weight: 500;
     font-size: ${({ size }) => {
       switch (size) {
         case "large":
