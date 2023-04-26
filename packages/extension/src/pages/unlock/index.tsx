@@ -108,6 +108,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
       <Button
         type="submit"
         text="Unlock"
+        size="large"
         disabled={password.length === 0}
         isLoading={
           isLoading ||
