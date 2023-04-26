@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Button } from "../../components/button";
 import { useInteractionInfo } from "../../hooks";
+import { Gutter } from "../../components/gutter";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
@@ -13,22 +14,26 @@ export const UnlockPage: FunctionComponent = observer(() => {
   });
   const [password, setPassword] = useState("");
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | undefined>();
+
   // TODO: Split usage of interaction store to other store?
   // TODO: Use "form"
   // TODO: Add loading indicator
   return (
-    <div>
-      <TextInput
-        value={password}
-        onChange={(e) => {
-          e.preventDefault();
+    <form
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        padding: "0.75rem",
+      }}
+      onSubmit={async (e) => {
+        e.preventDefault();
 
-          setPassword(e.target.value);
-        }}
-      />
-      <Button
-        text="Unlock"
-        onClick={async () => {
+        try {
+          setIsLoading(true);
+
           await keyRingStore.unlock(password);
 
           if (interactionInfo.interaction) {
@@ -64,8 +69,53 @@ export const UnlockPage: FunctionComponent = observer(() => {
               }
             }
           }
+
+          setError(undefined);
+        } catch (e) {
+          console.log(e);
+          setError(e);
+        } finally {
+          setIsLoading(false);
+        }
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
         }}
       />
-    </div>
+      <TextInput
+        type="password"
+        value={password}
+        onChange={(e) => {
+          e.preventDefault();
+
+          setPassword(e.target.value);
+
+          // Clear error if the user is typing.
+          setError(undefined);
+        }}
+        error={error ? "Invalid password" : undefined}
+      />
+      <Gutter size="1rem" />
+      <Button
+        type="submit"
+        text="Unlock"
+        isLoading={
+          isLoading ||
+          (() => {
+            if (interactionInfo.interaction) {
+              const interactions = interactionStore.getAllData("unlock");
+              for (const interaction of interactions) {
+                if (interactionStore.isObsoleteInteraction(interaction.id)) {
+                  return true;
+                }
+              }
+            }
+            return false;
+          })()
+        }
+      />
+    </form>
   );
 });
