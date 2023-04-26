@@ -1,20 +1,17 @@
 import { InteractionStore } from "./interaction";
-import { computed, flow, makeObservable, observable } from "mobx";
+import { computed, makeObservable } from "mobx";
 import {
   InteractionWaitingData,
   RequestICNSAdr36SignaturesMsg,
 } from "@keplr-wallet/background";
 
 export class ICNSInteractionStore {
-  @observable
-  protected _isLoading: boolean = false;
-
   constructor(protected readonly interactionStore: InteractionStore) {
     makeObservable(this);
   }
 
   get waitingDatas() {
-    return this.interactionStore.getDatas<{
+    return this.interactionStore.getAllData<{
       chainId: string;
       owner: string;
       username: string;
@@ -48,46 +45,25 @@ export class ICNSInteractionStore {
     return datas[0];
   }
 
-  @flow
-  *approve(id: string) {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.approve(
-        RequestICNSAdr36SignaturesMsg.type(),
-        id,
-        {}
-      );
-    } finally {
-      this._isLoading = false;
-    }
+  async approveWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.approveWithProceedNext(id, {}, afterFn);
   }
 
-  @flow
-  *reject(id: string) {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.reject(
-        RequestICNSAdr36SignaturesMsg.type(),
-        id
-      );
-    } finally {
-      this._isLoading = false;
-    }
+  async rejectWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
-  @flow
-  *rejectAll() {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.rejectAll(
-        RequestICNSAdr36SignaturesMsg.type()
-      );
-    } finally {
-      this._isLoading = false;
-    }
+  async rejectAll() {
+    await this.interactionStore.rejectAll(RequestICNSAdr36SignaturesMsg.type());
   }
 
-  get isLoading(): boolean {
-    return this._isLoading;
+  isObsoleteInteraction(id: string | undefined): boolean {
+    return this.interactionStore.isObsoleteInteraction(id);
   }
 }

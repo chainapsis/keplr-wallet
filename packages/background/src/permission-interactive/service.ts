@@ -17,13 +17,7 @@ export class PermissionInteractiveService {
     chainIds: string[],
     origin: string
   ): Promise<void> {
-    const isPermisionSatisfied =
-      this.permissionService.hasBasicAccessPermission(env, chainIds, origin);
-
-    await this.keyRingService.ensureUnlockInteractive(
-      env,
-      !isPermisionSatisfied
-    );
+    await this.keyRingService.ensureUnlockInteractive(env);
 
     return await this.permissionService.checkOrGrantBasicAccessPermission(
       env,

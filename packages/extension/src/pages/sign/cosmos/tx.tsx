@@ -165,19 +165,28 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
         text: "Approve",
         color: "primary",
         size: "large",
-        disabled: txConfigsValidate.interactionBlocked,
+        disabled:
+          signInteractionStore.waitingData == null ||
+          txConfigsValidate.interactionBlocked,
+        isLoading: signInteractionStore.isObsoleteInteraction(
+          signInteractionStore.waitingData?.id
+        ),
         onClick: async () => {
           if (signInteractionStore.waitingData) {
-            await signInteractionStore.approveAndWaitEnd(
-              signInteractionStore.waitingData.data.signDocWrapper
+            await signInteractionStore.approveWithProceedNext(
+              signInteractionStore.waitingData.id,
+              signInteractionStore.waitingData.data.signDocWrapper,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    window.close();
+                  }
+                }
+              }
             );
-
-            if (
-              interactionInfo.interaction &&
-              !interactionInfo.interactionInternal
-            ) {
-              window.close();
-            }
           }
         },
       }}
