@@ -181,6 +181,19 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
               privateKey: words[0].replace("0x", ""),
             });
           } else {
+            // Trim empty string from back.
+            while (
+              words.length > 0 &&
+              words[words.length - 1].trim().length === 0
+            ) {
+              words = words.slice(0, words.length - 1);
+            }
+
+            if (words.length <= 9) {
+              alert("Too short mnemonic");
+              return;
+            }
+
             const text = words.map((w) => w.trim()).join(" ");
             if (!Mnemonic.validateMnemonic(text)) {
               alert("Invalid mnemonic");
