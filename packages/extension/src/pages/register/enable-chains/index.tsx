@@ -16,6 +16,7 @@ import { Subtitle3 } from "../../../components/typography";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
+import { useNavigate } from "react-router";
 
 export const EnableChainsScene: FunctionComponent<{
   vaultId: string;
@@ -28,6 +29,8 @@ export const EnableChainsScene: FunctionComponent<{
   }[];
 }> = observer(({ vaultId, candidateAddresses }) => {
   const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
+
+  const navigate = useNavigate();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -309,10 +312,9 @@ export const EnableChainsScene: FunctionComponent<{
               })(),
             ]);
 
-            // TODO
-            alert("TODO");
-
-            window.close();
+            navigate("/welcome", {
+              replace: true,
+            });
           }}
         />
       </Box>

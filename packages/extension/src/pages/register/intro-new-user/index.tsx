@@ -71,7 +71,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
               size="large"
               color="secondary"
               onClick={() => {
-                sceneTransition.push("new-mnemonic");
+                alert("TODO: Not implemented yet");
               }}
             />
             <Button
@@ -79,7 +79,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
               size="large"
               color="secondary"
               onClick={() => {
-                sceneTransition.push("recover-mnemonic");
+                alert("TODO: Not implemented yet");
               }}
             />
           </Stack>
