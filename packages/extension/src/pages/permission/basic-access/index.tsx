@@ -23,7 +23,9 @@ export const PermissionBasicAccessPage: FunctionComponent<{
       <Button
         text="Approve"
         disabled={permissionStore.waitingPermissionData == null}
-        isLoading={permissionStore.waitingPermissionData?.obsolete}
+        isLoading={permissionStore.isObsoleteInteraction(
+          permissionStore.waitingPermissionData?.id
+        )}
         onClick={async () => {
           await permissionStore.approvePermissionWithProceedNext(
             data.id,

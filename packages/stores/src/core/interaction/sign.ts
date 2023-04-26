@@ -1,10 +1,8 @@
-import {
-  InteractionStore,
-  InteractionWaitingDataWithObsolete,
-} from "./interaction";
+import { InteractionStore } from "./interaction";
 import { computed, makeObservable } from "mobx";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 import { KeplrSignOptions, StdSignDoc } from "@keplr-wallet/types";
+import { InteractionWaitingData } from "@keplr-wallet/background";
 
 export type SignInteractionData =
   | {
@@ -39,7 +37,7 @@ export class SignInteractionStore {
 
   @computed
   get waitingData():
-    | InteractionWaitingDataWithObsolete<
+    | InteractionWaitingData<
         SignInteractionData & { signDocWrapper: SignDocWrapper }
       >
     | undefined {
@@ -59,7 +57,6 @@ export class SignInteractionStore {
       id: data.id,
       type: data.type,
       isInternal: data.isInternal,
-      obsolete: data.obsolete,
       data: {
         ...data.data,
         signDocWrapper: wrapper,
@@ -89,5 +86,9 @@ export class SignInteractionStore {
 
   async rejectAll() {
     await this.interactionStore.rejectAll("request-sign-cosmos");
+  }
+
+  isObsoleteInteraction(id: string | undefined): boolean {
+    return this.interactionStore.isObsoleteInteraction(id);
   }
 }

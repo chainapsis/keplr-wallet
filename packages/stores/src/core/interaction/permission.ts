@@ -72,4 +72,8 @@ export class PermissionStore {
   async rejectGlobalPermissionAll() {
     await this.interactionStore.rejectAll(INTERACTION_TYPE_GLOBAL_PERMISSION);
   }
+
+  isObsoleteInteraction(id: string | undefined): boolean {
+    return this.interactionStore.isObsoleteInteraction(id);
+  }
 }

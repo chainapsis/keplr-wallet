@@ -79,7 +79,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         color: "primary",
         size: "large",
         disabled: signInteractionStore.waitingData == null,
-        isLoading: signInteractionStore.waitingData?.obsolete,
+        isLoading: signInteractionStore.isObsoleteInteraction(
+          signInteractionStore.waitingData?.id
+        ),
         onClick: async () => {
           if (signInteractionStore.waitingData) {
             const signDocWrapper =

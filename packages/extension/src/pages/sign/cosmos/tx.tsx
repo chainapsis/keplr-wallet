@@ -168,7 +168,9 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
         disabled:
           signInteractionStore.waitingData == null ||
           txConfigsValidate.interactionBlocked,
-        isLoading: signInteractionStore.waitingData?.obsolete,
+        isLoading: signInteractionStore.isObsoleteInteraction(
+          signInteractionStore.waitingData?.id
+        ),
         onClick: async () => {
           if (signInteractionStore.waitingData) {
             await signInteractionStore.approveWithProceedNext(

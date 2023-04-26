@@ -14,14 +14,16 @@ import {
 import { action, observable, makeObservable, flow, toJS } from "mobx";
 import { computedFn } from "mobx-utils";
 
-export type InteractionWaitingDataWithObsolete<T = unknown> =
-  InteractionWaitingData<T> & {
-    obsolete: boolean;
-  };
-
 export class InteractionStore implements InteractionForegroundHandler {
   @observable.shallow
-  protected data: InteractionWaitingDataWithObsolete[] = [];
+  protected data: InteractionWaitingData[] = [];
+  // 원래 obsolete에 대한 정보를 data 밑의 field에 포함시켰는데
+  // obsolete 처리가 추가되기 전에는 data는 한번 받으면 그 이후에 변화되지 않는다는 가정으로 다른 로직이 짜여졌었다.
+  // ref도 변하면 안됐기 때문에 obsolete가 data 밑에 있으면 이러한 요구사항을 이루면서 처리할 수가 없다.
+  // (특히 서명 페이지에서 문제가 될 수 있음)
+  // 기존의 로직과의 호환성을 위해서 아예 분리되었음.
+  @observable.shallow
+  protected obsoleteData = new Map<string, boolean>();
 
   constructor(
     protected readonly router: Router,
@@ -34,29 +36,22 @@ export class InteractionStore implements InteractionForegroundHandler {
   }
 
   getAllData = computedFn(
-    <T = unknown>(type: string): InteractionWaitingDataWithObsolete<T>[] => {
+    <T = unknown>(type: string): InteractionWaitingData<T>[] => {
       return toJS(
         this.data.filter((d) => d.type === type)
-      ) as InteractionWaitingDataWithObsolete<T>[];
+      ) as InteractionWaitingData<T>[];
     }
   );
 
   getData = computedFn(
-    <T = unknown>(
-      id: string
-    ): InteractionWaitingDataWithObsolete<T> | undefined => {
-      return this.data.find(
-        (d) => d.id === id
-      ) as InteractionWaitingDataWithObsolete<T>;
+    <T = unknown>(id: string): InteractionWaitingData<T> | undefined => {
+      return this.data.find((d) => d.id === id) as InteractionWaitingData<T>;
     }
   );
 
   @action
   onInteractionDataReceived(data: InteractionWaitingData) {
-    this.data.push({
-      ...data,
-      obsolete: false,
-    });
+    this.data.push(data);
   }
 
   onEventDataReceived() {
@@ -80,7 +75,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
     const d = this.getData(id);
-    if (!d || d.obsolete) {
+    if (!d || this.isObsoleteInteraction(id)) {
       return;
     }
 
@@ -89,7 +84,7 @@ export class InteractionStore implements InteractionForegroundHandler {
       BACKGROUND_PORT,
       new ApproveInteractionMsg(id, result)
     );
-    yield this.delay(200);
+    yield this.delay(100);
     yield afterFn(this.hasOtherData(id));
     this.removeData(id);
   }
@@ -109,7 +104,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
     const d = this.getData(id);
-    if (!d || d.obsolete) {
+    if (!d || this.isObsoleteInteraction(id)) {
       return;
     }
 
@@ -118,7 +113,7 @@ export class InteractionStore implements InteractionForegroundHandler {
       BACKGROUND_PORT,
       new RejectInteractionMsg(id)
     );
-    yield this.delay(200);
+    yield this.delay(100);
     yield afterFn(this.hasOtherData(id));
     this.removeData(id);
   }
@@ -133,7 +128,7 @@ export class InteractionStore implements InteractionForegroundHandler {
   *rejectAll(type: string) {
     const data = this.getAllData(type);
     for (const d of data) {
-      if (d.obsolete) {
+      if (this.isObsoleteInteraction(d.id)) {
         continue;
       }
       yield this.msgRequester.sendMessage(
@@ -144,21 +139,24 @@ export class InteractionStore implements InteractionForegroundHandler {
     }
   }
 
+  // UI에서 좀 더 편하게 쓸 수 있게 하려고 undefined도 파라미터로 허용함.
+  isObsoleteInteraction(id: string | undefined): boolean {
+    if (!id) {
+      return false;
+    }
+    return this.obsoleteData.get(id) ?? false;
+  }
+
   @action
   protected removeData(id: string) {
     this.data = this.data.filter((d) => d.id !== id);
+    this.obsoleteData.delete(id);
   }
 
   @action
   protected markAsObsolete(id: string) {
-    const findIndex = this.data.findIndex((data) => {
-      return data.id === id;
-    });
-    if (findIndex >= 0) {
-      this.data[findIndex] = {
-        ...this.data[findIndex],
-        obsolete: true,
-      };
+    if (this.getData(id)) {
+      this.obsoleteData.set(id, true);
     }
   }
 

@@ -10,9 +10,6 @@ import { toGenerator } from "@keplr-wallet/common";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export class ChainSuggestStore {
-  @observable
-  protected _isLoading: boolean = false;
-
   @observable.shallow
   protected communityChainInfo: Map<
     string,
@@ -110,55 +107,26 @@ export class ChainSuggestStore {
     }
   }
 
-  @flow
-  *approveWithProceedNext(
+  async approveWithProceedNext(
+    id: string,
     chainInfo: ChainInfoWithRepoUpdateOptions,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    this._isLoading = true;
-
-    try {
-      const data = this.waitingSuggestedChainInfo;
-
-      if (data) {
-        yield this.interactionStore.approveWithProceedNext(
-          data.id,
-          chainInfo,
-          afterFn
-        );
-      }
-    } finally {
-      this._isLoading = false;
-    }
+    await this.interactionStore.approveWithProceedNext(id, chainInfo, afterFn);
   }
 
-  @flow
-  *rejectWithProceedNext(
+  async rejectWithProceedNext(
+    id: string,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    this._isLoading = true;
-
-    try {
-      const data = this.waitingSuggestedChainInfo;
-      if (data) {
-        yield this.interactionStore.rejectWithProceedNext(data.id, afterFn);
-      }
-    } finally {
-      this._isLoading = false;
-    }
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
-  @flow
-  *rejectAll() {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.rejectAll(SuggestChainInfoMsg.type());
-    } finally {
-      this._isLoading = false;
-    }
+  async rejectAll() {
+    await this.interactionStore.rejectAll(SuggestChainInfoMsg.type());
   }
 
-  get isLoading(): boolean {
-    return this._isLoading;
+  isObsoleteInteraction(id: string | undefined): boolean {
+    return this.interactionStore.isObsoleteInteraction(id);
   }
 }
