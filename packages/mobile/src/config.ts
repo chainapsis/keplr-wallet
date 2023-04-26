@@ -2219,6 +2219,56 @@ export const EmbedChainInfos: AppChainInfo[] = [
       txUrl: "https://www.mintscan.io/omniflix/txs/{txHash}",
     },
   },
+  {
+    rpc: "https://rpc-kyve.keplr.app",
+    rest: "https://lcd-kyve.keplr.app",
+    chainId: "kyve-1",
+    chainName: "KYVE",
+    stakeCurrency: {
+      coinDenom: "KYVE",
+      coinMinimalDenom: "ukyve",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/kyve.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "kyve",
+      bech32PrefixAccPub: "kyvepub",
+      bech32PrefixValAddr: "kyvevaloper",
+      bech32PrefixValPub: "kyvevaloperpub",
+      bech32PrefixConsAddr: "kyvevalcons",
+      bech32PrefixConsPub: "kyvevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "KYVE",
+        coinMinimalDenom: "ukyve",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/kyve.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "KYVE",
+        coinMinimalDenom: "ukyve",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/kyve.png",
+        gasPriceStep: {
+          low: 0.02,
+          average: 0.03,
+          high: 0.06,
+        },
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/kyve.png",
+  },
 ];
 
 export const LegacyAmplitudeApiKey =

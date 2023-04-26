@@ -144,7 +144,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <StakingInfoCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}
       />
-      {!chainStore.current.chainId.startsWith("quicksilver") ? (
+      {!(
+        chainStore.current.chainId.startsWith("quicksilver") ||
+        chainStore.current.chainId.startsWith("kyve")
+      ) ? (
         <GovernanceCard
           containerStyle={style.flatten(["margin-bottom-card-gap"])}
         />
