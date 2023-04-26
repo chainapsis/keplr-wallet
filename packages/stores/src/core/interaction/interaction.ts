@@ -11,24 +11,17 @@ import {
   ApproveInteractionMsg,
   RejectInteractionMsg,
 } from "@keplr-wallet/background";
-import {
-  action,
-  observable,
-  IObservableArray,
-  makeObservable,
-  flow,
-  toJS,
-} from "mobx";
+import { action, observable, makeObservable, flow, toJS } from "mobx";
+import { computedFn } from "mobx-utils";
+
+export type InteractionWaitingDataWithObsolete<T = unknown> =
+  InteractionWaitingData<T> & {
+    obsolete: boolean;
+  };
 
 export class InteractionStore implements InteractionForegroundHandler {
   @observable.shallow
-  protected datas: Map<string, InteractionWaitingData[]> = new Map();
-
-  @observable.shallow
-  protected events: Map<
-    string,
-    Omit<InteractionWaitingData, "id" | "isInternal">[]
-  > = new Map();
+  protected data: InteractionWaitingDataWithObsolete[] = [];
 
   constructor(
     protected readonly router: Router,
@@ -40,119 +33,139 @@ export class InteractionStore implements InteractionForegroundHandler {
     interactionForegroundInit(router, service);
   }
 
-  getDatas<T = unknown>(type: string): InteractionWaitingData<T>[] {
-    return toJS(this.datas.get(type) as InteractionWaitingData<T>[]) ?? [];
-  }
+  getAllData = computedFn(
+    <T = unknown>(type: string): InteractionWaitingDataWithObsolete<T>[] => {
+      return toJS(
+        this.data.filter((d) => d.type === type)
+      ) as InteractionWaitingDataWithObsolete<T>[];
+    }
+  );
 
-  getEvents<T = unknown>(
-    type: string
-  ): Omit<InteractionWaitingData<T>, "id" | "isInternal">[] {
-    return (
-      toJS(
-        this.events.get(type) as Omit<
-          InteractionWaitingData<T>,
-          "id" | "isInternal"
-        >[]
-      ) ?? []
-    );
-  }
+  getData = computedFn(
+    <T = unknown>(
+      id: string
+    ): InteractionWaitingDataWithObsolete<T> | undefined => {
+      return this.data.find(
+        (d) => d.id === id
+      ) as InteractionWaitingDataWithObsolete<T>;
+    }
+  );
 
   @action
   onInteractionDataReceived(data: InteractionWaitingData) {
-    if (!this.datas.has(data.type)) {
-      this.datas.set(
-        data.type,
-        observable.array([], {
-          deep: false,
-        })
-      );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.datas.get(data.type)!.push(data);
+    this.data.push({
+      ...data,
+      obsolete: false,
+    });
   }
 
-  @action
-  onEventDataReceived(data: Omit<InteractionWaitingData, "id" | "isInternal">) {
-    if (!this.events.has(data.type)) {
-      this.events.set(
-        data.type,
-        observable.array([], {
-          deep: false,
-        })
-      );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.events.get(data.type)!.push(data);
-  }
-
-  @flow
-  *approve(type: string, id: string, result: unknown) {
-    this.removeData(type, id);
-    yield this.msgRequester.sendMessage(
-      BACKGROUND_PORT,
-      new ApproveInteractionMsg(id, result)
-    );
+  onEventDataReceived() {
+    // noop
   }
 
   /**
-   * Approve the interaction without removing the data on the store.
-   * Actually, this method is used for the sign interaction to wait the actual signing ends.
-   * You should make sure that remove the data manually.
+   * 웹페이지에서 어떤 API를 요청해서 extension이 켜졌을때
+   * extension에서 요청을 처리하고 바로 팝업을 닫으면
+   * 이후에 연속적인 api 요청의 경우 다시 페이지가 열려야하는데 이게 은근히 어색한 UX를 만들기 때문에
+   * 이를 대충 해결하기 위해서 approve 이후에 대충 조금 기다리고 남은 interaction이 있느냐 아니냐에 따라 다른 처리를 한다.
+   * @param type
    * @param id
    * @param result
+   * @param afterFn
    */
   @flow
-  *approveWithoutRemovingData(id: string, result: unknown) {
+  *approveWithProceedNext(
+    id: string,
+    result: unknown,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    const d = this.getData(id);
+    if (!d || d.obsolete) {
+      return;
+    }
+
+    this.markAsObsolete(id);
     yield this.msgRequester.sendMessage(
       BACKGROUND_PORT,
       new ApproveInteractionMsg(id, result)
     );
+    yield this.delay(200);
+    yield afterFn(this.hasOtherData(id));
+    this.removeData(id);
   }
 
+  /**
+   * 웹페이지에서 어떤 API를 요청해서 extension이 켜졌을때
+   * extension에서 요청을 처리하고 바로 팝업을 닫으면
+   * 이후에 연속적인 api 요청의 경우 다시 페이지가 열려야하는데 이게 은근히 어색한 UX를 만들기 때문에
+   * 이를 대충 해결하기 위해서 approve 이후에 대충 조금 기다리고 남은 interaction이 있느냐 아니냐에 따라 다른 처리를 한다.
+   * @param type
+   * @param id
+   * @param afterFn
+   */
   @flow
-  *reject(type: string, id: string) {
-    this.removeData(type, id);
+  *rejectWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    const d = this.getData(id);
+    if (!d || d.obsolete) {
+      return;
+    }
+
+    this.markAsObsolete(id);
     yield this.msgRequester.sendMessage(
       BACKGROUND_PORT,
       new RejectInteractionMsg(id)
     );
+    yield this.delay(200);
+    yield afterFn(this.hasOtherData(id));
+    this.removeData(id);
+  }
+
+  protected delay(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 
   @flow
   *rejectAll(type: string) {
-    const datas = this.getDatas(type);
-    for (const data of datas) {
-      yield this.reject(data.type, data.id);
-    }
-  }
-
-  @action
-  removeData(type: string, id: string) {
-    if (this.datas.has(type)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const find = this.datas.get(type)!.find((data) => {
-        return data.id === id;
-      });
-      if (find) {
-        (
-          this.datas.get(type) as IObservableArray<InteractionWaitingData>
-        ).remove(find);
+    const data = this.getAllData(type);
+    for (const d of data) {
+      if (d.obsolete) {
+        continue;
       }
+      yield this.msgRequester.sendMessage(
+        BACKGROUND_PORT,
+        new RejectInteractionMsg(d.id)
+      );
+      this.removeData(d.id);
     }
   }
 
   @action
-  clearEvent(type: string) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (this.events.has(type) && this.events.get(type)!.length > 0) {
-      this.events.set(
-        type,
-        observable.array([], {
-          deep: false,
-        })
-      );
+  protected removeData(id: string) {
+    this.data = this.data.filter((d) => d.id !== id);
+  }
+
+  @action
+  protected markAsObsolete(id: string) {
+    const findIndex = this.data.findIndex((data) => {
+      return data.id === id;
+    });
+    if (findIndex >= 0) {
+      this.data[findIndex] = {
+        ...this.data[findIndex],
+        obsolete: true,
+      };
     }
+  }
+
+  protected hasOtherData(id: string): boolean {
+    const find = this.data.find((data) => {
+      return data.id !== id;
+    });
+    return !!find;
   }
 }

@@ -134,7 +134,7 @@ export class TokensStore<
   }
 
   get waitingSuggestedToken() {
-    const datas = this.interactionStore.getDatas<{
+    const datas = this.interactionStore.getAllData<{
       chainId: string;
       contractAddress: string;
       viewingKey?: string;
@@ -145,30 +145,36 @@ export class TokensStore<
     }
   }
 
-  @flow
-  *approveSuggestedToken(appCurrency: AppCurrency) {
-    const data = this.waitingSuggestedToken;
-    if (data) {
-      yield this.interactionStore.approve(
-        SuggestTokenMsg.type(),
-        data.id,
-        appCurrency
-      );
-
-      yield this.getTokensOf(data.data.chainId).refreshTokens();
+  async approveSuggestedTokenWithProceedNext(
+    id: string,
+    appCurrency: AppCurrency,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    const d = this.interactionStore.getData<{
+      chainId: string;
+      contractAddress: string;
+      viewingKey?: string;
+    }>(id);
+    if (!d) {
+      return;
     }
+
+    await this.interactionStore.approveWithProceedNext(
+      id,
+      appCurrency,
+      afterFn
+    );
+    this.getTokensOf(d.data.chainId).refreshTokens();
   }
 
-  @flow
-  *rejectSuggestedToken() {
-    const data = this.waitingSuggestedToken;
-    if (data) {
-      yield this.interactionStore.reject(SuggestTokenMsg.type(), data.id);
-    }
+  async rejectSuggestedToken(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
-  @flow
-  *rejectAllSuggestedTokens() {
-    yield this.interactionStore.rejectAll(SuggestTokenMsg.type());
+  async rejectAllSuggestedTokens() {
+    await this.interactionStore.rejectAll(SuggestTokenMsg.type());
   }
 }

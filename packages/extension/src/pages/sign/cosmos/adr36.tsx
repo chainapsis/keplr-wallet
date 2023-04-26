@@ -78,6 +78,8 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         text: "Approve",
         color: "primary",
         size: "large",
+        disabled: signInteractionStore.waitingData == null,
+        isLoading: signInteractionStore.waitingData?.obsolete,
         onClick: async () => {
           if (signInteractionStore.waitingData) {
             const signDocWrapper =
@@ -95,14 +97,20 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               throw new Error("Invalid sign doc for adr36");
             }
 
-            await signInteractionStore.approveAndWaitEnd(signDocWrapper);
-
-            if (
-              interactionInfo.interaction &&
-              !interactionInfo.interactionInternal
-            ) {
-              window.close();
-            }
+            await signInteractionStore.approveWithProceedNext(
+              signInteractionStore.waitingData.id,
+              signDocWrapper,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    window.close();
+                  }
+                }
+              }
+            );
           }
         },
       }}

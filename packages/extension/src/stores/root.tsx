@@ -21,8 +21,6 @@ import {
   IBCCurrencyRegistrar,
   InteractionStore,
   KeyRingStore,
-  LedgerInitStore,
-  KeystoneStore,
   PermissionStore,
   QueriesStore,
   SecretAccount,
@@ -68,8 +66,6 @@ export class RootStore {
   public readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
   public readonly signInteractionStore: SignInteractionStore;
-  public readonly ledgerInitStore: LedgerInitStore;
-  public readonly keystoneStore: KeystoneStore;
   public readonly chainSuggestStore: ChainSuggestStore;
   public readonly icnsInteractionStore: ICNSInteractionStore;
 
@@ -158,11 +154,6 @@ export class RootStore {
       new InExtensionMessageRequester()
     );
     this.signInteractionStore = new SignInteractionStore(this.interactionStore);
-    this.ledgerInitStore = new LedgerInitStore(
-      this.interactionStore,
-      new InExtensionMessageRequester()
-    );
-    this.keystoneStore = new KeystoneStore(this.interactionStore);
     this.chainSuggestStore = new ChainSuggestStore(
       this.interactionStore,
       CommunityChainInfoRepo

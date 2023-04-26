@@ -6,24 +6,38 @@ import {
 } from "@keplr-wallet/background";
 import { Button } from "../../../components/button";
 import { useStore } from "../../../stores";
+import { useInteractionInfo } from "../../../hooks";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: InteractionWaitingData<PermissionData>;
 }> = observer(({ data }) => {
   const { permissionStore } = useStore();
 
+  const interactionInfo = useInteractionInfo(() => {
+    permissionStore.rejectPermissionAll();
+  });
+
   return (
     <div>
       <div>{JSON.stringify(data.data)}</div>
       <Button
         text="Approve"
+        disabled={permissionStore.waitingPermissionData == null}
+        isLoading={permissionStore.waitingPermissionData?.obsolete}
         onClick={async () => {
-          // TODO: Handle loading state
-          await permissionStore.approvePermission(data.id);
-
-          if (permissionStore.waitingPermissionDatas.length === 0) {
-            window.close();
-          }
+          await permissionStore.approvePermissionWithProceedNext(
+            data.id,
+            (proceedNext) => {
+              if (!proceedNext) {
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  window.close();
+                }
+              }
+            }
+          );
         }}
       />
     </div>

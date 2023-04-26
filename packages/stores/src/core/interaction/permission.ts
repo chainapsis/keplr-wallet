@@ -20,7 +20,7 @@ export class PermissionStore {
   }
 
   get waitingPermissionDatas() {
-    return this.interactionStore.getDatas<PermissionData>(
+    return this.interactionStore.getAllData<PermissionData>(
       INTERACTION_TYPE_PERMISSION
     );
   }
@@ -32,33 +32,41 @@ export class PermissionStore {
   }
 
   get waitingGlobalPermissionDatas() {
-    return this.interactionStore.getDatas<GlobalPermissionData>(
+    return this.interactionStore.getAllData<GlobalPermissionData>(
       INTERACTION_TYPE_GLOBAL_PERMISSION
     );
   }
 
-  async approvePermission(id: string) {
-    await this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
+  async approvePermissionWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.approveWithProceedNext(id, {}, afterFn);
   }
 
-  async rejectPermission(id: string) {
-    await this.interactionStore.reject(INTERACTION_TYPE_PERMISSION, id);
+  async rejectPermissionWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
   async rejectPermissionAll() {
     await this.interactionStore.rejectAll(INTERACTION_TYPE_PERMISSION);
   }
 
-  async approveGlobalPermission(id: string) {
-    await this.interactionStore.approve(
-      INTERACTION_TYPE_GLOBAL_PERMISSION,
-      id,
-      {}
-    );
+  async approveGlobalPermissionWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.approveWithProceedNext(id, {}, afterFn);
   }
 
-  async rejectGlobalPermission(id: string) {
-    await this.interactionStore.reject(INTERACTION_TYPE_GLOBAL_PERMISSION, id);
+  async rejectGlobalPermissionWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
   async rejectGlobalPermissionAll() {

@@ -46,14 +46,9 @@ export class KeyRingService {
     this.vaultService.lock();
   }
 
-  async ensureUnlockInteractive(
-    env: Env,
-    remainUIAfterInteraction: boolean = false
-  ): Promise<void> {
+  async ensureUnlockInteractive(env: Env): Promise<void> {
     if (this.vaultService.isLocked) {
-      await this.interactionService.waitApprove(env, "/unlock", "unlock", {
-        remainUIAfterInteraction,
-      });
+      await this.interactionService.waitApprove(env, "/unlock", "unlock", {});
     }
   }
 

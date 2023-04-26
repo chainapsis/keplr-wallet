@@ -34,13 +34,13 @@ export class ChainSuggestStore {
   }
 
   get waitingSuggestedChainInfo() {
-    const datas = this.interactionStore.getDatas<{
+    const data = this.interactionStore.getAllData<{
       chainInfo: ChainInfo;
       origin: string;
     }>(SuggestChainInfoMsg.type());
 
-    if (datas.length > 0) {
-      return datas[0];
+    if (data.length > 0) {
+      return data[0];
     }
   }
 
@@ -111,14 +111,21 @@ export class ChainSuggestStore {
   }
 
   @flow
-  *approve(chainInfo: ChainInfoWithRepoUpdateOptions) {
+  *approveWithProceedNext(
+    chainInfo: ChainInfoWithRepoUpdateOptions,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
     this._isLoading = true;
 
     try {
       const data = this.waitingSuggestedChainInfo;
 
       if (data) {
-        yield this.interactionStore.approve(data.type, data.id, chainInfo);
+        yield this.interactionStore.approveWithProceedNext(
+          data.id,
+          chainInfo,
+          afterFn
+        );
       }
     } finally {
       this._isLoading = false;
@@ -126,13 +133,15 @@ export class ChainSuggestStore {
   }
 
   @flow
-  *reject() {
+  *rejectWithProceedNext(
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
     this._isLoading = true;
 
     try {
       const data = this.waitingSuggestedChainInfo;
       if (data) {
-        yield this.interactionStore.reject(data.type, data.id);
+        yield this.interactionStore.rejectWithProceedNext(data.id, afterFn);
       }
     } finally {
       this._isLoading = false;

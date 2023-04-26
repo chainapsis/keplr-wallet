@@ -14,7 +14,7 @@ export class ICNSInteractionStore {
   }
 
   get waitingDatas() {
-    return this.interactionStore.getDatas<{
+    return this.interactionStore.getAllData<{
       chainId: string;
       owner: string;
       username: string;
@@ -49,27 +49,26 @@ export class ICNSInteractionStore {
   }
 
   @flow
-  *approve(id: string) {
+  *approveWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
     this._isLoading = true;
     try {
-      yield this.interactionStore.approve(
-        RequestICNSAdr36SignaturesMsg.type(),
-        id,
-        {}
-      );
+      yield this.interactionStore.approveWithProceedNext(id, {}, afterFn);
     } finally {
       this._isLoading = false;
     }
   }
 
   @flow
-  *reject(id: string) {
+  *rejectWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
     this._isLoading = true;
     try {
-      yield this.interactionStore.reject(
-        RequestICNSAdr36SignaturesMsg.type(),
-        id
-      );
+      yield this.interactionStore.rejectWithProceedNext(id, afterFn);
     } finally {
       this._isLoading = false;
     }
