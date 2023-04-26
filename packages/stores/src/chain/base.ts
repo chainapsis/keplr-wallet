@@ -255,6 +255,10 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
     return this._embedded.walletUrlForStaking;
   }
 
+  get chainSymbolImageUrl(): string | undefined {
+    return this._embedded.chainSymbolImageUrl;
+  }
+
   hasFeature(feature: string): boolean {
     return !!(
       this._embedded.features && this._embedded.features.includes(feature)

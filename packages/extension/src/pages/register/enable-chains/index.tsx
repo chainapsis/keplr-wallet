@@ -4,7 +4,10 @@ import { useStore } from "../../../stores";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Stack } from "../../../components/stack";
 import { useRegisterHeader } from "../components/header";
-import { useSceneEvents } from "../../../components/transition";
+import {
+  useSceneEvents,
+  useSceneTransition,
+} from "../../../components/transition";
 import { ChainInfo } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Box } from "../../../components/box";
@@ -111,6 +114,8 @@ export const EnableChainsScene: FunctionComponent<{
       }
     }
   });
+
+  const sceneTransition = useSceneTransition();
 
   const [enabledChainIdentifiers, setEnabledChainIdentifiers] = useState(() => {
     // We assume that the chain store can be already initialized.
@@ -293,6 +298,21 @@ export const EnableChainsScene: FunctionComponent<{
               }
             }
 
+            const needFinalizeCoinType: string[] = [];
+            for (const enable of enables) {
+              const chainInfo = chainStore.getChain(enable);
+              if (
+                keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
+              ) {
+                // Remove enable from enables
+                enables.splice(enables.indexOf(enable), 1);
+                // And push it disables
+                disables.push(enable);
+
+                needFinalizeCoinType.push(enable);
+              }
+            }
+
             await Promise.all([
               (async () => {
                 if (enables.length > 0) {
@@ -312,9 +332,18 @@ export const EnableChainsScene: FunctionComponent<{
               })(),
             ]);
 
-            navigate("/welcome", {
-              replace: true,
-            });
+            if (needFinalizeCoinType.length > 0) {
+              sceneTransition.replace("select-derivation-path", {
+                vaultId,
+                chainIds: needFinalizeCoinType,
+
+                totalCount: needFinalizeCoinType.length,
+              });
+            } else {
+              navigate("/welcome", {
+                replace: true,
+              });
+            }
           }}
         />
       </Box>
