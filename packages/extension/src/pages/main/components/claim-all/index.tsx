@@ -408,19 +408,24 @@ const ClaimTokenItem: FunctionComponent<{
       console.log(e);
     }
 
-    await tx.send(
-      {
-        gas: gas.toString(),
-        amount: [],
-      },
-      "",
-      {},
-      {
-        onFulfill: (tx: any) => {
-          console.log(tx.code, tx);
+    try {
+      await tx.send(
+        {
+          gas: gas.toString(),
+          amount: [],
         },
-      }
-    );
+        "",
+        {},
+        {
+          onFulfill: (tx: any) => {
+            console.log(tx.code, tx);
+          },
+        }
+      );
+    } catch (e) {
+      // TODO: Add error handling.
+      console.log(e);
+    }
   };
 
   const isLoading =

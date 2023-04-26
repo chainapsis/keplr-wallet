@@ -78,20 +78,29 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         text: "Go to Sign",
         color: "primary",
         size: "large",
-        // TODO: Move to "onSubmit" under form
-        onClick: () => {
-          accountStore
-            .getAccount(chainId)
-            .makeSendTokenTx(
-              sendConfigs.amountConfig.amount[0].toDec().toString(),
-              sendConfigs.amountConfig.amount[0].currency,
-              sendConfigs.recipientConfig.recipient
-            )
-            .send(
-              sendConfigs.feeConfig.toStdFee(),
-              sendConfigs.memoConfig.memo
-            );
-        },
+        isLoading: accountStore.getAccount(chainId).isSendingMsg === "send",
+      }}
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        if (!txConfigsValidate.interactionBlocked) {
+          try {
+            await accountStore
+              .getAccount(chainId)
+              .makeSendTokenTx(
+                sendConfigs.amountConfig.amount[0].toDec().toString(),
+                sendConfigs.amountConfig.amount[0].currency,
+                sendConfigs.recipientConfig.recipient
+              )
+              .send(
+                sendConfigs.feeConfig.toStdFee(),
+                sendConfigs.memoConfig.memo
+              );
+          } catch (e) {
+            // TODO: Add error handling.
+            console.log(e);
+          }
+        }
       }}
     >
       <Box paddingX="0.75rem" paddingBottom="0.75rem">

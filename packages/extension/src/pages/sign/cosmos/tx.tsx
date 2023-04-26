@@ -123,28 +123,7 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
       : signDocHelper.signDocWrapper.protoSignDoc.txMsgs
     : [];
 
-  // If the preferNoSetFee or preferNoSetMemo in sign options is true,
-  // don't show the fee buttons/memo input by default
-  // But, the sign options would be removed right after the users click the approve/reject button.
-  // Thus, without this state, the fee buttons/memo input would be shown after clicking the approve buttion.
-  const [isProcessing, setIsProcessing] = useState(false);
-  const needSetIsProcessing =
-    signInteractionStore.waitingData?.data.signOptions.preferNoSetFee ===
-      true ||
-    signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo === true;
-
-  const preferNoSetFee =
-    signInteractionStore.waitingData?.data.signOptions.preferNoSetFee ===
-      true || isProcessing;
-  // const preferNoSetMemo =
-  //   signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo ===
-  //     true || isProcessing;
-
   const interactionInfo = useInteractionInfo(() => {
-    if (needSetIsProcessing) {
-      setIsProcessing(true);
-    }
-
     signInteractionStore.rejectAll();
   });
 
@@ -277,7 +256,9 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
             feeConfig={feeConfig}
             senderConfig={senderConfig}
             gasConfig={gasConfig}
-            disableAutomaticFeeSet={preferNoSetFee}
+            disableAutomaticFeeSet={
+              signInteractionStore.waitingData?.data.signOptions.preferNoSetFee
+            }
           />
         </Stack>
       </Box>
