@@ -56,7 +56,7 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
     return {
       icon: <div>TODO</div>,
       title: "Custom",
-      content: <pre style={{ width: "280px", margin: 0 }}>{prettyMsg}</pre>,
+      content: <pre style={{ margin: 0 }}>{prettyMsg}</pre>,
     };
   }
 }
