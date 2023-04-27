@@ -26,6 +26,7 @@ import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { useInteractionInfo } from "../../../../hooks";
+import { defaultRegistry } from "../../components/messages/registry";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -217,8 +218,9 @@ export const CosmosTxView: FunctionComponent<{
 
         <Box
           borderRadius="0.375rem"
+          backgroundColor={ColorPalette["gray-600"]}
           style={{
-            flex: 1,
+            flex: !isViewData ? "0 1 auto" : 1,
             overflow: "scroll",
           }}
         >
@@ -226,7 +228,6 @@ export const CosmosTxView: FunctionComponent<{
             {isViewData ? (
               <Box
                 as={"pre"}
-                backgroundColor={ColorPalette["gray-600"]}
                 padding="1rem"
                 // Remove normalized style of pre tag
                 margin="0"
@@ -237,27 +238,30 @@ export const CosmosTxView: FunctionComponent<{
                 {JSON.stringify(signDocHelper.signDocJson, null, 2)}
               </Box>
             ) : (
-              <Box>
-                <MessageItem paragraph="From cosmosvalope...tqgfnp42" />
-                <MessageItem paragraph="From cosmosvalope...tqgfnp42" />
-                <MessageItem paragraph="From cosmosvalope...tqgfnp42" />
+              <Box
+                style={{
+                  width: "fit-content",
+                  minWidth: "100%",
+                }}
+              >
+                {msgs.map((msg, i) => {
+                  const r = defaultRegistry.render(msg);
 
-                <MessageItem
-                  paragraph={`
-                  type: osmosis/gamm/swap-exact- amount in
-                  value:.   routes;
-                  pool_id: ‘2’.          
-                  token_out_denom: uiontype: osmosis/gamm/swap-exact- amount in
-                  value:.   routes;
-                  pool_id: ‘2’.          
-                  token_out_denom: uion
-                `}
-                />
+                  return (
+                    <MessageItem
+                      key={i}
+                      icon={r.icon}
+                      title={r.title}
+                      content={r.content}
+                    />
+                  );
+                })}
               </Box>
             )}
           </Box>
         </Box>
 
+        {!isViewData ? <div style={{ flex: 1 }} /> : null}
         <Box height="0" minHeight="1rem" />
 
         <Stack gutter="0.75rem">
