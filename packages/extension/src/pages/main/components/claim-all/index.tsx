@@ -30,6 +30,8 @@ import {
 import { action, makeObservable, observable } from "mobx";
 import { Tooltip } from "../../../../components/tooltip";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
+import { useNotification } from "../../../../hooks/notification";
+import { useNavigate } from "react-router";
 
 const Styles = {
   Container: styled.div`
@@ -369,6 +371,9 @@ const ClaimTokenItem: FunctionComponent<{
 }> = observer(({ viewToken, state }) => {
   const { accountStore, queriesStore } = useStore();
 
+  const navigate = useNavigate();
+  const notification = useNotification();
+
   // TODO: Add below property to config.ui.ts
   const defaultGasPerDelegation = 140000;
 
@@ -418,13 +423,33 @@ const ClaimTokenItem: FunctionComponent<{
         {},
         {
           onFulfill: (tx: any) => {
-            console.log(tx.code, tx);
+            if (tx.code != null && tx.code !== 0) {
+              const log = tx.log ?? tx.raw_log;
+              notification.show("failed", "Transaction Failed", log);
+              return;
+            }
+            notification.show("success", "Transaction Success", "");
           },
         }
       );
+
+      navigate("/", {
+        replace: true,
+      });
     } catch (e) {
-      // TODO: Add error handling.
+      if (e?.message === "Request rejected") {
+        return;
+      }
+
       console.log(e);
+      notification.show(
+        "failed",
+        "Transaction Failed",
+        e.message || e.toString()
+      );
+      navigate("/", {
+        replace: true,
+      });
     }
   };
 

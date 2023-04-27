@@ -88,7 +88,7 @@ export const NotificationProvider: FunctionComponent = ({ children }) => {
 
     setTimeout(() => {
       hideFnRef.current(id);
-    }, 2000);
+    }, 2500);
 
     return id;
   };
@@ -214,8 +214,12 @@ const NotificationView: FunctionComponent<{
           }}
         >
           <Subtitle4 color={titleColor}>{title}</Subtitle4>
-          <Gutter size="0.375rem" />
-          <Body3 color={paragraphColor}>{paragraph}</Body3>
+          {paragraph ? (
+            <React.Fragment>
+              <Gutter size="0.375rem" />
+              <Body3 color={paragraphColor}>{paragraph}</Body3>
+            </React.Fragment>
+          ) : null}
         </Box>
       </Box>
     </VerticalCollapseTransition>

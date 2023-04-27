@@ -19,6 +19,7 @@ import { MemoInput } from "../../../components/input/memo-input";
 import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { FeeControl } from "../../../components/input/fee-control";
+import { useNotification } from "../../../hooks/notification";
 
 const Styles = {
   Flex1: styled.div`
@@ -30,6 +31,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const notification = useNotification();
 
   const paramChainId = searchParams.get("chainId");
   const paramCoinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -94,11 +96,40 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               )
               .send(
                 sendConfigs.feeConfig.toStdFee(),
-                sendConfigs.memoConfig.memo
+                sendConfigs.memoConfig.memo,
+                {
+                  preferNoSetFee: true,
+                  preferNoSetMemo: true,
+                },
+                {
+                  onFulfill: (tx: any) => {
+                    if (tx.code != null && tx.code !== 0) {
+                      const log = tx.log ?? tx.raw_log;
+                      notification.show("failed", "Transaction Failed", log);
+                      return;
+                    }
+                    notification.show("success", "Transaction Success", "");
+                  },
+                }
               );
+
+            navigate("/", {
+              replace: true,
+            });
           } catch (e) {
-            // TODO: Add error handling.
+            if (e?.message === "Request rejected") {
+              return;
+            }
+
             console.log(e);
+            notification.show(
+              "failed",
+              "Transaction Failed",
+              e.message || e.toString()
+            );
+            navigate("/", {
+              replace: true,
+            });
           }
         }
       }}
