@@ -2,7 +2,8 @@ import React from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
 import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
-import { UnknownMessage } from "./unknown";
+import yaml from "js-yaml";
+import { Buffer } from "buffer/";
 import { ClaimRewardsMessage } from "./render/claim-rewards";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
@@ -12,14 +13,17 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
     this.renderers.push(renderer);
   }
 
-  render(msg: Msg | AnyWithUnpacked): {
+  render(
+    chainId: string,
+    msg: Msg | AnyWithUnpacked
+  ): {
     icon: React.ReactElement;
     title: string;
     content: string | React.ReactElement;
   } {
     try {
       for (const renderer of this.renderers) {
-        const res = renderer.process(msg);
+        const res = renderer.process(chainId, msg);
         if (res) {
           return res;
         }
@@ -29,7 +33,31 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
       // Fallback to unknown message
     }
 
-    return UnknownMessage.process(msg);
+    const prettyMsg = (() => {
+      try {
+        if ("type" in msg) {
+          return yaml.dump(msg);
+        }
+
+        if ("unpacked" in msg) {
+          return yaml.dump({
+            typeUrl: msg.typeUrl || "Unknown",
+            value: Buffer.from(msg.value).toString("base64"),
+          });
+        }
+
+        return yaml.dump(msg);
+      } catch (e) {
+        console.log(e);
+        return "Failed to decode the msg";
+      }
+    })();
+
+    return {
+      icon: <div>TODO</div>,
+      title: "Custom",
+      content: <pre style={{ width: "280px", margin: 0 }}>{prettyMsg}</pre>,
+    };
   }
 }
 

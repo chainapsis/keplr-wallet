@@ -245,7 +245,7 @@ export const CosmosTxView: FunctionComponent<{
                 }}
               >
                 {msgs.map((msg, i) => {
-                  const r = defaultRegistry.render(msg);
+                  const r = defaultRegistry.render(chainId, msg);
 
                   return (
                     <MessageItem

@@ -3,7 +3,10 @@ import { Msg } from "@keplr-wallet/types";
 import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 
 export interface IMessageRenderer {
-  process(msg: Msg | AnyWithUnpacked):
+  process(
+    chainId: string,
+    msg: Msg | AnyWithUnpacked
+  ):
     | {
         icon: React.ReactElement;
         title: string;
@@ -15,7 +18,10 @@ export interface IMessageRenderer {
 export interface IMessageRenderRegistry {
   register(renderer: IMessageRenderer): void;
 
-  render(msg: Msg | AnyWithUnpacked): {
+  render(
+    chainId: string,
+    msg: Msg | AnyWithUnpacked
+  ): {
     icon: React.ReactElement;
     title: string;
     content: string | React.ReactElement;
