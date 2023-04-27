@@ -133,6 +133,17 @@ export const CosmosTxView: FunctionComponent<{
     memoConfig,
   });
 
+  const preferNoSetFee = (() => {
+    // 자동으로 fee를 다뤄줄 수 있는건 fee가 하나인 경우이다.
+    // fee가 여러개인 경우는 일반적인 경우가 아니기 때문에
+    // 케플러에서 처리해줄 수 없다. 그러므로 옵션을 무시하고 fee 설정을 각 웹사이트에 맡긴다.
+    if (interactionData.data.signDocWrapper.fees.length >= 2) {
+      return true;
+    }
+
+    return interactionData.data.signOptions.preferNoSetFee;
+  })();
+
   const interactionInfo = useInteractionInfo();
 
   return (
@@ -255,9 +266,7 @@ export const CosmosTxView: FunctionComponent<{
             feeConfig={feeConfig}
             senderConfig={senderConfig}
             gasConfig={gasConfig}
-            disableAutomaticFeeSet={
-              interactionData.data.signOptions.preferNoSetFee
-            }
+            disableAutomaticFeeSet={preferNoSetFee}
           />
         </Stack>
       </Box>
