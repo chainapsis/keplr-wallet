@@ -12,6 +12,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
   right,
   isLoading,
   textOverrideIcon,
+  type,
   ...otherProps
 }) => {
   return (
@@ -22,6 +23,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
     >
       <Styles.Button
         isLoading={isLoading}
+        type={type || "button"}
         {...otherProps}
         onClick={(e) => {
           if (onClick) {
