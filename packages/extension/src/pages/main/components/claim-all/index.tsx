@@ -74,6 +74,8 @@ class ClaimAllEachState {
   }
 }
 
+const zeroDec = new Dec(0);
+
 export const ClaimAll: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
@@ -102,7 +104,34 @@ export const ClaimAll: FunctionComponent = observer(() => {
         chainInfo,
       };
     })
-    .filter((viewToken) => viewToken.token.toDec().gt(new Dec(0)));
+    .filter((viewToken) => viewToken.token.toDec().gt(zeroDec))
+    .sort((a, b) => {
+      const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
+      const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
+
+      if (aPrice.equals(bPrice)) {
+        return 0;
+      }
+      return aPrice.gt(bPrice) ? -1 : 1;
+    })
+    .sort((a, b) => {
+      const aHasError =
+        getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
+      const bHasError =
+        getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
+
+      if (aHasError || bHasError) {
+        if (aHasError && bHasError) {
+          return 0;
+        } else if (aHasError) {
+          return 1;
+        } else {
+          return -1;
+        }
+      }
+
+      return 0;
+    });
 
   const [isExpanded, setIsExpanded] = useState(true);
 
