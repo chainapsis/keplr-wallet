@@ -23,6 +23,10 @@
       font-weight: 400;
       margin-right: 6px;
       color: #808da0;
+      max-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .tokenBalance {
       font-size: 15px;
