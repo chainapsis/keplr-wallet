@@ -12,6 +12,7 @@ import {
   CopyAddress,
   CopyAddressModal,
   InternalLinkView,
+  IBCTransferView,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
@@ -32,7 +33,7 @@ export interface ViewToken {
 }
 
 export const MainPage: FunctionComponent = observer(() => {
-  const { keyRingStore, hugeQueriesStore } = useStore();
+  const { keyRingStore, hugeQueriesStore, uiConfigStore } = useStore();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
@@ -151,6 +152,10 @@ export const MainPage: FunctionComponent = observer(() => {
             각 컴포넌트에서 알아서 gutter를 처리해야한다.
            */}
           {tabStatus === "available" ? <AvailableTabView /> : <StakedTabView />}
+
+          {tabStatus === "available" && uiConfigStore.isDeveloper ? (
+            <IBCTransferView />
+          ) : null}
         </Stack>
       </Box>
 

@@ -7,3 +7,4 @@ export * from "./copy-address";
 export * from "./copy-address-modal";
 export * from "./empty-view";
 export * from "./internal-link-view";
+export * from "./ibc-transfer-view";

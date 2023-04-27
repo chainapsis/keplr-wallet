@@ -56,6 +56,7 @@ import {
 } from "./pages/wallet";
 import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
+import { IBCSendAmountPage, IBCSendSelectChannelPage } from "./pages/ibc-send";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -243,6 +244,11 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               path="/wallet/recovery-phrase"
               element={<WalletRecoveryPhrasePage />}
             />
+            <Route
+              path="/ibc-send/select-channel"
+              element={<IBCSendSelectChannelPage />}
+            />
+            <Route path="/ibc-send/amount" element={<IBCSendAmountPage />} />
           </Routes>
         )
       ) : (
