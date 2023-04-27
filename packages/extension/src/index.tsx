@@ -56,6 +56,7 @@ import {
 } from "./pages/wallet";
 import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
+import { NotificationProvider } from "./hooks/notification";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -257,11 +258,13 @@ const App: FunctionComponent = () => {
     <StoreProvider>
       <ModalRootProvider>
         <ConfirmProvider>
-          <IntlProvider locale={navigator.language}>
-            <GlobalStyle />
-            <GlobalPopupStyle />
-            <RoutesAfterReady />
-          </IntlProvider>
+          <NotificationProvider>
+            <IntlProvider locale={navigator.language}>
+              <GlobalStyle />
+              <GlobalPopupStyle />
+              <RoutesAfterReady />
+            </IntlProvider>
+          </NotificationProvider>
         </ConfirmProvider>
       </ModalRootProvider>
     </StoreProvider>

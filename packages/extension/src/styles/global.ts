@@ -73,6 +73,13 @@ export const GlobalStyle = createGlobalStyle`
     color: ${ColorPalette.white};
     background-color: ${ColorPalette["gray-700"]};
   }
+  
+  pre {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 0.8125rem;
+    color: ${ColorPalette["gray-200"]};
+  }
 
   // Set border-box as default for convenience.
   html {

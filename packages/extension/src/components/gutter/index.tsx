@@ -17,7 +17,21 @@ const Styles = {
 
       return size;
     }};
+    min-width: ${({ size, direction }) => {
+      if (direction === "vertical") {
+        return "1px";
+      }
+
+      return size;
+    }};
     height: ${({ size, direction }) => {
+      if (direction === "horizontal") {
+        return "1px";
+      }
+
+      return size;
+    }};
+    min-height: ${({ size, direction }) => {
       if (direction === "horizontal") {
         return "1px";
       }

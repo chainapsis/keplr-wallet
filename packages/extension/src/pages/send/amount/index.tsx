@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -16,6 +16,10 @@ import { TokenItem } from "../../main/components";
 import { Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { MemoInput } from "../../../components/input/memo-input";
+import { YAxis } from "../../../components/axis";
+import { Gutter } from "../../../components/gutter";
+import { FeeControl } from "../../../components/input/fee-control";
+import { useNotification } from "../../../hooks/notification";
 
 const Styles = {
   Flex1: styled.div`
@@ -27,14 +31,21 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const notification = useNotification();
 
-  const coinMinimalDenom = searchParams.get("coinMinimalDenom");
-  const chainId = searchParams.get("chainId");
+  const paramChainId = searchParams.get("chainId");
+  const paramCoinMinimalDenom = searchParams.get("coinMinimalDenom");
 
-  if (!coinMinimalDenom || !chainId) {
-    navigate("/send/select-asset");
-    return null;
-  }
+  const chainId = paramChainId || chainStore.chainInfosInUI[0].chainId;
+  const coinMinimalDenom =
+    paramCoinMinimalDenom ||
+    chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+
+  useEffect(() => {
+    if (!paramChainId || !paramCoinMinimalDenom) {
+      navigate("/send/select-asset");
+    }
+  }, [navigate, paramChainId, paramCoinMinimalDenom]);
 
   const sender = accountStore.getAccount(
     chainStore.getChain(chainId).chainId
@@ -69,26 +80,65 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         text: "Go to Sign",
         color: "primary",
         size: "large",
-        // TODO: Move to "onSubmit" under form
-        onClick: () => {
-          accountStore
-            .getAccount(chainId)
-            .makeSendTokenTx(
-              sendConfigs.amountConfig.amount[0].toDec().toString(),
-              sendConfigs.amountConfig.amount[0].currency,
-              sendConfigs.recipientConfig.recipient
-            )
-            .send(
-              sendConfigs.feeConfig.toStdFee(),
-              sendConfigs.memoConfig.memo
+        isLoading: accountStore.getAccount(chainId).isSendingMsg === "send",
+      }}
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        if (!txConfigsValidate.interactionBlocked) {
+          try {
+            await accountStore
+              .getAccount(chainId)
+              .makeSendTokenTx(
+                sendConfigs.amountConfig.amount[0].toDec().toString(),
+                sendConfigs.amountConfig.amount[0].currency,
+                sendConfigs.recipientConfig.recipient
+              )
+              .send(
+                sendConfigs.feeConfig.toStdFee(),
+                sendConfigs.memoConfig.memo,
+                {
+                  preferNoSetFee: true,
+                  preferNoSetMemo: true,
+                },
+                {
+                  onFulfill: (tx: any) => {
+                    if (tx.code != null && tx.code !== 0) {
+                      const log = tx.log ?? tx.raw_log;
+                      notification.show("failed", "Transaction Failed", log);
+                      return;
+                    }
+                    notification.show("success", "Transaction Success", "");
+                  },
+                }
+              );
+
+            navigate("/", {
+              replace: true,
+            });
+          } catch (e) {
+            if (e?.message === "Request rejected") {
+              return;
+            }
+
+            console.log(e);
+            notification.show(
+              "failed",
+              "Transaction Failed",
+              e.message || e.toString()
             );
-        },
+            navigate("/", {
+              replace: true,
+            });
+          }
+        }
       }}
     >
-      <Box paddingX="0.75rem">
+      <Box paddingX="0.75rem" paddingBottom="0.75rem">
         <Stack gutter="0.75rem">
-          <Stack gutter="0.375rem">
+          <YAxis>
             <Subtitle3>Asset</Subtitle3>
+            <Gutter size="0.375rem" />
             <TokenItem
               viewToken={{
                 token: balance,
@@ -96,7 +146,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               }}
               forChange
             />
-          </Stack>
+          </YAxis>
 
           <RecipientInput
             recipientConfig={sendConfigs.recipientConfig}
@@ -112,7 +162,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <Styles.Flex1 />
 
-          <Box marginBottom="4.75rem" />
+          <FeeControl
+            senderConfig={sendConfigs.senderConfig}
+            feeConfig={sendConfigs.feeConfig}
+            gasConfig={sendConfigs.gasConfig}
+          />
         </Stack>
       </Box>
     </HeaderLayout>

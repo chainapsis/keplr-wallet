@@ -13,6 +13,14 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
   };
 
   useEffect(() => {
+    return () => {
+      if (cleanUpRef.current) {
+        cleanUpRef.current();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     // Execute the clean-up function when closing window.
     const beforeunload = async () => {
       if (cleanUpRef.current) {
