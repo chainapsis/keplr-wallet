@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
@@ -17,6 +17,10 @@ import styled from "styled-components";
 import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../../components/image";
 import { Tooltip } from "../../../../components/tooltip";
+import { DenomHelper } from "@keplr-wallet/common";
+import { Tag } from "../../../../components/tag";
+import { XAxis } from "../../../../components/axis";
+import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
   Container: styled.div<{ forChange: boolean | undefined }>`
@@ -63,6 +67,43 @@ export const TokenItem: FunctionComponent<{
 
   const pricePretty = priceStore.calculatePrice(viewToken.token);
 
+  const isIBC = useMemo(() => {
+    return viewToken.token.currency.coinMinimalDenom.startsWith("ibc/");
+  }, [viewToken.token.currency]);
+
+  const coinDenom = useMemo(() => {
+    if (
+      "originCurrency" in viewToken.token.currency &&
+      viewToken.token.currency.originCurrency
+    ) {
+      return viewToken.token.currency.originCurrency.coinDenom;
+    }
+    return viewToken.token.currency.coinDenom;
+  }, [viewToken.token.currency]);
+
+  const tag = useMemo(() => {
+    const currency = viewToken.token.currency;
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+    if (
+      denomHelper.type === "native" &&
+      currency.coinMinimalDenom.startsWith("ibc/")
+    ) {
+      return {
+        text: "IBC",
+        tooltip: (() => {
+          const start = currency.coinDenom.indexOf("(");
+          const end = currency.coinDenom.lastIndexOf(")");
+          return currency.coinDenom.slice(start + 1, end);
+        })(),
+      };
+    }
+    if (denomHelper.type !== "native") {
+      return {
+        text: denomHelper.type,
+      };
+    }
+  }, [viewToken.token.currency]);
+
   return (
     <Styles.Container
       forChange={forChange}
@@ -88,9 +129,21 @@ export const TokenItem: FunctionComponent<{
           alt={viewToken.token.currency.coinDenom}
         />
         <Stack gutter="0.25rem">
-          <Subtitle2>{viewToken.token.currency.coinDenom}</Subtitle2>
+          <XAxis alignY="center">
+            <Subtitle2>{coinDenom}</Subtitle2>
+            {tag ? (
+              <React.Fragment>
+                <Gutter size="0.5rem" />
+                <Box alignY="center" height="1px">
+                  <Tag text={tag.text} tooltip={tag.tooltip} />
+                </Box>
+              </React.Fragment>
+            ) : null}
+          </XAxis>
           <Caption1 style={{ color: ColorPalette["gray-300"] }}>
-            {viewToken.chainInfo.chainName}
+            {isIBC
+              ? `on ${viewToken.chainInfo.chainName}`
+              : viewToken.chainInfo.chainName}
           </Caption1>
         </Stack>
 
