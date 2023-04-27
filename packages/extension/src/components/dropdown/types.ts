@@ -1,13 +1,13 @@
-import { CSSProperties } from "react";
+import React, { CSSProperties } from "react";
 
 export interface DropdownItemProps {
   key: string;
-  label: string;
+  label: string | React.ReactNode;
 }
 
 export interface DropdownProps {
   items: DropdownItemProps[];
-  selectedItemKey: string;
+  selectedItemKey?: string;
   onSelect: (key: string) => void;
   placeholder?: string;
   className?: string;
