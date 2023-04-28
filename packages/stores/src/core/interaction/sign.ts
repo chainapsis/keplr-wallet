@@ -14,6 +14,7 @@ export type SignInteractionData =
       signOptions: KeplrSignOptions & {
         isADR36WithString?: boolean;
       };
+      keyType: string;
 
       eip712?: {
         types: Record<string, { name: string; type: string }[] | undefined>;
@@ -28,6 +29,7 @@ export type SignInteractionData =
       signer: string;
       signDocBytes: Uint8Array;
       signOptions: KeplrSignOptions;
+      keyType: string;
     };
 
 export class SignInteractionStore {

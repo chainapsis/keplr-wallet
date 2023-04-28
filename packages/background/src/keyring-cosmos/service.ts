@@ -224,6 +224,7 @@ export class KeyRingCosmosService {
         signDoc,
         signer,
         signOptions,
+        keyType: keyInfo.type,
       }
     )) as {
       newSignDoc: StdSignDoc;
@@ -413,6 +414,7 @@ export class KeyRingCosmosService {
         signDoc,
         signer,
         signOptions,
+        keyType: keyInfo.type,
       }
     )) as {
       newSignDoc: StdSignDoc;
@@ -493,6 +495,7 @@ export class KeyRingCosmosService {
         signDocBytes: SignDoc.encode(signDoc).finish(),
         signer,
         signOptions,
+        keyType: keyInfo.type,
       }
     )) as {
       newSignDocBytes: Uint8Array;
@@ -692,6 +695,7 @@ export class KeyRingCosmosService {
         signer,
         signOptions,
         eip712,
+        keyType: keyInfo.type,
       }
     )) as {
       newSignDoc: StdSignDoc;
