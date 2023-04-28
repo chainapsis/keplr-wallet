@@ -14,6 +14,12 @@ export type SignInteractionData =
       signOptions: KeplrSignOptions & {
         isADR36WithString?: boolean;
       };
+
+      eip712?: {
+        types: Record<string, { name: string; type: string }[] | undefined>;
+        domain: Record<string, any>;
+        primaryType: string;
+      };
     }
   | {
       origin: string;
@@ -69,12 +75,46 @@ export class SignInteractionStore {
     newSignDocWrapper: SignDocWrapper,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    const newSignDoc =
-      newSignDocWrapper.mode === "amino"
-        ? newSignDocWrapper.aminoSignDoc
-        : newSignDocWrapper.protoSignDoc.toBytes();
+    const res = (() => {
+      if (newSignDocWrapper.mode === "amino") {
+        return {
+          newSignDoc: newSignDocWrapper.aminoSignDoc,
+        };
+      }
+      return {
+        newSignDocBytes: newSignDocWrapper.protoSignDoc.toBytes(),
+      };
+    })();
 
-    await this.interactionStore.approveWithProceedNext(id, newSignDoc, afterFn);
+    await this.interactionStore.approveWithProceedNext(id, res, afterFn);
+  }
+
+  // This must be used if ledger.
+  async approveWithSignatureWithProceedNext(
+    id: string,
+    newSignDocWrapper: SignDocWrapper,
+    signature: Uint8Array,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    const res = (() => {
+      if (newSignDocWrapper.mode === "amino") {
+        return {
+          newSignDoc: newSignDocWrapper.aminoSignDoc,
+        };
+      }
+      return {
+        newSignDocBytes: newSignDocWrapper.protoSignDoc.toBytes(),
+      };
+    })();
+
+    await this.interactionStore.approveWithProceedNext(
+      id,
+      {
+        ...res,
+        signature,
+      },
+      afterFn
+    );
   }
 
   async rejectWithProceedNext(
