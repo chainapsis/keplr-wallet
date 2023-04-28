@@ -5,6 +5,7 @@ import { TextInput } from "../../../../components/input";
 import { ColorPalette } from "../../../../styles";
 import { BIP44PathState } from "./state";
 import { observer } from "mobx-react-lite";
+import { useConfirm } from "../../../../hooks/confirm";
 
 const CloseSvg: FunctionComponent<{ size: number | string; color: string }> = ({
   size,
@@ -36,16 +37,24 @@ export const SetBip44PathCard: FunctionComponent<{
 
   onClose: () => void;
 }> = observer(({ coinType, state, onClose }) => {
+  const confirm = useConfirm();
+
   return (
     <Styles.Container>
       <Styles.Title>Set Custom Derivation Path</Styles.Title>
       <Styles.CloseContainer
-        onClick={(e) => {
+        onClick={async (e) => {
           e.preventDefault();
 
-          // TODO: Add alert saying that the setup will be reset.
-          state.reset();
-          onClose();
+          if (
+            await confirm.confirm(
+              "",
+              "Closing this box will reset the HD Path. Are you sure you want to proceed?"
+            )
+          ) {
+            state.reset();
+            onClose();
+          }
         }}
       >
         <CloseSvg size="1.5rem" color={ColorPalette["gray-300"]} />
