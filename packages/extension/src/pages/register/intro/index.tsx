@@ -16,6 +16,7 @@ import AnimIntro6 from "../../../public/assets/lottie/register/intro6.json";
 import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import lottie from "lottie-web";
+import { TextButton } from "../../../components/button-text";
 
 const AnimIntros = [
   AnimIntro1,
@@ -105,11 +106,12 @@ export const RegisterIntroScene: FunctionComponent = () => {
         <Button
           text="Import an existing wallet"
           size="large"
+          color="secondary"
           onClick={() => {
             sceneTransition.push("existing-user");
           }}
         />
-        <Button
+        <TextButton
           text="Connect Hardware Wallet"
           size="large"
           onClick={() => {
