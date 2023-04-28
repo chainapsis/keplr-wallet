@@ -206,6 +206,12 @@ export const Styles = {
         disabled ? "disabled" : "enabled"
       ]}
   `,
+  Left: styled.span`
+    height: 100%;
+    display: flex;
+    align-items: center;
+    margin-right: 0.25rem;
+  `,
   Right: styled.span`
     height: 100%;
     display: flex;

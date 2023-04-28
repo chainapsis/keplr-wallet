@@ -15,6 +15,7 @@ export interface ButtonProps {
   mode?: ButtonMode;
   size?: ButtonSize;
   disabled?: boolean;
+  left?: React.ReactNode;
   text?: string;
   right?: React.ReactNode;
   onClick?: () => void;
