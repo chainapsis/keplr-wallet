@@ -62,12 +62,12 @@ export const RegisterPage: FunctionComponent = observer(() => {
               {
                 name: "new-user",
                 element: RegisterIntroNewUserScene,
-                width: "47.8rem",
+                width: "53.75rem",
               },
               {
                 name: "existing-user",
                 element: RegisterIntroExistingUserScene,
-                width: "47.8rem",
+                width: "53.75rem",
               },
               {
                 name: "new-mnemonic",

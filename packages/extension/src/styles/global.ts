@@ -9,8 +9,6 @@ import InterSemiBold from "../public/assets/font/Inter-SemiBold.ttf";
 import InterBold from "../public/assets/font/Inter-Bold.ttf";
 import InterExtraBold from "../public/assets/font/Inter-ExtraBold.ttf";
 import InterBlack from "../public/assets/font/Inter-Black.ttf";
-import HafferSemiBold from "../public/assets/font/HafferSQXH-SemiBold.ttf";
-import HafferMedium from "../public/assets/font/HafferSQXH-Medium.ttf";
 import { ColorPalette } from "./colors";
 
 export const GlobalStyle = createGlobalStyle`
@@ -73,13 +71,13 @@ export const GlobalStyle = createGlobalStyle`
   @font-face {
     font-family: 'Haffer';
     font-weight: 600;
-    src: url(${HafferSemiBold}) format("truetype");
+    src: url(${InterSemiBold}) format("truetype");
   }
 
   @font-face {
     font-family: 'Haffer';
     font-weight: 500;
-    src: url(${HafferMedium}) format("truetype");
+    src: url(${InterMedium}) format("truetype");
   }
   
   html, body {
