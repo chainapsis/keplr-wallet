@@ -51,9 +51,9 @@ export const EnableChainsScene: FunctionComponent<{
     },
   });
 
-  if (!isFresh) {
-    // Handle coin type selection.
-    useEffectOnce(() => {
+  // Handle coin type selection.
+  useEffectOnce(() => {
+    if (!isFresh) {
       for (const candidateAddress of candidateAddresses) {
         const queries = queriesStore.get(candidateAddress.chainId);
         const chainInfo = chainStore.getChain(candidateAddress.chainId);
@@ -118,8 +118,8 @@ export const EnableChainsScene: FunctionComponent<{
           })();
         }
       }
-    });
-  }
+    }
+  });
 
   const sceneTransition = useSceneTransition();
 
