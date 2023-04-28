@@ -78,7 +78,7 @@ const Styles = {
     ${({ layoutHeight, fixedHeight }) => {
       if (!fixedHeight) {
         return css`
-          min-height: ${layoutHeight}rem;
+          // min-height: ${layoutHeight}rem;
         `;
       } else {
         return css`
