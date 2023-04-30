@@ -82,11 +82,22 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
 
   const sceneTransition = useSceneTransition();
 
-  const [seedType, setSeedType] = useState<SeedType>("12words");
   // Full words should remain 24 length.
   const [fullWords, setFullWords] = useState<string[]>(() =>
     new Array(24).fill("")
   );
+  const [seedType, _setSeedType] = useState<SeedType>("12words");
+  const setSeedType = (value: SeedType) => {
+    const prev = seedType;
+
+    const prevIsMnemonic = prev === "12words" || prev === "24words";
+    const newIsMnemonic = value === "12words" || value === "24words";
+    if (prevIsMnemonic !== newIsMnemonic) {
+      setFullWords(new Array(24).fill(""));
+    }
+
+    _setSeedType(value);
+  };
 
   const fixedWidthScene = useFixedWidthScene();
   useEffect(() => {
@@ -236,16 +247,18 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         </Box>
         <Gutter size="1rem" />
 
-        <Bleed left="1rem">
+        <Bleed left={seedType === "private-key" ? "0" : "1rem"}>
           <VerticalResizeTransition>
             {seedType === "private-key" ? (
-              <Box paddingLeft="1rem" width="100%">
+              <Box width="100%">
                 <FocusVisiblePasswordInput
                   value={fullWords[0]}
                   onChange={(e) => {
                     e.preventDefault();
 
-                    setFullWords([e.target.value]);
+                    const next = new Array(24).fill("");
+                    next[0] = e.target.value;
+                    setFullWords(next);
                   }}
                   onPaste={(e) => {
                     e.preventDefault();
