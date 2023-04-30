@@ -58,8 +58,8 @@ export const FinalizeKeyScene: FunctionComponent<{
     onWillVisible: () => {
       header.setHeader({
         mode: "welcome",
-        title: "TODO",
-        paragraph: "TODO",
+        title: "Creating Your Account...",
+        paragraph: "",
       });
     },
   });
@@ -243,9 +243,11 @@ export const FinalizeKeyScene: FunctionComponent<{
       isAnimEnded
     ) {
       onceRef.current = true;
+
       sceneTransition.replace("enable-chains", {
         vaultId,
         candidateAddresses,
+        isFresh: mnemonic?.isFresh ?? false,
       });
     }
   }, [candidateAddresses, isAnimEnded, sceneTransition, vaultId]);

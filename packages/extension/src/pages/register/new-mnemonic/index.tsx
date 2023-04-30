@@ -21,6 +21,10 @@ import AnimSeed from "../../../public/assets/lottie/register/seed.json";
 import { useRegisterHeader } from "../components/header";
 import { HorizontalRadioGroup } from "../../../components/radio-group";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { WarningBox } from "../../../components/warning-box";
+import { TextButton } from "../../../components/button-text";
+import { ColorPalette } from "../../../styles";
+import { Button1 } from "../../../components/typography";
 
 type WordsType = "12words" | "24words";
 
@@ -82,6 +86,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
   }, [fixedWidthScene, wordsType]);
 
   const [words, setWords] = useState<string[]>([]);
+  const [hasCopied, setHasCopied] = useState(false);
 
   useEffect(() => {
     const rng = (array: any) => {
@@ -144,8 +149,42 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
             <Gutter size="1rem" />
           </VerticalResizeTransition>
         </Bleed>
+
+        <TextButton
+          text={
+            hasCopied ? (
+              <Button1 color={ColorPalette["green-400"]}>Copied</Button1>
+            ) : (
+              "Copy to clipboard"
+            )
+          }
+          size="large"
+          onClick={async () => {
+            await navigator.clipboard.writeText(words.join(" "));
+
+            setHasCopied(true);
+
+            setTimeout(() => {
+              setHasCopied(false);
+            }, 2000);
+          }}
+        />
+
+        <Gutter size="1.625rem" />
       </Box>
-      <Gutter size="2.875rem" />
+
+      <Box width="25.5rem">
+        <WarningBox
+          title="DO NOT share your recovery phrase with ANYONE."
+          paragraph="Anyone with your recovery phrase can have full control over your assets. Please stay vigilant against phishing attacks at all times."
+        />
+
+        <WarningBox
+          title="Back up the phrase safely. "
+          paragraph="You will never be able to restore your account without your recovery phrase."
+        />
+      </Box>
+
       <Box width="27.25rem" marginX="auto">
         <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
           <Box alignX="center">

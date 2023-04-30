@@ -20,6 +20,8 @@ import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { useNavigate } from "react-router";
+import { ChainImageFallback } from "../../../components/image";
+import { Checkbox } from "../../../components/checkbox";
 
 export const EnableChainsScene: FunctionComponent<{
   vaultId: string;
@@ -30,7 +32,8 @@ export const EnableChainsScene: FunctionComponent<{
       address: string;
     }[];
   }[];
-}> = observer(({ vaultId, candidateAddresses }) => {
+  isFresh: boolean;
+}> = observer(({ vaultId, candidateAddresses, isFresh }) => {
   const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
 
   const navigate = useNavigate();
@@ -41,6 +44,7 @@ export const EnableChainsScene: FunctionComponent<{
       header.setHeader({
         mode: "step",
         title: "Select Chains",
+        paragraphs: ["Don’t worry, you can change your selections anytime."],
         stepCurrent: 3,
         stepTotal: 6,
       });
@@ -49,68 +53,70 @@ export const EnableChainsScene: FunctionComponent<{
 
   // Handle coin type selection.
   useEffectOnce(() => {
-    for (const candidateAddress of candidateAddresses) {
-      const queries = queriesStore.get(candidateAddress.chainId);
-      const chainInfo = chainStore.getChain(candidateAddress.chainId);
+    if (!isFresh) {
+      for (const candidateAddress of candidateAddresses) {
+        const queries = queriesStore.get(candidateAddress.chainId);
+        const chainInfo = chainStore.getChain(candidateAddress.chainId);
 
-      if (
-        candidateAddress.bech32Addresses.length >= 2 &&
-        keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
-      ) {
-        (async () => {
-          const promises: Promise<unknown>[] = [];
+        if (
+          candidateAddress.bech32Addresses.length >= 2 &&
+          keyRingStore.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo)
+        ) {
+          (async () => {
+            const promises: Promise<unknown>[] = [];
 
-          for (const bech32Address of candidateAddress.bech32Addresses) {
-            const queryAccount =
-              queries.cosmos.queryAccount.getQueryBech32Address(
-                bech32Address.address
-              );
-
-            promises.push(queryAccount.waitResponse());
-          }
-
-          await Promise.allSettled(promises);
-
-          const mainAddress = candidateAddress.bech32Addresses.find(
-            (a) => a.coinType === chainInfo.bip44.coinType
-          );
-          const otherAddresses = candidateAddress.bech32Addresses.filter(
-            (a) => a.coinType !== chainInfo.bip44.coinType
-          );
-
-          let otherIsSelectable = false;
-          if (mainAddress && otherAddresses.length > 0) {
-            for (const otherAddress of otherAddresses) {
-              const bech32Address = otherAddress.address;
+            for (const bech32Address of candidateAddress.bech32Addresses) {
               const queryAccount =
                 queries.cosmos.queryAccount.getQueryBech32Address(
-                  bech32Address
+                  bech32Address.address
                 );
 
-              // Check that the account exist on chain.
-              // With stargate implementation, querying account fails with 404 status if account not exists.
-              // But, if account receives some native tokens, the account would be created and it may deserve to be chosen.
-              if (queryAccount.response?.data && queryAccount.error == null) {
-                otherIsSelectable = true;
-                break;
+              promises.push(queryAccount.waitResponse());
+            }
+
+            await Promise.allSettled(promises);
+
+            const mainAddress = candidateAddress.bech32Addresses.find(
+              (a) => a.coinType === chainInfo.bip44.coinType
+            );
+            const otherAddresses = candidateAddress.bech32Addresses.filter(
+              (a) => a.coinType !== chainInfo.bip44.coinType
+            );
+
+            let otherIsSelectable = false;
+            if (mainAddress && otherAddresses.length > 0) {
+              for (const otherAddress of otherAddresses) {
+                const bech32Address = otherAddress.address;
+                const queryAccount =
+                  queries.cosmos.queryAccount.getQueryBech32Address(
+                    bech32Address
+                  );
+
+                // Check that the account exist on chain.
+                // With stargate implementation, querying account fails with 404 status if account not exists.
+                // But, if account receives some native tokens, the account would be created and it may deserve to be chosen.
+                if (queryAccount.response?.data && queryAccount.error == null) {
+                  otherIsSelectable = true;
+                  break;
+                }
               }
             }
-          }
 
-          if (!otherIsSelectable && mainAddress) {
-            console.log(
-              "Finalize mnemonic key coin type",
-              vaultId,
-              chainInfo.chainId,
-              mainAddress.coinType
-            );
-            keyRingStore.finalizeMnemonicKeyCoinType(
-              vaultId,
-              chainInfo.chainId,
-              mainAddress.coinType
-            );
-          }
-        })();
+            if (!otherIsSelectable && mainAddress) {
+              console.log(
+                "Finalize mnemonic key coin type",
+                vaultId,
+                chainInfo.chainId,
+                mainAddress.coinType
+              );
+              keyRingStore.finalizeMnemonicKeyCoinType(
+                vaultId,
+                chainInfo.chainId,
+                mainAddress.coinType
+              );
+            }
+          })();
+        }
       }
     }
   });
@@ -254,6 +260,7 @@ export const EnableChainsScene: FunctionComponent<{
                 balance={balance}
                 enabled={enabled}
                 blockInteraction={blockInteraction}
+                isFresh={isFresh}
                 onClick={() => {
                   if (
                     enabledChainIdentifierMap.get(chainInfo.chainIdentifier)
@@ -280,7 +287,7 @@ export const EnableChainsScene: FunctionComponent<{
       <Gutter size="1.25rem" />
       <Box width="22.5rem" marginX="auto">
         <Button
-          text="Import"
+          text="Save"
           size="large"
           onClick={async () => {
             const enables: string[] = [];
@@ -359,45 +366,77 @@ const ChainItem: FunctionComponent<{
   blockInteraction: boolean;
 
   onClick: () => void;
-}> = observer(({ chainInfo, balance, enabled, blockInteraction, onClick }) => {
-  const { priceStore } = useStore();
 
-  const price = priceStore.calculatePrice(balance);
+  isFresh: boolean;
+}> = observer(
+  ({ chainInfo, balance, enabled, blockInteraction, onClick, isFresh }) => {
+    const { priceStore } = useStore();
 
-  return (
-    <Box
-      borderRadius="0.375rem"
-      paddingX="1rem"
-      paddingY="0.75rem"
-      backgroundColor={
-        // TODO: Add alpha if needed.
-        enabled ? ColorPalette["gray-500"] : ColorPalette["gray-600"]
-      }
-      cursor={blockInteraction ? "not-allowed" : "pointer"}
-      onClick={() => {
-        if (!blockInteraction) {
-          onClick();
+    const price = priceStore.calculatePrice(balance);
+
+    return (
+      <Box
+        borderRadius="0.375rem"
+        paddingX="1rem"
+        paddingY="0.75rem"
+        backgroundColor={
+          // TODO: Add alpha if needed.
+          enabled ? ColorPalette["gray-500"] : ColorPalette["gray-600"]
         }
-      }}
-    >
-      <Columns sum={1}>
-        <XAxis alignY="center">
-          <div>TODO: Chain Icon</div>
-          <YAxis>
-            <div>{chainInfo.chainName}</div>
-            <Gutter size="0.25rem" />
-            <div>{balance.currency.coinDenom}</div>
-          </YAxis>
-        </XAxis>
-        <Column weight={1} />
-        <XAxis alignY="center">
-          <YAxis>
-            <div>{balance.maxDecimals(6).shrink(true).toString()}</div>
-            <Gutter size="0.25rem" />
-            <div>{price ? price.toString() : "-"}</div>
-          </YAxis>
-        </XAxis>
-      </Columns>
-    </Box>
-  );
-});
+        cursor={blockInteraction ? "not-allowed" : "pointer"}
+        onClick={() => {
+          if (!blockInteraction) {
+            onClick();
+          }
+        }}
+      >
+        <Columns sum={1}>
+          <XAxis alignY="center">
+            <ChainImageFallback
+              style={{
+                width: "3rem",
+                height: "3rem",
+              }}
+              src={chainInfo.chainSymbolImageUrl}
+              alt={chainInfo.chainId}
+            />
+
+            <Gutter size="0.5rem" />
+
+            <YAxis>
+              <div>{chainInfo.chainName}</div>
+              <Gutter size="0.25rem" />
+              <div>{balance.currency.coinDenom}</div>
+            </YAxis>
+          </XAxis>
+          <Column weight={1} />
+          <XAxis alignY="center">
+            {isFresh ? null : (
+              <YAxis alignX="right">
+                <div>
+                  {balance
+                    .maxDecimals(6)
+                    .shrink(true)
+                    .hideDenom(true)
+                    .toString()}
+                </div>
+                <Gutter size="0.25rem" />
+                <div>{price ? price.toString() : "-"}</div>
+              </YAxis>
+            )}
+
+            <Gutter size="1rem" />
+            <Checkbox
+              checked={enabled}
+              onChange={() => {
+                if (!blockInteraction) {
+                  onClick();
+                }
+              }}
+            />
+          </XAxis>
+        </Columns>
+      </Box>
+    );
+  }
+);

@@ -32,11 +32,11 @@ export const VerifyMnemonicScene: FunctionComponent<{
         mode: "step",
         title: "Verify Your Recovery Phrase",
         paragraphs: [
-          <React.Fragment key="1">
+          <div key="paragraphs">
             Fill out the words according to their numbers to
             <br />
             verify that you have stored your phrase safely.
-          </React.Fragment>,
+          </div>,
         ],
         stepCurrent: 2,
         stepTotal: 6,

@@ -67,6 +67,18 @@ export const GlobalStyle = createGlobalStyle`
     font-weight: 900;
     src: url(${InterBlack}) format("truetype");
   }
+
+  @font-face {
+    font-family: 'Haffer';
+    font-weight: 600;
+    src: url(${InterSemiBold}) format("truetype");
+  }
+
+  @font-face {
+    font-family: 'Haffer';
+    font-weight: 500;
+    src: url(${InterMedium}) format("truetype");
+  }
   
   html, body {
     font-family: 'Inter', sans-serif;

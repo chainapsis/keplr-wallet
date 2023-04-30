@@ -61,14 +61,18 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         mode: "step",
         title: "Import Existing Wallet",
         paragraphs: [
-          <React.Fragment key="1">
+          <div key="paragraphs">
             Enter your recovery phrase here to restore your wallet.
             <br />
             Click on any blank to paste the entire phrase.
-          </React.Fragment>,
-          <React.Fragment key="2">
+          </div>,
+          <div key="paragraphs">
             Please make sure that you have selected the right option.
-          </React.Fragment>,
+          </div>,
+          <div key="paragraphs">
+            If your recovery phrase is consisted of more than 12 words, please
+            select “24 words” and enter your phrase.
+          </div>,
         ],
         stepCurrent: 1,
         stepTotal: 6,
@@ -78,11 +82,22 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
 
   const sceneTransition = useSceneTransition();
 
-  const [seedType, setSeedType] = useState<SeedType>("12words");
   // Full words should remain 24 length.
   const [fullWords, setFullWords] = useState<string[]>(() =>
     new Array(24).fill("")
   );
+  const [seedType, _setSeedType] = useState<SeedType>("12words");
+  const setSeedType = (value: SeedType) => {
+    const prev = seedType;
+
+    const prevIsMnemonic = prev === "12words" || prev === "24words";
+    const newIsMnemonic = value === "12words" || value === "24words";
+    if (prevIsMnemonic !== newIsMnemonic) {
+      setFullWords(new Array(24).fill(""));
+    }
+
+    _setSeedType(value);
+  };
 
   const fixedWidthScene = useFixedWidthScene();
   useEffect(() => {
@@ -232,60 +247,88 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         </Box>
         <Gutter size="1rem" />
 
-        <Bleed left="1rem">
+        <Bleed left={seedType === "private-key" ? "0" : "1rem"}>
           <VerticalResizeTransition>
-            <Styles.WordsGridContainer columns={words.length > 12 ? 4 : 3}>
-              {words.map((word, i) => {
-                return (
-                  <XAxis key={i} alignY="center">
-                    <Styles.IndexText>{i + 1}.</Styles.IndexText>
-                    <FocusVisiblePasswordInput
-                      value={word}
-                      onChange={(e) => {
-                        e.preventDefault();
+            {seedType === "private-key" ? (
+              <Box width="100%">
+                <FocusVisiblePasswordInput
+                  value={fullWords[0]}
+                  onChange={(e) => {
+                    e.preventDefault();
 
-                        const next = fullWords.slice();
-                        next[i] = e.target.value;
-                        setFullWords(next);
-                      }}
-                      onPaste={(e) => {
-                        e.preventDefault();
+                    const next = new Array(24).fill("");
+                    next[0] = e.target.value;
+                    setFullWords(next);
+                  }}
+                  onPaste={(e) => {
+                    e.preventDefault();
 
-                        handlePaste(i, e.clipboardData.getData("text"));
-                      }}
-                    />
-                  </XAxis>
-                );
-              })}
-            </Styles.WordsGridContainer>
+                    handlePaste(0, e.clipboardData.getData("text"));
+                  }}
+                />
+              </Box>
+            ) : (
+              <Styles.WordsGridContainer columns={words.length > 12 ? 4 : 3}>
+                {words.map((word, i) => {
+                  return (
+                    <XAxis key={i} alignY="center">
+                      <Styles.IndexText>{i + 1}.</Styles.IndexText>
+                      <FocusVisiblePasswordInput
+                        value={word}
+                        onChange={(e) => {
+                          e.preventDefault();
+
+                          const next = fullWords.slice();
+                          next[i] = e.target.value;
+                          setFullWords(next);
+                        }}
+                        onPaste={(e) => {
+                          e.preventDefault();
+
+                          handlePaste(i, e.clipboardData.getData("text"));
+                        }}
+                      />
+                    </XAxis>
+                  );
+                })}
+              </Styles.WordsGridContainer>
+            )}
             <Gutter size="1rem" />
           </VerticalResizeTransition>
         </Bleed>
 
         <Gutter size="1.625rem" />
-        <Box width="27.25rem" marginX="auto">
-          <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
-            <Box alignX="center">
-              <Button
-                size="small"
-                color="secondary"
-                text="Advanced"
-                onClick={() => {
-                  setIsBIP44CardOpen(true);
-                }}
-              />
+
+        {seedType !== "private-key" ? (
+          <Box>
+            <Box width="27.25rem" marginX="auto">
+              <VerticalCollapseTransition
+                width="100%"
+                collapsed={isBIP44CardOpen}
+              >
+                <Box alignX="center">
+                  <Button
+                    size="small"
+                    color="secondary"
+                    text="Advanced"
+                    onClick={() => {
+                      setIsBIP44CardOpen(true);
+                    }}
+                  />
+                </Box>
+              </VerticalCollapseTransition>
+              <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
+                <SetBip44PathCard
+                  state={bip44PathState}
+                  onClose={() => {
+                    setIsBIP44CardOpen(false);
+                  }}
+                />
+              </VerticalCollapseTransition>
             </Box>
-          </VerticalCollapseTransition>
-          <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
-            <SetBip44PathCard
-              state={bip44PathState}
-              onClose={() => {
-                setIsBIP44CardOpen(false);
-              }}
-            />
-          </VerticalCollapseTransition>
-        </Box>
-        <Gutter size="1.25rem" />
+            <Gutter size="1.25rem" />
+          </Box>
+        ) : null}
 
         <Box width="22.5rem" marginX="auto">
           <Button text="Import" size="large" type="submit" />

@@ -13,10 +13,11 @@ import {
 } from "../../../../components/transition";
 import { Box } from "../../../../components/box";
 import { YAxis } from "../../../../components/axis";
-import { Body1, H1, H3, Subtitle3 } from "../../../../components/typography";
+import { Body1, H4, Subtitle3 } from "../../../../components/typography";
 import { useRegisterHeader } from "./context";
 import { Gutter } from "../../../../components/gutter";
 import { ColorPalette } from "../../../../styles";
+import { RegisterH1, RegisterH2, RegisterH3 } from "../typography";
 
 export const RegisterHeader: FunctionComponent<{
   sceneRef: MutableRefObject<SceneTransitionRef | null>;
@@ -149,7 +150,19 @@ const HeaderIntro: FunctionComponent<{
   return (
     <Box paddingY="0.25rem">
       <YAxis alignX="center">
-        <H1>Your Interchain Gateway</H1>
+        <img
+          src={require("../../../../public/assets/img/intro-logo.png")}
+          style={{
+            width: "9.5rem",
+          }}
+          alt="intro-hardware-wallet image"
+        />
+
+        <Gutter size="1.25rem" />
+
+        <RegisterH2 color={ColorPalette["gray-50"]}>
+          Your Interchain Gateway
+        </RegisterH2>
       </YAxis>
     </Box>
   );
@@ -163,9 +176,9 @@ const HeaderWelcome: FunctionComponent<{
   return (
     <Box position="relative">
       <YAxis alignX="center">
-        <H1>{title}</H1>
+        <RegisterH1>{title}</RegisterH1>
         <Gutter size="0.75rem" />
-        <H3>{paragraph}</H3>
+        <H4 color={ColorPalette["gray-200"]}>{paragraph}</H4>
       </YAxis>
     </Box>
   );
@@ -181,9 +194,11 @@ const HeaderStep: FunctionComponent<{
   return (
     <Box position="relative">
       <YAxis alignX="center">
-        <Subtitle3>{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
+        <Subtitle3
+          color={ColorPalette["gray-200"]}
+        >{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
         <Gutter size="0.75rem" />
-        <H3>{title}</H3>
+        <RegisterH3>{title}</RegisterH3>
       </YAxis>
       <Box width="29.5rem" marginX="auto">
         <VerticalResizeTransition>
@@ -197,6 +212,7 @@ const HeaderStep: FunctionComponent<{
               if (paragraphs.length === 1) {
                 return (
                   <Body1
+                    color={ColorPalette["gray-300"]}
                     style={{
                       textAlign: "center",
                     }}
@@ -211,7 +227,12 @@ const HeaderStep: FunctionComponent<{
                   <ul>
                     {paragraphs.map((paragraph, i) => {
                       return (
-                        <Body1 key={i} as="li">
+                        <Body1
+                          key={i}
+                          as="li"
+                          color={ColorPalette["gray-300"]}
+                          style={{ marginTop: i > 0 ? "0.5rem" : "0" }}
+                        >
                           {paragraph}
                         </Body1>
                       );
