@@ -253,6 +253,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
               <Box width="100%">
                 <FocusVisiblePasswordInput
                   value={fullWords[0]}
+                  disableShowPassword={true}
                   onChange={(e) => {
                     e.preventDefault();
 
@@ -340,14 +341,22 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
 
 const FocusVisiblePasswordInput: FunctionComponent<
   Omit<TextInputProps, "type" | "autoComplete" | "onFocus" | "onBlur"> &
-    React.InputHTMLAttributes<HTMLInputElement>
+    React.InputHTMLAttributes<HTMLInputElement> & {
+      disableShowPassword?: boolean;
+    }
 > = (props) => {
   const [focused, setFocused] = useState(false);
 
   return (
     <TextInput
       {...props}
-      type={focused ? "text" : "password"}
+      type={(() => {
+        if (props.disableShowPassword) {
+          return "password";
+        }
+
+        return focused ? "text" : "password";
+      })()}
       autoComplete="off"
       onFocus={() => {
         setFocused(true);
