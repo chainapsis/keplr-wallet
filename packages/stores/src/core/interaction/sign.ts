@@ -88,7 +88,7 @@ export class SignInteractionStore {
       };
     })();
 
-    await this.interactionStore.approveWithProceedNext(id, res, afterFn);
+    await this.interactionStore.approveWithProceedNextV2(id, res, afterFn);
   }
 
   // This must be used if ledger.
@@ -109,7 +109,7 @@ export class SignInteractionStore {
       };
     })();
 
-    await this.interactionStore.approveWithProceedNext(
+    await this.interactionStore.approveWithProceedNextV2(
       id,
       {
         ...res,

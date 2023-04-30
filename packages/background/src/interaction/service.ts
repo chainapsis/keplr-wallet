@@ -1,5 +1,6 @@
 import { InteractionWaitingData } from "./types";
 import {
+  APP_PORT,
   Env,
   FnRequestInteractionOptions,
   KeplrError,
@@ -59,6 +60,37 @@ export class InteractionService {
     const msg = new PushInteractionDataMsg(interactionWaitingData);
 
     return await this.wait(env, url, msg, options);
+  }
+
+  async waitApproveV2<Return, Response>(
+    env: Env,
+    url: string,
+    type: string,
+    data: unknown,
+    returnFn: (response: Response) => Promise<Return> | Return,
+    options?: Omit<FnRequestInteractionOptions, "unstableOnClose">
+  ): Promise<Return> {
+    if (!type) {
+      throw new KeplrError("interaction", 101, "Type should not be empty");
+    }
+
+    // TODO: Add timeout?
+    const interactionWaitingData = this.addDataToMap(
+      type,
+      env.isInternalMsg,
+      data
+    );
+
+    const msg = new PushInteractionDataMsg(interactionWaitingData);
+
+    try {
+      const response: any = await this.wait(env, url, msg, options);
+      return returnFn(response);
+    } finally {
+      this.dispatchEvent(APP_PORT, "interaction-ends", {
+        id: interactionWaitingData.id,
+      });
+    }
   }
 
   protected async wait(

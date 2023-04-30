@@ -167,7 +167,19 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
             bottom: 0,
           }}
         >
-          <Button {...bottomButton} />
+          <Button
+            {...(() => {
+              const { type, ...other } = bottomButton;
+
+              // onSubmit prop이 존재한다면 기본적으로 type="submit"으로 설정한다
+              // TODO: 만약에 bottomButton이 배열을 받을 수 있도록 수정된다면 이 부분도 수정되어야함.
+
+              return {
+                ...other,
+                type: type || onSubmit ? "submit" : undefined,
+              };
+            })()}
+          />
         </Box>
       ) : null}
     </Styles.Container>

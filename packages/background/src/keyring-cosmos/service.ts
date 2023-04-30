@@ -213,7 +213,7 @@ export class KeyRingCosmosService {
       );
     }
 
-    const res = (await this.interactionService.waitApprove(
+    return await this.interactionService.waitApproveV2(
       env,
       "/sign-cosmos",
       "request-sign-cosmos",
@@ -225,44 +225,38 @@ export class KeyRingCosmosService {
         signer,
         signOptions,
         keyType: keyInfo.type,
-      }
-    )) as {
-      newSignDoc: StdSignDoc;
-      signature?: Uint8Array;
-    };
+      },
+      async (res: { newSignDoc: StdSignDoc; signature?: Uint8Array }) => {
+        let newSignDoc = res.newSignDoc;
 
-    let newSignDoc = res.newSignDoc;
+        newSignDoc = {
+          ...newSignDoc,
+          memo: escapeHTML(newSignDoc.memo),
+        };
 
-    newSignDoc = {
-      ...newSignDoc,
-      memo: escapeHTML(newSignDoc.memo),
-    };
+        let signature: Uint8Array;
 
-    try {
-      let signature: Uint8Array;
-
-      if (keyInfo.type === "ledger") {
-        if (!res.signature || res.signature.length === 0) {
-          throw new Error("Frontend should provider signature if ledger");
+        if (keyInfo.type === "ledger") {
+          if (!res.signature || res.signature.length === 0) {
+            throw new Error("Frontend should provider signature if ledger");
+          }
+          signature = res.signature;
+        } else {
+          signature = await this.keyRingService.sign(
+            env,
+            chainId,
+            vaultId,
+            serializeSignDoc(newSignDoc),
+            isEthermintLike ? "keccak256" : "sha256"
+          );
         }
-        signature = res.signature;
-      } else {
-        signature = await this.keyRingService.sign(
-          env,
-          chainId,
-          vaultId,
-          serializeSignDoc(newSignDoc),
-          isEthermintLike ? "keccak256" : "sha256"
-        );
-      }
 
-      return {
-        signed: newSignDoc,
-        signature: encodeSecp256k1Signature(key.pubKey, signature),
-      };
-    } finally {
-      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-    }
+        return {
+          signed: newSignDoc,
+          signature: encodeSecp256k1Signature(key.pubKey, signature),
+        };
+      }
+    );
   }
 
   async privilegeSignAminoWithdrawRewards(
