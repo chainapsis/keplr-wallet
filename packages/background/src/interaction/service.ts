@@ -1,6 +1,5 @@
 import { InteractionWaitingData } from "./types";
 import {
-  APP_PORT,
   Env,
   FnRequestInteractionOptions,
   KeplrError,
@@ -14,6 +13,13 @@ export class InteractionService {
   protected resolverMap: Map<
     string,
     { onApprove: (result: unknown) => void; onReject: (e: Error) => void }
+  > = new Map();
+
+  protected resolverV2Map: Map<
+    string,
+    {
+      resolver: () => void;
+    }[]
   > = new Map();
 
   constructor(protected readonly eventMsgRequester: MessageRequester) {}
@@ -87,9 +93,13 @@ export class InteractionService {
       const response: any = await this.wait(env, url, msg, options);
       return returnFn(response);
     } finally {
-      this.dispatchEvent(APP_PORT, "interaction-ends", {
-        id: interactionWaitingData.id,
-      });
+      const resolvers = this.resolverV2Map.get(interactionWaitingData.id);
+      if (resolvers) {
+        for (const resolver of resolvers) {
+          resolver.resolver();
+        }
+      }
+      this.resolverV2Map.delete(interactionWaitingData.id);
     }
   }
 
@@ -129,6 +139,24 @@ export class InteractionService {
     this.removeDataFromMap(id);
   }
 
+  approveV2(id: string, result: unknown): Promise<void> {
+    return new Promise((resolve) => {
+      const resolvers = this.resolverV2Map.get(id) || [];
+      resolvers.push({
+        resolver: resolve,
+      });
+      this.resolverV2Map.set(id, resolvers);
+
+      if (this.resolverMap.has(id)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.resolverMap.get(id)!.onApprove(result);
+        this.resolverMap.delete(id);
+      }
+
+      this.removeDataFromMap(id);
+    });
+  }
+
   reject(id: string) {
     if (this.resolverMap.has(id)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -137,6 +165,24 @@ export class InteractionService {
     }
 
     this.removeDataFromMap(id);
+  }
+
+  rejectV2(id: string): Promise<void> {
+    return new Promise((resolve) => {
+      const resolvers = this.resolverV2Map.get(id) || [];
+      resolvers.push({
+        resolver: resolve,
+      });
+      this.resolverV2Map.set(id, resolvers);
+
+      if (this.resolverMap.has(id)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.resolverMap.get(id)!.onReject(new Error("Request rejected"));
+        this.resolverMap.delete(id);
+      }
+
+      this.removeDataFromMap(id);
+    });
   }
 
   protected addDataToMap(
