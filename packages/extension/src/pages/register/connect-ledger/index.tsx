@@ -15,6 +15,13 @@ import { Button } from "../../../components/button";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { observer } from "mobx-react-lite";
+import Transport from "@ledgerhq/hw-transport";
+import { useStore } from "../../../stores";
+import { useNavigate } from "react-router";
+import Eth from "@ledgerhq/hw-app-eth";
+import { Buffer } from "buffer/";
+import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { LedgerUtils } from "../../../utils";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -27,8 +34,14 @@ export const ConnectLedgerScene: FunctionComponent<{
     change: number;
     addressIndex: number;
   };
-}> = observer(({ name, password, app: propApp, bip44Path }) => {
-  if (propApp !== "Cosmos" && propApp !== "Terra") {
+
+  // append mode일 경우 위의 name, password는 안쓰인다. 대충 빈 문자열 넣으면 된다.
+  appendModeInfo?: {
+    vaultId: string;
+    afterEnableChains: string[];
+  };
+}> = observer(({ name, password, app: propApp, bip44Path, appendModeInfo }) => {
+  if (propApp !== "Cosmos" && propApp !== "Terra" && propApp !== "Ethereum") {
     throw new Error(`Unsupported app: ${propApp}`);
   }
 
@@ -49,11 +62,98 @@ export const ConnectLedgerScene: FunctionComponent<{
     },
   });
 
+  const { chainStore, keyRingStore } = useStore();
+
+  const navigate = useNavigate();
+
   const [step, setStep] = useState<Step>("unknown");
-  // TODO: Add loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const connectLedger = async () => {
-    let transport = await TransportWebUSB.create();
+    setIsLoading(true);
+
+    let transport: Transport;
+    try {
+      transport = await TransportWebUSB.create();
+    } catch {
+      setStep("unknown");
+      setIsLoading(false);
+      return;
+    }
+
+    if (propApp === "Ethereum") {
+      let ethApp = new Eth(transport);
+
+      // Ensure that the keplr can connect to ethereum app on ledger.
+      // getAppConfiguration() works even if the ledger is on screen saver mode.
+      // To detect the screen saver mode, we should request the address before using.
+      try {
+        await ethApp.getAddress(`m/44'/60'/'0/0/0`);
+      } catch (e) {
+        // Device is locked or user is in home sceen or other app.
+        if (
+          e?.message.includes("(0x6b0c)") ||
+          e?.message.includes("(0x6511)") ||
+          e?.message.includes("(0x6e00)")
+        ) {
+          setStep("connected");
+        } else {
+          console.log(e);
+          setStep("unknown");
+          await transport.close();
+
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      transport = await LedgerUtils.tryAppOpen(transport, propApp);
+      ethApp = new Eth(transport);
+
+      try {
+        const res = await ethApp.getAddress(
+          `m/44'/60'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`
+        );
+
+        const pubKey = new PubKeySecp256k1(Buffer.from(res.publicKey, "hex"));
+
+        setStep("app");
+
+        if (appendModeInfo) {
+          await keyRingStore.appendLedgerKeyApp(
+            appendModeInfo.vaultId,
+            pubKey.toBytes(true),
+            propApp
+          );
+          await chainStore.enableChainInfoInUI(
+            ...appendModeInfo.afterEnableChains
+          );
+          navigate("/welcome", {
+            replace: true,
+          });
+        } else {
+          sceneTransition.replaceAll("finalize-key", {
+            name,
+            password,
+            ledger: {
+              pubKey: pubKey.toBytes(),
+              app: propApp,
+              bip44Path,
+            },
+          });
+        }
+      } catch (e) {
+        console.log(e);
+        setStep("connected");
+      }
+
+      await transport.close();
+
+      setIsLoading(false);
+
+      return;
+    }
+
     let app = new CosmosApp(propApp, transport);
 
     try {
@@ -70,52 +170,14 @@ export const ConnectLedgerScene: FunctionComponent<{
       console.log(e);
       setStep("unknown");
       await transport.close();
+
+      setIsLoading(false);
       return;
     }
 
-    let isAppOpened = false;
-    try {
-      const appInfo = await app.getAppInfo();
-      if (
-        appInfo.error_message === "No errors" &&
-        appInfo.app_name === propApp
-      ) {
-        isAppOpened = true;
-      }
-    } catch (e) {
-      // Ignore error
-      console.log(e);
-    }
+    transport = await LedgerUtils.tryAppOpen(transport, propApp);
+    app = new CosmosApp(propApp, transport);
 
-    try {
-      if (!isAppOpened) {
-        await CosmosApp.openApp(transport, propApp);
-
-        const maxRetry = 25;
-        let i = 0;
-        while (i < maxRetry) {
-          // Reinstantiate the app with the new transport.
-          // This is needed because the connection can be closed if app opened. (Maybe ledger's permission system handles dashboard, and each app differently.)
-          transport = await TransportWebUSB.create();
-          app = new CosmosApp(propApp, transport);
-
-          const appInfo = await app.getAppInfo();
-          if (
-            appInfo.error_message === "No errors" &&
-            appInfo.app_name === propApp
-          ) {
-            break;
-          }
-
-          i++;
-          await new Promise((resolve) => setTimeout(resolve, 200));
-        }
-      }
-    } catch {
-      // Ignore error
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
     const res = await app.getPublicKey(
       bip44Path.account,
       bip44Path.change,
@@ -124,20 +186,36 @@ export const ConnectLedgerScene: FunctionComponent<{
     if (res.error_message === "No errors") {
       setStep("app");
 
-      sceneTransition.replaceAll("finalize-key", {
-        name,
-        password,
-        ledger: {
-          pubKey: res.compressed_pk,
-          app: propApp,
-          bip44Path,
-        },
-      });
+      if (appendModeInfo) {
+        await keyRingStore.appendLedgerKeyApp(
+          appendModeInfo.vaultId,
+          res.compressed_pk,
+          propApp
+        );
+        await chainStore.enableChainInfoInUI(
+          ...appendModeInfo.afterEnableChains
+        );
+        navigate("/welcome", {
+          replace: true,
+        });
+      } else {
+        sceneTransition.replaceAll("finalize-key", {
+          name,
+          password,
+          ledger: {
+            pubKey: res.compressed_pk,
+            app: propApp,
+            bip44Path,
+          },
+        });
+      }
     } else {
       setStep("connected");
     }
 
     await transport.close();
+
+    setIsLoading(false);
   };
 
   return (
@@ -156,10 +234,20 @@ export const ConnectLedgerScene: FunctionComponent<{
         />
         <StepView
           step={2}
-          paragraph="Open the Cosmos app on your Ledger device."
+          paragraph={`Open the ${propApp} app on your Ledger device.`}
           icon={
             <Box style={{ opacity: step !== "connected" ? 0.5 : 1 }}>
-              {propApp === "Cosmos" ? <CosmosIcon /> : <EthereumIcon />}
+              {(() => {
+                switch (propApp) {
+                  case "Terra":
+                    // TODO
+                    return <CosmosIcon />;
+                  case "Ethereum":
+                    return <EthereumIcon />;
+                  default:
+                    return <CosmosIcon />;
+                }
+              })()}
             </Box>
           }
           focused={step === "connected"}
@@ -170,7 +258,12 @@ export const ConnectLedgerScene: FunctionComponent<{
       <Gutter size="1.25rem" />
 
       <Box width="22.5rem" marginX="auto">
-        <Button text="Next" size="large" onClick={connectLedger} />
+        <Button
+          text="Next"
+          size="large"
+          isLoading={isLoading}
+          onClick={connectLedger}
+        />
       </Box>
     </RegisterSceneBox>
   );

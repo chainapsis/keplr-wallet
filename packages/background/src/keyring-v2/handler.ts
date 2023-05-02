@@ -12,6 +12,7 @@ import {
   GetKeyRingStatusMsg,
   LockKeyRingMsg,
   NewLedgerKeyMsg,
+  AppendLedgerKeyAppMsg,
   NewMnemonicKeyMsg,
   SelectKeyRingMsg,
   ShowSensitiveKeyRingDataMsg,
@@ -44,6 +45,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleNewMnemonicKeyMsg(service)(env, msg as NewMnemonicKeyMsg);
       case NewLedgerKeyMsg:
         return handleNewLedgerKeyMsg(service)(env, msg as NewLedgerKeyMsg);
+      case AppendLedgerKeyAppMsg:
+        return handleAppendLedgerKeyAppMsg(service)(
+          env,
+          msg as AppendLedgerKeyAppMsg
+        );
       case ChangeKeyRingNameMsg:
         return handleChangeKeyRingNameMsg(service)(
           env,
@@ -152,6 +158,18 @@ const handleNewLedgerKeyMsg: (
     );
     return {
       vaultId,
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleAppendLedgerKeyAppMsg: (
+  service: KeyRingService
+) => InternalHandler<AppendLedgerKeyAppMsg> = (service) => {
+  return (_, msg) => {
+    service.appendLedgerKeyRing(msg.vaultId, msg.pubKey, msg.app);
+    return {
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
     };

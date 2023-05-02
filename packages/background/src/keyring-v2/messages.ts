@@ -181,6 +181,45 @@ export class NewLedgerKeyMsg extends Message<{
   }
 }
 
+export class AppendLedgerKeyAppMsg extends Message<{
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "append-ledger-key-app";
+  }
+
+  constructor(
+    public readonly vaultId: string,
+    public readonly pubKey: Uint8Array,
+    public readonly app: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.pubKey || this.pubKey.length === 0) {
+      throw new Error("pub key not set");
+    }
+
+    if (!this.app) {
+      throw new Error("app not set");
+    }
+
+    if (!this.vaultId) {
+      throw new Error("vault id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AppendLedgerKeyAppMsg.type();
+  }
+}
+
 export class LockKeyRingMsg extends Message<{
   status: KeyRingStatus;
 }> {

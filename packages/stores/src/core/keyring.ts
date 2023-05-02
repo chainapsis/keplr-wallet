@@ -211,6 +211,18 @@ export class KeyRingStore {
   }
 
   @flow
+  *appendLedgerKeyApp(vaultId: string, pubKey: Uint8Array, app: string) {
+    const msg = new KeyRingV2.AppendLedgerKeyAppMsg(vaultId, pubKey, app);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+  }
+
+  @flow
   *lock() {
     const msg = new KeyRingV2.LockKeyRingMsg();
     const result = yield* toGenerator(
