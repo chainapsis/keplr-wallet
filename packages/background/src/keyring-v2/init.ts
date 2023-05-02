@@ -5,6 +5,7 @@ import {
   FinalizeMnemonicKeyCoinTypeMsg,
   NewMnemonicKeyMsg,
   NewLedgerKeyMsg,
+  AppendLedgerKeyAppMsg,
   LockKeyRingMsg,
   UnlockKeyRingMsg,
   SelectKeyRingMsg,
@@ -21,6 +22,7 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(FinalizeMnemonicKeyCoinTypeMsg);
   router.registerMessage(NewMnemonicKeyMsg);
   router.registerMessage(NewLedgerKeyMsg);
+  router.registerMessage(AppendLedgerKeyAppMsg);
   router.registerMessage(LockKeyRingMsg);
   router.registerMessage(UnlockKeyRingMsg);
   router.registerMessage(ChangeKeyRingNameMsg);

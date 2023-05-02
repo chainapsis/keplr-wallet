@@ -8,6 +8,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
 import { ChainInfo } from "@keplr-wallet/types";
+import { Buffer } from "buffer";
 
 export class KeyRingService {
   @observable
@@ -256,6 +257,27 @@ export class KeyRingService {
       this._selectedVaultId = id;
     });
     return id;
+  }
+
+  appendLedgerKeyRing(id: string, pubKey: Uint8Array, app: string) {
+    const vault = this.vaultService.getVault("keyRing", id);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "ledger") {
+      throw new Error("Key is not from ledger");
+    }
+
+    if (vault.insensitive[app]) {
+      throw new Error("App is already appended");
+    }
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", id, {
+      [app]: {
+        pubKey: Buffer.from(pubKey).toString("hex"),
+      },
+    });
   }
 
   getPubKeySelected(env: Env, chainId: string): Promise<PubKeySecp256k1> {

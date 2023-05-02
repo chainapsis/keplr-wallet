@@ -250,7 +250,13 @@ export const FinalizeKeyScene: FunctionComponent<{
         isFresh: mnemonic?.isFresh ?? false,
       });
     }
-  }, [candidateAddresses, isAnimEnded, sceneTransition, vaultId]);
+  }, [
+    candidateAddresses,
+    isAnimEnded,
+    mnemonic?.isFresh,
+    sceneTransition,
+    vaultId,
+  ]);
 
   const animContainerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {

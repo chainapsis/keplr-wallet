@@ -54,7 +54,9 @@ export class KeyRingCosmosService {
     }
 
     if (isEthermintLike && keyInfo.type === "ledger") {
-      this.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
     }
 
     const address = (() => {
@@ -172,7 +174,9 @@ export class KeyRingCosmosService {
     }
 
     if (isEthermintLike && keyInfo.type === "ledger") {
-      this.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
     }
 
     signDoc = {
@@ -280,7 +284,9 @@ export class KeyRingCosmosService {
     }
 
     if (isEthermintLike && keyInfo.type === "ledger") {
-      this.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
     }
 
     signDoc = {
@@ -385,7 +391,9 @@ export class KeyRingCosmosService {
     }
 
     if (isEthermintLike && keyInfo.type === "ledger") {
-      this.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
     }
 
     const key = await this.getKey(env, vaultId, chainId);
@@ -468,7 +476,9 @@ export class KeyRingCosmosService {
     }
 
     if (isEthermintLike && keyInfo.type === "ledger") {
-      this.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
     }
 
     const key = await this.getKey(env, vaultId, chainId);
@@ -660,7 +670,9 @@ export class KeyRingCosmosService {
     }
 
     if (isEthermintLike && keyInfo.type === "ledger") {
-      this.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
+      KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+        chainId
+      );
     }
 
     signDoc = {
@@ -738,7 +750,9 @@ export class KeyRingCosmosService {
   //      They make unnecessary and silly minor changes to ethermint spec.
   //      Thus, there is a probability that it will potentially not work on other chains and they blame us.
   //      So, block them explicitly for now.
-  public throwErrorIfEthermintWithLedgerButNotSupported(chainId: string) {
+  public static throwErrorIfEthermintWithLedgerButNotSupported(
+    chainId: string
+  ) {
     if (!chainId.startsWith("evmos_") && !chainId.startsWith("injective")) {
       throw new KeplrError(
         "keyring",
