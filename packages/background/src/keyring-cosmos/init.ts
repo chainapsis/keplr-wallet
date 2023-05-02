@@ -10,6 +10,7 @@ import {
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
   GetCosmosKeysForEachVaultSettledMsg,
+  RequestSignEIP712CosmosTxMsg_v0,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -29,6 +30,7 @@ export function init(
   router.registerMessage(ComputeNotFinalizedMnemonicKeyAddressesMsg);
   router.registerMessage(PrivilegeCosmosSignAminoWithdrawRewardsMsg);
   router.registerMessage(GetCosmosKeysForEachVaultSettledMsg);
+  router.registerMessage(RequestSignEIP712CosmosTxMsg_v0);
 
   router.addHandler(ROUTE, getHandler(service, permissionInteractionService));
 }

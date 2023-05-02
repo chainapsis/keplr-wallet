@@ -69,6 +69,7 @@
     "react-router": "^6.8.1",
     "react-router-dom": "^6.8.1",
     "scrypt-js": "^3.0.1",
+    "secp256k1": "^5.0.0",
     "secretjs": "0.17.7",
     "setimmediate": "^1.0.5",
     "sha.js": "^2.4.11",
@@ -99,6 +100,7 @@
     "@types/js-yaml": "^4",
     "@types/react-is": "^16.7.2",
     "@types/resize-observer-browser": "^0.1.7",
+    "@types/secp256k1": "^4.0.1",
     "@types/sha.js": "^2.4.0",
     "@types/styled-components": "^5.1.26",
     "babel-loader": "^8.2.5",
@@ -108,6 +110,7 @@
     "fork-ts-checker-webpack-plugin": "^7.2.13",
     "html-webpack-plugin": "^5.5.0",
     "identity-obj-proxy": "^3.0.0",
+    "secp256k1": "^4.0.2",
     "serialize-javascript": ">=3.1.0",
     "ts-loader": "^9.4.2",
     "webpack": "^5.74.0",
@@ -115,6 +118,7 @@
     "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
+    "@ledgerhq/hw-transport": "^6",
     "@ledgerhq/hw-transport-webusb": "^6",
     "mobx": "^6",
     "mobx-react-lite": "^3",

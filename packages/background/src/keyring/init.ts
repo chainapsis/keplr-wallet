@@ -20,7 +20,6 @@ import {
   CheckPasswordMsg,
   ExportKeyRingDatasMsg,
   RequestVerifyADR36AminoSignDoc,
-  RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
   CreateKeystoneKeyMsg,
   AddKeystoneKeyMsg,
@@ -56,7 +55,6 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(SetKeyStoreCoinTypeMsg);
   router.registerMessage(CheckPasswordMsg);
   router.registerMessage(ExportKeyRingDatasMsg);
-  router.registerMessage(RequestSignEIP712CosmosTxMsg_v0);
   router.registerMessage(InitNonDefaultLedgerAppMsg);
   router.registerMessage(RequestICNSAdr36SignaturesMsg);
   router.registerMessage(ChangeKeyRingNameMsg);

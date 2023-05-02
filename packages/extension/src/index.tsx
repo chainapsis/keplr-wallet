@@ -12,7 +12,14 @@ require("./public/assets/icon/icon-beta-16.png");
 require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { IntlProvider } from "react-intl";
@@ -68,6 +75,33 @@ window.keplr = new Keplr(
   new InExtensionMessageRequester()
 );
 
+const useIsURLUnlockPage = () => {
+  const [value, setValue] = useState(() => {
+    return (
+      window.location.hash === "#/unlock" ||
+      window.location.hash.startsWith("#/unlock?")
+    );
+  });
+
+  useLayoutEffect(() => {
+    const handler = () => {
+      const v =
+        window.location.hash === "#/unlock" ||
+        window.location.hash.startsWith("#/unlock?");
+
+      setValue(v);
+    };
+
+    window.addEventListener("locationchange", handler);
+
+    return () => {
+      window.removeEventListener("locationchange", handler);
+    };
+  }, []);
+
+  return value;
+};
+
 const RoutesAfterReady: FunctionComponent = observer(() => {
   const {
     chainStore,
@@ -98,6 +132,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     }
   }, [keyRingStore.status]);
 
+  const isURLUnlockPage = useIsURLUnlockPage();
   const openRegisterOnce = useRef(false);
 
   const isReady = useMemo(() => {
@@ -122,6 +157,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
     if (chainStore.isInitializing) {
       return false;
+    }
+
+    if (isURLUnlockPage) {
+      return true;
     }
 
     if (keyRingStore.status === "unlocked") {
@@ -153,19 +192,20 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
     return true;
   }, [
-    accountStore,
-    chainStore.chainInfos,
-    chainStore.isInitializing,
-    ibcCurrencyRegistrar.isInitialized,
-    uiConfigStore.isInitialized,
     keyRingStore.status,
+    chainStore.isInitializing,
+    chainStore.chainInfos,
+    isURLUnlockPage,
+    ibcCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
+    uiConfigStore.isInitialized,
+    accountStore,
   ]);
 
   return (
     <HashRouter>
       {isReady ? (
-        keyRingStore.status === "locked" ? (
+        keyRingStore.status === "locked" && !isURLUnlockPage ? (
           <UnlockPage />
         ) : (
           <Routes>

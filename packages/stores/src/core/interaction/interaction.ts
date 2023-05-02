@@ -11,7 +11,7 @@ import {
   ApproveInteractionMsg,
   RejectInteractionMsg,
 } from "@keplr-wallet/background";
-import { action, observable, makeObservable, flow, toJS } from "mobx";
+import { action, observable, makeObservable, flow, toJS, autorun } from "mobx";
 import { computedFn } from "mobx-utils";
 
 export class InteractionStore implements InteractionForegroundHandler {
@@ -24,6 +24,9 @@ export class InteractionStore implements InteractionForegroundHandler {
   // 기존의 로직과의 호환성을 위해서 아예 분리되었음.
   @observable.shallow
   protected obsoleteData = new Map<string, boolean>();
+
+  @observable.shallow
+  protected events: Omit<InteractionWaitingData, "id" | "isInternal">[] = [];
 
   constructor(
     protected readonly router: Router,
@@ -54,8 +57,11 @@ export class InteractionStore implements InteractionForegroundHandler {
     this.data.push(data);
   }
 
-  onEventDataReceived() {
-    // noop
+  @action
+  onEventDataReceived(
+    event: Omit<InteractionWaitingData, "id" | "isInternal">
+  ) {
+    this.events.push(event);
   }
 
   /**
@@ -87,6 +93,68 @@ export class InteractionStore implements InteractionForegroundHandler {
     yield this.delay(100);
     yield afterFn(this.hasOtherData(id));
     this.removeData(id);
+  }
+
+  /**
+   * 웹페이지에서 어떤 API를 요청해서 extension이 켜졌을때
+   * extension에서 요청을 처리하고 바로 팝업을 닫으면
+   * 이후에 연속적인 api 요청의 경우 다시 페이지가 열려야하는데 이게 은근히 어색한 UX를 만들기 때문에
+   * 이를 대충 해결하기 위해서 approve 이후에 대충 조금 기다리고 남은 interaction이 있느냐 아니냐에 따라 다른 처리를 한다.
+   * @param type
+   * @param id
+   * @param result
+   * @param afterFn
+   */
+  @flow
+  *approveWithProceedNextV2(
+    id: string,
+    result: unknown,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    const d = this.getData(id);
+    if (!d || this.isObsoleteInteraction(id)) {
+      return;
+    }
+
+    this.markAsObsolete(id);
+    yield this.msgRequester.sendMessage(
+      BACKGROUND_PORT,
+      new ApproveInteractionMsg(id, result)
+    );
+    yield this.waitInteractionEnd(id);
+    yield this.delay(50);
+    yield afterFn(this.hasOtherData(id));
+    this.removeData(id);
+  }
+
+  protected async waitInteractionEnd(id: string) {
+    const find = this.events.find((event) => {
+      return !!(
+        event.type === "interaction-ends" &&
+        event.data &&
+        (event.data as any).id === id
+      );
+    });
+
+    if (find) {
+      return;
+    }
+
+    return new Promise<void>((resolve) => {
+      const disposal = autorun(() => {
+        const find = this.events.find((event) => {
+          return !!(
+            event.type === "interaction-ends" &&
+            event.data &&
+            (event.data as any).id === id
+          );
+        });
+        if (find) {
+          resolve();
+          disposal();
+        }
+      });
+    });
   }
 
   /**

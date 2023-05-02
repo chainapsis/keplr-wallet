@@ -96,6 +96,10 @@ export class KeyRingService {
     });
   }
 
+  getKeyInfo(vaultId: string): KeyInfo | undefined {
+    return this.getKeyInfos().find((keyInfo) => keyInfo.id === vaultId);
+  }
+
   // Return selected vault id.
   // If selected vault doesn't exist for unknown reason,
   // try to return first id for key rings.
