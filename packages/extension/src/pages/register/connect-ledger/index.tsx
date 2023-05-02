@@ -15,6 +15,7 @@ import { Button } from "../../../components/button";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { observer } from "mobx-react-lite";
+import Transport from "@ledgerhq/hw-transport";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -55,7 +56,14 @@ export const ConnectLedgerScene: FunctionComponent<{
   const connectLedger = async () => {
     setIsLoading(true);
 
-    let transport = await TransportWebUSB.create();
+    let transport: Transport;
+    try {
+      transport = await TransportWebUSB.create();
+    } catch {
+      setStep("unknown");
+      setIsLoading(false);
+      return;
+    }
     let app = new CosmosApp(propApp, transport);
 
     try {
