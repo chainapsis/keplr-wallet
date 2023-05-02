@@ -1,5 +1,8 @@
 import { Buffer } from "buffer/";
-import { connectAndSignWithLedger } from "./cosmos-ledger-sign";
+import {
+  connectAndSignEIP712WithLedger,
+  connectAndSignWithLedger,
+} from "./cosmos-ledger-sign";
 import { SignInteractionStore } from "@keplr-wallet/stores";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 
@@ -25,6 +28,23 @@ export const handleCosmosPreSign = async (
         change: number;
         addressIndex: number;
       };
+
+      if ("eip712" in interactionData.data && interactionData.data.eip712) {
+        const publicKey = Buffer.from(
+          (appData["Ethereum"] as any)["pubKey"],
+          "hex"
+        );
+        if (publicKey.length === 0) {
+          throw new Error("Invalid ledger app data");
+        }
+
+        return await connectAndSignEIP712WithLedger(
+          publicKey,
+          bip44Path,
+          signDocWrapper.aminoSignDoc,
+          interactionData.data.eip712
+        );
+      }
 
       let ledgerApp = "Cosmos";
       let publicKey = new Uint8Array(0);

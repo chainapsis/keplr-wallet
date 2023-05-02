@@ -61,6 +61,10 @@ export const LedgerGuideBox: FunctionComponent<{
                   app = "Terra";
                 }
 
+                if (appData["Ethereum"]) {
+                  app = "Ethereum";
+                }
+
                 return (
                   <GuideBox
                     color="warning"
