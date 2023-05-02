@@ -243,7 +243,7 @@ export class KeyRingCosmosService {
 
         if (keyInfo.type === "ledger") {
           if (!res.signature || res.signature.length === 0) {
-            throw new Error("Frontend should provider signature if ledger");
+            throw new Error("Frontend should provide signature if ledger");
           }
           signature = res.signature;
         } else {
@@ -436,7 +436,7 @@ export class KeyRingCosmosService {
 
       if (keyInfo.type === "ledger") {
         if (!res.signature || res.signature.length === 0) {
-          throw new Error("Frontend should provider signature if ledger");
+          throw new Error("Frontend should provide signature if ledger");
         }
         signature = res.signature;
       } else {
@@ -518,7 +518,7 @@ export class KeyRingCosmosService {
       // XXX: 참고로 어차피 현재 ledger app이 direct signing을 지원하지 않는다. 그냥 일단 처리해놓은 것.
       if (keyInfo.type === "ledger") {
         if (!res.signature || res.signature.length === 0) {
-          throw new Error("Frontend should provider signature if ledger");
+          throw new Error("Frontend should provide signature if ledger");
         }
         signature = res.signature;
       } else {
@@ -720,7 +720,7 @@ export class KeyRingCosmosService {
     };
 
     if (!res.signature || res.signature.length === 0) {
-      throw new Error("Frontend should provider signature if ledger");
+      throw new Error("Frontend should provide signature if ledger");
     }
 
     try {
