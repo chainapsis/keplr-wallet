@@ -406,7 +406,7 @@ export class KeyRingCosmosService {
     }
 
     const signDoc = makeADR36AminoSignDoc(signer, data);
-    const res = (await this.interactionService.waitApprove(
+    return await this.interactionService.waitApproveV2(
       env,
       "/sign-cosmos-adr36",
       "request-sign-cosmos",
@@ -419,43 +419,37 @@ export class KeyRingCosmosService {
         signOptions,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
-      }
-    )) as {
-      newSignDoc: StdSignDoc;
-      signature?: Uint8Array;
-    };
+      },
+      async (res: { newSignDoc: StdSignDoc; signature?: Uint8Array }) => {
+        const newSignDoc = res.newSignDoc;
 
-    const newSignDoc = res.newSignDoc;
-
-    if (!checkAndValidateADR36AminoSignDoc(newSignDoc)) {
-      throw new Error("Invalid ADR36 sign doc delivered from view");
-    }
-
-    try {
-      let signature: Uint8Array;
-
-      if (keyInfo.type === "ledger") {
-        if (!res.signature || res.signature.length === 0) {
-          throw new Error("Frontend should provide signature if ledger");
+        if (!checkAndValidateADR36AminoSignDoc(newSignDoc)) {
+          throw new Error("Invalid ADR36 sign doc delivered from view");
         }
-        signature = res.signature;
-      } else {
-        signature = await this.keyRingService.sign(
-          env,
-          chainId,
-          vaultId,
-          serializeSignDoc(newSignDoc),
-          isEthermintLike ? "keccak256" : "sha256"
-        );
-      }
 
-      return {
-        signed: newSignDoc,
-        signature: encodeSecp256k1Signature(key.pubKey, signature),
-      };
-    } finally {
-      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-    }
+        let signature: Uint8Array;
+
+        if (keyInfo.type === "ledger") {
+          if (!res.signature || res.signature.length === 0) {
+            throw new Error("Frontend should provide signature if ledger");
+          }
+          signature = res.signature;
+        } else {
+          signature = await this.keyRingService.sign(
+            env,
+            chainId,
+            vaultId,
+            serializeSignDoc(newSignDoc),
+            isEthermintLike ? "keccak256" : "sha256"
+          );
+        }
+
+        return {
+          signed: newSignDoc,
+          signature: encodeSecp256k1Signature(key.pubKey, signature),
+        };
+      }
+    );
   }
 
   async signDirect(
@@ -490,7 +484,7 @@ export class KeyRingCosmosService {
       throw new Error("Signer mismatched");
     }
 
-    const res = (await this.interactionService.waitApprove(
+    return await this.interactionService.waitApproveV2(
       env,
       "/sign-cosmos",
       "request-sign-cosmos",
@@ -503,44 +497,38 @@ export class KeyRingCosmosService {
         signOptions,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
-      }
-    )) as {
-      newSignDocBytes: Uint8Array;
-      signature?: Uint8Array;
-    };
+      },
+      async (res: { newSignDocBytes: Uint8Array; signature?: Uint8Array }) => {
+        const newSignDocBytes = res.newSignDocBytes;
+        const newSignDoc = SignDoc.decode(newSignDocBytes);
 
-    const newSignDocBytes = res.newSignDocBytes;
-    const newSignDoc = SignDoc.decode(newSignDocBytes);
+        let signature: Uint8Array;
 
-    try {
-      let signature: Uint8Array;
-
-      // XXX: 참고로 어차피 현재 ledger app이 direct signing을 지원하지 않는다. 그냥 일단 처리해놓은 것.
-      if (keyInfo.type === "ledger") {
-        if (!res.signature || res.signature.length === 0) {
-          throw new Error("Frontend should provide signature if ledger");
+        // XXX: 참고로 어차피 현재 ledger app이 direct signing을 지원하지 않는다. 그냥 일단 처리해놓은 것.
+        if (keyInfo.type === "ledger") {
+          if (!res.signature || res.signature.length === 0) {
+            throw new Error("Frontend should provide signature if ledger");
+          }
+          signature = res.signature;
+        } else {
+          signature = await this.keyRingService.sign(
+            env,
+            chainId,
+            vaultId,
+            newSignDocBytes,
+            isEthermintLike ? "keccak256" : "sha256"
+          );
         }
-        signature = res.signature;
-      } else {
-        signature = await this.keyRingService.sign(
-          env,
-          chainId,
-          vaultId,
-          newSignDocBytes,
-          isEthermintLike ? "keccak256" : "sha256"
-        );
-      }
 
-      return {
-        signed: {
-          ...newSignDoc,
-          accountNumber: Long.fromString(newSignDoc.accountNumber),
-        },
-        signature: encodeSecp256k1Signature(key.pubKey, signature),
-      };
-    } finally {
-      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-    }
+        return {
+          signed: {
+            ...newSignDoc,
+            accountNumber: Long.fromString(newSignDoc.accountNumber),
+          },
+          signature: encodeSecp256k1Signature(key.pubKey, signature),
+        };
+      }
+    );
   }
 
   async signDirectSelected(
@@ -692,7 +680,7 @@ export class KeyRingCosmosService {
       throw new Error("Signer mismatched");
     }
 
-    const res = (await this.interactionService.waitApprove(
+    return await this.interactionService.waitApproveV2(
       env,
       "/sign-cosmos",
       "request-sign-cosmos",
@@ -706,35 +694,29 @@ export class KeyRingCosmosService {
         eip712,
         keyType: keyInfo.type,
         keyInsensitive: keyInfo.insensitive,
+      },
+      async (res: { newSignDoc: StdSignDoc; signature?: Uint8Array }) => {
+        let newSignDoc = res.newSignDoc;
+
+        newSignDoc = {
+          ...newSignDoc,
+          memo: escapeHTML(newSignDoc.memo),
+        };
+
+        if (!res.signature || res.signature.length === 0) {
+          throw new Error("Frontend should provide signature if ledger");
+        }
+
+        return {
+          signed: newSignDoc,
+          signature: {
+            pub_key: encodeSecp256k1Pubkey(key.pubKey),
+            // Return eth signature (r | s | v) 65 bytes.
+            signature: Buffer.from(res.signature).toString("base64"),
+          },
+        };
       }
-    )) as {
-      newSignDoc: StdSignDoc;
-      signature?: Uint8Array;
-    };
-
-    let newSignDoc = res.newSignDoc;
-
-    newSignDoc = {
-      ...newSignDoc,
-      memo: escapeHTML(newSignDoc.memo),
-    };
-
-    if (!res.signature || res.signature.length === 0) {
-      throw new Error("Frontend should provide signature if ledger");
-    }
-
-    try {
-      return {
-        signed: newSignDoc,
-        signature: {
-          pub_key: encodeSecp256k1Pubkey(key.pubKey),
-          // Return eth signature (r | s | v) 65 bytes.
-          signature: Buffer.from(res.signature).toString("base64"),
-        },
-      };
-    } finally {
-      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-    }
+    );
   }
 
   protected isEthermintLike(chainInfo: ChainInfo): boolean {
