@@ -93,8 +93,6 @@ export const connectAndSignWithLedger = async (
     // Ignore error
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
   try {
     const res = await app.getPublicKey(
       bip44Path.account,

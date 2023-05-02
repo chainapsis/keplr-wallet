@@ -26,8 +26,10 @@ export const useFormNamePassword = () => {
 };
 
 export const FormNamePassword: FunctionComponent<
-  UseFormReturn<FormDataNamePassword>
-> = observer(({ children, register, formState, getValues }) => {
+  UseFormReturn<FormDataNamePassword> & {
+    appendButton?: React.ReactNode;
+  }
+> = observer(({ children, register, formState, getValues, appendButton }) => {
   const { keyRingStore } = useStore();
 
   const needPassword = keyRingStore.keyInfos.length === 0;
@@ -88,6 +90,7 @@ export const FormNamePassword: FunctionComponent<
         <Gutter size="2.5rem" />
       )}
       <Button size="large" text="Next" type="submit" />
+      {appendButton}
     </Stack>
   );
 });

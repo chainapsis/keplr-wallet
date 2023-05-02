@@ -50,9 +50,11 @@ export const ConnectLedgerScene: FunctionComponent<{
   });
 
   const [step, setStep] = useState<Step>("unknown");
-  // TODO: Add loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const connectLedger = async () => {
+    setIsLoading(true);
+
     let transport = await TransportWebUSB.create();
     let app = new CosmosApp(propApp, transport);
 
@@ -70,6 +72,8 @@ export const ConnectLedgerScene: FunctionComponent<{
       console.log(e);
       setStep("unknown");
       await transport.close();
+
+      setIsLoading(false);
       return;
     }
 
@@ -115,7 +119,6 @@ export const ConnectLedgerScene: FunctionComponent<{
       // Ignore error
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
     const res = await app.getPublicKey(
       bip44Path.account,
       bip44Path.change,
@@ -138,6 +141,8 @@ export const ConnectLedgerScene: FunctionComponent<{
     }
 
     await transport.close();
+
+    setIsLoading(false);
   };
 
   return (
@@ -156,7 +161,7 @@ export const ConnectLedgerScene: FunctionComponent<{
         />
         <StepView
           step={2}
-          paragraph="Open the Cosmos app on your Ledger device."
+          paragraph={`Open the ${propApp} app on your Ledger device.`}
           icon={
             <Box style={{ opacity: step !== "connected" ? 0.5 : 1 }}>
               {propApp === "Cosmos" ? <CosmosIcon /> : <EthereumIcon />}
@@ -170,7 +175,12 @@ export const ConnectLedgerScene: FunctionComponent<{
       <Gutter size="1.25rem" />
 
       <Box width="22.5rem" marginX="auto">
-        <Button text="Next" size="large" onClick={connectLedger} />
+        <Button
+          text="Next"
+          size="large"
+          isLoading={isLoading}
+          onClick={connectLedger}
+        />
       </Box>
     </RegisterSceneBox>
   );

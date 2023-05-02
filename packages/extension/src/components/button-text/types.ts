@@ -8,9 +8,7 @@ export interface TextButtonProps {
   disabled?: boolean;
   text?: string | React.ReactNode;
   right?: React.ReactNode;
-  onClick?: (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void | Promise<void>;
+  onClick?: () => void | Promise<void>;
 
   // Native html element
   type?: ButtonType;
