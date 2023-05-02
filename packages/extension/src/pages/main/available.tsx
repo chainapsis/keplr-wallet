@@ -1,12 +1,20 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
-import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
+import {
+  MainEmptyView,
+  TokenFoundModal,
+  TokenItem,
+  TokenTitleView,
+} from "./components";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { Button } from "../../components/button";
 import { useStore } from "../../stores";
+import { TextButton } from "../../components/button-text";
+import { Box } from "../../components/box";
+import { Modal } from "../../components/modal";
 
 export const AvailableTabView: FunctionComponent = observer(() => {
   const { hugeQueriesStore } = useStore();
@@ -55,6 +63,8 @@ export const AvailableTabView: FunctionComponent = observer(() => {
     },
   ];
 
+  const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
+
   return (
     <React.Fragment>
       <Stack gutter="0.5rem">
@@ -96,6 +106,22 @@ export const AvailableTabView: FunctionComponent = observer(() => {
           button={<Button text="Get Started" color="primary" size="small" />}
         />
       ) : null}
+
+      <Box padding="0.75rem">
+        <TextButton
+          text={`1 new token(s) found`}
+          size="small"
+          onClick={() => setIsFoundTokenModalOpen(true)}
+        />
+      </Box>
+
+      <Modal
+        isOpen={isFoundTokenModalOpen}
+        align="bottom"
+        close={() => setIsFoundTokenModalOpen(false)}
+      >
+        <TokenFoundModal />
+      </Modal>
     </React.Fragment>
   );
 });
