@@ -225,6 +225,7 @@ export class KeyRingCosmosService {
         signer,
         signOptions,
         keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
       },
       async (res: { newSignDoc: StdSignDoc; signature?: Uint8Array }) => {
         let newSignDoc = res.newSignDoc;
@@ -409,6 +410,7 @@ export class KeyRingCosmosService {
         signer,
         signOptions,
         keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
       }
     )) as {
       newSignDoc: StdSignDoc;
@@ -490,6 +492,7 @@ export class KeyRingCosmosService {
         signer,
         signOptions,
         keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
       }
     )) as {
       newSignDocBytes: Uint8Array;
@@ -690,6 +693,7 @@ export class KeyRingCosmosService {
         signOptions,
         eip712,
         keyType: keyInfo.type,
+        keyInsensitive: keyInfo.insensitive,
       }
     )) as {
       newSignDoc: StdSignDoc;
