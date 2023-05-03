@@ -1,9 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import {
-  InteractionWaitingData,
-  PermissionData,
-} from "@keplr-wallet/background";
+import { PermissionData } from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
 import { useInteractionInfo } from "../../../hooks";
 import { HeaderLayout } from "../../../layouts/header";
@@ -14,19 +11,14 @@ import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
-  data: InteractionWaitingData<PermissionData>;
+  data: {
+    ids: string[];
+  } & PermissionData;
 }> = observer(({ data }) => {
   const { chainStore, permissionStore } = useStore();
 
   const interactionInfo = useInteractionInfo(() => {
     permissionStore.rejectPermissionAll();
-  });
-
-  const chainInfos = chainStore.chainInfos.map((chainInfo) => {
-    return {
-      chainId: chainInfo.chainId,
-      chainName: chainInfo.chainName,
-    };
   });
 
   return (
@@ -35,25 +27,29 @@ export const PermissionBasicAccessPage: FunctionComponent<{
       bottomButton={{
         text: "Approve",
         size: "large",
-        disabled: permissionStore.waitingPermissionData == null,
-        isLoading: permissionStore.isObsoleteInteraction(
-          permissionStore.waitingPermissionData?.id
-        ),
-        onClick: async () => {
-          await permissionStore.approvePermissionWithProceedNext(
-            data.id,
-            (proceedNext) => {
-              if (!proceedNext) {
-                if (
-                  interactionInfo.interaction &&
-                  !interactionInfo.interactionInternal
-                ) {
-                  window.close();
-                }
+        isLoading: (() => {
+          const obsolete = data.ids.find((id) => {
+            return permissionStore.isObsoleteInteraction(id);
+          });
+          return !!obsolete;
+        })(),
+      }}
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        await permissionStore.approvePermissionWithProceedNext(
+          data.ids,
+          (proceedNext) => {
+            if (!proceedNext) {
+              if (
+                interactionInfo.interaction &&
+                !interactionInfo.interactionInternal
+              ) {
+                window.close();
               }
             }
-          );
-        },
+          }
+        );
       }}
     >
       <Box padding="0.75rem" alignX="center">
@@ -70,7 +66,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
         <Gutter size="1rem" />
 
         <Body1 color={ColorPalette["gray-200"]}>
-          {data.data.origins.join(", ")}
+          {data.origins.join(", ")}
         </Body1>
 
         <Gutter size="1rem" />
@@ -80,10 +76,8 @@ export const PermissionBasicAccessPage: FunctionComponent<{
           backgroundColor={ColorPalette["gray-600"]}
           borderRadius="0.5rem"
         >
-          {data.data.chainIds.map((chainId, index) => {
-            const chainInfo = chainInfos.find(
-              (chainInfo) => chainInfo.chainId === chainId
-            );
+          {data.chainIds.map((chainId, index) => {
+            const chainInfo = chainStore.getChain(chainId);
 
             return (
               <Box key={chainId}>
@@ -91,11 +85,11 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                   color={ColorPalette["gray-50"]}
                   style={{ padding: "1.5rem" }}
                 >
-                  {chainInfo?.chainName}
+                  {chainInfo.chainName}
                 </Subtitle3>
 
-                {data.data.chainIds.length === 0 ||
-                index === data.data.chainIds.length - 1 ? null : (
+                {data.chainIds.length === 0 ||
+                index === data.chainIds.length - 1 ? null : (
                   <Box
                     height="1px"
                     backgroundColor={ColorPalette["gray-500"]}

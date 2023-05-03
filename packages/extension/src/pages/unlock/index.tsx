@@ -50,7 +50,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
             for (const interaction of interactions) {
               promises.push(
                 (async () => {
-                  await interactionStore.approveWithProceedNext(
+                  await interactionStore.approveWithProceedNextV2(
                     interaction.id,
                     {},
                     (proceedNext) => {

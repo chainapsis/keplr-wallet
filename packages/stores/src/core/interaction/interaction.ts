@@ -104,23 +104,42 @@ export class InteractionStore implements InteractionForegroundHandler {
    */
   @flow
   *approveWithProceedNextV2(
-    id: string,
+    ids: string | string[],
     result: unknown,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    const d = this.getData(id);
-    if (!d || this.isObsoleteInteraction(id)) {
-      return;
+    if (typeof ids === "string") {
+      ids = [ids];
     }
 
-    this.markAsObsolete(id);
-    yield this.msgRequester.sendMessage(
-      BACKGROUND_PORT,
-      new ApproveInteractionV2Msg(id, result)
-    );
+    const fresh: string[] = [];
+
+    for (const id of ids) {
+      const d = this.getData(id);
+      if (!d || this.isObsoleteInteraction(id)) {
+        return;
+      }
+
+      this.markAsObsolete(id);
+
+      fresh.push(id);
+    }
+
+    const promises: Promise<unknown>[] = [];
+    for (const id of fresh) {
+      promises.push(
+        this.msgRequester.sendMessage(
+          BACKGROUND_PORT,
+          new ApproveInteractionV2Msg(id, result)
+        )
+      );
+    }
+
+    yield Promise.all(promises);
+
     yield this.delay(50);
-    yield afterFn(this.hasOtherData(id));
-    this.removeData(id);
+    yield afterFn(this.hasOtherData(ids));
+    this.removeData(ids);
   }
 
   /**
@@ -163,22 +182,41 @@ export class InteractionStore implements InteractionForegroundHandler {
    */
   @flow
   *rejectWithProceedNextV2(
-    id: string,
+    ids: string | string[],
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    const d = this.getData(id);
-    if (!d || this.isObsoleteInteraction(id)) {
-      return;
+    if (typeof ids === "string") {
+      ids = [ids];
     }
 
-    this.markAsObsolete(id);
-    yield this.msgRequester.sendMessage(
-      BACKGROUND_PORT,
-      new RejectInteractionV2Msg(id)
-    );
+    const fresh: string[] = [];
+
+    for (const id of ids) {
+      const d = this.getData(id);
+      if (!d || this.isObsoleteInteraction(id)) {
+        return;
+      }
+
+      this.markAsObsolete(id);
+
+      fresh.push(id);
+    }
+
+    const promises: Promise<unknown>[] = [];
+    for (const id of fresh) {
+      promises.push(
+        this.msgRequester.sendMessage(
+          BACKGROUND_PORT,
+          new RejectInteractionV2Msg(id)
+        )
+      );
+    }
+
+    yield Promise.all(promises);
+
     yield this.delay(50);
-    yield afterFn(this.hasOtherData(id));
-    this.removeData(id);
+    yield afterFn(this.hasOtherData(ids));
+    this.removeData(ids);
   }
 
   protected delay(ms: number): Promise<void> {
@@ -211,9 +249,15 @@ export class InteractionStore implements InteractionForegroundHandler {
   }
 
   @action
-  protected removeData(id: string) {
-    this.data = this.data.filter((d) => d.id !== id);
-    this.obsoleteData.delete(id);
+  protected removeData(ids: string | string[]) {
+    if (typeof ids === "string") {
+      ids = [ids];
+    }
+
+    for (const id of ids) {
+      this.data = this.data.filter((d) => d.id !== id);
+      this.obsoleteData.delete(id);
+    }
   }
 
   @action
@@ -223,9 +267,13 @@ export class InteractionStore implements InteractionForegroundHandler {
     }
   }
 
-  protected hasOtherData(id: string): boolean {
+  protected hasOtherData(ids: string | string[]): boolean {
+    if (typeof ids === "string") {
+      ids = [ids];
+    }
+
     const find = this.data.find((data) => {
-      return data.id !== id;
+      return !ids.includes(data.id);
     });
     return !!find;
   }
