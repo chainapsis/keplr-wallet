@@ -13,6 +13,10 @@ import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
 import { CopyFillIcon, KeyIcon, TrashIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
+import { EmptyView } from "../../../../components/empty-view";
+import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { useConfirm } from "../../../../hooks/confirm";
 
 const Styles = {
   Container: styled(Stack)`
@@ -32,6 +36,21 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
   const [chainId, setChainId] = useState<string>(
     chainStore.chainInfos[0].chainId
   );
+
+  const chainInfo = chainStore.chainInfos.find(
+    (chainInfo) => chainInfo.chainId === chainId
+  );
+
+  const isSecretWasm =
+    chainInfo?.features && chainInfo.features.includes("secretwasm");
+
+  const appCurrencies = chainInfo?.currencies.filter((currency) => {
+    if (isSecretWasm) {
+      return "type" in currency && currency.type === "secret20";
+    } else {
+      return "type" in currency && currency.type === "cw20";
+    }
+  });
 
   const items = chainStore.chainInfosInUI.map((chainInfo) => {
     return {
@@ -62,13 +81,24 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
             color="secondary"
             size="extraSmall"
             text="Add Token"
-            onClick={() => navigate("/setting/token/add")}
+            onClick={() => navigate(`/setting/token/add?chainId=${chainId}`)}
           />
         </Columns>
 
-        <TokenItem />
-        <TokenItem />
-        <TokenItem />
+        {appCurrencies?.length === 0 ? (
+          <EmptyView subject="token" />
+        ) : (
+          appCurrencies?.map((currency) => {
+            const cosmwasmToken = currency as CW20Currency | Secret20Currency;
+            return (
+              <TokenItem
+                key={cosmwasmToken.contractAddress}
+                chainId={chainId}
+                cosmwasmToken={cosmwasmToken}
+              />
+            );
+          })
+        )}
       </Styles.Container>
     </HeaderLayout>
   );
@@ -92,31 +122,70 @@ const ItemStyles = {
   `,
 };
 
-const TokenItem: FunctionComponent = () => {
+const TokenItem: FunctionComponent<{
+  chainId: string;
+  cosmwasmToken: CW20Currency | Secret20Currency;
+}> = observer(({ chainId, cosmwasmToken }) => {
+  const { tokensStore } = useStore();
+  const confirm = useConfirm();
+
+  const copyText = async (text: string) => {
+    await navigator.clipboard.writeText(text);
+  };
+
   return (
     <ItemStyles.Container>
       <Columns sum={1}>
         <Stack gutter="0.25rem">
-          <ItemStyles.Denom>SSCRT</ItemStyles.Denom>
-          <ItemStyles.Address>secret1k0jntykt7e..y4c9e8fzek</ItemStyles.Address>
+          <ItemStyles.Denom>{cosmwasmToken.coinDenom}</ItemStyles.Denom>
+          <ItemStyles.Address>
+            {Bech32Address.shortenAddress(cosmwasmToken.contractAddress, 30)}
+          </ItemStyles.Address>
         </Stack>
 
         <Column weight={1} />
 
         <Columns sum={1} gutter="0.5rem" alignY="center">
-          <ItemStyles.Icon>
-            <KeyIcon width="1.25rem" height="1.25rem" />
-          </ItemStyles.Icon>
+          {cosmwasmToken.type === "secret20" ? (
+            <ItemStyles.Icon
+              onClick={async (e) => {
+                e.preventDefault();
 
-          <ItemStyles.Icon>
+                await copyText(cosmwasmToken.viewingKey);
+              }}
+            >
+              <KeyIcon width="1.25rem" height="1.25rem" />
+            </ItemStyles.Icon>
+          ) : null}
+
+          <ItemStyles.Icon
+            onClick={async (e) => {
+              e.preventDefault();
+
+              await copyText(cosmwasmToken.contractAddress);
+            }}
+          >
             <CopyFillIcon width="1.25rem" height="1.25rem" />
           </ItemStyles.Icon>
 
-          <ItemStyles.Icon>
+          <ItemStyles.Icon
+            onClick={async () => {
+              if (
+                await confirm.confirm(
+                  "",
+                  "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again."
+                )
+              ) {
+                await tokensStore
+                  .getTokensOf(chainId)
+                  .removeToken(cosmwasmToken);
+              }
+            }}
+          >
             <TrashIcon width="1.25rem" height="1.25rem" />
           </ItemStyles.Icon>
         </Columns>
       </Columns>
     </ItemStyles.Container>
   );
-};
+});
