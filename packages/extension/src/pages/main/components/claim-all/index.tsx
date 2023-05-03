@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useRef, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { Column, Columns } from "../../../../components/column";
 import { Button } from "../../../../components/button";
 import { Stack } from "../../../../components/stack";
@@ -81,6 +81,8 @@ const zeroDec = new Dec(0);
 export const ClaimAll: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
+  const [isExpanded, setIsExpanded] = useState(true);
+
   const statesRef = useRef(new Map<string, ClaimAllEachState>());
   const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
     const chainIdentifier = chainStore.getChain(chainId).chainIdentifier;
@@ -92,6 +94,15 @@ export const ClaimAll: FunctionComponent = observer(() => {
 
     return state;
   };
+
+  useEffect(() => {
+    if (!isExpanded) {
+      // Clear errors when collapsed.
+      for (const state of statesRef.current.values()) {
+        state.setFailedReason(undefined);
+      }
+    }
+  }, [isExpanded]);
 
   const viewTokens: ViewToken[] = chainStore.chainInfosInUI
     .map((chainInfo) => {
@@ -134,8 +145,6 @@ export const ClaimAll: FunctionComponent = observer(() => {
 
       return 0;
     });
-
-  const [isExpanded, setIsExpanded] = useState(true);
 
   const totalPrice = (() => {
     const fiatCurrency = priceStore.getFiatCurrency(
