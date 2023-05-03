@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { HeaderLayout } from "../../layouts/header";
@@ -26,7 +26,6 @@ import { ColorPalette } from "../../styles";
 import { AvailableTabView } from "./available";
 import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
-import { useFocusOnMount } from "../../hooks/use-focus-on-mount";
 import { useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
 
@@ -85,8 +84,19 @@ export const MainPage: FunctionComponent = observer(() => {
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
   const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
 
-  const searchRef = useFocusOnMount<HTMLInputElement>();
+  const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
+  useEffect(() => {
+    // Give focus whenever available tab is selected.
+    if (tabStatus === "available") {
+      // And clear search text.
+      setSearch("");
+
+      if (searchRef.current) {
+        searchRef.current.focus();
+      }
+    }
+  }, [tabStatus]);
 
   const searchScrollAnim = useSpringValue(0, {
     config: defaultSpringConfig,
@@ -157,36 +167,42 @@ export const MainPage: FunctionComponent = observer(() => {
           {tabStatus === "available" ? <Buttons /> : null}
           <ClaimAll />
           <InternalLinkView />
-          <SearchTextInput
-            ref={searchRef}
-            value={search}
-            onChange={(e) => {
-              e.preventDefault();
+          {tabStatus === "available" ? (
+            <SearchTextInput
+              ref={searchRef}
+              value={search}
+              onChange={(e) => {
+                e.preventDefault();
 
-              setSearch(e.target.value);
+                setSearch(e.target.value);
 
-              if (e.target.value.trim().length > 0) {
-                if (document.documentElement.scrollTop < 218) {
-                  searchScrollAnim.start(218, {
-                    from: document.documentElement.scrollTop,
-                    onChange: (anim: any) => {
-                      // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
-                      const v = anim.value != null ? anim.value : anim;
-                      if (typeof v === "number") {
-                        document.documentElement.scrollTop = v;
-                      }
-                    },
-                  });
+                if (e.target.value.trim().length > 0) {
+                  if (document.documentElement.scrollTop < 218) {
+                    searchScrollAnim.start(218, {
+                      from: document.documentElement.scrollTop,
+                      onChange: (anim: any) => {
+                        // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
+                        const v = anim.value != null ? anim.value : anim;
+                        if (typeof v === "number") {
+                          document.documentElement.scrollTop = v;
+                        }
+                      },
+                    });
+                  }
                 }
-              }
-            }}
-            placeholder="Search for a chain"
-          />
+              }}
+              placeholder="Search for a chain"
+            />
+          ) : null}
           {/*
             AvailableTabView, StakedTabView가 컴포넌트로 빠지면서 밑의 얘들의 각각의 item들에는 stack이 안먹힌다는 걸 주의
             각 컴포넌트에서 알아서 gutter를 처리해야한다.
            */}
-          {tabStatus === "available" ? <AvailableTabView /> : <StakedTabView />}
+          {tabStatus === "available" ? (
+            <AvailableTabView search={search} />
+          ) : (
+            <StakedTabView />
+          )}
         </Stack>
       </Box>
 
