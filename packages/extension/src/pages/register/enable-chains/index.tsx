@@ -579,7 +579,7 @@ export const EnableChainsScene: FunctionComponent<{
                     }
                     if (keyInfo.insensitive["Ethereum"]) {
                       await chainStore.enableChainInfoInUI(
-                        ...needFinalizeCoinType
+                        ...ledgerEthereumAppNeeds
                       );
                       navigate("/welcome", {
                         replace: true,
