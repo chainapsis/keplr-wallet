@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, { FunctionComponent, useRef, useState } from "react";
 import { Column, Columns } from "../../../../components/column";
 import { Button } from "../../../../components/button";
 import { Stack } from "../../../../components/stack";
@@ -81,7 +81,7 @@ const zeroDec = new Dec(0);
 export const ClaimAll: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const statesRef = useRef(new Map<string, ClaimAllEachState>());
   const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
@@ -94,15 +94,6 @@ export const ClaimAll: FunctionComponent = observer(() => {
 
     return state;
   };
-
-  useEffect(() => {
-    if (!isExpanded) {
-      // Clear errors when collapsed.
-      for (const state of statesRef.current.values()) {
-        state.setFailedReason(undefined);
-      }
-    }
-  }, [isExpanded]);
 
   const viewTokens: ViewToken[] = chainStore.chainInfosInUI
     .map((chainInfo) => {
@@ -168,7 +159,7 @@ export const ClaimAll: FunctionComponent = observer(() => {
 
   const claimAll = () => {
     if (viewTokens.length > 0) {
-      setIsExpanded(false);
+      setIsExpanded(true);
     }
 
     for (const viewToken of viewTokens) {
@@ -381,14 +372,24 @@ export const ClaimAll: FunctionComponent = observer(() => {
         alignX="center"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        {isExpanded ? (
+        {!isExpanded ? (
           <ArrowDownIcon width="1.25rem" height="1.25rem" />
         ) : (
           <ArrowUpIcon width="1.25rem" height="1.25rem" />
         )}
       </Styles.ExpandButton>
 
-      <VerticalCollapseTransition collapsed={isExpanded}>
+      <VerticalCollapseTransition
+        collapsed={!isExpanded}
+        onTransitionEnd={() => {
+          if (!isExpanded) {
+            // Clear errors when collapsed.
+            for (const state of statesRef.current.values()) {
+              state.setFailedReason(undefined);
+            }
+          }
+        }}
+      >
         {viewTokens.map((viewToken) => {
           return (
             <ClaimTokenItem
