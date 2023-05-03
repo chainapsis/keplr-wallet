@@ -14,7 +14,7 @@ import { Box } from "../../../components/box";
 import { Column, Columns } from "../../../components/column";
 import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
-import { TextInput } from "../../../components/input";
+import { SearchTextInput } from "../../../components/input";
 import { Subtitle3 } from "../../../components/typography";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
@@ -24,6 +24,7 @@ import { ChainImageFallback } from "../../../components/image";
 import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
+import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 
 export const EnableChainsScene: FunctionComponent<{
   vaultId: string;
@@ -309,6 +310,8 @@ export const EnableChainsScene: FunctionComponent<{
       return map;
     }, [enabledChainIdentifiers]);
 
+    const searchRef = useFocusOnMount<HTMLInputElement>();
+
     const [search, setSearch] = useState<string>("");
 
     // 검색 뿐만 아니라 로직에 따른 선택할 수 있는 체인 목록을 가지고 있다.
@@ -386,7 +389,8 @@ export const EnableChainsScene: FunctionComponent<{
 
     return (
       <RegisterSceneBox>
-        <TextInput
+        <SearchTextInput
+          ref={searchRef}
           placeholder="Search networks"
           value={search}
           onChange={(e) => {
