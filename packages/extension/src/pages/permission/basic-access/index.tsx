@@ -80,12 +80,22 @@ export const PermissionBasicAccessPage: FunctionComponent<{
           }}
           borderRadius="0.5rem"
         >
-          <Box backgroundColor={ColorPalette["gray-600"]}>
+          <Box>
             {data.chainIds.map((chainId, index) => {
               const chainInfo = chainStore.getChain(chainId);
 
+              const isLast = index === data.chainIds.length - 1;
+
               return (
-                <Box key={chainId}>
+                <Box
+                  key={chainId}
+                  backgroundColor={ColorPalette["gray-600"]}
+                  style={{
+                    overflow: "hidden",
+                    borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
+                    borderBottomRightRadius: isLast ? "0.5rem" : undefined,
+                  }}
+                >
                   <Subtitle3
                     color={ColorPalette["gray-50"]}
                     style={{ padding: "1.5rem" }}
@@ -93,8 +103,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                     {chainInfo.chainName}
                   </Subtitle3>
 
-                  {data.chainIds.length === 0 ||
-                  index === data.chainIds.length - 1 ? null : (
+                  {isLast ? null : (
                     <Box
                       height="1px"
                       backgroundColor={ColorPalette["gray-500"]}
