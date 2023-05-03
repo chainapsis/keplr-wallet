@@ -79,7 +79,8 @@ class ClaimAllEachState {
 const zeroDec = new Dec(0);
 
 export const ClaimAll: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
+  const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
+    useStore();
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -329,6 +330,10 @@ export const ClaimAll: FunctionComponent = observer(() => {
     }
   };
 
+  const isLedger =
+    keyRingStore.selectedKeyInfo &&
+    keyRingStore.selectedKeyInfo.type === "ledger";
+
   const claimAllDisabled = (() => {
     if (viewTokens.length === 0) {
       return true;
@@ -357,12 +362,17 @@ export const ClaimAll: FunctionComponent = observer(() => {
               </Subtitle2>
             </Stack>
           </Column>
-          <Button
-            text="Claim All"
-            size="small"
-            disabled={claimAllDisabled}
-            onClick={claimAll}
-          />
+          <Tooltip
+            enabled={isLedger || false}
+            content="TODO: 대충 렛저에서는 불가능하다는 메세지"
+          >
+            <Button
+              text="Claim All"
+              size="small"
+              disabled={claimAllDisabled || isLedger}
+              onClick={claimAll}
+            />
+          </Tooltip>
         </Columns>
       </Box>
 
