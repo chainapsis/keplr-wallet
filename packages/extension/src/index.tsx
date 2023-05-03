@@ -43,6 +43,7 @@ import { SettingGeneralAuthZRevokePage } from "./pages/setting/general/authz/rev
 import { SettingAdvancedPage } from "./pages/setting/advanced";
 import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
+import { SettingSecurityAutoLockPage } from "./pages/setting/security/auto-lock";
 import { PermissionPage } from "./pages/permission";
 import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
 import { SettingTokenListPage } from "./pages/setting/token/manage";
@@ -249,6 +250,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/security/permission"
               element={<SettingSecurityPermissionPage />}
+            />
+            <Route
+              path="/setting/security/auto-lock"
+              element={<SettingSecurityAutoLockPage />}
             />
             <Route
               path="/setting/security/change-password"
