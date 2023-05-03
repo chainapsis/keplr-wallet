@@ -79,7 +79,7 @@ export const LedgerGuideBox: FunctionComponent<{
                   <GuideBox
                     color="warning"
                     title="Error"
-                    paragraph="You've selected wrong account on Ledger. Please try again with the account that you've used to create this wallet."
+                    paragraph="Please try again with the same ledger device/account that you've connected with this wallet."
                   />
                 );
               case ErrSignRejected:
