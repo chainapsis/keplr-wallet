@@ -2,6 +2,7 @@ import { Router } from "@keplr-wallet/router";
 import { KeyRingService } from "./service";
 import {
   GetKeyRingStatusMsg,
+  GetKeyRingStatusOnlyMsg,
   FinalizeMnemonicKeyCoinTypeMsg,
   NewMnemonicKeyMsg,
   NewLedgerKeyMsg,
@@ -20,6 +21,7 @@ import { getHandler } from "./handler";
 
 export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(GetKeyRingStatusMsg);
+  router.registerMessage(GetKeyRingStatusOnlyMsg);
   router.registerMessage(SelectKeyRingMsg);
   router.registerMessage(FinalizeMnemonicKeyCoinTypeMsg);
   router.registerMessage(NewMnemonicKeyMsg);

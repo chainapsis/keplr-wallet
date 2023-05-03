@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import React, { FunctionComponent, useLayoutEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { ColorPalette } from "../../../../styles";
 import { Button2 } from "../../../../components/typography";
 import { observer } from "mobx-react-lite";
@@ -50,9 +49,7 @@ const Styles = {
 };
 
 export const InternalLinkView: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
-
-  const navigate = useNavigate();
+  const { chainStore, keyRingStore } = useStore();
 
   const [imgs, setImgs] = useState<ChainInfo[]>([]);
 
@@ -78,7 +75,15 @@ export const InternalLinkView: FunctionComponent = observer(() => {
         onClick={(e) => {
           e.preventDefault();
 
-          // TODO
+          if (keyRingStore.selectedKeyInfo) {
+            browser.tabs
+              .create({
+                url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}`,
+              })
+              .then(() => {
+                window.close();
+              });
+          }
         }}
       >
         <Gutter size="0.5rem" />

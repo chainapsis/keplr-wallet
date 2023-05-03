@@ -29,6 +29,30 @@ export class GetKeyRingStatusMsg extends Message<{
   }
 }
 
+export class GetKeyRingStatusOnlyMsg extends Message<{
+  status: KeyRingStatus;
+}> {
+  public static type() {
+    return "get-keyring-status-only";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetKeyRingStatusOnlyMsg.type();
+  }
+}
+
 export class SelectKeyRingMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
