@@ -1,6 +1,6 @@
 import { VaultService, Vault } from "../vault";
 import { BIP44HDPath, KeyInfo, KeyRing, KeyRingStatus } from "./types";
-import { Env } from "@keplr-wallet/router";
+import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
@@ -76,6 +76,8 @@ export class KeyRingService {
     }
 
     this._selectedVaultId = vaultId;
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
   }
 
   get keyRingStatus(): KeyRingStatus {
@@ -222,6 +224,9 @@ export class KeyRingService {
     runInAction(() => {
       this._selectedVaultId = id;
     });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
     return id;
   }
 
@@ -264,6 +269,9 @@ export class KeyRingService {
     runInAction(() => {
       this._selectedVaultId = id;
     });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
     return id;
   }
 
@@ -299,6 +307,9 @@ export class KeyRingService {
     runInAction(() => {
       this._selectedVaultId = id;
     });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
     return id;
   }
 
@@ -380,6 +391,14 @@ export class KeyRingService {
       } else {
         this._selectedVaultId = undefined;
       }
+    }
+
+    if (wasSelected) {
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
     }
 
     return wasSelected;
