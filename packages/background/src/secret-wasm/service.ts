@@ -1,4 +1,3 @@
-import { EnigmaUtils } from "secretjs";
 import { KeyRingService } from "../keyring";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
@@ -8,6 +7,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
+import { EnigmaUtils } from "./enigma-utils";
 
 export class SecretWasmService {
   protected debouncerMap: Map<
