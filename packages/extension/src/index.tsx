@@ -1,4 +1,6 @@
 // Shim ------------
+import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
+
 require("setimmediate");
 // Shim ------------
 
@@ -247,6 +249,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/security/permission"
               element={<SettingSecurityPermissionPage />}
+            />
+            <Route
+              path="/setting/security/change-password"
+              element={<SettingSecurityChangePasswordPage />}
             />
             <Route
               path="/setting/token/list"

@@ -11,7 +11,7 @@ export const SettingSecurityPage: FunctionComponent = () => {
   const navigate = useNavigate();
 
   return (
-    <HeaderLayout title="General" left={<BackButton />}>
+    <HeaderLayout title="Security&Privacy" left={<BackButton />}>
       <Box paddingX="0.75rem">
         <Stack gutter="1rem">
           <PageButton
@@ -19,6 +19,12 @@ export const SettingSecurityPage: FunctionComponent = () => {
             paragraph="Websites that can view your address and make requests for signing"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/permission")}
+          />
+
+          <PageButton
+            title="Change Password"
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/security/change-password")}
           />
         </Stack>
       </Box>
