@@ -40,18 +40,24 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
     });
   }, [keyRingStore.keyInfos]);
 
-  const ledgerKeys = useMemo(() => {
+  const privateKeyKeys = useMemo(() => {
     return keyRingStore.keyInfos.filter((keyInfo) => {
       return keyInfo.type === "private-key";
     });
   }, [keyRingStore.keyInfos]);
 
+  const ledgerKeys = useMemo(() => {
+    return keyRingStore.keyInfos.filter((keyInfo) => {
+      return keyInfo.type === "ledger";
+    });
+  }, [keyRingStore.keyInfos]);
+
   const unknownKeys = useMemo(() => {
-    const knownKeys = mnemonicKeys.concat(ledgerKeys);
+    const knownKeys = mnemonicKeys.concat(ledgerKeys).concat(privateKeyKeys);
     return keyRingStore.keyInfos.filter((keyInfo) => {
       return !knownKeys.find((k) => k.id === keyInfo.id);
     });
-  }, [keyRingStore.keyInfos, ledgerKeys, mnemonicKeys]);
+  }, [keyRingStore.keyInfos, ledgerKeys, mnemonicKeys, privateKeyKeys]);
 
   // TODO: Private key and web3 auth
 
@@ -74,6 +80,9 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
         <Styles.Content gutter="1.25rem">
           {mnemonicKeys.length > 0 ? (
             <KeyInfoList title="Recovery Phrase" keyInfos={mnemonicKeys} />
+          ) : null}
+          {privateKeyKeys.length > 0 ? (
+            <KeyInfoList title="Private key" keyInfos={privateKeyKeys} />
           ) : null}
           {ledgerKeys.length > 0 ? (
             <KeyInfoList title="Ledger" keyInfos={ledgerKeys} />
@@ -122,6 +131,40 @@ const KeyringItem: FunctionComponent<{
 
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
+  const paragraph = (() => {
+    if (keyInfo.insensitive["bip44Path"]) {
+      const bip44Path = keyInfo.insensitive["bip44Path"] as any;
+      if (
+        bip44Path.account === 0 &&
+        bip44Path.change === 0 &&
+        bip44Path.addressIndex === 0
+      ) {
+        return;
+      }
+
+      // -1 means it can be multiple coin type.
+      let coinType = -1;
+      if (keyInfo.type === "ledger") {
+        const isCosmos =
+          keyInfo.insensitive["Cosmos"] != null ||
+          keyInfo.insensitive["Terra"] != null;
+        const isEthereum = keyInfo.insensitive["Ethereum"] != null;
+
+        if (isCosmos && isEthereum) {
+          coinType = -1;
+        } else if (isCosmos) {
+          coinType = 118;
+        } else if (isEthereum) {
+          coinType = 60;
+        }
+      }
+
+      return `m/44'/${coinType >= 0 ? coinType : "-"}'/${bip44Path.account}'/${
+        bip44Path.change
+      }/${bip44Path.addressIndex}`;
+    }
+  })();
+
   return (
     <Box
       padding="1rem"
@@ -147,14 +190,18 @@ const KeyringItem: FunctionComponent<{
               ? " (Selected)"
               : ""}
           </Subtitle2>
-          <Gutter size="0.375rem" />
-          <Body2
-            style={{
-              color: ColorPalette["gray-300"],
-            }}
-          >
-            TEST
-          </Body2>
+          {paragraph ? (
+            <React.Fragment>
+              <Gutter size="0.375rem" />
+              <Body2
+                style={{
+                  color: ColorPalette["gray-300"],
+                }}
+              >
+                {paragraph}
+              </Body2>
+            </React.Fragment>
+          ) : null}
         </YAxis>
         <Column weight={1} />
         <XAxis alignY="center">
