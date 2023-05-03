@@ -77,6 +77,12 @@ export class KeyRingStore {
     return this._keyInfos;
   }
 
+  async fetchKeyRingStatus(): Promise<KeyRingV2.KeyRingStatus> {
+    const msg = new KeyRingV2.GetKeyRingStatusOnlyMsg();
+    const result = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return result.status;
+  }
+
   @computed
   get selectedKeyInfo(): KeyRingV2.KeyInfo | undefined {
     return this._keyInfos.find((keyInfo) => keyInfo.isSelected);

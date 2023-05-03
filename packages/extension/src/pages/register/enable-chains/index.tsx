@@ -26,6 +26,11 @@ import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 
+/**
+ * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
+ * 근데 문제는 extension 자체의 메인 페이지에서 manage chains 버튼을 눌러서도 올 수 있다는 점이다...
+ * registeration이 하는 역할이 많아지면서 복잡해졌는데... 알아서 잘 처리하자
+ */
 export const EnableChainsScene: FunctionComponent<{
   vaultId: string;
   // finalize-key scene으로부터 온 경우에는 finalize-key scene이 미리 계산해서 전달해준다.
@@ -248,8 +253,8 @@ export const EnableChainsScene: FunctionComponent<{
     const [enabledChainIdentifiers, setEnabledChainIdentifiers] = useState(
       () => {
         // We assume that the chain store can be already initialized.
-        // See FinalizeKeyScene
-        // However, if the chain store is not initialized, we should handle these case too.
+        // candidateAddresses가 prop으로 제공되지 않으면 얘는 무조건 초기값을 가진다.
+        // useState의 initial state 기능을 사용해서 이를 보장한다는 점을 참고...
         const enabledChainIdentifiers: string[] =
           chainStore.enabledChainIdentifiers;
 

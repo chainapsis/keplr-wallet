@@ -10,6 +10,7 @@ import {
   DeleteKeyRingMsg,
   FinalizeMnemonicKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
+  GetKeyRingStatusOnlyMsg,
   LockKeyRingMsg,
   NewLedgerKeyMsg,
   NewPrivateKeyKeyMsg,
@@ -31,6 +32,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleGetKeyRingStatusMsg(service)(
           env,
           msg as GetKeyRingStatusMsg
+        );
+      case GetKeyRingStatusOnlyMsg:
+        return handleGetKeyRingStatusOnlyMsg(service)(
+          env,
+          msg as GetKeyRingStatusOnlyMsg
         );
       case SelectKeyRingMsg:
         return handleSelectKeyRingMsg(service)(env, msg as SelectKeyRingMsg);
@@ -87,6 +93,16 @@ const handleGetKeyRingStatusMsg: (
     return {
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleGetKeyRingStatusOnlyMsg: (
+  service: KeyRingService
+) => InternalHandler<GetKeyRingStatusOnlyMsg> = (service) => {
+  return () => {
+    return {
+      status: service.keyRingStatus,
     };
   };
 };

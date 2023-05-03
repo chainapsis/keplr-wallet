@@ -52,7 +52,6 @@ import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
 import { SettingGeneralLinkKeplrMobilePage } from "./pages/setting/general/link-keplr-mobile";
 import { SettingContactsList } from "./pages/setting/contacts/list";
 import { SettingContactsAdd } from "./pages/setting/contacts/add";
-import { SettingChainListPage } from "./pages/setting/chain";
 import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
 import {
@@ -269,10 +268,6 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/contacts/add"
               element={<SettingContactsAdd />}
-            />
-            <Route
-              path="/setting/chain/list"
-              element={<SettingChainListPage />}
             />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />

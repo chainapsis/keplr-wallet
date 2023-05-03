@@ -28,26 +28,21 @@ export const RegisterHeader: FunctionComponent<{
 
   useEffect(() => {
     if (headerSceneRef.current) {
-      // TODO: Use `replace` instead of `push`
       switch (header.mode) {
         case "intro": {
           if (headerSceneRef.current.currentScene !== "intro") {
-            headerSceneRef.current.replace("intro", {
-              sceneRef,
-            });
+            headerSceneRef.current.replace("intro", {});
           }
           break;
         }
         case "welcome": {
           if (headerSceneRef.current.currentScene !== "welcome") {
             headerSceneRef.current.replace("welcome", {
-              sceneRef,
               title: header.title,
               paragraph: header.paragraph,
             });
           } else {
             headerSceneRef.current.setCurrentSceneProps({
-              sceneRef,
               title: header.title,
               paragraph: header.paragraph,
             });
@@ -57,7 +52,6 @@ export const RegisterHeader: FunctionComponent<{
         case "step": {
           if (headerSceneRef.current.currentScene !== "step") {
             headerSceneRef.current.replace("step", {
-              sceneRef,
               title: header.title,
               paragraphs: header.paragraphs,
               stepCurrent: header.stepCurrent,
@@ -65,7 +59,6 @@ export const RegisterHeader: FunctionComponent<{
             });
           } else {
             headerSceneRef.current.setCurrentSceneProps({
-              sceneRef,
               title: header.title,
               paragraphs: header.paragraphs,
               stepCurrent: header.stepCurrent,
@@ -76,7 +69,7 @@ export const RegisterHeader: FunctionComponent<{
         }
       }
     }
-  }, [header, sceneRef]);
+  }, [header]);
 
   const [isBackShown, setIsBackShown] = useState(
     sceneRef.current?.canPop() ?? false
@@ -133,9 +126,6 @@ export const RegisterHeader: FunctionComponent<{
         ]}
         initialSceneProps={{
           name: "intro",
-          props: {
-            sceneRef,
-          },
         }}
         transitionAlign="center"
         transitionMode="opacity"
@@ -144,16 +134,14 @@ export const RegisterHeader: FunctionComponent<{
   );
 };
 
-const HeaderIntro: FunctionComponent<{
-  sceneRef: MutableRefObject<SceneTransitionRef | null>;
-}> = () => {
+const HeaderIntro: FunctionComponent = () => {
   return (
     <Box paddingY="0.25rem">
       <YAxis alignX="center">
         <img
           src={require("../../../../public/assets/img/intro-logo.png")}
           style={{
-            width: "9.5rem",
+            height: "3.125rem",
           }}
           alt="intro-hardware-wallet image"
         />
@@ -169,7 +157,6 @@ const HeaderIntro: FunctionComponent<{
 };
 
 const HeaderWelcome: FunctionComponent<{
-  sceneRef: MutableRefObject<SceneTransitionRef | null>;
   title: string;
   paragraph: string;
 }> = ({ title, paragraph }) => {
@@ -185,7 +172,6 @@ const HeaderWelcome: FunctionComponent<{
 };
 
 const HeaderStep: FunctionComponent<{
-  sceneRef: MutableRefObject<SceneTransitionRef | null>;
   title: string;
   paragraphs?: (string | ReactNode)[];
   stepCurrent: number;
