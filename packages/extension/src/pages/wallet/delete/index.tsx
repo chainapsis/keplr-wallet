@@ -9,7 +9,7 @@ import { Stack } from "../../../components/stack";
 import { ColorPalette } from "../../../styles";
 import { TextInput } from "../../../components/input";
 import { useStore } from "../../../stores";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import lottie from "lottie-web";
@@ -108,12 +108,31 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
       })}
     >
       <Styles.Container>
-        <GuideBox
-          color="warning"
-          title="Alert"
-          paragraph="Make sure that you’ve backed up your recovery phrase and private key."
-          bottom={<Styles.BackUp>Back Up My Wallet</Styles.BackUp>}
-        />
+        {(() => {
+          const keyInfo = keyRingStore.keyInfos.find(
+            (keyInfo) => keyInfo.id === vaultId
+          );
+          if (!keyInfo) {
+            return null;
+          }
+
+          if (keyInfo.type === "mnemonic" || keyInfo.type === "private-key") {
+            return (
+              <GuideBox
+                color="warning"
+                title="Alert"
+                paragraph="Make sure that you’ve backed up your recovery phrase and private key."
+                bottom={
+                  <Link to={`/wallet/show-sensitive?id=${keyInfo.id}`}>
+                    <Styles.BackUp>Back Up My Wallet</Styles.BackUp>
+                  </Link>
+                }
+              />
+            );
+          }
+
+          return null;
+        })()}
 
         <YAxis alignX="center">
           <div
