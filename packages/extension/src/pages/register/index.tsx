@@ -90,6 +90,8 @@ export const RegisterPage: FunctionComponent = observer(() => {
 });
 
 const RegisterPageImpl: FunctionComponent = observer(() => {
+  const { chainStore } = useStore();
+
   const sceneRef = useRef<SceneTransitionRef | null>(null);
 
   const [searchParams] = useSearchParams();
@@ -98,6 +100,15 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
     const route = searchParams.get("route");
     const vaultId = searchParams.get("vaultId");
     if (route === "enable-chains" && vaultId) {
+      // 이 시점에서 chainStore가 초기화 되어있는게 보장된다.
+      if (chainStore.lastSyncedEnabledChainsVaultId !== vaultId) {
+        // 잘못된 vaultId로 접근한 것이다.
+        // 유저가 manage chains를 통해서 들어온 후에 계정을 바꾸고 이 페이지를 새로고침하면 발생할 수 있는데
+        // 이 경우에는 그냥 끈다.
+        // 구조상 처리하기가 너무 빡세진다.
+        window.close();
+      }
+
       return {
         header: {
           // TODO: ...
