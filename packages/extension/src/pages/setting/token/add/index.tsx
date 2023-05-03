@@ -22,8 +22,6 @@ import { Dropdown } from "../../../../components/dropdown";
 const Styles = {
   Container: styled(Stack)`
     padding: 0 0.75rem;
-
-    margin-bottom: 4.75rem;
   `,
 };
 
@@ -267,7 +265,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             >
               <Columns sum={1} alignY="center" gutter="0.25rem">
                 <Column weight={1}>
-                  <Stack>
+                  <Stack gutter="0.375rem">
                     <Subtitle2 color={ColorPalette["gray-50"]}>
                       I have my own viewing key
                     </Subtitle2>
