@@ -24,6 +24,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
   return (
     <HeaderLayout
       title=""
+      fixedHeight={true}
       bottomButton={{
         text: "Approve",
         size: "large",
@@ -52,52 +53,57 @@ export const PermissionBasicAccessPage: FunctionComponent<{
         );
       }}
     >
-      <Box padding="0.75rem" alignX="center">
-        <Image
-          alt="Keplr Logo Image"
-          src={require("../../../public/assets/logo-256.png")}
-          style={{ width: "4.625rem", height: "4.625rem" }}
-        />
+      <Box height="100%" padding="0.75rem" paddingBottom="0">
+        <Box alignX="center">
+          <Image
+            alt="Keplr Logo Image"
+            src={require("../../../public/assets/logo-256.png")}
+            style={{ width: "4.625rem", height: "4.625rem" }}
+          />
 
-        <Gutter size="1.125rem" />
+          <Gutter size="1.125rem" />
 
-        <H2 color={ColorPalette["gray-10"]}>Requesting Connection</H2>
+          <H2 color={ColorPalette["gray-10"]}>Requesting Connection</H2>
 
-        <Gutter size="1rem" />
+          <Gutter size="1rem" />
 
-        <Body1 color={ColorPalette["gray-200"]}>
-          {data.origins.join(", ")}
-        </Body1>
+          <Body1 color={ColorPalette["gray-200"]}>
+            {data.origins.join(", ")}
+          </Body1>
 
-        <Gutter size="1rem" />
-
+          <Gutter size="1rem" />
+        </Box>
         <Box
-          width="100%"
-          backgroundColor={ColorPalette["gray-600"]}
+          style={{
+            flex: 1,
+            overflow: "auto",
+          }}
           borderRadius="0.5rem"
         >
-          {data.chainIds.map((chainId, index) => {
-            const chainInfo = chainStore.getChain(chainId);
+          <Box backgroundColor={ColorPalette["gray-600"]}>
+            {data.chainIds.map((chainId, index) => {
+              const chainInfo = chainStore.getChain(chainId);
 
-            return (
-              <Box key={chainId}>
-                <Subtitle3
-                  color={ColorPalette["gray-50"]}
-                  style={{ padding: "1.5rem" }}
-                >
-                  {chainInfo.chainName}
-                </Subtitle3>
+              return (
+                <Box key={chainId}>
+                  <Subtitle3
+                    color={ColorPalette["gray-50"]}
+                    style={{ padding: "1.5rem" }}
+                  >
+                    {chainInfo.chainName}
+                  </Subtitle3>
 
-                {data.chainIds.length === 0 ||
-                index === data.chainIds.length - 1 ? null : (
-                  <Box
-                    height="1px"
-                    backgroundColor={ColorPalette["gray-500"]}
-                  />
-                )}
-              </Box>
-            );
-          })}
+                  {data.chainIds.length === 0 ||
+                  index === data.chainIds.length - 1 ? null : (
+                    <Box
+                      height="1px"
+                      backgroundColor={ColorPalette["gray-500"]}
+                    />
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
         </Box>
       </Box>
     </HeaderLayout>
