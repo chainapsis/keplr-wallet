@@ -343,7 +343,6 @@ export const ClaimAll: FunctionComponent = observer(() => {
     return true;
   })();
 
-  // TODO: Add loading state.
   return (
     <Styles.Container>
       <Box paddingX="1rem">
@@ -496,7 +495,6 @@ const ClaimTokenItem: FunctionComponent<{
     accountStore.getAccount(viewToken.chainInfo.chainId).isSendingMsg ===
       "withdrawRewards" || state.isLoading;
 
-  // TODO: Add loading state.
   return (
     <Box padding="1rem">
       <Columns sum={1} alignY="center">

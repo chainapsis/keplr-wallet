@@ -34,9 +34,16 @@ export const VerticalCollapseTransition: FunctionComponent<
   onTransitionEnd,
   onResize,
 }) => {
+  const onTransitionEndRef = useRef(onTransitionEnd);
+  onTransitionEndRef.current = onTransitionEnd;
+
   const heightPx = useSpringValue(collapsed ? 0 : -1, {
     config: defaultSpringConfig,
-    onRest: onTransitionEnd,
+    onRest: () => {
+      if (onTransitionEndRef.current) {
+        onTransitionEndRef.current();
+      }
+    },
   });
 
   const [registry] = useState<IDescendantRegistry>(
