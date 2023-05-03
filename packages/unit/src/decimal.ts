@@ -263,6 +263,10 @@ export class Dec {
     return new Dec(this.mulRaw(d2).chopPrecisionAndTruncate(), Dec.precision);
   }
 
+  public mulRoundUp(d2: Dec): Dec {
+    return new Dec(this.mulRaw(d2).chopPrecisionAndRoundUp(), Dec.precision);
+  }
+
   protected mulRaw(d2: Dec): Dec {
     return new Dec(this.int.multiply(d2.int), Dec.precision);
   }
