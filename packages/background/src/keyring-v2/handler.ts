@@ -12,6 +12,7 @@ import {
   GetKeyRingStatusMsg,
   LockKeyRingMsg,
   NewLedgerKeyMsg,
+  NewPrivateKeyKeyMsg,
   AppendLedgerKeyAppMsg,
   NewMnemonicKeyMsg,
   SelectKeyRingMsg,
@@ -46,6 +47,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleNewMnemonicKeyMsg(service)(env, msg as NewMnemonicKeyMsg);
       case NewLedgerKeyMsg:
         return handleNewLedgerKeyMsg(service)(env, msg as NewLedgerKeyMsg);
+      case NewPrivateKeyKeyMsg:
+        return handleNewPrivateKeyKeyMsg(service)(
+          env,
+          msg as NewPrivateKeyKeyMsg
+        );
       case AppendLedgerKeyAppMsg:
         return handleAppendLedgerKeyAppMsg(service)(
           env,
@@ -159,6 +165,25 @@ const handleNewLedgerKeyMsg: (
       msg.pubKey,
       msg.app,
       msg.bip44HDPath,
+      msg.name,
+      msg.password
+    );
+    return {
+      vaultId,
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleNewPrivateKeyKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<NewPrivateKeyKeyMsg> = (service) => {
+  return async (env, msg) => {
+    const vaultId = await service.createPrivateKeyKeyRing(
+      env,
+      msg.privateKey,
+      msg.meta,
       msg.name,
       msg.password
     );

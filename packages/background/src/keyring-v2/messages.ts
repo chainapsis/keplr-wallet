@@ -181,6 +181,47 @@ export class NewLedgerKeyMsg extends Message<{
   }
 }
 
+export class NewPrivateKeyKeyMsg extends Message<{
+  vaultId: string;
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "new-private-key-key";
+  }
+
+  constructor(
+    public readonly privateKey: Uint8Array,
+    public readonly meta: Record<string, string | undefined>,
+    public readonly name: string,
+    public readonly password?: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.privateKey || this.privateKey.length === 0) {
+      throw new Error("priv key not set");
+    }
+
+    if (!this.meta) {
+      throw new Error("meta not set");
+    }
+
+    if (!this.name) {
+      throw new Error("name not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return NewPrivateKeyKeyMsg.type();
+  }
+}
+
 export class AppendLedgerKeyAppMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];

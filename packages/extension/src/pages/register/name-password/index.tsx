@@ -10,7 +10,10 @@ import { observer } from "mobx-react-lite";
 
 export const RegisterNamePasswordScene: FunctionComponent<{
   mnemonic?: string;
-  privateKey?: string;
+  privateKey?: {
+    value: Uint8Array;
+    meta: Record<string, string | undefined>;
+  };
   bip44Path?: {
     account: number;
     change: number;
@@ -53,6 +56,14 @@ export const RegisterNamePasswordScene: FunctionComponent<{
                 value: mnemonic,
                 bip44Path,
               },
+            });
+          }
+
+          if (privateKey) {
+            sceneTransition.replaceAll("finalize-key", {
+              name: data.name,
+              password: data.password,
+              privateKey,
             });
           }
         })}

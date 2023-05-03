@@ -19,6 +19,7 @@ import { Styles } from "../new-mnemonic/styles";
 import { XAxis } from "../../../components/axis";
 import { TextInput, TextInputProps } from "../../../components/input";
 import { Mnemonic } from "@keplr-wallet/crypto";
+import { Buffer } from "buffer/";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
@@ -193,7 +194,10 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
             }
 
             sceneTransition.push("name-password", {
-              privateKey: words[0].replace("0x", ""),
+              privateKey: {
+                value: Buffer.from(words[0].replace("0x", ""), "hex"),
+                meta: {},
+              },
             });
           } else {
             // Trim empty string from back.

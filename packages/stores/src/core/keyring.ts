@@ -223,6 +223,30 @@ export class KeyRingStore {
   }
 
   @flow
+  *newPrivateKeyKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string | undefined>,
+    name: string,
+    password: string | undefined
+  ) {
+    const msg = new KeyRingV2.NewPrivateKeyKeyMsg(
+      privateKey,
+      meta,
+      name,
+      password
+    );
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+
+    return result.vaultId;
+  }
+
+  @flow
   *lock() {
     const msg = new KeyRingV2.LockKeyRingMsg();
     const result = yield* toGenerator(

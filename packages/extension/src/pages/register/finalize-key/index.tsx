@@ -38,6 +38,7 @@ export const FinalizeKeyScene: FunctionComponent<{
   };
   privateKey?: {
     value: Uint8Array;
+    meta: Record<string, string | undefined>;
   };
   ledger?: {
     pubKey: Uint8Array;
@@ -93,7 +94,12 @@ export const FinalizeKeyScene: FunctionComponent<{
           password
         );
       } else if (privateKey) {
-        throw new Error("TODO");
+        vaultId = await keyRingStore.newPrivateKeyKey(
+          privateKey.value,
+          privateKey.meta,
+          name,
+          password
+        );
       } else if (ledger) {
         vaultId = await keyRingStore.newLedgerKey(
           ledger.pubKey,

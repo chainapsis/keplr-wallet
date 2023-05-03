@@ -8,7 +8,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
 import { ChainInfo } from "@keplr-wallet/types";
-import { Buffer } from "buffer";
+import { Buffer } from "buffer/";
 
 export class KeyRingService {
   @observable
@@ -257,6 +257,41 @@ export class KeyRingService {
         ...vaultData.insensitive,
         keyRingName: name,
         keyRingType: keyRing.supportedKeyRingType(),
+      },
+      vaultData.sensitive
+    );
+
+    runInAction(() => {
+      this._selectedVaultId = id;
+    });
+    return id;
+  }
+
+  async createPrivateKeyKeyRing(
+    env: Env,
+    privateKey: Uint8Array,
+    meta: Record<string, string | undefined>,
+    name: string,
+    password?: string
+  ): Promise<string> {
+    if (!this.vaultService.isSignedUp) {
+      if (!password) {
+        throw new Error("Must provide password to sign in to vault");
+      }
+
+      await this.vaultService.signUp(password);
+    }
+
+    const keyRing = this.getKeyRing("private-key");
+    const vaultData = await keyRing.createKeyRingVault(env, privateKey);
+
+    const id = this.vaultService.addVault(
+      "keyRing",
+      {
+        ...vaultData.insensitive,
+        keyRingName: name,
+        keyRingType: keyRing.supportedKeyRingType(),
+        keyRingMeta: meta,
       },
       vaultData.sensitive
     );
@@ -530,6 +565,10 @@ export class KeyRingService {
       case "mnemonic": {
         const sensitive = this.vaultService.decrypt(vault.sensitive);
         return sensitive["mnemonic"] as string;
+      }
+      case "private-key": {
+        const sensitive = this.vaultService.decrypt(vault.sensitive);
+        return sensitive["privateKey"] as string;
       }
       default: {
         throw new Error("Unsupported keyRing type to show sensitive data");
