@@ -1,6 +1,4 @@
 // Shim ------------
-import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
-
 require("setimmediate");
 // Shim ------------
 
@@ -66,6 +64,7 @@ import {
 import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
 import { NotificationProvider } from "./hooks/notification";
+import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
