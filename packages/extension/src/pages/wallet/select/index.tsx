@@ -165,6 +165,42 @@ const KeyringItem: FunctionComponent<{
     }
   })();
 
+  const dropdownItems = (() => {
+    const defaults = [
+      {
+        key: "change-wallet-name",
+        label: "Change Wallet Name",
+        onSelect: () => navigate(`/wallet/change-name?id=${keyInfo.id}`),
+      },
+      {
+        key: "delete-wallet",
+        label: "Delete Wallet",
+        onSelect: () => navigate(`/wallet/delete?id=${keyInfo.id}`),
+      },
+    ];
+
+    switch (keyInfo.type) {
+      case "mnemonic": {
+        defaults.unshift({
+          key: "view-recovery-phrase",
+          label: "View Recovery Phrase",
+          onSelect: () => navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
+        });
+        break;
+      }
+      case "private-key": {
+        defaults.unshift({
+          key: "view-recovery-phrase",
+          label: "View Private key",
+          onSelect: () => navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
+        });
+        break;
+      }
+    }
+
+    return defaults;
+  })();
+
   return (
     <Box
       padding="1rem"
@@ -214,25 +250,7 @@ const KeyringItem: FunctionComponent<{
             <FloatingDropdown
               isOpen={isMenuOpen}
               close={() => setIsMenuOpen(false)}
-              items={[
-                {
-                  key: "view-recovery-phrase",
-                  label: "View Recovery Phrase",
-                  onSelect: () =>
-                    navigate(`/wallet/recovery-phrase?id=${keyInfo.id}`),
-                },
-                {
-                  key: "change-wallet-name",
-                  label: "Change Wallet Name",
-                  onSelect: () =>
-                    navigate(`/wallet/change-name?id=${keyInfo.id}`),
-                },
-                {
-                  key: "delete-wallet",
-                  label: "Delete Wallet",
-                  onSelect: () => navigate(`/wallet/delete?id=${keyInfo.id}`),
-                },
-              ]}
+              items={dropdownItems}
             >
               <Box
                 onClick={() => setIsMenuOpen(!isMenuOpen)}

@@ -59,7 +59,7 @@ import {
   WalletSelectPage,
   WalletChangeNamePage,
   WalletDeletePage,
-  WalletRecoveryPhrasePage,
+  WalletShowSensitivePage,
 } from "./pages/wallet";
 import { SuggestChainPage } from "./pages/suggest-chain";
 import { ModalRootProvider } from "./components/modal";
@@ -287,8 +287,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               element={<WalletChangeNamePage />}
             />
             <Route
-              path="/wallet/recovery-phrase"
-              element={<WalletRecoveryPhrasePage />}
+              path="/wallet/show-sensitive"
+              element={<WalletShowSensitivePage />}
             />
             <Route path="/suggest-chain" element={<SuggestChainPage />} />
           </Routes>

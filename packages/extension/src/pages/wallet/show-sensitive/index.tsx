@@ -43,7 +43,7 @@ interface FormData {
   password: string;
 }
 
-export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
+export const WalletShowSensitivePage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
   const [searchParams] = useSearchParams();
 
@@ -61,7 +61,7 @@ export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
     },
   });
 
-  const [keyRing, setKeyRing] = useState("");
+  const [sensitive, setSensitive] = useState("");
 
   useEffect(() => {
     setFocus("password");
@@ -69,11 +69,20 @@ export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="View Recovery Phrase"
+      title={(() => {
+        const keyInfo = keyRingStore.keyInfos.find(
+          (keyInfo) => keyInfo.id === vaultId
+        );
+        if (keyInfo && keyInfo.type === "private-key") {
+          return "View Private key";
+        }
+
+        return "View Recovery Phrase";
+      })()}
       left={<BackButton />}
       fixedHeight={true}
       bottomButton={
-        keyRing === ""
+        sensitive === ""
           ? {
               color: "secondary",
               text: "Confirm",
@@ -83,7 +92,7 @@ export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
           : undefined
       }
       onSubmit={
-        keyRing === ""
+        sensitive === ""
           ? handleSubmit(async (data) => {
               try {
                 if (vaultId) {
@@ -91,7 +100,7 @@ export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
                     vaultId,
                     data.password
                   );
-                  setKeyRing(result);
+                  setSensitive(result);
                 }
               } catch (e) {
                 console.log("Fail to decrypt: " + e.message);
@@ -104,7 +113,7 @@ export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
           : undefined
       }
     >
-      {keyRing === "" ? (
+      {sensitive === "" ? (
         <Styles.Container>
           <Gutter size="5.875rem" />
 
@@ -132,7 +141,7 @@ export const WalletRecoveryPhrasePage: FunctionComponent = observer(() => {
           />
         </Styles.Container>
       ) : (
-        <Styles.RecoveryPhrase>{keyRing}</Styles.RecoveryPhrase>
+        <Styles.RecoveryPhrase>{sensitive}</Styles.RecoveryPhrase>
       )}
     </HeaderLayout>
   );
