@@ -17,6 +17,7 @@ import {
   SelectKeyRingMsg,
   ShowSensitiveKeyRingDataMsg,
   UnlockKeyRingMsg,
+  ChangeUserPasswordMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 
@@ -61,6 +62,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleShowSensitiveKeyRingDataMsg(service)(
           env,
           msg as ShowSensitiveKeyRingDataMsg
+        );
+      case ChangeUserPasswordMsg:
+        return handleChangeUserPasswordMsg(service)(
+          env,
+          msg as ChangeUserPasswordMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -206,5 +212,16 @@ const handleShowSensitiveKeyRingDataMsg: (
 ) => InternalHandler<ShowSensitiveKeyRingDataMsg> = (service) => {
   return async (_env, msg) => {
     return await service.showSensitiveKeyRingData(msg.vaultId, msg.password);
+  };
+};
+
+const handleChangeUserPasswordMsg: (
+  service: KeyRingService
+) => InternalHandler<ChangeUserPasswordMsg> = (service) => {
+  return async (_env, msg) => {
+    return await service.changeUserPassword(
+      msg.prevUserPassword,
+      msg.newUserPassword
+    );
   };
 };

@@ -265,4 +265,15 @@ export class KeyRingStore {
       this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     }
   }
+
+  async changeUserPassword(
+    prevUserPassword: string,
+    newUserPassword: string
+  ): Promise<void> {
+    const msg = new KeyRingV2.ChangeUserPasswordMsg(
+      prevUserPassword,
+      newUserPassword
+    );
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
 }

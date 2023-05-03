@@ -537,6 +537,16 @@ export class KeyRingService {
     }
   }
 
+  async changeUserPassword(
+    prevUserPassword: string,
+    newUserPassword: string
+  ): Promise<void> {
+    await this.vaultService.changeUserPassword(
+      prevUserPassword,
+      newUserPassword
+    );
+  }
+
   protected getVaultKeyRing(vault: Vault): KeyRing {
     for (const keyRing of this.keyRings) {
       if (vault.insensitive["keyRingType"] === keyRing.supportedKeyRingType()) {

@@ -366,3 +366,34 @@ export class ShowSensitiveKeyRingDataMsg extends Message<string> {
     return ShowSensitiveKeyRingDataMsg.type();
   }
 }
+
+export class ChangeUserPasswordMsg extends Message<void> {
+  public static type() {
+    return "ChangeUserPasswordMsg";
+  }
+
+  constructor(
+    public readonly prevUserPassword: string,
+    public readonly newUserPassword: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.prevUserPassword) {
+      throw new Error("prevUserPassword not set");
+    }
+
+    if (!this.newUserPassword) {
+      throw new Error("newUserPassword not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ChangeUserPasswordMsg.type();
+  }
+}
