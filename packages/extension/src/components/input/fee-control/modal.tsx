@@ -11,6 +11,7 @@ import { Button } from "../../button";
 import { observer } from "mobx-react-lite";
 import { IFeeConfig, IGasConfig, IGasSimulator } from "@keplr-wallet/hooks";
 import { useStore } from "../../../stores";
+import { GuideBox } from "../../guide-box";
 
 const Styles = {
   Container: styled.div`
@@ -36,6 +37,24 @@ export const TransactionFeeModal: FunctionComponent<{
   gasConfig: IGasConfig;
   gasSimulator?: IGasSimulator;
 }> = observer(({ close, feeConfig, gasConfig, gasSimulator }) => {
+  const isGasSimulatorUsable = (() => {
+    if (!gasSimulator) {
+      return false;
+    }
+
+    if (gasSimulator.gasEstimated == null && gasSimulator.uiProperties.error) {
+      return false;
+    }
+
+    return true;
+  })();
+  const isGasSimulatorEnabled = (() => {
+    if (!isGasSimulatorUsable) {
+      return false;
+    }
+    return gasSimulator?.enabled;
+  })();
+
   return (
     <Styles.Container>
       <Subtitle1 style={{ marginBottom: "1.5rem" }}>Fee Set</Subtitle1>
@@ -80,7 +99,7 @@ export const TransactionFeeModal: FunctionComponent<{
 
           <Column weight={1} />
 
-          {gasSimulator ? (
+          {isGasSimulatorUsable && gasSimulator ? (
             <Columns sum={1} gutter="0.5rem" alignY="center">
               <Subtitle3>Auto</Subtitle3>
               <Toggle
@@ -93,10 +112,40 @@ export const TransactionFeeModal: FunctionComponent<{
           ) : null}
         </Columns>
 
-        {gasSimulator?.enabled ? (
+        {(() => {
+          if (gasSimulator) {
+            if (gasSimulator.uiProperties.error) {
+              return (
+                <GuideBox
+                  color="danger"
+                  title="Tx simulation failed"
+                  paragraph={
+                    gasSimulator.uiProperties.error.message ||
+                    gasSimulator.uiProperties.error.toString()
+                  }
+                />
+              );
+            }
+
+            if (gasSimulator.uiProperties.warning) {
+              return (
+                <GuideBox
+                  color="warning"
+                  title="Tx simulation failed"
+                  paragraph={
+                    gasSimulator.uiProperties.warning.message ||
+                    gasSimulator.uiProperties.warning.toString()
+                  }
+                />
+              );
+            }
+          }
+        })()}
+
+        {isGasSimulatorEnabled ? (
           <TextInput
             label="Gas Adjustment"
-            value={gasSimulator.gasAdjustmentValue}
+            value={gasSimulator?.gasAdjustmentValue}
             onChange={(e) => {
               e.preventDefault();
 
