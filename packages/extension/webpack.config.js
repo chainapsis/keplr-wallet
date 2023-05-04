@@ -35,7 +35,7 @@ const altResolve = () => {
 };
 const tsRule = { test: /\.tsx?$/, loader: "ts-loader" };
 const fileRule = {
-  test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
+  test: /\.(svg|png|mp4|jpe?g|gif|woff|woff2|eot|ttf)$/i,
   type: "asset/resource",
   generator: {
     filename: "assets/[name][ext]",
