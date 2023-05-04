@@ -9,9 +9,15 @@ import { Toggle } from "../../toggle";
 import { TextInput } from "..";
 import { Button } from "../../button";
 import { observer } from "mobx-react-lite";
-import { IFeeConfig, IGasConfig, IGasSimulator } from "@keplr-wallet/hooks";
+import {
+  IFeeConfig,
+  IGasConfig,
+  IGasSimulator,
+  ISenderConfig,
+} from "@keplr-wallet/hooks";
 import { useStore } from "../../../stores";
 import { GuideBox } from "../../guide-box";
+import { Dec } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled.div`
@@ -33,10 +39,13 @@ const Styles = {
 export const TransactionFeeModal: FunctionComponent<{
   close: () => void;
 
+  senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
   gasSimulator?: IGasSimulator;
-}> = observer(({ close, feeConfig, gasConfig, gasSimulator }) => {
+}> = observer(({ close, senderConfig, feeConfig, gasConfig, gasSimulator }) => {
+  const { queriesStore } = useStore();
+
   const isGasSimulatorUsable = (() => {
     if (!gasSimulator) {
       return false;
@@ -68,12 +77,25 @@ export const TransactionFeeModal: FunctionComponent<{
         <Stack gutter="0.375rem">
           <Subtitle3>Fee Token</Subtitle3>
           <Dropdown
-            items={feeConfig.selectableFeeCurrencies.map((cur) => {
-              return {
-                key: cur.coinMinimalDenom,
-                label: cur.coinDenom,
-              };
-            })}
+            items={feeConfig.selectableFeeCurrencies
+              .filter((cur, i) => {
+                if (i === 0) {
+                  return true;
+                }
+
+                const balance = queriesStore
+                  .get(feeConfig.chainId)
+                  .queryBalances.getQueryBech32Address(senderConfig.sender)
+                  .getBalanceFromCurrency(cur);
+
+                return balance.toDec().gt(new Dec(0));
+              })
+              .map((cur) => {
+                return {
+                  key: cur.coinMinimalDenom,
+                  label: cur.coinDenom,
+                };
+              })}
             selectedItemKey={feeConfig.fees[0]?.currency.coinMinimalDenom}
             onSelect={(key) => {
               const currency = feeConfig.selectableFeeCurrencies.find(
@@ -83,6 +105,11 @@ export const TransactionFeeModal: FunctionComponent<{
                 if (feeConfig.type !== "manual") {
                   feeConfig.setFee({
                     type: feeConfig.type,
+                    currency: currency,
+                  });
+                } else {
+                  feeConfig.setFee({
+                    type: "average",
                     currency: currency,
                   });
                 }

@@ -215,6 +215,7 @@ export const FeeControl: FunctionComponent<{
         >
           <TransactionFeeModal
             close={() => setIsModalOpen(false)}
+            senderConfig={senderConfig}
             feeConfig={feeConfig}
             gasConfig={gasConfig}
             gasSimulator={gasSimulator}
