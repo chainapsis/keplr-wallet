@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { Caption1, Caption2, H5, Subtitle1, Subtitle3 } from "../../typography";
 import { ColorPalette } from "../../../styles";
 import styled from "styled-components";
@@ -9,7 +9,7 @@ import { Toggle } from "../../toggle";
 import { TextInput } from "..";
 import { Button } from "../../button";
 import { observer } from "mobx-react-lite";
-import { IFeeConfig, IGasConfig } from "@keplr-wallet/hooks";
+import { IFeeConfig, IGasConfig, IGasSimulator } from "@keplr-wallet/hooks";
 import { useStore } from "../../../stores";
 
 const Styles = {
@@ -30,11 +30,12 @@ const Styles = {
 };
 
 export const TransactionFeeModal: FunctionComponent<{
+  close: () => void;
+
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
-}> = observer(({ feeConfig, gasConfig }) => {
-  const [isAuto, setIsAuto] = useState<boolean>(true);
-
+  gasSimulator?: IGasSimulator;
+}> = observer(({ close, feeConfig, gasConfig, gasSimulator }) => {
   return (
     <Styles.Container>
       <Subtitle1 style={{ marginBottom: "1.5rem" }}>Fee Set</Subtitle1>
@@ -79,23 +80,68 @@ export const TransactionFeeModal: FunctionComponent<{
 
           <Column weight={1} />
 
-          <Columns sum={1} gutter="0.5rem" alignY="center">
-            <Subtitle3>Auto</Subtitle3>
-            <Toggle isOpen={isAuto} setIsOpen={() => setIsAuto(!isAuto)} />
-          </Columns>
+          {gasSimulator ? (
+            <Columns sum={1} gutter="0.5rem" alignY="center">
+              <Subtitle3>Auto</Subtitle3>
+              <Toggle
+                isOpen={gasSimulator.enabled}
+                setIsOpen={(isOpen) => {
+                  gasSimulator?.setEnabled(isOpen);
+                }}
+              />
+            </Columns>
+          ) : null}
         </Columns>
 
-        <TextInput
-          label="Gas Amount"
-          value={gasConfig.value}
-          onChange={(e) => {
-            e.preventDefault();
+        {gasSimulator?.enabled ? (
+          <React.Fragment>
+            <Columns sum={2}>
+              <Column weight={1}>
+                <TextInput
+                  label="Gas Adjustment"
+                  value={gasSimulator.gasAdjustmentValue}
+                  onChange={(e) => {
+                    e.preventDefault();
 
-            gasConfig.setValue(e.target.value);
+                    gasSimulator?.setGasAdjustmentValue(e.target.value);
+                  }}
+                />
+              </Column>
+              <Column weight={1}>
+                <TextInput
+                  label="Estimated"
+                  value={gasSimulator.gasEstimated || "-"}
+                  readOnly={true}
+                />
+              </Column>
+            </Columns>
+            <TextInput
+              label="Gas Amount"
+              value={gasConfig.value}
+              readOnly={true}
+            />
+          </React.Fragment>
+        ) : (
+          <TextInput
+            label="Gas Amount"
+            value={gasConfig.value}
+            onChange={(e) => {
+              e.preventDefault();
+
+              gasConfig.setValue(e.target.value);
+            }}
+          />
+        )}
+
+        <Button
+          type="button"
+          text="Confirm"
+          color="secondary"
+          size="large"
+          onClick={() => {
+            close();
           }}
         />
-
-        <Button text="Confirm" color="secondary" size="large" />
       </Stack>
     </Styles.Container>
   );
@@ -117,15 +163,19 @@ const FeeSelectorStyle = {
   `,
   Title: styled(H5)<{ selected: boolean }>`
     color: ${({ selected }) =>
-      selected ? ColorPalette["white"] : ColorPalette["gray-50"]}};
+      selected ? ColorPalette["white"] : ColorPalette["gray-50"]};
   `,
   Price: styled(Caption2)<{ selected: boolean }>`
+    white-space: nowrap;
+    margin-top: 2px;
     color: ${({ selected }) =>
-      selected ? ColorPalette["blue-200"] : ColorPalette["gray-300"]}};
+      selected ? ColorPalette["blue-200"] : ColorPalette["gray-300"]};
   `,
   Amount: styled(Caption1)<{ selected: boolean }>`
+    white-space: nowrap;
+    margin-top: 2px;
     color: ${({ selected }) =>
-      selected ? ColorPalette["blue-100"] : ColorPalette["gray-200"]}};
+      selected ? ColorPalette["blue-100"] : ColorPalette["gray-200"]};
   `,
 };
 

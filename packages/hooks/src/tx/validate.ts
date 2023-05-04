@@ -2,6 +2,7 @@ import {
   IBaseAmountConfig,
   IFeeConfig,
   IGasConfig,
+  IGasSimulator,
   IMemoConfig,
   IRecipientConfig,
   ISenderConfig,
@@ -15,6 +16,7 @@ export const useTxConfigsValidate = (configs: {
   amountConfig?: IBaseAmountConfig;
   feeConfig?: IFeeConfig;
   memoConfig?: IMemoConfig;
+  gasSimulator?: IGasSimulator;
 }) => {
   const interactionBlocked = (() => {
     if (
@@ -23,7 +25,8 @@ export const useTxConfigsValidate = (configs: {
       configs.gasConfig?.uiProperties.error ||
       configs.amountConfig?.uiProperties.error ||
       configs.feeConfig?.uiProperties.error ||
-      configs.memoConfig?.uiProperties.error
+      configs.memoConfig?.uiProperties.error ||
+      configs.gasSimulator?.uiProperties.error
     ) {
       return true;
     }
@@ -34,7 +37,8 @@ export const useTxConfigsValidate = (configs: {
       configs.gasConfig?.uiProperties.loadingState === "loading-block" ||
       configs.amountConfig?.uiProperties.loadingState === "loading-block" ||
       configs.feeConfig?.uiProperties.loadingState === "loading-block" ||
-      configs.memoConfig?.uiProperties.loadingState === "loading-block"
+      configs.memoConfig?.uiProperties.loadingState === "loading-block" ||
+      configs.gasSimulator?.uiProperties.loadingState === "loading-block"
     ) {
       return true;
     }

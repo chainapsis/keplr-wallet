@@ -1,6 +1,11 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { IFeeConfig, IGasConfig, ISenderConfig } from "@keplr-wallet/hooks";
+import {
+  IFeeConfig,
+  IGasConfig,
+  IGasSimulator,
+  ISenderConfig,
+} from "@keplr-wallet/hooks";
 import styled from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Column, Columns } from "../../column";
@@ -32,10 +37,17 @@ export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  gasSimulator?: IGasSimulator;
 
   disableAutomaticFeeSet?: boolean;
 }> = observer(
-  ({ senderConfig, feeConfig, gasConfig, disableAutomaticFeeSet }) => {
+  ({
+    senderConfig,
+    feeConfig,
+    gasConfig,
+    gasSimulator,
+    disableAutomaticFeeSet,
+  }) => {
     const { queriesStore, priceStore } = useStore();
 
     useEffect(() => {
@@ -209,7 +221,12 @@ export const FeeControl: FunctionComponent<{
           align="bottom"
           close={() => setIsModalOpen(false)}
         >
-          <TransactionFeeModal feeConfig={feeConfig} gasConfig={gasConfig} />
+          <TransactionFeeModal
+            close={() => setIsModalOpen(false)}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
+            gasSimulator={gasSimulator}
+          />
         </Modal>
       </Styles.Container>
     );
