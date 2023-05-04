@@ -25,6 +25,7 @@ import { Gutter } from "../../../components/gutter";
 import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
+import { ICNSInfo } from "../../../config.ui";
 
 const Styles = {
   Flex1: styled.div`
@@ -70,7 +71,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainId,
     sender,
     // TODO: 이 값을 config 밑으로 빼자
-    300000
+    300000,
+    {
+      allowHexAddressOnEthermint: true,
+      icns: ICNSInfo,
+      computeTerraClassicTax: true,
+    }
   );
 
   sendConfigs.amountConfig.setCurrency(currency);
