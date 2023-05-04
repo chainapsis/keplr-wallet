@@ -719,6 +719,30 @@ export class KeyRingCosmosService {
     );
   }
 
+  // secret wasm에서만 사용됨
+  async legacySignArbitraryInternal(
+    env: Env,
+    chainId: string,
+    memo: string
+  ): Promise<Uint8Array> {
+    return await this.keyRingService.sign(
+      env,
+      chainId,
+      this.keyRingService.selectedVaultId,
+      Buffer.from(
+        JSON.stringify({
+          account_number: 0,
+          chain_id: chainId,
+          fee: [],
+          memo: memo,
+          msgs: [],
+          sequence: 0,
+        })
+      ),
+      "sha256"
+    );
+  }
+
   protected isEthermintLike(chainInfo: ChainInfo): boolean {
     return (
       chainInfo.bip44.coinType === 60 ||

@@ -12,23 +12,34 @@ import {
   RequestDecryptMsg,
 } from "./messages";
 import { SecretWasmService } from "./service";
+import { PermissionInteractiveService } from "../permission-interactive";
 
-export const getHandler: (service: SecretWasmService) => Handler = (
-  service: SecretWasmService
-) => {
+export const getHandler: (
+  service: SecretWasmService,
+  permissionInteractionService: PermissionInteractiveService
+) => Handler = (service, permissionInteractionService) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
       case GetPubkeyMsg:
-        return handleGetPubkeyMsg(service)(env, msg as GetPubkeyMsg);
-      case ReqeustEncryptMsg:
-        return handleReqeustEncryptMsg(service)(env, msg as ReqeustEncryptMsg);
-      case RequestDecryptMsg:
-        return handleRequestDecryptMsg(service)(env, msg as RequestDecryptMsg);
-      case GetTxEncryptionKeyMsg:
-        return handleGetTxEncryptionKeyMsg(service)(
+        return handleGetPubkeyMsg(service, permissionInteractionService)(
           env,
-          msg as GetTxEncryptionKeyMsg
+          msg as GetPubkeyMsg
         );
+      case ReqeustEncryptMsg:
+        return handleReqeustEncryptMsg(service, permissionInteractionService)(
+          env,
+          msg as ReqeustEncryptMsg
+        );
+      case RequestDecryptMsg:
+        return handleRequestDecryptMsg(service, permissionInteractionService)(
+          env,
+          msg as RequestDecryptMsg
+        );
+      case GetTxEncryptionKeyMsg:
+        return handleGetTxEncryptionKeyMsg(
+          service,
+          permissionInteractionService
+        )(env, msg as GetTxEncryptionKeyMsg);
       default:
         throw new KeplrError("secret-wasm", 120, "Unknown msg type");
     }
@@ -36,12 +47,16 @@ export const getHandler: (service: SecretWasmService) => Handler = (
 };
 
 const handleGetPubkeyMsg: (
-  service: SecretWasmService
-) => InternalHandler<GetPubkeyMsg> = (service) => {
+  service: SecretWasmService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<GetPubkeyMsg> = (
+  service,
+  permissionInteractionService
+) => {
   return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
+    await permissionInteractionService.ensureEnabled(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
@@ -50,12 +65,16 @@ const handleGetPubkeyMsg: (
 };
 
 const handleReqeustEncryptMsg: (
-  service: SecretWasmService
-) => InternalHandler<ReqeustEncryptMsg> = (service) => {
+  service: SecretWasmService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<ReqeustEncryptMsg> = (
+  service,
+  permissionInteractionService
+) => {
   return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
+    await permissionInteractionService.ensureEnabled(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
@@ -70,12 +89,16 @@ const handleReqeustEncryptMsg: (
 };
 
 const handleRequestDecryptMsg: (
-  service: SecretWasmService
-) => InternalHandler<RequestDecryptMsg> = (service) => {
+  service: SecretWasmService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestDecryptMsg> = (
+  service,
+  permissionInteractionService
+) => {
   return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
+    await permissionInteractionService.ensureEnabled(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 
@@ -85,12 +108,16 @@ const handleRequestDecryptMsg: (
 };
 
 const handleGetTxEncryptionKeyMsg: (
-  service: SecretWasmService
-) => InternalHandler<GetTxEncryptionKeyMsg> = (service) => {
+  service: SecretWasmService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<GetTxEncryptionKeyMsg> = (
+  service,
+  permissionInteractionService
+) => {
   return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
+    await permissionInteractionService.ensureEnabled(
       env,
-      msg.chainId,
+      [msg.chainId],
       msg.origin
     );
 

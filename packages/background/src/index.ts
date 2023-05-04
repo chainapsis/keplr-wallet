@@ -105,10 +105,6 @@ export function init(
     commonCrypto
   );
 
-  const secretWasmService = new SecretWasm.SecretWasmService(
-    storeCreator("secretwasm")
-  );
-
   const backgroundTxService = new BackgroundTx.BackgroundTxService(
     notification
   );
@@ -167,12 +163,17 @@ export function init(
     chainsUIService
   );
 
+  const secretWasmService = new SecretWasm.SecretWasmService(
+    storeCreator("secretwasm"),
+    chainsService,
+    keyRingCosmosService
+  );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(router, chainsService);
   Ledger.init(router, ledgerService);
   KeyRing.init(router, keyRingService);
-  SecretWasm.init(router, secretWasmService);
   BackgroundTx.init(router, backgroundTxService);
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
@@ -192,6 +193,7 @@ export function init(
     permissionInteractiveService,
     keyRingCosmosService
   );
+  SecretWasm.init(router, secretWasmService, permissionInteractiveService);
 
   return {
     initFn: async () => {
@@ -213,13 +215,14 @@ export function init(
         ledgerService,
         keystoneService
       );
-      secretWasmService.init(chainsService, keyRingService, permissionService);
       backgroundTxService.init(chainsService, permissionService);
       phishingListService.init();
       await autoLockAccountService.init();
       // No need to wait because user can't interact with app right after launch.
       await analyticsService.init();
       await permissionInteractiveService.init();
+
+      await secretWasmService.init();
     },
   };
 }
