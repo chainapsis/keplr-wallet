@@ -22,6 +22,7 @@ export const TextInput = forwardRef<
       rightLabel,
       left,
       right,
+      bottom,
       isLoading,
       ...props
     },
@@ -77,6 +78,8 @@ export const TextInput = forwardRef<
             ) : null}
           </Columns>
         </Styles.TextInputContainer>
+
+        {bottom}
 
         <VerticalResizeTransition transitionAlign="top">
           {error || paragraph ? (

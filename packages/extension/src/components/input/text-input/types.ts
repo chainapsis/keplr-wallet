@@ -15,4 +15,5 @@ export interface TextInputProps {
   style?: CSSProperties;
   left?: React.ReactNode;
   right?: React.ReactNode;
+  bottom?: React.ReactNode;
 }

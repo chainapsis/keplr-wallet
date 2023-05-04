@@ -73,6 +73,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     300000
   );
 
+  sendConfigs.amountConfig.setCurrency(currency);
+
   const gasSimulatorKey = useMemo(() => {
     if (sendConfigs.amountConfig.currency) {
       const denomHelper = new DenomHelper(
@@ -242,7 +244,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             memoConfig={sendConfigs.memoConfig}
           />
 
-          <AmountInput amountConfig={sendConfigs.amountConfig} />
+          <AmountInput
+            senderConfig={sendConfigs.senderConfig}
+            amountConfig={sendConfigs.amountConfig}
+            feeConfig={sendConfigs.feeConfig}
+          />
 
           <MemoInput
             memoConfig={sendConfigs.memoConfig}
