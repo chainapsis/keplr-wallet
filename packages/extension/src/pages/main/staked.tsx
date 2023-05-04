@@ -5,8 +5,10 @@ import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
-import { Button } from "../../components/button";
 import { useStore } from "../../stores";
+import { TextButton } from "../../components/button-text";
+import { ArrowRightSolidIcon } from "../../components/icon";
+import { ColorPalette } from "../../styles";
 
 export const StakedTabView: FunctionComponent = observer(() => {
   const { hugeQueriesStore } = useStore();
@@ -61,7 +63,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
         <MainEmptyView
           image={
             <img
-              src={require("../../public/assets/img/empty-staking.png")}
+              src={require("../../public/assets/img/main-empty-staking.png")}
               style={{
                 width: "6.25rem",
                 height: "6.25rem",
@@ -72,7 +74,17 @@ export const StakedTabView: FunctionComponent = observer(() => {
           title="Ready to Start Staking?"
           paragraph="Stake your assets to earn rewards and contribute to maintaining the networks!"
           button={
-            <Button text="Go to Dashboard" color="primary" size="small" />
+            <TextButton
+              text="Go to Dashboard"
+              size="small"
+              right={
+                <ArrowRightSolidIcon
+                  width="1.125rem"
+                  height="1.125rem"
+                  color={ColorPalette["gray-10"]}
+                />
+              }
+            />
           }
         />
       ) : null}
