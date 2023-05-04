@@ -18,6 +18,7 @@ import { useRegisterHeader } from "./context";
 import { Gutter } from "../../../../components/gutter";
 import { ColorPalette } from "../../../../styles";
 import { RegisterH1, RegisterH2, RegisterH3 } from "../typography";
+import { HelpDeskButton } from "../help-desk-button";
 
 export const RegisterHeader: FunctionComponent<{
   sceneRef: MutableRefObject<SceneTransitionRef | null>;
@@ -95,6 +96,7 @@ export const RegisterHeader: FunctionComponent<{
       width="47.75rem"
       paddingBottom="2rem"
     >
+      {header.mode !== "intro" ? <HelpDeskButton /> : null}
       {isBackShown ? (
         <div
           style={{
