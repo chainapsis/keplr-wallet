@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 import { ButtonProps } from "../../components/button";
 
 export interface HeaderProps {
-  title: string;
+  title: string | ReactNode;
   left?: ReactNode;
   right?: ReactNode;
 
