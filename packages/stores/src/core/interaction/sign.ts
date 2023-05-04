@@ -1,8 +1,8 @@
 import { InteractionStore } from "./interaction";
-import { autorun, computed, flow, makeObservable, observable } from "mobx";
-import { InteractionWaitingData } from "@keplr-wallet/background";
+import { computed, makeObservable } from "mobx";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 import { KeplrSignOptions, StdSignDoc } from "@keplr-wallet/types";
+import { InteractionWaitingData, PlainObject } from "@keplr-wallet/background";
 
 export type SignInteractionData =
   | {
@@ -14,6 +14,14 @@ export type SignInteractionData =
       signOptions: KeplrSignOptions & {
         isADR36WithString?: boolean;
       };
+      keyType: string;
+      keyInsensitive: PlainObject;
+
+      eip712?: {
+        types: Record<string, { name: string; type: string }[] | undefined>;
+        domain: Record<string, any>;
+        primaryType: string;
+      };
     }
   | {
       origin: string;
@@ -22,29 +30,17 @@ export type SignInteractionData =
       signer: string;
       signDocBytes: Uint8Array;
       signOptions: KeplrSignOptions;
+      keyType: string;
+      keyInsensitive: PlainObject;
     };
 
 export class SignInteractionStore {
-  @observable
-  protected _isLoading: boolean = false;
-
   constructor(protected readonly interactionStore: InteractionStore) {
     makeObservable(this);
-
-    autorun(() => {
-      // Reject all interactions that is not first one.
-      // This interaction can have only one interaction at once.
-      const datas = this.waitingDatas.slice();
-      if (datas.length > 1) {
-        for (let i = 1; i < datas.length; i++) {
-          this.rejectWithId(datas[i].id);
-        }
-      }
-    });
   }
 
-  protected get waitingDatas() {
-    return this.interactionStore.getDatas<SignInteractionData>(
+  get waitingDatas() {
+    return this.interactionStore.getAllData<SignInteractionData>(
       "request-sign-cosmos"
     );
   }
@@ -78,86 +74,45 @@ export class SignInteractionStore {
     };
   }
 
-  protected isEnded(): boolean {
-    return this.interactionStore.getEvents<void>("request-sign-end").length > 0;
+  async approveWithProceedNext(
+    id: string,
+    newSignDocWrapper: SignDocWrapper,
+    signature: Uint8Array | undefined,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    const res = (() => {
+      if (newSignDocWrapper.mode === "amino") {
+        return {
+          newSignDoc: newSignDocWrapper.aminoSignDoc,
+        };
+      }
+      return {
+        newSignDocBytes: newSignDocWrapper.protoSignDoc.toBytes(),
+      };
+    })();
+
+    await this.interactionStore.approveWithProceedNextV2(
+      id,
+      {
+        ...res,
+        signature,
+      },
+      afterFn
+    );
   }
 
-  protected clearEnded() {
-    this.interactionStore.clearEvent("request-sign-end");
+  async rejectWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
-  protected waitEnd(): Promise<void> {
-    if (this.isEnded()) {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve) => {
-      const disposer = autorun(() => {
-        if (this.isEnded()) {
-          resolve();
-          this.clearEnded();
-          disposer();
-        }
-      });
-    });
+  async rejectAll() {
+    await this.interactionStore.rejectAll("request-sign-cosmos");
   }
 
-  @flow
-  *approveAndWaitEnd(newSignDocWrapper: SignDocWrapper) {
-    if (this.waitingDatas.length === 0) {
-      return;
-    }
-
-    this._isLoading = true;
-    const id = this.waitingDatas[0].id;
-    try {
-      const newSignDoc =
-        newSignDocWrapper.mode === "amino"
-          ? newSignDocWrapper.aminoSignDoc
-          : newSignDocWrapper.protoSignDoc.toBytes();
-
-      yield this.interactionStore.approveWithoutRemovingData(id, newSignDoc);
-    } finally {
-      yield this.waitEnd();
-      this.interactionStore.removeData("request-sign", id);
-
-      this._isLoading = false;
-    }
-  }
-
-  @flow
-  *reject() {
-    if (this.waitingDatas.length === 0) {
-      return;
-    }
-
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.reject(
-        "request-sign",
-        this.waitingDatas[0].id
-      );
-    } finally {
-      this._isLoading = false;
-    }
-  }
-
-  @flow
-  *rejectAll() {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.rejectAll("request-sign");
-    } finally {
-      this._isLoading = false;
-    }
-  }
-
-  @flow
-  protected *rejectWithId(id: string) {
-    yield this.interactionStore.reject("request-sign", id);
-  }
-
-  get isLoading(): boolean {
-    return this._isLoading;
+  isObsoleteInteraction(id: string | undefined): boolean {
+    return this.interactionStore.isObsoleteInteraction(id);
   }
 }

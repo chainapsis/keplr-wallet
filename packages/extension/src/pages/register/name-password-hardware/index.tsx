@@ -12,6 +12,7 @@ import { VerticalCollapseTransition } from "../../../components/transition/verti
 import { Button } from "../../../components/button";
 import { Gutter } from "../../../components/gutter";
 import { observer } from "mobx-react-lite";
+import { TextButton } from "../../../components/button-text";
 
 export const RegisterNamePasswordHardwareScene: FunctionComponent<{
   type: string;
@@ -51,7 +52,22 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
           }
         })}
       >
-        <FormNamePassword {...form}>
+        <FormNamePassword
+          {...form}
+          appendButton={
+            <TextButton
+              text="Use Terra Ledger app"
+              onClick={form.handleSubmit((data) => {
+                sceneTransition.push("connect-ledger", {
+                  name: data.name,
+                  password: data.password,
+                  app: "Terra",
+                  bip44Path: bip44PathState.getPath(),
+                });
+              })}
+            />
+          }
+        >
           <Gutter size="1.625rem" />
           <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
             <Box alignX="center">

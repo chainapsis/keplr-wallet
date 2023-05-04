@@ -10,12 +10,16 @@ import {
   DeleteKeyRingMsg,
   FinalizeMnemonicKeyCoinTypeMsg,
   GetKeyRingStatusMsg,
+  GetKeyRingStatusOnlyMsg,
   LockKeyRingMsg,
   NewLedgerKeyMsg,
+  NewPrivateKeyKeyMsg,
+  AppendLedgerKeyAppMsg,
   NewMnemonicKeyMsg,
   SelectKeyRingMsg,
   ShowSensitiveKeyRingDataMsg,
   UnlockKeyRingMsg,
+  ChangeUserPasswordMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 
@@ -28,6 +32,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleGetKeyRingStatusMsg(service)(
           env,
           msg as GetKeyRingStatusMsg
+        );
+      case GetKeyRingStatusOnlyMsg:
+        return handleGetKeyRingStatusOnlyMsg(service)(
+          env,
+          msg as GetKeyRingStatusOnlyMsg
         );
       case SelectKeyRingMsg:
         return handleSelectKeyRingMsg(service)(env, msg as SelectKeyRingMsg);
@@ -44,6 +53,16 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleNewMnemonicKeyMsg(service)(env, msg as NewMnemonicKeyMsg);
       case NewLedgerKeyMsg:
         return handleNewLedgerKeyMsg(service)(env, msg as NewLedgerKeyMsg);
+      case NewPrivateKeyKeyMsg:
+        return handleNewPrivateKeyKeyMsg(service)(
+          env,
+          msg as NewPrivateKeyKeyMsg
+        );
+      case AppendLedgerKeyAppMsg:
+        return handleAppendLedgerKeyAppMsg(service)(
+          env,
+          msg as AppendLedgerKeyAppMsg
+        );
       case ChangeKeyRingNameMsg:
         return handleChangeKeyRingNameMsg(service)(
           env,
@@ -55,6 +74,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleShowSensitiveKeyRingDataMsg(service)(
           env,
           msg as ShowSensitiveKeyRingDataMsg
+        );
+      case ChangeUserPasswordMsg:
+        return handleChangeUserPasswordMsg(service)(
+          env,
+          msg as ChangeUserPasswordMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -69,6 +93,16 @@ const handleGetKeyRingStatusMsg: (
     return {
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleGetKeyRingStatusOnlyMsg: (
+  service: KeyRingService
+) => InternalHandler<GetKeyRingStatusOnlyMsg> = (service) => {
+  return () => {
+    return {
+      status: service.keyRingStatus,
     };
   };
 };
@@ -158,6 +192,37 @@ const handleNewLedgerKeyMsg: (
   };
 };
 
+const handleNewPrivateKeyKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<NewPrivateKeyKeyMsg> = (service) => {
+  return async (env, msg) => {
+    const vaultId = await service.createPrivateKeyKeyRing(
+      env,
+      msg.privateKey,
+      msg.meta,
+      msg.name,
+      msg.password
+    );
+    return {
+      vaultId,
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
+const handleAppendLedgerKeyAppMsg: (
+  service: KeyRingService
+) => InternalHandler<AppendLedgerKeyAppMsg> = (service) => {
+  return (_, msg) => {
+    service.appendLedgerKeyRing(msg.vaultId, msg.pubKey, msg.app);
+    return {
+      status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
+    };
+  };
+};
+
 const handleChangeKeyRingNameMsg: (
   service: KeyRingService
 ) => InternalHandler<ChangeKeyRingNameMsg> = (service) => {
@@ -188,5 +253,16 @@ const handleShowSensitiveKeyRingDataMsg: (
 ) => InternalHandler<ShowSensitiveKeyRingDataMsg> = (service) => {
   return async (_env, msg) => {
     return await service.showSensitiveKeyRingData(msg.vaultId, msg.password);
+  };
+};
+
+const handleChangeUserPasswordMsg: (
+  service: KeyRingService
+) => InternalHandler<ChangeUserPasswordMsg> = (service) => {
+  return async (_env, msg) => {
+    return await service.changeUserPassword(
+      msg.prevUserPassword,
+      msg.newUserPassword
+    );
   };
 };

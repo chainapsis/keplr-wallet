@@ -1,6 +1,6 @@
 import { VaultService, Vault } from "../vault";
 import { BIP44HDPath, KeyInfo, KeyRing, KeyRingStatus } from "./types";
-import { Env } from "@keplr-wallet/router";
+import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
@@ -8,6 +8,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
 import { ChainInfo } from "@keplr-wallet/types";
+import { Buffer } from "buffer/";
 
 export class KeyRingService {
   @observable
@@ -46,14 +47,17 @@ export class KeyRingService {
     this.vaultService.lock();
   }
 
-  async ensureUnlockInteractive(
-    env: Env,
-    remainUIAfterInteraction: boolean = false
-  ): Promise<void> {
+  async ensureUnlockInteractive(env: Env): Promise<void> {
     if (this.vaultService.isLocked) {
-      await this.interactionService.waitApprove(env, "/unlock", "unlock", {
-        remainUIAfterInteraction,
-      });
+      await this.interactionService.waitApproveV2(
+        env,
+        "/unlock",
+        "unlock",
+        {},
+        () => {
+          // noop
+        }
+      );
     }
   }
 
@@ -72,6 +76,8 @@ export class KeyRingService {
     }
 
     this._selectedVaultId = vaultId;
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
   }
 
   get keyRingStatus(): KeyRingStatus {
@@ -99,6 +105,10 @@ export class KeyRingService {
         insensitive: vault.insensitive,
       };
     });
+  }
+
+  getKeyInfo(vaultId: string): KeyInfo | undefined {
+    return this.getKeyInfos().find((keyInfo) => keyInfo.id === vaultId);
   }
 
   // Return selected vault id.
@@ -214,6 +224,9 @@ export class KeyRingService {
     runInAction(() => {
       this._selectedVaultId = id;
     });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
     return id;
   }
 
@@ -256,7 +269,69 @@ export class KeyRingService {
     runInAction(() => {
       this._selectedVaultId = id;
     });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
     return id;
+  }
+
+  async createPrivateKeyKeyRing(
+    env: Env,
+    privateKey: Uint8Array,
+    meta: Record<string, string | undefined>,
+    name: string,
+    password?: string
+  ): Promise<string> {
+    if (!this.vaultService.isSignedUp) {
+      if (!password) {
+        throw new Error("Must provide password to sign in to vault");
+      }
+
+      await this.vaultService.signUp(password);
+    }
+
+    const keyRing = this.getKeyRing("private-key");
+    const vaultData = await keyRing.createKeyRingVault(env, privateKey);
+
+    const id = this.vaultService.addVault(
+      "keyRing",
+      {
+        ...vaultData.insensitive,
+        keyRingName: name,
+        keyRingType: keyRing.supportedKeyRingType(),
+        keyRingMeta: meta,
+      },
+      vaultData.sensitive
+    );
+
+    runInAction(() => {
+      this._selectedVaultId = id;
+    });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
+    return id;
+  }
+
+  appendLedgerKeyRing(id: string, pubKey: Uint8Array, app: string) {
+    const vault = this.vaultService.getVault("keyRing", id);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "ledger") {
+      throw new Error("Key is not from ledger");
+    }
+
+    if (vault.insensitive[app]) {
+      throw new Error("App is already appended");
+    }
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", id, {
+      [app]: {
+        pubKey: Buffer.from(pubKey).toString("hex"),
+      },
+    });
   }
 
   getPubKeySelected(env: Env, chainId: string): Promise<PubKeySecp256k1> {
@@ -316,6 +391,14 @@ export class KeyRingService {
       } else {
         this._selectedVaultId = undefined;
       }
+    }
+
+    if (wasSelected) {
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
     }
 
     return wasSelected;
@@ -502,10 +585,24 @@ export class KeyRingService {
         const sensitive = this.vaultService.decrypt(vault.sensitive);
         return sensitive["mnemonic"] as string;
       }
+      case "private-key": {
+        const sensitive = this.vaultService.decrypt(vault.sensitive);
+        return sensitive["privateKey"] as string;
+      }
       default: {
         throw new Error("Unsupported keyRing type to show sensitive data");
       }
     }
+  }
+
+  async changeUserPassword(
+    prevUserPassword: string,
+    newUserPassword: string
+  ): Promise<void> {
+    await this.vaultService.changeUserPassword(
+      prevUserPassword,
+      newUserPassword
+    );
   }
 
   protected getVaultKeyRing(vault: Vault): KeyRing {

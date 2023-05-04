@@ -4,6 +4,7 @@ import {
   ToggleChainsMsg,
   EnableChainsMsg,
   DisableChainsMsg,
+  GetVaultsByEnabledChainMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -14,6 +15,7 @@ export function init(router: Router, service: ChainsUIService): void {
   router.registerMessage(ToggleChainsMsg);
   router.registerMessage(EnableChainsMsg);
   router.registerMessage(DisableChainsMsg);
+  router.registerMessage(GetVaultsByEnabledChainMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

@@ -26,13 +26,11 @@ import {
 } from "@keplr-wallet/router";
 import {
   SuggestChainInfoMsg,
-  SendTxMsg,
   GetSecret20ViewingKey,
   GetPubkeyMsg,
   ReqeustEncryptMsg,
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
-  RequestSignEIP712CosmosTxMsg_v0,
   GetAnalyticsIdMsg,
   RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
@@ -169,8 +167,17 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
-    const msg = new SendTxMsg(chainId, tx, mode);
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "background-tx",
+      "send-tx-to-background",
+      {
+        chainId,
+        tx,
+        mode,
+      }
+    );
   }
 
   async signAmino(
@@ -418,14 +425,19 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    const msg = new RequestSignEIP712CosmosTxMsg_v0(
-      chainId,
-      signer,
-      eip712,
-      signDoc,
-      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-sign-eip-712-cosmos-tx-v0",
+      {
+        chainId,
+        signer,
+        eip712,
+        signDoc,
+        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+      }
     );
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   __core__getAnalyticsId(): Promise<string> {

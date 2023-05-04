@@ -5279,6 +5279,7 @@ __metadata:
     "@keplr-wallet/provider": 0.11.41
     "@keplr-wallet/router": 0.11.41
     "@keplr-wallet/router-extension": 0.11.41
+    "@keplr-wallet/simple-fetch": 0.11.41
     "@keplr-wallet/stores": 0.11.41
     "@keplr-wallet/stores-etc": 0.11.41
     "@keplr-wallet/types": 0.11.41
@@ -5299,8 +5300,10 @@ __metadata:
     "@types/classnames": ^2.3.1
     "@types/color": ^3.0.3
     "@types/firefox-webext-browser": ^70.0.1
+    "@types/js-yaml": ^4
     "@types/react-is": ^16.7.2
     "@types/resize-observer-browser": ^0.1.7
+    "@types/secp256k1": ^4.0.1
     "@types/sha.js": ^2.4.0
     "@types/styled-components": ^5.1.26
     "@walletconnect/client": ^1.6.4
@@ -5322,6 +5325,7 @@ __metadata:
     https-browserify: ^1.0.0
     identity-obj-proxy: ^3.0.0
     joi: ^17.2.1
+    js-yaml: ^4.1.0
     lottie-web: ^5.10.2
     os-browserify: ^0.3.0
     process: ^0.11.10
@@ -5334,7 +5338,7 @@ __metadata:
     react-router: ^6.8.1
     react-router-dom: ^6.8.1
     scrypt-js: ^3.0.1
-    secp256k1: ^5.0.0
+    secp256k1: ^4.0.2
     serialize-javascript: ">=3.1.0"
     setimmediate: ^1.0.5
     sha.js: ^2.4.11
@@ -5351,6 +5355,8 @@ __metadata:
     webpack-bundle-analyzer: ^4.5.0
     webpack-cli: ^5.0.1
   peerDependencies:
+    "@ledgerhq/hw-app-eth": ^6
+    "@ledgerhq/hw-transport": ^6
     "@ledgerhq/hw-transport-webusb": ^6
     mobx: ^6
     mobx-react-lite: ^3
@@ -9166,6 +9172,13 @@ __metadata:
     expect: ^29.0.0
     pretty-format: ^29.0.0
   checksum: 23760282362a252e6690314584d83a47512d4cd61663e957ed3398ecf98195fe931c45606ee2f9def12f8ed7d8aa102d492ec42d26facdaf8b78094a31e6568e
+  languageName: node
+  linkType: hard
+
+"@types/js-yaml@npm:^4":
+  version: 4.0.5
+  resolution: "@types/js-yaml@npm:4.0.5"
+  checksum: 7dcac8c50fec31643cc9d6444b5503239a861414cdfaa7ae9a38bc22597c4d850c4b8cec3d82d73b3fbca408348ce223b0408d598b32e094470dfffc6d486b4d
   languageName: node
   linkType: hard
 
@@ -22792,15 +22805,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-addon-api@npm:^5.0.0":
-  version: 5.1.0
-  resolution: "node-addon-api@npm:5.1.0"
-  dependencies:
-    node-gyp: latest
-  checksum: 2508bd2d2981945406243a7bd31362fc7af8b70b8b4d65f869c61731800058fb818cc2fd36c8eac714ddd0e568cc85becf5e165cebbdf7b5024d5151bbc75ea1
-  languageName: node
-  linkType: hard
-
 "node-dir@npm:^0.1.10":
   version: 0.1.17
   resolution: "node-dir@npm:0.1.17"
@@ -27946,18 +27950,6 @@ __metadata:
     node-gyp: latest
     node-gyp-build: ^4.2.0
   checksum: 0d0d42e8033aee5aec5caaaa26d90fcaec4bf5e24dc4652552ddaa60734c2d95e90f7d95697b521fe833363c629d5ff623227961de86686c7a0ed5b5ffc1ebd0
-  languageName: node
-  linkType: hard
-
-"secp256k1@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "secp256k1@npm:5.0.0"
-  dependencies:
-    elliptic: ^6.5.4
-    node-addon-api: ^5.0.0
-    node-gyp: latest
-    node-gyp-build: ^4.2.0
-  checksum: a0719dff4687c38d385b5e0b7e811c51a4ea24893128be9d097aee99f879eb0ea52582590deb15a49da627a3db23c6b028ad5c9c6ac1fca92ce760153b8cf21c
   languageName: node
   linkType: hard
 

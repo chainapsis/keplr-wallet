@@ -2,18 +2,17 @@ import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { PermissionBasicAccessPage } from "./basic-access";
-import {
-  InteractionWaitingData,
-  PermissionData,
-} from "@keplr-wallet/background";
+import { PermissionData } from "@keplr-wallet/background";
 
 const UnknownPermissionPage: FunctionComponent<{
-  data: InteractionWaitingData<PermissionData>;
+  data: {
+    ids: string[];
+  } & PermissionData;
 }> = observer(({ data }) => {
   return (
     <div>
       <div>Unknown permission</div>
-      <div>{JSON.stringify(data.data)}</div>
+      <div>{JSON.stringify(data)}</div>
     </div>
   );
 });
@@ -21,18 +20,18 @@ const UnknownPermissionPage: FunctionComponent<{
 export const PermissionPage: FunctionComponent = observer(() => {
   const { permissionStore } = useStore();
 
-  const waitingData = permissionStore.waitingPermissionData;
+  const mergedData = permissionStore.waitingPermissionMergedData;
 
-  if (!waitingData) {
+  if (!mergedData) {
     return <div>loading</div>;
   }
 
-  switch (waitingData.data.type) {
+  switch (mergedData.type) {
     case "basic-access": {
-      return <PermissionBasicAccessPage data={waitingData} />;
+      return <PermissionBasicAccessPage data={mergedData} />;
     }
     default: {
-      return <UnknownPermissionPage data={waitingData} />;
+      return <UnknownPermissionPage data={mergedData} />;
     }
   }
 });

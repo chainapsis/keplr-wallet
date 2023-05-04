@@ -10,9 +10,6 @@ import { toGenerator } from "@keplr-wallet/common";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export class ChainSuggestStore {
-  @observable
-  protected _isLoading: boolean = false;
-
   @observable.shallow
   protected communityChainInfo: Map<
     string,
@@ -34,13 +31,13 @@ export class ChainSuggestStore {
   }
 
   get waitingSuggestedChainInfo() {
-    const datas = this.interactionStore.getDatas<{
+    const data = this.interactionStore.getAllData<{
       chainInfo: ChainInfo;
       origin: string;
     }>(SuggestChainInfoMsg.type());
 
-    if (datas.length > 0) {
-      return datas[0];
+    if (data.length > 0) {
+      return data[0];
     }
   }
 
@@ -110,46 +107,26 @@ export class ChainSuggestStore {
     }
   }
 
-  @flow
-  *approve(chainInfo: ChainInfoWithRepoUpdateOptions) {
-    this._isLoading = true;
-
-    try {
-      const data = this.waitingSuggestedChainInfo;
-
-      if (data) {
-        yield this.interactionStore.approve(data.type, data.id, chainInfo);
-      }
-    } finally {
-      this._isLoading = false;
-    }
+  async approveWithProceedNext(
+    id: string,
+    chainInfo: ChainInfoWithRepoUpdateOptions,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.approveWithProceedNext(id, chainInfo, afterFn);
   }
 
-  @flow
-  *reject() {
-    this._isLoading = true;
-
-    try {
-      const data = this.waitingSuggestedChainInfo;
-      if (data) {
-        yield this.interactionStore.reject(data.type, data.id);
-      }
-    } finally {
-      this._isLoading = false;
-    }
+  async rejectWithProceedNext(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
-  @flow
-  *rejectAll() {
-    this._isLoading = true;
-    try {
-      yield this.interactionStore.rejectAll(SuggestChainInfoMsg.type());
-    } finally {
-      this._isLoading = false;
-    }
+  async rejectAll() {
+    await this.interactionStore.rejectAll(SuggestChainInfoMsg.type());
   }
 
-  get isLoading(): boolean {
-    return this._isLoading;
+  isObsoleteInteraction(id: string | undefined): boolean {
+    return this.interactionStore.isObsoleteInteraction(id);
   }
 }

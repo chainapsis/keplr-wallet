@@ -5,7 +5,6 @@ require("setimmediate");
 import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
-import { RegisterPage } from "./pages/register";
 import { StoreProvider } from "./stores";
 import { GlobalStyle } from "./styles";
 import { Keplr } from "@keplr-wallet/provider";
@@ -14,6 +13,9 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { configure } from "mobx";
 import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
+
+import { RegisterPage } from "./pages/register";
+import { WelcomePage } from "./pages/register/pages/welcome";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -34,6 +36,7 @@ const App: FunctionComponent = () => {
           <HashRouter>
             <Routes>
               <Route path="/" element={<RegisterPage />} />
+              <Route path="/welcome" element={<WelcomePage />} />
             </Routes>
           </HashRouter>
         </ConfirmProvider>

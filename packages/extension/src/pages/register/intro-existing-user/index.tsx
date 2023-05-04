@@ -9,10 +9,15 @@ import {
 import { Column, Columns } from "../../../components/column";
 import { Box } from "../../../components/box";
 import { ColorPalette } from "../../../styles";
-import { YAxis } from "../../../components/axis";
-import { Subtitle2, Subtitle3 } from "../../../components/typography";
+import { Subtitle3 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { useRegisterHeader } from "../components/header";
+import { RegisterH4 } from "../components/typography";
+import {
+  AppleIcon,
+  ArrowDownTrayIcon,
+  GoogleIcon,
+} from "../../../components/icon";
 
 export const RegisterIntroExistingUserScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
@@ -23,7 +28,7 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
       header.setHeader({
         mode: "welcome",
         title: "Welcome Back to Keplr",
-        paragraph: "Glad you’re back!",
+        paragraph: "Glad you’re back! 🫶",
       });
     },
   });
@@ -32,48 +37,52 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
     <RegisterSceneBox>
       <Columns sum={2} gutter="2.5rem">
         <Column weight={1}>
-          {/* TODO: ㅅㅂ 이거 현재 컴포넌트 시스템으로 처리할 수가 없다 */}
-          <YAxis>
-            <Subtitle2>Via Recovery Phrase or Private Key</Subtitle2>
+          <Box height="100%">
+            <RegisterH4 color={ColorPalette["gray-50"]}>
+              Via Recovery Phrase or Private Key
+            </RegisterH4>
             <Gutter size="0.5rem" />
-            <Subtitle3>
+            <Subtitle3 color={ColorPalette["gray-200"]}>
               You can also import your wallets from other Interchain wallet
               providers with this option.
             </Subtitle3>
-            {/* TODO: Make and use Flex component? */}
+
             <div style={{ flex: 1 }} />
             <Button
-              text="Use Recovery Phrase"
+              text="I have recovery phrase or private key"
               size="large"
+              left={<ArrowDownTrayIcon width="1rem" height="1rem" />}
               onClick={() => {
                 sceneTransition.push("recover-mnemonic");
               }}
             />
-          </YAxis>
+          </Box>
         </Column>
         <Box width="1px" backgroundColor={ColorPalette["gray-400"]} />
         <Column weight={1}>
-          <YAxis>
-            <Subtitle2>Sign-up with Google or Apple</Subtitle2>
-            <Gutter size="0.625rem" />
-            <Subtitle3>Simple & easy registration</Subtitle3>
-            <Gutter size="1.5rem" />
-          </YAxis>
+          <RegisterH4 color={ColorPalette["gray-50"]}>
+            Continue with Google or Apple
+          </RegisterH4>
+
+          <Gutter size="3rem" />
+
           <Stack gutter="0.625rem">
             <Button
               text="Connect with Google"
               size="large"
               color="secondary"
+              left={<GoogleIcon />}
               onClick={() => {
-                sceneTransition.push("new-mnemonic");
+                alert("TODO: Not implemented yet");
               }}
             />
             <Button
               text="Connect with Apple ID"
               size="large"
               color="secondary"
+              left={<AppleIcon />}
               onClick={() => {
-                sceneTransition.push("recover-mnemonic");
+                alert("TODO: Not implemented yet");
               }}
             />
           </Stack>

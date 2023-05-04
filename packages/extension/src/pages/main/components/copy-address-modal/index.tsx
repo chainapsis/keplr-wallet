@@ -7,9 +7,9 @@ import {
   Caption1,
   Button2,
 } from "../../../../components/typography";
-import { TextInput } from "../../../../components/input";
+import { SearchTextInput } from "../../../../components/input";
 import { Column, Columns } from "../../../../components/column";
-import { SearchIcon, StarIcon } from "../../../../components/icon";
+import { StarIcon } from "../../../../components/icon";
 import { Box } from "../../../../components/box";
 import { Gutter } from "../../../../components/gutter";
 import { observer } from "mobx-react-lite";
@@ -18,6 +18,7 @@ import { ChainInfo } from "@keplr-wallet/types";
 import { YAxis } from "../../../../components/axis";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainImageFallback } from "../../../../components/image";
+import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
 
 const Styles = {
   Container: styled.div`
@@ -46,6 +47,8 @@ export const CopyAddressModal: FunctionComponent<{
   const { chainStore, accountStore, keyRingStore, uiConfigStore } = useStore();
 
   const [search, setSearch] = useState("");
+
+  const searchRef = useFocusOnMount<HTMLInputElement>();
 
   // 북마크된 체인과 sorting을 위한 state는 분리되어있다.
   // 이걸 분리하지 않고 북마크된 체인은 무조건 올린다고 가정하면
@@ -132,7 +135,8 @@ export const CopyAddressModal: FunctionComponent<{
       </Subtitle1>
 
       <Gutter size="0.75rem" />
-      <TextInput
+      <SearchTextInput
+        ref={searchRef}
         value={search}
         onChange={(e) => {
           e.preventDefault();
@@ -140,7 +144,6 @@ export const CopyAddressModal: FunctionComponent<{
           setSearch(e.target.value);
         }}
         placeholder="Search for a chain"
-        left={<SearchIcon width="1.25rem" height="1.25rem" />}
       />
       <Gutter size="0.75rem" />
 

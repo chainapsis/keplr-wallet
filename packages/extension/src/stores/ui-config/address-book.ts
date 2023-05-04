@@ -3,7 +3,10 @@ import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { ChainStore } from "../chain";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Key, SettledResponses } from "@keplr-wallet/types";
-import { GetCosmosKeysForEachVaultSettledMsg } from "@keplr-wallet/background";
+import {
+  GetCosmosKeysForEachVaultSettledMsg,
+  GetVaultsByEnabledChainMsg,
+} from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 
 export interface AddressBookData {
@@ -109,9 +112,9 @@ export class AddressBookConfig {
     addressBook.splice(index, 1);
   }
 
-  async getVaultCosmosKeysSettled(
+  async getEnabledVaultCosmosKeysSettled(
     chainId: string,
-    vaultIds: string[]
+    exceptVaultId?: string
   ): Promise<
     SettledResponses<
       Key & {
@@ -119,6 +122,17 @@ export class AddressBookConfig {
       }
     >
   > {
+    const vaultIds = (
+      await this.messageRequester.sendMessage(
+        BACKGROUND_PORT,
+        new GetVaultsByEnabledChainMsg(chainId)
+      )
+    ).filter((vault) => vault !== exceptVaultId);
+
+    if (vaultIds.length === 0) {
+      return [];
+    }
+
     const msg = new GetCosmosKeysForEachVaultSettledMsg(chainId, vaultIds);
     return await this.messageRequester.sendMessage(BACKGROUND_PORT, msg);
   }

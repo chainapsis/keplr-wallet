@@ -47,10 +47,16 @@ export const ChainImageFallback: FunctionComponent<
     alt: string;
   }
 > = (props) => {
+  const { style, ...otherProps } = props;
+
   return (
     <Image
-      {...props}
+      {...otherProps}
       defaultSrc={require("../../public/assets/img/chain-icon-alt.png")}
+      style={{
+        borderRadius: "1000000px",
+        ...style,
+      }}
     />
   );
 };

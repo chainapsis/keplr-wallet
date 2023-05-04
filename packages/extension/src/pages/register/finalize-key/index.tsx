@@ -38,6 +38,7 @@ export const FinalizeKeyScene: FunctionComponent<{
   };
   privateKey?: {
     value: Uint8Array;
+    meta: Record<string, string | undefined>;
   };
   ledger?: {
     pubKey: Uint8Array;
@@ -58,8 +59,8 @@ export const FinalizeKeyScene: FunctionComponent<{
     onWillVisible: () => {
       header.setHeader({
         mode: "welcome",
-        title: "TODO",
-        paragraph: "TODO",
+        title: "Creating Your Account...",
+        paragraph: "",
       });
     },
   });
@@ -93,7 +94,12 @@ export const FinalizeKeyScene: FunctionComponent<{
           password
         );
       } else if (privateKey) {
-        throw new Error("TODO");
+        vaultId = await keyRingStore.newPrivateKeyKey(
+          privateKey.value,
+          privateKey.meta,
+          name,
+          password
+        );
       } else if (ledger) {
         vaultId = await keyRingStore.newLedgerKey(
           ledger.pubKey,
@@ -243,12 +249,20 @@ export const FinalizeKeyScene: FunctionComponent<{
       isAnimEnded
     ) {
       onceRef.current = true;
+
       sceneTransition.replace("enable-chains", {
         vaultId,
         candidateAddresses,
+        isFresh: mnemonic?.isFresh ?? false,
       });
     }
-  }, [candidateAddresses, isAnimEnded, sceneTransition, vaultId]);
+  }, [
+    candidateAddresses,
+    isAnimEnded,
+    mnemonic?.isFresh,
+    sceneTransition,
+    vaultId,
+  ]);
 
   const animContainerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {

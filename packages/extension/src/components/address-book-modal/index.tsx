@@ -52,37 +52,27 @@ export const AddressBookModal: FunctionComponent<{
   const [accounts, setAccounts] = useState<Key[]>([]);
 
   useEffect(() => {
-    const vaultIds = keyRingStore.keyInfos
-      .map((keyInfo) => {
-        return keyInfo.id;
-      })
-      .filter((id) => {
-        return id !== keyRingStore.selectedKeyInfo?.id;
+    uiConfigStore.addressBookConfig
+      .getEnabledVaultCosmosKeysSettled(
+        chainId,
+        keyRingStore.selectedKeyInfo?.id
+      )
+      .then((keys) => {
+        setAccounts(
+          keys
+            .filter((res) => {
+              return res.status === "fulfilled";
+            })
+            .map((res) => {
+              if (res.status === "fulfilled") {
+                return res.value;
+              }
+              throw new Error("Unexpected status");
+            })
+        );
       });
-
-    if (vaultIds.length > 0) {
-      uiConfigStore.addressBookConfig
-        .getVaultCosmosKeysSettled(chainId, vaultIds)
-        .then((keys) => {
-          setAccounts(
-            keys
-              .filter((res) => {
-                return res.status === "fulfilled";
-              })
-              .map((res) => {
-                if (res.status === "fulfilled") {
-                  return res.value;
-                }
-                throw new Error("Unexpected status");
-              })
-          );
-        });
-    } else {
-      setAccounts([]);
-    }
   }, [
     chainId,
-    keyRingStore.keyInfos,
     keyRingStore.selectedKeyInfo?.id,
     uiConfigStore.addressBookConfig,
   ]);

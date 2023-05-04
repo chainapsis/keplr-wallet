@@ -29,6 +29,30 @@ export class GetKeyRingStatusMsg extends Message<{
   }
 }
 
+export class GetKeyRingStatusOnlyMsg extends Message<{
+  status: KeyRingStatus;
+}> {
+  public static type() {
+    return "get-keyring-status-only";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetKeyRingStatusOnlyMsg.type();
+  }
+}
+
 export class SelectKeyRingMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
@@ -181,6 +205,86 @@ export class NewLedgerKeyMsg extends Message<{
   }
 }
 
+export class NewPrivateKeyKeyMsg extends Message<{
+  vaultId: string;
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "new-private-key-key";
+  }
+
+  constructor(
+    public readonly privateKey: Uint8Array,
+    public readonly meta: Record<string, string | undefined>,
+    public readonly name: string,
+    public readonly password?: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.privateKey || this.privateKey.length === 0) {
+      throw new Error("priv key not set");
+    }
+
+    if (!this.meta) {
+      throw new Error("meta not set");
+    }
+
+    if (!this.name) {
+      throw new Error("name not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return NewPrivateKeyKeyMsg.type();
+  }
+}
+
+export class AppendLedgerKeyAppMsg extends Message<{
+  status: KeyRingStatus;
+  keyInfos: KeyInfo[];
+}> {
+  public static type() {
+    return "append-ledger-key-app";
+  }
+
+  constructor(
+    public readonly vaultId: string,
+    public readonly pubKey: Uint8Array,
+    public readonly app: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.pubKey || this.pubKey.length === 0) {
+      throw new Error("pub key not set");
+    }
+
+    if (!this.app) {
+      throw new Error("app not set");
+    }
+
+    if (!this.vaultId) {
+      throw new Error("vault id not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AppendLedgerKeyAppMsg.type();
+  }
+}
+
 export class LockKeyRingMsg extends Message<{
   status: KeyRingStatus;
 }> {
@@ -325,5 +429,36 @@ export class ShowSensitiveKeyRingDataMsg extends Message<string> {
 
   type(): string {
     return ShowSensitiveKeyRingDataMsg.type();
+  }
+}
+
+export class ChangeUserPasswordMsg extends Message<void> {
+  public static type() {
+    return "ChangeUserPasswordMsg";
+  }
+
+  constructor(
+    public readonly prevUserPassword: string,
+    public readonly newUserPassword: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.prevUserPassword) {
+      throw new Error("prevUserPassword not set");
+    }
+
+    if (!this.newUserPassword) {
+      throw new Error("newUserPassword not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ChangeUserPasswordMsg.type();
   }
 }

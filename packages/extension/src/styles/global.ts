@@ -67,11 +67,30 @@ export const GlobalStyle = createGlobalStyle`
     font-weight: 900;
     src: url(${InterBlack}) format("truetype");
   }
+
+  @font-face {
+    font-family: 'Haffer';
+    font-weight: 600;
+    src: url(${InterSemiBold}) format("truetype");
+  }
+
+  @font-face {
+    font-family: 'Haffer';
+    font-weight: 500;
+    src: url(${InterMedium}) format("truetype");
+  }
   
   html, body {
     font-family: 'Inter', sans-serif;
     color: ${ColorPalette.white};
     background-color: ${ColorPalette["gray-700"]};
+  }
+  
+  pre {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 0.8125rem;
+    color: ${ColorPalette["gray-200"]};
   }
 
   // Set border-box as default for convenience.

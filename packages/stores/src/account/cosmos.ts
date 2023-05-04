@@ -655,8 +655,14 @@ export class CosmosAccountImpl {
           : [new Uint8Array(0)],
     }).finish();
 
+    // Should use bind to avoid "this" problem
+    let sendTx = keplr.sendTx.bind(keplr);
+    if (signOptions?.sendTx) {
+      sendTx = signOptions.sendTx;
+    }
+
     return {
-      txHash: await keplr.sendTx(this.chainId, signedTx, mode as BroadcastMode),
+      txHash: await sendTx(this.chainId, signedTx, mode as BroadcastMode),
       signDoc: signResponse.signed,
     };
   }

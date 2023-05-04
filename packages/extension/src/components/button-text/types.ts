@@ -6,11 +6,9 @@ export type ButtonSize = "small" | "large";
 export interface TextButtonProps {
   size?: ButtonSize;
   disabled?: boolean;
-  text?: string;
+  text?: string | React.ReactNode;
   right?: React.ReactNode;
-  onClick?: (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void | Promise<void>;
+  onClick?: () => void | Promise<void>;
 
   // Native html element
   type?: ButtonType;

@@ -14,7 +14,7 @@ import { autoPlacement, shift } from "@floating-ui/react-dom";
 
 export const Tooltip: FunctionComponent<{
   enabled?: boolean;
-  content: string | React.ReactElement;
+  content?: string | React.ReactElement;
 }> = ({ enabled, content, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -66,7 +66,7 @@ export const Tooltip: FunctionComponent<{
       >
         {children}
       </div>
-      {isOpen && (
+      {(enabled == null || enabled) && content && isOpen && (
         <div
           ref={refs.setFloating}
           style={{
@@ -74,16 +74,24 @@ export const Tooltip: FunctionComponent<{
             top: y ?? 0,
             left: x ?? 0,
 
-            backgroundColor: ColorPalette["gray-400"],
+            backgroundColor: ColorPalette["gray-500"],
             padding: "0.625rem",
             borderRadius: "0.375rem",
+
+            borderStyle: "solid",
+            borderWidth: "1px",
+            borderColor: ColorPalette["gray-400"],
+
+            zIndex: 9999999,
           }}
           {...getFloatingProps()}
         >
           <FloatingArrow
             ref={arrowRef}
             context={context}
-            fill={ColorPalette["gray-400"]}
+            fill={ColorPalette["gray-500"]}
+            stroke={ColorPalette["gray-400"]}
+            strokeWidth={1}
           />
           <Caption2
             style={{

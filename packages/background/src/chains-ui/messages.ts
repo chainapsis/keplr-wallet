@@ -144,3 +144,26 @@ export class DisableChainsMsg extends Message<string[]> {
     return DisableChainsMsg.type();
   }
 }
+
+export class GetVaultsByEnabledChainMsg extends Message<string[]> {
+  public static type() {
+    return "chains-ui-get-vaults-by-enabled-chain";
+  }
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetVaultsByEnabledChainMsg.type();
+  }
+}

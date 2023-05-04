@@ -186,6 +186,25 @@ export class ChainsUIService {
     this.enabledChainIdentifiersMap.set(vaultId, newIdentifiers);
   }
 
+  getVaultsByEnabledChain = computedFn(
+    (chainId: string): ReadonlyArray<string> => {
+      const identifier = ChainIdHelper.parse(chainId).identifier;
+
+      const vaultIds = this.enabledChainIdentifiersMap.keys();
+      const vaults = [];
+      for (const vaultId of vaultIds) {
+        const map = this.enabledChainIdentifierMapForVault(vaultId);
+        if (map.get(identifier)) {
+          vaults.push(vaultId);
+        }
+      }
+      return vaults;
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
   @computed
   get allEnabledChainIdentifiers(): ReadonlyArray<string> {
     const set = new Set<string>();

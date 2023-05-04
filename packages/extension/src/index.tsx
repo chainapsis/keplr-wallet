@@ -12,7 +12,14 @@ require("./public/assets/icon/icon-beta-16.png");
 require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { IntlProvider } from "react-intl";
@@ -45,17 +52,19 @@ import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
 import { SettingGeneralLinkKeplrMobilePage } from "./pages/setting/general/link-keplr-mobile";
 import { SettingContactsList } from "./pages/setting/contacts/list";
 import { SettingContactsAdd } from "./pages/setting/contacts/add";
-import { SettingChainListPage } from "./pages/setting/chain";
 import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
 import {
   WalletSelectPage,
   WalletChangeNamePage,
   WalletDeletePage,
-  WalletRecoveryPhrasePage,
+  WalletShowSensitivePage,
 } from "./pages/wallet";
+import { SuggestChainPage } from "./pages/suggest-chain";
 import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
+import { NotificationProvider } from "./hooks/notification";
+import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -66,6 +75,33 @@ window.keplr = new Keplr(
   "core",
   new InExtensionMessageRequester()
 );
+
+const useIsURLUnlockPage = () => {
+  const [value, setValue] = useState(() => {
+    return (
+      window.location.hash === "#/unlock" ||
+      window.location.hash.startsWith("#/unlock?")
+    );
+  });
+
+  useLayoutEffect(() => {
+    const handler = () => {
+      const v =
+        window.location.hash === "#/unlock" ||
+        window.location.hash.startsWith("#/unlock?");
+
+      setValue(v);
+    };
+
+    window.addEventListener("locationchange", handler);
+
+    return () => {
+      window.removeEventListener("locationchange", handler);
+    };
+  }, []);
+
+  return value;
+};
 
 const RoutesAfterReady: FunctionComponent = observer(() => {
   const {
@@ -97,6 +133,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     }
   }, [keyRingStore.status]);
 
+  const isURLUnlockPage = useIsURLUnlockPage();
   const openRegisterOnce = useRef(false);
 
   const isReady = useMemo(() => {
@@ -121,6 +158,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
     if (chainStore.isInitializing) {
       return false;
+    }
+
+    if (isURLUnlockPage) {
+      return true;
     }
 
     if (keyRingStore.status === "unlocked") {
@@ -152,27 +193,24 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
     return true;
   }, [
-    accountStore,
-    chainStore.chainInfos,
-    chainStore.isInitializing,
-    ibcCurrencyRegistrar.isInitialized,
-    uiConfigStore.isInitialized,
     keyRingStore.status,
+    chainStore.isInitializing,
+    chainStore.chainInfos,
+    isURLUnlockPage,
+    ibcCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
+    uiConfigStore.isInitialized,
+    accountStore,
   ]);
 
   return (
     <HashRouter>
       {isReady ? (
-        keyRingStore.status === "locked" ? (
+        keyRingStore.status === "locked" && !isURLUnlockPage ? (
           <UnlockPage />
         ) : (
           <Routes>
-            {/*
-              XXX: There is no need to register unlock page even though permission interaction service
-                   interacts with "/unlock" url because it can be handled by above `keyRingStore.status === "locked"" case.
-              <Route path="/unlock" element={<UnlockPage />} />
-             */}
+            <Route path="/unlock" element={<UnlockPage />} />
             <Route path="/" element={<MainPage />} />
             <Route path="/send" element={<SendAmountPage />} />
             <Route
@@ -212,6 +250,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               element={<SettingSecurityPermissionPage />}
             />
             <Route
+              path="/setting/security/change-password"
+              element={<SettingSecurityChangePasswordPage />}
+            />
+            <Route
               path="/setting/token/list"
               element={<SettingTokenListPage />}
             />
@@ -227,10 +269,6 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               path="/setting/contacts/add"
               element={<SettingContactsAdd />}
             />
-            <Route
-              path="/setting/chain/list"
-              element={<SettingChainListPage />}
-            />
             <Route path="/permission" element={<PermissionPage />} />
             <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
             <Route
@@ -244,9 +282,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               element={<WalletChangeNamePage />}
             />
             <Route
-              path="/wallet/recovery-phrase"
-              element={<WalletRecoveryPhrasePage />}
+              path="/wallet/show-sensitive"
+              element={<WalletShowSensitivePage />}
             />
+            <Route path="/suggest-chain" element={<SuggestChainPage />} />
           </Routes>
         )
       ) : (
@@ -261,11 +300,13 @@ const App: FunctionComponent = () => {
     <StoreProvider>
       <ModalRootProvider>
         <ConfirmProvider>
-          <IntlProvider locale={navigator.language}>
-            <GlobalStyle />
-            <GlobalPopupStyle />
-            <RoutesAfterReady />
-          </IntlProvider>
+          <NotificationProvider>
+            <IntlProvider locale={navigator.language}>
+              <GlobalStyle />
+              <GlobalPopupStyle />
+              <RoutesAfterReady />
+            </IntlProvider>
+          </NotificationProvider>
         </ConfirmProvider>
       </ModalRootProvider>
     </StoreProvider>

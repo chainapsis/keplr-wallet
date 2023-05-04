@@ -43,7 +43,7 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
           right={
             props.memoConfig ? (
               <IconButton onClick={() => setIsAddressBookModalOpen(true)}>
-                <ProfileIcon width="1.75rem" height="1.75rem" />
+                <ProfileIcon width="1.5rem" height="1.5rem" />
               </IconButton>
             ) : null
           }

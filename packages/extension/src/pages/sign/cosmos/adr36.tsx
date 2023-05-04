@@ -11,6 +11,10 @@ import { Gutter } from "../../../components/gutter";
 import { Body2, Body3, H5, Subtitle3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { ViewDataButton } from "../components/view-data-button";
+import { handleCosmosPreSign } from "../utils/handle-cosmos-sign";
+import { KeplrError } from "@keplr-wallet/router";
+import { ErrModule } from "../utils/cosmos-ledger-sign";
+import { LedgerGuideBox } from "../components/ledger-guide-box";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore } = useStore();
@@ -69,6 +73,11 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     }
   }, [isADR36WithString, signDocWrapper]);
 
+  const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
+  const [ledgerInteractingError, setLedgerInteractingError] = useState<
+    Error | undefined
+  >(undefined);
+
   return (
     <HeaderLayout
       title="Prove Ownership"
@@ -78,6 +87,11 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         text: "Approve",
         color: "primary",
         size: "large",
+        disabled: signInteractionStore.waitingData == null,
+        isLoading:
+          signInteractionStore.isObsoleteInteraction(
+            signInteractionStore.waitingData?.id
+          ) || isLedgerInteracting,
         onClick: async () => {
           if (signInteractionStore.waitingData) {
             const signDocWrapper =
@@ -95,13 +109,46 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               throw new Error("Invalid sign doc for adr36");
             }
 
-            await signInteractionStore.approveAndWaitEnd(signDocWrapper);
+            if (signInteractionStore.waitingData.data.keyType === "ledger") {
+              setIsLedgerInteracting(true);
+              setLedgerInteractingError(undefined);
+            }
 
-            if (
-              interactionInfo.interaction &&
-              !interactionInfo.interactionInternal
-            ) {
-              window.close();
+            try {
+              const signature = await handleCosmosPreSign(
+                signInteractionStore.waitingData,
+                signDocWrapper
+              );
+
+              await signInteractionStore.approveWithProceedNext(
+                signInteractionStore.waitingData.id,
+                signDocWrapper,
+                signature,
+                (proceedNext) => {
+                  if (!proceedNext) {
+                    if (
+                      interactionInfo.interaction &&
+                      !interactionInfo.interactionInternal
+                    ) {
+                      window.close();
+                    }
+                  }
+                }
+              );
+            } catch (e) {
+              console.log(e);
+
+              if (e instanceof KeplrError) {
+                if (e.module === ErrModule) {
+                  setLedgerInteractingError(e);
+                } else {
+                  setLedgerInteractingError(undefined);
+                }
+              } else {
+                setLedgerInteractingError(undefined);
+              }
+            } finally {
+              setIsLedgerInteracting(false);
             }
           }
         },
@@ -199,6 +246,14 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             </Subtitle3>
           </XAxis>
         </Box>
+
+        {signInteractionStore.waitingData ? (
+          <LedgerGuideBox
+            interactionData={signInteractionStore.waitingData}
+            isLedgerInteracting={isLedgerInteracting}
+            ledgerInteractingError={ledgerInteractingError}
+          />
+        ) : null}
       </Box>
     </HeaderLayout>
   );

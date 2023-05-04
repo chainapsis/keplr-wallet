@@ -1,36 +1,40 @@
-import React, {
-  FunctionComponent,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import { Columns } from "../../../../components/column";
-import { CodeBracketIcon } from "../../../../components/icon";
-import { Stack } from "../../../../components/stack";
-import { Styles } from "./styles";
+import React, { FunctionComponent } from "react";
+import { Column, Columns } from "../../../../components/column";
+import { Box } from "../../../../components/box";
+import { ColorPalette } from "../../../../styles";
+import { Gutter } from "../../../../components/gutter";
+import { Body3, H5 } from "../../../../components/typography";
 
-export const MessageItem: FunctionComponent<{ paragraph: string }> = ({
-  paragraph,
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-
-  useLayoutEffect(() => {
-    setHeight(ref.current ? ref.current.offsetHeight : 0);
-  }, []);
-
+export const MessageItem: FunctionComponent<{
+  icon: React.ReactElement;
+  title: string;
+  content: string | React.ReactElement;
+}> = ({ icon, title, content }) => {
   return (
-    <Styles.Container ref={ref}>
-      <Columns sum={1} alignY={height > 81 ? "top" : "center"}>
-        <Styles.IconContainer>
-          <CodeBracketIcon width="2rem" height="2rem" />
-        </Styles.IconContainer>
+    <Box padding="1rem">
+      <Columns sum={1}>
+        <Box
+          width="3rem"
+          minWidth="3rem"
+          height="3rem"
+          backgroundColor={ColorPalette["gray-400"]}
+          borderRadius="9999px"
+          alignX="center"
+          alignY="center"
+        >
+          {icon}
+        </Box>
 
-        <Stack gutter="0.125rem">
-          <Styles.Title>Claim Staking Reward</Styles.Title>
-          <Styles.Paragraph>{paragraph}</Styles.Paragraph>
-        </Stack>
+        <Gutter size="0.75rem" />
+
+        <Column weight={1}>
+          <Box minHeight="3rem" alignY="center">
+            <H5 color={ColorPalette["gray-10"]}>{title}</H5>
+            <Gutter size="2px" />
+            <Body3 color={ColorPalette["gray-200"]}>{content}</Body3>
+          </Box>
+        </Column>
       </Columns>
-    </Styles.Container>
+    </Box>
   );
 };

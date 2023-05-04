@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
 import { Dec } from "@keplr-wallet/unit";
@@ -8,25 +8,77 @@ import { Stack } from "../../components/stack";
 import { Button } from "../../components/button";
 import { useStore } from "../../stores";
 
-export const AvailableTabView: FunctionComponent = observer(() => {
+const zeroDec = new Dec(0);
+
+export const AvailableTabView: FunctionComponent<{
+  search: string;
+}> = observer(({ search }) => {
   const { hugeQueriesStore } = useStore();
 
   const stakableBalances: ViewToken[] = hugeQueriesStore.stakables;
+  const stakableBalancesNonZero = useMemo(() => {
+    return hugeQueriesStore.stakables.filter((token) => {
+      return token.token.toDec().gt(zeroDec);
+    });
+  }, [hugeQueriesStore.stakables]);
 
-  const tokenBalances = hugeQueriesStore.notStakbles.filter((token) => {
-    return token.token.toDec().gt(new Dec(0));
-  });
+  const tokenBalancesNonZero = useMemo(() => {
+    return hugeQueriesStore.notStakbles.filter((token) => {
+      return token.token.toDec().gt(zeroDec);
+    });
+  }, [hugeQueriesStore.notStakbles]);
 
-  const ibcBalances = hugeQueriesStore.ibcTokens.filter((token) => {
-    return token.token.toDec().gt(new Dec(0));
-  });
+  const ibcBalancesNonZero = useMemo(() => {
+    return hugeQueriesStore.ibcTokens.filter((token) => {
+      return token.token.toDec().gt(zeroDec);
+    });
+  }, [hugeQueriesStore.ibcTokens]);
 
   const isFirstTime =
-    stakableBalances.filter((token) => {
-      return token.token.toDec().gt(new Dec(0));
-    }).length === 0 &&
-    tokenBalances.length === 0 &&
-    ibcBalances.length === 0;
+    stakableBalancesNonZero.length === 0 &&
+    tokenBalancesNonZero.length === 0 &&
+    ibcBalancesNonZero.length === 0;
+
+  const trimSearch = search.trim();
+
+  const stakableBalancesSearchFiltered = useMemo(() => {
+    return stakableBalances.filter((token) => {
+      return (
+        token.chainInfo.chainName
+          .toLowerCase()
+          .includes(trimSearch.toLowerCase()) ||
+        token.token.currency.coinDenom
+          .toLowerCase()
+          .includes(trimSearch.toLowerCase())
+      );
+    });
+  }, [stakableBalances, trimSearch]);
+
+  const tokenBalancesNonZeroSearchFiltered = useMemo(() => {
+    return tokenBalancesNonZero.filter((token) => {
+      return (
+        token.chainInfo.chainName
+          .toLowerCase()
+          .includes(trimSearch.toLowerCase()) ||
+        token.token.currency.coinDenom
+          .toLowerCase()
+          .includes(trimSearch.toLowerCase())
+      );
+    });
+  }, [tokenBalancesNonZero, trimSearch]);
+
+  const ibcBalancesNonZeroSearchFiltered = useMemo(() => {
+    return ibcBalancesNonZero.filter((token) => {
+      return (
+        token.chainInfo.chainName
+          .toLowerCase()
+          .includes(trimSearch.toLowerCase()) ||
+        token.token.currency.coinDenom
+          .toLowerCase()
+          .includes(trimSearch.toLowerCase())
+      );
+    });
+  }, [ibcBalancesNonZero, trimSearch]);
 
   const TokenViewData: {
     title: string;
@@ -36,19 +88,19 @@ export const AvailableTabView: FunctionComponent = observer(() => {
   }[] = [
     {
       title: "Balance",
-      balance: isFirstTime ? [] : stakableBalances,
+      balance: isFirstTime ? [] : stakableBalancesSearchFiltered,
       lenAlwaysShown: 5,
       tooltip: "TODO: Lorem ipsum dolor sit amet",
     },
     {
       title: "Token Balance",
-      balance: tokenBalances,
+      balance: tokenBalancesNonZeroSearchFiltered,
       lenAlwaysShown: 3,
       tooltip: "TODO: Lorem ipsum dolor sit amet, consectetur adipiscing elit",
     },
     {
       title: "IBC Balance",
-      balance: ibcBalances,
+      balance: ibcBalancesNonZeroSearchFiltered,
       lenAlwaysShown: 3,
       tooltip:
         "TODO: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",

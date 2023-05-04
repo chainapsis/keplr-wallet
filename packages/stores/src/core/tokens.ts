@@ -6,14 +6,7 @@ import {
   SuggestTokenMsg,
   TokenInfo,
 } from "@keplr-wallet/background";
-import {
-  action,
-  autorun,
-  flow,
-  makeObservable,
-  observable,
-  runInAction,
-} from "mobx";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
 import { IChainStore } from "../chain";
 import { InteractionStore } from "./interaction";
@@ -229,41 +222,47 @@ export class TokensStore {
   }
 
   get waitingSuggestedToken() {
-    const datas = this.interactionStore.getDatas<{
+    const datas = this.interactionStore.getAllData<{
       chainId: string;
       contractAddress: string;
       viewingKey?: string;
-    }>("suggest-token-cw20");
+    }>(SuggestTokenMsg.type());
 
     if (datas.length > 0) {
       return datas[0];
     }
   }
 
-  @flow
-  *approveSuggestedToken(appCurrency: AppCurrency) {
-    const data = this.waitingSuggestedToken;
-    if (data) {
-      yield this.interactionStore.approve(
-        SuggestTokenMsg.type(),
-        data.id,
-        appCurrency
-      );
-
-      yield this.refreshTokens();
+  async approveSuggestedTokenWithProceedNext(
+    id: string,
+    appCurrency: AppCurrency,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    const d = this.interactionStore.getData<{
+      chainId: string;
+      contractAddress: string;
+      viewingKey?: string;
+    }>(id);
+    if (!d) {
+      return;
     }
+
+    await this.interactionStore.approveWithProceedNext(
+      id,
+      appCurrency,
+      afterFn
+    );
+    this.refreshTokens();
   }
 
-  @flow
-  *rejectSuggestedToken() {
-    const data = this.waitingSuggestedToken;
-    if (data) {
-      yield this.interactionStore.reject(SuggestTokenMsg.type(), data.id);
-    }
+  async rejectSuggestedToken(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
-  @flow
-  *rejectAllSuggestedTokens() {
-    yield this.interactionStore.rejectAll(SuggestTokenMsg.type());
+  async rejectAllSuggestedTokens() {
+    await this.interactionStore.rejectAll(SuggestTokenMsg.type());
   }
 }

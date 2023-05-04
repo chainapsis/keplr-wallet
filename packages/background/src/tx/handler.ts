@@ -31,6 +31,11 @@ const handleSendTxMsg: (
       msg.origin
     );
 
-    return await service.sendTx(msg.chainId, msg.tx, msg.mode);
+    return await service.sendTx(
+      msg.chainId,
+      msg.tx,
+      msg.mode,
+      msg.silent ?? false
+    );
   };
 };

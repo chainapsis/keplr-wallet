@@ -4,7 +4,7 @@ import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import { ChainInfo } from "@keplr-wallet/types";
 
-export class KeyRingMnemonicService {
+export class KeyRingLedgerService {
   async init(): Promise<void> {
     // TODO: ?
   }

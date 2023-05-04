@@ -8,12 +8,14 @@ export const TextButton: FunctionComponent<TextButtonProps> = ({
   className,
   text,
   right,
+  type,
   ...otherProps
 }) => {
   return (
     <Styles.Container style={style} className={className}>
       <Styles.Button
         {...otherProps}
+        type={type || "button"}
         onClick={(e) => {
           if (onClick) {
             e.preventDefault();

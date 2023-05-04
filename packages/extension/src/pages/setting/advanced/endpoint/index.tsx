@@ -78,6 +78,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title="Change Endpoints"
+      fixedHeight={true}
       left={<BackButton />}
       bottomButton={{
         text: "Confirm",
@@ -131,7 +132,15 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
         <GuideBox
           title="Experimental Feature"
-          paragraph="The uptime and stability of custom endpoints are managed by the responsible service providers. Close and reopen Keplr extension to apply the changes."
+          paragraph={
+            <Box>
+              Please get in touch with the endpoint providers to address any
+              issues that may arise from changes to the endpoint(s).
+              <br />
+              <br />
+              Restart Keplr to apply changes.
+            </Box>
+          }
         />
       </Styles.Container>
     </HeaderLayout>

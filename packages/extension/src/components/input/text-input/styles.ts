@@ -85,7 +85,7 @@ export const Styles = {
   `,
   TextInput: styled.input<TextInputProps & { isTextarea?: boolean }>`
     width: 100%;
-    height: ${({ isTextarea }) => (isTextarea ? undefined : "3.5rem")};
+    height: ${({ isTextarea }) => (isTextarea ? undefined : "3.25rem")};
     margin: 0;
     padding: ${({ isTextarea }) =>
       isTextarea ? "0.75rem 0.75rem" : "0 0.75rem"};

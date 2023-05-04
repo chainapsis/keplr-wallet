@@ -11,6 +11,7 @@ import {
   ToggleChainsMsg,
   EnableChainsMsg,
   DisableChainsMsg,
+  GetVaultsByEnabledChainMsg,
 } from "./messages";
 
 export const getHandler: (service: ChainsUIService) => Handler = (service) => {
@@ -27,6 +28,11 @@ export const getHandler: (service: ChainsUIService) => Handler = (service) => {
         return handleEnableChainsMsg(service)(env, msg as EnableChainsMsg);
       case DisableChainsMsg:
         return handleDisableChainsMsg(service)(env, msg as DisableChainsMsg);
+      case GetVaultsByEnabledChainMsg:
+        return handleGetVaultsByEnabledChainMsg(service)(
+          env,
+          msg as GetVaultsByEnabledChainMsg
+        );
       default:
         throw new KeplrError("chains", 110, "Unknown msg type");
     }
@@ -65,5 +71,13 @@ const handleDisableChainsMsg: (
   return (_, msg) => {
     service.disableChain(msg.vaultId, ...msg.chainIds);
     return service.enabledChainIdentifiersForVault(msg.vaultId) as string[];
+  };
+};
+
+const handleGetVaultsByEnabledChainMsg: (
+  service: ChainsUIService
+) => InternalHandler<GetVaultsByEnabledChainMsg> = (service) => {
+  return (_, msg) => {
+    return service.getVaultsByEnabledChain(msg.chainId) as string[];
   };
 };

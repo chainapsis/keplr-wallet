@@ -1,11 +1,5 @@
 import { Message } from "@keplr-wallet/router";
-import {
-  ChainInfo,
-  KeplrSignOptions,
-  AminoSignResponse,
-  StdSignDoc,
-  ChainInfoWithoutEndpoints,
-} from "@keplr-wallet/types";
+import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
 
 export class SuggestChainInfoMsg extends Message<void> {
   public static type() {
@@ -28,46 +22,6 @@ export class SuggestChainInfoMsg extends Message<void> {
 
   type(): string {
     return SuggestChainInfoMsg.type();
-  }
-}
-
-// Return the tx hash
-export class SendTxMsg extends Message<Uint8Array> {
-  public static type() {
-    return "send-tx-to-background";
-  }
-
-  constructor(
-    public readonly chainId: string,
-    public readonly tx: unknown,
-    public readonly mode: "async" | "sync" | "block"
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id is empty");
-    }
-
-    if (!this.tx) {
-      throw new Error("tx is empty");
-    }
-
-    if (
-      !this.mode ||
-      (this.mode !== "sync" && this.mode !== "async" && this.mode !== "block")
-    ) {
-      throw new Error("invalid mode");
-    }
-  }
-
-  route(): string {
-    return "background-tx";
-  }
-
-  type(): string {
-    return SendTxMsg.type();
   }
 }
 
@@ -99,58 +53,6 @@ export class GetSecret20ViewingKey extends Message<string> {
 
   type(): string {
     return GetSecret20ViewingKey.type();
-  }
-}
-
-export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> {
-  public static type() {
-    return "request-sign-eip-712-cosmos-tx-v0";
-  }
-
-  constructor(
-    public readonly chainId: string,
-    public readonly signer: string,
-    public readonly eip712: {
-      types: Record<string, { name: string; type: string }[] | undefined>;
-      domain: Record<string, any>;
-      primaryType: string;
-    },
-    public readonly signDoc: StdSignDoc,
-    public readonly signOptions: KeplrSignOptions
-  ) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.chainId) {
-      throw new Error("chain id not set");
-    }
-
-    if (!this.signer) {
-      throw new Error("signer not set");
-    }
-
-    if (this.signDoc.chain_id !== this.chainId) {
-      throw new Error(
-        "Chain id in the message is not matched with the requested chain id"
-      );
-    }
-
-    if (!this.signOptions) {
-      throw new Error("Sign options are null");
-    }
-  }
-
-  override approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return "keyring";
-  }
-
-  type(): string {
-    return RequestSignEIP712CosmosTxMsg_v0.type();
   }
 }
 
