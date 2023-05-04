@@ -56,18 +56,13 @@ export const FeeControl: FunctionComponent<{
       }
 
       if (
-        feeConfig.fees.length === 0 ||
-        !feeConfig.selectableFeeCurrencies.find(
-          (cur) =>
-            cur.coinMinimalDenom === feeConfig.fees[0].currency.coinMinimalDenom
-        )
+        feeConfig.fees.length === 0 &&
+        feeConfig.selectableFeeCurrencies.length > 0
       ) {
-        if (feeConfig.selectableFeeCurrencies.length > 0) {
-          feeConfig.setFee({
-            type: "average",
-            currency: feeConfig.selectableFeeCurrencies[0],
-          });
-        }
+        feeConfig.setFee({
+          type: "average",
+          currency: feeConfig.selectableFeeCurrencies[0],
+        });
       }
     }, [
       disableAutomaticFeeSet,
@@ -100,8 +95,7 @@ export const FeeControl: FunctionComponent<{
           !(feeConfig.type !== "manual") &&
           feeConfig.selectableFeeCurrencies.length > 1 &&
           feeConfig.fees.length > 0 &&
-          feeConfig.selectableFeeCurrencies[0].coinMinimalDenom ===
-            feeConfig.fees[0].currency.coinMinimalDenom
+          feeConfig.type !== "manual"
         ) {
           const queryBalances = queriesStore
             .get(feeConfig.chainId)
@@ -113,30 +107,28 @@ export const FeeControl: FunctionComponent<{
           const firstFeeCurrencyBal =
             queryBalances.getBalanceFromCurrency(firstFeeCurrency);
 
-          if (feeConfig.type !== "manual") {
-            const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
-              firstFeeCurrency,
-              feeConfig.type
-            );
-            if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
-              // Not enough balances for fee.
-              // Try to find other fee currency to send.
-              for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
-                const feeCurrencyBal =
-                  queryBalances.getBalanceFromCurrency(feeCurrency);
-                const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
-                  feeCurrency,
-                  feeConfig.type
-                );
+          const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+            firstFeeCurrency,
+            feeConfig.type
+          );
+          if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
+            // Not enough balances for fee.
+            // Try to find other fee currency to send.
+            for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
+              const feeCurrencyBal =
+                queryBalances.getBalanceFromCurrency(feeCurrency);
+              const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+                feeCurrency,
+                feeConfig.type
+              );
 
-                if (feeCurrencyBal.toDec().gte(fee.toDec())) {
-                  feeConfig.setFee({
-                    type: feeConfig.type,
-                    currency: feeCurrency,
-                  });
-                  skip = true;
-                  return;
-                }
+              if (feeCurrencyBal.toDec().gte(fee.toDec())) {
+                feeConfig.setFee({
+                  type: feeConfig.type,
+                  currency: feeCurrency,
+                });
+                skip = true;
+                return;
               }
             }
           }

@@ -94,33 +94,15 @@ export const TransactionFeeModal: FunctionComponent<{
         </Columns>
 
         {gasSimulator?.enabled ? (
-          <React.Fragment>
-            <Columns sum={2}>
-              <Column weight={1}>
-                <TextInput
-                  label="Gas Adjustment"
-                  value={gasSimulator.gasAdjustmentValue}
-                  onChange={(e) => {
-                    e.preventDefault();
+          <TextInput
+            label="Gas Adjustment"
+            value={gasSimulator.gasAdjustmentValue}
+            onChange={(e) => {
+              e.preventDefault();
 
-                    gasSimulator?.setGasAdjustmentValue(e.target.value);
-                  }}
-                />
-              </Column>
-              <Column weight={1}>
-                <TextInput
-                  label="Estimated"
-                  value={gasSimulator.gasEstimated || "-"}
-                  readOnly={true}
-                />
-              </Column>
-            </Columns>
-            <TextInput
-              label="Gas Amount"
-              value={gasConfig.value}
-              readOnly={true}
-            />
-          </React.Fragment>
+              gasSimulator?.setGasAdjustmentValue(e.target.value);
+            }}
+          />
         ) : (
           <TextInput
             label="Gas Amount"
