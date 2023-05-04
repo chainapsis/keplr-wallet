@@ -197,7 +197,7 @@ export class TokenCW20Service {
 
     const appCurrency = (await this.interactionService.waitApprove(
       env,
-      "/setting/token/add",
+      `/setting/token/add`,
       "suggest-token-cw20",
       params
     )) as AppCurrency;

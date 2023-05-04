@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
@@ -13,6 +19,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { AppCurrency } from "@keplr-wallet/types";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
+import { useInteractionInfo } from "../../../../hooks";
 
 const Styles = {
   Container: styled(Stack)`
@@ -26,6 +33,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const paramChainId = searchParams.get("chainId");
+  const [inputContractAddress, setInputContractAddress] = useState(
+    searchParams.get("contractAddress") || ""
+  );
 
   const supportedChainInfos = useMemo(() => {
     return chainStore.chainInfos.filter((chainInfo) => {
@@ -47,6 +57,19 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
       return chainStore.chainInfos[0].chainId;
     }
   });
+
+  const interactionInfo = useInteractionInfo();
+
+  useLayoutEffect(() => {
+    if (interactionInfo.interaction) {
+      if (tokensStore.waitingSuggestedToken) {
+        setChainId(tokensStore.waitingSuggestedToken.data.chainId);
+        setInputContractAddress(
+          tokensStore.waitingSuggestedToken.data.contractAddress
+        );
+      }
+    }
+  }, [interactionInfo, tokensStore.waitingSuggestedToken]);
 
   useEffect(() => {
     // secret20은 계정에 귀속되기 때문에 추가/삭제 등을 할때 먼저 초기화가 되어있어야만 가능하다.
@@ -73,8 +96,6 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
       label: chainInfo.chainName,
     };
   });
-
-  const [inputContractAddress, setInputContractAddress] = useState("");
 
   const contractAddress = inputContractAddress.trim();
   const queryContract = (() => {
@@ -116,24 +137,49 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               };
             }
           })();
-          await tokensStore.addToken(chainId, currency);
-          navigate("/");
+
+          if (
+            interactionInfo.interaction &&
+            tokensStore.waitingSuggestedToken
+          ) {
+            await tokensStore.approveSuggestedTokenWithProceedNext(
+              tokensStore.waitingSuggestedToken.id,
+              currency,
+              (proceedNext) => {
+                if (!proceedNext) {
+                  if (
+                    interactionInfo.interaction &&
+                    !interactionInfo.interactionInternal
+                  ) {
+                    window.close();
+                  }
+                }
+              }
+            );
+          } else {
+            await tokensStore.addToken(chainId, currency);
+
+            navigate("/");
+          }
         }
       }}
     >
       <Styles.Container gutter="1rem">
-        <Box width="13rem">
-          <Dropdown
-            items={items}
-            selectedItemKey={chainId}
-            onSelect={setChainId}
-          />
-        </Box>
+        {!interactionInfo.interaction ? (
+          <Box width="13rem">
+            <Dropdown
+              items={items}
+              selectedItemKey={chainId}
+              onSelect={setChainId}
+            />
+          </Box>
+        ) : null}
 
         <TextInput
           label="Contract Address"
           isLoading={queryContract.isFetching}
           value={inputContractAddress}
+          readOnly={interactionInfo.interaction}
           onChange={(e) => {
             e.preventDefault();
 

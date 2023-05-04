@@ -3,7 +3,6 @@ import {
   AddTokenMsg,
   GetAllTokenInfosMsg,
   RemoveTokenMsg,
-  SuggestTokenMsg,
   TokenInfo,
 } from "@keplr-wallet/background";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
@@ -226,7 +225,7 @@ export class TokensStore {
       chainId: string;
       contractAddress: string;
       viewingKey?: string;
-    }>(SuggestTokenMsg.type());
+    }>("suggest-token-cw20");
 
     if (datas.length > 0) {
       return datas[0];
@@ -263,6 +262,6 @@ export class TokensStore {
   }
 
   async rejectAllSuggestedTokens() {
-    await this.interactionStore.rejectAll(SuggestTokenMsg.type());
+    await this.interactionStore.rejectAll("suggest-token-cw20");
   }
 }
