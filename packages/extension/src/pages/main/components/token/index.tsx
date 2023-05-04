@@ -122,8 +122,8 @@ export const TokenItem: FunctionComponent<{
       <Columns sum={1} gutter="0.5rem" alignY="center">
         <ChainImageFallback
           style={{
-            width: "2rem",
-            height: "2rem",
+            width: "2.5rem",
+            height: "2.5rem",
           }}
           src={viewToken.token.currency.coinImageUrl}
           alt={viewToken.token.currency.coinDenom}
