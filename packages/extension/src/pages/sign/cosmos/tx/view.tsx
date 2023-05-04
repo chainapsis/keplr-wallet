@@ -89,10 +89,7 @@ export const CosmosTxView: FunctionComponent<{
       memo = unescapeHTML(memo);
     }
     memoConfig.setValue(memo);
-    if (
-      data.data.signOptions.preferNoSetFee &&
-      data.data.signDocWrapper.fees[0]
-    ) {
+    if (data.data.signOptions.preferNoSetFee) {
       feeConfig.setFee(
         data.data.signDocWrapper.fees.map((fee) => {
           const currency = chainStore

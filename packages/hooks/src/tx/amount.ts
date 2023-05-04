@@ -1,4 +1,9 @@
-import { IAmountConfig, ISenderConfig, UIProperties } from "./types";
+import {
+  IAmountConfig,
+  IFeeConfig,
+  ISenderConfig,
+  UIProperties,
+} from "./types";
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
@@ -21,6 +26,12 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable
   protected _value: string = "";
 
+  @observable
+  protected _fraction: number = 0;
+
+  @observable.ref
+  protected _feeConfig: IFeeConfig | undefined = undefined;
+
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
@@ -32,7 +43,39 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     makeObservable(this);
   }
 
+  get feeConfig(): IFeeConfig | undefined {
+    return this._feeConfig;
+  }
+
+  @action
+  setFeeConfig(feeConfig: IFeeConfig | undefined) {
+    this._feeConfig = feeConfig;
+  }
+
+  @computed
   get value(): string {
+    if (this.fraction > 0) {
+      let result = this.queriesStore
+        .get(this.chainId)
+        .queryBalances.getQueryBech32Address(this.senderConfig.sender)
+        .getBalanceFromCurrency(this.currency);
+      if (this.feeConfig) {
+        for (const fee of this.feeConfig.fees) {
+          result = result.sub(fee);
+        }
+      }
+      if (result.toDec().lte(new Dec(0))) {
+        return "0";
+      }
+
+      return result
+        .mul(new Dec(this.fraction))
+        .trim(true)
+        .locale(false)
+        .hideDenom(true)
+        .toString();
+    }
+
     return this._value;
   }
 
@@ -43,16 +86,18 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     }
 
     this._value = value;
+
+    this.setFraction(0);
   }
 
   @computed
   get amount(): CoinPretty[] {
     let amount: Dec;
     try {
-      if (this._value.trim() === "") {
+      if (this.value.trim() === "") {
         amount = new Dec(0);
       } else {
-        amount = new Dec(this._value);
+        amount = new Dec(this.value);
       }
     } catch {
       amount = new Dec(0);
@@ -90,9 +135,19 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   setCurrency(currency: AppCurrency | undefined) {
     if (currency?.coinMinimalDenom !== this._currency?.coinMinimalDenom) {
       this._value = "";
+      this.setFraction(0);
     }
 
     this._currency = currency;
+  }
+
+  get fraction(): number {
+    return this._fraction;
+  }
+
+  @action
+  setFraction(fraction: number): void {
+    this._fraction = fraction;
   }
 
   get selectableCurrencies(): AppCurrency[] {

@@ -45,6 +45,8 @@ export const useSendTxConfig = (
     options
   );
 
+  amountConfig.setFeeConfig(feeConfig);
+
   const recipientConfig = useRecipientConfig(chainGetter, chainId, options);
 
   return {

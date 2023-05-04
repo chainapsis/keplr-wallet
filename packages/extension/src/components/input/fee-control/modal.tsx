@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent } from "react";
 import { Caption1, Caption2, H5, Subtitle1, Subtitle3 } from "../../typography";
 import { ColorPalette } from "../../../styles";
 import styled from "styled-components";
@@ -9,8 +9,15 @@ import { Toggle } from "../../toggle";
 import { TextInput } from "..";
 import { Button } from "../../button";
 import { observer } from "mobx-react-lite";
-import { IFeeConfig, IGasConfig } from "@keplr-wallet/hooks";
+import {
+  IFeeConfig,
+  IGasConfig,
+  IGasSimulator,
+  ISenderConfig,
+} from "@keplr-wallet/hooks";
 import { useStore } from "../../../stores";
+import { GuideBox } from "../../guide-box";
+import { Dec } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled.div`
@@ -30,10 +37,32 @@ const Styles = {
 };
 
 export const TransactionFeeModal: FunctionComponent<{
+  close: () => void;
+
+  senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
-}> = observer(({ feeConfig, gasConfig }) => {
-  const [isAuto, setIsAuto] = useState<boolean>(true);
+  gasSimulator?: IGasSimulator;
+}> = observer(({ close, senderConfig, feeConfig, gasConfig, gasSimulator }) => {
+  const { queriesStore } = useStore();
+
+  const isGasSimulatorUsable = (() => {
+    if (!gasSimulator) {
+      return false;
+    }
+
+    if (gasSimulator.gasEstimated == null && gasSimulator.uiProperties.error) {
+      return false;
+    }
+
+    return true;
+  })();
+  const isGasSimulatorEnabled = (() => {
+    if (!isGasSimulatorUsable) {
+      return false;
+    }
+    return gasSimulator?.enabled;
+  })();
 
   return (
     <Styles.Container>
@@ -48,12 +77,25 @@ export const TransactionFeeModal: FunctionComponent<{
         <Stack gutter="0.375rem">
           <Subtitle3>Fee Token</Subtitle3>
           <Dropdown
-            items={feeConfig.selectableFeeCurrencies.map((cur) => {
-              return {
-                key: cur.coinMinimalDenom,
-                label: cur.coinDenom,
-              };
-            })}
+            items={feeConfig.selectableFeeCurrencies
+              .filter((cur, i) => {
+                if (i === 0) {
+                  return true;
+                }
+
+                const balance = queriesStore
+                  .get(feeConfig.chainId)
+                  .queryBalances.getQueryBech32Address(senderConfig.sender)
+                  .getBalanceFromCurrency(cur);
+
+                return balance.toDec().gt(new Dec(0));
+              })
+              .map((cur) => {
+                return {
+                  key: cur.coinMinimalDenom,
+                  label: cur.coinDenom,
+                };
+              })}
             selectedItemKey={feeConfig.fees[0]?.currency.coinMinimalDenom}
             onSelect={(key) => {
               const currency = feeConfig.selectableFeeCurrencies.find(
@@ -63,6 +105,11 @@ export const TransactionFeeModal: FunctionComponent<{
                 if (feeConfig.type !== "manual") {
                   feeConfig.setFee({
                     type: feeConfig.type,
+                    currency: currency,
+                  });
+                } else {
+                  feeConfig.setFee({
+                    type: "average",
                     currency: currency,
                   });
                 }
@@ -79,23 +126,80 @@ export const TransactionFeeModal: FunctionComponent<{
 
           <Column weight={1} />
 
-          <Columns sum={1} gutter="0.5rem" alignY="center">
-            <Subtitle3>Auto</Subtitle3>
-            <Toggle isOpen={isAuto} setIsOpen={() => setIsAuto(!isAuto)} />
-          </Columns>
+          {isGasSimulatorUsable && gasSimulator ? (
+            <Columns sum={1} gutter="0.5rem" alignY="center">
+              <Subtitle3>Auto</Subtitle3>
+              <Toggle
+                isOpen={gasSimulator.enabled}
+                setIsOpen={(isOpen) => {
+                  gasSimulator?.setEnabled(isOpen);
+                }}
+              />
+            </Columns>
+          ) : null}
         </Columns>
 
-        <TextInput
-          label="Gas Amount"
-          value={gasConfig.value}
-          onChange={(e) => {
-            e.preventDefault();
+        {(() => {
+          if (gasSimulator) {
+            if (gasSimulator.uiProperties.error) {
+              return (
+                <GuideBox
+                  color="danger"
+                  title="Tx simulation failed"
+                  paragraph={
+                    gasSimulator.uiProperties.error.message ||
+                    gasSimulator.uiProperties.error.toString()
+                  }
+                />
+              );
+            }
 
-            gasConfig.setValue(e.target.value);
+            if (gasSimulator.uiProperties.warning) {
+              return (
+                <GuideBox
+                  color="warning"
+                  title="Tx simulation failed"
+                  paragraph={
+                    gasSimulator.uiProperties.warning.message ||
+                    gasSimulator.uiProperties.warning.toString()
+                  }
+                />
+              );
+            }
+          }
+        })()}
+
+        {isGasSimulatorEnabled ? (
+          <TextInput
+            label="Gas Adjustment"
+            value={gasSimulator?.gasAdjustmentValue}
+            onChange={(e) => {
+              e.preventDefault();
+
+              gasSimulator?.setGasAdjustmentValue(e.target.value);
+            }}
+          />
+        ) : (
+          <TextInput
+            label="Gas Amount"
+            value={gasConfig.value}
+            onChange={(e) => {
+              e.preventDefault();
+
+              gasConfig.setValue(e.target.value);
+            }}
+          />
+        )}
+
+        <Button
+          type="button"
+          text="Confirm"
+          color="secondary"
+          size="large"
+          onClick={() => {
+            close();
           }}
         />
-
-        <Button text="Confirm" color="secondary" size="large" />
       </Stack>
     </Styles.Container>
   );
@@ -117,15 +221,19 @@ const FeeSelectorStyle = {
   `,
   Title: styled(H5)<{ selected: boolean }>`
     color: ${({ selected }) =>
-      selected ? ColorPalette["white"] : ColorPalette["gray-50"]}};
+      selected ? ColorPalette["white"] : ColorPalette["gray-50"]};
   `,
   Price: styled(Caption2)<{ selected: boolean }>`
+    white-space: nowrap;
+    margin-top: 2px;
     color: ${({ selected }) =>
-      selected ? ColorPalette["blue-200"] : ColorPalette["gray-300"]}};
+      selected ? ColorPalette["blue-200"] : ColorPalette["gray-300"]};
   `,
   Amount: styled(Caption1)<{ selected: boolean }>`
+    white-space: nowrap;
+    margin-top: 2px;
     color: ${({ selected }) =>
-      selected ? ColorPalette["blue-100"] : ColorPalette["gray-200"]}};
+      selected ? ColorPalette["blue-100"] : ColorPalette["gray-200"]};
   `,
 };
 

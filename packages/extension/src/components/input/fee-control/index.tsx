@@ -1,6 +1,11 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { IFeeConfig, IGasConfig, ISenderConfig } from "@keplr-wallet/hooks";
+import {
+  IFeeConfig,
+  IGasConfig,
+  IGasSimulator,
+  ISenderConfig,
+} from "@keplr-wallet/hooks";
 import styled from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Column, Columns } from "../../column";
@@ -32,10 +37,17 @@ export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  gasSimulator?: IGasSimulator;
 
   disableAutomaticFeeSet?: boolean;
 }> = observer(
-  ({ senderConfig, feeConfig, gasConfig, disableAutomaticFeeSet }) => {
+  ({
+    senderConfig,
+    feeConfig,
+    gasConfig,
+    gasSimulator,
+    disableAutomaticFeeSet,
+  }) => {
     const { queriesStore, priceStore } = useStore();
 
     useEffect(() => {
@@ -44,18 +56,13 @@ export const FeeControl: FunctionComponent<{
       }
 
       if (
-        feeConfig.fees.length === 0 ||
-        !feeConfig.selectableFeeCurrencies.find(
-          (cur) =>
-            cur.coinMinimalDenom === feeConfig.fees[0].currency.coinMinimalDenom
-        )
+        feeConfig.fees.length === 0 &&
+        feeConfig.selectableFeeCurrencies.length > 0
       ) {
-        if (feeConfig.selectableFeeCurrencies.length > 0) {
-          feeConfig.setFee({
-            type: "average",
-            currency: feeConfig.selectableFeeCurrencies[0],
-          });
-        }
+        feeConfig.setFee({
+          type: "average",
+          currency: feeConfig.selectableFeeCurrencies[0],
+        });
       }
     }, [
       disableAutomaticFeeSet,
@@ -88,8 +95,7 @@ export const FeeControl: FunctionComponent<{
           !(feeConfig.type !== "manual") &&
           feeConfig.selectableFeeCurrencies.length > 1 &&
           feeConfig.fees.length > 0 &&
-          feeConfig.selectableFeeCurrencies[0].coinMinimalDenom ===
-            feeConfig.fees[0].currency.coinMinimalDenom
+          feeConfig.type !== "manual"
         ) {
           const queryBalances = queriesStore
             .get(feeConfig.chainId)
@@ -101,30 +107,28 @@ export const FeeControl: FunctionComponent<{
           const firstFeeCurrencyBal =
             queryBalances.getBalanceFromCurrency(firstFeeCurrency);
 
-          if (feeConfig.type !== "manual") {
-            const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
-              firstFeeCurrency,
-              feeConfig.type
-            );
-            if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
-              // Not enough balances for fee.
-              // Try to find other fee currency to send.
-              for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
-                const feeCurrencyBal =
-                  queryBalances.getBalanceFromCurrency(feeCurrency);
-                const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
-                  feeCurrency,
-                  feeConfig.type
-                );
+          const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+            firstFeeCurrency,
+            feeConfig.type
+          );
+          if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
+            // Not enough balances for fee.
+            // Try to find other fee currency to send.
+            for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
+              const feeCurrencyBal =
+                queryBalances.getBalanceFromCurrency(feeCurrency);
+              const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+                feeCurrency,
+                feeConfig.type
+              );
 
-                if (feeCurrencyBal.toDec().gte(fee.toDec())) {
-                  feeConfig.setFee({
-                    type: feeConfig.type,
-                    currency: feeCurrency,
-                  });
-                  skip = true;
-                  return;
-                }
+              if (feeCurrencyBal.toDec().gte(fee.toDec())) {
+                feeConfig.setFee({
+                  type: feeConfig.type,
+                  currency: feeCurrency,
+                });
+                skip = true;
+                return;
               }
             }
           }
@@ -209,7 +213,13 @@ export const FeeControl: FunctionComponent<{
           align="bottom"
           close={() => setIsModalOpen(false)}
         >
-          <TransactionFeeModal feeConfig={feeConfig} gasConfig={gasConfig} />
+          <TransactionFeeModal
+            close={() => setIsModalOpen(false)}
+            senderConfig={senderConfig}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
+            gasSimulator={gasSimulator}
+          />
         </Modal>
       </Styles.Container>
     );
