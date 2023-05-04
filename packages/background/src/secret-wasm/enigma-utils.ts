@@ -3,6 +3,8 @@ import { hkdf } from "@noble/hashes/hkdf";
 import { sha256 } from "@noble/hashes/sha256";
 import * as miscreant from "miscreant";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { Buffer } from "buffer/";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const cryptoProvider = new miscreant.PolyfillCryptoProvider();
 
@@ -20,26 +22,22 @@ const hkdfSalt: Uint8Array = new Uint8Array(
   )
 );
 
-const mainnetConsensusIoPubKey = new Uint8Array(
+const secretConsensusIoPubKey = new Uint8Array(
   Buffer.from("79++5YOHfm0SwhlpUDClv7cuCjq9xBZlWqSjDJWkRG8=", "base64")
 );
 
-const mainnetChainIds = new Set(["secret-2", "secret-3", "secret-4"]);
-
 export class EnigmaUtils implements EncryptionUtils {
-  private readonly seed: Uint8Array;
   private readonly privkey: Uint8Array;
   public readonly pubkey: Uint8Array;
   private consensusIoPubKey: Uint8Array = new Uint8Array(); // cache
 
-  public constructor(private url: string, seed?: Uint8Array, chainId?: string) {
-    if (!seed) {
-      this.seed = EnigmaUtils.GenerateNewSeed();
-    } else {
-      if (seed.length !== 32) {
-        throw new Error("encryptionSeed must be a Uint8Array of length 32");
-      }
-      this.seed = seed;
+  public constructor(
+    protected readonly url: string,
+    protected readonly seed: Uint8Array,
+    protected readonly chainId: string
+  ) {
+    if (seed.length !== 32) {
+      throw new Error("encryptionSeed must be a Uint8Array of length 32");
     }
 
     const { privkey, pubkey } = EnigmaUtils.GenerateNewKeyPairFromSeed(
@@ -48,25 +46,9 @@ export class EnigmaUtils implements EncryptionUtils {
     this.privkey = privkey;
     this.pubkey = pubkey;
 
-    // todo: add this again post upgrade
-    if (chainId && mainnetChainIds.has(chainId)) {
-      // Major speedup
-      // TODO: not sure if this is the best approach for detecting mainnet
-      this.consensusIoPubKey = mainnetConsensusIoPubKey;
+    if (ChainIdHelper.parse(chainId).identifier === "secret") {
+      this.consensusIoPubKey = secretConsensusIoPubKey;
     }
-  }
-
-  public static GenerateNewKeyPair(): {
-    privkey: Uint8Array;
-    pubkey: Uint8Array;
-  } {
-    return EnigmaUtils.GenerateNewKeyPairFromSeed(
-      EnigmaUtils.GenerateNewSeed()
-    );
-  }
-
-  public static GenerateNewSeed(): Uint8Array {
-    return EnigmaUtils.secureRandom(32);
   }
 
   private static secureRandom(count: number): Uint8Array {

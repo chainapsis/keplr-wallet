@@ -124,8 +124,7 @@ export class SecretWasmService {
       return this.cacheEnigmaUtils.get(key)!;
     }
 
-    // TODO: Handle the rest config.
-    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    const utils = new EnigmaUtils(chainInfo.rest, seed, chainInfo.rest);
     this.cacheEnigmaUtils.set(key, utils);
 
     return utils;

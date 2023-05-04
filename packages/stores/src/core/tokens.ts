@@ -88,7 +88,6 @@ export class TokensStore {
     }
   }
 
-  @action
   protected updateChainInfos() {
     const chainInfos = this.chainStore.chainInfos;
     for (const chainInfo of chainInfos) {
@@ -102,10 +101,18 @@ export class TokensStore {
         if (!token.associatedAccountAddress) {
           adds.push(token.currency);
         } else if (
-          this.accountStore.getAccount(chainInfo.chainId).bech32Address ===
-          token.associatedAccountAddress
+          this.accountStore.getAccount(chainInfo.chainId).bech32Address
         ) {
-          adds.push(token.currency);
+          if (
+            Bech32Address.fromBech32(
+              this.accountStore.getAccount(chainInfo.chainId).bech32Address
+            )
+              .toHex()
+              .replace("0x", "")
+              .toLowerCase() === token.associatedAccountAddress
+          ) {
+            adds.push(token.currency);
+          }
         }
       }
 

@@ -65,10 +65,12 @@ export class AccountStore<
   }
 
   getAccount(chainId: string): AccountSetReturn {
-    return this.get(chainId);
+    // chain identifier를 통한 접근도 허용하기 위해서 chainGetter를 통해 접근하도록 함.
+    return this.get(this.chainGetter.getChain(chainId).chainId);
   }
 
   hasAccount(chainId: string): boolean {
-    return this.has(chainId);
+    // chain identifier를 통한 접근도 허용하기 위해서 chainGetter를 통해 접근하도록 함.
+    return this.has(this.chainGetter.getChain(chainId).chainId);
   }
 }

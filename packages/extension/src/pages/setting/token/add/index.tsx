@@ -124,19 +124,40 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         e.preventDefault();
 
         if (queryContract.tokenInfo) {
-          const currency: AppCurrency = (() => {
-            if (isSecretWasm) {
-              throw new Error("TODO");
-            } else {
-              return {
-                type: "cw20",
-                contractAddress: contractAddress,
-                coinMinimalDenom: queryContract.tokenInfo.name,
-                coinDenom: queryContract.tokenInfo.symbol,
-                coinDecimals: queryContract.tokenInfo.decimals,
-              };
-            }
-          })();
+          let currency: AppCurrency;
+
+          if (isSecretWasm) {
+            currency = await new Promise<AppCurrency>((resolve, reject) => {
+              accountStore
+                .getAccount(chainId)
+                .secret.createSecret20ViewingKey(
+                  contractAddress,
+                  "",
+                  {},
+                  {},
+                  (tx, viewingKey) => {
+                    if (queryContract.tokenInfo) {
+                      resolve({
+                        type: "secret20",
+                        contractAddress: contractAddress,
+                        coinMinimalDenom: queryContract.tokenInfo.name,
+                        coinDenom: queryContract.tokenInfo.symbol,
+                        coinDecimals: queryContract.tokenInfo.decimals,
+                        viewingKey,
+                      });
+                    }
+                  }
+                );
+            });
+          } else {
+            currency = {
+              type: "cw20",
+              contractAddress: contractAddress,
+              coinMinimalDenom: queryContract.tokenInfo.name,
+              coinDenom: queryContract.tokenInfo.symbol,
+              coinDecimals: queryContract.tokenInfo.decimals,
+            };
+          }
 
           if (
             interactionInfo.interaction &&
