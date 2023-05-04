@@ -2,7 +2,7 @@ import styled, { css, FlattenSimpleInterpolation } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { ButtonProps, ButtonColor, ButtonMode, ButtonSize } from "./types";
 
-const makeTextAndSvgColor = (color: string) => {
+export const makeTextAndSvgColor = (color: string) => {
   return css`
     color: ${color};
     svg {
