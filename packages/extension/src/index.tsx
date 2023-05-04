@@ -1,4 +1,6 @@
 // Shim ------------
+import { AppIntlProvider } from "./languages";
+
 require("setimmediate");
 // Shim ------------
 
@@ -22,7 +24,6 @@ import React, {
 } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
-import { IntlProvider } from "react-intl";
 import { StoreProvider, useStore } from "./stores";
 import { GlobalStyle, GlobalPopupStyle } from "./styles";
 import { configure } from "mobx";
@@ -301,11 +302,11 @@ const App: FunctionComponent = () => {
       <ModalRootProvider>
         <ConfirmProvider>
           <NotificationProvider>
-            <IntlProvider locale={navigator.language}>
+            <AppIntlProvider>
               <GlobalStyle />
               <GlobalPopupStyle />
               <RoutesAfterReady />
-            </IntlProvider>
+            </AppIntlProvider>
           </NotificationProvider>
         </ConfirmProvider>
       </ModalRootProvider>
