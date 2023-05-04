@@ -44,7 +44,7 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
       return false;
     })();
 
-    const isICNSfetching: boolean = (() => {
+    const isICNSFetching: boolean = (() => {
       if ("isICNSFetching" in recipientConfig) {
         return recipientConfig.isICNSFetching;
       }
@@ -74,9 +74,10 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
 
             recipientConfig.setValue(value);
 
-            console.log("value", value);
-
             e.preventDefault();
+
+            // XXX: Failure to do this will result in two onChange events being fired.
+            e.stopPropagation();
           }}
           right={
             memoConfig ? (
@@ -85,7 +86,7 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
               </IconButton>
             ) : null
           }
-          isLoading={isICNSfetching}
+          isLoading={isICNSFetching}
           error={(() => {
             const uiProperties = recipientConfig.uiProperties;
 
