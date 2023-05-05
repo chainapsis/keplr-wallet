@@ -50,7 +50,8 @@ export const TextInput = forwardRef<
         <Styles.TextInputContainer
           paragraph={paragraph}
           error={error}
-          {...props}
+          disabled={props.disabled}
+          errorBorder={props.errorBorder}
         >
           <Columns sum={1}>
             {/*
