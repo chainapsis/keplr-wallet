@@ -135,7 +135,7 @@ export const AvailableTabView: FunctionComponent<{
         <MainEmptyView
           image={
             <img
-              src={require("../../public/assets/img/empty-balance.png")}
+              src={require("../../public/assets/img/main-empty-balance.png")}
               style={{
                 width: "6.25rem",
                 height: "6.25rem",

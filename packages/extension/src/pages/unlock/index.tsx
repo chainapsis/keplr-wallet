@@ -5,6 +5,11 @@ import { useStore } from "../../stores";
 import { Button } from "../../components/button";
 import { useInteractionInfo } from "../../hooks";
 import { Gutter } from "../../components/gutter";
+import { Box } from "../../components/box";
+import { Image } from "../../components/image";
+import { TextButton } from "../../components/button-text";
+import { ColorPalette } from "../../styles";
+import { H1 } from "../../components/typography";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
@@ -32,7 +37,8 @@ export const UnlockPage: FunctionComponent = observer(() => {
         display: "flex",
         flexDirection: "column",
         height: "100vh",
-        padding: "0.75rem",
+        paddingLeft: "1.5rem",
+        paddingRight: "1.5rem",
       }}
       onSubmit={async (e) => {
         e.preventDefault();
@@ -85,46 +91,73 @@ export const UnlockPage: FunctionComponent = observer(() => {
         }
       }}
     >
-      <div
-        style={{
-          flex: 1,
-        }}
-      />
-      <TextInput
-        ref={inputRef}
-        type="password"
-        value={password}
-        onChange={(e) => {
-          e.preventDefault();
+      <Box alignX="center">
+        <Gutter size="7.375rem" />
 
-          setPassword(e.target.value);
+        <Image
+          src={require("../../public/assets/img/unlock.png")}
+          alt={"unlock image"}
+          style={{
+            width: "12rem",
+            height: "9.5rem",
+          }}
+        />
+        <H1>Welcome Back</H1>
 
-          // Clear error if the user is typing.
-          setError(undefined);
-        }}
-        error={error ? "Invalid password" : undefined}
-      />
-      <Gutter size="1rem" />
-      <Button
-        type="submit"
-        text="Unlock"
-        size="large"
-        disabled={password.length === 0}
-        isLoading={
-          isLoading ||
-          (() => {
-            if (interactionInfo.interaction) {
-              const interactions = interactionStore.getAllData("unlock");
-              for (const interaction of interactions) {
-                if (interactionStore.isObsoleteInteraction(interaction.id)) {
-                  return true;
+        <Gutter size="1.75rem" />
+
+        <TextInput
+          ref={inputRef}
+          label="Password"
+          type="password"
+          value={password}
+          style={{ width: "100%" }}
+          onChange={(e) => {
+            e.preventDefault();
+
+            setPassword(e.target.value);
+
+            // Clear error if the user is typing.
+            setError(undefined);
+          }}
+          error={error ? "Invalid password" : undefined}
+        />
+
+        <Gutter size="2.125rem" />
+
+        <Button
+          type="submit"
+          text="Unlock"
+          size="large"
+          disabled={password.length === 0}
+          style={{ width: "100%" }}
+          isLoading={
+            isLoading ||
+            (() => {
+              if (interactionInfo.interaction) {
+                const interactions = interactionStore.getAllData("unlock");
+                for (const interaction of interactions) {
+                  if (interactionStore.isObsoleteInteraction(interaction.id)) {
+                    return true;
+                  }
                 }
               }
-            }
-            return false;
-          })()
-        }
-      />
+              return false;
+            })()
+          }
+        />
+
+        <Gutter size="3.125rem" />
+
+        <TextButton
+          text="Forgot Password?"
+          type="button"
+          size="small"
+          color="faint"
+          onClick={() => {}}
+          style={{ width: "100%", color: ColorPalette["gray-300"] }}
+        />
+      </Box>
     </form>
   );
 });

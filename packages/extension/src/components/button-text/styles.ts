@@ -1,6 +1,43 @@
-import styled, { css } from "styled-components";
-import { TextButtonProps } from "./types";
+import styled, { css, FlattenSimpleInterpolation } from "styled-components";
+import { ButtonColor, TextButtonProps } from "./types";
 import { ColorPalette } from "../../styles";
+import { makeTextAndSvgColor } from "../button";
+
+const buttonStyleFromColorAndMode: Record<
+  ButtonColor,
+  Record<"enabled" | "disabled", FlattenSimpleInterpolation>
+> = {
+  default: {
+    enabled: css`
+      color: ${ColorPalette["gray-50"]};
+      ${makeTextAndSvgColor(ColorPalette["gray-50"])}
+
+      :hover {
+        color: ${ColorPalette["gray-200"]};
+        ${makeTextAndSvgColor(ColorPalette["gray-200"])}
+      }
+    `,
+    disabled: css`
+      color: ${ColorPalette["gray-200"]};
+      ${makeTextAndSvgColor(ColorPalette["gray-200"])}
+    `,
+  },
+  faint: {
+    enabled: css`
+      color: ${ColorPalette["gray-200"]};
+      ${makeTextAndSvgColor(ColorPalette["gray-200"])}
+
+      :hover {
+        color: ${ColorPalette["gray-300"]};
+        ${makeTextAndSvgColor(ColorPalette["gray-300"])}
+      }
+    `,
+    disabled: css`
+      color: ${ColorPalette["gray-300"]};
+      ${makeTextAndSvgColor(ColorPalette["gray-300"])}
+    `,
+  },
+};
 
 export const Styles = {
   Container: styled.div`
@@ -37,8 +74,10 @@ export const Styles = {
     border: 0;
     padding: 0 1rem;
 
-    color: ${({ disabled }) =>
-      disabled ? ColorPalette["gray-200"] : ColorPalette["gray-50"]};
+    ${({ color, disabled }) =>
+      buttonStyleFromColorAndMode[color || "default"][
+        disabled ? "disabled" : "enabled"
+      ]}
     background-color: transparent;
 
     // For hovering.
@@ -52,19 +91,6 @@ export const Styles = {
       left: 0;
       right: 0;
     }
-
-    ${({ disabled }) =>
-      disabled
-        ? null
-        : css`
-            :hover {
-              color: rgba(198, 198, 204, 0.95);
-            }
-
-            :active {
-              color: ${ColorPalette["gray-200"]};
-            }
-          `}
   `,
   Right: styled.span`
     height: 100%;
