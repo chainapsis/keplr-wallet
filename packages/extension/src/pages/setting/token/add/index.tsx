@@ -236,6 +236,16 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                     window.close();
                   }
                 }
+
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal &&
+                  isSecretWasm
+                ) {
+                  // TODO: secret20의 경우는 서명 페이지로 페이지 자체가 넘어가기 때문에 proceedNext를 처리할 수가 없다.
+                  //       나중에 뭔가 해결법이 생기면 다시 생각해본다...
+                  window.close();
+                }
               }
             );
           } else {
