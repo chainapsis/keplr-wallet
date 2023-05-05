@@ -342,6 +342,7 @@ export class RootStore {
       new InExtensionMessageRequester(),
       this.chainStore,
       this.accountStore,
+      this.keyRingStore,
       this.interactionStore
     );
 

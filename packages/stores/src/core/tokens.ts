@@ -12,6 +12,7 @@ import { InteractionStore } from "./interaction";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import { IAccountStore } from "../account";
+import { KeyRingStore } from "./keyring";
 
 export class TokensStore {
   @observable
@@ -30,6 +31,7 @@ export class TokensStore {
     protected readonly requester: MessageRequester,
     protected readonly chainStore: IChainStore,
     protected readonly accountStore: IAccountStore,
+    protected readonly keyRingStore: KeyRingStore,
     protected readonly interactionStore: InteractionStore
   ) {
     makeObservable(this);
@@ -101,6 +103,7 @@ export class TokensStore {
         if (!token.associatedAccountAddress) {
           adds.push(token.currency);
         } else if (
+          this.keyRingStore.status === "unlocked" &&
           this.accountStore.getAccount(chainInfo.chainId).bech32Address
         ) {
           if (
