@@ -13,9 +13,9 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { configure } from "mobx";
 import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
-
 import { RegisterPage } from "./pages/register";
 import { WelcomePage } from "./pages/register/pages/welcome";
+import { AppIntlProvider } from "./languages";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -33,12 +33,14 @@ const App: FunctionComponent = () => {
       <ModalRootProvider>
         <ConfirmProvider>
           <GlobalStyle />
-          <HashRouter>
-            <Routes>
-              <Route path="/" element={<RegisterPage />} />
-              <Route path="/welcome" element={<WelcomePage />} />
-            </Routes>
-          </HashRouter>
+          <AppIntlProvider>
+            <HashRouter>
+              <Routes>
+                <Route path="/" element={<RegisterPage />} />
+                <Route path="/welcome" element={<WelcomePage />} />
+              </Routes>
+            </HashRouter>
+          </AppIntlProvider>
         </ConfirmProvider>
       </ModalRootProvider>
     </StoreProvider>

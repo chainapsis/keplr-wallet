@@ -30,7 +30,7 @@ export const useLanguage = (): Language => {
 };
 
 export const AppIntlProvider: FunctionComponent = ({ children }) => {
-  const [language, _setLanguage] = useState<string>(initLanguage());
+  const [language, _setLanguage] = useState<string>(() => initLanguage());
 
   useEffect(() => {
     document.body.setAttribute("data-lang", language);

@@ -1,6 +1,4 @@
 // Shim ------------
-import { AppIntlProvider } from "./languages";
-
 require("setimmediate");
 // Shim ------------
 
@@ -66,6 +64,7 @@ import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
 import { NotificationProvider } from "./hooks/notification";
 import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
+import { AppIntlProvider } from "./languages";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -205,94 +204,102 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
   ]);
 
   return (
-    <HashRouter>
-      {isReady ? (
-        keyRingStore.status === "locked" && !isURLUnlockPage ? (
-          <UnlockPage />
+    <AppIntlProvider>
+      <HashRouter>
+        {isReady ? (
+          keyRingStore.status === "locked" && !isURLUnlockPage ? (
+            <UnlockPage />
+          ) : (
+            <Routes>
+              <Route path="/unlock" element={<UnlockPage />} />
+              <Route path="/" element={<MainPage />} />
+              <Route path="/send" element={<SendAmountPage />} />
+              <Route
+                path="/send/select-asset"
+                element={<SendSelectAssetPage />}
+              />
+              <Route path="/setting" element={<SettingPage />} />
+              <Route path="/setting/general" element={<SettingGeneralPage />} />
+              <Route
+                path="/setting/general/language"
+                element={<SettingGeneralLanguagePage />}
+              />
+              <Route
+                path="/setting/general/fiat"
+                element={<SettingGeneralFiatPage />}
+              />
+              <Route
+                path="/setting/general/authz"
+                element={<SettingGeneralAuthZPage />}
+              />
+              <Route
+                path="/setting/general/authz/revoke"
+                element={<SettingGeneralAuthZRevokePage />}
+              />
+              <Route
+                path="/setting/general/link-keplr-mobile"
+                element={<SettingGeneralLinkKeplrMobilePage />}
+              />
+              <Route
+                path="/setting/advanced"
+                element={<SettingAdvancedPage />}
+              />
+              <Route
+                path="/setting/advanced/endpoint"
+                element={<SettingAdvancedEndpointPage />}
+              />
+              <Route
+                path="/setting/security"
+                element={<SettingSecurityPage />}
+              />
+              <Route
+                path="/setting/security/permission"
+                element={<SettingSecurityPermissionPage />}
+              />
+              <Route
+                path="/setting/security/change-password"
+                element={<SettingSecurityChangePasswordPage />}
+              />
+              <Route
+                path="/setting/token/list"
+                element={<SettingTokenListPage />}
+              />
+              <Route
+                path="/setting/token/add"
+                element={<SettingTokenAddPage />}
+              />
+              <Route
+                path="/setting/contacts/list"
+                element={<SettingContactsList />}
+              />
+              <Route
+                path="/setting/contacts/add"
+                element={<SettingContactsAdd />}
+              />
+              <Route path="/permission" element={<PermissionPage />} />
+              <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
+              <Route
+                path="/sign-cosmos-adr36"
+                element={<SignCosmosADR36Page />}
+              />
+              <Route path="/wallet/select" element={<WalletSelectPage />} />
+              <Route path="/wallet/delete" element={<WalletDeletePage />} />
+              <Route
+                path="/wallet/change-name"
+                element={<WalletChangeNamePage />}
+              />
+              <Route
+                path="/wallet/show-sensitive"
+                element={<WalletShowSensitivePage />}
+              />
+              <Route path="/suggest-chain" element={<SuggestChainPage />} />
+            </Routes>
+          )
         ) : (
-          <Routes>
-            <Route path="/unlock" element={<UnlockPage />} />
-            <Route path="/" element={<MainPage />} />
-            <Route path="/send" element={<SendAmountPage />} />
-            <Route
-              path="/send/select-asset"
-              element={<SendSelectAssetPage />}
-            />
-            <Route path="/setting" element={<SettingPage />} />
-            <Route path="/setting/general" element={<SettingGeneralPage />} />
-            <Route
-              path="/setting/general/language"
-              element={<SettingGeneralLanguagePage />}
-            />
-            <Route
-              path="/setting/general/fiat"
-              element={<SettingGeneralFiatPage />}
-            />
-            <Route
-              path="/setting/general/authz"
-              element={<SettingGeneralAuthZPage />}
-            />
-            <Route
-              path="/setting/general/authz/revoke"
-              element={<SettingGeneralAuthZRevokePage />}
-            />
-            <Route
-              path="/setting/general/link-keplr-mobile"
-              element={<SettingGeneralLinkKeplrMobilePage />}
-            />
-            <Route path="/setting/advanced" element={<SettingAdvancedPage />} />
-            <Route
-              path="/setting/advanced/endpoint"
-              element={<SettingAdvancedEndpointPage />}
-            />
-            <Route path="/setting/security" element={<SettingSecurityPage />} />
-            <Route
-              path="/setting/security/permission"
-              element={<SettingSecurityPermissionPage />}
-            />
-            <Route
-              path="/setting/security/change-password"
-              element={<SettingSecurityChangePasswordPage />}
-            />
-            <Route
-              path="/setting/token/list"
-              element={<SettingTokenListPage />}
-            />
-            <Route
-              path="/setting/token/add"
-              element={<SettingTokenAddPage />}
-            />
-            <Route
-              path="/setting/contacts/list"
-              element={<SettingContactsList />}
-            />
-            <Route
-              path="/setting/contacts/add"
-              element={<SettingContactsAdd />}
-            />
-            <Route path="/permission" element={<PermissionPage />} />
-            <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
-            <Route
-              path="/sign-cosmos-adr36"
-              element={<SignCosmosADR36Page />}
-            />
-            <Route path="/wallet/select" element={<WalletSelectPage />} />
-            <Route path="/wallet/delete" element={<WalletDeletePage />} />
-            <Route
-              path="/wallet/change-name"
-              element={<WalletChangeNamePage />}
-            />
-            <Route
-              path="/wallet/show-sensitive"
-              element={<WalletShowSensitivePage />}
-            />
-            <Route path="/suggest-chain" element={<SuggestChainPage />} />
-          </Routes>
-        )
-      ) : (
-        <div>TODO: Add preparing view</div>
-      )}
-    </HashRouter>
+          <div>TODO: Add preparing view</div>
+        )}
+      </HashRouter>
+    </AppIntlProvider>
   );
 });
 
@@ -302,11 +309,9 @@ const App: FunctionComponent = () => {
       <ModalRootProvider>
         <ConfirmProvider>
           <NotificationProvider>
-            <AppIntlProvider>
-              <GlobalStyle />
-              <GlobalPopupStyle />
-              <RoutesAfterReady />
-            </AppIntlProvider>
+            <GlobalStyle />
+            <GlobalPopupStyle />
+            <RoutesAfterReady />
           </NotificationProvider>
         </ConfirmProvider>
       </ModalRootProvider>
