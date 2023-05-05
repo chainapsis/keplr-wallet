@@ -12,6 +12,8 @@ import { Stack } from "../../../../components/stack";
 import { Toggle } from "../../../../components/toggle";
 import {
   GetAutoLockAccountDurationMsg,
+  GetLockOnSleepMsg,
+  SetLockOnSleepMsg,
   UpdateAutoLockAccountDurationMsg,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -21,8 +23,6 @@ import { useNavigate } from "react-router";
 
 export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
-  // 이미 설정된 값과 같은 값일 경우 버튼을 disable함
-  const [initialDuration, setInitialDuration] = useState(0);
   const navigate = useNavigate();
 
   const minDuration = 0;
@@ -31,22 +31,33 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
   const { watch, setValue, register, handleSubmit, formState } = useForm<{
     timer: string;
   }>({
+    mode: "onChange",
     defaultValues: {
       timer: "0",
     },
   });
 
   const watchTimer = watch("timer");
+  const watchTimerParsed = parseInt(watchTimer);
 
   useEffect(() => {
     const msg = new GetAutoLockAccountDurationMsg();
     new InExtensionMessageRequester()
       .sendMessage(BACKGROUND_PORT, msg)
       .then(function (duration) {
-        setInitialDuration(Math.floor(duration / 60000));
         setValue("timer", Math.floor(duration / 60000).toString());
       });
   }, [setValue]);
+
+  const [lockOnSleep, setLockOnSleep] = useState(false);
+  useEffect(() => {
+    const msg = new GetLockOnSleepMsg();
+    new InExtensionMessageRequester()
+      .sendMessage(BACKGROUND_PORT, msg)
+      .then((lockOnSleep) => {
+        setLockOnSleep(lockOnSleep);
+      });
+  }, []);
 
   return (
     <HeaderLayout
@@ -57,15 +68,28 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
         color: "secondary",
         size: "large",
         isLoading,
-        disabled: initialDuration === parseInt(watchTimer),
       }}
       onSubmit={handleSubmit(async (data) => {
         setIsLoading(true);
 
         let duration = parseInt(data.timer);
-        if (duration >= 0) {
+        if (!Number.isNaN(duration) && duration >= 0) {
           duration = duration * 60000;
           const msg = new UpdateAutoLockAccountDurationMsg(duration);
+          await new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            msg
+          );
+
+          if (duration === 0) {
+            const msg = new SetLockOnSleepMsg(lockOnSleep);
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              msg
+            );
+          }
+        } else {
+          const msg = new SetLockOnSleepMsg(lockOnSleep);
           await new InExtensionMessageRequester().sendMessage(
             BACKGROUND_PORT,
             msg
@@ -101,8 +125,11 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
             type="number"
             error={formState.errors.timer && formState.errors.timer.message}
             {...register("timer", {
-              required: true,
               validate: (input: string): string | undefined => {
+                if (input.trim().length === 0) {
+                  return;
+                }
+
                 if (input.includes(".")) {
                   return "The duration should be an integer.";
                 }
@@ -142,7 +169,17 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
               </Stack>
             </Column>
 
-            <Toggle isOpen={watchTimer !== "0"} />
+            <Toggle
+              isOpen={
+                (!Number.isNaN(watchTimerParsed) && watchTimerParsed !== 0) ||
+                lockOnSleep
+              }
+              setIsOpen={(value) => {
+                if (Number.isNaN(watchTimerParsed) || watchTimerParsed === 0) {
+                  setLockOnSleep(value);
+                }
+              }}
+            />
           </Columns>
         </Box>
       </Box>

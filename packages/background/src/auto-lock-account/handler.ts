@@ -9,6 +9,8 @@ import {
   GetAutoLockAccountDurationMsg,
   UpdateAutoLockAccountDurationMsg,
   StartAutoLockMonitoringMsg,
+  GetLockOnSleepMsg,
+  SetLockOnSleepMsg,
 } from "./messages";
 import { AutoLockAccountService } from "./service";
 
@@ -32,6 +34,10 @@ export const getHandler: (service: AutoLockAccountService) => Handler = (
           env,
           msg as StartAutoLockMonitoringMsg
         );
+      case GetLockOnSleepMsg:
+        return handleGetLockOnSleepMsg(service)(env, msg as GetLockOnSleepMsg);
+      case SetLockOnSleepMsg:
+        return handleSetLockOnSleepMsg(service)(env, msg as SetLockOnSleepMsg);
       default:
         throw new KeplrError("auto-lock-account", 100, "Unknown msg type");
     }
@@ -63,5 +69,21 @@ const handleStartAutoLockMonitoringMsg: (
 ) => InternalHandler<StartAutoLockMonitoringMsg> = (service) => {
   return () => {
     return service.startAppStateCheckTimer();
+  };
+};
+
+const handleGetLockOnSleepMsg: (
+  service: AutoLockAccountService
+) => InternalHandler<GetLockOnSleepMsg> = (service) => {
+  return () => {
+    return service.getLockOnSleep();
+  };
+};
+
+const handleSetLockOnSleepMsg: (
+  service: AutoLockAccountService
+) => InternalHandler<SetLockOnSleepMsg> = (service) => {
+  return (_, msg) => {
+    return service.setLockOnSleep(msg.lockOnSleep);
   };
 };

@@ -1,29 +1,64 @@
 import { KVStore } from "@keplr-wallet/common";
 import { KeyRingService } from "../keyring-v2";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 
 export class AutoLockAccountService {
   // Unit: ms
+  // Zero means disabled
+  // auto lock duration이 설정되면 컴퓨터가 sleep 모드가 되면 lock된다.
+  @observable
   protected autoLockDuration: number = 0;
+  // auto lock duration이 설정되어 있지 않더라도 sleep 모드가 되면 lock된다.
+  @observable
+  protected lockOnSleep: boolean = false;
 
   protected autoLockTimer: NodeJS.Timeout | null = null;
 
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly keyRingService: KeyRingService
-  ) {}
+  ) {
+    makeObservable(this);
+  }
 
   async init() {
+    const duration = await this.kvStore.get<number>("autoLockDuration");
+    runInAction(() => {
+      if (duration == null || Number.isNaN(duration)) {
+        this.autoLockDuration = 0;
+      } else {
+        this.autoLockDuration = duration;
+      }
+    });
+
+    autorun(() => {
+      this.kvStore.set<number>("autoLockDuration", this.autoLockDuration);
+    });
+
+    const lockOnSleep = await this.kvStore.get<boolean>("lockOnSleep");
+    runInAction(() => {
+      if (lockOnSleep) {
+        this.lockOnSleep = true;
+      } else {
+        this.lockOnSleep = false;
+      }
+    });
+
+    autorun(() => {
+      this.kvStore.set<boolean>("lockOnSleep", this.lockOnSleep);
+    });
+
     browser.idle.onStateChanged.addListener((idle) => {
       this.stateChangedHandler(idle);
     });
-
-    await this.loadDuration();
   }
 
   private stateChangedHandler(newState: browser.idle.IdleState) {
-    if (this.autoLockDuration > 0) {
-      if ((newState as any) === "locked") {
+    if ((newState as any) === "locked") {
+      if (this.autoLockDuration > 0) {
         this.stopAutoLockTimer();
+        this.lock();
+      } else if (this.lockOnSleep) {
         this.lock();
       }
     }
@@ -71,23 +106,21 @@ export class AutoLockAccountService {
     return this.autoLockDuration;
   }
 
-  public setDuration(duration: number): Promise<void> {
+  @action
+  public setDuration(duration: number) {
     this.autoLockDuration = duration;
 
     if (duration <= 0) {
       this.stopAutoLockTimer();
     }
-
-    return this.kvStore.set("autoLockDuration", duration);
   }
 
-  private async loadDuration() {
-    const duration = await this.kvStore.get<number>("autoLockDuration");
+  public getLockOnSleep(): boolean {
+    return this.lockOnSleep;
+  }
 
-    if (duration == null) {
-      this.autoLockDuration = 0;
-    } else {
-      this.autoLockDuration = duration;
-    }
+  @action
+  public setLockOnSleep(lockOnSleep: boolean) {
+    this.lockOnSleep = lockOnSleep;
   }
 }
