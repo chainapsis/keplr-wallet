@@ -8,6 +8,8 @@ import { H1, Body2, H5 } from "../../../../components/typography";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { RightArrowIcon } from "../../../../components/icon";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
 
 const Styles = {
   Chip: styled.div`
@@ -21,6 +23,8 @@ const Styles = {
 
     padding: 0.375rem 0.75rem;
     border-radius: 2.5rem;
+
+    cursor: pointer;
   `,
   Paragraph: styled(Body2)`
     text-align: center;
@@ -29,10 +33,26 @@ const Styles = {
   Bold: styled.span`
     font-weight: 600;
     font-size: 14px;
+    margin-right: 0.125rem;
   `,
 };
 
-export const CommunityInfoView: FunctionComponent = () => {
+export const CommunityInfoView: FunctionComponent<{
+  updateFromRepoDisabled: boolean;
+  setUpdateFromRepoDisabled: (updateFromRepoDisabled: boolean) => void;
+}> = observer(({ updateFromRepoDisabled, setUpdateFromRepoDisabled }) => {
+  const { chainSuggestStore, uiConfigStore } = useStore();
+
+  const chainInfo = chainSuggestStore.waitingSuggestedChainInfo
+    ? chainSuggestStore.getCommunityChainInfo(
+        chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.chainId
+      ).chainInfo
+    : undefined;
+
+  if (!chainInfo) {
+    return null;
+  }
+
   return (
     <Box
       paddingTop="3.75rem"
@@ -49,6 +69,7 @@ export const CommunityInfoView: FunctionComponent = () => {
           height="80px"
           alt="Chain Image"
           defaultSrc={require("../../../../public/assets/img/chain-icon-alt.png")}
+          src={chainInfo.chainSymbolImageUrl}
         />
 
         <Gutter size="1.25rem" />
@@ -65,54 +86,69 @@ export const CommunityInfoView: FunctionComponent = () => {
           width="80px"
           height="80px"
           alt="Chain Image"
+          style={{ borderRadius: "50%" }}
           defaultSrc={require("../../../../public/assets/img/chain-icon-alt.png")}
+          src={require("../../../../public/assets/logo-256.png")}
         />
       </XAxis>
 
       <Gutter size="2rem" />
 
-      <H1>Add Cosmos to Keplr</H1>
+      <H1>Add {chainInfo.chainName} to Keplr</H1>
 
       <Gutter size="0.75rem" />
 
-      <Styles.Chip>
-        Community driven
-        <Box>
-          <GihtubIcon />
-        </Box>
-      </Styles.Chip>
+      <a
+        href={chainSuggestStore.getCommunityChainInfoUrl(chainInfo.chainId)}
+        target="_blank"
+        rel="noreferrer"
+        style={{ textDecoration: "none" }}
+      >
+        <Styles.Chip>
+          Community driven
+          <Box>
+            <GithubIcon />
+          </Box>
+        </Styles.Chip>
+      </a>
 
       <Gutter size="1.15rem" />
 
       <Box paddingX="2.5rem">
         <Styles.Paragraph>
-          <Styles.Bold>cosmos.network</Styles.Bold> would like to add blockchain{" "}
-          <Styles.Bold>cosmos-1</Styles.Bold> to Keplr.
+          <Styles.Bold>
+            {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
+          </Styles.Bold>
+          would like to add blockchain
+          <Styles.Bold>{chainInfo.chainId}</Styles.Bold> to Keplr.
         </Styles.Paragraph>
       </Box>
 
       <Box style={{ flex: 1 }} />
 
-      <Box
-        cursor="pointer"
-        style={{
-          color: ColorPalette["gray-100"],
-          paddingBottom: "1rem",
-          userSelect: "none",
-        }}
-      >
-        <XAxis alignY="center">
-          <H5>Add chain as suggested</H5>
-          <RightArrowIcon
-            width="1rem"
-            height="1rem"
-            color={ColorPalette["gray-100"]}
-          />
-        </XAxis>
-      </Box>
+      {uiConfigStore.isDeveloper ? (
+        <Box
+          cursor="pointer"
+          style={{
+            color: ColorPalette["gray-100"],
+            paddingBottom: "1rem",
+            userSelect: "none",
+          }}
+          onClick={() => setUpdateFromRepoDisabled(!updateFromRepoDisabled)}
+        >
+          <XAxis alignY="center">
+            <H5>Add chain as suggested</H5>
+            <RightArrowIcon
+              width="1rem"
+              height="1rem"
+              color={ColorPalette["gray-100"]}
+            />
+          </XAxis>
+        </Box>
+      ) : null}
     </Box>
   );
-};
+});
 
 const DotIcon: FunctionComponent = () => (
   <svg
@@ -126,7 +162,7 @@ const DotIcon: FunctionComponent = () => (
   </svg>
 );
 
-const GihtubIcon: FunctionComponent = () => (
+const GithubIcon: FunctionComponent = () => (
   <svg
     width="14"
     height="15"

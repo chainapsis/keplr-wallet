@@ -1,32 +1,90 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts/header";
-import { BackButton } from "../../layouts/header/components";
 import { CommunityInfoView, RawInfoView } from "./components";
+import { useStore } from "../../stores";
+import { ArrowLeftIcon } from "../../components/icon";
+import { Box } from "../../components/box";
+import { useInteractionInfo } from "../../hooks";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
-  const [isCommunityDriven, setIsCommunityDriven] = React.useState(false);
-  const [isDeveloper, setIsDeveloper] = React.useState(false);
+  const { chainSuggestStore, uiConfigStore } = useStore();
+  const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
+
+  const interactionInfo = useInteractionInfo(async () => {
+    await chainSuggestStore.rejectAll();
+  });
+
+  const communityChainInfo = chainSuggestStore.waitingSuggestedChainInfo
+    ? chainSuggestStore.getCommunityChainInfo(
+        chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.chainId
+      ).chainInfo
+    : undefined;
+
+  const isCommunityChainInfo: boolean = !!communityChainInfo;
 
   return (
     <HeaderLayout
       fixedHeight
-      title={isCommunityDriven ? "" : "Add Injective to Keplr"}
-      left={isCommunityDriven && isDeveloper ? <BackButton /> : null}
+      title={
+        isCommunityChainInfo && !updateFromRepoDisabled
+          ? ""
+          : `Add ${chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo.chainName} to Keplr`
+      }
+      left={
+        isCommunityChainInfo &&
+        uiConfigStore.isDeveloper &&
+        updateFromRepoDisabled ? (
+          <Box
+            paddingLeft="1rem"
+            cursor="pointer"
+            onClick={() => setUpdateFromRepoDisabled(!updateFromRepoDisabled)}
+          >
+            <ArrowLeftIcon />
+          </Box>
+        ) : null
+      }
       bottomButton={{
         text: "Approve",
         size: "large",
         color: "primary",
-        onClick: () => {
-          setIsCommunityDriven(!isCommunityDriven);
-          setIsDeveloper(!isDeveloper);
+        onClick: async () => {
+          const chainInfo = updateFromRepoDisabled
+            ? chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo
+            : communityChainInfo ||
+              chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo;
+
+          if (chainInfo && chainSuggestStore.waitingSuggestedChainInfo) {
+            await chainSuggestStore.approveWithProceedNext(
+              chainSuggestStore.waitingSuggestedChainInfo.id,
+              {
+                ...chainInfo,
+                updateFromRepoDisabled,
+              },
+              () => {
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  window.close();
+                }
+              }
+            );
+          }
         },
       }}
     >
-      {isCommunityDriven ? (
-        <CommunityInfoView />
+      {isCommunityChainInfo && !updateFromRepoDisabled ? (
+        <CommunityInfoView
+          updateFromRepoDisabled={updateFromRepoDisabled}
+          setUpdateFromRepoDisabled={setUpdateFromRepoDisabled}
+        />
       ) : (
-        <RawInfoView isDeveloper={isDeveloper} />
+        <RawInfoView
+          isCommunityChainInfo={isCommunityChainInfo}
+          updateFromRepoDisabled={updateFromRepoDisabled}
+          setUpdateFromRepoDisabled={setUpdateFromRepoDisabled}
+        />
       )}
     </HeaderLayout>
   );
