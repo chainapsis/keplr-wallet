@@ -1,40 +1,52 @@
-import { EnigmaUtils } from "secretjs";
-import { KeyRingService } from "../keyring";
+import { EnigmaUtils } from "./enigma-utils";
 import { ChainsService } from "../chains";
-import { PermissionService } from "../permission";
-import { Hash } from "@keplr-wallet/crypto";
-import { KVStore, Debouncer } from "@keplr-wallet/common";
+import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
-import { Bech32Address } from "@keplr-wallet/cosmos";
-import { Env, KeplrError } from "@keplr-wallet/router";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Env } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
+import { KeyRingCosmosService } from "../keyring-cosmos";
+import { Hash } from "@keplr-wallet/crypto";
+import { autorun, observable, runInAction, toJS } from "mobx";
 
 export class SecretWasmService {
-  protected debouncerMap: Map<
-    string,
-    (
-      env: Env,
-      chainInfo: ChainInfo,
-      bech32Address: string
-    ) => Promise<Uint8Array>
-  > = new Map();
-
   protected cacheEnigmaUtils: Map<string, EnigmaUtils> = new Map();
+  // Key: `${chainInfo.chainIdentifier}-${bech32Address}`
+  @observable
+  protected readonly seedMap: Map<string, string> = new Map();
 
-  protected chainsService!: ChainsService;
-  protected keyRingService!: KeyRingService;
-  public permissionService!: PermissionService;
+  constructor(
+    protected readonly kvStore: KVStore,
+    protected readonly chainsService: ChainsService,
+    protected readonly keyRingCosmosService: KeyRingCosmosService
+  ) {}
 
-  constructor(protected readonly kvStore: KVStore) {}
+  async init(): Promise<void> {
+    const migrated = await this.kvStore.get("migration/v2");
+    if (!migrated) {
+      // TODO
 
-  init(
-    chainsService: ChainsService,
-    keyRingService: KeyRingService,
-    permissionService: PermissionService
-  ) {
-    this.chainsService = chainsService;
-    this.keyRingService = keyRingService;
-    this.permissionService = permissionService;
+      await this.kvStore.set("migration/v2", true);
+    }
+
+    const saved = await this.kvStore.get<Record<string, string | undefined>>(
+      "seedMap/v2"
+    );
+    if (saved) {
+      runInAction(() => {
+        for (const [key, value] of Object.entries(saved)) {
+          if (value) {
+            this.seedMap.set(key, value);
+          }
+        }
+      });
+    }
+
+    autorun(() => {
+      const js = toJS(this.seedMap);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<Record<string, string | undefined>>("seedMap/v2", obj);
+    });
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
@@ -44,12 +56,7 @@ export class SecretWasmService {
   };
 
   async getPubkey(env: Env, chainId: string): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
-
-    const keyRingType = await this.keyRingService.getKeyRingType();
-    if (keyRingType === "none") {
-      throw new KeplrError("secret-wasm", 130, "Key ring is not initialized");
-    }
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
     const seed = await this.getSeed(env, chainInfo);
 
@@ -63,11 +70,6 @@ export class SecretWasmService {
     nonce: Uint8Array
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
-
-    const keyRingType = await this.keyRingService.getKeyRingType();
-    if (keyRingType === "none") {
-      throw new KeplrError("secret-wasm", 130, "Key ring is not initialized");
-    }
 
     const seed = await this.getSeed(env, chainInfo);
 
@@ -83,11 +85,6 @@ export class SecretWasmService {
     msg: object
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
-
-    const keyRingType = await this.keyRingService.getKeyRingType();
-    if (keyRingType === "none") {
-      throw new KeplrError("secret-wasm", 130, "Key ring is not initialized");
-    }
 
     // XXX: Keplr should generate the seed deterministically according to the account.
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
@@ -108,11 +105,6 @@ export class SecretWasmService {
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
-    const keyRingType = await this.keyRingService.getKeyRingType();
-    if (keyRingType === "none") {
-      throw new KeplrError("secret-wasm", 130, "Key ring is not initialized");
-    }
-
     // XXX: Keplr should generate the seed deterministically according to the account.
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
     // For now, use the signature of some string to generate the seed.
@@ -132,35 +124,19 @@ export class SecretWasmService {
       return this.cacheEnigmaUtils.get(key)!;
     }
 
-    // TODO: Handle the rest config.
-    const utils = new EnigmaUtils(chainInfo.rest, seed);
+    const utils = new EnigmaUtils(chainInfo.rest, seed, chainInfo.rest);
     this.cacheEnigmaUtils.set(key, utils);
 
     return utils;
   }
 
-  // GetSeed will be debounced if the prior promise is pending.
-  // GetSeed can be occured multiple times at once,
-  // this case can be problem if the cache doesn't exist and key type is ledger,
-  // because multiple requests to ledger will make the connection unstable.
   protected async getSeed(env: Env, chainInfo: ChainInfo): Promise<Uint8Array> {
-    const key = await this.keyRingService.getKey(chainInfo.chainId);
-    const bech32Address = new Bech32Address(key.address).toBech32(
-      chainInfo.bech32Config.bech32PrefixAccAddr
+    const key = await this.keyRingCosmosService.getKeySelected(
+      env,
+      chainInfo.chainId
     );
-    const debouncerKey = `${env.isInternalMsg}/${chainInfo.chainId}/${bech32Address}`;
 
-    if (!this.debouncerMap.has(debouncerKey)) {
-      this.debouncerMap.set(
-        debouncerKey,
-        Debouncer.promise(this.getSeedInner.bind(this))
-      );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const debouncedFn = this.debouncerMap.get(debouncerKey)!;
-
-    return await debouncedFn(env, chainInfo, bech32Address);
+    return await this.getSeedInner(env, chainInfo, key.bech32Address);
   }
 
   protected async getSeedInner(
@@ -168,33 +144,25 @@ export class SecretWasmService {
     chainInfo: ChainInfo,
     bech32Address: string
   ): Promise<Uint8Array> {
-    const storeKey = `seed-${chainInfo.chainId}-${bech32Address}`;
+    const cacheKey = `seed-${
+      ChainIdHelper.parse(chainInfo.chainId).identifier
+    }-${bech32Address}`;
 
-    const cached = await this.kvStore.get<string>(storeKey);
+    const cached = this.seedMap.get(cacheKey);
     if (cached) {
       return Buffer.from(cached, "hex");
     }
 
+    // TODO: I don't know how to handle this in ledger.
     const seed = Hash.sha256(
-      Buffer.from(
-        await this.keyRingService.sign(
-          env,
-          chainInfo.chainId,
-          Buffer.from(
-            JSON.stringify({
-              account_number: 0,
-              chain_id: chainInfo.chainId,
-              fee: [],
-              memo: "Create Keplr Secret encryption key. Only approve requests by Keplr.",
-              msgs: [],
-              sequence: 0,
-            })
-          )
-        )
+      await this.keyRingCosmosService.legacySignArbitraryInternal(
+        env,
+        chainInfo.chainId,
+        "Create Keplr Secret encryption key. Only approve requests by Keplr."
       )
     );
 
-    await this.kvStore.set(storeKey, Buffer.from(seed).toString("hex"));
+    this.seedMap.set(cacheKey, Buffer.from(seed).toString("hex"));
 
     return seed;
   }

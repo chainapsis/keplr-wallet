@@ -8,7 +8,7 @@ import * as Keystone from "./keystone/internal";
 import * as KeyRing from "./keyring/internal";
 import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
-import * as Tokens from "./tokens/internal";
+import * as TokenCW20 from "./token-cw20/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
 import * as PhishingList from "./phishing-list/internal";
@@ -30,7 +30,7 @@ export * from "./keystone";
 export * from "./keyring";
 export * from "./secret-wasm";
 export * from "./tx";
-export * from "./tokens";
+export * from "./token-cw20";
 export * from "./interaction";
 export * from "./permission";
 export * from "./phishing-list";
@@ -71,12 +71,16 @@ export function init(
     eventMsgRequester
   );
 
-  const tokensService = new Tokens.TokensService(storeCreator("tokens"));
-
   const chainsService = new Chains.ChainsService(
     storeCreator("chains"),
     embedChainInfos,
     communityChainInfoRepo
+  );
+
+  const tokenCW20Service = new TokenCW20.TokenCW20Service(
+    storeCreator("tokens"),
+    chainsService,
+    interactionService
   );
 
   const permissionService = new Permission.PermissionService(
@@ -99,10 +103,6 @@ export function init(
     storeCreator("keyring"),
     embedChainInfos,
     commonCrypto
-  );
-
-  const secretWasmService = new SecretWasm.SecretWasmService(
-    storeCreator("secretwasm")
   );
 
   const backgroundTxService = new BackgroundTx.BackgroundTxService(
@@ -163,13 +163,17 @@ export function init(
     chainsUIService
   );
 
+  const secretWasmService = new SecretWasm.SecretWasmService(
+    storeCreator("secretwasm"),
+    chainsService,
+    keyRingCosmosService
+  );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
-  Tokens.init(router, tokensService);
   Chains.init(router, chainsService);
   Ledger.init(router, ledgerService);
   KeyRing.init(router, keyRingService);
-  SecretWasm.init(router, secretWasmService);
   BackgroundTx.init(router, backgroundTxService);
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
@@ -183,6 +187,13 @@ export function init(
   PermissionInteractive.init(router, permissionInteractiveService);
   ChainsUI.init(router, chainsUIService);
   ChainsUpdate.init(router, chainsUpdateService);
+  TokenCW20.init(
+    router,
+    tokenCW20Service,
+    permissionInteractiveService,
+    keyRingCosmosService
+  );
+  SecretWasm.init(router, secretWasmService, permissionInteractiveService);
 
   return {
     initFn: async () => {
@@ -193,13 +204,8 @@ export function init(
       await keyRingV2Service.init();
       await keyRingCosmosService.init();
       await permissionService.init();
+      await tokenCW20Service.init();
 
-      tokensService.init(
-        interactionService,
-        permissionService,
-        chainsService,
-        keyRingService
-      );
       ledgerService.init(interactionService);
       keystoneService.init(interactionService);
       keyRingService.init(
@@ -209,13 +215,14 @@ export function init(
         ledgerService,
         keystoneService
       );
-      secretWasmService.init(chainsService, keyRingService, permissionService);
       backgroundTxService.init(chainsService, permissionService);
       phishingListService.init();
       await autoLockAccountService.init();
       // No need to wait because user can't interact with app right after launch.
       await analyticsService.init();
       await permissionInteractiveService.init();
+
+      await secretWasmService.init();
     },
   };
 }

@@ -1,20 +1,21 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
+import { TokenInfo } from "./types";
 import { AppCurrency } from "@keplr-wallet/types";
 
-export class GetTokensMsg extends Message<AppCurrency[]> {
+export class GetAllTokenInfosMsg extends Message<
+  Record<string, TokenInfo[] | undefined>
+> {
   public static type() {
-    return "get-tokens";
+    return "GetAllTokenInfosMsg";
   }
 
-  constructor(public readonly chainId: string) {
+  constructor() {
     super();
   }
 
   validateBasic(): void {
-    if (!this.chainId) {
-      throw new KeplrError("tokens", 100, "Chain id is empty");
-    }
+    // noop
   }
 
   route(): string {
@@ -22,13 +23,13 @@ export class GetTokensMsg extends Message<AppCurrency[]> {
   }
 
   type(): string {
-    return GetTokensMsg.type();
+    return GetAllTokenInfosMsg.type();
   }
 }
 
 export class SuggestTokenMsg extends Message<void> {
   public static type() {
-    return "suggest-token";
+    return "SuggestTokenMsg";
   }
 
   constructor(
@@ -62,13 +63,17 @@ export class SuggestTokenMsg extends Message<void> {
   }
 }
 
-export class AddTokenMsg extends Message<void> {
+export class AddTokenMsg extends Message<
+  Record<string, TokenInfo[] | undefined>
+> {
   public static type() {
-    return "add-token";
+    return "AddTokenMsg";
   }
 
   constructor(
     public readonly chainId: string,
+    // Should be hex encoded. (not bech32)
+    public readonly associatedAccountAddress: string,
     public readonly currency: AppCurrency
   ) {
     super();
@@ -89,14 +94,18 @@ export class AddTokenMsg extends Message<void> {
   }
 }
 
-export class RemoveTokenMsg extends Message<void> {
+export class RemoveTokenMsg extends Message<
+  Record<string, TokenInfo[] | undefined>
+> {
   public static type() {
-    return "remove-token";
+    return "RemoveTokenMsg";
   }
 
   constructor(
     public readonly chainId: string,
-    public readonly currency: AppCurrency
+    // Should be hex encoded. (not bech32)
+    public readonly associatedAccountAddress: string,
+    public readonly contractAddress: string
   ) {
     super();
   }

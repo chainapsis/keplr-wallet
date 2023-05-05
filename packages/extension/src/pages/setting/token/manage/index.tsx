@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../../layouts/header";
 import { BackButton } from "../../../../layouts/header/components";
@@ -13,6 +13,11 @@ import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
 import { CopyFillIcon, KeyIcon, TrashIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
+import { autorun } from "mobx";
+import { TokenInfo } from "@keplr-wallet/background";
+import { EmptyView } from "../../../../components/empty-view";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { useConfirm } from "../../../../hooks/confirm";
 
 const Styles = {
   Container: styled(Stack)`
@@ -26,19 +31,51 @@ const Styles = {
 };
 
 export const SettingTokenListPage: FunctionComponent = observer(() => {
+  const { chainStore, accountStore, tokensStore } = useStore();
+
   const navigate = useNavigate();
-  const { chainStore } = useStore();
 
-  const [chainId, setChainId] = useState<string>(
-    chainStore.chainInfos[0].chainId
-  );
+  const supportedChainInfos = useMemo(() => {
+    return chainStore.chainInfos.filter((chainInfo) => {
+      return (
+        chainInfo.features?.includes("cosmwasm") ||
+        chainInfo.features?.includes("secretwasm")
+      );
+    });
+  }, [chainStore.chainInfos]);
 
-  const items = chainStore.chainInfosInUI.map((chainInfo) => {
+  const [chainId, setChainId] = useState<string>(() => {
+    if (supportedChainInfos.length > 0) {
+      return supportedChainInfos[0].chainId;
+    } else {
+      return chainStore.chainInfos[0].chainId;
+    }
+  });
+
+  useEffect(() => {
+    // secret20은 계정에 귀속되기 때문에 보려면 계정이 초기화되어있어야 가능하다...
+    const disposal = autorun(() => {
+      const account = accountStore.getAccount(chainId);
+      if (account.bech32Address === "") {
+        account.init();
+      }
+    });
+
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  }, [accountStore, chainId]);
+
+  const items = supportedChainInfos.map((chainInfo) => {
     return {
       key: chainInfo.chainId,
       label: chainInfo.chainName,
     };
   });
+
+  const tokens = tokensStore.getTokens(chainId);
 
   return (
     <HeaderLayout title="Manage Token List" left={<BackButton />}>
@@ -62,13 +99,23 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
             color="secondary"
             size="extraSmall"
             text="Add Token"
-            onClick={() => navigate("/setting/token/add")}
+            onClick={() => navigate(`/setting/token/add?chainId=${chainId}`)}
           />
         </Columns>
 
-        <TokenItem />
-        <TokenItem />
-        <TokenItem />
+        {tokens.length === 0 ? (
+          <EmptyView subject="token" />
+        ) : (
+          tokens.map((token) => {
+            return (
+              <TokenItem
+                key={token.currency.coinMinimalDenom}
+                chainId={chainId}
+                tokenInfo={token}
+              />
+            );
+          })
+        )}
       </Styles.Container>
     </HeaderLayout>
   );
@@ -92,31 +139,93 @@ const ItemStyles = {
   `,
 };
 
-const TokenItem: FunctionComponent = () => {
+const TokenItem: FunctionComponent<{
+  chainId: string;
+  tokenInfo: TokenInfo;
+}> = observer(({ chainId, tokenInfo }) => {
+  const { tokensStore } = useStore();
+
+  const isSecret20 = (() => {
+    if ("type" in tokenInfo.currency) {
+      return tokenInfo.currency.type === "secret20";
+    }
+    return false;
+  })();
+
+  const confirm = useConfirm();
+
   return (
     <ItemStyles.Container>
       <Columns sum={1}>
         <Stack gutter="0.25rem">
-          <ItemStyles.Denom>SSCRT</ItemStyles.Denom>
-          <ItemStyles.Address>secret1k0jntykt7e..y4c9e8fzek</ItemStyles.Address>
+          <ItemStyles.Denom>{tokenInfo.currency.coinDenom}</ItemStyles.Denom>
+          <ItemStyles.Address>
+            {(() => {
+              if ("contractAddress" in tokenInfo.currency) {
+                return Bech32Address.shortenAddress(
+                  tokenInfo.currency.contractAddress,
+                  26
+                );
+              }
+              return "Unknown";
+            })()}
+          </ItemStyles.Address>
         </Stack>
 
         <Column weight={1} />
 
         <Columns sum={1} gutter="0.5rem" alignY="center">
-          <ItemStyles.Icon>
-            <KeyIcon width="1.25rem" height="1.25rem" />
-          </ItemStyles.Icon>
+          {isSecret20 ? (
+            <ItemStyles.Icon
+              onClick={async (e) => {
+                e.preventDefault();
 
-          <ItemStyles.Icon>
+                if (
+                  "type" in tokenInfo.currency &&
+                  tokenInfo.currency.type === "secret20"
+                ) {
+                  await navigator.clipboard.writeText(
+                    tokenInfo.currency.viewingKey
+                  );
+                }
+              }}
+            >
+              <KeyIcon width="1.25rem" height="1.25rem" />
+            </ItemStyles.Icon>
+          ) : null}
+
+          <ItemStyles.Icon
+            onClick={async (e) => {
+              e.preventDefault();
+
+              if ("contractAddress" in tokenInfo.currency) {
+                await navigator.clipboard.writeText(
+                  tokenInfo.currency.contractAddress
+                );
+              }
+            }}
+          >
             <CopyFillIcon width="1.25rem" height="1.25rem" />
           </ItemStyles.Icon>
 
-          <ItemStyles.Icon>
+          <ItemStyles.Icon
+            onClick={async (e) => {
+              e.preventDefault();
+
+              if (
+                await confirm.confirm(
+                  "",
+                  "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again."
+                )
+              ) {
+                await tokensStore.removeToken(chainId, tokenInfo);
+              }
+            }}
+          >
             <TrashIcon width="1.25rem" height="1.25rem" />
           </ItemStyles.Icon>
         </Columns>
       </Columns>
     </ItemStyles.Container>
   );
-};
+});

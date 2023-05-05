@@ -26,12 +26,6 @@ import {
 } from "@keplr-wallet/router";
 import {
   SuggestChainInfoMsg,
-  SuggestTokenMsg,
-  GetSecret20ViewingKey,
-  GetPubkeyMsg,
-  ReqeustEncryptMsg,
-  RequestDecryptMsg,
-  GetTxEncryptionKeyMsg,
   GetAnalyticsIdMsg,
   RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
@@ -339,22 +333,44 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     contractAddress: string,
     viewingKey?: string
   ): Promise<void> {
-    const msg = new SuggestTokenMsg(chainId, contractAddress, viewingKey);
-    await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "token-cw20",
+      "SuggestTokenMsg",
+      {
+        chainId,
+        contractAddress,
+        viewingKey,
+      }
+    );
   }
 
   async getSecret20ViewingKey(
     chainId: string,
     contractAddress: string
   ): Promise<string> {
-    const msg = new GetSecret20ViewingKey(chainId, contractAddress);
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "token-cw20",
+      "get-secret20-viewing-key",
+      {
+        chainId,
+        contractAddress,
+      }
+    );
   }
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new GetPubkeyMsg(chainId)
+      "secret-wasm",
+      "get-pubkey-msg",
+      {
+        chainId,
+      }
     );
   }
 
@@ -362,9 +378,15 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     chainId: string,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new GetTxEncryptionKeyMsg(chainId, nonce)
+      "secret-wasm",
+      "get-tx-encryption-key-msg",
+      {
+        chainId,
+        nonce,
+      }
     );
   }
 
@@ -374,24 +396,38 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object
   ): Promise<Uint8Array> {
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new ReqeustEncryptMsg(chainId, contractCodeHash, msg)
+      "secret-wasm",
+      "request-encrypt-msg",
+      {
+        chainId,
+        contractCodeHash,
+        msg,
+      }
     );
   }
 
   async enigmaDecrypt(
     chainId: string,
-    ciphertext: Uint8Array,
+    cipherText: Uint8Array,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    if (!ciphertext || ciphertext.length === 0) {
+    if (!cipherText || cipherText.length === 0) {
       return new Uint8Array();
     }
 
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new RequestDecryptMsg(chainId, ciphertext, nonce)
+      "secret-wasm",
+      "request-decrypt-msg",
+      {
+        chainId,
+        cipherText,
+        nonce,
+      }
     );
   }
 
