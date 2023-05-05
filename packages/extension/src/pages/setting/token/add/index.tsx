@@ -20,6 +20,11 @@ import { AppCurrency } from "@keplr-wallet/types";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { useInteractionInfo } from "../../../../hooks";
+import { ColorPalette } from "../../../../styles";
+import { Column, Columns } from "../../../../components/column";
+import { Body3, Subtitle2 } from "../../../../components/typography";
+import { Toggle } from "../../../../components/toggle";
+import { useForm } from "react-hook-form";
 
 const Styles = {
   Container: styled(Stack)`
@@ -27,15 +32,26 @@ const Styles = {
   `,
 };
 
+interface FormData {
+  contractAddress: string;
+  // For the secret20
+  viewingKey: string;
+}
+
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const paramChainId = searchParams.get("chainId");
-  const [inputContractAddress, setInputContractAddress] = useState(
-    searchParams.get("contractAddress") || ""
-  );
+
+  const { setValue, handleSubmit, register, formState, watch } =
+    useForm<FormData>({
+      defaultValues: {
+        contractAddress: searchParams.get("contractAddress") || "",
+        viewingKey: "",
+      },
+    });
 
   const supportedChainInfos = useMemo(() => {
     return chainStore.chainInfos.filter((chainInfo) => {
@@ -64,7 +80,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     if (interactionInfo.interaction) {
       if (tokensStore.waitingSuggestedToken) {
         setChainId(tokensStore.waitingSuggestedToken.data.chainId);
-        setInputContractAddress(
+        setValue(
+          "contractAddress",
           tokensStore.waitingSuggestedToken.data.contractAddress
         );
       }
@@ -89,6 +106,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   }, [accountStore, chainId]);
 
   const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
+  const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
+    useState(false);
 
   const items = supportedChainInfos.map((chainInfo) => {
     return {
@@ -97,7 +116,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     };
   });
 
-  const contractAddress = inputContractAddress.trim();
+  const contractAddress = watch("contractAddress").trim();
   const queryContract = (() => {
     if (isSecretWasm) {
       return queriesStore
@@ -110,6 +129,22 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     }
   })();
 
+  const createViewingKey = async (): Promise<string> => {
+    return new Promise((resolve) => {
+      accountStore
+        .getAccount(chainId)
+        .secret.createSecret20ViewingKey(
+          contractAddress,
+          "",
+          {},
+          {},
+          (_, viewingKey) => {
+            resolve(viewingKey);
+          }
+        );
+    });
+  };
+
   return (
     <HeaderLayout
       title="Add Token Manually"
@@ -120,35 +155,47 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         size: "large",
         disabled: contractAddress.length === 0 || !queryContract.tokenInfo,
       }}
-      onSubmit={async (e) => {
-        e.preventDefault();
+      onSubmit={handleSubmit(async (data, event) => {
+        event?.preventDefault();
 
         if (queryContract.tokenInfo) {
           let currency: AppCurrency;
 
           if (isSecretWasm) {
-            currency = await new Promise<AppCurrency>((resolve, reject) => {
-              accountStore
-                .getAccount(chainId)
-                .secret.createSecret20ViewingKey(
-                  contractAddress,
-                  "",
-                  {},
-                  {},
-                  (tx, viewingKey) => {
-                    if (queryContract.tokenInfo) {
-                      resolve({
-                        type: "secret20",
-                        contractAddress: contractAddress,
-                        coinMinimalDenom: queryContract.tokenInfo.name,
-                        coinDenom: queryContract.tokenInfo.symbol,
-                        coinDecimals: queryContract.tokenInfo.decimals,
-                        viewingKey,
-                      });
-                    }
-                  }
-                );
-            });
+            let viewingKey = data.viewingKey;
+
+            if (!viewingKey && !isOpenSecret20ViewingKey) {
+              try {
+                viewingKey = await createViewingKey();
+              } catch (e) {
+                if (
+                  interactionInfo.interaction &&
+                  tokensStore.waitingSuggestedToken
+                ) {
+                  await tokensStore.rejectAllSuggestedTokens();
+                }
+
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  window.close();
+                } else {
+                  navigate("/");
+                }
+
+                return;
+              }
+            }
+
+            currency = {
+              type: "secret20",
+              contractAddress,
+              viewingKey,
+              coinMinimalDenom: queryContract.tokenInfo.name,
+              coinDenom: queryContract.tokenInfo.symbol,
+              coinDecimals: queryContract.tokenInfo.decimals,
+            };
           } else {
             currency = {
               type: "cw20",
@@ -183,7 +230,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             navigate("/");
           }
         }
-      }}
+      })}
     >
       <Styles.Container gutter="1rem">
         {!interactionInfo.interaction ? (
@@ -199,29 +246,30 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         <TextInput
           label="Contract Address"
           isLoading={queryContract.isFetching}
-          value={inputContractAddress}
           readOnly={interactionInfo.interaction}
-          onChange={(e) => {
-            e.preventDefault();
-
-            setInputContractAddress(e.target.value);
-          }}
-          error={(() => {
-            if (contractAddress === "") {
-              return;
-            }
-
-            try {
-              const chainInfo = chainStore.getChain(chainId);
-              Bech32Address.validate(
-                contractAddress,
-                chainInfo.bech32Config.bech32PrefixAccAddr
-              );
-              return (queryContract.error?.data as any)?.message;
-            } catch (e) {
-              return e.message || e.toString();
-            }
-          })()}
+          error={
+            formState.errors.contractAddress
+              ? formState.errors.contractAddress.message
+              : queryContract.tokenInfo == null
+              ? (queryContract.error?.data as any)?.error ||
+                queryContract.error?.message
+              : undefined
+          }
+          {...register("contractAddress", {
+            required: true,
+            validate: (value): string | undefined => {
+              try {
+                const chainInfo = chainStore.getChain(chainId);
+                Bech32Address.validate(
+                  value,
+                  chainInfo.bech32Config.bech32PrefixAccAddr
+                );
+                return (queryContract.error?.data as any)?.message;
+              } catch (e) {
+                return e.message || e.toString();
+              }
+            },
+          })}
         />
         <TextInput
           label="Name"
@@ -238,6 +286,49 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           value={queryContract.tokenInfo?.decimals || "-"}
           disabled
         />
+
+        {isSecretWasm ? (
+          <Stack gutter="0.75rem">
+            <Box
+              backgroundColor={ColorPalette["gray-600"]}
+              borderRadius="0.375rem"
+              padding="1rem"
+            >
+              <Columns sum={1} alignY="center" gutter="0.25rem">
+                <Column weight={1}>
+                  <Stack>
+                    <Subtitle2 color={ColorPalette["gray-50"]}>
+                      I have my own viewing key
+                    </Subtitle2>
+                    <Body3 color={ColorPalette["gray-200"]}>
+                      By enabling this toggle, you confirm that you have your
+                      viewing key and use it for adding this token.
+                    </Body3>
+                  </Stack>
+                </Column>
+
+                <Toggle
+                  isOpen={isOpenSecret20ViewingKey}
+                  setIsOpen={setIsOpenSecret20ViewingKey}
+                />
+              </Columns>
+            </Box>
+
+            {isOpenSecret20ViewingKey ? (
+              <TextInput
+                label="Viewing Key"
+                error={
+                  formState.errors.viewingKey
+                    ? formState.errors.viewingKey.message
+                    : undefined
+                }
+                {...register("viewingKey", {
+                  required: true,
+                })}
+              />
+            ) : null}
+          </Stack>
+        ) : null}
       </Styles.Container>
     </HeaderLayout>
   );
