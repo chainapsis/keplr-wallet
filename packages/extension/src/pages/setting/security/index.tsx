@@ -22,6 +22,12 @@ export const SettingSecurityPage: FunctionComponent = () => {
           />
 
           <PageButton
+            title="Auto-Lock"
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/security/auto-lock")}
+          />
+
+          <PageButton
             title="Change Password"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/change-password")}

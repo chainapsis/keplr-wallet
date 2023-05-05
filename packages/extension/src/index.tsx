@@ -65,6 +65,7 @@ import { ConfirmProvider } from "./hooks/confirm";
 import { NotificationProvider } from "./hooks/notification";
 import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
 import { AppIntlProvider } from "./languages";
+import { SettingSecurityAutoLockPage } from "./pages/setting/security/auto-lock";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -255,6 +256,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/setting/security/permission"
                 element={<SettingSecurityPermissionPage />}
+              />
+              <Route
+                path="/setting/security/auto-lock"
+                element={<SettingSecurityAutoLockPage />}
               />
               <Route
                 path="/setting/security/change-password"
