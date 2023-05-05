@@ -25,6 +25,7 @@ import { Column, Columns } from "../../../../components/column";
 import { Body3, Subtitle2 } from "../../../../components/typography";
 import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
+import { useNotification } from "../../../../hooks/notification";
 
 const Styles = {
   Container: styled(Stack)`
@@ -42,6 +43,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
 
   const navigate = useNavigate();
+  const notification = useNotification();
   const [searchParams] = useSearchParams();
   const paramChainId = searchParams.get("chainId");
 
@@ -168,6 +170,12 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               try {
                 viewingKey = await createViewingKey();
               } catch (e) {
+                notification.show(
+                  "failed",
+                  `Failed to create the viewing key: ${e.message}`,
+                  ""
+                );
+
                 if (
                   interactionInfo.interaction &&
                   tokensStore.waitingSuggestedToken

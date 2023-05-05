@@ -18,6 +18,7 @@ import { TokenInfo } from "@keplr-wallet/background";
 import { EmptyView } from "../../../../components/empty-view";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useConfirm } from "../../../../hooks/confirm";
+import { useNotification } from "../../../../hooks/notification";
 
 const Styles = {
   Container: styled(Stack)`
@@ -144,6 +145,7 @@ const TokenItem: FunctionComponent<{
   tokenInfo: TokenInfo;
 }> = observer(({ chainId, tokenInfo }) => {
   const { tokensStore } = useStore();
+  const notification = useNotification();
 
   const isSecret20 = (() => {
     if ("type" in tokenInfo.currency) {
@@ -187,6 +189,8 @@ const TokenItem: FunctionComponent<{
                   await navigator.clipboard.writeText(
                     tokenInfo.currency.viewingKey
                   );
+
+                  notification.show("success", "Viewing key copied", "");
                 }
               }}
             >
@@ -202,6 +206,8 @@ const TokenItem: FunctionComponent<{
                 await navigator.clipboard.writeText(
                   tokenInfo.currency.contractAddress
                 );
+
+                notification.show("success", "Contract address copied", "");
               }
             }}
           >
