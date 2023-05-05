@@ -57,7 +57,7 @@ export const MainPage: FunctionComponent = observer(() => {
       const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
       const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
         uiConfigStore.icnsInfo.resolverContractAddress,
-        accountStore.getAccount("osmosis").bech32Address
+        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
       );
 
       return icnsQuery.primaryName.split(".")[0];

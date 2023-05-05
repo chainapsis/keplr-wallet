@@ -75,9 +75,6 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
             recipientConfig.setValue(value);
 
             e.preventDefault();
-
-            // XXX: Failure to do this will result in two onChange events being fired.
-            e.stopPropagation();
           }}
           right={
             memoConfig ? (
@@ -87,12 +84,13 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
             ) : null
           }
           isLoading={isICNSFetching}
-          error={(() => {
-            const uiProperties = recipientConfig.uiProperties;
-
+          paragraph={(() => {
             if (isICNSName && !recipientConfig.uiProperties.error) {
               return recipientConfig.recipient;
             }
+          })()}
+          error={(() => {
+            const uiProperties = recipientConfig.uiProperties;
 
             const err = uiProperties.error || uiProperties.warning;
 
