@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { observer } from "mobx-react-lite";
@@ -76,7 +77,13 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     }
   });
 
-  const interactionInfo = useInteractionInfo();
+  // secret20은 서명 페이지로 넘어가야하기 때문에 막아야함...
+  const blockRejectAll = useRef(false);
+  const interactionInfo = useInteractionInfo(() => {
+    if (!blockRejectAll.current) {
+      tokensStore.rejectAllSuggestedTokens();
+    }
+  });
 
   useLayoutEffect(() => {
     if (interactionInfo.interaction) {
@@ -88,7 +95,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         );
       }
     }
-  }, [interactionInfo, tokensStore.waitingSuggestedToken]);
+  }, [interactionInfo, setValue, tokensStore.waitingSuggestedToken]);
 
   useEffect(() => {
     // secret20은 계정에 귀속되기 때문에 추가/삭제 등을 할때 먼저 초기화가 되어있어야만 가능하다.
@@ -132,7 +139,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   })();
 
   const createViewingKey = async (): Promise<string> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       accountStore
         .getAccount(chainId)
         .secret.createSecret20ViewingKey(
@@ -140,10 +147,20 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           "",
           {},
           {},
-          (_, viewingKey) => {
+          (tx, viewingKey) => {
+            if (tx.code != null && tx.code !== 0) {
+              reject(new Error(tx.raw_log));
+              return;
+            }
+
+            if (!viewingKey) {
+              reject(new Error("Viewing key is null"));
+              return;
+            }
             resolve(viewingKey);
           }
-        );
+        )
+        .catch(reject);
     });
   };
 
@@ -155,11 +172,12 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         text: "Confirm",
         color: "secondary",
         size: "large",
-        disabled: contractAddress.length === 0 || !queryContract.tokenInfo,
+        disabled:
+          contractAddress.length === 0 ||
+          !queryContract.tokenInfo ||
+          (isSecretWasm && !accountStore.getAccount(chainId).isReadyToSendTx),
       }}
-      onSubmit={handleSubmit(async (data, event) => {
-        event?.preventDefault();
-
+      onSubmit={handleSubmit(async (data) => {
         if (queryContract.tokenInfo) {
           let currency: AppCurrency;
 
@@ -168,30 +186,18 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
             if (!viewingKey && !isOpenSecret20ViewingKey) {
               try {
+                blockRejectAll.current = true;
                 viewingKey = await createViewingKey();
               } catch (e) {
                 notification.show(
                   "failed",
-                  `Failed to create the viewing key: ${e.message}`,
-                  ""
+                  "Failed to create the viewing key",
+                  e.message || e.toString()
                 );
 
-                if (
-                  interactionInfo.interaction &&
-                  tokensStore.waitingSuggestedToken
-                ) {
-                  await tokensStore.rejectAllSuggestedTokens();
-                }
+                await new Promise((resolve) => setTimeout(resolve, 2000));
 
-                if (
-                  interactionInfo.interaction &&
-                  !interactionInfo.interactionInternal
-                ) {
-                  window.close();
-                } else {
-                  navigate("/");
-                }
-
+                window.close();
                 return;
               }
             }
@@ -256,12 +262,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           isLoading={queryContract.isFetching}
           readOnly={interactionInfo.interaction}
           error={
-            formState.errors.contractAddress
-              ? formState.errors.contractAddress.message
-              : queryContract.tokenInfo == null
-              ? (queryContract.error?.data as any)?.error ||
-                queryContract.error?.message
-              : undefined
+            formState.errors.contractAddress?.message ||
+            (queryContract.error?.data as any)?.message
           }
           {...register("contractAddress", {
             required: true,
@@ -272,7 +274,6 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                   value,
                   chainInfo.bech32Config.bech32PrefixAccAddr
                 );
-                return (queryContract.error?.data as any)?.message;
               } catch (e) {
                 return e.message || e.toString();
               }

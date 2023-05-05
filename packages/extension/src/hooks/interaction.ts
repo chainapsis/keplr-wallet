@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export const useInteractionInfo = (cleanUp?: () => void) => {
@@ -34,5 +34,10 @@ export const useInteractionInfo = (cleanUp?: () => void) => {
     };
   }, []);
 
-  return result;
+  return useMemo(() => {
+    return {
+      interaction: result.interaction,
+      interactionInternal: result.interactionInternal,
+    };
+  }, [result.interaction, result.interactionInternal]);
 };

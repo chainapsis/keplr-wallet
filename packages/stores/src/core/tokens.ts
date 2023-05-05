@@ -107,12 +107,11 @@ export class TokensStore {
           this.accountStore.getAccount(chainInfo.chainId).bech32Address
         ) {
           if (
-            Bech32Address.fromBech32(
-              this.accountStore.getAccount(chainInfo.chainId).bech32Address
-            )
-              .toHex()
-              .replace("0x", "")
-              .toLowerCase() === token.associatedAccountAddress
+            Buffer.from(
+              Bech32Address.fromBech32(
+                this.accountStore.getAccount(chainInfo.chainId).bech32Address
+              ).address
+            ).toString("hex") === token.associatedAccountAddress
           ) {
             adds.push(token.currency);
           }
