@@ -28,6 +28,9 @@ import { StakedTabView } from "./staked";
 import { SearchTextInput } from "../../components/input";
 import { useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
+import { Columns } from "../../components/column";
+import { Tooltip } from "../../components/tooltip";
+import { Image } from "../../components/image";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -35,9 +38,31 @@ export interface ViewToken {
 }
 
 export const MainPage: FunctionComponent = observer(() => {
-  const { keyRingStore, hugeQueriesStore } = useStore();
+  const {
+    keyRingStore,
+    hugeQueriesStore,
+    uiConfigStore,
+    chainStore,
+    accountStore,
+    queriesStore,
+  } = useStore();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
+
+  const icnsPrimaryName = (() => {
+    if (
+      uiConfigStore.icnsInfo &&
+      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
+    ) {
+      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+        uiConfigStore.icnsInfo.resolverContractAddress,
+        accountStore.getAccount("osmosis").bech32Address
+      );
+
+      return icnsQuery.primaryName.split(".")[0];
+    }
+  })();
 
   const availableTotalPrice = (() => {
     let result: PricePretty | undefined;
@@ -104,7 +129,26 @@ export const MainPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={keyRingStore.selectedKeyInfo?.name || "Keplr Account"}
+      title={(() => {
+        const name = keyRingStore.selectedKeyInfo?.name || "Keplr Account";
+
+        if (icnsPrimaryName !== "") {
+          return (
+            <Columns sum={1} alignY="center" gutter="0.25rem">
+              <Box>{name}</Box>
+              <Tooltip content={icnsPrimaryName}>
+                <Image
+                  alt="icns-icon"
+                  src={require("../../public/assets/img/icns-icon.png")}
+                  style={{ width: "1rem", height: "1rem" }}
+                />
+              </Tooltip>
+            </Columns>
+          );
+        }
+
+        return name;
+      })()}
       left={
         <Box
           paddingLeft="1rem"
