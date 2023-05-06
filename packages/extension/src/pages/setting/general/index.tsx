@@ -60,6 +60,12 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/link-keplr-mobile")}
           />
+
+          <PageButton
+            title="Delete Suggest Chain"
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/delete-suggest-chain")}
+          />
         </Stack>
       </Box>
     </HeaderLayout>

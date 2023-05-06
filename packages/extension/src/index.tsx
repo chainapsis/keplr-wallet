@@ -39,6 +39,7 @@ import { SettingGeneralPage } from "./pages/setting/general";
 import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
 import { SettingGeneralAuthZPage } from "./pages/setting/general/authz";
 import { SettingGeneralAuthZRevokePage } from "./pages/setting/general/authz/revoke";
+import { SettingGeneralDeleteSuggestChainPage } from "./pages/setting/general/delete-suggest-chain";
 import { SettingAdvancedPage } from "./pages/setting/advanced";
 import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
@@ -240,6 +241,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/setting/general/link-keplr-mobile"
                 element={<SettingGeneralLinkKeplrMobilePage />}
+              />
+              <Route
+                path="setting/general/delete-suggest-chain"
+                element={<SettingGeneralDeleteSuggestChainPage />}
               />
               <Route
                 path="/setting/advanced"
