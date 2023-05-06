@@ -20,6 +20,12 @@ export class ChainsUpdateService {
 
     // must not wait
     this.startUpdateLoop();
+
+    this.chainsService.addChainSuggestedHandler((chainInfo) => {
+      this.updateChainInfo(chainInfo.chainId).catch((e) => {
+        console.log(e);
+      });
+    });
   }
 
   protected startUpdateLoop() {

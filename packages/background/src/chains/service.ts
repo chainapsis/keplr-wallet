@@ -28,6 +28,7 @@ import { Env } from "@keplr-wallet/router";
 import { SuggestChainInfoMsg } from "./messages";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
+type ChainSuggestedHandler = (chainInfo: ChainInfo) => void;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
@@ -52,6 +53,7 @@ export class ChainsService {
   protected endpointsKVStore: KVStore;
 
   protected onChainRemovedHandlers: ChainRemovedHandler[] = [];
+  protected onChainSuggestedHandlers: ChainSuggestedHandler[] = [];
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -297,6 +299,10 @@ export class ChainsService {
     if (chainInfo.chainId !== chainIdFromRPC) {
       chainIdUpdated = true;
 
+      if (!this.hasChainInfo(chainId)) {
+        throw new Error(`${chainId} became unregistered after fetching`);
+      }
+
       this.setUpdatedChainInfo(chainId, {
         chainId: chainIdFromRPC,
       });
@@ -306,6 +312,10 @@ export class ChainsService {
 
     const featuresUpdated = toUpdateFeatures.length !== 0;
     if (featuresUpdated) {
+      if (!this.hasChainInfo(chainId)) {
+        throw new Error(`${chainId} became unregistered after fetching`);
+      }
+
       const features = [
         ...new Set([...toUpdateFeatures, ...(chainInfo.features ?? [])]),
       ];
@@ -323,6 +333,10 @@ export class ChainsService {
     chainId: string,
     chainInfo: Partial<UpdatedChainInfo>
   ): void {
+    if (!this.hasChainInfo(chainId)) {
+      throw new Error(`${chainId} is not registered`);
+    }
+
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
     const i = this.updatedChainInfos.findIndex(
       (c) => ChainIdHelper.parse(c.chainId).identifier === chainIdentifier
@@ -400,6 +414,10 @@ export class ChainsService {
       const newChainInfos = this.suggestedChainInfos.slice();
       newChainInfos.push(chainInfo);
       this.suggestedChainInfos = newChainInfos;
+
+      for (const handler of this.onChainSuggestedHandlers) {
+        handler(chainInfo);
+      }
     }
   }
 
@@ -671,5 +689,9 @@ export class ChainsService {
 
   addChainRemovedHandler(handler: ChainRemovedHandler) {
     this.onChainRemovedHandlers.push(handler);
+  }
+
+  addChainSuggestedHandler(handler: ChainRemovedHandler) {
+    this.onChainSuggestedHandlers.push(handler);
   }
 }
