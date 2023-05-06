@@ -1,7 +1,7 @@
 import { PlainObject, Vault } from "../vault";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
-import { Env, KeplrError } from "@keplr-wallet/router";
+import { KeplrError } from "@keplr-wallet/router";
 import { ChainInfo } from "@keplr-wallet/types";
 
 export class KeyRingLedgerService {
@@ -14,7 +14,6 @@ export class KeyRingLedgerService {
   }
 
   createKeyRingVault(
-    _: Env,
     pubKey: Uint8Array,
     app: string,
     bip44Path: {
@@ -38,7 +37,6 @@ export class KeyRingLedgerService {
   }
 
   getPubKey(
-    _: Env,
     vault: Vault,
     _coinType: number,
     chainInfo: ChainInfo

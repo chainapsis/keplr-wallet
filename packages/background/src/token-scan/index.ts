@@ -3,7 +3,6 @@ import { KeyRingCosmosService } from "../keyring-cosmos";
 import { KeyRingService } from "../keyring-v2";
 import { ChainsUIService } from "../chains-ui";
 import { makeObservable, observable, runInAction } from "mobx";
-import { Env } from "@keplr-wallet/router";
 import { AppCurrency } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Dec } from "@keplr-wallet/unit";
@@ -38,12 +37,11 @@ export class TokenScanService {
     // TODO: key가 삭제되었을때 해당하는 정보 지우는 핸들러 만들기
 
     this.chainsService.addChainSuggestedHandler(async (chainInfo) => {
-      // TODO: env 처리하기;;
-      await this.scanWithAllVaults(undefined as any, chainInfo.chainId);
+      await this.scanWithAllVaults(chainInfo.chainId);
     });
   }
 
-  protected async scanWithAllVaults(env: Env, chainId: string): Promise<void> {
+  protected async scanWithAllVaults(chainId: string): Promise<void> {
     if (this.keyRingService.keyRingStatus !== "unlocked") {
       return;
     }
@@ -66,20 +64,16 @@ export class TokenScanService {
       });
     for (const vaultId of vaultIds) {
       // 얘는 계정 수를 예상하기 힘드니까 그냥 순차적으로 한다...
-      await this.scan(env, vaultId, chainId);
+      await this.scan(vaultId, chainId);
     }
   }
 
-  protected async scan(
-    env: Env,
-    vaultId: string,
-    chainId: string
-  ): Promise<void> {
+  protected async scan(vaultId: string, chainId: string): Promise<void> {
     if (this.keyRingService.keyRingStatus !== "unlocked") {
       return;
     }
 
-    const tokenScan = await this.calculateTokenScan(env, vaultId, chainId);
+    const tokenScan = await this.calculateTokenScan(vaultId, chainId);
 
     if (tokenScan) {
       if (this.chainsUIService.isEnabled(vaultId, tokenScan.chainId)) {
@@ -106,7 +100,7 @@ export class TokenScanService {
     }
   }
 
-  protected async scanAll(env: Env, vaultId: string): Promise<void> {
+  protected async scanAll(vaultId: string): Promise<void> {
     if (this.keyRingService.keyRingStatus !== "unlocked") {
       return;
     }
@@ -124,7 +118,6 @@ export class TokenScanService {
       promises.push(
         (async () => {
           const tokenScan = await this.calculateTokenScan(
-            env,
             vaultId,
             chainInfo.chainId
           );
@@ -167,7 +160,6 @@ export class TokenScanService {
   }
 
   protected async calculateTokenScan(
-    env: Env,
     vaultId: string,
     chainId: string
   ): Promise<TokenScan | undefined> {
@@ -186,22 +178,19 @@ export class TokenScanService {
       infos: [],
     };
 
-    // TODO: getKey()에서 env를 제거하자...
-    //       렛저를 frontend에서 처리하게 되면서 쓸모가 없어졌다.
     const bech32Addresses: string[] = await (async () => {
       if (
         this.keyRingService.needMnemonicKeyCoinTypeFinalize(vaultId, chainId)
       ) {
         return (
           await this.keyRingCosmosService.computeNotFinalizedMnemonicKeyAddresses(
-            env,
             vaultId,
             chainId
           )
         ).map((addr) => addr.bech32Address);
       } else {
         return [
-          (await this.keyRingCosmosService.getKey(env, chainId, vaultId))
+          (await this.keyRingCosmosService.getKey(chainId, vaultId))
             .bech32Address,
         ];
       }

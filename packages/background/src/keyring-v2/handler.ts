@@ -156,9 +156,8 @@ const handleFinalizeMnemonicKeyCoinTypeMsg: (
 const handleNewMnemonicKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<NewMnemonicKeyMsg> = (service) => {
-  return async (env, msg) => {
+  return async (_, msg) => {
     const vaultId = await service.createMnemonicKeyRing(
-      env,
       msg.mnemonic,
       msg.bip44HDPath,
       msg.name,
@@ -175,9 +174,8 @@ const handleNewMnemonicKeyMsg: (
 const handleNewLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<NewLedgerKeyMsg> = (service) => {
-  return async (env, msg) => {
+  return async (_, msg) => {
     const vaultId = await service.createLedgerKeyRing(
-      env,
       msg.pubKey,
       msg.app,
       msg.bip44HDPath,
@@ -195,9 +193,8 @@ const handleNewLedgerKeyMsg: (
 const handleNewPrivateKeyKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<NewPrivateKeyKeyMsg> = (service) => {
-  return async (env, msg) => {
+  return async (_, msg) => {
     const vaultId = await service.createPrivateKeyKeyRing(
-      env,
       msg.privateKey,
       msg.meta,
       msg.name,

@@ -1,7 +1,6 @@
 import { VaultService, PlainObject, Vault } from "../vault";
 import { Buffer } from "buffer/";
 import { Hash, PrivKeySecp256k1, PubKeySecp256k1 } from "@keplr-wallet/crypto";
-import { Env } from "@keplr-wallet/router";
 
 export class KeyRingPrivateKeyService {
   constructor(protected readonly vaultService: VaultService) {}
@@ -14,10 +13,7 @@ export class KeyRingPrivateKeyService {
     return "private-key";
   }
 
-  createKeyRingVault(
-    _: Env,
-    privateKey: Uint8Array
-  ): Promise<{
+  createKeyRingVault(privateKey: Uint8Array): Promise<{
     insensitive: PlainObject;
     sensitive: PlainObject;
   }> {
@@ -39,7 +35,7 @@ export class KeyRingPrivateKeyService {
     });
   }
 
-  getPubKey(_: Env, vault: Vault): PubKeySecp256k1 {
+  getPubKey(vault: Vault): PubKeySecp256k1 {
     const publicKeyBytes = Buffer.from(
       vault.insensitive["publicKey"] as string,
       "hex"
@@ -49,7 +45,6 @@ export class KeyRingPrivateKeyService {
   }
 
   sign(
-    _: Env,
     vault: Vault,
     _coinType: number,
     data: Uint8Array,
