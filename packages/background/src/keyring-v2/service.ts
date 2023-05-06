@@ -171,6 +171,27 @@ export class KeyRingService {
     });
   }
 
+  needMnemonicKeyCoinTypeFinalize(vaultId: string, chainId: string): boolean {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "mnemonic") {
+      return false;
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    return !vault.insensitive[coinTypeTag];
+  }
+
   async createMnemonicKeyRing(
     env: Env,
     mnemonic: string,

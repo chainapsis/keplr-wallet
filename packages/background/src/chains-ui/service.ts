@@ -95,6 +95,19 @@ export class ChainsUIService {
     }
   );
 
+  readonly isEnabled = computedFn(
+    (vaultId: string, chainId: string): boolean => {
+      const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+      return (
+        this.enabledChainIdentifierMapForVault(vaultId).get(chainIdentifier) ===
+        true
+      );
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
   @action
   toggleChain(vaultId: string, ...chainIds: string[]) {
     const vault = this.vaultService.getVault("keyRing", vaultId);
