@@ -74,7 +74,8 @@ export function init(
   const chainsService = new Chains.ChainsService(
     storeCreator("chains"),
     embedChainInfos,
-    communityChainInfoRepo
+    communityChainInfoRepo,
+    interactionService
   );
 
   const tokenCW20Service = new TokenCW20.TokenCW20Service(
@@ -171,7 +172,7 @@ export function init(
 
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
-  Chains.init(router, chainsService);
+  Chains.init(router, chainsService, permissionService);
   Ledger.init(router, ledgerService);
   KeyRing.init(router, keyRingService);
   BackgroundTx.init(router, backgroundTxService);

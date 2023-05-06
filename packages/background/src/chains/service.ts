@@ -13,13 +13,19 @@ import {
   runInAction,
 } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainInfoWithCoreTypes } from "./types";
+import {
+  ChainInfoWithCoreTypes,
+  ChainInfoWithRepoUpdateOptions,
+} from "./types";
 import { computedFn } from "mobx-utils";
 import {
   checkChainFeatures,
   validateBasicChainInfoType,
 } from "@keplr-wallet/chain-validator";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { InteractionService } from "../interaction";
+import { Env } from "@keplr-wallet/router";
+import { SuggestChainInfoMsg } from "./messages";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
@@ -54,7 +60,8 @@ export class ChainsService {
       readonly organizationName: string;
       readonly repoName: string;
       readonly branchName: string;
-    }
+    },
+    protected readonly interactionService: InteractionService
   ) {
     this.updatedChainInfoKVStore = new PrefixKVStore(
       kvStore,
@@ -339,6 +346,43 @@ export class ChainsService {
 
       this.updatedChainInfos = newChainInfos;
     }
+  }
+
+  async suggestChainInfo(
+    env: Env,
+    chainInfo: ChainInfo,
+    origin: string
+  ): Promise<void> {
+    chainInfo = await validateBasicChainInfoType(chainInfo);
+
+    await this.interactionService.waitApproveV2(
+      env,
+      "/suggest-chain",
+      SuggestChainInfoMsg.type(),
+      {
+        chainInfo,
+        origin,
+      },
+      async (receivedChainInfo: ChainInfoWithRepoUpdateOptions) => {
+        const validChainInfo = {
+          ...(await validateBasicChainInfoType(receivedChainInfo)),
+          beta: chainInfo.beta,
+          updateFromRepoDisabled: receivedChainInfo.updateFromRepoDisabled,
+        };
+
+        if (validChainInfo.updateFromRepoDisabled) {
+          console.log(
+            `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added with updateFromRepoDisabled`
+          );
+        } else {
+          console.log(
+            `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added`
+          );
+        }
+
+        await this.addSuggestedChainInfo(validChainInfo);
+      }
+    );
   }
 
   @action
