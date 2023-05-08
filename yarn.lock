@@ -5308,7 +5308,6 @@ __metadata:
     "@types/styled-components": ^5.1.26
     "@walletconnect/client": ^1.6.4
     aes-js: ^3.1.2
-    alt-sign-in: "file:./noop-alt-sign-in"
     amplitude-js: ^8.16.0
     babel-loader: ^8.2.5
     bip39: ^3.0.2
@@ -5326,6 +5325,7 @@ __metadata:
     identity-obj-proxy: ^3.0.0
     joi: ^17.2.1
     js-yaml: ^4.1.0
+    keplr-wallet-private: "file:./noop-keplr-wallet-private"
     lottie-web: ^5.10.2
     os-browserify: ^0.3.0
     process: ^0.11.10
@@ -10706,13 +10706,6 @@ __metadata:
   version: 1.0.2
   resolution: "alphanum-sort@npm:1.0.2"
   checksum: 5a32d0b3c0944e65d22ff3ae2f88d7a4f8d88a78a703033caeae33f2944915e053d283d02f630dc94823edc7757148ecdcf39fd687a5117bda5c10133a03a7d8
-  languageName: node
-  linkType: hard
-
-"alt-sign-in@file:./noop-alt-sign-in::locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension":
-  version: 0.0.1
-  resolution: "alt-sign-in@file:./noop-alt-sign-in#./noop-alt-sign-in::hash=de732e&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
-  checksum: d0c714077285bbe0f3c72ae25ef4e42cad92683ed96b501008d17cdb3a4c695f575b8b6d4a3a1fd2253109104673bf06a4e6b5327b259ef2821331450eae18a0
   languageName: node
   linkType: hard
 
@@ -20400,6 +20393,13 @@ __metadata:
     node-gyp: latest
     node-gyp-build: ^4.2.0
   checksum: 1de1b62fbb3e035ee186232b11f154bd5c2c12a2d910bc8ec313dab412b6f39ddc51d3a105618dd8de752875da0ead21abb0eb1d4e7d7b17771a4acbb7159390
+  languageName: node
+  linkType: hard
+
+"keplr-wallet-private@file:./noop-keplr-wallet-private::locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension":
+  version: 0.0.1
+  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=029cca&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
+  checksum: 404012587f3d4402d8387e60a8bbd364dadb773d44e211a8b9a548bb73c4bef372dd663fba62fcd77f171ae800389b1fea3a2ed0c3f878d5629c5feaff0f5cc3
   languageName: node
   linkType: hard
 

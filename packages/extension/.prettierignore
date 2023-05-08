@@ -16,6 +16,8 @@ dist/*
 prod/*
 build/*
 
+noop-keplr-wallet-private/build
+
 yarn.lock
 
 noop-alt-sign-in

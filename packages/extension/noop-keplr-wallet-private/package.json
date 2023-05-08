@@ -1,7 +1,7 @@
 {
-  "name": "noop-alt-sign-in",
+  "name": "noop-keplr-wallet-private",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "build/index.js",
   "sideEffects": false,
   "dependencies": {}
 }
