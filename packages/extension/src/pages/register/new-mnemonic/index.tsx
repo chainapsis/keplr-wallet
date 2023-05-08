@@ -251,9 +251,9 @@ const BlurBackdrop: FunctionComponent = ({ children }) => {
         bottom: 0,
         left: "-1rem",
         right: "-1rem",
-        background: "rgba(51, 51, 51, 0.5)",
+        backgroundImage: `url(${require("../../../public/assets/img/register-new-recovery-phrase-blur.png")})`,
+        backgroundSize: "cover",
         borderRadius: "1rem",
-        backdropFilter: "blur(13.5px)",
         zIndex: 1000,
 
         display: "flex",
