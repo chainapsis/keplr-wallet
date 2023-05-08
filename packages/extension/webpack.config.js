@@ -18,14 +18,14 @@ const commonResolve = (dir) => ({
   },
 });
 const altResolve = () => {
-  const p = path.resolve(__dirname, "./src/keplr-torus-signin/index.ts");
+  const p = path.resolve(__dirname, "./src/keplr-wallet-private/index.ts");
 
   if (fs.existsSync(p)) {
     return {
       alias: {
-        "alt-sign-in": path.resolve(
+        "keplr-wallet-private": path.resolve(
           __dirname,
-          "./src/keplr-torus-signin/index.ts"
+          "./src/keplr-wallet-private/index.ts"
         ),
       },
     };

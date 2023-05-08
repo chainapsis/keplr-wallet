@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.test = void 0;
-exports.test = "test";
+exports.RegisterScenes = exports.GlobalStyles = void 0;
+exports.GlobalStyles = undefined;
+exports.RegisterScenes = [];
 //# sourceMappingURL=index.js.map

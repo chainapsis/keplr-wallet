@@ -20398,8 +20398,11 @@ __metadata:
 
 "keplr-wallet-private@file:./noop-keplr-wallet-private::locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension":
   version: 0.0.1
-  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=029cca&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
-  checksum: 404012587f3d4402d8387e60a8bbd364dadb773d44e211a8b9a548bb73c4bef372dd663fba62fcd77f171ae800389b1fea3a2ed0c3f878d5629c5feaff0f5cc3
+  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=59cbb6&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18
+    styled-components: "*"
+  checksum: cf9d4517a86ffe689df4ab886ca8b466334b98d8bc30feb3e3e88824a28914f1804be49fb526f707b6a9a1d2a26f7950220b011bf8034e79b748afa8299a0bfe
   languageName: node
   linkType: hard
 

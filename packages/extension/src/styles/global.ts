@@ -10,6 +10,7 @@ import InterBold from "../public/assets/font/Inter-Bold.ttf";
 import InterExtraBold from "../public/assets/font/Inter-ExtraBold.ttf";
 import InterBlack from "../public/assets/font/Inter-Black.ttf";
 import { ColorPalette } from "./colors";
+import * as KeplrWalletPrivate from "keplr-wallet-private";
 
 export const GlobalStyle = createGlobalStyle`
   ${normalize}
@@ -68,17 +69,7 @@ export const GlobalStyle = createGlobalStyle`
     src: url(${InterBlack}) format("truetype");
   }
 
-  @font-face {
-    font-family: 'Haffer';
-    font-weight: 600;
-    src: url(${InterSemiBold}) format("truetype");
-  }
-
-  @font-face {
-    font-family: 'Haffer';
-    font-weight: 500;
-    src: url(${InterMedium}) format("truetype");
-  }
+  ${KeplrWalletPrivate.GlobalStyles}
   
   html, body {
     font-family: 'Inter', sans-serif;
