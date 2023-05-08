@@ -32,6 +32,7 @@ import { Tooltip } from "../../../../components/tooltip";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { useNotification } from "../../../../hooks/notification";
 import { useNavigate } from "react-router";
+import { Skeleton } from "../../../../components/skeleton";
 
 const Styles = {
   Container: styled.div`
@@ -352,27 +353,34 @@ export const ClaimAll: FunctionComponent = observer(() => {
     <Styles.Container>
       <Box paddingX="1rem">
         <Columns sum={1} alignY="center">
-          <Column weight={1}>
-            <Stack gutter="0.5rem">
+          <Stack gutter="0.5rem">
+            <Skeleton layer={1}>
               <Body2 style={{ color: ColorPalette["gray-300"] }}>
                 Pending Staking Reward
               </Body2>
+            </Skeleton>
+            <Skeleton layer={1}>
               <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
                 {totalPrice ? totalPrice.separator(" ").toString() : "?"}
               </Subtitle2>
-            </Stack>
-          </Column>
-          <Tooltip
-            enabled={isLedger || false}
-            content="TODO: 대충 렛저에서는 불가능하다는 메세지"
-          >
-            <Button
-              text="Claim All"
-              size="small"
-              disabled={claimAllDisabled || isLedger}
-              onClick={claimAll}
-            />
-          </Tooltip>
+            </Skeleton>
+          </Stack>
+
+          <Column weight={1} />
+
+          <Skeleton type="button" layer={1}>
+            <Tooltip
+              enabled={isLedger || false}
+              content="TODO: 대충 렛저에서는 불가능하다는 메세지"
+            >
+              <Button
+                text="Claim All"
+                size="small"
+                disabled={claimAllDisabled || isLedger}
+                onClick={claimAll}
+              />
+            </Tooltip>
+          </Skeleton>
         </Columns>
       </Box>
 

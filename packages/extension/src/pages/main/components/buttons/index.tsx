@@ -2,11 +2,11 @@ import React, { FunctionComponent, useMemo } from "react";
 import { Column, Columns } from "../../../../components/column";
 import { Button } from "../../../../components/button";
 import { Box } from "../../../../components/box";
-import { Gutter } from "../../../../components/gutter";
 import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Dec } from "@keplr-wallet/unit";
+import { Skeleton } from "../../../../components/skeleton";
 
 export const Buttons: FunctionComponent = observer(() => {
   const { hugeQueriesStore } = useStore();
@@ -20,17 +20,20 @@ export const Buttons: FunctionComponent = observer(() => {
 
   return (
     <Box>
-      <Columns sum={1}>
+      <Columns sum={1} gutter="0.5rem">
         <Column weight={1}>
-          <Button text="Deposit" color="secondary" />
+          <Skeleton type="button">
+            <Button text="Deposit" color="secondary" />
+          </Skeleton>
         </Column>
-        <Gutter size="0.5rem" />
         <Column weight={1}>
-          <Button
-            text="Send"
-            disabled={!hasBalance}
-            onClick={() => navigate("/send/select-asset")}
-          />
+          <Skeleton type="button">
+            <Button
+              text="Send"
+              disabled={!hasBalance}
+              onClick={() => navigate("/send/select-asset")}
+            />
+          </Skeleton>
         </Column>
       </Columns>
     </Box>

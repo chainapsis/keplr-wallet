@@ -31,6 +31,7 @@ import { defaultSpringConfig } from "../../styles/spring";
 import { Columns } from "../../components/column";
 import { Tooltip } from "../../components/tooltip";
 import { Image } from "../../components/image";
+import { Skeleton } from "../../components/skeleton";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -189,23 +190,29 @@ export const MainPage: FunctionComponent = observer(() => {
               }}
             >
               <Gutter size="2rem" />
-              <Subtitle3
-                style={{
-                  color: ColorPalette["gray-300"],
-                }}
-              >
-                {tabStatus === "available" ? "Total Available" : "Total Staked"}
-              </Subtitle3>
+              <Skeleton>
+                <Subtitle3
+                  style={{
+                    color: ColorPalette["gray-300"],
+                  }}
+                >
+                  {tabStatus === "available"
+                    ? "Total Available"
+                    : "Total Staked"}
+                </Subtitle3>
+              </Skeleton>
               <Gutter size="0.5rem" />
-              <H1
-                style={{
-                  color: ColorPalette["gray-10"],
-                }}
-              >
-                {tabStatus === "available"
-                  ? availableTotalPrice?.toString() || "-"
-                  : stakedTotalPrice?.toString() || "-"}
-              </H1>
+              <Skeleton>
+                <H1
+                  style={{
+                    color: ColorPalette["gray-10"],
+                  }}
+                >
+                  {tabStatus === "available"
+                    ? availableTotalPrice?.toString() || "-"
+                    : stakedTotalPrice?.toString() || "-"}
+                </H1>
+              </Skeleton>
             </Box>
           </Box>
           {tabStatus === "available" ? <Buttons /> : null}

@@ -2,6 +2,8 @@ import styled, { css, FlattenSimpleInterpolation } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { ButtonProps, ButtonColor, ButtonMode, ButtonSize } from "./types";
 
+export const ButtonRadius = "0.375rem";
+
 export const makeTextAndSvgColor = (color: string) => {
   return css`
     color: ${color};
@@ -162,7 +164,7 @@ export const Styles = {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 0.375rem;
+    border-radius: ${ButtonRadius};
     cursor: ${({ disabled, isLoading }) =>
       disabled ? "not-allowed" : isLoading ? "wait" : "pointer"};
     overflow: hidden;

@@ -5,6 +5,7 @@ import { Subtitle1 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
 import { Button, getButtonHeightRem } from "../../components/button";
+import { Skeleton } from "../../components/skeleton";
 
 const pxToRem = (px: number) => {
   const base = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -144,8 +145,11 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
       <Styles.HeaderContainer>
         {left && <Styles.HeaderLeft>{left}</Styles.HeaderLeft>}
         <Styles.HeaderTitle>
-          <Subtitle1>{title}</Subtitle1>
+          <Skeleton>
+            <Subtitle1>{title}</Subtitle1>
+          </Skeleton>
         </Styles.HeaderTitle>
+
         {right && <Styles.HeaderRight>{right}</Styles.HeaderRight>}
       </Styles.HeaderContainer>
 
