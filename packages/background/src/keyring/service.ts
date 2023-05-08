@@ -492,6 +492,7 @@ export class KeyRingService {
     const bech32Prefix = (await this.chainsService.getChainInfo(chainId))
       .bech32Config.bech32PrefixAccAddr;
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+
     if (signer !== bech32Address) {
       throw new KeplrError("keyring", 231, "Signer mismatched");
     }

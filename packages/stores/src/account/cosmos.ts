@@ -939,35 +939,50 @@ export class CosmosAccountImpl {
             .getChain(this.chainId)
             .features?.includes("eth-key-sign") === true;
 
+        const chainIsInjective = this.chainId.startsWith("injective");
         const eip712Signing = useEthereumSign && this.base.isNanoLedger;
 
         // On ledger with ethermint, eip712 types are required and we can't omit `timeoutTimestamp`.
         // Although we are not using `timeoutTimestamp` at present, just set it as mas uint64 only for eip712 cosmos tx.
         const timeoutTimestamp = eip712Signing ? "18446744073709551615" : "0";
 
-        const msg = {
-          type: this.msgOpts.ibcTransfer.type,
-          value: {
-            source_port: channel.portId,
-            source_channel: channel.channelId,
-            token: {
-              denom: currency.coinMinimalDenom,
-              amount: actualAmount,
+        const msg = (() => {
+          const msg = {
+            type: this.msgOpts.ibcTransfer.type,
+            value: {
+              source_port: channel.portId,
+              source_channel: channel.channelId,
+              token: {
+                denom: currency.coinMinimalDenom,
+                amount: actualAmount,
+              },
+              sender: this.base.bech32Address,
+              receiver: recipient,
+              timeout_height: {
+                revision_number: ChainIdHelper.parse(
+                  destinationInfo.network
+                ).version.toString() as string | undefined,
+                // Set the timeout height as the current height + 150.
+                revision_height: destinationInfo.latestBlockHeight
+                  .add(new Int("150"))
+                  .toString(),
+              },
+              timeout_timestamp: timeoutTimestamp as string | undefined,
             },
-            sender: this.base.bech32Address,
-            receiver: recipient,
-            timeout_height: {
-              revision_number: ChainIdHelper.parse(
-                destinationInfo.network
-              ).version.toString() as string | undefined,
-              // Set the timeout height as the current height + 150.
-              revision_height: destinationInfo.latestBlockHeight
-                .add(new Int("150"))
-                .toString(),
-            },
-            timeout_timestamp: timeoutTimestamp as string | undefined,
-          },
-        };
+          };
+
+          if (chainIsInjective && eip712Signing) {
+            return {
+              ...msg,
+              value: {
+                ...msg.value,
+                memo: "IBC Transfer",
+              },
+            };
+          }
+
+          return msg;
+        })();
 
         if (msg.value.timeout_height.revision_number === "0") {
           delete msg.value.timeout_height.revision_number;
@@ -977,30 +992,8 @@ export class CosmosAccountImpl {
           delete msg.value.timeout_timestamp;
         }
 
-        return {
-          aminoMsgs: [msg],
-          protoMsgs: [
-            {
-              typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
-              value: MsgTransfer.encode(
-                MsgTransfer.fromPartial({
-                  sourcePort: msg.value.source_port,
-                  sourceChannel: msg.value.source_channel,
-                  token: msg.value.token,
-                  sender: msg.value.sender,
-                  receiver: msg.value.receiver,
-                  timeoutHeight: {
-                    revisionNumber: msg.value.timeout_height.revision_number
-                      ? msg.value.timeout_height.revision_number
-                      : "0",
-                    revisionHeight: msg.value.timeout_height.revision_height,
-                  },
-                  timeoutTimestamp: msg.value.timeout_timestamp,
-                })
-              ).finish(),
-            },
-          ],
-          rlpTypes: {
+        const rlpTypes = (() => {
+          const rlpTypes = {
             MsgValue: [
               { name: "source_port", type: "string" },
               { name: "source_channel", type: "string" },
@@ -1018,7 +1011,58 @@ export class CosmosAccountImpl {
               { name: "revision_number", type: "uint64" },
               { name: "revision_height", type: "uint64" },
             ],
-          },
+          };
+
+          if (chainIsInjective && eip712Signing) {
+            return {
+              ...rlpTypes,
+              MsgValue: [
+                ...rlpTypes.MsgValue,
+                { name: "memo", type: "string" },
+              ],
+            };
+          }
+
+          return rlpTypes;
+        })();
+
+        const protoPartial = (() => {
+          const protoPartial = {
+            sourcePort: msg.value.source_port,
+            sourceChannel: msg.value.source_channel,
+            token: msg.value.token,
+            sender: msg.value.sender,
+            receiver: msg.value.receiver,
+            timeoutHeight: {
+              revisionNumber: msg.value.timeout_height.revision_number
+                ? msg.value.timeout_height.revision_number
+                : "0",
+              revisionHeight: msg.value.timeout_height.revision_height,
+            },
+            timeoutTimestamp: msg.value.timeout_timestamp,
+          };
+
+          if (chainIsInjective && eip712Signing) {
+            return {
+              ...protoPartial,
+              memo: "IBC Transfer",
+            };
+          }
+
+          return protoPartial;
+        })();
+
+        return {
+          aminoMsgs: [msg],
+          protoMsgs: [
+            {
+              typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+              value: MsgTransfer.encode(
+                MsgTransfer.fromPartial(protoPartial)
+              ).finish(),
+            },
+          ],
+          rlpTypes,
         };
       },
       (tx) => {
@@ -1102,28 +1146,74 @@ export class CosmosAccountImpl {
           );
         }
 
-        const msg = {
-          type: this.msgOpts.ibcTransfer.type,
-          value: {
-            source_port: channel.portId,
-            source_channel: channel.channelId,
-            token: {
-              denom: currency.coinMinimalDenom,
-              amount: actualAmount,
+        const useEthereumSign =
+          this.chainGetter
+            .getChain(this.chainId)
+            .features?.includes("eth-key-sign") === true;
+        const chainIsInjective = this.chainId.startsWith("injective");
+        const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+
+        const msg = (() => {
+          const msg = {
+            type: this.msgOpts.ibcTransfer.type,
+            value: {
+              source_port: channel.portId,
+              source_channel: channel.channelId,
+              token: {
+                denom: currency.coinMinimalDenom,
+                amount: actualAmount,
+              },
+              sender: this.base.bech32Address,
+              receiver: recipient,
+              timeout_height: {
+                revision_number: ChainIdHelper.parse(
+                  destinationInfo.network
+                ).version.toString() as string | undefined,
+                // Set the timeout height as the current height + 150.
+                revision_height: destinationInfo.latestBlockHeight
+                  .add(new Int("150"))
+                  .toString(),
+              },
             },
-            sender: this.base.bech32Address,
-            receiver: recipient,
-            timeout_height: {
-              revision_number: ChainIdHelper.parse(
-                destinationInfo.network
-              ).version.toString() as string | undefined,
-              // Set the timeout height as the current height + 150.
-              revision_height: destinationInfo.latestBlockHeight
-                .add(new Int("150"))
-                .toString(),
+          };
+
+          if (chainIsInjective && eip712Signing) {
+            return {
+              ...msg,
+              value: {
+                ...msg.value,
+                memo: "IBC Transfer",
+              },
+            };
+          }
+
+          return msg;
+        })();
+
+        const protoPartial = (() => {
+          const protoPartial = {
+            sourcePort: msg.value.source_port,
+            sourceChannel: msg.value.source_channel,
+            token: msg.value.token,
+            sender: msg.value.sender,
+            receiver: msg.value.receiver,
+            timeoutHeight: {
+              revisionNumber: msg.value.timeout_height.revision_number
+                ? msg.value.timeout_height.revision_number
+                : "0",
+              revisionHeight: msg.value.timeout_height.revision_height,
             },
-          },
-        };
+          };
+
+          if (chainIsInjective && eip712Signing) {
+            return {
+              ...protoPartial,
+              memo: "IBC Transfer",
+            };
+          }
+
+          return protoPartial;
+        })();
 
         if (msg.value.timeout_height.revision_number === "0") {
           delete msg.value.timeout_height.revision_number;
@@ -1135,19 +1225,7 @@ export class CosmosAccountImpl {
             {
               typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
               value: MsgTransfer.encode(
-                MsgTransfer.fromPartial({
-                  sourcePort: msg.value.source_port,
-                  sourceChannel: msg.value.source_channel,
-                  token: msg.value.token,
-                  sender: msg.value.sender,
-                  receiver: msg.value.receiver,
-                  timeoutHeight: {
-                    revisionNumber: msg.value.timeout_height.revision_number
-                      ? msg.value.timeout_height.revision_number
-                      : "0",
-                    revisionHeight: msg.value.timeout_height.revision_height,
-                  },
-                })
+                MsgTransfer.fromPartial(protoPartial)
               ).finish(),
             },
           ],
