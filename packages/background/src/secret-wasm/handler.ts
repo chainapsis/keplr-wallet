@@ -60,7 +60,7 @@ const handleGetPubkeyMsg: (
       msg.origin
     );
 
-    return await service.getPubkey(env, msg.chainId);
+    return await service.getPubkey(msg.chainId);
   };
 };
 
@@ -79,12 +79,7 @@ const handleReqeustEncryptMsg: (
     );
 
     // TODO: Should ask for user whether approve or reject to encrypt.
-    return await service.encrypt(
-      env,
-      msg.chainId,
-      msg.contractCodeHash,
-      msg.msg
-    );
+    return await service.encrypt(msg.chainId, msg.contractCodeHash, msg.msg);
   };
 };
 
@@ -103,7 +98,7 @@ const handleRequestDecryptMsg: (
     );
 
     // XXX: Is there need to ask for user whether approve or reject to decrypt?
-    return await service.decrypt(env, msg.chainId, msg.cipherText, msg.nonce);
+    return await service.decrypt(msg.chainId, msg.cipherText, msg.nonce);
   };
 };
 
@@ -122,6 +117,6 @@ const handleGetTxEncryptionKeyMsg: (
     );
 
     // XXX: Is there need to ask for user whether approve or reject to getting tx encryption key?
-    return await service.getTxEncryptionKey(env, msg.chainId, msg.nonce);
+    return await service.getTxEncryptionKey(msg.chainId, msg.nonce);
   };
 };

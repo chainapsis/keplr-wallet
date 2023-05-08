@@ -79,7 +79,7 @@ const handleSuggestTokenMsg: (
       msg.origin
     );
 
-    const key = await keyRingCosmosService.getKeySelected(env, msg.chainId);
+    const key = await keyRingCosmosService.getKeySelected(msg.chainId);
     const associatedAccountAddress = Buffer.from(key.address).toString("hex");
 
     await service.suggestToken(
@@ -134,7 +134,7 @@ const handleGetSecret20ViewingKey: (
       msg.origin
     );
 
-    const key = await keyRingCosmosService.getKeySelected(env, msg.chainId);
+    const key = await keyRingCosmosService.getKeySelected(msg.chainId);
     const associatedAccountAddress = Buffer.from(key.address).toString("hex");
 
     return service.getSecret20ViewingKey(

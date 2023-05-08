@@ -1,19 +1,28 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
-import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
+import {
+  MainEmptyView,
+  TokenFoundModal,
+  TokenItem,
+  TokenTitleView,
+} from "./components";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { Button } from "../../components/button";
 import { useStore } from "../../stores";
+import { TextButton } from "../../components/button-text";
+import { Box } from "../../components/box";
+import { Modal } from "../../components/modal";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const zeroDec = new Dec(0);
 
 export const AvailableTabView: FunctionComponent<{
   search: string;
 }> = observer(({ search }) => {
-  const { hugeQueriesStore } = useStore();
+  const { hugeQueriesStore, chainStore } = useStore();
 
   const stakableBalances: ViewToken[] = hugeQueriesStore.stakables;
   const stakableBalancesNonZero = useMemo(() => {
@@ -107,6 +116,29 @@ export const AvailableTabView: FunctionComponent<{
     },
   ];
 
+  const numFoundToken = useMemo(() => {
+    if (chainStore.tokenScans.length === 0) {
+      return 0;
+    }
+
+    const set = new Set<string>();
+
+    for (const tokenScan of chainStore.tokenScans) {
+      for (const info of tokenScan.infos) {
+        for (const asset of info.assets) {
+          const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
+            asset.currency.coinMinimalDenom
+          }`;
+          set.add(key);
+        }
+      }
+    }
+
+    return Array.from(set).length;
+  }, [chainStore.tokenScans]);
+
+  const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
+
   return (
     <React.Fragment>
       <Stack gutter="0.5rem">
@@ -148,6 +180,24 @@ export const AvailableTabView: FunctionComponent<{
           button={<Button text="Get Started" color="primary" size="small" />}
         />
       ) : null}
+
+      {numFoundToken > 0 ? (
+        <Box padding="0.75rem">
+          <TextButton
+            text={`${numFoundToken} new token(s) found`}
+            size="small"
+            onClick={() => setIsFoundTokenModalOpen(true)}
+          />
+        </Box>
+      ) : null}
+
+      <Modal
+        isOpen={isFoundTokenModalOpen && numFoundToken > 0}
+        align="bottom"
+        close={() => setIsFoundTokenModalOpen(false)}
+      >
+        <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
+      </Modal>
     </React.Fragment>
   );
 });

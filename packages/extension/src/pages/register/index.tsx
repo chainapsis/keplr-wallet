@@ -99,7 +99,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
   const [initials] = useState(() => {
     const route = searchParams.get("route");
     const vaultId = searchParams.get("vaultId");
-    if (route === "enable-chains" && vaultId) {
+    if (vaultId) {
       // 이 시점에서 chainStore가 초기화 되어있는게 보장된다.
       if (chainStore.lastSyncedEnabledChainsVaultId !== vaultId) {
         // 잘못된 vaultId로 접근한 것이다.
@@ -108,7 +108,9 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
         // 구조상 처리하기가 너무 빡세진다.
         window.close();
       }
+    }
 
+    if (route === "enable-chains") {
       return {
         header: {
           // TODO: ...
@@ -118,6 +120,24 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
           name: "enable-chains",
           props: {
             vaultId,
+          },
+        },
+      };
+    }
+
+    const chainIds = searchParams.get("chainIds");
+    if (route === "select-derivation-path" && chainIds) {
+      return {
+        header: {
+          // TODO: ...
+          mode: "intro" as const,
+        },
+        scene: {
+          name: "select-derivation-path",
+          props: {
+            vaultId,
+            chainIds: chainIds.split(",").map((chainId) => chainId.trim()),
+            totalCount: chainIds.split(",").length,
           },
         },
       };

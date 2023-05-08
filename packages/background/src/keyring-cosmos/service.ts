@@ -37,14 +37,14 @@ export class KeyRingCosmosService {
     // TODO: ?
   }
 
-  async getKeySelected(env: Env, chainId: string): Promise<Key> {
-    return await this.getKey(env, this.keyRingService.selectedVaultId, chainId);
+  async getKeySelected(chainId: string): Promise<Key> {
+    return await this.getKey(this.keyRingService.selectedVaultId, chainId);
   }
 
-  async getKey(env: Env, vaultId: string, chainId: string): Promise<Key> {
+  async getKey(vaultId: string, chainId: string): Promise<Key> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
-    const pubKey = await this.keyRingService.getPubKey(env, chainId, vaultId);
+    const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
     const isEthermintLike = this.isEthermintLike(chainInfo);
 
@@ -84,7 +84,6 @@ export class KeyRingCosmosService {
   }
 
   async computeNotFinalizedMnemonicKeyAddresses(
-    env: Env,
     vaultId: string,
     chainId: string
   ): Promise<
@@ -110,7 +109,6 @@ export class KeyRingCosmosService {
     for (const coinType of coinTypes) {
       const pubKey =
         await this.keyRingService.getPubKeyWithNotFinalizedCoinType(
-          env,
           chainId,
           vaultId,
           coinType
@@ -187,7 +185,7 @@ export class KeyRingCosmosService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const key = await this.getKey(env, vaultId, chainId);
+    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         .bech32PrefixAccAddr;
@@ -248,7 +246,6 @@ export class KeyRingCosmosService {
           signature = res.signature;
         } else {
           signature = await this.keyRingService.sign(
-            env,
             chainId,
             vaultId,
             serializeSignDoc(newSignDoc),
@@ -265,7 +262,6 @@ export class KeyRingCosmosService {
   }
 
   async privilegeSignAminoWithdrawRewards(
-    env: Env,
     chainId: string,
     signer: string,
     signDoc: StdSignDoc
@@ -297,7 +293,7 @@ export class KeyRingCosmosService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const key = await this.getKey(env, vaultId, chainId);
+    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         .bech32PrefixAccAddr;
@@ -332,7 +328,6 @@ export class KeyRingCosmosService {
 
     try {
       const signature = await this.keyRingService.sign(
-        env,
         chainId,
         vaultId,
         serializeSignDoc(signDoc),
@@ -396,7 +391,7 @@ export class KeyRingCosmosService {
       );
     }
 
-    const key = await this.getKey(env, vaultId, chainId);
+    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         .bech32PrefixAccAddr;
@@ -436,7 +431,6 @@ export class KeyRingCosmosService {
           signature = res.signature;
         } else {
           signature = await this.keyRingService.sign(
-            env,
             chainId,
             vaultId,
             serializeSignDoc(newSignDoc),
@@ -475,7 +469,7 @@ export class KeyRingCosmosService {
       );
     }
 
-    const key = await this.getKey(env, vaultId, chainId);
+    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         .bech32PrefixAccAddr;
@@ -512,7 +506,6 @@ export class KeyRingCosmosService {
           signature = res.signature;
         } else {
           signature = await this.keyRingService.sign(
-            env,
             chainId,
             vaultId,
             newSignDocBytes,
@@ -551,14 +544,12 @@ export class KeyRingCosmosService {
   }
 
   async verifyAminoADR36Selected(
-    env: Env,
     chainId: string,
     signer: string,
     data: Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
     return await this.verifyAminoADR36(
-      env,
       this.keyRingService.selectedVaultId,
       chainId,
       signer,
@@ -568,14 +559,13 @@ export class KeyRingCosmosService {
   }
 
   async verifyAminoADR36(
-    env: Env,
     vaultId: string,
     chainId: string,
     signer: string,
     data: Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
-    const key = await this.getKey(env, vaultId, chainId);
+    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         .bech32PrefixAccAddr;
@@ -671,7 +661,7 @@ export class KeyRingCosmosService {
     signDoc = trimAminoSignDoc(signDoc);
     signDoc = sortObjectByKey(signDoc);
 
-    const key = await this.getKey(env, vaultId, chainId);
+    const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
       this.chainsService.getChainInfoOrThrow(chainId).bech32Config
         .bech32PrefixAccAddr;
@@ -721,12 +711,10 @@ export class KeyRingCosmosService {
 
   // secret wasm에서만 사용됨
   async legacySignArbitraryInternal(
-    env: Env,
     chainId: string,
     memo: string
   ): Promise<Uint8Array> {
     return await this.keyRingService.sign(
-      env,
       chainId,
       this.keyRingService.selectedVaultId,
       Buffer.from(

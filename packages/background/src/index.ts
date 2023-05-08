@@ -21,6 +21,7 @@ import * as KeyRingLedger from "./keyring-ledger/internal";
 import * as KeyRingPrivateKey from "./keyring-private-key/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
+import * as TokenScan from "./token-scan/internal";
 
 export * from "./chains";
 export * from "./chains-ui";
@@ -40,6 +41,7 @@ export * from "./permission-interactive";
 export * as KeyRingV2 from "./keyring-v2";
 export * from "./vault";
 export * from "./keyring-cosmos";
+export * from "./token-scan";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -170,6 +172,15 @@ export function init(
     keyRingCosmosService
   );
 
+  const tokenScanService = new TokenScan.TokenScanService(
+    storeCreator("token-scan"),
+    chainsService,
+    chainsUIService,
+    vaultService,
+    keyRingV2Service,
+    keyRingCosmosService
+  );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(router, chainsService, permissionService);
@@ -195,6 +206,7 @@ export function init(
     keyRingCosmosService
   );
   SecretWasm.init(router, secretWasmService, permissionInteractiveService);
+  TokenScan.init(router, tokenScanService);
 
   return {
     initFn: async () => {
@@ -224,6 +236,8 @@ export function init(
       await permissionInteractiveService.init();
 
       await secretWasmService.init();
+
+      await tokenScanService.init();
     },
   };
 }

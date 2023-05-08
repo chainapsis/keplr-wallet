@@ -3,7 +3,6 @@ import { ChainsService } from "../chains";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { Env } from "@keplr-wallet/router";
 import { Buffer } from "buffer/";
 import { KeyRingCosmosService } from "../keyring-cosmos";
 import { Hash } from "@keplr-wallet/crypto";
@@ -55,30 +54,28 @@ export class SecretWasmService {
     this.cacheEnigmaUtils = new Map();
   };
 
-  async getPubkey(env: Env, chainId: string): Promise<Uint8Array> {
+  async getPubkey(chainId: string): Promise<Uint8Array> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
-    const seed = await this.getSeed(env, chainInfo);
+    const seed = await this.getSeed(chainInfo);
 
     const utils = this.getEnigmaUtils(chainInfo, seed);
     return utils.pubkey;
   }
 
   async getTxEncryptionKey(
-    env: Env,
     chainId: string,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
 
-    const seed = await this.getSeed(env, chainInfo);
+    const seed = await this.getSeed(chainInfo);
 
     const utils = this.getEnigmaUtils(chainInfo, seed);
     return utils.getTxEncryptionKey(nonce);
   }
 
   async encrypt(
-    env: Env,
     chainId: string,
     contractCodeHash: string,
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -90,7 +87,7 @@ export class SecretWasmService {
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
     // For now, use the signature of some string to generate the seed.
     // It need to more research.
-    const seed = await this.getSeed(env, chainInfo);
+    const seed = await this.getSeed(chainInfo);
 
     const utils = this.getEnigmaUtils(chainInfo, seed);
 
@@ -98,7 +95,6 @@ export class SecretWasmService {
   }
 
   async decrypt(
-    env: Env,
     chainId: string,
     ciphertext: Uint8Array,
     nonce: Uint8Array
@@ -109,7 +105,7 @@ export class SecretWasmService {
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
     // For now, use the signature of some string to generate the seed.
     // It need to more research.
-    const seed = await this.getSeed(env, chainInfo);
+    const seed = await this.getSeed(chainInfo);
 
     const utils = this.getEnigmaUtils(chainInfo, seed);
 
@@ -130,17 +126,15 @@ export class SecretWasmService {
     return utils;
   }
 
-  protected async getSeed(env: Env, chainInfo: ChainInfo): Promise<Uint8Array> {
+  protected async getSeed(chainInfo: ChainInfo): Promise<Uint8Array> {
     const key = await this.keyRingCosmosService.getKeySelected(
-      env,
       chainInfo.chainId
     );
 
-    return await this.getSeedInner(env, chainInfo, key.bech32Address);
+    return await this.getSeedInner(chainInfo, key.bech32Address);
   }
 
   protected async getSeedInner(
-    env: Env,
     chainInfo: ChainInfo,
     bech32Address: string
   ): Promise<Uint8Array> {
@@ -156,7 +150,6 @@ export class SecretWasmService {
     // TODO: I don't know how to handle this in ledger.
     const seed = Hash.sha256(
       await this.keyRingCosmosService.legacySignArbitraryInternal(
-        env,
         chainInfo.chainId,
         "Create Keplr Secret encryption key. Only approve requests by Keplr."
       )
