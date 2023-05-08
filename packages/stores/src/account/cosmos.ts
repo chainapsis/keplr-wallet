@@ -940,6 +940,7 @@ export class CosmosAccountImpl {
             .features?.includes("eth-key-sign") === true;
 
         const eip712Signing = useEthereumSign && this.base.isNanoLedger;
+        const chainIsInjective = this.chainId.startsWith("injective");
 
         // On ledger with ethermint, eip712 types are required and we can't omit `timeoutTimestamp`.
         // Although we are not using `timeoutTimestamp` at present, just set it as mas uint64 only for eip712 cosmos tx.
@@ -966,6 +967,15 @@ export class CosmosAccountImpl {
                 .toString(),
             },
             timeout_timestamp: timeoutTimestamp as string | undefined,
+            ...(() => {
+              if (eip712Signing && chainIsInjective) {
+                return {
+                  memo: "IBC Transfer",
+                };
+              }
+
+              return;
+            })(),
           },
         };
 
@@ -996,6 +1006,7 @@ export class CosmosAccountImpl {
                     revisionHeight: msg.value.timeout_height.revision_height,
                   },
                   timeoutTimestamp: msg.value.timeout_timestamp,
+                  memo: msg.value.memo,
                 })
               ).finish(),
             },
@@ -1009,6 +1020,18 @@ export class CosmosAccountImpl {
               { name: "receiver", type: "string" },
               { name: "timeout_height", type: "TypeTimeoutHeight" },
               { name: "timeout_timestamp", type: "uint64" },
+              ...(() => {
+                if (eip712Signing && chainIsInjective) {
+                  return [
+                    {
+                      name: "memo",
+                      type: "string",
+                    },
+                  ];
+                }
+
+                return [];
+              })(),
             ],
             TypeToken: [
               { name: "denom", type: "string" },
