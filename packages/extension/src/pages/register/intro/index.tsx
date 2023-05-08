@@ -28,7 +28,7 @@ export const RegisterIntroScene: FunctionComponent = () => {
       <YAxis alignX="center">
         <video width="200" height="200" autoPlay={true} loop={true}>
           <source
-            src={require("../../../public/assets/lottie/register/intro.mp4")}
+            src={require("../../../public/assets/lottie/register/intro-2.webm")}
           />
         </video>
       </YAxis>
