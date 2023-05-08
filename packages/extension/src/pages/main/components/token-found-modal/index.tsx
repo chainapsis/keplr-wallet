@@ -169,32 +169,38 @@ export const TokenFoundModal: FunctionComponent<{
         </Stack>
       </Box>
 
-      <Gutter size="0.75rem" />
-      <Box alignX="center">
-        <Box
-          style={{
-            cursor: "pointer",
-          }}
-          onClick={(e) => {
-            e.preventDefault();
+      {keyRingStore.selectedKeyInfo?.type === "ledger" ? (
+        <React.Fragment>
+          <Gutter size="0.75rem" />
+          <Box alignX="center">
+            <Box
+              style={{
+                cursor: "pointer",
+              }}
+              onClick={(e) => {
+                e.preventDefault();
 
-            if (keyRingStore.selectedKeyInfo) {
-              browser.tabs
-                .create({
-                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}`,
-                })
-                .then(() => {
-                  window.close();
-                });
-            }
-          }}
-        >
-          <Button2 color={ColorPalette["gray-300"]}>
-            Are you finding Injective, Evmos token?
-          </Button2>
-        </Box>
-      </Box>
-      <Gutter size="1.25rem" />
+                if (keyRingStore.selectedKeyInfo) {
+                  browser.tabs
+                    .create({
+                      url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}`,
+                    })
+                    .then(() => {
+                      window.close();
+                    });
+                }
+              }}
+            >
+              <Button2 color={ColorPalette["gray-300"]}>
+                Add tokens on Injective and Evmos
+              </Button2>
+            </Box>
+          </Box>
+          <Gutter size="1.25rem" />
+        </React.Fragment>
+      ) : (
+        <Gutter size="0.75rem" />
+      )}
 
       <Button text="Add Chains" size="large" onClick={buttonClicked} />
     </Box>
