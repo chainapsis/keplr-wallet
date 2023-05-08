@@ -1,0 +1,3 @@
+[submodule "packages/extension/src/keplr-wallet-private"]
+	path = packages/extension/src/keplr-wallet-private
+	url = https://github.com/chainapsis/keplr-wallet-private
