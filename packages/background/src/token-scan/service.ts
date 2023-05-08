@@ -69,7 +69,7 @@ export class TokenScanService {
           let prevTokenScans = this.vaultToMap.get(vaultId);
           if (prevTokenScans) {
             prevTokenScans = prevTokenScans.filter((tokenScan) => {
-              return chainIdentifiers.includes(
+              return !chainIdentifiers.includes(
                 ChainIdHelper.parse(tokenScan.chainId).identifier
               );
             });
@@ -120,7 +120,7 @@ export class TokenScanService {
     }
   }
 
-  protected async scan(vaultId: string, chainId: string): Promise<void> {
+  async scan(vaultId: string, chainId: string): Promise<void> {
     if (this.keyRingService.keyRingStatus !== "unlocked") {
       return;
     }
@@ -152,7 +152,7 @@ export class TokenScanService {
     }
   }
 
-  protected async scanAll(vaultId: string): Promise<void> {
+  async scanAll(vaultId: string): Promise<void> {
     if (this.keyRingService.keyRingStatus !== "unlocked") {
       return;
     }
@@ -242,7 +242,7 @@ export class TokenScanService {
         ).map((addr) => addr.bech32Address);
       } else {
         return [
-          (await this.keyRingCosmosService.getKey(chainId, vaultId))
+          (await this.keyRingCosmosService.getKey(vaultId, chainId))
             .bech32Address,
         ];
       }

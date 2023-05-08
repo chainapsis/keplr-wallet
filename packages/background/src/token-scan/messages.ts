@@ -25,3 +25,30 @@ export class GetTokenScansMsg extends Message<TokenScan[]> {
     return GetTokenScansMsg.type();
   }
 }
+
+export class RevalidateTokenScansMsg extends Message<{
+  vaultId: string;
+  tokenScans: TokenScan[];
+}> {
+  public static type() {
+    return "revalidate-token-scans";
+  }
+
+  constructor(public readonly vaultId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.vaultId) {
+      throw new Error("Empty vault id");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RevalidateTokenScansMsg.type();
+  }
+}

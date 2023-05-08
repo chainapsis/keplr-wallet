@@ -1,4 +1,11 @@
-import { autorun, computed, flow, makeObservable, observable } from "mobx";
+import {
+  autorun,
+  computed,
+  flow,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 
 import {
   ChainStore as BaseChainStore,
@@ -15,6 +22,7 @@ import {
   GetEnabledChainIdentifiersMsg,
   GetTokenScansMsg,
   RemoveSuggestedChainInfoMsg,
+  RevalidateTokenScansMsg,
   ToggleChainsMsg,
   TokenScan,
   TryUpdateEnabledChainInfosMsg,
@@ -257,6 +265,13 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       return;
     }
 
+    if (
+      this._lastSyncedEnabledChainsVaultId ===
+      this.keyRingStore.selectedKeyInfo.id
+    ) {
+      return;
+    }
+
     const id = this.keyRingStore.selectedKeyInfo.id;
     const msg = new GetEnabledChainIdentifiersMsg(id);
     this._enabledChainIdentifiers = yield* toGenerator(
@@ -266,6 +281,29 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this._tokenScans = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetTokenScansMsg(id))
     );
+    (async () => {
+      await new Promise<void>((resolve) => {
+        const disposal = autorun(() => {
+          if (this.keyRingStore.status === "unlocked") {
+            resolve();
+
+            if (disposal) {
+              disposal();
+            }
+          }
+        });
+      });
+
+      const res = await this.requester.sendMessage(
+        BACKGROUND_PORT,
+        new RevalidateTokenScansMsg(id)
+      );
+      if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
+        runInAction(() => {
+          this._tokenScans = res.tokenScans;
+        });
+      }
+    })();
 
     this._lastSyncedEnabledChainsVaultId = id;
   }

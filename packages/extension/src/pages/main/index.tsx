@@ -47,6 +47,8 @@ export const MainPage: FunctionComponent = observer(() => {
     queriesStore,
   } = useStore();
 
+  console.log(chainStore.tokenScans);
+
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
   const icnsPrimaryName = (() => {
