@@ -269,13 +269,14 @@ export class TokenScanService {
             if (typeof bal.amount !== "string") {
               throw new Error("Invalid amount");
             }
-            new Dec(bal.amount);
-            // validate
 
-            assets.push({
-              currency,
-              amount: bal.amount,
-            });
+            const dec = new Dec(bal.amount);
+            if (dec.gt(new Dec(0))) {
+              assets.push({
+                currency,
+                amount: bal.amount,
+              });
+            }
           }
         }
 

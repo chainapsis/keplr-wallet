@@ -110,8 +110,16 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     return map;
   }
 
+  @computed
   get tokenScans(): TokenScan[] {
-    return this._tokenScans;
+    return this._tokenScans.filter((scan) => {
+      if (!this.hasChain(scan.chainId)) {
+        return false;
+      }
+
+      const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
+      return !this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
   }
 
   @computed
