@@ -27,6 +27,8 @@ export const Styles = {
         ? ColorPalette["blue-400"]
         : ColorPalette["gray-400"]};
     border-radius: ${({ size }) => (size === "small" ? "0.25rem" : "0.4rem")};
+
+    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   `,
   HiddenCheckBox: styled.input.attrs({ type: "checkbox" })`
     border: 0;

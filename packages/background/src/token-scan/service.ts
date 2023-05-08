@@ -14,6 +14,7 @@ export type TokenScan = {
   chainId: string;
   infos: {
     bech32Address: string;
+    coinType?: number;
     assets: {
       currency: AppCurrency;
       amount: string;
@@ -230,7 +231,10 @@ export class TokenScanService {
       infos: [],
     };
 
-    const bech32Addresses: string[] = await (async () => {
+    const bech32Addresses: {
+      value: string;
+      coinType?: number;
+    }[] = await (async () => {
       if (
         this.keyRingService.needMnemonicKeyCoinTypeFinalize(vaultId, chainId)
       ) {
@@ -239,11 +243,18 @@ export class TokenScanService {
             vaultId,
             chainId
           )
-        ).map((addr) => addr.bech32Address);
+        ).map((addr) => {
+          return {
+            value: addr.bech32Address,
+            coinType: addr.coinType,
+          };
+        });
       } else {
         return [
-          (await this.keyRingCosmosService.getKey(vaultId, chainId))
-            .bech32Address,
+          {
+            value: (await this.keyRingCosmosService.getKey(vaultId, chainId))
+              .bech32Address,
+          },
         ];
       }
     })();
@@ -253,7 +264,7 @@ export class TokenScanService {
         balances: { denom: string; amount: string }[];
       }>(
         chainInfo.rest,
-        `/cosmos/bank/v1beta1/balances/${bech32Address}?pagination.limit=1000`
+        `/cosmos/bank/v1beta1/balances/${bech32Address.value}?pagination.limit=1000`
       );
 
       if (res.status === 200) {
@@ -282,7 +293,8 @@ export class TokenScanService {
 
         if (assets.length > 0) {
           tokenScan.infos.push({
-            bech32Address,
+            bech32Address: bech32Address.value,
+            coinType: bech32Address.coinType,
             assets,
           });
         }

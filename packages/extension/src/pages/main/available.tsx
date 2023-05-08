@@ -196,7 +196,7 @@ export const AvailableTabView: FunctionComponent<{
         align="bottom"
         close={() => setIsFoundTokenModalOpen(false)}
       >
-        <TokenFoundModal />
+        <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
       </Modal>
     </React.Fragment>
   );
