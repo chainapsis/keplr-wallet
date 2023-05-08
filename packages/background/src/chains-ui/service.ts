@@ -14,6 +14,11 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { computedFn } from "mobx-utils";
 import { VaultService } from "../vault";
 
+type ChainUIEnabledChangedHandler = (
+  vaultId: string,
+  chainIdentifiers: ReadonlyArray<string>
+) => void;
+
 export class ChainsUIService {
   // @observable.deep을 안쓴 이유가 있는데...
   // value가 빈값이 나올 경우에는 첫번째 chain info를 하나 가진 배열을 반환한다.
@@ -28,6 +33,9 @@ export class ChainsUIService {
     string,
     ReadonlyArray<string>
   >();
+
+  protected onChainUIEnabledChangedHandlers: ChainUIEnabledChangedHandler[] =
+    [];
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -164,6 +172,10 @@ export class ChainsUIService {
     }
 
     this.enabledChainIdentifiersMap.set(vaultId, newIdentifiers);
+
+    for (const handler of this.onChainUIEnabledChangedHandlers) {
+      handler(vaultId, this.enabledChainIdentifiersForVault(vaultId));
+    }
   }
 
   @action
@@ -197,6 +209,10 @@ export class ChainsUIService {
     }
 
     this.enabledChainIdentifiersMap.set(vaultId, newIdentifiers);
+
+    for (const handler of this.onChainUIEnabledChangedHandlers) {
+      handler(vaultId, this.enabledChainIdentifiersForVault(vaultId));
+    }
   }
 
   getVaultsByEnabledChain = computedFn(
@@ -229,6 +245,10 @@ export class ChainsUIService {
     return Array.from(set).filter((chainIdentifier) => {
       return this.chainsService.hasChainInfo(chainIdentifier);
     });
+  }
+
+  addChainUIEnabledChangedHandler(handler: ChainUIEnabledChangedHandler) {
+    this.onChainUIEnabledChangedHandlers.push(handler);
   }
 
   protected readonly onChainRemoved = (chainInfo: ChainInfo) => {

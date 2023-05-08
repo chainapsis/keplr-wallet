@@ -13,8 +13,10 @@ import {
   EnableChainsMsg,
   GetChainInfosWithCoreTypesMsg,
   GetEnabledChainIdentifiersMsg,
+  GetTokenScansMsg,
   RemoveSuggestedChainInfoMsg,
   ToggleChainsMsg,
+  TokenScan,
   TryUpdateEnabledChainInfosMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
@@ -29,6 +31,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected _lastSyncedEnabledChainsVaultId: string = "";
   @observable.ref
   protected _enabledChainIdentifiers: string[] = [];
+
+  @observable.ref
+  protected _tokenScans: TokenScan[] = [];
 
   constructor(
     protected readonly embedChainInfos: ChainInfo[],
@@ -95,6 +100,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       map.set(chainIdentifier, true);
     }
     return map;
+  }
+
+  get tokenScans(): TokenScan[] {
+    return this._tokenScans;
   }
 
   @computed
@@ -253,6 +262,11 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
+
+    this._tokenScans = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, new GetTokenScansMsg(id))
+    );
+
     this._lastSyncedEnabledChainsVaultId = id;
   }
 
