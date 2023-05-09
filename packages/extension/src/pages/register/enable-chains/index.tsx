@@ -9,7 +9,7 @@ import {
   useSceneTransition,
 } from "../../../components/transition";
 import { ChainInfo } from "@keplr-wallet/types";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { Box } from "../../../components/box";
 import { Column, Columns } from "../../../components/column";
 import { XAxis, YAxis } from "../../../components/axis";
@@ -25,6 +25,7 @@ import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -53,7 +54,8 @@ export const EnableChainsScene: FunctionComponent<{
     isFresh,
     fallbackEthereumLedgerApp,
   }) => {
-    const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
+    const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
+      useStore();
 
     const navigate = useNavigate();
 
@@ -157,6 +159,22 @@ export const EnableChainsScene: FunctionComponent<{
         })();
       }
     });
+    const candidateAddressesMap = useMemo(() => {
+      const map: Map<
+        string,
+        {
+          coinType: number;
+          address: string;
+        }[]
+      > = new Map();
+      for (const candidateAddress of candidateAddresses) {
+        map.set(
+          ChainIdHelper.parse(candidateAddress.chainId).identifier,
+          candidateAddress.bech32Addresses
+        );
+      }
+      return map;
+    }, [candidateAddresses]);
 
     // Handle coin type selection.
     useEffect(() => {
@@ -315,13 +333,22 @@ export const EnableChainsScene: FunctionComponent<{
       return map;
     }, [enabledChainIdentifiers]);
 
+    // 기본적으로 최초로 활성화되어있던 체인의 경우 sort에서 우선권을 가진다.
+    const [sortPriorityChainIdentifierMap] = useState(
+      enabledChainIdentifierMap
+    );
+
     const searchRef = useFocusOnMount<HTMLInputElement>();
 
     const [search, setSearch] = useState<string>("");
 
     // 검색 뿐만 아니라 로직에 따른 선택할 수 있는 체인 목록을 가지고 있다.
     // 그러니까 로직을 파악해서 주의해서 사용해야함.
-    const chainInfos = useMemo(() => {
+    // 그리고 이를 토대로 balance에 따른 sort를 진행한다.
+    // queries store의 구조 문제로 useMemo 안에서 balance에 따른 sort를 진행하긴 힘들다.
+    // 그래서 이를 위한 변수로 따로 둔다.
+    // 실제로는 chainInfos를 사용하면 된다.
+    const preSortChainInfos = useMemo(() => {
       let chainInfos = chainStore.chainInfos.slice();
 
       if (keyType === "ledger") {
@@ -376,6 +403,62 @@ export const EnableChainsScene: FunctionComponent<{
         });
       }
     }, [chainStore.chainInfos, fallbackEthereumLedgerApp, keyType, search]);
+    const chainInfos = preSortChainInfos.sort((a, b) => {
+      const aHasPriority = sortPriorityChainIdentifierMap.has(
+        a.chainIdentifier
+      );
+      const bHasPriority = sortPriorityChainIdentifierMap.has(
+        b.chainIdentifier
+      );
+
+      if (aHasPriority && !bHasPriority) {
+        return -1;
+      }
+
+      if (!aHasPriority && bHasPriority) {
+        return 1;
+      }
+
+      const aBalance = (() => {
+        const addresses = candidateAddressesMap.get(a.chainIdentifier);
+        if (addresses && addresses.length > 0) {
+          return queriesStore
+            .get(a.chainId)
+            .queryBalances.getQueryBech32Address(addresses[0].address).stakable
+            .balance;
+        }
+
+        return new CoinPretty(
+          chainStore.getChain(a.chainId).stakeCurrency,
+          "0"
+        );
+      })();
+      const bBalance = (() => {
+        const addresses = candidateAddressesMap.get(b.chainIdentifier);
+        if (addresses && addresses.length > 0) {
+          return queriesStore
+            .get(b.chainId)
+            .queryBalances.getQueryBech32Address(addresses[0].address).stakable
+            .balance;
+        }
+
+        return new CoinPretty(
+          chainStore.getChain(b.chainId).stakeCurrency,
+          "0"
+        );
+      })();
+
+      const aPrice = priceStore.calculatePrice(aBalance)?.toDec() ?? new Dec(0);
+      const bPrice = priceStore.calculatePrice(bBalance)?.toDec() ?? new Dec(0);
+
+      if (!aPrice.equals(bPrice)) {
+        return aPrice.gt(bPrice) ? -1 : 1;
+      }
+
+      // balance의 fiat 기준으로 sort.
+      // 같으면 이름 기준으로 sort.
+      return a.chainName.localeCompare(b.chainName);
+    });
 
     const numSelected = useMemo(() => {
       const chainInfoMap = new Map<string, ChainInfo>();
