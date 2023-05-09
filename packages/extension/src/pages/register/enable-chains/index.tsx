@@ -767,7 +767,7 @@ const ChainItem: FunctionComponent<{
                   {balance
                     .maxDecimals(6)
                     .shrink(true)
-                    .hideDenom(true)
+                    .inequalitySymbol(true)
                     .toString()}
                 </div>
                 <Gutter size="0.25rem" />
