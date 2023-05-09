@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { ColorPalette } from "../../../styles";
 import { Subtitle3 } from "../../../components/typography";
@@ -10,6 +10,8 @@ import { useStore } from "../../../stores";
 import { useSearchParams } from "react-router-dom";
 import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
+import lottie from "lottie-web";
+import AniMnemonic from "../../../public/assets/lottie/wallet/mnemonic.json";
 
 interface FormData {
   password: string;
@@ -18,6 +20,8 @@ interface FormData {
 export const WalletShowSensitivePage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
   const [searchParams] = useSearchParams();
+
+  const animDivRef = useRef<HTMLDivElement | null>(null);
 
   const vaultId = searchParams.get("id");
 
@@ -37,6 +41,20 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     setFocus("password");
+
+    if (animDivRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animDivRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: AniMnemonic,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
   }, [setFocus]);
 
   return (
@@ -102,10 +120,14 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
         {sensitive === "" ? (
           <React.Fragment>
             <Box alignX="center" alignY="center" style={{ flex: 1 }}>
-              <Box
-                width="8.5rem"
-                height="8.5rem"
-                backgroundColor={ColorPalette["gray-200"]}
+              <div
+                ref={animDivRef}
+                style={{
+                  backgroundColor: ColorPalette["gray-600"],
+                  borderRadius: "2.5rem",
+                  width: "8.5rem",
+                  height: "8.5rem",
+                }}
               />
 
               <Gutter size="2rem" />
