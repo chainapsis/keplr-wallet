@@ -250,6 +250,7 @@ export const ChatsViewSection = ({
                   chainId={current.chainId}
                   showDate={check}
                   message={message?.contents}
+                  messageId={message?.id}
                   isSender={message?.sender === accountInfo.bech32Address} // if I am the sender of this message
                   timestamp={message?.commitTimestamp || 1549312452}
                   groupLastSeenTimestamp={0}

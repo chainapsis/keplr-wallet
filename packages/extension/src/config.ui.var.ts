@@ -47,18 +47,30 @@ if (process.env.NODE_ENV === "production") {
 export const GRAPHQL_URL = { SUBSCRIPTION_SERVER, MESSAGING_SERVER };
 
 let FETCHHUB_AGENT, DORADO_AGENT;
+let FETCHHUB_FEEDBACK, DORADO_FEEDBACK;
 
 if (process.env.NODE_ENV === "production") {
   FETCHHUB_AGENT =
     "agent1qvmfez9k6fycllzqc6p7telhwyzzj709n32sc5x2q0ss62ehqc3e52qgna7";
   DORADO_AGENT =
     "agent1qdhydny2mmdntqn6dx3d3wpyukaq855j2yexl2f0z07d5esl76932mctpvf";
+  FETCHHUB_FEEDBACK = "https://fetchbot.prod.fetch-ai.com/";
+  DORADO_FEEDBACK = "https://fetchbot-dorado.prod.fetch-ai.com/";
 } else {
   FETCHHUB_AGENT =
     "agent1qv5rmumv0xe0fqlmm3k4lxu4mhmz9aluy07tgp5lmzr2z0mccttcyjksf7r";
   DORADO_AGENT =
     "agent1qtvyuq8gkywtymym00n83llwcj6dscwfaz9dgdhm2dw0e9tqmkzq7tesse9";
+  FETCHHUB_FEEDBACK =
+    "https://fetchbot-uagent-staging-mainnet.sandbox-london-b.fetch-ai.com";
+  DORADO_FEEDBACK =
+    "https://fetchbot-uagent-staging.sandbox-london-b.fetch-ai.com";
 }
+
+export const AGENT_FEEDBACK_URL: { [key: string]: string } = {
+  [CHAIN_ID_DORADO]: DORADO_FEEDBACK,
+  [CHAIN_ID_FETCHHUB]: FETCHHUB_FEEDBACK,
+};
 
 export const AGENT_ADDRESS: { [key: string]: string } = {
   [CHAIN_ID_FETCHHUB]: FETCHHUB_AGENT,

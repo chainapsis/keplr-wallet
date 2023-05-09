@@ -335,6 +335,7 @@ export const ChatsViewSection = ({
             <div key={message.id}>
               {group !== undefined && (
                 <ChatMessage
+                  messageId={message?.id}
                   chainId={current.chainId}
                   showDate={check}
                   message={message?.contents}
