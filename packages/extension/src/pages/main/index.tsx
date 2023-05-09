@@ -12,6 +12,7 @@ import {
   CopyAddress,
   CopyAddressModal,
   InternalLinkView,
+  BuyCryptoModal,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
@@ -108,6 +109,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
   const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
+  const [isOpenBuy, setIsOpenBuy] = React.useState(false);
 
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
@@ -208,7 +210,13 @@ export const MainPage: FunctionComponent = observer(() => {
               </H1>
             </Box>
           </Box>
-          {tabStatus === "available" ? <Buttons /> : null}
+          {tabStatus === "available" ? (
+            <Buttons
+              onClickDeposit={() => setIsOpenCopyAddress(true)}
+              onClickBuy={() => setIsOpenBuy(true)}
+            />
+          ) : null}
+
           <ClaimAll />
           <InternalLinkView />
           {tabStatus === "available" ? (
@@ -264,6 +272,14 @@ export const MainPage: FunctionComponent = observer(() => {
         close={() => setIsOpenCopyAddress(false)}
       >
         <CopyAddressModal close={() => setIsOpenCopyAddress(false)} />
+      </Modal>
+
+      <Modal
+        isOpen={isOpenBuy}
+        align="bottom"
+        close={() => setIsOpenBuy(false)}
+      >
+        <BuyCryptoModal close={() => setIsOpenBuy(false)} />
       </Modal>
     </HeaderLayout>
   );
