@@ -202,7 +202,12 @@ export const TokenFoundModal: FunctionComponent<{
         <Gutter size="0.75rem" />
       )}
 
-      <Button text="Add Chains" size="large" onClick={buttonClicked} />
+      <Button
+        text="Add Chains"
+        size="large"
+        disabled={checkedChainIdentifiers.length === 0}
+        onClick={buttonClicked}
+      />
     </Box>
   );
 });
