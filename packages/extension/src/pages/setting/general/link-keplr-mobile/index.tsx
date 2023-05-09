@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
@@ -8,6 +8,9 @@ import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle3 } from "../../../../components/typography";
 import { TextInput } from "../../../../components/input";
+import lottie from "lottie-web";
+import AnimScan from "../../../../public/assets/lottie/wallet/scan.json";
+import { YAxis } from "../../../../components/axis";
 
 const Styles = {
   Container: styled(Stack)`
@@ -38,6 +41,24 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
 
 const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
   ({ onClick }) => {
+    const animDivRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      if (animDivRef.current) {
+        const anim = lottie.loadAnimation({
+          container: animDivRef.current,
+          renderer: "svg",
+          loop: true,
+          autoplay: true,
+          animationData: AnimScan,
+        });
+
+        return () => {
+          anim.destroy();
+        };
+      }
+    }, []);
+
     return (
       <HeaderLayout
         title="Link Keplr Mobile"
@@ -49,7 +70,7 @@ const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
           onClick,
         }}
       >
-        <Styles.Container>
+        <Styles.Container gutter="0.75rem">
           <GuideBox
             title="Only scan on Keplr Mobile"
             paragraph={
@@ -59,6 +80,19 @@ const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
               </div>
             }
           />
+
+          <YAxis alignX="center">
+            <div
+              ref={animDivRef}
+              style={{
+                backgroundColor: ColorPalette["gray-600"],
+                borderRadius: "2.5rem",
+                width: "9.375rem",
+                height: "9.375rem",
+              }}
+            />
+          </YAxis>
+
           <Styles.Paragraph>
             Scan QR code to export accounts to Keplr Mobile. The process may
             take several minutes.

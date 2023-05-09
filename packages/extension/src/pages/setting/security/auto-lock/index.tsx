@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../../layouts/header";
 import { BackButton } from "../../../../layouts/header/components";
@@ -20,6 +20,9 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { YAxis } from "../../../../components/axis";
+import lottie from "lottie-web";
+import AnimShield from "../../../../public/assets/lottie/wallet/shield.json";
 
 export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,17 +31,20 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
   const minDuration = 0;
   const maxDuration = 4320;
 
-  const { watch, setValue, register, handleSubmit, formState } = useForm<{
-    timer: string;
-  }>({
-    mode: "onChange",
-    defaultValues: {
-      timer: "0",
-    },
-  });
+  const { watch, setValue, register, handleSubmit, formState, setFocus } =
+    useForm<{
+      timer: string;
+    }>({
+      mode: "onChange",
+      defaultValues: {
+        timer: "0",
+      },
+    });
 
   const watchTimer = watch("timer");
   const watchTimerParsed = parseInt(watchTimer);
+
+  const animDivRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const msg = new GetAutoLockAccountDurationMsg();
@@ -51,6 +57,22 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
 
   const [lockOnSleep, setLockOnSleep] = useState(false);
   useEffect(() => {
+    setFocus("timer");
+
+    if (animDivRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animDivRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: AnimShield,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
+
     const msg = new GetLockOnSleepMsg();
     new InExtensionMessageRequester()
       .sendMessage(BACKGROUND_PORT, msg)
@@ -109,13 +131,17 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
           You can set how long it takes Keplr to automatically lock.
         </Body2>
 
-        <Box
-          width="8.5rem"
-          height="8.5rem"
-          backgroundColor={ColorPalette["gray-200"]}
-        >
-          Image
-        </Box>
+        <YAxis alignX="center">
+          <div
+            ref={animDivRef}
+            style={{
+              backgroundColor: ColorPalette["gray-600"],
+              borderRadius: "2.5rem",
+              width: "8.5rem",
+              height: "8.5rem",
+            }}
+          />
+        </YAxis>
 
         <Gutter size="3.125rem" />
 
