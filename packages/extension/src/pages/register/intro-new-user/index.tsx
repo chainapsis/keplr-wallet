@@ -16,6 +16,7 @@ import { useRegisterHeader } from "../components/header";
 import { RegisterH4 } from "../components/typography";
 import { TextButton } from "../../../components/button-text";
 import { AppleIcon, GoogleIcon, KeyIcon } from "../../../components/icon";
+import * as KeplrWalletPrivate from "keplr-wallet-private";
 
 export const RegisterIntroNewUserScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
@@ -108,7 +109,11 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
                 color="secondary"
                 left={<GoogleIcon />}
                 onClick={() => {
-                  alert("TODO: Not implemented yet");
+                  if (KeplrWalletPrivate.onGoogleSignInClick) {
+                    KeplrWalletPrivate.onGoogleSignInClick(sceneTransition);
+                  } else {
+                    alert("Not supported");
+                  }
                 }}
               />
               <Button

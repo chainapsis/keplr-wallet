@@ -36,6 +36,12 @@ export const RegisterHeader: FunctionComponent<{
           }
           break;
         }
+        case "empty": {
+          if (headerSceneRef.current.currentScene !== "empty") {
+            headerSceneRef.current.replace("empty", {});
+          }
+          break;
+        }
         case "welcome": {
           if (headerSceneRef.current.currentScene !== "welcome") {
             headerSceneRef.current.replace("welcome", {
@@ -89,15 +95,29 @@ export const RegisterHeader: FunctionComponent<{
     };
   }, [sceneRef]);
 
+  const [currentIsEmpty, setCurrentIsEmpty] = useState(false);
+
+  useEffect(() => {
+    const listener = (stack: ReadonlyArray<string>) => {
+      if (stack.length > 0 && stack[stack.length - 1] === "empty") {
+        setCurrentIsEmpty(true);
+      } else {
+        setCurrentIsEmpty(false);
+      }
+    };
+
+    const ref = headerSceneRef.current;
+    ref?.addSceneChangeListener(listener);
+
+    return () => {
+      ref?.removeSceneChangeListener(listener);
+    };
+  }, []);
+
   return (
-    <Box
-      position="relative"
-      marginX="auto"
-      width="47.75rem"
-      paddingBottom="2rem"
-    >
+    <Box position="relative" marginX="auto" width="47.75rem">
       {header.mode !== "intro" ? <HelpDeskButton /> : null}
-      {isBackShown ? (
+      {isBackShown && !currentIsEmpty ? (
         <div
           style={{
             position: "absolute",
@@ -118,6 +138,10 @@ export const RegisterHeader: FunctionComponent<{
             element: HeaderIntro,
           },
           {
+            name: "empty",
+            element: () => null,
+          },
+          {
             name: "welcome",
             element: HeaderWelcome,
           },
@@ -132,6 +156,12 @@ export const RegisterHeader: FunctionComponent<{
         transitionAlign="center"
         transitionMode="opacity"
       />
+      {
+        <VerticalResizeTransition>
+          {/* bottom padding */}
+          {currentIsEmpty ? null : <Gutter size="2rem" />}
+        </VerticalResizeTransition>
+      }
     </Box>
   );
 };

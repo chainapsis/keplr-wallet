@@ -33,6 +33,7 @@ import { EnableChainsScene } from "./enable-chains";
 import { SelectDerivationPathScene } from "./select-derivation-path";
 import { useStore } from "../../stores";
 import { useSearchParams } from "react-router-dom";
+import * as KeplrWalletPrivate from "keplr-wallet-private";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -232,6 +233,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
               element: SelectDerivationPathScene,
               width: "40rem",
             },
+            ...KeplrWalletPrivate.RegisterScenes,
           ]}
           initialSceneProps={initials.scene}
           transitionAlign="center"
