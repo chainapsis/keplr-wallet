@@ -28,6 +28,7 @@ import {
   useRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { EthereumEndpoint } from "../../../config.ui";
+import { shortenAgentAddress } from "@utils/validate-agent";
 
 export interface chatSectionParams {
   openModal: boolean;
@@ -157,6 +158,22 @@ export const AddressBookPage: FunctionComponent<{
       ];
     };
 
+    const handleAddressClick = (
+      e: React.MouseEvent<HTMLDivElement>,
+      address: string,
+      i: number
+    ) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!address.startsWith("agent")) {
+        addressBookConfig.selectAddressAt(i);
+
+        if (onBackButton) {
+          onBackButton();
+        }
+      }
+    };
+
     return (
       <HeaderLayout
         showChainName={false}
@@ -254,20 +271,15 @@ export const AddressBookPage: FunctionComponent<{
                           .bech32PrefixAccAddr
                       ) === 0
                         ? Bech32Address.shortenAddress(data.address, 34)
+                        : data.address.startsWith("agent")
+                        ? shortenAgentAddress(data.address)
                         : data.address
                     }
                     subParagraph={data.memo}
                     icons={addressBookIcons(i)}
                     data-index={i}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      addressBookConfig.selectAddressAt(i);
-
-                      if (onBackButton) {
-                        onBackButton();
-                      }
-                    }}
+                    disabled={onBackButton && data.address.startsWith("agent")}
+                    onClick={(e) => handleAddressClick(e, data.address, i)}
                     style={{ cursor: selectHandler ? undefined : "auto" }}
                   />
                 );

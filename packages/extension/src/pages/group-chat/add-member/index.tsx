@@ -101,6 +101,7 @@ export const AddMember: FunctionComponent = observer(() => {
   );
 
   const userAddresses: NameAddress[] = addressBookConfig.addressBookDatas
+    .filter((data) => !data.address.startsWith("agent"))
     .map((data) => {
       if (newGroupState.isEditGroup) {
         const isAlreadyMember = selectedMembers.find(

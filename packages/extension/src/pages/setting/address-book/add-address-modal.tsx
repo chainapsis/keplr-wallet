@@ -12,6 +12,7 @@ import {
 import { useLocation } from "react-router";
 import { chatSectionParams, defaultParamValues } from "./index";
 import { useNotification } from "@components/notification";
+import { validateAgentAddress } from "@utils/validate-agent";
 
 /**
  *
@@ -102,7 +103,8 @@ export const AddAddressModal: FunctionComponent<{
             disabled={
               !name ||
               name.trim() === "" ||
-              recipientConfig.getError() != null ||
+              (recipientConfig.getError() != null &&
+                validateAgentAddress(recipientConfig.rawRecipient)) ||
               memoConfig.getError() != null
             }
             onClick={async (e) => {

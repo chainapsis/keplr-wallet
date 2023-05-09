@@ -8,7 +8,7 @@ import { useHistory } from "react-router";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
 
-export const UserNameSection = () => {
+export const UserNameSection = ({ addresses }: { addresses: any }) => {
   const history = useHistory();
 
   const userName = history.location.pathname.split("/")[3];
@@ -29,6 +29,18 @@ export const UserNameSection = () => {
       addresses + `[${walletAddress}]`
     );
     setIsOpendialog(false);
+  };
+
+  const contactName = (addresses: any) => {
+    let val = "";
+    for (let i = 0; i < addresses.length; i++) {
+      if (addresses[i].address == userName) {
+        val = addresses[i].name;
+      }
+    }
+    if (val.length) return val;
+
+    return userName;
   };
 
   return (
@@ -62,7 +74,7 @@ export const UserNameSection = () => {
               placement: "top",
             }}
           >
-            {formatAddress(userName)}
+            {formatAddress(contactName(addresses))}
           </ToolTip>
         </span>
         <span className={style.copyIcon} onClick={() => setIsOpendialog(true)}>

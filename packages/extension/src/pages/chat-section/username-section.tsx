@@ -89,7 +89,10 @@ export const UserNameSection = ({
           style={{ cursor: "pointer" }}
           className={style.more}
           src={moreIcon}
-          onClick={handleDropDown}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDropDown();
+          }}
           onBlur={handleDropDown}
         />
       </div>

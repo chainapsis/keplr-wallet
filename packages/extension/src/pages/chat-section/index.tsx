@@ -115,7 +115,7 @@ export const ChatSection: FunctionComponent = () => {
       rightRenderer={<SwitchUser />}
     >
       <ChatErrorPopup />
-      <div>
+      <div onClick={() => setShowDropdown(false)}>
         <UserNameSection
           handleDropDown={handleDropDown}
           addresses={addresses}
