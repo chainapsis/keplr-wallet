@@ -2363,6 +2363,48 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-neutron.keplr.app",
+    rest: "https://lcd-neutron.keplr.app",
+    chainId: "neutron-1",
+    chainName: "Neutron",
+    stakeCurrency: {
+      coinDenom: "STAKE",
+      coinMinimalDenom: "ustake",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "neutron",
+      bech32PrefixAccPub: "neutronpub",
+      bech32PrefixValAddr: "neutronvaloper",
+      bech32PrefixValPub: "neutronvaloperpub",
+      bech32PrefixConsAddr: "neutronvalcons",
+      bech32PrefixConsPub: "neutronvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "NTRN",
+        coinMinimalDenom: "untrn",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "STAKE",
+        coinMinimalDenom: "ustake",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "NTRN",
+        coinMinimalDenom: "untrn",
+        coinDecimals: 6,
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

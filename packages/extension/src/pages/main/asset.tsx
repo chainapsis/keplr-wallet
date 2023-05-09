@@ -134,9 +134,19 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
     (currency: AppCurrency) => currency.coinMinimalDenom === "uusdc"
   );
 
+  const isNeutron =
+    ChainIdHelper.parse(chainStore.current.chainId).identifier === "neutron";
+  const hasNTRN = chainStore.current.currencies.find(
+    (currency: AppCurrency) => currency.coinMinimalDenom === "untrn"
+  );
+
   const stakable = (() => {
     if (isNoble && hasUSDC) {
       return balanceQuery.getBalanceFromCurrency(hasUSDC);
+    }
+
+    if (isNeutron && hasNTRN) {
+      return balanceQuery.getBalanceFromCurrency(hasNTRN);
     }
 
     return balanceStakableQuery.balance;
@@ -309,7 +319,7 @@ export const AssetStakedChartView: FunctionComponent = observer(() => {
             {stakable.shrink(true).maxDecimals(6).toString()}
           </div>
         </div>
-        {isNoble && hasUSDC ? null : (
+        {(isNoble && hasUSDC) || (isNeutron && hasNTRN) ? null : (
           <div className={styleAsset.legend}>
             <div className={styleAsset.label} style={{ color: "#11cdef" }}>
               <span className="badge-dot badge badge-secondary">
