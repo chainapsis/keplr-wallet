@@ -226,6 +226,11 @@ export const FinalizeKeyScene: FunctionComponent<{
                 .getQueryBech32Address(bech32Address.address)
                 .waitFreshResponse()
             );
+            promises.push(
+              queries.queryBalances
+                .getQueryBech32Address(bech32Address.address)
+                .stakable.waitFreshResponse()
+            );
           }
         }
 
