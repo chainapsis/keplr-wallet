@@ -87,7 +87,13 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     <HeaderLayout
       title="Prove Ownership"
       fixedHeight={true}
-      left={<BackButton />}
+      left={
+        <BackButton
+          hidden={
+            interactionInfo.interaction && !interactionInfo.interactionInternal
+          }
+        />
+      }
       bottomButton={{
         text: "Approve",
         color: "primary",
