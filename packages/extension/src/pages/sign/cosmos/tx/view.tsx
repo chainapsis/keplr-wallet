@@ -180,7 +180,13 @@ export const CosmosTxView: FunctionComponent<{
     <HeaderLayout
       title="Confirm Transaction"
       fixedHeight={true}
-      left={<BackButton />}
+      left={
+        <BackButton
+          hidden={
+            interactionInfo.interaction && !interactionInfo.interactionInternal
+          }
+        />
+      }
       bottomButton={{
         text: "Approve",
         color: "primary",

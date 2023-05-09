@@ -167,7 +167,13 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title="Add Token Manually"
-      left={<BackButton />}
+      left={
+        <BackButton
+          hidden={
+            interactionInfo.interaction && !interactionInfo.interactionInternal
+          }
+        />
+      }
       bottomButton={{
         text: "Confirm",
         color: "secondary",
