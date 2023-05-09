@@ -158,9 +158,19 @@ export const ClaimAll: FunctionComponent = observer(() => {
     return res;
   })();
 
+  const isLedger =
+    keyRingStore.selectedKeyInfo &&
+    keyRingStore.selectedKeyInfo.type === "ledger";
+
   const claimAll = () => {
     if (viewTokens.length > 0) {
       setIsExpanded(true);
+    }
+
+    if (isLedger) {
+      // Ledger에서 현실적으로 이 기능을 처리해주기 난감하다.
+      // disable하기보다는 일단 눌렀을때 expand를 시켜주고 아무것도 하지 않는다.
+      return;
     }
 
     for (const viewToken of viewTokens) {
@@ -330,10 +340,6 @@ export const ClaimAll: FunctionComponent = observer(() => {
     }
   };
 
-  const isLedger =
-    keyRingStore.selectedKeyInfo &&
-    keyRingStore.selectedKeyInfo.type === "ledger";
-
   const claimAllDisabled = (() => {
     if (viewTokens.length === 0) {
       return true;
@@ -362,17 +368,12 @@ export const ClaimAll: FunctionComponent = observer(() => {
               </Subtitle2>
             </Stack>
           </Column>
-          <Tooltip
-            enabled={isLedger || false}
-            content="TODO: 대충 렛저에서는 불가능하다는 메세지"
-          >
-            <Button
-              text="Claim All"
-              size="small"
-              disabled={claimAllDisabled || isLedger}
-              onClick={claimAll}
-            />
-          </Tooltip>
+          <Button
+            text="Claim All"
+            size="small"
+            disabled={claimAllDisabled}
+            onClick={claimAll}
+          />
         </Columns>
       </Box>
 
