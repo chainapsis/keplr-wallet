@@ -379,7 +379,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const numSelected = useMemo(() => {
       const chainInfoMap = new Map<string, ChainInfo>();
-      for (const chanInfo of chainInfos) {
+      for (const chanInfo of chainStore.chainInfos) {
         chainInfoMap.set(chanInfo.chainIdentifier, chanInfo);
       }
 
@@ -390,7 +390,7 @@ export const EnableChainsScene: FunctionComponent<{
         }
       }
       return numSelected;
-    }, [chainInfos, enabledChainIdentifiers]);
+    }, [chainStore.chainInfos, enabledChainIdentifiers]);
 
     return (
       <RegisterSceneBox>
@@ -490,7 +490,8 @@ export const EnableChainsScene: FunctionComponent<{
               }
 
               const needFinalizeCoinType: string[] = [];
-              for (const enable of enables) {
+              for (let i = 0; i < enables.length; i++) {
+                const enable = enables[i];
                 const chainInfo = chainStore.getChain(enable);
                 if (
                   keyRingStore.needMnemonicKeyCoinTypeFinalize(
@@ -499,7 +500,8 @@ export const EnableChainsScene: FunctionComponent<{
                   )
                 ) {
                   // Remove enable from enables
-                  enables.splice(enables.indexOf(enable), 1);
+                  enables.splice(i, 1);
+                  i--;
                   // And push it disables
                   disables.push(enable);
 
@@ -508,10 +510,12 @@ export const EnableChainsScene: FunctionComponent<{
               }
 
               const ledgerEthereumAppNeeds: string[] = [];
-              for (const enable of enables) {
+              for (let i = 0; i < enables.length; i++) {
                 if (!fallbackEthereumLedgerApp) {
                   break;
                 }
+
+                const enable = enables[i];
 
                 const chainInfo = chainStore.getChain(enable);
                 const isEthermintLike =
@@ -523,7 +527,8 @@ export const EnableChainsScene: FunctionComponent<{
                   // 참고로 위에서 chainInfos memo로 인해서 막혀있기 때문에
                   // 여기서 throwErrorIfEthermintWithLedgerButNotSupported 확인은 생략한다.
                   // Remove enable from enables
-                  enables.splice(enables.indexOf(enable), 1);
+                  enables.splice(i, 1);
+                  i--;
                   // And push it disables
                   disables.push(enable);
 
