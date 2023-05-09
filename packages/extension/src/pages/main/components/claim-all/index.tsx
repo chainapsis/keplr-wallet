@@ -30,6 +30,8 @@ import {
 import { action, makeObservable, observable } from "mobx";
 import { Tooltip } from "../../../../components/tooltip";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
+import { useNotification } from "../../../../hooks/notification";
+import { useNavigate } from "react-router";
 
 const Styles = {
   Container: styled.div`
@@ -74,8 +76,13 @@ class ClaimAllEachState {
   }
 }
 
+const zeroDec = new Dec(0);
+
 export const ClaimAll: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore, priceStore } = useStore();
+  const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
+    useStore();
+
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const statesRef = useRef(new Map<string, ClaimAllEachState>());
   const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
@@ -102,9 +109,34 @@ export const ClaimAll: FunctionComponent = observer(() => {
         chainInfo,
       };
     })
-    .filter((viewToken) => viewToken.token.toDec().gt(new Dec(0)));
+    .filter((viewToken) => viewToken.token.toDec().gt(zeroDec))
+    .sort((a, b) => {
+      const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
+      const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
 
-  const [isExpanded, setIsExpanded] = useState(true);
+      if (aPrice.equals(bPrice)) {
+        return 0;
+      }
+      return aPrice.gt(bPrice) ? -1 : 1;
+    })
+    .sort((a, b) => {
+      const aHasError =
+        getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
+      const bHasError =
+        getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
+
+      if (aHasError || bHasError) {
+        if (aHasError && bHasError) {
+          return 0;
+        } else if (aHasError) {
+          return 1;
+        } else {
+          return -1;
+        }
+      }
+
+      return 0;
+    });
 
   const totalPrice = (() => {
     const fiatCurrency = priceStore.getFiatCurrency(
@@ -128,7 +160,7 @@ export const ClaimAll: FunctionComponent = observer(() => {
 
   const claimAll = () => {
     if (viewTokens.length > 0) {
-      setIsExpanded(false);
+      setIsExpanded(true);
     }
 
     for (const viewToken of viewTokens) {
@@ -298,6 +330,10 @@ export const ClaimAll: FunctionComponent = observer(() => {
     }
   };
 
+  const isLedger =
+    keyRingStore.selectedKeyInfo &&
+    keyRingStore.selectedKeyInfo.type === "ledger";
+
   const claimAllDisabled = (() => {
     if (viewTokens.length === 0) {
       return true;
@@ -312,7 +348,6 @@ export const ClaimAll: FunctionComponent = observer(() => {
     return true;
   })();
 
-  // TODO: Add loading state.
   return (
     <Styles.Container>
       <Box paddingX="1rem">
@@ -327,12 +362,17 @@ export const ClaimAll: FunctionComponent = observer(() => {
               </Subtitle2>
             </Stack>
           </Column>
-          <Button
-            text="Claim All"
-            size="small"
-            disabled={claimAllDisabled}
-            onClick={claimAll}
-          />
+          <Tooltip
+            enabled={isLedger || false}
+            content="TODO: 대충 렛저에서는 불가능하다는 메세지"
+          >
+            <Button
+              text="Claim All"
+              size="small"
+              disabled={claimAllDisabled || isLedger}
+              onClick={claimAll}
+            />
+          </Tooltip>
         </Columns>
       </Box>
 
@@ -341,14 +381,24 @@ export const ClaimAll: FunctionComponent = observer(() => {
         alignX="center"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        {isExpanded ? (
+        {!isExpanded ? (
           <ArrowDownIcon width="1.25rem" height="1.25rem" />
         ) : (
           <ArrowUpIcon width="1.25rem" height="1.25rem" />
         )}
       </Styles.ExpandButton>
 
-      <VerticalCollapseTransition collapsed={isExpanded}>
+      <VerticalCollapseTransition
+        collapsed={!isExpanded}
+        onTransitionEnd={() => {
+          if (!isExpanded) {
+            // Clear errors when collapsed.
+            for (const state of statesRef.current.values()) {
+              state.setFailedReason(undefined);
+            }
+          }
+        }}
+      >
         {viewTokens.map((viewToken) => {
           return (
             <ClaimTokenItem
@@ -368,6 +418,9 @@ const ClaimTokenItem: FunctionComponent<{
   state: ClaimAllEachState;
 }> = observer(({ viewToken, state }) => {
   const { accountStore, queriesStore } = useStore();
+
+  const navigate = useNavigate();
+  const notification = useNotification();
 
   // TODO: Add below property to config.ui.ts
   const defaultGasPerDelegation = 140000;
@@ -408,26 +461,50 @@ const ClaimTokenItem: FunctionComponent<{
       console.log(e);
     }
 
-    await tx.send(
-      {
-        gas: gas.toString(),
-        amount: [],
-      },
-      "",
-      {},
-      {
-        onFulfill: (tx: any) => {
-          console.log(tx.code, tx);
+    try {
+      await tx.send(
+        {
+          gas: gas.toString(),
+          amount: [],
         },
+        "",
+        {},
+        {
+          onFulfill: (tx: any) => {
+            if (tx.code != null && tx.code !== 0) {
+              const log = tx.log ?? tx.raw_log;
+              notification.show("failed", "Transaction Failed", log);
+              return;
+            }
+            notification.show("success", "Transaction Success", "");
+          },
+        }
+      );
+
+      navigate("/", {
+        replace: true,
+      });
+    } catch (e) {
+      if (e?.message === "Request rejected") {
+        return;
       }
-    );
+
+      console.log(e);
+      notification.show(
+        "failed",
+        "Transaction Failed",
+        e.message || e.toString()
+      );
+      navigate("/", {
+        replace: true,
+      });
+    }
   };
 
   const isLoading =
     accountStore.getAccount(viewToken.chainInfo.chainId).isSendingMsg ===
       "withdrawRewards" || state.isLoading;
 
-  // TODO: Add loading state.
   return (
     <Box padding="1rem">
       <Columns sum={1} alignY="center">

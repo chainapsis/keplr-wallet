@@ -77,6 +77,12 @@ export class KeyRingStore {
     return this._keyInfos;
   }
 
+  async fetchKeyRingStatus(): Promise<KeyRingV2.KeyRingStatus> {
+    const msg = new KeyRingV2.GetKeyRingStatusOnlyMsg();
+    const result = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return result.status;
+  }
+
   @computed
   get selectedKeyInfo(): KeyRingV2.KeyInfo | undefined {
     return this._keyInfos.find((keyInfo) => keyInfo.isSelected);
@@ -211,6 +217,42 @@ export class KeyRingStore {
   }
 
   @flow
+  *appendLedgerKeyApp(vaultId: string, pubKey: Uint8Array, app: string) {
+    const msg = new KeyRingV2.AppendLedgerKeyAppMsg(vaultId, pubKey, app);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+  }
+
+  @flow
+  *newPrivateKeyKey(
+    privateKey: Uint8Array,
+    meta: Record<string, string | undefined>,
+    name: string,
+    password: string | undefined
+  ) {
+    const msg = new KeyRingV2.NewPrivateKeyKeyMsg(
+      privateKey,
+      meta,
+      name,
+      password
+    );
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+
+    return result.vaultId;
+  }
+
+  @flow
   *lock() {
     const msg = new KeyRingV2.LockKeyRingMsg();
     const result = yield* toGenerator(
@@ -252,5 +294,16 @@ export class KeyRingStore {
     if (result.wasSelected && result.status === "unlocked") {
       this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     }
+  }
+
+  async changeUserPassword(
+    prevUserPassword: string,
+    newUserPassword: string
+  ): Promise<void> {
+    const msg = new KeyRingV2.ChangeUserPasswordMsg(
+      prevUserPassword,
+      newUserPassword
+    );
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

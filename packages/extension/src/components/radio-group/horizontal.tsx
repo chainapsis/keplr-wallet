@@ -21,6 +21,7 @@ export const HorizontalRadioGroup: FunctionComponent<RadioGroupProps> = ({
         return (
           <React.Fragment key={item.key}>
             <Styles.Button
+              type="button"
               size={size}
               selected={selected}
               itemMinWidth={itemMinWidth}

@@ -183,14 +183,15 @@ export class PermissionService {
       origins,
     };
 
-    await this.interactionService.waitApprove(
+    await this.interactionService.waitApproveV2(
       env,
       "/permission",
       INTERACTION_TYPE_PERMISSION,
-      permissionData
+      permissionData,
+      () => {
+        this.addPermission(chainIds, type, origins);
+      }
     );
-
-    this.addPermission(chainIds, type, origins);
   }
 
   async grantBasicAccessPermission(
@@ -221,14 +222,15 @@ export class PermissionService {
       origins,
     };
 
-    await this.interactionService.waitApprove(
+    await this.interactionService.waitApproveV2(
       env,
       "/permission-global",
       INTERACTION_TYPE_GLOBAL_PERMISSION,
-      permissionData
+      permissionData,
+      () => {
+        this.addGlobalPermission(type, origins);
+      }
     );
-
-    this.addGlobalPermission(type, origins);
   }
 
   checkPermission(env: Env, chainId: string, type: string, origin: string) {

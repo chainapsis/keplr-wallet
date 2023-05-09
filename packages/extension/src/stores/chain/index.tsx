@@ -1,4 +1,11 @@
-import { autorun, computed, flow, makeObservable, observable } from "mobx";
+import {
+  autorun,
+  computed,
+  flow,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 
 import {
   ChainStore as BaseChainStore,
@@ -13,8 +20,11 @@ import {
   EnableChainsMsg,
   GetChainInfosWithCoreTypesMsg,
   GetEnabledChainIdentifiersMsg,
+  GetTokenScansMsg,
   RemoveSuggestedChainInfoMsg,
+  RevalidateTokenScansMsg,
   ToggleChainsMsg,
+  TokenScan,
   TryUpdateEnabledChainInfosMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
@@ -29,6 +39,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected _lastSyncedEnabledChainsVaultId: string = "";
   @observable.ref
   protected _enabledChainIdentifiers: string[] = [];
+
+  @observable.ref
+  protected _tokenScans: TokenScan[] = [];
 
   constructor(
     protected readonly embedChainInfos: ChainInfo[],
@@ -95,6 +108,18 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       map.set(chainIdentifier, true);
     }
     return map;
+  }
+
+  @computed
+  get tokenScans(): TokenScan[] {
+    return this._tokenScans.filter((scan) => {
+      if (!this.hasChain(scan.chainId)) {
+        return false;
+      }
+
+      const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
+      return !this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
   }
 
   @computed
@@ -204,6 +229,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   protected *init() {
     this._isInitializing = true;
 
+    yield this.keyRingStore.waitUntilInitialized();
+
     yield Promise.all([
       this.updateChainInfosFromBackground(),
       this.updateEnabledChainIdentifiersFromBackground(),
@@ -246,11 +273,46 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       return;
     }
 
+    if (
+      this._lastSyncedEnabledChainsVaultId ===
+      this.keyRingStore.selectedKeyInfo.id
+    ) {
+      return;
+    }
+
     const id = this.keyRingStore.selectedKeyInfo.id;
     const msg = new GetEnabledChainIdentifiersMsg(id);
     this._enabledChainIdentifiers = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
+
+    this._tokenScans = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, new GetTokenScansMsg(id))
+    );
+    (async () => {
+      await new Promise<void>((resolve) => {
+        const disposal = autorun(() => {
+          if (this.keyRingStore.status === "unlocked") {
+            resolve();
+
+            if (disposal) {
+              disposal();
+            }
+          }
+        });
+      });
+
+      const res = await this.requester.sendMessage(
+        BACKGROUND_PORT,
+        new RevalidateTokenScansMsg(id)
+      );
+      if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
+        runInAction(() => {
+          this._tokenScans = res.tokenScans;
+        });
+      }
+    })();
+
     this._lastSyncedEnabledChainsVaultId = id;
   }
 

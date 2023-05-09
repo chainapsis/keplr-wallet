@@ -13,15 +13,22 @@ import {
   runInAction,
 } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainInfoWithCoreTypes } from "./types";
+import {
+  ChainInfoWithCoreTypes,
+  ChainInfoWithRepoUpdateOptions,
+} from "./types";
 import { computedFn } from "mobx-utils";
 import {
   checkChainFeatures,
   validateBasicChainInfoType,
 } from "@keplr-wallet/chain-validator";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { InteractionService } from "../interaction";
+import { Env } from "@keplr-wallet/router";
+import { SuggestChainInfoMsg } from "./messages";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
+type ChainSuggestedHandler = (chainInfo: ChainInfo) => void;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
@@ -46,6 +53,7 @@ export class ChainsService {
   protected endpointsKVStore: KVStore;
 
   protected onChainRemovedHandlers: ChainRemovedHandler[] = [];
+  protected onChainSuggestedHandlers: ChainSuggestedHandler[] = [];
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -54,7 +62,8 @@ export class ChainsService {
       readonly organizationName: string;
       readonly repoName: string;
       readonly branchName: string;
-    }
+    },
+    protected readonly interactionService: InteractionService
   ) {
     this.updatedChainInfoKVStore = new PrefixKVStore(
       kvStore,
@@ -290,6 +299,10 @@ export class ChainsService {
     if (chainInfo.chainId !== chainIdFromRPC) {
       chainIdUpdated = true;
 
+      if (!this.hasChainInfo(chainId)) {
+        throw new Error(`${chainId} became unregistered after fetching`);
+      }
+
       this.setUpdatedChainInfo(chainId, {
         chainId: chainIdFromRPC,
       });
@@ -299,6 +312,10 @@ export class ChainsService {
 
     const featuresUpdated = toUpdateFeatures.length !== 0;
     if (featuresUpdated) {
+      if (!this.hasChainInfo(chainId)) {
+        throw new Error(`${chainId} became unregistered after fetching`);
+      }
+
       const features = [
         ...new Set([...toUpdateFeatures, ...(chainInfo.features ?? [])]),
       ];
@@ -316,6 +333,10 @@ export class ChainsService {
     chainId: string,
     chainInfo: Partial<UpdatedChainInfo>
   ): void {
+    if (!this.hasChainInfo(chainId)) {
+      throw new Error(`${chainId} is not registered`);
+    }
+
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
     const i = this.updatedChainInfos.findIndex(
       (c) => ChainIdHelper.parse(c.chainId).identifier === chainIdentifier
@@ -341,6 +362,43 @@ export class ChainsService {
     }
   }
 
+  async suggestChainInfo(
+    env: Env,
+    chainInfo: ChainInfo,
+    origin: string
+  ): Promise<void> {
+    chainInfo = await validateBasicChainInfoType(chainInfo);
+
+    await this.interactionService.waitApproveV2(
+      env,
+      "/suggest-chain",
+      SuggestChainInfoMsg.type(),
+      {
+        chainInfo,
+        origin,
+      },
+      async (receivedChainInfo: ChainInfoWithRepoUpdateOptions) => {
+        const validChainInfo = {
+          ...(await validateBasicChainInfoType(receivedChainInfo)),
+          beta: chainInfo.beta,
+          updateFromRepoDisabled: receivedChainInfo.updateFromRepoDisabled,
+        };
+
+        if (validChainInfo.updateFromRepoDisabled) {
+          console.log(
+            `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added with updateFromRepoDisabled`
+          );
+        } else {
+          console.log(
+            `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added`
+          );
+        }
+
+        await this.addSuggestedChainInfo(validChainInfo);
+      }
+    );
+  }
+
   @action
   addSuggestedChainInfo(chainInfo: ChainInfo): void {
     const i = this.suggestedChainInfos.findIndex(
@@ -356,6 +414,10 @@ export class ChainsService {
       const newChainInfos = this.suggestedChainInfos.slice();
       newChainInfos.push(chainInfo);
       this.suggestedChainInfos = newChainInfos;
+
+      for (const handler of this.onChainSuggestedHandlers) {
+        handler(chainInfo);
+      }
     }
   }
 
@@ -627,5 +689,9 @@ export class ChainsService {
 
   addChainRemovedHandler(handler: ChainRemovedHandler) {
     this.onChainRemovedHandlers.push(handler);
+  }
+
+  addChainSuggestedHandler(handler: ChainRemovedHandler) {
+    this.onChainSuggestedHandlers.push(handler);
   }
 }

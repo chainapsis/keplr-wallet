@@ -1,13 +1,25 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { EmptyAmountError, IAmountConfig } from "@keplr-wallet/hooks";
+import {
+  EmptyAmountError,
+  IAmountConfig,
+  IFeeConfig,
+  ISenderConfig,
+  ZeroAmountError,
+} from "@keplr-wallet/hooks";
 import { TextInput } from "../text-input";
-import { Subtitle3 } from "../../typography";
-import { ArrowAcrossIcon } from "../../icon";
-import { IconButton } from "../../icon-button";
+import { useStore } from "../../../stores";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
+import { Box } from "../../box";
+import { Body2, Body3, Button1 } from "../../typography";
+import { ColorPalette } from "../../../styles";
+import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
+import { Columns } from "../../column";
 
 export const AmountInput: FunctionComponent<{
+  senderConfig: ISenderConfig;
   amountConfig: IAmountConfig;
+  feeConfig: IFeeConfig;
 }> = observer(({ amountConfig }) => {
   if (amountConfig.amount.length !== 1) {
     throw new Error(
@@ -17,25 +29,138 @@ export const AmountInput: FunctionComponent<{
     );
   }
 
+  const { priceStore } = useStore();
+
+  const price = (() => {
+    return priceStore.calculatePrice(amountConfig.amount[0]);
+  })();
+  const [priceValue, setPriceValue] = useState("");
+  const [isPriceBased, setIsPriceBased] = useState(false);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Price symbol의 collapsed transition을 기다리기 위해서 사용됨.
+  const [renderPriceSymbol, setRenderPriceSymbol] = useState(isPriceBased);
+  useEffect(() => {
+    if (isPriceBased) {
+      setRenderPriceSymbol(true);
+    }
+  }, [isPriceBased]);
+
   return (
     <TextInput
+      ref={inputRef}
       label="Amount"
-      rightLabel={
-        <Subtitle3 style={{ cursor: "pointer", textDecoration: "underline" }}>
-          Max
-        </Subtitle3>
-      }
       type="number"
-      value={amountConfig.value}
+      value={(() => {
+        if (isPriceBased) {
+          if (amountConfig.fraction != 0) {
+            return price?.toDec().toString(price?.options.maxDecimals);
+          }
+          return priceValue;
+        } else {
+          return amountConfig.value;
+        }
+      })()}
       onChange={(e) => {
         e.preventDefault();
 
-        amountConfig.setValue(e.target.value);
+        if (isPriceBased) {
+          if (price) {
+            let value = e.target.value;
+            if (value.startsWith(".")) {
+              value = "0" + value;
+            }
+            if (value.trim().length === 0) {
+              amountConfig.setValue("");
+              setPriceValue(value);
+              return;
+            }
+            if (/^\d+(\.\d+)*$/.test(value)) {
+              let dec: Dec;
+              try {
+                dec = new Dec(value);
+              } catch (e) {
+                console.log(e);
+                return;
+              }
+              if (dec.lte(new Dec(0))) {
+                setPriceValue(value);
+                return;
+              }
+
+              const onePrice = priceStore.calculatePrice(
+                new CoinPretty(
+                  amountConfig.amount[0].currency,
+                  DecUtils.getTenExponentN(
+                    amountConfig.amount[0].currency.coinDecimals
+                  )
+                )
+              );
+
+              if (!onePrice) {
+                // Can't be happen
+                return;
+              }
+              const onePriceDec = onePrice.toDec();
+              const expectedAmount = dec.quo(onePriceDec);
+
+              setPriceValue(value);
+              amountConfig.setValue(
+                expectedAmount.toString(
+                  amountConfig.amount[0].currency.coinDecimals
+                )
+              );
+            }
+          }
+        } else {
+          amountConfig.setValue(e.target.value);
+        }
       }}
-      right={
-        <IconButton onClick={() => console.log("TODO")}>
-          <ArrowAcrossIcon width="1.5rem" height="1.5rem" />
-        </IconButton>
+      left={
+        renderPriceSymbol ? (
+          <PriceSymbol
+            show={isPriceBased}
+            onTransitionEnd={() => {
+              if (!isPriceBased) {
+                setRenderPriceSymbol(false);
+              }
+            }}
+          />
+        ) : null
+      }
+      right={<MaxButton amountConfig={amountConfig} />}
+      bottom={
+        price ? (
+          <BottomPriceButton
+            text={(() => {
+              if (isPriceBased) {
+                return amountConfig.amount[0]
+                  .trim(true)
+                  .maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .shrink(true)
+                  .toString();
+              } else {
+                return price.toString();
+              }
+            })()}
+            onClick={() => {
+              if (!isPriceBased) {
+                if (price.toDec().lte(new Dec(0))) {
+                  setPriceValue("");
+                } else {
+                  setPriceValue(
+                    price.toDec().toString(price.options.maxDecimals).toString()
+                  );
+                }
+              }
+              setIsPriceBased(!isPriceBased);
+
+              inputRef.current?.focus();
+            }}
+          />
+        ) : null
       }
       error={(() => {
         const uiProperties = amountConfig.uiProperties;
@@ -46,10 +171,144 @@ export const AmountInput: FunctionComponent<{
           return;
         }
 
+        if (err instanceof ZeroAmountError) {
+          return;
+        }
+
         if (err) {
           return err.message || err.toString();
         }
       })()}
     />
+  );
+});
+
+const PriceSymbol: FunctionComponent<{
+  show: boolean;
+  onTransitionEnd: () => void;
+}> = observer(({ show, onTransitionEnd }) => {
+  const { priceStore } = useStore();
+
+  // VerticalCollapseTransition의 문제때메... 초기에는 transition이 안되는 문제가 있어서
+  // 초기에는 transition을 하지 않도록 해야함.
+  const [hasInit, setHasInit] = useState(false);
+
+  const [collapsed, setCollapsed] = useState(true);
+
+  useEffect(() => {
+    if (hasInit) {
+      setCollapsed(!show);
+    }
+  }, [hasInit, show]);
+
+  const fiatCurrency = priceStore.getFiatCurrency(priceStore.defaultVsCurrency);
+
+  if (!fiatCurrency) {
+    return null;
+  }
+
+  // VerticalCollapseTransition는 부모 컴포넌트로부터 width가 결정되어야만 작동 할 수 있기 때문에
+  // 부모의 width를 결정하기 위해서 opacity: 0인 mock text를 넣어야 함.
+  return (
+    <Box position="relative" alignY="center">
+      <Body2
+        color={ColorPalette["gray-50"]}
+        style={{
+          opacity: 0,
+        }}
+      >
+        {fiatCurrency.symbol}
+      </Body2>
+      <Box position="absolute" width="100%">
+        <VerticalCollapseTransition
+          transitionAlign="center"
+          collapsed={collapsed}
+          onResize={() => {
+            setHasInit(true);
+          }}
+          onTransitionEnd={onTransitionEnd}
+        >
+          <Body2 color={ColorPalette["gray-50"]}>{fiatCurrency.symbol}</Body2>
+        </VerticalCollapseTransition>
+      </Box>
+    </Box>
+  );
+});
+
+const BottomPriceButton: FunctionComponent<{
+  text: string;
+  onClick: () => void;
+}> = ({ text, onClick }) => {
+  return (
+    <Box marginTop="0.375rem" marginLeft="0.375rem" alignX="left">
+      <Box
+        onClick={(e) => {
+          e.preventDefault();
+
+          onClick();
+        }}
+        cursor="pointer"
+      >
+        <Columns sum={1} alignY="center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1.125rem"
+            height="1.125rem"
+            fill="none"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill={ColorPalette["gray-300"]}
+              fillRule="evenodd"
+              d="M13.2 2.24a.75.75 0 00.04 1.06l2.1 1.95H6.75a.75.75 0 000 1.5h8.59l-2.1 1.95a.75.75 0 101.02 1.1l3.5-3.25a.75.75 0 000-1.1l-3.5-3.25a.75.75 0 00-1.06.04zm-6.4 8a.75.75 0 00-1.06-.04l-3.5 3.25a.75.75 0 000 1.1l3.5 3.25a.75.75 0 101.02-1.1l-2.1-1.95h8.59a.75.75 0 000-1.5H4.66l2.1-1.95a.75.75 0 00.04-1.06z"
+              clipRule="evenodd"
+            />
+          </svg>
+          {/* 여기서 Gutter가 안먹힌다. 왜인지는 모른다. 그냥 marginLeft 썻음 */}
+          <Body3
+            color={ColorPalette["gray-300"]}
+            style={{
+              marginLeft: "0.3rem",
+            }}
+          >
+            {text}
+          </Body3>
+        </Columns>
+      </Box>
+    </Box>
+  );
+};
+
+const MaxButton: FunctionComponent<{
+  amountConfig: IAmountConfig;
+}> = observer(({ amountConfig }) => {
+  const isMax = amountConfig.fraction === 1;
+
+  return (
+    <Box
+      cursor="pointer"
+      height="1.625rem"
+      alignX="center"
+      alignY="center"
+      paddingX="0.5rem"
+      // Gray-550
+      backgroundColor={
+        isMax ? ColorPalette["gray-600"] : ColorPalette["gray-500"]
+      }
+      borderRadius="0.25rem"
+      onClick={(e) => {
+        e.preventDefault();
+
+        if (amountConfig.fraction > 0) {
+          amountConfig.setFraction(0);
+        } else {
+          amountConfig.setFraction(1);
+        }
+      }}
+    >
+      <Button1 color={isMax ? ColorPalette["white"] : ColorPalette["gray-10"]}>
+        max
+      </Button1>
+    </Box>
   );
 });

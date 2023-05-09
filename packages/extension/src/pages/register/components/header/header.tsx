@@ -13,10 +13,12 @@ import {
 } from "../../../../components/transition";
 import { Box } from "../../../../components/box";
 import { YAxis } from "../../../../components/axis";
-import { Body1, H1, H3, Subtitle3 } from "../../../../components/typography";
+import { Body1, H4, Subtitle3 } from "../../../../components/typography";
 import { useRegisterHeader } from "./context";
 import { Gutter } from "../../../../components/gutter";
 import { ColorPalette } from "../../../../styles";
+import { RegisterH1, RegisterH2, RegisterH3 } from "../typography";
+import { HelpDeskButton } from "../help-desk-button";
 
 export const RegisterHeader: FunctionComponent<{
   sceneRef: MutableRefObject<SceneTransitionRef | null>;
@@ -27,26 +29,21 @@ export const RegisterHeader: FunctionComponent<{
 
   useEffect(() => {
     if (headerSceneRef.current) {
-      // TODO: Use `replace` instead of `push`
       switch (header.mode) {
         case "intro": {
           if (headerSceneRef.current.currentScene !== "intro") {
-            headerSceneRef.current.replace("intro", {
-              sceneRef,
-            });
+            headerSceneRef.current.replace("intro", {});
           }
           break;
         }
         case "welcome": {
           if (headerSceneRef.current.currentScene !== "welcome") {
             headerSceneRef.current.replace("welcome", {
-              sceneRef,
               title: header.title,
               paragraph: header.paragraph,
             });
           } else {
             headerSceneRef.current.setCurrentSceneProps({
-              sceneRef,
               title: header.title,
               paragraph: header.paragraph,
             });
@@ -56,7 +53,6 @@ export const RegisterHeader: FunctionComponent<{
         case "step": {
           if (headerSceneRef.current.currentScene !== "step") {
             headerSceneRef.current.replace("step", {
-              sceneRef,
               title: header.title,
               paragraphs: header.paragraphs,
               stepCurrent: header.stepCurrent,
@@ -64,7 +60,6 @@ export const RegisterHeader: FunctionComponent<{
             });
           } else {
             headerSceneRef.current.setCurrentSceneProps({
-              sceneRef,
               title: header.title,
               paragraphs: header.paragraphs,
               stepCurrent: header.stepCurrent,
@@ -75,7 +70,7 @@ export const RegisterHeader: FunctionComponent<{
         }
       }
     }
-  }, [header, sceneRef]);
+  }, [header]);
 
   const [isBackShown, setIsBackShown] = useState(
     sceneRef.current?.canPop() ?? false
@@ -101,6 +96,7 @@ export const RegisterHeader: FunctionComponent<{
       width="47.75rem"
       paddingBottom="2rem"
     >
+      {header.mode !== "intro" ? <HelpDeskButton /> : null}
       {isBackShown ? (
         <div
           style={{
@@ -132,9 +128,6 @@ export const RegisterHeader: FunctionComponent<{
         ]}
         initialSceneProps={{
           name: "intro",
-          props: {
-            sceneRef,
-          },
         }}
         transitionAlign="center"
         transitionMode="opacity"
@@ -143,36 +136,44 @@ export const RegisterHeader: FunctionComponent<{
   );
 };
 
-const HeaderIntro: FunctionComponent<{
-  sceneRef: MutableRefObject<SceneTransitionRef | null>;
-}> = () => {
+const HeaderIntro: FunctionComponent = () => {
   return (
     <Box paddingY="0.25rem">
       <YAxis alignX="center">
-        <H1>Your Interchain Gateway</H1>
+        <img
+          src={require("../../../../public/assets/img/intro-logo.png")}
+          style={{
+            height: "3.125rem",
+          }}
+          alt="intro-hardware-wallet image"
+        />
+
+        <Gutter size="1.25rem" />
+
+        <RegisterH2 color={ColorPalette["gray-50"]}>
+          Your Interchain Gateway
+        </RegisterH2>
       </YAxis>
     </Box>
   );
 };
 
 const HeaderWelcome: FunctionComponent<{
-  sceneRef: MutableRefObject<SceneTransitionRef | null>;
   title: string;
   paragraph: string;
 }> = ({ title, paragraph }) => {
   return (
     <Box position="relative">
       <YAxis alignX="center">
-        <H1>{title}</H1>
+        <RegisterH1>{title}</RegisterH1>
         <Gutter size="0.75rem" />
-        <H3>{paragraph}</H3>
+        <H4 color={ColorPalette["gray-200"]}>{paragraph}</H4>
       </YAxis>
     </Box>
   );
 };
 
 const HeaderStep: FunctionComponent<{
-  sceneRef: MutableRefObject<SceneTransitionRef | null>;
   title: string;
   paragraphs?: (string | ReactNode)[];
   stepCurrent: number;
@@ -181,9 +182,11 @@ const HeaderStep: FunctionComponent<{
   return (
     <Box position="relative">
       <YAxis alignX="center">
-        <Subtitle3>{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
+        <Subtitle3
+          color={ColorPalette["gray-200"]}
+        >{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
         <Gutter size="0.75rem" />
-        <H3>{title}</H3>
+        <RegisterH3>{title}</RegisterH3>
       </YAxis>
       <Box width="29.5rem" marginX="auto">
         <VerticalResizeTransition>
@@ -197,6 +200,7 @@ const HeaderStep: FunctionComponent<{
               if (paragraphs.length === 1) {
                 return (
                   <Body1
+                    color={ColorPalette["gray-300"]}
                     style={{
                       textAlign: "center",
                     }}
@@ -211,7 +215,12 @@ const HeaderStep: FunctionComponent<{
                   <ul>
                     {paragraphs.map((paragraph, i) => {
                       return (
-                        <Body1 key={i} as="li">
+                        <Body1
+                          key={i}
+                          as="li"
+                          color={ColorPalette["gray-300"]}
+                          style={{ marginTop: i > 0 ? "0.5rem" : "0" }}
+                        >
                           {paragraph}
                         </Body1>
                       );

@@ -2,15 +2,15 @@ import React, { CSSProperties } from "react";
 
 export type ButtonType = "button" | "submit" | "reset";
 export type ButtonSize = "small" | "large";
+export type ButtonColor = "default" | "faint";
 
 export interface TextButtonProps {
+  color?: ButtonColor;
   size?: ButtonSize;
   disabled?: boolean;
-  text?: string;
+  text?: string | React.ReactNode;
   right?: React.ReactNode;
-  onClick?: (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void | Promise<void>;
+  onClick?: () => void | Promise<void>;
 
   // Native html element
   type?: ButtonType;

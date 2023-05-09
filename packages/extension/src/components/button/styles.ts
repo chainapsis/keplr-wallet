@@ -2,7 +2,7 @@ import styled, { css, FlattenSimpleInterpolation } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { ButtonProps, ButtonColor, ButtonMode, ButtonSize } from "./types";
 
-const makeTextAndSvgColor = (color: string) => {
+export const makeTextAndSvgColor = (color: string) => {
   return css`
     color: ${color};
     svg {
@@ -205,6 +205,12 @@ export const Styles = {
       buttonStyleFromColorAndMode[color || "primary"][mode || "fill"][
         disabled ? "disabled" : "enabled"
       ]}
+  `,
+  Left: styled.span`
+    height: 100%;
+    display: flex;
+    align-items: center;
+    margin-right: 0.25rem;
   `,
   Right: styled.span`
     height: 100%;

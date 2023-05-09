@@ -1,6 +1,11 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { IFeeConfig, IGasConfig, ISenderConfig } from "@keplr-wallet/hooks";
+import {
+  IFeeConfig,
+  IGasConfig,
+  IGasSimulator,
+  ISenderConfig,
+} from "@keplr-wallet/hooks";
 import styled from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Column, Columns } from "../../column";
@@ -11,6 +16,7 @@ import { Modal } from "../../modal";
 import { TransactionFeeModal } from "./modal";
 import { useStore } from "../../../stores";
 import { autorun } from "mobx";
+import { PricePretty } from "@keplr-wallet/unit";
 
 const Styles = {
   Container: styled.div`
@@ -31,11 +37,18 @@ export const FeeControl: FunctionComponent<{
   senderConfig: ISenderConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  gasSimulator?: IGasSimulator;
 
   disableAutomaticFeeSet?: boolean;
 }> = observer(
-  ({ senderConfig, feeConfig, gasConfig, disableAutomaticFeeSet }) => {
-    const { queriesStore } = useStore();
+  ({
+    senderConfig,
+    feeConfig,
+    gasConfig,
+    gasSimulator,
+    disableAutomaticFeeSet,
+  }) => {
+    const { queriesStore, priceStore } = useStore();
 
     useEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -43,18 +56,13 @@ export const FeeControl: FunctionComponent<{
       }
 
       if (
-        feeConfig.fees.length === 0 ||
-        !feeConfig.selectableFeeCurrencies.find(
-          (cur) =>
-            cur.coinMinimalDenom === feeConfig.fees[0].currency.coinMinimalDenom
-        )
+        feeConfig.fees.length === 0 &&
+        feeConfig.selectableFeeCurrencies.length > 0
       ) {
-        if (feeConfig.selectableFeeCurrencies.length > 0) {
-          feeConfig.setFee({
-            type: "average",
-            currency: feeConfig.selectableFeeCurrencies[0],
-          });
-        }
+        feeConfig.setFee({
+          type: "average",
+          currency: feeConfig.selectableFeeCurrencies[0],
+        });
       }
     }, [
       disableAutomaticFeeSet,
@@ -87,8 +95,7 @@ export const FeeControl: FunctionComponent<{
           !(feeConfig.type !== "manual") &&
           feeConfig.selectableFeeCurrencies.length > 1 &&
           feeConfig.fees.length > 0 &&
-          feeConfig.selectableFeeCurrencies[0].coinMinimalDenom ===
-            feeConfig.fees[0].currency.coinMinimalDenom
+          feeConfig.type !== "manual"
         ) {
           const queryBalances = queriesStore
             .get(feeConfig.chainId)
@@ -100,30 +107,28 @@ export const FeeControl: FunctionComponent<{
           const firstFeeCurrencyBal =
             queryBalances.getBalanceFromCurrency(firstFeeCurrency);
 
-          if (feeConfig.type !== "manual") {
-            const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
-              firstFeeCurrency,
-              feeConfig.type
-            );
-            if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
-              // Not enough balances for fee.
-              // Try to find other fee currency to send.
-              for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
-                const feeCurrencyBal =
-                  queryBalances.getBalanceFromCurrency(feeCurrency);
-                const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
-                  feeCurrency,
-                  feeConfig.type
-                );
+          const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+            firstFeeCurrency,
+            feeConfig.type
+          );
+          if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
+            // Not enough balances for fee.
+            // Try to find other fee currency to send.
+            for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
+              const feeCurrencyBal =
+                queryBalances.getBalanceFromCurrency(feeCurrency);
+              const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
+                feeCurrency,
+                feeConfig.type
+              );
 
-                if (feeCurrencyBal.toDec().gte(fee.toDec())) {
-                  feeConfig.setFee({
-                    type: feeConfig.type,
-                    currency: feeCurrency,
-                  });
-                  skip = true;
-                  return;
-                }
+              if (feeCurrencyBal.toDec().gte(fee.toDec())) {
+                feeConfig.setFee({
+                  type: feeConfig.type,
+                  currency: feeCurrency,
+                });
+                skip = true;
+                return;
               }
             }
           }
@@ -160,12 +165,40 @@ export const FeeControl: FunctionComponent<{
               <Subtitle3>
                 {feeConfig.fees
                   .map((fee) => {
-                    return fee.maxDecimals(6).inequalitySymbol(true).toString();
+                    return fee
+                      .maxDecimals(6)
+                      .inequalitySymbol(true)
+                      .trim(true)
+                      .shrink(true)
+                      .toString();
                   })
                   .join(",")}
               </Subtitle3>
               <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
-                $153.50 (TODO)
+                {(() => {
+                  let total: PricePretty | undefined;
+                  let hasUnknown = false;
+                  for (const fee of feeConfig.fees) {
+                    if (!fee.currency.coinGeckoId) {
+                      hasUnknown = true;
+                      break;
+                    } else {
+                      const price = priceStore.calculatePrice(fee);
+                      if (price) {
+                        if (!total) {
+                          total = price;
+                        } else {
+                          total = total.add(price);
+                        }
+                      }
+                    }
+                  }
+
+                  if (hasUnknown || !total) {
+                    return "-";
+                  }
+                  return total.toString();
+                })()}
               </Subtitle3>
             </Stack>
 
@@ -180,7 +213,13 @@ export const FeeControl: FunctionComponent<{
           align="bottom"
           close={() => setIsModalOpen(false)}
         >
-          <TransactionFeeModal feeConfig={feeConfig} gasConfig={gasConfig} />
+          <TransactionFeeModal
+            close={() => setIsModalOpen(false)}
+            senderConfig={senderConfig}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
+            gasSimulator={gasSimulator}
+          />
         </Modal>
       </Styles.Container>
     );

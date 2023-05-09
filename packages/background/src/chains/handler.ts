@@ -12,27 +12,34 @@ import {
   RemoveSuggestedChainInfoMsg,
   SuggestChainInfoMsg,
 } from "./messages";
+import { ChainInfo } from "@keplr-wallet/types";
+import { getBasicAccessPermissionType, PermissionService } from "../permission";
 
-export const getHandler: (service: ChainsService) => Handler = (service) => {
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
+export const getHandler: (
+  chainsService: ChainsService,
+  permissionService: PermissionService
+) => Handler = (chainsService, permissionService) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
       case GetChainInfosWithCoreTypesMsg:
-        return handleGetInfosWithCoreTypesMsg(service)(
+        return handleGetInfosWithCoreTypesMsg(chainsService)(
           env,
           msg as GetChainInfosWithCoreTypesMsg
         );
       case GetChainInfosWithoutEndpointsMsg:
-        return handleGetChainInfosWithoutEndpointsMsg(service)(
+        return handleGetChainInfosWithoutEndpointsMsg(chainsService)(
           env,
           msg as GetChainInfosWithoutEndpointsMsg
         );
       case SuggestChainInfoMsg:
-        return handleSuggestChainInfoMsg(service)(
+        return handleSuggestChainInfoMsg(chainsService, permissionService)(
           env,
           msg as SuggestChainInfoMsg
         );
       case RemoveSuggestedChainInfoMsg:
-        return handleRemoveSuggestedChainInfoMsg(service)(
+        return handleRemoveSuggestedChainInfoMsg(chainsService)(
           env,
           msg as RemoveSuggestedChainInfoMsg
         );
@@ -72,20 +79,28 @@ const handleGetChainInfosWithoutEndpointsMsg: (
 };
 
 const handleSuggestChainInfoMsg: (
-  service: ChainsService
-) => InternalHandler<SuggestChainInfoMsg> = (service) => {
-  return async (_, msg) => {
-    if (service.getChainInfo(msg.chainInfo.chainId) != null) {
+  chainsService: ChainsService,
+  permissionService: PermissionService
+) => InternalHandler<SuggestChainInfoMsg> = (
+  chainsService,
+  permissionService
+) => {
+  return async (env, msg) => {
+    if (chainsService.getChainInfo(msg.chainInfo.chainId) != null) {
       // If suggested chain info is already registered, just return.
       return;
     }
 
-    throw new Error("TODO");
-    // const chainInfo = msg.chainInfo as Writeable<ChainInfo>;
-    // // And, always handle it as beta.
-    // chainInfo.beta = true;
-    //
-    // await service.addSuggestedChainInfo(env, chainInfo, msg.origin);
+    const chainInfo = msg.chainInfo as Writeable<ChainInfo>;
+    chainInfo.beta = true;
+
+    await chainsService.suggestChainInfo(env, chainInfo, msg.origin);
+
+    permissionService.addPermission(
+      [chainInfo.chainId],
+      getBasicAccessPermissionType(),
+      [msg.origin]
+    );
   };
 };
 

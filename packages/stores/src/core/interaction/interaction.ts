@@ -9,7 +9,9 @@ import {
   InteractionForegroundService,
   InteractionWaitingData,
   ApproveInteractionMsg,
+  ApproveInteractionV2Msg,
   RejectInteractionMsg,
+  RejectInteractionV2Msg,
 } from "@keplr-wallet/background";
 import { action, observable, makeObservable, flow, toJS } from "mobx";
 import { computedFn } from "mobx-utils";
@@ -54,6 +56,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     this.data.push(data);
   }
 
+  @action
   onEventDataReceived() {
     // noop
   }
@@ -96,6 +99,56 @@ export class InteractionStore implements InteractionForegroundHandler {
    * 이를 대충 해결하기 위해서 approve 이후에 대충 조금 기다리고 남은 interaction이 있느냐 아니냐에 따라 다른 처리를 한다.
    * @param type
    * @param id
+   * @param result
+   * @param afterFn
+   */
+  @flow
+  *approveWithProceedNextV2(
+    ids: string | string[],
+    result: unknown,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    if (typeof ids === "string") {
+      ids = [ids];
+    }
+
+    const fresh: string[] = [];
+
+    for (const id of ids) {
+      const d = this.getData(id);
+      if (!d || this.isObsoleteInteraction(id)) {
+        return;
+      }
+
+      this.markAsObsolete(id);
+
+      fresh.push(id);
+    }
+
+    const promises: Promise<unknown>[] = [];
+    for (const id of fresh) {
+      promises.push(
+        this.msgRequester.sendMessage(
+          BACKGROUND_PORT,
+          new ApproveInteractionV2Msg(id, result)
+        )
+      );
+    }
+
+    yield Promise.all(promises);
+
+    yield this.delay(50);
+    yield afterFn(this.hasOtherData(ids));
+    this.removeData(ids);
+  }
+
+  /**
+   * 웹페이지에서 어떤 API를 요청해서 extension이 켜졌을때
+   * extension에서 요청을 처리하고 바로 팝업을 닫으면
+   * 이후에 연속적인 api 요청의 경우 다시 페이지가 열려야하는데 이게 은근히 어색한 UX를 만들기 때문에
+   * 이를 대충 해결하기 위해서 approve 이후에 대충 조금 기다리고 남은 interaction이 있느냐 아니냐에 따라 다른 처리를 한다.
+   * @param type
+   * @param id
    * @param afterFn
    */
   @flow
@@ -116,6 +169,54 @@ export class InteractionStore implements InteractionForegroundHandler {
     yield this.delay(100);
     yield afterFn(this.hasOtherData(id));
     this.removeData(id);
+  }
+
+  /**
+   * 웹페이지에서 어떤 API를 요청해서 extension이 켜졌을때
+   * extension에서 요청을 처리하고 바로 팝업을 닫으면
+   * 이후에 연속적인 api 요청의 경우 다시 페이지가 열려야하는데 이게 은근히 어색한 UX를 만들기 때문에
+   * 이를 대충 해결하기 위해서 approve 이후에 대충 조금 기다리고 남은 interaction이 있느냐 아니냐에 따라 다른 처리를 한다.
+   * @param type
+   * @param id
+   * @param afterFn
+   */
+  @flow
+  *rejectWithProceedNextV2(
+    ids: string | string[],
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    if (typeof ids === "string") {
+      ids = [ids];
+    }
+
+    const fresh: string[] = [];
+
+    for (const id of ids) {
+      const d = this.getData(id);
+      if (!d || this.isObsoleteInteraction(id)) {
+        return;
+      }
+
+      this.markAsObsolete(id);
+
+      fresh.push(id);
+    }
+
+    const promises: Promise<unknown>[] = [];
+    for (const id of fresh) {
+      promises.push(
+        this.msgRequester.sendMessage(
+          BACKGROUND_PORT,
+          new RejectInteractionV2Msg(id)
+        )
+      );
+    }
+
+    yield Promise.all(promises);
+
+    yield this.delay(50);
+    yield afterFn(this.hasOtherData(ids));
+    this.removeData(ids);
   }
 
   protected delay(ms: number): Promise<void> {
@@ -148,9 +249,15 @@ export class InteractionStore implements InteractionForegroundHandler {
   }
 
   @action
-  protected removeData(id: string) {
-    this.data = this.data.filter((d) => d.id !== id);
-    this.obsoleteData.delete(id);
+  protected removeData(ids: string | string[]) {
+    if (typeof ids === "string") {
+      ids = [ids];
+    }
+
+    for (const id of ids) {
+      this.data = this.data.filter((d) => d.id !== id);
+      this.obsoleteData.delete(id);
+    }
   }
 
   @action
@@ -160,9 +267,13 @@ export class InteractionStore implements InteractionForegroundHandler {
     }
   }
 
-  protected hasOtherData(id: string): boolean {
+  protected hasOtherData(ids: string | string[]): boolean {
+    if (typeof ids === "string") {
+      ids = [ids];
+    }
+
     const find = this.data.find((data) => {
-      return data.id !== id;
+      return !ids.includes(data.id);
     });
     return !!find;
   }

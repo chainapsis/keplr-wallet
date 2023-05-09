@@ -12,10 +12,16 @@ require("./public/assets/icon/icon-beta-16.png");
 require("./public/assets/icon/icon-beta-48.png");
 require("./public/assets/icon/icon-beta-128.png");
 
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
-import { IntlProvider } from "react-intl";
 import { StoreProvider, useStore } from "./stores";
 import { GlobalStyle, GlobalPopupStyle } from "./styles";
 import { configure } from "mobx";
@@ -33,6 +39,7 @@ import { SettingGeneralPage } from "./pages/setting/general";
 import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
 import { SettingGeneralAuthZPage } from "./pages/setting/general/authz";
 import { SettingGeneralAuthZRevokePage } from "./pages/setting/general/authz/revoke";
+import { SettingGeneralDeleteSuggestChainPage } from "./pages/setting/general/delete-suggest-chain";
 import { SettingAdvancedPage } from "./pages/setting/advanced";
 import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
@@ -45,17 +52,21 @@ import { SettingAdvancedEndpointPage } from "./pages/setting/advanced/endpoint";
 import { SettingGeneralLinkKeplrMobilePage } from "./pages/setting/general/link-keplr-mobile";
 import { SettingContactsList } from "./pages/setting/contacts/list";
 import { SettingContactsAdd } from "./pages/setting/contacts/add";
-import { SettingChainListPage } from "./pages/setting/chain";
 import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
 import {
   WalletSelectPage,
   WalletChangeNamePage,
   WalletDeletePage,
-  WalletRecoveryPhrasePage,
+  WalletShowSensitivePage,
 } from "./pages/wallet";
+import { SuggestChainPage } from "./pages/suggest-chain";
 import { ModalRootProvider } from "./components/modal";
 import { ConfirmProvider } from "./hooks/confirm";
+import { NotificationProvider } from "./hooks/notification";
+import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
+import { AppIntlProvider } from "./languages";
+import { SettingSecurityAutoLockPage } from "./pages/setting/security/auto-lock";
 import { IBCSendAmountPage, IBCSendSelectChannelPage } from "./pages/ibc-send";
 
 configure({
@@ -67,6 +78,33 @@ window.keplr = new Keplr(
   "core",
   new InExtensionMessageRequester()
 );
+
+const useIsURLUnlockPage = () => {
+  const [value, setValue] = useState(() => {
+    return (
+      window.location.hash === "#/unlock" ||
+      window.location.hash.startsWith("#/unlock?")
+    );
+  });
+
+  useLayoutEffect(() => {
+    const handler = () => {
+      const v =
+        window.location.hash === "#/unlock" ||
+        window.location.hash.startsWith("#/unlock?");
+
+      setValue(v);
+    };
+
+    window.addEventListener("locationchange", handler);
+
+    return () => {
+      window.removeEventListener("locationchange", handler);
+    };
+  }, []);
+
+  return value;
+};
 
 const RoutesAfterReady: FunctionComponent = observer(() => {
   const {
@@ -98,6 +136,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     }
   }, [keyRingStore.status]);
 
+  const isURLUnlockPage = useIsURLUnlockPage();
   const openRegisterOnce = useRef(false);
 
   const isReady = useMemo(() => {
@@ -122,6 +161,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
     if (chainStore.isInitializing) {
       return false;
+    }
+
+    if (isURLUnlockPage) {
+      return true;
     }
 
     if (keyRingStore.status === "unlocked") {
@@ -153,108 +196,126 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
     return true;
   }, [
-    accountStore,
-    chainStore.chainInfos,
-    chainStore.isInitializing,
-    ibcCurrencyRegistrar.isInitialized,
-    uiConfigStore.isInitialized,
     keyRingStore.status,
+    chainStore.isInitializing,
+    chainStore.chainInfos,
+    isURLUnlockPage,
+    ibcCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
+    uiConfigStore.isInitialized,
+    accountStore,
   ]);
 
   return (
-    <HashRouter>
-      {isReady ? (
-        keyRingStore.status === "locked" ? (
-          <UnlockPage />
+    <AppIntlProvider>
+      <HashRouter>
+        {isReady ? (
+          keyRingStore.status === "locked" && !isURLUnlockPage ? (
+            <UnlockPage />
+          ) : (
+            <Routes>
+              <Route path="/unlock" element={<UnlockPage />} />
+              <Route path="/" element={<MainPage />} />
+              <Route path="/send" element={<SendAmountPage />} />
+              <Route
+                path="/send/select-asset"
+                element={<SendSelectAssetPage />}
+              />
+              <Route path="/setting" element={<SettingPage />} />
+              <Route path="/setting/general" element={<SettingGeneralPage />} />
+              <Route
+                path="/setting/general/language"
+                element={<SettingGeneralLanguagePage />}
+              />
+              <Route
+                path="/setting/general/fiat"
+                element={<SettingGeneralFiatPage />}
+              />
+              <Route
+                path="/setting/general/authz"
+                element={<SettingGeneralAuthZPage />}
+              />
+              <Route
+                path="/setting/general/authz/revoke"
+                element={<SettingGeneralAuthZRevokePage />}
+              />
+              <Route
+                path="/setting/general/link-keplr-mobile"
+                element={<SettingGeneralLinkKeplrMobilePage />}
+              />
+              <Route
+                path="setting/general/delete-suggest-chain"
+                element={<SettingGeneralDeleteSuggestChainPage />}
+              />
+              <Route
+                path="/setting/advanced"
+                element={<SettingAdvancedPage />}
+              />
+              <Route
+                path="/setting/advanced/endpoint"
+                element={<SettingAdvancedEndpointPage />}
+              />
+              <Route
+                path="/setting/security"
+                element={<SettingSecurityPage />}
+              />
+              <Route
+                path="/setting/security/permission"
+                element={<SettingSecurityPermissionPage />}
+              />
+              <Route
+                path="/setting/security/auto-lock"
+                element={<SettingSecurityAutoLockPage />}
+              />
+              <Route
+                path="/setting/security/change-password"
+                element={<SettingSecurityChangePasswordPage />}
+              />
+              <Route
+                path="/setting/token/list"
+                element={<SettingTokenListPage />}
+              />
+              <Route
+                path="/setting/token/add"
+                element={<SettingTokenAddPage />}
+              />
+              <Route
+                path="/setting/contacts/list"
+                element={<SettingContactsList />}
+              />
+              <Route
+                path="/setting/contacts/add"
+                element={<SettingContactsAdd />}
+              />
+              <Route path="/permission" element={<PermissionPage />} />
+              <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
+              <Route
+                path="/sign-cosmos-adr36"
+                element={<SignCosmosADR36Page />}
+              />
+              <Route path="/wallet/select" element={<WalletSelectPage />} />
+              <Route path="/wallet/delete" element={<WalletDeletePage />} />
+              <Route
+                path="/wallet/change-name"
+                element={<WalletChangeNamePage />}
+              />
+              <Route
+                path="/wallet/show-sensitive"
+                element={<WalletShowSensitivePage />}
+              />
+              <Route path="/suggest-chain" element={<SuggestChainPage />} />
+              <Route
+                path="/ibc-send/select-channel"
+                element={<IBCSendSelectChannelPage />}
+              />
+              <Route path="/ibc-send/amount" element={<IBCSendAmountPage />} />
+            </Routes>
+          )
         ) : (
-          <Routes>
-            <Route path="/unlock" element={<UnlockPage />} />
-            <Route path="/" element={<MainPage />} />
-            <Route path="/send" element={<SendAmountPage />} />
-            <Route
-              path="/send/select-asset"
-              element={<SendSelectAssetPage />}
-            />
-            <Route path="/setting" element={<SettingPage />} />
-            <Route path="/setting/general" element={<SettingGeneralPage />} />
-            <Route
-              path="/setting/general/language"
-              element={<SettingGeneralLanguagePage />}
-            />
-            <Route
-              path="/setting/general/fiat"
-              element={<SettingGeneralFiatPage />}
-            />
-            <Route
-              path="/setting/general/authz"
-              element={<SettingGeneralAuthZPage />}
-            />
-            <Route
-              path="/setting/general/authz/revoke"
-              element={<SettingGeneralAuthZRevokePage />}
-            />
-            <Route
-              path="/setting/general/link-keplr-mobile"
-              element={<SettingGeneralLinkKeplrMobilePage />}
-            />
-            <Route path="/setting/advanced" element={<SettingAdvancedPage />} />
-            <Route
-              path="/setting/advanced/endpoint"
-              element={<SettingAdvancedEndpointPage />}
-            />
-            <Route path="/setting/security" element={<SettingSecurityPage />} />
-            <Route
-              path="/setting/security/permission"
-              element={<SettingSecurityPermissionPage />}
-            />
-            <Route
-              path="/setting/token/list"
-              element={<SettingTokenListPage />}
-            />
-            <Route
-              path="/setting/token/add"
-              element={<SettingTokenAddPage />}
-            />
-            <Route
-              path="/setting/contacts/list"
-              element={<SettingContactsList />}
-            />
-            <Route
-              path="/setting/contacts/add"
-              element={<SettingContactsAdd />}
-            />
-            <Route
-              path="/setting/chain/list"
-              element={<SettingChainListPage />}
-            />
-            <Route path="/permission" element={<PermissionPage />} />
-            <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
-            <Route
-              path="/sign-cosmos-adr36"
-              element={<SignCosmosADR36Page />}
-            />
-            <Route path="/wallet/select" element={<WalletSelectPage />} />
-            <Route path="/wallet/delete" element={<WalletDeletePage />} />
-            <Route
-              path="/wallet/change-name"
-              element={<WalletChangeNamePage />}
-            />
-            <Route
-              path="/wallet/recovery-phrase"
-              element={<WalletRecoveryPhrasePage />}
-            />
-            <Route
-              path="/ibc-send/select-channel"
-              element={<IBCSendSelectChannelPage />}
-            />
-            <Route path="/ibc-send/amount" element={<IBCSendAmountPage />} />
-          </Routes>
-        )
-      ) : (
-        <div>TODO: Add preparing view</div>
-      )}
-    </HashRouter>
+          <div>TODO: Add preparing view</div>
+        )}
+      </HashRouter>
+    </AppIntlProvider>
   );
 });
 
@@ -263,11 +324,11 @@ const App: FunctionComponent = () => {
     <StoreProvider>
       <ModalRootProvider>
         <ConfirmProvider>
-          <IntlProvider locale={navigator.language}>
+          <NotificationProvider>
             <GlobalStyle />
             <GlobalPopupStyle />
             <RoutesAfterReady />
-          </IntlProvider>
+          </NotificationProvider>
         </ConfirmProvider>
       </ModalRootProvider>
     </StoreProvider>

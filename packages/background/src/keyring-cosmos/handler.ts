@@ -15,6 +15,7 @@ import {
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
   GetCosmosKeysForEachVaultSettledMsg,
+  RequestSignEIP712CosmosTxMsg_v0,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -74,6 +75,11 @@ export const getHandler: (
           env,
           msg as GetCosmosKeysForEachVaultSettledMsg
         );
+      case RequestSignEIP712CosmosTxMsg_v0:
+        return handleRequestSignEIP712CosmosTxMsg_v0(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestSignEIP712CosmosTxMsg_v0);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -94,7 +100,7 @@ const handleGetCosmosKeyMsg: (
       msg.origin
     );
 
-    return await service.getKeySelected(env, msg.chainId);
+    return await service.getKeySelected(msg.chainId);
   };
 };
 
@@ -113,7 +119,7 @@ const handleGetCosmosKeysSettledMsg: (
     );
 
     return await Promise.allSettled(
-      msg.chainIds.map((chainId) => service.getKeySelected(env, chainId))
+      msg.chainIds.map((chainId) => service.getKeySelected(chainId))
     );
   };
 };
@@ -227,7 +233,6 @@ const handleVerifyCosmosSignAminoADR36Msg: (
     );
 
     return await service.verifyAminoADR36Selected(
-      env,
       msg.chainId,
       msg.signer,
       msg.data,
@@ -241,9 +246,8 @@ const handleComputeNotFinalizedMnemonicKeyAddressesMsg: (
 ) => InternalHandler<ComputeNotFinalizedMnemonicKeyAddressesMsg> = (
   service
 ) => {
-  return async (env, msg) => {
+  return async (_, msg) => {
     return await service.computeNotFinalizedMnemonicKeyAddresses(
-      env,
       msg.id,
       msg.chainId
     );
@@ -255,9 +259,8 @@ const handlePrivilegeCosmosSignAminoWithdrawRewardsMsg: (
 ) => InternalHandler<PrivilegeCosmosSignAminoWithdrawRewardsMsg> = (
   service
 ) => {
-  return async (env, msg) => {
+  return async (_, msg) => {
     return await service.privilegeSignAminoWithdrawRewards(
-      env,
       msg.chainId,
       msg.signer,
       msg.signDoc
@@ -268,17 +271,43 @@ const handlePrivilegeCosmosSignAminoWithdrawRewardsMsg: (
 const handleGetCosmosKeysForEachVaultSettledMsg: (
   service: KeyRingCosmosService
 ) => InternalHandler<GetCosmosKeysForEachVaultSettledMsg> = (service) => {
-  return async (env, msg) => {
+  return async (_, msg) => {
     return await Promise.allSettled(
       msg.vaultIds.map((vaultId) =>
         (async () => {
-          const key = await service.getKey(env, vaultId, msg.chainId);
+          const key = await service.getKey(vaultId, msg.chainId);
           return {
             vaultId,
             ...key,
           };
         })()
       )
+    );
+  };
+};
+
+const handleRequestSignEIP712CosmosTxMsg_v0: (
+  service: KeyRingCosmosService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestSignEIP712CosmosTxMsg_v0> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    return await service.requestSignEIP712CosmosTx_v0_selected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.eip712,
+      msg.signDoc,
+      msg.signOptions
     );
   };
 };

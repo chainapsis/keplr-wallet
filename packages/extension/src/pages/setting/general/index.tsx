@@ -8,9 +8,12 @@ import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { Box } from "../../../components/box";
+import { useLanguage } from "../../../languages";
 
 export const SettingGeneralPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
+
+  const language = useLanguage();
 
   const navigate = useNavigate();
 
@@ -20,7 +23,7 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
         <Stack gutter="0.5rem">
           <PageButton
             title="Language"
-            paragraph="Korean"
+            paragraph={language.languageFullName}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/language")}
           />
@@ -56,6 +59,12 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
             title="Link Keplr Mobile"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/link-keplr-mobile")}
+          />
+
+          <PageButton
+            title="Delete Suggest Chain"
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/delete-suggest-chain")}
           />
         </Stack>
       </Box>

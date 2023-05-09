@@ -83,6 +83,7 @@ export interface IRecipientConfigWithICNS extends IRecipientConfig {
   readonly isICNSEnabled: boolean;
   readonly isICNSName: boolean;
   readonly icnsExpectedBech32Prefix: string;
+  readonly isICNSFetching: boolean;
 }
 
 export interface IBaseAmountConfig extends ITxChainSetter {
@@ -95,8 +96,13 @@ export interface IAmountConfig extends IBaseAmountConfig {
   value: string;
   setValue(value: string): void;
 
+  currency: AppCurrency;
   setCurrency(currency: AppCurrency | undefined): void;
   selectableCurrencies: AppCurrency[];
+
+  // Zero means unset.
+  fraction: number;
+  setFraction(fraction: number): void;
 }
 
 export const DefaultGasPriceStep: {

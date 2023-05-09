@@ -8,10 +8,12 @@ export const Button: FunctionComponent<ButtonProps> = ({
   onClick,
   style,
   className,
+  left,
   text,
   right,
   isLoading,
   textOverrideIcon,
+  type,
   ...otherProps
 }) => {
   return (
@@ -22,6 +24,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
     >
       <Styles.Button
         isLoading={isLoading}
+        type={type || "button"}
         {...otherProps}
         onClick={(e) => {
           if (onClick) {
@@ -33,6 +36,8 @@ export const Button: FunctionComponent<ButtonProps> = ({
           }
         }}
       >
+        {left ? <Styles.Left>{left}</Styles.Left> : null}
+
         {isLoading ? (
           <Styles.Loading buttonColor={otherProps.color}>
             <LoadingIcon width="1rem" height="1rem" />

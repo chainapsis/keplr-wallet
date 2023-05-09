@@ -1,4 +1,3 @@
-import { Env } from "@keplr-wallet/router";
 import { PlainObject, Vault } from "../vault";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -21,21 +20,16 @@ export interface KeyInfo {
 
 export interface KeyRing {
   supportedKeyRingType(): string;
-  createKeyRingVault(
-    env: Env,
-    ...args: any[]
-  ): Promise<{
+  createKeyRingVault(...args: any[]): Promise<{
     insensitive: PlainObject;
     sensitive: PlainObject;
   }>;
   getPubKey(
-    env: Env,
     vault: Vault,
     coinType: number,
     chainInfo: ChainInfo
   ): PubKeySecp256k1 | Promise<PubKeySecp256k1>;
   sign(
-    env: Env,
     vault: Vault,
     coinType: number,
     data: Uint8Array,

@@ -1,11 +1,10 @@
 import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
-import { ColorPalette } from "../../styles";
 
 export const ArrowDownIcon: FunctionComponent<IconProps> = ({
   width = 24,
   height = 24,
-  color = ColorPalette["gray-300"],
+  color,
 }) => {
   return (
     <svg
@@ -17,7 +16,7 @@ export const ArrowDownIcon: FunctionComponent<IconProps> = ({
     >
       <path
         d="M19 9L11.5 15L4 9"
-        stroke={color}
+        stroke={color || "currentColor"}
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"

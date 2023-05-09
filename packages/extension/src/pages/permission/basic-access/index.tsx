@@ -1,47 +1,120 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
-import {
-  InteractionWaitingData,
-  PermissionData,
-} from "@keplr-wallet/background";
-import { Button } from "../../../components/button";
+import { PermissionData } from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
 import { useInteractionInfo } from "../../../hooks";
+import { HeaderLayout } from "../../../layouts/header";
+import { Box } from "../../../components/box";
+import { Image } from "../../../components/image";
+import { Body1, H2, Subtitle3 } from "../../../components/typography";
+import { ColorPalette } from "../../../styles";
+import { Gutter } from "../../../components/gutter";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
-  data: InteractionWaitingData<PermissionData>;
+  data: {
+    ids: string[];
+  } & PermissionData;
 }> = observer(({ data }) => {
-  const { permissionStore } = useStore();
+  const { chainStore, permissionStore } = useStore();
 
   const interactionInfo = useInteractionInfo(() => {
     permissionStore.rejectPermissionAll();
   });
 
   return (
-    <div>
-      <div>{JSON.stringify(data.data)}</div>
-      <Button
-        text="Approve"
-        disabled={permissionStore.waitingPermissionData == null}
-        isLoading={permissionStore.isObsoleteInteraction(
-          permissionStore.waitingPermissionData?.id
-        )}
-        onClick={async () => {
-          await permissionStore.approvePermissionWithProceedNext(
-            data.id,
-            (proceedNext) => {
-              if (!proceedNext) {
-                if (
-                  interactionInfo.interaction &&
-                  !interactionInfo.interactionInternal
-                ) {
-                  window.close();
-                }
+    <HeaderLayout
+      title=""
+      fixedHeight={true}
+      bottomButton={{
+        text: "Approve",
+        size: "large",
+        isLoading: (() => {
+          const obsolete = data.ids.find((id) => {
+            return permissionStore.isObsoleteInteraction(id);
+          });
+          return !!obsolete;
+        })(),
+      }}
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        await permissionStore.approvePermissionWithProceedNext(
+          data.ids,
+          (proceedNext) => {
+            if (!proceedNext) {
+              if (
+                interactionInfo.interaction &&
+                !interactionInfo.interactionInternal
+              ) {
+                window.close();
               }
             }
-          );
-        }}
-      />
-    </div>
+          }
+        );
+      }}
+    >
+      <Box height="100%" padding="0.75rem" paddingBottom="0">
+        <Box alignX="center">
+          <Image
+            alt="Keplr Logo Image"
+            src={require("../../../public/assets/logo-256.png")}
+            style={{ width: "4.625rem", height: "4.625rem" }}
+          />
+
+          <Gutter size="1.125rem" />
+
+          <H2 color={ColorPalette["gray-10"]}>Requesting Connection</H2>
+
+          <Gutter size="1rem" />
+
+          <Body1 color={ColorPalette["gray-200"]}>
+            {data.origins.join(", ")}
+          </Body1>
+
+          <Gutter size="1rem" />
+        </Box>
+        <Box
+          style={{
+            flex: 1,
+            overflow: "auto",
+          }}
+          borderRadius="0.5rem"
+        >
+          <Box>
+            {data.chainIds.map((chainId, index) => {
+              const chainInfo = chainStore.getChain(chainId);
+
+              const isLast = index === data.chainIds.length - 1;
+
+              return (
+                <Box
+                  key={chainId}
+                  backgroundColor={ColorPalette["gray-600"]}
+                  style={{
+                    overflow: "hidden",
+                    borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
+                    borderBottomRightRadius: isLast ? "0.5rem" : undefined,
+                  }}
+                >
+                  <Subtitle3
+                    color={ColorPalette["gray-50"]}
+                    style={{ padding: "1.5rem" }}
+                  >
+                    {chainInfo.chainName}
+                  </Subtitle3>
+
+                  {isLast ? null : (
+                    <Box
+                      height="1px"
+                      backgroundColor={ColorPalette["gray-500"]}
+                    />
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
+      </Box>
+    </HeaderLayout>
   );
 });

@@ -28,7 +28,6 @@ import {
   CheckPasswordMsg,
   ExportKeyRingDatasMsg,
   RequestVerifyADR36AminoSignDoc,
-  RequestSignEIP712CosmosTxMsg_v0,
   InitNonDefaultLedgerAppMsg,
   CreateKeystoneKeyMsg,
   AddKeystoneKeyMsg,
@@ -93,11 +92,6 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleRequestSignAminoMsg(service)(
           env,
           msg as RequestSignAminoMsg
-        );
-      case RequestSignEIP712CosmosTxMsg_v0:
-        return handleRequestSignEIP712CosmosTxMsg_v0(service)(
-          env,
-          msg as RequestSignEIP712CosmosTxMsg_v0
         );
       case RequestVerifyADR36AminoSignDoc:
         return handleRequestVerifyADR36AminoSignDoc(service)(
@@ -352,28 +346,6 @@ const handleRequestSignAminoMsg: (
       msg.origin,
       msg.chainId,
       msg.signer,
-      msg.signDoc,
-      msg.signOptions
-    );
-  };
-};
-
-const handleRequestSignEIP712CosmosTxMsg_v0: (
-  service: KeyRingService
-) => InternalHandler<RequestSignEIP712CosmosTxMsg_v0> = (service) => {
-  return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainId,
-      msg.origin
-    );
-
-    return await service.requestSignEIP712CosmosTx_v0(
-      env,
-      msg.origin,
-      msg.chainId,
-      msg.signer,
-      msg.eip712,
       msg.signDoc,
       msg.signOptions
     );

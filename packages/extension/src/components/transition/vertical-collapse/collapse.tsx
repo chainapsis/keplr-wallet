@@ -21,10 +21,29 @@ import {
 import { defaultSpringConfig } from "../../../styles/spring";
 
 export const VerticalCollapseTransition: FunctionComponent<
-  VerticalCollapseTransitionProps
-> = ({ children, collapsed, width, transitionAlign }) => {
+  VerticalCollapseTransitionProps & {
+    onTransitionEnd?: () => void;
+
+    onResize?: (height: number) => void;
+  }
+> = ({
+  children,
+  collapsed,
+  width,
+  transitionAlign,
+  onTransitionEnd,
+  onResize,
+}) => {
+  const onTransitionEndRef = useRef(onTransitionEnd);
+  onTransitionEndRef.current = onTransitionEnd;
+
   const heightPx = useSpringValue(collapsed ? 0 : -1, {
     config: defaultSpringConfig,
+    onRest: () => {
+      if (onTransitionEndRef.current) {
+        onTransitionEndRef.current();
+      }
+    },
   });
 
   const [registry] = useState<IDescendantRegistry>(
@@ -47,6 +66,10 @@ export const VerticalCollapseTransition: FunctionComponent<
     lastHeight.current = height;
     if (!collapsed) {
       heightPx.set(height);
+    }
+
+    if (onResize) {
+      onResize(height);
     }
   });
 

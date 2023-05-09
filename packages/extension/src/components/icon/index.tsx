@@ -1,5 +1,7 @@
+export * from "./apple";
 export * from "./arrow-across";
 export * from "./arrow-down";
+export * from "./arrow-down-tray";
 export * from "./arrow-drop-down";
 export * from "./arrow-left";
 export * from "./arrow-right";
@@ -12,6 +14,7 @@ export * from "./code-bracket";
 export * from "./copy-fill";
 export * from "./copy-outline";
 export * from "./ellipsis";
+export * from "./google";
 export * from "./information";
 export * from "./key";
 export * from "./loading";

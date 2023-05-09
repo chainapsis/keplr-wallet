@@ -2,7 +2,7 @@ import { InteractionStore } from "./interaction";
 import { computed, makeObservable } from "mobx";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 import { KeplrSignOptions, StdSignDoc } from "@keplr-wallet/types";
-import { InteractionWaitingData } from "@keplr-wallet/background";
+import { InteractionWaitingData, PlainObject } from "@keplr-wallet/background";
 
 export type SignInteractionData =
   | {
@@ -14,6 +14,14 @@ export type SignInteractionData =
       signOptions: KeplrSignOptions & {
         isADR36WithString?: boolean;
       };
+      keyType: string;
+      keyInsensitive: PlainObject;
+
+      eip712?: {
+        types: Record<string, { name: string; type: string }[] | undefined>;
+        domain: Record<string, any>;
+        primaryType: string;
+      };
     }
   | {
       origin: string;
@@ -22,6 +30,8 @@ export type SignInteractionData =
       signer: string;
       signDocBytes: Uint8Array;
       signOptions: KeplrSignOptions;
+      keyType: string;
+      keyInsensitive: PlainObject;
     };
 
 export class SignInteractionStore {
@@ -67,14 +77,28 @@ export class SignInteractionStore {
   async approveWithProceedNext(
     id: string,
     newSignDocWrapper: SignDocWrapper,
+    signature: Uint8Array | undefined,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    const newSignDoc =
-      newSignDocWrapper.mode === "amino"
-        ? newSignDocWrapper.aminoSignDoc
-        : newSignDocWrapper.protoSignDoc.toBytes();
+    const res = (() => {
+      if (newSignDocWrapper.mode === "amino") {
+        return {
+          newSignDoc: newSignDocWrapper.aminoSignDoc,
+        };
+      }
+      return {
+        newSignDocBytes: newSignDocWrapper.protoSignDoc.toBytes(),
+      };
+    })();
 
-    await this.interactionStore.approveWithProceedNext(id, newSignDoc, afterFn);
+    await this.interactionStore.approveWithProceedNextV2(
+      id,
+      {
+        ...res,
+        signature,
+      },
+      afterFn
+    );
   }
 
   async rejectWithProceedNext(

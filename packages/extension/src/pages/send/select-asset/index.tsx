@@ -4,8 +4,7 @@ import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import styled from "styled-components";
 import { Stack } from "../../../components/stack";
-import { TextInput } from "../../../components/input";
-import { SearchIcon } from "../../../components/icon";
+import { SearchTextInput } from "../../../components/input";
 import { useStore } from "../../../stores";
 import { TokenItem } from "../../main/components";
 import { Column, Columns } from "../../../components/column";
@@ -13,6 +12,7 @@ import { Body2 } from "../../../components/typography";
 import { Checkbox } from "../../../components/checkbox";
 import { ColorPalette } from "../../../styles";
 import { Dec } from "@keplr-wallet/unit";
+import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 
 const Styles = {
   Container: styled(Stack)`
@@ -25,6 +25,8 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
   const [search, setSearch] = useState("");
   const [hideIBCToken, setHideIBCToken] = useState(true);
+
+  const searchRef = useFocusOnMount<HTMLInputElement>();
 
   const tokens = hugeQueriesStore.getAllBalances(!hideIBCToken);
 
@@ -55,9 +57,9 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout title="Select Asset" left={<BackButton />}>
       <Styles.Container gutter="0.5rem">
-        <TextInput
+        <SearchTextInput
+          ref={searchRef}
           placeholder="Search for a chain"
-          left={<SearchIcon width="1.25rem" height="1.25rem" />}
           value={search}
           onChange={(e) => {
             e.preventDefault();

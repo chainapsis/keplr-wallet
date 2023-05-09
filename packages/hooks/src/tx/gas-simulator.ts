@@ -34,6 +34,8 @@ class GasSimulatorState {
   protected _tx: TxSimulate | undefined = undefined;
   @observable.ref
   protected _stdFee: StdFee | undefined = undefined;
+  @observable.ref
+  protected _error: Error | undefined = undefined;
 
   constructor() {
     makeObservable(this);
@@ -82,6 +84,15 @@ class GasSimulatorState {
   @action
   refreshStdFee(fee: StdFee | undefined) {
     this._stdFee = fee;
+  }
+
+  get error(): Error | undefined {
+    return this._error;
+  }
+
+  @action
+  setError(error: Error | undefined) {
+    this._error = error;
   }
 
   static isZeroFee(amount: readonly Coin[] | undefined): boolean {
@@ -213,6 +224,12 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     const key = this.storeKey;
     const state = this.getState(key);
     return state.outdatedCosmosSdk;
+  }
+
+  get error(): Error | undefined {
+    const key = this.storeKey;
+    const state = this.getState(key);
+    return state.error;
   }
 
   get gasEstimated(): number | undefined {
@@ -372,12 +389,14 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
             }
 
             state.setOutdatedCosmosSdk(false);
+            state.setError(undefined);
 
             this.kvStore.set(key, gasUsed).catch((e) => {
               console.log(e);
             });
           })
           .catch((e) => {
+            console.log(e);
             if (isSimpleFetchError(e) && e.response) {
               const response = e.response;
               if (
@@ -387,10 +406,11 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
                 response.data.message.includes("invalid empty tx")
               ) {
                 state.setOutdatedCosmosSdk(true);
+                return;
               }
             }
 
-            console.log(e);
+            state.setError(e);
           })
           .finally(() => {
             runInAction(() => {
@@ -421,12 +441,16 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
     return {
       warning: (() => {
-        if (!this.enabled) {
-          return;
-        }
-
         if (this.outdatedCosmosSdk) {
           return new Error("Outdated Cosmos SDK");
+        }
+
+        if (this.forceDisableReason) {
+          return this.forceDisableReason;
+        }
+
+        if (this.error) {
+          return this.error;
         }
       })(),
       loadingState: (() => {

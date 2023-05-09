@@ -6,7 +6,6 @@ import {
   PrivKeySecp256k1,
   PubKeySecp256k1,
 } from "@keplr-wallet/crypto";
-import { Env } from "@keplr-wallet/router";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
@@ -22,7 +21,6 @@ export class KeyRingMnemonicService {
   }
 
   createKeyRingVault(
-    _: Env,
     mnemonic: string,
     bip44Path: {
       account: number;
@@ -61,7 +59,7 @@ export class KeyRingMnemonicService {
     });
   }
 
-  getPubKey(_: Env, vault: Vault, coinType: number): PubKeySecp256k1 {
+  getPubKey(vault: Vault, coinType: number): PubKeySecp256k1 {
     const bip44Path = this.getBIP44PathFromVault(vault);
 
     const tag = `pubKey-m/44'/${coinType}'/${bip44Path.account}'/${bip44Path.change}/${bip44Path.addressIndex}`;
@@ -84,7 +82,6 @@ export class KeyRingMnemonicService {
   }
 
   sign(
-    _: Env,
     vault: Vault,
     coinType: number,
     data: Uint8Array,

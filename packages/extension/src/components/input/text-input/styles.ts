@@ -55,7 +55,11 @@ export const Styles = {
     // I don't know why yet :(
     line-height: ${({ isTextarea }) => (isTextarea ? 0 : undefined)};
   `,
-  TextInputContainer: styled.div<TextInputProps & { isTextarea?: boolean }>`
+  TextInputContainer: styled.div<
+    Pick<TextInputProps, "error" | "disabled" | "paragraph" | "errorBorder"> & {
+      isTextarea?: boolean;
+    }
+  >`
     border: 1px solid ${ColorPalette["gray-400"]};
     border-radius: 0.5rem;
     background-color: ${ColorPalette["gray-700"]};
