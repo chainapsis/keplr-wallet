@@ -13,6 +13,7 @@ import { Checkbox } from "../../../components/checkbox";
 import { ColorPalette } from "../../../styles";
 import { Dec } from "@keplr-wallet/unit";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
+import { useSearchParams } from "react-router-dom";
 
 const Styles = {
   Container: styled(Stack)`
@@ -22,6 +23,8 @@ const Styles = {
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const { hugeQueriesStore } = useStore();
+  const [searchParams] = useSearchParams();
+  const paramIsIBCTransfer = searchParams.get("isIBCTransfer");
 
   const [search, setSearch] = useState("");
   const [hideIBCToken, setHideIBCToken] = useState(true);
@@ -86,6 +89,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
             <TokenItem
               viewToken={viewToken}
               key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+              isIBCTransfer={paramIsIBCTransfer === "true"}
             />
           );
         })}

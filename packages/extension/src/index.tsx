@@ -67,7 +67,7 @@ import { NotificationProvider } from "./hooks/notification";
 import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
 import { AppIntlProvider } from "./languages";
 import { SettingSecurityAutoLockPage } from "./pages/setting/security/auto-lock";
-import { IBCSendAmountPage, IBCSendSelectChannelPage } from "./pages/ibc-send";
+import { IBCTransferPage } from "./pages/ibc-transfer";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -304,11 +304,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<WalletShowSensitivePage />}
               />
               <Route path="/suggest-chain" element={<SuggestChainPage />} />
-              <Route
-                path="/ibc-send/select-channel"
-                element={<IBCSendSelectChannelPage />}
-              />
-              <Route path="/ibc-send/amount" element={<IBCSendAmountPage />} />
+              <Route path="/ibc-transfer" element={<IBCTransferPage />} />
             </Routes>
           )
         ) : (

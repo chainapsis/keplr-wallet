@@ -5,8 +5,11 @@ import { Column, Columns } from "../../../../components/column";
 import { Stack } from "../../../../components/stack";
 import { Body3, Subtitle2 } from "../../../../components/typography";
 import { Button } from "../../../../components/button";
+import { useNavigate } from "react-router";
 
 export const IBCTransferView: FunctionComponent = () => {
+  const navigate = useNavigate();
+
   return (
     <Box
       backgroundColor={ColorPalette["gray-600"]}
@@ -21,7 +24,11 @@ export const IBCTransferView: FunctionComponent = () => {
 
         <Column weight={1} />
 
-        <Button text="Transfer" size="small" />
+        <Button
+          text="Transfer"
+          size="small"
+          onClick={() => navigate("/send/select-asset?isIBCTransfer=true")}
+        />
       </Columns>
     </Box>
   );

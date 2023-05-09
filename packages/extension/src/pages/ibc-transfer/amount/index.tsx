@@ -1,0 +1,54 @@
+import React, { FunctionComponent } from "react";
+import { observer } from "mobx-react-lite";
+import { Stack } from "../../../components/stack";
+import { Box } from "../../../components/box";
+import { AmountInput } from "../../../components/input";
+import {
+  IAmountConfig,
+  IFeeConfig,
+  IGasConfig,
+  IGasSimulator,
+  IMemoConfig,
+  ISenderConfig,
+} from "@keplr-wallet/hooks";
+import { MemoInput } from "../../../components/input/memo-input";
+import { FeeControl } from "../../../components/input/fee-control";
+
+export const IBCTransferAmountView: FunctionComponent<{
+  amountConfig: IAmountConfig;
+  feeConfig: IFeeConfig;
+  senderConfig: ISenderConfig;
+  memoConfig: IMemoConfig;
+  gasConfig: IGasConfig;
+  gasSimulator?: IGasSimulator;
+}> = observer(
+  ({
+    amountConfig,
+    feeConfig,
+    senderConfig,
+    memoConfig,
+    gasConfig,
+    gasSimulator,
+  }) => {
+    return (
+      <Box paddingX="0.75rem">
+        <Stack gutter="0.75rem">
+          <AmountInput
+            amountConfig={amountConfig}
+            feeConfig={feeConfig}
+            senderConfig={senderConfig}
+          />
+
+          <MemoInput memoConfig={memoConfig} />
+
+          <FeeControl
+            senderConfig={senderConfig}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
+            gasSimulator={gasSimulator}
+          />
+        </Stack>
+      </Box>
+    );
+  }
+);

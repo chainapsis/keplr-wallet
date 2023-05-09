@@ -50,8 +50,10 @@ export const IBCAddChannelModal: FunctionComponent<{
           placeholder="Select Chain"
           selectedItemKey={selectedChainId}
           items={chainStore.chainInfos
-            .filter((chainInfo) =>
-              (chainInfo.features ?? []).includes("ibc-transfer")
+            .filter(
+              (chainInfo) =>
+                chainInfo.chainId !== chainId &&
+                (chainInfo.features ?? []).includes("ibc-transfer")
             )
             .map((chainInfo) => {
               return {
@@ -121,6 +123,10 @@ export const IBCAddChannelModal: FunctionComponent<{
 
             setIsLoading(false);
             setError(error);
+
+            console.log("channel", channel);
+            console.log("clientState", clientState);
+            console.log(error);
 
             if (channel && clientState && error === "") {
               await ibcChannelStore.get(chainId).addChannel({
