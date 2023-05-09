@@ -6,3 +6,7 @@ export declare const RegisterScenes: {
     element: React.ElementType;
     width: string;
 }[];
+export declare const onGoogleSignInClick: ((sceneTransition: {
+    push(name: string, props?: Record<string, any>): void;
+    replace(name: string, props?: Record<string, any>): void;
+}) => void) | undefined;

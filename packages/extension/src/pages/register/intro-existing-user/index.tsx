@@ -18,6 +18,7 @@ import {
   ArrowDownTrayIcon,
   GoogleIcon,
 } from "../../../components/icon";
+import * as KeplrWalletPrivate from "keplr-wallet-private";
 
 export const RegisterIntroExistingUserScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
@@ -73,7 +74,11 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
               color="secondary"
               left={<GoogleIcon />}
               onClick={() => {
-                alert("TODO: Not implemented yet");
+                if (KeplrWalletPrivate.onGoogleSignInClick) {
+                  KeplrWalletPrivate.onGoogleSignInClick(sceneTransition);
+                } else {
+                  alert("Not supported");
+                }
               }}
             />
             <Button

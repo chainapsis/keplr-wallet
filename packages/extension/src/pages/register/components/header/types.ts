@@ -5,6 +5,9 @@ export type Header =
       mode: "intro";
     }
   | {
+      mode: "empty";
+    }
+  | {
       mode: "welcome";
       title: string;
       paragraph: string;
