@@ -161,6 +161,9 @@ export class ObservableQueryBalancesImplMap {
     return result;
   }
 
+  /**
+   * @deprecated
+   */
   readonly getBalanceFromCurrency = computedFn(
     (currency: AppCurrency): CoinPretty => {
       const bal = this.balances.find(
@@ -171,6 +174,19 @@ export class ObservableQueryBalancesImplMap {
       }
 
       return new CoinPretty(currency, new Int(0));
+    }
+  );
+
+  readonly getBalance = computedFn(
+    (currency: AppCurrency): IObservableQueryBalanceImpl | undefined => {
+      const bal = this.balances.find(
+        (bal) => bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+      );
+      if (bal) {
+        return bal;
+      }
+
+      return;
     }
   );
 }

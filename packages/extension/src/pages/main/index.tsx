@@ -32,10 +32,13 @@ import { defaultSpringConfig } from "../../styles/spring";
 import { Columns } from "../../components/column";
 import { Tooltip } from "../../components/tooltip";
 import { Image } from "../../components/image";
+import { QueryError } from "@keplr-wallet/stores";
 
 export interface ViewToken {
   token: CoinPretty;
   chainInfo: ChainInfo;
+  isFetching: boolean;
+  error: QueryError<any> | undefined;
 }
 
 export const MainPage: FunctionComponent = observer(() => {

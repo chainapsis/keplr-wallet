@@ -26,6 +26,7 @@ import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { ICNSInfo } from "../../../config.ui";
+import { CoinPretty } from "@keplr-wallet/unit";
 
 const Styles = {
   Flex1: styled.div`
@@ -63,7 +64,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const balance = queriesStore
     .get(chainId)
     .queryBalances.getQueryBech32Address(sender)
-    .getBalanceFromCurrency(currency);
+    .getBalance(currency);
 
   const sendConfigs = useSendTxConfig(
     chainStore,
@@ -238,8 +239,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             <Gutter size="0.375rem" />
             <TokenItem
               viewToken={{
-                token: balance,
+                token: balance?.balance ?? new CoinPretty(currency, "0"),
                 chainInfo: chainStore.getChain(chainId),
+                isFetching: balance?.isFetching ?? false,
+                error: balance?.error,
               }}
               forChange
             />

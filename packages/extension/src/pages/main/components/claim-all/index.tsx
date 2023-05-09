@@ -101,12 +101,14 @@ export const ClaimAll: FunctionComponent = observer(() => {
       const chainId = chainInfo.chainId;
       const accountAddress = accountStore.getAccount(chainId).bech32Address;
       const queries = queriesStore.get(chainId);
+      const queryRewards =
+        queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 
       return {
-        token:
-          queries.cosmos.queryRewards.getQueryBech32Address(accountAddress)
-            .stakableReward,
+        token: queryRewards.stakableReward,
         chainInfo,
+        isFetching: queryRewards.isFetching,
+        error: queryRewards.error,
       };
     })
     .filter((viewToken) => viewToken.token.toDec().gt(zeroDec))

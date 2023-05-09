@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, {
+  FunctionComponent,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
@@ -12,7 +17,11 @@ import {
   Subtitle4,
 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
-import { ArrowRightIcon, QuestionIcon } from "../../../../components/icon";
+import {
+  ArrowRightIcon,
+  LoadingIcon,
+  QuestionIcon,
+} from "../../../../components/icon";
 import styled from "styled-components";
 import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../../components/image";
@@ -21,14 +30,22 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { Tag } from "../../../../components/tag";
 import { XAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
+import Color from "color";
 
 const Styles = {
-  Container: styled.div<{ forChange: boolean | undefined }>`
+  Container: styled.div<{ forChange: boolean | undefined; isError: boolean }>`
     background-color: ${ColorPalette["gray-600"]};
     padding ${({ forChange }) =>
       forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "1rem 0.875rem"};
     border-radius: 0.375rem;
     cursor: pointer;
+
+    border: ${({ isError }) =>
+      isError
+        ? `1.5px solid ${Color(ColorPalette["yellow-400"])
+            .alpha(0.5)
+            .toString()}`
+        : undefined};
   `,
   IconContainer: styled.div`
     color: ${ColorPalette["gray-300"]};
@@ -107,6 +124,7 @@ export const TokenItem: FunctionComponent<{
   return (
     <Styles.Container
       forChange={forChange}
+      isError={viewToken.error != null}
       onClick={(e) => {
         e.preventDefault();
 
@@ -139,6 +157,34 @@ export const TokenItem: FunctionComponent<{
                 </Box>
               </React.Fragment>
             ) : null}
+            {viewToken.isFetching ? (
+              // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
+              // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
+              // 일괄적으로 로딩을 보여줄 필요가 없다.
+              // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
+              // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
+              <DelayedLoadingRender isFetching={viewToken.isFetching}>
+                <Box
+                  marginLeft="0.25rem"
+                  style={{
+                    color: ColorPalette["gray-300"],
+                  }}
+                >
+                  <LoadingIcon width="1rem" height="1rem" />
+                </Box>
+              </DelayedLoadingRender>
+            ) : viewToken.error ? (
+              <Box
+                marginLeft="0.25rem"
+                style={{
+                  color: ColorPalette["yellow-400"],
+                }}
+              >
+                <Tooltip content={viewToken.error.message}>
+                  <ErrorIcon size="1rem" />
+                </Tooltip>
+              </Box>
+            ) : undefined}
           </XAxis>
           <Caption1 style={{ color: ColorPalette["gray-300"] }}>
             {isIBC
@@ -176,3 +222,62 @@ export const TokenItem: FunctionComponent<{
     </Styles.Container>
   );
 });
+
+const ErrorIcon: FunctionComponent<{
+  size: string;
+}> = ({ size }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.5"
+        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+      />
+    </svg>
+  );
+};
+
+let initialOnLoad = false;
+setTimeout(() => {
+  initialOnLoad = true;
+}, 1000);
+
+const DelayedLoadingRender: FunctionComponent<{
+  isFetching: boolean;
+}> = ({ isFetching, children }) => {
+  const [show, setShow] = useState(false);
+
+  useLayoutEffect(() => {
+    if (isFetching) {
+      const id = setTimeout(
+        () => {
+          setShow(true);
+        },
+        // 유저가 토큰이 많은 경우에 locla state load하고 render하는데만 해도 500ms 가까이 걸리는 경우가 있다.
+        // 이런 경우에는 이 컴포넌트의 목표를 달성하지 못한건데...
+        // 일단 간단하게 그냥 처음에는 1초 기다리도록 처리한다...
+        initialOnLoad ? 500 : 1000
+      );
+
+      return () => {
+        clearTimeout(id);
+      };
+    } else {
+      setShow(false);
+    }
+  }, [isFetching]);
+
+  if (!show) {
+    return null;
+  }
+
+  return <React.Fragment>{children}</React.Fragment>;
+};

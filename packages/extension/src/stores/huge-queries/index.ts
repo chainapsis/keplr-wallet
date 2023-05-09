@@ -5,6 +5,7 @@ import {
   IAccountStore,
   IChainInfoImpl,
   IQueriesStore,
+  QueryError,
 } from "@keplr-wallet/stores";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
@@ -15,6 +16,8 @@ interface ViewToken {
   chainInfo: IChainInfoImpl;
   token: CoinPretty;
   price: PricePretty | undefined;
+  isFetching: boolean;
+  error: QueryError<any> | undefined;
 }
 
 /**
@@ -66,16 +69,22 @@ export class HugeQueriesStore {
               price: currency.coinGeckoId
                 ? this.priceStore.calculatePrice(balance)
                 : undefined,
+              isFetching: queryBalance.stakable.isFetching,
+              error: queryBalance.stakable.error,
             });
           } else {
-            const balance = queryBalance.getBalanceFromCurrency(currency);
-            map.set(key, {
-              chainInfo,
-              token: balance,
-              price: currency.coinGeckoId
-                ? this.priceStore.calculatePrice(balance)
-                : undefined,
-            });
+            const balance = queryBalance.getBalance(currency);
+            if (balance) {
+              map.set(key, {
+                chainInfo,
+                token: balance.balance,
+                price: currency.coinGeckoId
+                  ? this.priceStore.calculatePrice(balance.balance)
+                  : undefined,
+                isFetching: balance.isFetching,
+                error: balance.error,
+              });
+            }
           }
         }
       }
@@ -209,6 +218,8 @@ export class HugeQueriesStore {
         chainInfo,
         token: queryDelegation.total,
         price: this.priceStore.calculatePrice(queryDelegation.total),
+        isFetching: queryDelegation.isFetching,
+        error: queryDelegation.error,
       });
     }
     return res.sort(this.sortByPrice);
@@ -232,6 +243,8 @@ export class HugeQueriesStore {
         chainInfo,
         token: queryUnbonding.total,
         price: this.priceStore.calculatePrice(queryUnbonding.total),
+        isFetching: queryUnbonding.isFetching,
+        error: queryUnbonding.error,
       });
     }
     return res.sort(this.sortByPrice);
