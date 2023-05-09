@@ -32,6 +32,8 @@ import { handleCosmosPreSign } from "../../utils/handle-cosmos-sign";
 import { KeplrError } from "@keplr-wallet/router";
 import { ErrModule } from "../../utils/cosmos-ledger-sign";
 import { LedgerGuideBox } from "../../components/ledger-guide-box";
+import { Gutter } from "../../../../components/gutter";
+import { GuideBox } from "../../../../components/guide-box";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -165,6 +167,10 @@ export const CosmosTxView: FunctionComponent<{
     unmountPromise.resolver();
   });
 
+  const isLedgerAndDirect =
+    interactionData.data.keyType === "ledger" &&
+    interactionData.data.mode === "direct";
+
   const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
   const [ledgerInteractingError, setLedgerInteractingError] = useState<
     Error | undefined
@@ -180,7 +186,9 @@ export const CosmosTxView: FunctionComponent<{
         color: "primary",
         size: "large",
         disabled:
-          txConfigsValidate.interactionBlocked || !signDocHelper.signDocWrapper,
+          txConfigsValidate.interactionBlocked ||
+          !signDocHelper.signDocWrapper ||
+          isLedgerAndDirect,
         isLoading:
           signInteractionStore.isObsoleteInteraction(interactionData.id) ||
           isLedgerInteracting,
@@ -254,7 +262,12 @@ export const CosmosTxView: FunctionComponent<{
           overflow: "scroll",
         }}
       >
-        <Box marginBottom="0.5rem">
+        <Box
+          marginBottom="0.5rem"
+          style={{
+            opacity: isLedgerAndDirect ? 0.5 : undefined,
+          }}
+        >
           <Columns sum={1} alignY="center">
             <XAxis>
               <H5
@@ -287,6 +300,7 @@ export const CosmosTxView: FunctionComponent<{
           style={{
             flex: !isViewData ? "0 1 auto" : 1,
             overflow: "scroll",
+            opacity: isLedgerAndDirect ? 0.5 : undefined,
           }}
         >
           <Box>
@@ -329,15 +343,32 @@ export const CosmosTxView: FunctionComponent<{
         {!isViewData ? <div style={{ flex: 1 }} /> : null}
         <Box height="0" minHeight="1rem" />
 
-        <Stack gutter="0.75rem">
-          <MemoInput memoConfig={memoConfig} />
-          <FeeControl
-            feeConfig={feeConfig}
-            senderConfig={senderConfig}
-            gasConfig={gasConfig}
-            disableAutomaticFeeSet={preferNoSetFee}
-          />
-        </Stack>
+        <Box
+          style={{
+            opacity: isLedgerAndDirect ? 0.5 : undefined,
+          }}
+        >
+          <Stack gutter="0.75rem">
+            <MemoInput memoConfig={memoConfig} />
+            <FeeControl
+              feeConfig={feeConfig}
+              senderConfig={senderConfig}
+              gasConfig={gasConfig}
+              disableAutomaticFeeSet={preferNoSetFee}
+            />
+          </Stack>
+        </Box>
+
+        {isLedgerAndDirect ? (
+          <React.Fragment>
+            <Gutter size="0.75rem" />
+            <GuideBox
+              color="warning"
+              title="Incompatible Signing Requested"
+              paragraph="Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue."
+            />
+          </React.Fragment>
+        ) : null}
 
         <LedgerGuideBox
           interactionData={interactionData}

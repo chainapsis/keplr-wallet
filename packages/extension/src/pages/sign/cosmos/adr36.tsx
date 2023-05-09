@@ -15,6 +15,7 @@ import { handleCosmosPreSign } from "../utils/handle-cosmos-sign";
 import { KeplrError } from "@keplr-wallet/router";
 import { ErrModule } from "../utils/cosmos-ledger-sign";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
+import { GuideBox } from "../../../components/guide-box";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore } = useStore();
@@ -72,6 +73,10 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
       return msg.value.data as string;
     }
   }, [isADR36WithString, signDocWrapper]);
+
+  const isLedgerAndDirect =
+    signInteractionStore.waitingData?.data.keyType === "ledger" &&
+    signInteractionStore.waitingData?.data.mode === "direct";
 
   const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
   const [ledgerInteractingError, setLedgerInteractingError] = useState<
@@ -246,6 +251,17 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             </Subtitle3>
           </XAxis>
         </Box>
+
+        {isLedgerAndDirect ? (
+          <React.Fragment>
+            <Gutter size="0.75rem" />
+            <GuideBox
+              color="warning"
+              title="Incompatible Signing Requested"
+              paragraph="Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue."
+            />
+          </React.Fragment>
+        ) : null}
 
         {signInteractionStore.waitingData ? (
           <LedgerGuideBox
