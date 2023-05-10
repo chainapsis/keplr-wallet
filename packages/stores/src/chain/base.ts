@@ -82,13 +82,17 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
 
               this.addOrReplaceCurrency(currency);
             });
+          }
 
-            if (generator.done) {
+          if (generator.done) {
+            if (disposer) {
               disposer();
             }
           }
         } else {
-          disposer();
+          if (disposer) {
+            disposer();
+          }
         }
       });
     }

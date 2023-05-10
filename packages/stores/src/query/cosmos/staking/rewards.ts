@@ -6,7 +6,12 @@ import {
 import { ChainGetter } from "../../../chain";
 import { computed, makeObservable } from "mobx";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
-import { CoinPrimitive, QuerySharedContext, StoreUtils } from "../../../common";
+import {
+  CoinPrimitive,
+  QueryResponse,
+  QuerySharedContext,
+  StoreUtils,
+} from "../../../common";
 import { computedFn } from "mobx-utils";
 
 export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
@@ -221,6 +226,16 @@ export class ObservableQueryRewardsInner extends ObservableChainQuery<Rewards> {
         .map((r) => r.validator_address);
     }
   );
+
+  protected override onReceiveResponse(
+    response: Readonly<QueryResponse<Rewards>>
+  ) {
+    super.onReceiveResponse(response);
+
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const denoms = response.data.total.map((coin) => coin.denom);
+    chainInfo.addUnknownDenoms(...denoms);
+  }
 }
 
 export class ObservableQueryRewards extends ObservableChainQueryMap<Rewards> {

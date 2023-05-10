@@ -87,7 +87,7 @@ export class RootStore {
   public readonly tokensStore: TokensStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
-  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
+  public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
   protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
 
   public readonly analyticsStore: AnalyticsStore<
@@ -163,7 +163,7 @@ export class RootStore {
       new ExtensionKVStore("store_queries"),
       this.chainStore,
       {
-        responseDebounceMs: 50,
+        responseDebounceMs: 100,
       },
       CosmosQueries.use(),
       CosmwasmQueries.use(),
