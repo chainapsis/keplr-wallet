@@ -22,9 +22,8 @@ const zeroDec = new Dec(0);
 export const AvailableTabView: FunctionComponent<{
   search: string;
 }> = observer(({ search }) => {
-  const { hugeQueriesStore, chainStore } = useStore();
+  const { hugeQueriesStore, chainStore, priceStore } = useStore();
 
-  const stakableBalances: ViewToken[] = hugeQueriesStore.stakables;
   const stakableBalancesNonZero = useMemo(() => {
     return hugeQueriesStore.stakables.filter((token) => {
       return token.token.toDec().gt(zeroDec);
@@ -50,44 +49,43 @@ export const AvailableTabView: FunctionComponent<{
 
   const trimSearch = search.trim();
 
-  const stakableBalancesSearchFiltered = useMemo(() => {
-    return stakableBalances.filter((token) => {
-      return (
-        token.chainInfo.chainName
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase()) ||
-        token.token.currency.coinDenom
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase())
-      );
-    });
-  }, [stakableBalances, trimSearch]);
+  const allBalancesNonZeroSearchFiltered = useMemo(() => {
+    return stakableBalancesNonZero
+      .concat(tokenBalancesNonZero)
+      .concat(ibcBalancesNonZero)
+      .sort((a, b) => {
+        const aPrice =
+          priceStore.calculatePrice(a.token)?.toDec() ?? new Dec(0);
+        const bPrice =
+          priceStore.calculatePrice(b.token)?.toDec() ?? new Dec(0);
 
-  const tokenBalancesNonZeroSearchFiltered = useMemo(() => {
-    return tokenBalancesNonZero.filter((token) => {
-      return (
-        token.chainInfo.chainName
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase()) ||
-        token.token.currency.coinDenom
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase())
-      );
-    });
-  }, [tokenBalancesNonZero, trimSearch]);
-
-  const ibcBalancesNonZeroSearchFiltered = useMemo(() => {
-    return ibcBalancesNonZero.filter((token) => {
-      return (
-        token.chainInfo.chainName
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase()) ||
-        token.token.currency.coinDenom
-          .toLowerCase()
-          .includes(trimSearch.toLowerCase())
-      );
-    });
-  }, [ibcBalancesNonZero, trimSearch]);
+        if (aPrice.equals(bPrice)) {
+          return a.token.currency.coinDenom.localeCompare(
+            b.token.currency.coinDenom
+          );
+        } else if (aPrice.gt(bPrice)) {
+          return -1;
+        } else {
+          return 1;
+        }
+      })
+      .filter((token) => {
+        return (
+          token.chainInfo.chainName
+            .toLowerCase()
+            .includes(trimSearch.toLowerCase()) ||
+          token.token.currency.coinDenom
+            .toLowerCase()
+            .includes(trimSearch.toLowerCase())
+        );
+      });
+  }, [
+    ibcBalancesNonZero,
+    priceStore,
+    stakableBalancesNonZero,
+    tokenBalancesNonZero,
+    trimSearch,
+  ]);
 
   const TokenViewData: {
     title: string;
@@ -97,22 +95,9 @@ export const AvailableTabView: FunctionComponent<{
   }[] = [
     {
       title: "Balance",
-      balance: isFirstTime ? [] : stakableBalancesSearchFiltered,
-      lenAlwaysShown: 5,
+      balance: isFirstTime ? [] : allBalancesNonZeroSearchFiltered,
+      lenAlwaysShown: 10,
       tooltip: "TODO: Lorem ipsum dolor sit amet",
-    },
-    {
-      title: "Token Balance",
-      balance: tokenBalancesNonZeroSearchFiltered,
-      lenAlwaysShown: 3,
-      tooltip: "TODO: Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-    {
-      title: "IBC Balance",
-      balance: ibcBalancesNonZeroSearchFiltered,
-      lenAlwaysShown: 3,
-      tooltip:
-        "TODO: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     },
   ];
 
