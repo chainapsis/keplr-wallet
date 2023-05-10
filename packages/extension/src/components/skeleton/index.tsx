@@ -8,15 +8,16 @@ import {
 } from "../../pages/main/components";
 
 export interface SkeletonProps {
-  isReady?: boolean;
+  isNotReady?: boolean;
   type?: "default" | "button" | "stringToggle" | "copyAddress" | "circle";
+  dummyMinWidth?: string;
   // This is for the case that the skeleton's background color.
   layer?: 0 | 1;
 }
 
 export const Skeleton: FunctionComponent<
   SkeletonProps & Omit<BoxProps, "position">
-> = ({ isReady, type = "default", layer = 0, children }) => {
+> = ({ isNotReady, type = "default", layer = 0, dummyMinWidth, children }) => {
   const getBorderRadius = () => {
     switch (type) {
       case "button":
@@ -33,8 +34,8 @@ export const Skeleton: FunctionComponent<
   };
 
   return (
-    <Box position="relative">
-      {isReady ? null : (
+    <Box position="relative" minWidth={isNotReady ? dummyMinWidth : undefined}>
+      {isNotReady ? (
         <Box
           position="absolute"
           backgroundColor={
@@ -44,7 +45,7 @@ export const Skeleton: FunctionComponent<
           borderRadius={getBorderRadius()}
           style={{ top: 0, bottom: 0, left: 0, right: 0 }}
         />
-      )}
+      ) : null}
 
       {children}
     </Box>

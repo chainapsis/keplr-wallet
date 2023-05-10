@@ -58,13 +58,14 @@ export type TabStatus = "available" | "staked";
 export const StringToggle: FunctionComponent<{
   tabStatus: TabStatus;
   setTabStatus: (tabStatus: TabStatus) => void;
-}> = ({ tabStatus, setTabStatus }) => {
+  isNotReady?: boolean;
+}> = ({ tabStatus, setTabStatus, isNotReady }) => {
   return (
     <Columns sum={1} alignY="center" columnAlign="center">
       {tabStatus === "available" ? (
-        <Skeleton type="stringToggle">
+        <Skeleton type="stringToggle" isNotReady={isNotReady}>
           <Styles.Container>
-            <Skeleton type="stringToggle" layer={1}>
+            <Skeleton type="stringToggle" layer={1} isNotReady={isNotReady}>
               <Styles.Selected>Available</Styles.Selected>
             </Skeleton>
             <Styles.UnSelected onClick={() => setTabStatus("staked")}>

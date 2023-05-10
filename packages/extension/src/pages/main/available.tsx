@@ -6,7 +6,7 @@ import {
   TokenItem,
   TokenTitleView,
 } from "./components";
-import { Dec } from "@keplr-wallet/unit";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "./index";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
@@ -21,7 +21,8 @@ const zeroDec = new Dec(0);
 
 export const AvailableTabView: FunctionComponent<{
   search: string;
-}> = observer(({ search }) => {
+  isNotReady?: boolean;
+}> = observer(({ search, isNotReady }) => {
   const { hugeQueriesStore, chainStore } = useStore();
 
   const stakableBalances: ViewToken[] = hugeQueriesStore.stakables;
@@ -141,29 +142,20 @@ export const AvailableTabView: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <Stack gutter="0.5rem">
-        {TokenViewData.map(({ title, balance, lenAlwaysShown, tooltip }) => {
-          if (balance.length === 0) {
-            return null;
-          }
-
-          return (
-            <CollapsibleList
-              key={title}
-              title={<TokenTitleView title={title} tooltip={tooltip} />}
-              lenAlwaysShown={lenAlwaysShown}
-              items={balance.map((viewToken) => (
-                <TokenItem
-                  viewToken={viewToken}
-                  key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                />
-              ))}
-            />
-          );
-        })}
-      </Stack>
-
-      {isFirstTime ? (
+      {isNotReady ? (
+        <TokenItem
+          viewToken={{
+            token: new CoinPretty(
+              chainStore.chainInfos[0].stakeCurrency,
+              new Dec(0)
+            ),
+            chainInfo: chainStore.chainInfos[0],
+            isFetching: false,
+            error: undefined,
+          }}
+          isNotReady={isNotReady}
+        />
+      ) : isFirstTime ? (
         <MainEmptyView
           image={
             <img
@@ -179,7 +171,29 @@ export const AvailableTabView: FunctionComponent<{
           title="Ready to Explore the Interchain?"
           button={<Button text="Get Started" color="primary" size="small" />}
         />
-      ) : null}
+      ) : (
+        <Stack gutter="0.5rem">
+          {TokenViewData.map(({ title, balance, lenAlwaysShown, tooltip }) => {
+            if (balance.length === 0) {
+              return null;
+            }
+
+            return (
+              <CollapsibleList
+                key={title}
+                title={<TokenTitleView title={title} tooltip={tooltip} />}
+                lenAlwaysShown={lenAlwaysShown}
+                items={balance.map((viewToken) => (
+                  <TokenItem
+                    viewToken={viewToken}
+                    key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                  />
+                ))}
+              />
+            );
+          })}
+        </Stack>
+      )}
 
       {numFoundToken > 0 ? (
         <Box padding="0.75rem">

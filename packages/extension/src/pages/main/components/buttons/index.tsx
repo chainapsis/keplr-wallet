@@ -11,7 +11,8 @@ import { Skeleton } from "../../../../components/skeleton";
 export const Buttons: FunctionComponent<{
   onClickDeposit: () => void;
   onClickBuy: () => void;
-}> = observer(({ onClickDeposit, onClickBuy }) => {
+  isNotReady?: boolean;
+}> = observer(({ onClickDeposit, onClickBuy, isNotReady }) => {
   const { hugeQueriesStore } = useStore();
   const navigate = useNavigate();
 
@@ -24,17 +25,19 @@ export const Buttons: FunctionComponent<{
     <Box>
       <Columns sum={1} gutter="0.625rem">
         <Column weight={1}>
-          <Skeleton type="button">
+          <Skeleton type="button" isNotReady={isNotReady}>
             <Button text="Deposit" color="secondary" onClick={onClickDeposit} />
           </Skeleton>
         </Column>
 
         <Column weight={1}>
-          <Button text="Buy" color="secondary" onClick={onClickBuy} />
+          <Skeleton type="button" isNotReady={isNotReady}>
+            <Button text="Buy" color="secondary" onClick={onClickBuy} />
+          </Skeleton>
         </Column>
 
         <Column weight={1}>
-          <Skeleton type="button">
+          <Skeleton type="button" isNotReady={isNotReady}>
             <Button
               text="Send"
               disabled={!hasBalance}

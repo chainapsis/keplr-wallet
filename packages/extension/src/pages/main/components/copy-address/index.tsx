@@ -34,13 +34,18 @@ const Styles = {
   `,
 };
 
-export const CopyAddress: FunctionComponent<{ onClick: () => void }> = ({
-  onClick,
-}) => {
+export const CopyAddress: FunctionComponent<{
+  onClick: () => void;
+  isNotReady?: boolean;
+}> = ({ onClick, isNotReady }) => {
   return (
     <YAxis alignX="center">
       <XAxis alignY="center">
-        <Skeleton type="copyAddress">
+        <Skeleton
+          type="copyAddress"
+          isNotReady={isNotReady}
+          dummyMinWidth="7.125rem"
+        >
           <Styles.Container onClick={onClick}>
             <Caption1 style={{ color: ColorPalette["gray-300"] }}>
               Copy Address

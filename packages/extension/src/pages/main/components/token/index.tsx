@@ -78,7 +78,8 @@ export const TokenTitleView: FunctionComponent<{
 export const TokenItem: FunctionComponent<{
   viewToken: ViewToken;
   forChange?: boolean;
-}> = observer(({ viewToken, forChange }) => {
+  isNotReady?: boolean;
+}> = observer(({ viewToken, forChange, isNotReady }) => {
   const { priceStore } = useStore();
 
   const navigate = useNavigate();
@@ -139,7 +140,7 @@ export const TokenItem: FunctionComponent<{
       }}
     >
       <Columns sum={1} gutter="0.5rem" alignY="center">
-        <Skeleton type="circle" layer={1}>
+        <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
           <ChainImageFallback
             style={{
               width: "2.5rem",
@@ -151,7 +152,7 @@ export const TokenItem: FunctionComponent<{
         </Skeleton>
         <Stack gutter="0.25rem">
           <XAxis alignY="center">
-            <Skeleton layer={1}>
+            <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
               <Subtitle2>{coinDenom}</Subtitle2>
             </Skeleton>
 
@@ -192,7 +193,7 @@ export const TokenItem: FunctionComponent<{
               </Box>
             ) : undefined}
           </XAxis>
-          <Skeleton layer={1}>
+          <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
             <Caption1 style={{ color: ColorPalette["gray-300"] }}>
               {isIBC
                 ? `on ${viewToken.chainInfo.chainName}`
@@ -205,7 +206,7 @@ export const TokenItem: FunctionComponent<{
 
         <Columns sum={1} gutter="0.25rem" alignY="center">
           <Stack gutter="0.25rem" alignX="right">
-            <Skeleton layer={1}>
+            <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
               <Subtitle3>
                 {viewToken.token
                   .hideDenom(true)
@@ -215,7 +216,7 @@ export const TokenItem: FunctionComponent<{
                   .toString()}
               </Subtitle3>
             </Skeleton>
-            <Skeleton layer={1}>
+            <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
               <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
                 {pricePretty
                   ? pricePretty.inequalitySymbol(true).toString()

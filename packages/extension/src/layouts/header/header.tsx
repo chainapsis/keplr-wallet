@@ -108,6 +108,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   fixedHeight,
   onSubmit,
   children,
+  isNotReady,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(0);
@@ -145,7 +146,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
       <Styles.HeaderContainer>
         {left && <Styles.HeaderLeft>{left}</Styles.HeaderLeft>}
         <Styles.HeaderTitle>
-          <Skeleton>
+          <Skeleton isNotReady={isNotReady} dummyMinWidth="6.25rem">
             <Subtitle1>{title}</Subtitle1>
           </Skeleton>
         </Styles.HeaderTitle>
