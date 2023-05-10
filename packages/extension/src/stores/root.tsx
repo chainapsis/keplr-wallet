@@ -355,6 +355,7 @@ export class RootStore {
     );
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(
       new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+      24 * 3600 * 1000,
       this.chainStore,
       this.queriesStore
     );
