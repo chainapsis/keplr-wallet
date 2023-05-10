@@ -116,3 +116,28 @@ export class SetLockOnSleepMsg extends Message<void> {
     return SetLockOnSleepMsg.type();
   }
 }
+
+export class GetAutoLockStateMsg extends Message<{
+  duration: number;
+  lockOnSleep: boolean;
+}> {
+  public static type() {
+    return "get-auto-lock-state";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetAutoLockStateMsg.type();
+  }
+}

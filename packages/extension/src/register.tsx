@@ -2,10 +2,10 @@
 require("setimmediate");
 // Shim ------------
 
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
-import { StoreProvider, useStore } from "./stores";
+import { StoreProvider } from "./stores";
 import { GlobalStyle } from "./styles";
 import { Keplr } from "@keplr-wallet/provider";
 import manifest from "./manifest.json";
@@ -16,10 +16,9 @@ import { ConfirmProvider } from "./hooks/confirm";
 import { RegisterPage } from "./pages/register";
 import { WelcomePage } from "./pages/register/pages/welcome";
 import { AppIntlProvider } from "./languages";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { observer } from "mobx-react-lite";
-import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
-import { useLoadFonts } from "./load-fonts";
+import { useLoadFonts } from "./use-load-fonts";
+import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -32,27 +31,7 @@ window.keplr = new Keplr(
 );
 
 const AutoLockMonitor: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
-
-  useEffect(() => {
-    if (keyRingStore.status === "unlocked") {
-      const sendAutoLockMonitorMsg = async () => {
-        const msg = new StartAutoLockMonitoringMsg();
-        const requester = new InExtensionMessageRequester();
-        await requester.sendMessage(BACKGROUND_PORT, msg);
-      };
-
-      // Notify to auto lock service to start activation check whenever the keyring is unlocked.
-      sendAutoLockMonitorMsg();
-      const autoLockInterval = setInterval(() => {
-        sendAutoLockMonitorMsg();
-      }, 10000);
-
-      return () => {
-        clearInterval(autoLockInterval);
-      };
-    }
-  }, [keyRingStore.status]);
+  useAutoLockMonitoring();
 
   return null;
 });

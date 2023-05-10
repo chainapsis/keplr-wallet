@@ -14,7 +14,6 @@ require("./public/assets/icon/icon-beta-128.png");
 
 import React, {
   FunctionComponent,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -32,8 +31,6 @@ import manifest from "./manifest.json";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { UnlockPage } from "./pages/unlock";
 import { MainPage } from "./pages/main";
-import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SettingPage } from "./pages/setting";
 import { SettingGeneralPage } from "./pages/setting/general";
 import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
@@ -67,7 +64,8 @@ import { NotificationProvider } from "./hooks/notification";
 import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
 import { AppIntlProvider } from "./languages";
 import { SettingSecurityAutoLockPage } from "./pages/setting/security/auto-lock";
-import { useLoadFonts } from "./load-fonts";
+import { useLoadFonts } from "./use-load-fonts";
+import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -120,25 +118,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
   const { isLoaded: isFontLoaded } = useLoadFonts();
 
-  useEffect(() => {
-    if (keyRingStore.status === "unlocked") {
-      const sendAutoLockMonitorMsg = async () => {
-        const msg = new StartAutoLockMonitoringMsg();
-        const requester = new InExtensionMessageRequester();
-        await requester.sendMessage(BACKGROUND_PORT, msg);
-      };
-
-      // Notify to auto lock service to start activation check whenever the keyring is unlocked.
-      sendAutoLockMonitorMsg();
-      const autoLockInterval = setInterval(() => {
-        sendAutoLockMonitorMsg();
-      }, 10000);
-
-      return () => {
-        clearInterval(autoLockInterval);
-      };
-    }
-  }, [keyRingStore.status]);
+  useAutoLockMonitoring();
 
   const isURLUnlockPage = useIsURLUnlockPage();
   const openRegisterOnce = useRef(false);
