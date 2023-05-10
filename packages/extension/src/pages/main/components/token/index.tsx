@@ -31,6 +31,7 @@ import { Tag } from "../../../../components/tag";
 import { XAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import Color from "color";
+import { Skeleton } from "../../../../components/skeleton";
 
 const Styles = {
   Container: styled.div<{ forChange: boolean | undefined; isError: boolean }>`
@@ -138,17 +139,22 @@ export const TokenItem: FunctionComponent<{
       }}
     >
       <Columns sum={1} gutter="0.5rem" alignY="center">
-        <ChainImageFallback
-          style={{
-            width: "2.5rem",
-            height: "2.5rem",
-          }}
-          src={viewToken.token.currency.coinImageUrl}
-          alt={viewToken.token.currency.coinDenom}
-        />
+        <Skeleton type="circle" layer={1}>
+          <ChainImageFallback
+            style={{
+              width: "2.5rem",
+              height: "2.5rem",
+            }}
+            src={viewToken.token.currency.coinImageUrl}
+            alt={viewToken.token.currency.coinDenom}
+          />
+        </Skeleton>
         <Stack gutter="0.25rem">
           <XAxis alignY="center">
-            <Subtitle2>{coinDenom}</Subtitle2>
+            <Skeleton layer={1}>
+              <Subtitle2>{coinDenom}</Subtitle2>
+            </Skeleton>
+
             {tag ? (
               <React.Fragment>
                 <Gutter size="0.5rem" />
@@ -186,30 +192,36 @@ export const TokenItem: FunctionComponent<{
               </Box>
             ) : undefined}
           </XAxis>
-          <Caption1 style={{ color: ColorPalette["gray-300"] }}>
-            {isIBC
-              ? `on ${viewToken.chainInfo.chainName}`
-              : viewToken.chainInfo.chainName}
-          </Caption1>
+          <Skeleton layer={1}>
+            <Caption1 style={{ color: ColorPalette["gray-300"] }}>
+              {isIBC
+                ? `on ${viewToken.chainInfo.chainName}`
+                : viewToken.chainInfo.chainName}
+            </Caption1>
+          </Skeleton>
         </Stack>
 
         <Column weight={1} />
 
         <Columns sum={1} gutter="0.25rem" alignY="center">
           <Stack gutter="0.25rem" alignX="right">
-            <Subtitle3>
-              {viewToken.token
-                .hideDenom(true)
-                .maxDecimals(6)
-                .inequalitySymbol(true)
-                .shrink(true)
-                .toString()}
-            </Subtitle3>
-            <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
-              {pricePretty
-                ? pricePretty.inequalitySymbol(true).toString()
-                : "-"}
-            </Subtitle3>
+            <Skeleton layer={1}>
+              <Subtitle3>
+                {viewToken.token
+                  .hideDenom(true)
+                  .maxDecimals(6)
+                  .inequalitySymbol(true)
+                  .shrink(true)
+                  .toString()}
+              </Subtitle3>
+            </Skeleton>
+            <Skeleton layer={1}>
+              <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
+                {pricePretty
+                  ? pricePretty.inequalitySymbol(true).toString()
+                  : "-"}
+              </Subtitle3>
+            </Skeleton>
           </Stack>
 
           {forChange ? (

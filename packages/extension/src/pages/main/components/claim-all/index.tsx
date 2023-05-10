@@ -32,6 +32,7 @@ import { Tooltip } from "../../../../components/tooltip";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { useNotification } from "../../../../hooks/notification";
 import { useNavigate } from "react-router";
+import { Skeleton } from "../../../../components/skeleton";
 
 const Styles = {
   Container: styled.div`
@@ -360,22 +361,27 @@ export const ClaimAll: FunctionComponent = observer(() => {
     <Styles.Container>
       <Box paddingX="1rem">
         <Columns sum={1} alignY="center">
-          <Column weight={1}>
-            <Stack gutter="0.5rem">
+          <Stack gutter="0.5rem">
+            <Skeleton layer={1}>
               <Body2 style={{ color: ColorPalette["gray-300"] }}>
                 Pending Staking Reward
               </Body2>
+            </Skeleton>
+            <Skeleton layer={1}>
               <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
                 {totalPrice ? totalPrice.separator(" ").toString() : "?"}
               </Subtitle2>
-            </Stack>
-          </Column>
-          <Button
-            text="Claim All"
-            size="small"
-            disabled={claimAllDisabled}
-            onClick={claimAll}
-          />
+            </Skeleton>
+          </Stack>
+
+          <Skeleton type="button" layer={1}>
+            <Button
+              text="Claim All"
+              size="small"
+              disabled={claimAllDisabled}
+              onClick={claimAll}
+            />
+          </Skeleton>
         </Columns>
       </Box>
 

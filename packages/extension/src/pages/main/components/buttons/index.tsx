@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Dec } from "@keplr-wallet/unit";
+import { Skeleton } from "../../../../components/skeleton";
 
 export const Buttons: FunctionComponent<{
   onClickDeposit: () => void;
@@ -23,7 +24,9 @@ export const Buttons: FunctionComponent<{
     <Box>
       <Columns sum={1} gutter="0.625rem">
         <Column weight={1}>
-          <Button text="Deposit" color="secondary" onClick={onClickDeposit} />
+          <Skeleton type="button">
+            <Button text="Deposit" color="secondary" onClick={onClickDeposit} />
+          </Skeleton>
         </Column>
 
         <Column weight={1}>
@@ -31,11 +34,13 @@ export const Buttons: FunctionComponent<{
         </Column>
 
         <Column weight={1}>
-          <Button
-            text="Send"
-            disabled={!hasBalance}
-            onClick={() => navigate("/send/select-asset")}
-          />
+          <Skeleton type="button">
+            <Button
+              text="Send"
+              disabled={!hasBalance}
+              onClick={() => navigate("/send/select-asset")}
+            />
+          </Skeleton>
         </Column>
       </Columns>
     </Box>
