@@ -499,7 +499,7 @@ export const EnableChainsScene: FunctionComponent<{
         <Box
           height="25.5rem"
           style={{
-            overflowY: "scroll",
+            overflowY: "auto",
           }}
         >
           <Stack gutter="0.5rem">

@@ -24,7 +24,7 @@ const Styles = {
 
     gap: 0.75rem;
 
-    overflow-y: scroll;
+    overflow-y: auto;
   `,
   ItemContainer: styled.div`
     display: flex;

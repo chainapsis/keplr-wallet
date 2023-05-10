@@ -177,6 +177,9 @@ const ModalChild: FunctionComponent<{
       <animated.div
         ref={innerContainerRef}
         style={{
+          // 화면을 다 가릴수는 없게 만든다.
+          maxHeight: "85vh",
+
           position: "absolute",
           left: 0,
           right: 0,

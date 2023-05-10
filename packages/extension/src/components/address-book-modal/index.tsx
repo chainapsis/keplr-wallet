@@ -23,7 +23,7 @@ const Styles = {
   `,
   ListContainer: styled.div`
     flex: 1;
-    overflow-y: scroll;
+    overflow-y: auto;
   `,
 
   AddressItemContainer: styled(Box)`

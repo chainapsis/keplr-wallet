@@ -64,7 +64,7 @@ export const RawInfoView: FunctionComponent<{
               backgroundColor: ColorPalette["gray-600"],
               borderRadius: "0.375rem",
 
-              overflow: "scroll",
+              overflow: "auto",
             }}
           >
             <Box as={"pre"} style={{ margin: 0 }}>

@@ -8,7 +8,7 @@ export const Styles = {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    overflow: scroll;
+    overflow: auto;
 
     padding: 6.25rem 10rem;
 

@@ -31,7 +31,7 @@ const Styles = {
 
     background-color: ${ColorPalette["gray-600"]};
 
-    overflow-y: scroll;
+    overflow-y: auto;
   `,
   ItemContainer: styled.div`
     padding: 0.875rem 0.5rem 0.875rem 1rem;
@@ -150,7 +150,7 @@ export const CopyAddressModal: FunctionComponent<{
       <Box
         height="21.5rem"
         style={{
-          overflowY: "scroll",
+          overflowY: "auto",
         }}
       >
         {addresses.map((address) => {

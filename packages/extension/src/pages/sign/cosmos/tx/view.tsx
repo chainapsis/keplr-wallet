@@ -265,7 +265,7 @@ export const CosmosTxView: FunctionComponent<{
         padding="0.75rem"
         paddingBottom="0"
         style={{
-          overflow: "scroll",
+          overflow: "auto",
         }}
       >
         <Box
@@ -305,7 +305,7 @@ export const CosmosTxView: FunctionComponent<{
           backgroundColor={ColorPalette["gray-600"]}
           style={{
             flex: !isViewData ? "0 1 auto" : 1,
-            overflow: "scroll",
+            overflow: "auto",
             opacity: isLedgerAndDirect ? 0.5 : undefined,
           }}
         >

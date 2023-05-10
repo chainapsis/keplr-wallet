@@ -171,7 +171,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         paddingTop="0.5rem"
         paddingBottom="0"
         style={{
-          overflow: "scroll",
+          overflow: "auto",
         }}
       >
         <Box>
@@ -218,7 +218,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           backgroundColor={ColorPalette["gray-600"]}
           borderRadius="0.375rem"
           style={{
-            overflow: "scroll",
+            overflow: "auto",
           }}
         >
           <pre

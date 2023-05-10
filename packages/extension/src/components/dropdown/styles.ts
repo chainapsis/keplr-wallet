@@ -37,7 +37,7 @@ export const Styles = {
 
     width: 100%;
     max-height: 13rem;
-    overflow: scroll;
+    overflow: auto;
 
     margin-top: 0.375rem;
 

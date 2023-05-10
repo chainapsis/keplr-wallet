@@ -137,7 +137,7 @@ export const TokenFoundModal: FunctionComponent<{
         </Subtitle1>
       </Box>
 
-      <Box maxHeight="22rem" style={{ overflowY: "scroll" }}>
+      <Box maxHeight="22rem" style={{ overflowY: "auto" }}>
         <Stack gutter="0.75rem">
           {chainStore.tokenScans.map((tokenScan) => {
             return (
