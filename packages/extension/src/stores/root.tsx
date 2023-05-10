@@ -88,7 +88,7 @@ export class RootStore {
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
   public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
-  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
+  public readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -362,6 +362,7 @@ export class RootStore {
     this.axelarEVMBridgeCurrencyRegistrar =
       new AxelarEVMBridgeCurrencyRegistrar(
         new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
+        24 * 3600 * 1000,
         this.chainStore,
         this.queriesStore,
         "ethereum"

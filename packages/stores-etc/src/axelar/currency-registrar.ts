@@ -3,10 +3,26 @@ import { ChainStore, IQueriesStore } from "@keplr-wallet/stores";
 import { KVStore } from "@keplr-wallet/common";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryEVMTokenInfo } from "./token-info";
+import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 
 export class AxelarEVMBridgeCurrencyRegistrar {
+  @observable
+  public _isInitialized = false;
+
+  // Key: ${chain}/${minimalDenom}
+  @observable.shallow
+  protected cacheMetadata: Map<
+    string,
+    {
+      symbol: string;
+      decimals: number;
+      timestamp: number;
+    }
+  > = new Map();
+
   constructor(
     protected readonly kvStore: KVStore,
+    protected readonly cacheDuration: number = 24 * 3600 * 1000, // 1 days
     protected readonly chainStore: ChainStore,
     protected readonly queriesStore: IQueriesStore<{
       keplrETC: {
@@ -18,6 +34,56 @@ export class AxelarEVMBridgeCurrencyRegistrar {
     this.chainStore.registerCurrencyRegistrar(
       this.currencyRegistrar.bind(this)
     );
+
+    makeObservable(this);
+
+    this.init();
+  }
+
+  async init(): Promise<void> {
+    const key = `cacheMetadata`;
+    const saved = await this.kvStore.get<
+      Record<
+        string,
+        {
+          symbol: string;
+          decimals: number;
+          timestamp: number;
+        }
+      >
+    >(key);
+    if (saved) {
+      runInAction(() => {
+        for (const [key, value] of Object.entries(saved)) {
+          if (Date.now() - value.timestamp < this.cacheDuration) {
+            this.cacheMetadata.set(key, value);
+          }
+        }
+      });
+    }
+
+    autorun(() => {
+      const js = toJS(this.cacheMetadata);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<
+        Record<
+          string,
+          {
+            symbol: string;
+            decimals: number;
+            timestamp: number;
+          }
+        >
+      >(key, obj);
+    });
+
+    runInAction(() => {
+      this._isInitialized = true;
+    });
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
   }
 
   protected currencyRegistrar(
@@ -41,6 +107,25 @@ export class AxelarEVMBridgeCurrencyRegistrar {
       return;
     }
 
+    const cacheKey = `${chainId}/${coinMinimalDenom}`;
+    const cached = this.cacheMetadata.get(cacheKey);
+    if (cached) {
+      if (Date.now() - cached.timestamp < this.cacheDuration) {
+        return {
+          value: {
+            coinMinimalDenom,
+            coinDenom: cached.symbol,
+            coinDecimals: cached.decimals,
+          },
+          done: true,
+        };
+      } else {
+        runInAction(() => {
+          this.cacheMetadata.delete(cacheKey);
+        });
+      }
+    }
+
     const queries = this.queriesStore.get(chainId);
 
     const tokenInfo = queries.keplrETC.queryEVMTokenInfo.getAsset(
@@ -52,6 +137,16 @@ export class AxelarEVMBridgeCurrencyRegistrar {
       tokenInfo.decimals != null &&
       tokenInfo.isConfirmed
     ) {
+      if (!tokenInfo.isFetching) {
+        runInAction(() => {
+          this.cacheMetadata.set(cacheKey, {
+            symbol: tokenInfo.symbol!,
+            decimals: tokenInfo.decimals!,
+            timestamp: Date.now(),
+          });
+        });
+      }
+
       return {
         value: {
           coinMinimalDenom,
