@@ -18,6 +18,10 @@ export class ObservableQueryICNSNamesInner extends ObservableCosmwasmContractCha
     });
   }
 
+  protected override canFetch(): boolean {
+    return this.address !== "";
+  }
+
   @computed
   get primaryName(): string {
     if (!this.response || !this.response.data) {
