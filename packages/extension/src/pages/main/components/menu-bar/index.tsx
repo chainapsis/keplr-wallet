@@ -8,11 +8,10 @@ import { useNavigate } from "react-router";
 import { Gutter } from "../../../../components/gutter";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
+import { H3 } from "../../../../components/typography";
 
 const Styles = {
-  MenuItem: styled(Box)`
-    font-weight: 500;
-    font-size: 1.5rem;
+  MenuItem: styled(H3)`
     color: ${ColorPalette["white"]};
 
     cursor: pointer;
@@ -35,27 +34,51 @@ export const MenuBar: FunctionComponent<{
       width="70%"
       maxWidth="20rem"
       backgroundColor={ColorPalette["gray-600"]}
-      padding="2rem"
+      paddingTop="1.125rem"
+      paddingLeft="1.25rem"
+      paddingBottom="2rem"
       style={{
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <Box onClick={close} cursor="pointer" maxWidth="2.5rem">
-        <CloseIcon width="2rem" height="2rem" />
+      <Box onClick={close} cursor="pointer">
+        <CloseIcon />
       </Box>
       <Gutter size="1.25rem" />
       <Stack gutter="1.75rem">
-        <Styles.MenuItem onClick={() => navigate("/setting/contacts/list")}>
-          Address Book
-        </Styles.MenuItem>
-
         <Styles.MenuItem
           onClick={() => {
             navigate("/setting");
           }}
         >
           Settings
+        </Styles.MenuItem>
+
+        <Styles.MenuItem onClick={() => navigate("/setting/contacts/list")}>
+          Contacts
+        </Styles.MenuItem>
+
+        <Styles.MenuItem onClick={() => navigate("/setting/token/add")}>
+          Add Token
+        </Styles.MenuItem>
+
+        <Styles.MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+
+            if (keyRingStore.selectedKeyInfo) {
+              browser.tabs
+                .create({
+                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}`,
+                })
+                .then(() => {
+                  window.close();
+                });
+            }
+          }}
+        >
+          Manage Chain List
         </Styles.MenuItem>
       </Stack>
 

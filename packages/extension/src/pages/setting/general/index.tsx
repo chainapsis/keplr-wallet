@@ -11,7 +11,7 @@ import { Box } from "../../../components/box";
 import { useLanguage } from "../../../languages";
 
 export const SettingGeneralPage: FunctionComponent = observer(() => {
-  const { uiConfigStore } = useStore();
+  const { keyRingStore, uiConfigStore } = useStore();
 
   const language = useLanguage();
 
@@ -62,9 +62,27 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Delete Suggest Chain"
+            title="Manage Suggest Chains"
+            paragraph="Add or remove chains that are suggested and managed by our community repo"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/delete-suggest-chain")}
+          />
+
+          <PageButton
+            title="Manage Chain List"
+            paragraph="Add or remove chains that are natively integrated with Keplr"
+            endIcon={<RightArrowIcon />}
+            onClick={() => {
+              if (keyRingStore.selectedKeyInfo) {
+                browser.tabs
+                  .create({
+                    url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}`,
+                  })
+                  .then(() => {
+                    window.close();
+                  });
+              }
+            }}
           />
         </Stack>
       </Box>
