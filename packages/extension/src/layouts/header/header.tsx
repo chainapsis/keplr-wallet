@@ -144,14 +144,18 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
       <Styles.HeaderContainer>
-        {left && <Styles.HeaderLeft>{left}</Styles.HeaderLeft>}
+        {left && !isNotReady ? (
+          <Styles.HeaderLeft>{left}</Styles.HeaderLeft>
+        ) : null}
         <Styles.HeaderTitle>
           <Skeleton isNotReady={isNotReady} dummyMinWidth="6.25rem">
             <Subtitle1>{title}</Subtitle1>
           </Skeleton>
         </Styles.HeaderTitle>
 
-        {right && <Styles.HeaderRight>{right}</Styles.HeaderRight>}
+        {right && !isNotReady ? (
+          <Styles.HeaderRight>{right}</Styles.HeaderRight>
+        ) : null}
       </Styles.HeaderContainer>
 
       <Styles.ContentContainer
