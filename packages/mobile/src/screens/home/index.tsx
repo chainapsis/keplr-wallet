@@ -138,15 +138,21 @@ export const HomeScreen: FunctionComponent = observer(() => {
       <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
       {/* There is a reason to use TokensCardRenderIfTokenExists. Check the comments on TokensCardRenderIfTokenExists */}
       <TokensCardRenderIfTokenExists />
-      <MyRewardCard
-        containerStyle={style.flatten(["margin-bottom-card-gap"])}
-      />
-      <StakingInfoCard
-        containerStyle={style.flatten(["margin-bottom-card-gap"])}
-      />
+      {!chainStore.current.chainId.startsWith("neutron") ? (
+        <MyRewardCard
+          containerStyle={style.flatten(["margin-bottom-card-gap"])}
+        />
+      ) : null}
+      {!chainStore.current.chainId.startsWith("neutron") ? (
+        <StakingInfoCard
+          containerStyle={style.flatten(["margin-bottom-card-gap"])}
+        />
+      ) : null}
+
       {!(
         chainStore.current.chainId.startsWith("quicksilver") ||
-        chainStore.current.chainId.startsWith("kyve")
+        chainStore.current.chainId.startsWith("kyve") ||
+        chainStore.current.chainId.startsWith("neutron")
       ) ? (
         <GovernanceCard
           containerStyle={style.flatten(["margin-bottom-card-gap"])}

@@ -34,6 +34,8 @@ export const AccountCard: FunctionComponent<{
     accountStore.getAccount(chainStore.current.chainId).bech32Address
   );
 
+  const isNeutron = chainStore.current.chainId.startsWith("neutron");
+
   const queryStakable = queries.queryBalances.getQueryBech32Address(
     account.bech32Address
   ).stakable;
@@ -164,9 +166,29 @@ export const AccountCard: FunctionComponent<{
                 Total Balance
               </Text>
               <Text style={style.flatten(["h3", "color-text-high"])}>
-                {totalPrice
-                  ? totalPrice.toString()
-                  : total.shrink(true).maxDecimals(6).toString()}
+                {(() => {
+                  if (isNeutron) {
+                    const cur = chainStore.current.currencies.find(
+                      (cur) => cur.coinMinimalDenom === "untrn"
+                    );
+                    if (cur) {
+                      const balance = queries.queryBalances
+                        .getQueryBech32Address(account.bech32Address)
+                        .getBalanceFromCurrency(cur);
+
+                      const price = priceStore.calculatePrice(balance);
+                      if (price) {
+                        return price.toString();
+                      }
+
+                      return balance.shrink(true).maxDecimals(6).toString();
+                    }
+                  }
+
+                  return totalPrice
+                    ? totalPrice.toString()
+                    : total.shrink(true).maxDecimals(6).toString();
+                })()}
               </Text>
               {queryStakable.isFetching ? (
                 <View
@@ -191,11 +213,10 @@ export const AccountCard: FunctionComponent<{
       <CardBody style={style.flatten(["padding-top-16"])}>
         <View style={style.flatten(["flex", "items-center"])}>
           <View
-            style={style.flatten([
-              "flex-row",
-              "items-center",
-              "margin-bottom-28",
-            ])}
+            style={style.flatten(
+              ["flex-row", "items-center", "margin-bottom-28"],
+              [isNeutron && "margin-bottom-0"]
+            )}
           >
             <TokenSymbol
               size={44}
@@ -214,7 +235,28 @@ export const AccountCard: FunctionComponent<{
                 Available
               </Text>
               <Text style={style.flatten(["h5", "color-text-high"])}>
-                {stakable.maxDecimals(6).trim(true).shrink(true).toString()}
+                {(() => {
+                  if (isNeutron) {
+                    const cur = chainStore.current.currencies.find(
+                      (cur) => cur.coinMinimalDenom === "untrn"
+                    );
+                    if (cur) {
+                      return queries.queryBalances
+                        .getQueryBech32Address(account.bech32Address)
+                        .getBalanceFromCurrency(cur)
+                        .maxDecimals(6)
+                        .trim(true)
+                        .shrink(true)
+                        .toString();
+                    }
+                  }
+
+                  return stakable
+                    .maxDecimals(6)
+                    .trim(true)
+                    .shrink(true)
+                    .toString();
+                })()}
               </Text>
             </View>
             <View style={style.flatten(["flex-1"])} />
@@ -224,47 +266,61 @@ export const AccountCard: FunctionComponent<{
               containerStyle={style.flatten(["min-width-72"])}
               disabled={stakable.toDec().lte(new Dec(0))}
               onPress={() => {
+                if (isNeutron) {
+                  const cur = chainStore.current.currencies.find(
+                    (cur) => cur.coinMinimalDenom === "untrn"
+                  );
+                  if (cur) {
+                    smartNavigation.navigateSmart("Send", {
+                      currency: cur.coinMinimalDenom,
+                    });
+                    return;
+                  }
+                }
+
                 smartNavigation.navigateSmart("Send", {
                   currency: chainStore.current.stakeCurrency.coinMinimalDenom,
                 });
               }}
             />
           </View>
-          <View
-            style={style.flatten([
-              "flex-row",
-              "items-center",
-              "margin-bottom-8",
-            ])}
-          >
-            <StakedTokenSymbol size={44} />
-            <View style={style.flatten(["margin-left-12"])}>
-              <Text
-                style={style.flatten([
-                  "subtitle3",
-                  "color-blue-400",
-                  "dark:color-platinum-200",
-                  "margin-bottom-4",
-                ])}
-              >
-                Staking
-              </Text>
-              <Text style={style.flatten(["h5", "color-text-high"])}>
-                {stakedSum.maxDecimals(6).trim(true).shrink(true).toString()}
-              </Text>
+          {!isNeutron ? (
+            <View
+              style={style.flatten([
+                "flex-row",
+                "items-center",
+                "margin-bottom-8",
+              ])}
+            >
+              <StakedTokenSymbol size={44} />
+              <View style={style.flatten(["margin-left-12"])}>
+                <Text
+                  style={style.flatten([
+                    "subtitle3",
+                    "color-blue-400",
+                    "dark:color-platinum-200",
+                    "margin-bottom-4",
+                  ])}
+                >
+                  Staking
+                </Text>
+                <Text style={style.flatten(["h5", "color-text-high"])}>
+                  {stakedSum.maxDecimals(6).trim(true).shrink(true).toString()}
+                </Text>
+              </View>
+              <View style={style.flatten(["flex-1"])} />
+              <Button
+                text="Stake"
+                mode="light"
+                size="small"
+                containerStyle={style.flatten(["min-width-72"])}
+                disabled={stakable.toDec().lte(new Dec(0))}
+                onPress={() => {
+                  smartNavigation.navigateSmart("Validator.List", {});
+                }}
+              />
             </View>
-            <View style={style.flatten(["flex-1"])} />
-            <Button
-              text="Stake"
-              mode="light"
-              size="small"
-              containerStyle={style.flatten(["min-width-72"])}
-              disabled={stakable.toDec().lte(new Dec(0))}
-              onPress={() => {
-                smartNavigation.navigateSmart("Validator.List", {});
-              }}
-            />
-          </View>
+          ) : null}
         </View>
       </CardBody>
     </Card>

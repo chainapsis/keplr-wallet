@@ -2269,6 +2269,59 @@ export const EmbedChainInfos: AppChainInfo[] = [
     chainSymbolImageUrl:
       "https://asset-icons.s3.us-west-2.amazonaws.com/white/kyve.png",
   },
+  {
+    rpc: "https://rpc-neutron.keplr.app",
+    rest: "https://lcd-neutron.keplr.app",
+    chainId: "neutron-1",
+    chainName: "Neutron",
+    stakeCurrency: {
+      coinDenom: "STAKE",
+      coinMinimalDenom: "ustake",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "neutron",
+      bech32PrefixAccPub: "neutronpub",
+      bech32PrefixValAddr: "neutronvaloper",
+      bech32PrefixValPub: "neutronvaloperpub",
+      bech32PrefixConsAddr: "neutronvalcons",
+      bech32PrefixConsPub: "neutronvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "NTRN",
+        coinMinimalDenom: "untrn",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/neutron.png",
+      },
+      {
+        coinDenom: "STAKE",
+        coinMinimalDenom: "ustake",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "NTRN",
+        coinMinimalDenom: "untrn",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/neutron.png",
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.01,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/neutron.png",
+  },
 ];
 
 export const LegacyAmplitudeApiKey =

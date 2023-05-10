@@ -64,10 +64,18 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
     };
   }, [networkIsConnected]);
 
+  const isNeutron = chainStore.current.chainId.startsWith("neutron");
   useEffect(() => {
     if (networkIsConnected) {
-      const error =
-        queryStakable.error || queryDelegated.error || queryUnbonding.error;
+      const error = (() => {
+        if (isNeutron) {
+          return queryStakable.error;
+        }
+
+        return (
+          queryStakable.error || queryDelegated.error || queryUnbonding.error
+        );
+      })();
 
       if (error) {
         const errorData = error.data as { error?: string } | undefined;
@@ -91,6 +99,7 @@ export const NetworkErrorView: FunctionComponent = observer(() => {
     queryDelegated.error,
     queryUnbonding.error,
     networkIsConnected,
+    isNeutron,
   ]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
