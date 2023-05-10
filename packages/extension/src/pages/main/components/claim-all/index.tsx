@@ -310,7 +310,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 },
                 {
                   onFulfill: (tx: any) => {
-                    state.setIsLoading(false);
+                    // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
+                    // 쿼리하는 동안 시간차가 있기 때문에 훼이크로 그냥 1초 더 기다린다.
+                    setTimeout(() => {
+                      state.setIsLoading(false);
+                    }, 1000);
 
                     if (tx.code) {
                       state.setFailedReason(new Error(tx["raw_log"]));
