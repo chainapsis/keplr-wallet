@@ -41,6 +41,15 @@ export interface ViewToken {
   error: QueryError<any> | undefined;
 }
 
+const useIsReady = () => {
+  const { chainStore, queriesStore } = useStore();
+
+  const query = queriesStore.get(chainStore.chainInfos[0].chainId).cosmos
+    .queryRPCStatus;
+
+  return query.response != null || query.error != null;
+};
+
 export const MainPage: FunctionComponent = observer(() => {
   const {
     keyRingStore,
@@ -50,6 +59,8 @@ export const MainPage: FunctionComponent = observer(() => {
     accountStore,
     queriesStore,
   } = useStore();
+
+  const isReady = useIsReady();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
