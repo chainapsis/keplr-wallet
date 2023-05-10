@@ -130,7 +130,7 @@ export const MainPage: FunctionComponent = observer(() => {
   const [search, setSearch] = useState("");
   useEffect(() => {
     // Give focus whenever available tab is selected.
-    if (tabStatus === "available") {
+    if (!isNotReady && tabStatus === "available") {
       // And clear search text.
       setSearch("");
 
@@ -138,7 +138,7 @@ export const MainPage: FunctionComponent = observer(() => {
         searchRef.current.focus();
       }
     }
-  }, [tabStatus]);
+  }, [tabStatus, isNotReady]);
 
   const searchScrollAnim = useSpringValue(0, {
     config: defaultSpringConfig,

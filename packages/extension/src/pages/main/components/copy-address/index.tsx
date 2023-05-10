@@ -41,11 +41,7 @@ export const CopyAddress: FunctionComponent<{
   return (
     <YAxis alignX="center">
       <XAxis alignY="center">
-        <Skeleton
-          type="copyAddress"
-          isNotReady={isNotReady}
-          dummyMinWidth="7.125rem"
-        >
+        <Skeleton type="copyAddress" isNotReady={isNotReady}>
           <Styles.Container onClick={onClick}>
             <Caption1 style={{ color: ColorPalette["gray-300"] }}>
               Copy Address

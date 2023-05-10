@@ -19,6 +19,7 @@ import { AppIntlProvider } from "./languages";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { observer } from "mobx-react-lite";
 import { StartAutoLockMonitoringMsg } from "@keplr-wallet/background";
+import { useLoadFonts } from "./load-fonts";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -57,6 +58,8 @@ const AutoLockMonitor: FunctionComponent = observer(() => {
 });
 
 const App: FunctionComponent = () => {
+  useLoadFonts();
+
   return (
     <StoreProvider>
       <ModalRootProvider>

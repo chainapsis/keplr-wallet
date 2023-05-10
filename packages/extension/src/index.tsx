@@ -67,6 +67,7 @@ import { NotificationProvider } from "./hooks/notification";
 import { SettingSecurityChangePasswordPage } from "./pages/setting/security/change-password";
 import { AppIntlProvider } from "./languages";
 import { SettingSecurityAutoLockPage } from "./pages/setting/security/auto-lock";
+import { useLoadFonts } from "./load-fonts";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -117,6 +118,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     uiConfigStore,
   } = useStore();
 
+  const { isLoaded: isFontLoaded } = useLoadFonts();
+
   useEffect(() => {
     if (keyRingStore.status === "unlocked") {
       const sendAutoLockMonitorMsg = async () => {
@@ -157,6 +160,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           });
       }
 
+      return false;
+    }
+
+    if (!isFontLoaded) {
       return false;
     }
 
@@ -206,6 +213,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     return true;
   }, [
     keyRingStore.status,
+    isFontLoaded,
     chainStore.isInitializing,
     chainStore.chainInfos,
     isURLUnlockPage,

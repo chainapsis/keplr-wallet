@@ -172,38 +172,41 @@ export const AvailableTabView: FunctionComponent<{
           button={<Button text="Get Started" color="primary" size="small" />}
         />
       ) : (
-        <Stack gutter="0.5rem">
-          {TokenViewData.map(({ title, balance, lenAlwaysShown, tooltip }) => {
-            if (balance.length === 0) {
-              return null;
-            }
+        <React.Fragment>
+          <Stack gutter="0.5rem">
+            {TokenViewData.map(
+              ({ title, balance, lenAlwaysShown, tooltip }) => {
+                if (balance.length === 0) {
+                  return null;
+                }
 
-            return (
-              <CollapsibleList
-                key={title}
-                title={<TokenTitleView title={title} tooltip={tooltip} />}
-                lenAlwaysShown={lenAlwaysShown}
-                items={balance.map((viewToken) => (
-                  <TokenItem
-                    viewToken={viewToken}
-                    key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                return (
+                  <CollapsibleList
+                    key={title}
+                    title={<TokenTitleView title={title} tooltip={tooltip} />}
+                    lenAlwaysShown={lenAlwaysShown}
+                    items={balance.map((viewToken) => (
+                      <TokenItem
+                        viewToken={viewToken}
+                        key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                      />
+                    ))}
                   />
-                ))}
+                );
+              }
+            )}
+          </Stack>
+          {numFoundToken > 0 ? (
+            <Box padding="0.75rem">
+              <TextButton
+                text={`${numFoundToken} new token(s) found`}
+                size="small"
+                onClick={() => setIsFoundTokenModalOpen(true)}
               />
-            );
-          })}
-        </Stack>
+            </Box>
+          ) : null}
+        </React.Fragment>
       )}
-
-      {numFoundToken > 0 ? (
-        <Box padding="0.75rem">
-          <TextButton
-            text={`${numFoundToken} new token(s) found`}
-            size="small"
-            onClick={() => setIsFoundTokenModalOpen(true)}
-          />
-        </Box>
-      ) : null}
 
       <Modal
         isOpen={isFoundTokenModalOpen && numFoundToken > 0}
