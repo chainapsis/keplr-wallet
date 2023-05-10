@@ -7,7 +7,7 @@ import { VerticalCollapseTransition } from "../../../../components/transition/ve
 import { Body2, Subtitle2, Subtitle3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { ViewToken } from "../../index";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -34,6 +34,7 @@ import { useNotification } from "../../../../hooks/notification";
 import { useNavigate } from "react-router";
 import { Skeleton } from "../../../../components/skeleton";
 import { YAxis } from "../../../../components/axis";
+import Color from "color";
 
 const Styles = {
   Container: styled.div`
@@ -41,16 +42,28 @@ const Styles = {
     padding: 0.75rem 0 0 0;
     border-radius: 0.375rem;
   `,
-  ExpandButton: styled(Box)`
-    :hover {
-      background-color: ${ColorPalette["gray-500"]};
-      opacity: 0.5;
-    }
+  ExpandButton: styled(Box)<{ viewTokenCount: number }>`
+    ${({ viewTokenCount }) => {
+      if (viewTokenCount === 0) {
+        return css`
+          cursor: not-allowed;
+        `;
+      }
 
-    :active {
-      background-color: ${ColorPalette["gray-500"]};
-      opacity: 0.2;
-    }
+      return css`
+        :hover {
+          background-color: ${Color(ColorPalette["gray-500"])
+            .alpha(0.5)
+            .toString()};
+        }
+
+        :active {
+          background-color: ${Color(ColorPalette["gray-500"])
+            .alpha(0.2)
+            .toString()};
+        }
+      `;
+    }};
   `,
 };
 
@@ -408,12 +421,25 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         <Styles.ExpandButton
           paddingX="0.125rem"
           alignX="center"
-          onClick={() => setIsExpanded(!isExpanded)}
+          viewTokenCount={viewTokens.length}
+          onClick={() => {
+            if (viewTokens.length > 0) {
+              setIsExpanded(!isExpanded);
+            }
+          }}
         >
           {!isExpanded ? (
-            <ArrowDownIcon width="1.25rem" height="1.25rem" />
+            <ArrowDownIcon
+              width="1.25rem"
+              height="1.25rem"
+              color={ColorPalette["gray-300"]}
+            />
           ) : (
-            <ArrowUpIcon width="1.25rem" height="1.25rem" />
+            <ArrowUpIcon
+              width="1.25rem"
+              height="1.25rem"
+              color={ColorPalette["gray-300"]}
+            />
           )}
         </Styles.ExpandButton>
 

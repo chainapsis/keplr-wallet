@@ -4,6 +4,7 @@ import { IconProps } from "./types";
 export const ArrowUpIcon: FunctionComponent<IconProps> = ({
   width = 24,
   height = 24,
+  color,
 }) => {
   return (
     <svg
@@ -15,7 +16,7 @@ export const ArrowUpIcon: FunctionComponent<IconProps> = ({
     >
       <path
         d="M4 15L11.5 9L19 15"
-        stroke="currentColor"
+        stroke={color || "currentColor"}
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
