@@ -87,8 +87,8 @@ export class RootStore {
   public readonly tokensStore: TokensStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
-  protected readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
-  protected readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
+  public readonly gravityBridgeCurrencyRegistrar: GravityBridgeCurrencyRegistrar;
+  public readonly axelarEVMBridgeCurrencyRegistrar: AxelarEVMBridgeCurrencyRegistrar;
 
   public readonly analyticsStore: AnalyticsStore<
     {
@@ -163,7 +163,7 @@ export class RootStore {
       new ExtensionKVStore("store_queries"),
       this.chainStore,
       {
-        responseDebounceMs: 50,
+        responseDebounceMs: 100,
       },
       CosmosQueries.use(),
       CosmwasmQueries.use(),
@@ -355,12 +355,14 @@ export class RootStore {
     );
     this.gravityBridgeCurrencyRegistrar = new GravityBridgeCurrencyRegistrar(
       new ExtensionKVStore("store_gravity_bridge_currency_registrar"),
+      24 * 3600 * 1000,
       this.chainStore,
       this.queriesStore
     );
     this.axelarEVMBridgeCurrencyRegistrar =
       new AxelarEVMBridgeCurrencyRegistrar(
         new ExtensionKVStore("store_axelar_evm_bridge_currency_registrar"),
+        24 * 3600 * 1000,
         this.chainStore,
         this.queriesStore,
         "ethereum"

@@ -111,6 +111,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     accountStore,
     keyRingStore,
     ibcCurrencyRegistrar,
+    gravityBridgeCurrencyRegistrar,
+    axelarEVMBridgeCurrencyRegistrar,
     priceStore,
     uiConfigStore,
   } = useStore();
@@ -193,6 +195,14 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (!gravityBridgeCurrencyRegistrar.isInitialized) {
+      return false;
+    }
+
+    if (!axelarEVMBridgeCurrencyRegistrar.isInitialized) {
+      return false;
+    }
+
     return true;
   }, [
     keyRingStore.status,
@@ -202,6 +212,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     ibcCurrencyRegistrar.isInitialized,
     priceStore.isInitialized,
     uiConfigStore.isInitialized,
+    gravityBridgeCurrencyRegistrar.isInitialized,
+    axelarEVMBridgeCurrencyRegistrar.isInitialized,
     accountStore,
   ]);
 

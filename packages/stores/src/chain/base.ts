@@ -17,6 +17,7 @@ import {
 import { IChainInfoImpl, IChainStore, CurrencyRegistrar } from "./types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { keepAlive } from "mobx-utils";
+import { sortedJsonByKeyStringify } from "@keplr-wallet/common";
 
 export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
   implements IChainInfoImpl<C>
@@ -81,13 +82,17 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
 
               this.addOrReplaceCurrency(currency);
             });
+          }
 
-            if (generator.done) {
+          if (generator.done) {
+            if (disposer) {
               disposer();
             }
           }
         } else {
-          disposer();
+          if (disposer) {
+            disposer();
+          }
         }
       });
     }
@@ -200,7 +205,13 @@ export class ChainInfoImpl<C extends ChainInfo = ChainInfo>
         (cur) => cur.coinMinimalDenom === currency.coinMinimalDenom
       );
       if (index >= 0) {
-        this.registeredCurrencies.splice(index, 1, currency);
+        const prev = this.registeredCurrencies[index];
+        if (
+          // If same, do nothing
+          sortedJsonByKeyStringify(prev) !== sortedJsonByKeyStringify(currency)
+        ) {
+          this.registeredCurrencies.splice(index, 1, currency);
+        }
       }
     } else {
       this.registeredCurrencies.push(currency);
