@@ -33,6 +33,7 @@ import { Columns } from "../../components/column";
 import { Tooltip } from "../../components/tooltip";
 import { Image } from "../../components/image";
 import { QueryError } from "@keplr-wallet/stores";
+import { Skeleton } from "../../components/skeleton";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -40,6 +41,15 @@ export interface ViewToken {
   isFetching: boolean;
   error: QueryError<any> | undefined;
 }
+
+export const useIsNotReady = () => {
+  const { chainStore, queriesStore } = useStore();
+
+  const query = queriesStore.get(chainStore.chainInfos[0].chainId).cosmos
+    .queryRPCStatus;
+
+  return query.response == null && query.error == null;
+};
 
 export const MainPage: FunctionComponent = observer(() => {
   const {
@@ -50,6 +60,8 @@ export const MainPage: FunctionComponent = observer(() => {
     accountStore,
     queriesStore,
   } = useStore();
+
+  const isNotReady = useIsNotReady();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
@@ -134,6 +146,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
+      isNotReady={isNotReady}
       title={(() => {
         const name = keyRingStore.selectedKeyInfo?.name || "Keplr Account";
 
@@ -141,6 +154,7 @@ export const MainPage: FunctionComponent = observer(() => {
           return (
             <Columns sum={1} alignY="center" gutter="0.25rem">
               <Box>{name}</Box>
+
               <Tooltip content={icnsPrimaryName}>
                 <Image
                   alt="icns-icon"
@@ -167,8 +181,15 @@ export const MainPage: FunctionComponent = observer(() => {
     >
       <Box paddingX="0.75rem" paddingBottom="0.5rem">
         <Stack gutter="0.75rem">
-          <StringToggle tabStatus={tabStatus} setTabStatus={setTabStatus} />
-          <CopyAddress onClick={() => setIsOpenCopyAddress(true)} />
+          <StringToggle
+            tabStatus={tabStatus}
+            setTabStatus={setTabStatus}
+            isNotReady={isNotReady}
+          />
+          <CopyAddress
+            onClick={() => setIsOpenCopyAddress(true)}
+            isNotReady={isNotReady}
+          />
           <Box position="relative">
             <DualChart
               first={{
@@ -194,67 +215,79 @@ export const MainPage: FunctionComponent = observer(() => {
               }}
             >
               <Gutter size="2rem" />
-              <Subtitle3
-                style={{
-                  color: ColorPalette["gray-300"],
-                }}
-              >
-                {tabStatus === "available" ? "Total Available" : "Total Staked"}
-              </Subtitle3>
+              <Skeleton isNotReady={isNotReady}>
+                <Subtitle3
+                  style={{
+                    color: ColorPalette["gray-300"],
+                  }}
+                >
+                  {tabStatus === "available"
+                    ? "Total Available"
+                    : "Total Staked"}
+                </Subtitle3>
+              </Skeleton>
               <Gutter size="0.5rem" />
-              <H1
-                style={{
-                  color: ColorPalette["gray-10"],
-                }}
-              >
-                {tabStatus === "available"
-                  ? availableTotalPrice?.toString() || "-"
-                  : stakedTotalPrice?.toString() || "-"}
-              </H1>
+              <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
+                <H1
+                  style={{
+                    color: ColorPalette["gray-10"],
+                  }}
+                >
+                  {tabStatus === "available"
+                    ? availableTotalPrice?.toString() || "-"
+                    : stakedTotalPrice?.toString() || "-"}
+                </H1>
+              </Skeleton>
             </Box>
           </Box>
           {tabStatus === "available" ? (
             <Buttons
               onClickDeposit={() => setIsOpenCopyAddress(true)}
               onClickBuy={() => setIsOpenBuy(true)}
+              isNotReady={isNotReady}
             />
           ) : null}
 
-          <ClaimAll />
-          <InternalLinkView />
-          {tabStatus === "available" ? (
-            <SearchTextInput
-              ref={searchRef}
-              value={search}
-              onChange={(e) => {
-                e.preventDefault();
+          <ClaimAll isNotReady={isNotReady} />
+          {!isNotReady ? (
+            <Stack gutter="0.75rem">
+              <InternalLinkView />
+              {tabStatus === "available" ? (
+                <SearchTextInput
+                  ref={searchRef}
+                  value={search}
+                  onChange={(e) => {
+                    e.preventDefault();
 
-                setSearch(e.target.value);
+                    setSearch(e.target.value);
 
-                if (e.target.value.trim().length > 0) {
-                  if (document.documentElement.scrollTop < 218) {
-                    searchScrollAnim.start(218, {
-                      from: document.documentElement.scrollTop,
-                      onChange: (anim: any) => {
-                        // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
-                        const v = anim.value != null ? anim.value : anim;
-                        if (typeof v === "number") {
-                          document.documentElement.scrollTop = v;
-                        }
-                      },
-                    });
-                  }
-                }
-              }}
-              placeholder="Search for a chain"
-            />
+                    if (e.target.value.trim().length > 0) {
+                      if (document.documentElement.scrollTop < 218) {
+                        searchScrollAnim.start(218, {
+                          from: document.documentElement.scrollTop,
+                          onChange: (anim: any) => {
+                            // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
+                            const v = anim.value != null ? anim.value : anim;
+                            if (typeof v === "number") {
+                              document.documentElement.scrollTop = v;
+                            }
+                          },
+                        });
+                      }
+                    }
+                  }}
+                  placeholder="Search for a chain"
+                />
+              ) : null}
+            </Stack>
           ) : null}
+
           {/*
             AvailableTabView, StakedTabView가 컴포넌트로 빠지면서 밑의 얘들의 각각의 item들에는 stack이 안먹힌다는 걸 주의
             각 컴포넌트에서 알아서 gutter를 처리해야한다.
            */}
           {tabStatus === "available" ? (
-            <AvailableTabView search={search} />
+            <AvailableTabView search={search} isNotReady={isNotReady} />
           ) : (
             <StakedTabView />
           )}

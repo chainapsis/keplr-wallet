@@ -12,4 +12,5 @@ export interface HeaderProps {
   fixedHeight?: boolean;
 
   onSubmit?: React.FormEventHandler<HTMLFormElement>;
+  isNotReady?: boolean;
 }

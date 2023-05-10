@@ -3,6 +3,9 @@ import styled from "styled-components";
 import { Columns } from "../../../../components/column";
 import { ColorPalette } from "../../../../styles";
 import { Caption1, Caption2 } from "../../../../components/typography";
+import { Skeleton } from "../../../../components/skeleton";
+
+export const StringToggleRadius = "12rem";
 
 const Styles = {
   Container: styled.div`
@@ -14,7 +17,7 @@ const Styles = {
     width: 11.75rem;
 
     padding: 0 0.125rem;
-    border-radius: 12rem;
+    border-radius: ${StringToggleRadius};
 
     background-color: ${ColorPalette["gray-600"]};
   `,
@@ -25,7 +28,7 @@ const Styles = {
 
     height: 1.625rem;
     width: 5.75rem;
-    border-radius: 12rem;
+    border-radius: ${StringToggleRadius};
 
     background-color: ${ColorPalette["gray-400"]};
 
@@ -42,7 +45,7 @@ const Styles = {
 
     height: 1.625rem;
     width: 5.75rem;
-    border-radius: 12rem;
+    border-radius: ${StringToggleRadius};
 
     cursor: pointer;
 
@@ -55,16 +58,21 @@ export type TabStatus = "available" | "staked";
 export const StringToggle: FunctionComponent<{
   tabStatus: TabStatus;
   setTabStatus: (tabStatus: TabStatus) => void;
-}> = ({ tabStatus, setTabStatus }) => {
+  isNotReady?: boolean;
+}> = ({ tabStatus, setTabStatus, isNotReady }) => {
   return (
     <Columns sum={1} alignY="center" columnAlign="center">
       {tabStatus === "available" ? (
-        <Styles.Container>
-          <Styles.Selected>Available</Styles.Selected>
-          <Styles.UnSelected onClick={() => setTabStatus("staked")}>
-            Staked
-          </Styles.UnSelected>
-        </Styles.Container>
+        <Skeleton type="stringToggle" isNotReady={isNotReady}>
+          <Styles.Container>
+            <Skeleton type="stringToggle" layer={1} isNotReady={isNotReady}>
+              <Styles.Selected>Available</Styles.Selected>
+            </Skeleton>
+            <Styles.UnSelected onClick={() => setTabStatus("staked")}>
+              Staked
+            </Styles.UnSelected>
+          </Styles.Container>
+        </Skeleton>
       ) : (
         <Styles.Container>
           <Styles.UnSelected onClick={() => setTabStatus("available")}>

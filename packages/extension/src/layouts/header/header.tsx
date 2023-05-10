@@ -5,6 +5,7 @@ import { Subtitle1 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
 import { Button, getButtonHeightRem } from "../../components/button";
+import { Skeleton } from "../../components/skeleton";
 
 const pxToRem = (px: number) => {
   const base = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -107,6 +108,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   fixedHeight,
   onSubmit,
   children,
+  isNotReady,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(0);
@@ -144,8 +146,11 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
       <Styles.HeaderContainer>
         {left && <Styles.HeaderLeft>{left}</Styles.HeaderLeft>}
         <Styles.HeaderTitle>
-          <Subtitle1>{title}</Subtitle1>
+          <Skeleton isNotReady={isNotReady} dummyMinWidth="6.25rem">
+            <Subtitle1>{title}</Subtitle1>
+          </Skeleton>
         </Styles.HeaderTitle>
+
         {right && <Styles.HeaderRight>{right}</Styles.HeaderRight>}
       </Styles.HeaderContainer>
 

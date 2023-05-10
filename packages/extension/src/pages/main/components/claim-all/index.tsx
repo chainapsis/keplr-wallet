@@ -32,6 +32,8 @@ import { Tooltip } from "../../../../components/tooltip";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 import { useNotification } from "../../../../hooks/notification";
 import { useNavigate } from "react-router";
+import { Skeleton } from "../../../../components/skeleton";
+import { YAxis } from "../../../../components/axis";
 
 const Styles = {
   Container: styled.div`
@@ -78,343 +80,364 @@ class ClaimAllEachState {
 
 const zeroDec = new Dec(0);
 
-export const ClaimAll: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
-    useStore();
+export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
+  ({ isNotReady }) => {
+    const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
+      useStore();
 
-  const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
-  const statesRef = useRef(new Map<string, ClaimAllEachState>());
-  const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
-    const chainIdentifier = chainStore.getChain(chainId).chainIdentifier;
-    let state = statesRef.current.get(chainIdentifier);
-    if (!state) {
-      state = new ClaimAllEachState();
-      statesRef.current.set(chainIdentifier, state);
-    }
-
-    return state;
-  };
-
-  const viewTokens: ViewToken[] = chainStore.chainInfosInUI
-    .map((chainInfo) => {
-      const chainId = chainInfo.chainId;
-      const accountAddress = accountStore.getAccount(chainId).bech32Address;
-      const queries = queriesStore.get(chainId);
-      const queryRewards =
-        queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
-
-      return {
-        token: queryRewards.stakableReward,
-        chainInfo,
-        isFetching: queryRewards.isFetching,
-        error: queryRewards.error,
-      };
-    })
-    .filter((viewToken) => viewToken.token.toDec().gt(zeroDec))
-    .sort((a, b) => {
-      const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
-      const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
-
-      if (aPrice.equals(bPrice)) {
-        return 0;
+    const statesRef = useRef(new Map<string, ClaimAllEachState>());
+    const getClaimAllEachState = (chainId: string): ClaimAllEachState => {
+      const chainIdentifier = chainStore.getChain(chainId).chainIdentifier;
+      let state = statesRef.current.get(chainIdentifier);
+      if (!state) {
+        state = new ClaimAllEachState();
+        statesRef.current.set(chainIdentifier, state);
       }
-      return aPrice.gt(bPrice) ? -1 : 1;
-    })
-    .sort((a, b) => {
-      const aHasError =
-        getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
-      const bHasError =
-        getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
 
-      if (aHasError || bHasError) {
-        if (aHasError && bHasError) {
+      return state;
+    };
+
+    const viewTokens: ViewToken[] = chainStore.chainInfosInUI
+      .map((chainInfo) => {
+        const chainId = chainInfo.chainId;
+        const accountAddress = accountStore.getAccount(chainId).bech32Address;
+        const queries = queriesStore.get(chainId);
+        const queryRewards =
+          queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
+
+        return {
+          token: queryRewards.stakableReward,
+          chainInfo,
+          isFetching: queryRewards.isFetching,
+          error: queryRewards.error,
+        };
+      })
+      .filter((viewToken) => viewToken.token.toDec().gt(zeroDec))
+      .sort((a, b) => {
+        const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
+        const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
+
+        if (aPrice.equals(bPrice)) {
           return 0;
-        } else if (aHasError) {
-          return 1;
-        } else {
-          return -1;
+        }
+        return aPrice.gt(bPrice) ? -1 : 1;
+      })
+      .sort((a, b) => {
+        const aHasError =
+          getClaimAllEachState(a.chainInfo.chainId).failedReason != null;
+        const bHasError =
+          getClaimAllEachState(b.chainInfo.chainId).failedReason != null;
+
+        if (aHasError || bHasError) {
+          if (aHasError && bHasError) {
+            return 0;
+          } else if (aHasError) {
+            return 1;
+          } else {
+            return -1;
+          }
+        }
+
+        return 0;
+      });
+
+    const totalPrice = (() => {
+      const fiatCurrency = priceStore.getFiatCurrency(
+        priceStore.defaultVsCurrency
+      );
+      if (!fiatCurrency) {
+        return undefined;
+      }
+
+      let res = new PricePretty(fiatCurrency, 0);
+
+      for (const viewToken of viewTokens) {
+        const price = priceStore.calculatePrice(viewToken.token);
+        if (price) {
+          res = res.add(price);
         }
       }
 
-      return 0;
-    });
+      return res;
+    })();
 
-  const totalPrice = (() => {
-    const fiatCurrency = priceStore.getFiatCurrency(
-      priceStore.defaultVsCurrency
-    );
-    if (!fiatCurrency) {
-      return undefined;
-    }
+    const isLedger =
+      keyRingStore.selectedKeyInfo &&
+      keyRingStore.selectedKeyInfo.type === "ledger";
 
-    let res = new PricePretty(fiatCurrency, 0);
-
-    for (const viewToken of viewTokens) {
-      const price = priceStore.calculatePrice(viewToken.token);
-      if (price) {
-        res = res.add(price);
-      }
-    }
-
-    return res;
-  })();
-
-  const isLedger =
-    keyRingStore.selectedKeyInfo &&
-    keyRingStore.selectedKeyInfo.type === "ledger";
-
-  const claimAll = () => {
-    if (viewTokens.length > 0) {
-      setIsExpanded(true);
-    }
-
-    if (isLedger) {
-      // Ledger에서 현실적으로 이 기능을 처리해주기 난감하다.
-      // disable하기보다는 일단 눌렀을때 expand를 시켜주고 아무것도 하지 않는다.
-      return;
-    }
-
-    for (const viewToken of viewTokens) {
-      const chainId = viewToken.chainInfo.chainId;
-      const account = accountStore.getAccount(chainId);
-
-      if (!account.bech32Address) {
-        continue;
+    const claimAll = () => {
+      if (viewTokens.length > 0) {
+        setIsExpanded(true);
       }
 
-      const chainInfo = chainStore.getChain(chainId);
-      const queries = queriesStore.get(chainId);
-      const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
-        account.bech32Address
-      );
-
-      const validatorAddresses =
-        queryRewards.getDescendingPendingRewardValidatorAddresses(8);
-
-      if (validatorAddresses.length === 0) {
-        continue;
+      if (isLedger) {
+        // Ledger에서 현실적으로 이 기능을 처리해주기 난감하다.
+        // disable하기보다는 일단 눌렀을때 expand를 시켜주고 아무것도 하지 않는다.
+        return;
       }
 
-      const state = getClaimAllEachState(chainId);
+      for (const viewToken of viewTokens) {
+        const chainId = viewToken.chainInfo.chainId;
+        const account = accountStore.getAccount(chainId);
 
-      state.setIsLoading(true);
+        if (!account.bech32Address) {
+          continue;
+        }
 
-      const tx =
-        account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
-
-      (async () => {
-        // At present, only assume that user can pay the fee with the stake currency.
-        // (Normally, user has stake currency because it is used for staking)
-        const feeCurrency = chainInfo.feeCurrencies.find(
-          (cur) =>
-            cur.coinMinimalDenom === chainInfo.stakeCurrency.coinMinimalDenom
+        const chainInfo = chainStore.getChain(chainId);
+        const queries = queriesStore.get(chainId);
+        const queryRewards = queries.cosmos.queryRewards.getQueryBech32Address(
+          account.bech32Address
         );
-        if (feeCurrency) {
-          try {
-            const simulated = await tx.simulate();
 
-            // Gas adjustment is 1.5
-            // Since there is currently no convenient way to adjust the gas adjustment on the UI,
-            // Use high gas adjustment to prevent failure.
-            const gasEstimated = new Dec(simulated.gasUsed * 1.5).truncate();
-            const fee = {
-              denom: feeCurrency.coinMinimalDenom,
-              amount: new Dec(feeCurrency.gasPriceStep?.average ?? 0.025)
-                .mul(new Dec(gasEstimated))
-                .roundUp()
-                .toString(),
-            };
+        const validatorAddresses =
+          queryRewards.getDescendingPendingRewardValidatorAddresses(8);
 
-            const balance = queries.queryBalances
-              .getQueryBech32Address(account.bech32Address)
-              .balances.find(
-                (bal) =>
-                  bal.currency.coinMinimalDenom === feeCurrency.coinMinimalDenom
-              );
+        if (validatorAddresses.length === 0) {
+          continue;
+        }
 
-            if (!balance) {
-              state.setFailedReason(
-                new Error("Can't find balance for fee currency")
-              );
-              return;
-            }
+        const state = getClaimAllEachState(chainId);
 
-            await balance.waitResponse();
+        state.setIsLoading(true);
 
-            if (
-              new Dec(balance.balance.toCoin().amount).lt(new Dec(fee.amount))
-            ) {
-              state.setFailedReason(new Error("Not enough balance to pay fee"));
-              return;
-            }
+        const tx =
+          account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
 
-            const stakableReward = queryRewards.stakableReward;
-            if (
-              new Dec(stakableReward.toCoin().amount).lte(new Dec(fee.amount))
-            ) {
-              console.log(
-                `(${chainId}) Skip claim rewards. Fee: ${fee.amount}${
-                  fee.denom
-                } is greater than stakable reward: ${
-                  stakableReward.toCoin().amount
-                }${stakableReward.toCoin().denom}`
-              );
-              state.setFailedReason(
-                new Error("TODO: 기대값보다 소모값이 더 높음")
-              );
-              return;
-            }
+        (async () => {
+          // At present, only assume that user can pay the fee with the stake currency.
+          // (Normally, user has stake currency because it is used for staking)
+          const feeCurrency = chainInfo.feeCurrencies.find(
+            (cur) =>
+              cur.coinMinimalDenom === chainInfo.stakeCurrency.coinMinimalDenom
+          );
+          if (feeCurrency) {
+            try {
+              const simulated = await tx.simulate();
 
-            await tx.send(
-              {
-                gas: gasEstimated.toString(),
-                amount: [fee],
-              },
-              "",
-              {
-                signAmino: async (
-                  chainId: string,
-                  signer: string,
-                  signDoc: StdSignDoc
-                ): Promise<AminoSignResponse> => {
-                  const requester = new InExtensionMessageRequester();
+              // Gas adjustment is 1.5
+              // Since there is currently no convenient way to adjust the gas adjustment on the UI,
+              // Use high gas adjustment to prevent failure.
+              const gasEstimated = new Dec(simulated.gasUsed * 1.5).truncate();
+              const fee = {
+                denom: feeCurrency.coinMinimalDenom,
+                amount: new Dec(feeCurrency.gasPriceStep?.average ?? 0.025)
+                  .mul(new Dec(gasEstimated))
+                  .roundUp()
+                  .toString(),
+              };
 
-                  return await requester.sendMessage(
-                    BACKGROUND_PORT,
-                    new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
-                      chainId,
-                      signer,
-                      signDoc
-                    )
-                  );
-                },
-                sendTx: async (
-                  chainId: string,
-                  tx: Uint8Array,
-                  mode: BroadcastMode
-                ): Promise<Uint8Array> => {
-                  const requester = new InExtensionMessageRequester();
+              const balance = queries.queryBalances
+                .getQueryBech32Address(account.bech32Address)
+                .balances.find(
+                  (bal) =>
+                    bal.currency.coinMinimalDenom ===
+                    feeCurrency.coinMinimalDenom
+                );
 
-                  return await requester.sendMessage(
-                    BACKGROUND_PORT,
-                    new SendTxMsg(chainId, tx, mode, true)
-                  );
-                },
-              },
-              {
-                onFulfill: (tx: any) => {
-                  state.setIsLoading(false);
-
-                  if (tx.code) {
-                    state.setFailedReason(new Error(tx["raw_log"]));
-                  }
-                },
-              }
-            );
-          } catch (e) {
-            if (isSimpleFetchError(e) && e.response) {
-              const response = e.response;
-              if (
-                response.status === 400 &&
-                response.data?.message &&
-                typeof response.data.message === "string" &&
-                response.data.message.includes("invalid empty tx")
-              ) {
+              if (!balance) {
                 state.setFailedReason(
-                  new Error("cosmos-sdk 버전이 오래되서 지원되지 않음")
+                  new Error("Can't find balance for fee currency")
                 );
                 return;
               }
-            }
 
-            state.setFailedReason(e);
-            console.log(e);
+              await balance.waitResponse();
+
+              if (
+                new Dec(balance.balance.toCoin().amount).lt(new Dec(fee.amount))
+              ) {
+                state.setFailedReason(
+                  new Error("Not enough balance to pay fee")
+                );
+                return;
+              }
+
+              const stakableReward = queryRewards.stakableReward;
+              if (
+                new Dec(stakableReward.toCoin().amount).lte(new Dec(fee.amount))
+              ) {
+                console.log(
+                  `(${chainId}) Skip claim rewards. Fee: ${fee.amount}${
+                    fee.denom
+                  } is greater than stakable reward: ${
+                    stakableReward.toCoin().amount
+                  }${stakableReward.toCoin().denom}`
+                );
+                state.setFailedReason(
+                  new Error("TODO: 기대값보다 소모값이 더 높음")
+                );
+                return;
+              }
+
+              await tx.send(
+                {
+                  gas: gasEstimated.toString(),
+                  amount: [fee],
+                },
+                "",
+                {
+                  signAmino: async (
+                    chainId: string,
+                    signer: string,
+                    signDoc: StdSignDoc
+                  ): Promise<AminoSignResponse> => {
+                    const requester = new InExtensionMessageRequester();
+
+                    return await requester.sendMessage(
+                      BACKGROUND_PORT,
+                      new PrivilegeCosmosSignAminoWithdrawRewardsMsg(
+                        chainId,
+                        signer,
+                        signDoc
+                      )
+                    );
+                  },
+                  sendTx: async (
+                    chainId: string,
+                    tx: Uint8Array,
+                    mode: BroadcastMode
+                  ): Promise<Uint8Array> => {
+                    const requester = new InExtensionMessageRequester();
+
+                    return await requester.sendMessage(
+                      BACKGROUND_PORT,
+                      new SendTxMsg(chainId, tx, mode, true)
+                    );
+                  },
+                },
+                {
+                  onFulfill: (tx: any) => {
+                    state.setIsLoading(false);
+
+                    if (tx.code) {
+                      state.setFailedReason(new Error(tx["raw_log"]));
+                    }
+                  },
+                }
+              );
+            } catch (e) {
+              if (isSimpleFetchError(e) && e.response) {
+                const response = e.response;
+                if (
+                  response.status === 400 &&
+                  response.data?.message &&
+                  typeof response.data.message === "string" &&
+                  response.data.message.includes("invalid empty tx")
+                ) {
+                  state.setFailedReason(
+                    new Error("cosmos-sdk 버전이 오래되서 지원되지 않음")
+                  );
+                  return;
+                }
+              }
+
+              state.setFailedReason(e);
+              console.log(e);
+              return;
+            }
+          } else {
+            state.setFailedReason(
+              new Error("Can't pay for fee by stake currency")
+            );
             return;
           }
-        } else {
-          state.setFailedReason(
-            new Error("Can't pay for fee by stake currency")
-          );
-          return;
-        }
-      })();
-    }
-  };
-
-  const claimAllDisabled = (() => {
-    if (viewTokens.length === 0) {
-      return true;
-    }
-
-    for (const viewToken of viewTokens) {
-      if (viewToken.token.toDec().gt(new Dec(0))) {
-        return false;
+        })();
       }
-    }
+    };
 
-    return true;
-  })();
+    const claimAllDisabled = (() => {
+      if (viewTokens.length === 0) {
+        return true;
+      }
 
-  return (
-    <Styles.Container>
-      <Box paddingX="1rem">
-        <Columns sum={1} alignY="center">
-          <Column weight={1}>
+      for (const viewToken of viewTokens) {
+        if (viewToken.token.toDec().gt(new Dec(0))) {
+          return false;
+        }
+      }
+
+      return true;
+    })();
+
+    return (
+      <Styles.Container>
+        <Box paddingX="1rem">
+          <Columns sum={1} alignY="center">
             <Stack gutter="0.5rem">
-              <Body2 style={{ color: ColorPalette["gray-300"] }}>
-                Pending Staking Reward
-              </Body2>
-              <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
-                {totalPrice ? totalPrice.separator(" ").toString() : "?"}
-              </Subtitle2>
+              <YAxis alignX="left">
+                <Skeleton layer={1} isNotReady={isNotReady}>
+                  <Body2 style={{ color: ColorPalette["gray-300"] }}>
+                    Pending Staking Reward
+                  </Body2>
+                </Skeleton>
+              </YAxis>
+
+              <YAxis alignX="left">
+                <Skeleton
+                  layer={1}
+                  isNotReady={isNotReady}
+                  dummyMinWidth="5.125rem"
+                >
+                  <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
+                    {totalPrice ? totalPrice.separator(" ").toString() : "?"}
+                  </Subtitle2>
+                </Skeleton>
+              </YAxis>
             </Stack>
-          </Column>
-          <Button
-            text="Claim All"
-            size="small"
-            disabled={claimAllDisabled}
-            onClick={claimAll}
-          />
-        </Columns>
-      </Box>
 
-      <Styles.ExpandButton
-        paddingX="0.125rem"
-        alignX="center"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        {!isExpanded ? (
-          <ArrowDownIcon width="1.25rem" height="1.25rem" />
-        ) : (
-          <ArrowUpIcon width="1.25rem" height="1.25rem" />
-        )}
-      </Styles.ExpandButton>
+            <Column weight={1} />
 
-      <VerticalCollapseTransition
-        collapsed={!isExpanded}
-        onTransitionEnd={() => {
-          if (!isExpanded) {
-            // Clear errors when collapsed.
-            for (const state of statesRef.current.values()) {
-              state.setFailedReason(undefined);
+            <Skeleton type="button" layer={1} isNotReady={isNotReady}>
+              <Button
+                text="Claim All"
+                size="small"
+                disabled={claimAllDisabled}
+                onClick={claimAll}
+              />
+            </Skeleton>
+          </Columns>
+        </Box>
+
+        <Styles.ExpandButton
+          paddingX="0.125rem"
+          alignX="center"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {!isExpanded ? (
+            <ArrowDownIcon width="1.25rem" height="1.25rem" />
+          ) : (
+            <ArrowUpIcon width="1.25rem" height="1.25rem" />
+          )}
+        </Styles.ExpandButton>
+
+        <VerticalCollapseTransition
+          collapsed={!isExpanded}
+          onTransitionEnd={() => {
+            if (!isExpanded) {
+              // Clear errors when collapsed.
+              for (const state of statesRef.current.values()) {
+                state.setFailedReason(undefined);
+              }
             }
-          }
-        }}
-      >
-        {viewTokens.map((viewToken) => {
-          return (
-            <ClaimTokenItem
-              key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-              viewToken={viewToken}
-              state={getClaimAllEachState(viewToken.chainInfo.chainId)}
-            />
-          );
-        })}
-      </VerticalCollapseTransition>
-    </Styles.Container>
-  );
-});
+          }}
+        >
+          {viewTokens.map((viewToken) => {
+            return (
+              <ClaimTokenItem
+                key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                viewToken={viewToken}
+                state={getClaimAllEachState(viewToken.chainInfo.chainId)}
+              />
+            );
+          })}
+        </VerticalCollapseTransition>
+      </Styles.Container>
+    );
+  }
+);
 
 const ClaimTokenItem: FunctionComponent<{
   viewToken: ViewToken;
