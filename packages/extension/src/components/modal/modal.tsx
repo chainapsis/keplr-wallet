@@ -178,7 +178,9 @@ const ModalChild: FunctionComponent<{
         ref={innerContainerRef}
         style={{
           // 화면을 다 가릴수는 없게 만든다.
-          maxHeight: "85vh",
+          // align이 left일때는 (사실은 sidebar에서만 left align이 사용됨)
+          // 그냥 냅두고 알아서 처리하게 한다.
+          maxHeight: align !== "left" ? "85vh" : undefined,
 
           position: "absolute",
           left: 0,
