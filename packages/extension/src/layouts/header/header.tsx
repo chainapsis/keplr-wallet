@@ -8,7 +8,9 @@ import { Button, getButtonHeightRem } from "../../components/button";
 import { Skeleton } from "../../components/skeleton";
 
 const pxToRem = (px: number) => {
-  const base = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const base = parseFloat(
+    getComputedStyle(document.documentElement).fontSize.replace("px", "")
+  );
   return px / base;
 };
 const bottomButtonPaddingRem = 0.75;
@@ -111,19 +113,20 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
   isNotReady,
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
-  const lastSetHeight = useRef(0);
+  const lastSetHeight = useRef(-1);
 
   useLayoutEffect(() => {
     function handleResize() {
       if (window.visualViewport) {
         if (lastSetHeight.current !== window.visualViewport.height) {
-          setHeight(window.visualViewport.height);
-          lastSetHeight.current = pxToRem(window.visualViewport.height);
+          lastSetHeight.current = window.visualViewport.height;
+          setHeight(pxToRem(window.visualViewport.height));
         }
       }
     }
 
     if (window.visualViewport) {
+      lastSetHeight.current = window.visualViewport.height;
       setHeight(pxToRem(window.visualViewport.height));
     }
 
