@@ -18,12 +18,14 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
 
     return (
       <HeaderLayout
-        title="Delete Suggested Chain"
+        title="Manage Suggest Chains"
         left={<BackButton />}
         right={
-          <Box paddingRight="1rem" cursor="pointer">
-            <PlusIcon color={ColorPalette["gray-50"]} />
-          </Box>
+          <a href="https://chains.keplr.app/" target="_blank" rel="noreferrer">
+            <Box paddingRight="1rem" cursor="pointer">
+              <PlusIcon color={ColorPalette["gray-50"]} />
+            </Box>
+          </a>
         }
       >
         <Box paddingX="0.75rem">

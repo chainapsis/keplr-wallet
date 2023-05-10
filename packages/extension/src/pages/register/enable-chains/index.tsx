@@ -755,8 +755,6 @@ const ChainItem: FunctionComponent<{
 
             <YAxis>
               <div>{chainInfo.chainName}</div>
-              <Gutter size="0.25rem" />
-              <div>{balance.currency.coinDenom}</div>
             </YAxis>
           </XAxis>
           <Column weight={1} />
