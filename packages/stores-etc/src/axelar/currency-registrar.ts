@@ -16,11 +16,11 @@ export class AxelarEVMBridgeCurrencyRegistrar {
     public readonly mainChain: string
   ) {
     this.chainStore.registerCurrencyRegistrar(
-      this.ibcCurrencyRegistrar.bind(this)
+      this.currencyRegistrar.bind(this)
     );
   }
 
-  protected ibcCurrencyRegistrar(
+  protected currencyRegistrar(
     chainId: string,
     coinMinimalDenom: string
   ):

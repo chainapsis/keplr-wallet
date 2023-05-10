@@ -25,7 +25,7 @@ export class GravityBridgeCurrencyRegistrar {
     protected readonly queriesStore: IQueriesStore<KeplrETCQueries>
   ) {
     this.chainStore.registerCurrencyRegistrar(
-      this.ibcCurrencyRegistrar.bind(this)
+      this.currencyRegistrar.bind(this)
     );
 
     makeObservable(this);
@@ -79,7 +79,7 @@ export class GravityBridgeCurrencyRegistrar {
     return this._isInitialized;
   }
 
-  protected ibcCurrencyRegistrar(
+  protected currencyRegistrar(
     chainId: string,
     coinMinimalDenom: string
   ):
