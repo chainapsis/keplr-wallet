@@ -143,7 +143,8 @@ export const AccountView: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
         </div>
       )}
-      {accountInfo.hasEthereumHexAddress && (
+      {accountInfo.hasEthereumHexAddress &&
+      !chainStore.current.chainId.startsWith("injective") ? (
         <div
           className={styleAccount.containerAccount}
           style={{ marginTop: "2px" }}
@@ -170,7 +171,7 @@ export const AccountView: FunctionComponent = observer(() => {
           </div>
           <div style={{ flex: 1 }} />
         </div>
-      )}
+      ) : null}
     </div>
   );
 });

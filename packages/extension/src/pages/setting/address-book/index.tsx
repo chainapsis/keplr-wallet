@@ -48,7 +48,7 @@ export const AddressBookPage: FunctionComponent<{
     );
 
     const recipientConfig = useRecipientConfig(chainStore, selectedChainId, {
-      allowHexAddressOnEthermint: true,
+      allowHexAddressOnEthermint: !selectedChainId.startsWith("injective"),
       icns: uiConfigStore.icnsInfo,
     });
     const memoConfig = useMemoConfig(chainStore, selectedChainId);

@@ -72,7 +72,9 @@ export const SendPage: FunctionComponent = observer(() => {
     current.chainId,
     accountInfo.bech32Address,
     {
-      allowHexAddressOnEthermint: true,
+      allowHexAddressOnEthermint: !chainStore.current.chainId.startsWith(
+        "injective"
+      ),
       icns: uiConfigStore.icnsInfo,
       computeTerraClassicTax: true,
     }
