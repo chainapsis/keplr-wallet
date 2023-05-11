@@ -51,6 +51,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     chainStore.current.chainId,
     accountInfo.bech32Address,
     {
+      // Injective에서는 안되게 해야되는데 ibc의 경우는 recipient config의 설정된 chain id를 알기가 어려워서...
       allowHexAddressOnEthermint: true,
       icns: uiConfigStore.icnsInfo,
     }
