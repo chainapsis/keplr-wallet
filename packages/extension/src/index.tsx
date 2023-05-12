@@ -66,6 +66,7 @@ import { AppIntlProvider } from "./languages";
 import { SettingSecurityAutoLockPage } from "./pages/setting/security/auto-lock";
 import { useLoadFonts } from "./use-load-fonts";
 import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
+import { Splash } from "./components/splash";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -306,7 +307,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             </Routes>
           )
         ) : (
-          <div>TODO: Add preparing view</div>
+          <Splash />
         )}
       </HashRouter>
     </AppIntlProvider>

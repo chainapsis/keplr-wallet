@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useInteractionInfo } from "../../../../hooks";
 import { CosmosTxView } from "./view";
+import { Splash } from "../../../../components/splash";
 
 export const SignCosmosTxPage: FunctionComponent = observer(() => {
   const { signInteractionStore } = useStore();
@@ -19,7 +20,9 @@ export const SignCosmosTxPage: FunctionComponent = observer(() => {
           key={signInteractionStore.waitingData.id}
           interactionData={signInteractionStore.waitingData}
         />
-      ) : null}
+      ) : (
+        <Splash />
+      )}
     </React.Fragment>
   );
 });
