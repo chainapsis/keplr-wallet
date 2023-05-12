@@ -67,6 +67,7 @@ import { SettingSecurityAutoLockPage } from "./pages/setting/security/auto-lock"
 import { useLoadFonts } from "./use-load-fonts";
 import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 import { Splash } from "./components/splash";
+import { IBCTransferPage } from "./pages/ibc-transfer";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -304,6 +305,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 element={<WalletShowSensitivePage />}
               />
               <Route path="/suggest-chain" element={<SuggestChainPage />} />
+              <Route path="/ibc-transfer" element={<IBCTransferPage />} />
             </Routes>
           )
         ) : (

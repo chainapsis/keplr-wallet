@@ -71,5 +71,6 @@ export const useIBCTransferConfig = (
     feeConfig,
     recipientConfig,
     channelConfig,
+    senderConfig,
   };
 };

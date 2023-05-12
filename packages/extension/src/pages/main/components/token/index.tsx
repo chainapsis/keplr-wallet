@@ -79,7 +79,8 @@ export const TokenItem: FunctionComponent<{
   viewToken: ViewToken;
   forChange?: boolean;
   isNotReady?: boolean;
-}> = observer(({ viewToken, forChange, isNotReady }) => {
+  isIBCTransfer?: boolean;
+}> = observer(({ viewToken, forChange, isIBCTransfer, isNotReady }) => {
   const { priceStore } = useStore();
 
   const navigate = useNavigate();
@@ -131,11 +132,21 @@ export const TokenItem: FunctionComponent<{
         e.preventDefault();
 
         if (forChange) {
-          navigate("/send/select-asset");
+          if (isIBCTransfer) {
+            navigate(`/send/select-asset?isIBCTransfer=true`);
+          } else {
+            navigate("/send/select-asset");
+          }
         } else {
-          navigate(
-            `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
-          );
+          if (isIBCTransfer) {
+            navigate(
+              `/ibc-transfer?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
+            );
+          } else {
+            navigate(
+              `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
+            );
+          }
         }
       }}
     >

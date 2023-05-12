@@ -12,6 +12,7 @@ import {
   CopyAddress,
   CopyAddressModal,
   InternalLinkView,
+  IBCTransferView,
   BuyCryptoModal,
 } from "./components";
 import { Stack } from "../../components/stack";
@@ -291,6 +292,10 @@ export const MainPage: FunctionComponent = observer(() => {
           ) : (
             <StakedTabView />
           )}
+
+          {tabStatus === "available" && uiConfigStore.isDeveloper ? (
+            <IBCTransferView />
+          ) : null}
         </Stack>
       </Box>
 
