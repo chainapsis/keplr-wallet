@@ -285,6 +285,7 @@ const FeeSelector: FunctionComponent<{
               .maxDecimals(6)
               .inequalitySymbol(true)
               .trim(true)
+              .hideIBCMetadata(true)
               .toString()}
           </FeeSelectorStyle.Amount>
         </FeeSelectorStyle.Item>
@@ -321,6 +322,7 @@ const FeeSelector: FunctionComponent<{
               .maxDecimals(6)
               .inequalitySymbol(true)
               .trim(true)
+              .hideIBCMetadata(true)
               .toString()}
           </FeeSelectorStyle.Amount>
         </FeeSelectorStyle.Item>
@@ -358,6 +360,7 @@ const FeeSelector: FunctionComponent<{
               .maxDecimals(6)
               .inequalitySymbol(true)
               .trim(true)
+              .hideIBCMetadata(true)
               .toString()}
           </FeeSelectorStyle.Amount>
         </FeeSelectorStyle.Item>

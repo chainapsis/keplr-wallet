@@ -157,6 +157,7 @@ export const FeeControl: FunctionComponent<{
                       .inequalitySymbol(true)
                       .trim(true)
                       .shrink(true)
+                      .hideIBCMetadata(true)
                       .toString();
                   })
                   .join(",")}
