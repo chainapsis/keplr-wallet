@@ -110,7 +110,13 @@ export const InternalLinkView: FunctionComponent = observer(() => {
 
       <Styles.Divider />
 
-      <Styles.TextButton>Go to Dashboard</Styles.TextButton>
+      <Styles.TextButton
+        onClick={() =>
+          browser.tabs.create({ url: "https://wallet.keplr.app/?tab=staking" })
+        }
+      >
+        Go to Dashboard
+      </Styles.TextButton>
     </Styles.Container>
   );
 });

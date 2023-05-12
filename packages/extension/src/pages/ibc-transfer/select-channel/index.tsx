@@ -18,6 +18,7 @@ import { Modal } from "../../../components/modal";
 import { IBCAddChannelModal } from "../add-channel-modal";
 import { Columns } from "../../../components/column";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { useNavigate } from "react-router";
 
 export const IBCTransferSelectChannelView: FunctionComponent<{
   chainId: string;
@@ -35,6 +36,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
   }) => {
     const { accountStore, chainStore, queriesStore, ibcChannelStore } =
       useStore();
+    const navigate = useNavigate();
 
     const ibcChannelInfo = ibcChannelStore.get(chainId);
 
@@ -69,7 +71,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
                 error: queryBalance?.error,
               }}
               forChange
-              isIBCTransfer={true}
+              onClick={() => navigate(`/send/select-asset?isIBCTransfer=true`)}
             />
           </Stack>
 

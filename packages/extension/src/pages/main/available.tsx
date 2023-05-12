@@ -16,6 +16,7 @@ import { TextButton } from "../../components/button-text";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { useNavigate } from "react-router";
 
 const zeroDec = new Dec(0);
 
@@ -24,6 +25,7 @@ export const AvailableTabView: FunctionComponent<{
   isNotReady?: boolean;
 }> = observer(({ search, isNotReady }) => {
   const { hugeQueriesStore, chainStore } = useStore();
+  const navigate = useNavigate();
 
   const stakableBalances: ViewToken[] = hugeQueriesStore.stakables;
   const stakableBalancesNonZero = useMemo(() => {
@@ -189,6 +191,11 @@ export const AvailableTabView: FunctionComponent<{
                       <TokenItem
                         viewToken={viewToken}
                         key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                        onClick={() =>
+                          navigate(
+                            `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
+                          )
+                        }
                       />
                     ))}
                   />
