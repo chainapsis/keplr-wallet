@@ -163,7 +163,7 @@ export class RootStore {
       new ExtensionKVStore("store_queries"),
       this.chainStore,
       {
-        responseDebounceMs: 100,
+        responseDebounceMs: 75,
       },
       CosmosQueries.use(),
       CosmwasmQueries.use(),
