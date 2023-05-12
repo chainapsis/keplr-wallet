@@ -64,21 +64,6 @@ export const FeeControl: FunctionComponent<{
           currency: feeConfig.selectableFeeCurrencies[0],
         });
       }
-    }, [
-      disableAutomaticFeeSet,
-      feeConfig,
-      feeConfig.fees,
-      feeConfig.selectableFeeCurrencies,
-    ]);
-
-    useEffect(() => {
-      if (disableAutomaticFeeSet) {
-        return;
-      }
-
-      // Require to invoke effect whenever chain is changed,
-      // even though it is not used in logic.
-      noop(feeConfig.chainId);
 
       // Try to find other fee currency if the account doesn't have enough fee to pay.
       // This logic can be slightly complex, so use mobx's `autorun`.
@@ -92,26 +77,23 @@ export const FeeControl: FunctionComponent<{
       const disposer = autorun(() => {
         if (
           !skip &&
-          !(feeConfig.type !== "manual") &&
+          feeConfig.type !== "manual" &&
           feeConfig.selectableFeeCurrencies.length > 1 &&
-          feeConfig.fees.length > 0 &&
-          feeConfig.type !== "manual"
+          feeConfig.fees.length > 0
         ) {
           const queryBalances = queriesStore
             .get(feeConfig.chainId)
             .queryBalances.getQueryBech32Address(senderConfig.sender);
 
-          // Basically, `FeeConfig` implementation select the first fee currency as default.
-          // So, let's put the priority to first fee currency.
-          const firstFeeCurrency = feeConfig.selectableFeeCurrencies[0];
-          const firstFeeCurrencyBal =
-            queryBalances.getBalanceFromCurrency(firstFeeCurrency);
+          const currentFeeCurrency = feeConfig.fees[0].currency;
+          const currentFeeCurrencyBal =
+            queryBalances.getBalanceFromCurrency(currentFeeCurrency);
 
-          const fee = feeConfig.getFeeTypePrettyForFeeCurrency(
-            firstFeeCurrency,
+          const currentFee = feeConfig.getFeeTypePrettyForFeeCurrency(
+            currentFeeCurrency,
             feeConfig.type
           );
-          if (firstFeeCurrencyBal.toDec().lt(fee.toDec())) {
+          if (currentFeeCurrencyBal.toDec().lt(currentFee.toDec())) {
             // Not enough balances for fee.
             // Try to find other fee currency to send.
             for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
@@ -127,7 +109,11 @@ export const FeeControl: FunctionComponent<{
                   type: feeConfig.type,
                   currency: feeCurrency,
                 });
-                skip = true;
+                const uiProperties = feeConfig.uiProperties;
+                skip =
+                  !uiProperties.loadingState &&
+                  uiProperties.error == null &&
+                  uiProperties.warning == null;
                 return;
               }
             }
@@ -143,7 +129,8 @@ export const FeeControl: FunctionComponent<{
     }, [
       disableAutomaticFeeSet,
       feeConfig,
-      feeConfig.chainId,
+      feeConfig.fees,
+      feeConfig.selectableFeeCurrencies,
       queriesStore,
       senderConfig.sender,
     ]);
@@ -225,7 +212,3 @@ export const FeeControl: FunctionComponent<{
     );
   }
 );
-
-const noop = (..._args: any[]) => {
-  // noop
-};
