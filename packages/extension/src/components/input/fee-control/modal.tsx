@@ -18,6 +18,7 @@ import {
 import { useStore } from "../../../stores";
 import { GuideBox } from "../../guide-box";
 import { Dec } from "@keplr-wallet/unit";
+import { Box } from "../../box";
 
 const Styles = {
   Container: styled.div`
@@ -212,8 +213,6 @@ const FeeSelectorStyle = {
     align-items: center;
     padding: 0.75rem;
 
-    gap: 0.125rem;
-
     cursor: pointer;
 
     background-color: ${({ selected }) =>
@@ -225,13 +224,13 @@ const FeeSelectorStyle = {
   `,
   Price: styled(Caption2)<{ selected: boolean }>`
     white-space: nowrap;
-    margin-top: 2px;
+    margin-top: 0.25rem;
     color: ${({ selected }) =>
       selected ? ColorPalette["blue-200"] : ColorPalette["gray-300"]};
   `,
   Amount: styled(Caption1)<{ selected: boolean }>`
     white-space: nowrap;
-    margin-top: 2px;
+    margin-top: 0.25rem;
     color: ${({ selected }) =>
       selected ? ColorPalette["blue-100"] : ColorPalette["gray-200"]};
   `,
@@ -267,27 +266,30 @@ const FeeSelector: FunctionComponent<{
           }}
           selected={feeConfig.type === "low"}
         >
-          <FeeSelectorStyle.Title selected={feeConfig.type === "low"}>
-            Low
-          </FeeSelectorStyle.Title>
-          {feeCurrency.coinGeckoId ? (
-            <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
-              {priceStore
-                .calculatePrice(
-                  feeConfig.getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
-                )
-                ?.toString() || "-"}
-            </FeeSelectorStyle.Price>
-          ) : null}
-          <FeeSelectorStyle.Amount selected={feeConfig.type === "low"}>
-            {feeConfig
-              .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
-              .maxDecimals(6)
-              .inequalitySymbol(true)
-              .trim(true)
-              .hideIBCMetadata(true)
-              .toString()}
-          </FeeSelectorStyle.Amount>
+          {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
+          <Box width="1px" alignX="center">
+            <FeeSelectorStyle.Title selected={feeConfig.type === "low"}>
+              Low
+            </FeeSelectorStyle.Title>
+            {feeCurrency.coinGeckoId ? (
+              <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
+                {priceStore
+                  .calculatePrice(
+                    feeConfig.getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+                  )
+                  ?.toString() || "-"}
+              </FeeSelectorStyle.Price>
+            ) : null}
+            <FeeSelectorStyle.Amount selected={feeConfig.type === "low"}>
+              {feeConfig
+                .getFeeTypePrettyForFeeCurrency(feeCurrency, "low")
+                .maxDecimals(6)
+                .inequalitySymbol(true)
+                .trim(true)
+                .hideIBCMetadata(true)
+                .toString()}
+            </FeeSelectorStyle.Amount>
+          </Box>
         </FeeSelectorStyle.Item>
       </Column>
 
@@ -301,30 +303,33 @@ const FeeSelector: FunctionComponent<{
           }}
           selected={feeConfig.type === "average"}
         >
-          <FeeSelectorStyle.Title selected={feeConfig.type === "average"}>
-            Average
-          </FeeSelectorStyle.Title>
-          {feeCurrency.coinGeckoId ? (
-            <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
-              {priceStore
-                .calculatePrice(
-                  feeConfig.getFeeTypePrettyForFeeCurrency(
-                    feeCurrency,
-                    "average"
+          {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
+          <Box width="1px" alignX="center">
+            <FeeSelectorStyle.Title selected={feeConfig.type === "average"}>
+              Average
+            </FeeSelectorStyle.Title>
+            {feeCurrency.coinGeckoId ? (
+              <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
+                {priceStore
+                  .calculatePrice(
+                    feeConfig.getFeeTypePrettyForFeeCurrency(
+                      feeCurrency,
+                      "average"
+                    )
                   )
-                )
-                ?.toString() || "-"}
-            </FeeSelectorStyle.Price>
-          ) : null}
-          <FeeSelectorStyle.Amount selected={feeConfig.type === "average"}>
-            {feeConfig
-              .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
-              .maxDecimals(6)
-              .inequalitySymbol(true)
-              .trim(true)
-              .hideIBCMetadata(true)
-              .toString()}
-          </FeeSelectorStyle.Amount>
+                  ?.toString() || "-"}
+              </FeeSelectorStyle.Price>
+            ) : null}
+            <FeeSelectorStyle.Amount selected={feeConfig.type === "average"}>
+              {feeConfig
+                .getFeeTypePrettyForFeeCurrency(feeCurrency, "average")
+                .maxDecimals(6)
+                .inequalitySymbol(true)
+                .trim(true)
+                .hideIBCMetadata(true)
+                .toString()}
+            </FeeSelectorStyle.Amount>
+          </Box>
         </FeeSelectorStyle.Item>
       </Column>
 
@@ -342,27 +347,33 @@ const FeeSelector: FunctionComponent<{
           }}
           selected={feeConfig.type === "high"}
         >
-          <FeeSelectorStyle.Title selected={feeConfig.type === "high"}>
-            High
-          </FeeSelectorStyle.Title>
-          {feeCurrency.coinGeckoId ? (
-            <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>
-              {priceStore
-                .calculatePrice(
-                  feeConfig.getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
-                )
-                ?.toString() || "-"}
-            </FeeSelectorStyle.Price>
-          ) : null}
-          <FeeSelectorStyle.Amount selected={feeConfig.type === "high"}>
-            {feeConfig
-              .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
-              .maxDecimals(6)
-              .inequalitySymbol(true)
-              .trim(true)
-              .hideIBCMetadata(true)
-              .toString()}
-          </FeeSelectorStyle.Amount>
+          {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
+          <Box width="1px" alignX="center">
+            <FeeSelectorStyle.Title selected={feeConfig.type === "high"}>
+              High
+            </FeeSelectorStyle.Title>
+            {feeCurrency.coinGeckoId ? (
+              <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>
+                {priceStore
+                  .calculatePrice(
+                    feeConfig.getFeeTypePrettyForFeeCurrency(
+                      feeCurrency,
+                      "high"
+                    )
+                  )
+                  ?.toString() || "-"}
+              </FeeSelectorStyle.Price>
+            ) : null}
+            <FeeSelectorStyle.Amount selected={feeConfig.type === "high"}>
+              {feeConfig
+                .getFeeTypePrettyForFeeCurrency(feeCurrency, "high")
+                .maxDecimals(6)
+                .inequalitySymbol(true)
+                .trim(true)
+                .hideIBCMetadata(true)
+                .toString()}
+            </FeeSelectorStyle.Amount>
+          </Box>
         </FeeSelectorStyle.Item>
       </Column>
     </Columns>
