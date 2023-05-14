@@ -52,7 +52,7 @@ export const StakedTabView: FunctionComponent = observer(() => {
                 <TokenItem
                   viewToken={viewToken}
                   key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                  disabled={!!viewToken.chainInfo.walletUrlForStaking}
+                  disabled={!viewToken.chainInfo.walletUrlForStaking}
                   onClick={() => {
                     if (viewToken.chainInfo.walletUrlForStaking) {
                       browser.tabs.create({
