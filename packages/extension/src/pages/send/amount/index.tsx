@@ -245,6 +245,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 error: balance?.error,
               }}
               forChange
+              onClick={() => navigate("/send/select-asset")}
             />
           </YAxis>
 

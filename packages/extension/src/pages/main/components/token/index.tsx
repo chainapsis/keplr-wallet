@@ -23,7 +23,6 @@ import {
   QuestionIcon,
 } from "../../../../components/icon";
 import styled from "styled-components";
-import { useNavigate } from "react-router";
 import { ChainImageFallback } from "../../../../components/image";
 import { Tooltip } from "../../../../components/tooltip";
 import { DenomHelper } from "@keplr-wallet/common";
@@ -34,13 +33,17 @@ import Color from "color";
 import { Skeleton } from "../../../../components/skeleton";
 
 const Styles = {
-  Container: styled.div<{ forChange: boolean | undefined; isError: boolean }>`
+  Container: styled.div<{
+    forChange: boolean | undefined;
+    isError: boolean;
+    disabled?: boolean;
+  }>`
     background-color: ${ColorPalette["gray-600"]};
     padding ${({ forChange }) =>
       forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "1rem 0.875rem"};
     border-radius: 0.375rem;
-    cursor: pointer;
-
+    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+    
     border: ${({ isError }) =>
       isError
         ? `1.5px solid ${Color(ColorPalette["yellow-400"])
@@ -75,177 +78,179 @@ export const TokenTitleView: FunctionComponent<{
   );
 };
 
-export const TokenItem: FunctionComponent<{
+interface TokenItemProps {
   viewToken: ViewToken;
+  onClick?: () => void;
+  disabled?: boolean;
   forChange?: boolean;
   isNotReady?: boolean;
-  isIBCTransfer?: boolean;
-}> = observer(({ viewToken, forChange, isIBCTransfer, isNotReady }) => {
-  const { priceStore } = useStore();
+}
 
-  const navigate = useNavigate();
+export const TokenItem: FunctionComponent<TokenItemProps> = observer(
+  ({ viewToken, onClick, disabled, forChange, isNotReady }) => {
+    const { priceStore } = useStore();
 
-  const pricePretty = priceStore.calculatePrice(viewToken.token);
+    const pricePretty = priceStore.calculatePrice(viewToken.token);
 
-  const isIBC = useMemo(() => {
-    return viewToken.token.currency.coinMinimalDenom.startsWith("ibc/");
-  }, [viewToken.token.currency]);
+    const isIBC = useMemo(() => {
+      return viewToken.token.currency.coinMinimalDenom.startsWith("ibc/");
+    }, [viewToken.token.currency]);
 
-  const coinDenom = useMemo(() => {
-    if (
-      "originCurrency" in viewToken.token.currency &&
-      viewToken.token.currency.originCurrency
-    ) {
-      return viewToken.token.currency.originCurrency.coinDenom;
-    }
-    return viewToken.token.currency.coinDenom;
-  }, [viewToken.token.currency]);
+    const coinDenom = useMemo(() => {
+      if (
+        "originCurrency" in viewToken.token.currency &&
+        viewToken.token.currency.originCurrency
+      ) {
+        return viewToken.token.currency.originCurrency.coinDenom;
+      }
+      return viewToken.token.currency.coinDenom;
+    }, [viewToken.token.currency]);
 
-  const tag = useMemo(() => {
-    const currency = viewToken.token.currency;
-    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-    if (
-      denomHelper.type === "native" &&
-      currency.coinMinimalDenom.startsWith("ibc/")
-    ) {
-      return {
-        text: "IBC",
-        tooltip: (() => {
-          const start = currency.coinDenom.indexOf("(");
-          const end = currency.coinDenom.lastIndexOf(")");
-          return currency.coinDenom.slice(start + 1, end);
-        })(),
-      };
-    }
-    if (denomHelper.type !== "native") {
-      return {
-        text: denomHelper.type,
-      };
-    }
-  }, [viewToken.token.currency]);
+    const tag = useMemo(() => {
+      const currency = viewToken.token.currency;
+      const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+      if (
+        denomHelper.type === "native" &&
+        currency.coinMinimalDenom.startsWith("ibc/")
+      ) {
+        return {
+          text: "IBC",
+          tooltip: (() => {
+            const start = currency.coinDenom.indexOf("(");
+            const end = currency.coinDenom.lastIndexOf(")");
+            return currency.coinDenom.slice(start + 1, end);
+          })(),
+        };
+      }
+      if (denomHelper.type !== "native") {
+        return {
+          text: denomHelper.type,
+        };
+      }
+    }, [viewToken.token.currency]);
 
-  return (
-    <Styles.Container
-      forChange={forChange}
-      isError={viewToken.error != null}
-      onClick={(e) => {
-        e.preventDefault();
+    return (
+      <Styles.Container
+        forChange={forChange}
+        isError={viewToken.error != null}
+        disabled={disabled}
+        onClick={(e) => {
+          e.preventDefault();
 
-        if (forChange) {
-          if (isIBCTransfer) {
-            navigate(`/send/select-asset?isIBCTransfer=true`);
-          } else {
-            navigate("/send/select-asset");
+          if (onClick) {
+            onClick();
           }
-        } else {
-          if (isIBCTransfer) {
-            navigate(
-              `/ibc-transfer?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
-            );
-          } else {
-            navigate(
-              `/send?chainId=${viewToken.chainInfo.chainId}&coinMinimalDenom=${viewToken.token.currency.coinMinimalDenom}`
-            );
-          }
-        }
-      }}
-    >
-      <Columns sum={1} gutter="0.5rem" alignY="center">
-        <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
-          <ChainImageFallback
-            style={{
-              width: "2.5rem",
-              height: "2.5rem",
-            }}
-            src={viewToken.token.currency.coinImageUrl}
-            alt={viewToken.token.currency.coinDenom}
-          />
-        </Skeleton>
-        <Stack gutter="0.25rem">
-          <XAxis alignY="center">
-            <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
-              <Subtitle2>{coinDenom}</Subtitle2>
-            </Skeleton>
+        }}
+      >
+        <Columns sum={1} gutter="0.5rem" alignY="center">
+          <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
+            <ChainImageFallback
+              style={{
+                width: "2.5rem",
+                height: "2.5rem",
+              }}
+              src={viewToken.token.currency.coinImageUrl}
+              alt={viewToken.token.currency.coinDenom}
+            />
+          </Skeleton>
+          <Stack gutter="0.25rem">
+            <XAxis alignY="center">
+              <Skeleton
+                layer={1}
+                isNotReady={isNotReady}
+                dummyMinWidth="3.25rem"
+              >
+                <Subtitle2>{coinDenom}</Subtitle2>
+              </Skeleton>
 
-            {tag ? (
-              <React.Fragment>
-                <Gutter size="0.5rem" />
-                <Box alignY="center" height="1px">
-                  <Tag text={tag.text} tooltip={tag.tooltip} />
-                </Box>
-              </React.Fragment>
-            ) : null}
-            {viewToken.isFetching ? (
-              // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
-              // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
-              // 일괄적으로 로딩을 보여줄 필요가 없다.
-              // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
-              // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
-              <DelayedLoadingRender isFetching={viewToken.isFetching}>
+              {tag ? (
+                <React.Fragment>
+                  <Gutter size="0.5rem" />
+                  <Box alignY="center" height="1px">
+                    <Tag text={tag.text} tooltip={tag.tooltip} />
+                  </Box>
+                </React.Fragment>
+              ) : null}
+              {viewToken.isFetching ? (
+                // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
+                // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
+                // 일괄적으로 로딩을 보여줄 필요가 없다.
+                // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
+                // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
+                <DelayedLoadingRender isFetching={viewToken.isFetching}>
+                  <Box
+                    marginLeft="0.25rem"
+                    style={{
+                      color: ColorPalette["gray-300"],
+                    }}
+                  >
+                    <LoadingIcon width="1rem" height="1rem" />
+                  </Box>
+                </DelayedLoadingRender>
+              ) : viewToken.error ? (
                 <Box
                   marginLeft="0.25rem"
                   style={{
-                    color: ColorPalette["gray-300"],
+                    color: ColorPalette["yellow-400"],
                   }}
                 >
-                  <LoadingIcon width="1rem" height="1rem" />
+                  <Tooltip content={viewToken.error.message}>
+                    <ErrorIcon size="1rem" />
+                  </Tooltip>
                 </Box>
-              </DelayedLoadingRender>
-            ) : viewToken.error ? (
-              <Box
-                marginLeft="0.25rem"
-                style={{
-                  color: ColorPalette["yellow-400"],
-                }}
-              >
-                <Tooltip content={viewToken.error.message}>
-                  <ErrorIcon size="1rem" />
-                </Tooltip>
-              </Box>
-            ) : undefined}
-          </XAxis>
-          <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
-            <Caption1 style={{ color: ColorPalette["gray-300"] }}>
-              {isIBC
-                ? `on ${viewToken.chainInfo.chainName}`
-                : viewToken.chainInfo.chainName}
-            </Caption1>
-          </Skeleton>
-        </Stack>
-
-        <Column weight={1} />
-
-        <Columns sum={1} gutter="0.25rem" alignY="center">
-          <Stack gutter="0.25rem" alignX="right">
-            <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
-              <Subtitle3>
-                {viewToken.token
-                  .hideDenom(true)
-                  .maxDecimals(6)
-                  .inequalitySymbol(true)
-                  .shrink(true)
-                  .toString()}
-              </Subtitle3>
-            </Skeleton>
+              ) : undefined}
+            </XAxis>
             <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
-              <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
-                {pricePretty
-                  ? pricePretty.inequalitySymbol(true).toString()
-                  : "-"}
-              </Subtitle3>
+              <Caption1 style={{ color: ColorPalette["gray-300"] }}>
+                {isIBC
+                  ? `on ${viewToken.chainInfo.chainName}`
+                  : viewToken.chainInfo.chainName}
+              </Caption1>
             </Skeleton>
           </Stack>
 
-          {forChange ? (
-            <Styles.IconContainer>
-              <ArrowRightIcon />
-            </Styles.IconContainer>
-          ) : null}
+          <Column weight={1} />
+
+          <Columns sum={1} gutter="0.25rem" alignY="center">
+            <Stack gutter="0.25rem" alignX="right">
+              <Skeleton
+                layer={1}
+                isNotReady={isNotReady}
+                dummyMinWidth="3.25rem"
+              >
+                <Subtitle3>
+                  {viewToken.token
+                    .hideDenom(true)
+                    .maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .shrink(true)
+                    .toString()}
+                </Subtitle3>
+              </Skeleton>
+              <Skeleton
+                layer={1}
+                isNotReady={isNotReady}
+                dummyMinWidth="4.5rem"
+              >
+                <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
+                  {pricePretty
+                    ? pricePretty.inequalitySymbol(true).toString()
+                    : "-"}
+                </Subtitle3>
+              </Skeleton>
+            </Stack>
+
+            {forChange ? (
+              <Styles.IconContainer>
+                <ArrowRightIcon />
+              </Styles.IconContainer>
+            ) : null}
+          </Columns>
         </Columns>
-      </Columns>
-    </Styles.Container>
-  );
-});
+      </Styles.Container>
+    );
+  }
+);
 
 const ErrorIcon: FunctionComponent<{
   size: string;
