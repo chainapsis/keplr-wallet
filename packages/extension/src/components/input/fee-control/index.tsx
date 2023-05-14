@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useLayoutEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import {
   IFeeConfig,
@@ -63,7 +63,7 @@ export const FeeControl: FunctionComponent<{
   }) => {
     const { queriesStore, priceStore } = useStore();
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (disableAutomaticFeeSet) {
         return;
       }
@@ -77,6 +77,21 @@ export const FeeControl: FunctionComponent<{
           currency: feeConfig.selectableFeeCurrencies[0],
         });
       }
+    }, [
+      disableAutomaticFeeSet,
+      feeConfig,
+      feeConfig.fees,
+      feeConfig.selectableFeeCurrencies,
+    ]);
+
+    useLayoutEffect(() => {
+      if (disableAutomaticFeeSet) {
+        return;
+      }
+
+      // Require to invoke effect whenever chain is changed,
+      // even though it is not used in logic.
+      noop(feeConfig.chainId);
 
       // Try to find other fee currency if the account doesn't have enough fee to pay.
       // This logic can be slightly complex, so use mobx's `autorun`.
@@ -142,8 +157,7 @@ export const FeeControl: FunctionComponent<{
     }, [
       disableAutomaticFeeSet,
       feeConfig,
-      feeConfig.fees,
-      feeConfig.selectableFeeCurrencies,
+      feeConfig.chainId,
       queriesStore,
       senderConfig.sender,
     ]);
@@ -263,3 +277,7 @@ export const FeeControl: FunctionComponent<{
     );
   }
 );
+
+const noop = (..._args: any[]) => {
+  // noop
+};
