@@ -93,4 +93,45 @@ export const EmbedChainInfos = [
     },
     features: ["stargate", "ibc-transfer"],
   },
+  {
+    chainId: "secret-4",
+    chainName: "Secret",
+    rpc: "https://secret-4.api.trivium.network:26657",
+    rest: "https://secret-4.api.trivium.network:1317",
+    bip44: { coinType: 529 },
+    coinType: 529,
+    stakeCurrency: {
+      coinDenom: "$denom",
+      coinMinimalDenom: "$minimalDenom",
+      coinDecimals: 6,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "secret",
+      bech32PrefixAccPub: "secretpub",
+      bech32PrefixValAddr: "secretvaloper",
+      bech32PrefixValPub: "secretvaloperpub",
+      bech32PrefixConsAddr: "secretvalcons",
+      bech32PrefixConsPub: "secretvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "$denom",
+        coinMinimalDenom: "$minimalDenom",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "$denom",
+        coinMinimalDenom: "$minimalDenom",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.1,
+          average: 0.25,
+          high: 0.4,
+        },
+      },
+    ],
+    features: ["secretwasm"],
+  },
 ];

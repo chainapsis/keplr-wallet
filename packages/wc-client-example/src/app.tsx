@@ -73,6 +73,28 @@ export const App: FunctionComponent = observer(() => {
       >
         Test IBC 2
       </button>
+      <button
+        onClick={() => {
+          const chainInfo = chainStore.chainInfos[2];
+          const account = accountStore.getAccount(chainInfo.chainId);
+          const counterpartyAccount = accountStore.getAccount(
+            chainStore.chainInfos[0].chainId
+          );
+
+          account.cosmos.sendIBCTransferMsg(
+            {
+              portId: "transfer",
+              channelId: CounterpartyIBCChannel,
+              counterpartyChainId: chainStore.chainInfos[0].chainId,
+            },
+            "1",
+            chainInfo.stakeCurrency,
+            counterpartyAccount.bech32Address
+          );
+        }}
+      >
+        Test IBC 3
+      </button>
     </div>
   );
 });
