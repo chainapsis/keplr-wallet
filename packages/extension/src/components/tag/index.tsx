@@ -7,7 +7,9 @@ import { Tooltip } from "../tooltip";
 export const Tag: FunctionComponent<{
   text: string;
   tooltip?: string;
-}> = ({ text, tooltip }) => {
+
+  whiteSpace?: "normal" | "nowrap";
+}> = ({ text, tooltip, whiteSpace }) => {
   return (
     <Tooltip enabled={!!tooltip} content={tooltip}>
       <Box
@@ -18,7 +20,14 @@ export const Tag: FunctionComponent<{
         height="1.25rem"
         paddingX="0.625rem"
       >
-        <Caption1 color={ColorPalette["gray-100"]}>{text}</Caption1>
+        <Caption1
+          color={ColorPalette["gray-100"]}
+          style={{
+            whiteSpace,
+          }}
+        >
+          {text}
+        </Caption1>
       </Box>
     </Tooltip>
   );

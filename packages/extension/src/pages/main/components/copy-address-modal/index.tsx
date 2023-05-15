@@ -15,10 +15,11 @@ import { Gutter } from "../../../../components/gutter";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { ChainInfo } from "@keplr-wallet/types";
-import { YAxis } from "../../../../components/axis";
+import { XAxis, YAxis } from "../../../../components/axis";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainImageFallback } from "../../../../components/image";
+import { ChainImageFallback, Image } from "../../../../components/image";
 import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
+import { Tag } from "../../../../components/tag";
 
 const Styles = {
   Container: styled.div`
@@ -79,12 +80,17 @@ export const CopyAddressModal: FunctionComponent<{
 
   const addresses = chainStore.chainInfosInUI
     .map((chainInfo) => {
-      const bech32Address = accountStore.getAccount(
-        chainInfo.chainId
-      ).bech32Address;
+      const accountInfo = accountStore.getAccount(chainInfo.chainId);
+
+      const bech32Address = accountInfo.bech32Address;
+      const ethereumAddress = accountInfo.hasEthereumHexAddress
+        ? accountInfo.ethereumHexAddress
+        : undefined;
+
       return {
         chainInfo,
         bech32Address,
+        ethereumAddress,
       };
     })
     .filter((address) => {
@@ -153,55 +159,97 @@ export const CopyAddressModal: FunctionComponent<{
           overflowY: "auto",
         }}
       >
+        {addresses.length === 0 ? (
+          <Box
+            alignX="center"
+            alignY="center"
+            paddingX="1.625rem"
+            paddingTop="3.1rem"
+            paddingBottom="3.2rem"
+          >
+            <Image
+              width="140px"
+              height="160px"
+              src={require("../../../../public/assets/img/copy-address-no-search-result.png")}
+              alt="copy-address-no-search-result-image"
+            />
+            <Gutter size="0.75rem" />
+
+            <Subtitle3
+              color={ColorPalette["gray-300"]}
+              style={{ textAlign: "center" }}
+            >
+              To use an address on certain chain, you may need to first visit
+              the &quot;Manage Chain List&quot; in the side menu and make the
+              chain visible on your wallet.
+            </Subtitle3>
+          </Box>
+        ) : null}
+
         {addresses.map((address) => {
           return (
-            <ChainAddressItem
-              key={address.chainInfo.chainId}
-              chainInfo={address.chainInfo}
-              bech32Address={address.bech32Address}
-              isBookmarked={
-                keyRingStore.selectedKeyInfo
-                  ? uiConfigStore.copyAddressConfig.isBookmarkedChain(
-                      keyRingStore.selectedKeyInfo.id,
-                      address.chainInfo.chainId
-                    )
-                  : false
-              }
-              setBookmarked={(value) => {
-                if (keyRingStore.selectedKeyInfo) {
-                  if (value) {
-                    uiConfigStore.copyAddressConfig.bookmarkChain(
-                      keyRingStore.selectedKeyInfo.id,
-                      address.chainInfo.chainId
-                    );
-                  } else {
-                    uiConfigStore.copyAddressConfig.unbookmarkChain(
-                      keyRingStore.selectedKeyInfo.id,
-                      address.chainInfo.chainId
-                    );
-
-                    setSortPriorities((priorities) => {
-                      const identifier = ChainIdHelper.parse(
+            <YAxis key={address.chainInfo.chainId}>
+              <ChainAddressItem
+                chainInfo={address.chainInfo}
+                bech32Address={address.bech32Address}
+                isBookmarked={
+                  keyRingStore.selectedKeyInfo
+                    ? uiConfigStore.copyAddressConfig.isBookmarkedChain(
+                        keyRingStore.selectedKeyInfo.id,
                         address.chainInfo.chainId
-                      ).identifier;
-                      const newPriorities = { ...priorities };
-                      if (newPriorities[identifier]) {
-                        delete newPriorities[identifier];
-                      }
-                      return newPriorities;
-                    });
-                  }
+                      )
+                    : false
                 }
-              }}
-              blockInteraction={hasCopied}
-              afterCopied={() => {
-                setHasCopied(true);
+                setBookmarked={(value) => {
+                  if (keyRingStore.selectedKeyInfo) {
+                    if (value) {
+                      uiConfigStore.copyAddressConfig.bookmarkChain(
+                        keyRingStore.selectedKeyInfo.id,
+                        address.chainInfo.chainId
+                      );
+                    } else {
+                      uiConfigStore.copyAddressConfig.unbookmarkChain(
+                        keyRingStore.selectedKeyInfo.id,
+                        address.chainInfo.chainId
+                      );
 
-                setTimeout(() => {
-                  close();
-                }, 500);
-              }}
-            />
+                      setSortPriorities((priorities) => {
+                        const identifier = ChainIdHelper.parse(
+                          address.chainInfo.chainId
+                        ).identifier;
+                        const newPriorities = { ...priorities };
+                        if (newPriorities[identifier]) {
+                          delete newPriorities[identifier];
+                        }
+                        return newPriorities;
+                      });
+                    }
+                  }
+                }}
+                blockInteraction={hasCopied}
+                afterCopied={() => {
+                  setHasCopied(true);
+
+                  setTimeout(() => {
+                    close();
+                  }, 500);
+                }}
+              />
+              {address.ethereumAddress ? (
+                <EthereumAddressItem
+                  ethereumAddress={address.ethereumAddress}
+                  chainInfo={address.chainInfo}
+                  blockInteraction={hasCopied}
+                  afterCopied={() => {
+                    setHasCopied(true);
+
+                    setTimeout(() => {
+                      close();
+                    }, 500);
+                  }}
+                />
+              ) : null}
+            </YAxis>
           );
         })}
       </Box>
@@ -305,5 +353,88 @@ export const ChainAddressItem: FunctionComponent<{
         </Styles.TextButton>
       </Columns>
     </Styles.ItemContainer>
+  );
+};
+
+export const EthereumAddressItem: FunctionComponent<{
+  chainInfo: ChainInfo;
+  ethereumAddress: string;
+
+  blockInteraction: boolean;
+  afterCopied: () => void;
+}> = ({ chainInfo, ethereumAddress, blockInteraction, afterCopied }) => {
+  const [hasCopied, setHasCopied] = useState(false);
+
+  return (
+    <Box
+      paddingY="0.875rem"
+      paddingLeft="2.75rem"
+      paddingRight="0.5rem"
+      style={{
+        cursor: blockInteraction ? "auto" : "pointer",
+      }}
+      onClick={async (e) => {
+        e.preventDefault();
+
+        if (blockInteraction) {
+          return;
+        }
+
+        await navigator.clipboard.writeText(ethereumAddress);
+        setHasCopied(true);
+
+        afterCopied();
+      }}
+    >
+      <Columns sum={1} alignY="center" gutter="0.5rem">
+        <Box>
+          <ChainImageFallback
+            style={{
+              width: "2.5rem",
+              height: "2.5rem",
+            }}
+            src={chainInfo.chainSymbolImageUrl}
+            alt="chain icon"
+          />
+        </Box>
+        <YAxis>
+          <XAxis alignY="center">
+            <Subtitle3 color={ColorPalette["gray-10"]}>
+              {chainInfo.chainName}
+            </Subtitle3>
+
+            <Gutter size="0.25rem" />
+
+            {/* Make evm tag not occupy spaces */}
+            <Box position="relative" height="1px" alignY="center">
+              <Box position="absolute">
+                <Tag text="EVM Address" whiteSpace="nowrap" />
+              </Box>
+            </Box>
+          </XAxis>
+
+          <Gutter size="0.25rem" />
+          <Caption1
+            color={ColorPalette["gray-300"]}
+            style={{ fontFeatureSettings: `"calt" 0` }}
+          >
+            {ethereumAddress.length === 42
+              ? `${ethereumAddress.slice(0, 10)}...${ethereumAddress.slice(-8)}`
+              : ethereumAddress}
+          </Caption1>
+        </YAxis>
+        <Column weight={1} />
+
+        <Styles.TextButton
+          style={{
+            color: hasCopied
+              ? ColorPalette["green-400"]
+              : ColorPalette["gray-10"],
+          }}
+        >
+          {hasCopied ? "Copied" : "Copy"}
+        </Styles.TextButton>
+      </Columns>
+    </Box>
   );
 };
