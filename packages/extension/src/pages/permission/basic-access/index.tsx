@@ -17,9 +17,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
 }> = observer(({ data }) => {
   const { chainStore, permissionStore } = useStore();
 
-  const interactionInfo = useInteractionInfo(() => {
-    permissionStore.rejectPermissionAll();
-  });
+  const interactionInfo = useInteractionInfo();
 
   return (
     <HeaderLayout

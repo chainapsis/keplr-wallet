@@ -183,7 +183,12 @@ export function init(
 
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
-  Chains.init(router, chainsService, permissionService);
+  Chains.init(
+    router,
+    chainsService,
+    permissionService,
+    permissionInteractiveService
+  );
   Ledger.init(router, ledgerService);
   KeyRing.init(router, keyRingService);
   BackgroundTx.init(router, backgroundTxService);
