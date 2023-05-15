@@ -63,6 +63,10 @@ export class HugeQueriesStore {
             currency.coinMinimalDenom
           ) {
             const balance = queryBalance.stakable.balance;
+            // If the balance is zero, don't show it.
+            if (balance.toDec().equals(HugeQueriesStore.zeroDec)) {
+              continue;
+            }
             map.set(key, {
               chainInfo,
               token: balance,
@@ -75,6 +79,14 @@ export class HugeQueriesStore {
           } else {
             const balance = queryBalance.getBalance(currency);
             if (balance) {
+              // If the balance is zero and currency is "native", don't show it.
+              if (
+                balance.balance.toDec().equals(HugeQueriesStore.zeroDec) &&
+                new DenomHelper(currency.coinMinimalDenom).type === "native"
+              ) {
+                continue;
+              }
+
               map.set(key, {
                 chainInfo,
                 token: balance.balance,
