@@ -59,13 +59,6 @@ const buttonStyleFromColorAndMode: Record<
             opacity: 0.3;
           }
         }
-
-        :active {
-          ::after {
-            background-color: ${ColorPalette["gray-500"]};
-            opacity: 0.5;
-          }
-        }
       `,
       disabled: css`
         background-color: ${ColorPalette["blue-400"]};
@@ -90,13 +83,6 @@ const buttonStyleFromColorAndMode: Record<
           ::after {
             background-color: ${ColorPalette["gray-500"]};
             opacity: 0.2;
-          }
-        }
-
-        :active {
-          ::after {
-            background-color: ${ColorPalette["gray-500"]};
-            opacity: 0.4;
           }
         }
       `,
@@ -124,13 +110,6 @@ const buttonStyleFromColorAndMode: Record<
           ::after {
             background-color: ${ColorPalette["gray-500"]};
             opacity: 0.2;
-          }
-        }
-
-        :active {
-          ::after {
-            background-color: ${ColorPalette["gray-500"]};
-            opacity: 0.4;
           }
         }
       `,
