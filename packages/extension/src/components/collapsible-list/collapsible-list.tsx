@@ -67,22 +67,18 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         <Stack gutter="0.5rem">{hidden}</Stack>
       </VerticalCollapseTransition>
 
-      {hidden.length > alwaysShown.length ? (
+      {hidden.length > 0 ? (
         <Styles.MoreViewContainer
           onClick={(e) => {
             e.preventDefault();
 
-            if (hidden.length > 0) {
-              setIsCollapsed(!isCollapsed);
-            }
+            setIsCollapsed(!isCollapsed);
           }}
         >
           <Gutter size="0.75rem" />
           <XAxis alignY="center">
             <Button2>
-              {isCollapsed
-                ? `View ${hidden.length - alwaysShown.length} more tokens`
-                : "Collapse"}
+              {isCollapsed ? `View ${hidden.length} more tokens` : "Collapse"}
             </Button2>
 
             <Gutter size="0.25rem" />

@@ -405,7 +405,12 @@ export const EthereumAddressItem: FunctionComponent<{
 
             <Gutter size="0.25rem" />
 
-            <Tag text="EVM Address" />
+            {/* Make evm tag not occupy spaces */}
+            <Box position="relative" height="1px" alignY="center">
+              <Box position="absolute">
+                <Tag text="EVM Address" whiteSpace="nowrap" />
+              </Box>
+            </Box>
           </XAxis>
 
           <Gutter size="0.25rem" />

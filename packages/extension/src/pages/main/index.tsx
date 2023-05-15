@@ -249,13 +249,16 @@ export const MainPage: FunctionComponent = observer(() => {
             />
           ) : null}
 
-          {tabStatus === "staked" ? (
+          {tabStatus === "staked" && !isNotReady ? (
             <StakeWithKeplrDashboardButton
-              onClick={() =>
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+
                 browser.tabs.create({
                   url: "https://wallet.keplr.app/?tab=staking",
-                })
-              }
+                });
+              }}
             >
               Stake with Keplr Dashboard
             </StakeWithKeplrDashboardButton>
@@ -263,13 +266,16 @@ export const MainPage: FunctionComponent = observer(() => {
 
           <ClaimAll isNotReady={isNotReady} />
 
-          {tabStatus === "available" ? (
+          {tabStatus === "available" && !isNotReady ? (
             <StakeWithKeplrDashboardButton
-              onClick={() =>
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+
                 browser.tabs.create({
                   url: "https://wallet.keplr.app/?tab=staking",
-                })
-              }
+                });
+              }}
             >
               Stake with Keplr Dashboard
             </StakeWithKeplrDashboardButton>
