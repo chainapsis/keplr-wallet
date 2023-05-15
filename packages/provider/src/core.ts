@@ -24,12 +24,7 @@ import {
   MessageRequester,
   sendSimpleMessage,
 } from "@keplr-wallet/router";
-import {
-  SuggestChainInfoMsg,
-  GetAnalyticsIdMsg,
-  GetChainInfosWithoutEndpointsMsg,
-  ChangeKeyRingNameMsg,
-} from "./types";
+import { ChangeKeyRingNameMsg } from "./types";
 
 import { KeplrEnigmaUtils } from "./enigma";
 
@@ -123,8 +118,15 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       delete (chainInfo as any).coinType;
     }
 
-    const msg = new SuggestChainInfoMsg(chainInfo);
-    await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "chains",
+      "suggest-chain-info",
+      {
+        chainInfo,
+      }
+    );
   }
 
   async getKey(chainId: string): Promise<Key> {
@@ -152,8 +154,13 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
-    const msg = new GetChainInfosWithoutEndpointsMsg();
-    return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).chainInfos;
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "chains",
+      "get-chain-infos-without-endpoints",
+      {}
+    );
   }
 
   async sendTx(
@@ -470,9 +477,14 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     );
   }
 
-  __core__getAnalyticsId(): Promise<string> {
-    const msg = new GetAnalyticsIdMsg();
-    return this.requester.sendMessage(BACKGROUND_PORT, msg);
+  async __core__getAnalyticsId(): Promise<string> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "analytics",
+      "get-analytics-id",
+      {}
+    );
   }
 
   async changeKeyRingName({

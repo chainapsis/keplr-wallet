@@ -36,10 +36,7 @@ export class AnalyticsService {
     await this.kvStore.set<string>("analyticsId", rand);
   }
 
-  async getAnalyticsIdOnlyIfPrivileged(
-    env: Env,
-    origin: string
-  ): Promise<string> {
+  getAnalyticsIdOnlyIfPrivileged(env: Env, origin: string): string {
     if (!env.isInternalMsg && !this.privilegedOrigins.includes(origin)) {
       throw new Error("Rejected");
     }
