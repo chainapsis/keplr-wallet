@@ -195,8 +195,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
   protected static guessResponseTruncated(headers: any, data: string): boolean {
     return (
       headers &&
-      typeof headers["content-type"] === "string" &&
-      headers["content-type"].startsWith("application/json") &&
+      (headers.get("content-type") || "").startsWith("application/json") &&
       data.startsWith("{")
     );
   }
@@ -524,10 +523,9 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
       if (e.response) {
         // Default is status text
         let message: string = e.response.statusText;
-        const contentType: string =
-          typeof e.response.headers?.["content-type"] === "string"
-            ? e.response.headers["content-type"]
-            : "";
+        const contentType: string = e.response.headers
+          ? e.response.headers.get("content-type") || ""
+          : "";
         // Try to figure out the message from the response.
         // If the contentType in the header is specified, try to use the message from the response.
         if (
