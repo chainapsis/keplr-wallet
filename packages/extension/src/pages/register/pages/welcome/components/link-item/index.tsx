@@ -2,22 +2,44 @@ import React, { FunctionComponent } from "react";
 import { Box } from "../../../../../../components/box";
 import { ColorPalette } from "../../../../../../styles";
 import { YAxis } from "../../../../../../components/axis";
-import { ChainImageFallback } from "../../../../../../components/image";
+import { Image } from "../../../../../../components/image";
 import { Gutter } from "../../../../../../components/gutter";
+import styled from "styled-components";
+
+const Styles = {
+  Container: styled.div`
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    background-color: ${ColorPalette["gray-600"]};
+    border-radius: 2rem;
+
+    :hover {
+      background-color: ${ColorPalette["gray-550"]};
+    }
+
+    cursor: pointer;
+  `,
+};
 
 export const LinkItem: FunctionComponent<{
   title: string;
   paragraph: string;
-}> = ({ title, paragraph }) => {
+  src?: string;
+  url?: string;
+}> = ({ title, paragraph, src, url }) => {
   return (
-    <Box
-      padding="1rem 1.5rem 1.5rem 1.5rem"
-      backgroundColor={ColorPalette["gray-600"]}
-      borderRadius="2rem"
+    <Styles.Container
+      onClick={(e) => {
+        e.preventDefault();
+        if (url) {
+          browser.tabs.create({
+            url: url,
+          });
+        }
+      }}
     >
       <YAxis>
         <Box width="2.5rem">
-          <ChainImageFallback src={undefined} alt="service-image" />
+          <Image width="40px" height="40px" src={src} alt="service-image" />
         </Box>
 
         <Gutter size="1rem" />
@@ -44,6 +66,6 @@ export const LinkItem: FunctionComponent<{
           {paragraph}
         </Box>
       </YAxis>
-    </Box>
+    </Styles.Container>
   );
 };

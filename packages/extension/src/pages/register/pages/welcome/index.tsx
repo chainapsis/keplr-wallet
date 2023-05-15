@@ -5,12 +5,24 @@ import Color from "color";
 import { ColorPalette } from "../../../../styles";
 import { Column, Columns } from "../../../../components/column";
 import { Subtitle2 } from "../../../../components/typography";
-import { YAxis } from "../../../../components/axis";
+import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { CheckIcon, LinkItem, PinView, TwitterIcon } from "./components";
 import { Styles } from "./styled";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../../stores";
+import { Button } from "../../../../components/button";
 
-export const WelcomePage: FunctionComponent = () => {
+export const WelcomePage: FunctionComponent = observer(() => {
+  const { chainStore } = useStore();
+
+  const osmosisInfo = chainStore.chainInfos.find(
+    (chainInfo) => chainInfo.chainId === "osmosis-1"
+  );
+  const stargazeInfo = chainStore.chainInfos.find(
+    (chainInfo) => chainInfo.chainId === "stargaze-1"
+  );
+
   return (
     <Styles.Container>
       <PinView />
@@ -26,7 +38,7 @@ export const WelcomePage: FunctionComponent = () => {
           <Columns sum={1} gutter="0.625rem">
             <CheckIcon />
             <Subtitle2 color={ColorPalette["green-400"]}>
-              You’re all set Cosmonaut!
+              You may close this page
             </Subtitle2>
           </Columns>
         </Box>
@@ -40,13 +52,13 @@ export const WelcomePage: FunctionComponent = () => {
                 width="31.25rem"
                 style={{ fontWeight: 600, fontSize: "3.5rem" }}
               >
-                Welcome aboard the Interchain!
+                Account Created!
               </Box>
 
-              <Gutter size="0.75rem" />
+              <Gutter size="2.25rem" />
 
               <Box style={{ fontWeight: 500, fontSize: "1.25rem" }}>
-                Not sure where to start?
+                Ready to explore the Interchain?
               </Box>
 
               <Gutter size="1.5rem" />
@@ -55,22 +67,47 @@ export const WelcomePage: FunctionComponent = () => {
                 <Stack gutter="0.5rem">
                   <Columns sum={1} gutter="0.5rem">
                     <Column weight={1}>
-                      <LinkItem title="Osmosis" paragraph="Trade Tokens" />
+                      <LinkItem
+                        title="Osmosis"
+                        paragraph="Trade Tokens"
+                        src={osmosisInfo?.chainSymbolImageUrl}
+                        url="https://app.osmosis.zone/"
+                      />
                     </Column>
                     <Column weight={1}>
-                      <LinkItem title="Kado" paragraph="Buy Crypto" />
+                      <LinkItem
+                        title="Kado"
+                        paragraph="Buy Crypto"
+                        src={require("../../../../public/assets/img/fiat-on-ramp/kado.svg")}
+                        url="https://www.kado.money/"
+                      />
                     </Column>
                     <Column weight={1}>
-                      <LinkItem title="Stargaze" paragraph="Buy & Mint NFTs" />
+                      <LinkItem
+                        title="Stargaze"
+                        paragraph="Buy & Mint NFTs"
+                        src={stargazeInfo?.chainSymbolImageUrl}
+                        url="https://www.stargaze.zone/"
+                      />
                     </Column>
                   </Columns>
 
                   <Columns sum={1} gutter="0.5rem">
                     <Column weight={1}>
-                      <LinkItem title="Osmosis" paragraph="Trade Tokens" />
+                      <LinkItem
+                        title="Keplr Dashboard"
+                        paragraph="Stake Your Tokens"
+                        src={require("../../../../public/assets/logo-256.png")}
+                        url="https://wallet.keplr.app/"
+                      />
                     </Column>
                     <Column weight={1}>
-                      <LinkItem title="Kado" paragraph="Buy Crypto" />
+                      <LinkItem
+                        title="Interchain name service"
+                        paragraph="Simplify your crypto addres"
+                        src={require("../../../../public/assets/icns-logo.png")}
+                        url="https://icns.xyz/"
+                      />
                     </Column>
                   </Columns>
                 </Stack>
@@ -85,38 +122,66 @@ export const WelcomePage: FunctionComponent = () => {
           />
         </Styles.ResponsiveContainer>
 
-        <Gutter size="3rem" />
+        <Gutter size="1.5rem" />
 
-        <Columns sum={1} gutter="1rem" alignY="center">
-          <Box
-            padding="0.375rem"
-            backgroundColor={ColorPalette["gray-500"]}
-            borderRadius="50%"
-          >
-            <TwitterIcon />
-          </Box>
+        <XAxis alignY="center">
+          <Button
+            text="Finish"
+            size="large"
+            style={{ width: "10rem" }}
+            onClick={() => {
+              window.close();
+            }}
+          />
+
+          <Gutter size="1.5rem" />
 
           <Box
-            style={{
-              fontWeight: 600,
-              fontSize: "0.875rem",
+            cursor="pointer"
+            onClick={(e) => {
+              e.preventDefault();
+
+              browser.tabs.create({
+                url: "https://twitter.com/intent/follow?twterm%5Efollow%7Ctwgr%5Ekeplrwallet&screen_name=KeplrWallet",
+              });
             }}
           >
-            Follow Keplr on Twitter
-          </Box>
+            <XAxis alignY="center">
+              <Box
+                padding="0.375rem"
+                backgroundColor={ColorPalette["gray-500"]}
+                borderRadius="50%"
+              >
+                <TwitterIcon />
+              </Box>
 
-          <Box
-            width="12.5rem"
-            style={{
-              fontWeight: 500,
-              fontSize: "0.75rem",
-              color: ColorPalette["gray-200"],
-            }}
-          >
-            For all important information and updates on Keplr.
+              <Gutter size="1rem" />
+
+              <Box
+                style={{
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                }}
+              >
+                Follow Keplr on Twitter
+              </Box>
+
+              <Gutter size="1rem" />
+
+              <Box
+                width="12.5rem"
+                style={{
+                  fontWeight: 500,
+                  fontSize: "0.75rem",
+                  color: ColorPalette["gray-200"],
+                }}
+              >
+                For all important information and updates on Keplr.
+              </Box>
+            </XAxis>
           </Box>
-        </Columns>
+        </XAxis>
       </Stack>
     </Styles.Container>
   );
-};
+});
