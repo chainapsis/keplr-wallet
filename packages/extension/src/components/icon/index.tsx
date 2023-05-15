@@ -17,6 +17,7 @@ export * from "./ellipsis";
 export * from "./google";
 export * from "./information";
 export * from "./key";
+export * from "./link";
 export * from "./loading";
 export * from "./menu";
 export * from "./plus";
