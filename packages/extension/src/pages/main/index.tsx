@@ -293,7 +293,9 @@ export const MainPage: FunctionComponent = observer(() => {
             <StakedTabView />
           )}
 
-          {tabStatus === "available" && uiConfigStore.isDeveloper ? (
+          {tabStatus === "available" &&
+          uiConfigStore.isDeveloper &&
+          !isNotReady ? (
             <IBCTransferView />
           ) : null}
         </Stack>
