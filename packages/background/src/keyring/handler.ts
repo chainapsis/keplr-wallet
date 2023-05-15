@@ -31,7 +31,6 @@ import {
   InitNonDefaultLedgerAppMsg,
   CreateKeystoneKeyMsg,
   AddKeystoneKeyMsg,
-  RequestICNSAdr36SignaturesMsg,
   ChangeKeyRingNameMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
@@ -102,11 +101,6 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleRequestSignDirectMsg(service)(
           env,
           msg as RequestSignDirectMsg
-        );
-      case RequestICNSAdr36SignaturesMsg:
-        return handleRequestICNSAdr36SignaturesMsg(service)(
-          env,
-          msg as RequestICNSAdr36SignaturesMsg
         );
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
@@ -406,27 +400,6 @@ const handleRequestSignDirectMsg: (
       },
       signature: response.signature,
     };
-  };
-};
-
-const handleRequestICNSAdr36SignaturesMsg: (
-  service: KeyRingService
-) => InternalHandler<RequestICNSAdr36SignaturesMsg> = (service) => {
-  return async (env, msg) => {
-    await service.permissionService.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainId,
-      msg.origin
-    );
-
-    return service.requestICNSAdr36Signatures(
-      env,
-      msg.chainId,
-      msg.contractAddress,
-      msg.owner,
-      msg.username,
-      msg.addressChainIds
-    );
   };
 };
 

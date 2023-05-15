@@ -16,6 +16,7 @@ import {
   PrivilegeCosmosSignAminoWithdrawRewardsMsg,
   GetCosmosKeysForEachVaultSettledMsg,
   RequestSignEIP712CosmosTxMsg_v0,
+  RequestICNSAdr36SignaturesMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -80,6 +81,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestSignEIP712CosmosTxMsg_v0);
+      case RequestICNSAdr36SignaturesMsg:
+        return handleRequestICNSAdr36SignaturesMsg(
+          service,
+          permissionInteractionService
+        )(env, msg as RequestICNSAdr36SignaturesMsg);
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -308,6 +314,32 @@ const handleRequestSignEIP712CosmosTxMsg_v0: (
       msg.eip712,
       msg.signDoc,
       msg.signOptions
+    );
+  };
+};
+
+const handleRequestICNSAdr36SignaturesMsg: (
+  service: KeyRingCosmosService,
+  permissionInteractionService: PermissionInteractiveService
+) => InternalHandler<RequestICNSAdr36SignaturesMsg> = (
+  service,
+  permissionInteractionService
+) => {
+  return async (env, msg) => {
+    await permissionInteractionService.ensureEnabled(
+      env,
+      [msg.chainId],
+      msg.origin
+    );
+
+    return await service.requestICNSAdr36SignaturesSelected(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.contractAddress,
+      msg.owner,
+      msg.username,
+      msg.addressChainIds
     );
   };
 };
