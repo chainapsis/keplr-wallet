@@ -8,6 +8,7 @@
 **/*.woff2
 **/*.secret
 **/*.md
+**/*.webm
 .DS_Store
 
 node_modules

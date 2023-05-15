@@ -9,6 +9,7 @@
 **/*.secret
 **/*.md
 **/*.log
+**/*.webm
 .DS_Store
 
 .gitignore
