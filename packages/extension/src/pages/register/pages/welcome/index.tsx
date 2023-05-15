@@ -115,11 +115,19 @@ export const WelcomePage: FunctionComponent = observer(() => {
             </YAxis>
           </Box>
 
-          <Box
-            width="28rem"
-            height="28rem"
-            backgroundColor={ColorPalette["gray-600"]}
-          />
+          <Box alignX="center">
+            <video
+              width="450"
+              height="450"
+              autoPlay={true}
+              loop={true}
+              style={{ borderRadius: "2.5rem" }}
+            >
+              <source
+                src={require("../../../../public/assets/lottie/register/congrats.webm")}
+              />
+            </video>
+          </Box>
         </Styles.ResponsiveContainer>
 
         <Gutter size="1.5rem" />
