@@ -349,19 +349,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get uiProperties(): UIProperties {
-    if (
-      this.gasConfig.uiProperties.error ||
-      this.gasConfig.uiProperties.warning ||
-      this.gasConfig.uiProperties.loadingState
-    ) {
-      // TODO: 이 부분 완전 불필요해보임
-      return {
-        error: this.gasConfig.uiProperties.error,
-        warning: this.gasConfig.uiProperties.warning,
-        loadingState: this.gasConfig.uiProperties.loadingState,
-      };
-    }
-
     if (this.disableBalanceCheck) {
       return {};
     }
