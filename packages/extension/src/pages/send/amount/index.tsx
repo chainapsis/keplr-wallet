@@ -287,20 +287,22 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       title="Send"
       left={<BackButton />}
       right={
-        <Box
-          paddingRight="1rem"
-          cursor="pointer"
-          onClick={async (e) => {
-            e.preventDefault();
+        !isDetachedMode ? (
+          <Box
+            paddingRight="1rem"
+            cursor="pointer"
+            onClick={async (e) => {
+              e.preventDefault();
 
-            const url = window.location.href + "&detached=true";
+              const url = window.location.href + "&detached=true";
 
-            await openPopupWindow(url, undefined);
-            window.close();
-          }}
-        >
-          <DetachIcon size="1.5rem" color={ColorPalette["gray-300"]} />
-        </Box>
+              await openPopupWindow(url, undefined);
+              window.close();
+            }}
+          >
+            <DetachIcon size="1.5rem" color={ColorPalette["gray-300"]} />
+          </Box>
+        ) : null
       }
       bottomButton={{
         disabled: txConfigsValidate.interactionBlocked,
