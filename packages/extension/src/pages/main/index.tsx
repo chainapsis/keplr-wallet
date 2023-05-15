@@ -11,9 +11,9 @@ import {
   TabStatus,
   CopyAddress,
   CopyAddressModal,
-  InternalLinkView,
   IBCTransferView,
   BuyCryptoModal,
+  StakeWithKeplrDashboardButton,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
@@ -249,10 +249,33 @@ export const MainPage: FunctionComponent = observer(() => {
             />
           ) : null}
 
+          {tabStatus === "staked" ? (
+            <StakeWithKeplrDashboardButton
+              onClick={() =>
+                browser.tabs.create({
+                  url: "https://wallet.keplr.app/?tab=staking",
+                })
+              }
+            >
+              Stake with Keplr Dashboard
+            </StakeWithKeplrDashboardButton>
+          ) : null}
+
           <ClaimAll isNotReady={isNotReady} />
+
+          {tabStatus === "available" ? (
+            <StakeWithKeplrDashboardButton
+              onClick={() =>
+                browser.tabs.create({
+                  url: "https://wallet.keplr.app/?tab=staking",
+                })
+              }
+            >
+              Stake with Keplr Dashboard
+            </StakeWithKeplrDashboardButton>
+          ) : null}
           {!isNotReady ? (
             <Stack gutter="0.75rem">
-              <InternalLinkView />
               {tabStatus === "available" ? (
                 <SearchTextInput
                   ref={searchRef}

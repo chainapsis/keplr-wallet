@@ -7,6 +7,6 @@ export * from "./menu-bar";
 export * from "./copy-address";
 export * from "./copy-address-modal";
 export * from "./empty-view";
-export * from "./internal-link-view";
 export * from "./ibc-transfer-view";
 export * from "./token-found-modal";
+export * from "./stake-with-keplr-dashboard-button";
