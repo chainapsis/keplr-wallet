@@ -16,15 +16,21 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
 
       title: string;
       paragraph: string;
+      options: {
+        forceYes?: boolean;
+      };
       resolver: (value: boolean) => void;
     }[]
   >([]);
 
   const seqRef = useRef(0);
-  const confirmFn: (title: string, paragraph: string) => Promise<boolean> = (
-    title,
-    paragraph
-  ) => {
+  const confirmFn: (
+    title: string,
+    paragraph: string,
+    options?: {
+      forceYes?: boolean;
+    }
+  ) => Promise<boolean> = (title, paragraph, options = {}) => {
     return new Promise<boolean>((resolve) => {
       seqRef.current = seqRef.current + 1;
 
@@ -36,6 +42,7 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
 
           title,
           paragraph,
+          options,
           resolver: resolve,
         },
       ]);
@@ -91,7 +98,13 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
           <Modal
             key={confirm.id}
             isOpen={!confirm.detached}
-            close={no}
+            close={() => {
+              if (confirm.options.forceYes) {
+                return;
+              }
+
+              no();
+            }}
             onCloseTransitionEnd={() => {
               setConfirms((prev) => {
                 return prev.filter((c) => c.id !== confirm.id);
@@ -132,16 +145,20 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
                   <Gutter size="1.125rem" />
                   <YAxis alignX="right">
                     <XAxis>
-                      <Button
-                        size="small"
-                        color="secondary"
-                        text="Cancel"
-                        style={{
-                          minWidth: "4.875rem",
-                        }}
-                        onClick={no}
-                      />
-                      <Gutter size="0.75rem" />
+                      {!confirm.options.forceYes ? (
+                        <React.Fragment>
+                          <Button
+                            size="small"
+                            color="secondary"
+                            text="Cancel"
+                            style={{
+                              minWidth: "4.875rem",
+                            }}
+                            onClick={no}
+                          />
+                          <Gutter size="0.75rem" />
+                        </React.Fragment>
+                      ) : null}
                       <Button
                         size="small"
                         text="Yes"

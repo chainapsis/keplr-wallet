@@ -554,6 +554,34 @@ export class ChainsService {
     }
   }
 
+  getOriginalEndpoint = computedFn(
+    (
+      chainId: string
+    ): {
+      rpc: string;
+      rest: string;
+    } => {
+      const identifier = ChainIdHelper.parse(chainId).identifier;
+      const originalChainInfos = this.embedChainInfos.concat(
+        this.suggestedChainInfos
+      );
+      const chainInfo = originalChainInfos.find(
+        (c) => ChainIdHelper.parse(c.chainId).identifier === identifier
+      );
+      if (chainInfo) {
+        return {
+          rpc: chainInfo.rpc,
+          rest: chainInfo.rest,
+        };
+      }
+
+      throw new Error(`Unknown chain: ${chainId}`);
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
   protected getEndpoint(chainId: string):
     | {
         chainId: string;

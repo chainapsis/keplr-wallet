@@ -16,7 +16,11 @@ import {
   checkRestConnectivity,
   checkRPCConnectivity,
 } from "@keplr-wallet/chain-validator";
-import { useNavigate } from "react-router";
+import { useNotification } from "../../../../hooks/notification";
+import { useConfirm } from "../../../../hooks/confirm";
+import { GetChainOriginalEndpointsMsg } from "@keplr-wallet/background";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 const Styles = {
   Container: styled(Stack)`
@@ -30,11 +34,21 @@ const Styles = {
 
 export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
-  const navigate = useNavigate();
+
+  const notification = useNotification();
+  const confirm = useConfirm();
 
   const [chainId, setChainId] = useState<string>(
     chainStore.chainInfos[0].chainId
   );
+  const [originalEndpoint, setOriginalEndpoint] = useState<
+    | {
+        rpc: string;
+        rest: string;
+      }
+    | undefined
+  >();
+  const [isLoading, setIsLoading] = useState(false);
 
   const { setValue, watch, register, handleSubmit } = useForm<{
     rpc: string;
@@ -57,23 +71,19 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
     const chainInfo = chainStore.getChain(chainId);
     setValue("rpc", chainInfo.rpc);
     setValue("lcd", chainInfo.rest);
-  }, [chainId]);
 
-  const onClickResetButton = async (
-    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    event?.preventDefault();
-    try {
-      await chainStore.resetChainEndpoints(chainId);
+    const msg = new GetChainOriginalEndpointsMsg(chainId);
+    new InExtensionMessageRequester()
+      .sendMessage(BACKGROUND_PORT, msg)
+      .then((r) => {
+        setOriginalEndpoint(r);
+      })
+      .catch((e) => {
+        console.log(e);
 
-      const chainInfo = chainStore.getChain(chainId);
-
-      setValue("rpc", chainInfo.rpc);
-      setValue("lcd", chainInfo.rest);
-    } catch (e) {
-      console.log(e);
-    }
-  };
+        setOriginalEndpoint(undefined);
+      });
+  }, [chainId, chainStore, setValue]);
 
   return (
     <HeaderLayout
@@ -84,24 +94,63 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
         text: "Confirm",
         color: "secondary",
         size: "large",
+        isLoading,
         disabled:
           chainStore.getChain(chainId).rpc === watch("rpc") &&
           chainStore.getChain(chainId).rest === watch("lcd"),
       }}
       onSubmit={handleSubmit(async (data) => {
+        setIsLoading(true);
+
         try {
-          try {
-            await checkRPCConnectivity(chainId, data.rpc);
-            await checkRestConnectivity(chainId, data.lcd);
-          } catch (e) {
-            console.error(e);
+          if (
+            !originalEndpoint ||
+            originalEndpoint.rpc !== data.rpc ||
+            originalEndpoint.rpc !== data.lcd
+          ) {
+            try {
+              if (originalEndpoint?.rpc !== data.rpc) {
+                await checkRPCConnectivity(chainId, data.rpc);
+              }
+              if (originalEndpoint?.rest !== data.lcd) {
+                await checkRestConnectivity(chainId, data.lcd);
+              }
+            } catch (e) {
+              console.error(e);
+
+              notification.show(
+                "failed",
+                "Failed to set endpoints",
+                e.message || e.toString()
+              );
+
+              return;
+            }
           }
 
-          chainStore.setChainEndpoints(chainId, data.rpc, data.lcd);
+          if (
+            originalEndpoint &&
+            originalEndpoint.rpc == data.rpc &&
+            originalEndpoint.rest == data.lcd
+          ) {
+            await chainStore.resetChainEndpoints(chainId);
+          } else {
+            await chainStore.setChainEndpoints(chainId, data.rpc, data.lcd);
+          }
 
-          navigate("/");
+          await confirm.confirm(
+            "Set endpoints",
+            "You need to restart Keplr to apply changes",
+            {
+              forceYes: true,
+            }
+          );
+
+          window.close();
         } catch (e) {
           console.error(e);
+        } finally {
+          setIsLoading(false);
         }
       })}
     >
@@ -120,12 +169,26 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
             size="extraSmall"
             text="Reset"
             color="secondary"
-            onClick={onClickResetButton}
+            disabled={(() => {
+              if (!originalEndpoint) {
+                return true;
+              }
+
+              return (
+                originalEndpoint.rpc === watch("rpc") &&
+                originalEndpoint.rest === watch("lcd")
+              );
+            })()}
+            onClick={() => {
+              if (originalEndpoint) {
+                setValue("rpc", originalEndpoint.rpc);
+                setValue("lcd", originalEndpoint.rest);
+              }
+            }}
           />
         </Columns>
 
         <TextInput label="RPC" {...register("rpc")} />
-
         <TextInput label="LCD" {...register("lcd")} />
 
         <Styles.Flex1 />
