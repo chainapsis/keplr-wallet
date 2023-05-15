@@ -21,7 +21,10 @@ export async function openPopupWindow(
   channel: string = "default",
   options: Partial<Parameters<typeof browser.windows.create>[0]> = {}
 ): Promise<number> {
+  const windowInfo = await browser.windows.getCurrent();
   const option = {
+    top: (windowInfo.top || 0) + 80,
+    left: (windowInfo.left || 0) + (windowInfo.width || 0) - 360 - 20,
     width: PopupSize.width,
     height: PopupSize.height,
     url: url,

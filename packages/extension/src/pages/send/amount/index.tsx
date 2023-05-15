@@ -293,14 +293,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           onClick={async (e) => {
             e.preventDefault();
 
-            const windowInfo = await browser.windows.getCurrent();
-
             const url = window.location.href + "&detached=true";
 
-            await openPopupWindow(url, undefined, {
-              top: (windowInfo.top || 0) + 80,
-              left: (windowInfo.left || 0) + (windowInfo.width || 0) - 360 - 20,
-            });
+            await openPopupWindow(url, undefined);
             window.close();
           }}
         >
