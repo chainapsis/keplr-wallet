@@ -16,6 +16,7 @@ import {
 import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithCoreTypes,
+  ClearChainEndpointsMsg,
   DisableChainsMsg,
   EnableChainsMsg,
   GetChainInfosWithCoreTypesMsg,
@@ -23,6 +24,7 @@ import {
   GetTokenScansMsg,
   RemoveSuggestedChainInfoMsg,
   RevalidateTokenScansMsg,
+  SetChainEndpointsMsg,
   ToggleChainsMsg,
   TokenScan,
   TryUpdateEnabledChainInfosMsg,
@@ -385,33 +387,25 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @flow
   *setChainEndpoints(
-    _chainId: string,
-    _rpc: string | undefined,
-    _rest: string | undefined
+    chainId: string,
+    rpc: string | undefined,
+    rest: string | undefined
   ) {
-    // const msg = new SetChainEndpointsMsg(chainId, rpc, rest);
-    // const newChainInfos = yield* toGenerator(
-    //   this.requester.sendMessage(BACKGROUND_PORT, msg)
-    // );
-    //
-    // this.setChainInfos(newChainInfos);
+    const msg = new SetChainEndpointsMsg(chainId, rpc, rest);
+    const newChainInfos = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
 
-    throw new Error("TODO");
-
-    // ObservableQuery.refreshAllObserved();
+    this.setEmbeddedChainInfos(newChainInfos);
   }
 
   @flow
-  *resetChainEndpoints(_chainId: string) {
-    // const msg = new ResetChainEndpointsMsg(chainId);
-    // const newChainInfos = yield* toGenerator(
-    //   this.requester.sendMessage(BACKGROUND_PORT, msg)
-    // );
-    //
-    // this.setChainInfos(newChainInfos);
+  *resetChainEndpoints(chainId: string) {
+    const msg = new ClearChainEndpointsMsg(chainId);
+    const newChainInfos = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
 
-    throw new Error("TODO");
-
-    // ObservableQuery.refreshAllObserved();
+    this.setEmbeddedChainInfos(newChainInfos);
   }
 }

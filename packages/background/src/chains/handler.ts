@@ -11,6 +11,9 @@ import {
   GetChainInfosWithoutEndpointsMsg,
   RemoveSuggestedChainInfoMsg,
   SuggestChainInfoMsg,
+  SetChainEndpointsMsg,
+  ClearChainEndpointsMsg,
+  GetChainOriginalEndpointsMsg,
 } from "./messages";
 import { ChainInfo } from "@keplr-wallet/types";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
@@ -42,6 +45,21 @@ export const getHandler: (
         return handleRemoveSuggestedChainInfoMsg(chainsService)(
           env,
           msg as RemoveSuggestedChainInfoMsg
+        );
+      case SetChainEndpointsMsg:
+        return handleSetChainEndpointsMsg(chainsService)(
+          env,
+          msg as SetChainEndpointsMsg
+        );
+      case ClearChainEndpointsMsg:
+        return handleClearChainEndpointsMsg(chainsService)(
+          env,
+          msg as ClearChainEndpointsMsg
+        );
+      case GetChainOriginalEndpointsMsg:
+        return handleGetChainOriginalEndpointsMsg(chainsService)(
+          env,
+          msg as GetChainOriginalEndpointsMsg
         );
       default:
         throw new KeplrError("chains", 110, "Unknown msg type");
@@ -110,5 +128,34 @@ const handleRemoveSuggestedChainInfoMsg: (
   return (_, msg) => {
     service.removeSuggestedChainInfo(msg.chainId);
     return service.getChainInfosWithCoreTypes();
+  };
+};
+
+const handleSetChainEndpointsMsg: (
+  service: ChainsService
+) => InternalHandler<SetChainEndpointsMsg> = (service) => {
+  return (_, msg) => {
+    service.setEndpoint(msg.chainId, {
+      rpc: msg.rpc,
+      rest: msg.rest,
+    });
+    return service.getChainInfosWithCoreTypes();
+  };
+};
+
+const handleClearChainEndpointsMsg: (
+  service: ChainsService
+) => InternalHandler<ClearChainEndpointsMsg> = (service) => {
+  return (_, msg) => {
+    service.clearEndpoint(msg.chainId);
+    return service.getChainInfosWithCoreTypes();
+  };
+};
+
+const handleGetChainOriginalEndpointsMsg: (
+  service: ChainsService
+) => InternalHandler<GetChainOriginalEndpointsMsg> = (service) => {
+  return (_, msg) => {
+    return service.getOriginalEndpoint(msg.chainId);
   };
 };
