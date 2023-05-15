@@ -28,6 +28,8 @@ import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { ICNSInfo } from "../../../config.ui";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
+import { ColorPalette } from "../../../styles";
+import { openPopupWindow } from "@keplr-wallet/popup";
 
 const Styles = {
   Flex1: styled.div`
@@ -278,10 +280,33 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     gasSimulator,
   });
 
+  const isDetachedMode = searchParams.get("detached") === "true";
+
   return (
     <HeaderLayout
       title="Send"
       left={<BackButton />}
+      right={
+        <Box
+          paddingRight="1rem"
+          cursor="pointer"
+          onClick={async (e) => {
+            e.preventDefault();
+
+            const windowInfo = await browser.windows.getCurrent();
+
+            const url = window.location.href + "&detached=true";
+
+            await openPopupWindow(url, undefined, {
+              top: (windowInfo.top || 0) + 80,
+              left: (windowInfo.left || 0) + (windowInfo.width || 0) - 360 - 20,
+            });
+            window.close();
+          }}
+        >
+          <DetachIcon size="1.5rem" color={ColorPalette["gray-300"]} />
+        </Box>
+      }
       bottomButton={{
         disabled: txConfigsValidate.interactionBlocked,
         text: "Go to Sign",
@@ -320,9 +345,13 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 }
               );
 
-            navigate("/", {
-              replace: true,
-            });
+            if (!isDetachedMode) {
+              navigate("/", {
+                replace: true,
+              });
+            } else {
+              window.close();
+            }
           } catch (e) {
             if (e?.message === "Request rejected") {
               return;
@@ -334,9 +363,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
               "Transaction Failed",
               e.message || e.toString()
             );
-            navigate("/", {
-              replace: true,
-            });
+            if (!isDetachedMode) {
+              navigate("/", {
+                replace: true,
+              });
+            } else {
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+              window.close();
+            }
           }
         }
       }}
@@ -387,3 +421,26 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     </HeaderLayout>
   );
 });
+
+const DetachIcon: FunctionComponent<{
+  size: string;
+  color: string;
+}> = ({ size, color }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke={color || "currentColor"}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.5"
+        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+      />
+    </svg>
+  );
+};
