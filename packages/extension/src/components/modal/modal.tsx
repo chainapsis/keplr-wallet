@@ -182,6 +182,8 @@ const ModalChild: FunctionComponent<{
           // 그냥 냅두고 알아서 처리하게 한다.
           maxHeight: align !== "left" ? "85vh" : undefined,
 
+          overflow: "auto",
+
           position: "absolute",
           left: 0,
           right: 0,
