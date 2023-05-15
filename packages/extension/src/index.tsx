@@ -68,6 +68,7 @@ import { useLoadFonts } from "./use-load-fonts";
 import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 import { Splash } from "./components/splash";
 import { IBCTransferPage } from "./pages/ibc-transfer";
+import { SignCosmosICNSPage } from "./pages/sign/cosmos/icns";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -293,6 +294,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               <Route
                 path="/sign-cosmos-adr36"
                 element={<SignCosmosADR36Page />}
+              />
+              <Route
+                path="/sign-cosmos-icns"
+                element={<SignCosmosICNSPage />}
               />
               <Route path="/wallet/select" element={<WalletSelectPage />} />
               <Route path="/wallet/delete" element={<WalletDeletePage />} />

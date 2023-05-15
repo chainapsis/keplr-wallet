@@ -1,9 +1,6 @@
 import { InteractionStore } from "./interaction";
 import { computed, makeObservable } from "mobx";
-import {
-  InteractionWaitingData,
-  RequestICNSAdr36SignaturesMsg,
-} from "@keplr-wallet/background";
+import { InteractionWaitingData } from "@keplr-wallet/background";
 
 export class ICNSInteractionStore {
   constructor(protected readonly interactionStore: InteractionStore) {
@@ -15,12 +12,13 @@ export class ICNSInteractionStore {
       chainId: string;
       owner: string;
       username: string;
+      origin: string;
       accountInfos: {
         chainId: string;
         bech32Prefix: string;
         bech32Address: string;
       }[];
-    }>(RequestICNSAdr36SignaturesMsg.type());
+    }>("request-sign-icns-adr36");
   }
 
   @computed
@@ -29,6 +27,7 @@ export class ICNSInteractionStore {
         chainId: string;
         owner: string;
         username: string;
+        origin: string;
         accountInfos: {
           chainId: string;
           bech32Prefix: string;
@@ -49,18 +48,18 @@ export class ICNSInteractionStore {
     id: string,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    await this.interactionStore.approveWithProceedNext(id, {}, afterFn);
+    await this.interactionStore.approveWithProceedNextV2(id, {}, afterFn);
   }
 
   async rejectWithProceedNext(
     id: string,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    await this.interactionStore.rejectWithProceedNext(id, afterFn);
+    await this.interactionStore.rejectWithProceedNextV2(id, afterFn);
   }
 
   async rejectAll() {
-    await this.interactionStore.rejectAll(RequestICNSAdr36SignaturesMsg.type());
+    await this.interactionStore.rejectAll("request-sign-icns-adr36");
   }
 
   isObsoleteInteraction(id: string | undefined): boolean {

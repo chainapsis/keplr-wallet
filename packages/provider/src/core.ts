@@ -27,7 +27,6 @@ import {
 import {
   SuggestChainInfoMsg,
   GetAnalyticsIdMsg,
-  RequestICNSAdr36SignaturesMsg,
   GetChainInfosWithoutEndpointsMsg,
   ChangeKeyRingNameMsg,
 } from "./types";
@@ -291,22 +290,25 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     throw new Error("TODO");
   }
 
-  signICNSAdr36(
+  async signICNSAdr36(
     chainId: string,
     contractAddress: string,
     owner: string,
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {
-    return this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new RequestICNSAdr36SignaturesMsg(
+      "keyring-cosmos",
+      "request-icns-adr-36-signatures-v2",
+      {
         chainId,
         contractAddress,
         owner,
         username,
-        addressChainIds
-      )
+        addressChainIds,
+      }
     );
   }
 

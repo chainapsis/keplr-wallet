@@ -41,4 +41,17 @@ export class PermissionInteractiveService {
       this.permissionService.removeAllTypeGlobalPermission([origin]);
     }
   }
+
+  async checkOrGrantGetChainInfosWithoutEndpointsPermission(
+    env: Env,
+    origin: string
+  ): Promise<void> {
+    await this.keyRingService.ensureUnlockInteractive(env);
+
+    return await this.permissionService.checkOrGrantGlobalPermission(
+      env,
+      "get-chain-infos",
+      origin
+    );
+  }
 }

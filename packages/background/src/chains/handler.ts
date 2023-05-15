@@ -17,13 +17,19 @@ import {
 } from "./messages";
 import { ChainInfo } from "@keplr-wallet/types";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
+import { PermissionInteractiveService } from "../permission-interactive";
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export const getHandler: (
   chainsService: ChainsService,
-  permissionService: PermissionService
-) => Handler = (chainsService, permissionService) => {
+  permissionService: PermissionService,
+  permissionInteractiveService: PermissionInteractiveService
+) => Handler = (
+  chainsService,
+  permissionService,
+  permissionInteractiveService
+) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
       case GetChainInfosWithCoreTypesMsg:
@@ -32,10 +38,10 @@ export const getHandler: (
           msg as GetChainInfosWithCoreTypesMsg
         );
       case GetChainInfosWithoutEndpointsMsg:
-        return handleGetChainInfosWithoutEndpointsMsg(chainsService)(
-          env,
-          msg as GetChainInfosWithoutEndpointsMsg
-        );
+        return handleGetChainInfosWithoutEndpointsMsg(
+          chainsService,
+          permissionInteractiveService
+        )(env, msg as GetChainInfosWithoutEndpointsMsg);
       case SuggestChainInfoMsg:
         return handleSuggestChainInfoMsg(chainsService, permissionService)(
           env,
@@ -78,21 +84,22 @@ const handleGetInfosWithCoreTypesMsg: (
 };
 
 const handleGetChainInfosWithoutEndpointsMsg: (
-  service: ChainsService
-) => InternalHandler<GetChainInfosWithoutEndpointsMsg> = (_service) => {
-  return async (_env, _msg) => {
-    throw new Error("TODO");
-    // await service.permissionService.checkOrGrantGlobalPermission(
-    //   env,
-    //   "/permissions/grant/get-chain-infos",
-    //   "get-chain-infos",
-    //   msg.origin
-    // );
-    //
-    // const chainInfos = await service.getChainInfosWithoutEndpoints();
-    // return {
-    //   chainInfos,
-    // };
+  service: ChainsService,
+  permissionInteractiveService: PermissionInteractiveService
+) => InternalHandler<GetChainInfosWithoutEndpointsMsg> = (
+  service,
+  permissionInteractiveService
+) => {
+  return async (env, msg) => {
+    await permissionInteractiveService.checkOrGrantGetChainInfosWithoutEndpointsPermission(
+      env,
+      msg.origin
+    );
+
+    const chainInfos = service.getChainInfosWithoutEndpoints();
+    return {
+      chainInfos,
+    };
   };
 };
 

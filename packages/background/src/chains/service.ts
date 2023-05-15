@@ -159,6 +159,24 @@ export class ChainsService {
     }
   );
 
+  getChainInfosWithoutEndpoints = computedFn(
+    (): Omit<ChainInfo, "rpc" | "rest">[] => {
+      return this.mergeChainInfosWithDynamics(
+        this.embedChainInfos.concat(this.suggestedChainInfos)
+      ).map((chainInfo) => {
+        return {
+          ...chainInfo,
+          rpc: undefined,
+          rest: undefined,
+          nodeProvider: undefined,
+        };
+      });
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
   getChainInfo = computedFn(
     (chainId: string): ChainInfo | undefined => {
       return this.chainInfoMap.get(ChainIdHelper.parse(chainId).identifier);

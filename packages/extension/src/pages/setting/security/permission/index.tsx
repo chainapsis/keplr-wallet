@@ -130,7 +130,10 @@ const OriginView: FunctionComponent<{
 
         <OriginStyle.Count>
           <Columns sum={1} alignY="center" gutter="0.5rem">
-            <Body1>{value?.permissions.length ?? 0}</Body1>
+            <Body1>
+              {(value?.permissions.length ?? 0) +
+                (value?.globalPermissions.length ?? 0)}
+            </Body1>
             {isCollapsed ? (
               <ArrowDownIcon width="1.25rem" height="1.25rem" />
             ) : (
@@ -162,6 +165,41 @@ const OriginView: FunctionComponent<{
                   <Columns sum={1} gutter="0.75rem" alignY="center">
                     <Body2 style={{ color: ColorPalette["gray-100"] }}>
                       {permission.chainIdentifier}
+                    </Body2>
+                    <Box
+                      cursor="pointer"
+                      style={{ color: ColorPalette["gray-300"] }}
+                    >
+                      <CloseIcon width="1rem" height="1rem" />
+                    </Box>
+                  </Columns>
+                </OriginStyle.Item>
+              </Columns>
+            );
+          })}
+          {value.globalPermissions.map((globalPermission) => {
+            return (
+              <Columns sum={1} key={globalPermission.type}>
+                <TreeIcon />
+                <OriginStyle.Item
+                  cursor="pointer"
+                  onClick={async () => {
+                    await permissionManagerStore.removeGlobalPermission(
+                      origin,
+                      globalPermission.type
+                    );
+                  }}
+                >
+                  <Columns sum={1} gutter="0.75rem" alignY="center">
+                    <Body2 style={{ color: ColorPalette["gray-100"] }}>
+                      {(() => {
+                        switch (globalPermission.type) {
+                          case "get-chain-infos":
+                            return "Get chain infos";
+                          default:
+                            return `Unknown: ${globalPermission.type}`;
+                        }
+                      })()}
                     </Body2>
                     <Box
                       cursor="pointer"

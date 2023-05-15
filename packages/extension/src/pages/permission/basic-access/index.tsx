@@ -17,9 +17,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
 }> = observer(({ data }) => {
   const { chainStore, permissionStore } = useStore();
 
-  const interactionInfo = useInteractionInfo(() => {
-    permissionStore.rejectPermissionAll();
-  });
+  const interactionInfo = useInteractionInfo();
 
   return (
     <HeaderLayout
@@ -96,12 +94,11 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                     borderBottomRightRadius: isLast ? "0.5rem" : undefined,
                   }}
                 >
-                  <Subtitle3
-                    color={ColorPalette["gray-50"]}
-                    style={{ padding: "1.5rem" }}
-                  >
-                    {chainInfo.chainName}
-                  </Subtitle3>
+                  <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
+                    <Subtitle3 color={ColorPalette["gray-50"]}>
+                      {chainInfo.chainName}
+                    </Subtitle3>
+                  </Box>
 
                   {isLast ? null : (
                     <Box

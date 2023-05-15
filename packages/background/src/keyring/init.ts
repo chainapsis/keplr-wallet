@@ -23,7 +23,6 @@ import {
   InitNonDefaultLedgerAppMsg,
   CreateKeystoneKeyMsg,
   AddKeystoneKeyMsg,
-  RequestICNSAdr36SignaturesMsg,
   ChangeKeyRingNameMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
@@ -56,7 +55,6 @@ export function init(router: Router, service: KeyRingService): void {
   router.registerMessage(CheckPasswordMsg);
   router.registerMessage(ExportKeyRingDatasMsg);
   router.registerMessage(InitNonDefaultLedgerAppMsg);
-  router.registerMessage(RequestICNSAdr36SignaturesMsg);
   router.registerMessage(ChangeKeyRingNameMsg);
 
   router.addHandler(ROUTE, getHandler(service));

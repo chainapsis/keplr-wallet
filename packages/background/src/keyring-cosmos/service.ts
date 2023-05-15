@@ -25,6 +25,7 @@ import { InteractionService } from "../interaction";
 import { Buffer } from "buffer/";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
+import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 
 export class KeyRingCosmosService {
   constructor(
@@ -705,6 +706,194 @@ export class KeyRingCosmosService {
             signature: Buffer.from(res.signature).toString("base64"),
           },
         };
+      }
+    );
+  }
+
+  async requestICNSAdr36SignaturesSelected(
+    env: Env,
+    origin: string,
+    chainId: string,
+    contractAddress: string,
+    owner: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<
+    {
+      chainId: string;
+      bech32Prefix: string;
+      bech32Address: string;
+      addressHash: "cosmos" | "ethereum";
+      pubKey: Uint8Array;
+      signatureSalt: number;
+      signature: Uint8Array;
+    }[]
+  > {
+    return await this.requestICNSAdr36Signatures(
+      env,
+      origin,
+      this.keyRingService.selectedVaultId,
+      chainId,
+      contractAddress,
+      owner,
+      username,
+      addressChainIds
+    );
+  }
+
+  async requestICNSAdr36Signatures(
+    env: Env,
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    contractAddress: string,
+    owner: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<
+    {
+      chainId: string;
+      bech32Prefix: string;
+      bech32Address: string;
+      addressHash: "cosmos" | "ethereum";
+      pubKey: Uint8Array;
+      signatureSalt: number;
+      signature: Uint8Array;
+    }[]
+  > {
+    const interactionInfo = {
+      chainId,
+      owner,
+      username,
+      origin,
+      accountInfos: [] as {
+        chainId: string;
+        bech32Prefix: string;
+        bech32Address: string;
+        pubKey: Uint8Array;
+      }[],
+    };
+
+    {
+      // Do this on other code block to avoid variable conflict.
+      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+      Bech32Address.validate(
+        contractAddress,
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      );
+
+      const key = await this.getKey(vaultId, chainId);
+      const bech32Address = new Bech32Address(key.address).toBech32(
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      );
+
+      if (bech32Address !== owner) {
+        throw new Error(
+          `Unmatched owner: (expected: ${bech32Address}, actual: ${owner})`
+        );
+      }
+    }
+    const salt = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+
+    for (const chainId of addressChainIds) {
+      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+      const key = await this.getKey(vaultId, chainId);
+
+      const bech32Address = new Bech32Address(key.address).toBech32(
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      );
+
+      interactionInfo.accountInfos.push({
+        chainId: chainInfo.chainId,
+        bech32Prefix: chainInfo.bech32Config.bech32PrefixAccAddr,
+        bech32Address: bech32Address,
+        pubKey: key.pubKey,
+      });
+    }
+
+    return await this.interactionService.waitApproveV2(
+      env,
+      "/sign-cosmos-icns",
+      "request-sign-icns-adr36",
+      interactionInfo,
+      async () => {
+        // 현재로써는 ledger에서는 따로 signature를 처리해줄 필요는 없다.
+        // 왜냐하면 어차피 ledger의 cosmos app에서는 coin type이 118로 고정되어있어서 모두 같은 주소를 가지기 때문이다.
+        // 아직까지 ethereum app 등은 지원하지 않기 때문에 실제로는 ledger에 대한 처리가 없더라도 문제가 되지 않는다.
+
+        const r: {
+          chainId: string;
+          bech32Prefix: string;
+          bech32Address: string;
+          addressHash: "cosmos" | "ethereum";
+          pubKey: Uint8Array;
+          signatureSalt: number;
+          signature: Uint8Array;
+        }[] = [];
+
+        const ownerBech32 = Bech32Address.fromBech32(owner);
+        for (const accountInfo of interactionInfo.accountInfos) {
+          const isEthermintLike = this.isEthermintLike(
+            this.chainsService.getChainInfoOrThrow(accountInfo.chainId)
+          );
+
+          if (
+            ownerBech32.toHex(false) !==
+            Bech32Address.fromBech32(accountInfo.bech32Address).toHex(false)
+          ) {
+            // When only the address is different with owner, the signature is necessary.
+            const data = `The following is the information for ICNS registration for ${username}.${accountInfo.bech32Prefix}.
+
+Chain id: ${chainId}
+Contract Address: ${contractAddress}
+Owner: ${owner}
+Salt: ${salt}`;
+
+            const signDoc = makeADR36AminoSignDoc(
+              accountInfo.bech32Address,
+              data
+            );
+
+            const signature = await this.keyRingService.sign(
+              accountInfo.chainId,
+              vaultId,
+              serializeSignDoc(signDoc),
+              isEthermintLike ? "keccak256" : "sha256"
+            );
+
+            r.push({
+              chainId: accountInfo.chainId,
+              bech32Prefix: accountInfo.bech32Prefix,
+              bech32Address: accountInfo.bech32Address,
+              addressHash: isEthermintLike ? "ethereum" : "cosmos",
+              pubKey: new PubKeySecp256k1(accountInfo.pubKey).toBytes(
+                // Should return uncompressed format if ethereum.
+                // Else return as compressed format.
+                isEthermintLike
+              ),
+              signatureSalt: salt,
+              signature,
+            });
+          } else {
+            r.push({
+              chainId: accountInfo.chainId,
+              bech32Prefix: accountInfo.bech32Prefix,
+              bech32Address: accountInfo.bech32Address,
+              addressHash: isEthermintLike ? "ethereum" : "cosmos",
+              pubKey: new PubKeySecp256k1(accountInfo.pubKey).toBytes(
+                // Should return uncompressed format if ethereum.
+                // Else return as compressed format.
+                isEthermintLike
+              ),
+              signatureSalt: 0,
+              signature: new Uint8Array(0),
+            });
+          }
+        }
+
+        return r;
       }
     );
   }

@@ -224,7 +224,7 @@ export class PermissionService {
 
     await this.interactionService.waitApproveV2(
       env,
-      "/permission-global",
+      "/permission",
       INTERACTION_TYPE_GLOBAL_PERMISSION,
       permissionData,
       () => {

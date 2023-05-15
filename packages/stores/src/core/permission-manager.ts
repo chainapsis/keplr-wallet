@@ -5,6 +5,7 @@ import {
   ClearAllPermissionsMsg,
   ClearOriginPermissionMsg,
   GetAllPermissionDataPerOriginMsg,
+  RemoveGlobalPermissionOriginMsg,
   RemovePermissionOrigin,
 } from "@keplr-wallet/background";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -104,6 +105,27 @@ export class PermissionManagerStore {
       });
 
       const msg = new RemovePermissionOrigin(chainId, type, origin);
+      await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    }
+  }
+
+  async removeGlobalPermission(origin: string, type: string) {
+    const perms = this.permissionData[origin];
+    const i = perms
+      ? perms.globalPermissions.findIndex((perm) => perm.type === type)
+      : -1;
+    if (i >= 0 && perms) {
+      perms.globalPermissions.splice(i, 1);
+
+      runInAction(() => {
+        // Update state optimistically before sending message to background.
+        // Dumb way to force to update the ref observable.
+        this._permissionData = {
+          ...this._permissionData,
+        };
+      });
+
+      const msg = new RemoveGlobalPermissionOriginMsg(type, origin);
       await this.requester.sendMessage(BACKGROUND_PORT, msg);
     }
   }
