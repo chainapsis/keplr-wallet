@@ -31,7 +31,12 @@ export const IBCTransferAmountView: FunctionComponent<{
     gasSimulator,
   }) => {
     return (
-      <Box paddingX="0.75rem">
+      <Box
+        paddingX="0.75rem"
+        style={{
+          flex: 1,
+        }}
+      >
         <Stack gutter="0.75rem">
           <AmountInput
             amountConfig={amountConfig}
@@ -41,6 +46,7 @@ export const IBCTransferAmountView: FunctionComponent<{
 
           <MemoInput memoConfig={memoConfig} />
 
+          <div style={{ flex: 1 }} />
           <FeeControl
             senderConfig={senderConfig}
             feeConfig={feeConfig}

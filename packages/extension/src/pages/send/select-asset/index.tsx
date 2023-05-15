@@ -47,7 +47,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
       return newTokens;
     }
 
-    return newTokens.filter((token) => {
+    const filtered = newTokens.filter((token) => {
       return (
         token.chainInfo.chainName
           .toLowerCase()
@@ -57,7 +57,15 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
           .includes(trimSearch.toLowerCase())
       );
     });
-  }, [search, tokens]);
+
+    if (paramIsIBCTransfer) {
+      return filtered.filter((token) => {
+        return token.chainInfo.hasFeature("ibc-transfer");
+      });
+    }
+
+    return filtered;
+  }, [paramIsIBCTransfer, search, tokens]);
 
   return (
     <HeaderLayout title="Select Asset" left={<BackButton />}>

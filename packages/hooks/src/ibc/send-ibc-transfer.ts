@@ -55,6 +55,8 @@ export const useIBCTransferConfig = (
     gasConfig
   );
 
+  amountConfig.setFeeConfig(feeConfig);
+
   const channelConfig = useIBCChannelConfig();
 
   const recipientConfig = useIBCRecipientConfig(

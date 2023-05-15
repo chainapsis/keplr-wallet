@@ -1,9 +1,13 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts/header";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
-import { useGasSimulator, useIBCTransferConfig } from "@keplr-wallet/hooks";
+import {
+  useGasSimulator,
+  useIBCTransferConfig,
+  useTxConfigsValidate,
+} from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
 import { IBCTransferSelectChannelView } from "./select-channel";
 import { IBCTransferAmountView } from "./amount";
@@ -59,7 +63,11 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
       // because gas simulator can change the gas config and fee config from the result of reaction,
       // and it can make repeated reaction.
       if (
+        ibcTransferConfigs.amountConfig.uiProperties.loadingState ===
+          "loading-block" ||
         ibcTransferConfigs.amountConfig.uiProperties.error != null ||
+        ibcTransferConfigs.recipientConfig.uiProperties.loadingState ===
+          "loading-block" ||
         ibcTransferConfigs.recipientConfig.uiProperties.error != null
       ) {
         throw new Error("Not ready to simulate tx");
@@ -76,28 +84,37 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const isSelectChannelPhase = phase === "channel";
 
-  const isSelectChannelValid =
-    ibcTransferConfigs.channelConfig.error == null &&
-    ibcTransferConfigs.recipientConfig.uiProperties.error == null &&
-    ibcTransferConfigs.memoConfig.uiProperties.error == null;
+  const _isSelectChannelInteractionBlocked = useTxConfigsValidate({
+    recipientConfig: ibcTransferConfigs.recipientConfig,
+    memoConfig: ibcTransferConfigs.memoConfig,
+  }).interactionBlocked;
+  const isSelectChannelInteractionBlocked = useMemo(() => {
+    if (_isSelectChannelInteractionBlocked) {
+      return true;
+    }
 
-  const isAmountValid =
-    ibcTransferConfigs.amountConfig.uiProperties.error == null &&
-    ibcTransferConfigs.feeConfig.uiProperties.error == null &&
-    ibcTransferConfigs.gasConfig.uiProperties.error == null;
+    return ibcTransferConfigs.channelConfig.error != null;
+  }, [
+    _isSelectChannelInteractionBlocked,
+    ibcTransferConfigs.channelConfig.error,
+  ]);
+
+  const isAmountInteractionBlocked = useTxConfigsValidate({
+    ...ibcTransferConfigs,
+    gasSimulator,
+  }).interactionBlocked;
 
   return (
     <HeaderLayout
       title="IBC Transfer"
+      fixedHeight={true}
       left={
         <Box
           paddingLeft="1rem"
           cursor="pointer"
           onClick={() => {
             if (isSelectChannelPhase) {
-              navigate("/send/select-asset?isIBCTransfer=true", {
-                replace: true,
-              });
+              navigate(-1);
             } else {
               setPhase("channel");
             }
@@ -130,49 +147,56 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                     preferNoSetMemo: true,
                   },
                   {
-                    onBroadcasted: () => {
-                      notification.show(
-                        "success",
-                        "IBC token transfer success",
-                        ""
-                      );
+                    onFulfill: (tx) => {
+                      if (tx.code != null && tx.code !== 0) {
+                        const log = tx.log ?? tx.raw_log;
+                        notification.show("failed", "Transaction Failed", log);
+                        return;
+                      }
+                      notification.show("success", "Transaction Success", "");
                     },
                   }
                 );
               } catch (e) {
                 notification.show(
                   "failed",
-                  "Fail to transfer token",
-                  e.message
+                  "Transaction Failed",
+                  e.message || e.toString()
                 );
               }
 
-              navigate("/");
+              navigate("/", {
+                replace: true,
+              });
             }
           }
         },
-        disabled: isSelectChannelPhase ? !isSelectChannelValid : !isAmountValid,
+        disabled: isSelectChannelPhase
+          ? isSelectChannelInteractionBlocked
+          : isAmountInteractionBlocked,
         isLoading: accountInfo.isSendingMsg === "ibcTransfer",
       }}
     >
-      {isSelectChannelPhase ? (
-        <IBCTransferSelectChannelView
-          chainId={chainId}
-          coinMinimalDenom={coinMinimalDenom}
-          channelConfig={ibcTransferConfigs.channelConfig}
-          recipientConfig={ibcTransferConfigs.recipientConfig}
-          memoConfig={ibcTransferConfigs.memoConfig}
-        />
-      ) : (
-        <IBCTransferAmountView
-          amountConfig={ibcTransferConfigs.amountConfig}
-          feeConfig={ibcTransferConfigs.feeConfig}
-          senderConfig={ibcTransferConfigs.senderConfig}
-          memoConfig={ibcTransferConfigs.memoConfig}
-          gasConfig={ibcTransferConfigs.gasConfig}
-          gasSimulator={gasSimulator}
-        />
-      )}
+      <Box height="100%">
+        {isSelectChannelPhase ? (
+          <IBCTransferSelectChannelView
+            chainId={chainId}
+            coinMinimalDenom={coinMinimalDenom}
+            channelConfig={ibcTransferConfigs.channelConfig}
+            recipientConfig={ibcTransferConfigs.recipientConfig}
+            memoConfig={ibcTransferConfigs.memoConfig}
+          />
+        ) : (
+          <IBCTransferAmountView
+            amountConfig={ibcTransferConfigs.amountConfig}
+            feeConfig={ibcTransferConfigs.feeConfig}
+            senderConfig={ibcTransferConfigs.senderConfig}
+            memoConfig={ibcTransferConfigs.memoConfig}
+            gasConfig={ibcTransferConfigs.gasConfig}
+            gasSimulator={gasSimulator}
+          />
+        )}
+      </Box>
     </HeaderLayout>
   );
 });

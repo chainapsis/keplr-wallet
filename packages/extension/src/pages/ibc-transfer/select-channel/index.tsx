@@ -41,9 +41,9 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
     const ibcChannelInfo = ibcChannelStore.get(chainId);
 
     const [isOpenSelectChannel, setIsOpenSelectChannel] = useState(false);
-    const [selectedChainId, setSelectedChainId] = useState<string | undefined>(
-      channelConfig.channel?.channelId
-    );
+    const [selectedChannelId, setSelectedChannelId] = useState<
+      string | undefined
+    >(channelConfig.channel?.channelId);
 
     const sender = accountStore.getAccount(
       chainStore.getChain(chainId).chainId
@@ -59,7 +59,12 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
       .getBalance(currency);
 
     return (
-      <Box paddingX="0.75rem">
+      <Box
+        paddingX="0.75rem"
+        style={{
+          flex: 1,
+        }}
+      >
         <Stack gutter="0.75rem">
           <Stack gutter="0.375rem">
             <Subtitle3>Asset</Subtitle3>
@@ -108,18 +113,21 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
                   },
                 ])}
               placeholder="Select Chain"
-              selectedItemKey={selectedChainId}
+              selectedItemKey={selectedChannelId}
               onSelect={(key) => {
                 if (key === "add-channel") {
                   setIsOpenSelectChannel(true);
                 } else {
-                  setSelectedChainId(key);
-
-                  channelConfig.setChannel(
-                    ibcChannelInfo
-                      .getTransferChannels()
-                      .find((channel) => channel.channelId === key)
-                  );
+                  const channel = ibcChannelInfo
+                    .getTransferChannels()
+                    .find((channel) => channel.channelId === key);
+                  if (channel) {
+                    channelConfig.setChannel(channel);
+                    setSelectedChannelId(key);
+                  } else {
+                    channelConfig.setChannel(undefined);
+                    setSelectedChannelId(undefined);
+                  }
                 }
               }}
             />
@@ -129,13 +137,14 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
           />
-
-          <GuideBox
-            color="danger"
-            title=" Most of the centralized exchanges do not support IBC transfers"
-            paragraph="We advise you not to perform IBC transfers to these exchanges, as your assets may be lost. Please check with the exchange's policies before initiating any IBC transfers. "
-          />
         </Stack>
+
+        <div style={{ flex: 1 }} />
+        <GuideBox
+          color="danger"
+          title=" Most of the centralized exchanges do not support IBC transfers"
+          paragraph="We advise you not to perform IBC transfers to these exchanges, as your assets may be lost. Please check with the exchange's policies before initiating any IBC transfers. "
+        />
 
         <Modal
           isOpen={isOpenSelectChannel}

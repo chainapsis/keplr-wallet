@@ -17,14 +17,15 @@ export const IBCAddChannelModal: FunctionComponent<{
   const { chainStore, queriesStore, ibcChannelStore } = useStore();
 
   const [selectedChainId, setSelectedChainId] = useState("");
-  const [channelId, setChannelId] = useState("");
+  const [value, setValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   return (
     <YAxis alignX="center">
       <Box
-        width="20rem"
+        width="90%"
+        maxWidth="22.5rem"
         padding="1.5rem 1rem"
         backgroundColor={ColorPalette["gray-600"]}
         borderRadius="0.5rem"
@@ -49,11 +50,11 @@ export const IBCAddChannelModal: FunctionComponent<{
           size="large"
           placeholder="Select Chain"
           selectedItemKey={selectedChainId}
-          items={chainStore.chainInfos
+          items={chainStore.chainInfosInUI
             .filter(
               (chainInfo) =>
                 chainInfo.chainId !== chainId &&
-                (chainInfo.features ?? []).includes("ibc-transfer")
+                chainInfo.hasFeature("ibc-transfer")
             )
             .map((chainInfo) => {
               return {
@@ -72,9 +73,9 @@ export const IBCAddChannelModal: FunctionComponent<{
         <TextInput
           label="Channel Id"
           placeholder="Source Channel ID"
-          onChange={(event) => {
-            const field = event.target.value;
-            setChannelId(isNaN(parseFloat(field)) ? field : `channel-${field}`);
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
             setError("");
           }}
           error={error}
@@ -84,12 +85,18 @@ export const IBCAddChannelModal: FunctionComponent<{
 
         <Button
           text="Save"
-          disabled={selectedChainId === "" || channelId === "" || error !== ""}
+          disabled={
+            selectedChainId === "" || value.trim() === "" || error !== ""
+          }
           isLoading={isLoading}
           onClick={async () => {
             setIsLoading(true);
 
             const queries = queriesStore.get(chainId);
+
+            const channelId = Number.isNaN(parseFloat(value.trim()))
+              ? value
+              : `channel-${value}`;
 
             const channel = await queries.cosmos.queryIBCChannel
               .getTransferChannel(channelId)
@@ -123,10 +130,6 @@ export const IBCAddChannelModal: FunctionComponent<{
 
             setIsLoading(false);
             setError(error);
-
-            console.log("channel", channel);
-            console.log("clientState", clientState);
-            console.log(error);
 
             if (channel && clientState && error === "") {
               await ibcChannelStore.get(chainId).addChannel({
