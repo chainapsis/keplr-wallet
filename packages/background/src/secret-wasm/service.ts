@@ -131,29 +131,39 @@ export class SecretWasmService {
       chainInfo.chainId
     );
 
-    return await this.getSeedInner(chainInfo, key.bech32Address);
+    return await this.getSeedInner(chainInfo, key);
   }
 
   protected async getSeedInner(
     chainInfo: ChainInfo,
-    bech32Address: string
+    key: {
+      readonly bech32Address: string;
+      readonly isNanoLedger: boolean;
+    }
   ): Promise<Uint8Array> {
     const cacheKey = `seed-${
       ChainIdHelper.parse(chainInfo.chainId).identifier
-    }-${bech32Address}`;
+    }-${key.bech32Address}`;
 
     const cached = this.seedMap.get(cacheKey);
     if (cached) {
       return Buffer.from(cached, "hex");
     }
 
-    // TODO: I don't know how to handle this in ledger.
-    const seed = Hash.sha256(
-      await this.keyRingCosmosService.legacySignArbitraryInternal(
-        chainInfo.chainId,
-        "Create Keplr Secret encryption key. Only approve requests by Keplr."
-      )
-    );
+    const seed = await (async () => {
+      if (key.isNanoLedger) {
+        const arr = new Uint8Array(32);
+        crypto.getRandomValues(arr);
+        return arr;
+      }
+
+      return Hash.sha256(
+        await this.keyRingCosmosService.legacySignArbitraryInternal(
+          chainInfo.chainId,
+          "Create Keplr Secret encryption key. Only approve requests by Keplr."
+        )
+      );
+    })();
 
     this.seedMap.set(cacheKey, Buffer.from(seed).toString("hex"));
 
