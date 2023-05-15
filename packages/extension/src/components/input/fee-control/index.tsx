@@ -169,7 +169,8 @@ export const FeeControl: FunctionComponent<{
         <Styles.Container
           hasError={
             feeConfig.uiProperties.error != null ||
-            feeConfig.uiProperties.error != null
+            gasConfig.uiProperties.error != null ||
+            gasSimulator?.uiProperties.error != null
           }
           onClick={() => setIsModalOpen(true)}
         >
@@ -266,6 +267,34 @@ export const FeeControl: FunctionComponent<{
                     return (
                       feeConfig.uiProperties.warning.message ||
                       feeConfig.uiProperties.warning.toString()
+                    );
+                  }
+
+                  if (gasConfig.uiProperties.error) {
+                    return (
+                      gasConfig.uiProperties.error.message ||
+                      gasConfig.uiProperties.error.toString()
+                    );
+                  }
+
+                  if (gasConfig.uiProperties.warning) {
+                    return (
+                      gasConfig.uiProperties.warning.message ||
+                      gasConfig.uiProperties.warning.toString()
+                    );
+                  }
+
+                  if (gasSimulator?.uiProperties.error) {
+                    return (
+                      gasSimulator.uiProperties.error.message ||
+                      gasSimulator.uiProperties.error.toString()
+                    );
+                  }
+
+                  if (gasSimulator?.uiProperties.warning) {
+                    return (
+                      gasSimulator.uiProperties.warning.message ||
+                      gasSimulator.uiProperties.warning.toString()
                     );
                   }
                 })()}
