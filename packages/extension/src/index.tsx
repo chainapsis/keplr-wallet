@@ -217,6 +217,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       return false;
     }
 
+    if (isURLUnlockPage) {
+      return true;
+    }
+
     if (keyRingStore.status === "unlocked") {
       // mobx의 특성상 밑의 로직은 useMemo 안에서 처리할 수가 없어서 분리되었음.
       const firstAccount = accountStore.getAccount(

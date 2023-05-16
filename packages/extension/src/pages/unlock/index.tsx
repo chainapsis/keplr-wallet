@@ -49,37 +49,22 @@ export const UnlockPage: FunctionComponent = observer(() => {
           await keyRingStore.unlock(password);
 
           if (interactionInfo.interaction) {
-            let _proceedNext = false;
-            const promises: Promise<unknown>[] = [];
             // Approve all waiting interaction for the enabling key ring.
             const interactions = interactionStore.getAllData("unlock");
-            for (const interaction of interactions) {
-              promises.push(
-                (async () => {
-                  await interactionStore.approveWithProceedNextV2(
-                    interaction.id,
-                    {},
-                    (proceedNext) => {
-                      if (proceedNext) {
-                        _proceedNext = true;
-                      }
-                    }
-                  );
-                })()
-              );
-            }
-
-            // 실패할리가 없지만... 실패했다고 해도 별 방법은 없으니 settled로...
-            await Promise.allSettled(promises);
-
-            if (!_proceedNext) {
-              if (
-                interactionInfo.interaction &&
-                !interactionInfo.interactionInternal
-              ) {
-                window.close();
+            await interactionStore.approveWithProceedNextV2(
+              interactions.map((interaction) => interaction.id),
+              {},
+              (proceedNext) => {
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  if (!proceedNext) {
+                    window.close();
+                  }
+                }
               }
-            }
+            );
           }
 
           setError(undefined);
