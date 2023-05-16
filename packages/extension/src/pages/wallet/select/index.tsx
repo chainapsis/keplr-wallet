@@ -105,8 +105,9 @@ const KeyInfoList: FunctionComponent<{
     <Box>
       <YAxis>
         <Subtitle4
+          color={ColorPalette["gray-300"]}
           style={{
-            color: ColorPalette["gray-300"],
+            paddingLeft: "0.5rem",
           }}
         >
           {title}
