@@ -117,7 +117,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     for (const id of ids) {
       const d = this.getData(id);
       if (!d || this.isObsoleteInteraction(id)) {
-        return;
+        continue;
       }
 
       this.markAsObsolete(id);
@@ -194,7 +194,7 @@ export class InteractionStore implements InteractionForegroundHandler {
     for (const id of ids) {
       const d = this.getData(id);
       if (!d || this.isObsoleteInteraction(id)) {
-        return;
+        continue;
       }
 
       this.markAsObsolete(id);
