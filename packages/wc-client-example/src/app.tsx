@@ -95,8 +95,8 @@ export const App: FunctionComponent = observer(() => {
               const cyphertext = Buffer.from(encrypted ?? [])
                 .slice(64)
                 .toString("base64");
-              console.log(nonce);
-              console.log(cyphertext);
+              console.log(`enigmaEncrypt: ${nonce}`);
+              console.log(`enigmaEncrypt: ${cyphertext}`);
             });
         }}
       >
@@ -124,7 +124,7 @@ export const App: FunctionComponent = observer(() => {
             )
             .then((plaintext) => {
               const decoded = Buffer.from(plaintext ?? []).toString();
-              console.log(decoded);
+              console.log(`enigmaDecrypt: ${decoded}`);
             });
         }}
       >
@@ -179,7 +179,10 @@ export const App: FunctionComponent = observer(() => {
                 chainInfo.chainId,
                 "secret1k6u0cy4feepm6pehnz804zmwakuwdapm69tuc4"
               )
-            );
+            )
+            .then(() => {
+              console.log(`suggestToken complete`);
+            });
         }}
       >
         Test suggestToken
@@ -239,7 +242,9 @@ export const App: FunctionComponent = observer(() => {
               )
             )
             .then((result) => {
-              console.log(`getSecret20ViewingKey: ${JSON.stringify(result)}`);
+              console.log(
+                `getSecret20ViewingKeyOrPermit: ${JSON.stringify(result)}`
+              );
             });
         }}
       >
