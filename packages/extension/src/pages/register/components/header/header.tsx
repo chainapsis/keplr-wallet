@@ -212,7 +212,7 @@ const HeaderStep: FunctionComponent<{
   return (
     <Box position="relative">
       <YAxis alignX="center">
-        {stepCurrent === 0 && stepTotal === 0 ? null : (
+        {stepCurrent <= 0 && stepTotal <= 0 ? null : (
           <React.Fragment>
             <Subtitle3
               color={ColorPalette["gray-200"]}
