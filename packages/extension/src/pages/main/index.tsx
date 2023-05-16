@@ -262,7 +262,7 @@ export const MainPage: FunctionComponent = observer(() => {
                 e.preventDefault();
 
                 browser.tabs.create({
-                  url: "https://wallet.keplr.app/?tab=staking",
+                  url: "https://wallet.keplr.app",
                 });
               }}
             >
@@ -279,7 +279,7 @@ export const MainPage: FunctionComponent = observer(() => {
                 e.preventDefault();
 
                 browser.tabs.create({
-                  url: "https://wallet.keplr.app/?tab=staking",
+                  url: "https://wallet.keplr.app",
                 });
               }}
             >
