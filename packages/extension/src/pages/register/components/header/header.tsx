@@ -213,11 +213,14 @@ const HeaderStep: FunctionComponent<{
     <Box position="relative">
       <YAxis alignX="center">
         {stepCurrent === 0 && stepTotal === 0 ? null : (
-          <Subtitle3
-            color={ColorPalette["gray-200"]}
-          >{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
+          <React.Fragment>
+            <Subtitle3
+              color={ColorPalette["gray-200"]}
+            >{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
+            <Gutter size="0.75rem" />
+          </React.Fragment>
         )}
-        <Gutter size="0.75rem" />
+
         <RegisterH3>{title}</RegisterH3>
       </YAxis>
       <Box width="29.5rem" marginX="auto">
