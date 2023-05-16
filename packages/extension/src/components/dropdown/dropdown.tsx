@@ -3,6 +3,7 @@ import { Styles } from "./styles";
 import { DropdownProps } from "./types";
 import { Column, Columns } from "../column";
 import { ArrowDropDownIcon } from "../icon";
+import { Label } from "../input";
 
 // eslint-disable-next-line react/display-name
 export const Dropdown: FunctionComponent<DropdownProps> = ({
@@ -13,6 +14,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   selectedItemKey,
   onSelect,
   size = "small",
+  label,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const wrapperRef = useRef<HTMLInputElement>(null);
@@ -35,6 +37,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
 
   return (
     <Styles.Container ref={wrapperRef}>
+      {label ? <Label content={label} /> : null}
       <Styles.SelectedContainer
         className={className}
         style={style}

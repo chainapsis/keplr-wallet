@@ -76,8 +76,8 @@ export const TransactionFeeModal: FunctionComponent<{
         </Stack>
 
         <Stack gutter="0.375rem">
-          <Subtitle3>Fee Token</Subtitle3>
           <Dropdown
+            label="Fee Token"
             items={feeConfig.selectableFeeCurrencies
               .filter((cur, i) => {
                 if (i === 0) {

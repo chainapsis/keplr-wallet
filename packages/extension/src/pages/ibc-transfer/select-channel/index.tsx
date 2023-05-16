@@ -12,7 +12,6 @@ import {
   IRecipientConfig,
 } from "@keplr-wallet/hooks";
 import { GuideBox } from "../../../components/guide-box";
-import { ColorPalette } from "../../../styles";
 import { Dropdown, DropdownItemProps } from "../../../components/dropdown";
 import { Modal } from "../../../components/modal";
 import { IBCAddChannelModal } from "../add-channel-modal";
@@ -81,12 +80,9 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
           </Stack>
 
           <Stack gutter="0.375rem">
-            <Subtitle3 color={ColorPalette["gray-100"]}>
-              Destination Chain
-            </Subtitle3>
-
             <Dropdown
               size="large"
+              label="Destination Chain"
               items={ibcChannelInfo
                 .getTransferChannels()
                 .filter((channel) =>
