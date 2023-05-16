@@ -19,7 +19,7 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout title="General" left={<BackButton />}>
-      <Box paddingX="0.75rem">
+      <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
             title="Language"

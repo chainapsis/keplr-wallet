@@ -12,7 +12,7 @@ export const SettingSecurityPage: FunctionComponent = () => {
 
   return (
     <HeaderLayout title="Security&Privacy" left={<BackButton />}>
-      <Box paddingX="0.75rem">
+      <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="1rem">
           <PageButton
             title="Connected Websites"
