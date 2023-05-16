@@ -485,6 +485,8 @@ const ClaimTokenItem: FunctionComponent<{
   const navigate = useNavigate();
   const notification = useNotification();
 
+  const [isSimulating, setIsSimulating] = useState(false);
+
   // TODO: Add below property to config.ui.ts
   const defaultGasPerDelegation = 140000;
 
@@ -514,6 +516,8 @@ const ClaimTokenItem: FunctionComponent<{
     let gas = new Int(validatorAddresses.length * defaultGasPerDelegation);
 
     try {
+      setIsSimulating(true);
+
       const simulated = await tx.simulate();
 
       // Gas adjustment is 1.5
@@ -561,12 +565,16 @@ const ClaimTokenItem: FunctionComponent<{
       navigate("/", {
         replace: true,
       });
+    } finally {
+      setIsSimulating(false);
     }
   };
 
   const isLoading =
     accountStore.getAccount(viewToken.chainInfo.chainId).isSendingMsg ===
-      "withdrawRewards" || state.isLoading;
+      "withdrawRewards" ||
+    state.isLoading ||
+    isSimulating;
 
   return (
     <Box padding="1rem">
