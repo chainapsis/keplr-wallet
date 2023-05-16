@@ -242,6 +242,10 @@ const BottomPriceButton: FunctionComponent<{
   return (
     <Box marginTop="0.375rem" marginLeft="0.375rem" alignX="left">
       <Box
+        color={ColorPalette["gray-300"]}
+        hover={{
+          color: ColorPalette["gray-200"],
+        }}
         onClick={(e) => {
           e.preventDefault();
 
@@ -258,7 +262,7 @@ const BottomPriceButton: FunctionComponent<{
             viewBox="0 0 20 20"
           >
             <path
-              fill={ColorPalette["gray-300"]}
+              fill="currentColor"
               fillRule="evenodd"
               d="M13.2 2.24a.75.75 0 00.04 1.06l2.1 1.95H6.75a.75.75 0 000 1.5h8.59l-2.1 1.95a.75.75 0 101.02 1.1l3.5-3.25a.75.75 0 000-1.1l-3.5-3.25a.75.75 0 00-1.06.04zm-6.4 8a.75.75 0 00-1.06-.04l-3.5 3.25a.75.75 0 000 1.1l3.5 3.25a.75.75 0 101.02-1.1l-2.1-1.95h8.59a.75.75 0 000-1.5H4.66l2.1-1.95a.75.75 0 00.04-1.06z"
               clipRule="evenodd"
@@ -266,7 +270,6 @@ const BottomPriceButton: FunctionComponent<{
           </svg>
           {/* 여기서 Gutter가 안먹힌다. 왜인지는 모른다. 그냥 marginLeft 썻음 */}
           <Body3
-            color={ColorPalette["gray-300"]}
             style={{
               marginLeft: "0.3rem",
             }}
@@ -290,12 +293,21 @@ const MaxButton: FunctionComponent<{
       height="1.625rem"
       alignX="center"
       alignY="center"
-      paddingX="0.5rem"
-      // Gray-550
-      backgroundColor={
-        isMax ? ColorPalette["gray-600"] : ColorPalette["gray-500"]
-      }
+      paddingX="0.4375rem"
+      color={isMax ? ColorPalette["gray-300"] : ColorPalette["gray-10"]}
+      backgroundColor={ColorPalette["gray-500"]}
       borderRadius="0.25rem"
+      borderWidth={"1px"}
+      borderColor={isMax ? ColorPalette["gray-300"] : ColorPalette["gray-500"]}
+      hover={{
+        color: isMax ? ColorPalette["gray-300"] : ColorPalette["white"],
+        backgroundColor: isMax
+          ? ColorPalette["gray-500"]
+          : ColorPalette["gray-550"],
+        borderColor: isMax
+          ? ColorPalette["gray-400"]
+          : ColorPalette["gray-550"],
+      }}
       onClick={(e) => {
         e.preventDefault();
 
@@ -306,9 +318,7 @@ const MaxButton: FunctionComponent<{
         }
       }}
     >
-      <Button1 color={isMax ? ColorPalette["white"] : ColorPalette["gray-10"]}>
-        max
-      </Button1>
+      <Button1>max</Button1>
     </Box>
   );
 });

@@ -14,6 +14,8 @@ export interface BoxProps {
   color?: string;
   backgroundColor?: string;
   borderRadius?: string;
+  borderWidth?: string;
+  borderColor?: string;
   padding?: string;
   paddingX?: string;
   paddingY?: string;
@@ -46,5 +48,7 @@ export interface BoxProps {
   hover?: {
     color?: string;
     backgroundColor?: string;
+    borderWidth?: string;
+    borderColor?: string;
   };
 }

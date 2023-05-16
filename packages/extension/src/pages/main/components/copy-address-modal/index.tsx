@@ -34,9 +34,6 @@ const Styles = {
 
     overflow-y: auto;
   `,
-  ItemContainer: styled.div`
-    padding: 0.875rem 0.5rem 0.875rem 1rem;
-  `,
   TextButton: styled(Button2)`
     padding: 0.5rem 1rem;
   `,
@@ -281,7 +278,17 @@ export const ChainAddressItem: FunctionComponent<{
   const [hasCopied, setHasCopied] = useState(false);
 
   return (
-    <Styles.ItemContainer
+    <Box
+      paddingY="0.875rem"
+      paddingLeft="1rem"
+      paddingRight="0.5rem"
+      borderRadius="0.375rem"
+      backgroundColor={ColorPalette["gray-600"]}
+      hover={{
+        backgroundColor: !blockInteraction
+          ? ColorPalette["gray-550"]
+          : undefined,
+      }}
       style={{
         cursor: blockInteraction ? "auto" : "pointer",
       }}
@@ -352,7 +359,7 @@ export const ChainAddressItem: FunctionComponent<{
           {hasCopied ? "Copied" : "Copy"}
         </Styles.TextButton>
       </Columns>
-    </Styles.ItemContainer>
+    </Box>
   );
 };
 
@@ -370,6 +377,13 @@ export const EthereumAddressItem: FunctionComponent<{
       paddingY="0.875rem"
       paddingLeft="2.75rem"
       paddingRight="0.5rem"
+      borderRadius="0.375rem"
+      backgroundColor={ColorPalette["gray-600"]}
+      hover={{
+        backgroundColor: !blockInteraction
+          ? ColorPalette["gray-550"]
+          : undefined,
+      }}
       style={{
         cursor: blockInteraction ? "auto" : "pointer",
       }}

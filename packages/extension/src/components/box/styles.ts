@@ -13,6 +13,10 @@ export const Styles = {
     color: ${({ color }) => color};
     background-color: ${({ backgroundColor }) => backgroundColor};
     border-radius: ${({ borderRadius }) => borderRadius};
+    
+    border-style: ${({ borderWidth }) => (borderWidth ? "solid" : undefined)};
+    border-width: ${({ borderWidth }) => borderWidth};
+    border-color: ${({ borderColor }) => borderColor};
 
     padding: ${({ padding }) => padding};
     padding-left: ${({ paddingLeft, paddingX }) => paddingLeft || paddingX};
@@ -62,6 +66,9 @@ export const Styles = {
           &:hover {
             color: ${hover.color};
             background-color: ${hover.backgroundColor};
+            border-style: ${hover.borderWidth ? "solid" : undefined};
+            border-width: ${hover.borderWidth};
+            border-color: ${hover.borderColor};
           }
         `;
       }
