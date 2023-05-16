@@ -124,7 +124,6 @@ export const UnlockPage: FunctionComponent = observer(() => {
               }
               enabled={false}
               isAlwaysOpen={isOnCapsLock}
-              placement={["top", "left"]}
             >
               <div />
             </Tooltip>
@@ -135,7 +134,6 @@ export const UnlockPage: FunctionComponent = observer(() => {
             label="Password"
             type="password"
             value={password}
-            style={{ width: "100%" }}
             onChange={(e) => {
               e.preventDefault();
 

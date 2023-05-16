@@ -16,8 +16,7 @@ export const Tooltip: FunctionComponent<{
   enabled?: boolean;
   content?: string | React.ReactElement;
   isAlwaysOpen?: boolean;
-  placement?: ("top" | "left" | "right" | "bottom")[];
-}> = ({ enabled, content, isAlwaysOpen = false, placement, children }) => {
+}> = ({ enabled, content, isAlwaysOpen = false, children }) => {
   const [_isOpen, setIsOpen] = useState(false);
   const isOpen = _isOpen || isAlwaysOpen;
 
@@ -26,7 +25,7 @@ export const Tooltip: FunctionComponent<{
     middleware: [
       offset(9),
       autoPlacement({
-        allowedPlacements: placement ?? ["top", "bottom"],
+        allowedPlacements: ["top", "bottom"],
       }),
       shift({
         padding: 10,
