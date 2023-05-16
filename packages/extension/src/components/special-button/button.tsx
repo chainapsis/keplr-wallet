@@ -12,6 +12,38 @@ const springConfig = {
   friction: 21,
 };
 
+const gradientSpringConfig = {
+  mass: 0.6,
+  tension: 220,
+  friction: 15,
+};
+
+const onClickSpringConfig = {
+  mass: 0.6,
+  tension: 320,
+  friction: 10,
+};
+
+const gradient1Pos = "16.15%";
+const gradient1DefaultColor = ColorPalette["blue-400"];
+const gradient1HoverColor = "#2C4BE2";
+
+const gradient2Pos = "100%";
+const gradient2DefaultColor = ColorPalette["blue-400"];
+const gradient2HoverColor = "#7A59FF";
+
+const defaultBoxShadowColor = "#2723F700";
+const hoverBoxShadowColor = "#2723F7FF";
+const pressedBoxShadowColor = "#2723F700";
+
+const defaultBoxShadowStrength = 0;
+const hoverBoxShadowStrength = 11;
+const pressedBoxShadowStrength = 0;
+
+const defaultScale = 1;
+const hoverScale = 1.03;
+const pressedScale = 0.98;
+
 export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   onClick,
   left,
@@ -20,84 +52,113 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   isLoading,
   textOverrideIcon,
 }) => {
-  const gradient1Pos = "16.15%";
-  const gradient1DefaultColor = ColorPalette["blue-400"];
-  const gradient1HoverColor = "#2C4BE2";
-  const gradient1 = useSpringValue(gradient1DefaultColor, {
-    config: springConfig,
-  });
-  const gradient2Pos = "100%";
-  const gradient2DefaultColor = ColorPalette["blue-400"];
-  const gradient2HoverColor = "#7A59FF";
-  const gradient2 = useSpringValue(gradient2DefaultColor, {
-    config: springConfig,
-  });
+  const gradient1 = useSpringValue(gradient1DefaultColor);
+  const gradient2 = useSpringValue(gradient2DefaultColor);
 
-  const defaultBoxShadowColor = "#2723F700";
-  const hoverBoxShadowColor = "#2723F7FF";
-  const pressedBoxShadowColor = "#2723F700";
-  const boxShadowColor = useSpringValue(defaultBoxShadowColor, {
-    config: springConfig,
-  });
+  const boxShadowColor = useSpringValue(defaultBoxShadowColor);
 
-  const defaultBoxShadowStrength = 0;
-  const hoverBoxShadowStrength = 11;
-  const pressedBoxShadowStrength = 0;
-  const boxShadowStrength = useSpringValue(defaultBoxShadowStrength, {
-    config: springConfig,
-  });
+  const boxShadowStrength = useSpringValue(defaultBoxShadowStrength);
 
-  const defaultScale = 1;
-  const hoverScale = 1.05;
-  const pressedScale = 0.95;
-  const scale = useSpringValue(defaultScale, { config: springConfig });
+  const scale = useSpringValue(defaultScale);
 
   const [isHover, setIsHover] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
   useLayoutEffect(() => {
     if (isHover) {
-      gradient1.start(gradient1HoverColor);
-      gradient2.start(gradient2HoverColor);
+      gradient1.start(gradient1HoverColor, {
+        config: gradientSpringConfig,
+      });
+      gradient2.start(gradient2HoverColor, {
+        config: gradientSpringConfig,
+      });
 
-      scale.start(hoverScale);
-      boxShadowColor.start(hoverBoxShadowColor);
-      boxShadowStrength.start(hoverBoxShadowStrength);
+      scale.start(hoverScale, {
+        config: springConfig,
+      });
+      boxShadowColor.start(hoverBoxShadowColor, {
+        config: springConfig,
+      });
+      boxShadowStrength.start(hoverBoxShadowStrength, {
+        config: springConfig,
+      });
     } else {
-      gradient1.start(gradient1DefaultColor);
-      gradient2.start(gradient2DefaultColor);
+      gradient1.start(gradient1DefaultColor, {
+        config: gradientSpringConfig,
+      });
+      gradient2.start(gradient2DefaultColor, {
+        config: gradientSpringConfig,
+      });
 
-      scale.start(defaultScale);
-      boxShadowColor.start(defaultBoxShadowColor);
-      boxShadowStrength.start(defaultBoxShadowStrength);
+      scale.start(defaultScale, {
+        config: springConfig,
+      });
+      boxShadowColor.start(defaultBoxShadowColor, {
+        config: springConfig,
+      });
+      boxShadowStrength.start(defaultBoxShadowStrength, {
+        config: springConfig,
+      });
     }
-  }, [
-    // Other things except for `isHover` are constant.
-    boxShadowColor,
-    boxShadowStrength,
-    gradient1,
-    gradient1DefaultColor,
-    gradient2,
-    gradient2DefaultColor,
-    isHover,
-    scale,
-  ]);
+  }, [boxShadowColor, boxShadowStrength, gradient1, gradient2, isHover, scale]);
 
   useLayoutEffect(() => {
     if (isPressed) {
-      scale.start(pressedScale);
-      boxShadowColor.start(pressedBoxShadowColor);
-      boxShadowStrength.start(pressedBoxShadowStrength);
+      gradient1.start(gradient1HoverColor, {
+        config: gradientSpringConfig,
+      });
+      gradient2.start(gradient2HoverColor, {
+        config: gradientSpringConfig,
+      });
+
+      scale.start(pressedScale, {
+        config: springConfig,
+      });
+      boxShadowColor.start(pressedBoxShadowColor, {
+        config: springConfig,
+      });
+      boxShadowStrength.start(pressedBoxShadowStrength, {
+        config: springConfig,
+      });
     }
-    // Other things except for `isPressed` are constant.
-  }, [boxShadowColor, boxShadowStrength, isPressed, scale]);
+  }, [
+    boxShadowColor,
+    boxShadowStrength,
+    gradient1,
+    gradient2,
+    isPressed,
+    scale,
+  ]);
 
   return (
     <Styles.Container>
       <Styles.Button
         isLoading={isLoading}
         type="button"
-        onClick={onClick}
+        onClick={() => {
+          setIsPressed(false);
+
+          gradient1.start(gradient1DefaultColor, {
+            config: gradientSpringConfig,
+          });
+          gradient2.start(gradient2DefaultColor, {
+            config: gradientSpringConfig,
+          });
+
+          scale.start(defaultScale, {
+            config: onClickSpringConfig,
+          });
+          boxShadowColor.start(defaultBoxShadowColor, {
+            config: onClickSpringConfig,
+          });
+          boxShadowStrength.start(defaultBoxShadowStrength, {
+            config: onClickSpringConfig,
+          });
+
+          if (onClick) {
+            onClick();
+          }
+        }}
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => {
           setIsHover(false);
@@ -105,7 +166,6 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           setIsPressed(false);
         }}
         onMouseDown={() => setIsPressed(true)}
-        onMouseUp={() => setIsPressed(false)}
         style={{
           background: to(
             [gradient1, gradient2],

@@ -1,8 +1,10 @@
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
-import { ButtonRadius } from "../button";
+import { ButtonRadius, getButtonHeightRem } from "../button";
 import { SpecialButtonProps } from "./types";
 import { animated } from "@react-spring/web";
+
+export const SpecialButtonHeightRem = getButtonHeightRem("large");
 
 export const Styles = {
   Container: styled.div`
@@ -16,7 +18,7 @@ export const Styles = {
   // If not omitted, they are intersected with each other.
   Button: styled(animated.button)<SpecialButtonProps>`
     width: 100%;
-    height: 3.25rem;
+    height: ${SpecialButtonHeightRem}rem;
     display: flex;
     justify-content: center;
     align-items: center;

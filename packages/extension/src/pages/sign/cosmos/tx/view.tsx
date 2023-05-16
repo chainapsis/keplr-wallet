@@ -176,6 +176,76 @@ export const CosmosTxView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
+  const buttonDisabled =
+    txConfigsValidate.interactionBlocked ||
+    !signDocHelper.signDocWrapper ||
+    isLedgerAndDirect;
+
+  const approve = async () => {
+    if (signDocHelper.signDocWrapper) {
+      if (interactionData.data.keyType === "ledger") {
+        setIsLedgerInteracting(true);
+        setLedgerInteractingError(undefined);
+      }
+
+      try {
+        const signature = await handleCosmosPreSign(
+          interactionData,
+          signDocHelper.signDocWrapper
+        );
+
+        await signInteractionStore.approveWithProceedNext(
+          interactionData.id,
+          signDocHelper.signDocWrapper,
+          signature,
+          async (proceedNext) => {
+            if (!proceedNext) {
+              if (
+                interactionInfo.interaction &&
+                !interactionInfo.interactionInternal
+              ) {
+                window.close();
+              }
+            }
+
+            if (
+              interactionInfo.interaction &&
+              interactionInfo.interactionInternal
+            ) {
+              // XXX: 약간 난해한 부분인데
+              //      내부의 tx의 경우에는 tx 이후의 routing을 요청한 쪽에서 처리한다.
+              //      하지만 tx를 처리할때 tx broadcast 등의 과정이 있고
+              //      서명 페이지에서는 이러한 과정이 끝났는지 아닌지를 파악하기 힘들다.
+              //      만약에 밑과같은 처리를 하지 않으면 interaction data가 먼저 지워지면서
+              //      화면이 깜빡거리는 문제가 발생한다.
+              //      이 문제를 해결하기 위해서 내부의 tx는 보내는 쪽에서 routing을 잘 처리한다고 가정하고
+              //      페이지를 벗어나고 나서야 data를 지우도록한다.
+              await unmountPromise.promise;
+            }
+          },
+          {
+            // XXX: 단지 special button의 애니메이션을 보여주기 위해서 delay를 넣음...ㅋ;
+            preDelay: 200,
+          }
+        );
+      } catch (e) {
+        console.log(e);
+
+        if (e instanceof KeplrError) {
+          if (e.module === ErrModule) {
+            setLedgerInteractingError(e);
+          } else {
+            setLedgerInteractingError(undefined);
+          }
+        } else {
+          setLedgerInteractingError(undefined);
+        }
+      } finally {
+        setIsLedgerInteracting(false);
+      }
+    }
+  };
+
   return (
     <HeaderLayout
       title="Confirm Transaction"
@@ -187,78 +257,32 @@ export const CosmosTxView: FunctionComponent<{
           }
         />
       }
-      bottomButton={{
-        text: "Approve",
-        color: "primary",
-        size: "large",
-        disabled:
-          txConfigsValidate.interactionBlocked ||
-          !signDocHelper.signDocWrapper ||
-          isLedgerAndDirect,
-        isLoading:
-          signInteractionStore.isObsoleteInteraction(interactionData.id) ||
-          isLedgerInteracting,
-        onClick: async () => {
-          if (signDocHelper.signDocWrapper) {
-            if (interactionData.data.keyType === "ledger") {
-              setIsLedgerInteracting(true);
-              setLedgerInteractingError(undefined);
+      // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
+      bottomButton={
+        buttonDisabled
+          ? {
+              // speical button에는 disabled 상태가 없으므로 이 경우 그냥 button으로 대체한다.
+              // 근데 이때는 무조건 disabled 상태라서 사실 onClick 등의 경우는 실행될수가 없는데 그냥 일단 넣어놓음...
+              text: "Approve",
+              color: "primary",
+              size: "large",
+              disabled: buttonDisabled,
+              isLoading:
+                signInteractionStore.isObsoleteInteraction(
+                  interactionData.id
+                ) || isLedgerInteracting,
+              onClick: approve,
             }
-
-            try {
-              const signature = await handleCosmosPreSign(
-                interactionData,
-                signDocHelper.signDocWrapper
-              );
-
-              await signInteractionStore.approveWithProceedNext(
-                interactionData.id,
-                signDocHelper.signDocWrapper,
-                signature,
-                async (proceedNext) => {
-                  if (!proceedNext) {
-                    if (
-                      interactionInfo.interaction &&
-                      !interactionInfo.interactionInternal
-                    ) {
-                      window.close();
-                    }
-                  }
-
-                  if (
-                    interactionInfo.interaction &&
-                    interactionInfo.interactionInternal
-                  ) {
-                    // XXX: 약간 난해한 부분인데
-                    //      내부의 tx의 경우에는 tx 이후의 routing을 요청한 쪽에서 처리한다.
-                    //      하지만 tx를 처리할때 tx broadcast 등의 과정이 있고
-                    //      서명 페이지에서는 이러한 과정이 끝났는지 아닌지를 파악하기 힘들다.
-                    //      만약에 밑과같은 처리를 하지 않으면 interaction data가 먼저 지워지면서
-                    //      화면이 깜빡거리는 문제가 발생한다.
-                    //      이 문제를 해결하기 위해서 내부의 tx는 보내는 쪽에서 routing을 잘 처리한다고 가정하고
-                    //      페이지를 벗어나고 나서야 data를 지우도록한다.
-                    await unmountPromise.promise;
-                  }
-                }
-              );
-            } catch (e) {
-              console.log(e);
-
-              if (e instanceof KeplrError) {
-                if (e.module === ErrModule) {
-                  setLedgerInteractingError(e);
-                } else {
-                  setLedgerInteractingError(undefined);
-                }
-              } else {
-                setLedgerInteractingError(undefined);
-              }
-            } finally {
-              setIsLedgerInteracting(false);
+          : {
+              isSpecial: true,
+              text: "Approve",
+              isLoading:
+                signInteractionStore.isObsoleteInteraction(
+                  interactionData.id
+                ) || isLedgerInteracting,
+              onClick: approve,
             }
-          }
-        },
-      }}
+      }
     >
       <Box
         height="100%"
