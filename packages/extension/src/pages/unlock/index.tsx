@@ -10,6 +10,7 @@ import { Image } from "../../components/image";
 import { TextButton } from "../../components/button-text";
 import { ColorPalette } from "../../styles";
 import { H1 } from "../../components/typography";
+import { Tooltip } from "../../components/tooltip";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
@@ -30,6 +31,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
+  const [isOnCapsLock, setIsOnCapsLock] = useState(false);
 
   return (
     <form
@@ -106,22 +108,62 @@ export const UnlockPage: FunctionComponent = observer(() => {
 
         <Gutter size="1.75rem" />
 
-        <TextInput
-          ref={inputRef}
-          label="Password"
-          type="password"
-          value={password}
-          style={{ width: "100%" }}
-          onChange={(e) => {
-            e.preventDefault();
+        <Box position="relative" width="100%">
+          <Box
+            position="absolute"
+            alignY="center"
+            style={{
+              top: 0,
+              left: 20,
+              bottom: 0,
+            }}
+          >
+            <Tooltip
+              content={
+                <div style={{ whiteSpace: "nowrap" }}>CapsLock is on</div>
+              }
+              enabled={false}
+              isAlwaysOpen={isOnCapsLock}
+              placement={["top", "left"]}
+            >
+              <div />
+            </Tooltip>
+          </Box>
 
-            setPassword(e.target.value);
+          <TextInput
+            ref={inputRef}
+            label="Password"
+            type="password"
+            value={password}
+            style={{ width: "100%" }}
+            onChange={(e) => {
+              e.preventDefault();
 
-            // Clear error if the user is typing.
-            setError(undefined);
-          }}
-          error={error ? "Invalid password" : undefined}
-        />
+              setPassword(e.target.value);
+
+              // Clear error if the user is typing.
+              setError(undefined);
+            }}
+            onBlur={() => {
+              setIsOnCapsLock(false);
+            }}
+            onKeyUp={(e) => {
+              if (e.getModifierState("CapsLock")) {
+                setIsOnCapsLock(true);
+              } else {
+                setIsOnCapsLock(false);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.getModifierState("CapsLock")) {
+                setIsOnCapsLock(true);
+              } else {
+                setIsOnCapsLock(false);
+              }
+            }}
+            error={error ? "Invalid password" : undefined}
+          />
+        </Box>
 
         <Gutter size="2.125rem" />
 
