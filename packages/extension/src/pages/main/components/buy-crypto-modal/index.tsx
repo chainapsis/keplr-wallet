@@ -36,9 +36,15 @@ const Styles = {
 
     background-color: ${ColorPalette["gray-500"]};
 
+    :hover {
+      background-color: ${ColorPalette["gray-450"]};
+    }
+
     gap: 0.25rem;
 
     cursor: pointer;
+
+    border-radius: 0.25rem;
   `,
   ItemName: styled(Subtitle1)`
     color: ${ColorPalette["gray-10"]};
