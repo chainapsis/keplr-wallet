@@ -18,7 +18,9 @@ export const VerifyMnemonicScene: FunctionComponent<{
     change: number;
     addressIndex: number;
   };
-}> = observer(({ mnemonic, bip44Path }) => {
+  stepPrevious: number;
+  stepTotal: number;
+}> = observer(({ mnemonic, bip44Path, stepPrevious, stepTotal }) => {
   if (!mnemonic || !bip44Path) {
     throw new Error("Mnemonic and bip44Path should be provided");
   }
@@ -38,8 +40,8 @@ export const VerifyMnemonicScene: FunctionComponent<{
             verify that you have stored your phrase safely.
           </div>,
         ],
-        stepCurrent: 2,
-        stepTotal: 6,
+        stepCurrent: stepPrevious + 1,
+        stepTotal: stepTotal,
       });
     },
   });
@@ -95,6 +97,8 @@ export const VerifyMnemonicScene: FunctionComponent<{
                 bip44Path,
                 isFresh: true,
               },
+              stepPrevious: stepPrevious + 1,
+              stepTotal,
             });
           }
         })}

@@ -121,6 +121,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
           name: "enable-chains",
           props: {
             vaultId,
+            stepPrevious: -1,
+            stepTotal: 0,
           },
         },
       };

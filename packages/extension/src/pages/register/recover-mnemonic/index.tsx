@@ -76,7 +76,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
           </div>,
         ],
         stepCurrent: 1,
-        stepTotal: 6,
+        stepTotal: 3,
       });
     },
   });
@@ -198,6 +198,8 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
                 value: Buffer.from(words[0].replace("0x", ""), "hex"),
                 meta: {},
               },
+              stepPrevious: 1,
+              stepTotal: 3,
             });
           } else {
             // Trim empty string from back.
@@ -221,6 +223,8 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
             sceneTransition.push("name-password", {
               mnemonic: text,
               bip44Path: bip44PathState.getPath(),
+              stepPrevious: 1,
+              stepTotal: 3,
             });
           }
         }}

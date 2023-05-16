@@ -25,8 +25,8 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
       header.setHeader({
         mode: "step",
         title: "Set Up Your Wallet",
-        stepCurrent: 3,
-        stepTotal: 6,
+        stepCurrent: 1,
+        stepTotal: 3,
       });
     },
   });
@@ -46,6 +46,8 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               password: data.password,
               app: "Cosmos",
               bip44Path: bip44PathState.getPath(),
+              stepPrevious: 1,
+              stepTotal: 3,
             });
           } else {
             alert("TODO");
@@ -63,6 +65,8 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
                   password: data.password,
                   app: "Terra",
                   bip44Path: bip44PathState.getPath(),
+                  stepPrevious: 1,
+                  stepTotal: 3,
                 });
               })}
             />
