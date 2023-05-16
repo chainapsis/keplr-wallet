@@ -82,7 +82,7 @@ export const MenuBar: FunctionComponent<{
 
         <Gutter size="1.75rem" />
 
-        <Styles.MenuItem onClick={() => navigate("/setting/token/add")}>
+        <Styles.MenuItem onClick={() => navigate("/setting/token/list")}>
           Add Token
         </Styles.MenuItem>
 
