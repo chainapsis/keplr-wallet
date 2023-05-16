@@ -293,12 +293,21 @@ const MaxButton: FunctionComponent<{
       height="1.625rem"
       alignX="center"
       alignY="center"
-      paddingX="0.5rem"
-      // Gray-550
-      backgroundColor={
-        isMax ? ColorPalette["gray-600"] : ColorPalette["gray-500"]
-      }
+      paddingX="0.4375rem"
+      color={isMax ? ColorPalette["gray-300"] : ColorPalette["gray-10"]}
+      backgroundColor={ColorPalette["gray-500"]}
       borderRadius="0.25rem"
+      borderWidth={"1px"}
+      borderColor={isMax ? ColorPalette["gray-300"] : ColorPalette["gray-500"]}
+      hover={{
+        color: isMax ? ColorPalette["gray-300"] : ColorPalette["white"],
+        backgroundColor: isMax
+          ? ColorPalette["gray-500"]
+          : ColorPalette["gray-550"],
+        borderColor: isMax
+          ? ColorPalette["gray-400"]
+          : ColorPalette["gray-550"],
+      }}
       onClick={(e) => {
         e.preventDefault();
 
@@ -309,9 +318,7 @@ const MaxButton: FunctionComponent<{
         }
       }}
     >
-      <Button1 color={isMax ? ColorPalette["white"] : ColorPalette["gray-10"]}>
-        max
-      </Button1>
+      <Button1>max</Button1>
     </Box>
   );
 });
