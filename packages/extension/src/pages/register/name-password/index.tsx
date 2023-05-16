@@ -19,57 +19,65 @@ export const RegisterNamePasswordScene: FunctionComponent<{
     change: number;
     addressIndex: number;
   };
-}> = observer(({ mnemonic, privateKey, bip44Path }) => {
-  const sceneTransition = useSceneTransition();
+  stepPrevious: number;
+  stepTotal: number;
+}> = observer(
+  ({ mnemonic, privateKey, bip44Path, stepPrevious, stepTotal }) => {
+    const sceneTransition = useSceneTransition();
 
-  const header = useRegisterHeader();
-  useSceneEvents({
-    onWillVisible: () => {
-      header.setHeader({
-        mode: "step",
-        title: "Set Up Your Wallet",
-        stepCurrent: 3,
-        stepTotal: 6,
-      });
-    },
-  });
+    const header = useRegisterHeader();
+    useSceneEvents({
+      onWillVisible: () => {
+        header.setHeader({
+          mode: "step",
+          title: "Set Up Your Wallet",
+          stepCurrent: stepPrevious + 1,
+          stepTotal: stepTotal,
+        });
+      },
+    });
 
-  const form = useFormNamePassword();
+    const form = useFormNamePassword();
 
-  return (
-    <RegisterSceneBox>
-      <form
-        onSubmit={form.handleSubmit((data) => {
-          if (mnemonic && privateKey) {
-            throw new Error("Both mnemonic and private key are provided");
-          }
-
-          if (mnemonic) {
-            if (!bip44Path) {
-              throw new Error("BIP44 path should be provided");
+    return (
+      <RegisterSceneBox>
+        <form
+          onSubmit={form.handleSubmit((data) => {
+            if (mnemonic && privateKey) {
+              throw new Error("Both mnemonic and private key are provided");
             }
 
-            sceneTransition.replaceAll("finalize-key", {
-              name: data.name,
-              password: data.password,
-              mnemonic: {
-                value: mnemonic,
-                bip44Path,
-              },
-            });
-          }
+            if (mnemonic) {
+              if (!bip44Path) {
+                throw new Error("BIP44 path should be provided");
+              }
 
-          if (privateKey) {
-            sceneTransition.replaceAll("finalize-key", {
-              name: data.name,
-              password: data.password,
-              privateKey,
-            });
-          }
-        })}
-      >
-        <FormNamePassword {...form} />
-      </form>
-    </RegisterSceneBox>
-  );
-});
+              sceneTransition.replaceAll("finalize-key", {
+                name: data.name,
+                password: data.password,
+                mnemonic: {
+                  value: mnemonic,
+                  bip44Path,
+                },
+                stepPrevious: stepPrevious + 1,
+                stepTotal,
+              });
+            }
+
+            if (privateKey) {
+              sceneTransition.replaceAll("finalize-key", {
+                name: data.name,
+                password: data.password,
+                privateKey,
+                stepPrevious: stepPrevious + 1,
+                stepTotal,
+              });
+            }
+          })}
+        >
+          <FormNamePassword {...form} />
+        </form>
+      </RegisterSceneBox>
+    );
+  }
+);

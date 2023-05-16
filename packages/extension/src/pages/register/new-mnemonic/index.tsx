@@ -38,7 +38,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
         mode: "step",
         title: "New Recovery Phrase",
         stepCurrent: 1,
-        stepTotal: 6,
+        stepTotal: 3,
       });
     },
   });
@@ -247,6 +247,8 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
                 sceneTransition.push("verify-mnemonic", {
                   mnemonic: words.join(" "),
                   bip44Path: bip44PathState.getPath(),
+                  stepPrevious: 1,
+                  stepTotal: 3,
                 });
               }
             }}

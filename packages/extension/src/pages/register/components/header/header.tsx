@@ -212,9 +212,11 @@ const HeaderStep: FunctionComponent<{
   return (
     <Box position="relative">
       <YAxis alignX="center">
-        <Subtitle3
-          color={ColorPalette["gray-200"]}
-        >{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
+        {stepCurrent === 0 && stepTotal === 0 ? null : (
+          <Subtitle3
+            color={ColorPalette["gray-200"]}
+          >{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
+        )}
         <Gutter size="0.75rem" />
         <RegisterH3>{title}</RegisterH3>
       </YAxis>

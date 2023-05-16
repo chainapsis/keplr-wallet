@@ -51,8 +51,8 @@ export const SelectDerivationPathScene: FunctionComponent<{
             To use both paths, you need to go through the import process twice.
           </Body1>,
         ],
-        stepCurrent: 3,
-        stepTotal: 6,
+        stepCurrent: 0,
+        stepTotal: 0,
       });
     },
   });

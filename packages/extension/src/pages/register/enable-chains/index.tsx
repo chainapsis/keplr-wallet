@@ -47,12 +47,16 @@ export const EnableChainsScene: FunctionComponent<{
   isFresh?: boolean;
 
   fallbackEthereumLedgerApp?: boolean;
+  stepPrevious: number;
+  stepTotal: number;
 }> = observer(
   ({
     vaultId,
     candidateAddresses: propCandiateAddresses,
     isFresh,
     fallbackEthereumLedgerApp,
+    stepPrevious,
+    stepTotal,
   }) => {
     const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
       useStore();
@@ -66,8 +70,8 @@ export const EnableChainsScene: FunctionComponent<{
           mode: "step",
           title: "Select Chains",
           paragraphs: ["Don’t worry, you can change your selections anytime."],
-          stepCurrent: 3,
-          stepTotal: 6,
+          stepCurrent: stepPrevious + 1,
+          stepTotal: stepTotal,
         });
       },
     });
@@ -657,6 +661,8 @@ export const EnableChainsScene: FunctionComponent<{
                       isFresh: false,
 
                       fallbackEthereumLedgerApp: true,
+                      stepPrevious: stepPrevious,
+                      stepTotal: stepTotal,
                     });
                   } else if (ledgerEthereumAppNeeds.length > 0) {
                     const keyInfo = keyRingStore.keyInfos.find(
@@ -687,6 +693,8 @@ export const EnableChainsScene: FunctionComponent<{
                           vaultId,
                           afterEnableChains: ledgerEthereumAppNeeds,
                         },
+                        stepPrevious: stepPrevious,
+                        stepTotal: stepTotal,
                       });
                     }
                   } else {
