@@ -85,20 +85,50 @@ export const App: FunctionComponent = observer(() => {
               keplr?.enigmaEncrypt(
                 chainInfo.chainId,
                 "5b64d22c7774b11cbc3aac55168d11f624a51921679b005df7d59487d254c892",
-                {}
+                { hello: "world" }
               )
             )
             .then((encrypted) => {
               const nonce = Buffer.from(encrypted ?? [])
                 .slice(0, 32)
                 .toString("base64");
-              const encoded = Buffer.from(encrypted ?? []).toString("base64");
+              const cyphertext = Buffer.from(encrypted ?? [])
+                .slice(64)
+                .toString("base64");
               console.log(nonce);
-              console.log(encoded);
+              console.log(cyphertext);
             });
         }}
       >
         Test Encrypt
+      </button>
+      <button
+        onClick={() => {
+          const chainInfo = chainStore.chainInfos[2];
+          const account = accountStore.getAccount(chainInfo.chainId);
+
+          account
+            .getKeplr()
+            .then((keplr) =>
+              keplr?.enigmaDecrypt(
+                chainInfo.chainId,
+                Buffer.from(
+                  "7qK+rsMx1IdnFl/TBfFp8DlzuSAy/vRBYyStbP2GU36Yipt/+NKF3khoXZ3yYPEEFtEs1faXhCK5Ad8OxHoWmpp4CXsMmnjBOjZQuGeqWb8FoXNNFj96Eu6HaBgcuHtQjw==",
+                  "base64"
+                ),
+                Buffer.from(
+                  "nyCG0DftPcW7HJshdhGs+rXpHZfK5hQQDx+wJ3Jtu08=",
+                  "base64"
+                )
+              )
+            )
+            .then((plaintext) => {
+              const decoded = Buffer.from(plaintext ?? []).toString();
+              console.log(decoded);
+            });
+        }}
+      >
+        Test Decrypt
       </button>
       <button
         onClick={() => {
