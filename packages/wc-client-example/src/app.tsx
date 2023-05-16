@@ -137,6 +137,41 @@ export const App: FunctionComponent = observer(() => {
       >
         Test getEnigmaTxEncryptionKey
       </button>
+      <button
+        onClick={() => {
+          const chainInfo = chainStore.chainInfos[2];
+          const account = accountStore.getAccount(chainInfo.chainId);
+
+          account
+            .getKeplr()
+            .then((keplr) =>
+              keplr?.suggestToken(
+                chainInfo.chainId,
+                "secret1d96jn9azwqw40paqyd5g02kz0ye0udhhqlue7j"
+              )
+            );
+        }}
+      >
+        Test suggestToken
+      </button>
+      <button
+        onClick={() => {
+          const chainInfo = chainStore.chainInfos[2];
+          const account = accountStore.getAccount(chainInfo.chainId);
+
+          account
+            .getKeplr()
+            .then((keplr) =>
+              keplr?.suggestToken(
+                chainInfo.chainId,
+                "secret1d96jn9azwqw40paqyd5g02kz0ye0udhhqlue7j",
+                "viewingkey"
+              )
+            );
+        }}
+      >
+        Test suggestToken w/ viewingkey
+      </button>
     </div>
   );
 });

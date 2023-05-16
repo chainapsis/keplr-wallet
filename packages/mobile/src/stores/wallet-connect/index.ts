@@ -393,6 +393,30 @@ export abstract class WalletConnectManager {
           });
           break;
         }
+        case "keplr_suggest_token_wallet_connect_v1": {
+          if (payload.params.length !== 2 && payload.params.length !== 3) {
+            throw new Error("Invalid parmas");
+          }
+          if (
+            typeof payload.params[0] !== "string" &&
+            typeof payload.params[1] !== "string" &&
+            (typeof payload.params[2] !== "string" ||
+              typeof payload.params[2] !== "object")
+          ) {
+            throw new Error("Invalid parmas");
+          }
+          await keplr.suggestToken(
+            payload.params[0],
+            payload.params[1],
+            payload.params[2]
+          );
+
+          client.approveRequest({
+            id,
+            result: [],
+          });
+          break;
+        }
         default:
           throw new Error(`Unknown method (${payload.method})`);
       }

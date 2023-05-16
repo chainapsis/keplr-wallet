@@ -517,12 +517,17 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  suggestToken(
-    _chainId: string,
-    _contractAddress: string,
-    _viewingKey?: string
+  async suggestToken(
+    chainId: string,
+    contractAddress: string,
+    viewingKey?: string
   ): Promise<void> {
-    throw new Error("Not yet implemented");
+    await this.sendCustomRequest({
+      id: payloadId(),
+      jsonrpc: "2.0",
+      method: "keplr_suggest_token_wallet_connect_v1",
+      params: [chainId, contractAddress, viewingKey],
+    });
   }
 
   experimentalSignEIP712CosmosTx_v0(
