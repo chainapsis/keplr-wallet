@@ -295,15 +295,31 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  getEnigmaPubKey(_chainId: string): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+  async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
+    const encryptedBase64: string = (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_enigma_pub_key_wallet_connect_v1",
+        params: [chainId],
+      })
+    )[0];
+    return Buffer.from(encryptedBase64, "base64");
   }
 
-  getEnigmaTxEncryptionKey(
-    _chainId: string,
-    _nonce: Uint8Array
+  async getEnigmaTxEncryptionKey(
+    chainId: string,
+    nonce: Uint8Array
   ): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+    const encryptedBase64: string = (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_enigma_tx_encryption_key_wallet_connect_v1",
+        params: [chainId, Buffer.from(nonce).toString("base64")],
+      })
+    )[0];
+    return Buffer.from(encryptedBase64, "base64");
   }
 
   getEnigmaUtils(chainId: string): SecretUtils {

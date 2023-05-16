@@ -366,6 +366,33 @@ export abstract class WalletConnectManager {
           });
           break;
         }
+        case "keplr_enigma_pub_key_wallet_connect_v1": {
+          if (payload.params.length !== 1) {
+            throw new Error("Invalid parmas");
+          }
+          const result = await keplr.getEnigmaPubKey(payload.params[0]);
+
+          client.approveRequest({
+            id,
+            result: [Buffer.from(result).toString("base64")],
+          });
+          break;
+        }
+        case "keplr_enigma_tx_encryption_key_wallet_connect_v1": {
+          if (payload.params.length !== 2) {
+            throw new Error("Invalid parmas");
+          }
+          const result = await keplr.getEnigmaTxEncryptionKey(
+            payload.params[0],
+            Buffer.from(payload.params[1], "base64")
+          );
+
+          client.approveRequest({
+            id,
+            result: [Buffer.from(result).toString("base64")],
+          });
+          break;
+        }
         default:
           throw new Error(`Unknown method (${payload.method})`);
       }

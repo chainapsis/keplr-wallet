@@ -100,6 +100,43 @@ export const App: FunctionComponent = observer(() => {
       >
         Test Encrypt
       </button>
+      <button
+        onClick={() => {
+          const chainInfo = chainStore.chainInfos[2];
+          const account = accountStore.getAccount(chainInfo.chainId);
+
+          account
+            .getKeplr()
+            .then((keplr) => keplr?.getEnigmaPubKey(chainInfo.chainId))
+            .then((pubKey) => {
+              const encoded = Buffer.from(pubKey ?? []).toString("base64");
+              console.log(`getEnigmaPubKey: ${encoded}`);
+            });
+        }}
+      >
+        Test getEnigmaPubKey
+      </button>
+      <button
+        onClick={() => {
+          const chainInfo = chainStore.chainInfos[2];
+          const account = accountStore.getAccount(chainInfo.chainId);
+
+          account
+            .getKeplr()
+            .then((keplr) =>
+              keplr?.getEnigmaTxEncryptionKey(
+                chainInfo.chainId,
+                Uint8Array.from([])
+              )
+            )
+            .then((result) => {
+              const encoded = Buffer.from(result ?? []).toString("base64");
+              console.log(`getEnigmaTxEncryptionKey: ${encoded}`);
+            });
+        }}
+      >
+        Test getEnigmaTxEncryptionKey
+      </button>
     </div>
   );
 });
