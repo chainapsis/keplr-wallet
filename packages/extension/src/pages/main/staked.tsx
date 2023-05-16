@@ -142,6 +142,13 @@ export const StakedTabView: FunctionComponent = observer(() => {
                   color={ColorPalette["gray-10"]}
                 />
               }
+              onClick={async () => {
+                await browser.tabs.create({
+                  url: "https://wallet.keplr.app",
+                });
+
+                close();
+              }}
             />
           }
         />
