@@ -58,9 +58,7 @@ export const FinalizeKeyScene: FunctionComponent<{
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
-        mode: "welcome",
-        title: "Creating Your Account...",
-        paragraph: "",
+        mode: "empty",
       });
     },
   });
