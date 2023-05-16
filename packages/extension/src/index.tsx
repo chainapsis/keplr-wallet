@@ -22,7 +22,7 @@ import React, {
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
-import { GlobalStyle, GlobalPopupStyle } from "./styles";
+import { GlobalPopupStyle, GlobalStyle } from "./styles";
 import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 import { Keplr } from "@keplr-wallet/provider";
@@ -41,7 +41,7 @@ import { SettingAdvancedPage } from "./pages/setting/advanced";
 import { SettingSecurityPage } from "./pages/setting/security";
 import { SettingSecurityPermissionPage } from "./pages/setting/security/permission";
 import { PermissionPage } from "./pages/permission";
-import { SignCosmosTxPage, SignCosmosADR36Page } from "./pages/sign/cosmos";
+import { SignCosmosADR36Page, SignCosmosTxPage } from "./pages/sign/cosmos";
 import { SettingTokenListPage } from "./pages/setting/token/manage";
 import { SettingTokenAddPage } from "./pages/setting/token/add";
 import { SettingGeneralLanguagePage } from "./pages/setting/general/language";
@@ -52,9 +52,9 @@ import { SettingContactsAdd } from "./pages/setting/contacts/add";
 import { SendAmountPage } from "./pages/send/amount";
 import { SendSelectAssetPage } from "./pages/send/select-asset";
 import {
-  WalletSelectPage,
   WalletChangeNamePage,
   WalletDeletePage,
+  WalletSelectPage,
   WalletShowSensitivePage,
 } from "./pages/wallet";
 import { SuggestChainPage } from "./pages/suggest-chain";
@@ -125,8 +125,9 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 
   const isURLUnlockPage = useIsURLUnlockPage();
   const openRegisterOnce = useRef(false);
+  const initAccountsOnce = useRef(false);
 
-  const isReady = useMemo(() => {
+  const _isReady: boolean = useMemo(() => {
     if (keyRingStore.status === "not-loaded") {
       return false;
     }
@@ -159,16 +160,19 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     }
 
     if (keyRingStore.status === "unlocked") {
-      // XXX: Below logic not observe state changes on account store and it's inner state.
-      //      This is intended because this logic is only for the first time and avoid global re-rendering.
-      // Start init for registered chains so that users can see account address more quickly.
-      for (const chainInfo of chainStore.chainInfos) {
-        const account = accountStore.getAccount(chainInfo.chainId);
-        // Because {autoInit: true} is given as the option on account store,
-        // initialization for the account starts at this time just by using getAccount().
-        // However, run safe check on current status and init if status is not inited.
-        if (account.walletStatus === WalletStatus.NotInit) {
-          account.init();
+      if (!initAccountsOnce.current) {
+        initAccountsOnce.current = true;
+        // XXX: Below logic not observe state changes on account store and it's inner state.
+        //      This is intended because this logic is only for the first time and avoid global re-rendering.
+        // Start init for registered chains so that users can see account address more quickly.
+        for (const chainInfo of chainStore.chainInfos) {
+          const account = accountStore.getAccount(chainInfo.chainId);
+          // Because {autoInit: true} is given as the option on account store,
+          // initialization for the account starts at this time just by using getAccount().
+          // However, run safe check on current status and init if status is not inited.
+          if (account.walletStatus === WalletStatus.NotInit) {
+            account.init();
+          }
         }
       }
     }
@@ -207,6 +211,27 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     axelarEVMBridgeCurrencyRegistrar.isInitialized,
     accountStore,
   ]);
+
+  const isReady: boolean = (() => {
+    if (!_isReady) {
+      return false;
+    }
+
+    if (keyRingStore.status === "unlocked") {
+      // mobx의 특성상 밑의 로직은 useMemo 안에서 처리할 수가 없어서 분리되었음.
+      const firstAccount = accountStore.getAccount(
+        chainStore.chainInfos[0].chainId
+      );
+      if (
+        firstAccount.walletStatus === WalletStatus.NotInit ||
+        firstAccount.walletStatus === WalletStatus.Loading
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  })();
 
   return (
     <AppIntlProvider>
