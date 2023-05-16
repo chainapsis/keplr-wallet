@@ -426,7 +426,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
         </Box>
 
         <Styles.ExpandButton
-          padding="0.125rem"
+          paddingX="0.125rem"
           alignX="center"
           viewTokenCount={viewTokens.length}
           onClick={() => {
