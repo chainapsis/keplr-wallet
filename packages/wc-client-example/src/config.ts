@@ -96,8 +96,8 @@ export const EmbedChainInfos = [
   {
     chainId: "secret-4",
     chainName: "Secret",
-    rpc: "https://secret-4.api.trivium.network:26657",
-    rest: "https://secret-4.api.trivium.network:1317",
+    rpc: "https://rpc-secret.keplr.app",
+    rest: "https://lcd-secret.keplr.app",
     bip44: { coinType: 529 },
     coinType: 529,
     stakeCurrency: {
