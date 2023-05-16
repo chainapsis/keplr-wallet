@@ -97,6 +97,8 @@ export const VerifyMnemonicScene: FunctionComponent<{
                 bip44Path,
                 isFresh: true,
               },
+              stepPrevious: stepPrevious + 1,
+              stepTotal,
             });
           }
         })}

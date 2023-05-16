@@ -280,6 +280,8 @@ export const FinalizeKeyScene: FunctionComponent<{
       isAnimEnded,
       mnemonic?.isFresh,
       sceneTransition,
+      stepPrevious,
+      stepTotal,
       vaultId,
     ]);
 
