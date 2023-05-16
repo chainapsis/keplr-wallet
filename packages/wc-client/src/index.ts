@@ -268,7 +268,11 @@ export class KeplrWalletConnectV1 implements Keplr {
         id: payloadId(),
         jsonrpc: "2.0",
         method: "keplr_enigma_decrypt_wallet_connect_v1",
-        params: [chainId, ciphertext, nonce],
+        params: [
+          chainId,
+          Buffer.from(ciphertext).toString("base64"),
+          Buffer.from(nonce).toString("base64"),
+        ],
       })
     )[0];
     return Buffer.from(encryptedBase64, "base64");
