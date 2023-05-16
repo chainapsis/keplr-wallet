@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { HeaderLayout } from "../../layouts/header";
@@ -81,7 +87,7 @@ export const MainPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const availableTotalPrice = (() => {
+  const availableTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.allKnownBalances) {
       if (bal.price) {
@@ -93,11 +99,11 @@ export const MainPage: FunctionComponent = observer(() => {
       }
     }
     return result;
-  })();
+  }, [hugeQueriesStore.allKnownBalances]);
   const availableChartWeight = availableTotalPrice
     ? Number.parseFloat(availableTotalPrice.toDec().toString())
     : 0;
-  const stakedTotalPrice = (() => {
+  const stakedTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
       if (bal.price) {
@@ -109,16 +115,16 @@ export const MainPage: FunctionComponent = observer(() => {
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
-      if (bal.price) {
+      if (bal.viewToken.price) {
         if (!result) {
-          result = bal.price;
+          result = bal.viewToken.price;
         } else {
-          result = result.add(bal.price);
+          result = result.add(bal.viewToken.price);
         }
       }
     }
     return result;
-  })();
+  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
   const stakedChartWeight = stakedTotalPrice
     ? Number.parseFloat(stakedTotalPrice.toDec().toString())
     : 0;

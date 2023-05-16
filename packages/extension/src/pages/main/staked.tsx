@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useMemo } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { MainEmptyView, TokenItem, TokenTitleView } from "./components";
 import { Dec } from "@keplr-wallet/unit";
@@ -9,25 +9,52 @@ import { useStore } from "../../stores";
 import { TextButton } from "../../components/button-text";
 import { ArrowRightSolidIcon } from "../../components/icon";
 import { ColorPalette } from "../../styles";
+import { useIntl } from "react-intl";
 
 export const StakedTabView: FunctionComponent = observer(() => {
   const { hugeQueriesStore } = useStore();
 
-  const delegations: ViewToken[] = hugeQueriesStore.delegations.filter(
-    (token) => {
-      return token.token.toDec().gt(new Dec(0));
-    }
+  const intl = useIntl();
+
+  const delegations: ViewToken[] = useMemo(
+    () =>
+      hugeQueriesStore.delegations.filter((token) => {
+        return token.token.toDec().gt(new Dec(0));
+      }),
+    [hugeQueriesStore.delegations]
   );
 
-  const unbondings: ViewToken[] = hugeQueriesStore.unbondings.filter(
-    (token) => {
-      return token.token.toDec().gt(new Dec(0));
-    }
+  const unbondings: {
+    viewToken: ViewToken;
+    altSentence: string;
+  }[] = useMemo(
+    () =>
+      hugeQueriesStore.unbondings
+        .filter((unbonding) => {
+          return unbonding.viewToken.token.toDec().gt(new Dec(0));
+        })
+        .map((unbonding) => {
+          const relativeTime = formatRelativeTime(unbonding.completeTime);
+
+          return {
+            viewToken: unbonding.viewToken,
+            altSentence: intl.formatRelativeTime(
+              relativeTime.value,
+              relativeTime.unit
+            ),
+          };
+        }),
+    [hugeQueriesStore.unbondings, intl]
   );
 
   const TokenViewData: {
     title: string;
-    balance: ViewToken[];
+    balance:
+      | ViewToken[]
+      | {
+          viewToken: ViewToken;
+          altSentence: string;
+        }[];
     lenAlwaysShown: number;
     tooltip?: string | React.ReactElement;
   }[] = [
@@ -48,20 +75,43 @@ export const StakedTabView: FunctionComponent = observer(() => {
               key={title}
               title={<TokenTitleView title={title} tooltip={tooltip} />}
               lenAlwaysShown={lenAlwaysShown}
-              items={balance.map((viewToken) => (
-                <TokenItem
-                  viewToken={viewToken}
-                  key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                  disabled={!viewToken.chainInfo.walletUrlForStaking}
-                  onClick={() => {
-                    if (viewToken.chainInfo.walletUrlForStaking) {
-                      browser.tabs.create({
-                        url: viewToken.chainInfo.walletUrlForStaking,
-                      });
-                    }
-                  }}
-                />
-              ))}
+              items={balance.map((viewToken) => {
+                if ("altSentence" in viewToken) {
+                  return (
+                    <TokenItem
+                      viewToken={viewToken.viewToken}
+                      key={`${viewToken.viewToken.chainInfo.chainId}-${viewToken.viewToken.token.currency.coinMinimalDenom}`}
+                      disabled={
+                        !viewToken.viewToken.chainInfo.walletUrlForStaking
+                      }
+                      onClick={() => {
+                        if (viewToken.viewToken.chainInfo.walletUrlForStaking) {
+                          browser.tabs.create({
+                            url: viewToken.viewToken.chainInfo
+                              .walletUrlForStaking,
+                          });
+                        }
+                      }}
+                      altSentence={viewToken.altSentence}
+                    />
+                  );
+                }
+
+                return (
+                  <TokenItem
+                    viewToken={viewToken}
+                    key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                    disabled={!viewToken.chainInfo.walletUrlForStaking}
+                    onClick={() => {
+                      if (viewToken.chainInfo.walletUrlForStaking) {
+                        browser.tabs.create({
+                          url: viewToken.chainInfo.walletUrlForStaking,
+                        });
+                      }
+                    }}
+                  />
+                );
+              })}
             />
           );
         })}
@@ -99,3 +149,47 @@ export const StakedTabView: FunctionComponent = observer(() => {
     </React.Fragment>
   );
 });
+
+function formatRelativeTime(time: string): {
+  unit: "minute" | "hour" | "day";
+  value: number;
+} {
+  const remaining = new Date(time).getTime() - Date.now();
+  if (remaining <= 0) {
+    return {
+      unit: "minute",
+      value: 1,
+    };
+  }
+
+  const remainingSeconds = remaining / 1000;
+  const remainingMinutes = remainingSeconds / 60;
+  if (remainingMinutes < 1) {
+    return {
+      unit: "minute",
+      value: 1,
+    };
+  }
+
+  const remainingHours = remainingMinutes / 60;
+  const remainingDays = remainingHours / 24;
+
+  if (remainingDays >= 1) {
+    return {
+      unit: "day",
+      value: Math.ceil(remainingDays),
+    };
+  }
+
+  if (remainingHours >= 1) {
+    return {
+      unit: "hour",
+      value: Math.ceil(remainingHours),
+    };
+  }
+
+  return {
+    unit: "minute",
+    value: Math.ceil(remainingMinutes),
+  };
+}

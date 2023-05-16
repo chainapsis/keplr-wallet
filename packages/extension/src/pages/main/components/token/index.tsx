@@ -84,10 +84,13 @@ interface TokenItemProps {
   disabled?: boolean;
   forChange?: boolean;
   isNotReady?: boolean;
+
+  // For remaining unbonding time.
+  altSentence?: string | React.ReactElement;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
-  ({ viewToken, onClick, disabled, forChange, isNotReady }) => {
+  ({ viewToken, onClick, disabled, forChange, isNotReady, altSentence }) => {
     const { priceStore } = useStore();
 
     const pricePretty = priceStore.calculatePrice(viewToken.token);
@@ -233,9 +236,15 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 dummyMinWidth="4.5rem"
               >
                 <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
-                  {pricePretty
-                    ? pricePretty.inequalitySymbol(true).toString()
-                    : "-"}
+                  {(() => {
+                    if (altSentence) {
+                      return altSentence;
+                    }
+
+                    return pricePretty
+                      ? pricePretty.inequalitySymbol(true).toString()
+                      : "-";
+                  })()}
                 </Subtitle3>
               </Skeleton>
             </Stack>

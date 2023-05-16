@@ -238,8 +238,14 @@ export class HugeQueriesStore {
   }
 
   @computed
-  get unbondings(): ViewToken[] {
-    const res: ViewToken[] = [];
+  get unbondings(): {
+    viewToken: ViewToken;
+    completeTime: string;
+  }[] {
+    const res: {
+      viewToken: ViewToken;
+      completeTime: string;
+    }[] = [];
     for (const chainInfo of this.chainStore.chainInfosInUI) {
       const account = this.accountStore.getAccount(chainInfo.chainId);
       if (account.bech32Address === "") {
@@ -251,14 +257,25 @@ export class HugeQueriesStore {
           account.bech32Address
         );
 
-      res.push({
-        chainInfo,
-        token: queryUnbonding.total,
-        price: this.priceStore.calculatePrice(queryUnbonding.total),
-        isFetching: queryUnbonding.isFetching,
-        error: queryUnbonding.error,
-      });
+      for (const unbonding of queryUnbonding.unbondings) {
+        for (const entry of unbonding.entries) {
+          const balance = new CoinPretty(
+            chainInfo.stakeCurrency,
+            entry.balance
+          );
+          res.push({
+            viewToken: {
+              chainInfo,
+              token: balance,
+              price: this.priceStore.calculatePrice(balance),
+              isFetching: queryUnbonding.isFetching,
+              error: queryUnbonding.error,
+            },
+            completeTime: entry.completion_time,
+          });
+        }
+      }
     }
-    return res.sort(this.sortByPrice);
+    return res;
   }
 }
