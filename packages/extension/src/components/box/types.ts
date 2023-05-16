@@ -11,6 +11,7 @@ export interface BoxProps {
   height?: string;
   minHeight?: string;
   maxHeight?: string;
+  color?: string;
   backgroundColor?: string;
   borderRadius?: string;
   padding?: string;
@@ -41,4 +42,9 @@ export interface BoxProps {
   as?: React.ElementType;
 
   onClick?: MouseEventHandler<HTMLDivElement>;
+
+  hover?: {
+    color?: string;
+    backgroundColor?: string;
+  };
 }
