@@ -22,7 +22,7 @@ import {
   LoadingIcon,
   QuestionIcon,
 } from "../../../../components/icon";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { ChainImageFallback } from "../../../../components/image";
 import { Tooltip } from "../../../../components/tooltip";
 import { DenomHelper } from "@keplr-wallet/common";
@@ -50,6 +50,17 @@ const Styles = {
             .alpha(0.5)
             .toString()}`
         : undefined};
+    
+    ${({ disabled }) => {
+      if (!disabled) {
+        return css`
+          &:hover {
+            background-color: ${ColorPalette["gray-550"]};
+          }
+        `;
+      }
+    }}
+    
   `,
   IconContainer: styled.div`
     color: ${ColorPalette["gray-300"]};

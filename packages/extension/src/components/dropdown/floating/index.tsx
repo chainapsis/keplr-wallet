@@ -117,6 +117,10 @@ export const FloatingDropdown: FunctionComponent<FloatingDropdownProps> = ({
                   paddingX="1rem"
                   paddingY="0.75rem"
                   cursor="pointer"
+                  color={ColorPalette["white"]}
+                  hover={{
+                    color: ColorPalette["gray-200"],
+                  }}
                   onClick={(e) => {
                     e.preventDefault();
 
@@ -125,13 +129,8 @@ export const FloatingDropdown: FunctionComponent<FloatingDropdownProps> = ({
                     close();
                   }}
                 >
-                  <Subtitle3
-                    style={{
-                      color: ColorPalette["gray-10"],
-                    }}
-                  >
-                    {item.label}
-                  </Subtitle3>
+                  {/* 이 텍스트의 색은 hover 때문에 상위 Box에서 결정함 */}
+                  <Subtitle3>{item.label}</Subtitle3>
                 </Box>
                 {i !== items.length - 1 ? (
                   <div

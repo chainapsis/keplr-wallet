@@ -204,8 +204,10 @@ const KeyringItem: FunctionComponent<{
   return (
     <Box
       padding="1rem"
+      minHeight="4.625rem"
       backgroundColor={ColorPalette["gray-600"]}
       borderRadius="0.375rem"
+      alignY="center"
       cursor="pointer"
       onClick={async () => {
         await keyRingStore.selectKeyRing(keyInfo.id);
@@ -214,7 +216,7 @@ const KeyringItem: FunctionComponent<{
         navigate(-1);
       }}
     >
-      <Columns sum={1}>
+      <Columns sum={1} alignY="center">
         <YAxis>
           <Subtitle2
             style={{
@@ -256,7 +258,7 @@ const KeyringItem: FunctionComponent<{
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 style={{ color: ColorPalette["gray-10"] }}
               >
-                <EllipsisIcon width="1.25rem" height="1.25rem" />
+                <EllipsisIcon width="1.5rem" height="1.5rem" />
               </Box>
             </FloatingDropdown>
           </Box>

@@ -43,6 +43,13 @@ const Styles = {
     border-radius: 0.375rem;
   `,
   ExpandButton: styled(Box)<{ viewTokenCount: number }>`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 1.5rem;
+
+    cursor: pointer;
+
     ${({ viewTokenCount }) => {
       if (viewTokenCount === 0) {
         return css`

@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { BoxProps } from "./types";
 
 export const Styles = {
@@ -10,6 +10,7 @@ export const Styles = {
     height: ${({ height }) => height};
     min-height: ${({ minHeight }) => minHeight};
     max-height: ${({ maxHeight }) => maxHeight};
+    color: ${({ color }) => color};
     background-color: ${({ backgroundColor }) => backgroundColor};
     border-radius: ${({ borderRadius }) => borderRadius};
 
@@ -54,5 +55,16 @@ export const Styles = {
     }};
     
     cursor: ${({ cursor }) => cursor};
+    
+    ${({ hover }) => {
+      if (hover) {
+        return css`
+          &:hover {
+            color: ${hover.color};
+            background-color: ${hover.backgroundColor};
+          }
+        `;
+      }
+    }}
   `,
 };
