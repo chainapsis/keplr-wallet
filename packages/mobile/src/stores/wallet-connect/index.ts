@@ -417,6 +417,25 @@ export abstract class WalletConnectManager {
           });
           break;
         }
+        case "keplr_get_scrt20_viewing_key_wallet_connect_v1": {
+          if (payload.params.length !== 2) {
+            throw new Error("Invalid parmas");
+          }
+          for (const param of payload.params) {
+            if (typeof param !== "string") {
+              throw new Error("Invalid parmas");
+            }
+          }
+          const result = await keplr.getSecret20ViewingKey(
+            payload.params[0],
+            payload.params[1]
+          );
+          client.approveRequest({
+            id,
+            result: [result],
+          });
+          break;
+        }
         default:
           throw new Error(`Unknown method (${payload.method})`);
       }

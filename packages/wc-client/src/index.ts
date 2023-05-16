@@ -454,11 +454,18 @@ export class KeplrWalletConnectV1 implements Keplr {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
-  getSecret20ViewingKey(
-    _chainId: string,
-    _contractAddress: string
+  async getSecret20ViewingKey(
+    chainId: string,
+    contractAddress: string
   ): Promise<string> {
-    throw new Error("Not yet implemented");
+    return (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_get_scrt20_viewing_key_wallet_connect_v1",
+        params: [chainId, contractAddress],
+      })
+    )[0];
   }
 
   /**

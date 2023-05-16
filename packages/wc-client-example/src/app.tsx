@@ -147,7 +147,7 @@ export const App: FunctionComponent = observer(() => {
             .then((keplr) =>
               keplr?.suggestToken(
                 chainInfo.chainId,
-                "secret1d96jn9azwqw40paqyd5g02kz0ye0udhhqlue7j"
+                "secret1k6u0cy4feepm6pehnz804zmwakuwdapm69tuc4"
               )
             );
         }}
@@ -164,13 +164,36 @@ export const App: FunctionComponent = observer(() => {
             .then((keplr) =>
               keplr?.suggestToken(
                 chainInfo.chainId,
-                "secret1d96jn9azwqw40paqyd5g02kz0ye0udhhqlue7j",
+                "secret1k6u0cy4feepm6pehnz804zmwakuwdapm69tuc4",
                 "viewingkey"
               )
-            );
+            )
+            .then(() => {
+              console.log(`suggestToken w/ viewing key complete`);
+            });
         }}
       >
         Test suggestToken w/ viewingkey
+      </button>
+      <button
+        onClick={() => {
+          const chainInfo = chainStore.chainInfos[2];
+          const account = accountStore.getAccount(chainInfo.chainId);
+
+          account
+            .getKeplr()
+            .then((keplr) =>
+              keplr?.getSecret20ViewingKey(
+                chainInfo.chainId,
+                "secret1k6u0cy4feepm6pehnz804zmwakuwdapm69tuc4"
+              )
+            )
+            .then((result) => {
+              console.log(`getSecret20ViewingKey: ${result}`);
+            });
+        }}
+      >
+        Test getSecret20ViewingKey
       </button>
     </div>
   );
