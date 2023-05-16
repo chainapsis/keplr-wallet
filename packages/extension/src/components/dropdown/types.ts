@@ -13,4 +13,5 @@ export interface DropdownProps {
   className?: string;
   style?: CSSProperties;
   size?: "small" | "large";
+  label?: string;
 }

@@ -2,7 +2,7 @@ import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Box } from "../../../components/box";
 import { ColorPalette } from "../../../styles";
-import { Subtitle1, Subtitle3 } from "../../../components/typography";
+import { Subtitle1 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { Dropdown } from "../../../components/dropdown";
 import { TextInput } from "../../../components/input";
@@ -40,14 +40,9 @@ export const IBCAddChannelModal: FunctionComponent<{
 
         <Gutter size="1.125rem" />
 
-        <Subtitle3 color={ColorPalette["gray-100"]}>
-          Destination Chain
-        </Subtitle3>
-
-        <Gutter size="0.375rem" />
-
         <Dropdown
           size="large"
+          label="Destination Chain"
           placeholder="Select Chain"
           selectedItemKey={selectedChainId}
           items={chainStore.chainInfosInUI

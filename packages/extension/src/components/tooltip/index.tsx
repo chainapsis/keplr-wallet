@@ -15,8 +15,10 @@ import { autoPlacement, shift } from "@floating-ui/react-dom";
 export const Tooltip: FunctionComponent<{
   enabled?: boolean;
   content?: string | React.ReactElement;
-}> = ({ enabled, content, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  isAlwaysOpen?: boolean;
+}> = ({ enabled, content, isAlwaysOpen = false, children }) => {
+  const [_isOpen, setIsOpen] = useState(false);
+  const isOpen = _isOpen || isAlwaysOpen;
 
   const arrowRef = useRef(null);
   const { x, y, strategy, refs, context } = useFloating({
@@ -66,7 +68,7 @@ export const Tooltip: FunctionComponent<{
       >
         {children}
       </div>
-      {(enabled == null || enabled) && content && isOpen && (
+      {content && (isAlwaysOpen || ((enabled == null || enabled) && isOpen)) ? (
         <div
           ref={refs.setFloating}
           style={{
@@ -101,7 +103,7 @@ export const Tooltip: FunctionComponent<{
             {content}
           </Caption2>
         </div>
-      )}
+      ) : null}
     </React.Fragment>
   );
 };

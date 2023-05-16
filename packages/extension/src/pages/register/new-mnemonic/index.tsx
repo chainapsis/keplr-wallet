@@ -201,7 +201,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
         <Gutter size="1.625rem" />
       </Box>
 
-      <Box width="25.5rem">
+      <Box>
         <WarningBox
           title="DO NOT share your recovery phrase with ANYONE."
           paragraph="Anyone with your recovery phrase can have full control over your assets. Please stay vigilant against phishing attacks at all times."
@@ -212,6 +212,8 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
           paragraph="You will never be able to restore your account without your recovery phrase."
         />
       </Box>
+
+      <Gutter size="1.5rem" />
 
       <Box width="27.25rem" marginX="auto">
         <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>

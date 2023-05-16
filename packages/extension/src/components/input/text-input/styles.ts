@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { TextInputProps } from "./types";
-import { Caption2, Subtitle3 } from "../../typography";
+import { Caption2 } from "../../typography";
 
 const getTextInputStyleForErrorOrParagraph = (
   error?: string,
@@ -123,10 +123,6 @@ export const Styles = {
       -webkit-appearance: none;
       margin: 0;
     }
-  `,
-  Label: styled(Subtitle3)`
-    margin-bottom: 0.375rem;
-    color: ${ColorPalette["gray-100"]};
   `,
   SubText: styled(Caption2)<Pick<TextInputProps, "error" | "paragraph">>`
     margin-top: 4px;

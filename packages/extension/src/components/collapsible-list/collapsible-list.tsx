@@ -19,10 +19,10 @@ const Styles = {
 
     cursor: pointer;
 
-    color: ${ColorPalette["gray-100"]};
+    color: ${ColorPalette["gray-300"]};
 
     :hover {
-      color: ${ColorPalette["gray-200"]};
+      color: ${ColorPalette["gray-400"]};
     }
   `,
 };
