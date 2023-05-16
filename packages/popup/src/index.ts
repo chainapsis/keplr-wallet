@@ -24,7 +24,10 @@ export async function openPopupWindow(
   const windowInfo = await browser.windows.getCurrent();
   const option = {
     top: (windowInfo.top || 0) + 80,
-    left: (windowInfo.left || 0) + (windowInfo.width || 0) - 360 - 20,
+    left: Math.max(
+      0,
+      (windowInfo.left || 0) + (windowInfo.width || 0) - PopupSize.width - 100
+    ),
     width: PopupSize.width,
     height: PopupSize.height,
     url: url,
