@@ -22,6 +22,7 @@ import {
 import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
+  KeplrEnigmaUtils,
 } from "@keplr-wallet/provider";
 import { SecretUtils } from "secretjs/types/enigmautils";
 import { payloadId } from "@walletconnect/utils";
@@ -72,6 +73,8 @@ export type KeplrKeystoreMayChangedEventParam = {
 };
 
 export class KeplrWalletConnectV1 implements Keplr {
+  protected enigmaUtils: Map<string, SecretUtils> = new Map();
+
   constructor(
     public readonly connector: IConnector,
     public readonly options: {
@@ -255,21 +258,37 @@ export class KeplrWalletConnectV1 implements Keplr {
     );
   }
 
-  enigmaDecrypt(
-    _chainId: string,
-    _ciphertext: Uint8Array,
-    _nonce: Uint8Array
+  async enigmaDecrypt(
+    chainId: string,
+    ciphertext: Uint8Array,
+    nonce: Uint8Array
   ): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+    const encryptedBase64: string = (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_enigma_decrypt_wallet_connect_v1",
+        params: [chainId, ciphertext, nonce],
+      })
+    )[0];
+    return Buffer.from(encryptedBase64, "base64");
   }
 
-  enigmaEncrypt(
-    _chainId: string,
-    _contractCodeHash: string,
+  async enigmaEncrypt(
+    chainId: string,
+    contractCodeHash: string,
     // eslint-disable-next-line @typescript-eslint/ban-types
-    _msg: object
+    msg: object
   ): Promise<Uint8Array> {
-    throw new Error("Not yet implemented");
+    const encryptedBase64: string = (
+      await this.sendCustomRequest({
+        id: payloadId(),
+        jsonrpc: "2.0",
+        method: "keplr_enigma_encrypt_wallet_connect_v1",
+        params: [chainId, contractCodeHash, msg],
+      })
+    )[0];
+    return Buffer.from(encryptedBase64, "base64");
   }
 
   experimentalSuggestChain(_chainInfo: ChainInfo): Promise<void> {
@@ -287,8 +306,15 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
-  getEnigmaUtils(_chainId: string): SecretUtils {
-    throw new Error("Not yet implemented");
+  getEnigmaUtils(chainId: string): SecretUtils {
+    if (this.enigmaUtils.has(chainId)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return this.enigmaUtils.get(chainId)!;
+    }
+
+    const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
+    this.enigmaUtils.set(chainId, enigmaUtils);
+    return enigmaUtils;
   }
 
   async getKey(chainId: string): Promise<Key> {

@@ -334,6 +334,38 @@ export abstract class WalletConnectManager {
           });
           break;
         }
+        case "keplr_enigma_decrypt_wallet_connect_v1": {
+          if (payload.params.length !== 3) {
+            throw new Error("Invalid parmas");
+          }
+          const result = await keplr.enigmaEncrypt(
+            payload.params[0],
+            payload.params[1],
+            payload.params[2]
+          );
+
+          client.approveRequest({
+            id,
+            result: [Buffer.from(result).toString("base64")],
+          });
+          break;
+        }
+        case "keplr_enigma_encrypt_wallet_connect_v1": {
+          if (payload.params.length !== 3) {
+            throw new Error("Invalid parmas");
+          }
+          const result = await keplr.enigmaEncrypt(
+            payload.params[0],
+            payload.params[1],
+            payload.params[2]
+          );
+
+          client.approveRequest({
+            id,
+            result: [Buffer.from(result).toString("base64")],
+          });
+          break;
+        }
         default:
           throw new Error(`Unknown method (${payload.method})`);
       }

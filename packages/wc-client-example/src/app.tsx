@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "./stores";
+import { Buffer } from "buffer";
 
 const IBCChannel = "channel-141";
 const CounterpartyIBCChannel = "channel-0";
@@ -77,23 +78,27 @@ export const App: FunctionComponent = observer(() => {
         onClick={() => {
           const chainInfo = chainStore.chainInfos[2];
           const account = accountStore.getAccount(chainInfo.chainId);
-          const counterpartyAccount = accountStore.getAccount(
-            chainStore.chainInfos[0].chainId
-          );
 
-          account.cosmos.sendIBCTransferMsg(
-            {
-              portId: "transfer",
-              channelId: CounterpartyIBCChannel,
-              counterpartyChainId: chainStore.chainInfos[0].chainId,
-            },
-            "1",
-            chainInfo.stakeCurrency,
-            counterpartyAccount.bech32Address
-          );
+          account
+            .getKeplr()
+            .then((keplr) =>
+              keplr?.enigmaEncrypt(
+                chainInfo.chainId,
+                "5b64d22c7774b11cbc3aac55168d11f624a51921679b005df7d59487d254c892",
+                {}
+              )
+            )
+            .then((encrypted) => {
+              const nonce = Buffer.from(encrypted ?? [])
+                .slice(0, 32)
+                .toString("base64");
+              const encoded = Buffer.from(encrypted ?? []).toString("base64");
+              console.log(nonce);
+              console.log(encoded);
+            });
         }}
       >
-        Test IBC 3
+        Test Encrypt
       </button>
     </div>
   );
