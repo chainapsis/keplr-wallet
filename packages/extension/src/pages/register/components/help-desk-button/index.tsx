@@ -42,7 +42,7 @@ export const HelpDeskButton: FunctionComponent = () => {
     <a href={HelpDeskUrl} target="_blank" rel="noreferrer">
       <Container>
         <Columns sum={1} gutter="0.5rem" alignY="center">
-          <Styles.Title>HelpDesk</Styles.Title>
+          <Styles.Title>Help Desk</Styles.Title>
           <Styles.QuestionBox
             width="2.375rem"
             height="2.375rem"
