@@ -468,6 +468,16 @@ export class KeplrWalletConnectV1 implements Keplr {
     )[0];
   }
 
+  async getSecret20ViewingKeyOrPermit(
+    chainId: string,
+    contractAddress: string
+  ): Promise<{ permit: any | undefined; viewing_key: string | undefined }> {
+    return {
+      permit: null,
+      viewing_key: await this.getSecret20ViewingKey(chainId, contractAddress),
+    };
+  }
+
   /**
    * In the extension environment, this API let the extension to send the tx on behalf of the client.
    * But, in the wallet connect environment, in order to send the tx on behalf of the client, wallet should receive the tx data from remote.

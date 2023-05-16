@@ -256,6 +256,16 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
+  async getSecret20ViewingKeyOrPermit(
+    chainId: string,
+    contractAddress: string
+  ): Promise<{ permit: any | undefined; viewing_key: string | undefined }> {
+    return {
+      permit: null,
+      viewing_key: await this.getSecret20ViewingKey(chainId, contractAddress),
+    };
+  }
+
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
     return await this.requester.sendMessage(
       BACKGROUND_PORT,

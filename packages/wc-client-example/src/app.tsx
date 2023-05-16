@@ -195,6 +195,26 @@ export const App: FunctionComponent = observer(() => {
       >
         Test getSecret20ViewingKey
       </button>
+      <button
+        onClick={() => {
+          const chainInfo = chainStore.chainInfos[2];
+          const account = accountStore.getAccount(chainInfo.chainId);
+
+          account
+            .getKeplr()
+            .then((keplr) =>
+              keplr?.getSecret20ViewingKeyOrPermit(
+                chainInfo.chainId,
+                "secret1k6u0cy4feepm6pehnz804zmwakuwdapm69tuc4"
+              )
+            )
+            .then((result) => {
+              console.log(`getSecret20ViewingKey: ${JSON.stringify(result)}`);
+            });
+        }}
+      >
+        Test getSecret20ViewingKeyOrPermit
+      </button>
     </div>
   );
 });
