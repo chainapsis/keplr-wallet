@@ -338,10 +338,15 @@ export abstract class WalletConnectManager {
           if (payload.params.length !== 3) {
             throw new Error("Invalid parmas");
           }
-          const result = await keplr.enigmaEncrypt(
+          for (const param of payload.params) {
+            if (typeof param !== "string") {
+              throw new Error("Invalid parmas");
+            }
+          }
+          const result = await keplr.enigmaDecrypt(
             payload.params[0],
-            payload.params[1],
-            payload.params[2]
+            Buffer.from(payload.params[1], "base64"),
+            Buffer.from(payload.params[2], "base64")
           );
 
           client.approveRequest({
@@ -352,6 +357,13 @@ export abstract class WalletConnectManager {
         }
         case "keplr_enigma_encrypt_wallet_connect_v1": {
           if (payload.params.length !== 3) {
+            throw new Error("Invalid parmas");
+          }
+          if (
+            typeof payload.params[0] !== "string" &&
+            typeof payload.params[1] !== "string" &&
+            typeof payload.params[2] !== "object"
+          ) {
             throw new Error("Invalid parmas");
           }
           const result = await keplr.enigmaEncrypt(
@@ -370,6 +382,9 @@ export abstract class WalletConnectManager {
           if (payload.params.length !== 1) {
             throw new Error("Invalid parmas");
           }
+          if (typeof payload.params[0] !== "string") {
+            throw new Error("Invalid parmas");
+          }
           const result = await keplr.getEnigmaPubKey(payload.params[0]);
 
           client.approveRequest({
@@ -381,6 +396,11 @@ export abstract class WalletConnectManager {
         case "keplr_enigma_tx_encryption_key_wallet_connect_v1": {
           if (payload.params.length !== 2) {
             throw new Error("Invalid parmas");
+          }
+          for (const param of payload.params) {
+            if (typeof param !== "string") {
+              throw new Error("Invalid parmas");
+            }
           }
           const result = await keplr.getEnigmaTxEncryptionKey(
             payload.params[0],
@@ -401,7 +421,7 @@ export abstract class WalletConnectManager {
             typeof payload.params[0] !== "string" &&
             typeof payload.params[1] !== "string" &&
             (typeof payload.params[2] !== "string" ||
-              typeof payload.params[2] !== "object")
+              typeof payload.params[2] !== undefined)
           ) {
             throw new Error("Invalid parmas");
           }
