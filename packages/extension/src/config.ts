@@ -2405,6 +2405,48 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-gitopia.keplr.app",
+    rest: "https://lcd-gitopia.keplr.app",
+    chainId: "gitopia",
+    chainName: "Gitopia",
+    stakeCurrency: {
+      coinDenom: "LORE",
+      coinMinimalDenom: "ulore",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "gitopia",
+      bech32PrefixAccPub: "gitopiapub",
+      bech32PrefixValAddr: "gitopiavaloper",
+      bech32PrefixValPub: "gitopiavaloperpub",
+      bech32PrefixConsAddr: "gitopiavalcons",
+      bech32PrefixConsPub: "gitopiavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LORE",
+        coinMinimalDenom: "ulore",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LORE",
+        coinMinimalDenom: "ulore",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.0012,
+          average: 0.0016,
+          high: 0.0024,
+        },
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
