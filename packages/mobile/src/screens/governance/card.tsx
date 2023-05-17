@@ -11,6 +11,7 @@ import { useIntl } from "react-intl";
 import { dateToLocalString } from "./utils";
 import { useSmartNavigation } from "../../navigation";
 import { RectButton } from "../../components/rect-button";
+import { Spacer } from "../../components/spacer";
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
   status: Governance.ProposalStatus;
@@ -31,11 +32,14 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
   }
 };
 
+export const VotedStatusChip: FunctionComponent = () => {
+  return <Chip text="Voted" color="primary" mode="outline" />;
+};
+
 export const GovernanceCardBody: FunctionComponent<{
   proposalId: string;
 }> = observer(({ proposalId }) => {
-  const { chainStore, queriesStore } = useStore();
-
+  const { chainStore, queriesStore, accountStore } = useStore();
   const navigation = useSmartNavigation();
 
   const style = useStyle();
@@ -45,6 +49,16 @@ export const GovernanceCardBody: FunctionComponent<{
   const queries = queriesStore.get(chainStore.current.chainId);
   const queryGovernance = queries.cosmos.queryGovernance;
   const proposal = queryGovernance.getProposal(proposalId);
+  const account = accountStore.getAccount(chainStore.current.chainId);
+
+  const voteData = queries.cosmos.queryProposalVote.getVote(
+    proposalId,
+    account.bech32Address
+  );
+
+  const isVoted =
+    voteData.vote !== "Unspecified" &&
+    proposal?.proposalStatus === Governance.ProposalStatus.VOTING_PERIOD;
 
   const renderProposalDateString = (proposal: ObservableQueryProposal) => {
     switch (proposal.proposalStatus) {
@@ -164,6 +178,8 @@ export const GovernanceCardBody: FunctionComponent<{
               style={style.flatten(["h5", "color-text-high"])}
             >{`#${proposal.id}`}</Text>
             <View style={style.flatten(["flex-1"])} />
+            {isVoted && <VotedStatusChip />}
+            <Spacer size={8} />
             <GovernanceProposalStatusChip status={proposal.proposalStatus} />
           </View>
           <View style={style.flatten(["margin-bottom-8"])}>
