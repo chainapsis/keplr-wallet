@@ -24,7 +24,6 @@ import {
   MessageRequester,
   sendSimpleMessage,
 } from "@keplr-wallet/router";
-import { ChangeKeyRingNameMsg } from "./types";
 
 import { KeplrEnigmaUtils } from "./enigma";
 
@@ -496,8 +495,15 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     defaultName: string;
     editable?: boolean;
   }): Promise<string> {
-    const msg = new ChangeKeyRingNameMsg(defaultName, editable);
-
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-v2",
+      "change-keyring-name-interactive",
+      {
+        defaultName,
+        editable,
+      }
+    );
   }
 }

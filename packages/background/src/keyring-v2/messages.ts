@@ -366,6 +366,35 @@ export class ChangeKeyRingNameMsg extends Message<{
   }
 }
 
+export class ChangeKeyRingNameInteractiveMsg extends Message<string> {
+  public static type() {
+    return "change-keyring-name-interactive";
+  }
+
+  constructor(
+    public readonly defaultName: string,
+    public readonly editable: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  override approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ChangeKeyRingNameInteractiveMsg.type();
+  }
+}
+
 export class DeleteKeyRingMsg extends Message<{
   wasSelected: boolean;
   status: KeyRingStatus;
