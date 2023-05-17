@@ -10,7 +10,7 @@ const Styles = {
   Container: styled.div`
     padding: 1rem 1.5rem 1.5rem 1.5rem;
     background-color: ${ColorPalette["gray-600"]};
-    border-radius: 2rem;
+    border-radius: 1rem;
 
     :hover {
       background-color: ${ColorPalette["gray-550"]};
