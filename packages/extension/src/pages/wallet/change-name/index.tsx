@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import { Stack } from "../../../components/stack";
@@ -9,6 +9,8 @@ import { useForm } from "react-hook-form";
 import { useStore } from "../../../stores";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
+import { useInteractionInfo } from "../../../hooks";
+import { InteractionWaitingData } from "@keplr-wallet/background";
 
 const Styles = {
   Container: styled(Stack)`
@@ -26,26 +28,46 @@ interface FormData {
   name: string;
 }
 
-// Todo: Add window.changeName() to change the name of the wallet
 export const WalletChangeNamePage: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const { keyRingStore, interactionStore } = useStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const vaultId = searchParams.get("id");
-  const walletName = keyRingStore.keyInfos.find((info) => info.id === vaultId);
+  const walletName = useMemo(() => {
+    return keyRingStore.keyInfos.find((info) => info.id === vaultId);
+  }, [keyRingStore.keyInfos, vaultId]);
 
   const {
     handleSubmit,
     register,
     setFocus,
-    setError,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
       name: "",
     },
   });
+
+  // 이 페이지는 외부에서 changeKeyRingName api로 접근할 수도 있으므로
+  // 인터렉션이 필요한 경우 따로 처리를 해줘야한다.
+  const interactionInfo = useInteractionInfo(() => {
+    interactionStore.rejectAll("change-keyring-name");
+  });
+  const interactionData: InteractionWaitingData | undefined =
+    interactionStore.getAllData("change-keyring-name")[0];
+
+  useEffect(() => {
+    if (interactionData?.data) {
+      const defaultName = (interactionData?.data as any).defaultName;
+      if (defaultName) {
+        setValue("name", defaultName);
+      }
+    }
+  }, [interactionData?.data, setValue]);
+
+  const notEditable = (interactionData?.data as any).editable === false;
 
   useEffect(() => {
     setFocus("name");
@@ -54,27 +76,52 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title="Change Wallet Name"
-      left={<BackButton />}
+      left={
+        <BackButton
+          hidden={
+            interactionInfo.interaction && !interactionInfo.interactionInternal
+          }
+        />
+      }
       bottomButton={{
         text: "Save",
         color: "secondary",
         size: "large",
         type: "submit",
+        isLoading: (() => {
+          if (!interactionInfo.interaction) {
+            return false;
+          }
+
+          return interactionStore.isObsoleteInteraction(interactionData?.id);
+        })(),
       }}
       onSubmit={handleSubmit(async (data) => {
-        console.log("submit: " + data.name);
         try {
           if (vaultId) {
-            await keyRingStore.changeKeyRingName(vaultId, data.name);
+            if (
+              interactionInfo.interaction &&
+              !interactionInfo.interactionInternal
+            ) {
+              await interactionStore.approveWithProceedNextV2(
+                interactionStore
+                  .getAllData("change-keyring-name")
+                  .map((data) => data.id),
+                data.name,
+                (proceedNext) => {
+                  if (!proceedNext) {
+                    window.close();
+                  }
+                }
+              );
+            } else {
+              await keyRingStore.changeKeyRingName(vaultId, data.name);
 
-            navigate(-1);
+              navigate(-1);
+            }
           }
         } catch (e) {
-          console.log("Fail to decrypt: " + e.message);
-          setError("name", {
-            type: "custom",
-            message: "Account name is required",
-          });
+          console.log(e);
         }
       })}
     >
@@ -88,6 +135,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
         <TextInput
           label="New Wallet Name"
           error={errors.name && errors.name.message}
+          disabled={notEditable}
           {...register("name", { required: true })}
         />
       </Styles.Container>

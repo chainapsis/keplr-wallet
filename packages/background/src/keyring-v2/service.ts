@@ -374,6 +374,44 @@ export class KeyRingService {
     this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
       keyRingName: name,
     });
+
+    if (this.selectedVaultId === vault.id) {
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
+    }
+  }
+
+  async changeKeyRingNameInteractive(
+    env: Env,
+    vaultId: string,
+    defaultName: string,
+    editable: boolean
+  ): Promise<string> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    return await this.interactionService.waitApproveV2(
+      env,
+      `/wallet/change-name?id=${vaultId}`,
+      "change-keyring-name",
+      {
+        defaultName,
+        editable,
+      },
+      (name: string) => {
+        this.changeKeyRingName(vaultId, name);
+        return name;
+      }
+    );
   }
 
   @action
