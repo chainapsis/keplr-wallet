@@ -18,15 +18,11 @@ import { SetBip44PathCard, useBIP44PathState } from "../components/bip-44-path";
 import { observer } from "mobx-react-lite";
 import lottie from "lottie-web";
 import AnimSeed from "../../../public/assets/lottie/register/seed.json";
-import AnimCheck from "../../../public/assets/lottie/register/check_circle-icon.json";
 import { useRegisterHeader } from "../components/header";
 import { HorizontalRadioGroup } from "../../../components/radio-group";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { WarningBox } from "../../../components/warning-box";
-import { Columns } from "../../../components/column";
-import { Button1 } from "../../../components/typography";
-import { ColorPalette } from "../../../styles";
-import { TextButton } from "../../../components/button-text";
+import { CopyToClipboard } from "../components/copy-to-clipboard";
 
 type WordsType = "12words" | "24words";
 
@@ -88,24 +84,6 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
   }, [fixedWidthScene, wordsType]);
 
   const [words, setWords] = useState<string[]>([]);
-  const [hasCopied, setHasCopied] = useState(false);
-  const checkAnimDivRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (checkAnimDivRef.current) {
-      const anim = lottie.loadAnimation({
-        container: checkAnimDivRef.current,
-        renderer: "svg",
-        autoplay: true,
-        loop: false,
-        animationData: AnimCheck,
-      });
-
-      return () => {
-        anim.destroy();
-      };
-    }
-  }, [hasCopied]);
 
   useEffect(() => {
     const rng = (array: any) => {
@@ -172,31 +150,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
           </VerticalResizeTransition>
         </Bleed>
 
-        <TextButton
-          text={
-            hasCopied ? (
-              <Columns sum={1} gutter="0.25rem">
-                <Button1 color={ColorPalette["green-400"]}>Copied</Button1>
-                <div
-                  style={{ width: "1.125rem", height: "1.125rem" }}
-                  ref={checkAnimDivRef}
-                />
-              </Columns>
-            ) : (
-              "Copy to clipboard"
-            )
-          }
-          size="large"
-          onClick={async () => {
-            await navigator.clipboard.writeText(words.join(" "));
-
-            setHasCopied(true);
-
-            setTimeout(() => {
-              setHasCopied(false);
-            }, 1000);
-          }}
-        />
+        <CopyToClipboard text={words.join(" ")} />
 
         <Gutter size="1.625rem" />
       </Box>

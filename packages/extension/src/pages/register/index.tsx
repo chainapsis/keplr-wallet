@@ -34,6 +34,7 @@ import { SelectDerivationPathScene } from "./select-derivation-path";
 import { useStore } from "../../stores";
 import { useSearchParams } from "react-router-dom";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
+import { BackUpPrivateKeyScene } from "./back-up-private-key";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -209,6 +210,11 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
               name: "connect-ledger",
               element: ConnectLedgerScene,
               width: "40rem",
+            },
+            {
+              name: "back-up-private-key",
+              element: BackUpPrivateKeyScene,
+              width: "28rem",
             },
             {
               name: "name-password",
