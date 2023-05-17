@@ -177,7 +177,8 @@ export const FeeControl: FunctionComponent<{
             <Columns sum={1} alignY="center">
               <Subtitle4>Transaction Fee</Subtitle4>
               <Gutter size="0.25rem" />
-              {feeConfig.uiProperties.loadingState ? (
+              {feeConfig.uiProperties.loadingState ||
+              gasSimulator?.uiProperties.loadingState ? (
                 <LoadingIcon width="1rem" height="1rem" />
               ) : (
                 <SettingIcon width="1rem" height="1rem" />
