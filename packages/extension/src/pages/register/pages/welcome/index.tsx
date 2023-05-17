@@ -121,7 +121,7 @@ export const WelcomePage: FunctionComponent = observer(() => {
               height="450"
               autoPlay={true}
               loop={true}
-              style={{ borderRadius: "2.5rem" }}
+              style={{ borderRadius: "2.5rem", backgroundColor: "#1A1239" }}
             >
               <source
                 src={require("../../../../public/assets/lottie/register/congrats.webm")}
