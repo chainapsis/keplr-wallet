@@ -147,7 +147,6 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   ) {
     super(chainGetter, initialChainId);
 
-    this._chainId = initialChainId;
     this._key = initialKey;
 
     makeObservable(this);

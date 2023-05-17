@@ -8,7 +8,7 @@ import { Button, getButtonHeightRem } from "../../components/button";
 import { Skeleton } from "../../components/skeleton";
 import {
   SpecialButton,
-  SpecialButtonHeightRem,
+  getSpecialButtonHeightRem,
 } from "../../components/special-button";
 
 const pxToRem = (px: number) => {
@@ -144,7 +144,11 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
     }
 
     if (bottomButton.isSpecial) {
-      return bottomButtonPaddingRem * 2 + SpecialButtonHeightRem + "rem";
+      return (
+        bottomButtonPaddingRem * 2 +
+        getSpecialButtonHeightRem(bottomButton.size) +
+        "rem"
+      );
     }
 
     return (

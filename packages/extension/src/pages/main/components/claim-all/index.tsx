@@ -35,6 +35,7 @@ import { useNavigate } from "react-router";
 import { Skeleton } from "../../../../components/skeleton";
 import { YAxis } from "../../../../components/axis";
 import Color from "color";
+import { SpecialButton } from "../../../../components/special-button";
 
 const Styles = {
   Container: styled.div`
@@ -386,6 +387,16 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       return true;
     })();
 
+    const claimAllIsLoading = (() => {
+      for (const chainInfo of chainStore.chainInfosInUI) {
+        const state = getClaimAllEachState(chainInfo.chainId);
+        if (state.isLoading) {
+          return true;
+        }
+      }
+      return false;
+    })();
+
     return (
       <Styles.Container>
         <Box paddingX="1rem">
@@ -415,12 +426,27 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             <Column weight={1} />
 
             <Skeleton type="button" layer={1} isNotReady={isNotReady}>
-              <Button
-                text="Claim All"
-                size="small"
-                disabled={claimAllDisabled}
-                onClick={claimAll}
-              />
+              {/*
+                 ledger일 경우 특수한 행동을 하진 못하고 그냥 collapse를 펼치기만 한다.
+                 특수한 기능이 없다는 것을 암시하기 위해서 ledger일때는 일반 버튼으로 처리한다.
+               */}
+              {isLedger ? (
+                <Button
+                  text="Claim All"
+                  size="small"
+                  isLoading={claimAllIsLoading}
+                  disabled={claimAllDisabled}
+                  onClick={claimAll}
+                />
+              ) : (
+                <SpecialButton
+                  text="Claim All"
+                  size="small"
+                  isLoading={claimAllIsLoading}
+                  disabled={claimAllDisabled}
+                  onClick={claimAll}
+                />
+              )}
             </Skeleton>
           </Columns>
         </Box>
