@@ -11,6 +11,7 @@ import { ProfileIcon } from "../../icon";
 import { Box } from "../../box";
 import { AddressBookModal } from "../../address-book-modal";
 import { IconButton } from "../../icon-button";
+import { ColorPalette } from "../../../styles";
 
 export interface RecipientInputWithAddressBookProps {
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
@@ -78,7 +79,11 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
           }}
           right={
             memoConfig ? (
-              <IconButton onClick={() => setIsAddressBookModalOpen(true)}>
+              <IconButton
+                onClick={() => setIsAddressBookModalOpen(true)}
+                hoverColor={ColorPalette["gray-500"]}
+                padding="0.25rem"
+              >
                 <ProfileIcon width="1.5rem" height="1.5rem" />
               </IconButton>
             ) : null

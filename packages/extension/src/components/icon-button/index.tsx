@@ -1,31 +1,33 @@
 import React, { FunctionComponent } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
-import Color from "color";
 
 export const Styles = {
-  Container: styled.div`
+  Container: styled.div<{ padding?: string; hoverColor?: string }>`
     cursor: pointer;
 
-    border-radius: 1000rem;
+    border-radius: 50%;
+
+    padding: ${({ padding }) => (padding ? padding : undefined)};
 
     color: ${ColorPalette["gray-50"]};
 
-    // TODO: 스타일링 이거 맞음?
     :hover {
-      background-color: ${Color(ColorPalette["gray-500"]).alpha(0.5).string()};
-    }
-    :active {
-      background-color: ${ColorPalette["gray-500"]};
+      background-color: ${({ hoverColor }) =>
+        hoverColor ? hoverColor : ColorPalette["gray-550"]};
     }
   `,
 };
 
 export const IconButton: FunctionComponent<{
   onClick: () => void;
-}> = ({ children, onClick }) => {
+  padding?: string;
+  hoverColor?: string;
+}> = ({ children, onClick, padding, hoverColor }) => {
   return (
     <Styles.Container
+      padding={padding}
+      hoverColor={hoverColor}
       onClick={(e) => {
         e.preventDefault();
 
