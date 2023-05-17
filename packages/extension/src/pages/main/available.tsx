@@ -17,6 +17,7 @@ import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useNavigate } from "react-router";
+import { YAxis } from "../../components/axis";
 
 const zeroDec = new Dec(0);
 
@@ -151,11 +152,13 @@ export const AvailableTabView: FunctionComponent<{
           </Stack>
           {numFoundToken > 0 ? (
             <Box padding="0.75rem">
-              <TextButton
-                text={`${numFoundToken} new token(s) found`}
-                size="small"
-                onClick={() => setIsFoundTokenModalOpen(true)}
-              />
+              <YAxis alignX="center">
+                <TextButton
+                  text={`${numFoundToken} new token(s) found`}
+                  size="small"
+                  onClick={() => setIsFoundTokenModalOpen(true)}
+                />
+              </YAxis>
             </Box>
           ) : null}
         </React.Fragment>
