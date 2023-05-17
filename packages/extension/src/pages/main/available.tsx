@@ -24,7 +24,11 @@ const zeroDec = new Dec(0);
 export const AvailableTabView: FunctionComponent<{
   search: string;
   isNotReady?: boolean;
-}> = observer(({ search, isNotReady }) => {
+
+  // 초기 유저에게 뜨는 alternative에서 get started 버튼을 누르면 copy address modal을 띄워야된다...
+  // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
+  onClickGetStarted: () => void;
+}> = observer(({ search, isNotReady, onClickGetStarted }) => {
   const { hugeQueriesStore, chainStore } = useStore();
   const navigate = useNavigate();
 
@@ -118,7 +122,14 @@ export const AvailableTabView: FunctionComponent<{
           }
           paragraph="Gear up yourself by topping up your wallet! "
           title="Ready to Explore the Interchain?"
-          button={<Button text="Get Started" color="primary" size="small" />}
+          button={
+            <Button
+              text="Get Started"
+              color="primary"
+              size="small"
+              onClick={onClickGetStarted}
+            />
+          }
         />
       ) : (
         <React.Fragment>

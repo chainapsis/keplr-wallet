@@ -329,7 +329,13 @@ export const MainPage: FunctionComponent = observer(() => {
             각 컴포넌트에서 알아서 gutter를 처리해야한다.
            */}
           {tabStatus === "available" ? (
-            <AvailableTabView search={search} isNotReady={isNotReady} />
+            <AvailableTabView
+              search={search}
+              isNotReady={isNotReady}
+              onClickGetStarted={() => {
+                setIsOpenCopyAddress(true);
+              }}
+            />
           ) : (
             <StakedTabView />
           )}
