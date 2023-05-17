@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { SpecialButtonProps } from "./types";
 import { Styles } from "./styles";
 import { LoadingIcon } from "../icon";
@@ -45,11 +50,13 @@ const hoverScale = 1.03;
 const pressedScale = 0.98;
 
 export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
+  size,
   onClick,
   left,
   text,
   right,
   isLoading,
+  disabled,
   textOverrideIcon,
 }) => {
   const gradient1 = useSpringValue(gradient1DefaultColor);
@@ -64,7 +71,38 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   const [isHover, setIsHover] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
+  const animateToDefault = useCallback(() => {
+    return Promise.all([
+      gradient1.start(gradient1DefaultColor, {
+        config: gradientSpringConfig,
+      }),
+      gradient2.start(gradient2DefaultColor, {
+        config: gradientSpringConfig,
+      }),
+      scale.start(defaultScale, {
+        config: springConfig,
+      }),
+      boxShadowColor.start(defaultBoxShadowColor, {
+        config: springConfig,
+      }),
+      boxShadowStrength.start(defaultBoxShadowStrength, {
+        config: springConfig,
+      }),
+    ]);
+    // 이 함수는 lifecycle내에서 constant하고 그게 보장이 되어야함.
+  }, [boxShadowColor, boxShadowStrength, gradient1, gradient2, scale]);
+
   useLayoutEffect(() => {
+    if (disabled) {
+      animateToDefault();
+    }
+  }, [animateToDefault, disabled]);
+
+  useLayoutEffect(() => {
+    if (disabled) {
+      return;
+    }
+
     if (isHover) {
       gradient1.start(gradient1HoverColor, {
         config: gradientSpringConfig,
@@ -83,26 +121,24 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
         config: springConfig,
       });
     } else {
-      gradient1.start(gradient1DefaultColor, {
-        config: gradientSpringConfig,
-      });
-      gradient2.start(gradient2DefaultColor, {
-        config: gradientSpringConfig,
-      });
-
-      scale.start(defaultScale, {
-        config: springConfig,
-      });
-      boxShadowColor.start(defaultBoxShadowColor, {
-        config: springConfig,
-      });
-      boxShadowStrength.start(defaultBoxShadowStrength, {
-        config: springConfig,
-      });
+      animateToDefault();
     }
-  }, [boxShadowColor, boxShadowStrength, gradient1, gradient2, isHover, scale]);
+  }, [
+    animateToDefault,
+    boxShadowColor,
+    boxShadowStrength,
+    disabled,
+    gradient1,
+    gradient2,
+    isHover,
+    scale,
+  ]);
 
   useLayoutEffect(() => {
+    if (disabled) {
+      return;
+    }
+
     if (isPressed) {
       gradient1.start(gradient1HoverColor, {
         config: gradientSpringConfig,
@@ -124,6 +160,7 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   }, [
     boxShadowColor,
     boxShadowStrength,
+    disabled,
     gradient1,
     gradient2,
     isPressed,
@@ -133,9 +170,15 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   return (
     <Styles.Container>
       <Styles.Button
+        size={size}
         isLoading={isLoading}
+        disabled={disabled}
         type="button"
         onClick={() => {
+          if (disabled || isLoading) {
+            return;
+          }
+
           setIsPressed(false);
 
           gradient1.start(gradient1DefaultColor, {
@@ -156,9 +199,7 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           });
 
           if (onClick) {
-            if (!isLoading) {
-              onClick();
-            }
+            onClick();
           }
         }}
         onMouseEnter={() => setIsHover(true)}
@@ -167,7 +208,13 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           // 외부에서 마우스가 up 되었을 경우 event가 발생하지 않으므로 여기서도 처리해준다.
           setIsPressed(false);
         }}
-        onMouseDown={() => setIsPressed(true)}
+        onMouseDown={() => {
+          if (isLoading) {
+            return;
+          }
+
+          setIsPressed(true);
+        }}
         style={{
           background: to(
             [gradient1, gradient2],

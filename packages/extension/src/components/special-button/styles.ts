@@ -1,10 +1,10 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { ButtonRadius, getButtonHeightRem } from "../button";
 import { SpecialButtonProps } from "./types";
 import { animated } from "@react-spring/web";
 
-export const SpecialButtonHeightRem = getButtonHeightRem("large");
+export const getSpecialButtonHeightRem = getButtonHeightRem;
 
 export const Styles = {
   Container: styled.div`
@@ -16,21 +16,29 @@ export const Styles = {
 
   // "onClick" field should be omitted because "onClick" prop already exists on html button component.
   // If not omitted, they are intersected with each other.
-  Button: styled(animated.button)<SpecialButtonProps>`
+  Button: styled(animated.button)<
+    Pick<SpecialButtonProps, "size" | "isLoading" | "disabled">
+  >`
     width: 100%;
-    height: ${SpecialButtonHeightRem}rem;
+    height: ${({ size }) => `${getSpecialButtonHeightRem(size)}rem`};
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: ${ButtonRadius};
     cursor: ${({ disabled, isLoading }) =>
-      disabled ? "not-allowed" : isLoading ? "wait" : "pointer"};
+      disabled ? "not-allowed" : isLoading ? "progress" : "pointer"};
     overflow: hidden;
 
     font-weight: 500;
-    font-size: 1rem;
+    font-size: ${({ size }) => {
+      switch (size) {
+        case "large":
+          return "1rem";
+        default:
+          return "0.875rem";
+      }
+    }};
     letter-spacing: 0.2px;
-
     white-space: nowrap;
 
     // Remove normalized css properties.
@@ -45,6 +53,29 @@ export const Styles = {
       fill: ${ColorPalette["white"]};
       stroke: ${ColorPalette["white"]};
     }
+
+    // For disabled state.
+    position: relative;
+    ::after {
+      content: "";
+
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    ${({ disabled }) => {
+      if (!disabled) return;
+
+      return css`
+        ::after {
+          background-color: ${ColorPalette["gray-600"]};
+          opacity: 0.5;
+        }
+      `;
+    }}
   `,
   Left: styled.span`
     height: 100%;

@@ -258,31 +258,16 @@ export const CosmosTxView: FunctionComponent<{
         />
       }
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
-      bottomButton={
-        buttonDisabled
-          ? {
-              // speical button에는 disabled 상태가 없으므로 이 경우 그냥 button으로 대체한다.
-              // 근데 이때는 무조건 disabled 상태라서 사실 onClick 등의 경우는 실행될수가 없는데 그냥 일단 넣어놓음...
-              text: "Approve",
-              color: "primary",
-              size: "large",
-              disabled: buttonDisabled,
-              isLoading:
-                signInteractionStore.isObsoleteInteraction(
-                  interactionData.id
-                ) || isLedgerInteracting,
-              onClick: approve,
-            }
-          : {
-              isSpecial: true,
-              text: "Approve",
-              isLoading:
-                signInteractionStore.isObsoleteInteraction(
-                  interactionData.id
-                ) || isLedgerInteracting,
-              onClick: approve,
-            }
-      }
+      bottomButton={{
+        isSpecial: true,
+        text: "Approve",
+        size: "large",
+        disabled: buttonDisabled,
+        isLoading:
+          signInteractionStore.isObsoleteInteraction(interactionData.id) ||
+          isLedgerInteracting,
+        onClick: approve,
+      }}
     >
       <Box
         height="100%"

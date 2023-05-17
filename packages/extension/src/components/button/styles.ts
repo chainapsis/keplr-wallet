@@ -145,7 +145,7 @@ export const Styles = {
     align-items: center;
     border-radius: ${ButtonRadius};
     cursor: ${({ disabled, isLoading }) =>
-      disabled ? "not-allowed" : isLoading ? "wait" : "pointer"};
+      disabled ? "not-allowed" : isLoading ? "progress" : "pointer"};
     overflow: hidden;
 
     // Default font style.

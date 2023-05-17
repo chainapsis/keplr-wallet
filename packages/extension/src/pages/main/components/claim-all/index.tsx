@@ -35,6 +35,7 @@ import { useNavigate } from "react-router";
 import { Skeleton } from "../../../../components/skeleton";
 import { YAxis } from "../../../../components/axis";
 import Color from "color";
+import { SpecialButton } from "../../../../components/special-button";
 
 const Styles = {
   Container: styled.div`
@@ -386,6 +387,16 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       return true;
     })();
 
+    const claimAllIsLoading = (() => {
+      for (const chainInfo of chainStore.chainInfosInUI) {
+        const state = getClaimAllEachState(chainInfo.chainId);
+        if (state.isLoading) {
+          return true;
+        }
+      }
+      return false;
+    })();
+
     return (
       <Styles.Container>
         <Box paddingX="1rem">
@@ -415,9 +426,10 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             <Column weight={1} />
 
             <Skeleton type="button" layer={1} isNotReady={isNotReady}>
-              <Button
+              <SpecialButton
                 text="Claim All"
                 size="small"
+                isLoading={claimAllIsLoading}
                 disabled={claimAllDisabled}
                 onClick={claimAll}
               />
