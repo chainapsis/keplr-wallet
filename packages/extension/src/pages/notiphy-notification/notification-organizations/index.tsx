@@ -180,16 +180,16 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
             <i className="fa fa-spinner fa-spin fa-2x fa-fw" />
           </div>
         ) : (
-          <>
+          <React.Fragment>
             {!orgList.length && (
               <div className={style.resultText}>
                 <p>
                   No results found.
                   {inputVal !== "" && (
-                    <>
+                    <React.Fragment>
                       <br />
                       Please refine your search.
-                    </>
+                    </React.Fragment>
                   )}
                 </p>
               </div>
@@ -210,7 +210,7 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
                 />
               );
             })}
-          </>
+          </React.Fragment>
         )}
       </div>
       <div className={style.buttonContainer}>

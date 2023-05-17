@@ -7,6 +7,7 @@ import { useStore } from "../../stores";
 
 import style from "./style.module.scss";
 import { ToolTip } from "@components/tooltip";
+import classnames from "classnames";
 
 import { ChainList } from "./chain-list";
 import { Menu, useMenu, MenuButton } from "../menu";
@@ -18,6 +19,7 @@ export interface Props {
   canChangeChainInfo: boolean;
 
   alternativeTitle?: string;
+  smallTitle?: boolean;
   menuRenderer?: ReactNode;
   rightRenderer?: ReactNode;
   onBackButton?: () => void;
@@ -32,6 +34,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
     showChainName,
     canChangeChainInfo,
     alternativeTitle,
+    smallTitle,
     menuRenderer,
     rightRenderer,
     isMenuOpen,
@@ -50,7 +53,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
         left={
           <div className={style.menuContainer}>
             {menuRenderer ? (
-              <>
+              <React.Fragment>
                 <Menu isOpen={isMenuOpen}>{menuRenderer}</Menu>
                 <motion.div
                   className={style["menu-img"]}
@@ -60,7 +63,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
                 >
                   <MenuButton />
                 </motion.div>
-              </>
+              </React.Fragment>
             ) : null}
             {onBackButton ? (
               <div
@@ -96,7 +99,11 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
               className={style.chainListContainer}
               style={{ cursor: chainInfoChangable ? undefined : "default" }}
             >
-              <div className={style.title}>
+              <div
+                className={classnames(style.title, {
+                  [style.small]: smallTitle,
+                })}
+              >
                 {showChainName
                   ? chainStore.current.chainName
                   : alternativeTitle}

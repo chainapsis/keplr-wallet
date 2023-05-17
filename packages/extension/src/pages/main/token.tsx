@@ -5,14 +5,18 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { useHistory } from "react-router";
 import { Hash } from "@keplr-wallet/crypto";
-import { ObservableQueryBalanceInner } from "@keplr-wallet/stores/build/query/balances";
 import { UncontrolledTooltip } from "reactstrap";
-import { WrongViewingKeyError } from "@keplr-wallet/stores";
+import {
+  WrongViewingKeyError,
+  ObservableQueryBalanceInner,
+} from "@keplr-wallet/stores";
 import { useNotification } from "@components/notification";
 import { useLoadingIndicator } from "@components/loading-indicator";
 import sendIcon from "@assets/icon/send.png";
 import { Dec } from "@keplr-wallet/unit";
+import { DenomHelper } from "@keplr-wallet/common";
 import { ToolTip } from "@components/tooltip";
+import { formatTokenName } from "@utils/format";
 
 const TokenView: FunctionComponent<{
   balance: ObservableQueryBalanceInner;
@@ -110,7 +114,7 @@ const TokenView: FunctionComponent<{
       </div>
       <div className={styleToken.tokenName}>
         <ToolTip trigger="hover" tooltip={name}>
-          {name}
+          {formatTokenName(name)}
         </ToolTip>
       </div>
       <div className={styleToken.tokenBalance}>
@@ -203,7 +207,26 @@ export const TokensView: FunctionComponent = observer(() => {
   const tokens = queriesStore
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(accountInfo.bech32Address)
-    .unstakables.sort((a, b) => {
+    .unstakables.filter((bal) => {
+      if (
+        chainStore.current.features &&
+        chainStore.current.features.includes("terra-classic-fee")
+      ) {
+        // At present, can't handle stability tax well if it is not registered native token.
+        // So, for terra classic, disable other tokens.
+        const denom = new DenomHelper(bal.currency.coinMinimalDenom);
+        if (denom.type !== "native" || denom.denom.startsWith("ibc/")) {
+          return false;
+        }
+
+        if (denom.type === "native") {
+          return bal.balance.toDec().gt(new Dec("0"));
+        }
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
       const aDecIsZero = a.balance.toDec().isZero();
       const bDecIsZero = b.balance.toDec().isZero();
 

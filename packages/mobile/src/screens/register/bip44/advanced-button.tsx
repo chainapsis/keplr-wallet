@@ -94,7 +94,7 @@ export const BIP44SelectModal: FunctionComponent<{
         <Text
           style={style.flatten([
             "body2",
-            "color-text-black-medium",
+            "color-text-middle",
             "margin-bottom-18",
           ])}
         >
@@ -107,9 +107,9 @@ export const BIP44SelectModal: FunctionComponent<{
             "margin-bottom-16",
           ])}
         >
-          <Text
-            style={style.flatten(["body2", "color-text-black-medium"])}
-          >{`m/44’/${bip44Option.coinType ?? "-"}’`}</Text>
+          <Text style={style.flatten(["body2", "color-text-middle"])}>{`m/44’/${
+            bip44Option.coinType ?? "-"
+          }’`}</Text>
           <TextInput
             value={account.value}
             containerStyle={style.flatten(["min-width-58", "padding-bottom-0"])}
@@ -138,7 +138,7 @@ export const BIP44SelectModal: FunctionComponent<{
           <Text
             style={style.flatten([
               "text-caption2",
-              "color-danger",
+              "color-red-400",
               "margin-bottom-8",
             ])}
           >

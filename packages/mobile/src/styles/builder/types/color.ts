@@ -1,3 +1,26 @@
+type MultipleOfFiveAlphas =
+  | "0%"
+  | "5%"
+  | "10%"
+  | "15%"
+  | "20%"
+  | "25%"
+  | "30%"
+  | "35%"
+  | "40%"
+  | "45%"
+  | "50%"
+  | "55%"
+  | "60%"
+  | "65%"
+  | "70%"
+  | "75%"
+  | "80%"
+  | "85%"
+  | "90%"
+  | "95%"
+  | "100%";
+
 export type StyleBuilderColorDefinitions<
   Colors extends Record<string, string>
 > = {
@@ -6,12 +29,30 @@ export type StyleBuilderColorDefinitions<
   };
 } &
   {
+    [K in keyof Colors as `color-${string & K}@${string &
+      MultipleOfFiveAlphas}`]: {
+      color: string;
+    };
+  } &
+  {
     [K in keyof Colors as `background-color-${string & K}`]: {
       backgroundColor: string;
     };
   } &
   {
+    [K in keyof Colors as `background-color-${string & K}@${string &
+      MultipleOfFiveAlphas}`]: {
+      backgroundColor: string;
+    };
+  } &
+  {
     [K in keyof Colors as `border-color-${string & K}`]: {
+      borderColor: string;
+    };
+  } &
+  {
+    [K in keyof Colors as `border-color-${string & K}@${string &
+      MultipleOfFiveAlphas}`]: {
       borderColor: string;
     };
   };

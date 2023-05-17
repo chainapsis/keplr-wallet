@@ -2,12 +2,13 @@
   "main.account.chart.total-balance": "Total Balance",
   "main.account.chart.available-balance": "Available",
   "main.account.chart.staked-balance": "Staked",
+  "main.account.button.buy": "Buy",
+  "main.account.button.buy.not-support": "Unavailable on this chain",
   "main.account.chart.reward-balance": "Rewards",
   "main.account.button.deposit": "Deposit",
   "main.account.deposit.paragraph": "Add tokens to your wallet",
   "main.account.button.send": "Send",
   "main.account.tooltip.no-asset": "No token in your account. Deposit some tokens to send.",
-  "main.account.button.buy": "Buy",
   "main.account.buy.paragraph": "Buy and add native tokens to your wallet",
 
   "main.modal.select-account.title": "Select your account",
@@ -27,8 +28,14 @@
   "main.ibc.transfer.paragraph": "Send tokens over IBC",
   "main.ibc.transfer.button": "Transfer",
 
+  "main.evmos.dashboard.title": "Dashboard",
+  "main.evmos.dashboard.paragraph": "View ERC-20 and IBC tokens",
+  "main.evmos.dashboard.button": "View",
+
   "main.address.copied": "Address copied!",
   "main.name.copied": "Name copied!",
+
+  "main.suggest.chain.link": "Add Suggest Chains",
 
   "main.menu.settings": "Settings",
   "main.menu.address-book": "Address Book",
@@ -42,6 +49,15 @@
   "main.update-chain.confirm.yes": "Proceed",
   "main.update-chain.confirm.no": "Ignore",
 
+  "main.authz.title": "AuthZ",
+  "main.authz.grant.grantee.information": "You authorized",
+  "main.authz.grant.grantee.address": "Grantee Address",
+  "main.authz.grant.expiration.title": "Expiration dates",
+  "main.authz.grant.expiration.information": "Expiration dates: ",
+  "main.authz.grant.expiration.expired": "Expired",
+  "main.authz.grant.expiration.infinite": "Your Authz delegation will not be expired until you revoke it.",
+  "main.authz.grant.revoke": "Revoke",
+
   "setting.language": "Language",
   "setting.language.automatic": "Automatic (Browser default)",
   "setting.language.automatic-with-language": "Automatic ({language})",
@@ -52,10 +68,15 @@
   "setting.fiat.automatic": "Automatic",
   "setting.fiat.automatic-with-fiat": "Automatic ({fiat})",
 
-  "setting.connections": "Manage Connections",
-  "setting.connections.paragraph": "Manage websites connected to your wallet",
+  "setting.security-privacy": "Security & Privacy",
+
+  "setting.connections": "Wallet Access Permissions",
+  "setting.connections.paragraph": "Websites that can access address/signing",
   "setting.connections.confirm.delete-connection.title": "Disable Connection",
   "setting.connections.confirm.delete-connection.paragraph": "Are you sure you want to disable this connection?",
+
+  "setting.permissions.get-chain-infos": "Chain List Access",
+  "setting.permissions.get-chain-infos.paragraph": "Websites that can access your active chain list",
 
   "setting.address-book.button.add": "Add New",
   "setting.address-book.add-address.title": "Add Address",
@@ -89,8 +110,6 @@
   "setting.receipts": "Read Receipts",
   "setting.receipts.paragraph": "Off - You won't send or receive Read receipts",
   "setting.receipts.paragraph.on": "On - You send and receive Read Receipts",
-
-  "setting.credit": "Special thanks",
 
   "setting.keyring": "Select Account",
   "setting.keyring.button.add": "Add Account",
@@ -133,8 +152,26 @@
   "setting.token.add.secret20.checkbox.use-suggested-viewing-key": "Use webpage suggested viewing key",
   "setting.token.add.secret20.viewing-key": "Viewing Key",
 
-  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You wil not be able to see your balance or transfer until you register a viewing key.",
+  "setting.token.manage.confirm.remove-token": "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you register again.",
   "setting.token.manage.notification.viewing-key.copy": "Viewing key copied!",
+  "setting.token.manage.notification.viewing-key.copy.hover": "Viewing key copy",
+  "setting.token.manage.notification.contract-address.copy": "Contract address copied!",
+  "setting.token.manage.notification.contract-address.copy.hover": "Contract address copy",
+
+  "setting.endpoints": "Endpoints",
+  "setting.endpoints.paragraph": "Change into the node you wish to connect",
+  "setting.endpoints.button.reset": "Reset",
+  "setting.endpoints.button.confirm": "Confirm",
+
+  "setting.autolock": "Auto-Lock Timer",
+  "setting.autolock.duration": "Set the duration (unit: minutes)",
+  "setting.autolock.description": "With Auto-Lock enabled, Wallet will lock when the device is in sleep mode",
+  "setting.autolock.error.required": "Duration is required",
+  "setting.autolock.error.out-of-range": "It cannot be less than 0 or greater than 4320(3days)",
+
+  "setting.developer-mode": "Developer Mode",
+
+  "setting.chain-active.title": "Show/Hide Chains",
 
   "register.name": "Account name",
   "register.name.error.required": "Account name is required",
@@ -151,6 +188,7 @@
   "register.intro.sub-content": "All sensitive information is stored only on your device.{br}This process does not require an internet connection.",
 
   "register.recover.title": "Input your seed",
+  "register.recover.alt.private-key.title": "Input your private key",
 
   "register.create.title": "Mnemonic Seed",
   "register.create.toggle.word12": "12 words",
@@ -167,11 +205,18 @@
   "register.create.warning.keep-your-mnemonic.header": "Backup your mnemonic seed securely.",
   "register.create.warning.keep-your-mnemonic.paragraph1": "Anyone with your mnemonic seed can take your assets.",
   "register.create.warning.keep-your-mnemonic.paragraph2": "Lost mnemonic seed can't be recovered.",
+  "register.import.textarea.mnemonic.error.required": "Mnemonic is required",
+  "register.import.textarea.mnemonic.error.invalid": "Invalid mnemonic",
+  "register.import.textarea.mnemonic.error.too-short": "Too short mnemonic",
+  "register.import.textarea.private-key.error.required": "Private key is required",
   "register.import.textarea.private-key.error.invalid": "Invalid private key",
   "register.import.textarea.private-key.error.invalid-length": "Invalid length of private key",
   "register.create.button.next": "Next",
+  "register.create.button.ledger.terra": "Use Terra Ledger app",
 
-  "register.ledger.title": "Import ledger",
+  "register.keystone.title": "Connect Keystone",
+
+  "register.ledger.title": "Connect ledger",
 
   "register.eth-migrate.title": "Migrate from ETH",
   "register.eth-migrate.metamask-private-key.title": "Migrate a Metamask Private Key",
@@ -189,12 +234,19 @@
   "register.welcome.content": "Open the extension and sign in to begin your interchain journey.",
   "register.welcome.button.done": "Done",
 
-  "chain.suggested.title": "Chain Add Request",
+  "chain.suggested.title": "Add {chainName} to Keplr",
+  "chain.suggested.tooltip": "Chain info being added is from this web",
+  "chain.suggested.developer.checkbox": "Use this as the preferred code string and override info registered on the community repo",
   "chain.suggested.paragraph": "<b>{host}</b> would like to add blockchain <b>{chainId}</b> to Fetch Wallet.",
-  "chain.suggested.waring.experiment.title": "Experimental Feature",
-  "chain.suggested.waring.experiment.paragraph": "For the brave-hearted cosmonauts",
+  "chain.suggested.approve-info.title": "Before You Approve",
+  "chain.suggested.approve-info.content": "Keplr recommends that ‘suggest chain’ info be managed by the community. At this time, this chain’s info has not been registered.",
+  "chain.suggested.approve-info.link": "Click here to update chain info on Github ->",
+  "chain.suggested.approve-alert.content": "Adding this chain requires information from a web page not managed by Keplr.",
   "chain.suggested.button.approve": "Approve",
   "chain.suggested.button.reject": "Reject",
+  "chain.suggested.community-driven": "Community Driven",
+  "chain.suggested.add-chain-as-suggested": "Add chain as suggested",
+  "chain.suggested.chain-info-is-from": "Chain info being added is from",
 
   "chain.remove.confirm.paragraph": "Are you sure to remove the {chainName}?",
 
@@ -206,6 +258,9 @@
   "access.permission.secret": "Be able to encrypt/decrypt your messages",
   "access.button.approve": "Approve",
   "access.button.reject": "Reject",
+
+  "permissions.grant.get-chain-infos.description.title": "<b>{host}</b> is requesting to connect to your Keplr.",
+  "permissions.grant.get-chain-infos.description.list1": "Get the list of all chains on your Keplr Wallet",
 
   "access.viewing-key.title": "Requesting Viewing Key",
   "access.viewing-key.paragraph": "<b>{host}</b> is requesting to get your token's viewing key on <b>{contractAddress}</b>.",
@@ -222,10 +277,6 @@
 
   "send.input.recipient": "Recipient",
   "send.input.recipient.error.invalid": "Invalid address",
-  "send.input.recipient.error.ens-invalid-name": "Invalid ENS name format",
-  "send.input.recipient.error.ens-not-found": "ENS name not found",
-  "sned.input.recipient.error.ens-unknown-error": "Failed to get address from ENS",
-  "send.input.recipient.error.ens-not-supported": "ENS not supported for this chain",
   "send.input.amount": "Amount",
   "send.input.amount.error.insufficient": "Insufficient asset",
   "send.input.memo": "Memo (Optional)",
@@ -269,6 +320,17 @@
   "sign.list.message.cosmos-sdk/MsgWithdrawDelegatorReward.content": "Claim pending staking reward from <b>{validator}</b>",
   "sign.list.message.cosmos-sdk/MsgVote.title": "Vote",
   "sign.list.message.cosmos-sdk/MsgVote.content": "Vote <b>{option}</b> on <b>Proposal {id}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.title": "Grant",
+  "sign.list.message.cosmos-sdk/MsgGrant.unspecified": "Unspecified",
+  "sign.list.message.cosmos-sdk/MsgGrant.unrecognized": "Unrecognized",
+  "sign.list.message.cosmos-sdk/MsgGrant.generic.content": "Grant <b>{grantType}</b> permission to <b>{grantee}</b> until <b>{expirationDate}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.sending.content": "Grant <b>Send</b> permission to <b>{grantee}</b> until <b>{expirationDate}</b>{br}Max Amount: <b>{maxAmount}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.unlimited": "Unlimited",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.content": "Grant <b>{grantType}</b> permission to <b>{grantee}</b> until <b>{expirationDate}</b>{br}{validatorListType} Validators: <b>{validators}</b>{br}Max Amount: <b>{maxAmount}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorAllowedLabel": "Allowed",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorDeniedLabel": "Denied",
+  "sign.list.message.cosmos-sdk/MsgRevoke.title": "Revoke",
+  "sign.list.message.cosmos-sdk/MsgRevoke.content": "Revoke <b>{revokeType}</b> permission from <b>{grantee}</b>",
 
   "sign.list.message.wasm.button.details": "Details",
   "sign.list.message.wasm.button.close": "Close",
@@ -282,10 +344,12 @@
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{neuron}</b> create link {br}<b>{link}</b>",
 
+  "sign.icns.registration.title": "Request registration",
+
   "ledger.step1": "Step 1",
   "ledger.step1.paragraph": "Connect and unlock your Ledger.",
   "ledger.step2": "Step 2",
-  "ledger.step2.paragraph": "Open the Cosmos app on your Ledger device.",
+  "ledger.step2.paragraph": "Open the {ledgerApp} app on your Ledger device.",
   "ledger.option.webhid.checkbox": "Use alternative USB connection method(HID)",
   "ledger.option.webhid.warning": "Please copy and paste the following link {link} on your browser and enable ‘experimental web platform features’",
   "ledger.option.webhid.link.copied": "Link copied!",
@@ -301,15 +365,16 @@
   "fee-buttons.select.high": "High",
 
   "input.recipient.error.invalid-bech32": "Invalid address",
-  "input.recipient.error.ens-not-supported": "ENS not supported for this chain",
-  "input.recipient.error.ens-failed-to-fetch": "Failed to get address from ENS",
+  "input.recipient.error.icns-failed-to-fetch": "Failed to get address from ICNS",
+  "input.recipient.error.invalid-hex": "Invalid hex address",
   "input.amount.error.invalid-number": "Invalid number",
   "input.amount.error.is-zero": "Amount should not be zero",
   "input.amount.error.is-negative": "Amount should be positive",
   "input.amount.error.insufficient": "Insufficient asset",
   "input.fee.error.insufficient": "Insufficient available balance for transaction fee",
-  "input.fee.toggle.set-gas": "Set Gas",
+  "input.fee.toggle.set-gas": "Advanced",
   "input.fee.toggle.set-gas.close": "Close",
+  "input.fee.selector.fee-currency": "Fee Token",
 
   "confirm.yes": "Yes",
   "confirm.no": "No",
@@ -322,6 +387,9 @@
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "Source Channel ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.button": "Save",
+
+  "component.waring.experimental-feature.title": "Experimental Feature",
+  "component.waring.experimental-feature.paragraph": "For the brave-hearted cosmonauts",
 
   "chat.disappear-message": "Messages will disappear after 14 days.",
 

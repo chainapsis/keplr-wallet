@@ -27,7 +27,6 @@ import {
   useMemoConfig,
   useRecipientConfig,
 } from "@keplr-wallet/hooks";
-import { EthereumEndpoint } from "../../../config.ui";
 import { shortenAgentAddress } from "@utils/validate-agent";
 
 export interface chatSectionParams {
@@ -43,12 +42,11 @@ export const AddressBookPage: FunctionComponent<{
   hideChainDropdown?: boolean;
   selectHandler?: AddressBookSelectHandler;
   ibcChannelConfig?: IIBCChannelConfig;
-  isInTransaction?: boolean;
 }> = observer(
   ({ onBackButton, hideChainDropdown, selectHandler, ibcChannelConfig }) => {
     const intl = useIntl();
     const history = useHistory();
-    const { chainStore } = useStore();
+    const { chainStore, uiConfigStore } = useStore();
     const current = chainStore.current;
     const location = useLocation();
     const chatSectionParams =
@@ -59,12 +57,10 @@ export const AddressBookPage: FunctionComponent<{
         : current.chainId
     );
 
-    const recipientConfig = useRecipientConfig(
-      chainStore,
-      selectedChainId,
-      EthereumEndpoint
-    );
-
+    const recipientConfig = useRecipientConfig(chainStore, selectedChainId, {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    });
     const memoConfig = useMemoConfig(chainStore, selectedChainId);
 
     const addressBookConfig = useAddressBookConfig(
@@ -217,19 +213,22 @@ export const AddressBookPage: FunctionComponent<{
                   <DropdownToggle caret style={{ boxShadow: "none" }}>
                     {chainStore.getChain(selectedChainId).chainName}
                   </DropdownToggle>
+
                   <DropdownMenu>
-                    {chainStore.chainInfos.map((chainInfo) => {
-                      return (
-                        <DropdownItem
-                          key={chainInfo.chainId}
-                          onClick={() => {
-                            setSelectedChainId(chainInfo.chainId);
-                          }}
-                        >
-                          {chainInfo.chainName}
-                        </DropdownItem>
-                      );
-                    })}
+                    <div className={styleAddressBook.dropdownWrapper}>
+                      {chainStore.chainInfos.map((chainInfo) => {
+                        return (
+                          <DropdownItem
+                            key={chainInfo.chainId}
+                            onClick={() => {
+                              setSelectedChainId(chainInfo.chainId);
+                            }}
+                          >
+                            {chainInfo.chainName}
+                          </DropdownItem>
+                        );
+                      })}
+                    </div>
                   </DropdownMenu>
                 </ButtonDropdown>
               )}

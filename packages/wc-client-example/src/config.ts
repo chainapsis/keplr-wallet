@@ -14,12 +14,12 @@ export const EmbedChainInfos = [
     },
     walletUrl:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub/stake"
-        : "http://localhost:8081/#/cosmoshub/stake",
+        ? "https://wallet.keplr.app/chains/cosmos-hub"
+        : "http://localhost:8081/chains/cosmos-hub",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/cosmoshub/stake"
-        : "http://localhost:8081/#/cosmoshub/stake",
+        ? "https://wallet.keplr.app/chains/cosmos-hub"
+        : "http://localhost:8081/chains/cosmos-hub",
     bip44: {
       coinType: 118,
     },
@@ -60,8 +60,8 @@ export const EmbedChainInfos = [
         : "https://app.osmosis.zone",
     walletUrlForStaking:
       process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/#/osmosis/stake"
-        : "http://localhost:8081/#/osmosis/stake",
+        ? "https://wallet.keplr.app/chains/osmosis"
+        : "http://localhost:8081/chains/osmosis",
     bip44: { coinType: 118 },
     bech32Config: Bech32Address.defaultBech32Config("osmo"),
     currencies: [

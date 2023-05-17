@@ -515,72 +515,80 @@ describe("Test CoinPretty", () => {
       expect(test.pre(test.base).toString()).toBe(test.res);
     }
   });
-});
 
-describe("#toMetricPrefix", function () {
-  describe("should return the correct unit prefix", () => {
-    const padRightZero = (str: string, length: number): string => {
-      return str + Array(length).fill("0").join("");
-    };
+  it("Test CoinPretty's toString() with hideIBCMetadata", () => {
+    const tests: {
+      base: CoinPretty;
+      pre: (pretty: CoinPretty) => CoinPretty;
+      res: string;
+    }[] = [
+      {
+        base: new CoinPretty(
+          {
+            coinDenom: "ATOM",
+            coinMinimalDenom: "uatom",
+            coinDecimals: 6,
+          },
+          new Int("12345600")
+        ),
+        pre: (pretty) => pretty.hideIBCMetadata(true),
+        res: "12.345600 ATOM",
+      },
+      {
+        base: new CoinPretty(
+          {
+            originCurrency: {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            coinDenom: "ATOM (Cosmos Hun/channel-0)",
+            coinMinimalDenom: "ibc/aaaa",
+            coinDecimals: 6,
+          },
+          new Int("12345600")
+        ),
+        pre: (pretty) => pretty,
+        res: "12.345600 ATOM (Cosmos Hun/channel-0)",
+      },
+      {
+        base: new CoinPretty(
+          {
+            originCurrency: {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            coinDenom: "ATOM (Cosmos Hun/channel-0)",
+            coinMinimalDenom: "ibc/aaaa",
+            coinDecimals: 6,
+          },
+          new Int("12345600")
+        ),
+        pre: (pretty) => pretty.hideIBCMetadata(true),
+        res: "12.345600 ATOM",
+      },
+      {
+        base: new CoinPretty(
+          {
+            originCurrency: {
+              coinDenom: "ATOM",
+              coinMinimalDenom: "uatom",
+              coinDecimals: 6,
+            },
+            coinDenom: "ATOM (Cosmos Hun/channel-0)",
+            coinMinimalDenom: "ibc/aaaa",
+            coinDecimals: 6,
+          },
+          new Int("12345600")
+        ),
+        pre: (pretty) => pretty.hideIBCMetadata(true).hideDenom(true),
+        res: "12.345600",
+      },
+    ];
 
-    const testCoinPretty = (
-      significantDigits: string,
-      zeroPadLength: number
-    ): CoinPretty | null => {
-      if (zeroPadLength < 0) return null;
-
-      return new CoinPretty(
-        {
-          coinDenom: "ATOM",
-          coinMinimalDenom: "attoatom",
-          coinDecimals: 18,
-        },
-        new Int(padRightZero(significantDigits, zeroPadLength))
-      );
-    };
-
-    const metricPrefixes = ["atto", "femto", "pico", "nano", "micro", "milli"];
-    const scenarios = (prefix: string, index: number) => {
-      const smallerPrefix = metricPrefixes[index - 1];
-      return [
-        {
-          name: "one significant digit",
-          input: testCoinPretty("1", index * 3),
-          expectedAmount: `1 ${prefix} ATOM`,
-        },
-        {
-          name: "two significant digits",
-          input: testCoinPretty("14", index * 3 - 1),
-          expectedAmount: `1.4 ${prefix} ATOM`,
-        },
-        {
-          name: "three significant digits",
-          input: testCoinPretty("125", index * 3 - 2),
-          expectedAmount: `1.25 ${prefix} ATOM`,
-        },
-        {
-          name: "four significant digits",
-          input: testCoinPretty("1725", index * 3 - 3),
-          expectedAmount: `1725 ${smallerPrefix} ATOM`,
-        },
-      ];
-    };
-
-    metricPrefixes.forEach((prefix: string, i: number) => {
-      describe(prefix, () => {
-        scenarios(prefix, i).forEach((scenario: Record<string, any>) => {
-          if (scenario.input === null)
-            pending(
-              "prefix unit is minimal denomination in fractional amount scenario"
-            );
-
-          it(scenario.name, () => {
-            expect(scenario.input.toMetricPrefix()).toBe(
-              scenario.expectedAmount
-            );
-          });
-        });
-      });
-    });
+    for (const test of tests) {
+      expect(test.pre(test.base).toString()).toBe(test.res);
+    }
   });
 });

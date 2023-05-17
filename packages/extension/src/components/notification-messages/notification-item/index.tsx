@@ -88,7 +88,7 @@ export const NotificationItem: FunctionComponent<Props> = ({
   };
 
   return (
-    <>
+    <React.Fragment>
       <div
         className={style.notification}
         onClick={handleNavigateToUrl}
@@ -138,6 +138,6 @@ export const NotificationItem: FunctionComponent<Props> = ({
           </p>
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };

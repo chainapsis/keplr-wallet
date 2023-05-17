@@ -1,20 +1,6 @@
 import { NameAddress } from "@chatTypes";
-import { toHex } from "@cosmjs/encoding";
-import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { formatAddress } from "./format";
 import { GroupEvent } from "./group-events";
-
-export const getWalletKeys = async (mnemonic: string) => {
-  const wallet: any = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic);
-  return {
-    privateKey: toHex(wallet?.privkey),
-    publicKey: toHex(wallet?.pubkey),
-  };
-};
-
-export function removeByIndex(str: string, index: number) {
-  return str.slice(0, index) + str.slice(index + 1);
-}
 
 // translate the contact address into the address book name if it exists
 export function getUserName(

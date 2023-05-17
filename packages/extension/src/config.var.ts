@@ -71,5 +71,3 @@ export const SENTINEL_RPC_ENDPOINT = "";
 export const SENTINEL_RPC_CONFIG: AxiosRequestConfig | undefined = undefined;
 export const SENTINEL_REST_ENDPOINT = "";
 export const SENTINEL_REST_CONFIG: AxiosRequestConfig | undefined = undefined;
-
-export const PRIVILEGED_ORIGINS: string[] = [];

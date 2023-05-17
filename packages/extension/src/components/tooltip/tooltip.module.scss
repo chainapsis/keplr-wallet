@@ -34,6 +34,14 @@ $bright: rgba(255, 255, 255, 0.75);
     border-right: $arrow-size solid transparent;
     border-left: $arrow-size solid transparent;
   }
+
+  .popper[x-placement="top-end"] [x-arrow] {
+    bottom: -$arrow-size;
+    margin-right: 4px;
+    border-top: $arrow-size solid $dark;
+    border-right: $arrow-size solid transparent;
+    border-left: $arrow-size solid transparent;
+  }
 }
 
 .bright {
@@ -48,6 +56,10 @@ $bright: rgba(255, 255, 255, 0.75);
     }
 
     .popper[x-placement="top"] [x-arrow] {
+      border-top: $arrow-size solid $bright;
+    }
+
+    .popper[x-placement="top-end"] [x-arrow] {
       border-top: $arrow-size solid $bright;
     }
   }

@@ -1,19 +1,31 @@
 import { BaseKVStore } from "./base";
 import { KVStoreProvider } from "./interface";
 
-const ExtensionKVStoreProvider: KVStoreProvider = {
-  get:
-    typeof browser !== "undefined"
-      ? browser.storage.local.get
-      : (undefined as any),
-  set:
-    typeof browser !== "undefined"
-      ? browser.storage.local.set
-      : (undefined as any),
-};
-
 export class ExtensionKVStore extends BaseKVStore {
+  protected static KVStoreProvider: KVStoreProvider | undefined;
+
   constructor(prefix: string) {
-    super(ExtensionKVStoreProvider, prefix);
+    if (!ExtensionKVStore.KVStoreProvider) {
+      if (typeof browser === "undefined") {
+        console.log(
+          "You should use ExtensionKVStore on the extension environment."
+        );
+      } else if (!browser.storage || !browser.storage.local) {
+        console.log(
+          "The 'browser' exists, but it doesn't seem to be an extension environment. This can happen in Safari browser."
+        );
+      } else {
+        ExtensionKVStore.KVStoreProvider = {
+          get: browser.storage.local.get,
+          set: browser.storage.local.set,
+        };
+      }
+    }
+
+    if (!ExtensionKVStore.KVStoreProvider) {
+      throw new Error("Can't initialize kv store for browser extension");
+    }
+
+    super(ExtensionKVStore.KVStoreProvider, prefix);
   }
 }

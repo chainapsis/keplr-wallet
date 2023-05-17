@@ -1,0 +1,13 @@
+.container {
+  display: flex;
+  flex-direction: column;
+
+  .gasAdjustmentContainer {
+    display: flex;
+
+    .multiply-icon {
+      margin: 0 8px;
+      margin-top: 42px;
+    }
+  }
+}

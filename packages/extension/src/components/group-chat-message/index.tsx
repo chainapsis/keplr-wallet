@@ -70,7 +70,7 @@ export const GroupChatMessage = ({
   };
 
   return (
-    <>
+    <React.Fragment>
       <div className={style.currentDateContainer}>
         {" "}
         {showDate ? (
@@ -123,6 +123,6 @@ export const GroupChatMessage = ({
           </Container>
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };

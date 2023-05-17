@@ -1,30 +1,38 @@
-import { cosmos } from "../proto";
-import SignDoc = cosmos.tx.v1beta1.SignDoc;
-import { defaultProtoCodec, ProtoCodec } from "../codec";
+import {
+  SignDoc,
+  TxBody,
+  AuthInfo,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  AnyWithUnpacked,
+  defaultProtoCodec,
+  ProtoCodec,
+  UnknownMessage,
+} from "../codec";
 
 export class ProtoSignDocDecoder {
   public static decode(bytes: Uint8Array): ProtoSignDocDecoder {
-    return new ProtoSignDocDecoder(cosmos.tx.v1beta1.SignDoc.decode(bytes));
+    return new ProtoSignDocDecoder(SignDoc.decode(bytes));
   }
 
-  protected _txBody?: cosmos.tx.v1beta1.TxBody;
-  protected _authInfo?: cosmos.tx.v1beta1.AuthInfo;
+  protected _txBody?: TxBody;
+  protected _authInfo?: AuthInfo;
 
   constructor(
     public readonly signDoc: SignDoc,
     protected readonly protoCodec: ProtoCodec = defaultProtoCodec
   ) {}
 
-  get txBody(): cosmos.tx.v1beta1.TxBody {
+  get txBody(): TxBody {
     if (!this._txBody) {
-      this._txBody = cosmos.tx.v1beta1.TxBody.decode(this.signDoc.bodyBytes);
+      this._txBody = TxBody.decode(this.signDoc.bodyBytes);
     }
 
     return this._txBody;
   }
 
-  get txMsgs(): any[] {
-    const msgs: any[] = [];
+  get txMsgs(): AnyWithUnpacked[] {
+    const msgs: AnyWithUnpacked[] = [];
     for (const msg of this.txBody.messages) {
       msgs.push(this.protoCodec.unpackAny(msg));
     }
@@ -32,11 +40,9 @@ export class ProtoSignDocDecoder {
     return msgs;
   }
 
-  get authInfo(): cosmos.tx.v1beta1.AuthInfo {
+  get authInfo(): AuthInfo {
     if (!this._authInfo) {
-      this._authInfo = cosmos.tx.v1beta1.AuthInfo.decode(
-        this.signDoc.authInfoBytes
-      );
+      this._authInfo = AuthInfo.decode(this.signDoc.authInfoBytes);
     }
 
     return this._authInfo;
@@ -51,23 +57,28 @@ export class ProtoSignDocDecoder {
   }
 
   toBytes(): Uint8Array {
-    return cosmos.tx.v1beta1.SignDoc.encode(this.signDoc).finish();
+    return SignDoc.encode(this.signDoc).finish();
   }
 
   toJSON(): any {
     return {
       txBody: {
-        ...this.txBody.toJSON(),
+        ...(TxBody.toJSON(this.txBody) as any),
         ...{
           messages: this.txMsgs.map((msg) => {
-            if (msg && msg.toJSON) {
-              return msg.toJSON();
+            if (msg) {
+              if (msg instanceof UnknownMessage) {
+                return msg.toJSON();
+              }
+              if ("factory" in msg) {
+                return msg.factory.toJSON(msg.unpacked);
+              }
             }
             return msg;
           }),
         },
       },
-      authInfo: this.authInfo.toJSON(),
+      authInfo: AuthInfo.toJSON(this.authInfo),
       chainId: this.chainId,
       accountNumber: this.accountNumber,
     };

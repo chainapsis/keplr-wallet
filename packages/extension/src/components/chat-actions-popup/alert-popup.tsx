@@ -18,7 +18,7 @@ export const AlertPopup = ({
   onClick: (option: CommonPopupOptions) => void;
 }) => {
   return (
-    <>
+    <React.Fragment>
       <div className={style.overlay} />
       <div className={style.popup}>
         <h4>{heading}</h4>
@@ -45,6 +45,6 @@ export const AlertPopup = ({
           </button>
         </div>
       </div>
-    </>
+    </React.Fragment>
   );
 };

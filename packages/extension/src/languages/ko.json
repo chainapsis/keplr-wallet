@@ -2,6 +2,7 @@
   "main.account.chart.total-balance": "총 자산",
   "main.account.chart.available-balance": "전송 가능한 자산",
   "main.account.chart.staked-balance": "스테이킹된 자산",
+  "main.account.button.buy.not-support": "이 체인에서는 지원되지 않습니다.",
   "main.account.chart.reward-balance": "보상",
   "main.account.button.deposit": "입금",
   "main.account.button.send": "보내기",
@@ -29,6 +30,8 @@
 
   "main.address.copied": "주소가 복사되었습니다",
 
+  "main.suggest.chain.link": "더 많은 체인 추가",
+
   "main.menu.settings": "설정",
   "main.menu.address-book": "주소록",
   "main.menu.guide": "가이드",
@@ -40,6 +43,15 @@
   "main.update-chain.confirm.yes": "진행",
   "main.update-chain.confirm.no": "무시",
 
+  "main.authz.title": "AuthZ",
+  "main.authz.grant.grantee.information": "You authorized ",
+  "main.authz.grant.grantee.address": "Grantee Address",
+  "main.authz.grant.expiration.title": "Expiration dates",
+  "main.authz.grant.expiration.information": "Expiration dates: ",
+  "main.authz.grant.expiration.expired": "Expired",
+  "main.authz.grant.expiration.infinite": "Your Authz delegation will not be expired until you revoke it.",
+  "main.authz.grant.revoke": "Revoke",
+
   "setting.language": "언어",
   "setting.language.automatic": "자동 (브라우저 언어)",
   "setting.language.automatic-with-language": "자동 ({language})",
@@ -48,10 +60,15 @@
   "setting.fiat.automatic": "자동",
   "setting.fiat.automatic-with-fiat": "자동 ({fiat})",
 
-  "setting.connections": "연결 관리",
-  "setting.connections.paragraph": "지갑에 연결을 허용한 웹사이트를 관리합니다",
+  "setting.security-privacy": "보안과 개인정보",
+
+  "setting.connections": "지갑 접근 권한",
+  "setting.connections.paragraph": "주소와 서명을 요청할 수 있는 웹사이트",
   "setting.connections.confirm.delete-connection.title": "연결 삭제",
   "setting.connections.confirm.delete-connection.paragraph": "이 연결을 삭제하시겠습니까?",
+
+  "setting.permissions.get-chain-infos": "체인 목록 접근",
+  "setting.permissions.get-chain-infos.paragraph": "체인 목록에 접근할 수 있는 웹사이트",
 
   "setting.address-book.button.add": "주소 추가",
   "setting.address-book.add-address.title": "주소 추가",
@@ -63,8 +80,6 @@
   "setting.address-book.confirm.delete-address.title": "주소 삭제",
   "setting.address-book.confirm.delete-address.paragraph": "이 주소를 삭제하시겠습니까?",
   "setting.address-book.button.save": "저장",
-
-  "setting.credit": "도움을 주신 분들",
 
   "setting.keyring": "계정 선택",
   "setting.keyring.button.add": "계정 추가",
@@ -109,6 +124,24 @@
 
   "setting.token.manage.confirm.remove-token": "토큰을 비활성화 하시겠습니까? 다시 등록할 때까지 잔고를 보거나 토큰을 전송할 수 없습니다.",
   "setting.token.manage.notification.viewing-key.copy": "뷰잉키가 복사되었습니다",
+  "setting.token.manage.notification.viewing-key.copy.hover": "뷰잉키 복사",
+  "setting.token.manage.notification.contract-address.copy": "컨트랙트 주소가 복사되었습니다",
+  "setting.token.manage.notification.contract-address.copy.hover": "컨트랙트 주소 복사",
+
+  "setting.endpoints": "노드 주소",
+  "setting.endpoints.paragraph": "원하는 풀노드를 사용하도록 설정하세요",
+  "setting.endpoints.button.reset": "초기화",
+  "setting.endpoints.button.confirm": "확인",
+
+  "setting.autolock": "자동 잠금 타이머",
+  "setting.autolock.duration": "잠금 주기 (단위: 분)",
+  "setting.autolock.description": "자동 잠금 기능이 활성화 된 경우 기기가 잠금 상태가 되면 설정된 시간과 관계없이 자동으로 지갑을 잠급니다",
+  "setting.autolock.error.required": "잠금 주기를 입력해주세요",
+  "setting.autolock.error.out-of-range": "잠금 주기는 0분 보다 작거나 4320분(3일)보다 클 수 없습니다",
+
+  "setting.developer-mode": "개발자 모드",
+
+  "setting.chain-active.title": "체인 보이기/숨기기",
 
   "register.name": "계정 이름",
   "register.name.error.required": "계정 이름을 입력하세요",
@@ -125,6 +158,7 @@
   "register.intro.sub-content": "모든 정보는 기기에 저장됩니다.{br}이 과정은 인터넷 접속을 필요로하지 않습니다.",
 
   "register.recover.title": "시드를 입력하세요",
+  "register.recover.alt.private-key.title": "개인키를 입력하세요",
 
   "register.create.title": "니모닉 단어",
   "register.create.toggle.word12": "12 단어",
@@ -144,8 +178,11 @@
   "register.import.textarea.private-key.error.invalid": "잘못된 개인키 입니다",
   "register.import.textarea.private-key.error.invalid-length": "잘못된 길이의 개인키 입니다",
   "register.create.button.next": "다음",
+  "register.create.button.ledger.terra": "테라 앱 사용하기",
 
-  "register.ledger.title": "렛저 계정 불러오기",
+  "register.keystone.title": "키스톤 계정 연결하기",
+
+  "register.ledger.title": "렛저 계정 연결하기",
 
   "register.verify.button.register": "등록",
 
@@ -153,12 +190,19 @@
   "register.welcome.content": "확장 프로그램을 열고 로그인하여 인터체인 여행을 시작하세요.",
   "register.welcome.button.done": "완료",
 
-  "chain.suggested.title": "체인 추가 요청",
+  "chain.suggested.title": "{chainName} 체인 추가",
+  "chain.suggested.tooltip": "이 체인정보는 커뮤니티로부터 제공되었습니다.",
+  "chain.suggested.developer.checkbox": "커뮤니티 레포와 관계없이 이 웹에서 제공한 코드를\n사용하는 것을 유지합니다.",
   "chain.suggested.paragraph": "<b>{host}</b>가 <b>{chainId}</b> 블록체인을 케플러에 추가하길 원합니다.",
-  "chain.suggested.waring.experiment.title": "실험적 기능",
-  "chain.suggested.waring.experiment.paragraph": "용감한 우주 여행자를 위한 기능입니다",
+  "chain.suggested.approve-info.title": "승인하기 전에",
+  "chain.suggested.approve-info.content": "케플러는 등록되는 체인정보가 커뮤니티에서 관리되는 것을 추천합니다. 이 체인정보는 커뮤니티에서 관리하는 깃허브에 등록되어 있지 않습니다.",
+  "chain.suggested.approve-info.link": "Github에 체인정보 등록하러가기 ->",
+  "chain.suggested.approve-alert.content": "이 체인은 케플러가 아닌 웹에서 제공한 체인정보를 통해 추가하는 것입니다. ",
   "chain.suggested.button.approve": "허락",
   "chain.suggested.button.reject": "거부",
+  "chain.suggested.community-driven": "커뮤니티 기반",
+  "chain.suggested.add-chain-as-suggested": "웹이 제안한 방식으로 추가하기",
+  "chain.suggested.chain-info-is-from": "추가될 체인 정보는 여기서",
 
   "chain.remove.confirm.paragraph": "{chainName}를 삭제하시겠습니까?",
 
@@ -171,6 +215,9 @@
   "access.button.approve": "허락",
   "access.button.reject": "거부",
 
+  "permissions.grant.get-chain-infos.description.title": "<b>{host}</b>가 케플러 정보에 접근을 요청합니다.",
+  "permissions.grant.get-chain-infos.description.list1": "케플러에 등록된 체인 목록을 알 수 있습니다",
+
   "lock.input.password": "비밀번호",
   "lock.input.password.error.required": "비밀번호를 입력하세요",
   "lock.input.password.error.invalid": "잘못된 비밀번호입니다",
@@ -179,10 +226,6 @@
 
   "send.input.recipient": "받는 주소",
   "send.input.recipient.error.invalid": "잘못된 주소입니다",
-  "send.input.recipient.error.ens-invalid-name": "잘못된 ENS 이름 형식입니다",
-  "send.input.recipient.error.ens-not-found": "ENS 이름을 찾을 수 없습니다",
-  "sned.input.recipient.error.ens-unknown-error": "ENS로부터 주소를 받는데 실패했습니다",
-  "send.input.recipient.error.ens-not-supported": "이 체인에는 ENS가 지원되지 않습니다",
   "send.input.amount": "수량",
   "send.input.amount.error.insufficient": "자산이 부족합니다",
   "send.input.memo": "메모 (선택사항)",
@@ -235,14 +278,27 @@
   "sign.list.message.wasm/MsgExecuteContract.content": "<only-sent-exist><b>{sent}</b>를 전송하며 </only-sent-exist><b>{address}</b> 컨트랙트를 실행합니다",
   "sign.list.message.wasm/MsgExecuteContract.content.badge.secret-wasm": "암호화됨",
   "sign.list.message.wasm/MsgExecuteContract.content.warning.secret-wasm.failed-decryption": "메세지를 복호화하지 못 했습니다. 케플러를 통하지 않고 암호화되었을 수 있습니다.",
+  "sign.list.message.cosmos-sdk/MsgGrant.title": "승인",
+  "sign.list.message.cosmos-sdk/MsgGrant.unspecified": "정확하지 않음",
+  "sign.list.message.cosmos-sdk/MsgGrant.unrecognized": "인식되지 않음",
+  "sign.list.message.cosmos-sdk/MsgGrant.generic.content": "<b>{expirationDate}</b>까지 Grant <b>{grantType}</b>을 <b>{grantee}</b>에 허용합니다",
+  "sign.list.message.cosmos-sdk/MsgGrant.sending.content": "<b>{expirationDate}</b>까지 Grant <b>보내기</b>를 <b>{grantee}</b>에게 허용합니다{br}최고가: <b>{maxAmount}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.unlimited": "무제한",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.content": "<b>{expirationDate}</b>까지 Grant <b>{grantType}</b>을 <b>{grantee}</b>에 허용합니다</b>{br}{validatorListType} Validators: <b>{validators}</b>{br}최고가: <b>{maxAmount}</b>",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorAllowedLabel": "허가된",
+  "sign.list.message.cosmos-sdk/MsgGrant.staking.validatorDeniedLabel": "거절당한",
+  "sign.list.message.cosmos-sdk/MsgRevoke.title": "취소",
+  "sign.list.message.cosmos-sdk/MsgRevoke.content": "<b>{revokeType}</b>이 <b>{grantee}</b> 허가를 취소합니다",
 
   "sign.list.message.cyber/Link.title": "Cyberlink",
   "sign.list.message.cyber/Link.content": "<b>{neuron}</b>가 링크<b>{link}</b>를 생성합니다",
 
+  "sign.icns.registration.title": "등록 요청",
+
   "ledger.step1": "1 단계",
   "ledger.step1.paragraph": "렛저를 연결하고 잠금을 해제하세요",
   "ledger.step2": "2 단계",
-  "ledger.step2.paragraph": "렛저에서 Cosmos 앱을 실행하세요",
+  "ledger.step2.paragraph": "렛저에서 {ledgerApp} 앱을 실행하세요",
   "ledger.option.webhid.checkbox": "WebUSB 대신 WebHID를 사용합니다",
   "ledger.option.webhid.warning": "이 링크 {link}를 복사하고 브라우저 주소 줄에 붙여넣으세요. 그리고 ‘experimental web platform features’ 플래그를 활성화하세요.",
   "ledger.option.webhid.link.copied": "링크가 복사되었습니다",
@@ -258,15 +314,15 @@
   "fee-buttons.select.high": "빠름",
 
   "input.recipient.error.invalid-bech32": "잘못된 주소입니다",
-  "input.recipient.error.ens-not-supported": "이 체인에는 ENS가 지원되지 않습니다",
-  "input.recipient.error.ens-failed-to-fetch": "ENS로부터 주소를 받는데 실패했습니다",
+  "input.recipient.error.icns-failed-to-fetch": "ICNS로부터 주소를 받는데 실패했습니다",
   "input.amount.error.invalid-number": "잘못된 숫자입니",
   "input.amount.error.is-zero": "0이 아니여야 합니다",
   "input.amount.error.is-negative": "양수여야 합니다",
   "input.amount.error.insufficient": "자산이 부족합니다",
   "input.fee.error.insufficient": "수수료를 낼 충분한 잔고가 없습니다",
-  "input.fee.toggle.set-gas": "가스 설정",
+  "input.fee.toggle.set-gas": "고급",
   "input.fee.toggle.set-gas.close": "닫기",
+  "input.fee.selector.fee-currency": "수수료 토큰",
 
   "confirm.yes": "예",
   "confirm.no": "아니요",
@@ -278,5 +334,8 @@
   "component.ibc.channel-registrar.chain-selector.button.add": "IBC 전송 채널 추가",
   "component.ibc.channel-registrar.chain-selector.add.channel.label": "채널 ID",
   "component.ibc.channel-registrar.chain-selector.add.channel.placeholder": "채널 ID를 입력하세요",
-  "component.ibc.channel-registrar.chain-selector.add.channel.button": "저장"
+  "component.ibc.channel-registrar.chain-selector.add.channel.button": "저장",
+
+  "component.waring.experimental-feature.title": "실험적 기능",
+  "component.waring.experimental-feature.paragraph": "용감한 우주 여행자를 위한 기능입니다"
 }

@@ -58,7 +58,8 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
       await registerConfig.createLedger(
         getValues("name"),
         getValues("password"),
-        bip44Option.bip44HDPath
+        bip44Option.bip44HDPath,
+        "Cosmos"
       );
       analyticsStore.setUserProperties({
         registerType: "ledger",
@@ -85,6 +86,7 @@ export const NewLedgerScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"])}
     >

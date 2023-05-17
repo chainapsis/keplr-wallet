@@ -1,9 +1,10 @@
 import { observer } from "mobx-react-lite";
 import React, {
+  Fragment,
   FunctionComponent,
+  useCallback,
   useEffect,
   useState,
-  useCallback,
 } from "react";
 import { FormattedMessage } from "react-intl";
 import { ToolTip } from "@components/tooltip";
@@ -20,6 +21,13 @@ import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { store } from "@chatStore/index";
 import { setHasFET } from "@chatStore/user-slice";
+import { AppCurrency } from "@keplr-wallet/types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { BuySupportServiceInfo, useBuy } from "@hooks/use-buy";
+import Modal from "react-modal";
+
+import styleTxButton from "./tx-button.module.scss";
+import classNames from "classnames";
 
 export const ProgressBar = ({
   width,
@@ -55,8 +63,8 @@ export const ProgressBar = ({
 
 const EmptyState = ({
   chainName,
-  denom,
   chainId,
+  denom,
 }: {
   chainName: string;
   denom: string;
@@ -110,6 +118,9 @@ const EmptyState = ({
     },
     [walletStatus, notification, intl]
   );
+
+  const { buySupportServiceInfos } = useBuy();
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   return (
     <div className={styleAsset.emptyState}>
       <DepositModal
@@ -133,18 +144,43 @@ const EmptyState = ({
       >
         Deposit {denom}
       </button>
+
+      {/* isBuySupportChain || */}
       {chainId == "fetchhub-4" && (
-        <a
-          href={"https://fetch.ai/get-fet/"}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
           className={styleAsset.buyButton}
+          onClick={(e) => {
+            e.preventDefault();
+            if (chainId == "fetchhub-4") {
+              window.open("https://fetch.ai/get-fet/", "_blank");
+            }
+            /// It will enable buy support for other network chains
+            /// Require necessary keys to support them
+            // if (isBuySupportChain) {
+            //   setIsBuyModalOpen(true);
+            // }
+          }}
         >
-          <button>
-            <img draggable={false} src={buyIcon} alt="buy tokens" /> Buy Tokens
-          </button>
-        </a>
+          <img draggable={false} src={buyIcon} alt="buy tokens" /> Buy Tokens
+        </button>
       )}
+
+      <Modal
+        style={{
+          content: {
+            width: "330px",
+            minWidth: "330px",
+            minHeight: "unset",
+            maxHeight: "unset",
+          },
+        }}
+        isOpen={isBuyModalOpen}
+        onRequestClose={() => {
+          setIsBuyModalOpen(false);
+        }}
+      >
+        <BuyModalContent buySupportServiceInfos={buySupportServiceInfos} />
+      </Modal>
     </div>
   );
 };
@@ -162,11 +198,24 @@ export const AssetView: FunctionComponent = observer(() => {
 
   const accountInfo = accountStore.getAccount(current.chainId);
 
-  const balanceStakableQuery = queries.queryBalances.getQueryBech32Address(
+  const balanceQuery = queries.queryBalances.getQueryBech32Address(
     accountInfo.bech32Address
-  ).stakable;
+  );
+  const balanceStakableQuery = balanceQuery.stakable;
 
-  const stakable = balanceStakableQuery.balance;
+  const isNoble =
+    ChainIdHelper.parse(chainStore.current.chainId).identifier === "noble";
+  const hasUSDC = chainStore.current.currencies.find(
+    (currency: AppCurrency) => currency.coinMinimalDenom === "uusdc"
+  );
+
+  const stakable = (() => {
+    if (isNoble && hasUSDC) {
+      return balanceQuery.getBalanceFromCurrency(hasUSDC);
+    }
+
+    return balanceStakableQuery.balance;
+  })();
 
   const delegated = queries.cosmos.queryDelegations
     .getQueryBech32Address(accountInfo.bech32Address)
@@ -213,7 +262,12 @@ export const AssetView: FunctionComponent = observer(() => {
     ? !totalPrice.toDec().isZero()
     : !total.toDec().isZero();
 
-  store.dispatch(setHasFET(hasBalance));
+  const hasStakableFET = stakablePrice
+    ? !stakablePrice.toDec().isZero()
+    : !stakable.toDec().isZero();
+
+  store.dispatch(setHasFET(hasStakableFET));
+
   if (!hasBalance) {
     return (
       <EmptyState
@@ -225,7 +279,7 @@ export const AssetView: FunctionComponent = observer(() => {
   }
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div className={styleAsset.containerAsset}>
         <div className={styleAsset.containerChart}>
           <div className={styleAsset.centerText}>
@@ -243,7 +297,7 @@ export const AssetView: FunctionComponent = observer(() => {
                 : total.shrink(true).trim(true).maxDecimals(6).toString()}
             </div>
             <div className={styleAsset.indicatorIcon}>
-              <React.Fragment>
+              <Fragment>
                 {balanceStakableQuery.isFetching ? (
                   <i className="fas fa-spinner fa-spin" />
                 ) : balanceStakableQuery.error ? (
@@ -261,7 +315,7 @@ export const AssetView: FunctionComponent = observer(() => {
                     <i className="fas fa-exclamation-triangle text-danger" />
                   </ToolTip>
                 ) : null}
-              </React.Fragment>
+              </Fragment>
             </div>
           </div>
           <ProgressBar width={300} data={data} />
@@ -295,25 +349,60 @@ export const AssetView: FunctionComponent = observer(() => {
               {stakedSum.shrink(true).maxDecimals(6).toString()}
             </div>
           </div>
-          <div className={styleAsset.legend}>
-            <div className={styleAsset.label} style={{ color: "#D43BF6" }}>
-              <FormattedMessage id="main.account.chart.reward-balance" />
+          {isNoble && hasUSDC ? null : (
+            <div className={styleAsset.legend}>
+              <div className={styleAsset.label} style={{ color: "#D43BF6" }}>
+                <FormattedMessage id="main.account.chart.reward-balance" />
+              </div>
+              <div style={{ minWidth: "16px" }} />
+              <div
+                className={styleAsset.value}
+                style={{
+                  color: "#525f7f",
+                }}
+              >
+                {stakableReward.shrink(true).maxDecimals(6).toString()}
+              </div>
             </div>
-            <div style={{ minWidth: "16px" }} />
-            <div
-              className={styleAsset.value}
-              style={{
-                color: "#525f7f",
-              }}
-            >
-              {stakableReward.shrink(true).maxDecimals(6).toString()}
-            </div>
-          </div>
+          )}
         </div>
       </div>
       <TxButtonView />
       <hr className={styleAsset.hr} />
       <DepositView />
-    </React.Fragment>
+    </Fragment>
   );
 });
+
+export const BuyModalContent: FunctionComponent<{
+  buySupportServiceInfos: BuySupportServiceInfo[];
+}> = ({ buySupportServiceInfos }) => {
+  return (
+    <div className={styleTxButton.modalContent}>
+      <h1 style={{ marginBottom: 0 }}>Buy Crypto</h1>
+      <div className={styleTxButton.buySupportServices}>
+        {buySupportServiceInfos.map((serviceInfo) => (
+          <a
+            key={serviceInfo.serviceId}
+            href={serviceInfo.buyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={classNames(styleTxButton.service, {
+              [styleTxButton.disabled]: !serviceInfo.buyUrl,
+            })}
+            onClick={(e) => !serviceInfo.buyUrl && e.preventDefault()}
+          >
+            <div className={styleTxButton.serviceLogoContainer}>
+              <img
+                src={require(`../../public/assets/img/fiat-on-ramp/${serviceInfo.serviceId}.svg`)}
+              />
+            </div>
+            <div className={styleTxButton.serviceName}>
+              {serviceInfo.serviceName}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+};

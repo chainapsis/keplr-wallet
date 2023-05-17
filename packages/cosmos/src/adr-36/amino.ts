@@ -1,7 +1,8 @@
-import { serializeSignDoc, StdSignDoc } from "@cosmjs/launchpad";
+import { StdSignDoc } from "@keplr-wallet/types";
+import { serializeSignDoc } from "../signing";
 import { Bech32Address } from "../bech32";
 import { Buffer } from "buffer/";
-import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { Hash, PubKeySecp256k1 } from "@keplr-wallet/crypto";
 
 /**
  * Check the sign doc is for ADR-36.
@@ -119,16 +120,24 @@ export function verifyADR36AminoSignDoc(
   bech32PrefixAccAddr: string,
   signDoc: StdSignDoc,
   pubKey: Uint8Array,
-  signature: Uint8Array
+  signature: Uint8Array,
+  algo: "secp256k1" | "ethsecp256k1" = "secp256k1"
 ): boolean {
   if (!checkAndValidateADR36AminoSignDoc(signDoc, bech32PrefixAccAddr)) {
     throw new Error("Invalid sign doc for ADR-36");
   }
 
   const cryptoPubKey = new PubKeySecp256k1(pubKey);
-  const expectedSigner = new Bech32Address(cryptoPubKey.getAddress()).toBech32(
-    bech32PrefixAccAddr
-  );
+  const expectedSigner = (() => {
+    if (algo === "ethsecp256k1") {
+      return new Bech32Address(cryptoPubKey.getEthAddress()).toBech32(
+        bech32PrefixAccAddr
+      );
+    }
+    return new Bech32Address(cryptoPubKey.getAddress()).toBech32(
+      bech32PrefixAccAddr
+    );
+  })();
   const signer = signDoc.msgs[0].value.signer;
   if (expectedSigner !== signer) {
     throw new Error("Unmatched signer");
@@ -136,7 +145,15 @@ export function verifyADR36AminoSignDoc(
 
   const msg = serializeSignDoc(signDoc);
 
-  return cryptoPubKey.verify(msg, signature);
+  return cryptoPubKey.verifyDigest32(
+    (() => {
+      if (algo === "ethsecp256k1") {
+        return Hash.keccak256(msg);
+      }
+      return Hash.sha256(msg);
+    })(),
+    signature
+  );
 }
 
 export function verifyADR36Amino(
@@ -144,7 +161,8 @@ export function verifyADR36Amino(
   signer: string,
   data: string | Uint8Array,
   pubKey: Uint8Array,
-  signature: Uint8Array
+  signature: Uint8Array,
+  algo: "secp256k1" | "ethsecp256k1" = "secp256k1"
 ): boolean {
   const signDoc = makeADR36AminoSignDoc(signer, data);
 
@@ -152,6 +170,7 @@ export function verifyADR36Amino(
     bech32PrefixAccAddr,
     signDoc,
     pubKey,
-    signature
+    signature,
+    algo
   );
 }

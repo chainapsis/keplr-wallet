@@ -17,7 +17,6 @@ import { NameAddress } from "@chatTypes";
 import { userDetails } from "@chatStore/user-slice";
 import { ChatLoader } from "@components/chat-loader";
 import { SwitchUser } from "@components/switch-user";
-import { EthereumEndpoint } from "../../config.ui";
 import { HeaderLayout } from "@layouts/index";
 import chevronLeft from "@assets/icon/chevron-left.png";
 import rightArrowIcon from "@assets/icon/right-arrow.png";
@@ -112,19 +111,21 @@ export const NewChat: FunctionComponent = observer(() => {
   const [addresses, setAddresses] = useState<NameAddress[]>([]);
   const [randomAddress, setRandomAddress] = useState<NameAddress | undefined>();
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountInfo.bech32Address;
   // address book values
-  const queries = queriesStore.get(chainStore.current.chainId);
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
 
   const [selectedChainId] = useState(
@@ -146,7 +147,7 @@ export const NewChat: FunctionComponent = observer(() => {
     }
   );
 
-  const useraddresses: NameAddress[] = addressBookConfig.addressBookDatas
+  const userAddresses: NameAddress[] = addressBookConfig.addressBookDatas
     .filter((data) => !data.address.startsWith("agent"))
     .map((data) => {
       return { name: data.name, address: data.address };
@@ -156,13 +157,13 @@ export const NewChat: FunctionComponent = observer(() => {
     });
 
   useEffect(() => {
-    setAddresses(useraddresses.filter((a) => a.address !== walletAddress));
+    setAddresses(userAddresses.filter((a) => a.address !== walletAddress));
   }, [addressBookConfig.addressBookDatas]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputVal(e.target.value);
     const searchedVal = e.target.value.toLowerCase();
-    const addresses = useraddresses.filter(
+    const addresses = userAddresses.filter(
       (address: NameAddress) =>
         address.address !== walletAddress &&
         (address.name.toLowerCase().includes(searchedVal) ||

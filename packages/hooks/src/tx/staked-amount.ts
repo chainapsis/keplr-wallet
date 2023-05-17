@@ -1,10 +1,6 @@
 import { IAmountConfig } from "./types";
 import { TxChainSetter } from "./chain";
-import {
-  ChainGetter,
-  CoinPrimitive,
-  ObservableQueryDelegations,
-} from "@keplr-wallet/stores";
+import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
 import {
@@ -16,11 +12,9 @@ import {
 } from "./errors";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
 import { useState } from "react";
+import { QueriesStore } from "./internal";
 
 export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
-  @observable.ref
-  protected queryDelegations: ObservableQueryDelegations;
-
   @observable
   protected _sender: string;
 
@@ -35,15 +29,14 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   constructor(
     chainGetter: ChainGetter,
+    protected readonly queriesStore: QueriesStore,
     initialChainId: string,
     sender: string,
-    queryDelegations: ObservableQueryDelegations,
     initialValidatorAddress: string
   ) {
     super(chainGetter, initialChainId);
 
     this._sender = sender;
-    this.queryDelegations = queryDelegations;
     this._amount = "";
     this._validatorAddress = initialValidatorAddress;
 
@@ -57,11 +50,6 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   get validatorAddress(): string {
     return this._validatorAddress;
-  }
-
-  @action
-  setQueryDelegations(queryDelegations: ObservableQueryDelegations) {
-    this.queryDelegations = queryDelegations;
   }
 
   @action
@@ -115,9 +103,14 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   @computed
   get amount(): string {
+    if (!this.queriesStore.get(this.chainId).cosmos) {
+      throw new Error("No querier for delegations");
+    }
+
     if (this.fraction != null) {
-      const result = this.queryDelegations
-        .getQueryBech32Address(this.sender)
+      const result = this.queriesStore
+        .get(this.chainId)
+        .cosmos!.queryDelegations.getQueryBech32Address(this.sender)
         .getDelegationTo(this.validatorAddress);
 
       if (result.toDec().lte(new Dec(0))) {
@@ -171,7 +164,12 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
     return [this.chainInfo.stakeCurrency];
   }
 
-  getError(): Error | undefined {
+  @computed
+  get error(): Error | undefined {
+    if (!this.queriesStore.get(this.chainId).cosmos) {
+      throw new Error("No querier for delegations");
+    }
+
     const sendCurrency = this.sendCurrency;
     if (!sendCurrency) {
       return new Error("Currency to send not set");
@@ -195,8 +193,9 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
       return new NegativeAmountError("Amount is negative");
     }
 
-    const balance = this.queryDelegations
-      .getQueryBech32Address(this.sender)
+    const balance = this.queriesStore
+      .get(this.chainId)
+      .cosmos!.queryDelegations.getQueryBech32Address(this.sender)
       .getDelegationTo(this.validatorAddress);
     const balanceDec = balance.toDec();
     if (dec.gt(balanceDec)) {
@@ -209,23 +208,22 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
 export const useStakedAmountConfig = (
   chainGetter: ChainGetter,
+  queriesStore: QueriesStore,
   chainId: string,
   sender: string,
-  queryDelegations: ObservableQueryDelegations,
   validatorAddress: string
 ) => {
   const [txConfig] = useState(
     () =>
       new StakedAmountConfig(
         chainGetter,
+        queriesStore,
         chainId,
         sender,
-        queryDelegations,
         validatorAddress
       )
   );
   txConfig.setChain(chainId);
-  txConfig.setQueryDelegations(queryDelegations);
   txConfig.setSender(sender);
   txConfig.setValidatorAddress(validatorAddress);
 

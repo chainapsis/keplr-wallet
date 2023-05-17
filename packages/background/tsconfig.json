@@ -5,7 +5,7 @@
     "outDir": "build",
     "declaration": true,
     "rootDir": "src",
-    "emitDecoratorMetadata": true
+    "skipLibCheck": true
   },
   "excluded": ["**/*.wasm"]
 }

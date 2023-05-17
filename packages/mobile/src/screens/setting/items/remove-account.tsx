@@ -25,9 +25,15 @@ export const SettingRemoveAccountItem: FunctionComponent<{
           setIsOpenModal(true);
         }}
         containerStyle={style.flatten(["margin-top-16"])}
-        labelStyle={style.flatten(["subtitle1", "color-danger"])}
-        style={style.flatten(["justify-center"])}
+        labelStyle={style.flatten(["subtitle1", "color-red-400"])}
+        style={style.flatten([
+          "justify-center",
+          "dark:background-color-red-700@30%",
+        ])}
         topBorder={topBorder}
+        borderColor={style.flatten(["dark:color-red-600@50%"]).color}
+        rippleColor={style.flatten(["dark:color-red-700"]).color}
+        underlayColor={style.flatten(["dark:color-red-700"]).color}
       />
       <PasswordInputModal
         isOpen={isOpenModal}

@@ -1,5 +1,7 @@
 import bech32, { fromWords } from "bech32";
 import { Bech32Config } from "@keplr-wallet/types";
+import { Buffer } from "buffer/";
+import { getAddress as getEthAddress } from "@ethersproject/address";
 
 export class Bech32Address {
   static shortenAddress(bech32: string, maxCharacters: number): string {
@@ -76,5 +78,19 @@ export class Bech32Address {
   toBech32(prefix: string): string {
     const words = bech32.toWords(this.address);
     return bech32.encode(prefix, words);
+  }
+
+  toHex(mixedCaseChecksum: boolean = true): string {
+    const hex = Buffer.from(this.address).toString("hex");
+
+    if (hex.length === 0) {
+      throw new Error("Empty address");
+    }
+
+    if (mixedCaseChecksum) {
+      return getEthAddress("0x" + hex);
+    } else {
+      return "0x" + hex;
+    }
   }
 }

@@ -23,6 +23,8 @@ import {
   CheckPasswordMsg,
   ExportKeyRingData,
   ExportKeyRingDatasMsg,
+  CreateKeystoneKeyMsg,
+  AddKeystoneKeyMsg,
 } from "@keplr-wallet/background";
 
 import { computed, flow, makeObservable, observable, runInAction } from "mobx";
@@ -148,6 +150,18 @@ export class KeyRingStore {
     this.restore();
   }
 
+  get waitingNameData() {
+    const data = this.interactionStore.getDatas<{
+      defaultName: string;
+      editable: boolean;
+      isExternal: boolean;
+    }>("change-keyring-name");
+
+    if (data.length > 0) {
+      return data[0];
+    }
+  }
+
   @computed
   get keyRingType(): string {
     const keyStore = this.multiKeyStoreInfo.find(
@@ -159,6 +173,20 @@ export class KeyRingStore {
     } else {
       return KeyRing.getTypeOfKeyStore(keyStore);
     }
+  }
+
+  @flow
+  *approveChangeName(changedName: string) {
+    const data = this.interactionStore.getDatas("change-keyring-name")[0];
+
+    yield this.interactionStore.approve(
+      "change-keyring-name",
+      data.id,
+      changedName
+    );
+
+    this.dispatchKeyStoreChangeEvent();
+    this.selectablesMap.forEach((selectables) => selectables.refresh());
   }
 
   @flow
@@ -199,13 +227,35 @@ export class KeyRingStore {
   }
 
   @flow
-  *createLedgerKey(
+  *createKeystoneKey(
     password: string,
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
     kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
-    const msg = new CreateLedgerKeyMsg(kdf, password, meta, bip44HDPath);
+    const msg = new CreateKeystoneKeyMsg(kdf, password, meta, bip44HDPath);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this.status = result.status;
+    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+  }
+
+  @flow
+  *createLedgerKey(
+    password: string,
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp: string,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
+  ) {
+    const msg = new CreateLedgerKeyMsg(
+      kdf,
+      password,
+      meta,
+      bip44HDPath,
+      cosmosLikeApp
+    );
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -239,12 +289,25 @@ export class KeyRingStore {
   }
 
   @flow
-  *addLedgerKey(
+  *addKeystoneKey(
     meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
     kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
   ) {
-    const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath);
+    const msg = new AddKeystoneKeyMsg(kdf, meta, bip44HDPath);
+    this.multiKeyStoreInfo = (yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    )).multiKeyStoreInfo;
+  }
+
+  @flow
+  *addLedgerKey(
+    meta: Record<string, string>,
+    bip44HDPath: BIP44HDPath,
+    cosmosLikeApp: string,
+    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
+  ) {
+    const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath, cosmosLikeApp);
     this.multiKeyStoreInfo = (yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     )).multiKeyStoreInfo;

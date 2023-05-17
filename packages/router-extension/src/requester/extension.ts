@@ -34,7 +34,11 @@ export class InExtensionMessageRequester implements MessageRequester {
     }
 
     if (result.error) {
-      throw new Error(result.error);
+      if (typeof result.error === "string") {
+        throw new Error(result.error);
+      } else {
+        throw new Error(result.error.message);
+      }
     }
 
     return result.return;
@@ -69,7 +73,11 @@ export class InExtensionMessageRequester implements MessageRequester {
     }
 
     if (result.error) {
-      throw new Error(result.error);
+      if (typeof result.error === "string") {
+        throw new Error(result.error);
+      } else {
+        throw new Error(result.error.message);
+      }
     }
 
     return result.return;

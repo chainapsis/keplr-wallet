@@ -41,6 +41,7 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
+      smallTitle={true}
       alternativeTitle={intl.formatMessage({
         id: "setting.connections",
       })}
@@ -58,20 +59,23 @@ export const SettingConnectionsPage: FunctionComponent = observer(() => {
             {chainStore.getChain(selectedChainId).chainName}
           </DropdownToggle>
           <DropdownMenu>
-            {chainStore.chainInfos.map((chainInfo) => {
-              return (
-                <DropdownItem
-                  key={chainInfo.chainId}
-                  onClick={(e) => {
-                    e.preventDefault();
+            <div className={styleConnections.dropdownWrapper}>
+              <DropdownItem>Get Chain Infos</DropdownItem>
+              {chainStore.chainInfos.map((chainInfo) => {
+                return (
+                  <DropdownItem
+                    key={chainInfo.chainId}
+                    onClick={(e) => {
+                      e.preventDefault();
 
-                    setSelectedChainId(chainInfo.chainId);
-                  }}
-                >
-                  {chainInfo.chainName}
-                </DropdownItem>
-              );
-            })}
+                      setSelectedChainId(chainInfo.chainId);
+                    }}
+                  >
+                    {chainInfo.chainName}
+                  </DropdownItem>
+                );
+              })}
+            </div>
           </DropdownMenu>
         </ButtonDropdown>
         {basicAccessInfo.origins.map((origin) => {

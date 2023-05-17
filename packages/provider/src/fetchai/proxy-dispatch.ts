@@ -55,7 +55,7 @@ async function proxyRequestHandler(
     return createProxyResponse(request.id, {
       return: JSONUint8Array.wrap(result),
     });
-  } catch (e) {
+  } catch (e: any) {
     return createProxyResponse(request.id, {
       error: e.m || e.toString(),
     });

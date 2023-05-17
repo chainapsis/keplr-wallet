@@ -15,11 +15,11 @@ import QRCode from "react-native-qrcode-svg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { FullScreenCameraView } from "../../components/camera";
 import {
-  importFromMobile,
-  parseQRCodeDataForImportFromMobile,
+  importFromExtension,
+  parseQRCodeDataForImportFromExtension,
   registerExportedAddressBooks,
   registerExportedKeyRingDatas,
-} from "../../utils/import-from-mobile";
+} from "../../utils/import-from-extension";
 import { AddressBookConfigMap, useRegisterConfig } from "@keplr-wallet/hooks";
 import { AsyncKVStore } from "../../common";
 import { useFocusEffect } from "@react-navigation/native";
@@ -61,7 +61,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
   );
 
   return (
-    <PageWithView disableSafeArea={true}>
+    <PageWithView disableSafeArea={true} backgroundMode={null}>
       <FullScreenCameraView
         type={RNCamera.Constants.Type.back}
         barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
@@ -103,9 +103,11 @@ export const CameraScreen: FunctionComponent = observer(() => {
                     smartNavigation.navigateSmart("Home", {});
                   }
                 } else {
-                  const sharedData = parseQRCodeDataForImportFromMobile(data);
+                  const sharedData = parseQRCodeDataForImportFromExtension(
+                    data
+                  );
 
-                  const improted = await importFromMobile(
+                  const improted = await importFromExtension(
                     sharedData,
                     chainStore.chainInfosInUI.map(
                       (chainInfo) => chainInfo.chainId
@@ -204,7 +206,14 @@ export const AddressQRCodeModal: FunctionComponent<{
           <AddressCopyable address={account.bech32Address} maxCharacters={22} />
           <View style={style.flatten(["margin-y-32"])}>
             {account.bech32Address ? (
-              <QRCode size={200} value={account.bech32Address} />
+              <View
+                style={style.flatten([
+                  "padding-8",
+                  "dark:background-color-white",
+                ])}
+              >
+                <QRCode size={200} value={account.bech32Address} />
+              </View>
             ) : (
               <View
                 style={StyleSheet.flatten([
@@ -212,7 +221,7 @@ export const AddressQRCodeModal: FunctionComponent<{
                     width: 200,
                     height: 200,
                   },
-                  style.flatten(["background-color-disabled"]),
+                  style.flatten(["background-color-gray-400"]),
                 ])}
               />
             )}

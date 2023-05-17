@@ -1,6 +1,6 @@
 import { AccountSetBase, WalletStatus } from "./base";
 import { ChainStore } from "../chain";
-import { ChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { MockKeplr } from "@keplr-wallet/provider-mock";
 
 describe("Test Account set base", () => {
@@ -10,12 +10,14 @@ describe("Test Account set base", () => {
       readonly bech32Config: {
         readonly bech32PrefixAccAddr: string;
       };
+      readonly currencies: AppCurrency[];
     }[] = [
       {
         chainId: "test",
         bech32Config: {
           bech32PrefixAccAddr: "cosmos",
         },
+        currencies: [],
       },
     ];
     const chainStore = new ChainStore(chainInfos as ChainInfo[]);
@@ -29,9 +31,7 @@ describe("Test Account set base", () => {
       },
       chainStore,
       "test",
-      undefined as any,
       {
-        prefetching: true,
         suggestChain: false,
         autoInit: true,
         getKeplr: async () => {
@@ -43,7 +43,6 @@ describe("Test Account set base", () => {
             "curious kitchen brief change imitate open close knock cause romance trim offer"
           );
         },
-        msgOpts: {},
       }
     );
 
@@ -69,12 +68,14 @@ describe("Test Account set base", () => {
       readonly bech32Config: {
         readonly bech32PrefixAccAddr: string;
       };
+      readonly currencies: AppCurrency[];
     }[] = [
       {
         chainId: "test",
         bech32Config: {
           bech32PrefixAccAddr: "cosmos",
         },
+        currencies: [],
       },
     ];
     const chainStore = new ChainStore(chainInfos as ChainInfo[]);
@@ -88,9 +89,7 @@ describe("Test Account set base", () => {
       },
       chainStore,
       "test",
-      undefined as any,
       {
-        prefetching: true,
         suggestChain: false,
         autoInit: false,
         getKeplr: async () => {
@@ -102,7 +101,6 @@ describe("Test Account set base", () => {
             "curious kitchen brief change imitate open close knock cause romance trim offer"
           );
         },
-        msgOpts: {},
       }
     );
 

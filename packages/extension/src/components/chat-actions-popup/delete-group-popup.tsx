@@ -25,7 +25,7 @@ export const DeleteGroupPopup = ({
   };
 
   return (
-    <>
+    <React.Fragment>
       <div className={style.overlay} />
       <div className={style.popup}>
         <h4>Delete Group</h4>
@@ -49,6 +49,6 @@ export const DeleteGroupPopup = ({
           </button>
         </div>
       </div>
-    </>
+    </React.Fragment>
   );
 };

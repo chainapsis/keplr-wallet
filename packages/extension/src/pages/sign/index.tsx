@@ -15,15 +15,17 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useHistory } from "react-router";
 import { observer } from "mobx-react-lite";
 import {
-  useInteractionInfo,
-  useSignDocHelper,
-  useGasConfig,
   useFeeConfig,
+  useInteractionInfo,
   useMemoConfig,
   useSignDocAmountConfig,
+  useSignDocHelper,
+  useZeroAllowedGasConfig,
 } from "@keplr-wallet/hooks";
 import { ADR36SignDocDetailsTab } from "./adr-36";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { unescapeHTML } from "@keplr-wallet/common";
+import { EthSignType } from "@keplr-wallet/types";
 
 enum Tab {
   Details,
@@ -50,21 +52,23 @@ export const SignPage: FunctionComponent = observer(() => {
   const [isADR36WithString, setIsADR36WithString] = useState<
     boolean | undefined
   >();
+  const [ethSignType, setEthSignType] = useState<EthSignType | undefined>();
 
   const current = chainStore.current;
-  // Make the gas config with 1 gas initially to prevent the temporary 0 gas error at the beginning.
-  const gasConfig = useGasConfig(chainStore, current.chainId, 1);
+  // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
+  // In this case, there is no obligation to deal with it, but 0 gas is favorably allowed.
+  const gasConfig = useZeroAllowedGasConfig(chainStore, current.chainId, 0);
   const amountConfig = useSignDocAmountConfig(
     chainStore,
+    accountStore,
     current.chainId,
-    accountStore.getAccount(current.chainId).msgOpts,
     signer
   );
   const feeConfig = useFeeConfig(
     chainStore,
+    queriesStore,
     current.chainId,
     signer,
-    queriesStore.get(current.chainId).queryBalances,
     amountConfig,
     gasConfig
   );
@@ -80,6 +84,9 @@ export const SignPage: FunctionComponent = observer(() => {
       if (data.data.signDocWrapper.isADR36SignDoc) {
         setIsADR36WithString(data.data.isADR36WithString);
       }
+      if (data.data.ethSignType) {
+        setEthSignType(data.data.ethSignType);
+      }
       setOrigin(data.data.msgOrigin);
       if (
         !data.data.signDocWrapper.isADR36SignDoc &&
@@ -91,7 +98,15 @@ export const SignPage: FunctionComponent = observer(() => {
       }
       signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
       gasConfig.setGas(data.data.signDocWrapper.gas);
-      memoConfig.setMemo(data.data.signDocWrapper.memo);
+      let memo = data.data.signDocWrapper.memo;
+      if (data.data.signDocWrapper.mode === "amino") {
+        // For amino-json sign doc, the memo is escaped by default behavior of golang's json marshaller.
+        // For normal users, show the escaped characters with unescaped form.
+        // Make sure that the actual sign doc's memo should be escaped.
+        // In this logic, memo should be escaped from account store or background's request signing function.
+        memo = unescapeHTML(memo);
+      }
+      memoConfig.setMemo(memo);
       if (
         data.data.signOptions.preferNoSetFee &&
         data.data.signDocWrapper.fees[0]
@@ -104,6 +119,12 @@ export const SignPage: FunctionComponent = observer(() => {
       feeConfig.setDisableBalanceCheck(
         !!data.data.signOptions.disableBalanceCheck
       );
+      if (
+        data.data.signDocWrapper.granter &&
+        data.data.signDocWrapper.granter !== data.data.signer
+      ) {
+        feeConfig.setDisableBalanceCheck(true);
+      }
       setSigner(data.data.signer);
     }
   }, [
@@ -133,28 +154,41 @@ export const SignPage: FunctionComponent = observer(() => {
     signInteractionStore.waitingData?.data.signOptions.preferNoSetMemo ===
       true || isProcessing;
 
-  const interactionInfo = useInteractionInfo(() => {
-    if (needSetIsProcessing) {
-      setIsProcessing(true);
-    }
+  const interactionInfo = useInteractionInfo(
+    () => {
+      if (needSetIsProcessing) {
+        setIsProcessing(true);
+      }
 
-    signInteractionStore.rejectAll();
-  });
+      signInteractionStore.rejectAll();
+    },
+    {
+      enableScroll: true,
+    }
+  );
+
+  const currentChainId = chainStore.current.chainId;
+  const currentChainIdentifier = useMemo(
+    () => ChainIdHelper.parse(currentChainId).identifier,
+    [currentChainId]
+  );
+  const selectedChainId = chainStore.selectedChainId;
+  const selectedChainIdentifier = useMemo(
+    () => ChainIdHelper.parse(selectedChainId).identifier,
+    [selectedChainId]
+  );
 
   // Check that the request is delivered
   // and the chain is selected properly.
   // The chain store loads the saved chain infos including the suggested chain asynchronously on init.
   // So, it can be different the current chain and the expected selected chain for a moment.
-  const isLoaded = useMemo(() => {
+  const isLoaded = (() => {
     if (!signDocHelper.signDocWrapper) {
       return false;
     }
 
-    return (
-      ChainIdHelper.parse(chainStore.current.chainId).identifier ===
-      ChainIdHelper.parse(chainStore.selectedChainId).identifier
-    );
-  }, [chainStore, signDocHelper.signDocWrapper]);
+    return currentChainIdentifier === selectedChainIdentifier;
+  })();
 
   // If this is undefined, show the chain name on the header.
   // If not, show the alternative title.
@@ -165,7 +199,8 @@ export const SignPage: FunctionComponent = observer(() => {
 
     if (
       signDocHelper.signDocWrapper &&
-      signDocHelper.signDocWrapper.isADR36SignDoc
+      signDocHelper.signDocWrapper.isADR36SignDoc &&
+      !ethSignType
     ) {
       return "Prove Ownership";
     }
@@ -188,7 +223,7 @@ export const SignPage: FunctionComponent = observer(() => {
       return false;
     }
 
-    return memoConfig.getError() != null || feeConfig.getError() != null;
+    return memoConfig.error != null || feeConfig.error != null;
   })();
 
   return (
@@ -203,7 +238,8 @@ export const SignPage: FunctionComponent = observer(() => {
             }
           : undefined
       }
-      style={{ background: "white" }}
+      style={{ background: "white", minHeight: "100%" }}
+      innerStyle={{ display: "flex", flexDirection: "column" }}
     >
       {
         /*
@@ -253,6 +289,7 @@ export const SignPage: FunctionComponent = observer(() => {
                   <ADR36SignDocDetailsTab
                     signDocWrapper={signDocHelper.signDocWrapper}
                     isADR36WithString={isADR36WithString}
+                    ethSignType={ethSignType}
                     origin={origin}
                   />
                 ) : (
@@ -267,11 +304,14 @@ export const SignPage: FunctionComponent = observer(() => {
                     }
                     preferNoSetFee={preferNoSetFee}
                     preferNoSetMemo={preferNoSetMemo}
+                    isNeedLedgerEthBlindSigning={
+                      ethSignType === EthSignType.EIP712 &&
+                      accountStore.getAccount(current.chainId).isNanoLedger
+                    }
                   />
                 )
               ) : null}
             </div>
-            <div style={{ flex: 1 }} />
             <div className={style.buttons}>
               {keyRingStore.keyRingType === "ledger" &&
               signInteractionStore.isLoading ? (

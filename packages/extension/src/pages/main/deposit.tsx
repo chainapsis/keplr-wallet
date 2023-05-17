@@ -10,6 +10,9 @@ import { useIntl } from "react-intl";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { FormattedMessage } from "react-intl";
 import { DepositModal } from "./qr-code";
+import { useBuy } from "@hooks/use-buy";
+import Modal from "react-modal";
+import { BuyModalContent } from "./asset";
 
 export const DepositView: FunctionComponent = observer(() => {
   const { accountStore, chainStore } = useStore();
@@ -41,6 +44,9 @@ export const DepositView: FunctionComponent = observer(() => {
     },
     [accountInfo.walletStatus, notification, intl]
   );
+
+  const { isBuySupportChain, buySupportServiceInfos } = useBuy();
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
 
   return (
     <div>
@@ -90,7 +96,7 @@ export const DepositView: FunctionComponent = observer(() => {
         </Button>
       </div>
 
-      {chainStore.current.chainId == "fetchhub-4" && (
+      {(chainStore.current.chainId == "fetchhub-4" || isBuySupportChain) && (
         <div>
           <hr className={styleDeposit.hr} />
 
@@ -119,18 +125,42 @@ export const DepositView: FunctionComponent = observer(() => {
               </p>
             </div>
             <div style={{ flex: 1 }} />
-            <a
-              href={"https://fetch.ai/get-fet/"}
-              target="_blank"
-              rel="noopener noreferrer"
+
+            <Button
+              className={styleDeposit.button}
+              color="primary"
+              size="sm"
+              onClick={(e) => {
+                e.preventDefault();
+                if (chainStore.current.chainId == "fetchhub-4") {
+                  window.open("https://fetch.ai/get-fet/", "_blank");
+                }
+                if (isBuySupportChain) {
+                  setIsBuyModalOpen(true);
+                }
+              }}
             >
-              <Button className={styleDeposit.button} color="primary" size="sm">
-                <FormattedMessage id="main.account.button.buy" />
-              </Button>
-            </a>
+              <FormattedMessage id="main.account.button.buy" />
+            </Button>
           </div>
         </div>
       )}
+      <Modal
+        style={{
+          content: {
+            width: "330px",
+            minWidth: "330px",
+            minHeight: "unset",
+            maxHeight: "unset",
+          },
+        }}
+        isOpen={isBuyModalOpen}
+        onRequestClose={() => {
+          setIsBuyModalOpen(false);
+        }}
+      >
+        <BuyModalContent buySupportServiceInfos={buySupportServiceInfos} />
+      </Modal>
     </div>
   );
 });

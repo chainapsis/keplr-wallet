@@ -1,11 +1,11 @@
 import { RNInjectedKeplr } from "./injected-provider";
-import { init } from "./init";
+import {
+  BrowserInjectedFetchWallet,
+  injectKeplrToWindow,
+} from "@keplr-wallet/provider";
 
 // TODO: Set the Keplr version properly
-const keplr = new RNInjectedKeplr("0.9.6", "mobile-web");
+const keplr = new RNInjectedKeplr("0.10.10", "mobile-web");
+const fetchWallet = new BrowserInjectedFetchWallet(keplr, "0.10.10");
 
-init(
-  keplr,
-  (chainId: string) => keplr.getOfflineSigner(chainId),
-  (chainId: string) => keplr.getEnigmaUtils(chainId)
-);
+injectKeplrToWindow(keplr, fetchWallet);

@@ -21,6 +21,7 @@ export const SettingLanguagePage: FunctionComponent = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
+      smallTitle={true}
       alternativeTitle={intl.formatMessage({
         id: "setting.language",
       })}

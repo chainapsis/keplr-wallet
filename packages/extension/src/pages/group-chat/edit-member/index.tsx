@@ -28,7 +28,6 @@ import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { EthereumEndpoint } from "../../../config.ui";
 import { useStore } from "../../../stores";
 import { encryptGroupMessage, GroupMessageType } from "@utils/encrypt-group";
 import { fetchPublicKey } from "@utils/fetch-public-key";
@@ -72,7 +71,7 @@ export const EditMember: FunctionComponent = observer(() => {
   /// Show alert popup for remove member
   const [removeMemberPopup, setRemoveMemberPopup] = useState(false);
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountInfo.bech32Address;
@@ -80,14 +79,16 @@ export const EditMember: FunctionComponent = observer(() => {
     (address) => address.address == walletAddress
   );
   // address book values
-  const queries = queriesStore.get(chainStore.current.chainId);
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
 
   const [selectedChainId] = useState(

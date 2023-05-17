@@ -5,7 +5,6 @@ import {
 } from "@keplr-wallet/hooks";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useHistory } from "react-router";
-import { EthereumEndpoint } from "../../../config.ui";
 import { HeaderLayout } from "@layouts/index";
 import { useStore } from "../../../stores";
 import style from "./style.module.scss";
@@ -55,20 +54,22 @@ export const ReviewGroupChat: FunctionComponent = observer(() => {
   const [selectedAddress, setSelectedAddresse] = useState<any>();
   const [confirmAction, setConfirmAction] = useState(false);
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountInfo.bech32Address;
 
   // address book values
-  const queries = queriesStore.get(chainStore.current.chainId);
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
 
   const [selectedChainId] = useState(

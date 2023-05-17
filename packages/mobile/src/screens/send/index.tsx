@@ -2,7 +2,6 @@ import React, { FunctionComponent, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useSendTxConfig } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
-import { EthereumEndpoint } from "../../config";
 import { PageWithScrollView } from "../../components/page";
 import { View } from "react-native";
 import {
@@ -44,15 +43,16 @@ export const SendScreen: FunctionComponent = observer(() => {
     : chainStore.current.chainId;
 
   const account = accountStore.getAccount(chainId);
-  const queries = queriesStore.get(chainId);
 
   const sendConfigs = useSendTxConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainId,
-    account.msgOpts["send"],
     account.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+    }
   );
 
   useEffect(() => {
@@ -73,15 +73,16 @@ export const SendScreen: FunctionComponent = observer(() => {
   }, [route.params.recipient, sendConfigs.recipientConfig]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"])}
     >

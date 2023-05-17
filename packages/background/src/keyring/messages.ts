@@ -10,15 +10,24 @@ import { BIP44HDPath, ExportKeyRingData } from "./types";
 import {
   Bech32Address,
   checkAndValidateADR36AminoSignDoc,
+  EthermintChainIdHelper,
 } from "@keplr-wallet/cosmos";
-import { BIP44, KeplrSignOptions, Key } from "@keplr-wallet/types";
-
-import { StdSignDoc, AminoSignResponse, StdSignature } from "@cosmjs/launchpad";
+import {
+  BIP44,
+  EthSignType,
+  KeplrSignOptions,
+  Key,
+  StdSignDoc,
+  AminoSignResponse,
+  StdSignature,
+} from "@keplr-wallet/types";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
-import { cosmos } from "@keplr-wallet/cosmos";
-import Long from "long";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { Buffer } from "buffer/";
+import { LedgerApp } from "../ledger";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export class RestoreKeyRingMsg extends Message<{
   status: KeyRingStatus;
@@ -291,6 +300,48 @@ export class CreatePrivateKeyMsg extends Message<{
   }
 }
 
+export class CreateKeystoneKeyMsg extends Message<{
+  status: KeyRingStatus;
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
+  public static type() {
+    return "create-keystone-key";
+  }
+
+  constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
+    public readonly password: string,
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CreateKeystoneKeyMsg.type();
+  }
+}
+
 export class CreateLedgerKeyMsg extends Message<{
   status: KeyRingStatus;
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
@@ -303,7 +354,8 @@ export class CreateLedgerKeyMsg extends Message<{
     public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly password: string,
     public readonly meta: Record<string, string>,
-    public readonly bip44HDPath: BIP44HDPath
+    public readonly bip44HDPath: BIP44HDPath,
+    public readonly cosmosLikeApp?: string
   ) {
     super();
   }
@@ -375,6 +427,42 @@ export class AddPrivateKeyMsg extends Message<{
   }
 }
 
+export class AddKeystoneKeyMsg extends Message<{
+  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
+}> {
+  public static type() {
+    return "add-keystone-key";
+  }
+
+  constructor(
+    public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
+    public readonly meta: Record<string, string>,
+    public readonly bip44HDPath: BIP44HDPath
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (
+      this.kdf !== "scrypt" &&
+      this.kdf !== "sha256" &&
+      this.kdf !== "pbkdf2"
+    ) {
+      throw new Error("Invalid kdf");
+    }
+
+    KeyRing.validateBIP44Path(this.bip44HDPath);
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return AddKeystoneKeyMsg.type();
+  }
+}
+
 export class AddLedgerKeyMsg extends Message<{
   multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
 }> {
@@ -385,7 +473,8 @@ export class AddLedgerKeyMsg extends Message<{
   constructor(
     public readonly kdf: "scrypt" | "sha256" | "pbkdf2",
     public readonly meta: Record<string, string>,
-    public readonly bip44HDPath: BIP44HDPath
+    public readonly bip44HDPath: BIP44HDPath,
+    public readonly cosmosLikeApp?: string
   ) {
     super();
   }
@@ -497,7 +586,97 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     public readonly signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
+      ethSignType?: EthSignType;
     } = {}
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.signer);
+
+    // Check and validate the ADR-36 sign doc.
+    // ADR-36 sign doc doesn't have the chain id
+    if (!checkAndValidateADR36AminoSignDoc(this.signDoc)) {
+      if (this.signOptions.ethSignType) {
+        throw new Error(
+          "Eth sign type can be requested with only ADR-36 amino sign doc"
+        );
+      }
+
+      if (this.signDoc.chain_id !== this.chainId) {
+        throw new Error(
+          "Chain id in the message is not matched with the requested chain id"
+        );
+      }
+    } else {
+      if (this.signDoc.msgs[0].value.signer !== this.signer) {
+        throw new Error("Unmatched signer in sign doc");
+      }
+
+      if (this.signOptions.ethSignType) {
+        switch (this.signOptions.ethSignType) {
+          // TODO: Check chain id in tx data.
+          // case EthSignType.TRANSACTION:
+          case EthSignType.EIP712: {
+            const message = JSON.parse(
+              Buffer.from(this.signDoc.msgs[0].value.data, "base64").toString()
+            );
+            const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
+            if (parseFloat(message.domain?.chainId) !== ethChainId) {
+              throw new Error(
+                `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${message.domain?.chainId})`
+              );
+            }
+          }
+          // XXX: There is no way to check chain id if type is message because eth personal sign standard doesn't define chain id field.
+          // case EthSignType.MESSAGE:
+        }
+      }
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestSignAminoMsg.type();
+  }
+}
+
+export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> {
+  public static type() {
+    return "request-sign-eip-712-cosmos-tx-v0";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    public readonly signDoc: StdSignDoc,
+    public readonly signOptions: KeplrSignOptions
   ) {
     super();
   }
@@ -522,10 +701,16 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
           "Chain id in the message is not matched with the requested chain id"
         );
       }
-    } else {
-      if (this.signDoc.msgs[0].value.signer !== this.signer) {
-        throw new Error("Unmatched signer in sign doc");
+
+      const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
+
+      if (!BigNumber.from(this.eip712.domain.chainId).eq(ethChainId)) {
+        throw new Error(
+          `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${this.eip712.domain.chainId})`
+        );
       }
+    } else {
+      throw new Error("Can't sign ADR-36 with EIP-712");
     }
 
     if (!this.signOptions) {
@@ -542,7 +727,73 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
   }
 
   type(): string {
-    return RequestSignAminoMsg.type();
+    return RequestSignEIP712CosmosTxMsg_v0.type();
+  }
+}
+
+export class RequestICNSAdr36SignaturesMsg extends Message<
+  {
+    chainId: string;
+    bech32Prefix: string;
+    bech32Address: string;
+    addressHash: "cosmos" | "ethereum";
+    pubKey: Uint8Array;
+    signatureSalt: number;
+    signature: Uint8Array;
+  }[]
+> {
+  public static type() {
+    return "request-icns-adr-36-signatures";
+  }
+
+  constructor(
+    readonly chainId: string,
+    readonly contractAddress: string,
+    readonly owner: string,
+    readonly username: string,
+    readonly addressChainIds: string[]
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.contractAddress) {
+      throw new Error("contract address not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.contractAddress);
+
+    if (!this.owner) {
+      throw new Error("signer not set");
+    }
+
+    // Validate bech32 address.
+    Bech32Address.validate(this.owner);
+
+    if (!this.username) {
+      throw new Error("username not set");
+    }
+
+    if (!this.addressChainIds || this.addressChainIds.length === 0) {
+      throw new Error("address chain ids not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RequestICNSAdr36SignaturesMsg.type();
   }
 }
 
@@ -607,10 +858,10 @@ export class RequestSignDirectMsg extends Message<{
     public readonly chainId: string,
     public readonly signer: string,
     public readonly signDoc: {
-      bodyBytes?: Uint8Array | null;
-      authInfoBytes?: Uint8Array | null;
-      chainId?: string | null;
-      accountNumber?: string | null;
+      bodyBytes?: Uint8Array;
+      authInfoBytes?: Uint8Array;
+      chainId?: string;
+      accountNumber?: string;
     },
     public readonly signOptions: KeplrSignOptions = {}
   ) {
@@ -629,13 +880,11 @@ export class RequestSignDirectMsg extends Message<{
     // Validate bech32 address.
     Bech32Address.validate(this.signer);
 
-    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+    const signDoc = SignDoc.fromPartial({
       bodyBytes: this.signDoc.bodyBytes,
       authInfoBytes: this.signDoc.authInfoBytes,
       chainId: this.signDoc.chainId,
-      accountNumber: this.signDoc.accountNumber
-        ? Long.fromString(this.signDoc.accountNumber)
-        : undefined,
+      accountNumber: this.signDoc.accountNumber,
     });
 
     if (signDoc.chainId !== this.chainId) {
@@ -831,5 +1080,61 @@ export class ExportKeyRingDatasMsg extends Message<ExportKeyRingData[]> {
 
   type(): string {
     return ExportKeyRingDatasMsg.type();
+  }
+}
+
+export class InitNonDefaultLedgerAppMsg extends Message<void> {
+  public static type() {
+    return "init-non-default-ledger-app";
+  }
+
+  constructor(public readonly ledgerApp: LedgerApp) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.ledgerApp) {
+      throw new Error("ledger app not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return InitNonDefaultLedgerAppMsg.type();
+  }
+}
+
+export class ChangeKeyRingNameMsg extends Message<string> {
+  public static type() {
+    return "change-keyring-name-msg";
+  }
+
+  constructor(
+    public readonly defaultName: string,
+    public readonly editable: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // Not allow empty name.
+    if (!this.defaultName) {
+      throw new Error("default name not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ChangeKeyRingNameMsg.type();
   }
 }

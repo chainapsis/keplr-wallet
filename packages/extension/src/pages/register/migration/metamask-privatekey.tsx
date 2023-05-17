@@ -42,7 +42,7 @@ export const MigrateMetamaskPrivateKeyPage: FunctionComponent<{
   });
 
   return (
-    <>
+    <React.Fragment>
       <h1>
         <FormattedMessage id="register.eth-migrate.metamask-private-key.title" />
       </h1>
@@ -101,7 +101,7 @@ export const MigrateMetamaskPrivateKeyPage: FunctionComponent<{
               id: "register.eth-migrate.eth-address.error.required",
             }),
           })}
-          error={errors.name && errors.name.message}
+          error={errors.ethAddress && errors.ethAddress.message}
         />
         <TextArea
           label="Private Key"
@@ -157,7 +157,7 @@ export const MigrateMetamaskPrivateKeyPage: FunctionComponent<{
           error={errors.ethPrivateKey && errors.ethPrivateKey.message}
         />
         {registerConfig.mode === "create" && (
-          <>
+          <React.Fragment>
             <Input
               label={intl.formatMessage({
                 id: "register.create.input.password",
@@ -199,13 +199,13 @@ export const MigrateMetamaskPrivateKeyPage: FunctionComponent<{
               })}
               error={errors.confirmPassword && errors.confirmPassword.message}
             />
-          </>
+          </React.Fragment>
         )}
         <Button color="primary" type="submit" block>
           <FormattedMessage id="register.create.button.next" />
         </Button>
       </Form>
       <BackButton onClick={onBack} />
-    </>
+    </React.Fragment>
   );
 };

@@ -14,6 +14,7 @@
     &:last-child {
       margin-right: 0;
     }
+
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -22,7 +23,7 @@
   }
 }
 
-.deposit-modal {
+.modal-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30,5 +31,51 @@
 
   .qrcode {
     margin-bottom: 20px;
+  }
+}
+
+.buy-support-services {
+  margin-top: 15px;
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+
+  .service {
+    width: 100%;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 12px;
+    border: 1px solid #f2f2f7;
+    border-radius: 4px;
+
+    &:hover:not(&.disabled) {
+      cursor: pointer;
+      background: rgb(162, 150, 150, 0.1);
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    & > .service-logo-container {
+      width: 52px;
+      height: 52px;
+      padding: 4px;
+    }
+
+    & > .service-name {
+      margin-top: 4px;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 22px;
+      color: #31345b;
+    }
   }
 }

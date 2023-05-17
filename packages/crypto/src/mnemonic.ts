@@ -2,6 +2,8 @@
 const bip39 = require("bip39");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip32 = require("bip32");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bs58check = require("bs58check");
 
 import { Buffer } from "buffer/";
 
@@ -42,8 +44,8 @@ export class Mnemonic {
     };
   }
 
-  static validateMnemonic(mnemonic: string) {
-    bip39.validateMnemonic(mnemonic);
+  static validateMnemonic(mnemonic: string): boolean {
+    return bip39.validateMnemonic(mnemonic);
   }
 
   static async generateSeed(rng: RNG, strength: number = 128): Promise<string> {
@@ -61,8 +63,32 @@ export class Mnemonic {
     password: string = ""
   ): Uint8Array {
     const seed = bip39.mnemonicToSeedSync(mnemonic, password);
+    const masterSeed = bip32.fromSeed(seed);
+    const hd = masterSeed.derivePath(path);
+
+    const privateKey = hd.privateKey;
+    if (!privateKey) {
+      throw new Error("null hd key");
+    }
+    return privateKey;
+  }
+
+  static generateMasterSeedFromMnemonic(
+    mnemonic: string,
+    password: string = ""
+  ): Uint8Array {
+    const seed = bip39.mnemonicToSeedSync(mnemonic, password);
     const masterKey = bip32.fromSeed(seed);
-    const hd = masterKey.derivePath(path);
+
+    return Buffer.from(bs58check.decode(masterKey.toBase58()));
+  }
+
+  static generatePrivateKeyFromMasterSeed(
+    seed: Uint8Array,
+    path: string = `m/44'/118'/0'/0/0`
+  ): Uint8Array {
+    const masterSeed = bip32.fromBase58(bs58check.encode(seed));
+    const hd = masterSeed.derivePath(path);
 
     const privateKey = hd.privateKey;
     if (!privateKey) {

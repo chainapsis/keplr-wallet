@@ -30,7 +30,6 @@ import ReactHtmlParser from "react-html-parser";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Button } from "reactstrap";
-import { EthereumEndpoint } from "../../../config.ui";
 import { useStore } from "../../../stores";
 import { encryptGroupMessage, GroupMessageType } from "@utils/encrypt-group";
 import { fetchPublicKey } from "@utils/fetch-public-key";
@@ -66,19 +65,21 @@ export const AddMember: FunctionComponent = observer(() => {
   const [addresses, setAddresses] = useState<NameAddress[]>([]);
   const [randomAddress, setRandomAddress] = useState<NameAddress | undefined>();
 
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountInfo.bech32Address;
   // address book values
-  const queries = queriesStore.get(chainStore.current.chainId);
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
 
   const [selectedChainId] = useState(

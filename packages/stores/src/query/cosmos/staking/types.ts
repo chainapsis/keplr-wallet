@@ -1,11 +1,8 @@
 import { CoinPrimitive } from "../../../common";
 
 export type Rewards = {
-  height: string;
-  result: {
-    rewards: DelegatorReward[] | null;
-    total: CoinPrimitive[];
-  };
+  rewards: DelegatorReward[] | null;
+  total: CoinPrimitive[];
 };
 
 export type DelegatorReward = {
@@ -14,49 +11,26 @@ export type DelegatorReward = {
 };
 
 export type Delegations = {
-  height: string;
-  result: Delegation[];
+  delegation_responses: Delegation[];
+  // pagination: {}
 };
 
 export type Delegation = {
-  delegator_address: string;
-  validator_address: string;
-  // Dec
-  shares: string;
-  // Int
-  balance:
-    | string
-    // There is difference according to the cosmos-sdk's version.
-    // But, latter is the latest version.
-    | {
-        denom: string;
-        amount: string;
-      };
-};
-
-export type DelegationsStargate = {
-  height: string;
-  result: DelegationStargate[];
-};
-
-export type DelegationStargate = {
   delegation: {
     delegator_address: string;
     validator_address: string;
     // Dec
     shares: string;
   };
-  balance:
-    | string
-    | {
-        denom: string;
-        amount: string;
-      };
+  balance: {
+    denom: string;
+    amount: string;
+  };
 };
 
 export type UnbondingDelegations = {
-  height: string;
-  result: UnbondingDelegation[];
+  unbonding_responses: UnbondingDelegation[];
+  // pagination: {}
 };
 
 export type UnbondingDelegation = {
@@ -74,15 +48,26 @@ export type UnbondingDelegation = {
 
 export type Validator = {
   operator_address: string;
-  consensus_pubkey: string;
+  consensus_pubkey: {
+    "@type": string;
+    // Base64
+    key: string;
+  };
   jailed: boolean;
-  status: number;
+  status:
+    | "BOND_STATUS_UNSPECIFIED"
+    | "BOND_STATUS_UNBONDED"
+    | "BOND_STATUS_UNBONDING"
+    | "BOND_STATUS_BONDED";
+  // Int
   tokens: string;
+  // Dec
   delegator_shares: string;
   description: {
     moniker?: string;
     identity?: string;
     website?: string;
+    security_contact?: string;
     details?: string;
   };
   unbonding_height: string;
@@ -103,31 +88,31 @@ export type Validator = {
 };
 
 export type Validators = {
-  height: string;
-  result: Validator[];
+  validators: Validator[];
+  // pagination: {}
 };
 
 export enum BondStatus {
   Unbonded = "Unbonded",
   Unbonding = "Unbonding",
   Bonded = "Bonded",
+  Unspecified = "Unspecified",
 }
 
 export type StakingParams = {
-  height: string;
-  result: {
+  params: {
     unbonding_time: string;
     max_validators: number;
     max_entries: number;
+    historical_entries: number;
     bond_denom: string;
   };
 };
 
 export type StakingPool = {
-  height: string;
-  result: {
+  pool: {
     // Int
-    notBondedTokens: string;
+    not_bonded_tokens: string;
     // Int
     bonded_tokens: string;
   };

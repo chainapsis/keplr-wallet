@@ -33,11 +33,7 @@ export const SignTransaction = ({
   const notification = useNotification();
   const signTxn = async (data: string) => {
     try {
-      const signResult = await signTransaction(
-        data,
-        chainId,
-        accountInfo.bech32Address
-      );
+      const signResult = await signTransaction(data, chainId, accountInfo);
       history.goBack();
       deliverMessages(
         user.accessToken,
@@ -101,19 +97,27 @@ export const SignTransaction = ({
     <div className={style.message}>
       Please recheck parameters of the transaction in Data Tab before approving
       the transaction.
-      <button
+      <Button
         type="button"
+        color="primary"
+        size="sm"
         disabled={disabled}
-        className={style.buttonContainer}
-        style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+        style={{
+          cursor: disabled ? "not-allowed" : "pointer",
+          marginTop: "10px",
+        }}
         onClick={() => signTxn(rawText)}
       >
         Sign transaction
-      </button>
+      </Button>
       <Button
         type="button"
         color="secondary"
-        size="small"
+        size="sm"
+        style={{
+          cursor: disabled ? "not-allowed" : "pointer",
+          marginTop: "10px",
+        }}
         disabled={disabled}
         onClick={() => cancel()}
       >

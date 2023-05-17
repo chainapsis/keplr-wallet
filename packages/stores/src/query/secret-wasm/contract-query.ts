@@ -2,9 +2,8 @@ import { ObservableChainQuery } from "../chain-query";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
-import { autorun, computed, flow, makeObservable, observable } from "mobx";
+import { computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
-import Axios, { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
 
 import { Buffer } from "buffer/";
@@ -33,23 +32,24 @@ export class ObservableSecretContractChainQuery<
     // Don't need to set the url initially because it can't request without encyption.
     super(kvStore, chainId, chainGetter, ``);
     makeObservable(this);
-
-    // Try to get the keplr API.
-    this.initKeplr();
-
-    const disposer = autorun(() => {
-      // If the keplr API is ready and the contract code hash is fetched, try to init.
-      if (this.keplr && this.contractCodeHash) {
-        this.init();
-        disposer();
-      }
-    });
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  protected setObj(obj: object) {
-    this.obj = obj;
-    this.init();
+  protected async onStart() {
+    super.onStart();
+
+    if (!this.keplr) {
+      await this.initKeplr();
+    }
+
+    if (!this.keplr) {
+      throw new Error("Failed to get keplr");
+    }
+
+    await this.querySecretContractCodeHash
+      .getQueryContract(this.contractAddress)
+      .waitResponse();
+
+    await this.init();
   }
 
   get isFetching(): boolean {
@@ -89,26 +89,24 @@ export class ObservableSecretContractChainQuery<
       );
       this.nonce = encrypted.slice(0, 32);
 
-      const encoded = Buffer.from(
-        Buffer.from(encrypted).toString("base64")
-      ).toString("hex");
-
-      this.setUrl(
-        `/wasm/contract/${this.contractAddress}/query/${encoded}?encoding=hex`
-      );
+      const encoded = Buffer.from(encrypted).toString("base64");
+      this.setUrl(this.getSecretWasmUrl(this.contractAddress, encoded));
     }
 
     this._isIniting = false;
   }
 
   protected async fetchResponse(
-    cancelToken: CancelToken
-  ): Promise<QueryResponse<T>> {
+    abortController: AbortController
+  ): Promise<{ response: QueryResponse<T>; headers: any }> {
     let response: QueryResponse<T>;
+    let headers: any;
     try {
-      response = await super.fetchResponse(cancelToken);
+      const fetched = await super.fetchResponse(abortController);
+      response = fetched.response;
+      headers = fetched.headers;
     } catch (e) {
-      if (!Axios.isCancel(e) && e.response?.data?.error) {
+      if (e.response?.data?.error) {
         const encryptedError = e.response.data.error;
 
         const errorMessageRgx = /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
@@ -135,10 +133,7 @@ export class ObservableSecretContractChainQuery<
 
     const encResult = (response.data as unknown) as
       | {
-          height: string;
-          result: {
-            smart: string;
-          };
+          data: string;
         }
       | undefined;
 
@@ -156,7 +151,7 @@ export class ObservableSecretContractChainQuery<
 
     const decrypted = await this.keplr
       .getEnigmaUtils(this.chainId)
-      .decrypt(Buffer.from(encResult.result.smart, "base64"), this.nonce);
+      .decrypt(Buffer.from(encResult.data, "base64"), this.nonce);
 
     const message = Buffer.from(
       Buffer.from(decrypted).toString(),
@@ -165,11 +160,19 @@ export class ObservableSecretContractChainQuery<
 
     const obj = JSON.parse(message);
     return {
-      data: obj as T,
-      status: response.status,
-      staled: false,
-      timestamp: Date.now(),
+      headers,
+      response: {
+        data: obj as T,
+        status: response.status,
+        staled: false,
+        timestamp: Date.now(),
+      },
     };
+  }
+
+  protected getSecretWasmUrl(contractAddress: string, msg: string): string {
+    const queryParam = new URLSearchParams({ query: msg });
+    return `/compute/v1beta1/query/${contractAddress}?${queryParam.toString()}`;
   }
 
   // Actually, the url of fetching the secret20 balance will be changed every time.
@@ -178,9 +181,10 @@ export class ObservableSecretContractChainQuery<
     return `${this.instance.name}-${
       this.instance.defaults.baseURL
     }${this.instance.getUri({
-      url: `/wasm/contract/${this.contractAddress}/query/${JSON.stringify(
-        this.obj
-      )}?encoding=json`,
+      url: this.getSecretWasmUrl(
+        this.contractAddress,
+        JSON.stringify(this.obj)
+      ),
     })}`;
   }
 
@@ -196,6 +200,6 @@ export class ObservableSecretContractChainQuery<
 
     // Code hash is persistent, so it is safe not to consider that the response is from cache or network.
     // TODO: Handle the error case.
-    return queryCodeHash.response.data.result;
+    return queryCodeHash.response.data.code_hash;
   }
 }

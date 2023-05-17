@@ -15,7 +15,7 @@ export const ChatActionsDropdown = ({
   handleClick: (data: string) => void;
 }) => {
   return (
-    <>
+    <React.Fragment>
       {showDropdown && (
         <div className={style.dropdown}>
           {added ? <ViewContactOption /> : <AddContactOption />}
@@ -27,7 +27,7 @@ export const ChatActionsDropdown = ({
           {/* <div onClick={() => handleClick("delete")}>Delete chat</div> */}
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };
 

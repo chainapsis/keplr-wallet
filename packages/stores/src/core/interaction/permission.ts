@@ -11,6 +11,8 @@ import {
   getSecret20ViewingKeyPermissionType,
   AddPermissionOrigin,
   GetOriginPermittedChainsMsg,
+  GlobalPermissionData,
+  INTERACTION_TYPE_GLOBAL_PERMISSION,
 } from "@keplr-wallet/background";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { HasMapStore } from "../../common";
@@ -125,6 +127,7 @@ interface MapKeyData {
   contractAddress: string;
 }
 
+// TODO: Replace this with GeneralPermissionStore
 export class PermissionStore extends HasMapStore<
   BasicAccessPermissionInnerStore | Secret20ViewingKeyPermissionInnerStore
 > {
@@ -271,6 +274,123 @@ export class PermissionStore extends HasMapStore<
     this._isLoading = true;
     try {
       yield this.interactionStore.rejectAll(INTERACTION_TYPE_PERMISSION);
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  get isLoading(): boolean {
+    return this._isLoading;
+  }
+}
+
+export class GeneralPermissionStore {
+  @observable
+  protected _isLoading: boolean = false;
+
+  constructor(
+    protected readonly interactionStore: InteractionStore,
+    protected readonly requester: MessageRequester
+  ) {
+    makeObservable(this);
+  }
+
+  async getOriginPermittedChains(
+    origin: string,
+    type: string
+  ): Promise<string[]> {
+    return await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new GetOriginPermittedChainsMsg(origin, type)
+    );
+  }
+
+  get allWaitingPermissions() {
+    return this.interactionStore.getDatas<PermissionData>(
+      INTERACTION_TYPE_PERMISSION
+    );
+  }
+
+  get allWaitingGlobalPermissions() {
+    return this.interactionStore.getDatas<GlobalPermissionData>(
+      INTERACTION_TYPE_GLOBAL_PERMISSION
+    );
+  }
+
+  getWaitingGlobalPermissions(type: string) {
+    return this.interactionStore
+      .getDatas<PermissionData>(INTERACTION_TYPE_GLOBAL_PERMISSION)
+      .filter((data) => data.data.type === type);
+  }
+
+  getWaitingPermissions(type: string) {
+    return this.interactionStore
+      .getDatas<PermissionData>(INTERACTION_TYPE_PERMISSION)
+      .filter((data) => data.data.type === type);
+  }
+
+  @flow
+  *approvePermission(id: string) {
+    this._isLoading = true;
+    try {
+      yield this.interactionStore.approve(INTERACTION_TYPE_PERMISSION, id, {});
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *rejectPermission(id: string) {
+    this._isLoading = true;
+    try {
+      yield this.interactionStore.reject(INTERACTION_TYPE_PERMISSION, id);
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *rejectAllPermission() {
+    this._isLoading = true;
+    try {
+      yield this.interactionStore.rejectAll(INTERACTION_TYPE_PERMISSION);
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *approveGlobalPermission(id: string) {
+    this._isLoading = true;
+    try {
+      yield this.interactionStore.approve(
+        INTERACTION_TYPE_GLOBAL_PERMISSION,
+        id,
+        {}
+      );
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *rejectGlobalPermission(id: string) {
+    this._isLoading = true;
+    try {
+      yield this.interactionStore.reject(
+        INTERACTION_TYPE_GLOBAL_PERMISSION,
+        id
+      );
+    } finally {
+      this._isLoading = false;
+    }
+  }
+
+  @flow
+  *rejectAllGlobalPermission() {
+    this._isLoading = true;
+    try {
+      yield this.interactionStore.rejectAll(INTERACTION_TYPE_GLOBAL_PERMISSION);
     } finally {
       this._isLoading = false;
     }

@@ -1,37 +1,14 @@
+import { action, computed, flow, makeObservable, observable } from "mobx";
 import {
-  action,
-  computed,
-  flow,
-  makeObservable,
-  observable,
-  runInAction,
-} from "mobx";
-import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
-import { DeepReadonly } from "utility-types";
-import { ChainGetter } from "../common";
-import { QueriesSetBase, QueriesStore } from "../query";
-import { DenomHelper, toGenerator } from "@keplr-wallet/common";
-import {
-  BroadcastMode,
-  makeSignDoc,
-  makeStdTx,
-  Msg,
+  AppCurrency,
+  Keplr,
+  KeplrSignOptions,
   StdFee,
-  StdSignDoc,
-} from "@cosmjs/launchpad";
-import {
-  BaseAccount,
-  cosmos,
-  google,
-  TendermintTxTracer,
-} from "@keplr-wallet/cosmos";
-import Axios, { AxiosInstance } from "axios";
-import { Buffer } from "buffer/";
-import Long from "long";
-import ICoin = cosmos.base.v1beta1.ICoin;
-import SignMode = cosmos.tx.signing.v1beta1.SignMode;
-
-import { evmosToEth } from "@hanchon/ethermint-address-converter";
+} from "@keplr-wallet/types";
+import { ChainGetter } from "../common";
+import { DenomHelper, toGenerator } from "@keplr-wallet/common";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { MakeTxResponse } from "./types";
 
 export enum WalletStatus {
   NotInit = "NotInit",
@@ -46,57 +23,40 @@ export interface MsgOpt {
   readonly gas: number;
 }
 
-/*
-  If the chain has "no-legacy-stdTx" feature, we should send the tx based on protobuf.
-  Expectedly, the sign doc should be formed as animo-json regardless of the tx type (animo or proto).
-*/
-type AminoMsgsOrWithProtoMsgs =
-  | Msg[]
-  | {
-      aminoMsgs: Msg[];
-      protoMsgs?: google.protobuf.IAny[];
-    };
-
-export interface AccountSetOpts<MsgOpts> {
-  readonly prefetching: boolean;
+export interface AccountSetOpts {
   readonly suggestChain: boolean;
   readonly suggestChainFn?: (
     keplr: Keplr,
     chainInfo: ReturnType<ChainGetter["getChain"]>
   ) => Promise<void>;
   readonly autoInit: boolean;
-  readonly preTxEvents?: {
-    onBroadcastFailed?: (e?: Error) => void;
-    onBroadcasted?: (txHash: Uint8Array) => void;
-    onFulfill?: (tx: any) => void;
-  };
   readonly getKeplr: () => Promise<Keplr | undefined>;
-  readonly msgOpts: MsgOpts;
-  readonly wsObject?: new (
-    url: string,
-    protocols?: string | string[]
-  ) => WebSocket;
 }
 
-export class AccountSetBase<MsgOpts, Queries> {
+export class AccountSetBase {
   @observable
   protected _walletVersion: string | undefined = undefined;
 
   @observable
   protected _walletStatus: WalletStatus = WalletStatus.NotInit;
 
+  @observable.ref
+  protected _rejectionReason: Error | undefined = undefined;
+
   @observable
   protected _name: string = "";
 
   @observable
   protected _bech32Address: string = "";
+  @observable
+  protected _isNanoLedger: boolean = false;
+  @observable
+  protected _isKeystone: boolean = false;
 
   @observable
-  protected _isSendingMsg: string | boolean = false;
+  protected _txTypeInProgress: string = "";
 
-  public broadcastMode: "sync" | "async" | "block" = "sync";
-
-  protected pubKey: Uint8Array;
+  protected _pubKey: Uint8Array;
 
   protected hasInited = false;
 
@@ -116,6 +76,12 @@ export class AccountSetBase<MsgOpts, Queries> {
         }
   ) => Promise<boolean>)[] = [];
 
+  protected makeSendTokenTxFns: ((
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) => MakeTxResponse | undefined)[] = [];
+
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
@@ -123,12 +89,11 @@ export class AccountSetBase<MsgOpts, Queries> {
     },
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
-    protected readonly queriesStore: QueriesStore<QueriesSetBase & Queries>,
-    protected readonly opts: AccountSetOpts<MsgOpts>
+    protected readonly opts: AccountSetOpts
   ) {
     makeObservable(this);
 
-    this.pubKey = new Uint8Array();
+    this._pubKey = new Uint8Array();
 
     if (opts.autoInit) {
       this.init();
@@ -137,10 +102,6 @@ export class AccountSetBase<MsgOpts, Queries> {
 
   getKeplr(): Promise<Keplr | undefined> {
     return this.opts.getKeplr();
-  }
-
-  get msgOpts(): MsgOpts {
-    return this.opts.msgOpts;
   }
 
   registerSendTokenFn(
@@ -160,6 +121,16 @@ export class AccountSetBase<MsgOpts, Queries> {
     ) => Promise<boolean>
   ) {
     this.sendTokenFns.push(fn);
+  }
+
+  registerMakeSendTokenFn(
+    fn: (
+      amount: string,
+      currency: AppCurrency,
+      recipient: string
+    ) => MakeTxResponse | undefined
+  ) {
+    this.makeSendTokenTxFns.push(fn);
   }
 
   protected async enable(keplr: Keplr, chainId: string): Promise<void> {
@@ -217,16 +188,38 @@ export class AccountSetBase<MsgOpts, Queries> {
     } catch (e) {
       console.log(e);
       this._walletStatus = WalletStatus.Rejected;
+      this._rejectionReason = e;
       return;
     }
 
-    const key = yield* toGenerator(keplr.getKey(this.chainId));
-    this._bech32Address = key.bech32Address;
-    this._name = key.name;
-    this.pubKey = key.pubKey;
+    try {
+      const key = yield* toGenerator(keplr.getKey(this.chainId));
+      this._bech32Address = key.bech32Address;
+      this._isNanoLedger = key.isNanoLedger;
+      this._isKeystone = key.isKeystone;
+      this._name = key.name;
+      this._pubKey = key.pubKey;
 
-    // Set the wallet status as loaded after getting all necessary infos.
-    this._walletStatus = WalletStatus.Loaded;
+      // Set the wallet status as loaded after getting all necessary infos.
+      this._walletStatus = WalletStatus.Loaded;
+    } catch (e) {
+      console.log(e);
+      // Caught error loading key
+      // Reset properties, and set status to Rejected
+      this._bech32Address = "";
+      this._isNanoLedger = false;
+      this._isKeystone = false;
+      this._name = "";
+      this._pubKey = new Uint8Array(0);
+
+      this._walletStatus = WalletStatus.Rejected;
+      this._rejectionReason = e;
+    }
+
+    if (this._walletStatus !== WalletStatus.Rejected) {
+      // Reset previous rejection error message
+      this._rejectionReason = undefined;
+    }
   }
 
   @action
@@ -238,8 +231,11 @@ export class AccountSetBase<MsgOpts, Queries> {
       this.handleInit
     );
     this._bech32Address = "";
+    this._isNanoLedger = false;
+    this._isKeystone = false;
     this._name = "";
-    this.pubKey = new Uint8Array(0);
+    this._pubKey = new Uint8Array(0);
+    this._rejectionReason = undefined;
   }
 
   get walletVersion(): string | undefined {
@@ -247,127 +243,39 @@ export class AccountSetBase<MsgOpts, Queries> {
   }
 
   @computed
+  get isReadyToSendTx(): boolean {
+    return (
+      this.walletStatus === WalletStatus.Loaded && this.bech32Address !== ""
+    );
+  }
+
+  /**
+   * @deprecated Use `isReadyToSendTx`
+   */
+  @computed
   get isReadyToSendMsgs(): boolean {
     return (
       this.walletStatus === WalletStatus.Loaded && this.bech32Address !== ""
     );
   }
 
-  async sendMsgs(
-    type: string | "unknown",
-    msgs:
-      | AminoMsgsOrWithProtoMsgs
-      | (() => Promise<AminoMsgsOrWithProtoMsgs> | AminoMsgsOrWithProtoMsgs),
-    memo: string = "",
-    fee: StdFee,
-    signOptions?: KeplrSignOptions,
-    onTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcastFailed?: (e?: Error) => void;
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-  ) {
-    runInAction(() => {
-      this._isSendingMsg = type;
-    });
+  makeSendTokenTx(
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ): MakeTxResponse {
+    for (let i = 0; i < this.makeSendTokenTxFns.length; i++) {
+      const fn = this.makeSendTokenTxFns[i];
 
-    let txHash: Uint8Array;
-    let signDoc: StdSignDoc;
-    try {
-      if (typeof msgs === "function") {
-        msgs = await msgs();
-      }
-
-      const result = await this.broadcastMsgs(
-        msgs,
-        fee,
-        memo,
-        signOptions,
-        this.broadcastMode
-      );
-      txHash = result.txHash;
-      signDoc = result.signDoc;
-    } catch (e) {
-      runInAction(() => {
-        this._isSendingMsg = false;
-      });
-
-      if (this.opts.preTxEvents?.onBroadcastFailed) {
-        this.opts.preTxEvents.onBroadcastFailed(e);
-      }
-
-      if (
-        onTxEvents &&
-        "onBroadcastFailed" in onTxEvents &&
-        onTxEvents.onBroadcastFailed
-      ) {
-        onTxEvents.onBroadcastFailed(e);
-      }
-
-      throw e;
-    }
-
-    let onBroadcasted: ((txHash: Uint8Array) => void) | undefined;
-    let onFulfill: ((tx: any) => void) | undefined;
-
-    if (onTxEvents) {
-      if (typeof onTxEvents === "function") {
-        onFulfill = onTxEvents;
-      } else {
-        onBroadcasted = onTxEvents.onBroadcasted;
-        onFulfill = onTxEvents.onFulfill;
+      const res = fn(amount, currency, recipient);
+      if (res) {
+        return res;
       }
     }
 
-    if (this.opts.preTxEvents?.onBroadcasted) {
-      this.opts.preTxEvents.onBroadcasted(txHash);
-    }
-    if (onBroadcasted) {
-      onBroadcasted(txHash);
-    }
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
 
-    const txTracer = new TendermintTxTracer(
-      this.chainGetter.getChain(this.chainId).rpc,
-      "/websocket",
-      {
-        wsObject: this.opts.wsObject,
-      }
-    );
-    txTracer.traceTx(txHash).then((tx) => {
-      txTracer.close();
-
-      runInAction(() => {
-        this._isSendingMsg = false;
-      });
-
-      // After sending tx, the balances is probably changed due to the fee.
-      for (const feeAmount of signDoc.fee.amount) {
-        const bal = this.queries.queryBalances
-          .getQueryBech32Address(this.bech32Address)
-          .balances.find(
-            (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
-          );
-
-        if (bal) {
-          bal.fetch();
-        }
-      }
-
-      // Always add the tx hash data.
-      if (tx && !tx.hash) {
-        tx.hash = Buffer.from(txHash).toString("hex");
-      }
-
-      if (this.opts.preTxEvents?.onFulfill) {
-        this.opts.preTxEvents.onFulfill(tx);
-      }
-
-      if (onFulfill) {
-        onFulfill(tx);
-      }
-    });
+    throw new Error(`Unsupported type of currency (${denomHelper.type})`);
   }
 
   async sendToken(
@@ -407,126 +315,12 @@ export class AccountSetBase<MsgOpts, Queries> {
     throw new Error(`Unsupported type of currency (${denomHelper.type})`);
   }
 
-  // Return the tx hash.
-  protected async broadcastMsgs(
-    msgs: AminoMsgsOrWithProtoMsgs,
-    fee: StdFee,
-    memo: string = "",
-    signOptions?: KeplrSignOptions,
-    mode: "block" | "async" | "sync" = "async"
-  ): Promise<{
-    txHash: Uint8Array;
-    signDoc: StdSignDoc;
-  }> {
-    if (this.walletStatus !== WalletStatus.Loaded) {
-      throw new Error(`Wallet is not loaded: ${this.walletStatus}`);
-    }
-
-    let aminoMsgs: Msg[];
-    let protoMsgs: google.protobuf.IAny[] | undefined;
-    if ("aminoMsgs" in msgs) {
-      aminoMsgs = msgs.aminoMsgs;
-      protoMsgs = msgs.protoMsgs;
-    } else {
-      aminoMsgs = msgs;
-    }
-
-    if (aminoMsgs.length === 0) {
-      throw new Error("There is no msg to send");
-    }
-
-    if (
-      this.hasNoLegacyStdFeature() &&
-      (!protoMsgs || protoMsgs.length === 0)
-    ) {
-      throw new Error(
-        "Chain can't send legecy stdTx. But, proto any type msgs are not provided"
-      );
-    }
-
-    const account = await BaseAccount.fetchFromRest(
-      this.instance,
-      this.bech32Address,
-      true
-    );
-
-    const coinType = this.chainGetter.getChain(this.chainId).coinType;
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const keplr = (await this.getKeplr())!;
-
-    const signDoc = makeSignDoc(
-      aminoMsgs,
-      fee,
-      this.chainId,
-      memo,
-      account.getAccountNumber().toString(),
-      account.getSequence().toString()
-    );
-
-    const signResponse = await keplr.signAmino(
-      this.chainId,
-      this.bech32Address,
-      signDoc,
-      signOptions
-    );
-
-    const signedTx = this.hasNoLegacyStdFeature()
-      ? cosmos.tx.v1beta1.TxRaw.encode({
-          bodyBytes: cosmos.tx.v1beta1.TxBody.encode({
-            messages: protoMsgs,
-            memo: signResponse.signed.memo,
-          }).finish(),
-          authInfoBytes: cosmos.tx.v1beta1.AuthInfo.encode({
-            signerInfos: [
-              {
-                publicKey: {
-                  type_url:
-                    coinType === 60
-                      ? "/ethermint.crypto.v1.ethsecp256k1.PubKey"
-                      : "/cosmos.crypto.secp256k1.PubKey",
-                  value: cosmos.crypto.secp256k1.PubKey.encode({
-                    key: Buffer.from(
-                      signResponse.signature.pub_key.value,
-                      "base64"
-                    ),
-                  }).finish(),
-                },
-                modeInfo: {
-                  single: {
-                    mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
-                  },
-                },
-                sequence: Long.fromString(signResponse.signed.sequence),
-              },
-            ],
-            fee: {
-              amount: signResponse.signed.fee.amount as ICoin[],
-              gasLimit: Long.fromString(signResponse.signed.fee.gas),
-            },
-          }).finish(),
-          signatures: [Buffer.from(signResponse.signature.signature, "base64")],
-        }).finish()
-      : makeStdTx(signResponse.signed, signResponse.signature);
-
-    return {
-      txHash: await keplr.sendTx(this.chainId, signedTx, mode as BroadcastMode),
-      signDoc: signResponse.signed,
-    };
-  }
-
-  get instance(): AxiosInstance {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return Axios.create({
-      ...{
-        baseURL: chainInfo.rest,
-      },
-      ...chainInfo.restConfig,
-    });
-  }
-
   get walletStatus(): WalletStatus {
     return this._walletStatus;
+  }
+
+  get rejectionReason(): Error | undefined {
+    return this._rejectionReason;
   }
 
   get name(): string {
@@ -537,27 +331,63 @@ export class AccountSetBase<MsgOpts, Queries> {
     return this._bech32Address;
   }
 
+  get pubKey(): Uint8Array {
+    return this._pubKey.slice();
+  }
+
+  get isNanoLedger(): boolean {
+    return this._isNanoLedger;
+  }
+
+  get isKeystone(): boolean {
+    return this._isKeystone;
+  }
+
+  /**
+   * Returns the tx type in progress waiting to be committed.
+   * If there is no tx type in progress, this returns an empty string ("").
+   */
+  get txTypeInProgress(): string {
+    return this._txTypeInProgress;
+  }
+
+  /**
+   * @deprecated Use `txTypeInProgress`
+   */
   get isSendingMsg(): string | boolean {
-    return this._isSendingMsg;
+    return this.txTypeInProgress;
   }
 
-  get hasEvmosHexAddress(): boolean {
-    return this.bech32Address.startsWith("evmos");
-  }
-
-  get evmosHexAddress(): string {
-    return evmosToEth(this.bech32Address);
-  }
-
-  protected get queries(): DeepReadonly<QueriesSetBase & Queries> {
-    return this.queriesStore.get(this.chainId);
-  }
-
-  protected hasNoLegacyStdFeature(): boolean {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+  get hasEthereumHexAddress(): boolean {
     return (
-      chainInfo.features != null &&
-      chainInfo.features.includes("no-legacy-stdTx")
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-address-gen") ?? false
     );
+  }
+
+  @computed
+  get ethereumHexAddress(): string {
+    if (this.bech32Address === "") {
+      return "";
+    }
+
+    return Bech32Address.fromBech32(
+      this.bech32Address,
+      this.chainGetter.getChain(this.chainId).bech32Config.bech32PrefixAccAddr
+    ).toHex(true);
+  }
+}
+
+export class AccountSetBaseSuper extends AccountSetBase {
+  constructor(...params: ConstructorParameters<typeof AccountSetBase>) {
+    super(...params);
+
+    makeObservable(this);
+  }
+
+  @action
+  setTxTypeInProgress(type: string): void {
+    this._txTypeInProgress = type;
   }
 }

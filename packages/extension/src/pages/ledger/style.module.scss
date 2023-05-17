@@ -31,6 +31,15 @@
   }
 }
 
+.buttons {
+  display: flex;
+  padding-top: 15px;
+}
+
+.button {
+  flex: 1;
+}
+
 .sign-complete-dialog {
   height: 100%;
   display: flex;

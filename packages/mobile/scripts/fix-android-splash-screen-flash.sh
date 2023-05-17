@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # We need to set the full background image for the splash screen.
 # But, the expo's splash screen module doesn't handle the bakcground as image but the color.

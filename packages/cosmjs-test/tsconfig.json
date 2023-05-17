@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": true,
+    "rootDir": "src",
+    "noEmit": true,
+    // Secretjs uses nodejs 18 as typing.
+    // However, keplr uses 16. And, it makes type conflicts.
+    // This package is not used as public and not included to product.
+    // So, just ignore the error from node_modules.
+    "skipLibCheck": true
+  }
+}

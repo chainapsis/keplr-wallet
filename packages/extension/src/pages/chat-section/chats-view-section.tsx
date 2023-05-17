@@ -308,7 +308,7 @@ export const ChatsViewSection = ({
     >
       <div className={style.messages}>
         {pagination?.lastPage <= pagination?.page && (
-          <>
+          <React.Fragment>
             {isNewUser && (
               <NewUserSection
                 targetAddress={targetAddress}
@@ -319,7 +319,7 @@ export const ChatsViewSection = ({
               Messages are end to end encrypted. Nobody else can read them
               except you and the recipient.
             </p>
-          </>
+          </React.Fragment>
         )}
         {pagination?.lastPage > pagination?.page &&
           (pagination?.page === -1 ||
@@ -335,7 +335,6 @@ export const ChatsViewSection = ({
             <div key={message.id}>
               {group !== undefined && (
                 <ChatMessage
-                  messageId={message?.id}
                   chainId={current.chainId}
                   showDate={check}
                   message={message?.contents}
@@ -346,7 +345,6 @@ export const ChatsViewSection = ({
                       ? new Date(receiver.groupLastSeenTimestamp).getTime()
                       : 0
                   }
-                  disabled={true}
                 />
               )}
               {index === CHAT_PAGE_COUNT && <div ref={messagesScrollRef} />}

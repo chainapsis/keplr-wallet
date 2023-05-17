@@ -27,7 +27,7 @@ export const ChatActionsPopup = ({
   };
 
   return (
-    <>
+    <React.Fragment>
       {action === "block" && (
         <BlockUserPopup setConfirmAction={setConfirmAction} />
       )}
@@ -62,6 +62,6 @@ export const ChatActionsPopup = ({
           }}
         />
       )}
-    </>
+    </React.Fragment>
   );
 };

@@ -1,7 +1,9 @@
 import React, {
-  FunctionComponent,
   ChangeEvent,
+  FunctionComponent,
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
 
@@ -9,6 +11,7 @@ import { Button } from "reactstrap";
 
 import {
   Ledger,
+  LedgerApp,
   LedgerInitErrorOn,
   LedgerWebHIDIniter,
   LedgerWebUSBIniter,
@@ -21,13 +24,24 @@ import classnames from "classnames";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNotification } from "@components/notification";
 import delay from "delay";
-import { useInteractionInfo } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
+import { ledgerUSBVendorId } from "@ledgerhq/devices";
+import { Buffer } from "buffer/";
 
 export const LedgerGrantPage: FunctionComponent = observer(() => {
-  // Force to fit the screen size.
-  useInteractionInfo();
+  useLayoutEffect(() => {
+    // XXX: Temporal solution for fitting the popup window.
+    //      Even though this is noy proper way to adjust style,
+    //      it is safe because this page only can be open on popup.
+    document.documentElement.style.height = "100%";
+    document.body.style.height = "100%";
+    const app = document.getElementById("app");
+    if (app) {
+      app.style.height = "100%";
+    }
+  }, []);
 
   const { ledgerInitStore } = useStore();
 
@@ -36,6 +50,23 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
   const notification = useNotification();
 
   const [showWebHIDWarning, setShowWebHIDWarning] = useState(false);
+  // TODO: Show link to full-screen grant permission page to ensure usb permission.
+  const [showPermissionLink, setShowPermissionLink] = useState(false);
+
+  const testUSBDevices = useCallback(async (isWebHID: boolean) => {
+    const anyNavigator = navigator as any;
+    let protocol: any;
+    if (isWebHID) {
+      protocol = anyNavigator.hid;
+    } else {
+      protocol = anyNavigator.usb;
+    }
+
+    const devices = await protocol.getDevices();
+
+    const exist = devices.find((d: any) => d.vendorId === ledgerUSBVendorId);
+    return !!exist;
+  }, []);
 
   const toggleWebHIDFlag = async (e: ChangeEvent) => {
     e.preventDefault();
@@ -78,22 +109,76 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
   const [initSucceed, setInitSucceed] = useState(false);
 
   const tryInit = async () => {
-    setInitTryCount(initTryCount + 1);
     setTryInitializing(true);
+
+    let deviceSelected = false;
+
     let initErrorOn: LedgerInitErrorOn | undefined;
 
     try {
+      if (!(await testUSBDevices(ledgerInitStore.isWebHID))) {
+        throw new Error("There is no device selected");
+      }
+
+      const transportIniter = ledgerInitStore.isWebHID
+        ? LedgerWebHIDIniter
+        : LedgerWebUSBIniter;
+      const transport = await transportIniter();
+      try {
+        if (ledgerInitStore.requestedLedgerApp === LedgerApp.Cosmos) {
+          await CosmosApp.openApp(
+            transport,
+            ledgerInitStore.cosmosLikeApp || "Cosmos"
+          );
+        } else if (ledgerInitStore.requestedLedgerApp === LedgerApp.Ethereum) {
+          await CosmosApp.openApp(transport, "Ethereum");
+        }
+      } catch (e) {
+        // Ignore error
+        console.log(e);
+      } finally {
+        await transport.close();
+
+        await delay(500);
+      }
+
+      // I don't know the reason exactly.
+      // However, we sometimes should wait for some until actually app opened.
+      // It is hard to set exact delay. So, just wait for 500ms 5 times.
+      let tempSuccess = false;
+      for (let i = 0; i < 5; i++) {
+        // Test again to ensure usb permission after interaction.
+        if (await testUSBDevices(ledgerInitStore.isWebHID)) {
+          tempSuccess = true;
+          break;
+        }
+
+        await delay(500);
+      }
+      if (!tempSuccess) {
+        throw new Error("There is no device selected");
+      }
+
+      deviceSelected = true;
+
       const ledger = await Ledger.init(
-        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter
+        ledgerInitStore.isWebHID ? LedgerWebHIDIniter : LedgerWebUSBIniter,
+        undefined,
+        // requestedLedgerApp should be set if ledger init needed.
+        ledgerInitStore.requestedLedgerApp!,
+        ledgerInitStore.cosmosLikeApp || "Cosmos"
       );
       await ledger.close();
       // Unfortunately, closing ledger blocks the writing to Ledger on background process.
       // I'm not sure why this happens. But, not closing reduce this problem if transport is webhid.
       if (!ledgerInitStore.isWebHID) {
         delay(1000);
+      } else {
+        delay(500);
       }
     } catch (e) {
       console.log(e);
+
       if (e.errorOn != null) {
         initErrorOn = e.errorOn;
       } else {
@@ -101,8 +186,10 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
       }
     }
 
+    setInitTryCount(initTryCount + 1);
     setInitErrorOn(initErrorOn);
     setTryInitializing(false);
+    setShowPermissionLink(!deviceSelected);
 
     if (initErrorOn === undefined) {
       setInitSucceed(true);
@@ -134,16 +221,84 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
           <Instruction
             icon={
               <img
-                src={require("@assets/img/atom-o.svg")}
+                src={(() => {
+                  switch (ledgerInitStore.requestedLedgerApp) {
+                    case "ethereum":
+                      return require("../../public/assets/img/ethereum.svg");
+                    case "cosmos":
+                      if (ledgerInitStore.cosmosLikeApp === "Terra") {
+                        return require("../../public/assets/img/ledger-terra.svg");
+                      }
+                      return require("../../public/assets/img/atom-o.svg");
+                    default:
+                      return require("@assets/img/atom-o.svg");
+                  }
+                })()}
                 style={{ height: "34px" }}
                 alt="atom"
               />
             }
             title={intl.formatMessage({ id: "ledger.step2" })}
-            paragraph={intl.formatMessage({ id: "ledger.step2.paragraph" })}
+            paragraph={intl.formatMessage(
+              {
+                id: "ledger.step2.paragraph",
+              },
+              {
+                ledgerApp: (() => {
+                  switch (ledgerInitStore.requestedLedgerApp) {
+                    case "ethereum":
+                      return "Ethereum";
+                    case "cosmos":
+                      return ledgerInitStore.cosmosLikeApp || "Cosmos";
+                    default:
+                      return "Cosmos";
+                  }
+                })(),
+              }
+            )}
             pass={initTryCount > 0 && initErrorOn == null}
           />
           <div style={{ flex: 1 }} />
+          {showPermissionLink ? (
+            <div
+              style={{
+                fontSize: "13px",
+                lineHeight: "120%",
+                letterSpacing: "0.15px",
+                color: "#172B4D",
+                marginBottom: "0.5rem",
+              }}
+            >
+              If your Ledger is connected, but your browser {`doesn't`} detect
+              your wallet,{" "}
+              <a
+                style={{
+                  color: "#314FDF",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  browser.tabs
+                    .create({
+                      url: `/ledger-grant.html?request=${Buffer.from(
+                        JSON.stringify({
+                          app: ledgerInitStore.requestedLedgerApp,
+                          cosmosLikeApp: ledgerInitStore.cosmosLikeApp,
+                        })
+                      ).toString("base64")}`,
+                    })
+                    .then(() => {
+                      window.close();
+                    });
+                }}
+              >
+                click here
+              </a>{" "}
+              to grant permission from your browser.
+            </div>
+          ) : null}
           <div className="custom-control custom-checkbox mb-2">
             <input
               className="custom-control-input"
@@ -204,17 +359,31 @@ export const LedgerGrantPage: FunctionComponent = observer(() => {
               />
             </div>
           ) : null}
-          <Button
-            color="primary"
-            block
-            onClick={async (e) => {
-              e.preventDefault();
-              await tryInit();
-            }}
-            data-loading={tryInitializing}
-          >
-            <FormattedMessage id="ledger.button.next" />
-          </Button>
+          <div className={style.buttons}>
+            <Button
+              color="primary"
+              className={style.button}
+              onClick={async (e) => {
+                e.preventDefault();
+                await tryInit();
+              }}
+              data-loading={tryInitializing}
+            >
+              <FormattedMessage id="ledger.button.next" />
+            </Button>
+            <Button
+              color="danger"
+              className={style.button}
+              onClick={async (e) => {
+                e.preventDefault();
+                ledgerInitStore.abortAll();
+              }}
+              data-loading={ledgerInitStore.isLoading}
+              outline
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       )}
     </EmptyLayout>

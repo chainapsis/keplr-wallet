@@ -1,6 +1,14 @@
 import { Message } from "@keplr-wallet/router";
-import { ChainInfo, KeplrSignOptions, Key } from "@keplr-wallet/types";
-import { AminoSignResponse, StdSignature, StdSignDoc } from "@cosmjs/launchpad";
+import {
+  ChainInfo,
+  EthSignType,
+  KeplrSignOptions,
+  Key,
+  AminoSignResponse,
+  StdSignature,
+  StdSignDoc,
+  ChainInfoWithoutEndpoints,
+} from "@keplr-wallet/types";
 
 export class EnableAccessMsg extends Message<void> {
   public static type() {
@@ -23,6 +31,30 @@ export class EnableAccessMsg extends Message<void> {
 
   type(): string {
     return EnableAccessMsg.type();
+  }
+}
+
+export class DisableAccessMsg extends Message<void> {
+  public static type() {
+    return "disable-access";
+  }
+
+  constructor(public readonly chainIds: string[]) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainIds) {
+      throw new Error("chain id not set");
+    }
+  }
+
+  route(): string {
+    return "permission";
+  }
+
+  type(): string {
+    return DisableAccessMsg.type();
   }
 }
 
@@ -189,6 +221,7 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     public readonly signOptions: KeplrSignOptions & {
       // Hack option field to detect the sign arbitrary for string
       isADR36WithString?: boolean;
+      ethSignType?: EthSignType;
     } = {}
   ) {
     super();
@@ -244,6 +277,121 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
 
   type(): string {
     return RequestSignAminoMsg.type();
+  }
+}
+
+export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> {
+  public static type() {
+    return "request-sign-eip-712-cosmos-tx-v0";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly signer: string,
+    public readonly eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    public readonly signDoc: StdSignDoc,
+    public readonly signOptions: KeplrSignOptions
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.signer) {
+      throw new Error("signer not set");
+    }
+
+    if (this.signDoc.chain_id !== this.chainId) {
+      throw new Error(
+        "Chain id in the message is not matched with the requested chain id"
+      );
+    }
+
+    if (!this.signOptions) {
+      throw new Error("Sign options are null");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestSignEIP712CosmosTxMsg_v0.type();
+  }
+}
+
+export class RequestICNSAdr36SignaturesMsg extends Message<
+  {
+    chainId: string;
+    bech32Prefix: string;
+    bech32Address: string;
+    addressHash: "cosmos" | "ethereum";
+    pubKey: Uint8Array;
+    signatureSalt: number;
+    signature: Uint8Array;
+  }[]
+> {
+  public static type() {
+    return "request-icns-adr-36-signatures";
+  }
+
+  constructor(
+    readonly chainId: string,
+    readonly contractAddress: string,
+    readonly owner: string,
+    readonly username: string,
+    readonly addressChainIds: string[]
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chain id not set");
+    }
+
+    if (!this.contractAddress) {
+      throw new Error("contract address not set");
+    }
+
+    if (!this.owner) {
+      throw new Error("signer not set");
+    }
+
+    // Validate bech32 address.
+    // Bech32Address.validate(this.signer);
+
+    if (!this.username) {
+      throw new Error("username not set");
+    }
+
+    if (!this.addressChainIds || this.addressChainIds.length === 0) {
+      throw new Error("address chain ids not set");
+    }
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return RequestICNSAdr36SignaturesMsg.type();
   }
 }
 
@@ -483,5 +631,79 @@ export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
 
   type(): string {
     return GetTxEncryptionKeyMsg.type();
+  }
+}
+
+export class GetChainInfosWithoutEndpointsMsg extends Message<{
+  chainInfos: ChainInfoWithoutEndpoints[];
+}> {
+  public static type() {
+    return "get-chain-infos-without-endpoints";
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return "chains";
+  }
+
+  type(): string {
+    return GetChainInfosWithoutEndpointsMsg.type();
+  }
+}
+
+export class GetAnalyticsIdMsg extends Message<string> {
+  public static type() {
+    return "get-analytics-id";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  approveExternal(): boolean {
+    return true;
+  }
+
+  route(): string {
+    return "analytics";
+  }
+
+  type(): string {
+    return GetAnalyticsIdMsg.type();
+  }
+}
+
+export class ChangeKeyRingNameMsg extends Message<string> {
+  public static type() {
+    return "change-keyring-name-msg";
+  }
+
+  constructor(
+    public readonly defaultName: string,
+    public readonly editable: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    // Not allow empty name.
+    if (!this.defaultName) {
+      throw new Error("default name not set");
+    }
+  }
+
+  route(): string {
+    return "keyring";
+  }
+
+  type(): string {
+    return ChangeKeyRingNameMsg.type();
   }
 }

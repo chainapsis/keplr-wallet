@@ -20,7 +20,7 @@ export const GroupChatPopup = ({
   onClick: (option: GroupChatMemberOptions) => void;
 }) => {
   return (
-    <>
+    <React.Fragment>
       <div
         className={style.overlay}
         onClick={() => onClick(GroupChatMemberOptions.dissmisPopup)}
@@ -76,6 +76,6 @@ export const GroupChatPopup = ({
           />
         )}
       </div>
-    </>
+    </React.Fragment>
   );
 };

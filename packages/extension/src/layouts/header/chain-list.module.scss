@@ -39,4 +39,15 @@
       align-items: center;
     }
   }
+
+  .add-chain {
+    flex-direction: row;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.5);
+
+    &:not(:global(.selected)):hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+  }
 }

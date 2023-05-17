@@ -1,0 +1,24 @@
+.container {
+  padding: 12px;
+  background-color: white;
+  border-radius: 6px;
+
+  box-shadow: 0 1px 3px rgb(50 50 93 / 15%), 0 1px 0 rgb(0 0 0 / 2%) !important;
+
+  margin-bottom: 1.5rem;
+
+  .auto-button-group {
+    margin-bottom: 0.5rem;
+
+    display: flex;
+    align-items: center;
+
+    .label {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 21px;
+      color: #323c4a;
+      margin-right: 0.325rem;
+    }
+  }
+}

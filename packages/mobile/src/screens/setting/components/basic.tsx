@@ -18,11 +18,7 @@ export const SettingSectionTitle: FunctionComponent<{
       ])}
     >
       <Text
-        style={style.flatten([
-          "text-caption1",
-          "color-text-black-very-low",
-          "uppercase",
-        ])}
+        style={style.flatten(["text-caption1", "color-text-low", "uppercase"])}
       >
         {title}
       </Text>
@@ -44,6 +40,11 @@ export const SettingItem: FunctionComponent<{
   onPress?: () => void;
 
   topBorder?: boolean;
+  borderColor?: string;
+
+  rippleColor?: string;
+  underlayColor?: string;
+  activeOpacity?: number;
 }> = ({
   containerStyle,
   style: propStyle,
@@ -55,6 +56,10 @@ export const SettingItem: FunctionComponent<{
   right,
   onPress,
   topBorder,
+  borderColor,
+  rippleColor,
+  underlayColor,
+  activeOpacity,
 }) => {
   const style = useStyle();
 
@@ -65,7 +70,7 @@ export const SettingItem: FunctionComponent<{
         <View>
           <Text
             style={StyleSheet.flatten([
-              style.flatten(["body1", "color-text-black-medium"]),
+              style.flatten(["body1", "color-text-middle"]),
               labelStyle,
             ])}
           >
@@ -74,7 +79,7 @@ export const SettingItem: FunctionComponent<{
           {paragraph ? (
             <Text
               style={StyleSheet.flatten([
-                style.flatten(["subtitle3", "color-text-black-low"]),
+                style.flatten(["subtitle3", "color-text-low"]),
                 paragraphStyle,
               ])}
             >
@@ -96,7 +101,14 @@ export const SettingItem: FunctionComponent<{
     <View style={containerStyle}>
       {topBorder ? (
         <View
-          style={style.flatten(["height-1", "background-color-border-white"])}
+          style={StyleSheet.flatten([
+            style.flatten([
+              "height-1",
+              "background-color-gray-50",
+              "dark:background-color-platinum-500@75%",
+            ]),
+            borderColor ? { backgroundColor: borderColor } : {},
+          ])}
         />
       ) : null}
       {onPress ? (
@@ -104,6 +116,7 @@ export const SettingItem: FunctionComponent<{
           style={StyleSheet.flatten([
             style.flatten([
               "background-color-white",
+              "dark:background-color-platinum-600",
               "height-62",
               "padding-x-20",
               "flex-row",
@@ -112,6 +125,9 @@ export const SettingItem: FunctionComponent<{
             propStyle,
           ])}
           onPress={onPress}
+          rippleColor={rippleColor}
+          underlayColor={underlayColor}
+          activeOpacity={activeOpacity}
         >
           {renderChildren()}
         </RectButton>
@@ -120,6 +136,7 @@ export const SettingItem: FunctionComponent<{
           style={StyleSheet.flatten([
             style.flatten([
               "background-color-white",
+              "dark:background-color-platinum-600",
               "height-62",
               "padding-x-20",
               "flex-row",
@@ -131,9 +148,15 @@ export const SettingItem: FunctionComponent<{
           {renderChildren()}
         </View>
       )}
-
       <View
-        style={style.flatten(["height-1", "background-color-border-white"])}
+        style={StyleSheet.flatten([
+          style.flatten([
+            "height-1",
+            "background-color-gray-50",
+            "dark:background-color-platinum-500@75%",
+          ]),
+          borderColor ? { backgroundColor: borderColor } : {},
+        ])}
       />
     </View>
   );
@@ -148,19 +171,12 @@ export const RightArrow: FunctionComponent<{
     <React.Fragment>
       {paragraph ? (
         <Text
-          style={style.flatten([
-            "body1",
-            "color-text-black-low",
-            "margin-right-16",
-          ])}
+          style={style.flatten(["body1", "color-text-low", "margin-right-16"])}
         >
           {paragraph}
         </Text>
       ) : null}
-      <RightArrowIcon
-        color={style.get("color-text-black-low").color}
-        height={15}
-      />
+      <RightArrowIcon color={style.get("color-text-low").color} height={15} />
     </React.Fragment>
   );
 };

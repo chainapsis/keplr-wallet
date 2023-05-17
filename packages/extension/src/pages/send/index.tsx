@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useMemo } from "react";
 import {
   AddressInput,
   FeeButtons,
@@ -20,13 +20,13 @@ import { Button } from "reactstrap";
 import { useHistory, useLocation } from "react-router";
 import queryString from "querystring";
 
-import { useSendTxConfig } from "@keplr-wallet/hooks";
-import { EthereumEndpoint } from "../../config.ui";
+import { useGasSimulator, useSendTxConfig } from "@keplr-wallet/hooks";
 import {
   fitPopupWindow,
   openPopupWindow,
   PopupSize,
 } from "@keplr-wallet/popup";
+import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 
 export const SendPage: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -59,6 +59,7 @@ export const SendPage: FunctionComponent = observer(() => {
     priceStore,
     queriesStore,
     analyticsStore,
+    uiConfigStore,
   } = useStore();
   const current = chainStore.current;
 
@@ -66,12 +67,112 @@ export const SendPage: FunctionComponent = observer(() => {
 
   const sendConfigs = useSendTxConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     current.chainId,
-    accountInfo.msgOpts.send,
     accountInfo.bech32Address,
-    queriesStore.get(current.chainId).queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+      computeTerraClassicTax: true,
+    }
   );
+
+  const gasSimulatorKey = useMemo(() => {
+    if (sendConfigs.amountConfig.sendCurrency) {
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+
+      if (denomHelper.type !== "native") {
+        if (denomHelper.type === "cw20") {
+          // Probably, the gas can be different per cw20 according to how the contract implemented.
+          return `${denomHelper.type}/${denomHelper.contractAddress}`;
+        }
+
+        return denomHelper.type;
+      }
+    }
+
+    return "native";
+  }, [sendConfigs.amountConfig.sendCurrency]);
+
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.main.send"),
+    chainStore,
+    current.chainId,
+    sendConfigs.gasConfig,
+    sendConfigs.feeConfig,
+    gasSimulatorKey,
+    () => {
+      if (!sendConfigs.amountConfig.sendCurrency) {
+        throw new Error("Send currency not set");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        sendConfigs.amountConfig.error != null ||
+        sendConfigs.recipientConfig.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      const denomHelper = new DenomHelper(
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom
+      );
+      // I don't know why, but simulation does not work for secret20
+      if (denomHelper.type === "secret20") {
+        throw new Error("Simulating secret wasm not supported");
+      }
+
+      return accountInfo.makeSendTokenTx(
+        sendConfigs.amountConfig.amount,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        sendConfigs.amountConfig.sendCurrency!,
+        sendConfigs.recipientConfig.recipient
+      );
+    }
+  );
+
+  useEffect(() => {
+    // To simulate secretwasm, we need to include the signature in the tx.
+    // With the current structure, this approach is not possible.
+    if (
+      sendConfigs.amountConfig.sendCurrency &&
+      new DenomHelper(sendConfigs.amountConfig.sendCurrency.coinMinimalDenom)
+        .type === "secret20"
+    ) {
+      gasSimulator.forceDisable(
+        new Error("Simulating secret20 is not supported")
+      );
+      sendConfigs.gasConfig.setGas(
+        accountInfo.secret.msgOpts.send.secret20.gas
+      );
+    } else {
+      gasSimulator.forceDisable(false);
+      gasSimulator.setEnabled(true);
+    }
+  }, [
+    accountInfo.secret.msgOpts.send.secret20.gas,
+    gasSimulator,
+    sendConfigs.amountConfig.sendCurrency,
+    sendConfigs.gasConfig,
+  ]);
+
+  useEffect(() => {
+    if (
+      sendConfigs.feeConfig.chainInfo.features &&
+      sendConfigs.feeConfig.chainInfo.features.includes("terra-classic-fee")
+    ) {
+      // When considering stability tax for terra classic.
+      // Simulation itself doesn't consider the stability tax send.
+      // Thus, it always returns fairly lower gas.
+      // To adjust this, for terra classic, increase the default gas adjustment
+      gasSimulator.setGasAdjustment(1.6);
+    }
+  }, [gasSimulator, sendConfigs.feeConfig.chainInfo]);
 
   useEffect(() => {
     if (query.defaultDenom) {
@@ -107,17 +208,18 @@ export const SendPage: FunctionComponent = observer(() => {
   }, [query.defaultAmount, query.defaultMemo, query.defaultRecipient]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   return (
     <HeaderLayout
       showChainName
       canChangeChainInfo={false}
+      // style={{ height: "auto", minHeight: "100%" }}
       onBackButton={
         isDetachedPage
           ? undefined
@@ -126,7 +228,7 @@ export const SendPage: FunctionComponent = observer(() => {
             }
       }
       rightRenderer={
-        isDetachedPage || true ? undefined : (
+        isDetachedPage ? undefined : (
           <div
             style={{
               height: "64px",
@@ -187,13 +289,16 @@ export const SendPage: FunctionComponent = observer(() => {
             try {
               const stdFee = sendConfigs.feeConfig.toStdFee();
 
-              await accountInfo.sendToken(
+              const tx = accountInfo.makeSendTokenTx(
                 sendConfigs.amountConfig.amount,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 sendConfigs.amountConfig.sendCurrency!,
-                sendConfigs.recipientConfig.recipient,
-                sendConfigs.memoConfig.memo,
+                sendConfigs.recipientConfig.recipient
+              );
+
+              await tx.send(
                 stdFee,
+                sendConfigs.memoConfig.memo,
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
@@ -208,6 +313,7 @@ export const SendPage: FunctionComponent = observer(() => {
                   },
                 }
               );
+
               if (!isDetachedPage) {
                 history.replace("/");
               }
@@ -249,6 +355,45 @@ export const SendPage: FunctionComponent = observer(() => {
               balanceText={intl.formatMessage({
                 id: "send.input-button.balance",
               })}
+              disableAllBalance={(() => {
+                if (
+                  // In the case of terra classic, tax is applied in proportion to the amount.
+                  // However, in this case, the tax itself changes the fee,
+                  // so if you use the max function, it will fall into infinite repetition.
+                  // We currently disable if chain is terra classic because we can't handle it properly.
+                  sendConfigs.feeConfig.chainInfo.features &&
+                  sendConfigs.feeConfig.chainInfo.features.includes(
+                    "terra-classic-fee"
+                  )
+                ) {
+                  return true;
+                }
+                return false;
+              })()}
+              overrideSelectableCurrencies={(() => {
+                if (
+                  chainStore.current.features &&
+                  chainStore.current.features.includes("terra-classic-fee")
+                ) {
+                  // At present, can't handle stability tax well if it is not registered native token.
+                  // So, for terra classic, disable other tokens.
+                  const currencies =
+                    sendConfigs.amountConfig.sendableCurrencies;
+                  return currencies.filter((cur) => {
+                    const denom = new DenomHelper(cur.coinMinimalDenom);
+                    if (
+                      denom.type !== "native" ||
+                      denom.denom.startsWith("ibc/")
+                    ) {
+                      return false;
+                    }
+
+                    return true;
+                  });
+                }
+
+                return undefined;
+              })()}
             />
             <MemoInput
               memoConfig={sendConfigs.memoConfig}
@@ -267,6 +412,7 @@ export const SendPage: FunctionComponent = observer(() => {
                 high: intl.formatMessage({ id: "fee-buttons.select.high" }),
               }}
               gasLabel={intl.formatMessage({ id: "send.input.gas" })}
+              gasSimulator={gasSimulator}
             />
           </div>
           <div style={{ flex: 1 }} />
@@ -276,6 +422,9 @@ export const SendPage: FunctionComponent = observer(() => {
             block
             data-loading={accountInfo.isSendingMsg === "send"}
             disabled={!accountInfo.isReadyToSendMsgs || !txStateIsValid}
+            style={{
+              marginTop: "12px",
+            }}
           >
             {intl.formatMessage({
               id: "send.button.send",

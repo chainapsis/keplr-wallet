@@ -60,7 +60,7 @@ export const ChatStoreProvider: FunctionComponent = observer((props) => {
     return () => {
       clearInterval(intervalCall);
     };
-  }, [accountInfo.bech32Address]);
+  }, [chainStore.current.chainId, accountInfo.bech32Address]);
 
   return <Provider store={store}>{children}</Provider>;
 });

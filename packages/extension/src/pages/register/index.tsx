@@ -25,6 +25,12 @@ import {
 } from "./ledger";
 import { WelcomePage } from "./welcome";
 import { AdditionalSignInPrepend } from "../../config.ui";
+import classnames from "classnames";
+import {
+  ImportKeystoneIntro,
+  ImportKeystonePage,
+  TypeImportKeystone,
+} from "./keystone";
 import {
   MigrateEthereumAddressIntro,
   MigrateEthereumAddressPage,
@@ -51,14 +57,14 @@ export const BackButton: FunctionComponent<{ onClick: () => void }> = ({
 
 export const RegisterPage: FunctionComponent = observer(() => {
   useEffect(() => {
-    document.body.setAttribute("data-centered", "true");
+    document.documentElement.setAttribute("data-register-page", "true");
 
     return () => {
-      document.body.removeAttribute("data-centered");
+      document.documentElement.removeAttribute("data-register-page");
     };
   }, []);
 
-  const { keyRingStore } = useStore();
+  const { keyRingStore, uiConfigStore } = useStore();
 
   const registerConfig = useRegisterConfig(keyRingStore, [
     ...(AdditionalSignInPrepend ?? []),
@@ -72,10 +78,21 @@ export const RegisterPage: FunctionComponent = observer(() => {
       intro: RecoverMnemonicIntro,
       page: RecoverMnemonicPage,
     },
+    // Currently, there is no way to use ledger with keplr on firefox.
+    // Temporarily, hide the ledger usage.
+    ...(uiConfigStore.platform !== "firefox"
+      ? [
+          {
+            type: TypeImportLedger,
+            intro: ImportLedgerIntro,
+            page: ImportLedgerPage,
+          },
+        ]
+      : []),
     {
-      type: TypeImportLedger,
-      intro: ImportLedgerIntro,
-      page: ImportLedgerPage,
+      type: TypeImportKeystone,
+      intro: ImportKeystoneIntro,
+      page: ImportKeystonePage,
     },
     // TODO: think about moving this into the configuration at some point
     {
@@ -87,22 +104,40 @@ export const RegisterPage: FunctionComponent = observer(() => {
 
   return (
     <EmptyLayout
-      className={style.container}
+      className={classnames(style.container, {
+        large:
+          !registerConfig.isFinalized &&
+          registerConfig.type === "recover-mnemonic",
+      })}
       style={{ height: "100%", backgroundColor: "white", padding: 0 }}
     >
+      <div style={{ flex: 10 }} />
       <div className={style.logoContainer}>
-        <img
-          className={style.icon}
-          src={require("@assets/temp-icon.svg")}
-          alt="logo"
-        />
-        <div className={style.logoInnerContainer}>
+        <div
+          className={classnames(style.logoInnerContainer, {
+            [style.justifyCenter]: registerConfig.isIntro,
+          })}
+        >
+          <img
+            className={style.icon}
+            src={require("@assets/logo-256.svg")}
+            alt="logo"
+          />
           <img
             className={style.logo}
-            src={require("@assets/logo-temp.png")}
+            src={require("@assets/brand-text.png")}
             alt="logo"
           />
         </div>
+        {registerConfig.isIntro ? (
+          <div className={style.introBrandSubTextContainer}>
+            <img
+              className={style.introBrandSubText}
+              src={require("../../public/assets/brand-sub-text.png")}
+              alt="The Interchain Wallet"
+            />
+          </div>
+        ) : null}
       </div>
       {registerConfig.render()}
       {registerConfig.isFinalized ? <WelcomePage /> : null}
@@ -116,6 +151,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
           />
         </div>
       ) : null}
+      <div style={{ flex: 13 }} />
     </EmptyLayout>
   );
 });

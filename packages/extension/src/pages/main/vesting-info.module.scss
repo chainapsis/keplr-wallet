@@ -1,0 +1,52 @@
+.token-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  margin: 0 0 12px 0;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .icon {
+    width: 36px;
+    height: 36px;
+
+    margin-right: 8px;
+  }
+
+  .inner-container {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .content {
+      display: flex;
+      flex-direction: column;
+
+      .name {
+        font-size: 14px;
+        color: #525f7f;
+
+        max-width: 216px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+
+      .amount {
+        font-size: 16px;
+        line-height: 1.13;
+        letter-spacing: -0.3px;
+        color: #32325d;
+
+        max-width: 216px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
+  }
+}

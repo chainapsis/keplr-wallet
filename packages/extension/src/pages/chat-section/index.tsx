@@ -12,7 +12,6 @@ import { userDetails } from "@chatStore/user-slice";
 import { ChatActionsPopup } from "@components/chat-actions-popup";
 import { ChatErrorPopup } from "@components/chat-error-popup";
 import { SwitchUser } from "@components/switch-user";
-import { EthereumEndpoint } from "../../config.ui";
 import { HeaderLayout } from "@layouts/index";
 import { useStore } from "../../stores";
 import { fetchPublicKey } from "@utils/fetch-public-key";
@@ -32,19 +31,21 @@ export const ChatSection: FunctionComponent = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [confirmAction, setConfirmAction] = useState(false);
   const [action, setAction] = useState("");
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
   // address book values
-  const queries = queriesStore.get(chainStore.current.chainId);
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
 
   const [selectedChainId] = useState(

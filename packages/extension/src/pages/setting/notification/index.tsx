@@ -2,7 +2,7 @@ import { HeaderLayout } from "@layouts/header-layout";
 import React, { FunctionComponent, useMemo } from "react";
 import { useHistory } from "react-router";
 import style from "./style.module.scss";
-import { NotificationOption } from "../../../components/notification-option/notification-option";
+import { NotificationOption } from "@components/notification-option/notification-option";
 import { PageButton } from "../page-button";
 import { notificationsDetails, setNotifications } from "@chatStore/user-slice";
 import { NotificationSetup } from "@notificationTypes";
@@ -68,7 +68,7 @@ export const SettingNotifications: FunctionComponent = () => {
       <div className={style.notificationSettingContainer}>
         <div className={style.notificationOptionMainContainer}>
           <NotificationOption
-            name="Receive notifications"
+            name="Receive Notifications"
             isChecked={notificationInfo.isNotificationOn}
             handleOnChange={handleOnChange}
           />
@@ -81,7 +81,7 @@ export const SettingNotifications: FunctionComponent = () => {
 
         {Object.values(notificationInfo.organisations).length !== 0 &&
         notificationInfo.isNotificationOn ? (
-          <>
+          <React.Fragment>
             <PageButton
               title="Organisations"
               paragraph={`${orgInfo.length} organisation${orgSuffix} followed`}
@@ -104,9 +104,9 @@ export const SettingNotifications: FunctionComponent = () => {
                 });
               }}
             />
-          </>
+          </React.Fragment>
         ) : (
-          <></>
+          <React.Fragment />
         )}
       </div>
     </HeaderLayout>

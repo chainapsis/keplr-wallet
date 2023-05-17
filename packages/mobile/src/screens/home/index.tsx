@@ -22,7 +22,6 @@ import { TokensCard } from "./tokens-card";
 import { usePrevious } from "../../hooks";
 import { BIP44Selectable } from "./bip44-selectable";
 import { useFocusEffect } from "@react-navigation/native";
-import { ChainUpdaterService } from "@keplr-wallet/background";
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const [refreshing, setRefreshing] = React.useState(false);
@@ -45,15 +44,14 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const checkAndUpdateChainInfo = useCallback(() => {
     if (!chainStoreIsInitializing) {
       (async () => {
-        const result = await ChainUpdaterService.checkChainUpdate(currentChain);
-
-        // TODO: Add the modal for explicit chain update.
-        if (result.slient) {
-          chainStore.tryUpdateChain(currentChainId);
+        try {
+          await chainStore.tryUpdateChain(currentChainId);
+        } catch (e) {
+          console.log(e);
         }
       })();
     }
-  }, [chainStore, chainStoreIsInitializing, currentChain, currentChainId]);
+  }, [chainStore, chainStoreIsInitializing, currentChainId]);
 
   useEffect(() => {
     const appStateHandler = (state: AppStateStatus) => {
@@ -121,6 +119,46 @@ export const HomeScreen: FunctionComponent = observer(() => {
     setRefreshing(false);
   }, [accountStore, chainStore, priceStore, queriesStore]);
 
+  return (
+    <PageWithScrollViewInBottomTabView
+      backgroundMode="gradient"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      ref={scrollViewRef}
+    >
+      <BIP44Selectable />
+      <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
+      {/* There is a reason to use TokensCardRenderIfTokenExists. Check the comments on TokensCardRenderIfTokenExists */}
+      <TokensCardRenderIfTokenExists />
+      <MyRewardCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+      <StakingInfoCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+      <GovernanceCard
+        containerStyle={style.flatten(["margin-bottom-card-gap"])}
+      />
+    </PageWithScrollViewInBottomTabView>
+  );
+});
+
+/**
+ * TokensCardRenderIfTokenExists is used to reduce the re-rendering of HomeScreen component.
+ * Because HomeScreen is screen of the app, if it is re-rendered, all children component will be re-rendered.
+ * If all components on screen are re-rendered, performance problems may occur and users may feel delay.
+ * Therefore, the screen should not have state as much as possible.
+ *
+ * In fact, re-rendering took place because home screen had to check the user's balances
+ * when deciding whether to render the tokens card on the screen and this makes some delay.
+ * To solve this problem, this component has been separated.
+ */
+const TokensCardRenderIfTokenExists: FunctionComponent = observer(() => {
+  const { chainStore, accountStore, queriesStore } = useStore();
+
+  const style = useStyle();
+
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(
@@ -132,28 +170,12 @@ export const HomeScreen: FunctionComponent = observer(() => {
   );
 
   return (
-    <PageWithScrollViewInBottomTabView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      ref={scrollViewRef}
-    >
-      <BIP44Selectable />
-      <AccountCard containerStyle={style.flatten(["margin-y-card-gap"])} />
+    <React.Fragment>
       {tokens.length > 0 ? (
         <TokensCard
           containerStyle={style.flatten(["margin-bottom-card-gap"])}
         />
       ) : null}
-      <MyRewardCard
-        containerStyle={style.flatten(["margin-bottom-card-gap"])}
-      />
-      <StakingInfoCard
-        containerStyle={style.flatten(["margin-bottom-card-gap"])}
-      />
-      <GovernanceCard
-        containerStyle={style.flatten(["margin-bottom-card-gap"])}
-      />
-    </PageWithScrollViewInBottomTabView>
+    </React.Fragment>
   );
 });

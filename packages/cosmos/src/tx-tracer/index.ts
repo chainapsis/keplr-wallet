@@ -224,6 +224,14 @@ export class TendermintTxTracer {
         });
 
       this.subscribeTx(hash).then(resolve);
+    }).then((tx) => {
+      // Occasionally, even if the subscribe tx event occurs, the state through query is not changed yet.
+      // Perhaps it is because the block has not been committed yet even though the result of deliverTx in tendermint is complete.
+      // This method is usually used to reflect the state change through query when tx is completed.
+      // The simplest solution is to just add a little delay.
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(tx), 100);
+      });
     });
   }
 

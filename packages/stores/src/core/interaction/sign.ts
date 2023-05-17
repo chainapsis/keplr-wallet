@@ -1,9 +1,8 @@
 import { InteractionStore } from "./interaction";
 import { autorun, computed, flow, makeObservable, observable } from "mobx";
-import { StdSignDoc } from "@cosmjs/launchpad";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
-import { KeplrSignOptions } from "@keplr-wallet/types";
+import { EthSignType, KeplrSignOptions, StdSignDoc } from "@keplr-wallet/types";
 
 export class SignInteractionStore {
   @observable
@@ -35,6 +34,7 @@ export class SignInteractionStore {
           signOptions: KeplrSignOptions;
           isADR36SignDoc: boolean;
           isADR36WithString?: boolean;
+          ethSignType?: EthSignType;
         }
       | {
           msgOrigin: string;
@@ -56,6 +56,7 @@ export class SignInteractionStore {
         signDocWrapper: SignDocWrapper;
         signOptions: KeplrSignOptions;
         isADR36WithString?: boolean;
+        ethSignType?: EthSignType;
       }>
     | undefined {
     const datas = this.waitingDatas;
@@ -84,6 +85,8 @@ export class SignInteractionStore {
           "isADR36WithString" in data.data
             ? data.data.isADR36WithString
             : undefined,
+        ethSignType:
+          "ethSignType" in data.data ? data.data.ethSignType : undefined,
       },
     };
   }

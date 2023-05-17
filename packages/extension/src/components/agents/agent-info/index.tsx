@@ -4,7 +4,7 @@ import style from "./style.module.scss";
 export const AgentInfo = ({ handleClose }: { handleClose: any }) => {
   // address book values
   return (
-    <>
+    <React.Fragment>
       <div className={style.overlay} />
       <div className={style.popupContainer}>
         <div className={style.infoContainer}>
@@ -34,6 +34,6 @@ export const AgentInfo = ({ handleClose }: { handleClose: any }) => {
           Get Started
         </button>
       </div>
-    </>
+    </React.Fragment>
   );
 };

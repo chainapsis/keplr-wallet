@@ -8,7 +8,7 @@ module.exports = {
     "prettier/standard",
     "plugin:import/typescript",
   ],
-  plugins: ["react-hooks", "unicorn", "import"],
+  plugins: ["react-hooks", "unicorn", "import", "unused-imports"],
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: "module",
@@ -20,6 +20,7 @@ module.exports = {
     "prettier/prettier": "error",
     "react/prop-types": "off",
     "react/self-closing-comp": "error",
+    "react/jsx-fragments": ["error", "element"],
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-inferrable-types": "off",
@@ -55,6 +56,8 @@ module.exports = {
       },
     ],
     "import/no-default-export": "error",
+    "import/no-useless-path-segments": "error",
+    "unused-imports/no-unused-imports": "error",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",

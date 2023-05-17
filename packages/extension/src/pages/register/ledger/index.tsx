@@ -9,6 +9,7 @@ import { AdvancedBIP44Option, useBIP44Option } from "../advanced-bip44";
 import { BackButton } from "../index";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { ledgerUSBVendorId } from "@ledgerhq/devices";
 
 export const TypeImportLedger = "import-ledger";
 
@@ -27,6 +28,7 @@ export const ImportLedgerIntro: FunctionComponent<{
       color="primary"
       outline
       block
+      size="lg"
       onClick={(e) => {
         e.preventDefault();
 
@@ -56,7 +58,35 @@ export const ImportLedgerPage: FunctionComponent<{
     },
   });
 
-  const { analyticsStore } = useStore();
+  const { analyticsStore, ledgerInitStore } = useStore();
+
+  const ensureUSBPermission = async () => {
+    const anyNavigator = navigator as any;
+    if (ledgerInitStore.isWebHID) {
+      const device = await anyNavigator.hid.requestDevice({
+        filters: [
+          {
+            vendorId: ledgerUSBVendorId,
+          },
+        ],
+      });
+      if (!device || (Array.isArray(device) && device.length === 0)) {
+        throw new Error("No device selected");
+      }
+    } else {
+      if (
+        !(await anyNavigator.usb.requestDevice({
+          filters: [
+            {
+              vendorId: ledgerUSBVendorId,
+            },
+          ],
+        }))
+      ) {
+        throw new Error("No device selected");
+      }
+    }
+  };
 
   return (
     <div>
@@ -69,10 +99,13 @@ export const ImportLedgerPage: FunctionComponent<{
         className={style.formContainer}
         onSubmit={handleSubmit(async (data: FormData) => {
           try {
+            await ensureUSBPermission();
+
             await registerConfig.createLedger(
               data.name,
               data.password,
-              bip44Option.bip44HDPath
+              bip44Option.bip44HDPath,
+              "Cosmos"
             );
             analyticsStore.setUserProperties({
               registerType: "ledger",
@@ -146,9 +179,39 @@ export const ImportLedgerPage: FunctionComponent<{
           color="primary"
           type="submit"
           block
+          size="lg"
           data-loading={registerConfig.isLoading}
         >
           <FormattedMessage id="register.create.button.next" />
+        </Button>
+        <Button
+          type="button"
+          color="link"
+          onClick={handleSubmit(async (data: FormData) => {
+            if (registerConfig.isLoading) {
+              return;
+            }
+
+            try {
+              await ensureUSBPermission();
+
+              await registerConfig.createLedger(
+                data.name,
+                data.password,
+                bip44Option.bip44HDPath,
+                "Terra"
+              );
+              analyticsStore.setUserProperties({
+                registerType: "ledger",
+                accountType: "ledger",
+              });
+            } catch (e) {
+              alert(e.message ? e.message : e.toString());
+              registerConfig.clear();
+            }
+          })}
+        >
+          <FormattedMessage id="register.create.button.ledger.terra" />
         </Button>
       </Form>
       <BackButton

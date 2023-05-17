@@ -7,7 +7,7 @@ import { useStyle } from "../../../styles";
 import { useIntl } from "react-intl";
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { ProgressBar } from "../../../components/progress-bar";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 
 export const UndelegationsCard: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -22,15 +22,14 @@ export const UndelegationsCard: FunctionComponent<{
   ).unbondingBalances;
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
   const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonding
+    Staking.BondStatus.Unbonding
   );
   const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonded
+    Staking.BondStatus.Unbonded
   );
-  const stakingParams = queries.cosmos.queryStakingParams.response;
 
   const style = useStyle();
 
@@ -39,7 +38,7 @@ export const UndelegationsCard: FunctionComponent<{
   return (
     <Card style={containerStyle}>
       <CardBody>
-        <Text style={style.flatten(["h4", "color-text-black-very-high"])}>
+        <Text style={style.flatten(["h4", "color-text-highest"])}>
           My Unstaking
         </Text>
         {unbondings.map((unbonding, unbondingIndex) => {
@@ -75,7 +74,7 @@ export const UndelegationsCard: FunctionComponent<{
                     style={style.flatten([
                       "margin-left-16",
                       "h6",
-                      "color-text-black-medium",
+                      "color-text-middle",
                     ])}
                   >
                     {validator?.description.moniker ?? "..."}
@@ -121,12 +120,15 @@ export const UndelegationsCard: FunctionComponent<{
                     const remainingTime = Math.floor(
                       (endTime - currentTime) / 1000
                     );
-                    const unbondingTime = stakingParams
-                      ? parseFloat(stakingParams.data.result.unbonding_time) /
-                        10 ** 9
+                    const unbondingTime = queries.cosmos.queryStakingParams
+                      .response
+                      ? queries.cosmos.queryStakingParams.unbondingTimeSec
                       : 3600 * 24 * 21;
 
-                    return 100 - (remainingTime / unbondingTime) * 100;
+                    return Math.max(
+                      0,
+                      Math.min(100 - (remainingTime / unbondingTime) * 100, 100)
+                    );
                   })();
 
                   return (
@@ -144,7 +146,7 @@ export const UndelegationsCard: FunctionComponent<{
                         <Text
                           style={style.flatten([
                             "subtitle2",
-                            "color-text-black-medium",
+                            "color-text-middle",
                           ])}
                         >
                           {entry.balance
@@ -155,10 +157,7 @@ export const UndelegationsCard: FunctionComponent<{
                         </Text>
                         <View style={style.get("flex-1")} />
                         <Text
-                          style={style.flatten([
-                            "body2",
-                            "color-text-black-low",
-                          ])}
+                          style={style.flatten(["body2", "color-text-low"])}
                         >
                           {remainingText}
                         </Text>
@@ -173,7 +172,11 @@ export const UndelegationsCard: FunctionComponent<{
               {!isLastUnbondingIndex && (
                 <View
                   style={StyleSheet.flatten([
-                    style.flatten(["height-1", "background-color-divider"]),
+                    style.flatten([
+                      "height-1",
+                      "background-color-gray-200",
+                      "dark:background-color-platinum-400",
+                    ]),
                   ])}
                 />
               )}

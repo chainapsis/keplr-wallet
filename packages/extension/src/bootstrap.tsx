@@ -7,8 +7,8 @@ const Application = React.lazy(() => import("./index"));
 const LoadingScreen: React.FC = () => {
   return (
     <Banner
-      icon={require("@assets/temp-icon.svg")}
-      logo={require("@assets/logo-temp.png")}
+      icon={require("@assets/logo-256.svg")}
+      logo={require("@assets/brand-text.png")}
     />
   );
 };

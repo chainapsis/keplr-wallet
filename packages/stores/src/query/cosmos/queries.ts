@@ -1,7 +1,6 @@
 import { QueriesSetBase } from "../queries";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
-import { ObservableQueryBlock } from "./block";
 import { ObservableQueryAccount } from "./account";
 import {
   ObservableQueryInflation,
@@ -26,7 +25,10 @@ import {
   ObservableQueryIBCClientState,
 } from "./ibc";
 import { ObservableQuerySifchainLiquidityAPY } from "./supply/sifchain";
-import { ObservableQueryCosmosBalanceRegistry } from "./balance";
+import {
+  ObservableQueryCosmosBalanceRegistry,
+  ObservableQuerySpendableBalances,
+} from "./balance";
 import { ObservableQueryIrisMintingInfation } from "./supply/iris-minting";
 import { DeepReadonly } from "utility-types";
 import {
@@ -34,30 +36,54 @@ import {
   ObservableQueryOsmosisEpochs,
   ObservableQueryOsmosisMintParmas,
 } from "./supply/osmosis";
+import { ObservableQueryDistributionParams } from "./distribution";
+import { ObservableQueryRPCStatus } from "./status";
+import { ObservableQueryJunoAnnualProvisions } from "./supply/juno";
+import {
+  ObservableQueryStrideEpochProvisions,
+  ObservableQueryStrideMintParams,
+} from "./supply/stride";
+import { ObservableQueryAuthZGranter } from "./authz";
 
-export interface HasCosmosQueries {
-  cosmos: CosmosQueries;
+export interface CosmosQueries {
+  cosmos: CosmosQueriesImpl;
 }
 
-export class QueriesWithCosmos
-  extends QueriesSetBase
-  implements HasCosmosQueries {
-  public cosmos: CosmosQueries;
+export const CosmosQueries = {
+  use(): (
+    queriesSetBase: QueriesSetBase,
+    kvStore: KVStore,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) => CosmosQueries {
+    return (
+      queriesSetBase: QueriesSetBase,
+      kvStore: KVStore,
+      chainId: string,
+      chainGetter: ChainGetter
+    ) => {
+      return {
+        cosmos: new CosmosQueriesImpl(
+          queriesSetBase,
+          kvStore,
+          chainId,
+          chainGetter
+        ),
+      };
+    };
+  },
+};
 
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter);
+export class CosmosQueriesImpl {
+  public readonly queryRPCStatus: DeepReadonly<ObservableQueryRPCStatus>;
 
-    this.cosmos = new CosmosQueries(this, kvStore, chainId, chainGetter);
-  }
-}
-
-export class CosmosQueries {
-  public readonly queryBlock: DeepReadonly<ObservableQueryBlock>;
   public readonly queryAccount: DeepReadonly<ObservableQueryAccount>;
+  public readonly querySpendableBalances: DeepReadonly<ObservableQuerySpendableBalances>;
   public readonly queryMint: DeepReadonly<ObservableQueryMintingInfation>;
   public readonly queryPool: DeepReadonly<ObservableQueryStakingPool>;
   public readonly queryStakingParams: DeepReadonly<ObservableQueryStakingParams>;
   public readonly querySupplyTotal: DeepReadonly<ObservableQuerySupplyTotal>;
+  public readonly queryDistributionParams: DeepReadonly<ObservableQueryDistributionParams>;
   public readonly queryInflation: DeepReadonly<ObservableQueryInflation>;
   public readonly queryRewards: DeepReadonly<ObservableQueryRewards>;
   public readonly queryDelegations: DeepReadonly<ObservableQueryDelegations>;
@@ -71,6 +97,7 @@ export class CosmosQueries {
   public readonly queryIBCDenomTrace: DeepReadonly<ObservableQueryDenomTrace>;
 
   public readonly querySifchainAPY: DeepReadonly<ObservableQuerySifchainLiquidityAPY>;
+  public readonly queryAuthZGranter: DeepReadonly<ObservableQueryAuthZGranter>;
 
   constructor(
     base: QueriesSetBase,
@@ -78,6 +105,12 @@ export class CosmosQueries {
     chainId: string,
     chainGetter: ChainGetter
   ) {
+    this.queryRPCStatus = new ObservableQueryRPCStatus(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
     this.querySifchainAPY = new ObservableQuerySifchainLiquidityAPY(
       kvStore,
       chainId
@@ -87,8 +120,12 @@ export class CosmosQueries {
       new ObservableQueryCosmosBalanceRegistry(kvStore)
     );
 
-    this.queryBlock = new ObservableQueryBlock(kvStore, chainId, chainGetter);
     this.queryAccount = new ObservableQueryAccount(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this.querySpendableBalances = new ObservableQuerySpendableBalances(
       kvStore,
       chainId,
       chainGetter
@@ -120,6 +157,18 @@ export class CosmosQueries {
       chainGetter
     );
 
+    this.queryDistributionParams = new ObservableQueryDistributionParams(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
+    const queryStrideMintParams = new ObservableQueryStrideMintParams(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+
     this.queryInflation = new ObservableQueryInflation(
       chainId,
       chainGetter,
@@ -135,7 +184,11 @@ export class CosmosQueries {
         chainGetter,
         osmosisMintParams
       ),
-      osmosisMintParams
+      osmosisMintParams,
+      new ObservableQueryJunoAnnualProvisions(kvStore, chainId, chainGetter),
+      this.queryDistributionParams,
+      new ObservableQueryStrideEpochProvisions(kvStore, chainId, chainGetter),
+      queryStrideMintParams
     );
     this.queryRewards = new ObservableQueryRewards(
       kvStore,
@@ -180,6 +233,11 @@ export class CosmosQueries {
       chainGetter
     );
     this.queryIBCDenomTrace = new ObservableQueryDenomTrace(
+      kvStore,
+      chainId,
+      chainGetter
+    );
+    this.queryAuthZGranter = new ObservableQueryAuthZGranter(
       kvStore,
       chainId,
       chainGetter

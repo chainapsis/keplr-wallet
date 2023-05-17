@@ -229,6 +229,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
         })}
       >
         <Input
+          formGroupClassName={style.formGroup}
           type="text"
           label={intl.formatMessage({
             id: "setting.token.add.contract-address",
@@ -258,7 +259,7 @@ export const AddTokenPage: FunctionComponent = observer(() => {
               : undefined
           }
           text={
-            queryContractInfo.isFetching ? (
+            queryContractInfo.isFetching && contractAddress.length ? (
               <i className="fas fa-spinner fa-spin" />
             ) : undefined
           }

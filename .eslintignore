@@ -13,6 +13,7 @@ node_modules
 
 dist/*
 prod/*
+build/*
 
 yarn.lock
 Podfile.lock
@@ -23,3 +24,12 @@ injected-provider.bundle.js
 .gitsecret/*
 *.styl
 .github/*
+
+**/*.proto
+
+packages/proto-types/!(proto-types-gen)/**/*.ts
+packages/proto-types/!(proto-types-gen)/**/*.js
+packages/proto-types/!(proto-types-gen)/**/*.mjs
+packages/proto-types/!(proto-types-gen)/**/*.cjs
+packages/proto-types/!(proto-types-gen)/**/*.map
+packages/proto-types/outputHash

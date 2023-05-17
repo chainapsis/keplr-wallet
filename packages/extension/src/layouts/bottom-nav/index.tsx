@@ -89,7 +89,7 @@ const NotificationTab = () => {
   }, [accountInfo.bech32Address, config.notiphyWhitelist]);
 
   return (
-    <>
+    <React.Fragment>
       {!isComingSoon &&
         notificationInfo.unreadNotification &&
         notificationInfo.isNotificationOn && <span className={style.bellDot} />}
@@ -101,7 +101,7 @@ const NotificationTab = () => {
         disabled={isComingSoon}
         tooltip={"Coming Soon"}
       />
-    </>
+    </React.Fragment>
   );
 };
 const ChatTab = () => {

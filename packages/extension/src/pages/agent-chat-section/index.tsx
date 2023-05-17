@@ -13,7 +13,6 @@ import { fetchPublicKey } from "@utils/fetch-public-key";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { EthereumEndpoint } from "../../config.ui";
 import { useStore } from "../../stores";
 import { Menu } from "../main/menu";
 import { ChatsViewSection } from "./chats-view-section";
@@ -26,7 +25,7 @@ export const AgentChatSection: FunctionComponent = () => {
 
   const [targetPubKey, setTargetPubKey] = useState("");
   const [loadingChats, setLoadingChats] = useState(false);
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
 
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
@@ -41,15 +40,17 @@ export const AgentChatSection: FunctionComponent = () => {
     };
     setPublicAddress();
   }, [user.accessToken, current.chainId, targetAddress]);
-  const queries = queriesStore.get(chainStore.current.chainId);
 
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
   const [selectedChainId] = useState(
     ibcTransferConfigs.channelConfig?.channel

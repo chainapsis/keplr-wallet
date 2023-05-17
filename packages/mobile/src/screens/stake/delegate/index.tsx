@@ -6,11 +6,10 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { View } from "react-native";
 import { useStore } from "../../../stores";
 import { useDelegateTxConfig } from "@keplr-wallet/hooks";
-import { EthereumEndpoint } from "../../../config";
 import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { useSmartNavigation } from "../../../navigation";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 
 export const DelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -37,11 +36,10 @@ export const DelegateScreen: FunctionComponent = observer(() => {
 
   const sendConfigs = useDelegateTxConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    account.msgOpts["delegate"].gas,
-    account.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    account.bech32Address
   );
 
   useEffect(() => {
@@ -49,21 +47,22 @@ export const DelegateScreen: FunctionComponent = observer(() => {
   }, [sendConfigs.recipientConfig, validatorAddress]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
 
   const validator = bondedValidators.getValidator(validatorAddress);
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       style={style.flatten(["padding-x-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >

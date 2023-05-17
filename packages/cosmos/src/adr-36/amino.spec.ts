@@ -4,8 +4,8 @@ import {
   verifyADR36Amino,
   verifyADR36AminoSignDoc,
 } from "./amino";
-import { serializeSignDoc } from "@cosmjs/launchpad";
-import { PrivKeySecp256k1 } from "@keplr-wallet/crypto";
+import { serializeSignDoc } from "../signing";
+import { Hash, PrivKeySecp256k1 } from "@keplr-wallet/crypto";
 import { Bech32Address } from "../bech32";
 
 describe("Test ADR-36 Amino Sign Doc", () => {
@@ -567,7 +567,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         "osmo",
         signDoc,
         pubKey.toBytes(),
-        signature.slice().filter((b) => (Math.random() > 0.5 ? 0 : b))
+        signature.slice().map((b) => (Math.random() > 0.5 ? 0 : b))
       )
     ).toBe(false);
 
@@ -578,6 +578,84 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         new Uint8Array([1, 2]),
         pubKey.toBytes(),
         signature
+      )
+    ).toBe(false);
+  });
+
+  it("Verify ADR-36 Amino sign doc with ethsecp256k1", () => {
+    const privKey = PrivKeySecp256k1.generateRandomKey();
+    const pubKey = privKey.getPubKey();
+    const signer = new Bech32Address(pubKey.getEthAddress()).toBech32("eth");
+
+    const signDoc = makeADR36AminoSignDoc(signer, new Uint8Array([1, 2, 3]));
+
+    const msg = serializeSignDoc(signDoc);
+
+    const signature = privKey.signDigest32(Hash.keccak256(msg));
+
+    expect(
+      verifyADR36AminoSignDoc(
+        "eth",
+        signDoc,
+        pubKey.toBytes(),
+        signature,
+        "ethsecp256k1"
+      )
+    ).toBe(true);
+
+    expect(
+      verifyADR36Amino(
+        "eth",
+        signer,
+        new Uint8Array([1, 2, 3]),
+        pubKey.toBytes(),
+        signature,
+        "ethsecp256k1"
+      )
+    ).toBe(true);
+
+    expect(() =>
+      verifyADR36Amino(
+        "eth",
+        // Unmatched signer
+        new Bech32Address(pubKey.getAddress()).toBech32("eth"),
+        new Uint8Array([1, 2, 3]),
+        pubKey.toBytes(),
+        signature,
+        "ethsecp256k1"
+      )
+    ).toThrow();
+
+    expect(() =>
+      verifyADR36Amino(
+        "eth",
+        // Invalid signer
+        "invalid1ymk637a7wljvt4w7q9lnrw95mg9sr37yatxd9h",
+        new Uint8Array([1, 2, 3]),
+        pubKey.toBytes(),
+        signature,
+        "ethsecp256k1"
+      )
+    ).toThrow();
+
+    expect(
+      verifyADR36AminoSignDoc(
+        "eth",
+        signDoc,
+        pubKey.toBytes(),
+        signature.slice().map((b) => (Math.random() > 0.5 ? 0 : b)),
+        "ethsecp256k1"
+      )
+    ).toBe(false);
+
+    expect(
+      verifyADR36Amino(
+        "eth",
+        signer,
+        new Uint8Array([1, 2]),
+        pubKey.toBytes(),
+        signature,
+        "ethsecp256k1"
       )
     ).toBe(false);
   });

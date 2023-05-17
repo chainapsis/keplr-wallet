@@ -1,4 +1,2 @@
 build/*
-
-**/codecimpl.d.ts
-**/codecimpl.js
+.DS_Store

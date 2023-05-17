@@ -24,7 +24,7 @@ export const ChatErrorPopup = () => {
   };
 
   return errorMessage?.message?.length && confirmAction ? (
-    <>
+    <React.Fragment>
       <div className={style.overlay} />
       <div className={style.popup}>
         <h4>Error</h4>
@@ -39,8 +39,8 @@ export const ChatErrorPopup = () => {
           </div>
         )}
       </div>
-    </>
+    </React.Fragment>
   ) : (
-    <></>
+    <React.Fragment />
   );
 };

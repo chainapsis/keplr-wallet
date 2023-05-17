@@ -12,6 +12,8 @@ Further information on the Keplr wallet can be found at the base [repo](https://
 
 ### Environment Setup
 
+To use this repository, `protoc` must be set up. For more information, see [Install protobuf](https://grpc.io/docs/protoc-installation/).
+
 Install global npm dependencies:
 
 ```bash

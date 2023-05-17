@@ -67,6 +67,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"])}
     >
@@ -75,7 +76,7 @@ export const NewMnemonicScreen: FunctionComponent = observer(() => {
       <Text
         style={style.flatten([
           "h5",
-          "color-text-black-medium",
+          "color-text-middle",
           "margin-bottom-4",
           "text-center",
         ])}
@@ -224,6 +225,7 @@ const WordsCard: FunctionComponent<{
         "padding-x-28",
         "padding-bottom-12",
         "background-color-white",
+        "dark:background-color-platinum-700",
         "border-radius-8",
         "flex-row",
         "flex-wrap",
@@ -241,10 +243,10 @@ const WordsCard: FunctionComponent<{
       })}
       <View style={style.flatten(["width-full"])}>
         <Button
-          textStyle={style.flatten([
-            "text-button1",
-            isTimedOut ? "color-success" : "color-primary",
-          ])}
+          textStyle={style.flatten(
+            ["text-button1", "color-blue-400", "dark:color-platinum-50"],
+            [isTimedOut && "color-green-400"]
+          )}
           mode="text"
           {...(isTimedOut && {
             rightIcon: (

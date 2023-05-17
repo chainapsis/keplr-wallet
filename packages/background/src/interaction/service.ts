@@ -1,6 +1,3 @@
-import { singleton, inject } from "tsyringe";
-import { TYPES } from "../types";
-
 import { InteractionWaitingData } from "./types";
 import {
   Env,
@@ -10,7 +7,6 @@ import {
 import { PushEventDataMsg, PushInteractionDataMsg } from "./foreground";
 import { RNG } from "@keplr-wallet/crypto";
 
-@singleton()
 export class InteractionService {
   protected waitingMap: Map<string, InteractionWaitingData> = new Map();
   protected resolverMap: Map<
@@ -19,10 +15,13 @@ export class InteractionService {
   > = new Map();
 
   constructor(
-    @inject(TYPES.EventMsgRequester)
     protected readonly eventMsgRequester: MessageRequester,
-    @inject(TYPES.RNG) protected readonly rng: RNG
+    protected readonly rng: RNG
   ) {}
+
+  init() {
+    // noop
+  }
 
   // Dispatch the event to the frontend. Don't wait any interaction.
   // And, don't ensure that the event is delivered successfully, just ignore the any errors.
@@ -106,10 +105,14 @@ export class InteractionService {
     isInternal: boolean,
     data: unknown
   ): Promise<InteractionWaitingData> {
-    const bytes = new Uint8Array(8);
+    const bytes = new Uint8Array(12);
     const id: string = Array.from(await this.rng(bytes))
       .map((value) => {
-        return value.toString(16);
+        let v = value.toString(16);
+        if (v.length === 1) {
+          v = "0" + v;
+        }
+        return v;
       })
       .join("");
 

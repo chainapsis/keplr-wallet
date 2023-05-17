@@ -1,4 +1,3 @@
-import { delay, inject, singleton } from "tsyringe";
 import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import { PermissionService } from "../permission";
@@ -10,20 +9,22 @@ import {
   UmbralKeyFragment,
 } from "@fetchai/umbral-types";
 
-@singleton()
 export class UmbralService {
   private _cachedUmbral: typeof Umbral | null = null;
+
+  protected keyRingService!: KeyRingService;
+  public permissionService!: PermissionService;
 
   constructor(
     // @inject(TYPES.SecretWasmStore)
     // protected readonly kvStore: KVStore,
-    @inject(ChainsService)
-    protected readonly chainsService: ChainsService,
-    @inject(delay(() => KeyRingService))
-    protected readonly keyRingService: KeyRingService,
-    @inject(delay(() => PermissionService))
-    public readonly permissionService: PermissionService
+    protected readonly chainsService: ChainsService
   ) {}
+
+  init(keyRingService: KeyRingService, permissionService: PermissionService) {
+    this.keyRingService = keyRingService;
+    this.permissionService = permissionService;
+  }
 
   async getPublicKey(env: Env, chainId: string): Promise<Uint8Array> {
     const sk = await this.getPrivateKey(env, chainId);

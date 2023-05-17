@@ -1,51 +1,55 @@
-import {
-  ChainGetter,
-  CosmosMsgOpts,
-  CosmwasmMsgOpts,
-  SecretMsgOpts,
-} from "@keplr-wallet/stores";
-import { ObservableQueryBalances } from "@keplr-wallet/stores/build/query/balances";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { useFeeConfig, useMemoConfig, useRecipientConfig } from "./index";
 import { useSendGasConfig } from "./send-gas";
 import { useAmountConfig } from "./amount";
-
-type MsgOpts = CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts;
+import { AccountStore } from "./send-types";
+import { QueriesStore } from "./internal";
 
 export const useSendTxConfig = (
   chainGetter: ChainGetter,
+  queriesStore: QueriesStore,
+  accountStore: AccountStore,
   chainId: string,
-  sendMsgOpts: MsgOpts["send"],
   sender: string,
-  queryBalances: ObservableQueryBalances,
-  ensEndpoint?: string
+  options: {
+    allowHexAddressOnEthermint?: boolean;
+    icns?: {
+      chainId: string;
+      resolverContractAddress: string;
+    };
+    computeTerraClassicTax?: boolean;
+  } = {}
 ) => {
   const amountConfig = useAmountConfig(
     chainGetter,
+    queriesStore,
     chainId,
-    sender,
-    queryBalances
+    sender
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
   const gasConfig = useSendGasConfig(
     chainGetter,
+    accountStore,
     chainId,
-    amountConfig,
-    sendMsgOpts
+    amountConfig
   );
   const feeConfig = useFeeConfig(
     chainGetter,
+    queriesStore,
     chainId,
     sender,
-    queryBalances,
     amountConfig,
-    gasConfig
+    gasConfig,
+    {
+      computeTerraClassicTax: options.computeTerraClassicTax,
+    }
   );
   // Due to the circular references between the amount config and gas/fee configs,
   // set the fee config of the amount config after initing the gas/fee configs.
   amountConfig.setFeeConfig(feeConfig);
 
-  const recipientConfig = useRecipientConfig(chainGetter, chainId, ensEndpoint);
+  const recipientConfig = useRecipientConfig(chainGetter, chainId, options);
 
   return {
     amountConfig,

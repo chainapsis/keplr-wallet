@@ -130,28 +130,7 @@ export const ChatAgent: React.FC<{
       style={{ position: "relative" }}
       onClick={handleClick}
     >
-      {/* Disable unread dot for agents */}
-      {/* {Number(sender?.lastSeenTimestamp) <
-        Number(receiver?.lastSeenTimestamp) &&
-        group.lastMessageSender === targetAddress &&
-        Number(group.lastMessageTimestamp) >
-          Number(sender?.lastSeenTimestamp) && (
-          <span
-            style={{
-              height: "12px",
-              width: "12px",
-              backgroundColor: "#d027e5",
-              borderRadius: "20px",
-              bottom: "22px",
-              left: "8px",
-              position: "absolute",
-              zIndex: 1,
-            }}
-          />
-        )} */}
-
       <img src={require("@assets/svg/fetchbot.svg")} width="40px" />
-
       <div className={style.messageInner}>
         <div className={style.name}>{contactName}</div>
         <div className={style.messageText}>{message}</div>

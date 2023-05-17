@@ -1,314 +1,308 @@
-import { inject, singleton, delay } from "tsyringe";
-import { TYPES } from "../types";
-
 import { ChainInfo } from "@keplr-wallet/types";
-import Axios from "axios";
-import { KVStore } from "@keplr-wallet/common";
+import { KVStore, sortedJsonByKeyStringify } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { ChainsService } from "../chains";
+import { ChainInfoWithCoreTypes, ChainsService } from "../chains";
+import {
+  checkChainFeatures,
+  validateBasicChainInfoType,
+} from "@keplr-wallet/chain-validator";
+import Axios from "axios";
 
-@singleton()
 export class ChainUpdaterService {
+  public chainsService!: ChainsService;
+
   constructor(
-    @inject(TYPES.UpdaterStore) protected readonly kvStore: KVStore,
-    @inject(delay(() => ChainsService))
-    protected readonly chainsService: ChainsService
+    protected readonly kvStore: KVStore,
+    protected readonly communityChainInfoRepo: {
+      readonly organizationName: string;
+      readonly repoName: string;
+      readonly branchName: string;
+    }
   ) {}
 
-  async putUpdatedPropertyToChainInfo(
-    chainInfo: ChainInfo
-  ): Promise<ChainInfo> {
-    const updatedProperty = await this.getUpdatedChainProperty(
-      chainInfo.chainId
+  init(chainsService: ChainsService) {
+    this.chainsService = chainsService;
+  }
+
+  async replaceChainInfo(origin: ChainInfo): Promise<ChainInfo> {
+    const chainIdentifier = ChainIdHelper.parse(origin.chainId).identifier;
+
+    let chainInfo: ChainInfo = origin;
+
+    const updatedChainInfo = await this.kvStore.get<ChainInfo>(
+      "updated-chain-info/" + chainIdentifier
     );
 
-    const chainId = ChainIdHelper.parse(chainInfo.chainId);
-    const updatedChainId = ChainIdHelper.parse(
-      updatedProperty.chainId || chainInfo.chainId
-    );
+    if (updatedChainInfo) {
+      chainInfo = {
+        ...updatedChainInfo,
+        walletUrlForStaking:
+          updatedChainInfo.walletUrlForStaking || origin.walletUrlForStaking,
+        features: (() => {
+          const features = chainInfo.features ?? [];
 
-    // If the saved property is lesser than the current chain id, just ignore.
-    if (updatedChainId.version < chainId.version) {
-      return chainInfo;
+          for (const f of updatedChainInfo.features ?? []) {
+            if (!features.includes(f)) {
+              features.push(f);
+            }
+          }
+
+          return features;
+        })(),
+        beta: origin.beta,
+      };
     }
 
-    const features = chainInfo.features ?? [];
-    for (const updatedFeature of updatedProperty.features ?? []) {
-      if (!features.includes(updatedFeature)) {
-        features.push(updatedFeature);
-      }
+    const local = await this.kvStore.get<Partial<ChainInfo>>(chainIdentifier);
+    if (local) {
+      chainInfo = {
+        ...chainInfo,
+        ...{
+          chainId: local.chainId || chainInfo.chainId,
+          features: (() => {
+            if (!local.features) {
+              return chainInfo.features;
+            }
+
+            const features = chainInfo.features ?? [];
+            for (const add of local.features) {
+              if (!features.includes(add)) {
+                features.push(add);
+              }
+            }
+
+            return features;
+          })(),
+        },
+      };
     }
+
+    // Reduce the confusion from different coin type on ecosystem.
+    // Unite coin type for all chain to 118 with allowing alternatives.
+    // (If coin type is 60, it is probably to be compatible with metamask. So, in this case, do nothing.)
+    if (chainInfo.bip44.coinType !== 118 && chainInfo.bip44.coinType !== 60) {
+      chainInfo = {
+        ...chainInfo,
+        alternativeBIP44s: (() => {
+          let res = chainInfo.alternativeBIP44s ?? [];
+
+          if (res.find((c) => c.coinType === 118)) {
+            return res;
+          }
+
+          res = [...res, { coinType: 118 }];
+
+          return res;
+        })(),
+      };
+    }
+
+    const endpoints = await this.getChainEndpoints(origin.chainId);
 
     return {
       ...chainInfo,
-      ...{
-        chainId: updatedProperty.chainId || chainInfo.chainId,
-        features,
-      },
+      rpc: endpoints.rpc || chainInfo.rpc,
+      rest: endpoints.rest || chainInfo.rest,
     };
   }
 
+  async tryUpdateChainInfo(chainId: string): Promise<boolean> {
+    if (
+      (await this.chainsService.getChainInfo(chainId)).updateFromRepoDisabled
+    ) {
+      return false;
+    }
+
+    try {
+      const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+
+      let repoUpdated = false;
+
+      try {
+        const res = await Axios.get<ChainInfo>(
+          `/cosmos/${chainIdentifier}.json`,
+          {
+            baseURL: `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
+          }
+        );
+
+        let chainInfo: ChainInfo = res.data;
+
+        const fetchedChainIdentifier = ChainIdHelper.parse(chainInfo.chainId)
+          .identifier;
+        if (chainIdentifier !== fetchedChainIdentifier) {
+          console.log(
+            `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
+          );
+          return false;
+        }
+
+        const prevFetchedChainInfo = await this.kvStore.get<ChainInfo>(
+          "updated-chain-info/" + chainIdentifier
+        );
+        if (
+          !prevFetchedChainInfo ||
+          sortedJsonByKeyStringify(prevFetchedChainInfo) !==
+            sortedJsonByKeyStringify(chainInfo)
+        ) {
+          repoUpdated = true;
+
+          chainInfo = await validateBasicChainInfoType(chainInfo);
+
+          await this.kvStore.set<ChainInfo>(
+            "updated-chain-info/" + chainIdentifier,
+            chainInfo
+          );
+
+          this.chainsService.clearCachedChainInfos();
+        }
+      } catch (e) {
+        // Proceed logic event if fetching from github failed
+        console.log(e);
+      }
+
+      const updatedChainInfo = await this.chainsService.getChainInfo(chainId);
+
+      let chainIdUpdated = false;
+      const chainIdFromRPC = await this.checkChainIdFromRPC(
+        updatedChainInfo.rpc
+      );
+      if (ChainIdHelper.parse(chainIdFromRPC).identifier !== chainIdentifier) {
+        throw new Error(
+          `Chain id is different from rpc: (expected: ${chainId}, actual: ${chainIdFromRPC})`
+        );
+      }
+      if (updatedChainInfo.chainId !== chainIdFromRPC) {
+        chainIdUpdated = true;
+
+        const local = await this.kvStore.get<Partial<ChainInfo>>(
+          chainIdentifier
+        );
+
+        await this.kvStore.set<Partial<ChainInfo>>(chainIdentifier, {
+          ...local,
+          chainId: chainIdFromRPC,
+        });
+      }
+
+      const toUpdateFeatures = await checkChainFeatures(updatedChainInfo);
+
+      const featuresUpdated = toUpdateFeatures.length !== 0;
+
+      if (featuresUpdated) {
+        const local = await this.kvStore.get<Partial<ChainInfo>>(
+          chainIdentifier
+        );
+
+        await this.kvStore.set<Partial<ChainInfo>>(chainIdentifier, {
+          ...local,
+          features: [
+            ...new Set([...toUpdateFeatures, ...(local?.features ?? [])]),
+          ],
+        });
+      }
+
+      if (chainIdUpdated || featuresUpdated) {
+        this.chainsService.clearCachedChainInfos();
+      }
+
+      return repoUpdated || chainIdUpdated || featuresUpdated;
+    } catch (e) {
+      console.log(`Failed to try to update chain info for ${chainId}`, e);
+    }
+
+    return false;
+  }
+
+  // This method is called on `ChainsService`.
+  // TODO: Refactor
   async clearUpdatedProperty(chainId: string) {
     await this.kvStore.set(ChainIdHelper.parse(chainId).identifier, null);
+    await this.kvStore.set<ChainInfo>(
+      "updated-chain-info/" + ChainIdHelper.parse(chainId).identifier,
+      null
+    );
 
     this.chainsService.clearCachedChainInfos();
   }
 
-  async tryUpdateChain(chainId: string) {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
+  // XXX: It is not conceptually valid that the function to set the rpc/rest endpoint of the chain exists in this service.
+  //      However, in order to focus on adding feature rather than making a big change, the refactor is postponed later and the configuration of the rpc/rest endpoint is handled here.
 
-    // If chain id is not fomatted as {chainID}-{version},
-    // there is no way to deal with the updated chain id.
-    if (!ChainIdHelper.hasChainVersion(chainInfo.chainId)) {
-      return;
-    }
-
-    const updates = await ChainUpdaterService.checkChainUpdate(chainInfo);
-
-    if (updates.explicit || updates.slient) {
-      const currentVersion = ChainIdHelper.parse(chainInfo.chainId);
-
-      if (updates.chainId) {
-        const fetchedChainId = updates.chainId;
-        const fetchedVersion = ChainIdHelper.parse(fetchedChainId);
-
-        if (
-          currentVersion.identifier === fetchedVersion.identifier &&
-          currentVersion.version < fetchedVersion.version
-        ) {
-          await this.saveChainProperty(currentVersion.identifier, {
-            chainId: fetchedChainId,
-          });
-        }
+  public async setChainEndpoints(
+    chainId: string,
+    rpc: string | undefined,
+    rest: string | undefined
+  ): Promise<ChainInfoWithCoreTypes[]> {
+    await this.kvStore.set(
+      "chain-info-endpoints/" + ChainIdHelper.parse(chainId).identifier,
+      {
+        rpc,
+        rest,
       }
+    );
 
-      if (updates.features && updates.features.length > 0) {
-        const savedChainProperty = await this.getUpdatedChainProperty(
-          chainInfo.chainId
-        );
+    this.chainsService.clearCachedChainInfos();
 
-        const updateFeatures = savedChainProperty.features ?? [];
-
-        for (const feature of updates.features) {
-          if (!updateFeatures.includes(feature)) {
-            updateFeatures.push(feature);
-          }
-        }
-
-        await this.saveChainProperty(currentVersion.identifier, {
-          features: updateFeatures,
-        });
-      }
-    }
+    return await this.chainsService.getChainInfos();
   }
 
-  private async getUpdatedChainProperty(
+  public async getChainEndpoints(
     chainId: string
-  ): Promise<Partial<ChainInfo>> {
-    const version = ChainIdHelper.parse(chainId);
+  ): Promise<{
+    rpc: string | undefined;
+    rest: string | undefined;
+  }> {
+    const saved = await this.kvStore.get<{
+      rpc: string | undefined;
+      rest: string | undefined;
+    }>("chain-info-endpoints/" + ChainIdHelper.parse(chainId).identifier);
 
-    return await this.loadChainProperty(version.identifier);
+    if (!saved) {
+      return {
+        rpc: undefined,
+        rest: undefined,
+      };
+    }
+
+    return saved;
   }
 
-  private async saveChainProperty(
-    identifier: string,
-    chainInfo: Partial<ChainInfo>
-  ) {
-    const saved = await this.loadChainProperty(identifier);
-
-    await this.kvStore.set(identifier, {
-      ...saved,
-      ...chainInfo,
-    });
+  public async resetChainEndpoints(
+    chainId: string
+  ): Promise<ChainInfoWithCoreTypes[]> {
+    await this.kvStore.set(
+      "chain-info-endpoints/" + ChainIdHelper.parse(chainId).identifier,
+      null
+    );
 
     this.chainsService.clearCachedChainInfos();
+
+    return await this.chainsService.getChainInfos();
   }
 
-  private async loadChainProperty(
-    identifier: string
-  ): Promise<Partial<ChainInfo>> {
-    const chainInfo = await this.kvStore.get<Partial<ChainInfo>>(identifier);
-    if (!chainInfo) return {};
-    return chainInfo;
-  }
-
-  /**
-   * Returns wether the chain has been changed.
-   * Currently, only check the chain id has been changed.
-   * @param chainInfo Chain information.
-   */
-  public static async checkChainUpdate(
-    chainInfo: Readonly<ChainInfo>
-  ): Promise<{
-    explicit: boolean;
-    slient: boolean;
-
-    chainId?: string;
-    features?: string[];
-  }> {
-    const chainId = chainInfo.chainId;
-
-    // If chain id is not fomatted as {chainID}-{version},
-    // there is no way to deal with the updated chain id.
-    if (!ChainIdHelper.hasChainVersion(chainId)) {
-      return {
-        explicit: false,
-        slient: false,
-      };
-    }
-
-    const instance = Axios.create({
-      baseURL: chainInfo.rpc,
+  protected async checkChainIdFromRPC(rpc: string): Promise<string> {
+    const statusResponse = await Axios.get<
+      | {
+          result: {
+            node_info: {
+              network: string;
+            };
+          };
+        }
+      | {
+          node_info: {
+            network: string;
+          };
+        }
+    >("/status", {
+      baseURL: rpc,
     });
 
-    // Get the status to get the chain id.
-    const result = await instance.get<{
-      result: {
-        node_info: {
-          network: "osmosis-1";
-        };
-      };
-    }>("/status");
-
-    const resultChainId = result.data.result.node_info.network;
-
-    const version = ChainIdHelper.parse(chainId);
-    const fetchedVersion = ChainIdHelper.parse(resultChainId);
-
-    // TODO: Should throw an error?
-    if (version.identifier !== fetchedVersion.identifier) {
-      return {
-        explicit: false,
-        slient: false,
-      };
+    if ("result" in statusResponse.data) {
+      return statusResponse.data.result.node_info.network;
     }
 
-    const restInstance = Axios.create({
-      baseURL: chainInfo.rest,
-    });
-
-    let staragteUpdate = false;
-    try {
-      if (!chainInfo.features || !chainInfo.features.includes("stargate")) {
-        // If the chain doesn't have the stargate feature,
-        // but it can use the GRPC HTTP Gateway,
-        // assume that it can support the stargate and try to update the features.
-        await restInstance.get("/cosmos/base/tendermint/v1beta1/node_info");
-        staragteUpdate = true;
-      }
-    } catch {}
-
-    let ibcGoUpdates = false;
-    try {
-      if (
-        (!chainInfo.features || !chainInfo.features.includes("ibc-go")) &&
-        (staragteUpdate ||
-          (chainInfo.features && chainInfo.features.includes("stargate")))
-      ) {
-        // If the chain uses the ibc-go module separated from the cosmos-sdk,
-        // we need to check it because the REST API is different.
-        const result = await restInstance.get<{
-          params: {
-            receive_enabled: boolean;
-            send_enabled: boolean;
-          };
-        }>("/ibc/apps/transfer/v1/params");
-
-        if (result.status === 200) {
-          ibcGoUpdates = true;
-        }
-      }
-    } catch {}
-
-    let ibcTransferUpdate = false;
-    try {
-      if (
-        (!chainInfo.features || !chainInfo.features.includes("ibc-transfer")) &&
-        (staragteUpdate ||
-          (chainInfo.features && chainInfo.features.includes("stargate")))
-      ) {
-        const isIBCGo =
-          ibcGoUpdates ||
-          (chainInfo.features && chainInfo.features.includes("ibc-go"));
-
-        // If the chain doesn't have the ibc transfer feature,
-        // try to fetch the params of ibc transfer module.
-        // assume that it can support the ibc transfer if the params return true, and try to update the features.
-        const result = await restInstance.get<{
-          params: {
-            receive_enabled: boolean;
-            send_enabled: boolean;
-          };
-        }>(
-          isIBCGo
-            ? "/ibc/apps/transfer/v1/params"
-            : "/ibc/applications/transfer/v1beta1/params"
-        );
-        if (
-          result.data.params.receive_enabled &&
-          result.data.params.send_enabled
-        ) {
-          ibcTransferUpdate = true;
-        }
-      }
-    } catch {}
-
-    let noLegacyStdTxUpdate = false;
-    try {
-      if (
-        (!chainInfo.features ||
-          !chainInfo.features.includes("no-legacy-stdTx")) &&
-        (staragteUpdate ||
-          (chainInfo.features && chainInfo.features.includes("stargate")))
-      ) {
-        // The chain with above cosmos-sdk@v0.44.0 can't send the legacy stdTx,
-        // Assume that it can't send the legacy stdTx if the POST /txs responses "not implemented".
-        const result = await restInstance.post<
-          | {
-              code: 12;
-              message: "Not Implemented";
-              details: [];
-            }
-          | any
-        >("/txs", undefined, {
-          validateStatus: (status) => {
-            return (status >= 200 && status < 300) || status === 501;
-          },
-        });
-        if (
-          result.status === 501 &&
-          result.data.code === 12 &&
-          result.data.message === "Not Implemented"
-        ) {
-          noLegacyStdTxUpdate = true;
-        }
-      }
-    } catch {}
-
-    const features: string[] = [];
-    if (staragteUpdate) {
-      features.push("stargate");
-    }
-    if (ibcGoUpdates) {
-      features.push("ibc-go");
-    }
-    if (ibcTransferUpdate) {
-      features.push("ibc-transfer");
-    }
-    if (noLegacyStdTxUpdate) {
-      features.push("no-legacy-stdTx");
-    }
-
-    return {
-      explicit: version.version < fetchedVersion.version,
-      slient:
-        staragteUpdate ||
-        ibcGoUpdates ||
-        ibcTransferUpdate ||
-        noLegacyStdTxUpdate,
-
-      chainId: resultChainId,
-      features,
-    };
+    return statusResponse.data.node_info.network;
   }
 }

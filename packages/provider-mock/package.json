@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/provider-mock",
-  "version": "0.9.12",
+  "version": "0.11.59",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -17,14 +17,14 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@cosmjs/launchpad": "^0.24.0-alpha.25",
-    "@cosmjs/proto-signing": "^0.24.0-alpha.25",
-    "@keplr-wallet/cosmos": "^0.9.12",
-    "@keplr-wallet/provider": "^0.9.12",
-    "@keplr-wallet/router": "^0.9.6",
-    "@keplr-wallet/types": "^0.9.12",
+    "@keplr-wallet/cosmos": "0.11.59",
+    "@keplr-wallet/crypto": "0.11.59",
+    "@keplr-wallet/proto-types": "0.11.59",
+    "@keplr-wallet/provider": "0.11.59",
+    "@keplr-wallet/router": "0.11.59",
+    "@keplr-wallet/types": "0.11.59",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
-    "secretjs": "^0.17.0"
+    "long": "^4.0.0"
   }
 }

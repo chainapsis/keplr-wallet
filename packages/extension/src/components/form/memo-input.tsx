@@ -1,5 +1,5 @@
-import React, { FunctionComponent, useState } from "react";
-import { FormGroup, Input, Label } from "reactstrap";
+import React, { FunctionComponent, useMemo, useState } from "react";
+import { FormFeedback, FormGroup, Input, Label } from "reactstrap";
 import { IMemoConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 
@@ -22,6 +22,16 @@ export const MemoInput: FunctionComponent<MemoInputProps> = observer(
       crypto.getRandomValues(bytes);
       return `input-${Buffer.from(bytes).toString("hex")}`;
     });
+
+    const error = memoConfig.error;
+    const errorText: string | undefined = useMemo(() => {
+      if (error) {
+        switch (error.constructor) {
+          default:
+            return error.message;
+        }
+      }
+    }, [error]);
 
     return (
       <FormGroup className={className}>
@@ -48,6 +58,9 @@ export const MemoInput: FunctionComponent<MemoInputProps> = observer(
           autoComplete="off"
           disabled={disabled}
         />
+        {errorText != null ? (
+          <FormFeedback style={{ display: "block" }}>{errorText}</FormFeedback>
+        ) : null}
       </FormGroup>
     );
   }

@@ -11,11 +11,11 @@ import {
   RegisterConfig,
 } from "@keplr-wallet/hooks";
 import {
-  parseQRCodeDataForImportFromMobile,
-  importFromMobile,
+  parseQRCodeDataForImportFromExtension,
+  importFromExtension,
   registerExportedAddressBooks,
   registerExportedKeyRingDatas,
-} from "../../../utils/import-from-mobile";
+} from "../../../utils/import-from-extension";
 import { AsyncKVStore } from "../../../common";
 
 export * from "./intro";
@@ -69,11 +69,11 @@ export const ImportFromExtensionScreen: FunctionComponent = observer(() => {
     }
 
     try {
-      const sharedData = parseQRCodeDataForImportFromMobile(data);
+      const sharedData = parseQRCodeDataForImportFromExtension(data);
 
       setIsLoading(true);
 
-      const imported = await importFromMobile(
+      const imported = await importFromExtension(
         sharedData,
         chainStore.chainInfosInUI.map((chainInfo) => chainInfo.chainId)
       );

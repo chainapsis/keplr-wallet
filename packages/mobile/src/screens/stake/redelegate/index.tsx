@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useStore } from "../../../stores";
 import { useStyle } from "../../../styles";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 import { useRedelegateTxConfig } from "@keplr-wallet/hooks";
 import { PageWithScrollView } from "../../../components/page";
 import { Card, CardBody, CardDivider } from "../../../components/card";
@@ -44,24 +44,24 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
 
   const srcValidator =
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Bonded)
+      .getQueryStatus(Staking.BondStatus.Bonded)
       .getValidator(validatorAddress) ||
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Unbonding)
+      .getQueryStatus(Staking.BondStatus.Unbonding)
       .getValidator(validatorAddress) ||
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Unbonded)
+      .getQueryStatus(Staking.BondStatus.Unbonded)
       .getValidator(validatorAddress);
 
   const srcValidatorThumbnail = srcValidator
     ? queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Bonded)
+        .getQueryStatus(Staking.BondStatus.Bonded)
         .getValidatorThumbnail(validatorAddress) ||
       queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Unbonding)
+        .getQueryStatus(Staking.BondStatus.Unbonding)
         .getValidatorThumbnail(validatorAddress) ||
       queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Unbonded)
+        .getQueryStatus(Staking.BondStatus.Unbonded)
         .getValidatorThumbnail(validatorAddress)
     : undefined;
 
@@ -71,11 +71,10 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
 
   const sendConfigs = useRedelegateTxConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    account.msgOpts["undelegate"].gas,
     account.bech32Address,
-    queries.queryBalances,
-    queries.cosmos.queryDelegations,
     validatorAddress
   );
 
@@ -83,13 +82,13 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
 
   const dstValidator =
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Bonded)
+      .getQueryStatus(Staking.BondStatus.Bonded)
       .getValidator(dstValidatorAddress) ||
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Unbonding)
+      .getQueryStatus(Staking.BondStatus.Unbonding)
       .getValidator(dstValidatorAddress) ||
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Unbonded)
+      .getQueryStatus(Staking.BondStatus.Unbonded)
       .getValidator(dstValidatorAddress);
 
   useEffect(() => {
@@ -97,20 +96,27 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
   }, [dstValidatorAddress, sendConfigs.recipientConfig]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       style={style.flatten(["padding-x-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >
       <View style={style.flatten(["height-page-pad"])} />
-      <Card style={style.flatten(["margin-bottom-12", "border-radius-8"])}>
+      <Card
+        style={style.flatten([
+          "margin-bottom-12",
+          "border-radius-8",
+          "dark:background-color-platinum-500",
+        ])}
+      >
         <CardBody>
           <View style={style.flatten(["flex-row", "items-center"])}>
             <ValidatorThumbnail
@@ -118,7 +124,7 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
               size={36}
               url={srcValidatorThumbnail}
             />
-            <Text style={style.flatten(["h6", "color-text-black-high"])}>
+            <Text style={style.flatten(["h6", "color-text-high"])}>
               {srcValidator ? srcValidator.description.moniker : "..."}
             </Text>
           </View>
@@ -130,13 +136,11 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
             ])}
           />
           <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text
-              style={style.flatten(["subtitle2", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
               Staked
             </Text>
             <View style={style.get("flex-1")} />
-            <Text style={style.flatten(["body2", "color-text-black-medium"])}>
+            <Text style={style.flatten(["body2", "color-text-middle"])}>
               {staked.trim(true).shrink(true).maxDecimals(6).toString()}
             </Text>
           </View>

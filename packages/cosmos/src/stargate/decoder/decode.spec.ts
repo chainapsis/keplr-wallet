@@ -1,7 +1,7 @@
 import assert from "assert";
 import { ProtoSignDocDecoder } from "./index";
 
-import { cosmos } from "../proto";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 
 describe("Test decode sign doc", () => {
   it("should decode properly", function () {
@@ -79,7 +79,10 @@ d701a0c0a057374616b65120331303012580a500a460a1f2f636f736d6f732e63727970746f2e736
 
     assert.strictEqual(signDoc.txMsgs.length, 1);
 
-    const msg: cosmos.bank.v1beta1.MsgSend = signDoc.txMsgs[0];
+    if (!("unpacked" in signDoc.txMsgs[0])) {
+      throw new Error("Msgs not parsed properly");
+    }
+    const msg = signDoc.txMsgs[0].unpacked as MsgSend;
     assert.strictEqual(
       msg.fromAddress,
       "cosmos1xesvkr6d0j96j5zdcw5fmqxavjvuvqx2ygy7mp"

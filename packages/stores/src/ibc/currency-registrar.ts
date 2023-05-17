@@ -1,7 +1,12 @@
 import { flow, makeObservable, observable, runInAction } from "mobx";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { ChainInfoInner, ChainStore } from "../chain";
-import { HasCosmosQueries, HasCosmwasmQueries, QueriesSetBase } from "../query";
+import {
+  CosmosQueries,
+  CosmwasmQueries,
+  IQueriesStore,
+  QueriesSetBase,
+} from "../query";
 import { DenomHelper, KVStore, toGenerator } from "@keplr-wallet/common";
 
 type CacheIBCDenomData = {
@@ -50,13 +55,9 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
         bech32Address: string;
       };
     },
-    protected readonly queriesStore: {
-      get(chainId: string): QueriesSetBase & HasCosmosQueries;
-    },
+    protected readonly queriesStore: IQueriesStore<CosmosQueries>,
     protected readonly cosmwasmQueriesStore:
-      | {
-          get(chainId: string): QueriesSetBase & HasCosmwasmQueries;
-        }
+      | IQueriesStore<CosmwasmQueries>
       | undefined,
     protected readonly coinDenomGenerator: (
       denomTrace: {
@@ -243,6 +244,8 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
           );
           if (contractInfo.response) {
             cw20Currency = {
+              type: "cw20",
+              contractAddress,
               coinDecimals: contractInfo.response.data.decimals,
               coinDenom: contractInfo.response.data.symbol,
               coinMinimalDenom: `cw20:${contractAddress}:${contractInfo.response.data.name}`,
@@ -272,9 +275,9 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
           ];
         }
       } else {
-        const currency = originChainInfo.forceFindCurrency(denomTrace.denom);
+        const currency = originChainInfo.findCurrency(denomTrace.denom);
 
-        if (!("paths" in currency)) {
+        if (currency && !("paths" in currency)) {
           return [
             {
               coinDecimals: currency.coinDecimals,
@@ -370,11 +373,11 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
       };
     },
     protected readonly queriesStore: {
-      get(chainId: string): QueriesSetBase & HasCosmosQueries;
+      get(chainId: string): QueriesSetBase & CosmosQueries;
     },
     protected readonly cosmwasmQueriesStore:
       | {
-          get(chainId: string): QueriesSetBase & HasCosmwasmQueries;
+          get(chainId: string): QueriesSetBase & CosmwasmQueries;
         }
       | undefined,
     protected readonly coinDenomGenerator: (

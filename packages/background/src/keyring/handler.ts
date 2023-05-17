@@ -22,12 +22,16 @@ import {
   CheckPasswordMsg,
   ExportKeyRingDatasMsg,
   RequestVerifyADR36AminoSignDoc,
+  RequestSignEIP712CosmosTxMsg_v0,
+  InitNonDefaultLedgerAppMsg,
+  CreateKeystoneKeyMsg,
+  AddKeystoneKeyMsg,
+  RequestICNSAdr36SignaturesMsg,
+  ChangeKeyRingNameMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-
-import { cosmos } from "@keplr-wallet/cosmos";
-import Long from "long";
+import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
 export const getHandler: (service: KeyRingService) => Handler = (
   service: KeyRingService
@@ -59,11 +63,18 @@ export const getHandler: (service: KeyRingService) => Handler = (
         );
       case AddPrivateKeyMsg:
         return handleAddPrivateKeyMsg(service)(env, msg as AddPrivateKeyMsg);
+      case CreateKeystoneKeyMsg:
+        return handleCreateKeystoneKeyMsg(service)(
+          env,
+          msg as CreateKeystoneKeyMsg
+        );
       case CreateLedgerKeyMsg:
         return handleCreateLedgerKeyMsg(service)(
           env,
           msg as CreateLedgerKeyMsg
         );
+      case AddKeystoneKeyMsg:
+        return handleAddKeystoneKeyMsg(service)(env, msg as AddKeystoneKeyMsg);
       case AddLedgerKeyMsg:
         return handleAddLedgerKeyMsg(service)(env, msg as AddLedgerKeyMsg);
       case LockKeyRingMsg:
@@ -77,6 +88,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
           env,
           msg as RequestSignAminoMsg
         );
+      case RequestSignEIP712CosmosTxMsg_v0:
+        return handleRequestSignEIP712CosmosTxMsg_v0(service)(
+          env,
+          msg as RequestSignEIP712CosmosTxMsg_v0
+        );
       case RequestVerifyADR36AminoSignDoc:
         return handleRequestVerifyADR36AminoSignDoc(service)(
           env,
@@ -86,6 +102,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleRequestSignDirectMsg(service)(
           env,
           msg as RequestSignDirectMsg
+        );
+      case RequestICNSAdr36SignaturesMsg:
+        return handleRequestICNSAdr36SignaturesMsg(service)(
+          env,
+          msg as RequestICNSAdr36SignaturesMsg
         );
       case GetMultiKeyStoreInfoMsg:
         return handleGetMultiKeyStoreInfoMsg(service)(
@@ -110,6 +131,16 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleExportKeyRingDatasMsg(service)(
           env,
           msg as ExportKeyRingDatasMsg
+        );
+      case InitNonDefaultLedgerAppMsg:
+        return handleInitNonDefaultLedgerAppMsg(service)(
+          env,
+          msg as InitNonDefaultLedgerAppMsg
+        );
+      case ChangeKeyRingNameMsg:
+        return handleChangeKeyNameMsg(service)(
+          env,
+          msg as ChangeKeyRingNameMsg
         );
       default:
         throw new Error("Unknown msg type");
@@ -197,6 +228,20 @@ const handleAddPrivateKeyMsg: (
   };
 };
 
+const handleCreateKeystoneKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<CreateKeystoneKeyMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.createKeystoneKey(
+      env,
+      msg.kdf,
+      msg.password,
+      msg.meta,
+      msg.bip44HDPath
+    );
+  };
+};
+
 const handleCreateLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<CreateLedgerKeyMsg> = (service) => {
@@ -205,6 +250,20 @@ const handleCreateLedgerKeyMsg: (
       env,
       msg.kdf,
       msg.password,
+      msg.meta,
+      msg.bip44HDPath,
+      msg.cosmosLikeApp
+    );
+  };
+};
+
+const handleAddKeystoneKeyMsg: (
+  service: KeyRingService
+) => InternalHandler<AddKeystoneKeyMsg> = (service) => {
+  return async (env, msg) => {
+    return await service.addKeystoneKey(
+      env,
+      msg.kdf,
       msg.meta,
       msg.bip44HDPath
     );
@@ -215,7 +274,13 @@ const handleAddLedgerKeyMsg: (
   service: KeyRingService
 ) => InternalHandler<AddLedgerKeyMsg> = (service) => {
   return async (env, msg) => {
-    return await service.addLedgerKey(env, msg.kdf, msg.meta, msg.bip44HDPath);
+    return await service.addLedgerKey(
+      env,
+      msg.kdf,
+      msg.meta,
+      msg.bip44HDPath,
+      msg.cosmosLikeApp
+    );
   };
 };
 
@@ -261,6 +326,7 @@ const handleGetKeyMsg: (
           .bech32PrefixAccAddr
       ),
       isNanoLedger: key.isNanoLedger,
+      isKeystone: key.isKeystone,
     };
   };
 };
@@ -280,6 +346,28 @@ const handleRequestSignAminoMsg: (
       msg.origin,
       msg.chainId,
       msg.signer,
+      msg.signDoc,
+      msg.signOptions
+    );
+  };
+};
+
+const handleRequestSignEIP712CosmosTxMsg_v0: (
+  service: KeyRingService
+) => InternalHandler<RequestSignEIP712CosmosTxMsg_v0> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      msg.chainId,
+      msg.origin
+    );
+
+    return await service.requestSignEIP712CosmosTx_v0(
+      env,
+      msg.origin,
+      msg.chainId,
+      msg.signer,
+      msg.eip712,
       msg.signDoc,
       msg.signOptions
     );
@@ -315,13 +403,11 @@ const handleRequestSignDirectMsg: (
       msg.origin
     );
 
-    const signDoc = cosmos.tx.v1beta1.SignDoc.create({
+    const signDoc = SignDoc.fromPartial({
       bodyBytes: msg.signDoc.bodyBytes,
       authInfoBytes: msg.signDoc.authInfoBytes,
       chainId: msg.signDoc.chainId,
-      accountNumber: msg.signDoc.accountNumber
-        ? Long.fromString(msg.signDoc.accountNumber)
-        : undefined,
+      accountNumber: msg.signDoc.accountNumber,
     });
 
     const response = await service.requestSignDirect(
@@ -342,6 +428,27 @@ const handleRequestSignDirectMsg: (
       },
       signature: response.signature,
     };
+  };
+};
+
+const handleRequestICNSAdr36SignaturesMsg: (
+  service: KeyRingService
+) => InternalHandler<RequestICNSAdr36SignaturesMsg> = (service) => {
+  return async (env, msg) => {
+    await service.permissionService.checkOrGrantBasicAccessPermission(
+      env,
+      msg.chainId,
+      msg.origin
+    );
+
+    return service.requestICNSAdr36Signatures(
+      env,
+      msg.chainId,
+      msg.contractAddress,
+      msg.owner,
+      msg.username,
+      msg.addressChainIds
+    );
   };
 };
 
@@ -393,5 +500,38 @@ const handleExportKeyRingDatasMsg: (
 ) => InternalHandler<ExportKeyRingDatasMsg> = (service) => {
   return async (_, msg) => {
     return await service.exportKeyRingDatas(msg.password);
+  };
+};
+
+const handleInitNonDefaultLedgerAppMsg: (
+  service: KeyRingService
+) => InternalHandler<InitNonDefaultLedgerAppMsg> = (service) => {
+  return async (env, msg) => {
+    await service.initializeNonDefaultLedgerApp(env, msg.ledgerApp);
+  };
+};
+
+const handleChangeKeyNameMsg: (
+  service: KeyRingService
+) => InternalHandler<ChangeKeyRingNameMsg> = (service) => {
+  return async (env, msg) => {
+    // Ensure that keyring is unlocked and selected.
+    await service.enable(env);
+
+    let index = -1;
+    service.getMultiKeyStoreInfo().forEach(({ selected }, idx) => {
+      if (selected) {
+        index = idx;
+      }
+    });
+
+    if (index === -1) {
+      throw new Error("No account selected");
+    }
+
+    return await service.changeKeyRingName(env, index, {
+      defaultName: msg.defaultName,
+      editable: msg.editable,
+    });
   };
 };

@@ -13,10 +13,10 @@
     "default_title": "Fetch Wallet"
   },
   "background": {
-    "scripts": ["browser-polyfill.js", "background.bundle.js"],
+    "page": "background.html",
     "persistent": true
   },
-  "permissions": ["storage", "notifications", "identity"],
+  "permissions": ["storage", "notifications", "identity", "idle"],
   "content_security_policy": "script-src 'self' 'wasm-eval'; object-src 'self'",
   "content_scripts": [
     {
@@ -28,6 +28,7 @@
   ],
   "web_accessible_resources": [
     "injectedScript.bundle.js",
-    "assets/temp-icon.svg"
+    "assets/logo-256.svg",
+    "blocklist.html"
   ]
 }

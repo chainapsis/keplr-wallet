@@ -9,7 +9,7 @@ import { AmountInput, FeeButtons, MemoInput } from "../../../components/input";
 import { Text, View } from "react-native";
 import { Button } from "../../../components/button";
 import { Card, CardBody, CardDivider } from "../../../components/card";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 import { ValidatorThumbnail } from "../../../components/thumbnail";
 import { Buffer } from "buffer/";
 import { useSmartNavigation } from "../../../navigation";
@@ -39,24 +39,24 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   const validator =
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Bonded)
+      .getQueryStatus(Staking.BondStatus.Bonded)
       .getValidator(validatorAddress) ||
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Unbonding)
+      .getQueryStatus(Staking.BondStatus.Unbonding)
       .getValidator(validatorAddress) ||
     queries.cosmos.queryValidators
-      .getQueryStatus(BondStatus.Unbonded)
+      .getQueryStatus(Staking.BondStatus.Unbonded)
       .getValidator(validatorAddress);
 
   const validatorThumbnail = validator
     ? queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Bonded)
+        .getQueryStatus(Staking.BondStatus.Bonded)
         .getValidatorThumbnail(validatorAddress) ||
       queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Unbonding)
+        .getQueryStatus(Staking.BondStatus.Unbonding)
         .getValidatorThumbnail(validatorAddress) ||
       queries.cosmos.queryValidators
-        .getQueryStatus(BondStatus.Unbonded)
+        .getQueryStatus(Staking.BondStatus.Unbonded)
         .getValidatorThumbnail(validatorAddress)
     : undefined;
 
@@ -66,11 +66,10 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   const sendConfigs = useUndelegateTxConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    account.msgOpts["undelegate"].gas,
     account.bech32Address,
-    queries.queryBalances,
-    queries.cosmos.queryDelegations,
     validatorAddress
   );
 
@@ -79,20 +78,27 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
   }, [sendConfigs.recipientConfig, validatorAddress]);
 
   const sendConfigError =
-    sendConfigs.recipientConfig.getError() ??
-    sendConfigs.amountConfig.getError() ??
-    sendConfigs.memoConfig.getError() ??
-    sendConfigs.gasConfig.getError() ??
-    sendConfigs.feeConfig.getError();
+    sendConfigs.recipientConfig.error ??
+    sendConfigs.amountConfig.error ??
+    sendConfigs.memoConfig.error ??
+    sendConfigs.gasConfig.error ??
+    sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
   return (
     <PageWithScrollView
+      backgroundMode="tertiary"
       style={style.flatten(["padding-x-page"])}
       contentContainerStyle={style.get("flex-grow-1")}
     >
       <View style={style.flatten(["height-page-pad"])} />
-      <Card style={style.flatten(["margin-bottom-12", "border-radius-8"])}>
+      <Card
+        style={style.flatten([
+          "margin-bottom-12",
+          "border-radius-8",
+          "dark:background-color-platinum-500",
+        ])}
+      >
         <CardBody>
           <View style={style.flatten(["flex-row", "items-center"])}>
             <ValidatorThumbnail
@@ -100,7 +106,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
               size={36}
               url={validatorThumbnail}
             />
-            <Text style={style.flatten(["h6", "color-text-black-high"])}>
+            <Text style={style.flatten(["h6", "color-text-high"])}>
               {validator ? validator.description.moniker : "..."}
             </Text>
           </View>
@@ -112,13 +118,11 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
             ])}
           />
           <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text
-              style={style.flatten(["subtitle2", "color-text-black-medium"])}
-            >
+            <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
               Staked
             </Text>
             <View style={style.get("flex-1")} />
-            <Text style={style.flatten(["body2", "color-text-black-medium"])}>
+            <Text style={style.flatten(["body2", "color-text-middle"])}>
               {staked.trim(true).shrink(true).maxDecimals(6).toString()}
             </Text>
           </View>

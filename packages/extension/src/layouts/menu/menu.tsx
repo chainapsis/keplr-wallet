@@ -79,7 +79,7 @@ export const Menu: FunctionComponent<Props> = ({ isOpen, children }) => {
   }, [menu]);
 
   return (
-    <>
+    <React.Fragment>
       <AnimatePresence>
         {isOpen ? (
           <motion.div
@@ -101,6 +101,6 @@ export const Menu: FunctionComponent<Props> = ({ isOpen, children }) => {
       >
         {children}
       </motion.nav>
-    </>
+    </React.Fragment>
   );
 };

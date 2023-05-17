@@ -16,7 +16,7 @@ export const CommandsDropdown = ({
   const { hasFET } = useSelector(userDetails);
 
   return (
-    <>
+    <React.Fragment>
       {showDropdown && (
         <div
           className={`${style.dropdown} ${
@@ -42,7 +42,7 @@ export const CommandsDropdown = ({
           ))}
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };
 

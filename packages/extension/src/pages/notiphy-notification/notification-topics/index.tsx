@@ -121,10 +121,10 @@ export const NotificationTopics: FunctionComponent = () => {
                 <p>
                   No results found.
                   {inputVal !== "" && (
-                    <>
+                    <React.Fragment>
                       <br />
                       Please refine your search.
-                    </>
+                    </React.Fragment>
                   )}
                 </p>
               </div>
@@ -134,9 +134,7 @@ export const NotificationTopics: FunctionComponent = () => {
                 key={topic.name}
                 topic={topic}
                 checked={
-                  selectedTopics.find((item) => item.name === topic.name)
-                    ? true
-                    : false
+                  !!selectedTopics.find((item) => item.name === topic.name)
                 }
                 handleCheck={(isChecked) => handleCheck(isChecked, index)}
               />

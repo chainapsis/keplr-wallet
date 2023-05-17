@@ -11,6 +11,7 @@ export type CoinPrettyOptions = {
   upperCase: boolean;
   lowerCase: boolean;
   hideDenom: boolean;
+  hideIBCMetadata: boolean;
 };
 
 export class CoinPretty {
@@ -21,6 +22,7 @@ export class CoinPretty {
     upperCase: false,
     lowerCase: false,
     hideDenom: false,
+    hideIBCMetadata: false,
   };
 
   constructor(
@@ -87,6 +89,12 @@ export class CoinPretty {
   hideDenom(bool: boolean): CoinPretty {
     const pretty = this.clone();
     pretty._options.hideDenom = bool;
+    return pretty;
+  }
+
+  hideIBCMetadata(bool: boolean): CoinPretty {
+    const pretty = this.clone();
+    pretty._options.hideIBCMetadata = bool;
     return pretty;
   }
 
@@ -261,6 +269,13 @@ export class CoinPretty {
 
   toString(): string {
     let denom = this.denom;
+    if (
+      this._options.hideIBCMetadata &&
+      "originCurrency" in this.currency &&
+      this.currency.originCurrency
+    ) {
+      denom = this.currency.originCurrency.coinDenom;
+    }
     if (this._options.upperCase) {
       denom = denom.toUpperCase();
     }

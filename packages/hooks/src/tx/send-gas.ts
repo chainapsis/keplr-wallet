@@ -1,39 +1,25 @@
 import { GasConfig } from "./gas";
 import { DenomHelper } from "@keplr-wallet/common";
-import {
-  ChainGetter,
-  CosmosMsgOpts,
-  SecretMsgOpts,
-  CosmwasmMsgOpts,
-} from "@keplr-wallet/stores";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { IAmountConfig } from "./types";
 import { useState } from "react";
-import { action, makeObservable, observable } from "mobx";
-
-type MsgOpts = CosmosMsgOpts & SecretMsgOpts & CosmwasmMsgOpts;
+import { makeObservable, override } from "mobx";
+import { AccountStore } from "./send-types";
+import { UnknownCurrencyError } from "./errors";
 
 export class SendGasConfig extends GasConfig {
-  @observable.ref
-  protected sendMsgOpts: MsgOpts["send"];
-
   constructor(
     chainGetter: ChainGetter,
+    protected readonly accountStore: AccountStore,
     initialChainId: string,
-    protected readonly amountConfig: IAmountConfig,
-    sendMsgOpts: MsgOpts["send"]
+    protected readonly amountConfig: IAmountConfig
   ) {
     super(chainGetter, initialChainId);
-
-    this.sendMsgOpts = sendMsgOpts;
 
     makeObservable(this);
   }
 
-  @action
-  setSendMsgOpts(opts: MsgOpts["send"]) {
-    this.sendMsgOpts = opts;
-  }
-
+  @override
   get gas(): number {
     // If gas not set manually, assume that the tx is for MsgSend.
     // And, set the default gas according to the currency type.
@@ -42,31 +28,65 @@ export class SendGasConfig extends GasConfig {
         this.amountConfig.sendCurrency.coinMinimalDenom
       );
 
+      const account = this.accountStore.getAccount(this.chainId);
+
       switch (denomHelper.type) {
         case "secret20":
-          return this.sendMsgOpts.secret20.gas;
+          return account.secret?.msgOpts.send.secret20.gas ?? 0;
         case "cw20":
-          return this.sendMsgOpts.cw20.gas;
+          return account.cosmwasm?.msgOpts.send.cw20.gas ?? 0;
         default:
-          return this.sendMsgOpts.native.gas;
+          return account.cosmos?.msgOpts.send.native.gas ?? 0;
       }
     }
 
     return super.gas;
   }
+
+  @override
+  get error(): Error | undefined {
+    if (this.amountConfig.sendCurrency) {
+      const denomHelper = new DenomHelper(
+        this.amountConfig.sendCurrency.coinMinimalDenom
+      );
+
+      const account = this.accountStore.getAccount(this.chainId);
+
+      switch (denomHelper.type) {
+        case "secret20": {
+          if (!account.secret?.msgOpts.send.secret20.gas) {
+            return new UnknownCurrencyError("Unknown currency");
+          }
+          break;
+        }
+        case "cw20": {
+          if (!account.cosmwasm?.msgOpts.send.cw20.gas) {
+            return new UnknownCurrencyError("Unknown currency");
+          }
+          break;
+        }
+        default: {
+          if (!account.cosmos?.msgOpts.send.native.gas) {
+            return new UnknownCurrencyError("Unknown currency");
+          }
+        }
+      }
+    }
+
+    return super.error;
+  }
 }
 
 export const useSendGasConfig = (
   chainGetter: ChainGetter,
+  accountStore: AccountStore,
   chainId: string,
-  amountConfig: IAmountConfig,
-  sendMsgOpts: MsgOpts["send"]
+  amountConfig: IAmountConfig
 ) => {
   const [gasConfig] = useState(
-    () => new SendGasConfig(chainGetter, chainId, amountConfig, sendMsgOpts)
+    () => new SendGasConfig(chainGetter, accountStore, chainId, amountConfig)
   );
   gasConfig.setChain(chainId);
-  gasConfig.setSendMsgOpts(sendMsgOpts);
 
   return gasConfig;
 };

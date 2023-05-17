@@ -8,11 +8,12 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WriteFilePlugin = require("write-file-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
+const fs = require("fs");
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
 const commonResolve = () => ({
-  extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss", ".svg"],
+  extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss", ".svg", ".wasm"],
   alias: {
     "@components": path.resolve(__dirname, "src/components"),
     "@layouts": path.resolve(__dirname, "src/layouts"),
@@ -24,6 +25,22 @@ const commonResolve = () => ({
     "@utils": path.resolve(__dirname, "src/utils"),
   },
 });
+const altResolve = () => {
+  const p = path.resolve(__dirname, "./src/keplr-torus-signin/index.ts");
+
+  if (fs.existsSync(p)) {
+    return {
+      alias: {
+        "alt-sign-in": path.resolve(
+          __dirname,
+          "./src/keplr-torus-signin/index.ts"
+        ),
+      },
+    };
+  }
+
+  return {};
+};
 const sassRule = {
   test: /(\.s?css)|(\.sass)$/,
   oneOf: [
@@ -89,14 +106,54 @@ const extensionConfig = () => {
     entry: {
       popup: ["./src/bootstrap.tsx"],
       background: ["./src/background/bootstrap.ts"],
+      blocklist: ["./src/pages/blocklist/bootstrap.tsx"],
+      ledgerGrant: ["./src/pages/ledger-grant/bootstrap.tsx"],
       contentScripts: ["./src/content-scripts/content-scripts.ts"],
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
     },
     output: {
-      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "prod"),
+      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
       filename: "[name].bundle.js",
     },
-    resolve: commonResolve(),
+    optimization: {
+      splitChunks: {
+        chunks(chunk) {
+          if (chunk.name === "reactChartJS") {
+            return false;
+          }
+
+          return (
+            chunk.name !== "contentScripts" && chunk.name !== "injectedScript"
+          );
+        },
+        cacheGroups: {
+          background: {
+            maxSize: 3_000_000,
+            maxInitialRequests: 100,
+            maxAsyncRequests: 100,
+          },
+          popup: {
+            maxSize: 3_000_000,
+            maxInitialRequests: 100,
+            maxAsyncRequests: 100,
+          },
+          blocklist: {
+            maxSize: 3_000_000,
+            maxInitialRequests: 100,
+            maxAsyncRequests: 100,
+          },
+          ledgerGrant: {
+            maxSize: 3_000_000,
+            maxInitialRequests: 100,
+            maxAsyncRequests: 100,
+          },
+        },
+      },
+    },
+    resolve: {
+      ...commonResolve(),
+      ...altResolve(),
+    },
     module: {
       rules: [sassRule, tsRule, fileRule],
     },
@@ -119,9 +176,48 @@ const extensionConfig = () => {
         { copyUnmodified: true }
       ),
       new HtmlWebpackPlugin({
+        template: "./src/background.html",
+        filename: "background.html",
+        excludeChunks: [
+          "popup",
+          "blocklist",
+          "ledgerGrant",
+          "contentScripts",
+          "injectedScript",
+        ],
+      }),
+      new HtmlWebpackPlugin({
         template: "./src/index.html",
         filename: "popup.html",
-        excludeChunks: ["background", "contentScripts", "injectedScript"],
+        excludeChunks: [
+          "background",
+          "blocklist",
+          "ledgerGrant",
+          "contentScripts",
+          "injectedScript",
+        ],
+      }),
+      new HtmlWebpackPlugin({
+        template: "./src/index.html",
+        filename: "blocklist.html",
+        excludeChunks: [
+          "background",
+          "popup",
+          "ledgerGrant",
+          "contentScripts",
+          "injectedScript",
+        ],
+      }),
+      new HtmlWebpackPlugin({
+        template: "./src/index.html",
+        filename: "ledger-grant.html",
+        excludeChunks: [
+          "background",
+          "popup",
+          "blocklist",
+          "contentScripts",
+          "injectedScript",
+        ],
       }),
       new WriteFilePlugin(),
       new webpack.EnvironmentPlugin([
@@ -129,6 +225,13 @@ const extensionConfig = () => {
         "USER_ENV",
         "PROD_AMPLITUDE_API_KEY",
         "DEV_AMPLITUDE_API_KEY",
+        "KEPLR_EXT_ETHEREUM_ENDPOINT",
+        "KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY",
+        "KEPLR_EXT_TRANSAK_API_KEY",
+        "KEPLR_EXT_MOONPAY_API_KEY",
+        "KEPLR_EXT_KADO_API_KEY",
+        "KEPLR_EXT_COINGECKO_ENDPOINT",
+        "KEPLR_EXT_COINGECKO_GETPRICE",
       ]),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",

@@ -35,11 +35,13 @@
 
     h1 {
       font-size: 14px;
+      font-weight: bold;
       color: #525f7f;
       margin: 0;
 
       max-width: 240px;
       text-overflow: ellipsis;
+      white-space: nowrap;
       overflow: hidden;
     }
 
@@ -48,8 +50,9 @@
       color: #8898aa;
       margin: 0;
 
-      max-width: 280px;
+      max-width: 320px;
       text-overflow: ellipsis;
+      white-space: nowrap;
       max-lines: 2;
     }
   }

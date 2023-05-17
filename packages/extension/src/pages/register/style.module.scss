@@ -2,19 +2,27 @@
 
 $container-width: 420px;
 
-:global(body)[data-centered="true"] {
-  height: 85vh;
-  background-color: white;
+// Used only on the mnemonic recover page.
+// The overall design refactoring is needed, but now the refactoring has been delayed for various reasons.
+// For now, it is handled roughly.
+$large-container-width: 680px;
 
-  overflow: visible !important;
+html[data-register-page="true"] {
+  height: 100%;
 
-  :global(#app) {
+  body {
     height: 100%;
+    background-color: white;
 
-    .container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+    overflow: visible !important;
+
+    :global(#app) {
+      height: 100%;
+
+      .container {
+        display: flex;
+        flex-direction: column;
+      }
     }
   }
 }
@@ -22,6 +30,11 @@ $container-width: 420px;
 .container {
   width: $container-width;
   margin-left: ($popup-size-width - $container-width) / 2;
+
+  &:global(.large) {
+    width: $large-container-width;
+    margin-left: ($popup-size-width - $large-container-width) / 2;
+  }
 
   display: flex;
   flex-direction: column;
@@ -32,32 +45,67 @@ $container-width: 420px;
     margin-right: 0;
   }
 
+  :global(.btn-block + .btn-block) {
+    margin-top: 14px;
+  }
+
   .logo-container {
     margin-top: 40px;
     margin-bottom: 40px;
 
     display: flex;
-
-    .icon {
-      height: 100px;
-    }
+    flex-direction: column;
 
     .logo-inner-container {
-      margin-top: 8px;
-      margin-left: 20px;
-
       display: flex;
-      flex-direction: column;
-      justify-content: space-evenly;
-      align-items: start;
+      flex-direction: row;
+
+      &.justify-center {
+        justify-content: center;
+      }
+
+      .icon {
+        height: 100px;
+      }
 
       .logo {
         height: 100px;
       }
 
-      .paragraph {
-        font-size: 16px;
-        line-height: 1;
+      .logo-inner-container {
+        margin-top: 8px;
+        margin-left: 20px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        align-items: start;
+
+        .logo {
+          height: 100px;
+        }
+
+        .paragraph {
+          font-size: 16px;
+          line-height: 1;
+        }
+
+        .brand-text {
+          height: 80px;
+          margin-left: 18px;
+        }
+      }
+    }
+
+    .intro-brand-sub-text-container {
+      margin-top: 16px;
+      height: 14px;
+
+      .intro-brand-sub-text {
+        display: block;
+        width: auto;
+        height: 100%;
+        margin: 0 auto;
       }
     }
   }
@@ -68,6 +116,15 @@ $container-width: 420px;
     margin-bottom: 24px;
 
     color: #525f7f;
+  }
+
+  .new-mnemonic {
+    font-family: "Courier Prime", serif;
+    font-size: 16px;
+    letter-spacing: -0.36px;
+
+    padding: 20px 30px;
+    text-align: center;
   }
 
   .mnemonic {
@@ -84,6 +141,14 @@ $container-width: 420px;
 
     &[readonly] {
       background-color: white;
+    }
+
+    &::placeholder {
+      font-family: "Nunito Sans", sans-serif;
+
+      body[data-lang="ko"] & {
+        font-family: "Nanum Barun Gothic", sans-serif !important;
+      }
     }
   }
 
@@ -120,5 +185,43 @@ $container-width: 420px;
   button {
     margin-bottom: 8px;
     margin-left: 0 !important;
+  }
+}
+
+.intro-icon {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  margin-top: -16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &:hover {
+    background: #485cce;
+  }
+}
+
+.dialog {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(10, 14, 27, 0.5);
+  .content {
+    width: 420px;
+    box-sizing: border-box;
+    padding: 20px 30px;
+    border-radius: 8px;
+    border: 1px solid #f5f5f5;
+    background: #fff;
+    text-align: center;
   }
 }

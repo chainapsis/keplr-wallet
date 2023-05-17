@@ -27,7 +27,6 @@ import { ChatInitPopup } from "@components/chat/chat-init-popup";
 import { ChatSearchInput } from "@components/chat/chat-search-input";
 import { DeactivatedChat } from "@components/chat/deactivated-chat";
 import { SwitchUser } from "@components/switch-user";
-import { EthereumEndpoint } from "../../config.ui";
 import { AUTH_SERVER } from "../../config.ui.var";
 import {
   fetchBlockList,
@@ -50,21 +49,23 @@ const ChatView = () => {
   const userState = useSelector(userDetails);
   const chatStorePopulated = useSelector(userChatStorePopulated);
   const chatSubscriptionActive = useSelector(userChatSubscriptionActive);
-  const { chainStore, accountStore, queriesStore } = useStore();
+  const { chainStore, accountStore, queriesStore, uiConfigStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const walletAddress = accountStore.getAccount(chainStore.current.chainId)
     .bech32Address;
 
   // address book values
-  const queries = queriesStore.get(chainStore.current.chainId);
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
   const location: any = useLocation();
   const selectedTabState = location?.search;

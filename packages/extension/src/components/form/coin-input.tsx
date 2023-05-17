@@ -24,6 +24,7 @@ import {
 import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useStore } from "../../stores";
+import { AppCurrency } from "@keplr-wallet/types";
 
 export interface CoinInputProps {
   amountConfig: IAmountConfig;
@@ -34,10 +35,18 @@ export interface CoinInputProps {
   label?: string;
 
   disableAllBalance?: boolean;
+
+  overrideSelectableCurrencies?: AppCurrency[];
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = observer(
-  ({ amountConfig, className, label, disableAllBalance }) => {
+  ({
+    amountConfig,
+    className,
+    label,
+    disableAllBalance,
+    overrideSelectableCurrencies,
+  }) => {
     const intl = useIntl();
 
     const { queriesStore } = useStore();
@@ -60,7 +69,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
       return Buffer.from(bytes).toString("hex");
     });
 
-    const error = amountConfig.getError();
+    const error = amountConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
         switch (error.constructor) {
@@ -91,7 +100,9 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
 
     const [isOpenTokenSelector, setIsOpenTokenSelector] = useState(false);
 
-    const selectableCurrencies = amountConfig.sendableCurrencies
+    const selectableCurrencies = (
+      overrideSelectableCurrencies || amountConfig.sendableCurrencies
+    )
       .filter((cur) => {
         const bal = queryBalances.getBalanceFromCurrency(cur);
         return !bal.toDec().isZero();
@@ -112,12 +123,9 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
           </Label>
           <ButtonDropdown
             id={`selector-${randomId}`}
-            className={classnames(styleCoinInput.tokenSelector, {
-              disabled: amountConfig.isMax,
-            })}
+            className={classnames(styleCoinInput.tokenSelector)}
             isOpen={isOpenTokenSelector}
             toggle={() => setIsOpenTokenSelector((value) => !value)}
-            disabled={amountConfig.isMax}
           >
             <DropdownToggle caret>
               {amountConfig.sendCurrency.coinDenom}
@@ -193,7 +201,6 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
               )
               .toString(amountConfig.sendCurrency?.coinDecimals ?? 0)}
             min={0}
-            disabled={amountConfig.isMax}
             autoComplete="off"
           />
           {errorText != null ? (

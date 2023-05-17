@@ -16,7 +16,6 @@ import {
   Label,
 } from "reactstrap";
 import { useStore } from "../../../stores";
-import { EthereumEndpoint } from "../../../config.ui";
 import { deliverMessages } from "@graphQL/messages-api";
 import { useHistory } from "react-router";
 import { useSelector } from "react-redux";
@@ -28,7 +27,7 @@ export const TokenDropdown: FunctionComponent<{
   disabled: boolean;
   ibc?: boolean;
 }> = observer(({ label, disabled, ibc }) => {
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const history = useHistory();
@@ -37,20 +36,26 @@ export const TokenDropdown: FunctionComponent<{
   const user = useSelector(userDetails);
   const sendConfigs = useSendTxConfig(
     chainStore,
-    current.chainId,
-    accountInfo.msgOpts.send,
+    queriesStore,
+    accountStore,
+    chainStore.current.chainId,
     accountInfo.bech32Address,
-    queriesStore.get(current.chainId).queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
 
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
-    current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
+    queriesStore,
+    accountStore,
+    chainStore.current.chainId,
     accountInfo.bech32Address,
-    queriesStore.get(current.chainId).queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
   );
 
   const { amountConfig } = ibc ? ibcTransferConfigs : sendConfigs;
@@ -184,7 +189,7 @@ export const TokenDropdown: FunctionComponent<{
         <Button
           type="button"
           color="primary"
-          size="small"
+          size="sm"
           style={{ marginTop: "15px" }}
           disabled={disabled}
           onClick={() => sendTokenDetails()}
@@ -194,7 +199,7 @@ export const TokenDropdown: FunctionComponent<{
         <Button
           type="button"
           color="secondary"
-          size="small"
+          size="sm"
           style={{ marginTop: "15px" }}
           disabled={disabled}
           onClick={() => cancel()}

@@ -3,7 +3,6 @@ import { userChatAgents, userMessages } from "@chatStore/messages-slice";
 import { userDetails } from "@chatStore/user-slice";
 import { Chats, Groups } from "@chatTypes";
 import { AgentDisclaimer } from "@components/agents/agents-disclaimer";
-import { ChatMessage } from "@components/chat-message";
 import { useNotification } from "@components/notification";
 import { deliverMessages } from "@graphQL/messages-api";
 import { recieveGroups, recieveMessages } from "@graphQL/recieve-messages";
@@ -26,6 +25,7 @@ import {
   InputField,
   ProcessingLastMessage,
 } from "./input-section";
+import { AgentChatMessage } from "@components/agent-chat-message";
 
 export const ChatsViewSection = ({
   targetPubKey,
@@ -246,7 +246,7 @@ export const ChatsViewSection = ({
           return (
             <div key={message.id}>
               {
-                <ChatMessage
+                <AgentChatMessage
                   chainId={current.chainId}
                   showDate={check}
                   message={message?.contents}

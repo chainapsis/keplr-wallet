@@ -17,12 +17,17 @@ jobs:
   test:
     name: Test code base
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
       - run: npm install --global yarn
+      - run: sudo apt-get update
       - run: sudo apt-get install libusb-1.0-0-dev
+      - run: sudo apt-get install curl
+      - run: curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-x86_64.zip
+      - run: unzip protoc-21.3-linux-x86_64.zip -d $HOME/protoc && echo $HOME/protoc/bin >> $GITHUB_PATH
       - run: yarn ci

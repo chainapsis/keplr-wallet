@@ -16,34 +16,74 @@ import {
   IAmountConfig,
   IFeeConfig,
   IGasConfig,
+  IGasSimulator,
   IIBCChannelConfig,
   IMemoConfig,
   IRecipientConfig,
+  useGasSimulator,
   useIBCTransferConfig,
 } from "@keplr-wallet/hooks";
 import { useStore } from "../../stores";
-import { EthereumEndpoint } from "../../config.ui";
 import { useNotification } from "@components/notification";
 import { FormattedMessage, useIntl } from "react-intl";
+import { ExtensionKVStore } from "@keplr-wallet/common";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {
   const history = useHistory();
 
   const [phase, setPhase] = useState<"channel" | "amount">("channel");
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    analyticsStore,
+    uiConfigStore,
+  } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
-  const queries = queriesStore.get(chainStore.current.chainId);
 
   const notification = useNotification();
 
   const ibcTransferConfigs = useIBCTransferConfig(
     chainStore,
+    queriesStore,
+    accountStore,
     chainStore.current.chainId,
-    accountInfo.msgOpts.ibcTransfer,
     accountInfo.bech32Address,
-    queries.queryBalances,
-    EthereumEndpoint
+    {
+      allowHexAddressOnEthermint: true,
+      icns: uiConfigStore.icnsInfo,
+    }
+  );
+  const gasSimulator = useGasSimulator(
+    new ExtensionKVStore("gas-simulator.ibc.transfer"),
+    chainStore,
+    chainStore.current.chainId,
+    ibcTransferConfigs.gasConfig,
+    ibcTransferConfigs.feeConfig,
+    "native",
+    () => {
+      if (!ibcTransferConfigs.channelConfig.channel) {
+        throw new Error("Channel not set yet");
+      }
+
+      // Prefer not to use the gas config or fee config,
+      // because gas simulator can change the gas config and fee config from the result of reaction,
+      // and it can make repeated reaction.
+      if (
+        ibcTransferConfigs.amountConfig.error != null ||
+        ibcTransferConfigs.recipientConfig.error != null
+      ) {
+        throw new Error("Not ready to simulate tx");
+      }
+
+      return accountInfo.cosmos.makeIBCTransferTx(
+        ibcTransferConfigs.channelConfig.channel,
+        ibcTransferConfigs.amountConfig.amount,
+        ibcTransferConfigs.amountConfig.sendCurrency,
+        ibcTransferConfigs.recipientConfig.recipient
+      );
+    }
   );
 
   const toChainId =
@@ -78,16 +118,20 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           amountConfig={ibcTransferConfigs.amountConfig}
           feeConfig={ibcTransferConfigs.feeConfig}
           gasConfig={ibcTransferConfigs.gasConfig}
+          gasSimulator={gasSimulator}
           onSubmit={async () => {
             if (ibcTransferConfigs.channelConfig.channel) {
               try {
-                await accountInfo.cosmos.sendIBCTransferMsg(
+                const tx = accountInfo.cosmos.makeIBCTransferTx(
                   ibcTransferConfigs.channelConfig.channel,
                   ibcTransferConfigs.amountConfig.amount,
                   ibcTransferConfigs.amountConfig.sendCurrency,
-                  ibcTransferConfigs.recipientConfig.recipient,
-                  ibcTransferConfigs.memoConfig.memo,
+                  ibcTransferConfigs.recipientConfig.recipient
+                );
+
+                await tx.send(
                   ibcTransferConfigs.feeConfig.toStdFee(),
+                  ibcTransferConfigs.memoConfig.memo,
                   {
                     preferNoSetFee: true,
                     preferNoSetMemo: true,
@@ -105,6 +149,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                     },
                   }
                 );
+
                 history.push("/");
               } catch (e) {
                 history.replace("/");
@@ -135,9 +180,9 @@ export const IBCTransferPageChannel: FunctionComponent<{
 }> = observer(({ channelConfig, recipientConfig, memoConfig, onNext }) => {
   const intl = useIntl();
   const isValid =
-    channelConfig.getError() == null &&
-    recipientConfig.getError() == null &&
-    memoConfig.getError() == null;
+    channelConfig.error == null &&
+    recipientConfig.error == null &&
+    memoConfig.error == null;
 
   const isChannelSet = channelConfig.channel != null;
 
@@ -195,51 +240,58 @@ export const IBCTransferPageAmount: FunctionComponent<{
   amountConfig: IAmountConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  gasSimulator?: IGasSimulator;
   onSubmit: () => void;
-}> = observer(({ amountConfig, feeConfig, gasConfig, onSubmit }) => {
-  const intl = useIntl();
-  const { accountStore, chainStore, priceStore } = useStore();
+}> = observer(
+  ({ amountConfig, feeConfig, gasConfig, gasSimulator, onSubmit }) => {
+    const intl = useIntl();
+    const { accountStore, chainStore, priceStore } = useStore();
 
-  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+    const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
-  const isValid =
-    amountConfig.getError() == null &&
-    feeConfig.getError() == null &&
-    gasConfig.getError() == null;
+    const isValid =
+      amountConfig.error == null &&
+      feeConfig.error == null &&
+      gasConfig.error == null;
 
-  return (
-    <form className={style.formContainer}>
-      <div className={style.formInnerContainer}>
-        <CoinInput
-          label={intl.formatMessage({
-            id: "send.input.amount",
-          })}
-          amountConfig={amountConfig}
-        />
-        <div style={{ flex: 1 }} />
-        <FeeButtons
-          label={intl.formatMessage({
-            id: "send.input.fee",
-          })}
-          feeConfig={feeConfig}
-          gasConfig={gasConfig}
-          priceStore={priceStore}
-        />
-        <Button
-          type="submit"
-          color="primary"
-          block
-          disabled={!isValid}
-          data-loading={accountInfo.isSendingMsg === "ibcTransfer"}
-          onClick={(e) => {
-            e.preventDefault();
+    return (
+      <form className={style.formContainer}>
+        <div className={style.formInnerContainer}>
+          <CoinInput
+            label={intl.formatMessage({
+              id: "send.input.amount",
+            })}
+            amountConfig={amountConfig}
+          />
+          <div style={{ flex: 1 }} />
+          <FeeButtons
+            label={intl.formatMessage({
+              id: "send.input.fee",
+            })}
+            feeConfig={feeConfig}
+            gasConfig={gasConfig}
+            priceStore={priceStore}
+            gasSimulator={gasSimulator}
+          />
+          <Button
+            type="submit"
+            color="primary"
+            block
+            disabled={!isValid}
+            data-loading={accountInfo.isSendingMsg === "ibcTransfer"}
+            onClick={(e) => {
+              e.preventDefault();
 
-            onSubmit();
-          }}
-        >
-          <FormattedMessage id="ibc.transfer.submit" />
-        </Button>
-      </div>
-    </form>
-  );
-});
+              onSubmit();
+            }}
+            style={{
+              marginTop: "12px",
+            }}
+          >
+            <FormattedMessage id="ibc.transfer.submit" />
+          </Button>
+        </div>
+      </form>
+    );
+  }
+);

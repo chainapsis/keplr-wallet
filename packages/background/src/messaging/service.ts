@@ -1,4 +1,3 @@
-import { delay, inject, singleton } from "tsyringe";
 import { KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
 import { Hash, PrivKeySecp256k1 } from "@keplr-wallet/crypto";
@@ -8,17 +7,16 @@ import { getPubKey, registerPubKey } from "./memorandum-client";
 import { MESSAGE_CHANNEL_ID } from "./constants";
 import { PrivacySetting, PubKey } from "./types";
 
-@singleton()
 export class MessagingService {
   // map of target address vs target public key
   // assumption: chainId incorporated since each network will have a different
   // bech32 prefix
   private _publicKeyCache = new Map<string, PubKey>();
+  protected keyRingService!: KeyRingService;
 
-  constructor(
-    @inject(delay(() => KeyRingService))
-    protected readonly keyRingService: KeyRingService
-  ) {}
+  init(keyRingService: KeyRingService) {
+    this.keyRingService = keyRingService;
+  }
 
   /**
    * Lookup the public key associated with the messaging service

@@ -4,7 +4,6 @@ import { HeaderLayout } from "@layouts/index";
 
 import { Card, CardBody } from "reactstrap";
 
-import { ChainUpdaterService } from "@keplr-wallet/background";
 import classnames from "classnames";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
@@ -14,6 +13,10 @@ import { useStore } from "../../stores";
 import { AccountView } from "./account";
 import { AssetView } from "./asset";
 import { BIP44SelectModal } from "./bip44-select-modal";
+import { VestingInfo } from "./vesting-info";
+import { LedgerAppModal } from "./ledger-app-modal";
+import { EvmosDashboardView } from "./evmos-dashboard";
+import { AuthZView } from "./authz";
 import { Menu } from "./menu";
 import style from "./style.module.scss";
 import { TokensView } from "./token";
@@ -27,37 +30,32 @@ import { getWalletConfig } from "@graphQL/config-api";
 export const MainPage: FunctionComponent = observer(() => {
   const intl = useIntl();
 
-  const { keyRingStore, chainStore, accountStore, queriesStore } = useStore();
+  const {
+    chainStore,
+    accountStore,
+    queriesStore,
+    keyRingStore,
+    analyticsStore,
+  } = useStore();
+
+  useEffect(() => {
+    analyticsStore.setUserProperties({
+      totalAccounts: keyRingStore.multiKeyStoreInfo.length,
+    });
+  }, [analyticsStore, keyRingStore.multiKeyStoreInfo.length]);
 
   const confirm = useConfirm();
 
-  const currentChainId = chainStore.current.chainId;
+  const current = chainStore.current;
+  const currentChainId = current.chainId;
   const prevChainId = useRef<string | undefined>();
   useEffect(() => {
     if (!chainStore.isInitializing && prevChainId.current !== currentChainId) {
       (async () => {
-        const result = await ChainUpdaterService.checkChainUpdate(
-          chainStore.current
-        );
-        if (result.explicit) {
-          // If chain info has been changed, warning the user wether update the chain or not.
-          if (
-            await confirm.confirm({
-              paragraph: intl.formatMessage({
-                id: "main.update-chain.confirm.paragraph",
-              }),
-              yes: intl.formatMessage({
-                id: "main.update-chain.confirm.yes",
-              }),
-              no: intl.formatMessage({
-                id: "main.update-chain.confirm.no",
-              }),
-            })
-          ) {
-            await chainStore.tryUpdateChain(chainStore.current.chainId);
-          }
-        } else if (result.slient) {
+        try {
           await chainStore.tryUpdateChain(chainStore.current.chainId);
+        } catch (e) {
+          console.log(e);
         }
       })();
 
@@ -67,11 +65,54 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
 
+  const queryAccount = queriesStore
+    .get(chainStore.current.chainId)
+    .cosmos.queryAccount.getQueryBech32Address(accountInfo.bech32Address);
+  // Show the spendable balances if the account is vesting account.
+  const showVestingInfo = (() => {
+    // If the chain can't query /cosmos/bank/v1beta1/spendable_balances/{account},
+    // no need to show the vesting info because its query always fails.
+    if (
+      !current.features ||
+      !current.features.includes(
+        "query:/cosmos/bank/v1beta1/spendable_balances"
+      )
+    ) {
+      return false;
+    }
+
+    return (
+      !queryAccount.error &&
+      queryAccount.response &&
+      queryAccount.isVestingAccount
+    );
+  })();
+
   const queryBalances = queriesStore
     .get(chainStore.current.chainId)
     .queryBalances.getQueryBech32Address(accountInfo.bech32Address);
 
+  const queryAuthZGrants = queriesStore
+    .get(chainStore.current.chainId)
+    .cosmos.queryAuthZGranter.getGranter(accountInfo.bech32Address);
+
   // const tokens = queryBalances.unstakables.filter((bal) => {
+  //   if (
+  //     chainStore.current.features &&
+  //     chainStore.current.features.includes("terra-classic-fee")
+  //   ) {
+  //     // At present, can't handle stability tax well if it is not registered native token.
+  //     // So, for terra classic, disable other tokens.
+  //     const denom = new DenomHelper(bal.currency.coinMinimalDenom);
+  //     if (denom.type !== "native" || denom.denom.startsWith("ibc/")) {
+  //       return false;
+  //     }
+  //
+  //     if (denom.type === "native") {
+  //       return bal.balance.toDec().gt(new Dec("0"));
+  //     }
+  //   }
+  //
   //   // Temporary implementation for trimming the 0 balanced native tokens.
   //   // TODO: Remove this part.
   //   if (new DenomHelper(bal.currency.coinMinimalDenom).type === "native") {
@@ -79,8 +120,6 @@ export const MainPage: FunctionComponent = observer(() => {
   //   }
   //   return true;
   // });
-
-  // const hasTokens = tokens.length > 0;
 
   /// Fetching wallet config info
   useEffect(() => {
@@ -106,6 +145,7 @@ export const MainPage: FunctionComponent = observer(() => {
     >
       <BIP44SelectModal />
       <ChatDisclaimer />
+      <LedgerAppModal />
       <Card className={classnames(style.card, "shadow")}>
         <CardBody>
           <div className={style.containerAccountInner}>
@@ -114,6 +154,8 @@ export const MainPage: FunctionComponent = observer(() => {
           </div>
         </CardBody>
       </Card>
+
+      {showVestingInfo ? <VestingInfo /> : null}
 
       {queryBalances.unstakables.length > 0 && (
         <Card className={classnames(style.card, "shadow")}>
@@ -124,6 +166,21 @@ export const MainPage: FunctionComponent = observer(() => {
           </CardBody>
         </Card>
       )}
+      {chainStore.current.chainId === "evmos_9001-2" && (
+        <Card className={classnames(style.card, "shadow")}>
+          <CardBody>
+            <EvmosDashboardView />
+          </CardBody>
+        </Card>
+      )}
+
+      {queryAuthZGrants.response?.data.grants.length ? (
+        <Card className={classnames(style.card, "shadow")}>
+          <CardBody>
+            <AuthZView grants={queryAuthZGrants.response.data.grants} />
+          </CardBody>
+        </Card>
+      ) : null}
     </HeaderLayout>
   );
 });

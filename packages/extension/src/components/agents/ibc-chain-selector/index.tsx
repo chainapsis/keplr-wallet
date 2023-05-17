@@ -22,9 +22,9 @@ import { useNotification } from "@components/notification";
 import { useHistory } from "react-router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainInfoInner } from "@keplr-wallet/stores";
-import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import { Int } from "@keplr-wallet/unit";
 import { useLoadingIndicator } from "@components/loading-indicator";
+import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 
 interface ChannelDetails extends Channel {
   counterPartyBech32Prefix: string;
@@ -122,17 +122,19 @@ export const IBCChainSelector: FunctionComponent<{
 
   const setChannel = async (
     channel: Channel,
-    chainInfo: ChainInfoInner<ChainInfoWithEmbed>
+    chainInfo: ChainInfoInner<ChainInfoWithCoreTypes>
   ) => {
     loadingIndicator.setIsLoading("set-channel", true);
-    const destinationBlockHeight = queriesStore
-      .get(channel.counterpartyChainId)
-      .cosmos.queryBlock.getBlock("latest");
+    const destinationBlockHeight = queriesStore.get(channel.counterpartyChainId)
+      .cosmos.queryRPCStatus;
 
     // Wait until fetching complete.
     await destinationBlockHeight.waitFreshResponse();
 
-    if (destinationBlockHeight.height.equals(new Int("0"))) {
+    if (
+      destinationBlockHeight.latestBlockHeight === undefined ||
+      destinationBlockHeight.latestBlockHeight.equals(new Int("0"))
+    ) {
       throw new Error(
         `Failed to fetch the latest block of ${channel.counterpartyChainId}`
       );
@@ -144,7 +146,7 @@ export const IBCChainSelector: FunctionComponent<{
       revisionHeight: ChainIdHelper.parse(
         channel.counterpartyChainId
       ).version.toString(),
-      revisionNumber: destinationBlockHeight.height
+      revisionNumber: destinationBlockHeight.latestBlockHeight
         .add(new Int("150"))
         .toString(),
     });
@@ -216,7 +218,7 @@ export const IBCChainSelector: FunctionComponent<{
         <Button
           type="button"
           color="primary"
-          size="small"
+          size="sm"
           style={{ marginTop: "15px" }}
           disabled={disabled || !selectedChannel}
           onClick={() => sendChannelDetails()}
@@ -226,9 +228,9 @@ export const IBCChainSelector: FunctionComponent<{
         <Button
           type="button"
           color="secondary"
-          size="small"
+          size="sm"
           style={{ marginTop: "15px" }}
-          disabled={disabled || !selectedChannel}
+          disabled={disabled}
           onClick={() => cancel()}
         >
           Cancel

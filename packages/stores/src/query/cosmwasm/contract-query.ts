@@ -1,14 +1,16 @@
 import { ObservableChainQuery } from "../chain-query";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../common";
-import { CancelToken } from "axios";
 import { QueryResponse } from "../../common";
 
 import { Buffer } from "buffer/";
+import { autorun } from "mobx";
 
 export class ObservableCosmwasmContractChainQuery<
   T
 > extends ObservableChainQuery<T> {
+  protected disposer?: () => void;
+
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -25,24 +27,41 @@ export class ObservableCosmwasmContractChainQuery<
     );
   }
 
+  protected onStart() {
+    super.onStart();
+
+    return new Promise<void>((resolve) => {
+      this.disposer = autorun(() => {
+        const chainInfo = this.chainGetter.getChain(this.chainId);
+        if (chainInfo.features && chainInfo.features.includes("wasmd_0.24+")) {
+          if (this.url.startsWith("/wasm/v1/")) {
+            this.setUrl(`/cosmwasm${this.url}`);
+          }
+        } else {
+          if (this.url.startsWith("/cosmwasm/")) {
+            this.setUrl(`${this.url.replace("/cosmwasm", "")}`);
+          }
+        }
+
+        resolve();
+      });
+    });
+  }
+
+  protected onStop() {
+    if (this.disposer) {
+      this.disposer();
+      this.disposer = undefined;
+    }
+    super.onStop();
+  }
+
   // eslint-disable-next-line @typescript-eslint/ban-types
   protected static getUrlFromObj(contractAddress: string, obj: object): string {
     const msg = JSON.stringify(obj);
     const query = Buffer.from(msg).toString("base64");
 
-    return `/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${query}`;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  protected setObj(obj: object) {
-    this.obj = obj;
-
-    this.setUrl(
-      ObservableCosmwasmContractChainQuery.getUrlFromObj(
-        this.contractAddress,
-        this.obj
-      )
-    );
+    return `/wasm/v1/contract/${contractAddress}/smart/${query}`;
   }
 
   protected canFetch(): boolean {
@@ -50,9 +69,9 @@ export class ObservableCosmwasmContractChainQuery<
   }
 
   protected async fetchResponse(
-    cancelToken: CancelToken
-  ): Promise<QueryResponse<T>> {
-    const response = await super.fetchResponse(cancelToken);
+    abortController: AbortController
+  ): Promise<{ response: QueryResponse<T>; headers: any }> {
+    const { response, headers } = await super.fetchResponse(abortController);
 
     const wasmResult = (response.data as unknown) as
       | {
@@ -65,10 +84,13 @@ export class ObservableCosmwasmContractChainQuery<
     }
 
     return {
-      data: wasmResult.data as T,
-      status: response.status,
-      staled: false,
-      timestamp: Date.now(),
+      headers,
+      response: {
+        data: wasmResult.data as T,
+        status: response.status,
+        staled: false,
+        timestamp: Date.now(),
+      },
     };
   }
 }

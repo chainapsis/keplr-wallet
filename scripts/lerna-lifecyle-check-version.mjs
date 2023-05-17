@@ -12,7 +12,10 @@ const version = require("../lerna.json").version;
       const packages = fs.readdirSync(`${__dirname}/../packages/`);
       for (const pack of packages) {
         const stat = fs.statSync(`${__dirname}/../packages/${pack}`);
-        if (stat.isDirectory()) {
+        if (
+          stat.isDirectory() &&
+          fs.existsSync(`${__dirname}/../packages/${pack}/package.json`)
+        ) {
           const packageJson = JSON.parse(
             fs.readFileSync(
               `${__dirname}/../packages/${pack}/package.json`,

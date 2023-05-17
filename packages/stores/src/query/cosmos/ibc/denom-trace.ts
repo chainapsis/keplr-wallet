@@ -8,6 +8,8 @@ import { DenomTraceResponse } from "./types";
 import { autorun, computed } from "mobx";
 
 export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTraceResponse> {
+  protected disposer?: () => void;
+
   constructor(
     kvStore: KVStore,
     chainId: string,
@@ -20,13 +22,28 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
       chainGetter,
       `/ibc/applications/transfer/v1beta1/denom_traces/${hash}`
     );
+  }
 
-    autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
-        this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${hash}`);
-      }
+  protected onStart() {
+    super.onStart();
+
+    return new Promise<void>((resolve) => {
+      this.disposer = autorun(() => {
+        const chainInfo = this.chainGetter.getChain(this.chainId);
+        if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
+          this.setUrl(`/ibc/apps/transfer/v1/denom_traces/${this.hash}`);
+        }
+        resolve();
+      });
     });
+  }
+
+  protected onStop() {
+    if (this.disposer) {
+      this.disposer();
+      this.disposer = undefined;
+    }
+    super.onStop();
   }
 
   @computed

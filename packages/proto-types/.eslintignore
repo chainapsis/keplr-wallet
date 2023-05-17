@@ -1,0 +1,7 @@
+!(proto-types-gen)/**/*.ts
+!(proto-types-gen)/**/*.js
+!(proto-types-gen)/**/*.mjs
+!(proto-types-gen)/**/*.cjs
+!(proto-types-gen)/**/*.map
+outputHash
+.DS_Store

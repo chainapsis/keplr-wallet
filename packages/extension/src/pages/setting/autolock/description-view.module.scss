@@ -1,0 +1,34 @@
+.inner-container {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .img-lock {
+    height: 96px;
+  }
+
+  p {
+    margin-top: 24px;
+    margin-left: 10px;
+    margin-right: 10px;
+
+    font-size: 16px;
+    letter-spacing: -0.6px;
+    color: #32325d;
+
+    text-align: center;
+  }
+
+  b {
+    width: 100%;
+
+    margin-bottom: 24px;
+
+    font-size: 14px;
+    letter-spacing: -0.3px;
+    color: #32325d;
+  }
+}

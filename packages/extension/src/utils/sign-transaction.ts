@@ -3,48 +3,56 @@
 
 import { ContextProps } from "@components/notification";
 import { deliverMessages } from "@graphQL/messages-api";
-import { cosmos } from "@keplr-wallet/cosmos";
-import { AccountWithAll, getKeplrFromWindow } from "@keplr-wallet/stores";
-import Long from "long";
+import { getKeplrFromWindow } from "@keplr-wallet/stores";
 import { TRANSACTION_APPROVED } from "../config.ui.var";
+import {
+  AuthInfo,
+  Fee,
+  TxRaw,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
+import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
 
 export const signTransaction = async (
   data: string,
   chainId: string,
-  signer: string
+  accountInfo: any
 ) => {
   const payload = JSON.parse(data);
 
   const keplr = (await getKeplrFromWindow())!;
   const pubKey = (await keplr.getKey(payload.chainId)).pubKey;
-  const unsignedTx = cosmos.tx.v1beta1.TxRaw.create({
+
+  const unsignedTx = TxRaw.fromPartial({
     bodyBytes: payload.bodyBytes,
-    authInfoBytes: cosmos.tx.v1beta1.AuthInfo.encode({
+    authInfoBytes: AuthInfo.encode({
       signerInfos: [
         {
           publicKey: {
-            type_url: "/cosmos.crypto.secp256k1.PubKey",
-            value: cosmos.crypto.secp256k1.PubKey.encode({
+            typeUrl: "/cosmos.crypto.secp256k1.PubKey",
+            value: PubKey.encode({
               key: pubKey,
             }).finish(),
           },
           modeInfo: {
             single: {
-              mode: cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+              mode: SignMode.SIGN_MODE_DIRECT,
             },
+            multi: undefined,
           },
           sequence: payload.sequence,
         },
       ],
-      fee: {
+      fee: Fee.fromPartial({
         amount: [
           {
             denom: "atestfet",
             amount: "480000000000000",
           },
         ],
-        gasLimit: Long.fromString(payload.gasLimit),
-      },
+        gasLimit: payload.gasLimit,
+        payer: undefined,
+      }),
     }).finish(),
   });
   const signDoc = {
@@ -53,12 +61,17 @@ export const signTransaction = async (
     chainId: payload.chainId,
     accountNumber: payload.accountNumber,
   };
-  const signResponse = await keplr.signDirect(chainId, signer, signDoc, {
-    preferNoSetFee: false,
-    preferNoSetMemo: true,
-    disableBalanceCheck: true,
-  });
-  const signedTx = cosmos.tx.v1beta1.TxRaw.encode({
+  const signResponse = await keplr.signDirect(
+    chainId,
+    accountInfo.bech32Address,
+    signDoc,
+    {
+      preferNoSetFee: false,
+      preferNoSetMemo: true,
+      disableBalanceCheck: true,
+    }
+  );
+  const signedTx = TxRaw.encode({
     bodyBytes: signResponse.signed.bodyBytes,
     authInfoBytes: signResponse.signed.authInfoBytes,
     signatures: [Buffer.from(signResponse.signature.signature, "base64")],
@@ -72,7 +85,7 @@ export const signTransaction = async (
 
 //currently not in use
 export const executeTxn = async (
-  accountInfo: AccountWithAll,
+  accountInfo: any,
   notification: ContextProps,
   payload: any,
   messagePayload: any
@@ -100,7 +113,7 @@ export const executeTxn = async (
 };
 
 export const claimRewards = async (
-  accountInfo: AccountWithAll,
+  accountInfo: any,
   notification: ContextProps,
   payload: any,
   messagePayload: any
@@ -147,7 +160,7 @@ export const claimRewards = async (
 };
 
 export const sendToken = async (
-  accountInfo: AccountWithAll,
+  accountInfo: any,
   notification: ContextProps,
   payload: any,
   messagePayload: any

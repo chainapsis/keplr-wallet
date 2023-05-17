@@ -51,6 +51,7 @@ export const ExportToMobilePage: FunctionComponent = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
+      smallTitle={true}
       alternativeTitle={intl.formatMessage({
         id: "setting.export-to-mobile",
       })}
@@ -125,7 +126,7 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
               color: "#32325D",
             }}
           >
-            Only scan on Keplr Mobile
+            Only scan on Fetch Mobile
           </h3>
           <div
             style={{
@@ -134,7 +135,7 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
               color: "#32325D",
             }}
           >
-            Scanning the QR code outside of Keplr Mobile can lead to loss of
+            Scanning the QR code outside of Fetch Mobile can lead to loss of
             funds
           </div>
         </div>
@@ -157,7 +158,7 @@ export const EnterPasswordToExportKeyRingView: FunctionComponent<{
           lineHeight: "22px",
         }}
       >
-        Scan QR code to export accounts to Keplr Mobile
+        Scan QR code to export accounts to Fetch Mobile
       </div>
       {keyRingStore.multiKeyStoreInfo.length > 2 ? (
         <div
@@ -282,73 +283,73 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
           connector.killSession();
         } else {
           loadingIndicator.setIsLoading("export-to-mobile", true);
+        }
+      });
 
-          connector.on("call_request", (error, payload) => {
-            if (
-              error ||
-              payload.method !==
-                "keplr_request_export_keyring_datas_wallet_connect_v1"
-            ) {
-              console.log(error, payload?.method);
-              history.replace("/");
-              connector.killSession();
-              loadingIndicator.setIsLoading("export-to-mobile", false);
-            } else {
-              const buf = Buffer.from(JSON.stringify(exportKeyRingDatas));
+      connector.on("call_request", (error, payload) => {
+        if (
+          error ||
+          payload.method !==
+            "keplr_request_export_keyring_datas_wallet_connect_v1"
+        ) {
+          console.log(error, payload?.method);
+          history.replace("/");
+          connector.killSession();
+          loadingIndicator.setIsLoading("export-to-mobile", false);
+        } else {
+          const buf = Buffer.from(JSON.stringify(exportKeyRingDatas));
 
-              const bytes = new Uint8Array(16);
-              crypto.getRandomValues(bytes);
-              const iv = Buffer.from(bytes);
+          const bytes = new Uint8Array(16);
+          crypto.getRandomValues(bytes);
+          const iv = Buffer.from(bytes);
 
-              const counter = new Counter(0);
-              counter.setBytes(iv);
-              const aesCtr = new AES.ModeOfOperation.ctr(
-                Buffer.from(qrCodeData?.sharedPassword ?? "", "hex"),
-                counter
-              );
+          const counter = new Counter(0);
+          counter.setBytes(iv);
+          const aesCtr = new AES.ModeOfOperation.ctr(
+            Buffer.from(qrCodeData?.sharedPassword ?? "", "hex"),
+            counter
+          );
 
-              (async () => {
-                const addressBooks: {
-                  [chainId: string]: AddressBookData[] | undefined;
-                } = {};
+          (async () => {
+            const addressBooks: {
+              [chainId: string]: AddressBookData[] | undefined;
+            } = {};
 
-                if (payload.params && payload.params.length > 0) {
-                  for (const chainId of payload.params[0].addressBookChainIds ??
-                    []) {
-                    const addressBookConfig = addressBookConfigMap.getAddressBookConfig(
-                      chainId
-                    );
+            if (payload.params && payload.params.length > 0) {
+              for (const chainId of payload.params[0].addressBookChainIds ??
+                []) {
+                const addressBookConfig = addressBookConfigMap.getAddressBookConfig(
+                  chainId
+                );
 
-                    await addressBookConfig.waitLoaded();
+                await addressBookConfig.waitLoaded();
 
-                    addressBooks[chainId] = toJS(
-                      addressBookConfig.addressBookDatas
-                    ) as AddressBookData[];
-                  }
-                }
-
-                const response: WCExportKeyRingDatasResponse = {
-                  encrypted: {
-                    ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString(
-                      "hex"
-                    ),
-                    // Hex encoded
-                    iv: iv.toString("hex"),
-                  },
-                  addressBooks,
-                };
-
-                connector.approveRequest({
-                  id: payload.id,
-                  result: [response],
-                });
-
-                history.replace("/");
-                connector.killSession();
-                loadingIndicator.setIsLoading("export-to-mobile", false);
-              })();
+                addressBooks[chainId] = toJS(
+                  addressBookConfig.addressBookDatas
+                ) as AddressBookData[];
+              }
             }
-          });
+
+            const response: WCExportKeyRingDatasResponse = {
+              encrypted: {
+                ciphertext: Buffer.from(aesCtr.encrypt(buf)).toString("hex"),
+                // Hex encoded
+                iv: iv.toString("hex"),
+              },
+              addressBooks,
+            };
+
+            connector.approveRequest({
+              id: payload.id,
+              result: [response],
+            });
+
+            history.replace("/");
+            setTimeout(() => {
+              connector.killSession();
+            }, 5000);
+            loadingIndicator.setIsLoading("export-to-mobile", false);
+          })();
         }
       });
     }
@@ -379,7 +380,7 @@ export const WalletConnectToExportKeyRingView: FunctionComponent<{
             color: "#172B4D",
           }}
         >
-          Scan this QR code on Keplr Mobile to export your accounts.
+          Scan this QR code on Fetch Mobile to export your accounts.
         </div>
       </div>
       <div style={{ flex: 1 }} />

@@ -5,9 +5,8 @@ import {
   ScryptParams,
   CommonCrypto,
 } from "./types";
-import { Hash, RNG, KeyCurve } from "@keplr-wallet/crypto";
+import { Hash, KeyCurve } from "@keplr-wallet/crypto";
 import pbkdf2 from "pbkdf2";
-
 import { Buffer } from "buffer/";
 
 /**
@@ -20,11 +19,13 @@ export interface KeyStore {
    * Type can be "mnemonic" or "privateKey".
    * Below version "1", type is not defined and it is considered as "mnemonic".
    */
-  type?: "mnemonic" | "privateKey" | "ledger";
+  type?: "mnemonic" | "privateKey" | "ledger" | "keystone";
   curve: KeyCurve;
   coinTypeForChain: CoinTypeForChain;
   bip44HDPath?: BIP44HDPath;
   meta?: {
+    // "__ledger__cosmos_app_like__" is used for allowing other cosmos-like app such as "Terra"
+    // If "__ledger__cosmos_app_like__" is empty, handle it as "Cosmos" for backward compatibility.
     [key: string]: string;
   };
   crypto: {
@@ -42,10 +43,9 @@ export interface KeyStore {
 
 export class Crypto {
   public static async encrypt(
-    rng: RNG,
     crypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
-    type: "mnemonic" | "privateKey" | "ledger",
+    type: "mnemonic" | "privateKey" | "ledger" | "keystone",
     curve: KeyCurve,
     text: string,
     password: string,
@@ -53,7 +53,7 @@ export class Crypto {
     bip44HDPath?: BIP44HDPath
   ): Promise<KeyStore> {
     let random = new Uint8Array(32);
-    const salt = Buffer.from(await rng(random)).toString("hex");
+    const salt = Buffer.from(await crypto.rng(random)).toString("hex");
 
     const scryptParams: ScryptParams = {
       salt,
@@ -92,7 +92,7 @@ export class Crypto {
     const buf = Buffer.from(text);
 
     random = new Uint8Array(16);
-    const iv = Buffer.from(await rng(random));
+    const iv = Buffer.from(await crypto.rng(random));
 
     const counter = new Counter(0);
     counter.setBytes(iv);

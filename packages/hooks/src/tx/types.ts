@@ -1,5 +1,9 @@
-import { AppCurrency, Currency } from "@keplr-wallet/types";
-import { StdFee } from "@cosmjs/launchpad";
+import {
+  AppCurrency,
+  Currency,
+  FeeCurrency,
+  StdFee,
+} from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { CoinPrimitive } from "@keplr-wallet/stores";
 
@@ -12,7 +16,7 @@ export interface IMemoConfig extends ITxChainSetter {
   memo: string;
   setMemo(memo: string): void;
 
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export interface IGasConfig extends ITxChainSetter {
@@ -23,20 +27,27 @@ export interface IGasConfig extends ITxChainSetter {
   gasRaw: string;
   setGas(gas: number | string): void;
 
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export interface IFeeConfig extends ITxChainSetter {
+  sender: string;
+  setSender(sender: string): void;
   feeType: FeeType | undefined;
   setFeeType(feeType: FeeType | undefined): void;
+  setAutoFeeCoinMinimalDenom(denom: string | undefined): void;
   feeCurrencies: Currency[];
   feeCurrency: Currency | undefined;
   toStdFee(): StdFee;
   fee: CoinPretty | undefined;
   getFeeTypePretty(feeType: FeeType): CoinPretty;
+  getFeeTypePrettyForFeeCurrency(
+    feeCurrency: FeeCurrency,
+    feeType: FeeType
+  ): CoinPretty;
   getFeePrimitive(): CoinPrimitive | undefined;
   isManual: boolean;
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export interface IRecipientConfig extends ITxChainSetter {
@@ -44,7 +55,14 @@ export interface IRecipientConfig extends ITxChainSetter {
   rawRecipient: string;
   setRawRecipient(recipient: string): void;
 
-  getError(): Error | undefined;
+  error: Error | undefined;
+}
+
+export interface IRecipientConfigWithICNS extends IRecipientConfig {
+  readonly isICNSEnabled: boolean;
+  readonly isICNSName: boolean;
+  readonly isICNSFetching: boolean;
+  readonly icnsExpectedBech32Prefix: string;
 }
 
 export interface IAmountConfig extends ITxChainSetter {
@@ -76,7 +94,7 @@ export interface IAmountConfig extends ITxChainSetter {
   fraction: number | undefined;
   setFraction(value: number | undefined): void;
 
-  getError(): Error | undefined;
+  error: Error | undefined;
 }
 
 export const DefaultGasPriceStep: {
@@ -90,3 +108,15 @@ export const DefaultGasPriceStep: {
 };
 
 export type FeeType = "high" | "average" | "low";
+
+export interface IGasSimulator {
+  enabled: boolean;
+  setEnabled(value: boolean): void;
+
+  isSimulating: boolean;
+
+  gasEstimated: number | undefined;
+  gasAdjustment: number;
+  gasAdjustmentRaw: string;
+  setGasAdjustment(gasAdjustment: string | number): void;
+}

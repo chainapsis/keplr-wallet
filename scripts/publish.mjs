@@ -56,11 +56,12 @@ const lerna = JSON.parse(lernaFile);
       if (semantic) {
         const isPrelease = semantic.prerelease.length > 0;
 
-        await $`cd packages/extension/prod && zip -r keplr-extension-${foundedVersion}.zip .`;
+        await $`cd packages/extension/build/chrome && zip -r keplr-extension-${foundedVersion}.zip .`;
+        await $`cd packages/extension/build/firefox && zip -r keplr-extension-${foundedVersion}.firefox.zip .`;
         if (isPrelease) {
-          await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion} --prerelease`;
+          await $`gh release create ${foundedVersion} packages/extension/build/chrome/keplr-extension-${foundedVersion}.zip packages/extension/build/firefox/keplr-extension-${foundedVersion}.firefox.zip -t ${foundedVersion} --prerelease`;
         } else {
-          await $`gh release create ${foundedVersion} packages/extension/prod/keplr-extension-${foundedVersion}.zip -t ${foundedVersion}`;
+          await $`gh release create ${foundedVersion} packages/extension/build/chrome/keplr-extension-${foundedVersion}.zip packages/extension/build/firefox/keplr-extension-${foundedVersion}.firefox.zip -t ${foundedVersion}`;
         }
 
         console.log("Release created");

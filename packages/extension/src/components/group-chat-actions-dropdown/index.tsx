@@ -39,7 +39,7 @@ export const GroupChatActionsDropdown = ({
   }
 
   return (
-    <>
+    <React.Fragment>
       {showDropdown && (
         <div className={style.dropdown}>
           {options.map(({ title, option }) => (
@@ -51,6 +51,6 @@ export const GroupChatActionsDropdown = ({
           ))}
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };

@@ -12,13 +12,11 @@ import { useSelector } from "react-redux";
 import { useStore } from "../../stores";
 
 export const SettingPage: FunctionComponent = observer(() => {
-  // const { uiConfigStore } = useStore();
-
   const language = useLanguage();
   const history = useHistory();
   const intl = useIntl();
 
-  const { accountStore, chainStore } = useStore();
+  const { accountStore, chainStore, keyRingStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const config: WalletConfig = useSelector(walletConfig);
@@ -51,6 +49,9 @@ export const SettingPage: FunctionComponent = observer(() => {
   const user = useSelector(userDetails);
   const requiredNative = useSelector(userChatActive);
   const isChatActive = !requiredNative || user.hasFET;
+
+  /// const isDeveloperMode = uiConfigStore.isDeveloper;
+
   return (
     <HeaderLayout
       showChainName={false}
@@ -95,14 +96,11 @@ export const SettingPage: FunctionComponent = observer(() => {
         />
         <PageButton
           title={intl.formatMessage({
-            id: "setting.connections",
-          })}
-          paragraph={intl.formatMessage({
-            id: "setting.connections.paragraph",
+            id: "setting.security-privacy",
           })}
           onClick={() => {
             history.push({
-              pathname: "/setting/connections",
+              pathname: "/setting/security-privacy",
             });
           }}
           icons={useMemo(
@@ -132,7 +130,8 @@ export const SettingPage: FunctionComponent = observer(() => {
             )}
           />
         )}
-        {config.notiphyWhitelist &&
+        {keyRingStore.keyRingType !== "ledger" &&
+          config.notiphyWhitelist &&
           (config.notiphyWhitelist.length === 0 ||
             config.notiphyWhitelist.indexOf(accountInfo.bech32Address) !==
               -1) && (
@@ -149,12 +148,42 @@ export const SettingPage: FunctionComponent = observer(() => {
               )}
             />
           )}
-        {/* <PageButton
-          title="Show Advanced IBC Transfers"
+
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.export-to-mobile",
+          })}
+          style={{ display: "none" }}
           onClick={() => {
-            uiConfigStore.setShowAdvancedIBCTransfer(
-              !uiConfigStore.showAdvancedIBCTransfer
-            );
+            history.push({
+              pathname: "/setting/export-to-mobile",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        <PageButton
+          title={intl.formatMessage({
+            id: "setting.chain-active.title",
+          })}
+          onClick={() => {
+            history.push({
+              pathname: "/setting/chain-active",
+            });
+          }}
+          icons={useMemo(
+            () => [<i key="next" className="fas fa-chevron-right" />],
+            []
+          )}
+        />
+        {/*<PageButton
+          title={intl.formatMessage({
+            id: "setting.developer-mode",
+          })}
+          onClick={() => {
+            uiConfigStore.setDeveloperMode(!isDeveloperMode);
           }}
           icons={[
             <label
@@ -164,11 +193,9 @@ export const SettingPage: FunctionComponent = observer(() => {
             >
               <input
                 type="checkbox"
-                checked={uiConfigStore.showAdvancedIBCTransfer}
+                checked={isDeveloperMode}
                 onChange={() => {
-                  uiConfigStore.setShowAdvancedIBCTransfer(
-                    !uiConfigStore.showAdvancedIBCTransfer
-                  );
+                  uiConfigStore.setDeveloperMode(isDeveloperMode);
                 }}
               />
               <span className="custom-toggle-slider rounded-circle" />
@@ -177,11 +204,14 @@ export const SettingPage: FunctionComponent = observer(() => {
         /> */}
         <PageButton
           title={intl.formatMessage({
-            id: "setting.credit",
+            id: "setting.endpoints",
+          })}
+          paragraph={intl.formatMessage({
+            id: "setting.endpoints.paragraph",
           })}
           onClick={() => {
             history.push({
-              pathname: "/setting/credit",
+              pathname: "/setting/endpoints",
             });
           }}
           icons={useMemo(

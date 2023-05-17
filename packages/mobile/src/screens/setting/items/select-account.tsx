@@ -21,7 +21,11 @@ export const SettingSelectAccountItem: FunctionComponent = observer(() => {
   return (
     <React.Fragment>
       <View
-        style={style.flatten(["height-1", "background-color-border-white"])}
+        style={style.flatten([
+          "height-1",
+          "background-color-gray-50",
+          "dark:background-color-platinum-500@75%",
+        ])}
       />
       <KeyStoreItem
         containerStyle={style.flatten(["padding-left-10"])}
@@ -36,7 +40,11 @@ export const SettingSelectAccountItem: FunctionComponent = observer(() => {
         }}
       />
       <View
-        style={style.flatten(["height-1", "background-color-border-white"])}
+        style={style.flatten([
+          "height-1",
+          "background-color-gray-50",
+          "dark:background-color-platinum-500@75%",
+        ])}
       />
     </React.Fragment>
   );

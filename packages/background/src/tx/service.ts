@@ -1,10 +1,7 @@
-import { delay, inject, singleton } from "tsyringe";
-import { TYPES } from "../types";
-
 import Axios from "axios";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
-import { TendermintTxTracer } from "@keplr-wallet/cosmos/build/tx-tracer";
+import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Notification } from "./types";
 
 import { Buffer } from "buffer/";
@@ -22,16 +19,16 @@ interface ABCIMessageLog {
   // Events StringEvents
 }
 
-@singleton()
 export class BackgroundTxService {
-  constructor(
-    @inject(delay(() => ChainsService))
-    protected readonly chainsService: ChainsService,
-    @inject(delay(() => PermissionService))
-    public readonly permissionService: PermissionService,
-    @inject(TYPES.Notification)
-    protected readonly notification: Notification
-  ) {}
+  protected chainsService!: ChainsService;
+  public permissionService!: PermissionService;
+
+  constructor(protected readonly notification: Notification) {}
+
+  init(chainsService: ChainsService, permissionService: PermissionService) {
+    this.chainsService = chainsService;
+    this.permissionService = permissionService;
+  }
 
   async sendTx(
     chainId: string,
@@ -47,7 +44,7 @@ export class BackgroundTxService {
     });
 
     this.notification.create({
-      iconRelativeUrl: "assets/temp-icon.svg",
+      iconRelativeUrl: "assets/logo-256.png",
       title: "Tx is pending...",
       message: "Wait a second",
     });
@@ -127,7 +124,7 @@ export class BackgroundTxService {
       }
 
       notification.create({
-        iconRelativeUrl: "assets/temp-icon.svg",
+        iconRelativeUrl: "assets/logo-256.png",
         title: "Tx succeeds",
         // TODO: Let users know the tx id?
         message: "Congratulations!",
@@ -182,7 +179,7 @@ export class BackgroundTxService {
     }
 
     notification.create({
-      iconRelativeUrl: "assets/temp-icon.svg",
+      iconRelativeUrl: "assets/logo-256.png",
       title: "Tx failed",
       message,
     });

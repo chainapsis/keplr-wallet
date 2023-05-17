@@ -28,7 +28,7 @@ export const UnblockUserPopup = ({
   };
 
   return (
-    <>
+    <React.Fragment>
       <div className={style.overlay} />
       <div className={style.popup}>
         <h4>Unblock User</h4>
@@ -52,6 +52,6 @@ export const UnblockUserPopup = ({
           </button>
         </div>
       </div>
-    </>
+    </React.Fragment>
   );
 };

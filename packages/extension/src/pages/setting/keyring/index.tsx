@@ -13,6 +13,7 @@ import { useLoadingIndicator } from "@components/loading-indicator";
 import { PageButton } from "../page-button";
 import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
+import { App, AppCoinType } from "@keplr-wallet/ledger-cosmos";
 import { store } from "@chatStore/index";
 import { resetUser } from "@chatStore/user-slice";
 import {
@@ -76,6 +77,42 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                 change: 0,
                 addressIndex: 0,
               };
+          let paragraph = keyStore.meta?.email
+            ? keyStore.meta.email
+            : undefined;
+          if (keyStore.type === "keystone") {
+            paragraph = "Keystone";
+          } else if (keyStore.type === "ledger") {
+            const coinType = (() => {
+              if (
+                keyStore.meta &&
+                keyStore.meta["__ledger__cosmos_app_like__"] &&
+                keyStore.meta["__ledger__cosmos_app_like__"] !== "Cosmos"
+              ) {
+                return (
+                  AppCoinType[
+                    keyStore.meta["__ledger__cosmos_app_like__"] as App
+                  ] || 118
+                );
+              }
+
+              return 118;
+            })();
+
+            paragraph = `Ledger - m/44'/${coinType}'/${bip44HDPath.account}'${
+              bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
+                ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
+                : ""
+            }`;
+
+            if (
+              keyStore.meta &&
+              keyStore.meta["__ledger__cosmos_app_like__"] &&
+              keyStore.meta["__ledger__cosmos_app_like__"] !== "Cosmos"
+            ) {
+              paragraph += ` (${keyStore.meta["__ledger__cosmos_app_like__"]})`;
+            }
+          }
 
           return (
             <PageButton
@@ -93,17 +130,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                     })
                   : ""
               }`}
-              paragraph={
-                keyStore.type === "ledger"
-                  ? `Ledger - m/44'/118'/${bip44HDPath.account}'${
-                      bip44HDPath.change !== 0 || bip44HDPath.addressIndex !== 0
-                        ? `/${bip44HDPath.change}/${bip44HDPath.addressIndex}`
-                        : ""
-                    }`
-                  : keyStore.meta?.email
-                  ? keyStore.meta.email
-                  : undefined
-              }
+              paragraph={paragraph}
               onClick={
                 keyStore.selected
                   ? undefined
@@ -119,7 +146,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                         store.dispatch(setIsChatSubscriptionActive(false));
                         messageAndGroupListenerUnsubscribe();
                         history.push("/");
-                      } catch (e) {
+                      } catch (e: any) {
                         console.log(`Failed to change keyring: ${e.message}`);
                         loadingIndicator.setIsLoading("keyring", false);
                       }

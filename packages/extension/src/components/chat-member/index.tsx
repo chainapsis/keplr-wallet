@@ -75,7 +75,7 @@ export const ChatMember = (props: {
     /// [alreadyMember] Member is already a part of group
     /// So hiding the add/remove icon
     if (alreadyMember) {
-      return <></>;
+      return <React.Fragment />;
     }
 
     /// [showSelectedIcon] from calling component to display icon or not
@@ -99,7 +99,7 @@ export const ChatMember = (props: {
       );
     }
 
-    return <></>;
+    return <React.Fragment />;
   }
 
   return (

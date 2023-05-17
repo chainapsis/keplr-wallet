@@ -24,7 +24,7 @@ export const AgentDisclaimer = () => {
   };
 
   return openDialog ? (
-    <>
+    <React.Fragment>
       <div className={style.overlay} onClick={() => handleClose()} />
       <div className={style.popupContainer}>
         <img
@@ -64,8 +64,8 @@ export const AgentDisclaimer = () => {
           Continue
         </button>
       </div>
-    </>
+    </React.Fragment>
   ) : (
-    <></>
+    <React.Fragment />
   );
 };

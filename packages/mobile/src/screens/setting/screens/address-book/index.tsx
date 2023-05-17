@@ -96,7 +96,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
     addressBookItemComponent[isInTransaction ? "inTransaction" : "inSetting"];
 
   return addressBookConfig.addressBookDatas.length > 0 ? (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="secondary">
       <View style={style.flatten(["height-card-gap"])} />
       {addressBookConfig.addressBookDatas.map((data, i) => {
         return (
@@ -104,6 +104,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
             <AddressBookItem
               style={style.flatten([
                 "background-color-white",
+                "dark:background-color-platinum-600",
                 "padding-x-18",
                 "padding-y-14",
               ])}
@@ -126,7 +127,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                   <Text
                     style={style.flatten([
                       "subtitle2",
-                      "color-text-black-medium",
+                      "color-text-middle",
                       "margin-bottom-4",
                     ])}
                   >
@@ -136,7 +137,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                     <Text
                       style={style.flatten([
                         "body3",
-                        "color-text-black-low",
+                        "color-text-low",
                         "margin-bottom-4",
                       ])}
                     >
@@ -147,7 +148,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                     style={style.flatten([
                       "text-caption1",
                       "font-medium",
-                      "color-primary",
+                      "color-blue-400",
                     ])}
                   >
                     {Bech32Address.shortenAddress(data.address, 30)}
@@ -170,7 +171,12 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                   }}
                 >
                   <TrashCanIcon
-                    color={style.get("color-text-black-very-very-low").color}
+                    color={
+                      style.flatten([
+                        "color-gray-100",
+                        "dark:color-platinum-300",
+                      ]).color
+                    }
                     size={24}
                   />
                 </TouchableOpacity>
@@ -180,7 +186,8 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
               <View
                 style={style.flatten([
                   "height-1",
-                  "background-color-border-white",
+                  "background-color-gray-50",
+                  "dark:background-color-platinum-500",
                 ])}
               />
             ) : null}
@@ -190,6 +197,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
     </PageWithScrollView>
   ) : (
     <PageWithScrollView
+      backgroundMode="secondary"
       contentContainerStyle={style.flatten(["flex-grow-1"])}
       scrollEnabled={false}
     >
@@ -197,12 +205,18 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
       <View style={style.flatten(["justify-center", "items-center"])}>
         <View style={style.flatten(["margin-bottom-21"])}>
           <AddressBookIcon
-            color={style.get("color-text-black-very-very-low").color}
+            color={
+              style.flatten(["color-gray-200", "dark:color-platinum-300"]).color
+            }
             height={56}
           />
         </View>
         <Text
-          style={style.flatten(["subtitle2", "color-text-black-very-very-low"])}
+          style={style.flatten([
+            "subtitle2",
+            "color-gray-100",
+            "dark:color-platinum-300",
+          ])}
         >
           Address book is empty
         </Text>

@@ -54,7 +54,8 @@ export const FullScreenCameraView: FunctionComponent<
                   "width-38",
                   "height-38",
                   "border-radius-64",
-                  "background-color-primary-50",
+                  "background-color-blue-100",
+                  "dark:background-color-platinum-500",
                   "opacity-90",
                   "margin-top-8",
                   "margin-right-16",
@@ -64,7 +65,10 @@ export const FullScreenCameraView: FunctionComponent<
               >
                 <CloseIcon
                   size={28}
-                  color={style.get("color-primary-300").color}
+                  color={
+                    style.flatten(["color-blue-400", "dark:color-platinum-50"])
+                      .color
+                  }
                 />
               </View>
             </TouchableOpacity>
@@ -74,7 +78,7 @@ export const FullScreenCameraView: FunctionComponent<
         <View>
           <Svg width="217" height="217" fill="none" viewBox="0 0 217 217">
             <Path
-              stroke={style.get("color-primary").color}
+              stroke={style.get("color-blue-400").color}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="6"
@@ -94,19 +98,22 @@ export const FullScreenCameraView: FunctionComponent<
                   "padding-x-32",
                   "padding-top-48",
                   "padding-bottom-31",
-                  "background-color-camera-loading-background",
+                  "background-color-card",
                   "border-radius-8",
                   "items-center",
                 ])}
               >
                 <LoadingSpinner
                   size={42}
-                  color={style.get("color-primary").color}
+                  color={
+                    style.flatten(["color-blue-400", "dark:color-platinum-100"])
+                      .color
+                  }
                 />
                 <Text
                   style={style.flatten([
                     "subtitle1",
-                    "color-text-black-low",
+                    "color-text-low",
                     "margin-top-34",
                   ])}
                 >

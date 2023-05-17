@@ -10,7 +10,7 @@ import { Controller, useForm } from "react-hook-form";
 import {
   registerExportedAddressBooks,
   registerExportedKeyRingDatas,
-} from "../../../utils/import-from-mobile";
+} from "../../../utils/import-from-extension";
 import {
   AddressBookConfigMap,
   AddressBookData,
@@ -98,6 +98,7 @@ export const ImportFromExtensionSetPasswordScreen: FunctionComponent = observer(
 
     return (
       <PageWithScrollView
+        backgroundMode="tertiary"
         contentContainerStyle={style.get("flex-grow-1")}
         style={style.flatten(["padding-x-page"])}
       >

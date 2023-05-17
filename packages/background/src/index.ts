@@ -1,13 +1,9 @@
-import "reflect-metadata";
-
-import { container } from "tsyringe";
-import { TYPES } from "./types";
-
 import { MessageRequester, Router } from "@keplr-wallet/router";
 
 import * as PersistentMemory from "./persistent-memory/internal";
 import * as Chains from "./chains/internal";
 import * as Ledger from "./ledger/internal";
+import * as Keystone from "./keystone/internal";
 import * as KeyRing from "./keyring/internal";
 import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
@@ -15,12 +11,16 @@ import * as Updater from "./updater/internal";
 import * as Tokens from "./tokens/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
+import * as PhishingList from "./phishing-list/internal";
+import * as AutoLocker from "./auto-lock-account/internal";
+import * as Analytics from "./analytics/internal";
 import * as Umbral from "./umbral/internal";
 import * as Messaging from "./messaging/internal";
 
 export * from "./persistent-memory";
 export * from "./chains";
 export * from "./ledger";
+export * from "./keystone";
 export * from "./keyring";
 export * from "./secret-wasm";
 export * from "./tx";
@@ -28,10 +28,12 @@ export * from "./updater";
 export * from "./tokens";
 export * from "./interaction";
 export * from "./permission";
+export * from "./phishing-list";
+export * from "./auto-lock-account";
+export * from "./analytics";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
-import { RNG } from "@keplr-wallet/crypto";
 import { CommonCrypto } from "./keyring";
 import { Notification } from "./tx";
 import { LedgerOptions } from "./ledger/options";
@@ -44,85 +46,144 @@ export function init(
   embedChainInfos: ChainInfo[],
   // The origins that are able to pass any permission.
   privilegedOrigins: string[],
-  rng: RNG,
+  analyticsPrivilegedOrigins: string[],
+  communityChainInfoRepo: {
+    readonly organizationName: string;
+    readonly repoName: string;
+    readonly branchName: string;
+  },
   commonCrypto: CommonCrypto,
   notification: Notification,
-  ledgerOptions: Partial<LedgerOptions> = {}
+  ledgerOptions: Partial<LedgerOptions> = {},
+  experimentalOptions: Partial<{
+    suggestChain: Partial<{
+      // Chains registered as suggest chains are managed in memory.
+      // In other words, it disappears when the app is closed.
+      // General operation should be fine. This is a temporary solution for the mobile app.
+      useMemoryKVStore: boolean;
+    }>;
+  }> = {}
 ) {
-  container.register(TYPES.ChainsEmbedChainInfos, {
-    useValue: embedChainInfos,
-  });
-
-  container.register(TYPES.EventMsgRequester, {
-    useValue: eventMsgRequester,
-  });
-  container.register(TYPES.RNG, { useValue: rng });
-  container.register(TYPES.CommonCrypto, { useValue: commonCrypto });
-  container.register(TYPES.Notification, { useValue: notification });
-
-  container.register(TYPES.ChainsStore, { useValue: storeCreator("chains") });
-  container.register(TYPES.InteractionStore, {
-    useValue: storeCreator("interaction"),
-  });
-  container.register(TYPES.KeyRingStore, { useValue: storeCreator("keyring") });
-  container.register(TYPES.LedgerStore, { useValue: storeCreator("ledger") });
-  container.register(TYPES.LedgerOptions, { useValue: ledgerOptions });
-
-  container.register(TYPES.PermissionStore, {
-    useValue: storeCreator("permission"),
-  });
-  container.register(TYPES.PermissionServicePrivilegedOrigins, {
-    useValue: privilegedOrigins,
-  });
-  container.register(TYPES.PersistentMemoryStore, {
-    useValue: storeCreator("persistent-memory"),
-  });
-  container.register(TYPES.SecretWasmStore, {
-    useValue: storeCreator("secretwasm"),
-  });
-  container.register(TYPES.TokensStore, { useValue: storeCreator("tokens") });
-  container.register(TYPES.TxStore, {
-    useValue: storeCreator("background-tx"),
-  });
-  container.register(TYPES.UpdaterStore, { useValue: storeCreator("updator") });
-
-  const interactionService = container.resolve(Interaction.InteractionService);
-  Interaction.init(router, interactionService);
-
-  const persistentMemory = container.resolve(
-    PersistentMemory.PersistentMemoryService
+  const interactionService = new Interaction.InteractionService(
+    eventMsgRequester,
+    commonCrypto.rng
   );
-  PersistentMemory.init(router, persistentMemory);
 
-  const permissionService = container.resolve(Permission.PermissionService);
+  const persistentMemoryService = new PersistentMemory.PersistentMemoryService();
+
+  const permissionService = new Permission.PermissionService(
+    storeCreator("permission"),
+    privilegedOrigins
+  );
+
+  const chainUpdaterService = new Updater.ChainUpdaterService(
+    storeCreator("updator"),
+    communityChainInfoRepo
+  );
+
+  const tokensService = new Tokens.TokensService(storeCreator("tokens"));
+
+  const chainsService = new Chains.ChainsService(
+    storeCreator("chains"),
+    embedChainInfos,
+    {
+      useMemoryKVStoreForSuggestChain:
+        experimentalOptions.suggestChain?.useMemoryKVStore,
+    }
+  );
+
+  const ledgerService = new Ledger.LedgerService(
+    storeCreator("ledger"),
+    ledgerOptions
+  );
+
+  const keystoneService = new Keystone.KeystoneService(
+    storeCreator("keystone")
+  );
+
+  const keyRingService = new KeyRing.KeyRingService(
+    storeCreator("keyring"),
+    embedChainInfos,
+    commonCrypto
+  );
+
+  const secretWasmService = new SecretWasm.SecretWasmService(
+    storeCreator("secretwasm")
+  );
+
+  const backgroundTxService = new BackgroundTx.BackgroundTxService(
+    notification
+  );
+
+  const phishingListService = new PhishingList.PhishingListService({
+    blockListUrl:
+      "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/block-list.txt",
+    twitterListUrl:
+      "https://raw.githubusercontent.com/chainapsis/phishing-block-list/main/twitter-scammer-list.txt",
+    fetchingIntervalMs: 3 * 3600 * 1000, // 3 hours
+    retryIntervalMs: 10 * 60 * 1000, // 10 mins,
+    allowTimeoutMs: 10 * 60 * 1000, // 10 mins,
+  });
+  const autoLockAccountService = new AutoLocker.AutoLockAccountService(
+    storeCreator("auto-lock-account")
+  );
+  const analyticsService = new Analytics.AnalyticsService(
+    storeCreator("background.analytics"),
+    commonCrypto.rng,
+    analyticsPrivilegedOrigins
+  );
+
+  persistentMemoryService.init();
+  permissionService.init(interactionService, chainsService, keyRingService);
+  chainUpdaterService.init(chainsService);
+  tokensService.init(
+    interactionService,
+    permissionService,
+    chainsService,
+    keyRingService
+  );
+  chainsService.init(
+    chainUpdaterService,
+    interactionService,
+    permissionService
+  );
+  ledgerService.init(interactionService);
+  keystoneService.init(interactionService);
+  keyRingService.init(
+    interactionService,
+    chainsService,
+    permissionService,
+    ledgerService,
+    keystoneService,
+    analyticsService
+  );
+  secretWasmService.init(chainsService, keyRingService, permissionService);
+  backgroundTxService.init(chainsService, permissionService);
+  phishingListService.init();
+  // No need to wait because user can't interact with app right after launch.
+  autoLockAccountService.init(keyRingService);
+  // No need to wait because user can't interact with app right after launch.
+  analyticsService.init();
+
+  Interaction.init(router, interactionService);
+  PersistentMemory.init(router, persistentMemoryService);
   Permission.init(router, permissionService);
-
-  const chainUpdaterService = container.resolve(Updater.ChainUpdaterService);
   Updater.init(router, chainUpdaterService);
-
-  const tokensService = container.resolve(Tokens.TokensService);
   Tokens.init(router, tokensService);
-
-  const chainsService = container.resolve(Chains.ChainsService);
   Chains.init(router, chainsService);
-
-  const ledgerService = container.resolve(Ledger.LedgerService);
   Ledger.init(router, ledgerService);
-
-  const keyRingService = container.resolve(KeyRing.KeyRingService);
   KeyRing.init(router, keyRingService);
-
-  const secretWasmService = container.resolve(SecretWasm.SecretWasmService);
   SecretWasm.init(router, secretWasmService);
+  BackgroundTx.init(router, backgroundTxService);
+  PhishingList.init(router, phishingListService);
+  AutoLocker.init(router, autoLockAccountService);
+  Analytics.init(router, analyticsService);
 
-  const umbralService = container.resolve(Umbral.UmbralService);
+  const umbralService = new Umbral.UmbralService(chainsService);
+  umbralService.init(keyRingService, permissionService);
   Umbral.init(router, umbralService);
 
-  const messagingService = container.resolve(Messaging.MessagingService);
+  const messagingService = new Messaging.MessagingService();
+  messagingService.init(keyRingService);
   Messaging.init(router, messagingService);
-
-  const backgroundTxService = container.resolve(
-    BackgroundTx.BackgroundTxService
-  );
-  BackgroundTx.init(router, backgroundTxService);
 }

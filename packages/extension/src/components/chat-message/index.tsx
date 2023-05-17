@@ -9,11 +9,6 @@ import { isToday, isYesterday, format } from "date-fns";
 import { store } from "@chatStore/index";
 import { setMessageError } from "@chatStore/messages-slice";
 import { MessagePrimitive } from "@utils/encrypt-message";
-import { TokenDropdown } from "@components/agents/tokens-dropdown";
-import { IBCChainSelector } from "@components/agents/ibc-chain-selector";
-import { SignTransaction } from "@components/agents/sign-transaction";
-import { MessageFeedBack } from "@components/chat-message-feedback";
-import { useHistory } from "react-router";
 
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp);
@@ -22,29 +17,20 @@ const formatTime = (timestamp: number): string => {
 
 export const ChatMessage = ({
   chainId,
-  messageId,
   message,
   isSender,
   timestamp,
   showDate,
   groupLastSeenTimestamp,
-  disabled,
-  setIsInputType2,
 }: {
   chainId: string;
-  messageId: string;
   isSender: boolean;
   message: string;
   timestamp: number;
   showDate: boolean;
   groupLastSeenTimestamp: number;
-  disabled: boolean;
-  setIsInputType2?: any;
 }) => {
   const [decryptedMessage, setDecryptedMessage] = useState<MessagePrimitive>();
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-  const history = useHistory();
-  const targetAddress = history.location.pathname.split("/")[3];
   useEffect(() => {
     decryptMessage(chainId, message, isSender)
       .then((message) => {
@@ -78,54 +64,23 @@ export const ChatMessage = ({
 
     if (!decryptedMessage) return messageView;
 
-    if (decryptedMessage.type === 1) {
+    if (decryptedMessage.type === 1)
       messageView = (
         <div className={style.message}>{decryptedMessage.content.text}</div>
       );
-      if (setIsInputType2 && !disabled) setIsInputType2(false);
-    } else {
+    else {
       const messageObj = JSON.parse(decryptedMessage.content.text);
-
-      switch (messageObj.method) {
-        case "signTransaction":
-          messageView = (
-            <SignTransaction
-              rawText={messageObj.message}
-              chainId={chainId}
-              disabled={disabled}
-            />
-          );
-          break;
-        case "inputToken":
-          messageView = (
-            <TokenDropdown label={messageObj.message} disabled={disabled} />
-          );
-          break;
-        case "inputIBCToken":
-          messageView = (
-            <TokenDropdown label={messageObj.message} ibc disabled={disabled} />
-          );
-          break;
-        case "inputChannel":
-          messageView = (
-            <IBCChainSelector label={messageObj.message} disabled={disabled} />
-          );
-          break;
-        default:
-          messageView = (
-            <div className={style.message}>
-              {messageObj?.message || "Cant Parse Message"}
-            </div>
-          );
-          break;
-      }
-      if (setIsInputType2 && !disabled) setIsInputType2(true);
+      messageView = (
+        <div className={style.message}>
+          {messageObj?.message || "Cant Parse Message"}
+        </div>
+      );
     }
     return messageView;
   }
 
   return (
-    <>
+    <React.Fragment>
       <div className={style.currentDateContainer}>
         {" "}
         {showDate ? (
@@ -138,32 +93,19 @@ export const ChatMessage = ({
           className={classnames(style.messageBox, {
             [style.senderBox]: isSender,
           })}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
           {decideMessageView()}
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div className={style.timestamp}>
-              {!isSender && isHovered && targetAddress?.includes("agent") && (
-                <MessageFeedBack
-                  messageId={messageId}
-                  chainId={chainId}
-                  targetAddress={targetAddress}
-                />
-              )}
-            </div>
-            <div className={style.timestamp}>
-              {formatTime(timestamp)}
-              {isSender && groupLastSeenTimestamp < timestamp && (
-                <img draggable={false} alt="delivered" src={deliveredIcon} />
-              )}
-              {isSender && groupLastSeenTimestamp >= timestamp && (
-                <img draggable={false} alt="seen" src={chatSeenIcon} />
-              )}
-            </div>
+          <div className={style.timestamp}>
+            {formatTime(timestamp)}
+            {isSender && groupLastSeenTimestamp < timestamp && (
+              <img draggable={false} alt="delivered" src={deliveredIcon} />
+            )}
+            {isSender && groupLastSeenTimestamp >= timestamp && (
+              <img draggable={false} alt="seen" src={chatSeenIcon} />
+            )}
           </div>
         </Container>
       </div>
-    </>
+    </React.Fragment>
   );
 };

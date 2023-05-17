@@ -2,7 +2,7 @@ import React, { FunctionComponent, useMemo } from "react";
 import { observer } from "mobx-react-lite";
 import { Card, CardBody } from "../../../components/card";
 import { useStore } from "../../../stores";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "../../../styles";
 import { CoinPretty, Dec, IntPretty } from "@keplr-wallet/unit";
@@ -19,13 +19,13 @@ export const ValidatorDetailsCard: FunctionComponent<{
   const queries = queriesStore.get(chainStore.current.chainId);
 
   const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Bonded
+    Staking.BondStatus.Bonded
   );
   const unbondingValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonding
+    Staking.BondStatus.Unbonding
   );
   const unbondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-    BondStatus.Unbonded
+    Staking.BondStatus.Unbonded
   );
 
   const validator = useMemo(() => {
@@ -65,7 +65,7 @@ export const ValidatorDetailsCard: FunctionComponent<{
               size={44}
               url={thumbnail}
             />
-            <Text style={style.flatten(["h4", "color-text-black-medium"])}>
+            <Text style={style.flatten(["h4", "color-text-middle"])}>
               {validator.description.moniker}
             </Text>
           </View>
@@ -74,13 +74,13 @@ export const ValidatorDetailsCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "h6",
-                  "color-text-black-medium",
+                  "color-text-middle",
                   "margin-bottom-4",
                 ])}
               >
                 Commission
               </Text>
-              <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+              <Text style={style.flatten(["body3", "color-text-middle"])}>
                 {new IntPretty(
                   new Dec(validator.commission.commission_rates.rate)
                 )
@@ -94,13 +94,13 @@ export const ValidatorDetailsCard: FunctionComponent<{
               <Text
                 style={style.flatten([
                   "h6",
-                  "color-text-black-medium",
+                  "color-text-middle",
                   "margin-bottom-4",
                 ])}
               >
                 Voting Power
               </Text>
-              <Text style={style.flatten(["body3", "color-text-black-medium"])}>
+              <Text style={style.flatten(["body3", "color-text-middle"])}>
                 {new CoinPretty(
                   chainStore.current.stakeCurrency,
                   new Dec(validator.tokens)
@@ -114,14 +114,14 @@ export const ValidatorDetailsCard: FunctionComponent<{
             <Text
               style={style.flatten([
                 "h6",
-                "color-text-black-medium",
+                "color-text-middle",
                 "margin-bottom-4",
               ])}
             >
               Description
             </Text>
             <Text
-              style={style.flatten(["body3", "color-text-black-medium"])}
+              style={style.flatten(["body3", "color-text-middle"])}
               selectable={true}
             >
               {validator.description.details}

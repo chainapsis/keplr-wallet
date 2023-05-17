@@ -18,18 +18,18 @@ import {
   EmptyAddressError,
   IRecipientConfig,
   IMemoConfig,
-  ENSNotSupportedError,
-  ENSFailedToFetchError,
-  ENSIsFetchingError,
+  ICNSFailedToFetchError,
+  ICNSIsFetchingError,
   IIBCChannelConfig,
+  InvalidHexError,
+  IRecipientConfigWithICNS,
 } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
-import { ObservableEnsFetcher } from "@keplr-wallet/ens";
 import { validateAgentAddress } from "@utils/validate-agent";
 
 export interface AddressInputProps {
-  recipientConfig: IRecipientConfig;
+  recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
   memoConfig?: IMemoConfig;
   ibcChannelConfig?: IIBCChannelConfig;
 
@@ -40,6 +40,10 @@ export interface AddressInputProps {
 
   disabled?: boolean;
   value: string;
+}
+
+function numOfCharacter(str: string, c: string): number {
+  return str.split(c).length - 1;
 }
 
 export const AddressInput: FunctionComponent<AddressInputProps> = observer(
@@ -61,15 +65,12 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       return `input-${Buffer.from(bytes).toString("hex")}`;
     });
 
-    const isENSAddress = ObservableEnsFetcher?.isValidENS(
-      recipientConfig.rawRecipient
-    );
     useEffect(() => {
       if (value) {
         recipientConfig.setRawRecipient(value);
       }
     }, [recipientConfig, value]);
-    const error = recipientConfig.getError();
+    const error = recipientConfig.error;
     const errorText: string | undefined = useMemo(() => {
       if (error) {
         switch (error.constructor) {
@@ -80,23 +81,35 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             return intl.formatMessage({
               id: "input.recipient.error.invalid-bech32",
             });
-          case ENSNotSupportedError:
+          case ICNSFailedToFetchError:
             return intl.formatMessage({
-              id: "input.recipient.error.ens-not-supported",
+              id: "input.recipient.error.icns-failed-to-fetch",
             });
-          case ENSFailedToFetchError:
-            return intl.formatMessage({
-              id: "input.recipient.error.ens-failed-to-fetch",
-            });
-          case ENSIsFetchingError:
+          case ICNSIsFetchingError:
             return;
+          case InvalidHexError:
+            return intl.formatMessage({
+              id: "input.recipient.error.invalid-hex",
+            });
           default:
             return intl.formatMessage({ id: "input.recipient.error.unknown" });
         }
       }
     }, [intl, error]);
 
-    const isENSLoading: boolean = error instanceof ENSIsFetchingError;
+    const isICNSName: boolean = (() => {
+      if ("isICNSName" in recipientConfig) {
+        return recipientConfig.isICNSName;
+      }
+      return false;
+    })();
+
+    const isICNSfetching: boolean = (() => {
+      if ("isICNSFetching" in recipientConfig) {
+        return recipientConfig.isICNSFetching;
+      }
+      return false;
+    })();
 
     const selectAddressFromAddressBook = {
       setRecipient: (recipient: string) => {
@@ -109,10 +122,6 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
       },
     };
 
-    const handleSearchInputChange = (e: any) => {
-      e.preventDefault();
-      recipientConfig.setRawRecipient(e?.target?.value);
-    };
     return (
       <React.Fragment>
         <Modal
@@ -128,7 +137,6 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               hideChainDropdown={true}
               selectHandler={selectAddressFromAddressBook}
               ibcChannelConfig={ibcChannelConfig}
-              isInTransaction={true}
             />
           </ModalBody>
         </Modal>
@@ -147,7 +155,20 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               )}
               value={recipientConfig.rawRecipient}
               onChange={(e) => {
-                handleSearchInputChange(e);
+                let value = e.target.value;
+                if (
+                  // If icns is possible and users enters ".", complete bech32 prefix automatically.
+                  "isICNSEnabled" in recipientConfig &&
+                  recipientConfig.isICNSEnabled &&
+                  value.length > 0 &&
+                  value[value.length - 1] === "." &&
+                  numOfCharacter(value, ".") === 1 &&
+                  numOfCharacter(recipientConfig.rawRecipient, ".") === 0
+                ) {
+                  value = value + recipientConfig.icnsExpectedBech32Prefix;
+                }
+                recipientConfig.setRawRecipient(value);
+                e.preventDefault();
               }}
               autoComplete="off"
               disabled={disabled}
@@ -165,12 +186,12 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               </Button>
             ) : null}
           </InputGroup>
-          {isENSLoading ? (
+          {isICNSfetching ? (
             <FormText>
               <i className="fa fa-spinner fa-spin fa-fw" />
             </FormText>
           ) : null}
-          {!isENSLoading && isENSAddress && !error ? (
+          {!isICNSfetching && isICNSName && !error ? (
             <FormText>{recipientConfig.recipient}</FormText>
           ) : null}
           {errorText != null &&

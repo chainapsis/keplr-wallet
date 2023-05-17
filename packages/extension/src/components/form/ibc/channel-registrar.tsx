@@ -98,7 +98,10 @@ export const IBCChannelRegistrarModal: FunctionComponent<{
             })}
             onChange={(e) => {
               e.preventDefault();
-              setChannelId(e.target.value);
+              const field = e.target.value;
+              setChannelId(
+                isNaN(parseFloat(field)) ? field : `channel-${field}`
+              );
               setError("");
             }}
             error={error}

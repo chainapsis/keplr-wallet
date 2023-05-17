@@ -19,7 +19,7 @@ export const StakingDashboardScreen: FunctionComponent = () => {
   ).unbondingBalances;
 
   return (
-    <PageWithScrollView>
+    <PageWithScrollView backgroundMode="gradient">
       <MyRewardCard containerStyle={style.flatten(["margin-y-card-gap"])} />
       <DelegationsCard
         containerStyle={style.flatten(["margin-bottom-card-gap"])}

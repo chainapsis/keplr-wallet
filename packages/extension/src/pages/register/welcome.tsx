@@ -23,6 +23,7 @@ export const WelcomePage: FunctionComponent = () => {
       <Button
         color="primary"
         type="submit"
+        size="lg"
         onClick={() => {
           if (typeof browser !== "undefined") {
             browser.tabs.getCurrent().then((tab) => {

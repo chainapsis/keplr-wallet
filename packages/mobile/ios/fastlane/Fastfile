@@ -55,7 +55,7 @@ platform :ios do
       UI.user_error!("BUGSNAG_API_KEY is not provided")
     end
     sh("cd ../.. && appcenter codepush release-react -a #{ENV["IOS_APPCENTER_APP_NAME"]} -d Production -t #{target_version} --output-dir build")
-    sh("cd ../.. && npx bugsnag-source-maps upload-react-native --api-key #{ENV["BUGSNAG_API_KEY"]} --code-bundle-id #{version} --platform ios --source-map build/CodePush/main.jsbundle.map --bundle build/CodePush/main.jsbundle")
+    # sh("cd ../.. && npx bugsnag-source-maps upload-react-native --api-key #{ENV["BUGSNAG_API_KEY"]} --code-bundle-id #{version} --platform ios --source-map build/CodePush/main.jsbundle.map --bundle build/CodePush/main.jsbundle")
   end
 
   desc "Push a new beta build to TestFlight"
@@ -98,7 +98,6 @@ platform :ios do
       git_url: match_git_url,
       keychain_name: ENV["KEYCHAIN_NAME"],
       keychain_password: ENV["KEYCHAIN_PASSWORD"],
-      readonly: ENV["CI"] == "true"
     )
 
     increment_version_number(

@@ -174,7 +174,7 @@ export const NotificationModal: FunctionComponent = () => {
 
     if (notificationPayload && notificationPayload.notificationList) {
       return (
-        <>
+        <React.Fragment>
           {notificationPayload.notificationList.map((elem) => (
             <NotificationItem
               key={elem.delivery_id}
@@ -183,13 +183,13 @@ export const NotificationModal: FunctionComponent = () => {
               onFlagClick={onFlagClick}
             />
           ))}
-        </>
+        </React.Fragment>
       );
     }
 
     if (notificationPayload) {
       return (
-        <>
+        <React.Fragment>
           <div className={style.notifyContainer}>
             <div className={style.greyCircle}>
               {notificationPayload.image && (
@@ -225,7 +225,7 @@ export const NotificationModal: FunctionComponent = () => {
               </Button>
             )}
           </div>
-        </>
+        </React.Fragment>
       );
     }
   }

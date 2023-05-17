@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 
 import { AppIntlProvider } from "./languages";
 
@@ -28,9 +28,11 @@ import {
 import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 
-import { KeyRingStatus } from "@keplr-wallet/background";
+import {
+  KeyRingStatus,
+  StartAutoLockMonitoringMsg,
+} from "@keplr-wallet/background";
 import Modal from "react-modal";
-import { ChainSuggestedPage } from "./pages/chain/suggest";
 import { LedgerGrantPage } from "./pages/ledger";
 import { SettingPage } from "./pages/setting";
 import { AddressBookPage } from "./pages/setting/address-book";
@@ -39,27 +41,23 @@ import {
   SettingConnectionsPage,
   SettingSecret20ViewingKeyConnectionsPage,
 } from "./pages/setting/connections";
-import { CreditPage } from "./pages/setting/credit";
 import { ExportPage } from "./pages/setting/export";
 import { SettingFiatPage } from "./pages/setting/fiat";
 import { ChangeNamePage } from "./pages/setting/keyring/change";
 import { SettingLanguagePage } from "./pages/setting/language";
 import { AddTokenPage } from "./pages/setting/token/add";
 import { ManageTokenPage } from "./pages/setting/token/manage";
-import { SignPage } from "./pages/sign";
 import { StoreProvider, useStore } from "./stores";
 
-// import * as BackgroundTxResult from "../../background/tx/foreground";
-
-import { AdditonalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
+import { AdditionalIntlMessages, LanguageToFiatCurrency } from "./config.ui";
 
 import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { LogPageViewWrapper } from "@components/analytics";
 import manifest from "./manifest.json";
 import { ChatPage } from "./pages/chat";
 import { ChatSection } from "./pages/chat-section";
 import { ExportToMobilePage } from "./pages/setting/export-to-mobile";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { ChatStoreProvider } from "@components/chat/store";
 import { NewChat } from "./pages/new-chat";
 import { ChatSettings } from "./pages/setting/chat";
@@ -72,10 +70,22 @@ import { ReviewGroupChat } from "./pages/group-chat/review-details";
 import { GroupChatSection } from "./pages/group-chat/chat-section";
 import { EditMember } from "./pages/group-chat/edit-member";
 import { AgentChatSection } from "./pages/agent-chat-section";
-import { NotificationOrganizations } from "./pages/notiphy-notification/notification-organizations/index";
-import { NotificationTopics } from "./pages/notiphy-notification/notification-topics/index";
-import { SettingNotifications } from "./pages/setting/notification/index";
-import { ReviewNotification } from "./pages/notiphy-notification/review-notification/index";
+import { NotificationOrganizations } from "./pages/notiphy-notification/notification-organizations";
+import { NotificationTopics } from "./pages/notiphy-notification/notification-topics";
+import { SettingNotifications } from "./pages/setting/notification";
+import { ReviewNotification } from "./pages/notiphy-notification/review-notification";
+import { KeystoneImportPubkeyPage } from "./pages/keystone";
+import { KeystoneSignPage } from "./pages/keystone/sign";
+import { SettingEndpointsPage } from "./pages/setting/endpoints";
+import { SettingAutoLockPage } from "./pages/setting/autolock";
+import { SettingSecurityPrivacyPage } from "./pages/setting/security-privacy";
+import { ChainActivePage } from "./pages/setting/chain-active";
+import { SettingPermissionsGetChainInfosPage } from "./pages/setting/security-privacy/permissions/get-chain-infos";
+import { AuthZPage } from "./pages/authz";
+import { ICNSAdr36SignPage } from "./pages/icns/sign";
+import { SignPage } from "./pages/sign";
+import { ChainSuggestedPage } from "./pages/chain/suggest";
+import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -84,10 +94,10 @@ window.keplr = new Keplr(
 );
 
 // Make sure that icon file will be included in bundle
-require("@assets/temp-icon.svg");
-require("@assets/icon/icon-16.png");
-require("@assets/icon/icon-48.png");
-require("@assets/icon/icon-128.png");
+require("@assets/logo-256.svg");
+require("./public/assets/icon/icon-16.png");
+require("./public/assets/icon/icon-48.png");
+require("./public/assets/icon/icon-128.png");
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -115,6 +125,16 @@ Modal.defaultStyles = {
 
 const StateRenderer: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
+
+  useEffect(() => {
+    // Notify to auto lock service to start activation check whenever the keyring is unlocked.
+    if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
+      const msg = new StartAutoLockMonitoringMsg();
+      const requester = new InExtensionMessageRequester();
+      requester.sendMessage(BACKGROUND_PORT, msg);
+    }
+  }, [keyRingStore.status]);
+
   if (keyRingStore.status === KeyRingStatus.UNLOCKED) {
     return <MainPage />;
   } else if (keyRingStore.status === KeyRingStatus.LOCKED) {
@@ -127,8 +147,8 @@ const StateRenderer: FunctionComponent = observer(() => {
     return (
       <div style={{ height: "100%" }}>
         <Banner
-          icon={require("@assets/temp-icon.svg")}
-          logo={require("@assets/logo-temp.png")}
+          icon={require("@assets/logo-256.svg")}
+          logo={require("@assets/brand-text.png")}
         />
       </div>
     );
@@ -136,8 +156,8 @@ const StateRenderer: FunctionComponent = observer(() => {
     return (
       <div style={{ height: "100%" }}>
         <Banner
-          icon={require("@assets/temp-icon.svg")}
-          logo={require("@assets/logo-temp.png")}
+          icon={require("@assets/logo-256.svg")}
+          logo={require("@assets/brand-text.png")}
         />
       </div>
     );
@@ -150,7 +170,7 @@ const Application: FunctionComponent = () => {
   return (
     <StoreProvider>
       <AppIntlProvider
-        additionalMessages={AdditonalIntlMessages}
+        additionalMessages={AdditionalIntlMessages}
         languageToFiatCurrency={LanguageToFiatCurrency}
       >
         <LoadingIndicatorProvider>
@@ -158,193 +178,218 @@ const Application: FunctionComponent = () => {
             <NotificationProvider>
               <ConfirmProvider>
                 <HashRouter>
-                  <LogPageViewWrapper>
-                    <ChatStoreProvider>
-                      <Switch>
-                        <Route exact path="/" component={StateRenderer} />
-                        <Route exact path="/unlock" component={LockPage} />
-                        <Route exact path="/access" component={AccessPage} />
-                        <Route
-                          exact
-                          path="/notification"
-                          component={NotificationPage}
-                        />
-                        <Route
-                          exact
-                          path="/notification/organisations/:type"
-                          component={NotificationOrganizations}
-                        />
-                        <Route
-                          exact
-                          path="/notification/topics/:type"
-                          component={NotificationTopics}
-                        />
-                        <Route
-                          exact
-                          path="/notification/review"
-                          component={ReviewNotification}
-                        />
-
-                        <Route exact path="/chat" component={ChatPage} />
-                        <Route
-                          exact
-                          path="/chat/:name"
-                          component={ChatSection}
-                        />
-                        <Route
-                          exact
-                          path="/chat/group-chat/create"
-                          component={CreateGroupChat}
-                        />
-                        <Route
-                          exact
-                          path="/chat/group-chat/add-member"
-                          component={AddMember}
-                        />
-                        <Route
-                          exact
-                          path="/chat/group-chat/edit-member"
-                          component={EditMember}
-                        />
-                        <Route
-                          exact
-                          path="/chat/group-chat/review-details"
-                          component={ReviewGroupChat}
-                        />
-                        <Route
-                          exact
-                          path="/chat/group-chat-section/:name"
-                          component={GroupChatSection}
-                        />
-                        <Route
-                          exact
-                          path="/chat/agent/:name"
-                          component={AgentChatSection}
-                        />
-                        <Route exact path="/more" component={MorePage} />
-                        <Route
-                          exact
-                          path="/access/viewing-key"
-                          component={Secret20ViewingKeyAccessPage}
-                        />
-                        <Route
-                          exact
-                          path="/register"
-                          component={RegisterPage}
-                        />
-                        <Route exact path="/send" component={SendPage} />
-                        <Route
-                          exact
-                          path="/ibc-transfer"
-                          component={IBCTransferPage}
-                        />
-                        <Route exact path="/setting" component={SettingPage} />
-                        <Route
-                          exact
-                          path="/ledger-grant"
-                          component={LedgerGrantPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/language"
-                          component={SettingLanguagePage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/notifications"
-                          component={SettingNotifications}
-                        />
-
-                        <Route
-                          exact
-                          path="/setting/fiat"
-                          component={SettingFiatPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/connections"
-                          component={SettingConnectionsPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/connections/viewing-key/:contractAddress"
-                          component={SettingSecret20ViewingKeyConnectionsPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/address-book"
-                          component={AddressBookPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/export-to-mobile"
-                          component={ExportToMobilePage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/chat"
-                          component={ChatSettings}
-                        />
-                        <Route
-                          exact
-                          path="/setting/chat/block"
-                          component={BlockList}
-                        />
-                        <Route
-                          exact
-                          path="/setting/chat/privacy"
-                          component={Privacy}
-                        />
-                        <Route
-                          exact
-                          path="/setting/chat/readRecipt"
-                          component={ReadRecipt}
-                        />
-                        <Route
-                          exact
-                          path="/setting/credit"
-                          component={CreditPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/set-keyring"
-                          component={SetKeyRingPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/export/:index"
-                          component={ExportPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/clear/:index"
-                          component={ClearPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/keyring/change/name/:index"
-                          component={ChangeNamePage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/token/add"
-                          component={AddTokenPage}
-                        />
-                        <Route
-                          exact
-                          path="/setting/token/manage"
-                          component={ManageTokenPage}
-                        />
-                        <Route exact path="/new-chat" component={NewChat} />
-                        <Route path="/sign" component={SignPage} />
-                        <Route
-                          path="/suggest-chain"
-                          component={ChainSuggestedPage}
-                        />
-                        <Route path="*" component={StateRenderer} />
-                      </Switch>
-                    </ChatStoreProvider>
-                  </LogPageViewWrapper>
+                  <ChatStoreProvider>
+                    <Switch>
+                      <Route exact path="/" component={StateRenderer} />
+                      <Route exact path="/unlock" component={LockPage} />
+                      <Route exact path="/access" component={AccessPage} />
+                      <Route
+                        exact
+                        path="/access/viewing-key"
+                        component={Secret20ViewingKeyAccessPage}
+                      />
+                      <Route exact path="/register" component={RegisterPage} />
+                      <Route exact path="/send" component={SendPage} />
+                      <Route
+                        exact
+                        path="/ibc-transfer"
+                        component={IBCTransferPage}
+                      />
+                      <Route exact path="/setting" component={SettingPage} />
+                      <Route
+                        exact
+                        path="/keystone/import-pubkey"
+                        component={KeystoneImportPubkeyPage}
+                      />
+                      <Route
+                        exact
+                        path="/keystone/sign"
+                        component={KeystoneSignPage}
+                      />
+                      <Route
+                        exact
+                        path="/ledger-grant"
+                        component={LedgerGrantPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/language"
+                        component={SettingLanguagePage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/fiat"
+                        component={SettingFiatPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/connections"
+                        component={SettingConnectionsPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/connections/viewing-key/:contractAddress"
+                        component={SettingSecret20ViewingKeyConnectionsPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/address-book"
+                        component={AddressBookPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/export-to-mobile"
+                        component={ExportToMobilePage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/set-keyring"
+                        component={SetKeyRingPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/export/:index"
+                        component={ExportPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/clear/:index"
+                        component={ClearPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/keyring/change/name/:index"
+                        component={ChangeNamePage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/token/add"
+                        component={AddTokenPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/token/manage"
+                        component={ManageTokenPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/endpoints"
+                        component={SettingEndpointsPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/autolock"
+                        component={SettingAutoLockPage}
+                      />
+                      <Route
+                        exact
+                        path="/setting/security-privacy"
+                        component={SettingSecurityPrivacyPage}
+                      />
+                      <Route path="/sign" component={SignPage} />
+                      <Route
+                        path="/icns/adr36-signatures"
+                        component={ICNSAdr36SignPage}
+                      />
+                      <Route
+                        path="/suggest-chain"
+                        component={ChainSuggestedPage}
+                      />
+                      <Route
+                        path="/permissions/grant/get-chain-infos"
+                        component={GrantGlobalPermissionGetChainInfosPage}
+                      />
+                      <Route
+                        path="/setting/permissions/get-chain-infos"
+                        component={SettingPermissionsGetChainInfosPage}
+                      />
+                      <Route
+                        path="/setting/chain-active"
+                        component={ChainActivePage}
+                      />
+                      <Route path="/authz" component={AuthZPage} />
+                      <Route
+                        exact
+                        path="/notification"
+                        component={NotificationPage}
+                      />
+                      <Route
+                        exact
+                        path="/notification/organisations/:type"
+                        component={NotificationOrganizations}
+                      />
+                      <Route
+                        exact
+                        path="/notification/topics/:type"
+                        component={NotificationTopics}
+                      />
+                      <Route
+                        exact
+                        path="/notification/review"
+                        component={ReviewNotification}
+                      />
+                      <Route exact path="/chat" component={ChatPage} />
+                      <Route exact path="/chat/:name" component={ChatSection} />
+                      <Route exact path="/new-chat" component={NewChat} />
+                      <Route
+                        exact
+                        path="/chat/group-chat/create"
+                        component={CreateGroupChat}
+                      />
+                      <Route
+                        exact
+                        path="/chat/group-chat/add-member"
+                        component={AddMember}
+                      />
+                      <Route
+                        exact
+                        path="/chat/group-chat/edit-member"
+                        component={EditMember}
+                      />
+                      <Route
+                        exact
+                        path="/chat/group-chat/review-details"
+                        component={ReviewGroupChat}
+                      />
+                      <Route
+                        exact
+                        path="/chat/group-chat-section/:name"
+                        component={GroupChatSection}
+                      />
+                      <Route
+                        exact
+                        path="/chat/agent/:name"
+                        component={AgentChatSection}
+                      />
+                      <Route exact path="/more" component={MorePage} />
+                      <Route
+                        exact
+                        path="/setting/notifications"
+                        component={SettingNotifications}
+                      />
+                      <Route
+                        exact
+                        path="/setting/chat"
+                        component={ChatSettings}
+                      />
+                      <Route
+                        exact
+                        path="/setting/chat/block"
+                        component={BlockList}
+                      />
+                      <Route
+                        exact
+                        path="/setting/chat/privacy"
+                        component={Privacy}
+                      />
+                      <Route
+                        exact
+                        path="/setting/chat/readRecipt"
+                        component={ReadRecipt}
+                      />
+                      <Route path="*" component={StateRenderer} />
+                    </Switch>
+                  </ChatStoreProvider>
                 </HashRouter>
               </ConfirmProvider>
             </NotificationProvider>

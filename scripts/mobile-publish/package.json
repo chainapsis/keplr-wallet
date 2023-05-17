@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "repository-dispatch": "npx zx ./repository-dispatch.mjs",
-    "publish-ios": "npx zx ./publish.mjs ios",
-    "publish-android": "npx zx ./publish.mjs android"
+    "repository-dispatch": "zx ./repository-dispatch.mjs",
+    "publish-ios": "zx ./publish.mjs ios",
+    "publish-android": "zx ./publish.mjs android"
   },
   "devDependencies": {
     "@octokit/core": "^3.5.1",

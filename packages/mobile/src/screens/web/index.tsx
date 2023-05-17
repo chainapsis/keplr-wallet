@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ViewStyle,
 } from "react-native";
 import { useStyle } from "../../styles";
 import { useSmartNavigation } from "../../navigation";
@@ -22,6 +23,7 @@ export const WebScreen: FunctionComponent = () => {
 
   return (
     <PageWithScrollViewInBottomTabView
+      backgroundMode="gradient"
       contentContainerStyle={style.get("flex-grow-1")}
       style={StyleSheet.flatten([
         style.flatten(["padding-x-20"]),
@@ -33,12 +35,12 @@ export const WebScreen: FunctionComponent = () => {
       <Text
         style={style.flatten([
           "h3",
-          "color-text-black-high",
+          "color-text-high",
           "margin-top-44",
           "margin-bottom-20",
         ])}
       >
-        Discover DeFi
+        Discover Apps
       </Text>
       <WebpageImageButton
         name="Osmosis"
@@ -48,10 +50,51 @@ export const WebScreen: FunctionComponent = () => {
         }}
       />
       <WebpageImageButton
+        name="Stargaze"
+        source={require("../../assets/image/webpage/stargaze.png")}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.Stargaze", {});
+        }}
+      />
+      <WebpageImageButton
+        name="Junoswap"
+        source={require("../../assets/image/webpage/junoswap.png")}
+        nameContainerStyle={style.flatten(["flex-row"])}
+        onPress={() => {
+          smartNavigation.pushSmart("Web.Junoswap", {});
+        }}
+      />
+      <WebpageImageButton
+        name="Osmosis"
+        source={require("../../assets/image/webpage/osmosis-frontier.png")}
+        nameContainerStyle={style.flatten(["flex-row"])}
+        nameAppend={
+          <View style={style.flatten(["justify-end"])}>
+            <Image
+              source={require("../../assets/image/webpage/osmosis-frontier-text.png")}
+              style={{
+                width: 52.8,
+                height: 18,
+                marginLeft: 8,
+                marginBottom: 7,
+              }}
+              fadeDuration={0}
+            />
+          </View>
+        }
+        onPress={() => {
+          smartNavigation.pushSmart("Web.OsmosisFrontier", {});
+        }}
+      />
+      <WebpageImageButton
         overrideInner={
           <View style={style.flatten(["flex-1", "items-center"])}>
             <Text
-              style={style.flatten(["h4", "color-text-black-very-very-low"])}
+              style={style.flatten([
+                "h4",
+                "color-gray-200",
+                "dark:color-platinum-300",
+              ])}
             >
               Coming soon
             </Text>
@@ -67,8 +110,17 @@ export const WebpageImageButton: FunctionComponent<{
   source?: ImageSourcePropType;
   onPress?: () => void;
 
+  nameContainerStyle?: ViewStyle;
+  nameAppend?: React.ReactElement;
   overrideInner?: React.ReactElement;
-}> = ({ name, source, onPress, overrideInner }) => {
+}> = ({
+  name,
+  source,
+  onPress,
+  nameContainerStyle,
+  nameAppend,
+  overrideInner,
+}) => {
   const style = useStyle();
 
   const height = 104;
@@ -106,7 +158,8 @@ export const WebpageImageButton: FunctionComponent<{
           "items-center",
           "overflow-hidden",
           "border-radius-8",
-          "background-color-big-image-placeholder",
+          "background-color-gray-100@50%",
+          "dark:background-color-platinum-500@50%",
           "margin-bottom-16",
         ]),
         {
@@ -158,7 +211,10 @@ export const WebpageImageButton: FunctionComponent<{
             overrideInner
           ) : (
             <React.Fragment>
-              <Text style={style.flatten(["h2", "color-white"])}>{name}</Text>
+              <View style={nameContainerStyle}>
+                <Text style={style.flatten(["h2", "color-white"])}>{name}</Text>
+                {nameAppend}
+              </View>
               <View style={style.get("flex-1")} />
               <GoIcon
                 width={34.7}

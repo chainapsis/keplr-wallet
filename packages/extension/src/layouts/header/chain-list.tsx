@@ -1,4 +1,3 @@
-import { ChainInfoWithEmbed } from "@keplr-wallet/background";
 import classnames from "classnames";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent } from "react";
@@ -14,9 +13,10 @@ import { useConfirm } from "@components/confirm";
 import { messageAndGroupListenerUnsubscribe } from "@graphQL/messages-api";
 import { useStore } from "../../stores";
 import style from "./chain-list.module.scss";
+import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 
 const ChainElement: FunctionComponent<{
-  chainInfo: ChainInfoWithEmbed;
+  chainInfo: ChainInfoWithCoreTypes;
 }> = observer(({ chainInfo }) => {
   const { chainStore, analyticsStore } = useStore();
   const history = useHistory();
@@ -84,13 +84,46 @@ const ChainElement: FunctionComponent<{
   );
 });
 
+const Divider: FunctionComponent = (props) => {
+  return (
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <hr
+        className="my-3"
+        style={{
+          flex: 1,
+          borderTop: "1px solid #64646D",
+        }}
+      />
+      {props.children ? (
+        <div
+          style={{
+            fontSize: "14px",
+            color: "rgba(255, 255, 255)",
+            margin: "0 8px",
+          }}
+        >
+          {props.children}
+        </div>
+      ) : null}
+      <hr
+        className="my-3"
+        style={{
+          flex: 1,
+          borderTop: "1px solid #64646D",
+        }}
+      />
+    </div>
+  );
+};
+
 export const ChainList: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
+  const intl = useIntl();
 
-  const mainChainList = chainStore.chainInfos.filter(
+  const mainChainList = chainStore.chainInfosInUI.filter(
     (chainInfo) => !chainInfo.beta
   );
-  const betaChainList = chainStore.chainInfos.filter(
+  const betaChainList = chainStore.chainInfosInUI.filter(
     (chainInfo) => chainInfo.beta
   );
 
@@ -99,36 +132,22 @@ export const ChainList: FunctionComponent = observer(() => {
       {mainChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}
-      {betaChainList.length > 0 ? (
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <hr
-            className="my-3"
-            style={{
-              flex: 1,
-              borderTop: "1px solid rgba(255, 255, 255)",
-            }}
-          />
-          <div
-            style={{
-              fontSize: "14px",
-              color: "rgba(255, 255, 255)",
-              margin: "0 8px",
-            }}
-          >
-            Beta support
-          </div>
-          <hr
-            className="my-3"
-            style={{
-              flex: 1,
-              borderTop: "1px solid rgba(255, 255, 255)",
-            }}
-          />
-        </div>
-      ) : null}
+      {betaChainList.length > 0 ? <Divider>Beta support</Divider> : null}
       {betaChainList.map((chainInfo) => (
         <ChainElement key={chainInfo.chainId} chainInfo={chainInfo.raw} />
       ))}
+
+      {/* <Divider /> */}
+      <a
+        href="https://chains.keplr.app/"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ display: "none" }}
+      >
+        <div className={classnames(style.chainName, style.addChain)}>
+          <div>{intl.formatMessage({ id: "main.suggest.chain.link" })}</div>
+        </div>
+      </a>
     </div>
   );
 });

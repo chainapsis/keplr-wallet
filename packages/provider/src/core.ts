@@ -1,20 +1,24 @@
 import {
   ChainInfo,
+  EthSignType,
   Keplr as IKeplr,
   KeplrIntereactionOptions,
   KeplrMode,
   KeplrSignOptions,
   Key,
-} from "@keplr-wallet/types";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
-import {
   BroadcastMode,
   AminoSignResponse,
   StdSignDoc,
   StdTx,
-  OfflineSigner,
+  OfflineAminoSigner,
   StdSignature,
-} from "@cosmjs/launchpad";
+  DirectSignResponse,
+  OfflineDirectSigner,
+  ICNSAdr36Signatures,
+  ChainInfoWithoutEndpoints,
+  SecretUtils,
+} from "@keplr-wallet/types";
+import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   EnableAccessMsg,
   SuggestChainInfoMsg,
@@ -29,18 +33,23 @@ import {
   RequestDecryptMsg,
   GetTxEncryptionKeyMsg,
   RequestVerifyADR36AminoSignDoc,
+  RequestSignEIP712CosmosTxMsg_v0,
+  GetAnalyticsIdMsg,
+  RequestICNSAdr36SignaturesMsg,
+  GetChainInfosWithoutEndpointsMsg,
+  DisableAccessMsg,
+  ChangeKeyRingNameMsg,
 } from "./types";
-import { SecretUtils } from "secretjs/types/enigmautils";
 
 import { KeplrEnigmaUtils } from "./enigma";
-import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
 
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
 import Long from "long";
 import { Buffer } from "buffer/";
+import { KeplrCoreTypes } from "./core-types";
 
-export class Keplr implements IKeplr {
+export class Keplr implements IKeplr, KeplrCoreTypes {
   protected enigmaUtils: Map<string, SecretUtils> = new Map();
 
   public defaultOptions: KeplrIntereactionOptions = {};
@@ -62,7 +71,49 @@ export class Keplr implements IKeplr {
     );
   }
 
-  async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+  async disable(chainIds?: string | string[]): Promise<void> {
+    if (typeof chainIds === "string") {
+      chainIds = [chainIds];
+    }
+
+    await this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new DisableAccessMsg(chainIds ?? [])
+    );
+  }
+
+  async experimentalSuggestChain(
+    chainInfo: ChainInfo & {
+      // Legacy
+      gasPriceStep?: {
+        readonly low: number;
+        readonly average: number;
+        readonly high: number;
+      };
+    }
+  ): Promise<void> {
+    if (chainInfo.gasPriceStep) {
+      // Gas price step in ChainInfo is legacy format.
+      // Try to change the recent format for backward-compatibility.
+      const gasPriceStep = { ...chainInfo.gasPriceStep };
+      for (const feeCurrency of chainInfo.feeCurrencies) {
+        if (!feeCurrency.gasPriceStep) {
+          (feeCurrency as {
+            gasPriceStep?: {
+              readonly low: number;
+              readonly average: number;
+              readonly high: number;
+            };
+          }).gasPriceStep = gasPriceStep;
+        }
+      }
+      delete chainInfo.gasPriceStep;
+
+      console.warn(
+        "The `gasPriceStep` field of the `ChainInfo` has been moved under `feeCurrencies`. This is automatically handled as of right now, but the upcoming update would potentially cause errors."
+      );
+    }
+
     const msg = new SuggestChainInfoMsg(chainInfo);
     await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
@@ -70,6 +121,11 @@ export class Keplr implements IKeplr {
   async getKey(chainId: string): Promise<Key> {
     const msg = new GetKeyMsg(chainId);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
+    const msg = new GetChainInfosWithoutEndpointsMsg();
+    return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).chainInfos;
   }
 
   async sendTx(
@@ -138,33 +194,9 @@ export class Keplr implements IKeplr {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
-    let isADR36WithString = false;
-    if (typeof data === "string") {
-      data = Buffer.from(data).toString("base64");
-      isADR36WithString = true;
-    } else {
-      data = Buffer.from(data).toString("base64");
-    }
-
-    const signDoc = {
-      chain_id: "",
-      account_number: "0",
-      sequence: "0",
-      fee: {
-        gas: "0",
-        amount: [],
-      },
-      msgs: [
-        {
-          type: "sign/MsgSignData",
-          value: {
-            signer,
-            data,
-          },
-        },
-      ],
-      memo: "",
-    };
+    let isADR36WithString: boolean;
+    [data, isADR36WithString] = this.getDataForADR36(data);
+    const signDoc = this.getADR36SignDoc(signer, data);
 
     const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
       isADR36WithString,
@@ -188,17 +220,59 @@ export class Keplr implements IKeplr {
     );
   }
 
-  getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner {
+  async signEthereum(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    type: EthSignType
+  ): Promise<Uint8Array> {
+    let isADR36WithString: boolean;
+    [data, isADR36WithString] = this.getDataForADR36(data);
+    const signDoc = this.getADR36SignDoc(signer, data);
+
+    if (data === "") {
+      throw new Error("Signing empty data is not supported.");
+    }
+
+    const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
+      isADR36WithString,
+      ethSignType: type,
+    });
+    const signature = (await this.requester.sendMessage(BACKGROUND_PORT, msg))
+      .signature;
+    return Buffer.from(signature.signature, "base64");
+  }
+
+  signICNSAdr36(
+    chainId: string,
+    contractAddress: string,
+    owner: string,
+    username: string,
+    addressChainIds: string[]
+  ): Promise<ICNSAdr36Signatures> {
+    return this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new RequestICNSAdr36SignaturesMsg(
+        chainId,
+        contractAddress,
+        owner,
+        username,
+        addressChainIds
+      )
+    );
+  }
+
+  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
     return new CosmJSOfflineSigner(chainId, this);
   }
 
-  getOfflineSignerOnlyAmino(chainId: string): OfflineSigner {
+  getOfflineSignerOnlyAmino(chainId: string): OfflineAminoSigner {
     return new CosmJSOfflineSignerOnlyAmino(chainId, this);
   }
 
   async getOfflineSignerAuto(
     chainId: string
-  ): Promise<OfflineSigner | OfflineDirectSigner> {
+  ): Promise<OfflineAminoSigner | OfflineDirectSigner> {
     const key = await this.getKey(chainId);
     if (key.isNanoLedger) {
       return new CosmJSOfflineSignerOnlyAmino(chainId, this);
@@ -276,5 +350,76 @@ export class Keplr implements IKeplr {
     const enigmaUtils = new KeplrEnigmaUtils(chainId, this);
     this.enigmaUtils.set(chainId, enigmaUtils);
     return enigmaUtils;
+  }
+
+  async experimentalSignEIP712CosmosTx_v0(
+    chainId: string,
+    signer: string,
+    eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    signDoc: StdSignDoc,
+    signOptions: KeplrSignOptions = {}
+  ): Promise<AminoSignResponse> {
+    const msg = new RequestSignEIP712CosmosTxMsg_v0(
+      chainId,
+      signer,
+      eip712,
+      signDoc,
+      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    );
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  protected getDataForADR36(data: string | Uint8Array): [string, boolean] {
+    let isADR36WithString = false;
+    if (typeof data === "string") {
+      data = Buffer.from(data).toString("base64");
+      isADR36WithString = true;
+    } else {
+      data = Buffer.from(data).toString("base64");
+    }
+    return [data, isADR36WithString];
+  }
+
+  protected getADR36SignDoc(signer: string, data: string): StdSignDoc {
+    return {
+      chain_id: "",
+      account_number: "0",
+      sequence: "0",
+      fee: {
+        gas: "0",
+        amount: [],
+      },
+      msgs: [
+        {
+          type: "sign/MsgSignData",
+          value: {
+            signer,
+            data,
+          },
+        },
+      ],
+      memo: "",
+    };
+  }
+
+  __core__getAnalyticsId(): Promise<string> {
+    const msg = new GetAnalyticsIdMsg();
+    return this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async changeKeyRingName({
+    defaultName,
+    editable = true,
+  }: {
+    defaultName: string;
+    editable?: boolean;
+  }): Promise<string> {
+    const msg = new ChangeKeyRingNameMsg(defaultName, editable);
+
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

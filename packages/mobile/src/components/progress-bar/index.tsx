@@ -11,7 +11,8 @@ export const ProgressBar: FunctionComponent<{
     <View
       style={style.flatten([
         "height-8",
-        "background-color-border-white",
+        "background-color-gray-50",
+        "dark:background-color-platinum-500",
         "border-radius-32",
         "overflow-hidden",
       ])}
@@ -20,7 +21,7 @@ export const ProgressBar: FunctionComponent<{
         style={StyleSheet.flatten([
           style.flatten([
             "height-8",
-            "background-color-primary",
+            "background-color-blue-400",
             "border-radius-32",
           ]),
           {

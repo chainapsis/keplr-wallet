@@ -1,12 +1,14 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
-
-import { Button } from "reactstrap";
+import React, { FunctionComponent, useMemo, useRef, useState } from "react";
 
 import styleTxButton from "./tx-button.module.scss";
+
+import { Button, Tooltip } from "reactstrap";
 
 import { observer } from "mobx-react-lite";
 
 import { useStore } from "../../stores";
+
+import Modal from "react-modal";
 
 import { useNotification } from "@components/notification";
 
@@ -14,35 +16,39 @@ import { FormattedMessage } from "react-intl";
 import { useHistory } from "react-router";
 
 import { Dec } from "@keplr-wallet/unit";
-
-import reward from "@assets/icon/reward.png";
 import send from "@assets/icon/send.png";
+import reward from "@assets/icon/reward.png";
 import stake from "@assets/icon/stake.png";
 
 import activeReward from "@assets/icon/activeReward.png";
-import activeSend from "@assets/icon/activeSend.png";
 import activeStake from "@assets/icon/activeStake.png";
+import activeSend from "@assets/icon/activeSend.png";
+import { DepositModal } from "./qr-code";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
 
-  const notification = useNotification();
-
   const [isActiveSend, setIsActiveSend] = useState(false);
   const [isActiveStake, setIsActiveStake] = useState(false);
   const [isActiveReward, setIsActiveReward] = useState(false);
-
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
   const queryBalances = queries.queryBalances.getQueryBech32Address(
     accountInfo.bech32Address
   );
 
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+
+  const [sendTooltipOpen, setSendTooltipOpen] = useState(false);
+
   const history = useHistory();
 
   const hasAssets =
     queryBalances.balances.find((bal) => bal.balance.toDec().gt(new Dec(0))) !==
     undefined;
+
+  const sendBtnRef = useRef<HTMLButtonElement>(null);
+  const notification = useNotification();
 
   const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
     accountInfo.bech32Address
@@ -104,7 +110,13 @@ export const TxButtonView: FunctionComponent = observer(() => {
       className={styleTxButton.containerTxButton}
       style={{ margin: "0px -2px" }}
     >
+      {/*
+        "Disabled" property in button tag will block the mouse enter/leave events.
+        So, tooltip will not work as expected.
+        To solve this problem, don't add "disabled" property to button tag and just add "disabled" class manually.
+       */}
       <Button
+        innerRef={sendBtnRef}
         className={styleTxButton.button}
         style={
           !hasAssets
@@ -219,6 +231,40 @@ export const TxButtonView: FunctionComponent = observer(() => {
           <FormattedMessage id="main.stake.button.stake" />
         </Button>
       </a>
+      {!hasAssets ? (
+        <Tooltip
+          placement="bottom"
+          isOpen={sendTooltipOpen}
+          target={sendBtnRef}
+          toggle={() => setSendTooltipOpen((value) => !value)}
+          fade
+        >
+          <FormattedMessage id="main.account.tooltip.no-asset" />
+        </Tooltip>
+      ) : null}
+      <Modal
+        style={{
+          content: {
+            width: "330px",
+            minWidth: "330px",
+            minHeight: "unset",
+            maxHeight: "unset",
+          },
+        }}
+        isOpen={isDepositModalOpen}
+        onRequestClose={() => {
+          setIsDepositModalOpen(false);
+        }}
+      >
+        <DepositModal
+          chainName={chainStore.current.chainName}
+          bech32Address={accountInfo.bech32Address}
+          isDepositOpen={isDepositModalOpen}
+          setIsDepositOpen={setIsDepositModalOpen}
+        />
+      </Modal>
     </div>
   );
 });
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires

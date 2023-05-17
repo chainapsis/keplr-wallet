@@ -103,9 +103,9 @@ export const AddAddressModal: FunctionComponent<{
             disabled={
               !name ||
               name.trim() === "" ||
-              (recipientConfig.getError() != null &&
+              (recipientConfig.error != null &&
                 validateAgentAddress(recipientConfig.rawRecipient)) ||
-              memoConfig.getError() != null
+              memoConfig.error != null
             }
             onClick={async (e) => {
               e.preventDefault();

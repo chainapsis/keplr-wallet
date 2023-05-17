@@ -28,7 +28,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
   const style = useStyle();
 
   return (
-    <PageWithView>
+    <PageWithView backgroundMode="secondary">
       <View style={style.flatten(["padding-page", "flex-grow-1"])}>
         <View style={style.get("flex-2")} />
         <View style={style.flatten(["items-center"])}>
@@ -38,7 +38,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
           <Text
             style={style.flatten([
               "h3",
-              "color-text-black-high",
+              "color-text-high",
               "margin-top-68",
               "margin-bottom-46",
             ])}
@@ -48,18 +48,18 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
           <Text
             style={style.flatten([
               "body1",
-              "color-text-black-low",
+              "color-text-low",
               "text-center",
               "margin-x-18",
               "margin-bottom-24",
             ])}
           >
-            {`Import your account(s) by going to\n‘Settings > Link Keplr Mobile’ on Keplr Extension and scanning the QR code`}
+            {`Import your account(s) by going to\n‘Settings > Link Fetch Mobile’ on Keplr Extension and scanning the QR code`}
           </Text>
           <Text
             style={style.flatten([
               "body3",
-              "color-text-black-low",
+              "color-text-low",
               "text-center",
               "margin-x-38",
             ])}

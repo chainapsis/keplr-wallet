@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 
 export const ChatDisclaimer = () => {
   const userState = useSelector(userDetails);
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, keyRingStore } = useStore();
   const current = chainStore.current;
   const walletAddress = accountStore.getAccount(chainStore.current.chainId)
     .bech32Address;
@@ -20,11 +20,13 @@ export const ChatDisclaimer = () => {
     if (
       walletAddress &&
       userState?.enabledChainIds.includes(current.chainId) &&
-      !userState.walletConfig.requiredNative
+      !userState.walletConfig.requiredNative &&
+      keyRingStore.keyRingType !== "ledger"
     )
       setIsOpendialog(!addresses.includes(walletAddress));
   }, [
     current.chainId,
+    keyRingStore.keyRingType,
     userState.enabledChainIds,
     userState.walletConfig.requiredNative,
     walletAddress,
@@ -42,7 +44,7 @@ export const ChatDisclaimer = () => {
   };
 
   return openDialog ? (
-    <>
+    <React.Fragment>
       <div className={style.overlay} onClick={() => handleClick(false)} />
       <div className={style.popupContainer}>
         <img
@@ -74,8 +76,8 @@ export const ChatDisclaimer = () => {
           Go To Chat
         </button>
       </div>
-    </>
+    </React.Fragment>
   ) : (
-    <></>
+    <React.Fragment />
   );
 };
