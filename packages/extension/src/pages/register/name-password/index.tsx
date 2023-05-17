@@ -67,7 +67,7 @@ export const RegisterNamePasswordScene: FunctionComponent<{
 
             if (privateKey) {
               if (privateKey.needBackUpPrivateKey) {
-                sceneTransition.replaceAll("back-up-private-key", {
+                sceneTransition.push("back-up-private-key", {
                   name: data.name,
                   password: data.password,
                   privateKey,

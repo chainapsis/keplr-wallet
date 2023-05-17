@@ -18,7 +18,7 @@ import { Buffer } from "buffer/";
 export const BackUpPrivateKeyScene: FunctionComponent<{
   name: string;
   password: string;
-  privateKey?: {
+  privateKey: {
     value: Uint8Array;
     meta: Record<string, string | undefined>;
   };
@@ -66,16 +66,12 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
           color={ColorPalette["gray-100"]}
           style={{ wordWrap: "break-word", fontFeatureSettings: `"calt" 0` }}
         >
-          {Buffer.from(privateKey?.value ?? new Uint8Array(0)).toString("hex")}
+          {Buffer.from(privateKey.value).toString("hex")}
         </Body1>
 
         <Gutter size="2rem" />
 
-        <CopyToClipboard
-          text={Buffer.from(privateKey?.value ?? new Uint8Array(0)).toString(
-            "hex"
-          )}
-        />
+        <CopyToClipboard text={Buffer.from(privateKey.value).toString("hex")} />
       </Box>
 
       <Gutter size="1.25rem" />
