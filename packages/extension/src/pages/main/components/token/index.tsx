@@ -160,8 +160,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
           <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
             <ChainImageFallback
               style={{
-                width: "2.5rem",
-                height: "2.5rem",
+                width: "2rem",
+                height: "2rem",
               }}
               src={viewToken.token.currency.coinImageUrl}
               alt={viewToken.token.currency.coinDenom}

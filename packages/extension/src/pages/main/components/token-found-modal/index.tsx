@@ -246,6 +246,10 @@ const FoundChainView: FunctionComponent<{
       <Columns sum={1} gutter="0.5rem" alignY="center">
         <Box width="2.25rem" height="2.25rem">
           <ChainImageFallback
+            style={{
+              width: "2rem",
+              height: "2rem",
+            }}
             alt="Token Found Modal Chain Image"
             src={chainStore.getChain(tokenScan.chainId).chainSymbolImageUrl}
           />
