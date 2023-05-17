@@ -78,7 +78,10 @@ export class SignInteractionStore {
     id: string,
     newSignDocWrapper: SignDocWrapper,
     signature: Uint8Array | undefined,
-    afterFn: (proceedNext: boolean) => void | Promise<void>
+    afterFn: (proceedNext: boolean) => void | Promise<void>,
+    options: {
+      preDelay?: number;
+    } = {}
   ) {
     const res = (() => {
       if (newSignDocWrapper.mode === "amino") {
@@ -97,7 +100,8 @@ export class SignInteractionStore {
         ...res,
         signature,
       },
-      afterFn
+      afterFn,
+      options
     );
   }
 

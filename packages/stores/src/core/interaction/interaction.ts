@@ -106,7 +106,10 @@ export class InteractionStore implements InteractionForegroundHandler {
   *approveWithProceedNextV2(
     ids: string | string[],
     result: unknown,
-    afterFn: (proceedNext: boolean) => void | Promise<void>
+    afterFn: (proceedNext: boolean) => void | Promise<void>,
+    options: {
+      preDelay?: number;
+    } = {}
   ) {
     if (typeof ids === "string") {
       ids = [ids];
@@ -123,6 +126,10 @@ export class InteractionStore implements InteractionForegroundHandler {
       this.markAsObsolete(id);
 
       fresh.push(id);
+    }
+
+    if (options.preDelay && options.preDelay > 0) {
+      yield new Promise((resolve) => setTimeout(resolve, options.preDelay));
     }
 
     const promises: Promise<unknown>[] = [];

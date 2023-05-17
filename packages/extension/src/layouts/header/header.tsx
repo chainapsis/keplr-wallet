@@ -6,6 +6,10 @@ import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
 import { Button, getButtonHeightRem } from "../../components/button";
 import { Skeleton } from "../../components/skeleton";
+import {
+  SpecialButton,
+  SpecialButtonHeightRem,
+} from "../../components/special-button";
 
 const pxToRem = (px: number) => {
   const base = parseFloat(
@@ -139,6 +143,10 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
       return "0";
     }
 
+    if (bottomButton.isSpecial) {
+      return bottomButtonPaddingRem * 2 + SpecialButtonHeightRem + "rem";
+    }
+
     return (
       bottomButtonPaddingRem * 2 + getButtonHeightRem(bottomButton.size) + "rem"
     );
@@ -179,19 +187,26 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
             bottom: 0,
           }}
         >
-          <Button
-            {...(() => {
-              const { type, ...other } = bottomButton;
+          {(() => {
+            if (bottomButton.isSpecial) {
+              // isSpecial is not used.
+              const { isSpecial, ...other } = bottomButton;
+              return <SpecialButton {...other} />;
+            } else {
+              // isSpecial is not used.
+              const { isSpecial, type, ...other } = bottomButton;
 
               // onSubmit prop이 존재한다면 기본적으로 type="submit"으로 설정한다
               // TODO: 만약에 bottomButton이 배열을 받을 수 있도록 수정된다면 이 부분도 수정되어야함.
 
-              return {
+              const props = {
                 ...other,
-                type: type || onSubmit ? "submit" : undefined,
+                type: type || onSubmit ? ("submit" as const) : undefined,
               };
-            })()}
-          />
+
+              return <Button {...props} />;
+            }
+          })()}
         </Box>
       ) : null}
     </Styles.Container>
