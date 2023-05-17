@@ -3,6 +3,7 @@ export * from "./arrow-across";
 export * from "./arrow-down";
 export * from "./arrow-down-tray";
 export * from "./arrow-drop-down";
+export * from "./arrow-top-right-on-square";
 export * from "./arrow-left";
 export * from "./arrow-right";
 export * from "./arrow-right-solid";

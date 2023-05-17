@@ -24,7 +24,7 @@ import {
 import { Stack } from "../../components/stack";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 import { ChainInfo } from "@keplr-wallet/types";
-import { MenuIcon } from "../../components/icon";
+import { ArrowTopRightOnSquareIcon, MenuIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { DualChart } from "./components/chart";
@@ -267,6 +267,9 @@ export const MainPage: FunctionComponent = observer(() => {
               }}
             >
               Stake with Keplr Dashboard
+              <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
+                <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
+              </Box>
             </StakeWithKeplrDashboardButton>
           ) : null}
 
@@ -283,7 +286,10 @@ export const MainPage: FunctionComponent = observer(() => {
                 });
               }}
             >
-              Stake with Keplr Dashboard
+              Manage Portfolio in Keplr Dashboard
+              <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
+                <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
+              </Box>
             </StakeWithKeplrDashboardButton>
           ) : null}
           {!isNotReady ? (
