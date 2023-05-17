@@ -114,7 +114,7 @@ export const AGENT_COMMANDS = [
     command: "/tweet",
     label: "tweet (Share your tweet)",
     icon: require("@assets/icon/agent-tweet.svg"),
-    enabled: true,
+    enabled: false,
   },
   {
     command: "/cancel",
