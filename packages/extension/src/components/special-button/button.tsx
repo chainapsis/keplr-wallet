@@ -156,7 +156,9 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           });
 
           if (onClick) {
-            onClick();
+            if (!isLoading) {
+              onClick();
+            }
           }
         }}
         onMouseEnter={() => setIsHover(true)}
