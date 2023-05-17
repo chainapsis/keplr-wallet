@@ -13,6 +13,7 @@ export const RegisterNamePasswordScene: FunctionComponent<{
   privateKey?: {
     value: Uint8Array;
     meta: Record<string, string | undefined>;
+    needBackUpPrivateKey?: boolean;
   };
   bip44Path?: {
     account: number;
@@ -65,13 +66,23 @@ export const RegisterNamePasswordScene: FunctionComponent<{
             }
 
             if (privateKey) {
-              sceneTransition.replaceAll("finalize-key", {
-                name: data.name,
-                password: data.password,
-                privateKey,
-                stepPrevious: stepPrevious + 1,
-                stepTotal,
-              });
+              if (privateKey.needBackUpPrivateKey) {
+                sceneTransition.replaceAll("back-up-private-key", {
+                  name: data.name,
+                  password: data.password,
+                  privateKey,
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal,
+                });
+              } else {
+                sceneTransition.replaceAll("finalize-key", {
+                  name: data.name,
+                  password: data.password,
+                  privateKey,
+                  stepPrevious: stepPrevious + 1,
+                  stepTotal,
+                });
+              }
             }
           })}
         >
