@@ -202,8 +202,8 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
             onClick();
           }
         }}
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => {
+        onMouseOver={() => setIsHover(true)}
+        onMouseOut={() => {
           setIsHover(false);
           // 외부에서 마우스가 up 되었을 경우 event가 발생하지 않으므로 여기서도 처리해준다.
           setIsPressed(false);
