@@ -167,6 +167,9 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
               alt={viewToken.token.currency.coinDenom}
             />
           </Skeleton>
+
+          <Gutter size="0.75rem" />
+
           <Stack gutter="0.25rem">
             <XAxis alignY="center">
               <Skeleton
