@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, MouseEvent } from "react";
 import { Styles } from "./styles";
 import { Gutter } from "../../../../components/gutter";
 import { TextInput } from "../../../../components/input";
@@ -39,24 +39,24 @@ export const SetBip44PathCard: FunctionComponent<{
 }> = observer(({ coinType, state, onClose }) => {
   const confirm = useConfirm();
 
+  const onClickReset = async (e: MouseEvent) => {
+    e.preventDefault();
+
+    if (
+      await confirm.confirm(
+        "",
+        "Closing this box will reset the HD Path. Are you sure you want to proceed?"
+      )
+    ) {
+      state.reset();
+      onClose();
+    }
+  };
+
   return (
     <Styles.Container>
       <Styles.Title>Set Custom Derivation Path</Styles.Title>
-      <Styles.CloseContainer
-        onClick={async (e) => {
-          e.preventDefault();
-
-          if (
-            await confirm.confirm(
-              "",
-              "Closing this box will reset the HD Path. Are you sure you want to proceed?"
-            )
-          ) {
-            state.reset();
-            onClose();
-          }
-        }}
-      >
+      <Styles.CloseContainer onClick={onClickReset}>
         <CloseSvg size="1.5rem" color={ColorPalette["gray-300"]} />
       </Styles.CloseContainer>
       <Gutter size="1.125rem" />
@@ -65,7 +65,17 @@ export const SetBip44PathCard: FunctionComponent<{
         <li>A lost path cannot be recovered</li>
         <li>
           If you{`'`}re unfamiliar with this feature, skip or undo this step{" "}
-          {`->`} Reset Settings
+          {`->`}{" "}
+          <span
+            style={{
+              fontWeight: 700,
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+            onClick={onClickReset}
+          >
+            Reset Settings
+          </span>
         </li>
       </ul>
       <Gutter size="1.5rem" />
