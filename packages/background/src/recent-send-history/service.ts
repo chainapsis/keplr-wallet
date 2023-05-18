@@ -1,7 +1,14 @@
 import { ChainsService } from "../chains";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { BackgroundTxService } from "../tx";
-import { action, autorun, observable, runInAction, toJS } from "mobx";
+import {
+  action,
+  autorun,
+  makeObservable,
+  observable,
+  runInAction,
+  toJS,
+} from "mobx";
 import { KVStore } from "@keplr-wallet/common";
 import { RecentSendHistory } from "./types";
 
@@ -14,15 +21,17 @@ export class RecentSendHistoryService {
     protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
     protected readonly txService: BackgroundTxService
-  ) {}
+  ) {
+    makeObservable(this);
+  }
 
   async init(): Promise<void> {
-    const recentSendHistoryMap = await this.kvStore.get<
-      Record<string, RecentSendHistory[]>
-    >("recentSendHistoryMap");
-    if (recentSendHistoryMap) {
+    const saved = await this.kvStore.get<Record<string, RecentSendHistory[]>>(
+      "recentSendHistoryMap"
+    );
+    if (saved) {
       runInAction(() => {
-        for (const [key, value] of Object.entries(recentSendHistoryMap)) {
+        for (const [key, value] of Object.entries(saved)) {
           this.recentSendHistoryMap.set(key, value);
         }
       });
