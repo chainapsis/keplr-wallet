@@ -56,9 +56,17 @@ export const GovernanceCardBody: FunctionComponent<{
     account.bech32Address
   );
 
-  const isVoted =
-    voteData.vote !== "Unspecified" &&
-    proposal?.proposalStatus === Governance.ProposalStatus.VOTING_PERIOD;
+  const isVoted = (() => {
+    if (!proposal) {
+      return false;
+    }
+
+    if (proposal.proposalStatus !== Governance.ProposalStatus.VOTING_PERIOD) {
+      return false;
+    }
+
+    return voteData.vote !== "Unspecified";
+  })();
 
   const renderProposalDateString = (proposal: ObservableQueryProposal) => {
     switch (proposal.proposalStatus) {
@@ -178,7 +186,7 @@ export const GovernanceCardBody: FunctionComponent<{
               style={style.flatten(["h5", "color-text-high"])}
             >{`#${proposal.id}`}</Text>
             <View style={style.flatten(["flex-1"])} />
-            {isVoted && <VotedStatusChip />}
+            {isVoted ? <VotedStatusChip /> : null}
             <Spacer size={8} />
             <GovernanceProposalStatusChip status={proposal.proposalStatus} />
           </View>
