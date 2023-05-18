@@ -28,6 +28,9 @@ class GasSimulatorState {
   protected _initialGasEstimated: number | null = null;
 
   @observable
+  protected _isInitialized: boolean = false;
+
+  @observable
   protected _recentGasEstimated: number | undefined = undefined;
 
   @observable.ref
@@ -43,6 +46,15 @@ class GasSimulatorState {
 
   get outdatedCosmosSdk(): boolean {
     return this._outdatedCosmosSdk;
+  }
+
+  @action
+  setIsInitialized(value: boolean) {
+    this._isInitialized = value;
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
   }
 
   @action
@@ -304,6 +316,8 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
           if (saved) {
             state.setInitialGasEstimated(saved);
           }
+
+          state.setIsInitialized(true);
         });
       })
     );
@@ -322,35 +336,29 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
         }
 
         try {
-          const tx = this.simulateGasFn();
-
           const key = this.storeKey;
           const state = this.getState(key);
 
-          state.refreshTx(tx);
+          if (!state.isInitialized) {
+            return;
+          }
+
+          const tx = this.simulateGasFn();
+          const fee = this.feeConfig.toStdFee();
+
+          runInAction(() => {
+            if (
+              (state.recentGasEstimated == null && !state.outdatedCosmosSdk) ||
+              GasSimulatorState.isZeroFee(state.stdFee?.amount) !==
+                GasSimulatorState.isZeroFee(fee.amount)
+            ) {
+              state.refreshTx(tx);
+              state.refreshStdFee(fee);
+            }
+          });
         } catch (e) {
           console.log(e);
           return;
-        }
-      })
-    );
-
-    this._disposers.push(
-      autorun(() => {
-        if (!this.enabled) {
-          return;
-        }
-
-        const fee = this.feeConfig.toStdFee();
-
-        const key = this.storeKey;
-        const state = this.getState(key);
-
-        if (
-          GasSimulatorState.isZeroFee(state.stdFee?.amount) !==
-          GasSimulatorState.isZeroFee(fee.amount)
-        ) {
-          state.refreshStdFee(fee);
         }
       })
     );
