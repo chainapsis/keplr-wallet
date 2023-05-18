@@ -15,7 +15,8 @@ import { RecentSendHistory } from "./types";
 export class RecentSendHistoryService {
   // Key: {chain_identifier}/{type}
   @observable
-  protected recentSendHistoryMap: Map<string, RecentSendHistory[]> = new Map();
+  protected readonly recentSendHistoryMap: Map<string, RecentSendHistory[]> =
+    new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
