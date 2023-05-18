@@ -348,7 +348,8 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
 
           runInAction(() => {
             if (
-              (state.recentGasEstimated == null && !state.outdatedCosmosSdk) ||
+              ((state.recentGasEstimated == null || state.error != null) &&
+                !state.outdatedCosmosSdk) ||
               GasSimulatorState.isZeroFee(state.stdFee?.amount) !==
                 GasSimulatorState.isZeroFee(fee.amount)
             ) {
