@@ -1,5 +1,4 @@
 import { ChainsService } from "../chains";
-import { PermissionService } from "../permission";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Notification } from "./types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
@@ -19,25 +18,27 @@ interface ABCIMessageLog {
 }
 
 export class BackgroundTxService {
-  protected chainsService!: ChainsService;
-  public permissionService!: PermissionService;
+  constructor(
+    protected readonly chainsService: ChainsService,
+    protected readonly notification: Notification
+  ) {}
 
-  constructor(protected readonly notification: Notification) {}
-
-  init(chainsService: ChainsService, permissionService: PermissionService) {
-    this.chainsService = chainsService;
-    this.permissionService = permissionService;
+  async init(): Promise<void> {
+    // noop
   }
 
   async sendTx(
     chainId: string,
     tx: unknown,
     mode: "async" | "sync" | "block",
-    slient: boolean
+    options: {
+      silent?: boolean;
+      onFulfill?: (tx: any) => void;
+    }
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
-    if (!slient) {
+    if (!options.silent) {
       this.notification.create({
         iconRelativeUrl: "assets/logo-256.png",
         title: "Tx is pending...",
@@ -92,7 +93,12 @@ export class BackgroundTxService {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
       txTracer.traceTx(txHash).then((tx) => {
         txTracer.close();
-        if (!slient) {
+
+        if (options.onFulfill) {
+          options.onFulfill(tx);
+        }
+
+        if (!options.silent) {
           BackgroundTxService.processTxResultNotification(
             this.notification,
             tx
@@ -103,7 +109,7 @@ export class BackgroundTxService {
       return txHash;
     } catch (e) {
       console.log(e);
-      if (!slient) {
+      if (!options.silent) {
         BackgroundTxService.processTxErrorNotification(this.notification, e);
       }
       throw e;
