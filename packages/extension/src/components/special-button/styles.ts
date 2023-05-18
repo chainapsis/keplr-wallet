@@ -16,9 +16,16 @@ export const Styles = {
 
   // "onClick" field should be omitted because "onClick" prop already exists on html button component.
   // If not omitted, they are intersected with each other.
-  Button: styled(animated.button)<
+  Button: styled(animated.button).withConfig<
     Pick<SpecialButtonProps, "size" | "isLoading" | "disabled">
-  >`
+  >({
+    shouldForwardProp: (prop) => {
+      if (prop === "isLoading" || prop === "size") {
+        return false;
+      }
+      return true;
+    },
+  })`
     width: 100%;
     height: ${({ size }) => `${getSpecialButtonHeightRem(size)}rem`};
     display: flex;
