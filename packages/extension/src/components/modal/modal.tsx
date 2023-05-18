@@ -14,7 +14,7 @@ import {
 } from "tua-body-scroll-lock";
 import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
-import { ModalProps } from "./types";
+import { ModalProps, OverflowType } from "./types";
 import Color from "color";
 
 export const Modal: FunctionComponent<ModalProps> = ({
@@ -23,6 +23,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
   align,
   onCloseTransitionEnd,
   children,
+  overflowType,
 }) => {
   const modalRoot = useModalRoot(isOpen);
 
@@ -89,6 +90,7 @@ export const Modal: FunctionComponent<ModalProps> = ({
         isOpen={isOpen}
         close={close}
         align={align}
+        overflowType={overflowType}
         onCloseTransitionEnd={() => {
           setForceNotDetach(false);
 
@@ -108,9 +110,16 @@ const ModalChild: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
   align: "center" | "bottom" | "left";
-
+  overflowType?: OverflowType;
   onCloseTransitionEnd: () => void;
-}> = ({ children, align, isOpen, close, onCloseTransitionEnd }) => {
+}> = ({
+  children,
+  align,
+  isOpen,
+  close,
+  onCloseTransitionEnd,
+  overflowType = "auto",
+}) => {
   const transition = useSpringValue(0, {
     config: defaultSpringConfig,
   });
@@ -137,7 +146,6 @@ const ModalChild: FunctionComponent<{
         bottom: 0,
         left: 0,
         right: 0,
-
         ...(() => {
           if (align === "left") {
             return;
@@ -146,7 +154,6 @@ const ModalChild: FunctionComponent<{
           return {
             display: "flex",
             flexDirection: "column",
-
             justifyContent: align === "center" ? "center" : "flex-end",
           };
         })(),
@@ -182,7 +189,7 @@ const ModalChild: FunctionComponent<{
           // 그냥 냅두고 알아서 처리하게 한다.
           maxHeight: align !== "left" ? "85vh" : undefined,
 
-          overflow: "auto",
+          overflow: overflowType === "none" ? "" : overflowType,
 
           position: "absolute",
           left: 0,

@@ -146,6 +146,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
           isOpen={isOpenSelectChannel}
           align="center"
           close={() => setIsOpenSelectChannel(false)}
+          overflowType="none"
         >
           <IBCAddChannelModal
             chainId={chainId}
