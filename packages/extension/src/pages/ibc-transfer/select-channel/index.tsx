@@ -20,6 +20,8 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import { useNavigate } from "react-router";
 
 export const IBCTransferSelectChannelView: FunctionComponent<{
+  historyType: string;
+
   chainId: string;
   coinMinimalDenom: string;
   channelConfig: IIBCChannelConfig;
@@ -27,6 +29,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
   memoConfig: IMemoConfig;
 }> = observer(
   ({
+    historyType,
     chainId,
     coinMinimalDenom,
     channelConfig,
@@ -130,6 +133,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
           </Stack>
 
           <RecipientInput
+            historyType={historyType}
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
           />

@@ -22,6 +22,7 @@ import * as KeyRingPrivateKey from "./keyring-private-key/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
+import * as RecentSendHistory from "./recent-send-history/internal";
 
 export * from "./chains";
 export * from "./chains-ui";
@@ -42,6 +43,7 @@ export * as KeyRingV2 from "./keyring-v2";
 export * from "./vault";
 export * from "./keyring-cosmos";
 export * from "./token-scan";
+export * from "./recent-send-history";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
@@ -109,6 +111,7 @@ export function init(
   );
 
   const backgroundTxService = new BackgroundTx.BackgroundTxService(
+    chainsService,
     notification
   );
 
@@ -181,6 +184,13 @@ export function init(
     keyRingCosmosService
   );
 
+  const recentSendHistoryService =
+    new RecentSendHistory.RecentSendHistoryService(
+      storeCreator("recent-send-history"),
+      chainsService,
+      backgroundTxService
+    );
+
   Interaction.init(router, interactionService);
   Permission.init(router, permissionService);
   Chains.init(
@@ -191,7 +201,7 @@ export function init(
   );
   Ledger.init(router, ledgerService);
   KeyRing.init(router, keyRingService);
-  BackgroundTx.init(router, backgroundTxService);
+  BackgroundTx.init(router, backgroundTxService, permissionInteractiveService);
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
   Analytics.init(router, analyticsService);
@@ -212,6 +222,7 @@ export function init(
   );
   SecretWasm.init(router, secretWasmService, permissionInteractiveService);
   TokenScan.init(router, tokenScanService);
+  RecentSendHistory.init(router, recentSendHistoryService);
 
   return {
     initFn: async () => {
@@ -233,7 +244,7 @@ export function init(
         ledgerService,
         keystoneService
       );
-      backgroundTxService.init(chainsService, permissionService);
+      await backgroundTxService.init();
       phishingListService.init();
       await autoLockAccountService.init();
       // No need to wait because user can't interact with app right after launch.
@@ -243,6 +254,8 @@ export function init(
       await secretWasmService.init();
 
       await tokenScanService.init();
+
+      await recentSendHistoryService.init();
     },
   };
 }

@@ -15,6 +15,10 @@ import { ExtensionKVStore } from "@keplr-wallet/common";
 import { ArrowLeftIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { useNotification } from "../../hooks/notification";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { SendTxAndRecordMsg } from "@keplr-wallet/background";
+import { DecUtils } from "@keplr-wallet/unit";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
@@ -104,6 +108,8 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     gasSimulator,
   }).interactionBlocked;
 
+  const historyType = "ibc-transfer";
+
   return (
     <HeaderLayout
       title="IBC Transfer"
@@ -145,6 +151,33 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   {
                     preferNoSetFee: true,
                     preferNoSetMemo: true,
+                    sendTx: async (chainId, tx, mode) => {
+                      const msg = new SendTxAndRecordMsg(
+                        historyType,
+                        chainId,
+                        ibcTransferConfigs.recipientConfig.chainId,
+                        tx,
+                        mode,
+                        false,
+                        ibcTransferConfigs.senderConfig.sender,
+                        ibcTransferConfigs.recipientConfig.recipient,
+                        ibcTransferConfigs.amountConfig.amount.map((amount) => {
+                          return {
+                            amount: DecUtils.getTenExponentN(
+                              amount.currency.coinDecimals
+                            )
+                              .mul(amount.toDec())
+                              .toString(),
+                            denom: amount.currency.coinMinimalDenom,
+                          };
+                        }),
+                        ibcTransferConfigs.memoConfig.memo
+                      );
+                      return await new InExtensionMessageRequester().sendMessage(
+                        BACKGROUND_PORT,
+                        msg
+                      );
+                    },
                   },
                   {
                     onFulfill: (tx) => {
@@ -180,6 +213,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
       <Box height="100%">
         {isSelectChannelPhase ? (
           <IBCTransferSelectChannelView
+            historyType={historyType}
             chainId={chainId}
             coinMinimalDenom={coinMinimalDenom}
             channelConfig={ibcTransferConfigs.channelConfig}

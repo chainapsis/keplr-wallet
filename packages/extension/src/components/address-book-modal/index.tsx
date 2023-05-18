@@ -15,6 +15,8 @@ import { useStore } from "../../stores";
 import { Key } from "@keplr-wallet/types";
 import { IMemoConfig, IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../bleed";
+import { RecentSendHistory } from "@keplr-wallet/background";
+import { useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -37,24 +39,33 @@ const Styles = {
 type Type = "recent" | "contacts" | "accounts";
 
 export const AddressBookModal: FunctionComponent<{
-  chainId: string;
   isOpen: boolean;
   close: () => void;
 
+  historyType: string;
   recipientConfig: IRecipientConfig;
   memoConfig: IMemoConfig;
-}> = observer(({ chainId, isOpen, close, recipientConfig, memoConfig }) => {
+}> = observer(({ isOpen, close, historyType, recipientConfig, memoConfig }) => {
   const { uiConfigStore, keyRingStore } = useStore();
 
   // TODO: Implement "recent"
   const [type, setType] = useState<Type>("recent");
 
+  const [recents, setRecents] = useState<RecentSendHistory[]>([]);
   const [accounts, setAccounts] = useState<Key[]>([]);
 
   useEffect(() => {
     uiConfigStore.addressBookConfig
+      .getRecentSendHistory(recipientConfig.chainId, historyType)
+      .then((res) => {
+        setRecents(res);
+      });
+  }, [historyType, recipientConfig.chainId, uiConfigStore.addressBookConfig]);
+
+  useEffect(() => {
+    uiConfigStore.addressBookConfig
       .getEnabledVaultCosmosKeysSettled(
-        chainId,
+        recipientConfig.chainId,
         keyRingStore.selectedKeyInfo?.id
       )
       .then((keys) => {
@@ -72,16 +83,30 @@ export const AddressBookModal: FunctionComponent<{
         );
       });
   }, [
-    chainId,
     keyRingStore.selectedKeyInfo?.id,
+    recipientConfig.chainId,
     uiConfigStore.addressBookConfig,
   ]);
 
-  const datas: { name: string; address: string; memo?: string }[] = (() => {
+  const datas: {
+    timestamp?: number;
+    name?: string;
+    address: string;
+    memo?: string;
+  }[] = (() => {
     switch (type) {
+      case "recent": {
+        return recents.map((recent) => {
+          return {
+            timestamp: recent.timestamp,
+            address: recent.recipient,
+            memo: recent.memo,
+          };
+        });
+      }
       case "contacts": {
         return uiConfigStore.addressBookConfig
-          .getAddressBook(chainId)
+          .getAddressBook(recipientConfig.chainId)
           .map((addressData) => {
             return {
               name: addressData.name,
@@ -157,6 +182,7 @@ export const AddressBookModal: FunctionComponent<{
                 return (
                   <AddressItem
                     key={i}
+                    timestamp={data.timestamp}
                     name={data.name}
                     address={data.address}
                     memo={data.memo}
@@ -205,12 +231,16 @@ export const AddressBookModal: FunctionComponent<{
 });
 
 const AddressItem: FunctionComponent<{
-  name: string;
+  timestamp?: number;
+
+  name?: string;
   address: string;
   memo?: string;
 
   onClick: () => void;
-}> = ({ name, address, memo, onClick }) => {
+}> = ({ timestamp, name, address, memo, onClick }) => {
+  const intl = useIntl();
+
   return (
     <Styles.AddressItemContainer
       paddingX="1rem"
@@ -223,14 +253,35 @@ const AddressItem: FunctionComponent<{
         onClick();
       }}
     >
-      <H5
-        style={{
-          color: ColorPalette["gray-10"],
-        }}
-      >
-        {name}
-      </H5>
-      <Gutter size="0.25rem" />
+      {timestamp ? (
+        <React.Fragment>
+          <H5
+            style={{
+              color: ColorPalette["gray-10"],
+            }}
+          >
+            {`Sent on ${intl.formatDate(new Date(timestamp), {
+              year: "numeric",
+              month: "long",
+              day: "2-digit",
+            })}`}
+          </H5>
+          <Gutter size="0.25rem" />
+        </React.Fragment>
+      ) : null}
+
+      {name ? (
+        <React.Fragment>
+          <H5
+            style={{
+              color: ColorPalette["gray-10"],
+            }}
+          >
+            {name}
+          </H5>
+          <Gutter size="0.25rem" />
+        </React.Fragment>
+      ) : null}
 
       <Body2
         style={{
@@ -239,16 +290,18 @@ const AddressItem: FunctionComponent<{
       >
         {Bech32Address.shortenAddress(address, 30)}
       </Body2>
-      {memo ? <Gutter size="0.25rem" /> : null}
 
       {memo ? (
-        <Body2
-          style={{
-            color: ColorPalette["gray-200"],
-          }}
-        >
-          {memo}
-        </Body2>
+        <React.Fragment>
+          <Gutter size="0.25rem" />
+          <Body2
+            style={{
+              color: ColorPalette["gray-200"],
+            }}
+          >
+            {memo}
+          </Body2>
+        </React.Fragment>
       ) : null}
     </Styles.AddressItemContainer>
   );
