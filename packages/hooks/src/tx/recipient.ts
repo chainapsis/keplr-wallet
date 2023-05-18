@@ -223,13 +223,26 @@ export class RecipientConfig
             error: new ICNSFailedToFetchError(
               "Failed to fetch the address from ICNS"
             ),
-            loadingState: fetched.isFetching ? "loading" : undefined,
+            loadingState: fetched.isFetching ? "loading-block" : undefined,
           };
         }
 
-        return {
-          loadingState: "loading-block",
-        };
+        if (fetched.error) {
+          return {
+            error: new ICNSFailedToFetchError(
+              "Failed to fetch the address from ICNS"
+            ),
+            loadingState: fetched.isFetching ? "loading-block" : undefined,
+          };
+        }
+
+        if (fetched.isFetching) {
+          return {
+            loadingState: "loading-block",
+          };
+        }
+
+        return {};
       } catch (e) {
         return {
           error: e,
