@@ -9,3 +9,4 @@ export * from "./mars";
 export * from "./injective";
 export * from "./pstake";
 export * from "./streamswap";
+export * from "./ibcx";
