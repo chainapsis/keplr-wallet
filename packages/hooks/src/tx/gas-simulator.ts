@@ -407,6 +407,32 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
                 state.setOutdatedCosmosSdk(true);
                 return;
               }
+
+              let message = "";
+              const contentType: string = e.response.headers
+                ? e.response.headers.get("content-type") || ""
+                : "";
+              // Try to figure out the message from the response.
+              // If the contentType in the header is specified, try to use the message from the response.
+              if (
+                contentType.startsWith("text/plain") &&
+                typeof e.response.data === "string"
+              ) {
+                message = e.response.data;
+              }
+              // If the response is an object and "message" field exists, it is used as a message.
+              if (
+                contentType.startsWith("application/json") &&
+                e.response.data?.message &&
+                typeof e.response.data?.message === "string"
+              ) {
+                message = e.response.data.message;
+              }
+
+              if (message !== "") {
+                state.setError(new Error(message));
+                return;
+              }
             }
 
             state.setError(e);
