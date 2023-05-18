@@ -171,6 +171,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   }, [gasSimulator, sendConfigs.amountConfig.currency, sendConfigs.gasConfig]);
 
   useEffectOnce(() => {
+    const initialAmountFraction = searchParams.get("initialAmountFraction");
+    if (
+      initialAmountFraction &&
+      !Number.isNaN(parseFloat(initialAmountFraction))
+    ) {
+      sendConfigs.amountConfig.setFraction(
+        Number.parseFloat(initialAmountFraction)
+      );
+    }
     const initialAmount = searchParams.get("initialAmount");
     if (initialAmount) {
       // AmountInput에는 price based 모드가 있다.
@@ -224,10 +233,20 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         } else {
           prev.delete("initialRecipient");
         }
-        if (sendConfigs.amountConfig.value.trim().length > 0) {
-          prev.set("initialAmount", sendConfigs.amountConfig.value);
+        // Fraction and amount value are exclusive
+        if (sendConfigs.amountConfig.fraction <= 0) {
+          prev.delete("initialAmountFraction");
+          if (sendConfigs.amountConfig.value.trim().length > 0) {
+            prev.set("initialAmount", sendConfigs.amountConfig.value);
+          } else {
+            prev.delete("initialAmount");
+          }
         } else {
           prev.delete("initialAmount");
+          prev.set(
+            "initialAmountFraction",
+            sendConfigs.amountConfig.fraction.toString()
+          );
         }
         if (sendConfigs.memoConfig.value.trim().length > 0) {
           prev.set("initialMemo", sendConfigs.memoConfig.value);
