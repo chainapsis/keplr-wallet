@@ -14,6 +14,7 @@ import { IconButton } from "../../icon-button";
 import { ColorPalette } from "../../../styles";
 
 export interface RecipientInputWithAddressBookProps {
+  historyType: string;
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
   memoConfig: IMemoConfig;
 }
@@ -34,7 +35,9 @@ function numOfCharacter(str: string, c: string): number {
 }
 
 export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
-  ({ recipientConfig, memoConfig }) => {
+  (props) => {
+    const { recipientConfig, memoConfig } = props;
+
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
       React.useState(false);
 
@@ -111,9 +114,9 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
 
         {memoConfig ? (
           <AddressBookModal
-            chainId={recipientConfig.chainId}
             isOpen={isAddressBookModalOpen}
             close={() => setIsAddressBookModalOpen(false)}
+            historyType={props.historyType}
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
           />

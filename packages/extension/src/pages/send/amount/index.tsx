@@ -26,10 +26,13 @@ import { FeeControl } from "../../../components/input/fee-control";
 import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { ICNSInfo } from "../../../config.ui";
-import { CoinPretty } from "@keplr-wallet/unit";
+import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { SendTxAndRecordMsg } from "@keplr-wallet/background";
 
 const Styles = {
   Flex1: styled.div`
@@ -282,6 +285,8 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const isDetachedMode = searchParams.get("detached") === "true";
 
+  const historyType = "basic-send";
+
   return (
     <HeaderLayout
       title="Send"
@@ -329,6 +334,33 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                 {
                   preferNoSetFee: true,
                   preferNoSetMemo: true,
+                  sendTx: async (chainId, tx, mode) => {
+                    const msg = new SendTxAndRecordMsg(
+                      historyType,
+                      chainId,
+                      sendConfigs.recipientConfig.chainId,
+                      tx,
+                      mode,
+                      false,
+                      sendConfigs.senderConfig.sender,
+                      sendConfigs.recipientConfig.recipient,
+                      sendConfigs.amountConfig.amount.map((amount) => {
+                        return {
+                          amount: DecUtils.getTenExponentN(
+                            amount.currency.coinDecimals
+                          )
+                            .mul(amount.toDec())
+                            .toString(),
+                          denom: amount.currency.coinMinimalDenom,
+                        };
+                      }),
+                      sendConfigs.memoConfig.memo
+                    );
+                    return await new InExtensionMessageRequester().sendMessage(
+                      BACKGROUND_PORT,
+                      msg
+                    );
+                  },
                 },
                 {
                   onFulfill: (tx: any) => {
@@ -390,6 +422,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           </YAxis>
 
           <RecipientInput
+            historyType={historyType}
             recipientConfig={sendConfigs.recipientConfig}
             memoConfig={sendConfigs.memoConfig}
           />

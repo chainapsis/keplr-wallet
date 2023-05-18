@@ -6,6 +6,8 @@ import { Key, SettledResponses } from "@keplr-wallet/types";
 import {
   GetCosmosKeysForEachVaultSettledMsg,
   GetVaultsByEnabledChainMsg,
+  RecentSendHistory,
+  GetRecentSendHistoriesMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 
@@ -110,6 +112,14 @@ export class AddressBookConfig {
       return;
     }
     addressBook.splice(index, 1);
+  }
+
+  async getRecentSendHistory(
+    chainId: string,
+    type: string
+  ): Promise<RecentSendHistory[]> {
+    const msg = new GetRecentSendHistoriesMsg(chainId, type);
+    return await this.messageRequester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   async getEnabledVaultCosmosKeysSettled(
