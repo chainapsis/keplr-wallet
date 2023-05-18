@@ -93,7 +93,7 @@ export class RecentSendHistoryService {
 
   getRecentSendHistories(chainId: string, type: string): RecentSendHistory[] {
     const key = `${ChainIdHelper.parse(chainId).identifier}/${type}`;
-    return (this.recentSendHistoryMap.get(key) ?? []).slice(0, 10);
+    return (this.recentSendHistoryMap.get(key) ?? []).slice(0, 20);
   }
 
   @action
@@ -109,7 +109,7 @@ export class RecentSendHistoryService {
       timestamp: Date.now(),
       ...history,
     });
-    histories = histories.slice(0, 10);
+    histories = histories.slice(0, 20);
 
     this.recentSendHistoryMap.set(key, histories);
   }
