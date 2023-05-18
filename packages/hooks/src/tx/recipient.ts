@@ -218,6 +218,13 @@ export class RecipientConfig
     if (this.isICNSName) {
       try {
         const fetched = this.getICNSFetchData(rawRecipient);
+
+        if (fetched.isFetching) {
+          return {
+            loadingState: "loading-block",
+          };
+        }
+
         if (!fetched.bech32Address) {
           return {
             error: new ICNSFailedToFetchError(
@@ -233,12 +240,6 @@ export class RecipientConfig
               "Failed to fetch the address from ICNS"
             ),
             loadingState: fetched.isFetching ? "loading-block" : undefined,
-          };
-        }
-
-        if (fetched.isFetching) {
-          return {
-            loadingState: "loading-block",
           };
         }
 
