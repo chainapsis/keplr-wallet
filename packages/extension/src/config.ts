@@ -12,8 +12,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: "uatom",
       coinDecimals: 6,
       coinGeckoId: "cosmos",
-      coinImageUrl:
-        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/chain.png",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -33,8 +31,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uatom",
         coinDecimals: 6,
         coinGeckoId: "cosmos",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/chain.png",
       },
     ],
     feeCurrencies: [
@@ -43,8 +39,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uatom",
         coinDecimals: 6,
         coinGeckoId: "cosmos",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/chain.png",
       },
     ],
     features: ["ibc-transfer", "ibc-go"],
@@ -59,8 +53,6 @@ export const EmbedChainInfos: ChainInfo[] = [
       coinMinimalDenom: "uosmo",
       coinDecimals: 6,
       coinGeckoId: "osmosis",
-      coinImageUrl:
-        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/chain.png",
     },
     walletUrl:
       process.env.NODE_ENV === "production"
@@ -78,8 +70,6 @@ export const EmbedChainInfos: ChainInfo[] = [
         coinMinimalDenom: "uosmo",
         coinDecimals: 6,
         coinGeckoId: "osmosis",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/chain.png",
       },
       {
         coinDenom: "ION",
@@ -99,8 +89,6 @@ export const EmbedChainInfos: ChainInfo[] = [
           average: 0.025,
           high: 0.04,
         },
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/osmosis/chain.png",
       },
     ],
     features: [
@@ -2172,6 +2160,292 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["terra-classic-fee"],
+  },
+  {
+    rpc: "https://rpc-quasar.keplr.app",
+    rest: "https://lcd-quasar.keplr.app",
+    chainId: "quasar-1",
+    chainName: "Quasar",
+    stakeCurrency: {
+      coinDenom: "QSR",
+      coinMinimalDenom: "uqsr",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "quasar",
+      bech32PrefixAccPub: "quasarpub",
+      bech32PrefixValAddr: "quasarvaloper",
+      bech32PrefixValPub: "quasarvaloperpub",
+      bech32PrefixConsAddr: "quasarvalcons",
+      bech32PrefixConsPub: "quasarvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "QSR",
+        coinMinimalDenom: "uqsr",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "OSMO",
+        coinMinimalDenom:
+          "ibc/0471F1C4E7AFD3F07702BEF6DC365268D64570F7C1FDC98EA6098DD6DE59817B",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.02,
+        },
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/FA0006F056DB6719B8C16C551FC392B62F5729978FC0B125AC9A432DBB2AA1A5",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.02,
+        },
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom:
+          "ibc/FA7775734CC73176B7425910DE001A1D2AD9B6D9E93129A5D0750EAD13E4E63A",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.01,
+          high: 0.02,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-noble.keplr.app",
+    rest: "https://lcd-noble.keplr.app",
+    chainId: "noble-1",
+    chainName: "Noble",
+    stakeCurrency: {
+      coinDenom: "STAKE",
+      coinMinimalDenom: "ustake",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "noble",
+      bech32PrefixAccPub: "noblepub",
+      bech32PrefixValAddr: "noblevaloper",
+      bech32PrefixValPub: "noblevaloperpub",
+      bech32PrefixConsAddr: "noblevalcons",
+      bech32PrefixConsPub: "noblevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "STAKE",
+        coinMinimalDenom: "ustake",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "USDC",
+        coinMinimalDenom: "uusdc",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "ATOM",
+        coinMinimalDenom:
+          "ibc/EF48E6B1A1A19F47ECAEA62F5670C37C0580E86A9E88498B7E393EB6F49F33C0",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.001,
+          high: 0.001,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-omniflixhub.keplr.app",
+    rest: "https://lcd-omniflixhub.keplr.app",
+    chainId: "omniflixhub-1",
+    chainName: "OmniFlix",
+    stakeCurrency: {
+      coinDenom: "FLIX",
+      coinMinimalDenom: "uflix",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "omniflix",
+      bech32PrefixAccPub: "omniflixpub",
+      bech32PrefixValAddr: "omniflixvaloper",
+      bech32PrefixValPub: "omniflixvaloperpub",
+      bech32PrefixConsAddr: "omniflixvalcons",
+      bech32PrefixConsPub: "omniflixvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "FLIX",
+        coinMinimalDenom: "uflix",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "FLIX",
+        coinMinimalDenom: "uflix",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.001,
+          average: 0.0025,
+          high: 0.025,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-kyve.keplr.app",
+    rest: "https://lcd-kyve.keplr.app",
+    chainId: "kyve-1",
+    chainName: "KYVE",
+    stakeCurrency: {
+      coinDenom: "KYVE",
+      coinMinimalDenom: "ukyve",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "kyve",
+      bech32PrefixAccPub: "kyvepub",
+      bech32PrefixValAddr: "kyvevaloper",
+      bech32PrefixValPub: "kyvevaloperpub",
+      bech32PrefixConsAddr: "kyvevalcons",
+      bech32PrefixConsPub: "kyvevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "KYVE",
+        coinMinimalDenom: "ukyve",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "KYVE",
+        coinMinimalDenom: "ukyve",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.02,
+          average: 0.03,
+          high: 0.06,
+        },
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-neutron.keplr.app",
+    rest: "https://lcd-neutron.keplr.app",
+    chainId: "neutron-1",
+    chainName: "Neutron",
+    stakeCurrency: {
+      coinDenom: "STAKE",
+      coinMinimalDenom: "ustake",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "neutron",
+      bech32PrefixAccPub: "neutronpub",
+      bech32PrefixValAddr: "neutronvaloper",
+      bech32PrefixValPub: "neutronvaloperpub",
+      bech32PrefixConsAddr: "neutronvalcons",
+      bech32PrefixConsPub: "neutronvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "NTRN",
+        coinMinimalDenom: "untrn",
+        coinDecimals: 6,
+      },
+      {
+        coinDenom: "STAKE",
+        coinMinimalDenom: "ustake",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "NTRN",
+        coinMinimalDenom: "untrn",
+        coinDecimals: 6,
+      },
+    ],
+    features: [],
+  },
+  {
+    rpc: "https://rpc-gitopia.keplr.app",
+    rest: "https://lcd-gitopia.keplr.app",
+    chainId: "gitopia",
+    chainName: "Gitopia",
+    stakeCurrency: {
+      coinDenom: "LORE",
+      coinMinimalDenom: "ulore",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "gitopia",
+      bech32PrefixAccPub: "gitopiapub",
+      bech32PrefixValAddr: "gitopiavaloper",
+      bech32PrefixValPub: "gitopiavaloperpub",
+      bech32PrefixConsAddr: "gitopiavalcons",
+      bech32PrefixConsPub: "gitopiavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LORE",
+        coinMinimalDenom: "ulore",
+        coinDecimals: 6,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LORE",
+        coinMinimalDenom: "ulore",
+        coinDecimals: 6,
+        gasPriceStep: {
+          low: 0.0012,
+          average: 0.0016,
+          high: 0.0024,
+        },
+      },
+    ],
+    features: [],
   },
 ];
 
