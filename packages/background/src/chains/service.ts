@@ -57,7 +57,7 @@ export class ChainsService {
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly embedChainInfos: ChainInfo[],
+    protected readonly embedChainInfos: ReadonlyArray<ChainInfo>,
     protected readonly communityChainInfoRepo: {
       readonly organizationName: string;
       readonly repoName: string;
@@ -101,7 +101,14 @@ export class ChainsService {
       );
       if (chainInfos) {
         runInAction(() => {
-          this.suggestedChainInfos = chainInfos;
+          this.suggestedChainInfos = chainInfos.filter(
+            (chainInfo) =>
+              !this.embedChainInfos.some(
+                (embedChainInfo) =>
+                  ChainIdHelper.parse(chainInfo.chainId).identifier ===
+                  ChainIdHelper.parse(embedChainInfo.chainId).identifier
+              )
+          );
         });
       }
 

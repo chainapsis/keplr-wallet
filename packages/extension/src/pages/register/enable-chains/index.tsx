@@ -15,7 +15,7 @@ import { Column, Columns } from "../../../components/column";
 import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
-import { Subtitle3 } from "../../../components/typography";
+import { Subtitle2, Subtitle3 } from "../../../components/typography";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
@@ -762,22 +762,24 @@ const ChainItem: FunctionComponent<{
             <Gutter size="0.5rem" />
 
             <YAxis>
-              <div>{chainInfo.chainName}</div>
+              <Subtitle2>{chainInfo.chainName}</Subtitle2>
             </YAxis>
           </XAxis>
           <Column weight={1} />
           <XAxis alignY="center">
             {isFresh ? null : (
               <YAxis alignX="right">
-                <div>
+                <Subtitle3>
                   {balance
                     .maxDecimals(6)
                     .shrink(true)
                     .inequalitySymbol(true)
                     .toString()}
-                </div>
+                </Subtitle3>
                 <Gutter size="0.25rem" />
-                <div>{price ? price.toString() : "-"}</div>
+                <Subtitle3 color={ColorPalette["gray-300"]}>
+                  {price ? price.toString() : "-"}
+                </Subtitle3>
               </YAxis>
             )}
 

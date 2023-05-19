@@ -36,6 +36,7 @@ import { Skeleton } from "../../../../components/skeleton";
 import { YAxis } from "../../../../components/axis";
 import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
+import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
   Container: styled.div`
@@ -612,6 +613,9 @@ const ClaimTokenItem: FunctionComponent<{
             src={viewToken.token.currency.coinImageUrl}
           />
         )}
+
+        <Gutter size="0.75rem" />
+
         <Column weight={1}>
           <Stack gutter="0.375rem">
             <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
