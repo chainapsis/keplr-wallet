@@ -60,7 +60,11 @@ export const CosmosTxView: FunctionComponent<{
   // There are services that sometimes use invalid tx to sign arbitrary data on the sign page.
   // In this case, there is no obligation to deal with it, but 0 gas is favorably allowed.
   const gasConfig = useZeroAllowedGasConfig(chainStore, chainId, 0);
-  const amountConfig = useSignDocAmountConfig(chainStore, chainId);
+  const amountConfig = useSignDocAmountConfig(
+    chainStore,
+    chainId,
+    senderConfig
+  );
   const feeConfig = useFeeConfig(
     chainStore,
     queriesStore,
