@@ -101,12 +101,13 @@ export class ChainsService {
       );
       if (chainInfos) {
         runInAction(() => {
-          this.suggestedChainInfos = chainInfos.filter((chainInfo) =>
-            this.embedChainInfos.some(
-              (embedChainInfo) =>
-                ChainIdHelper.parse(chainInfo.chainId).identifier ===
-                ChainIdHelper.parse(embedChainInfo.chainId).identifier
-            )
+          this.suggestedChainInfos = chainInfos.filter(
+            (chainInfo) =>
+              !this.embedChainInfos.some(
+                (embedChainInfo) =>
+                  ChainIdHelper.parse(chainInfo.chainId).identifier ===
+                  ChainIdHelper.parse(embedChainInfo.chainId).identifier
+              )
           );
         });
       }
