@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useLayoutEffect } from "react";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import Color from "color";
@@ -15,6 +15,7 @@ import { Button } from "../../../../components/button";
 
 export const WelcomePage: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
+  const [isDesktop, setIsDesktop] = React.useState(true);
 
   const osmosisInfo = chainStore.chainInfos.find(
     (chainInfo) => chainInfo.chainId === "osmosis-1"
@@ -23,11 +24,38 @@ export const WelcomePage: FunctionComponent = observer(() => {
     (chainInfo) => chainInfo.chainId === "stargaze-1"
   );
 
+  useLayoutEffect(() => {
+    if (window.innerWidth < 1150) {
+      setIsDesktop(false);
+    }
+
+    const resizeHandler = () => {
+      if (window.innerWidth < 1150) {
+        setIsDesktop(false);
+      } else {
+        setIsDesktop(true);
+      }
+    };
+
+    window.addEventListener("resize", resizeHandler);
+
+    return () => {
+      window.removeEventListener("resize", resizeHandler);
+    };
+  }, []);
+
   return (
     <Styles.Container>
       <PinView />
 
       <Stack alignX="left">
+        {isDesktop ? null : (
+          <React.Fragment>
+            <CongratsVideo size="150" />
+            <Gutter size="1.25rem" />
+          </React.Fragment>
+        )}
+
         <Box
           padding="0.5rem 1rem"
           borderRadius="1.5rem"
@@ -115,19 +143,7 @@ export const WelcomePage: FunctionComponent = observer(() => {
             </YAxis>
           </Box>
 
-          <Box alignX="center">
-            <video
-              width="450"
-              height="450"
-              autoPlay={true}
-              loop={true}
-              style={{ borderRadius: "2.5rem", backgroundColor: "#1A1239" }}
-            >
-              <source
-                src={require("../../../../public/assets/lottie/register/congrats.webm")}
-              />
-            </video>
-          </Box>
+          {isDesktop ? <CongratsVideo size="450" /> : null}
         </Styles.ResponsiveContainer>
 
         <Gutter size="1.5rem" />
@@ -193,3 +209,19 @@ export const WelcomePage: FunctionComponent = observer(() => {
     </Styles.Container>
   );
 });
+
+const CongratsVideo: FunctionComponent<{ size: string }> = ({ size }) => {
+  return (
+    <video
+      width={size}
+      height={size}
+      autoPlay={true}
+      loop={true}
+      style={{ borderRadius: "2.5rem", backgroundColor: "#1A1239" }}
+    >
+      <source
+        src={require("../../../../public/assets/lottie/register/congrats.webm")}
+      />
+    </video>
+  );
+};
