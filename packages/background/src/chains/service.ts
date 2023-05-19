@@ -57,6 +57,7 @@ export class ChainsService {
 
   constructor(
     protected readonly kvStore: KVStore,
+    // embedChainInfos는 실행 이후에 변경되어서는 안된다.
     protected readonly embedChainInfos: ReadonlyArray<ChainInfo>,
     protected readonly communityChainInfoRepo: {
       readonly organizationName: string;
@@ -101,6 +102,8 @@ export class ChainsService {
       );
       if (chainInfos) {
         runInAction(() => {
+          // embedChainInfos에 있는 chainInfo는 suggestedChainInfos에 넣지 않는다.
+          // embedChainInfos는 실행 이후에 변경되지 않기 때문에 여기서 처리해도 안전하다.
           this.suggestedChainInfos = chainInfos.filter(
             (chainInfo) =>
               !this.embedChainInfos.some(
