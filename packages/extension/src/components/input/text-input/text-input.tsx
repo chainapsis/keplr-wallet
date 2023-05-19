@@ -23,6 +23,7 @@ export const TextInput = forwardRef<
       right,
       bottom,
       isLoading,
+      autoComplete,
       ...props
     },
     ref
@@ -58,6 +59,7 @@ export const TextInput = forwardRef<
             <Column weight={1}>
               <Styles.TextInput
                 {...props}
+                autoComplete={autoComplete || "off"}
                 paragraph={paragraph}
                 error={error}
                 ref={ref}
