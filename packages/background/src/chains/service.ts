@@ -434,11 +434,7 @@ export class ChainsService {
         ChainIdHelper.parse(c.chainId).identifier ===
         ChainIdHelper.parse(chainInfo.chainId).identifier
     );
-    if (i >= 0) {
-      const newChainInfos = this.suggestedChainInfos.slice();
-      newChainInfos[i] = chainInfo;
-      this.suggestedChainInfos = newChainInfos;
-    } else {
+    if (i < 0) {
       const newChainInfos = this.suggestedChainInfos.slice();
       newChainInfos.push(chainInfo);
       this.suggestedChainInfos = newChainInfos;
@@ -446,6 +442,8 @@ export class ChainsService {
       for (const handler of this.onChainSuggestedHandlers) {
         handler(chainInfo);
       }
+    } else {
+      throw new Error(`There is already chain info for ${chainInfo.chainId}`);
     }
   }
 
