@@ -482,6 +482,16 @@ export const EnableChainsScene: FunctionComponent<{
       return numSelected;
     }, [chainStore.chainInfos, enabledChainIdentifiers]);
 
+    const replaceToWelcomePage = () => {
+      if (skipWelcome) {
+        window.close();
+      } else {
+        navigate("/welcome", {
+          replace: true,
+        });
+      }
+    };
+
     return (
       <RegisterSceneBox>
         <SearchTextInput
@@ -651,6 +661,8 @@ export const EnableChainsScene: FunctionComponent<{
                   chainIds: needFinalizeCoinType,
 
                   totalCount: needFinalizeCoinType.length,
+
+                  skipWelcome,
                 });
               } else {
                 // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
@@ -678,9 +690,7 @@ export const EnableChainsScene: FunctionComponent<{
                       await chainStore.enableChainInfoInUI(
                         ...ledgerEthereumAppNeeds
                       );
-                      navigate("/welcome", {
-                        replace: true,
-                      });
+                      replaceToWelcomePage();
                     } else {
                       const bip44Path = keyInfo.insensitive["bip44Path"];
                       if (!bip44Path) {
@@ -701,18 +711,10 @@ export const EnableChainsScene: FunctionComponent<{
                       });
                     }
                   } else {
-                    navigate("/welcome", {
-                      replace: true,
-                    });
+                    replaceToWelcomePage();
                   }
                 } else {
-                  if (skipWelcome) {
-                    window.close();
-                  } else {
-                    navigate("/welcome", {
-                      replace: true,
-                    });
-                  }
+                  replaceToWelcomePage();
                 }
               }
             }}
