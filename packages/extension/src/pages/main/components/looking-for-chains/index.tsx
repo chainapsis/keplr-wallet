@@ -79,7 +79,7 @@ export const LookingForChainItem: FunctionComponent<{
             if (keyRingStore.selectedKeyInfo) {
               browser.tabs
                 .create({
-                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&searchValue=${chainInfo.chainName}`,
+                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&initialSearchValue=${chainInfo.chainName}`,
                 })
                 .then(() => {
                   window.close();
