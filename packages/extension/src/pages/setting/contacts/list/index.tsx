@@ -1,20 +1,17 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useLayoutEffect, useState } from "react";
+import React, { FunctionComponent, useLayoutEffect } from "react";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import styled from "styled-components";
 import { Stack } from "../../../../components/stack";
 import { useStore } from "../../../../stores";
 import { Column, Columns } from "../../../../components/column";
-import { Dropdown, FloatingDropdown } from "../../../../components/dropdown";
+import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
-import { ColorPalette } from "../../../../styles";
-import { Body2, H5 } from "../../../../components/typography";
-import { EllipsisIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
-import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useSearchParams } from "react-router-dom";
+import { AddressItem } from "../../../../components/address-item";
 import { useConfirm } from "../../../../hooks/confirm";
 
 const Styles = {
@@ -35,6 +32,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   const paramChainId = searchParams.get("chainId");
 
   const chainId = paramChainId || chainStore.chainInfos[0].chainId;
+  const confirm = useConfirm();
 
   useLayoutEffect(() => {
     if (!paramChainId) {
@@ -88,93 +86,44 @@ export const SettingContactsList: FunctionComponent = observer(() => {
             .getAddressBook(chainId)
             .map((data, i) => {
               return (
-                <AddressItemView
+                <AddressItem
                   key={i}
-                  chainId={chainId}
                   name={data.name}
                   address={data.address}
                   memo={data.memo}
-                  index={i}
+                  hasDropDown={true}
+                  dropdownItems={[
+                    {
+                      key: "change-contact-label",
+                      label: "Change Contact Label",
+                      onSelect: () =>
+                        navigate(
+                          `/setting/contacts/add?chainId=${chainId}&editIndex=${i}`
+                        ),
+                    },
+                    {
+                      key: "delete-wallet",
+                      label: "Delete Wallet",
+                      onSelect: async () => {
+                        if (
+                          await confirm.confirm(
+                            "Delete Address",
+                            "Are you sure you want to delete this account?"
+                          )
+                        ) {
+                          uiConfigStore.addressBookConfig.removeAddressBookAt(
+                            chainId,
+                            i
+                          );
+                        }
+                      },
+                    },
+                  ]}
                 />
               );
             })}
         </Styles.ItemList>
       </Styles.Container>
     </HeaderLayout>
-  );
-});
-
-const AddressItemView: FunctionComponent<{
-  chainId: string;
-  name: string;
-  address: string;
-  memo: string;
-  index: number;
-}> = observer(({ chainId, name, address, memo, index }) => {
-  const { uiConfigStore } = useStore();
-
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const navigate = useNavigate();
-
-  const confirm = useConfirm();
-
-  return (
-    <Box
-      padding="0.75rem 1rem"
-      backgroundColor={ColorPalette["gray-600"]}
-      borderRadius="0.375rem"
-    >
-      <Columns sum={1} alignY="center">
-        <Stack gutter="0.25rem">
-          <H5 style={{ color: ColorPalette["gray-10"] }}>{name}</H5>
-          <Body2 style={{ color: ColorPalette["gray-200"] }}>
-            {Bech32Address.shortenAddress(address, 30)}
-          </Body2>
-
-          <Body2 style={{ color: ColorPalette["gray-200"] }}>{memo}</Body2>
-        </Stack>
-
-        <Column weight={1} />
-
-        <FloatingDropdown
-          isOpen={isMenuOpen}
-          close={() => setIsMenuOpen(false)}
-          items={[
-            {
-              key: "change-contact-label",
-              label: "Change Contact Label",
-              onSelect: () =>
-                navigate(
-                  `/setting/contacts/add?chainId=${chainId}&editIndex=${index}`
-                ),
-            },
-            {
-              key: "delete-wallet",
-              label: "Delete Wallet",
-              onSelect: async () => {
-                if (
-                  await confirm.confirm(
-                    "Delete Address",
-                    "Are you sure you want to delete this account?"
-                  )
-                ) {
-                  uiConfigStore.addressBookConfig.removeAddressBookAt(
-                    chainId,
-                    index
-                  );
-                }
-              },
-            },
-          ]}
-        >
-          <Box
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            style={{ color: ColorPalette["gray-10"] }}
-          >
-            <EllipsisIcon width="1.25rem" height="1.25rem" />
-          </Box>
-        </FloatingDropdown>
-      </Columns>
-    </Box>
   );
 });

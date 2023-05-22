@@ -3,12 +3,11 @@ import { Modal } from "../modal";
 import { Box } from "../box";
 import { ColorPalette } from "../../styles";
 import styled from "styled-components";
-import { Body2, H5, Subtitle1, Subtitle3 } from "../typography";
+import { Subtitle1, Subtitle3 } from "../typography";
 import { Gutter } from "../gutter";
 import { HorizontalRadioGroup } from "../radio-group";
 import { YAxis } from "../axis";
 import { Stack } from "../stack";
-import { Bech32Address } from "@keplr-wallet/cosmos";
 import Color from "color";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
@@ -16,7 +15,7 @@ import { Key } from "@keplr-wallet/types";
 import { IMemoConfig, IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
-import { useIntl } from "react-intl";
+import { AddressItem } from "../address-item";
 
 const Styles = {
   Container: styled.div`
@@ -189,7 +188,6 @@ export const AddressBookModal: FunctionComponent<{
                     onClick={() => {
                       recipientConfig.setValue(data.address);
                       memoConfig.setValue(data.memo ?? "");
-
                       close();
                     }}
                   />
@@ -229,84 +227,6 @@ export const AddressBookModal: FunctionComponent<{
     </Modal>
   );
 });
-
-const AddressItem: FunctionComponent<{
-  timestamp?: number;
-
-  name?: string;
-  address: string;
-  memo?: string;
-
-  onClick: () => void;
-}> = ({ timestamp, name, address, memo, onClick }) => {
-  const intl = useIntl();
-
-  return (
-    <Styles.AddressItemContainer
-      paddingX="1rem"
-      paddingY="0.75rem"
-      borderRadius="0.375rem"
-      cursor="pointer"
-      onClick={(e) => {
-        e.preventDefault();
-
-        onClick();
-      }}
-    >
-      {timestamp ? (
-        <React.Fragment>
-          <H5
-            style={{
-              color: ColorPalette["gray-10"],
-            }}
-          >
-            {`Sent on ${intl.formatDate(new Date(timestamp), {
-              year: "numeric",
-              month: "long",
-              day: "2-digit",
-            })}`}
-          </H5>
-          <Gutter size="0.25rem" />
-        </React.Fragment>
-      ) : null}
-
-      {name ? (
-        <React.Fragment>
-          <H5
-            style={{
-              color: ColorPalette["gray-10"],
-            }}
-          >
-            {name}
-          </H5>
-          <Gutter size="0.25rem" />
-        </React.Fragment>
-      ) : null}
-
-      <Body2
-        style={{
-          color: ColorPalette["gray-200"],
-        }}
-      >
-        {Bech32Address.shortenAddress(address, 30)}
-      </Body2>
-
-      {memo ? (
-        <React.Fragment>
-          <Gutter size="0.25rem" />
-          <Body2
-            style={{
-              color: ColorPalette["gray-200"],
-            }}
-          >
-            {memo}
-          </Body2>
-        </React.Fragment>
-      ) : null}
-    </Styles.AddressItemContainer>
-  );
-};
-
 const EmptyIcon: FunctionComponent<{
   size: string;
 }> = ({ size }) => {
