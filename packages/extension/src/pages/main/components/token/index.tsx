@@ -31,6 +31,9 @@ import { XAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import Color from "color";
 import { Skeleton } from "../../../../components/skeleton";
+import { WrongViewingKeyError } from "@keplr-wallet/stores";
+import { useNavigate } from "react-router";
+import { Secret20Currency } from "@keplr-wallet/types";
 
 const Styles = {
   Container: styled.div<{
@@ -103,6 +106,7 @@ interface TokenItemProps {
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
   ({ viewToken, onClick, disabled, forChange, isNotReady, altSentence }) => {
     const { priceStore } = useStore();
+    const navigate = useNavigate();
 
     const pricePretty = priceStore.calculatePrice(viewToken.token);
 
@@ -148,8 +152,23 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         forChange={forChange}
         isError={viewToken.error != null}
         disabled={disabled}
-        onClick={(e) => {
+        onClick={async (e) => {
           e.preventDefault();
+
+          if (
+            viewToken.error?.data &&
+            viewToken.error.data instanceof WrongViewingKeyError
+          ) {
+            navigate(
+              `/setting/token/add?chainId=${
+                viewToken.chainInfo.chainId
+              }&contractAddress=${
+                (viewToken.token.currency as Secret20Currency).contractAddress
+              }`
+            );
+
+            return;
+          }
 
           if (onClick) {
             onClick();
@@ -182,7 +201,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
 
               {tag ? (
                 <React.Fragment>
-                  <Gutter size="0.5rem" />
+                  <Gutter size="0.25rem" />
                   <Box alignY="center" height="1px">
                     <Tag text={tag.text} tooltip={tag.tooltip} />
                   </Box>
@@ -249,17 +268,42 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 isNotReady={isNotReady}
                 dummyMinWidth="4.5rem"
               >
-                <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
-                  {(() => {
-                    if (altSentence) {
-                      return altSentence;
-                    }
+                {viewToken.error?.data &&
+                viewToken.error.data instanceof WrongViewingKeyError ? (
+                  <Box position="relative" alignX="right">
+                    <Subtitle3
+                      color={ColorPalette["gray-100"]}
+                      style={{
+                        textDecoration: "underline",
+                        position: "absolute",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Set your viewing key
+                    </Subtitle3>
+                    <Subtitle3
+                      style={{
+                        textDecoration: "underline",
+                        whiteSpace: "nowrap",
+                        opacity: 0,
+                      }}
+                    >
+                      &nbps;
+                    </Subtitle3>
+                  </Box>
+                ) : (
+                  <Subtitle3 color={ColorPalette["gray-300"]}>
+                    {(() => {
+                      if (altSentence) {
+                        return altSentence;
+                      }
 
-                    return pricePretty
-                      ? pricePretty.inequalitySymbol(true).toString()
-                      : "-";
-                  })()}
-                </Subtitle3>
+                      return pricePretty
+                        ? pricePretty.inequalitySymbol(true).toString()
+                        : "-";
+                    })()}
+                  </Subtitle3>
+                )}
               </Skeleton>
             </Stack>
 

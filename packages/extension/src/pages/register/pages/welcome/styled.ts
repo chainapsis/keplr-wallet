@@ -21,11 +21,6 @@ export const Styles = {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 5rem;
-
-    @media screen and (max-width: 1150px) {
-      flex-direction: column;
-      gap: 1rem;
-    }
+    gap: 3rem;
   `,
 };
