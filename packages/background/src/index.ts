@@ -66,7 +66,11 @@ export function init(
   );
 
   const chainsService = new Chains.ChainsService(
-    storeCreator("chains"),
+    storeCreator("chains-v2"),
+    {
+      kvStore: storeCreator("chains"),
+      updaterKVStore: storeCreator("updator"),
+    },
     embedChainInfos,
     communityChainInfoRepo,
     interactionService

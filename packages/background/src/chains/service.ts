@@ -57,6 +57,10 @@ export class ChainsService {
 
   constructor(
     protected readonly kvStore: KVStore,
+    protected readonly migrationKVStore: {
+      kvStore: KVStore;
+      updaterKVStore: KVStore;
+    },
     // embedChainInfos는 실행 이후에 변경되어서는 안된다.
     protected readonly embedChainInfos: ReadonlyArray<ChainInfo>,
     protected readonly communityChainInfoRepo: {
@@ -81,6 +85,75 @@ export class ChainsService {
   }
 
   async init(): Promise<void> {
+    const migrated = await this.kvStore.get<boolean>("migration/v1");
+    if (!migrated) {
+      const legacySuggestedChainInfos = await this.migrationKVStore.kvStore.get<
+        ChainInfoWithRepoUpdateOptions[]
+      >("chain-infos");
+
+      if (legacySuggestedChainInfos) {
+        const filtered = legacySuggestedChainInfos.filter((chainInfo) => {
+          return !this.embedChainInfos.some(
+            (embed) =>
+              ChainIdHelper.parse(embed.chainId).identifier ===
+              ChainIdHelper.parse(chainInfo.chainId).identifier
+          );
+        });
+
+        for (const chainInfo of filtered) {
+          this.addSuggestedChainInfo(chainInfo, true);
+        }
+
+        const chainInfos = this.embedChainInfos.concat(filtered);
+
+        for (const chainInfo of chainInfos) {
+          const chainIdentifier = ChainIdHelper.parse(
+            chainInfo.chainId
+          ).identifier;
+
+          const repoUpdatedChainInfo =
+            await this.migrationKVStore.updaterKVStore.get<ChainInfo>(
+              "updated-chain-info/" + chainIdentifier
+            );
+
+          if (repoUpdatedChainInfo) {
+            try {
+              const validated = await validateBasicChainInfoType(
+                repoUpdatedChainInfo
+              );
+              runInAction(() => {
+                this.repoChainInfos = [...this.repoChainInfos, validated];
+              });
+            } catch (e) {
+              console.log(e);
+            }
+          }
+
+          const localUpdatedChainInfo =
+            await this.migrationKVStore.updaterKVStore.get<Partial<ChainInfo>>(
+              chainIdentifier
+            );
+          if (localUpdatedChainInfo) {
+            this.setUpdatedChainInfo(chainInfo.chainId, {
+              chainId: localUpdatedChainInfo.chainId,
+              features: localUpdatedChainInfo.features,
+            });
+          }
+
+          const endpoints = await this.migrationKVStore.updaterKVStore.get<{
+            rpc: string | undefined;
+            rest: string | undefined;
+          }>("chain-info-endpoints/" + chainIdentifier);
+
+          if (endpoints) {
+            this.setEndpoint(chainInfo.chainId, endpoints);
+          }
+        }
+      }
+
+      await this.kvStore.set("migration/v1", true);
+    }
+
     {
       const chainInfos = await this.updatedChainInfoKVStore.get<
         UpdatedChainInfo[]
@@ -359,7 +432,7 @@ export class ChainsService {
   @action
   protected setUpdatedChainInfo(
     chainId: string,
-    chainInfo: Partial<UpdatedChainInfo>
+    chainInfo: Partial<Pick<UpdatedChainInfo, "chainId" | "features">>
   ): void {
     if (!this.hasChainInfo(chainId)) {
       throw new Error(`${chainId} is not registered`);
@@ -428,7 +501,11 @@ export class ChainsService {
   }
 
   @action
-  addSuggestedChainInfo(chainInfo: ChainInfo): void {
+  addSuggestedChainInfo(
+    chainInfo: ChainInfoWithRepoUpdateOptions,
+    // Used for migration
+    notInvokeHandlers?: boolean
+  ): void {
     const i = this.suggestedChainInfos.findIndex(
       (c) =>
         ChainIdHelper.parse(c.chainId).identifier ===
@@ -439,8 +516,10 @@ export class ChainsService {
       newChainInfos.push(chainInfo);
       this.suggestedChainInfos = newChainInfos;
 
-      for (const handler of this.onChainSuggestedHandlers) {
-        handler(chainInfo);
+      if (!notInvokeHandlers) {
+        for (const handler of this.onChainSuggestedHandlers) {
+          handler(chainInfo);
+        }
       }
     } else {
       throw new Error(`There is already chain info for ${chainInfo.chainId}`);
