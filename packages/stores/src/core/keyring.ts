@@ -9,8 +9,24 @@ import {
 } from "mobx";
 import { toGenerator } from "@keplr-wallet/common";
 import {
+  AppendLedgerKeyAppMsg,
+  BIP44HDPath,
+  ChangeKeyRingNameMsg,
+  ChangeUserPasswordMsg,
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
-  KeyRingV2,
+  DeleteKeyRingMsg,
+  FinalizeMnemonicKeyCoinTypeMsg,
+  GetKeyRingStatusMsg,
+  GetKeyRingStatusOnlyMsg,
+  KeyInfo,
+  KeyRingStatus,
+  LockKeyRingMsg,
+  NewLedgerKeyMsg,
+  NewMnemonicKeyMsg,
+  NewPrivateKeyKeyMsg,
+  SelectKeyRingMsg,
+  ShowSensitiveKeyRingDataMsg,
+  UnlockKeyRingMsg,
 } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -20,10 +36,10 @@ export class KeyRingStore {
   protected _isInitialized: boolean = false;
 
   @observable
-  protected _status: KeyRingV2.KeyRingStatus | "not-loaded" = "not-loaded";
+  protected _status: KeyRingStatus | "not-loaded" = "not-loaded";
 
   @observable.ref
-  protected _keyInfos: KeyRingV2.KeyInfo[] = [];
+  protected _keyInfos: KeyInfo[] = [];
 
   constructor(
     protected readonly eventDispatcher: {
@@ -37,7 +53,7 @@ export class KeyRingStore {
   }
 
   async init(): Promise<void> {
-    const msg = new KeyRingV2.GetKeyRingStatusMsg();
+    const msg = new GetKeyRingStatusMsg();
     const result = await this.requester.sendMessage(BACKGROUND_PORT, msg);
     runInAction(() => {
       this._status = result.status;
@@ -69,22 +85,22 @@ export class KeyRingStore {
     });
   }
 
-  get status(): KeyRingV2.KeyRingStatus | "not-loaded" {
+  get status(): KeyRingStatus | "not-loaded" {
     return this._status;
   }
 
-  get keyInfos(): KeyRingV2.KeyInfo[] {
+  get keyInfos(): KeyInfo[] {
     return this._keyInfos;
   }
 
-  async fetchKeyRingStatus(): Promise<KeyRingV2.KeyRingStatus> {
-    const msg = new KeyRingV2.GetKeyRingStatusOnlyMsg();
+  async fetchKeyRingStatus(): Promise<KeyRingStatus> {
+    const msg = new GetKeyRingStatusOnlyMsg();
     const result = await this.requester.sendMessage(BACKGROUND_PORT, msg);
     return result.status;
   }
 
   @computed
-  get selectedKeyInfo(): KeyRingV2.KeyInfo | undefined {
+  get selectedKeyInfo(): KeyInfo | undefined {
     return this._keyInfos.find((keyInfo) => keyInfo.isSelected);
   }
 
@@ -94,7 +110,7 @@ export class KeyRingStore {
 
   @flow
   *selectKeyRing(vaultId: string) {
-    const msg = new KeyRingV2.SelectKeyRingMsg(vaultId);
+    const msg = new SelectKeyRingMsg(vaultId);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -142,7 +158,7 @@ export class KeyRingStore {
   }
 
   async showKeyRing(vaultId: string, password: string) {
-    const msg = new KeyRingV2.ShowSensitiveKeyRingDataMsg(vaultId, password);
+    const msg = new ShowSensitiveKeyRingDataMsg(vaultId, password);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
@@ -152,11 +168,7 @@ export class KeyRingStore {
     chainId: string,
     coinType: number
   ) {
-    const msg = new KeyRingV2.FinalizeMnemonicKeyCoinTypeMsg(
-      vaultId,
-      chainId,
-      coinType
-    );
+    const msg = new FinalizeMnemonicKeyCoinTypeMsg(vaultId, chainId, coinType);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -169,16 +181,11 @@ export class KeyRingStore {
   @flow
   *newMnemonicKey(
     mnemonic: string,
-    bip44HDPath: KeyRingV2.BIP44HDPath,
+    bip44HDPath: BIP44HDPath,
     name: string,
     password: string | undefined
   ) {
-    const msg = new KeyRingV2.NewMnemonicKeyMsg(
-      mnemonic,
-      bip44HDPath,
-      name,
-      password
-    );
+    const msg = new NewMnemonicKeyMsg(mnemonic, bip44HDPath, name, password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -194,17 +201,11 @@ export class KeyRingStore {
   *newLedgerKey(
     pubKey: Uint8Array,
     app: string,
-    bip44HDPath: KeyRingV2.BIP44HDPath,
+    bip44HDPath: BIP44HDPath,
     name: string,
     password: string | undefined
   ) {
-    const msg = new KeyRingV2.NewLedgerKeyMsg(
-      pubKey,
-      app,
-      bip44HDPath,
-      name,
-      password
-    );
+    const msg = new NewLedgerKeyMsg(pubKey, app, bip44HDPath, name, password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -218,7 +219,7 @@ export class KeyRingStore {
 
   @flow
   *appendLedgerKeyApp(vaultId: string, pubKey: Uint8Array, app: string) {
-    const msg = new KeyRingV2.AppendLedgerKeyAppMsg(vaultId, pubKey, app);
+    const msg = new AppendLedgerKeyAppMsg(vaultId, pubKey, app);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -235,12 +236,7 @@ export class KeyRingStore {
     name: string,
     password: string | undefined
   ) {
-    const msg = new KeyRingV2.NewPrivateKeyKeyMsg(
-      privateKey,
-      meta,
-      name,
-      password
-    );
+    const msg = new NewPrivateKeyKeyMsg(privateKey, meta, name, password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -254,7 +250,7 @@ export class KeyRingStore {
 
   @flow
   *lock() {
-    const msg = new KeyRingV2.LockKeyRingMsg();
+    const msg = new LockKeyRingMsg();
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -263,7 +259,7 @@ export class KeyRingStore {
 
   @flow
   *unlock(password: string) {
-    const msg = new KeyRingV2.UnlockKeyRingMsg(password);
+    const msg = new UnlockKeyRingMsg(password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -272,7 +268,7 @@ export class KeyRingStore {
 
   @flow
   *changeKeyRingName(vaultId: string, name: string) {
-    const msg = new KeyRingV2.ChangeKeyRingNameMsg(vaultId, name);
+    const msg = new ChangeKeyRingNameMsg(vaultId, name);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -284,7 +280,7 @@ export class KeyRingStore {
 
   @flow
   *deleteKeyRing(vaultId: string, password: string) {
-    const msg = new KeyRingV2.DeleteKeyRingMsg(vaultId, password);
+    const msg = new DeleteKeyRingMsg(vaultId, password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
@@ -300,10 +296,7 @@ export class KeyRingStore {
     prevUserPassword: string,
     newUserPassword: string
   ): Promise<void> {
-    const msg = new KeyRingV2.ChangeUserPasswordMsg(
-      prevUserPassword,
-      newUserPassword
-    );
+    const msg = new ChangeUserPasswordMsg(prevUserPassword, newUserPassword);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

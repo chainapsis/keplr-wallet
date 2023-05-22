@@ -33,7 +33,7 @@ export * from "./phishing-list";
 export * from "./auto-lock-account";
 export * from "./analytics";
 export * from "./permission-interactive";
-export * as KeyRingV2 from "./keyring-v2";
+export * from "./keyring-v2";
 export * from "./vault";
 export * from "./keyring-cosmos";
 export * from "./token-scan";
