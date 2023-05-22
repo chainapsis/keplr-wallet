@@ -101,6 +101,12 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
   const [initials] = useState(() => {
     const route = searchParams.get("route");
     const vaultId = searchParams.get("vaultId");
+    //isFromRegister을 params로 받으면 string이 되기 때문에 boolean으로 변경 해줘야함
+    //이때 enable-chains에서 isFromRegister 기본값이 true이기 때문에 false일때만 false로 설정
+
+    const isFromRegister =
+      searchParams.get("isFromRegister")?.toLowerCase() !== "false";
+
     if (vaultId) {
       // 이 시점에서 chainStore가 초기화 되어있는게 보장된다.
       if (chainStore.lastSyncedEnabledChainsVaultId !== vaultId) {
@@ -124,9 +130,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             vaultId,
             stepPrevious: -1,
             stepTotal: 0,
-            //route 값에 enable-chains이 들어와서 라우팅 하는경우 초기화면이 아니라고 가정하기때문에
-            //welcome 페이지로 이동 하지 않기 위해 isFromRegister: false 으로 설정
-            isFromRegister: false,
+            isFromRegister,
           },
         },
       };
