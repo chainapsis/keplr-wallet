@@ -124,6 +124,9 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             vaultId,
             stepPrevious: -1,
             stepTotal: 0,
+            //route 값에 enable-chains이 들어와서 라우팅 하는경우 초기화면이 아니라고 가정하기때문에
+            //welcome 페이지로 이동 하지 않기 위해 isFromRegister: false 으로 설정
+            isFromRegister: false,
           },
         },
       };
