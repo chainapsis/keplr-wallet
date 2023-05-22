@@ -23,9 +23,19 @@ export const AddTokenModal: FunctionComponent<{
     const contractAddress =
       tokensStore.waitingSuggestedToken?.data.contractAddress || "";
 
-    const queryTokenInfo = queriesStore
-      .get(chainId)
-      .cosmwasm.querycw20ContractInfo.getQueryContract(contractAddress);
+    const isSecret20 =
+      (chainStore.current.features ?? []).find(
+        (feature) => feature === "secretwasm"
+      ) != null;
+
+    const queries = queriesStore.get(chainId);
+
+    const query = isSecret20
+      ? queries.secret.querySecret20ContractInfo
+      : queries.cosmwasm.querycw20ContractInfo;
+
+    const queryContractInfo = query.getQueryContract(contractAddress);
+    const tokenInfo = queryContractInfo.tokenInfo;
 
     return (
       <CardModal title="Add Token">
@@ -37,32 +47,32 @@ export const AddTokenModal: FunctionComponent<{
         <TextInput
           label="Name"
           editable={false}
-          value={queryTokenInfo.tokenInfo?.name ?? ""}
+          value={tokenInfo?.name ?? ""}
         />
         <TextInput
           label="Symbol"
           editable={false}
-          value={queryTokenInfo.tokenInfo?.symbol ?? ""}
+          value={tokenInfo?.symbol ?? ""}
         />
         <TextInput
           label="Decimals"
           editable={false}
-          value={queryTokenInfo.tokenInfo?.decimals.toString() ?? ""}
+          value={tokenInfo?.decimals.toString() ?? ""}
         />
         <View style={style.flatten(["height-16"])} />
         <Button
           text="Submit"
           size="large"
-          disabled={!queryTokenInfo.tokenInfo || queryTokenInfo.error != null}
-          loading={!queryTokenInfo.tokenInfo && queryTokenInfo.isFetching}
+          disabled={!tokenInfo || queryContractInfo.error != null}
+          loading={!tokenInfo && queryContractInfo.isFetching}
           onPress={async () => {
-            if (queryTokenInfo.tokenInfo) {
+            if (tokenInfo) {
               await tokensStore.approveSuggestedToken({
                 type: "cw20",
                 contractAddress,
-                coinMinimalDenom: queryTokenInfo.tokenInfo.name,
-                coinDenom: queryTokenInfo.tokenInfo.symbol,
-                coinDecimals: queryTokenInfo.tokenInfo.decimals,
+                coinMinimalDenom: tokenInfo.name,
+                coinDenom: tokenInfo.symbol,
+                coinDecimals: tokenInfo.decimals,
               });
             }
           }}
