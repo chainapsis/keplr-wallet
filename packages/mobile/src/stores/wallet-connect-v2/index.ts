@@ -177,7 +177,6 @@ export class WalletConnectV2Store {
             params = params.slice(1);
           }
 
-          const topic = params;
           if (this.sessionProposalResolverMap.has(topic)) {
             // Already requested. Do nothing.
             return;
@@ -714,7 +713,7 @@ export class WalletConnectV2Store {
         this.isPendingWcCallFromDeepLinkClient = false;
 
         if (AppState.currentState === "active") {
-          this.clearNeedGoBackToBrowser();
+          this._needGoBackToBrowser = true;
         }
       }
     }
