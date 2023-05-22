@@ -170,13 +170,26 @@ export class WalletConnectV2Store {
     try {
       const url = new URL(_url);
       if (url.protocol === "keplrwallet:" && url.host === "wcV2") {
-        let params = url.search;
+        // If deep link, uri can be escaped.
+        let params = decodeURIComponent(url.search);
         if (params) {
           if (params.startsWith("?")) {
             params = params.slice(1);
           }
 
-          const topic = params;
+          const topic = this.getTopicFromURI(params);
+          try {
+            // Validate that topic is hex encoded.
+            if (
+              Buffer.from(topic, "hex").toString("hex").toLowerCase() !==
+              topic.toLowerCase()
+            ) {
+              throw new Error("Invalid topic");
+            }
+          } catch {
+            console.log("Invalid topic", params);
+            return;
+          }
           if (this.sessionProposalResolverMap.has(topic)) {
             // Already requested. Do nothing.
             return;
@@ -493,12 +506,12 @@ export class WalletConnectV2Store {
       this.sessionProposalResolverMap.delete(topic);
     }
 
+    const randomId = Buffer.from(
+      await getRandomBytesAsync(new Uint32Array(10))
+    ).toString("hex");
+
     try {
       const proposal = await SessionProposalSchema.validateAsync(event);
-
-      const randomId = Buffer.from(
-        await getRandomBytesAsync(new Uint32Array(10))
-      ).toString("hex");
 
       const metadata = proposal.params?.proposer?.metadata;
       if (metadata) {
@@ -543,7 +556,17 @@ export class WalletConnectV2Store {
         },
       });
     } finally {
-      this.pendingSessionProposalMetadataMap.delete(topic);
+      this.pendingSessionProposalMetadataMap.delete(randomId);
+
+      if (
+        resolver &&
+        resolver.fromDeepLink &&
+        this.pendingSessionProposalMetadataMap.size === 0
+      ) {
+        runInAction(() => {
+          this._needGoBackToBrowser = true;
+        });
+      }
     }
   }
 
@@ -713,7 +736,9 @@ export class WalletConnectV2Store {
         this.isPendingWcCallFromDeepLinkClient = false;
 
         if (AppState.currentState === "active") {
-          this.clearNeedGoBackToBrowser();
+          runInAction(() => {
+            this._needGoBackToBrowser = true;
+          });
         }
       }
     }

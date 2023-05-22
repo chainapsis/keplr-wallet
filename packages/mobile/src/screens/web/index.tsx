@@ -18,6 +18,7 @@ import {
   WYNDDaoItem,
   PStakeItem,
   StreamSwapItem,
+  IBCXItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 
@@ -40,6 +41,7 @@ const WebpagesPerLabel: {
       PStakeItem,
       RegenItem,
       StreamSwapItem,
+      IBCXItem,
     ],
   },
   {
@@ -54,6 +56,7 @@ const WebpagesPerLabel: {
       StrideItem,
       PStakeItem,
       StreamSwapItem,
+      IBCXItem,
     ],
   },
   {

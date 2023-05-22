@@ -256,3 +256,22 @@ export const StreamSwapItem: Item = {
   key: "streamswap",
   component: StreamSwapImage,
 };
+
+const IBCXImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="IBCX"
+      source={require("../../assets/image/webpage/ibcx.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.IBCX", {});
+      }}
+    />
+  );
+};
+
+export const IBCXItem: Item = {
+  key: "ibcx",
+  component: IBCXImage,
+};
