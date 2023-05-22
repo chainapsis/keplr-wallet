@@ -1,4 +1,4 @@
-import { KeyRingStatus } from "../keyring-v2";
+import { KeyRingStatus } from "../keyring";
 import { AutoLockAccountService } from "./service";
 import { MemoryKVStore } from "@keplr-wallet/common";
 import EventEmitter from "events";

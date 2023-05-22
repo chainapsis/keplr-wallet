@@ -1,5 +1,5 @@
 import { KVStore } from "@keplr-wallet/common";
-import { KeyRingService } from "../keyring-v2";
+import { KeyRingService } from "../keyring";
 import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 
 export class AutoLockAccountService {

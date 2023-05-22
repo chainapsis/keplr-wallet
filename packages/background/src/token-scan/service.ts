@@ -1,6 +1,6 @@
 import { ChainsService } from "../chains";
 import { KeyRingCosmosService } from "../keyring-cosmos";
-import { KeyRingService } from "../keyring-v2";
+import { KeyRingService } from "../keyring";
 import { ChainsUIService } from "../chains-ui";
 import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";

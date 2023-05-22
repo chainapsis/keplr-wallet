@@ -1,5 +1,5 @@
 import { ChainsService } from "../chains";
-import { KeyRingService } from "../keyring-v2";
+import { KeyRingService } from "../keyring";
 import {
   AminoSignResponse,
   ChainInfo,
