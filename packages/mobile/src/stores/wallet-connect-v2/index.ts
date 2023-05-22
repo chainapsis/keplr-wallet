@@ -170,7 +170,8 @@ export class WalletConnectV2Store {
     try {
       const url = new URL(_url);
       if (url.protocol === "keplrwallet:" && url.host === "wcV2") {
-        let params = url.search;
+        // If deep link, uri can be escaped.
+        let params = decodeURIComponent(url.search);
         if (params) {
           if (params.startsWith("?")) {
             params = params.slice(1);
