@@ -115,6 +115,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
     }
 
     if (route === "enable-chains") {
+      const initialSearchValue = searchParams.get("initialSearchValue");
+
       return {
         header: {
           // TODO: ...
@@ -127,6 +129,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             stepPrevious: -1,
             stepTotal: 0,
             skipWelcome,
+            initialSearchValue,
           },
         },
       };
