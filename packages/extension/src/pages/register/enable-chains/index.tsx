@@ -45,7 +45,7 @@ export const EnableChainsScene: FunctionComponent<{
     }[];
   }[];
   isFresh?: boolean;
-  isFromRegister?: boolean;
+  skipWelcome?: boolean;
   fallbackEthereumLedgerApp?: boolean;
   stepPrevious: number;
   stepTotal: number;
@@ -57,7 +57,7 @@ export const EnableChainsScene: FunctionComponent<{
     fallbackEthereumLedgerApp,
     stepPrevious,
     stepTotal,
-    isFromRegister = true,
+    skipWelcome,
   }) => {
     const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
       useStore();
@@ -481,11 +481,11 @@ export const EnableChainsScene: FunctionComponent<{
     }, [chainStore.chainInfos, enabledChainIdentifiers]);
 
     const redirectWhenFinish = () => {
-      isFromRegister
-        ? navigate("/welcome", {
+      skipWelcome
+        ? window.close()
+        : navigate("/welcome", {
             replace: true,
-          })
-        : window.close();
+          });
     };
 
     return (
