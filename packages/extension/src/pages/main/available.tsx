@@ -58,6 +58,10 @@ export const AvailableTabView: FunctionComponent<{
 
   const lookingForChains = (() => {
     return chainStore.chainInfos.filter((chainInfo) => {
+      if (chainStore.isEnabledChain(chainInfo.chainId)) {
+        return false;
+      }
+
       const replacedSearchValue = trimSearch.replace(/ /g, "").toLowerCase();
       const hasChainName =
         chainInfo.chainName.replace(/ /gi, "").toLowerCase() ===
