@@ -169,6 +169,26 @@ export const App: FunctionComponent = observer(() => {
       </button>
       <button
         onClick={() => {
+          const chainInfo = chainStore.chainInfos[3];
+          const account = accountStore.getAccount(chainInfo.chainId);
+
+          account
+            .getKeplr()
+            .then((keplr) =>
+              keplr?.suggestToken(
+                chainInfo.chainId,
+                "juno1epxnvge53c4hkcmqzlxryw5fp7eae2utyk6ehjcfpwajwp48km3sgxsh9k"
+              )
+            )
+            .then(() => {
+              console.log(`suggestToken:cw20 complete`);
+            });
+        }}
+      >
+        Test suggestToken:cw20
+      </button>
+      <button
+        onClick={() => {
           const chainInfo = chainStore.chainInfos[2];
           const account = accountStore.getAccount(chainInfo.chainId);
 
@@ -181,11 +201,11 @@ export const App: FunctionComponent = observer(() => {
               )
             )
             .then(() => {
-              console.log(`suggestToken complete`);
+              console.log(`suggestToken:snip20 complete`);
             });
         }}
       >
-        Test suggestToken
+        Test suggestToken:snip20
       </button>
       <button
         onClick={() => {
@@ -202,11 +222,11 @@ export const App: FunctionComponent = observer(() => {
               )
             )
             .then(() => {
-              console.log(`suggestToken w/ viewing key complete`);
+              console.log(`suggestToken:snip20 w/ viewing key complete`);
             });
         }}
       >
-        Test suggestToken w/ viewingkey
+        Test suggestToken:snip20 w/ viewingkey
       </button>
       <button
         onClick={() => {

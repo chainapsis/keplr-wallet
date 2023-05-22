@@ -134,4 +134,49 @@ export const EmbedChainInfos = [
     ],
     features: ["secretwasm"],
   },
+  {
+    chainId: "juno-1",
+    chainName: "Juno",
+    rpc: "https://rpc-juno.mib.tech:443/",
+    rest: "https://lcd-juno.itastakers.com:443/",
+    stakeCurrency: {
+      coinDenom: "JUNO",
+      coinMinimalDenom: "ujuno",
+      coinDecimals: 6,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "juno",
+      bech32PrefixAccPub: "junopub",
+      bech32PrefixValAddr: "junovaloper",
+      bech32PrefixValPub: "junovaloperpub",
+      bech32PrefixConsAddr: "junovalcons",
+      bech32PrefixConsPub: "junovalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "JUNO",
+        coinMinimalDenom: "ujuno",
+        coinDecimals: 6,
+        coinGeckoId: "juno-network",
+      },
+    ],
+    coinType: 118,
+    gasPriceStep: {
+      low: 0.0025,
+      average: 0.01,
+      high: 0.025,
+    },
+    features: ["cosmwasm", "stargate", "ibc-transfer"],
+  },
 ];
