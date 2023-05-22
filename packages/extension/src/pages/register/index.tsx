@@ -113,6 +113,8 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
     }
 
     if (route === "enable-chains") {
+      const searchValue = searchParams.get("searchValue");
+
       return {
         header: {
           // TODO: ...
@@ -124,6 +126,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             vaultId,
             stepPrevious: -1,
             stepTotal: 0,
+            searchValue: searchValue,
           },
         },
       };

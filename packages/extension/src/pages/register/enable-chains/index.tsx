@@ -46,6 +46,7 @@ export const EnableChainsScene: FunctionComponent<{
   }[];
   isFresh?: boolean;
 
+  searchValue?: string;
   fallbackEthereumLedgerApp?: boolean;
   stepPrevious: number;
   stepTotal: number;
@@ -57,6 +58,7 @@ export const EnableChainsScene: FunctionComponent<{
     fallbackEthereumLedgerApp,
     stepPrevious,
     stepTotal,
+    searchValue,
   }) => {
     const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
       useStore();
@@ -344,7 +346,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const searchRef = useFocusOnMount<HTMLInputElement>();
 
-    const [search, setSearch] = useState<string>("");
+    const [search, setSearch] = useState<string>(searchValue ?? "");
 
     // 검색 뿐만 아니라 로직에 따른 선택할 수 있는 체인 목록을 가지고 있다.
     // 그러니까 로직을 파악해서 주의해서 사용해야함.

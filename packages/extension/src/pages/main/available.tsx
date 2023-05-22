@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import {
+  LookingForChains,
   MainEmptyView,
   TokenFoundModal,
   TokenItem,
@@ -40,7 +41,6 @@ export const AvailableTabView: FunctionComponent<{
   }, [allBalances]);
 
   const isFirstTime = allBalancesNonZero.length === 0;
-
   const trimSearch = search.trim();
 
   const allBalancesSearchFiltered = useMemo(() => {
@@ -55,6 +55,26 @@ export const AvailableTabView: FunctionComponent<{
       );
     });
   }, [allBalances, trimSearch]);
+
+  const lookingForChains = (() => {
+    return chainStore.chainInfos.filter((chainInfo) => {
+      const replacedSearchValue = trimSearch.replace(/ /g, "").toLowerCase();
+      const hasChainName =
+        chainInfo.chainName.replace(/ /gi, "").toLowerCase() ===
+        replacedSearchValue;
+      const hasCurrency = chainInfo.currencies.some(
+        (currency) =>
+          currency.coinDenom.replace(/ /gi, "").toLowerCase() ===
+          replacedSearchValue
+      );
+
+      const hasStakeCurrency =
+        chainInfo.stakeCurrency.coinDenom.replace(/ /gi, "").toLowerCase() ===
+        replacedSearchValue;
+
+      return hasChainName || hasCurrency || hasStakeCurrency;
+    });
+  })();
 
   const TokenViewData: {
     title: string;
@@ -95,6 +115,10 @@ export const AvailableTabView: FunctionComponent<{
 
   return (
     <React.Fragment>
+      {lookingForChains.length > 0 ? (
+        <LookingForChains chainInfos={lookingForChains} />
+      ) : null}
+
       {isNotReady ? (
         <TokenItem
           viewToken={{
