@@ -2,25 +2,15 @@ import React, { FunctionComponent, useState } from "react";
 
 import { Box } from "../box";
 import { Column, Columns } from "../column";
-import { Stack } from "../stack";
 import { Body2, H5 } from "../typography";
 import { EllipsisIcon, ProfileIcon, DocumentTextIcon } from "../icon";
 import { FloatingDropdown, FloatingDropdownItem } from "../dropdown";
 import { ColorPalette } from "../../styles";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import styled from "styled-components";
-import Color from "color";
 import { useIntl } from "react-intl";
 import { Gutter } from "../gutter";
-
-const Styles = {
-  AddressItemContainer: styled(Box)`
-    background-color: ${ColorPalette["gray-600"]};
-    &:hover {
-      background-color: ${Color(ColorPalette["gray-550"]).string()};
-    }
-  `,
-};
+import { IconButton } from "../icon-button";
+import { XAxis, YAxis } from "../axis";
 
 export const AddressItem: FunctionComponent<{
   timestamp?: number;
@@ -35,52 +25,61 @@ export const AddressItem: FunctionComponent<{
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   return (
-    <Styles.AddressItemContainer
+    <Box
       padding="1rem"
       backgroundColor={ColorPalette["gray-600"]}
+      hover={{
+        backgroundColor: onClick ? ColorPalette["gray-550"] : undefined,
+      }}
       borderRadius="0.375rem"
-      cursor="pointer"
+      cursor={onClick ? "pointer" : undefined}
       onClick={(e) => {
         e.preventDefault();
-        onClick && onClick();
+        if (onClick) {
+          onClick();
+        }
       }}
     >
       <Columns sum={1} alignY="center">
-        <Stack gutter="0.5rem">
-          {timestamp ? (
-            <React.Fragment>
-              <H5
-                style={{
-                  color: ColorPalette["gray-10"],
-                }}
-              >
-                {`Sent on ${intl.formatDate(new Date(timestamp), {
-                  year: "numeric",
-                  month: "long",
-                  day: "2-digit",
-                })}`}
-              </H5>
+        <Column weight={1}>
+          <YAxis>
+            {timestamp ? (
+              <React.Fragment>
+                <H5
+                  style={{
+                    color: ColorPalette["gray-10"],
+                  }}
+                >
+                  {`Sent on ${intl.formatDate(new Date(timestamp), {
+                    year: "numeric",
+                    month: "long",
+                    day: "2-digit",
+                  })}`}
+                </H5>
+                <Gutter size="0.5rem" />
+              </React.Fragment>
+            ) : null}
+
+            {name ? (
+              <React.Fragment>
+                <H5
+                  style={{
+                    color: ColorPalette["gray-10"],
+                    width: "16rem",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {name}
+                </H5>
+                <Gutter size="0.5rem" />
+              </React.Fragment>
+            ) : null}
+
+            <XAxis alignY="center">
+              <ProfileIcon width="0.75rem" height="0.75rem" />
               <Gutter size="0.25rem" />
-            </React.Fragment>
-          ) : null}
-
-          {name ? (
-            <H5
-              style={{
-                color: ColorPalette["gray-10"],
-                width: "16rem",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {name}
-            </H5>
-          ) : null}
-
-          <Stack alignX="left" gutter="0.25rem">
-            <Columns sum={1} gutter="0.375rem">
-              <ProfileIcon width=".8rem" height=".8rem" />
               <Body2
                 style={{
                   color: ColorPalette["gray-200"],
@@ -88,10 +87,12 @@ export const AddressItem: FunctionComponent<{
               >
                 {Bech32Address.shortenAddress(address, 30)}
               </Body2>
-            </Columns>
+            </XAxis>
 
-            <Columns sum={1} gutter="0.375rem">
-              <DocumentTextIcon width=".8rem" height=".8rem" />
+            <Gutter size="0.25rem" />
+            <XAxis alignY="center">
+              <DocumentTextIcon width="0.75rem" height="0.75rem" />
+              <Gutter size="0.25rem" />
               {memo ? (
                 <Body2
                   style={{
@@ -107,33 +108,31 @@ export const AddressItem: FunctionComponent<{
               ) : (
                 <Body2
                   style={{
-                    color: ColorPalette["gray-200"],
-                    width: "15rem",
+                    color: ColorPalette["gray-300"],
                   }}
                 >
-                  {"(Empty Memo)"}
+                  (Empty Memo)
                 </Body2>
               )}
-            </Columns>
-          </Stack>
-        </Stack>
+            </XAxis>
+          </YAxis>
+        </Column>
 
-        <Column weight={1} />
         {dropdownItems && dropdownItems.length > 0 ? (
           <FloatingDropdown
             isOpen={isMenuOpen}
             close={() => setIsMenuOpen(false)}
             items={dropdownItems}
           >
-            <Box
+            <IconButton
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              style={{ color: ColorPalette["gray-10"] }}
+              color={ColorPalette["gray-10"]}
             >
-              <EllipsisIcon width="1.25rem" height="1.25rem" />
-            </Box>
+              <EllipsisIcon width="1.5rem" height="1.5rem" />
+            </IconButton>
           </FloatingDropdown>
         ) : null}
       </Columns>
-    </Styles.AddressItemContainer>
+    </Box>
   );
 };
