@@ -32,8 +32,8 @@ import { Gutter } from "../../../../components/gutter";
 import Color from "color";
 import { Skeleton } from "../../../../components/skeleton";
 import { WrongViewingKeyError } from "@keplr-wallet/stores";
-import { AppCurrency } from "@keplr-wallet/types";
 import { useNavigate } from "react-router";
+import { Secret20Currency } from "@keplr-wallet/types";
 
 const Styles = {
   Container: styled.div<{
@@ -105,7 +105,7 @@ interface TokenItemProps {
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
   ({ viewToken, onClick, disabled, forChange, isNotReady, altSentence }) => {
-    const { accountStore, tokensStore, priceStore } = useStore();
+    const { priceStore } = useStore();
     const navigate = useNavigate();
 
     const pricePretty = priceStore.calculatePrice(viewToken.token);
@@ -147,30 +147,6 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
       }
     }, [viewToken.token.currency]);
 
-    const createViewingKey = (): Promise<string | undefined> => {
-      if (
-        "type" in viewToken.token.currency &&
-        viewToken.token.currency.type === "secret20"
-      ) {
-        const contractAddress = viewToken.token.currency.contractAddress;
-        return new Promise((resolve) => {
-          accountStore
-            .getAccount(viewToken.chainInfo.chainId)
-            .secret.createSecret20ViewingKey(
-              contractAddress,
-              "",
-              {},
-              {},
-              (_, viewingKey) => {
-                resolve(viewingKey);
-              }
-            );
-        });
-      } else {
-        return new Promise((resolve) => resolve(undefined));
-      }
-    };
-
     return (
       <Styles.Container
         forChange={forChange}
@@ -183,17 +159,13 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
             viewToken.error?.data &&
             viewToken.error.data instanceof WrongViewingKeyError
           ) {
-            const viewingKey = await createViewingKey();
-            if (viewingKey) {
-              await tokensStore.addToken(viewToken.chainInfo.chainId, {
-                ...viewToken.token.currency,
-                viewingKey,
-              } as AppCurrency);
-            }
-
-            navigate("/", {
-              replace: true,
-            });
+            navigate(
+              `/setting/token/add?chainId=${
+                viewToken.chainInfo.chainId
+              }&contractAddress=${
+                (viewToken.token.currency as Secret20Currency).contractAddress
+              }`
+            );
 
             return;
           }
@@ -296,7 +268,8 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 isNotReady={isNotReady}
                 dummyMinWidth="4.5rem"
               >
-                {viewToken.error ? (
+                {viewToken.error?.data &&
+                viewToken.error.data instanceof WrongViewingKeyError ? (
                   <Box position="relative" alignX="right">
                     <Subtitle3
                       color={ColorPalette["gray-100"]}
