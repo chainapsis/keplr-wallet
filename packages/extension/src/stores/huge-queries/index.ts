@@ -64,9 +64,11 @@ export class HugeQueriesStore {
           ) {
             const balance = queryBalance.stakable.balance;
             // If the balance is zero, don't show it.
-            if (balance.toDec().equals(HugeQueriesStore.zeroDec)) {
-              continue;
-            }
+            // 다시 제로 일때 보여주기 위해서 아래코드를 주석처리함
+            // if (balance.toDec().equals(HugeQueriesStore.zeroDec)) {
+            //   continue;
+            // }
+
             map.set(key, {
               chainInfo,
               token: balance,
