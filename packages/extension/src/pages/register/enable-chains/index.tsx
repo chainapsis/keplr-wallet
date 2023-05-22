@@ -480,14 +480,6 @@ export const EnableChainsScene: FunctionComponent<{
       return numSelected;
     }, [chainStore.chainInfos, enabledChainIdentifiers]);
 
-    const redirectWhenFinish = () => {
-      skipWelcome
-        ? window.close()
-        : navigate("/welcome", {
-            replace: true,
-          });
-    };
-
     return (
       <RegisterSceneBox>
         <SearchTextInput
@@ -712,7 +704,13 @@ export const EnableChainsScene: FunctionComponent<{
                     });
                   }
                 } else {
-                  redirectWhenFinish();
+                  if (skipWelcome) {
+                    window.close();
+                  } else {
+                    navigate("/welcome", {
+                      replace: true,
+                    });
+                  }
                 }
               }
             }}

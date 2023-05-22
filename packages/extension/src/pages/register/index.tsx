@@ -101,9 +101,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
   const [initials] = useState(() => {
     const route = searchParams.get("route");
     const vaultId = searchParams.get("vaultId");
-
-    const skipWelcome =
-      searchParams.get("skipWelcome")?.toLowerCase() === "true";
+    const skipWelcome = searchParams.get("skipWelcome") === "true";
 
     if (vaultId) {
       // 이 시점에서 chainStore가 초기화 되어있는게 보장된다.
@@ -147,6 +145,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
             vaultId,
             chainIds: chainIds.split(",").map((chainId) => chainId.trim()),
             totalCount: chainIds.split(",").length,
+            skipWelcome,
           },
         },
       };

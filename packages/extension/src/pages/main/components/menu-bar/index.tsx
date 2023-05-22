@@ -56,7 +56,7 @@ export const MenuBar: FunctionComponent<{
             if (keyRingStore.selectedKeyInfo) {
               browser.tabs
                 .create({
-                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome="true"`,
+                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
                 })
                 .then(() => {
                   window.close();

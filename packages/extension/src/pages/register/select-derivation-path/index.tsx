@@ -39,7 +39,9 @@ export const SelectDerivationPathScene: FunctionComponent<{
   // 체이닝 기반이라 따로 prop을 안받으면 계산이 어려워진다.
   // 똑같은 prop을 체이닝할때 계속 넘겨준다.
   totalCount: number;
-}> = observer(({ chainIds, vaultId, totalCount }) => {
+
+  skipWelcome?: boolean;
+}> = observer(({ chainIds, vaultId, totalCount, skipWelcome }) => {
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
@@ -169,9 +171,13 @@ export const SelectDerivationPathScene: FunctionComponent<{
                     totalCount,
                   });
                 } else {
-                  navigate("/welcome", {
-                    replace: true,
-                  });
+                  if (skipWelcome) {
+                    window.close();
+                  } else {
+                    navigate("/welcome", {
+                      replace: true,
+                    });
+                  }
                 }
               }
             }}
