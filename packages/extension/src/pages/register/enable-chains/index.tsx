@@ -661,6 +661,8 @@ export const EnableChainsScene: FunctionComponent<{
                   chainIds: needFinalizeCoinType,
 
                   totalCount: needFinalizeCoinType.length,
+
+                  skipWelcome,
                 });
               } else {
                 // 어차피 bip44 coin type selection과 ethereum ledger app이 동시에 필요한 경우는 없다.
