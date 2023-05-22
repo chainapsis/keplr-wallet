@@ -8,13 +8,16 @@ import { Button } from "../../components/button";
 import { useStyle } from "../../styles";
 import { StyleSheet, View } from "react-native";
 import { DownArrowIcon, UpArrowIcon } from "../../components/icon";
+import { AppCurrency } from "@keplr-wallet/types";
 
 export const AddTokenModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
 }> = registerModal(
   observer(() => {
-    const { chainStore, queriesStore, tokensStore } = useStore();
+    const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
+
+    const account = accountStore.getAccount(chainStore.current.chainId);
 
     const [isAdvanced, setAdvanced] = useState(false);
     const [viewingKey, setViewingKey] = useState(
@@ -42,6 +45,22 @@ export const AddTokenModal: FunctionComponent<{
 
     const queryContractInfo = query.getQueryContract(contractAddress);
     const tokenInfo = queryContractInfo.tokenInfo;
+
+    const createViewingKey = async (): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        account.secret
+          .createSecret20ViewingKey(
+            contractAddress,
+            "",
+            {},
+            {},
+            (_, viewingKey) => {
+              resolve(viewingKey);
+            }
+          )
+          .catch(reject);
+      });
+    };
 
     return (
       <CardModal title="Add Token">
@@ -108,13 +127,33 @@ export const AddTokenModal: FunctionComponent<{
           loading={!tokenInfo && queryContractInfo.isFetching}
           onPress={async () => {
             if (tokenInfo) {
-              await tokensStore.approveSuggestedToken({
-                type: "cw20",
-                contractAddress,
-                coinMinimalDenom: tokenInfo.name,
-                coinDenom: tokenInfo.symbol,
-                coinDecimals: tokenInfo.decimals,
-              });
+              let currency: AppCurrency;
+
+              if (isSecret20) {
+                let newViewingKey = viewingKey;
+
+                if (!viewingKey) {
+                  newViewingKey = await createViewingKey();
+                }
+
+                currency = {
+                  type: "secret20",
+                  contractAddress,
+                  viewingKey: newViewingKey,
+                  coinMinimalDenom: tokenInfo.name,
+                  coinDenom: tokenInfo.symbol,
+                  coinDecimals: tokenInfo.decimals,
+                };
+              } else {
+                currency = {
+                  type: "cw20",
+                  contractAddress,
+                  coinMinimalDenom: tokenInfo.name,
+                  coinDenom: tokenInfo.symbol,
+                  coinDecimals: tokenInfo.decimals,
+                };
+              }
+              await tokensStore.approveSuggestedToken(currency);
             }
           }}
         />
