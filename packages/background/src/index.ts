@@ -208,9 +208,8 @@ export function init(
       await tokenCW20Service.init();
 
       await backgroundTxService.init();
-      phishingListService.init();
+      await phishingListService.init();
       await autoLockAccountService.init();
-      // No need to wait because user can't interact with app right after launch.
       await analyticsService.init();
       await permissionInteractiveService.init();
 
