@@ -3,9 +3,6 @@ import { MessageRequester, Router } from "@keplr-wallet/router";
 import * as Chains from "./chains/internal";
 import * as ChainsUI from "./chains-ui/internal";
 import * as ChainsUpdate from "./chains-update/internal";
-import * as Ledger from "./ledger/internal";
-import * as Keystone from "./keystone/internal";
-import * as KeyRing from "./keyring/internal";
 import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
 import * as TokenCW20 from "./token-cw20/internal";
@@ -27,9 +24,6 @@ import * as RecentSendHistory from "./recent-send-history/internal";
 export * from "./chains";
 export * from "./chains-ui";
 export * from "./chains-update";
-export * from "./ledger";
-export * from "./keystone";
-export * from "./keyring";
 export * from "./secret-wasm";
 export * from "./tx";
 export * from "./token-cw20";
@@ -47,9 +41,7 @@ export * from "./recent-send-history";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
-import { CommonCrypto } from "./keyring";
 import { Notification } from "./tx";
-import { LedgerOptions } from "./ledger/options";
 
 export function init(
   router: Router,
@@ -65,9 +57,7 @@ export function init(
     readonly repoName: string;
     readonly branchName: string;
   },
-  commonCrypto: CommonCrypto,
-  notification: Notification,
-  ledgerOptions: Partial<LedgerOptions> = {}
+  notification: Notification
 ): {
   initFn: () => Promise<void>;
 } {
@@ -95,21 +85,6 @@ export function init(
     chainsService
   );
 
-  const ledgerService = new Ledger.LedgerService(
-    storeCreator("ledger"),
-    ledgerOptions
-  );
-
-  const keystoneService = new Keystone.KeystoneService(
-    storeCreator("keystone")
-  );
-
-  const keyRingService = new KeyRing.KeyRingService(
-    storeCreator("keyring"),
-    embedChainInfos,
-    commonCrypto
-  );
-
   const backgroundTxService = new BackgroundTx.BackgroundTxService(
     chainsService,
     notification
@@ -126,7 +101,6 @@ export function init(
   });
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
-    commonCrypto.rng,
     analyticsPrivilegedOrigins
   );
 
@@ -199,8 +173,6 @@ export function init(
     permissionService,
     permissionInteractiveService
   );
-  Ledger.init(router, ledgerService);
-  KeyRing.init(router, keyRingService);
   BackgroundTx.init(router, backgroundTxService, permissionInteractiveService);
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
@@ -235,15 +207,6 @@ export function init(
       await permissionService.init();
       await tokenCW20Service.init();
 
-      ledgerService.init(interactionService);
-      keystoneService.init(interactionService);
-      keyRingService.init(
-        interactionService,
-        chainsService,
-        permissionService,
-        ledgerService,
-        keystoneService
-      );
       await backgroundTxService.init();
       phishingListService.init();
       await autoLockAccountService.init();

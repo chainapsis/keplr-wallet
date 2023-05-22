@@ -20,7 +20,7 @@ import {
   verifyADR36AminoSignDoc,
 } from "@keplr-wallet/cosmos";
 import { escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
-import { trimAminoSignDoc } from "../keyring/amino-sign-doc";
+import { trimAminoSignDoc } from "./amino-sign-doc";
 import { InteractionService } from "../interaction";
 import { Buffer } from "buffer/";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
