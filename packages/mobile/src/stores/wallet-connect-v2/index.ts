@@ -177,6 +177,19 @@ export class WalletConnectV2Store {
             params = params.slice(1);
           }
 
+          const topic = this.getTopicFromURI(params);
+          try {
+            // Validate that topic is hex encoded.
+            if (
+              Buffer.from(topic, "hex").toString("hex").toLowerCase() !==
+              topic.toLowerCase()
+            ) {
+              throw new Error("Invalid topic");
+            }
+          } catch {
+            console.log("Invalid topic", params);
+            return;
+          }
           if (this.sessionProposalResolverMap.has(topic)) {
             // Already requested. Do nothing.
             return;
