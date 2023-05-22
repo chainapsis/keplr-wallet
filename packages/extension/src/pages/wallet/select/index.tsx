@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { KeyRingV2 } from "@keplr-wallet/background";
+import { KeyRingV2, PlainObject } from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
@@ -127,10 +127,11 @@ const KeyringItem: FunctionComponent<{
   keyInfo: KeyRingV2.KeyInfo;
 }> = observer(({ keyInfo }) => {
   const { chainStore, keyRingStore } = useStore();
-
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  const isSelected = keyRingStore.selectedKeyInfo?.id === keyInfo.id;
 
   const paragraph = (() => {
     if (keyInfo.insensitive["bip44Path"]) {
@@ -163,6 +164,16 @@ const KeyringItem: FunctionComponent<{
       return `m/44'/${coinType >= 0 ? coinType : "-"}'/${bip44Path.account}'/${
         bip44Path.change
       }/${bip44Path.addressIndex}`;
+    }
+  })();
+
+  const email = (() => {
+    if (keyInfo.insensitive["keyRingMeta"]) {
+      const googleEmail = (keyInfo.insensitive["keyRingMeta"] as PlainObject)[
+        "google"
+      ];
+
+      return googleEmail;
     }
   })();
 
@@ -207,6 +218,8 @@ const KeyringItem: FunctionComponent<{
       padding="1rem"
       minHeight="4.625rem"
       backgroundColor={ColorPalette["gray-600"]}
+      borderColor={isSelected ? ColorPalette["gray-200"] : ""}
+      borderWidth={isSelected ? "1px" : ""}
       borderRadius="0.375rem"
       alignY="center"
       cursor="pointer"
@@ -225,9 +238,6 @@ const KeyringItem: FunctionComponent<{
             }}
           >
             {keyInfo.name}
-            {keyRingStore.selectedKeyInfo?.id === keyInfo.id
-              ? " (Selected)"
-              : ""}
           </Subtitle2>
           {paragraph ? (
             <React.Fragment>
@@ -241,7 +251,21 @@ const KeyringItem: FunctionComponent<{
               </Body2>
             </React.Fragment>
           ) : null}
+
+          {email ? (
+            <React.Fragment>
+              <Gutter size="0.375rem" />
+              <Body2
+                style={{
+                  color: ColorPalette["gray-300"],
+                }}
+              >
+                {email}
+              </Body2>
+            </React.Fragment>
+          ) : null}
         </YAxis>
+
         <Column weight={1} />
         <XAxis alignY="center">
           <Box
