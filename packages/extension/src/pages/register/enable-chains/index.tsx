@@ -482,6 +482,16 @@ export const EnableChainsScene: FunctionComponent<{
       return numSelected;
     }, [chainStore.chainInfos, enabledChainIdentifiers]);
 
+    const replaceToWelcomePage = () => {
+      if (skipWelcome) {
+        window.close();
+      } else {
+        navigate("/welcome", {
+          replace: true,
+        });
+      }
+    };
+
     return (
       <RegisterSceneBox>
         <SearchTextInput
@@ -678,9 +688,7 @@ export const EnableChainsScene: FunctionComponent<{
                       await chainStore.enableChainInfoInUI(
                         ...ledgerEthereumAppNeeds
                       );
-                      navigate("/welcome", {
-                        replace: true,
-                      });
+                      replaceToWelcomePage();
                     } else {
                       const bip44Path = keyInfo.insensitive["bip44Path"];
                       if (!bip44Path) {
@@ -701,18 +709,10 @@ export const EnableChainsScene: FunctionComponent<{
                       });
                     }
                   } else {
-                    navigate("/welcome", {
-                      replace: true,
-                    });
+                    replaceToWelcomePage();
                   }
                 } else {
-                  if (skipWelcome) {
-                    window.close();
-                  } else {
-                    navigate("/welcome", {
-                      replace: true,
-                    });
-                  }
+                  replaceToWelcomePage();
                 }
               }
             }}
