@@ -60,14 +60,16 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (interactionData?.data) {
-      const defaultName = (interactionData?.data as any).defaultName;
+      const defaultName = (interactionData.data as any).defaultName;
       if (defaultName) {
         setValue("name", defaultName);
       }
     }
   }, [interactionData?.data, setValue]);
 
-  const notEditable = (interactionData?.data as any).editable === false;
+  const notEditable =
+    interactionData?.data != null &&
+    (interactionData.data as any).editable === false;
 
   useEffect(() => {
     setFocus("name");
