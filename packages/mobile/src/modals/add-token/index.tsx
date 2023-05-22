@@ -17,8 +17,6 @@ export const AddTokenModal: FunctionComponent<{
   observer(() => {
     const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
 
-    const account = accountStore.getAccount(chainStore.current.chainId);
-
     const [isAdvanced, setAdvanced] = useState(false);
     const [viewingKey, setViewingKey] = useState(
       tokensStore.waitingSuggestedToken?.data?.viewingKey ?? ""
@@ -31,9 +29,10 @@ export const AddTokenModal: FunctionComponent<{
       chainStore.current.chainId;
     const contractAddress =
       tokensStore.waitingSuggestedToken?.data.contractAddress || "";
+    const account = accountStore.getAccount(chainId);
 
     const isSecret20 =
-      (chainStore.current.features ?? []).find(
+      (chainStore.getChain(chainId).features ?? []).find(
         (feature) => feature === "secretwasm"
       ) != null;
 
