@@ -40,9 +40,7 @@ export const AvailableTabView: FunctionComponent<{
   }, [allBalances]);
 
   const isFirstTime = allBalancesNonZero.length === 0;
-
   const trimSearch = search.trim();
-
   const allBalancesSearchFiltered = useMemo(() => {
     return allBalances.filter((token) => {
       return (
@@ -64,7 +62,7 @@ export const AvailableTabView: FunctionComponent<{
   }[] = [
     {
       title: "Available Balance",
-      balance: isFirstTime ? [] : allBalancesSearchFiltered,
+      balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
       tooltip: "TODO: Lorem ipsum dolor sit amet",
     },
@@ -108,29 +106,6 @@ export const AvailableTabView: FunctionComponent<{
           }}
           isNotReady={isNotReady}
         />
-      ) : isFirstTime ? (
-        <MainEmptyView
-          image={
-            <img
-              src={require("../../public/assets/img/main-empty-balance.png")}
-              style={{
-                width: "6.25rem",
-                height: "6.25rem",
-              }}
-              alt="empty balance image"
-            />
-          }
-          paragraph="Gear up yourself by topping up your wallet! "
-          title="Ready to Explore the Interchain?"
-          button={
-            <Button
-              text="Get Started"
-              color="primary"
-              size="small"
-              onClick={onClickGetStarted}
-            />
-          }
-        />
       ) : (
         <React.Fragment>
           <Stack gutter="0.5rem">
@@ -161,6 +136,31 @@ export const AvailableTabView: FunctionComponent<{
               }
             )}
           </Stack>
+          {isFirstTime ? (
+            <MainEmptyView
+              image={
+                <img
+                  src={require("../../public/assets/img/main-empty-balance.png")}
+                  style={{
+                    width: "6.25rem",
+                    height: "6.25rem",
+                  }}
+                  alt="empty balance image"
+                />
+              }
+              paragraph="Gear up yourself by topping up your wallet! "
+              title="Ready to Explore the Interchain?"
+              button={
+                <Button
+                  text="Get Started"
+                  color="primary"
+                  size="small"
+                  onClick={onClickGetStarted}
+                />
+              }
+            />
+          ) : null}
+
           {numFoundToken > 0 ? (
             <Box padding="0.75rem">
               <YAxis alignX="center">
