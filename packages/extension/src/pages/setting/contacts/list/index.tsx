@@ -91,7 +91,6 @@ export const SettingContactsList: FunctionComponent = observer(() => {
                   name={data.name}
                   address={data.address}
                   memo={data.memo}
-                  hasDropDown={true}
                   dropdownItems={[
                     {
                       key: "change-contact-label",

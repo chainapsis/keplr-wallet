@@ -4,8 +4,7 @@ import { Box } from "../box";
 import { Column, Columns } from "../column";
 import { Stack } from "../stack";
 import { Body2, H5 } from "../typography";
-import { EllipsisIcon, ProfileIcon } from "../icon";
-import { MemoIcon } from "../icon/memo";
+import { EllipsisIcon, ProfileIcon, DocumentTextIcon } from "../icon";
 import { FloatingDropdown, FloatingDropdownItem } from "../dropdown";
 import { ColorPalette } from "../../styles";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -23,27 +22,15 @@ const Styles = {
   `,
 };
 
-type HasDropDownOptionalType =
-  | { hasDropDown: true; dropdownItems: FloatingDropdownItem[] }
-  | { hasDropDown?: false; dropdownItems?: FloatingDropdownItem[] };
+export const AddressItem: FunctionComponent<{
+  timestamp?: number;
+  name?: string;
+  address: string;
+  memo?: string;
+  onClick?: () => void;
 
-export const AddressItem: FunctionComponent<
-  {
-    timestamp?: number;
-    name?: string;
-    address: string;
-    memo?: string;
-    onClick?: () => void;
-  } & HasDropDownOptionalType
-> = ({
-  timestamp,
-  name,
-  address,
-  memo,
-  hasDropDown = false,
-  onClick,
-  dropdownItems,
-}) => {
+  dropdownItems?: FloatingDropdownItem[];
+}> = ({ timestamp, name, address, memo, onClick, dropdownItems }) => {
   const intl = useIntl();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
@@ -104,7 +91,7 @@ export const AddressItem: FunctionComponent<
             </Columns>
 
             <Columns sum={1} gutter="0.375rem">
-              <MemoIcon width=".8rem" height=".8rem" />
+              <DocumentTextIcon width=".8rem" height=".8rem" />
               {memo ? (
                 <Body2
                   style={{
@@ -132,7 +119,7 @@ export const AddressItem: FunctionComponent<
         </Stack>
 
         <Column weight={1} />
-        {hasDropDown && dropdownItems ? (
+        {dropdownItems && dropdownItems.length > 0 ? (
           <FloatingDropdown
             isOpen={isMenuOpen}
             close={() => setIsMenuOpen(false)}
