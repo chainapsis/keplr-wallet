@@ -115,7 +115,7 @@ export const TokenFoundModal: FunctionComponent<{
         .create({
           url: `/register.html#?route=select-derivation-path&vaultId=${
             keyRingStore.selectedKeyInfo.id
-          }&chainIds=${needBIP44Selects.join(",")}`,
+          }&chainIds=${needBIP44Selects.join(",")}&skipWelcome=true`,
         })
         .then(() => {
           window.close();

@@ -76,7 +76,7 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
               if (keyRingStore.selectedKeyInfo) {
                 browser.tabs
                   .create({
-                    url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}`,
+                    url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
                   })
                   .then(() => {
                     window.close();
