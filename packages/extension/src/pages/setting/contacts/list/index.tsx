@@ -12,6 +12,7 @@ import { Button } from "../../../../components/button";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { AddressItem } from "../../../../components/address-item";
+import { useConfirm } from "../../../../hooks/confirm";
 
 const Styles = {
   Container: styled(Stack)`
@@ -31,6 +32,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   const paramChainId = searchParams.get("chainId");
 
   const chainId = paramChainId || chainStore.chainInfos[0].chainId;
+  const confirm = useConfirm();
 
   useLayoutEffect(() => {
     if (!paramChainId) {
@@ -86,12 +88,37 @@ export const SettingContactsList: FunctionComponent = observer(() => {
               return (
                 <AddressItem
                   key={i}
-                  chainId={chainId}
                   name={data.name}
                   address={data.address}
                   memo={data.memo}
-                  index={i}
                   hasDropDown={true}
+                  dropdownItems={[
+                    {
+                      key: "change-contact-label",
+                      label: "Change Contact Label",
+                      onSelect: () =>
+                        navigate(
+                          `/setting/contacts/add?chainId=${chainId}&editIndex=${i}`
+                        ),
+                    },
+                    {
+                      key: "delete-wallet",
+                      label: "Delete Wallet",
+                      onSelect: async () => {
+                        if (
+                          await confirm.confirm(
+                            "Delete Address",
+                            "Are you sure you want to delete this account?"
+                          )
+                        ) {
+                          uiConfigStore.addressBookConfig.removeAddressBookAt(
+                            chainId,
+                            i
+                          );
+                        }
+                      },
+                    },
+                  ]}
                 />
               );
             })}
