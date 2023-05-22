@@ -506,12 +506,12 @@ export class WalletConnectV2Store {
       this.sessionProposalResolverMap.delete(topic);
     }
 
+    const randomId = Buffer.from(
+      await getRandomBytesAsync(new Uint32Array(10))
+    ).toString("hex");
+
     try {
       const proposal = await SessionProposalSchema.validateAsync(event);
-
-      const randomId = Buffer.from(
-        await getRandomBytesAsync(new Uint32Array(10))
-      ).toString("hex");
 
       const metadata = proposal.params?.proposer?.metadata;
       if (metadata) {
@@ -556,7 +556,17 @@ export class WalletConnectV2Store {
         },
       });
     } finally {
-      this.pendingSessionProposalMetadataMap.delete(topic);
+      this.pendingSessionProposalMetadataMap.delete(randomId);
+
+      if (
+        resolver &&
+        resolver.fromDeepLink &&
+        this.pendingSessionProposalMetadataMap.size === 0
+      ) {
+        runInAction(() => {
+          this._needGoBackToBrowser = true;
+        });
+      }
     }
   }
 
@@ -726,7 +736,9 @@ export class WalletConnectV2Store {
         this.isPendingWcCallFromDeepLinkClient = false;
 
         if (AppState.currentState === "active") {
-          this._needGoBackToBrowser = true;
+          runInAction(() => {
+            this._needGoBackToBrowser = true;
+          });
         }
       }
     }
