@@ -16,6 +16,8 @@ import { IMemoConfig, IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
 import { AddressItem } from "../address-item";
+import { KeyringItem } from "../keyring-item";
+import { KeyInfo } from "@keplr-wallet/background/build/keyring-v2";
 
 const Styles = {
   Container: styled.div`
@@ -46,12 +48,11 @@ export const AddressBookModal: FunctionComponent<{
   memoConfig: IMemoConfig;
 }> = observer(({ isOpen, close, historyType, recipientConfig, memoConfig }) => {
   const { uiConfigStore, keyRingStore } = useStore();
-
   // TODO: Implement "recent"
   const [type, setType] = useState<Type>("recent");
-
   const [recents, setRecents] = useState<RecentSendHistory[]>([]);
-  const [accounts, setAccounts] = useState<Key[]>([]);
+  const [accounts, setAccounts] = useState<(Key & { keyInfo: KeyInfo })[]>([]);
+  const keyInfos = keyRingStore.keyInfos;
 
   useEffect(() => {
     uiConfigStore.addressBookConfig
@@ -75,13 +76,18 @@ export const AddressBookModal: FunctionComponent<{
             })
             .map((res) => {
               if (res.status === "fulfilled") {
-                return res.value;
+                const keyInfo = keyInfos.filter(
+                  (key) => key.id === res.value.vaultId
+                )[0];
+
+                return { ...res.value, keyInfo };
               }
               throw new Error("Unexpected status");
             })
         );
       });
   }, [
+    keyInfos,
     keyRingStore.selectedKeyInfo?.id,
     recipientConfig.chainId,
     uiConfigStore.addressBookConfig,
@@ -92,6 +98,7 @@ export const AddressBookModal: FunctionComponent<{
     name?: string;
     address: string;
     memo?: string;
+    keyInfo?: KeyInfo;
   }[] = (() => {
     switch (type) {
       case "recent": {
@@ -117,7 +124,7 @@ export const AddressBookModal: FunctionComponent<{
       case "accounts": {
         return accounts.map((account) => {
           return {
-            name: account.name,
+            keyInfo: account.keyInfo,
             address: account.bech32Address,
           };
         });
@@ -177,22 +184,37 @@ export const AddressBookModal: FunctionComponent<{
         {datas.length > 0 ? (
           <Styles.ListContainer>
             <Stack gutter="0.75rem">
-              {datas.map((data, i) => {
-                return (
-                  <AddressItem
-                    key={i}
-                    timestamp={data.timestamp}
-                    name={data.name}
-                    address={data.address}
-                    memo={data.memo}
-                    onClick={() => {
-                      recipientConfig.setValue(data.address);
-                      memoConfig.setValue(data.memo ?? "");
-                      close();
-                    }}
-                  />
-                );
-              })}
+              {type === "accounts"
+                ? datas.map((data, i) => {
+                    {
+                      return data.keyInfo ? (
+                        <KeyringItem
+                          key={i}
+                          keyInfo={data.keyInfo}
+                          onClick={() => {
+                            recipientConfig.setValue(data.address);
+                            close();
+                          }}
+                        />
+                      ) : null;
+                    }
+                  })
+                : datas.map((data, i) => {
+                    return (
+                      <AddressItem
+                        key={i}
+                        timestamp={data.timestamp}
+                        name={data.name}
+                        address={data.address}
+                        memo={data.memo}
+                        onClick={() => {
+                          recipientConfig.setValue(data.address);
+                          memoConfig.setValue(data.memo ?? "");
+                          close();
+                        }}
+                      />
+                    );
+                  })}
               <Gutter size="0.75rem" />
             </Stack>
           </Styles.ListContainer>
