@@ -7,9 +7,7 @@ import {
 } from "./types";
 import { Hash } from "@keplr-wallet/crypto";
 import pbkdf2 from "pbkdf2";
-
 import { Buffer } from "buffer/";
-import { KeplrError } from "@keplr-wallet/router";
 
 /**
  * This is similar to ethereum's key store.
@@ -44,7 +42,7 @@ export interface KeyStore {
 
 export class Crypto {
   public static async encrypt(
-    crypto: CommonCrypto,
+    commonCrypto: CommonCrypto,
     kdf: "scrypt" | "sha256" | "pbkdf2",
     type: "mnemonic" | "privateKey" | "ledger" | "keystone",
     text: string,
@@ -53,7 +51,8 @@ export class Crypto {
     bip44HDPath?: BIP44HDPath
   ): Promise<KeyStore> {
     let random = new Uint8Array(32);
-    const salt = Buffer.from(await crypto.rng(random)).toString("hex");
+    crypto.getRandomValues(random);
+    const salt = Buffer.from(random).toString("hex");
 
     const scryptParams: ScryptParams = {
       salt,
@@ -65,7 +64,7 @@ export class Crypto {
     const derivedKey = await (async () => {
       switch (kdf) {
         case "scrypt":
-          return await crypto.scrypt(password, scryptParams);
+          return await commonCrypto.scrypt(password, scryptParams);
         case "sha256":
           return Hash.sha256(Buffer.from(`${salt}/${password}`));
         case "pbkdf2":
@@ -86,13 +85,14 @@ export class Crypto {
             );
           });
         default:
-          throw new KeplrError("keyring", 220, "Unknown kdf");
+          throw new Error("Unknown kdf");
       }
     })();
     const buf = Buffer.from(text);
 
     random = new Uint8Array(16);
-    const iv = Buffer.from(await crypto.rng(random));
+    crypto.getRandomValues(random);
+    const iv = Buffer.from(random);
 
     const counter = new Counter(0);
     counter.setBytes(iv);
@@ -155,7 +155,7 @@ export class Crypto {
             );
           });
         default:
-          throw new KeplrError("keyring", 220, "Unknown kdf");
+          throw new Error("Unknown kdf");
       }
     })();
 
@@ -170,7 +170,7 @@ export class Crypto {
       ])
     );
     if (!Buffer.from(mac).equals(Buffer.from(keyStore.crypto.mac, "hex"))) {
-      throw new KeplrError("keyring", 222, "Unmatched mac");
+      throw new Error("Unmatched mac");
     }
 
     return Buffer.from(

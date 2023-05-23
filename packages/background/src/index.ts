@@ -1,11 +1,10 @@
 import { MessageRequester, Router } from "@keplr-wallet/router";
 
+import * as KeyRingLegacy from "./keyring/legacy";
+
 import * as Chains from "./chains/internal";
 import * as ChainsUI from "./chains-ui/internal";
 import * as ChainsUpdate from "./chains-update/internal";
-import * as Ledger from "./ledger/internal";
-import * as Keystone from "./keystone/internal";
-import * as KeyRing from "./keyring/internal";
 import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
 import * as TokenCW20 from "./token-cw20/internal";
@@ -15,7 +14,7 @@ import * as PhishingList from "./phishing-list/internal";
 import * as AutoLocker from "./auto-lock-account/internal";
 import * as Analytics from "./analytics/internal";
 import * as Vault from "./vault/internal";
-import * as KeyRingV2 from "./keyring-v2/internal";
+import * as KeyRingV2 from "./keyring/internal";
 import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
 import * as KeyRingLedger from "./keyring-ledger/internal";
 import * as KeyRingPrivateKey from "./keyring-private-key/internal";
@@ -27,9 +26,6 @@ import * as RecentSendHistory from "./recent-send-history/internal";
 export * from "./chains";
 export * from "./chains-ui";
 export * from "./chains-update";
-export * from "./ledger";
-export * from "./keystone";
-export * from "./keyring";
 export * from "./secret-wasm";
 export * from "./tx";
 export * from "./token-cw20";
@@ -39,7 +35,7 @@ export * from "./phishing-list";
 export * from "./auto-lock-account";
 export * from "./analytics";
 export * from "./permission-interactive";
-export * as KeyRingV2 from "./keyring-v2";
+export * from "./keyring";
 export * from "./vault";
 export * from "./keyring-cosmos";
 export * from "./token-scan";
@@ -47,9 +43,7 @@ export * from "./recent-send-history";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
-import { CommonCrypto } from "./keyring";
 import { Notification } from "./tx";
-import { LedgerOptions } from "./ledger/options";
 
 export function init(
   router: Router,
@@ -65,9 +59,11 @@ export function init(
     readonly repoName: string;
     readonly branchName: string;
   },
-  commonCrypto: CommonCrypto,
   notification: Notification,
-  ledgerOptions: Partial<LedgerOptions> = {}
+  keyRingMigrations: {
+    commonCrypto: KeyRingLegacy.CommonCrypto;
+    readonly getDisabledChainIdentifiers: () => Promise<string[]>;
+  }
 ): {
   initFn: () => Promise<void>;
 } {
@@ -76,7 +72,11 @@ export function init(
   );
 
   const chainsService = new Chains.ChainsService(
-    storeCreator("chains"),
+    storeCreator("chains-v2"),
+    {
+      kvStore: storeCreator("chains"),
+      updaterKVStore: storeCreator("updator"),
+    },
     embedChainInfos,
     communityChainInfoRepo,
     interactionService
@@ -95,21 +95,6 @@ export function init(
     chainsService
   );
 
-  const ledgerService = new Ledger.LedgerService(
-    storeCreator("ledger"),
-    ledgerOptions
-  );
-
-  const keystoneService = new Keystone.KeystoneService(
-    storeCreator("keystone")
-  );
-
-  const keyRingService = new KeyRing.KeyRingService(
-    storeCreator("keyring"),
-    embedChainInfos,
-    commonCrypto
-  );
-
   const backgroundTxService = new BackgroundTx.BackgroundTxService(
     chainsService,
     notification
@@ -126,13 +111,26 @@ export function init(
   });
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
-    commonCrypto.rng,
     analyticsPrivilegedOrigins
   );
 
   const vaultService = new Vault.VaultService(storeCreator("vault"));
+
+  const chainsUIService = new ChainsUI.ChainsUIService(
+    storeCreator("chains-ui"),
+    chainsService,
+    vaultService
+  );
+
   const keyRingV2Service = new KeyRingV2.KeyRingService(
     storeCreator("keyring-v2"),
+    {
+      kvStore: storeCreator("keyring"),
+      commonCrypto: keyRingMigrations.commonCrypto,
+      getDisabledChainIdentifiers:
+        keyRingMigrations.getDisabledChainIdentifiers,
+      chainsUIService,
+    },
     chainsService,
     interactionService,
     vaultService,
@@ -156,12 +154,6 @@ export function init(
       permissionService,
       keyRingV2Service
     );
-
-  const chainsUIService = new ChainsUI.ChainsUIService(
-    storeCreator("chains-ui"),
-    chainsService,
-    vaultService
-  );
 
   const chainsUpdateService = new ChainsUpdate.ChainsUpdateService(
     storeCreator("chains-update"),
@@ -199,8 +191,6 @@ export function init(
     permissionService,
     permissionInteractiveService
   );
-  Ledger.init(router, ledgerService);
-  KeyRing.init(router, keyRingService);
   BackgroundTx.init(router, backgroundTxService, permissionInteractiveService);
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
@@ -235,19 +225,9 @@ export function init(
       await permissionService.init();
       await tokenCW20Service.init();
 
-      ledgerService.init(interactionService);
-      keystoneService.init(interactionService);
-      keyRingService.init(
-        interactionService,
-        chainsService,
-        permissionService,
-        ledgerService,
-        keystoneService
-      );
       await backgroundTxService.init();
-      phishingListService.init();
+      await phishingListService.init();
       await autoLockAccountService.init();
-      // No need to wait because user can't interact with app right after launch.
       await analyticsService.init();
       await permissionInteractiveService.init();
 

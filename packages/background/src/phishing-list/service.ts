@@ -137,7 +137,7 @@ export class PhishingListService {
     }
   }
 
-  init() {
+  async init(): Promise<void> {
     this.urlFetcher.start();
     if (this.twitterFetcher) {
       this.twitterFetcher.start();

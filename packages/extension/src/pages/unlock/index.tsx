@@ -6,11 +6,12 @@ import { Button } from "../../components/button";
 import { useInteractionInfo } from "../../hooks";
 import { Gutter } from "../../components/gutter";
 import { Box } from "../../components/box";
-import { Image } from "../../components/image";
 import { TextButton } from "../../components/button-text";
 import { ColorPalette } from "../../styles";
 import { H1 } from "../../components/typography";
 import { Tooltip } from "../../components/tooltip";
+import AnimLogo from "../../public/assets/lottie/unlock/logo.json";
+import lottie, { AnimationItem } from "lottie-web";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
@@ -32,6 +33,42 @@ export const UnlockPage: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
   const [isOnCapsLock, setIsOnCapsLock] = useState(false);
+
+  const animContainerRef = useRef<HTMLDivElement | null>(null);
+  const animRef = useRef<AnimationItem | null>(null);
+  useEffect(() => {
+    if (animContainerRef.current) {
+      const anim = lottie.loadAnimation({
+        container: animContainerRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: false,
+        animationData: AnimLogo,
+      });
+
+      animRef.current = anim;
+
+      return () => {
+        anim.destroy();
+
+        animRef.current = null;
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    // 현실적으로는 이 애니메이션은 마이그레이션 과정 중에서만 보이고 그게 의도이다.
+    if (animRef.current) {
+      if (isLoading) {
+        animRef.current.goToAndPlay(0);
+      } else {
+        // page가 넘어가기 직전에 애니메이션이 멈추지 않도록 약간의 delay를 준다.
+        setTimeout(() => {
+          animRef.current?.goToAndStop(0);
+        }, 50);
+      }
+    }
+  }, [isLoading]);
 
   return (
     <form
@@ -81,15 +118,18 @@ export const UnlockPage: FunctionComponent = observer(() => {
       <Box alignX="center">
         <Gutter size="7.375rem" />
 
-        <Image
-          src={require("../../public/assets/img/unlock.png")}
-          alt={"unlock image"}
+        <div
+          ref={animContainerRef}
           style={{
             width: "12rem",
             height: "9.5rem",
           }}
         />
-        <H1>Welcome Back</H1>
+        {keyRingStore.needMigration ? (
+          <H1>TODO: In migration</H1>
+        ) : (
+          <H1>Welcome Back</H1>
+        )}
 
         <Gutter size="1.75rem" />
 

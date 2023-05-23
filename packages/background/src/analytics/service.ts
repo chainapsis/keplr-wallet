@@ -1,5 +1,4 @@
 import { KVStore } from "@keplr-wallet/common";
-import { RNG } from "@keplr-wallet/crypto";
 import { Env } from "@keplr-wallet/router";
 import {
   KEPLR_EXT_ANALYTICS_API_URL,
@@ -12,7 +11,6 @@ export class AnalyticsService {
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly rng: RNG,
     protected readonly privilegedOrigins: string[]
   ) {}
 
@@ -23,7 +21,8 @@ export class AnalyticsService {
       return;
     }
     const bytes = new Uint8Array(20);
-    const rand: string = Array.from(await this.rng(bytes))
+    crypto.getRandomValues(bytes);
+    const rand: string = Array.from(bytes)
       .map((value) => {
         let v = value.toString(16);
         if (v.length === 1) {

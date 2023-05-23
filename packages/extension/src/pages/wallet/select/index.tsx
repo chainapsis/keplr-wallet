@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { KeyRingV2 } from "@keplr-wallet/background";
+import { KeyInfo } from "@keplr-wallet/background";
 import { useStore } from "../../../stores";
 import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
@@ -99,7 +99,7 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
 const KeyInfoList: FunctionComponent<{
   title: string;
-  keyInfos: KeyRingV2.KeyInfo[];
+  keyInfos: KeyInfo[];
 }> = observer(({ title, keyInfos }) => {
   return (
     <Box>
@@ -124,7 +124,7 @@ const KeyInfoList: FunctionComponent<{
 });
 
 const KeyringItem: FunctionComponent<{
-  keyInfo: KeyRingV2.KeyInfo;
+  keyInfo: KeyInfo;
 }> = observer(({ keyInfo }) => {
   const { chainStore, keyRingStore } = useStore();
 

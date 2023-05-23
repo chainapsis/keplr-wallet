@@ -1,4 +1,4 @@
-import { KeyRingService } from "../keyring-v2";
+import { KeyRingService } from "../keyring";
 import { Env } from "@keplr-wallet/router";
 import { PermissionService } from "../permission";
 

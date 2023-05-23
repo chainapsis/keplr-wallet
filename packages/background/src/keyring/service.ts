@@ -1,802 +1,988 @@
-import {
-  Key,
-  KeyRing,
-  KeyRingStatus,
-  MultiKeyStoreInfoWithSelected,
-} from "./keyring";
-
-import {
-  Bech32Address,
-  checkAndValidateADR36AminoSignDoc,
-  makeADR36AminoSignDoc,
-  verifyADR36AminoSignDoc,
-  encodeSecp256k1Pubkey,
-  encodeSecp256k1Signature,
-  serializeSignDoc,
-} from "@keplr-wallet/cosmos";
-import {
-  BIP44HDPath,
-  CommonCrypto,
-  ExportKeyRingData,
-  SignMode,
-} from "./types";
-
-import { escapeHTML, KVStore, sortObjectByKey } from "@keplr-wallet/common";
-
+import { VaultService, Vault } from "../vault";
+import { BIP44HDPath, KeyInfo, KeyRing, KeyRingStatus } from "./types";
+import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { ChainsService } from "../chains";
-import { LedgerApp, LedgerService } from "../ledger";
-import {
-  BIP44,
-  ChainInfo,
-  EthSignType,
-  KeplrSignOptions,
-  AminoSignResponse,
-  StdSignature,
-  StdSignDoc,
-  DirectSignResponse,
-} from "@keplr-wallet/types";
-import { APP_PORT, Env, KeplrError, WEBPAGE_PORT } from "@keplr-wallet/router";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
+import { KVStore } from "@keplr-wallet/common";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { InteractionService } from "../interaction";
-import { PermissionService } from "../permission";
-
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import Long from "long";
+import { ChainInfo } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
-import { trimAminoSignDoc } from "./amino-sign-doc";
-import { KeystoneService } from "../keystone";
+import * as Legacy from "./legacy";
+import { ChainsUIService } from "../chains-ui";
 
 export class KeyRingService {
-  private keyRing!: KeyRing;
+  protected _needMigration = false;
 
-  protected interactionService!: InteractionService;
-  public chainsService!: ChainsService;
-  public permissionService!: PermissionService;
+  @observable
+  protected _selectedVaultId: string | undefined = undefined;
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly embedChainInfos: ChainInfo[],
-    protected readonly crypto: CommonCrypto
-  ) {}
-
-  init(
-    interactionService: InteractionService,
-    chainsService: ChainsService,
-    permissionService: PermissionService,
-    ledgerService: LedgerService,
-    keystoneService: KeystoneService
+    protected readonly migrations: {
+      readonly kvStore: KVStore;
+      readonly commonCrypto: Legacy.CommonCrypto;
+      readonly chainsUIService: ChainsUIService;
+      readonly getDisabledChainIdentifiers: () => Promise<string[]>;
+    },
+    protected readonly chainsService: ChainsService,
+    protected readonly interactionService: InteractionService,
+    protected readonly vaultService: VaultService,
+    protected readonly keyRings: KeyRing[]
   ) {
-    this.interactionService = interactionService;
-    this.chainsService = chainsService;
-    this.permissionService = permissionService;
+    makeObservable(this);
+  }
 
-    this.keyRing = new KeyRing(
-      this.embedChainInfos,
-      this.kvStore,
-      ledgerService,
-      keystoneService,
-      this.crypto
+  async init(): Promise<void> {
+    const migrated = await this.kvStore.get<boolean>("migration/v1");
+    if (!migrated) {
+      const multiKeyStore = await this.migrations.kvStore.get<
+        Legacy.KeyStore[]
+      >("key-multi-store");
+
+      if (multiKeyStore && multiKeyStore.length > 0) {
+        this._needMigration = true;
+      }
+    }
+
+    const selectedVaultId = await this.kvStore.get<string>("selectedVaultId");
+    if (
+      selectedVaultId &&
+      this.vaultService.getVault("keyRing", selectedVaultId)
+    ) {
+      runInAction(() => {
+        this._selectedVaultId = selectedVaultId;
+      });
+    }
+    autorun(() => {
+      if (this._selectedVaultId) {
+        this.kvStore.set<string>("selectedVaultId", this._selectedVaultId);
+      } else {
+        this.kvStore.set<string>("selectedVaultId", null);
+      }
+    });
+  }
+
+  lockKeyRing(): void {
+    this.vaultService.lock();
+  }
+
+  async ensureUnlockInteractive(env: Env): Promise<void> {
+    if (this.vaultService.isLocked) {
+      await this.interactionService.waitApproveV2(
+        env,
+        "/unlock",
+        "unlock",
+        {},
+        () => {
+          // noop
+        }
+      );
+    }
+  }
+
+  get needMigration(): boolean {
+    return this._needMigration;
+  }
+
+  async unlockKeyRing(password: string): Promise<void> {
+    if (this._needMigration) {
+      await this.migrate(password);
+      return;
+    }
+    await this.vaultService.unlock(password);
+  }
+
+  protected async migrate(password: string): Promise<void> {
+    if (!this._needMigration) {
+      throw new Error("Migration is not needed");
+    }
+
+    const legacySelectedKeyStore =
+      await this.migrations.kvStore.get<Legacy.KeyStore>("key-store");
+    const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
+      "key-multi-store"
     );
 
-    this.chainsService.addChainRemovedHandler(this.onChainRemoved);
-  }
+    let selectingVaultId: string | undefined = undefined;
+    if (!multiKeyStore || multiKeyStore.length === 0) {
+      throw new Error("No key store to migrate");
+    }
 
-  protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
-    this.keyRing.removeAllKeyStoreCoinType(chainInfo.chainId);
-  };
+    const disabledChainIdentifierMap = new Map<string, boolean>();
+    for (const chainIdentifier of await this.migrations.getDisabledChainIdentifiers()) {
+      if (!this.chainsService.hasChainInfo(chainIdentifier)) {
+        continue;
+      }
 
-  async restore(): Promise<{
-    status: KeyRingStatus;
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    await this.keyRing.restore();
-    return {
-      status: this.keyRing.status,
-      multiKeyStoreInfo: this.keyRing.getMultiKeyStoreInfo(),
+      const identifier = ChainIdHelper.parse(chainIdentifier).identifier;
+      disabledChainIdentifierMap.set(identifier, true);
+    }
+
+    const checkChainDisabled = (chainId: string) => {
+      if (disabledChainIdentifierMap.size === 0) {
+        return false;
+      }
+      return (
+        disabledChainIdentifierMap.get(
+          ChainIdHelper.parse(chainId).identifier
+        ) === true
+      );
     };
+
+    for (const keyStore of multiKeyStore) {
+      const keyStoreId = keyStore.meta?.["__id__"];
+      if (keyStoreId) {
+        const migrated = await this.kvStore.get<boolean>(
+          "migration/v1/keyStore/" + keyStoreId
+        );
+        if (migrated) {
+          continue;
+        }
+      }
+
+      if (keyStore.type === "mnemonic") {
+        // If password is invalid, error will be thrown.
+        const mnemonic = Buffer.from(
+          await Legacy.Crypto.decrypt(
+            this.migrations.commonCrypto,
+            keyStore,
+            password
+          )
+        ).toString();
+        const vaultId = await this.createMnemonicKeyRing(
+          mnemonic,
+          keyStore.bip44HDPath ?? {
+            account: 0,
+            change: 0,
+            addressIndex: 0,
+          },
+          keyStore.meta?.["name"] ?? "Keplr Account",
+          password
+        );
+        if (keyStore.coinTypeForChain) {
+          for (const chainInfo of this.chainsService.getChainInfos()) {
+            const coinType =
+              keyStore.coinTypeForChain[
+                ChainIdHelper.parse(chainInfo.chainId).identifier
+              ];
+            if (
+              coinType != null &&
+              this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
+            ) {
+              this.finalizeMnemonicKeyCoinType(
+                vaultId,
+                chainInfo.chainId,
+                coinType
+              );
+            }
+          }
+        }
+
+        for (const chainInfo of this.chainsService.getChainInfos()) {
+          if (checkChainDisabled(chainInfo.chainId)) {
+            continue;
+          }
+
+          if (
+            !this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
+          ) {
+            this.migrations.chainsUIService.enableChain(
+              vaultId,
+              chainInfo.chainId
+            );
+          }
+        }
+
+        if (
+          keyStore.meta?.["__id__"] === legacySelectedKeyStore?.meta?.["__id__"]
+        ) {
+          selectingVaultId = vaultId;
+        }
+      } else if (keyStore.type === "privateKey") {
+        // If password is invalid, error will be thrown.
+        const privateKey = Buffer.from(
+          Buffer.from(
+            await Legacy.Crypto.decrypt(
+              this.migrations.commonCrypto,
+              keyStore,
+              password
+            )
+          ).toString(),
+          "hex"
+        );
+        const meta: Record<string, string | undefined> = {};
+        if (keyStore.meta?.["email"]) {
+          const socialType = keyStore.meta["socialType"] || "google";
+          meta[socialType] = keyStore.meta["email"];
+        }
+        const vaultId = await this.createPrivateKeyKeyRing(
+          privateKey,
+          meta,
+          keyStore.meta?.["name"] ?? "Keplr Account",
+          password
+        );
+
+        for (const chainInfo of this.chainsService.getChainInfos()) {
+          if (checkChainDisabled(chainInfo.chainId)) {
+            continue;
+          }
+
+          this.migrations.chainsUIService.enableChain(
+            vaultId,
+            chainInfo.chainId
+          );
+        }
+
+        if (
+          keyStore.meta?.["__id__"] === legacySelectedKeyStore?.meta?.["__id__"]
+        ) {
+          selectingVaultId = vaultId;
+        }
+      } else if (keyStore.type === "ledger") {
+        // Attempt to decode the ciphertext as a JSON public key map. If that fails,
+        // try decoding as a single public key hex.
+        const cipherText = await Legacy.Crypto.decrypt(
+          this.migrations.commonCrypto,
+          keyStore,
+          password
+        );
+
+        try {
+          const encodedPubkeys = JSON.parse(Buffer.from(cipherText).toString());
+          if (encodedPubkeys["Cosmos"]) {
+            const pubKey = Buffer.from(
+              encodedPubkeys["Cosmos"] as string,
+              "hex"
+            );
+            const vaultId = await this.createLedgerKeyRing(
+              pubKey,
+              "Cosmos",
+              keyStore.bip44HDPath ?? {
+                account: 0,
+                change: 0,
+                addressIndex: 0,
+              },
+              keyStore.meta?.["name"] ?? "Keplr Account",
+              password
+            );
+
+            let hasEthereum = false;
+            if (encodedPubkeys["Ethereum"]) {
+              const pubKey = Buffer.from(
+                encodedPubkeys["Ethereum"] as string,
+                "hex"
+              );
+              this.appendLedgerKeyRing(vaultId, pubKey, "Ethereum");
+
+              hasEthereum = true;
+            }
+
+            for (const chainInfo of this.chainsService.getChainInfos()) {
+              if (checkChainDisabled(chainInfo.chainId)) {
+                continue;
+              }
+
+              if (KeyRingService.isEthermintLike(chainInfo) && !hasEthereum) {
+                continue;
+              }
+
+              this.migrations.chainsUIService.enableChain(
+                vaultId,
+                chainInfo.chainId
+              );
+            }
+
+            if (
+              keyStore.meta?.["__id__"] ===
+              legacySelectedKeyStore?.meta?.["__id__"]
+            ) {
+              selectingVaultId = vaultId;
+            }
+          }
+        } catch (e) {
+          // Decode as bytes (Legacy representation)
+          const pubKey = Buffer.from(Buffer.from(cipherText).toString(), "hex");
+          const vaultId = await this.createLedgerKeyRing(
+            pubKey,
+            "Cosmos",
+            keyStore.bip44HDPath ?? {
+              account: 0,
+              change: 0,
+              addressIndex: 0,
+            },
+            keyStore.meta?.["name"] ?? "Keplr Account",
+            password
+          );
+
+          for (const chainInfo of this.chainsService.getChainInfos()) {
+            if (checkChainDisabled(chainInfo.chainId)) {
+              continue;
+            }
+
+            if (KeyRingService.isEthermintLike(chainInfo)) {
+              continue;
+            }
+
+            this.migrations.chainsUIService.enableChain(
+              vaultId,
+              chainInfo.chainId
+            );
+          }
+
+          if (
+            keyStore.meta?.["__id__"] ===
+            legacySelectedKeyStore?.meta?.["__id__"]
+          ) {
+            selectingVaultId = vaultId;
+          }
+        }
+      } else {
+        throw new Error("Unexpected type of keyring");
+      }
+
+      if (keyStoreId) {
+        await this.kvStore.set("migration/v1/keyStore/" + keyStoreId, true);
+      }
+    }
+
+    if (selectingVaultId) {
+      this.selectKeyRing(selectingVaultId);
+    }
+
+    await this.kvStore.set("migration/v1", true);
+    this._needMigration = false;
   }
 
-  async enable(env: Env): Promise<KeyRingStatus> {
-    if (this.keyRing.status === KeyRingStatus.EMPTY) {
-      throw new KeplrError("keyring", 261, "key doesn't exist");
+  @action
+  selectKeyRing(vaultId: string): void {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
     }
 
-    if (this.keyRing.status === KeyRingStatus.NOTLOADED) {
-      await this.keyRing.restore();
+    if (!this.vaultService.getVault("keyRing", vaultId)) {
+      throw new Error("Unknown vault");
     }
 
-    if (this.keyRing.status === KeyRingStatus.LOCKED) {
-      await this.interactionService.waitApprove(env, "/unlock", "unlock", {});
-      return this.keyRing.status;
-    }
+    this._selectedVaultId = vaultId;
 
-    return this.keyRing.status;
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
   }
 
   get keyRingStatus(): KeyRingStatus {
-    return this.keyRing.status;
-  }
-
-  async deleteKeyRing(
-    index: number,
-    password: string
-  ): Promise<{
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-    status: KeyRingStatus;
-  }> {
-    let keyStoreChanged = false;
-
-    try {
-      const result = await this.keyRing.deleteKeyRing(index, password);
-      keyStoreChanged = result.keyStoreChanged;
-      return {
-        multiKeyStoreInfo: result.multiKeyStoreInfo,
-        status: this.keyRing.status,
-      };
-    } finally {
-      if (keyStoreChanged) {
-        this.interactionService.dispatchEvent(
-          WEBPAGE_PORT,
-          "keystore-changed",
-          {}
-        );
-      }
-    }
-  }
-
-  async updateNameKeyRing(
-    index: number,
-    name: string
-  ): Promise<{
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    const multiKeyStoreInfo = await this.keyRing.updateNameKeyRing(index, name);
-    return {
-      multiKeyStoreInfo,
-    };
-  }
-
-  async showKeyRing(index: number, password: string): Promise<string> {
-    return await this.keyRing.showKeyRing(index, password);
-  }
-
-  async createMnemonicKey(
-    kdf: "scrypt" | "sha256" | "pbkdf2",
-    mnemonic: string,
-    password: string,
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
-  ): Promise<{
-    status: KeyRingStatus;
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    // TODO: Check mnemonic checksum.
-    return await this.keyRing.createMnemonicKey(
-      kdf,
-      mnemonic,
-      password,
-      meta,
-      bip44HDPath
-    );
-  }
-
-  async createPrivateKey(
-    kdf: "scrypt" | "sha256" | "pbkdf2",
-    privateKey: Uint8Array,
-    password: string,
-    meta: Record<string, string>
-  ): Promise<{
-    status: KeyRingStatus;
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    return await this.keyRing.createPrivateKey(kdf, privateKey, password, meta);
-  }
-
-  async createKeystoneKey(
-    env: Env,
-    kdf: "scrypt" | "sha256" | "pbkdf2",
-    password: string,
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
-  ): Promise<{
-    status: KeyRingStatus;
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    return await this.keyRing.createKeystoneKey(
-      env,
-      kdf,
-      password,
-      meta,
-      bip44HDPath
-    );
-  }
-
-  async createLedgerKey(
-    env: Env,
-    kdf: "scrypt" | "sha256" | "pbkdf2",
-    password: string,
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath,
-    cosmosLikeApp?: string
-  ): Promise<{
-    status: KeyRingStatus;
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    return await this.keyRing.createLedgerKey(
-      env,
-      kdf,
-      password,
-      meta,
-      bip44HDPath,
-      cosmosLikeApp
-    );
-  }
-
-  lock(): KeyRingStatus {
-    this.keyRing.lock();
-    return this.keyRing.status;
-  }
-
-  async unlock(password: string): Promise<KeyRingStatus> {
-    await this.keyRing.unlock(password);
-
-    return this.keyRing.status;
-  }
-
-  async getKey(chainId: string): Promise<Key> {
-    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
-
-    if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
-      // Check the comment on the method itself.
-      this.keyRing.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
+    if (this._needMigration) {
+      // If the migration is needed, assume that key ring is locked.
+      // Because, the migration starts when key ring would be unlocked.
+      return "locked";
     }
 
-    return this.keyRing.getKey(
-      chainId,
-      this.getChainCoinType(chainId),
-      ethereumKeyFeatures.address
-    );
-  }
-
-  getKeyStoreMeta(key: string): string {
-    return this.keyRing.getKeyStoreMeta(key);
-  }
-
-  getKeyRingType(): string {
-    return this.keyRing.type;
-  }
-
-  async requestSignAmino(
-    env: Env,
-    msgOrigin: string,
-    chainId: string,
-    signer: string,
-    signDoc: StdSignDoc,
-    signOptions: KeplrSignOptions & {
-      // Hack option field to detect the sign arbitrary for string
-      isADR36WithString?: boolean;
-      ethSignType?: EthSignType;
-    }
-  ): Promise<AminoSignResponse> {
-    signDoc = {
-      ...signDoc,
-      memo: escapeHTML(signDoc.memo),
-    };
-
-    signDoc = trimAminoSignDoc(signDoc);
-    signDoc = sortObjectByKey(signDoc);
-
-    const coinType = this.getChainCoinType(chainId);
-    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
-
-    if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
-      // Check the comment on the method itself.
-      this.keyRing.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
-    }
-
-    const key = await this.keyRing.getKey(
-      chainId,
-      coinType,
-      ethereumKeyFeatures.address
-    );
-    const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
-    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
-    if (signer !== bech32Address) {
-      throw new KeplrError("keyring", 231, "Signer mismatched");
-    }
-
-    const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
-      signDoc,
-      bech32Prefix
-    );
-    if (isADR36SignDoc) {
-      if (signDoc.msgs[0].value.signer !== signer) {
-        throw new KeplrError("keyring", 233, "Unmatched signer in sign doc");
-      }
-    }
-
-    if (signOptions.isADR36WithString != null && !isADR36SignDoc) {
-      throw new KeplrError(
-        "keyring",
-        236,
-        'Sign doc is not for ADR-36. But, "isADR36WithString" option is defined'
-      );
-    }
-
-    if (signOptions.ethSignType && !isADR36SignDoc) {
-      throw new Error(
-        "Eth sign type can be requested with only ADR-36 amino sign doc"
-      );
-    }
-
-    let newSignDoc = (await this.interactionService.waitApprove(
-      env,
-      "/sign",
-      "request-sign",
-      {
-        msgOrigin,
-        chainId,
-        mode: "amino",
-        signDoc,
-        signer,
-        signOptions,
-        isADR36SignDoc,
-        isADR36WithString: signOptions.isADR36WithString,
-        ethSignType: signOptions.ethSignType,
-      }
-    )) as StdSignDoc;
-
-    newSignDoc = {
-      ...newSignDoc,
-      memo: escapeHTML(newSignDoc.memo),
-    };
-
-    if (isADR36SignDoc) {
-      // Validate the new sign doc, if it was for ADR-36.
-      if (checkAndValidateADR36AminoSignDoc(signDoc, bech32Prefix)) {
-        if (signDoc.msgs[0].value.signer !== signer) {
-          throw new KeplrError(
-            "keyring",
-            232,
-            "Unmatched signer in new sign doc"
-          );
-        }
-      } else {
-        throw new KeplrError(
-          "keyring",
-          237,
-          "Signing request was for ADR-36. But, accidentally, new sign doc is not for ADR-36"
-        );
-      }
-    }
-
-    // Handle Ethereum signing
-    if (signOptions.ethSignType) {
-      if (newSignDoc.msgs.length !== 1) {
-        // Validate number of messages
-        throw new Error("Invalid number of messages for Ethereum sign request");
-      }
-
-      const signBytes = Buffer.from(newSignDoc.msgs[0].value.data, "base64");
-
-      try {
-        const signatureBytes = await this.keyRing.signEthereum(
-          env,
-          chainId,
-          coinType,
-          signBytes,
-          signOptions.ethSignType
-        );
-
-        return {
-          signed: newSignDoc, // Included to match return type
-          signature: {
-            pub_key: encodeSecp256k1Pubkey(key.pubKey), // Included to match return type
-            signature: Buffer.from(signatureBytes).toString("base64"), // No byte limit
-          },
-        };
-      } finally {
-        this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-      }
-    }
-
-    try {
-      const signature = await this.keyRing.sign(
-        env,
-        chainId,
-        coinType,
-        serializeSignDoc(newSignDoc),
-        ethereumKeyFeatures.signing,
-        SignMode.Amino
-      );
-
-      return {
-        signed: newSignDoc,
-        signature: encodeSecp256k1Signature(key.pubKey, signature),
-      };
-    } finally {
-      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-    }
-  }
-
-  async requestSignEIP712CosmosTx_v0(
-    env: Env,
-    msgOrigin: string,
-    chainId: string,
-    signer: string,
-    eip712: {
-      types: Record<string, { name: string; type: string }[] | undefined>;
-      domain: Record<string, any>;
-      primaryType: string;
-    },
-    signDoc: StdSignDoc,
-    signOptions: KeplrSignOptions
-  ): Promise<AminoSignResponse> {
-    signDoc = {
-      ...signDoc,
-      memo: escapeHTML(signDoc.memo),
-    };
-
-    signDoc = trimAminoSignDoc(signDoc);
-    signDoc = sortObjectByKey(signDoc);
-
-    const coinType = this.getChainCoinType(chainId);
-    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
-
-    if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
-      // Check the comment on the method itself.
-      this.keyRing.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
-    }
-
-    const key = await this.keyRing.getKey(
-      chainId,
-      coinType,
-      ethereumKeyFeatures.address
-    );
-    const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
-    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
-    if (signer !== bech32Address) {
-      throw new KeplrError("keyring", 231, "Signer mismatched");
-    }
-
-    let newSignDoc = (await this.interactionService.waitApprove(
-      env,
-      "/sign",
-      "request-sign",
-      {
-        msgOrigin,
-        chainId,
-        mode: "amino",
-        signDoc,
-        signer,
-        signOptions,
-        isADR36SignDoc: false,
-        ethSignType: EthSignType.EIP712,
-      }
-    )) as StdSignDoc;
-
-    newSignDoc = {
-      ...newSignDoc,
-      memo: escapeHTML(newSignDoc.memo),
-    };
-
-    try {
-      const signature = await this.keyRing.signEthereum(
-        env,
-        chainId,
-        coinType,
-        Buffer.from(
-          JSON.stringify({
-            types: eip712.types,
-            domain: eip712.domain,
-            primaryType: eip712.primaryType,
-            message: newSignDoc,
-          })
-        ),
-        EthSignType.EIP712
-      );
-
-      return {
-        signed: newSignDoc,
-        signature: {
-          pub_key: encodeSecp256k1Pubkey(key.pubKey),
-          // Return eth signature (r | s | v) 65 bytes.
-          signature: Buffer.from(signature).toString("base64"),
-        },
-      };
-    } finally {
-      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-    }
-  }
-
-  async requestSignDirect(
-    env: Env,
-    msgOrigin: string,
-    chainId: string,
-    signer: string,
-    signDoc: SignDoc,
-    signOptions: KeplrSignOptions
-  ): Promise<DirectSignResponse> {
-    const coinType = this.getChainCoinType(chainId);
-    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
-
-    if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
-      // Check the comment on the method itself.
-      this.keyRing.throwErrorIfEthermintWithLedgerButNotSupported(chainId);
-    }
-
-    const key = await this.keyRing.getKey(
-      chainId,
-      coinType,
-      ethereumKeyFeatures.address
-    );
-    const bech32Address = new Bech32Address(key.address).toBech32(
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr
-    );
-    if (signer !== bech32Address) {
-      throw new KeplrError("keyring", 231, "Signer mismatched");
-    }
-
-    const newSignDocBytes = (await this.interactionService.waitApprove(
-      env,
-      "/sign",
-      "request-sign",
-      {
-        msgOrigin,
-        chainId,
-        mode: "direct",
-        signDocBytes: SignDoc.encode(signDoc).finish(),
-        signer,
-        signOptions,
-      }
-    )) as Uint8Array;
-
-    const newSignDoc = SignDoc.decode(newSignDocBytes);
-
-    try {
-      const signature = await this.keyRing.sign(
-        env,
-        chainId,
-        coinType,
-        newSignDocBytes,
-        ethereumKeyFeatures.signing,
-        SignMode.Direct
-      );
-
-      return {
-        signed: {
-          ...newSignDoc,
-          accountNumber: Long.fromString(newSignDoc.accountNumber),
-        },
-        signature: encodeSecp256k1Signature(key.pubKey, signature),
-      };
-    } finally {
-      this.interactionService.dispatchEvent(APP_PORT, "request-sign-end", {});
-    }
-  }
-
-  async verifyADR36AminoSignDoc(
-    chainId: string,
-    signer: string,
-    data: Uint8Array,
-    signature: StdSignature
-  ): Promise<boolean> {
-    const coinType = this.getChainCoinType(chainId);
-    const ethereumKeyFeatures = this.getChainEthereumKeyFeatures(chainId);
-
-    const key = await this.keyRing.getKey(
-      chainId,
-      coinType,
-      ethereumKeyFeatures.address
-    );
-    const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        .bech32PrefixAccAddr;
-    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
-    if (signer !== bech32Address) {
-      throw new KeplrError("keyring", 231, "Signer mismatched");
-    }
-    if (signature.pub_key.type !== "tendermint/PubKeySecp256k1") {
-      throw new KeplrError(
-        "keyring",
-        211,
-        `Unsupported type of pub key: ${signature.pub_key.type}`
-      );
-    }
     if (
-      Buffer.from(key.pubKey).toString("base64") !== signature.pub_key.value
+      !this.vaultService.isSignedUp ||
+      this.vaultService.getVaults("keyRing").length === 0
     ) {
-      throw new KeplrError("keyring", 210, "Pub key unmatched");
+      return "empty";
     }
 
-    const signDoc = makeADR36AminoSignDoc(signer, data);
-
-    return verifyADR36AminoSignDoc(
-      bech32Prefix,
-      signDoc,
-      Buffer.from(signature.pub_key.value, "base64"),
-      Buffer.from(signature.signature, "base64")
-    );
+    return this.vaultService.isLocked ? "locked" : "unlocked";
   }
 
-  async sign(
-    env: Env,
+  getKeyRingVaults(): Vault[] {
+    return this.vaultService.getVaults("keyRing");
+  }
+
+  getKeyInfos(): KeyInfo[] {
+    return this.getKeyRingVaults().map((vault) => {
+      return {
+        id: vault.id,
+        name: vault.insensitive["keyRingName"] as string,
+        type: vault.insensitive["keyRingType"] as string,
+        isSelected: this._selectedVaultId === vault.id,
+        insensitive: vault.insensitive,
+      };
+    });
+  }
+
+  getKeyInfo(vaultId: string): KeyInfo | undefined {
+    return this.getKeyInfos().find((keyInfo) => keyInfo.id === vaultId);
+  }
+
+  // Return selected vault id.
+  // If selected vault doesn't exist for unknown reason,
+  // try to return first id for key rings.
+  // If key rings are empty, throw an error.
+  get selectedVaultId(): string {
+    if (
+      this._selectedVaultId &&
+      this.vaultService.getVault("keyRing", this._selectedVaultId)
+    ) {
+      return this._selectedVaultId;
+    }
+    const vaults = this.vaultService.getVaults("keyRing");
+    if (vaults.length === 0) {
+      throw new Error("Key ring is empty");
+    }
+    return vaults[0].id;
+  }
+
+  finalizeMnemonicKeyCoinType(
+    vaultId: string,
     chainId: string,
-    message: Uint8Array
-  ): Promise<Uint8Array> {
-    return this.keyRing.sign(
-      env,
-      chainId,
-      this.getChainCoinType(chainId),
-      message,
-      this.getChainEthereumKeyFeatures(chainId).signing
-    );
+    coinType: number
+  ): void {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+    if (
+      chainInfo.bip44.coinType !== coinType &&
+      !(chainInfo.alternativeBIP44s ?? []).find(
+        (path) => path.coinType === coinType
+      )
+    ) {
+      throw new Error("Coin type is not associated to chain");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "mnemonic") {
+      throw new Error("Key is not from mnemonic");
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    if (vault.insensitive[coinTypeTag]) {
+      throw new Error("Coin type is already finalized");
+    }
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
+      [coinTypeTag]: coinType,
+    });
   }
 
-  async addMnemonicKey(
-    kdf: "scrypt" | "sha256" | "pbkdf2",
+  needMnemonicKeyCoinTypeFinalize(vaultId: string, chainId: string): boolean {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "mnemonic") {
+      return false;
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    return !vault.insensitive[coinTypeTag];
+  }
+
+  async createMnemonicKeyRing(
     mnemonic: string,
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
-  ): Promise<{
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    return this.keyRing.addMnemonicKey(kdf, mnemonic, meta, bip44HDPath);
-  }
-
-  async addPrivateKey(
-    kdf: "scrypt" | "sha256" | "pbkdf2",
-    privateKey: Uint8Array,
-    meta: Record<string, string>
-  ): Promise<{
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    return this.keyRing.addPrivateKey(kdf, privateKey, meta);
-  }
-
-  async addKeystoneKey(
-    env: Env,
-    kdf: "scrypt" | "sha256" | "pbkdf2",
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath
-  ): Promise<{
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    return this.keyRing.addKeystoneKey(env, kdf, meta, bip44HDPath);
-  }
-
-  async addLedgerKey(
-    env: Env,
-    kdf: "scrypt" | "sha256" | "pbkdf2",
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath,
-    cosmosLikeApp?: string
-  ): Promise<{
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    return this.keyRing.addLedgerKey(
-      env,
-      kdf,
-      meta,
-      bip44HDPath,
-      cosmosLikeApp
-    );
-  }
-
-  public async changeKeyStoreFromMultiKeyStore(index: number): Promise<{
-    multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
-  }> {
-    try {
-      return await this.keyRing.changeKeyStoreFromMultiKeyStore(index);
-    } finally {
-      this.interactionService.dispatchEvent(
-        WEBPAGE_PORT,
-        "keystore-changed",
-        {}
-      );
-    }
-  }
-
-  public checkPassword(password: string): boolean {
-    return this.keyRing.checkPassword(password);
-  }
-
-  getMultiKeyStoreInfo(): MultiKeyStoreInfoWithSelected {
-    return this.keyRing.getMultiKeyStoreInfo();
-  }
-
-  isKeyStoreCoinTypeSet(chainId: string): boolean {
-    return this.keyRing.isKeyStoreCoinTypeSet(chainId);
-  }
-
-  async setKeyStoreCoinType(chainId: string, coinType: number): Promise<void> {
-    const prevCoinType = this.keyRing.computeKeyStoreCoinType(
-      chainId,
-      this.getChainCoinType(chainId)
-    );
-
-    await this.keyRing.setKeyStoreCoinType(chainId, coinType);
-
-    if (prevCoinType !== coinType) {
-      this.interactionService.dispatchEvent(
-        WEBPAGE_PORT,
-        "keystore-changed",
-        {}
-      );
-    }
-  }
-
-  async getKeyStoreBIP44Selectables(
-    chainId: string,
-    paths: BIP44[]
-  ): Promise<{ readonly path: BIP44; readonly bech32Address: string }[]> {
-    if (this.isKeyStoreCoinTypeSet(chainId)) {
-      return [];
-    }
-
-    const result = [];
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-
-    for (const path of paths) {
-      const key = await this.keyRing.getKeyFromCoinType(
-        path.coinType,
-        this.getChainEthereumKeyFeatures(chainId).address
-      );
-      const bech32Address = new Bech32Address(key.address).toBech32(
-        chainInfo.bech32Config.bech32PrefixAccAddr
-      );
-
-      result.push({
-        path,
-        bech32Address,
-      });
-    }
-
-    return result;
-  }
-
-  async exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
-    return await this.keyRing.exportKeyRingDatas(password);
-  }
-
-  async initializeNonDefaultLedgerApp(env: Env, ledgerApp: LedgerApp) {
-    return await this.keyRing.initializeNonDefaultLedgerApp(env, ledgerApp);
-  }
-
-  async changeKeyRingName(
-    env: Env,
-    index: number,
-    { defaultName, editable }: { defaultName: string; editable: boolean }
+    bip44Path: BIP44HDPath,
+    name: string,
+    password?: string
   ): Promise<string> {
-    const newName = (await this.interactionService.waitApprove(
-      env,
-      `/setting/keyring/change/name/${index}`,
-      "change-keyring-name",
-      { defaultName, editable }
-    )) as string;
+    if (!this.vaultService.isSignedUp) {
+      if (!password) {
+        throw new Error("Must provide password to sign in to vault");
+      }
 
-    await this.updateNameKeyRing(index, newName);
+      await this.vaultService.signUp(password);
+    }
 
-    return newName;
+    KeyRingService.validateBIP44Path(bip44Path);
+
+    const keyRing = this.getKeyRing("mnemonic");
+    const vaultData = await keyRing.createKeyRingVault(mnemonic, bip44Path);
+
+    // Finalize coin type if only one coin type exists.
+    const coinTypes: Record<string, number | undefined> = {};
+    const chainInfos = this.chainsService.getChainInfos();
+    for (const chainInfo of chainInfos) {
+      if (
+        !chainInfo.alternativeBIP44s ||
+        chainInfo.alternativeBIP44s.length === 0
+      ) {
+        const coinTypeTag = `keyRing-${
+          ChainIdHelper.parse(chainInfo.chainId).identifier
+        }-coinType`;
+        coinTypes[coinTypeTag] = chainInfo.bip44.coinType;
+      }
+    }
+
+    const id = this.vaultService.addVault(
+      "keyRing",
+      {
+        ...vaultData.insensitive,
+        ...coinTypes,
+        keyRingName: name,
+        keyRingType: keyRing.supportedKeyRingType(),
+      },
+      vaultData.sensitive
+    );
+
+    runInAction(() => {
+      this._selectedVaultId = id;
+    });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
+    return id;
   }
 
-  protected getChainEthereumKeyFeatures(chainId: string): {
-    address: boolean;
-    signing: boolean;
-  } {
+  async createLedgerKeyRing(
+    pubKey: Uint8Array,
+    app: string,
+    bip44Path: BIP44HDPath,
+    name: string,
+    password?: string
+  ): Promise<string> {
+    if (!this.vaultService.isSignedUp) {
+      if (!password) {
+        throw new Error("Must provide password to sign in to vault");
+      }
+
+      await this.vaultService.signUp(password);
+    }
+
+    KeyRingService.validateBIP44Path(bip44Path);
+
+    const keyRing = this.getKeyRing("ledger");
+    const vaultData = await keyRing.createKeyRingVault(pubKey, app, bip44Path);
+
+    const id = this.vaultService.addVault(
+      "keyRing",
+      {
+        ...vaultData.insensitive,
+        keyRingName: name,
+        keyRingType: keyRing.supportedKeyRingType(),
+      },
+      vaultData.sensitive
+    );
+
+    runInAction(() => {
+      this._selectedVaultId = id;
+    });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
+    return id;
+  }
+
+  async createPrivateKeyKeyRing(
+    privateKey: Uint8Array,
+    meta: Record<string, string | undefined>,
+    name: string,
+    password?: string
+  ): Promise<string> {
+    if (!this.vaultService.isSignedUp) {
+      if (!password) {
+        throw new Error("Must provide password to sign in to vault");
+      }
+
+      await this.vaultService.signUp(password);
+    }
+
+    const keyRing = this.getKeyRing("private-key");
+    const vaultData = await keyRing.createKeyRingVault(privateKey);
+
+    const id = this.vaultService.addVault(
+      "keyRing",
+      {
+        ...vaultData.insensitive,
+        keyRingName: name,
+        keyRingType: keyRing.supportedKeyRingType(),
+        keyRingMeta: meta,
+      },
+      vaultData.sensitive
+    );
+
+    runInAction(() => {
+      this._selectedVaultId = id;
+    });
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
+    return id;
+  }
+
+  appendLedgerKeyRing(id: string, pubKey: Uint8Array, app: string) {
+    const vault = this.vaultService.getVault("keyRing", id);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "ledger") {
+      throw new Error("Key is not from ledger");
+    }
+
+    if (vault.insensitive[app]) {
+      throw new Error("App is already appended");
+    }
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", id, {
+      [app]: {
+        pubKey: Buffer.from(pubKey).toString("hex"),
+      },
+    });
+  }
+
+  getPubKeySelected(chainId: string): Promise<PubKeySecp256k1> {
+    return this.getPubKey(chainId, this.selectedVaultId);
+  }
+
+  getKeyRingNameSelected(): string {
+    return this.getKeyRingName(this.selectedVaultId);
+  }
+
+  getKeyRingName(vaultId: string): string {
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    return (vault.insensitive["keyRingName"] as string) || "Keplr Account";
+  }
+
+  @action
+  changeKeyRingName(vaultId: string, name: string) {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vaultId, {
+      keyRingName: name,
+    });
+
+    if (this.selectedVaultId === vault.id) {
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
+    }
+  }
+
+  async changeKeyRingNameInteractive(
+    env: Env,
+    vaultId: string,
+    defaultName: string,
+    editable: boolean
+  ): Promise<string> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    return await this.interactionService.waitApproveV2(
+      env,
+      `/wallet/change-name?id=${vaultId}`,
+      "change-keyring-name",
+      {
+        defaultName,
+        editable,
+      },
+      (name: string) => {
+        this.changeKeyRingName(vaultId, name);
+        return name;
+      }
+    );
+  }
+
+  @action
+  async deleteKeyRing(vaultId: string, password: string) {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    await this.vaultService.checkUserPassword(password);
+
+    const wasSelected = this.selectedVaultId === vaultId;
+
+    this.vaultService.removeVault("keyRing", vaultId);
+
+    if (wasSelected) {
+      const keyInfos = this.getKeyInfos();
+      if (keyInfos.length > 0) {
+        this._selectedVaultId = keyInfos[0].id;
+      } else {
+        this._selectedVaultId = undefined;
+      }
+    }
+
+    if (wasSelected) {
+      this.interactionService.dispatchEvent(
+        WEBPAGE_PORT,
+        "keystore-changed",
+        {}
+      );
+    }
+
+    return wasSelected;
+  }
+
+  signSelected(
+    chainId: string,
+    data: Uint8Array,
+    digestMethod: "sha256" | "keccak256"
+  ): Promise<Uint8Array> {
+    return this.sign(chainId, this.selectedVaultId, data, digestMethod);
+  }
+
+  getPubKey(chainId: string, vaultId: string): Promise<PubKeySecp256k1> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
-    return {
-      address: chainInfo.features?.includes("eth-address-gen") ?? false,
-      signing: chainInfo.features?.includes("eth-key-sign") ?? false,
-    };
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    const coinType = (() => {
+      if (vault.insensitive[coinTypeTag]) {
+        return vault.insensitive[coinTypeTag] as number;
+      }
+
+      return chainInfo.bip44.coinType;
+    })();
+
+    return this.getPubKeyWithVault(vault, coinType, chainInfo);
   }
 
-  protected getChainCoinType(chainId: string): number {
-    return this.chainsService.getChainInfoOrThrow(chainId).bip44.coinType;
+  getPubKeyWithNotFinalizedCoinType(
+    chainId: string,
+    vaultId: string,
+    coinType: number
+  ): Promise<PubKeySecp256k1> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+    if (
+      chainInfo.bip44.coinType !== coinType &&
+      !(chainInfo.alternativeBIP44s ?? []).find(
+        (path) => path.coinType === coinType
+      )
+    ) {
+      throw new Error("Coin type is not associated to chain");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    if (vault.insensitive["keyRingType"] !== "mnemonic") {
+      throw new Error("Key is not from mnemonic");
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    if (vault.insensitive[coinTypeTag]) {
+      throw new Error("Coin type is already finalized");
+    }
+
+    return this.getPubKeyWithVault(vault, coinType, chainInfo);
+  }
+
+  sign(
+    chainId: string,
+    vaultId: string,
+    data: Uint8Array,
+    digestMethod: "sha256" | "keccak256"
+  ): Promise<Uint8Array> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainId).identifier
+    }-coinType`;
+
+    const coinType = (() => {
+      if (vault.insensitive[coinTypeTag]) {
+        return vault.insensitive[coinTypeTag] as number;
+      }
+
+      return chainInfo.bip44.coinType;
+    })();
+
+    const signature = this.signWithVault(
+      vault,
+      coinType,
+      data,
+      digestMethod,
+      chainInfo
+    );
+
+    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vault.id, {
+      coinTypeTag: coinType,
+    });
+
+    return signature;
+  }
+
+  getPubKeyWithVault(
+    vault: Vault,
+    coinType: number,
+    chainInfo: ChainInfo
+  ): Promise<PubKeySecp256k1> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const keyRing = this.getVaultKeyRing(vault);
+
+    return Promise.resolve(keyRing.getPubKey(vault, coinType, chainInfo));
+  }
+
+  signWithVault(
+    vault: Vault,
+    coinType: number,
+    data: Uint8Array,
+    digestMethod: "sha256" | "keccak256",
+    chainInfo: ChainInfo
+  ): Promise<Uint8Array> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const keyRing = this.getVaultKeyRing(vault);
+
+    return Promise.resolve(
+      keyRing.sign(vault, coinType, data, digestMethod, chainInfo)
+    );
+  }
+
+  async showSensitiveKeyRingData(
+    vaultId: string,
+    password: string
+  ): Promise<string> {
+    if (this.vaultService.isLocked) {
+      throw new Error("KeyRing is locked");
+    }
+
+    const vault = this.vaultService.getVault("keyRing", vaultId);
+    if (!vault) {
+      throw new Error("Vault is null");
+    }
+
+    await this.vaultService.checkUserPassword(password);
+
+    switch (vault.insensitive["keyRingType"]) {
+      case "mnemonic": {
+        const sensitive = this.vaultService.decrypt(vault.sensitive);
+        return sensitive["mnemonic"] as string;
+      }
+      case "private-key": {
+        const sensitive = this.vaultService.decrypt(vault.sensitive);
+        return sensitive["privateKey"] as string;
+      }
+      default: {
+        throw new Error("Unsupported keyRing type to show sensitive data");
+      }
+    }
+  }
+
+  async changeUserPassword(
+    prevUserPassword: string,
+    newUserPassword: string
+  ): Promise<void> {
+    await this.vaultService.changeUserPassword(
+      prevUserPassword,
+      newUserPassword
+    );
+  }
+
+  protected getVaultKeyRing(vault: Vault): KeyRing {
+    for (const keyRing of this.keyRings) {
+      if (vault.insensitive["keyRingType"] === keyRing.supportedKeyRingType()) {
+        return keyRing;
+      }
+    }
+
+    throw new Error("Unsupported keyRing vault");
+  }
+
+  protected getKeyRing(type: string): KeyRing {
+    for (const keyRing of this.keyRings) {
+      if (type === keyRing.supportedKeyRingType()) {
+        return keyRing;
+      }
+    }
+
+    throw new Error(`Unsupported keyRing ${type}`);
+  }
+
+  protected static validateBIP44Path(bip44Path: BIP44HDPath): void {
+    if (!Number.isInteger(bip44Path.account) || bip44Path.account < 0) {
+      throw new Error("Invalid account in hd path");
+    }
+
+    if (
+      !Number.isInteger(bip44Path.change) ||
+      !(bip44Path.change === 0 || bip44Path.change === 1)
+    ) {
+      throw new Error("Invalid change in hd path");
+    }
+
+    if (
+      !Number.isInteger(bip44Path.addressIndex) ||
+      bip44Path.addressIndex < 0
+    ) {
+      throw new Error("Invalid address index in hd path");
+    }
+  }
+
+  static isEthermintLike(chainInfo: ChainInfo): boolean {
+    return (
+      chainInfo.bip44.coinType === 60 ||
+      !!chainInfo.features?.includes("eth-address-gen") ||
+      !!chainInfo.features?.includes("eth-key-sign")
+    );
   }
 }
