@@ -19,6 +19,7 @@ import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useNavigate } from "react-router";
 import { YAxis } from "../../components/axis";
+import { Gutter } from "../../components/gutter";
 
 const zeroDec = new Dec(0);
 
@@ -79,6 +80,9 @@ export const AvailableTabView: FunctionComponent<{
     });
   })();
 
+  const isShowLookingForChains =
+    lookingForChains.length > 0 && trimSearch.length >= 3;
+
   const TokenViewData: {
     title: string;
     balance: ViewToken[];
@@ -118,10 +122,6 @@ export const AvailableTabView: FunctionComponent<{
 
   return (
     <React.Fragment>
-      {lookingForChains.length > 0 ? (
-        <LookingForChains chainInfos={lookingForChains} />
-      ) : null}
-
       {isNotReady ? (
         <TokenItem
           viewToken={{
@@ -165,6 +165,14 @@ export const AvailableTabView: FunctionComponent<{
               }
             )}
           </Stack>
+
+          {isShowLookingForChains ? (
+            <React.Fragment>
+              <Gutter size="0.5rem" direction="vertical" />
+              <LookingForChains chainInfos={lookingForChains} />
+            </React.Fragment>
+          ) : null}
+
           {isFirstTime ? (
             <MainEmptyView
               image={
