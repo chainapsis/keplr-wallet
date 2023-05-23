@@ -65,6 +65,11 @@ export const AvailableTabView: FunctionComponent<{
       }
 
       const replacedSearchValue = trimSearch.replace(/ /g, "").toLowerCase();
+
+      if (replacedSearchValue.length < 3) {
+        return false;
+      }
+
       const hasChainName =
         chainInfo.chainName.replace(/ /gi, "").toLowerCase() ===
         replacedSearchValue;
@@ -122,9 +127,6 @@ export const AvailableTabView: FunctionComponent<{
   const isShowNotFound =
     allBalancesSearchFiltered.length === 0 && trimSearch.length > 0;
 
-  const isShowLookingForChains =
-    lookingForChains.length > 0 && trimSearch.length >= 3;
-
   return (
     <React.Fragment>
       {isNotReady ? (
@@ -171,7 +173,7 @@ export const AvailableTabView: FunctionComponent<{
             )}
           </Stack>
 
-          {isShowLookingForChains ? (
+          {lookingForChains.length > 0 ? (
             <React.Fragment>
               <Gutter size="0.5rem" direction="vertical" />
               <LookingForChains chainInfos={lookingForChains} />
