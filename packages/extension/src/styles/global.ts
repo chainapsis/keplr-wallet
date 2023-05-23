@@ -8,6 +8,11 @@ export const GlobalStyle = createGlobalStyle`
   
   ${KeplrWalletPrivate.GlobalStyles}
   
+  html {
+    // TODO: Change the scheme according to theme after theme feature is implemented.
+    color-scheme: dark;
+  }
+  
   html, body {
     font-family: 'Inter', sans-serif;
     color: ${ColorPalette.white};
