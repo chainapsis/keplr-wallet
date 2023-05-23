@@ -16,6 +16,7 @@ import { FormattedDate } from "react-intl";
 import { Columns } from "../../../../components/column";
 import { useNavigate } from "react-router";
 import { EmptyView } from "../../../../components/empty-view";
+import { Gutter } from "../../../../components/gutter";
 
 type grantListType = Record<string, AuthZ.Grant[]>;
 
@@ -199,7 +200,12 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
       {Object.entries(grantList).every(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ([_, grants]) => grants.length === 0
-      ) && <EmptyView subject="Authz" />}
+      ) && (
+        <React.Fragment>
+          <Gutter direction="vertical" size="4rem" />
+          <EmptyView subject="Authz" />
+        </React.Fragment>
+      )}
     </HeaderLayout>
   );
 });
