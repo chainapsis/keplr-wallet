@@ -118,11 +118,11 @@ export class UIConfigStore {
             }
           }
         });
-
-        autorun(() => {
-          this.kvStore.set("options", toJS(this._options));
-        });
       }
+
+      autorun(() => {
+        this.kvStore.set("options", toJS(this._options));
+      });
     }
 
     await Promise.all([
