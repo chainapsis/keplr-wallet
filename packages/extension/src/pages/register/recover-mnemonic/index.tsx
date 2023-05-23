@@ -148,7 +148,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
       if (bip39.validateMnemonic(words.join(" "))) {
         if (words.length === 12) {
           setSeedType("12words");
-          setFullWords(words.concat(new Array(12).fill("")));
+          setFullWords(words.concat(new Array(24).fill("")));
         } else {
           setSeedType("24words");
           setFullWords(words);
@@ -163,7 +163,14 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
       newFullWords[i] = words[i - index];
     }
 
-    if (newFullWords.length > 12) {
+    let lastIndexOfNotEmpty = -1;
+    for (let i = newFullWords.length - 1; i >= 0; i--) {
+      if (newFullWords[i].length > 0) {
+        lastIndexOfNotEmpty = i;
+        break;
+      }
+    }
+    if (lastIndexOfNotEmpty >= 12) {
       setSeedType("24words");
     }
 
