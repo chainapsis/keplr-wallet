@@ -13,6 +13,8 @@ import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { AddressItem } from "../../../../components/address-item";
 import { useConfirm } from "../../../../hooks/confirm";
+import { EmptyView } from "../../../../components/empty-view";
+import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
   Container: styled(Stack)`
@@ -52,6 +54,8 @@ export const SettingContactsList: FunctionComponent = observer(() => {
     };
   });
 
+  const addresses = uiConfigStore.addressBookConfig.getAddressBook(chainId);
+
   return (
     <HeaderLayout title="General" left={<BackButton />}>
       <Styles.Container>
@@ -82,9 +86,8 @@ export const SettingContactsList: FunctionComponent = observer(() => {
         </Columns>
 
         <Styles.ItemList gutter="0.5rem">
-          {uiConfigStore.addressBookConfig
-            .getAddressBook(chainId)
-            .map((data, i) => {
+          {addresses.length > 0 ? (
+            addresses.map((data, i) => {
               return (
                 <AddressItem
                   key={i}
@@ -120,7 +123,13 @@ export const SettingContactsList: FunctionComponent = observer(() => {
                   ]}
                 />
               );
-            })}
+            })
+          ) : (
+            <React.Fragment>
+              <Gutter size="7.5rem" direction="vertical" />
+              <EmptyView subject="Contacts" />
+            </React.Fragment>
+          )}
         </Styles.ItemList>
       </Styles.Container>
     </HeaderLayout>

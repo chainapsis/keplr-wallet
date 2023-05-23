@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
+import { Subtitle3 } from "../typography";
 
 const Styles = {
   Container: styled.div`
@@ -14,9 +15,6 @@ const Styles = {
   Icon: styled.div`
     width: 4.5rem;
     height: 4.5rem;
-  `,
-  Subject: styled.div`
-    color: ${ColorPalette["gray-400"]};
   `,
 };
 
@@ -43,9 +41,9 @@ export const EmptyView: FunctionComponent<{ subject?: string }> = ({
           />
         </svg>
       </Styles.Icon>
-      <Styles.Subject>
+      <Subtitle3 color={ColorPalette["gray-400"]}>
         {subject ? `No ${subject} Yet` : children}
-      </Styles.Subject>
+      </Subtitle3>
     </Styles.Container>
   );
 };
