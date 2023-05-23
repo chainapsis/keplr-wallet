@@ -4,7 +4,6 @@ import {
   AmplitudeApiKey,
   EthereumEndpoint,
   FiatCurrencies,
-  ICNSFrontendLink,
   ICNSInfo,
 } from "../config.ui";
 import {
@@ -333,8 +332,7 @@ export class RootStore {
       new InExtensionMessageRequester(),
       this.chainStore,
       this.priceStore,
-      ICNSInfo,
-      ICNSFrontendLink
+      ICNSInfo
     );
 
     this.tokensStore = new TokensStore(

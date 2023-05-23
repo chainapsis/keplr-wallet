@@ -32,8 +32,8 @@ export class UIConfigStore {
   @observable
   protected _isInitialized: boolean = false;
 
-  @observable.deep
-  protected options: UIConfigOptions = {
+  @observable
+  protected _options: UIConfigOptions = {
     isDeveloperMode: false,
     hideLowBalance: false,
   };
@@ -66,8 +66,7 @@ export class UIConfigStore {
     _icnsInfo?: {
       readonly chainId: string;
       readonly resolverContractAddress: string;
-    },
-    _icnsFrontendLink?: string
+    }
   ) {
     this.kvStore = kvStores.kvStore;
     this.copyAddressConfig = new CopyAddressConfig(
@@ -97,19 +96,6 @@ export class UIConfigStore {
   }
 
   protected async init() {
-    // There is no guarantee that this value will contain all options fields, as the options field may be added later.
-    // showAdvancedIBCTransfer is legacy value
-    const data = await this.kvStore.get<
-      Partial<UIConfigOptions & { showAdvancedIBCTransfer: boolean }>
-    >("options");
-
-    if (data?.showAdvancedIBCTransfer) {
-      // remove showAdvancedIBCTransfer legacy value
-      await this.kvStore.set("options", { isDeveloperMode: true });
-
-      this.options.isDeveloperMode = true;
-    }
-
     {
       const saved = await this.kvStore.get<string>("fiatCurrency");
       if (saved) {
@@ -122,12 +108,22 @@ export class UIConfigStore {
       });
     }
 
-    runInAction(() => {
-      this.options = {
-        ...this.options,
-        ...data,
-      };
-    });
+    {
+      const saved = await this.kvStore.get<Partial<UIConfigOptions>>("options");
+      if (saved) {
+        runInAction(() => {
+          for (const [key, value] of Object.entries(saved)) {
+            if (value != null) {
+              (this._options as any)[key] = value;
+            }
+          }
+        });
+
+        autorun(() => {
+          this.kvStore.set("options", toJS(this._options));
+        });
+      }
+    }
 
     await Promise.all([
       this.copyAddressConfig.init(),
@@ -137,6 +133,10 @@ export class UIConfigStore {
     runInAction(() => {
       this._isInitialized = true;
     });
+  }
+
+  get options(): UIConfigOptions {
+    return this._options;
   }
 
   get isBeta(): boolean {
@@ -154,9 +154,6 @@ export class UIConfigStore {
   @action
   setDeveloperMode(value: boolean) {
     this.options.isDeveloperMode = value;
-
-    // No need to await
-    this.save();
   }
 
   get isHideLowBalance(): boolean {
@@ -166,8 +163,6 @@ export class UIConfigStore {
   @action
   setHideLowBalance(value: boolean) {
     this.options.hideLowBalance = value;
-
-    this.save();
   }
 
   @computed
@@ -208,10 +203,5 @@ export class UIConfigStore {
 
   get icnsInfo() {
     return this._icnsInfo;
-  }
-
-  async save() {
-    const data = toJS(this.options);
-    await this.kvStore.set("options", data);
   }
 }

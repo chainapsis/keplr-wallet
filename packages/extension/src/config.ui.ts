@@ -93,9 +93,6 @@ export const ICNSInfo = {
     "osmo1xk0s8xgktn9x5vwcgtjdxqzadg88fgn33p8u9cnpdxwemvxscvast52cdd",
 };
 
-// If not needed, just set as empty string ("")
-export const ICNSFrontendLink: string = "https://app.icns.xyz";
-
 export interface FiatOnRampServiceInfo {
   serviceId: string;
   serviceName: string;
