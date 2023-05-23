@@ -311,6 +311,7 @@ export class LockKeyRingMsg extends Message<{
 
 export class UnlockKeyRingMsg extends Message<{
   status: KeyRingStatus;
+  keyInfos: KeyInfo[];
 }> {
   public static type() {
     return "unlock-keyring";

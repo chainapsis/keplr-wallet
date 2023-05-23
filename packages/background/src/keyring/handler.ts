@@ -143,6 +143,7 @@ const handleUnlockKeyRingMsg: (
     await service.unlockKeyRing(msg.password);
     return {
       status: service.keyRingStatus,
+      keyInfos: service.getKeyInfos(),
     };
   };
 };

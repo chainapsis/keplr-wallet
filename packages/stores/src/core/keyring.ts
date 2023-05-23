@@ -264,6 +264,7 @@ export class KeyRingStore {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this._status = result.status;
+    this._keyInfos = result.keyInfos;
   }
 
   @flow
