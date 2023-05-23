@@ -467,6 +467,11 @@ export class ChainsService {
     }
   }
 
+  @action
+  clearAllSuggestedChainInfos(): void {
+    this.suggestedChainInfos = [];
+  }
+
   @computed({
     keepAlive: true,
   })
@@ -578,6 +583,11 @@ export class ChainsService {
       newEndpoints.splice(i, 1);
       this.endpoints = newEndpoints;
     }
+  }
+
+  @action
+  clearAllEndpoints(): void {
+    this.endpoints = [];
   }
 
   getOriginalEndpoint = computedFn(

@@ -16,6 +16,8 @@ import {
 import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithCoreTypes,
+  ClearAllChainEndpointsMsg,
+  ClearAllSuggestedChainInfosMsg,
   ClearChainEndpointsMsg,
   DisableChainsMsg,
   EnableChainsMsg,
@@ -407,5 +409,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     );
 
     this.setEmbeddedChainInfos(newChainInfos);
+  }
+
+  @flow
+  *clearClearAllSuggestedChainInfos() {
+    const msg = new ClearAllSuggestedChainInfosMsg();
+    yield* toGenerator(this.requester.sendMessage(BACKGROUND_PORT, msg));
+  }
+
+  @flow
+  *clearAllChainEndpoints() {
+    const msg = new ClearAllChainEndpointsMsg();
+    yield* toGenerator(this.requester.sendMessage(BACKGROUND_PORT, msg));
   }
 }

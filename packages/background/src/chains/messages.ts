@@ -194,3 +194,47 @@ export class GetChainOriginalEndpointsMsg extends Message<{
     return GetChainOriginalEndpointsMsg.type();
   }
 }
+
+export class ClearAllSuggestedChainInfosMsg extends Message<void> {
+  public static type() {
+    return "clear-all-suggested-chain-infos";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    //noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllSuggestedChainInfosMsg.type();
+  }
+}
+
+export class ClearAllChainEndpointsMsg extends Message<void> {
+  public static type() {
+    return "clear-all-chain-endpoints";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    //noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllChainEndpointsMsg.type();
+  }
+}

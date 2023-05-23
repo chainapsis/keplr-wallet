@@ -10,6 +10,8 @@ import { ExclamationTriangleIcon } from "./components/icon";
 import { ColorPalette } from "./styles";
 import { Gutter } from "./components/gutter";
 import { Button } from "./components/button";
+import { observer } from "mobx-react-lite";
+import { useStore } from "./stores";
 
 interface Prop {
   children?: ReactNode;
@@ -42,15 +44,15 @@ export class ErrorBoundary extends Component<Prop, State> {
   }
 }
 
-const ErrorBoundaryView: FunctionComponent = () => {
-  const onClickRestCacheData = async () => {
+const ErrorBoundaryView: FunctionComponent = observer(() => {
+  const { chainStore } = useStore();
+
+  const resetStoreQueries = async () => {
     const storageList = await browser.storage.local.get();
     const storeQueriesKeys = Object.keys(storageList).filter((key) =>
       key.includes("store_queries")
     );
     await browser.storage.local.remove(storeQueriesKeys);
-
-    window.location.reload();
   };
 
   return (
@@ -80,7 +82,11 @@ const ErrorBoundaryView: FunctionComponent = () => {
         color="secondary"
         size="medium"
         style={{ width: "100%" }}
-        onClick={onClickRestCacheData}
+        onClick={async () => {
+          await resetStoreQueries();
+
+          window.location.reload();
+        }}
       />
 
       <Gutter size="2.625rem" />
@@ -105,7 +111,15 @@ const ErrorBoundaryView: FunctionComponent = () => {
         }
         color="danger"
         style={{ width: "100%" }}
+        onClick={async () => {
+          await resetStoreQueries();
+
+          chainStore.clearAllChainEndpoints();
+          chainStore.clearClearAllSuggestedChainInfos();
+
+          window.location.reload();
+        }}
       />
     </Box>
   );
-};
+});

@@ -14,6 +14,8 @@ import {
   SetChainEndpointsMsg,
   ClearChainEndpointsMsg,
   GetChainOriginalEndpointsMsg,
+  ClearAllSuggestedChainInfosMsg,
+  ClearAllChainEndpointsMsg,
 } from "./messages";
 import { ChainInfo } from "@keplr-wallet/types";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
@@ -66,6 +68,16 @@ export const getHandler: (
         return handleGetChainOriginalEndpointsMsg(chainsService)(
           env,
           msg as GetChainOriginalEndpointsMsg
+        );
+      case ClearAllSuggestedChainInfosMsg:
+        return handleClearAllSuggestedChainInfosMsg(chainsService)(
+          env,
+          msg as ClearAllSuggestedChainInfosMsg
+        );
+      case ClearAllChainEndpointsMsg:
+        return handleClearAllChainEndpointsMsg(chainsService)(
+          env,
+          msg as ClearAllChainEndpointsMsg
         );
       default:
         throw new KeplrError("chains", 110, "Unknown msg type");
@@ -164,5 +176,21 @@ const handleGetChainOriginalEndpointsMsg: (
 ) => InternalHandler<GetChainOriginalEndpointsMsg> = (service) => {
   return (_, msg) => {
     return service.getOriginalEndpoint(msg.chainId);
+  };
+};
+
+const handleClearAllSuggestedChainInfosMsg: (
+  service: ChainsService
+) => InternalHandler<ClearAllSuggestedChainInfosMsg> = (service) => {
+  return () => {
+    return service.clearAllSuggestedChainInfos();
+  };
+};
+
+const handleClearAllChainEndpointsMsg: (
+  service: ChainsService
+) => InternalHandler<ClearAllChainEndpointsMsg> = (service) => {
+  return () => {
+    return service.clearAllEndpoints();
   };
 };
