@@ -411,15 +411,15 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this.setEmbeddedChainInfos(newChainInfos);
   }
 
-  @flow
-  *clearClearAllSuggestedChainInfos() {
+  // I use Async, Await because it doesn't change the state value.
+  async clearClearAllSuggestedChainInfos() {
     const msg = new ClearAllSuggestedChainInfosMsg();
-    yield* toGenerator(this.requester.sendMessage(BACKGROUND_PORT, msg));
+    await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
-  @flow
-  *clearAllChainEndpoints() {
+  // I use Async, Await because it doesn't change the state value.
+  async clearAllChainEndpoints() {
     const msg = new ClearAllChainEndpointsMsg();
-    yield* toGenerator(this.requester.sendMessage(BACKGROUND_PORT, msg));
+    await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

@@ -50,7 +50,7 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
   const resetStoreQueries = async () => {
     const storageList = await browser.storage.local.get();
     const storeQueriesKeys = Object.keys(storageList).filter((key) =>
-      key.includes("store_queries")
+      key.includes("store_queries/")
     );
     await browser.storage.local.remove(storeQueriesKeys);
   };
@@ -114,8 +114,10 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
         onClick={async () => {
           await resetStoreQueries();
 
-          chainStore.clearAllChainEndpoints();
-          chainStore.clearClearAllSuggestedChainInfos();
+          await Promise.all([
+            chainStore.clearAllChainEndpoints(),
+            chainStore.clearClearAllSuggestedChainInfos(),
+          ]);
 
           window.location.reload();
         }}
