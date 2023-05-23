@@ -7,6 +7,7 @@ import { KeyRingStatus, BIP44HDPath, KeyInfo } from "./types";
 export class GetKeyRingStatusMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
+  needMigration: boolean;
 }> {
   public static type() {
     return "get-keyring-status";

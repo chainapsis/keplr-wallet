@@ -82,6 +82,10 @@ export class KeyRingService {
     }
   }
 
+  get needMigration(): boolean {
+    return this._needMigration;
+  }
+
   async unlockKeyRing(password: string): Promise<void> {
     if (this._needMigration) {
       await this.migrate(password);

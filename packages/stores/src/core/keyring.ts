@@ -38,6 +38,9 @@ export class KeyRingStore {
   @observable
   protected _status: KeyRingStatus | "not-loaded" = "not-loaded";
 
+  @observable
+  protected _needMigration: boolean = false;
+
   @observable.ref
   protected _keyInfos: KeyInfo[] = [];
 
@@ -58,9 +61,14 @@ export class KeyRingStore {
     runInAction(() => {
       this._status = result.status;
       this._keyInfos = result.keyInfos;
+      this._needMigration = result.needMigration;
 
       this._isInitialized = true;
     });
+  }
+
+  get needMigration(): boolean {
+    return this._needMigration;
   }
 
   get isInitialized(): boolean {
@@ -265,6 +273,8 @@ export class KeyRingStore {
     );
     this._status = result.status;
     this._keyInfos = result.keyInfos;
+
+    this._needMigration = false;
   }
 
   @flow

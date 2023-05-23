@@ -99,6 +99,7 @@ const handleGetKeyRingStatusMsg: (
     return {
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
+      needMigration: service.needMigration,
     };
   };
 };
