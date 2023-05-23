@@ -101,13 +101,13 @@ export const SettingContactsList: FunctionComponent = observer(() => {
                         ),
                     },
                     {
-                      key: "delete-wallet",
-                      label: "Delete Wallet",
+                      key: "delete-contact",
+                      label: "Delete Contact",
                       onSelect: async () => {
                         if (
                           await confirm.confirm(
-                            "Delete Address",
-                            "Are you sure you want to delete this account?"
+                            "Delete Contact",
+                            "Are you sure you want to delete this contact?"
                           )
                         ) {
                           uiConfigStore.addressBookConfig.removeAddressBookAt(
