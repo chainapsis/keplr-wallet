@@ -12,6 +12,8 @@ import {
 } from "@keplr-wallet/router-extension";
 import { ExtensionKVStore } from "@keplr-wallet/common";
 import { init } from "@keplr-wallet/background";
+import scrypt from "scrypt-js";
+import { Buffer } from "buffer/";
 
 import {
   CommunityChainInfoRepo,
@@ -45,6 +47,21 @@ const { initFn } = init(
         title: params.title,
         message: params.message,
       });
+    },
+  },
+  {
+    scrypt: async (
+      text: string,
+      params: { dklen: number; salt: string; n: number; r: number; p: number }
+    ) => {
+      return await scrypt.scrypt(
+        Buffer.from(text),
+        Buffer.from(params.salt, "hex"),
+        params.n,
+        params.r,
+        params.p,
+        params.dklen
+      );
     },
   }
 );

@@ -1,5 +1,7 @@
 import { MessageRequester, Router } from "@keplr-wallet/router";
 
+import * as KeyRingLegacy from "./keyring/legacy";
+
 import * as Chains from "./chains/internal";
 import * as ChainsUI from "./chains-ui/internal";
 import * as ChainsUpdate from "./chains-update/internal";
@@ -57,7 +59,8 @@ export function init(
     readonly repoName: string;
     readonly branchName: string;
   },
-  notification: Notification
+  notification: Notification,
+  commonCrypto: KeyRingLegacy.CommonCrypto
 ): {
   initFn: () => Promise<void>;
 } {
@@ -109,8 +112,20 @@ export function init(
   );
 
   const vaultService = new Vault.VaultService(storeCreator("vault"));
+
+  const chainsUIService = new ChainsUI.ChainsUIService(
+    storeCreator("chains-ui"),
+    chainsService,
+    vaultService
+  );
+
   const keyRingV2Service = new KeyRingV2.KeyRingService(
     storeCreator("keyring-v2"),
+    {
+      kvStore: storeCreator("keyring"),
+      commonCrypto,
+      chainsUIService,
+    },
     chainsService,
     interactionService,
     vaultService,
@@ -134,12 +149,6 @@ export function init(
       permissionService,
       keyRingV2Service
     );
-
-  const chainsUIService = new ChainsUI.ChainsUIService(
-    storeCreator("chains-ui"),
-    chainsService,
-    vaultService
-  );
 
   const chainsUpdateService = new ChainsUpdate.ChainsUpdateService(
     storeCreator("chains-update"),
