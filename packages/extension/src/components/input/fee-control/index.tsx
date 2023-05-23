@@ -39,6 +39,13 @@ const Styles = {
             .toString()}`};
     border-radius: 0.375rem;
 
+    :hover {
+      border: ${({ hasError }) =>
+        hasError
+          ? `1.5px solid ${ColorPalette["yellow-500"]}`
+          : `1.5px solid ${ColorPalette["blue-500"]};`};
+    }
+
     cursor: pointer;
   `,
   IconContainer: styled.div`
