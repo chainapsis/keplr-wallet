@@ -20,6 +20,8 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useNavigate } from "react-router";
 import { YAxis } from "../../components/axis";
 import { Gutter } from "../../components/gutter";
+import { EmptyView } from "../../components/empty-view";
+import { Subtitle3 } from "../../components/typography";
 
 const zeroDec = new Dec(0);
 
@@ -80,9 +82,6 @@ export const AvailableTabView: FunctionComponent<{
     });
   })();
 
-  const isShowLookingForChains =
-    lookingForChains.length > 0 && trimSearch.length >= 3;
-
   const TokenViewData: {
     title: string;
     balance: ViewToken[];
@@ -119,6 +118,12 @@ export const AvailableTabView: FunctionComponent<{
   }, [chainStore.tokenScans]);
 
   const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
+
+  const isShowNotFound =
+    allBalancesSearchFiltered.length === 0 && trimSearch.length > 0;
+
+  const isShowLookingForChains =
+    lookingForChains.length > 0 && trimSearch.length >= 3;
 
   return (
     <React.Fragment>
@@ -173,7 +178,16 @@ export const AvailableTabView: FunctionComponent<{
             </React.Fragment>
           ) : null}
 
-          {isFirstTime ? (
+          {isShowNotFound ? (
+            <Box marginY="2rem">
+              <EmptyView>
+                <Stack alignX="center" gutter="0.1rem">
+                  <Subtitle3 style={{ fontWeight: 700 }}>Oops!</Subtitle3>
+                  <Subtitle3>No Result Found</Subtitle3>
+                </Stack>
+              </EmptyView>
+            </Box>
+          ) : isFirstTime ? (
             <MainEmptyView
               image={
                 <img
