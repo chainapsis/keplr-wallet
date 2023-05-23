@@ -39,6 +39,10 @@ const Styles = {
             .toString()}`};
     border-radius: 0.375rem;
 
+    :hover {
+      border: 1.5px solid ${ColorPalette["blue-500"]};
+    }
+
     cursor: pointer;
   `,
   IconContainer: styled.div`
