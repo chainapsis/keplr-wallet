@@ -50,18 +50,30 @@ const { initFn } = init(
     },
   },
   {
-    scrypt: async (
-      text: string,
-      params: { dklen: number; salt: string; n: number; r: number; p: number }
-    ) => {
-      return await scrypt.scrypt(
-        Buffer.from(text),
-        Buffer.from(params.salt, "hex"),
-        params.n,
-        params.r,
-        params.p,
-        params.dklen
+    commonCrypto: {
+      scrypt: async (
+        text: string,
+        params: { dklen: number; salt: string; n: number; r: number; p: number }
+      ) => {
+        return await scrypt.scrypt(
+          Buffer.from(text),
+          Buffer.from(params.salt, "hex"),
+          params.n,
+          params.r,
+          params.p,
+          params.dklen
+        );
+      },
+    },
+    getDisabledChainIdentifiers: async () => {
+      const kvStore = new ExtensionKVStore("store_chain_config");
+      const legacy = await kvStore.get<{ disabledChains: string[] }>(
+        "extension_chainInfoInUIConfig"
       );
+      if (!legacy) {
+        return [];
+      }
+      return legacy.disabledChains ?? [];
     },
   }
 );

@@ -24,6 +24,7 @@ export class KeyRingService {
       readonly kvStore: KVStore;
       readonly commonCrypto: Legacy.CommonCrypto;
       readonly chainsUIService: ChainsUIService;
+      readonly getDisabledChainIdentifiers: () => Promise<string[]>;
     },
     protected readonly chainsService: ChainsService,
     protected readonly interactionService: InteractionService,
@@ -105,6 +106,27 @@ export class KeyRingService {
       throw new Error("No key store to migrate");
     }
 
+    const disabledChainIdentifierMap = new Map<string, boolean>();
+    for (const chainIdentifier of await this.migrations.getDisabledChainIdentifiers()) {
+      if (!this.chainsService.hasChainInfo(chainIdentifier)) {
+        continue;
+      }
+
+      const identifier = ChainIdHelper.parse(chainIdentifier).identifier;
+      disabledChainIdentifierMap.set(identifier, true);
+    }
+
+    const checkChainDisabled = (chainId: string) => {
+      if (disabledChainIdentifierMap.size === 0) {
+        return false;
+      }
+      return (
+        disabledChainIdentifierMap.get(
+          ChainIdHelper.parse(chainId).identifier
+        ) === true
+      );
+    };
+
     for (const keyStore of multiKeyStore) {
       const keyStoreId = keyStore.meta?.["__id__"];
       if (keyStoreId) {
@@ -153,6 +175,22 @@ export class KeyRingService {
             }
           }
         }
+
+        for (const chainInfo of this.chainsService.getChainInfos()) {
+          if (checkChainDisabled(chainInfo.chainId)) {
+            continue;
+          }
+
+          if (
+            !this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
+          ) {
+            this.migrations.chainsUIService.enableChain(
+              vaultId,
+              chainInfo.chainId
+            );
+          }
+        }
+
         if (
           keyStore.meta?.["__id__"] === legacySelectedKeyStore?.meta?.["__id__"]
         ) {
@@ -181,6 +219,18 @@ export class KeyRingService {
           keyStore.meta?.["name"] ?? "Keplr Account",
           password
         );
+
+        for (const chainInfo of this.chainsService.getChainInfos()) {
+          if (checkChainDisabled(chainInfo.chainId)) {
+            continue;
+          }
+
+          this.migrations.chainsUIService.enableChain(
+            vaultId,
+            chainInfo.chainId
+          );
+        }
+
         if (
           keyStore.meta?.["__id__"] === legacySelectedKeyStore?.meta?.["__id__"]
         ) {
@@ -214,12 +264,30 @@ export class KeyRingService {
               password
             );
 
+            let hasEthereum = false;
             if (encodedPubkeys["Ethereum"]) {
               const pubKey = Buffer.from(
                 encodedPubkeys["Ethereum"] as string,
                 "hex"
               );
               this.appendLedgerKeyRing(vaultId, pubKey, "Ethereum");
+
+              hasEthereum = true;
+            }
+
+            for (const chainInfo of this.chainsService.getChainInfos()) {
+              if (checkChainDisabled(chainInfo.chainId)) {
+                continue;
+              }
+
+              if (KeyRingService.isEthermintLike(chainInfo) && !hasEthereum) {
+                continue;
+              }
+
+              this.migrations.chainsUIService.enableChain(
+                vaultId,
+                chainInfo.chainId
+              );
             }
 
             if (
@@ -243,6 +311,21 @@ export class KeyRingService {
             keyStore.meta?.["name"] ?? "Keplr Account",
             password
           );
+
+          for (const chainInfo of this.chainsService.getChainInfos()) {
+            if (checkChainDisabled(chainInfo.chainId)) {
+              continue;
+            }
+
+            if (KeyRingService.isEthermintLike(chainInfo)) {
+              continue;
+            }
+
+            this.migrations.chainsUIService.enableChain(
+              vaultId,
+              chainInfo.chainId
+            );
+          }
 
           if (
             keyStore.meta?.["__id__"] ===
@@ -889,5 +972,13 @@ export class KeyRingService {
     ) {
       throw new Error("Invalid address index in hd path");
     }
+  }
+
+  static isEthermintLike(chainInfo: ChainInfo): boolean {
+    return (
+      chainInfo.bip44.coinType === 60 ||
+      !!chainInfo.features?.includes("eth-address-gen") ||
+      !!chainInfo.features?.includes("eth-key-sign")
+    );
   }
 }

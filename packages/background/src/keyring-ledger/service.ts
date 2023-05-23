@@ -3,6 +3,7 @@ import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { KeplrError } from "@keplr-wallet/router";
 import { ChainInfo } from "@keplr-wallet/types";
+import { KeyRingService } from "../keyring";
 
 export class KeyRingLedgerService {
   async init(): Promise<void> {
@@ -43,7 +44,7 @@ export class KeyRingLedgerService {
   ): PubKeySecp256k1 {
     let app = "Cosmos";
 
-    const isEthermintLike = this.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
     if (isEthermintLike) {
       app = "Ethereum";
       if (!vault.insensitive[app]) {
@@ -74,14 +75,6 @@ export class KeyRingLedgerService {
   sign(): Uint8Array {
     throw new Error(
       "Ledger can't sign message in background. You should provide the signature from frontend."
-    );
-  }
-
-  protected isEthermintLike(chainInfo: ChainInfo): boolean {
-    return (
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign")
     );
   }
 }

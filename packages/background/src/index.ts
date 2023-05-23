@@ -60,7 +60,10 @@ export function init(
     readonly branchName: string;
   },
   notification: Notification,
-  commonCrypto: KeyRingLegacy.CommonCrypto
+  keyRingMigrations: {
+    commonCrypto: KeyRingLegacy.CommonCrypto;
+    readonly getDisabledChainIdentifiers: () => Promise<string[]>;
+  }
 ): {
   initFn: () => Promise<void>;
 } {
@@ -123,7 +126,9 @@ export function init(
     storeCreator("keyring-v2"),
     {
       kvStore: storeCreator("keyring"),
-      commonCrypto,
+      commonCrypto: keyRingMigrations.commonCrypto,
+      getDisabledChainIdentifiers:
+        keyRingMigrations.getDisabledChainIdentifiers,
       chainsUIService,
     },
     chainsService,

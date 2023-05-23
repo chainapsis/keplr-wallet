@@ -2,7 +2,6 @@ import { ChainsService } from "../chains";
 import { KeyRingService } from "../keyring";
 import {
   AminoSignResponse,
-  ChainInfo,
   DirectSignResponse,
   KeplrSignOptions,
   Key,
@@ -47,7 +46,7 @@ export class KeyRingCosmosService {
 
     const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
-    const isEthermintLike = this.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -100,7 +99,7 @@ export class KeyRingCosmosService {
       coinTypes.push(...chainInfo.alternativeBIP44s.map((alt) => alt.coinType));
     }
 
-    const isEthermintLike = this.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const res: {
       coinType: number;
@@ -165,7 +164,7 @@ export class KeyRingCosmosService {
     signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    const isEthermintLike = this.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -273,7 +272,7 @@ export class KeyRingCosmosService {
 
     const vaultId = this.keyRingService.selectedVaultId;
 
-    const isEthermintLike = this.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -379,7 +378,7 @@ export class KeyRingCosmosService {
     }
   ): Promise<AminoSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    const isEthermintLike = this.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -457,7 +456,7 @@ export class KeyRingCosmosService {
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    const isEthermintLike = this.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const keyInfo = this.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
@@ -633,7 +632,7 @@ export class KeyRingCosmosService {
     signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    const isEthermintLike = this.isEthermintLike(chainInfo);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     if (!isEthermintLike) {
       throw new Error("This feature is only usable on cosmos-sdk evm chain");
@@ -835,7 +834,7 @@ export class KeyRingCosmosService {
 
         const ownerBech32 = Bech32Address.fromBech32(owner);
         for (const accountInfo of interactionInfo.accountInfos) {
-          const isEthermintLike = this.isEthermintLike(
+          const isEthermintLike = KeyRingService.isEthermintLike(
             this.chainsService.getChainInfoOrThrow(accountInfo.chainId)
           );
 
@@ -917,14 +916,6 @@ Salt: ${salt}`;
         })
       ),
       "sha256"
-    );
-  }
-
-  protected isEthermintLike(chainInfo: ChainInfo): boolean {
-    return (
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign")
     );
   }
 
