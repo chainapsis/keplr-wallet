@@ -1,5 +1,7 @@
+export type CheckBoxSize = "extra-small" | "small" | "large";
+
 export interface CheckBoxProps {
-  size?: "small" | "large";
+  size?: CheckBoxSize;
   checked: boolean;
   onChange: (checked: boolean) => void;
 
