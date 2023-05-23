@@ -10,10 +10,7 @@ import { signatureImport } from "secp256k1";
 import { LedgerUtils } from "../../../utils";
 import Eth from "@ledgerhq/hw-app-eth";
 import { EIP712MessageValidator } from "@keplr-wallet/background";
-import {
-  domainHash,
-  messageHash,
-} from "@keplr-wallet/background/build/keyring/utils";
+import { domainHash, messageHash } from "@keplr-wallet/background";
 
 export const ErrModule = "ledger-sign";
 export const ErrFailedInit = 1;

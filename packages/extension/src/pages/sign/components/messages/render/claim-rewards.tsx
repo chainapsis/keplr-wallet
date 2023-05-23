@@ -4,7 +4,7 @@ import { MsgWithdrawDelegatorReward } from "@keplr-wallet/proto-types/cosmos/dis
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
-import { BondStatus } from "@keplr-wallet/stores/build/query/cosmos/staking/types";
+import { Staking } from "@keplr-wallet/stores";
 
 export const ClaimRewardsMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -53,7 +53,7 @@ const ClaimRewardsMessagePretty: FunctionComponent<{
 
   const moniker = queriesStore
     .get(chainId)
-    .cosmos.queryValidators.getQueryStatus(BondStatus.Bonded)
+    .cosmos.queryValidators.getQueryStatus(Staking.BondStatus.Bonded)
     .getValidator(validatorAddress)?.description.moniker;
 
   return (
