@@ -73,22 +73,38 @@ const Styles = {
 export const TokenTitleView: FunctionComponent<{
   title: string;
   tooltip?: string | React.ReactElement;
-}> = ({ title, tooltip }) => {
+
+  right?: React.ReactElement;
+}> = ({ title, tooltip, right }) => {
   return (
-    <Columns sum={1} alignY="center">
-      <Subtitle4 style={{ color: ColorPalette["gray-200"] }}>{title}</Subtitle4>
-      {tooltip ? (
-        <Box marginLeft="0.25rem">
-          <Tooltip content={tooltip}>
-            <QuestionIcon
-              width="1rem"
-              height="1rem"
-              color={ColorPalette["gray-300"]}
-            />
-          </Tooltip>
-        </Box>
-      ) : null}
-    </Columns>
+    <Box
+      style={{
+        flex: 1,
+      }}
+    >
+      <Columns sum={1} alignY="center">
+        <Subtitle4 style={{ color: ColorPalette["gray-200"] }}>
+          {title}
+        </Subtitle4>
+        {tooltip ? (
+          <Box marginLeft="0.25rem">
+            <Tooltip content={tooltip}>
+              <QuestionIcon
+                width="1rem"
+                height="1rem"
+                color={ColorPalette["gray-300"]}
+              />
+            </Tooltip>
+          </Box>
+        ) : null}
+        {right ? (
+          <React.Fragment>
+            <Column weight={1} />
+            {right}
+          </React.Fragment>
+        ) : null}
+      </Columns>
+    </Box>
   );
 };
 

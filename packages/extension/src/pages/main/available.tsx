@@ -21,9 +21,8 @@ import { useNavigate } from "react-router";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
 import { Subtitle3 } from "../../components/typography";
-import { XAxis, YAxis } from "../../components/axis";
+import { YAxis } from "../../components/axis";
 import { Checkbox } from "../../components/checkbox";
-import { Column, Columns } from "../../components/column";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 
@@ -178,44 +177,29 @@ export const AvailableTabView: FunctionComponent<{
                   <CollapsibleList
                     key={title}
                     title={
-                      <Box width="100%">
-                        <Columns sum={1} alignY="center">
-                          <TokenTitleView title={title} tooltip={tooltip} />
+                      <TokenTitleView
+                        title={title}
+                        tooltip={tooltip}
+                        right={
+                          <React.Fragment>
+                            <Caption2 color={ColorPalette["gray-300"]}>
+                              Hide Low Balance
+                            </Caption2>
 
-                          <Column weight={1} />
+                            <Gutter size="0.25rem" />
 
-                          <Box
-                            cursor="pointer"
-                            style={{ userSelect: "none" }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-
-                              uiConfigStore.setHideLowBalance(
-                                !uiConfigStore.isHideLowBalance
-                              );
-                            }}
-                          >
-                            <XAxis alignY="center">
-                              <Caption2 color={ColorPalette["gray-300"]}>
-                                Hide Low Balance
-                              </Caption2>
-
-                              <Gutter size="0.25rem" />
-
-                              <Checkbox
-                                size="extra-small"
-                                checked={uiConfigStore.isHideLowBalance}
-                                onChange={() => {
-                                  uiConfigStore.setHideLowBalance(
-                                    !uiConfigStore.isHideLowBalance
-                                  );
-                                }}
-                              />
-                            </XAxis>
-                          </Box>
-                        </Columns>
-                      </Box>
+                            <Checkbox
+                              size="extra-small"
+                              checked={uiConfigStore.isHideLowBalance}
+                              onChange={() => {
+                                uiConfigStore.setHideLowBalance(
+                                  !uiConfigStore.isHideLowBalance
+                                );
+                              }}
+                            />
+                          </React.Fragment>
+                        }
+                      />
                     }
                     lenAlwaysShown={lenAlwaysShown}
                     items={balance.map((viewToken) => (
