@@ -20,6 +20,7 @@ import { MessageRequester } from "@keplr-wallet/router";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
+  hideLowBalance: boolean;
 }
 
 export class UIConfigStore {
@@ -34,6 +35,7 @@ export class UIConfigStore {
   @observable.deep
   protected options: UIConfigOptions = {
     isDeveloperMode: false,
+    hideLowBalance: false,
   };
 
   protected _isBeta: boolean;
@@ -154,6 +156,17 @@ export class UIConfigStore {
     this.options.isDeveloperMode = value;
 
     // No need to await
+    this.save();
+  }
+
+  get isHideLowBalance(): boolean {
+    return this.options.hideLowBalance;
+  }
+
+  @action
+  setHideLowBalance(value: boolean) {
+    this.options.hideLowBalance = value;
+
     this.save();
   }
 

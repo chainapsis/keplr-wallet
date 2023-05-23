@@ -1,6 +1,17 @@
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
-import { CheckBoxProps } from "./types";
+import { CheckBoxProps, CheckBoxSize } from "./types";
+
+const makeCheckBoxSize = (size?: CheckBoxSize) => {
+  switch (size) {
+    case "extra-small":
+      return "0.75rem";
+    case "small":
+      return "1rem";
+    default:
+      return "1.5rem";
+  }
+};
 
 export const Styles = {
   CheckBoxContainer: styled.div<Omit<CheckBoxProps, "onChange">>`
@@ -10,8 +21,8 @@ export const Styles = {
     align-items: center;
     justify-content: center;
 
-    width: ${({ size }) => (size === "small" ? "1rem" : "1.5rem")};
-    height: ${({ size }) => (size === "small" ? "1rem" : "1.5rem")};
+    width: ${({ size }) => makeCheckBoxSize(size)};
+    height: ${({ size }) => makeCheckBoxSize(size)};
 
     color: ${({ disabled }) => {
       if (disabled) {
@@ -26,7 +37,16 @@ export const Styles = {
         : checked
         ? ColorPalette["blue-400"]
         : ColorPalette["gray-400"]};
-    border-radius: ${({ size }) => (size === "small" ? "0.25rem" : "0.4rem")};
+    border-radius: ${({ size }) => {
+      switch (size) {
+        case "extra-small":
+          return "0.2rem";
+        case "small":
+          return "0.25rem";
+        default:
+          return "0.4rem";
+      }
+    }};
 
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   `,

@@ -8,7 +8,16 @@ export const Checkbox: FunctionComponent<CheckBoxProps> = ({
   onChange,
   disabled = false,
 }) => {
-  const iconSize = size === "small" ? "0.625rem" : "1rem";
+  const iconSize = (() => {
+    switch (size) {
+      case "extra-small":
+        return "0.5rem";
+      case "small":
+        return "0.625rem";
+      default:
+        return "1rem";
+    }
+  })();
 
   return (
     <Styles.CheckBoxContainer

@@ -18,10 +18,14 @@ import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useNavigate } from "react-router";
-import { YAxis } from "../../components/axis";
 import { Gutter } from "../../components/gutter";
 import { EmptyView } from "../../components/empty-view";
 import { Subtitle3 } from "../../components/typography";
+import { XAxis, YAxis } from "../../components/axis";
+import { Checkbox } from "../../components/checkbox";
+import { Column, Columns } from "../../components/column";
+import { Caption2 } from "../../components/typography";
+import { ColorPalette } from "../../styles";
 
 const zeroDec = new Dec(0);
 
@@ -33,7 +37,8 @@ export const AvailableTabView: FunctionComponent<{
   // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
   onClickGetStarted: () => void;
 }> = observer(({ search, isNotReady, onClickGetStarted }) => {
-  const { hugeQueriesStore, chainStore } = useStore();
+  const { hugeQueriesStore, chainStore, priceStore, uiConfigStore } =
+    useStore();
   const navigate = useNavigate();
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
@@ -45,7 +50,7 @@ export const AvailableTabView: FunctionComponent<{
 
   const isFirstTime = allBalancesNonZero.length === 0;
   const trimSearch = search.trim();
-  const allBalancesSearchFiltered = useMemo(() => {
+  const _allBalancesSearchFiltered = useMemo(() => {
     return allBalances.filter((token) => {
       return (
         token.chainInfo.chainName
@@ -57,6 +62,24 @@ export const AvailableTabView: FunctionComponent<{
       );
     });
   }, [allBalances, trimSearch]);
+
+  const allBalancesSearchFiltered = _allBalancesSearchFiltered.filter(
+    (viewToken) => {
+      if (!uiConfigStore.isHideLowBalance) {
+        return true;
+      }
+
+      const notSmallPrice =
+        priceStore
+          .calculatePrice(viewToken.token, "usd")
+          ?.toDec()
+          .gte(new Dec("1")) ?? false;
+
+      const notSmallBalance = viewToken.token.toDec().gte(new Dec("0.001"));
+
+      return notSmallPrice || notSmallBalance;
+    }
+  );
 
   const lookingForChains = (() => {
     return chainStore.chainInfos.filter((chainInfo) => {
@@ -154,7 +177,46 @@ export const AvailableTabView: FunctionComponent<{
                 return (
                   <CollapsibleList
                     key={title}
-                    title={<TokenTitleView title={title} tooltip={tooltip} />}
+                    title={
+                      <Box width="100%">
+                        <Columns sum={1} alignY="center">
+                          <TokenTitleView title={title} tooltip={tooltip} />
+
+                          <Column weight={1} />
+
+                          <Box
+                            cursor="pointer"
+                            style={{ userSelect: "none" }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+
+                              uiConfigStore.setHideLowBalance(
+                                !uiConfigStore.isHideLowBalance
+                              );
+                            }}
+                          >
+                            <XAxis alignY="center">
+                              <Caption2 color={ColorPalette["gray-300"]}>
+                                Hide Low Balance
+                              </Caption2>
+
+                              <Gutter size="0.25rem" />
+
+                              <Checkbox
+                                size="extra-small"
+                                checked={uiConfigStore.isHideLowBalance}
+                                onChange={() => {
+                                  uiConfigStore.setHideLowBalance(
+                                    !uiConfigStore.isHideLowBalance
+                                  );
+                                }}
+                              />
+                            </XAxis>
+                          </Box>
+                        </Columns>
+                      </Box>
+                    }
                     lenAlwaysShown={lenAlwaysShown}
                     items={balance.map((viewToken) => (
                       <TokenItem
