@@ -11,10 +11,14 @@ import { Body1, Body3 } from "../../../../components/typography";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Column, Columns } from "../../../../components/column";
 import { ChainImageFallback } from "../../../../components/image";
+import { EmptyView } from "../../../../components/empty-view";
 
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
     const { chainStore } = useStore();
+    const suggestedChains = chainStore.chainInfos.filter(
+      (chainInfo) => !chainInfo.embedded.embedded
+    );
 
     return (
       <HeaderLayout
@@ -30,9 +34,8 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
       >
         <Box paddingX="0.75rem">
           <Stack gutter="0.5rem">
-            {chainStore.chainInfos
-              .filter((chainInfo) => !chainInfo.embedded.embedded)
-              .map((chainInfo) => {
+            {suggestedChains.length ? (
+              suggestedChains.map((chainInfo) => {
                 return (
                   <ChainItem
                     key={chainInfo.chainIdentifier}
@@ -42,7 +45,10 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
                     }}
                   />
                 );
-              })}
+              })
+            ) : (
+              <EmptyView subject="No suggest chains added yet" />
+            )}
           </Stack>
         </Box>
       </HeaderLayout>

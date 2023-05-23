@@ -22,6 +22,8 @@ const Styles = {
     height: 4.5rem;
   `,
   Subject: styled.div`
+    font-size: 0.875rem;
+    font-weight: 500;
     color: ${ColorPalette["gray-400"]};
   `,
 };
