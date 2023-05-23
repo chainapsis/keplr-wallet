@@ -15,7 +15,10 @@ import { useNavigate } from "react-router";
 import { EllipsisIcon } from "../../../components/icon";
 import { Button } from "../../../components/button";
 import styled from "styled-components";
-import { FloatingDropdown } from "../../../components/dropdown";
+import {
+  FloatingDropdown,
+  FloatingDropdownItem,
+} from "../../../components/dropdown";
 
 const Styles = {
   Container: styled(Stack)`
@@ -34,30 +37,49 @@ const Styles = {
 export const WalletSelectPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
+  const [googleKeys, appleKeys, restKeys] = useMemo(() => {
+    const googleKeys = keyRingStore.keyInfos.filter((keyInfo) => {
+      return (keyInfo.insensitive["keyRingMeta"] as PlainObject)?.["google"];
+    });
+
+    const appleKeys = keyRingStore.keyInfos.filter((keyInfo) => {
+      return (keyInfo.insensitive["keyRingMeta"] as PlainObject)?.["apple"];
+    });
+
+    const restKeys = keyRingStore.keyInfos.filter((keyInfo) => {
+      return (
+        !(keyInfo.insensitive["keyRingMeta"] as PlainObject)?.["google"] &&
+        !(keyInfo.insensitive["keyRingMeta"] as PlainObject)?.["apple"]
+      );
+    });
+
+    return [googleKeys, appleKeys, restKeys];
+  }, [keyRingStore.keyInfos]);
+
   const mnemonicKeys = useMemo(() => {
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return restKeys.filter((keyInfo) => {
       return keyInfo.type === "mnemonic";
     });
-  }, [keyRingStore.keyInfos]);
+  }, [restKeys]);
 
   const privateKeyKeys = useMemo(() => {
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return restKeys.filter((keyInfo) => {
       return keyInfo.type === "private-key";
     });
-  }, [keyRingStore.keyInfos]);
+  }, [restKeys]);
 
   const ledgerKeys = useMemo(() => {
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return restKeys.filter((keyInfo) => {
       return keyInfo.type === "ledger";
     });
-  }, [keyRingStore.keyInfos]);
+  }, [restKeys]);
 
   const unknownKeys = useMemo(() => {
     const knownKeys = mnemonicKeys.concat(ledgerKeys).concat(privateKeyKeys);
-    return keyRingStore.keyInfos.filter((keyInfo) => {
+    return restKeys.filter((keyInfo) => {
       return !knownKeys.find((k) => k.id === keyInfo.id);
     });
-  }, [keyRingStore.keyInfos, ledgerKeys, mnemonicKeys, privateKeyKeys]);
+  }, [restKeys, ledgerKeys, mnemonicKeys, privateKeyKeys]);
 
   // TODO: Private key and web3 auth
 
@@ -81,6 +103,18 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
           {mnemonicKeys.length > 0 ? (
             <KeyInfoList title="Recovery Phrase" keyInfos={mnemonicKeys} />
           ) : null}
+          {googleKeys.length > 0 ? (
+            <KeyInfoList
+              title="Connected with Google Account"
+              keyInfos={googleKeys}
+            />
+          ) : null}
+          {appleKeys.length > 0 ? (
+            <KeyInfoList
+              title="Connected with Apple Account"
+              keyInfos={appleKeys}
+            />
+          ) : null}
           {privateKeyKeys.length > 0 ? (
             <KeyInfoList title="Private key" keyInfos={privateKeyKeys} />
           ) : null}
@@ -101,6 +135,8 @@ const KeyInfoList: FunctionComponent<{
   title: string;
   keyInfos: KeyRingV2.KeyInfo[];
 }> = observer(({ title, keyInfos }) => {
+  const navigate = useNavigate();
+
   return (
     <Box>
       <YAxis>
@@ -115,7 +151,51 @@ const KeyInfoList: FunctionComponent<{
         <Gutter size="0.5rem" />
         <Stack gutter="0.5rem">
           {keyInfos.map((keyInfo) => {
-            return <KeyringItem key={keyInfo.id} keyInfo={keyInfo} />;
+            return (
+              <KeyringItem
+                key={keyInfo.id}
+                keyInfo={keyInfo}
+                dropdownItems={(() => {
+                  const defaults = [
+                    {
+                      key: "change-wallet-name",
+                      label: "Change Wallet Name",
+                      onSelect: () =>
+                        navigate(`/wallet/change-name?id=${keyInfo.id}`),
+                    },
+                    {
+                      key: "delete-wallet",
+                      label: "Delete Wallet",
+                      onSelect: () =>
+                        navigate(`/wallet/delete?id=${keyInfo.id}`),
+                    },
+                  ];
+
+                  switch (keyInfo.type) {
+                    case "mnemonic": {
+                      defaults.unshift({
+                        key: "view-recovery-phrase",
+                        label: "View Recovery Phrase",
+                        onSelect: () =>
+                          navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
+                      });
+                      break;
+                    }
+                    case "private-key": {
+                      defaults.unshift({
+                        key: "view-recovery-phrase",
+                        label: "View Private key",
+                        onSelect: () =>
+                          navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
+                      });
+                      break;
+                    }
+                  }
+
+                  return defaults;
+                })()}
+              />
+            );
           })}
         </Stack>
       </YAxis>
@@ -125,7 +205,8 @@ const KeyInfoList: FunctionComponent<{
 
 const KeyringItem: FunctionComponent<{
   keyInfo: KeyRingV2.KeyInfo;
-}> = observer(({ keyInfo }) => {
+  dropdownItems?: FloatingDropdownItem[];
+}> = observer(({ keyInfo, dropdownItems }) => {
   const { chainStore, keyRingStore } = useStore();
   const navigate = useNavigate();
 
@@ -175,42 +256,6 @@ const KeyringItem: FunctionComponent<{
 
       return googleEmail;
     }
-  })();
-
-  const dropdownItems = (() => {
-    const defaults = [
-      {
-        key: "change-wallet-name",
-        label: "Change Wallet Name",
-        onSelect: () => navigate(`/wallet/change-name?id=${keyInfo.id}`),
-      },
-      {
-        key: "delete-wallet",
-        label: "Delete Wallet",
-        onSelect: () => navigate(`/wallet/delete?id=${keyInfo.id}`),
-      },
-    ];
-
-    switch (keyInfo.type) {
-      case "mnemonic": {
-        defaults.unshift({
-          key: "view-recovery-phrase",
-          label: "View Recovery Phrase",
-          onSelect: () => navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
-        });
-        break;
-      }
-      case "private-key": {
-        defaults.unshift({
-          key: "view-recovery-phrase",
-          label: "View Private key",
-          onSelect: () => navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
-        });
-        break;
-      }
-    }
-
-    return defaults;
   })();
 
   return (
@@ -274,18 +319,20 @@ const KeyringItem: FunctionComponent<{
               e.stopPropagation();
             }}
           >
-            <FloatingDropdown
-              isOpen={isMenuOpen}
-              close={() => setIsMenuOpen(false)}
-              items={dropdownItems}
-            >
-              <Box
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                style={{ color: ColorPalette["gray-10"] }}
+            {dropdownItems ? (
+              <FloatingDropdown
+                isOpen={isMenuOpen}
+                close={() => setIsMenuOpen(false)}
+                items={dropdownItems}
               >
-                <EllipsisIcon width="1.5rem" height="1.5rem" />
-              </Box>
-            </FloatingDropdown>
+                <Box
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  style={{ color: ColorPalette["gray-10"] }}
+                >
+                  <EllipsisIcon width="1.5rem" height="1.5rem" />
+                </Box>
+              </FloatingDropdown>
+            ) : null}
           </Box>
         </XAxis>
       </Columns>
