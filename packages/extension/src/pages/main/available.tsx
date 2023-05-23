@@ -24,6 +24,7 @@ import { Column, Columns } from "../../components/column";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { Gutter } from "../../components/gutter";
+import { computed } from "mobx";
 
 const zeroDec = new Dec(0);
 
@@ -61,8 +62,8 @@ export const AvailableTabView: FunctionComponent<{
     });
   }, [allBalances, trimSearch]);
 
-  const allBalancesSearchFiltered = _allBalancesSearchFiltered.filter(
-    (viewToken) => {
+  const allBalancesSearchFiltered = computed(() =>
+    _allBalancesSearchFiltered.filter((viewToken) => {
       if (!uiConfigStore.isHideLowBalance) {
         return true;
       }
@@ -76,8 +77,8 @@ export const AvailableTabView: FunctionComponent<{
       const notSmallBalance = viewToken.token.toDec().gte(new Dec("0.001"));
 
       return notSmallPrice || notSmallBalance;
-    }
-  );
+    })
+  ).get();
 
   const lookingForChains = (() => {
     return chainStore.chainInfos.filter((chainInfo) => {
