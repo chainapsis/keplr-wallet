@@ -124,15 +124,15 @@ export const WelcomePage: FunctionComponent = observer(() => {
                     <Column weight={1}>
                       <LinkItem
                         title="Keplr Dashboard"
-                        paragraph="Stake Your Tokens"
+                        paragraph="Manage Portfolio and Stake Assets"
                         src={require("../../../../public/assets/logo-256.png")}
                         url="https://wallet.keplr.app/"
                       />
                     </Column>
                     <Column weight={1}>
                       <LinkItem
-                        title="Interchain name service"
-                        paragraph="Simplify your crypto addres"
+                        title="Interchain Name Service (ICNS)"
+                        paragraph="Simplify Your Crypto Address"
                         src={require("../../../../public/assets/icns-logo.png")}
                         url="https://icns.xyz/"
                       />
