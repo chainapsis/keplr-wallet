@@ -196,7 +196,13 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 isNotReady={isNotReady}
                 dummyMinWidth="3.25rem"
               >
-                <Subtitle2>{coinDenom}</Subtitle2>
+                <Subtitle2
+                  style={{
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {coinDenom}
+                </Subtitle2>
               </Skeleton>
 
               {tag ? (
