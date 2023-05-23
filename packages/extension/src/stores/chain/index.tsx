@@ -16,6 +16,8 @@ import {
 import { ChainInfo } from "@keplr-wallet/types";
 import {
   ChainInfoWithCoreTypes,
+  ClearAllChainEndpointsMsg,
+  ClearAllSuggestedChainInfosMsg,
   ClearChainEndpointsMsg,
   DisableChainsMsg,
   EnableChainsMsg,
@@ -407,5 +409,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     );
 
     this.setEmbeddedChainInfos(newChainInfos);
+  }
+
+  // I use Async, Await because it doesn't change the state value.
+  async clearClearAllSuggestedChainInfos() {
+    const msg = new ClearAllSuggestedChainInfosMsg();
+    await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  // I use Async, Await because it doesn't change the state value.
+  async clearAllChainEndpoints() {
+    const msg = new ClearAllChainEndpointsMsg();
+    await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

@@ -69,6 +69,7 @@ import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 import { Splash } from "./components/splash";
 import { IBCTransferPage } from "./pages/ibc-transfer";
 import { SignCosmosICNSPage } from "./pages/sign/cosmos/icns";
+import { ErrorBoundary } from "./error-boundary";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -358,7 +359,9 @@ const App: FunctionComponent = () => {
           <NotificationProvider>
             <GlobalStyle />
             <GlobalPopupStyle />
-            <RoutesAfterReady />
+            <ErrorBoundary>
+              <RoutesAfterReady />
+            </ErrorBoundary>
           </NotificationProvider>
         </ConfirmProvider>
       </ModalRootProvider>
