@@ -7,13 +7,7 @@ const Styles = {
     display: flex;
     flex-direction: column;
 
-    position: absolute;
-
     align-items: center;
-
-    left: 0;
-    top: 14.25rem;
-    right: 0;
 
     gap: 0.75rem;
   `,
@@ -26,8 +20,9 @@ const Styles = {
   `,
 };
 
-export const EmptyView: FunctionComponent<{ subject: string }> = ({
+export const EmptyView: FunctionComponent<{ subject?: string }> = ({
   subject,
+  children,
 }) => {
   return (
     <Styles.Container>
@@ -48,7 +43,9 @@ export const EmptyView: FunctionComponent<{ subject: string }> = ({
           />
         </svg>
       </Styles.Icon>
-      <Styles.Subject>{`No ${subject} Yet`}</Styles.Subject>
+      <Styles.Subject>
+        {subject ? `No ${subject} Yet` : children}
+      </Styles.Subject>
     </Styles.Container>
   );
 };

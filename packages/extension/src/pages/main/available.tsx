@@ -19,6 +19,9 @@ import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useNavigate } from "react-router";
 import { YAxis } from "../../components/axis";
+import { Gutter } from "../../components/gutter";
+import { EmptyView } from "../../components/empty-view";
+import { Subtitle3 } from "../../components/typography";
 
 const zeroDec = new Dec(0);
 
@@ -62,6 +65,11 @@ export const AvailableTabView: FunctionComponent<{
       }
 
       const replacedSearchValue = trimSearch.replace(/ /g, "").toLowerCase();
+
+      if (replacedSearchValue.length < 3) {
+        return false;
+      }
+
       const hasChainName =
         chainInfo.chainName.replace(/ /gi, "").toLowerCase() ===
         replacedSearchValue;
@@ -116,12 +124,11 @@ export const AvailableTabView: FunctionComponent<{
 
   const [isFoundTokenModalOpen, setIsFoundTokenModalOpen] = useState(false);
 
+  const isShowNotFound =
+    allBalancesSearchFiltered.length === 0 && trimSearch.length > 0;
+
   return (
     <React.Fragment>
-      {lookingForChains.length > 0 ? (
-        <LookingForChains chainInfos={lookingForChains} />
-      ) : null}
-
       {isNotReady ? (
         <TokenItem
           viewToken={{
@@ -165,7 +172,24 @@ export const AvailableTabView: FunctionComponent<{
               }
             )}
           </Stack>
-          {isFirstTime ? (
+
+          {lookingForChains.length > 0 ? (
+            <React.Fragment>
+              <Gutter size="0.5rem" direction="vertical" />
+              <LookingForChains chainInfos={lookingForChains} />
+            </React.Fragment>
+          ) : null}
+
+          {isShowNotFound ? (
+            <Box marginY="2rem">
+              <EmptyView>
+                <Stack alignX="center" gutter="0.1rem">
+                  <Subtitle3 style={{ fontWeight: 700 }}>Oops!</Subtitle3>
+                  <Subtitle3>No Result Found</Subtitle3>
+                </Stack>
+              </EmptyView>
+            </Box>
+          ) : isFirstTime ? (
             <MainEmptyView
               image={
                 <img

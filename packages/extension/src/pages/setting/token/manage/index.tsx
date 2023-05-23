@@ -19,6 +19,7 @@ import { EmptyView } from "../../../../components/empty-view";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useConfirm } from "../../../../hooks/confirm";
 import { useNotification } from "../../../../hooks/notification";
+import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
   Container: styled(Stack)`
@@ -105,7 +106,10 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
         </Columns>
 
         {tokens.length === 0 ? (
-          <EmptyView subject="token" />
+          <React.Fragment>
+            <Gutter size="7.5rem" direction="vertical" />
+            <EmptyView subject="token" />
+          </React.Fragment>
         ) : (
           tokens.map((token) => {
             return (
