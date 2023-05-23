@@ -2,7 +2,7 @@ import React, {
   Component,
   ErrorInfo,
   FunctionComponent,
-  ReactNode,
+  useState,
 } from "react";
 import { Box } from "./components/box";
 import { H1, Subtitle4 } from "./components/typography";
@@ -13,15 +13,16 @@ import { Button } from "./components/button";
 import { observer } from "mobx-react-lite";
 import { useStore } from "./stores";
 
-interface Prop {
-  children?: ReactNode;
-}
-
 interface State {
   hasError: boolean;
 }
 
-export class ErrorBoundary extends Component<Prop, State> {
+export class ErrorBoundary extends Component<
+  {
+    // noop
+  },
+  State
+> {
   public override state: State = {
     hasError: false,
   };
@@ -47,10 +48,12 @@ export class ErrorBoundary extends Component<Prop, State> {
 const ErrorBoundaryView: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const resetStoreQueries = async () => {
     const storageList = await browser.storage.local.get();
     const storeQueriesKeys = Object.keys(storageList).filter((key) =>
-      key.includes("store_queries/")
+      key.startsWith("store_queries/")
     );
     await browser.storage.local.remove(storeQueriesKeys);
   };
@@ -83,9 +86,19 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
         size="medium"
         style={{ width: "100%" }}
         onClick={async () => {
-          await resetStoreQueries();
+          if (isLoading) {
+            return;
+          }
 
-          window.location.reload();
+          setIsLoading(true);
+
+          try {
+            await resetStoreQueries();
+
+            window.location.reload();
+          } finally {
+            setIsLoading(false);
+          }
         }}
       />
 
@@ -112,14 +125,24 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
         color="danger"
         style={{ width: "100%" }}
         onClick={async () => {
-          await resetStoreQueries();
+          if (isLoading) {
+            return;
+          }
 
-          await Promise.all([
-            chainStore.clearAllChainEndpoints(),
-            chainStore.clearClearAllSuggestedChainInfos(),
-          ]);
+          setIsLoading(true);
 
-          window.location.reload();
+          try {
+            await resetStoreQueries();
+
+            await Promise.all([
+              chainStore.clearAllChainEndpoints(),
+              chainStore.clearClearAllSuggestedChainInfos(),
+            ]);
+
+            window.location.reload();
+          } finally {
+            setIsLoading(false);
+          }
         }}
       />
     </Box>
