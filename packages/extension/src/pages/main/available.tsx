@@ -36,8 +36,7 @@ export const AvailableTabView: FunctionComponent<{
   // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
   onClickGetStarted: () => void;
 }> = observer(({ search, isNotReady, onClickGetStarted }) => {
-  const { hugeQueriesStore, chainStore, priceStore, uiConfigStore } =
-    useStore();
+  const { hugeQueriesStore, chainStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
@@ -62,23 +61,9 @@ export const AvailableTabView: FunctionComponent<{
     });
   }, [allBalances, trimSearch]);
 
-  const allBalancesSearchFiltered = _allBalancesSearchFiltered.filter(
-    (viewToken) => {
-      if (!uiConfigStore.isHideLowBalance) {
-        return true;
-      }
-
-      const notSmallPrice =
-        priceStore
-          .calculatePrice(viewToken.token, "usd")
-          ?.toDec()
-          .gte(new Dec("1")) ?? false;
-
-      const notSmallBalance = viewToken.token.toDec().gte(new Dec("0.001"));
-
-      return notSmallPrice || notSmallBalance;
-    }
-  );
+  const allBalancesSearchFiltered = uiConfigStore.isHideLowBalance
+    ? hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered)
+    : _allBalancesSearchFiltered;
 
   const lookingForChains = (() => {
     return chainStore.chainInfos.filter((chainInfo) => {

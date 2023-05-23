@@ -152,6 +152,24 @@ export class HugeQueriesStore {
     return res.sort(this.sortByPrice);
   });
 
+  filterLowBalanceTokens = computedFn(
+    (viewTokens: ViewToken[]): ViewToken[] => {
+      return viewTokens.filter((viewToken) => {
+        const notSmallPrice =
+          this.priceStore
+            .calculatePrice(viewToken.token, "usd")
+            ?.toDec()
+            .gte(new Dec("1")) ?? false;
+
+        if (notSmallPrice) {
+          return true;
+        }
+
+        return viewToken.token.toDec().gte(new Dec("0.001"));
+      });
+    }
+  );
+
   @computed
   get stakables(): ViewToken[] {
     const res: ViewToken[] = [];
