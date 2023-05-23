@@ -469,7 +469,15 @@ export class ChainsService {
 
   @action
   clearAllSuggestedChainInfos(): void {
+    const prev = this.suggestedChainInfos.slice();
+
     this.suggestedChainInfos = [];
+
+    for (const chainInfo of prev) {
+      for (const handler of this.onChainRemovedHandlers) {
+        handler(chainInfo);
+      }
+    }
   }
 
   @computed({
