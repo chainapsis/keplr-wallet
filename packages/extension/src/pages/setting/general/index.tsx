@@ -44,7 +44,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
 
           <PageButton
             title="Contacts"
-            paragraph="4"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/contacts/list")}
           />
