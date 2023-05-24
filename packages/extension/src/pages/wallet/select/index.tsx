@@ -163,9 +163,11 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
             return (
               <KeyInfoList
                 key={info.type}
-                title={`Connected with ${info.type.replace(/^[a-z]/, (char) =>
-                  char.toUpperCase()
-                )} Account`}
+                title={`Connected with ${
+                  info.type.length > 0
+                    ? info.type[0].toUpperCase() + info.type.slice(1)
+                    : info.type
+                } Account`}
                 keyInfos={info.keyInfos}
               />
             );
