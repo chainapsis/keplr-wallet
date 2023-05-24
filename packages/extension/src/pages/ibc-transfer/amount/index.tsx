@@ -38,11 +38,7 @@ export const IBCTransferAmountView: FunctionComponent<{
         }}
       >
         <Stack gutter="0.75rem">
-          <AmountInput
-            amountConfig={amountConfig}
-            feeConfig={feeConfig}
-            senderConfig={senderConfig}
-          />
+          <AmountInput amountConfig={amountConfig} />
 
           <MemoInput memoConfig={memoConfig} />
 

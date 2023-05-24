@@ -446,11 +446,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             memoConfig={sendConfigs.memoConfig}
           />
 
-          <AmountInput
-            senderConfig={sendConfigs.senderConfig}
-            amountConfig={sendConfigs.amountConfig}
-            feeConfig={sendConfigs.feeConfig}
-          />
+          <AmountInput amountConfig={sendConfigs.amountConfig} />
 
           <MemoInput
             memoConfig={sendConfigs.memoConfig}

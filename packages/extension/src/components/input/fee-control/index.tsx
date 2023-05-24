@@ -196,19 +196,22 @@ export const FeeControl: FunctionComponent<{
 
             <Columns sum={1} gutter="0.25rem" alignY="center">
               <Stack gutter="0.25rem" alignX="right">
-                <Subtitle3>
-                  {feeConfig.fees
-                    .map((fee) => {
-                      return fee
-                        .maxDecimals(6)
-                        .inequalitySymbol(true)
-                        .trim(true)
-                        .shrink(true)
-                        .hideIBCMetadata(true)
-                        .toString();
-                    })
-                    .join(",")}
-                </Subtitle3>
+                <Stack>
+                  {feeConfig.fees.map((fee) => {
+                    return (
+                      <Subtitle3 key={fee.currency.coinMinimalDenom}>
+                        {fee
+                          .maxDecimals(6)
+                          .inequalitySymbol(true)
+                          .trim(true)
+                          .shrink(true)
+                          .hideIBCMetadata(true)
+                          .toString()}
+                      </Subtitle3>
+                    );
+                  })}
+                </Stack>
+
                 <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
                   {(() => {
                     let total: PricePretty | undefined;

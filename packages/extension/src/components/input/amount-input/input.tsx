@@ -3,8 +3,6 @@ import { observer } from "mobx-react-lite";
 import {
   EmptyAmountError,
   IAmountConfig,
-  IFeeConfig,
-  ISenderConfig,
   ZeroAmountError,
 } from "@keplr-wallet/hooks";
 import { TextInput } from "../text-input";
@@ -17,9 +15,7 @@ import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
 import { Columns } from "../../column";
 
 export const AmountInput: FunctionComponent<{
-  senderConfig: ISenderConfig;
   amountConfig: IAmountConfig;
-  feeConfig: IFeeConfig;
 }> = observer(({ amountConfig }) => {
   if (amountConfig.amount.length !== 1) {
     throw new Error(
@@ -29,7 +25,7 @@ export const AmountInput: FunctionComponent<{
     );
   }
 
-  const { priceStore } = useStore();
+  const { chainStore, priceStore } = useStore();
 
   const price = (() => {
     return priceStore.calculatePrice(amountConfig.amount[0]);
@@ -129,7 +125,22 @@ export const AmountInput: FunctionComponent<{
           />
         ) : null
       }
-      right={<MaxButton amountConfig={amountConfig} />}
+      right={(() => {
+        if (
+          // In the case of terra classic, tax is applied in proportion to the amount.
+          // However, in this case, the tax itself changes the fee,
+          // so if you use the max function, it will fall into infinite repetition.
+          // We currently disable if chain is terra classic because we can't handle it properly.
+          chainStore.hasChain(amountConfig.chainId) &&
+          chainStore
+            .getChain(amountConfig.chainId)
+            .hasFeature("terra-classic-fee")
+        ) {
+          return undefined;
+        }
+
+        return <MaxButton amountConfig={amountConfig} />;
+      })()}
       bottom={
         price ? (
           <BottomPriceButton

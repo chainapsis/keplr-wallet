@@ -10,12 +10,13 @@ import {
 import { TxChainSetter } from "./chain";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
-import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { Currency, FeeCurrency, StdFee } from "@keplr-wallet/types";
 import { computedFn } from "mobx-utils";
 import { useState } from "react";
 import { InsufficientFeeError } from "./errors";
 import { QueriesStore } from "./internal";
+import { DenomHelper } from "@keplr-wallet/common";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
@@ -121,13 +122,6 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get selectableFeeCurrencies(): FeeCurrency[] {
-    if (
-      this.computeTerraClassicTax &&
-      this.chainInfo.hasFeature("terra-classic-fee")
-    ) {
-      // TODO: 나중에 하자...
-    }
-
     if (this.canOsmosisTxFeesAndReady()) {
       const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
 
@@ -219,13 +213,16 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     amount: string;
     currency: FeeCurrency;
   }[] {
+    let res: {
+      amount: string;
+      currency: FeeCurrency;
+    }[] = [];
+
     // If there is no fee currency, just return with empty fee amount.
     if (!this._fee) {
-      return [];
-    }
-
-    if ("type" in this._fee) {
-      return [
+      res = [];
+    } else if ("type" in this._fee) {
+      res = [
         {
           amount: this.getFeeTypePrettyForFeeCurrency(
             this._fee.currency,
@@ -234,14 +231,72 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           currency: this._fee.currency,
         },
       ];
+    } else {
+      res = this._fee.map((fee) => {
+        return {
+          amount: fee.toCoin().amount,
+          currency: fee.currency,
+        };
+      });
     }
 
-    return this._fee.map((fee) => {
-      return {
-        amount: fee.toCoin().amount,
-        currency: fee.currency,
-      };
-    });
+    if (
+      res.length > 0 &&
+      this.computeTerraClassicTax &&
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("terra-classic-fee")
+    ) {
+      const etcQueries = this.queriesStore.get(this.chainId).keplrETC;
+      if (
+        etcQueries &&
+        etcQueries.queryTerraClassicTaxRate.response &&
+        etcQueries.queryTerraClassicTaxCaps.response
+      ) {
+        const taxRate = etcQueries.queryTerraClassicTaxRate.taxRate;
+        if (taxRate && taxRate.toDec().gt(new Dec(0))) {
+          const sendAmount = this.amountConfig.amount;
+          for (const sendAmt of sendAmount) {
+            if (
+              new DenomHelper(sendAmt.currency.coinMinimalDenom).type ===
+              "native"
+            ) {
+              let tax = sendAmt
+                .toDec()
+                .mul(DecUtils.getTenExponentN(sendAmt.currency.coinDecimals))
+                .mul(taxRate.toDec());
+              const taxCap = etcQueries.queryTerraClassicTaxCaps.getTaxCaps(
+                sendAmt.currency.coinMinimalDenom
+              );
+              if (taxCap && tax.roundUp().gt(taxCap)) {
+                tax = taxCap.toDec();
+              }
+
+              const taxAmount = tax.roundUp();
+              if (taxAmount.isPositive()) {
+                const i = res.findIndex(
+                  (f) =>
+                    f.currency.coinMinimalDenom ===
+                    sendAmt.currency.coinMinimalDenom
+                );
+                if (i >= 0) {
+                  res[i] = {
+                    amount: new Int(res[i].amount).add(taxAmount).toString(),
+                    currency: res[i].currency,
+                  };
+                } else {
+                  res.push({
+                    amount: taxAmount.toString(),
+                    currency: sendAmt.currency,
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return res;
   }
 
   protected canOsmosisTxFeesAndReady(): boolean {
@@ -356,6 +411,48 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     const fee = this.getFeePrimitive();
     if (!fee) {
       return {};
+    }
+
+    if (
+      fee.length > 0 &&
+      this.computeTerraClassicTax &&
+      this.chainInfo.features &&
+      this.chainInfo.features.includes("terra-classic-fee")
+    ) {
+      const etcQueries = this.queriesStore.get(this.chainId).keplrETC;
+      if (etcQueries) {
+        if (
+          etcQueries.queryTerraClassicTaxRate.error ||
+          etcQueries.queryTerraClassicTaxRate.isFetching
+        ) {
+          return {
+            error: (() => {
+              if (etcQueries.queryTerraClassicTaxRate.error) {
+                return new Error("Failed to fetch tax rate");
+              }
+            })(),
+            loadingState: etcQueries.queryTerraClassicTaxRate.isFetching
+              ? "loading-block"
+              : undefined,
+          };
+        }
+
+        if (
+          etcQueries.queryTerraClassicTaxCaps.error ||
+          etcQueries.queryTerraClassicTaxCaps.isFetching
+        ) {
+          return {
+            error: (() => {
+              if (etcQueries.queryTerraClassicTaxCaps.error) {
+                return new Error("Failed to fetch tax rate");
+              }
+            })(),
+            loadingState: etcQueries.queryTerraClassicTaxCaps.isFetching
+              ? "loading-block"
+              : undefined,
+          };
+        }
+      }
     }
 
     if (this.canOsmosisTxFeesAndReady()) {
