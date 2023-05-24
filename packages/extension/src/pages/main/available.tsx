@@ -193,7 +193,7 @@ export const AvailableTabView: FunctionComponent<{
                                 }}
                               />
                             </React.Fragment>
-                          ) : null
+                          ) : undefined
                         }
                       />
                     }
