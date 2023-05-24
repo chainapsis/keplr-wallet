@@ -61,9 +61,12 @@ export const AvailableTabView: FunctionComponent<{
     });
   }, [allBalances, trimSearch]);
 
+  const lowBalanceFilteredAllBalancesSearchFiltered =
+    hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered);
   const allBalancesSearchFiltered =
-    uiConfigStore.isHideLowBalance && !isFirstTime
-      ? hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered)
+    uiConfigStore.isHideLowBalance &&
+    lowBalanceFilteredAllBalancesSearchFiltered.length > 0
+      ? lowBalanceFilteredAllBalancesSearchFiltered
       : _allBalancesSearchFiltered;
 
   const lookingForChains = (() => {
@@ -167,7 +170,8 @@ export const AvailableTabView: FunctionComponent<{
                         title={title}
                         tooltip={tooltip}
                         right={
-                          !isFirstTime ? (
+                          lowBalanceFilteredAllBalancesSearchFiltered.length >
+                          0 ? (
                             <React.Fragment>
                               <Caption2
                                 style={{ cursor: "pointer" }}
