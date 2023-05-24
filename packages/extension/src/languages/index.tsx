@@ -13,10 +13,24 @@ interface Language {
   language: string;
   languageFullName: string;
   setLanguage: (language: string) => void;
+  automatic: boolean;
+  clearLanguage: () => void;
 }
 
+const defaultLangMap: Record<string, string> = {
+  ko: "ko",
+  en: "en",
+};
+
 const initLanguage = (): string => {
-  return localStorage.getItem("language") || "en";
+  const language =
+    localStorage.getItem("language") || navigator.language.split(/[-_]/)[0];
+
+  if (!defaultLangMap[language]) {
+    return "en";
+  }
+
+  return language;
 };
 
 const LanguageContext = createContext<Language | null>(null);
@@ -31,6 +45,13 @@ export const useLanguage = (): Language => {
 
 export const AppIntlProvider: FunctionComponent = ({ children }) => {
   const [language, _setLanguage] = useState<string>(() => initLanguage());
+  const [automatic, setAutomatic] = useState(!localStorage.getItem("language"));
+
+  const clearLanguage = () => {
+    localStorage.removeItem("language");
+    _setLanguage(initLanguage());
+    setAutomatic(true);
+  };
 
   useEffect(() => {
     document.body.setAttribute("data-lang", language);
@@ -39,6 +60,7 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
   const setLanguage = (language: string) => {
     localStorage.setItem("language", language);
     _setLanguage(language);
+    setAutomatic(false);
   };
 
   const languageFullName = () => {
@@ -65,6 +87,8 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
         language: language,
         languageFullName: languageFullName(),
         setLanguage,
+        automatic,
+        clearLanguage,
       }}
     >
       <IntlProvider locale={language} messages={getMessages()} key={language}>
