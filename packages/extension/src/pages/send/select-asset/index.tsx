@@ -83,8 +83,10 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
 
         <Columns sum={1} gutter="0.25rem">
           <Column weight={1} />
-
-          <Body2 style={{ color: ColorPalette["gray-300"] }}>
+          <Body2
+            onClick={() => setHideIBCToken(!hideIBCToken)}
+            style={{ color: ColorPalette["gray-300"], cursor: "pointer" }}
+          >
             Hide IBC token
           </Body2>
           <Checkbox

@@ -167,7 +167,15 @@ export const AvailableTabView: FunctionComponent<{
                         tooltip={tooltip}
                         right={
                           <React.Fragment>
-                            <Caption2 color={ColorPalette["gray-300"]}>
+                            <Caption2
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                uiConfigStore.setHideLowBalance(
+                                  !uiConfigStore.isHideLowBalance
+                                );
+                              }}
+                              color={ColorPalette["gray-300"]}
+                            >
                               Hide Low Balance
                             </Caption2>
 
