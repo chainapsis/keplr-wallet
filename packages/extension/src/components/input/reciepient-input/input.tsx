@@ -12,6 +12,7 @@ import { Box } from "../../box";
 import { AddressBookModal } from "../../address-book-modal";
 import { IconButton } from "../../icon-button";
 import { ColorPalette } from "../../../styles";
+import { useIntl } from "react-intl";
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
@@ -37,6 +38,7 @@ function numOfCharacter(str: string, c: string): number {
 export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
   (props) => {
     const { recipientConfig, memoConfig } = props;
+    const intl = useIntl();
 
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
       React.useState(false);
@@ -58,7 +60,9 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
     return (
       <Box>
         <TextInput
-          label="Address"
+          label={intl.formatMessage({
+            id: "component.input.recipient.input-text",
+          })}
           value={recipientConfig.value}
           autoComplete="off"
           onChange={(e) => {

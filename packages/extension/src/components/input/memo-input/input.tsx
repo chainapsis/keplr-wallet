@@ -3,6 +3,7 @@ import { TextInput } from "../text-input";
 import { observer } from "mobx-react-lite";
 import { IMemoConfig } from "@keplr-wallet/hooks";
 import { Box } from "../../box";
+import { useIntl } from "react-intl";
 
 export const MemoInput: FunctionComponent<{
   memoConfig: IMemoConfig;
@@ -18,10 +19,14 @@ export const MemoInput: FunctionComponent<{
 
   disabled?: boolean;
 }> = observer(({ memoConfig, ...others }) => {
+  const intl = useIntl();
+
   return (
     <Box>
       <TextInput
-        label="Memo"
+        label={intl.formatMessage({
+          id: "component.input.memo.input-text",
+        })}
         onChange={(e) => {
           e.preventDefault();
           memoConfig.setValue(e.target.value);

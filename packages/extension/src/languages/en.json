@@ -87,5 +87,34 @@
   "pages.setting.general.revoke.bottom-button": "Revoke",
   "pages.setting.general.revoke.grantee-title": "Grantee Address",
   "pages.setting.general.revoke.grantee-expiration-date": "Expiration dates",
-  "pages.setting.general.revoke.grantee-no-expiration": "No expiration"
+  "pages.setting.general.revoke.grantee-no-expiration": "No expiration",
+
+  "pages.setting.contacts.list.header": "General",
+  "pages.setting.contacts.list.new-button": "Add New",
+  "pages.setting.contacts.list.dropdown-change-contact-label": "Change Contact Label",
+  "pages.setting.contacts.list.dropdown-delete-contact-label": "Delete Contact",
+  "pages.setting.contacts.list.dropdown-delete-confirm-title": "Delete Contact",
+  "pages.setting.contacts.list.dropdown-delete-confirm-content": "Are you sure you want to delete this contact?",
+  "pages.setting.contacts.list.not-found": "Contacts",
+
+  "pages.setting.contacts.add.header": "{type} Address",
+  "pages.setting.contacts.add.bottom-button": "Confirm",
+  "pages.setting.contacts.add.name-input-text": "Name",
+
+  "pages.setting.advanced.header": "Advanced",
+  "pages.setting.advanced.developer-mode-button": "Developer Mode",
+  "pages.setting.advanced.developer-mode-paragraph": "Feeling techie today? :)",
+  "pages.setting.advanced.change-endpoint-button": "Change Endpoints",
+
+  "pages.setting.advanced.endpoint.header": "Change Endpoints",
+  "pages.setting.advanced.endpoint.bottom-button": "Confirm",
+  "pages.setting.advanced.endpoint.set-fail-notification": "Failed to set endpoints",
+  "pages.setting.advanced.endpoint.set-confirm-title": "Set endpoints",
+  "pages.setting.advanced.endpoint.set-confirm": "You need to restart Keplr to apply changes",
+  "pages.setting.advanced.endpoint.reset-button": "Reset",
+  "pages.setting.advanced.endpoint.guide-title": "Experimental Feature",
+  "pages.setting.advanced.endpoint.guide-paragraph": "Please get in touch with the endpoint providers to address any issues that may arise from changes to the endpoint(s). {br} {br} Restart Keplr to apply changes.",
+
+  "component.input.recipient.input-text": "Address",
+  "component.input.memo.input-text": "Memo"
 }

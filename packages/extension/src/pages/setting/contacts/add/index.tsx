@@ -14,6 +14,7 @@ import {
 import { useStore } from "../../../../stores";
 import { MemoInput } from "../../../../components/input/memo-input";
 import { useNavigate } from "react-router";
+import { useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -23,6 +24,7 @@ const Styles = {
 
 export const SettingContactsAdd: FunctionComponent = observer(() => {
   const { chainStore, uiConfigStore } = useStore();
+  const intl = useIntl();
   const navigate = useNavigate();
 
   const [chainId, setChainId] = useState(chainStore.chainInfosInUI[0].chainId);
@@ -80,7 +82,17 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={`${editIndex < 0 ? "Add" : "Edit"} Address`}
+      title={
+        editIndex < 0
+          ? intl.formatMessage(
+              { id: "pages.setting.contacts.add.header" },
+              { type: "Add" }
+            )
+          : intl.formatMessage(
+              { id: "pages.setting.contacts.add.header" },
+              { type: "Edit" }
+            )
+      }
       left={<BackButton />}
       onSubmit={(e) => {
         e.preventDefault();
