@@ -29,7 +29,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const paramIsIBCTransfer = searchParams.get("isIBCTransfer");
 
   const [search, setSearch] = useState("");
-  const [hideIBCToken, setHideIBCToken] = useState(true);
+  const [hideIBCToken, setHideIBCToken] = useState(false);
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
 
