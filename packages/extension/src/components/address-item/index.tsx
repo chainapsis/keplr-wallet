@@ -17,10 +17,19 @@ export const AddressItem: FunctionComponent<{
   name?: string;
   address: string;
   memo?: string;
+  isShowMemo?: boolean;
   onClick?: () => void;
 
   dropdownItems?: FloatingDropdownItem[];
-}> = ({ timestamp, name, address, memo, onClick, dropdownItems }) => {
+}> = ({
+  timestamp,
+  name,
+  address,
+  memo,
+  isShowMemo,
+  onClick,
+  dropdownItems,
+}) => {
   const intl = useIntl();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
@@ -90,31 +99,33 @@ export const AddressItem: FunctionComponent<{
             </XAxis>
 
             <Gutter size="0.25rem" />
-            <XAxis alignY="center">
-              <DocumentTextIcon width="0.75rem" height="0.75rem" />
-              <Gutter size="0.25rem" />
-              {memo ? (
-                <Body2
-                  style={{
-                    color: ColorPalette["gray-200"],
-                    width: "15rem",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {memo}
-                </Body2>
-              ) : (
-                <Body2
-                  style={{
-                    color: ColorPalette["gray-300"],
-                  }}
-                >
-                  (Empty Memo)
-                </Body2>
-              )}
-            </XAxis>
+            {isShowMemo ? (
+              <XAxis alignY="center">
+                <DocumentTextIcon width="0.75rem" height="0.75rem" />
+                <Gutter size="0.25rem" />
+                {memo ? (
+                  <Body2
+                    style={{
+                      color: ColorPalette["gray-200"],
+                      width: "15rem",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {memo}
+                  </Body2>
+                ) : (
+                  <Body2
+                    style={{
+                      color: ColorPalette["gray-300"],
+                    }}
+                  >
+                    (Empty Memo)
+                  </Body2>
+                )}
+              </XAxis>
+            ) : null}
           </YAxis>
         </Column>
 

@@ -61,9 +61,10 @@ export const AvailableTabView: FunctionComponent<{
     });
   }, [allBalances, trimSearch]);
 
-  const allBalancesSearchFiltered = uiConfigStore.isHideLowBalance
-    ? hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered)
-    : _allBalancesSearchFiltered;
+  const allBalancesSearchFiltered =
+    uiConfigStore.isHideLowBalance && !isFirstTime
+      ? hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered)
+      : _allBalancesSearchFiltered;
 
   const lookingForChains = (() => {
     return chainStore.chainInfos.filter((chainInfo) => {

@@ -185,6 +185,7 @@ export const AddressBookModal: FunctionComponent<{
                     name={data.name}
                     address={data.address}
                     memo={data.memo}
+                    isShowMemo={type !== "accounts"}
                     onClick={() => {
                       recipientConfig.setValue(data.address);
                       memoConfig.setValue(data.memo ?? "");
