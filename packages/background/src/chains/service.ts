@@ -13,10 +13,7 @@ import {
   runInAction,
 } from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import {
-  ChainInfoWithCoreTypes,
-  ChainInfoWithRepoUpdateOptions,
-} from "./types";
+import { ChainInfoWithCoreTypes, ChainInfoWithSuggestedOptions } from "./types";
 import { computedFn } from "mobx-utils";
 import {
   checkChainFeatures,
@@ -37,7 +34,7 @@ export class ChainsService {
   protected updatedChainInfoKVStore: KVStore;
 
   @observable.ref
-  protected suggestedChainInfos: ChainInfo[] = [];
+  protected suggestedChainInfos: ChainInfoWithSuggestedOptions[] = [];
   protected suggestedChainInfoKVStore: KVStore;
 
   @observable.ref
@@ -62,7 +59,7 @@ export class ChainsService {
       updaterKVStore: KVStore;
     },
     // embedChainInfos는 실행 이후에 변경되어서는 안된다.
-    protected readonly embedChainInfos: ReadonlyArray<ChainInfo>,
+    protected readonly embedChainInfos: ReadonlyArray<ChainInfoWithCoreTypes>,
     protected readonly communityChainInfoRepo: {
       readonly organizationName: string;
       readonly repoName: string;
@@ -88,7 +85,7 @@ export class ChainsService {
     const migrated = await this.kvStore.get<boolean>("migration/v1");
     if (!migrated) {
       const legacySuggestedChainInfos = await this.migrationKVStore.kvStore.get<
-        ChainInfoWithRepoUpdateOptions[]
+        ChainInfoWithSuggestedOptions[]
       >("chain-infos");
 
       if (legacySuggestedChainInfos) {
@@ -252,6 +249,8 @@ export class ChainsService {
           rpc: undefined,
           rest: undefined,
           nodeProvider: undefined,
+          updateFromRepoDisabled: undefined,
+          embedded: undefined,
         };
       });
     },
@@ -321,6 +320,13 @@ export class ChainsService {
   async tryUpdateChainInfoFromRepo(chainId: string): Promise<boolean> {
     if (!this.hasChainInfo(chainId)) {
       throw new Error(`${chainId} is not registered`);
+    }
+
+    if (
+      (this.getChainInfoOrThrow(chainId) as ChainInfoWithCoreTypes)
+        .updateFromRepoDisabled
+    ) {
+      return false;
     }
 
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
@@ -478,7 +484,7 @@ export class ChainsService {
         chainInfo,
         origin,
       },
-      async (receivedChainInfo: ChainInfoWithRepoUpdateOptions) => {
+      async (receivedChainInfo: ChainInfoWithSuggestedOptions) => {
         const validChainInfo = {
           ...(await validateBasicChainInfoType(receivedChainInfo)),
           beta: chainInfo.beta,
@@ -502,7 +508,7 @@ export class ChainsService {
 
   @action
   addSuggestedChainInfo(
-    chainInfo: ChainInfoWithRepoUpdateOptions,
+    chainInfo: ChainInfoWithSuggestedOptions,
     // Used for migration
     notInvokeHandlers?: boolean
   ): void {
@@ -748,22 +754,24 @@ export class ChainsService {
         ...chainInfo,
       };
 
-      const repoChainInfo = this.getRepoChainInfo(chainInfo.chainId);
-      if (repoChainInfo) {
-        newChainInfo = {
-          ...newChainInfo,
-          ...repoChainInfo,
-          walletUrlForStaking:
-            repoChainInfo.walletUrlForStaking ||
-            newChainInfo.walletUrlForStaking,
-          features: [
-            ...new Set([
-              ...(repoChainInfo.features ?? []),
-              ...(newChainInfo.features ?? []),
-            ]),
-          ],
-          beta: newChainInfo.beta,
-        };
+      if (!(chainInfo as ChainInfoWithCoreTypes).updateFromRepoDisabled) {
+        const repoChainInfo = this.getRepoChainInfo(chainInfo.chainId);
+        if (repoChainInfo) {
+          newChainInfo = {
+            ...newChainInfo,
+            ...repoChainInfo,
+            walletUrlForStaking:
+              repoChainInfo.walletUrlForStaking ||
+              newChainInfo.walletUrlForStaking,
+            features: [
+              ...new Set([
+                ...(repoChainInfo.features ?? []),
+                ...(newChainInfo.features ?? []),
+              ]),
+            ],
+            beta: newChainInfo.beta,
+          };
+        }
       }
 
       const updatedChainInfo = this.getUpdatedChainInfo(chainInfo.chainId);

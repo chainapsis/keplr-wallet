@@ -1,7 +1,7 @@
 import { InteractionStore } from "./interaction";
 import { ChainInfo } from "@keplr-wallet/types";
 import {
-  ChainInfoWithRepoUpdateOptions,
+  ChainInfoWithSuggestedOptions,
   SuggestChainInfoMsg,
 } from "@keplr-wallet/background";
 import { flow, makeObservable, observable } from "mobx";
@@ -109,7 +109,7 @@ export class ChainSuggestStore {
 
   async approveWithProceedNext(
     id: string,
-    chainInfo: ChainInfoWithRepoUpdateOptions,
+    chainInfo: ChainInfoWithSuggestedOptions,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
     await this.interactionStore.approveWithProceedNext(id, chainInfo, afterFn);

@@ -1,9 +1,9 @@
 import { ChainInfo } from "@keplr-wallet/types";
 
-export type ChainInfoWithRepoUpdateOptions = ChainInfo & {
-  updateFromRepoDisabled?: boolean;
+export type ChainInfoWithSuggestedOptions = ChainInfo & {
+  readonly updateFromRepoDisabled?: boolean;
 };
 
 export type ChainInfoWithCoreTypes = ChainInfo & {
-  embedded: boolean;
-} & ChainInfoWithRepoUpdateOptions;
+  readonly embedded?: boolean;
+} & ChainInfoWithSuggestedOptions;
