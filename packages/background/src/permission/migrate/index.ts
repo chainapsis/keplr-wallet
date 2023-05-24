@@ -41,7 +41,7 @@ export async function migrate(
             const originMap = typeMap[type];
             if (originMap) {
               for (const origin of Object.keys(originMap)) {
-                const granted = typeMap[origin];
+                const granted = originMap[origin];
                 if (granted) {
                   res[
                     PermissionKeyHelper.getPermissionKey(
@@ -62,7 +62,7 @@ export async function migrate(
         const originMap = globalMap[type];
         if (originMap) {
           for (const origin of Object.keys(originMap)) {
-            const granted = globalMap[origin];
+            const granted = originMap[origin];
             if (granted) {
               res[PermissionKeyHelper.getGlobalPermissionKey(type, origin)] =
                 true;
