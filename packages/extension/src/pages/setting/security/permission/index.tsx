@@ -18,6 +18,7 @@ import {
 import { Column, Columns } from "../../../../components/column";
 import { Body1, Body2, Button2 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -34,18 +35,27 @@ const Styles = {
 
 export const SettingSecurityPermissionPage: FunctionComponent = observer(() => {
   const { permissionManagerStore } = useStore();
-
+  const intl = useIntl();
   // TODO: Handle global permission
   return (
-    <HeaderLayout title="Connected Websites" left={<BackButton />}>
+    <HeaderLayout
+      title={intl.formatMessage({
+        id: "pages.setting.security.permission.header",
+      })}
+      left={<BackButton />}
+    >
       <Styles.Container gutter="0.5rem">
         <TextInput
-          placeholder="Search"
+          placeholder={intl.formatMessage({
+            id: "pages.setting.security.permission.search-input-text",
+          })}
           left={<SearchIcon width="1.25rem" height="1.25rem" />}
         />
         <Styles.Disconnect>
           <Button
-            text="Disconnect All"
+            text={intl.formatMessage({
+              id: "pages.setting.security.permission.disconnect-all-button",
+            })}
             color="secondary"
             size="extraSmall"
             onClick={async () => {
@@ -118,7 +128,9 @@ const OriginView: FunctionComponent<{
             >
               <OriginStyle.All>
                 <Columns sum={1} gutter="0.125rem">
-                  <Button2>All</Button2>
+                  <Button2>
+                    <FormattedMessage id="pages.setting.security.permission.origin-all-button" />
+                  </Button2>
                   <CloseIcon width="1rem" height="1rem" />
                 </Columns>
               </OriginStyle.All>

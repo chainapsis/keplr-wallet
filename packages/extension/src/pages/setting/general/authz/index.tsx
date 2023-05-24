@@ -12,7 +12,7 @@ import { Stack } from "../../../../components/stack";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { FormattedDate } from "react-intl";
+import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import { Columns } from "../../../../components/column";
 import { useNavigate } from "react-router";
 import { EmptyView } from "../../../../components/empty-view";
@@ -23,6 +23,7 @@ type grantListType = Record<string, AuthZ.Grant[]>;
 export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const [chainId, setChainId] = useState<string>(
     chainStore.chainInfos[0].chainId
@@ -161,7 +162,12 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
   }, [chainId, grants]);
 
   return (
-    <HeaderLayout title="AuthZ List" left={<BackButton />}>
+    <HeaderLayout
+      title={intl.formatMessage({
+        id: "pages.setting.general.authz.header",
+      })}
+      left={<BackButton />}
+    >
       <Box paddingX="0.75rem">
         <Box width="13rem" marginBottom="0.5rem">
           <Dropdown
@@ -203,7 +209,11 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
       ) && (
         <React.Fragment>
           <Gutter direction="vertical" size="7.5rem" />
-          <EmptyView subject="Authz" />
+          <EmptyView
+            subject={intl.formatMessage({
+              id: "pages.setting.general.authz.not-found",
+            })}
+          />
         </React.Fragment>
       )}
     </HeaderLayout>
@@ -238,7 +248,10 @@ const GrantView: FunctionComponent<{
           {grant.expiration ? (
             new Date() < new Date(grant.expiration) ? (
               <Columns sum={1}>
-                <Box>Expiration Date:&nbsp;</Box>
+                <Box>
+                  <FormattedMessage id="pages.setting.general.grant-expiration-date" />
+                  &nbsp;
+                </Box>
 
                 <FormattedDate
                   value={grant.expiration}
@@ -251,10 +264,10 @@ const GrantView: FunctionComponent<{
                 />
               </Columns>
             ) : (
-              "Expired"
+              <FormattedMessage id="pages.setting.general.grant-expired" />
             )
           ) : (
-            "No expiration"
+            <FormattedMessage id="pages.setting.general.grant-no-expiration" />
           )}
         </Styles.Paragraph>
       </Styles.Container>

@@ -27,6 +27,7 @@ import { Body3, Subtitle2 } from "../../../../components/typography";
 import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
 import { useNotification } from "../../../../hooks/notification";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -42,6 +43,7 @@ interface FormData {
 
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
+  const intl = useIntl();
 
   const navigate = useNavigate();
   const notification = useNotification();
@@ -166,7 +168,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Add Token Manually"
+      title={intl.formatMessage({ id: "pages.setting.token.add.header" })}
       left={
         <BackButton
           hidden={
@@ -175,7 +177,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         />
       }
       bottomButton={{
-        text: "Confirm",
+        text: intl.formatMessage({
+          id: "pages.setting.token.add.confirm-button",
+        }),
         color: "secondary",
         size: "large",
         disabled:
@@ -197,7 +201,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               } catch (e) {
                 notification.show(
                   "failed",
-                  "Failed to create the viewing key",
+                  intl.formatMessage({
+                    id: "pages.setting.token.add.submit-fail-notification",
+                  }),
                   e.message || e.toString()
                 );
 
@@ -274,7 +280,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         ) : null}
 
         <TextInput
-          label="Contract Address"
+          label={intl.formatMessage({
+            id: "pages.setting.token.add.contract-address-input-text",
+          })}
           isLoading={queryContract.isFetching}
           readOnly={interactionInfo.interaction}
           error={
@@ -297,17 +305,23 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           })}
         />
         <TextInput
-          label="Name"
+          label={intl.formatMessage({
+            id: "pages.setting.token.add.name-input-text",
+          })}
           value={queryContract.tokenInfo?.name || "-"}
           disabled
         />
         <TextInput
-          label="Symbol"
+          label={intl.formatMessage({
+            id: "pages.setting.token.add.symbol-input-text",
+          })}
           value={queryContract.tokenInfo?.symbol || "-"}
           disabled
         />
         <TextInput
-          label="Decimals"
+          label={intl.formatMessage({
+            id: "pages.setting.token.add.decimals-input-text",
+          })}
           value={queryContract.tokenInfo?.decimals || "-"}
           disabled
         />
@@ -323,11 +337,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                 <Column weight={1}>
                   <Stack>
                     <Subtitle2 color={ColorPalette["gray-50"]}>
-                      I have my own viewing key
+                      <FormattedMessage id="pages.setting.token.add.secret.sub-title" />
                     </Subtitle2>
                     <Body3 color={ColorPalette["gray-200"]}>
-                      By enabling this toggle, you confirm that you have your
-                      viewing key and use it for adding this token.
+                      <FormattedMessage id="pages.setting.token.add.secret.text" />
                     </Body3>
                   </Stack>
                 </Column>
@@ -341,7 +354,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
             {isOpenSecret20ViewingKey ? (
               <TextInput
-                label="Viewing Key"
+                label={intl.formatMessage({
+                  id: "pages.setting.token.add.viewing-key-input-text",
+                })}
                 error={
                   formState.errors.viewingKey
                     ? formState.errors.viewingKey.message

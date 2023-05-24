@@ -20,6 +20,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useConfirm } from "../../../../hooks/confirm";
 import { useNotification } from "../../../../hooks/notification";
 import { Gutter } from "../../../../components/gutter";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -36,6 +37,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, tokensStore } = useStore();
 
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const supportedChainInfos = useMemo(() => {
     return chainStore.chainInfos.filter((chainInfo) => {
@@ -83,7 +85,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
     <HeaderLayout title="Manage Token List" left={<BackButton />}>
       <Styles.Container gutter="0.5rem">
         <Styles.Paragraph>
-          Only for the tokens that are added manually via contract addresses
+          <FormattedMessage id="pages.setting.token.manage.paragraph" />
         </Styles.Paragraph>
 
         <Columns sum={1} alignY="bottom">
@@ -100,7 +102,9 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
           <Button
             color="secondary"
             size="extraSmall"
-            text="Add Token"
+            text={intl.formatMessage({
+              id: "pages.setting.token.manage.add-token-button",
+            })}
             onClick={() => navigate(`/setting/token/add?chainId=${chainId}`)}
           />
         </Columns>
@@ -150,6 +154,7 @@ const TokenItem: FunctionComponent<{
 }> = observer(({ chainId, tokenInfo }) => {
   const { tokensStore } = useStore();
   const notification = useNotification();
+  const intl = useIntl();
 
   const isSecret20 = (() => {
     if ("type" in tokenInfo.currency) {
@@ -194,7 +199,13 @@ const TokenItem: FunctionComponent<{
                     tokenInfo.currency.viewingKey
                   );
 
-                  notification.show("success", "Viewing key copied", "");
+                  notification.show(
+                    "success",
+                    intl.formatMessage({
+                      id: "pages.setting.token.manage.token-item.notification.key-copy-text",
+                    }),
+                    ""
+                  );
                 }
               }}
             >
@@ -211,7 +222,13 @@ const TokenItem: FunctionComponent<{
                   tokenInfo.currency.contractAddress
                 );
 
-                notification.show("success", "Contract address copied", "");
+                notification.show(
+                  "success",
+                  intl.formatMessage({
+                    id: "pages.setting.token.manage.token-item.notification.address-copy-text",
+                  }),
+                  ""
+                );
               }
             }}
           >
@@ -225,7 +242,9 @@ const TokenItem: FunctionComponent<{
               if (
                 await confirm.confirm(
                   "",
-                  "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again."
+                  intl.formatMessage({
+                    id: "pages.setting.token.manage.token-item.confirm.remove-text",
+                  })
                 )
               ) {
                 await tokensStore.removeToken(chainId, tokenInfo);

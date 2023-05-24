@@ -11,6 +11,7 @@ import { TextInput } from "../../../../components/input";
 import lottie from "lottie-web";
 import AnimScan from "../../../../public/assets/lottie/wallet/scan.json";
 import { YAxis } from "../../../../components/axis";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -42,6 +43,7 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
 const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
   ({ onClick }) => {
     const animDivRef = useRef<HTMLDivElement | null>(null);
+    const intl = useIntl();
 
     useEffect(() => {
       if (animDivRef.current) {
@@ -61,23 +63,26 @@ const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
 
     return (
       <HeaderLayout
-        title="Link Keplr Mobile"
+        title={intl.formatMessage({
+          id: "pages.setting.general.link-keplr-mobile.header",
+        })}
         left={<BackButton />}
         bottomButton={{
           color: "secondary",
-          text: "Confirm",
+          text: intl.formatMessage({
+            id: "pages.setting.general.link-keplr-mobile.bottom-button",
+          }),
           size: "large",
           onClick,
         }}
       >
         <Styles.Container gutter="0.75rem">
           <GuideBox
-            title="Only scan on Keplr Mobile"
+            title={intl.formatMessage({
+              id: "pages.setting.general.link-keplr-mobile.guide-title",
+            })}
             paragraph={
-              <div>
-                Scanning the QR code outside of Keplr Mobile can lead to loss of
-                funds
-              </div>
+              <FormattedMessage id="pages.setting.general.link-keplr-mobile.guide-paragraph" />
             }
           />
 
@@ -94,11 +99,15 @@ const EnterPasswordView: FunctionComponent<{ onClick: () => void }> = observer(
           </YAxis>
 
           <Styles.Paragraph>
-            Scan QR code to export accounts to Keplr Mobile. The process may
-            take several minutes.
+            <FormattedMessage id="pages.setting.general.link-keplr-mobile.paragraph" />
           </Styles.Paragraph>
 
-          <TextInput label="Password" type="password" />
+          <TextInput
+            label={intl.formatMessage({
+              id: "pages.setting.general.link-keplr-mobile.password-input-text",
+            })}
+            type="password"
+          />
         </Styles.Container>
       </HeaderLayout>
     );

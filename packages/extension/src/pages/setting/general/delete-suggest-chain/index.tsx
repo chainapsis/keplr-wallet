@@ -13,17 +13,22 @@ import { Column, Columns } from "../../../../components/column";
 import { ChainImageFallback } from "../../../../components/image";
 import { EmptyView } from "../../../../components/empty-view";
 import { Gutter } from "../../../../components/gutter";
+import { useIntl } from "react-intl";
 
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
     const { chainStore } = useStore();
+    const intl = useIntl();
+
     const suggestedChains = chainStore.chainInfos.filter(
       (chainInfo) => !chainInfo.embedded.embedded
     );
 
     return (
       <HeaderLayout
-        title="Manage Suggest Chains"
+        title={intl.formatMessage({
+          id: "pages.setting.general.manage-suggest-chain.header",
+        })}
         left={<BackButton />}
         right={
           <a href="https://chains.keplr.app/" target="_blank" rel="noreferrer">
@@ -50,7 +55,11 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
             ) : (
               <React.Fragment>
                 <Gutter size="9.25rem" direction="vertical" />
-                <EmptyView subject="No suggest chains added yet" />
+                <EmptyView
+                  subject={intl.formatMessage({
+                    id: "pages.setting.general.manage-suggest-chain.not-found",
+                  })}
+                />
               </React.Fragment>
             )}
           </Stack>

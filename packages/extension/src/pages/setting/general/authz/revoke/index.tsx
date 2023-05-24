@@ -12,7 +12,7 @@ import { ColorPalette } from "../../../../../styles";
 import { Body3, H4, Subtitle3 } from "../../../../../components/typography";
 import { CopyOutlineIcon } from "../../../../../components/icon";
 import { Columns } from "../../../../../components/column";
-import { FormattedDate } from "react-intl";
+import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
 
 const Styles = {
@@ -36,6 +36,7 @@ const Styles = {
 
 export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
   const { accountStore } = useStore();
+  const intl = useIntl();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -128,7 +129,7 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Authz Details"
+      title={intl.formatMessage({ id: "pages.setting.general.revoke.header" })}
       left={<BackButton />}
       bottomButton={{
         text: "Revoke",
@@ -141,7 +142,9 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
         <Stack gutter="0.5rem">
           <H4 style={{ color: ColorPalette["gray-50"] }}>{state.title}</H4>
           <Styles.Card gutter="0.5rem">
-            <Styles.Title>Grantee Address</Styles.Title>
+            <Styles.Title>
+              <FormattedMessage id="pages.setting.general.revoke.grantee-title" />
+            </Styles.Title>
             <Styles.Paragraph>
               {state.grant.grantee}
               <CopyOutlineIcon width="0.875rem" height="0.875rem" />
@@ -149,7 +152,9 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
           </Styles.Card>
 
           <Styles.Card gutter="0.5rem">
-            <Styles.Title>Expiration dates</Styles.Title>
+            <Styles.Title>
+              <FormattedMessage id="pages.setting.general.revoke.grantee-expiration-date" />
+            </Styles.Title>
             <Styles.Paragraph>
               {state.grant.expiration ? (
                 new Date() < new Date(state.grant.expiration) ? (
@@ -166,11 +171,10 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
                   </Columns>
                 ) : null
               ) : (
-                "No expiration"
+                <FormattedMessage id="pages.setting.general.revoke.grantee-no-expiration" />
               )}
             </Styles.Paragraph>
           </Styles.Card>
-
           <Styles.Card gutter="0.5rem">
             <Styles.Paragraph>
               <Styles.JSON>

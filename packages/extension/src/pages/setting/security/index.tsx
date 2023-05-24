@@ -6,29 +6,40 @@ import { PageButton } from "../components";
 import { RightArrowIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
 import { Box } from "../../../components/box";
+import { useIntl } from "react-intl";
 
 export const SettingSecurityPage: FunctionComponent = () => {
   const navigate = useNavigate();
+  const intl = useIntl();
 
   return (
-    <HeaderLayout title="Security&Privacy" left={<BackButton />}>
+    <HeaderLayout
+      title={intl.formatMessage({ id: "pages.setting.security.header" })}
+      left={<BackButton />}
+    >
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="1rem">
           <PageButton
-            title="Connected Websites"
+            title={intl.formatMessage({
+              id: "pages.setting.security.connect-website-button",
+            })}
             paragraph="Websites that can view your address and make requests for signing"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/permission")}
           />
 
           <PageButton
-            title="Auto-Lock"
+            title={intl.formatMessage({
+              id: "pages.setting.security.lock-button",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/auto-lock")}
           />
 
           <PageButton
-            title="Change Password"
+            title={intl.formatMessage({
+              id: "pages.setting.security.change-password-button",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/change-password")}
           />

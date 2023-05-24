@@ -9,31 +9,47 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { Box } from "../../../components/box";
 import { useLanguage } from "../../../languages";
+import { useIntl } from "react-intl";
 
 export const SettingGeneralPage: FunctionComponent = observer(() => {
   const { keyRingStore, uiConfigStore } = useStore();
+  const intl = useIntl();
 
   const language = useLanguage();
 
   const navigate = useNavigate();
 
   return (
-    <HeaderLayout title="General" left={<BackButton />}>
+    <HeaderLayout
+      title={intl.formatMessage({
+        id: "pages.setting.general.header",
+      })}
+      left={<BackButton />}
+    >
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
-            title="Language"
+            title={intl.formatMessage({
+              id: "pages.setting.general.language-button",
+            })}
             paragraph={language.languageFullName}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/language")}
           />
 
           <PageButton
-            title="Currency"
+            title={intl.formatMessage({
+              id: "pages.setting.general.currency-button",
+            })}
             paragraph={(() => {
               const fiatCurrency = uiConfigStore.fiatCurrency;
               if (fiatCurrency.isAutomatic) {
-                return `Automatic (${fiatCurrency.currency.toUpperCase()})`;
+                return intl.formatMessage(
+                  {
+                    id: "pages.setting.general.currency-automatic-paragraph",
+                  },
+                  { currency: fiatCurrency.currency.toUpperCase() }
+                );
               }
 
               return uiConfigStore.fiatCurrency.currency.toUpperCase();
@@ -43,34 +59,48 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Contacts"
+            title={intl.formatMessage({
+              id: "pages.setting.general.contacts-button",
+            })}
             paragraph="4"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/contacts/list")}
           />
 
           <PageButton
-            title="Manage AuthZ"
+            title={intl.formatMessage({
+              id: "pages.setting.general.manage-authz-button",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/authz")}
           />
 
           <PageButton
-            title="Link Keplr Mobile"
+            title={intl.formatMessage({
+              id: "pages.setting.general.link-mobile-button",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/link-keplr-mobile")}
           />
 
           <PageButton
-            title="Manage Suggest Chains"
-            paragraph="Add or remove chains that are suggested and managed by our community repo"
+            title={intl.formatMessage({
+              id: "pages.setting.general.manage-suggest-chain-button",
+            })}
+            paragraph={intl.formatMessage({
+              id: "pages.setting.general.manage-suggest-chain-paragraph",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/delete-suggest-chain")}
           />
 
           <PageButton
-            title="Manage Chain List"
-            paragraph="Add or remove chains that are natively integrated with Keplr"
+            title={intl.formatMessage({
+              id: "pages.setting.general.manage-chain-button",
+            })}
+            paragraph={intl.formatMessage({
+              id: "pages.setting.general.manage-chain-paragraph",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => {
               if (keyRingStore.selectedKeyInfo) {

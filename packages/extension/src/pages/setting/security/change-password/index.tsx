@@ -11,6 +11,7 @@ import { Gutter } from "../../../../components/gutter";
 import { useForm } from "react-hook-form";
 import { useStore } from "../../../../stores";
 import { useNavigate } from "react-router";
+import { FormattedMessage, useIntl } from "react-intl";
 
 interface FormData {
   password: string;
@@ -21,6 +22,7 @@ interface FormData {
 export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
   () => {
     const { keyRingStore } = useStore();
+    const intl = useIntl();
 
     const form = useForm<FormData>({
       defaultValues: {
@@ -36,10 +38,14 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
 
     return (
       <HeaderLayout
-        title="Change Password"
+        title={intl.formatMessage({
+          id: "pages.setting.security.change-password.header",
+        })}
         left={<BackButton />}
         bottomButton={{
-          text: "Next",
+          text: intl.formatMessage({
+            id: "pages.setting.security.change-password.bottom-button",
+          }),
           color: "secondary",
           size: "large",
           isLoading,
@@ -78,15 +84,18 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
               paddingRight: "0.5rem",
             }}
           >
-            The password is for Keplr extension itself, not for each account.
-            Therefore, you will need to type in the same password for unlocking
-            the extension for different accounts.
+            <FormattedMessage id="pages.setting.security.change-password.content" />
+            {intl.formatMessage({
+              id: "pages.setting.security.change-password.header",
+            })}
           </Body2>
           <Gutter size="1.75rem" />
 
           <Stack gutter="1rem">
             <TextInput
-              label="Password"
+              label={intl.formatMessage({
+                id: "pages.setting.security.change-password.password-input-text",
+              })}
               type="password"
               {...form.register("password", {
                 required: true,
@@ -95,7 +104,9 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
             />
 
             <TextInput
-              label="New Keplr Password"
+              label={intl.formatMessage({
+                id: "pages.setting.security.change-password.new-password-input-text",
+              })}
               type="password"
               {...form.register("newPassword", {
                 required: true,
@@ -109,7 +120,9 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
             />
 
             <TextInput
-              label="Confirm New Keplr Password"
+              label={intl.formatMessage({
+                id: "pages.setting.security.change-password.confirm-new-password-input-text",
+              })}
               type="password"
               {...form.register("confirmNewPassword", {
                 required: true,

@@ -13,41 +13,59 @@ import {
 import { useNavigate } from "react-router";
 import { XAxis } from "../../components/axis";
 import { Box } from "../../components/box";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
+  const intl = useIntl();
 
   return (
     <HeaderLayout title="Setting" left={<BackButton />}>
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
-            title={<XAxis alignY="center">General</XAxis>}
-            paragraph="Language, Currency, Contacts..."
+            title={
+              <XAxis alignY="center">
+                <FormattedMessage id="pages.setting.general-button" />
+              </XAxis>
+            }
+            paragraph={intl.formatMessage({
+              id: "pages.setting.general-paragraph",
+            })}
             startIcon={<SettingIcon width="1rem" height="1rem" />}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general")}
           />
 
           <PageButton
-            title="Advanced"
-            paragraph="Developer Mode, Change Endpoints..."
+            title={intl.formatMessage({ id: "pages.setting.advanced-button" })}
+            paragraph={intl.formatMessage({
+              id: "pages.setting.advanced-paragraph",
+            })}
             startIcon={<RocketLaunchIcon width="1rem" height="1rem" />}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/advanced")}
           />
 
           <PageButton
-            title="Security & Privacy"
-            paragraph="Connected Websites, Auto-Lock"
+            title={intl.formatMessage({
+              id: "pages.setting.security-button",
+            })}
+            paragraph={intl.formatMessage({
+              id: "pages.setting.security-paragraph",
+            })}
             startIcon={<KeyIcon width="1rem" height="1rem" />}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security")}
           />
 
           <PageButton
-            title="Manage Token List"
-            paragraph="Only for the tokens that can be added manually via contract addresses"
+            title={intl.formatMessage({
+              id: "pages.setting.manage-token-button",
+            })}
+            paragraph={intl.formatMessage({
+              id: "pages.setting.manage-token-paragraph",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/token/list")}
           />
