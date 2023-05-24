@@ -24,6 +24,7 @@ import {
   NewLedgerKeyMsg,
   NewMnemonicKeyMsg,
   NewPrivateKeyKeyMsg,
+  PlainObject,
   SelectKeyRingMsg,
   ShowSensitiveKeyRingDataMsg,
   UnlockKeyRingMsg,
@@ -240,7 +241,7 @@ export class KeyRingStore {
   @flow
   *newPrivateKeyKey(
     privateKey: Uint8Array,
-    meta: Record<string, string | undefined>,
+    meta: PlainObject,
     name: string,
     password: string | undefined
   ) {

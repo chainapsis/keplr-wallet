@@ -16,6 +16,7 @@ import {
 import { WalletStatus } from "@keplr-wallet/stores";
 import AnimCreating from "../../../public/assets/lottie/register/creating.json";
 import lottie from "lottie-web";
+import { PlainObject } from "@keplr-wallet/background";
 
 /**
  * FinalizeKeyScene is used to create the key (account).
@@ -38,7 +39,7 @@ export const FinalizeKeyScene: FunctionComponent<{
   };
   privateKey?: {
     value: Uint8Array;
-    meta: Record<string, string | undefined>;
+    meta: PlainObject;
   };
   ledger?: {
     pubKey: Uint8Array;

@@ -14,13 +14,14 @@ import { ColorPalette } from "../../../styles";
 import { Body1, Subtitle3 } from "../../../components/typography";
 import { CopyToClipboard } from "../components/copy-to-clipboard";
 import { Buffer } from "buffer/";
+import { PlainObject } from "@keplr-wallet/background";
 
 export const BackUpPrivateKeyScene: FunctionComponent<{
   name: string;
   password: string;
   privateKey: {
     value: Uint8Array;
-    meta: Record<string, string | undefined>;
+    meta: PlainObject;
   };
   stepPrevious: number;
   stepTotal: number;

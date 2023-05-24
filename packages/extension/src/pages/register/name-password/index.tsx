@@ -7,12 +7,13 @@ import {
   useSceneTransition,
 } from "../../../components/transition";
 import { observer } from "mobx-react-lite";
+import { PlainObject } from "@keplr-wallet/background";
 
 export const RegisterNamePasswordScene: FunctionComponent<{
   mnemonic?: string;
   privateKey?: {
     value: Uint8Array;
-    meta: Record<string, string | undefined>;
+    meta: PlainObject;
     needBackUpPrivateKey?: boolean;
   };
   bip44Path?: {

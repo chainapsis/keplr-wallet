@@ -3,6 +3,7 @@ import { Message } from "@keplr-wallet/router";
 const bip39 = require("bip39");
 import { ROUTE } from "./constants";
 import { KeyRingStatus, BIP44HDPath, KeyInfo } from "./types";
+import { PlainObject } from "../vault";
 
 export class GetKeyRingStatusMsg extends Message<{
   status: KeyRingStatus;
@@ -217,7 +218,7 @@ export class NewPrivateKeyKeyMsg extends Message<{
 
   constructor(
     public readonly privateKey: Uint8Array,
-    public readonly meta: Record<string, string | undefined>,
+    public readonly meta: PlainObject,
     public readonly name: string,
     public readonly password?: string
   ) {

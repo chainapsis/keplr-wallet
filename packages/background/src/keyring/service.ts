@@ -1,4 +1,4 @@
-import { VaultService, Vault } from "../vault";
+import { VaultService, Vault, PlainObject } from "../vault";
 import { BIP44HDPath, KeyInfo, KeyRing, KeyRingStatus } from "./types";
 import { Env, WEBPAGE_PORT } from "@keplr-wallet/router";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
@@ -212,10 +212,13 @@ export class KeyRingService {
           ).toString(),
           "hex"
         );
-        const meta: Record<string, string | undefined> = {};
+        const meta: PlainObject = {};
         if (keyStore.meta?.["email"]) {
           const socialType = keyStore.meta["socialType"] || "google";
-          meta[socialType] = keyStore.meta["email"];
+          meta["web3Auth"] = {
+            email: keyStore.meta["email"],
+            type: socialType,
+          };
         }
         const vaultId = await this.createPrivateKeyKeyRing(
           privateKey,
@@ -585,7 +588,7 @@ export class KeyRingService {
 
   async createPrivateKeyKeyRing(
     privateKey: Uint8Array,
-    meta: Record<string, string | undefined>,
+    meta: PlainObject,
     name: string,
     password?: string
   ): Promise<string> {
