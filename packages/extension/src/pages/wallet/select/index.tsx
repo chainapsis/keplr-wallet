@@ -31,13 +31,6 @@ const Styles = {
   `,
 };
 
-type KeyInfoWithEmail = KeyInfo & { email?: string };
-
-interface KeyInfoListProps {
-  title: string;
-  keyInfos: KeyInfoWithEmail[];
-}
-
 export const WalletSelectPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
 
@@ -67,15 +60,14 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
     });
   }, [keyRingStore.keyInfos]);
 
-  const privateKeyInfos = keyRingStore.keyInfos.filter((keyInfo) => {
-    return (
-      keyInfo.type === "private-key" &&
-      typeof keyInfo.insensitive === "object" &&
-      keyInfo.insensitive["keyRingMeta"] &&
-      typeof keyInfo.insensitive["keyRingMeta"] === "object" &&
-      Object.keys(keyInfo.insensitive["keyRingMeta"]).length === 0
-    );
-  });
+  const privateKeyInfos = useMemo(() => {
+    return keyRingStore.keyInfos.filter((keyInfo) => {
+      return (
+        keyInfo.type === "private-key" &&
+        !socialPrivateKeyInfos.some((k) => k.id === keyInfo.id)
+      );
+    });
+  }, [keyRingStore.keyInfos, socialPrivateKeyInfos]);
 
   const ledgerKeys = useMemo(() => {
     return keyRingStore.keyInfos.filter((keyInfo) => {
@@ -101,53 +93,50 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
   const socialPrivateKeyInfoByType: {
     type: string;
-    keyInfos: KeyInfoWithEmail[];
-  }[] = useMemo(
-    () =>
-      (() => {
-        const types: string[] = [];
-        const typeMap: {
-          [type: string]: (KeyInfo & { email: string })[];
-        } = {};
+    keyInfos: KeyInfo[];
+  }[] = useMemo(() => {
+    const typeMap = new Map<string, KeyInfo[]>();
 
-        socialPrivateKeyInfos.forEach((keyInfo) => {
-          if (
-            keyInfo.type === "private-key" &&
-            typeof keyInfo.insensitive === "object" &&
-            keyInfo.insensitive["keyRingMeta"] &&
-            typeof keyInfo.insensitive["keyRingMeta"] === "object" &&
-            keyInfo.insensitive["keyRingMeta"]["web3Auth"] &&
-            typeof keyInfo.insensitive["keyRingMeta"]["web3Auth"] === "object"
-          ) {
-            const web3Auth = keyInfo.insensitive["keyRingMeta"]["web3Auth"];
-            if (
-              web3Auth["type"] &&
-              web3Auth["email"] &&
-              typeof web3Auth["type"] === "string" &&
-              typeof web3Auth["email"] === "string"
-            ) {
-              if (!typeMap[web3Auth["type"]]) {
-                types.push(web3Auth["type"]);
-                typeMap[web3Auth["type"]] = [];
-              }
+    socialPrivateKeyInfos.forEach((keyInfo) => {
+      if (
+        keyInfo.type === "private-key" &&
+        typeof keyInfo.insensitive === "object" &&
+        keyInfo.insensitive["keyRingMeta"] &&
+        typeof keyInfo.insensitive["keyRingMeta"] === "object" &&
+        keyInfo.insensitive["keyRingMeta"]["web3Auth"] &&
+        typeof keyInfo.insensitive["keyRingMeta"]["web3Auth"] === "object"
+      ) {
+        const web3Auth = keyInfo.insensitive["keyRingMeta"]["web3Auth"];
+        if (
+          web3Auth["type"] &&
+          web3Auth["email"] &&
+          typeof web3Auth["type"] === "string" &&
+          typeof web3Auth["email"] === "string"
+        ) {
+          const type = web3Auth["type"];
 
-              typeMap[web3Auth["type"]].push({
-                ...keyInfo,
-                email: web3Auth["email"],
-              });
-            }
-          }
-        });
+          const arr = typeMap.get(type) || [];
+          arr.push(keyInfo);
 
-        return types.map((type) => {
-          return {
-            type,
-            keyInfos: typeMap[type],
-          };
-        });
-      })(),
-    [socialPrivateKeyInfos]
-  );
+          typeMap.set(type, arr);
+        }
+      }
+    });
+
+    const res: {
+      type: string;
+      keyInfos: KeyInfo[];
+    }[] = [];
+
+    for (const [type, keyInfos] of typeMap.entries()) {
+      res.push({
+        type,
+        keyInfos,
+      });
+    }
+
+    return res;
+  }, [socialPrivateKeyInfos]);
 
   return (
     <HeaderLayout title="Select Wallet" left={<BackButton />}>
@@ -199,33 +188,34 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
   );
 });
 
-const KeyInfoList: FunctionComponent<KeyInfoListProps> = observer(
-  ({ title, keyInfos }) => {
-    return (
-      <Box>
-        <YAxis>
-          <Subtitle4
-            color={ColorPalette["gray-300"]}
-            style={{
-              paddingLeft: "0.5rem",
-            }}
-          >
-            {title}
-          </Subtitle4>
-          <Gutter size="0.5rem" />
-          <Stack gutter="0.5rem">
-            {keyInfos.map((keyInfo) => {
-              return <KeyringItem key={keyInfo.id} keyInfo={keyInfo} />;
-            })}
-          </Stack>
-        </YAxis>
-      </Box>
-    );
-  }
-);
+const KeyInfoList: FunctionComponent<{
+  title: string;
+  keyInfos: KeyInfo[];
+}> = observer(({ title, keyInfos }) => {
+  return (
+    <Box>
+      <YAxis>
+        <Subtitle4
+          color={ColorPalette["gray-300"]}
+          style={{
+            paddingLeft: "0.5rem",
+          }}
+        >
+          {title}
+        </Subtitle4>
+        <Gutter size="0.5rem" />
+        <Stack gutter="0.5rem">
+          {keyInfos.map((keyInfo) => {
+            return <KeyringItem key={keyInfo.id} keyInfo={keyInfo} />;
+          })}
+        </Stack>
+      </YAxis>
+    </Box>
+  );
+});
 
 const KeyringItem: FunctionComponent<{
-  keyInfo: KeyInfoWithEmail;
+  keyInfo: KeyInfo;
 }> = observer(({ keyInfo }) => {
   const { chainStore, keyRingStore } = useStore();
 
@@ -233,7 +223,7 @@ const KeyringItem: FunctionComponent<{
 
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  const paragraph = (() => {
+  const paragraph = useMemo(() => {
     if (keyInfo.insensitive["bip44Path"]) {
       const bip44Path = keyInfo.insensitive["bip44Path"] as any;
       if (
@@ -266,10 +256,25 @@ const KeyringItem: FunctionComponent<{
       }/${bip44Path.addressIndex}`;
     }
 
-    if (keyInfo.email) {
-      return keyInfo.email;
+    if (
+      keyInfo.type === "private-key" &&
+      typeof keyInfo.insensitive === "object" &&
+      keyInfo.insensitive["keyRingMeta"] &&
+      typeof keyInfo.insensitive["keyRingMeta"] === "object" &&
+      keyInfo.insensitive["keyRingMeta"]["web3Auth"] &&
+      typeof keyInfo.insensitive["keyRingMeta"]["web3Auth"] === "object"
+    ) {
+      const web3Auth = keyInfo.insensitive["keyRingMeta"]["web3Auth"];
+      if (
+        web3Auth["type"] &&
+        web3Auth["email"] &&
+        typeof web3Auth["type"] === "string" &&
+        typeof web3Auth["email"] === "string"
+      ) {
+        return web3Auth["email"];
+      }
     }
-  })();
+  }, [keyInfo.insensitive, keyInfo.type]);
 
   const dropdownItems = (() => {
     const defaults = [
@@ -316,8 +321,12 @@ const KeyringItem: FunctionComponent<{
       backgroundColor={ColorPalette["gray-600"]}
       borderRadius="0.375rem"
       alignY="center"
-      cursor="pointer"
+      cursor={!isSelected ? "pointer" : undefined}
       onClick={async () => {
+        if (isSelected) {
+          return;
+        }
+
         await keyRingStore.selectKeyRing(keyInfo.id);
         await chainStore.waitSyncedEnabledChains();
 
@@ -354,6 +363,7 @@ const KeyringItem: FunctionComponent<{
         <Column weight={1} />
         <XAxis alignY="center">
           <Box
+            cursor="pointer"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
