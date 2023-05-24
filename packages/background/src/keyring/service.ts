@@ -258,7 +258,9 @@ export class KeyRingService {
             );
             const vaultId = await this.createLedgerKeyRing(
               pubKey,
-              "Cosmos",
+              keyStore.meta?.["__ledger__cosmos_app_like__"] === "Terra"
+                ? "Terra"
+                : "Cosmos",
               keyStore.bip44HDPath ?? {
                 account: 0,
                 change: 0,
