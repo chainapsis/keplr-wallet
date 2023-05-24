@@ -22,9 +22,21 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
       <Box paddingX="0.75rem">
         <Stack gutter="0.5rem">
           <PageButton
+            title="Automatic (Browser default)"
+            endIcon={
+              language.automatic ? (
+                <CheckIcon width="1.25rem" height="1.25rem" />
+              ) : null
+            }
+            onClick={() => {
+              language.clearLanguage();
+              navigate(-1);
+            }}
+          />
+          <PageButton
             title="English"
             endIcon={
-              language.language === "en" ? (
+              !language.automatic && language.language === "en" ? (
                 <CheckIcon width="1.25rem" height="1.25rem" />
               ) : null
             }
@@ -36,7 +48,7 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
           <PageButton
             title="Korean"
             endIcon={
-              language.language === "ko" ? (
+              !language.automatic && language.language === "ko" ? (
                 <CheckIcon width="1.25rem" height="1.25rem" />
               ) : null
             }
