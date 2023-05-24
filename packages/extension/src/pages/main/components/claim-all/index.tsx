@@ -400,7 +400,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
     return (
       <Styles.Container>
-        <Box paddingX="1rem">
+        <Box paddingX="1rem" paddingBottom="0.25rem">
           <Columns sum={1} alignY="center">
             <Stack gutter="0.5rem">
               <YAxis alignX="left">
