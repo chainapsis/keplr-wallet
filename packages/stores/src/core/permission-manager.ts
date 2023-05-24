@@ -14,7 +14,7 @@ export class PermissionManagerStore {
   @observable
   protected _isInitialized: boolean = false;
 
-  @observable.ref
+  @observable
   protected _permissionData: AllPermissionDataPerOrigin = {};
 
   constructor(protected readonly requester: MessageRequester) {
@@ -67,16 +67,10 @@ export class PermissionManagerStore {
   }
 
   async clearOrigin(origin: string) {
-    const perms = this.permissionData[origin];
+    const perms = this._permissionData[origin];
     if (perms) {
-      delete this.permissionData[origin];
-
       runInAction(() => {
-        // Update state optimistically before sending message to background.
-        // Dumb way to force to update the ref observable.
-        this._permissionData = {
-          ...this._permissionData,
-        };
+        delete this._permissionData[origin];
       });
 
       const msg = new ClearOriginPermissionMsg(origin);
@@ -86,7 +80,7 @@ export class PermissionManagerStore {
 
   async removePermission(origin: string, chainId: string, type: string) {
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
-    const perms = this.permissionData[origin];
+    const perms = this._permissionData[origin];
     const i = perms
       ? perms.permissions.findIndex(
           (perm) =>
@@ -94,14 +88,8 @@ export class PermissionManagerStore {
         )
       : -1;
     if (i >= 0 && perms) {
-      perms.permissions.splice(i, 1);
-
       runInAction(() => {
-        // Update state optimistically before sending message to background.
-        // Dumb way to force to update the ref observable.
-        this._permissionData = {
-          ...this._permissionData,
-        };
+        perms.permissions.splice(i, 1);
       });
 
       const msg = new RemovePermissionOrigin(chainId, type, origin);
@@ -110,19 +98,13 @@ export class PermissionManagerStore {
   }
 
   async removeGlobalPermission(origin: string, type: string) {
-    const perms = this.permissionData[origin];
+    const perms = this._permissionData[origin];
     const i = perms
       ? perms.globalPermissions.findIndex((perm) => perm.type === type)
       : -1;
     if (i >= 0 && perms) {
-      perms.globalPermissions.splice(i, 1);
-
       runInAction(() => {
-        // Update state optimistically before sending message to background.
-        // Dumb way to force to update the ref observable.
-        this._permissionData = {
-          ...this._permissionData,
-        };
+        perms.globalPermissions.splice(i, 1);
       });
 
       const msg = new RemoveGlobalPermissionOriginMsg(type, origin);

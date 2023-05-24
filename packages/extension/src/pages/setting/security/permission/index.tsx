@@ -7,12 +7,11 @@ import { useStore } from "../../../../stores";
 import { Button } from "../../../../components/button";
 import { Box } from "../../../../components/box";
 import styled from "styled-components";
-import { TextInput } from "../../../../components/input";
+import { SearchTextInput } from "../../../../components/input";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
   CloseIcon,
-  SearchIcon,
   TreeIcon,
 } from "../../../../components/icon";
 import { Column, Columns } from "../../../../components/column";
@@ -35,13 +34,19 @@ const Styles = {
 export const SettingSecurityPermissionPage: FunctionComponent = observer(() => {
   const { permissionManagerStore } = useStore();
 
-  // TODO: Handle global permission
+  const [search, setSearch] = useState("");
+
   return (
     <HeaderLayout title="Connected Websites" left={<BackButton />}>
       <Styles.Container gutter="0.5rem">
-        <TextInput
+        <SearchTextInput
           placeholder="Search"
-          left={<SearchIcon width="1.25rem" height="1.25rem" />}
+          value={search}
+          onChange={(e) => {
+            e.preventDefault();
+
+            setSearch(e.target.value);
+          }}
         />
         <Styles.Disconnect>
           <Button
@@ -53,11 +58,18 @@ export const SettingSecurityPermissionPage: FunctionComponent = observer(() => {
             }}
           />
         </Styles.Disconnect>
-        {Object.entries(permissionManagerStore.permissionData).map(
-          ([origin, value]) => {
+        {Object.entries(permissionManagerStore.permissionData)
+          .filter(([origin]) => {
+            const trim = search.trim();
+            if (trim.length === 0) {
+              return true;
+            }
+
+            return origin.toLowerCase().includes(trim.toLowerCase());
+          })
+          .map(([origin, value]) => {
             return <OriginView key={origin} origin={origin} value={value} />;
-          }
-        )}
+          })}
       </Styles.Container>
     </HeaderLayout>
   );
@@ -98,7 +110,7 @@ const OriginView: FunctionComponent<{
 }> = observer(({ origin, value }) => {
   const { permissionManagerStore } = useStore();
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   if (!value) {
     return null;
@@ -112,7 +124,10 @@ const OriginView: FunctionComponent<{
             <Body2>{origin}</Body2>
             <Box
               cursor="pointer"
-              onClick={async () => {
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
                 await permissionManagerStore.clearOrigin(origin);
               }}
             >
@@ -154,7 +169,10 @@ const OriginView: FunctionComponent<{
                 <TreeIcon />
                 <OriginStyle.Item
                   cursor="pointer"
-                  onClick={async () => {
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
                     await permissionManagerStore.removePermission(
                       origin,
                       permission.chainIdentifier,
@@ -183,7 +201,10 @@ const OriginView: FunctionComponent<{
                 <TreeIcon />
                 <OriginStyle.Item
                   cursor="pointer"
-                  onClick={async () => {
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
                     await permissionManagerStore.removeGlobalPermission(
                       origin,
                       globalPermission.type
