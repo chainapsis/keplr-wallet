@@ -167,31 +167,33 @@ export const AvailableTabView: FunctionComponent<{
                         title={title}
                         tooltip={tooltip}
                         right={
-                          <React.Fragment>
-                            <Caption2
-                              style={{ cursor: "pointer" }}
-                              onClick={() => {
-                                uiConfigStore.setHideLowBalance(
-                                  !uiConfigStore.isHideLowBalance
-                                );
-                              }}
-                              color={ColorPalette["gray-300"]}
-                            >
-                              Hide Low Balance
-                            </Caption2>
+                          !isFirstTime ? (
+                            <React.Fragment>
+                              <Caption2
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                  uiConfigStore.setHideLowBalance(
+                                    !uiConfigStore.isHideLowBalance
+                                  );
+                                }}
+                                color={ColorPalette["gray-300"]}
+                              >
+                                Hide Low Balance
+                              </Caption2>
 
-                            <Gutter size="0.25rem" />
+                              <Gutter size="0.25rem" />
 
-                            <Checkbox
-                              size="extra-small"
-                              checked={uiConfigStore.isHideLowBalance}
-                              onChange={() => {
-                                uiConfigStore.setHideLowBalance(
-                                  !uiConfigStore.isHideLowBalance
-                                );
-                              }}
-                            />
-                          </React.Fragment>
+                              <Checkbox
+                                size="extra-small"
+                                checked={uiConfigStore.isHideLowBalance}
+                                onChange={() => {
+                                  uiConfigStore.setHideLowBalance(
+                                    !uiConfigStore.isHideLowBalance
+                                  );
+                                }}
+                              />
+                            </React.Fragment>
+                          ) : null
                         }
                       />
                     }
