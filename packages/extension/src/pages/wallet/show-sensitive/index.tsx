@@ -12,6 +12,7 @@ import { Box } from "../../../components/box";
 import { Gutter } from "../../../components/gutter";
 import lottie from "lottie-web";
 import AniMnemonic from "../../../public/assets/lottie/wallet/mnemonic.json";
+import { useNavigate } from "react-router";
 
 interface FormData {
   password: string;
@@ -20,6 +21,8 @@ interface FormData {
 export const WalletShowSensitivePage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
   const [searchParams] = useSearchParams();
+
+  const navigate = useNavigate();
 
   const animDivRef = useRef<HTMLDivElement | null>(null);
 
@@ -85,7 +88,9 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
               size: "large",
               type: "button",
               onClick: () => {
-                window.close();
+                navigate("/", {
+                  replace: true,
+                });
               },
             }
       }
