@@ -184,11 +184,7 @@ export const AvailableTabView: FunctionComponent<{
                             <Checkbox
                               size="extra-small"
                               checked={uiConfigStore.isHideLowBalance}
-                              onChange={() => {
-                                uiConfigStore.setHideLowBalance(
-                                  !uiConfigStore.isHideLowBalance
-                                );
-                              }}
+                              onChange={uiConfigStore.setHideLowBalance}
                             />
                           </React.Fragment>
                         }
