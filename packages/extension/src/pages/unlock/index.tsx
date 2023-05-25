@@ -8,7 +8,7 @@ import { Gutter } from "../../components/gutter";
 import { Box } from "../../components/box";
 import { TextButton } from "../../components/button-text";
 import { ColorPalette } from "../../styles";
-import { H1 } from "../../components/typography";
+import { H1, Subtitle4 } from "../../components/typography";
 import { Tooltip } from "../../components/tooltip";
 import AnimLogo from "../../public/assets/lottie/unlock/logo.json";
 import lottie, { AnimationItem } from "lottie-web";
@@ -116,7 +116,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
       }}
     >
       <Box alignX="center">
-        <Gutter size="7.375rem" />
+        <Gutter size="6rem" />
 
         <div
           ref={animContainerRef}
@@ -125,13 +125,28 @@ export const UnlockPage: FunctionComponent = observer(() => {
             height: "9.5rem",
           }}
         />
-        {keyRingStore.needMigration ? (
-          <H1>TODO: In migration</H1>
-        ) : (
-          <H1>Welcome Back</H1>
-        )}
 
-        <Gutter size="1.75rem" />
+        <Box
+          minHeight="4.375rem"
+          alignY="center"
+          style={{
+            textAlign: "center",
+          }}
+        >
+          {keyRingStore.needMigration ? (
+            <React.Fragment>
+              <H1 color={ColorPalette["white"]}>Unlock the New Keplr!</H1>
+              <Gutter size="0.5rem" />
+              <Subtitle4 color={ColorPalette["gray-200"]}>
+                💫 Keplr 2.0 has finally arrived.
+                <br />
+                Enter your password to upgrade.
+              </Subtitle4>
+            </React.Fragment>
+          ) : (
+            <H1 color={ColorPalette["white"]}>Welcome Back</H1>
+          )}
+        </Box>
 
         <Box position="relative" width="100%">
           <Box
@@ -154,6 +169,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
             </Tooltip>
           </Box>
 
+          <Gutter size="0.75rem" />
           <TextInput
             ref={inputRef}
             label="Password"
