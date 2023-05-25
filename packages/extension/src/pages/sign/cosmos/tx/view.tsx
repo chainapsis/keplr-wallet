@@ -3,7 +3,7 @@ import { SignInteractionStore } from "@keplr-wallet/stores";
 import { Box } from "../../../../components/box";
 import { Column, Columns } from "../../../../components/column";
 import { XAxis } from "../../../../components/axis";
-import { H5 } from "../../../../components/typography";
+import { H5, Subtitle3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { ViewDataButton } from "../../components/view-data-button";
 import { MessageItem } from "../../components/message-item";
@@ -95,7 +95,13 @@ export const CosmosTxView: FunctionComponent<{
       memo = unescapeHTML(memo);
     }
     memoConfig.setValue(memo);
-    if (data.data.signOptions.preferNoSetFee) {
+    if (
+      data.data.signOptions.preferNoSetFee ||
+      // 자동으로 fee를 다뤄줄 수 있는건 fee가 하나인 경우이다.
+      // fee가 여러개인 경우는 일반적인 경우가 아니기 때문에
+      // 케플러에서 처리해줄 수 없다. 그러므로 옵션을 무시하고 fee 설정을 각 웹사이트에 맡긴다.
+      data.data.signDocWrapper.fees.length >= 2
+    ) {
       feeConfig.setFee(
         data.data.signDocWrapper.fees.map((fee) => {
           const currency = chainStore
@@ -152,6 +158,8 @@ export const CosmosTxView: FunctionComponent<{
 
     return interactionData.data.signOptions.preferNoSetFee;
   })();
+
+  const preferNoSetMemo = interactionData.data.signOptions.preferNoSetMemo;
 
   const interactionInfo = useInteractionInfo();
 
@@ -368,7 +376,12 @@ export const CosmosTxView: FunctionComponent<{
           }}
         >
           <Stack gutter="0.75rem">
-            <MemoInput memoConfig={memoConfig} label="Memo (Optional)" />
+            {preferNoSetMemo ? (
+              <ReadonlyMemo memo={memoConfig.memo} />
+            ) : (
+              <MemoInput memoConfig={memoConfig} />
+            )}
+
             <FeeControl
               feeConfig={feeConfig}
               senderConfig={senderConfig}
@@ -398,3 +411,33 @@ export const CosmosTxView: FunctionComponent<{
     </HeaderLayout>
   );
 });
+
+const ReadonlyMemo: FunctionComponent<{
+  memo: string;
+}> = ({ memo }) => {
+  return (
+    <Box
+      backgroundColor={ColorPalette["gray-600"]}
+      padding="1rem"
+      borderRadius="0.375rem"
+    >
+      <XAxis alignY="center">
+        <Subtitle3 color={ColorPalette["gray-200"]}>Memo</Subtitle3>
+        <Gutter size="1.5rem" direction="horizontal" />
+        <Subtitle3
+          color={memo ? ColorPalette["gray-50"] : ColorPalette["gray-300"]}
+          style={{
+            flex: 1,
+
+            textAlign: "right",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {memo || "(Empty)"}
+        </Subtitle3>
+      </XAxis>
+    </Box>
+  );
+};
