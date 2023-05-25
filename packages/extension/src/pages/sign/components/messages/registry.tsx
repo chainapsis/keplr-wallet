@@ -4,7 +4,17 @@ import { Msg } from "@keplr-wallet/types";
 import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 import yaml from "js-yaml";
 import { Buffer } from "buffer/";
-import { ClaimRewardsMessage } from "./render/claim-rewards";
+import {
+  ClaimRewardsMessage,
+  CustomIcon,
+  DelegateMessage,
+  ExecuteContractMessage,
+  RedelegateMessage,
+  SendMessage,
+  TransferMessage,
+  UndelegateMessage,
+  VoteMessage,
+} from "./render";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -54,7 +64,7 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
     })();
 
     return {
-      icon: <div>TODO</div>,
+      icon: <CustomIcon />,
       title: "Custom",
       content: <pre style={{ margin: 0 }}>{prettyMsg}</pre>,
     };
@@ -63,3 +73,10 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
 
 export const defaultRegistry = new MessageRenderRegistry();
 defaultRegistry.register(ClaimRewardsMessage);
+defaultRegistry.register(DelegateMessage);
+defaultRegistry.register(ExecuteContractMessage);
+defaultRegistry.register(RedelegateMessage);
+defaultRegistry.register(SendMessage);
+defaultRegistry.register(TransferMessage);
+defaultRegistry.register(UndelegateMessage);
+defaultRegistry.register(VoteMessage);
