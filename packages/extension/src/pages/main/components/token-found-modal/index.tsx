@@ -314,7 +314,7 @@ const FoundTokenView: FunctionComponent<{
       <Box width="1.75rem" height="1.75rem">
         <ChainImageFallback
           alt="Token Found Modal Token Image"
-          src={undefined}
+          src={asset.currency.coinImageUrl}
         />
       </Box>
 
