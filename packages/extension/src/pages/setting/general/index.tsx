@@ -61,8 +61,8 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Manage Suggest Chains"
-            paragraph="Add or remove chains that are suggested and managed by our community repo"
+            title="Manage Non-Native Chains"
+            paragraph="Add or remove non-native chains operated by external parties"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/delete-suggest-chain")}
           />

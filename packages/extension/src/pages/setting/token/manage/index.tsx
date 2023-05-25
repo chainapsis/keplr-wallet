@@ -83,7 +83,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
     <HeaderLayout title="Manage Token List" left={<BackButton />}>
       <Styles.Container gutter="0.5rem">
         <Styles.Paragraph>
-          Only for the tokens that are added manually via contract addresses
+          Only for the tokens that can be added manually via contract addresses
         </Styles.Paragraph>
 
         <Columns sum={1} alignY="bottom">
@@ -108,7 +108,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
         {tokens.length === 0 ? (
           <React.Fragment>
             <Gutter size="7.5rem" direction="vertical" />
-            <EmptyView subject="token" />
+            <EmptyView subject="Token" />
           </React.Fragment>
         ) : (
           tokens.map((token) => {

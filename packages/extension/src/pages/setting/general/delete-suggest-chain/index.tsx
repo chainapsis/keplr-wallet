@@ -7,7 +7,7 @@ import { Box } from "../../../../components/box";
 import { CloseIcon, PlusIcon } from "../../../../components/icon";
 import { ColorPalette } from "../../../../styles";
 import { Stack } from "../../../../components/stack";
-import { Body1, Body3 } from "../../../../components/typography";
+import { Body1, Body3, Subtitle3 } from "../../../../components/typography";
 import { ChainInfo } from "@keplr-wallet/types";
 import { Column, Columns } from "../../../../components/column";
 import { ChainImageFallback } from "../../../../components/image";
@@ -23,7 +23,7 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
 
     return (
       <HeaderLayout
-        title="Manage Suggest Chains"
+        title="Manage Non-Native Chains"
         left={<BackButton />}
         right={
           <a href="https://chains.keplr.app/" target="_blank" rel="noreferrer">
@@ -50,7 +50,9 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
             ) : (
               <React.Fragment>
                 <Gutter size="9.25rem" direction="vertical" />
-                <EmptyView subject="No suggest chains added yet" />
+                <EmptyView>
+                  <Subtitle3>Hmm.. Nothing Here!</Subtitle3>
+                </EmptyView>
               </React.Fragment>
             )}
           </Stack>

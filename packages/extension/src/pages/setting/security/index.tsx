@@ -11,7 +11,7 @@ export const SettingSecurityPage: FunctionComponent = () => {
   const navigate = useNavigate();
 
   return (
-    <HeaderLayout title="Security&Privacy" left={<BackButton />}>
+    <HeaderLayout title="Security & Privacy" left={<BackButton />}>
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="1rem">
           <PageButton
