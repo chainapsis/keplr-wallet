@@ -15,7 +15,7 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
       detached: boolean;
 
       title: string;
-      paragraph: string;
+      paragraph: string | React.ReactNode;
       options: {
         forceYes?: boolean;
       };
@@ -26,7 +26,7 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
   const seqRef = useRef(0);
   const confirmFn: (
     title: string,
-    paragraph: string,
+    paragraph: string | React.ReactNode,
     options?: {
       forceYes?: boolean;
     }

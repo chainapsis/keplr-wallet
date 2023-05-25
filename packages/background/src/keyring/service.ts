@@ -1002,9 +1002,11 @@ export class KeyRingService {
             typeof keyInfo.insensitive["keyRingMeta"]["web3Auth"] === "object"
           ) {
             const web3Auth = keyInfo.insensitive["keyRingMeta"]["web3Auth"];
-            if (web3Auth["type"] === "google" && web3Auth["email"]) {
-              // TODO: Add apple?
-              meta["socialType"] = "google";
+            if (
+              (web3Auth["type"] === "google" || web3Auth["type"] === "apple") &&
+              web3Auth["email"]
+            ) {
+              meta["socialType"] = web3Auth["type"];
               meta["email"] = web3Auth["email"] as string;
             } else {
               // Keplr mobile only supports google web3Auth.
