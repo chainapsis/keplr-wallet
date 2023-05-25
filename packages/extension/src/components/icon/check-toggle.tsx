@@ -2,8 +2,9 @@ import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
 
 export const CheckToggleIcon: FunctionComponent<IconProps> = ({
-  width = 24,
-  height = 24,
+  width = "1.5rem",
+  height = "1.5rem",
+  color,
 }) => {
   return (
     <svg
@@ -15,7 +16,7 @@ export const CheckToggleIcon: FunctionComponent<IconProps> = ({
     >
       <path
         d="M9.00003 16.17L4.83003 12L3.41003 13.41L9.00003 19L21 6.99997L19.59 5.58997L9.00003 16.17Z"
-        fill="currentColor"
+        fill={color || "currentColor"}
       />
     </svg>
   );

@@ -2,8 +2,9 @@ import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
 
 export const CloseIcon: FunctionComponent<IconProps> = ({
-  width = 24,
-  height = 24,
+  width = "1.5rem",
+  height = "1.5rem",
+  color,
 }) => {
   return (
     <svg
@@ -15,7 +16,7 @@ export const CloseIcon: FunctionComponent<IconProps> = ({
     >
       <path
         d="M6 18L18 6M6 6L18 18"
-        stroke="currentColor"
+        stroke={color || "currentColor"}
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
