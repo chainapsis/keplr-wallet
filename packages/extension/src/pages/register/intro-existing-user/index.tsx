@@ -44,7 +44,8 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
             </RegisterH4>
             <Gutter size="0.5rem" />
             <Subtitle3 color={ColorPalette["gray-200"]}>
-              Use an existing 12/24 word recovery phrase or private key. You can also import wallets from other wallet providers.
+              Use an existing 12/24 word recovery phrase or private key. You can
+              also import wallets from other wallet providers.
             </Subtitle3>
 
             <div style={{ flex: 1 }} />

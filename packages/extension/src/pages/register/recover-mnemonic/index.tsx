@@ -68,7 +68,8 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
             or paste the entire phrase in any text input.
           </div>,
           <div key="paragraphs">
-            Enter the phrase in the right order without capitalization, punctuation symbols, or spaces.
+            Enter the phrase in the right order without capitalization,
+            punctuation symbols, or spaces.
           </div>,
         ],
         stepCurrent: 1,
