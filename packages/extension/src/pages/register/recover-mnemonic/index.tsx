@@ -74,6 +74,9 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
             If your recovery phrase is consisted of more than 12 words, please
             select “24 words” and enter your phrase.
           </div>,
+          <div key="paragraphs">
+            Type the words in small letters and in correct order only
+          </div>,
         ],
         stepCurrent: 1,
         stepTotal: 3,
