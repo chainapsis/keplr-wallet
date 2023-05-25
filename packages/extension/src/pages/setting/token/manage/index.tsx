@@ -20,6 +20,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useConfirm } from "../../../../hooks/confirm";
 import { useNotification } from "../../../../hooks/notification";
 import { Gutter } from "../../../../components/gutter";
+import { Tooltip } from "../../../../components/tooltip";
 
 const Styles = {
   Container: styled(Stack)`
@@ -182,58 +183,64 @@ const TokenItem: FunctionComponent<{
 
         <Columns sum={1} gutter="0.5rem" alignY="center">
           {isSecret20 ? (
+            <Tooltip content="Copy Viewing Key">
+              <ItemStyles.Icon
+                onClick={async (e) => {
+                  e.preventDefault();
+
+                  if (
+                    "type" in tokenInfo.currency &&
+                    tokenInfo.currency.type === "secret20"
+                  ) {
+                    await navigator.clipboard.writeText(
+                      tokenInfo.currency.viewingKey
+                    );
+
+                    notification.show("success", "Viewing key copied", "");
+                  }
+                }}
+              >
+                <KeyIcon width="1.25rem" height="1.25rem" />
+              </ItemStyles.Icon>
+            </Tooltip>
+          ) : null}
+
+          <Tooltip content="Copy Contract Address">
+            <ItemStyles.Icon
+              onClick={async (e) => {
+                e.preventDefault();
+
+                if ("contractAddress" in tokenInfo.currency) {
+                  await navigator.clipboard.writeText(
+                    tokenInfo.currency.contractAddress
+                  );
+
+                  notification.show("success", "Contract address copied", "");
+                }
+              }}
+            >
+              <CopyFillIcon width="1.25rem" height="1.25rem" />
+            </ItemStyles.Icon>
+          </Tooltip>
+
+          <Tooltip content="Disable Token">
             <ItemStyles.Icon
               onClick={async (e) => {
                 e.preventDefault();
 
                 if (
-                  "type" in tokenInfo.currency &&
-                  tokenInfo.currency.type === "secret20"
+                  await confirm.confirm(
+                    "",
+                    "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again."
+                  )
                 ) {
-                  await navigator.clipboard.writeText(
-                    tokenInfo.currency.viewingKey
-                  );
-
-                  notification.show("success", "Viewing key copied", "");
+                  await tokensStore.removeToken(chainId, tokenInfo);
                 }
               }}
             >
-              <KeyIcon width="1.25rem" height="1.25rem" />
+              <TrashIcon width="1.25rem" height="1.25rem" />
             </ItemStyles.Icon>
-          ) : null}
-
-          <ItemStyles.Icon
-            onClick={async (e) => {
-              e.preventDefault();
-
-              if ("contractAddress" in tokenInfo.currency) {
-                await navigator.clipboard.writeText(
-                  tokenInfo.currency.contractAddress
-                );
-
-                notification.show("success", "Contract address copied", "");
-              }
-            }}
-          >
-            <CopyFillIcon width="1.25rem" height="1.25rem" />
-          </ItemStyles.Icon>
-
-          <ItemStyles.Icon
-            onClick={async (e) => {
-              e.preventDefault();
-
-              if (
-                await confirm.confirm(
-                  "",
-                  "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again."
-                )
-              ) {
-                await tokensStore.removeToken(chainId, tokenInfo);
-              }
-            }}
-          >
-            <TrashIcon width="1.25rem" height="1.25rem" />
-          </ItemStyles.Icon>
+          </Tooltip>
         </Columns>
       </Columns>
     </ItemStyles.Container>
