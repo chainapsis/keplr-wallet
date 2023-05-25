@@ -27,7 +27,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
       header.setHeader({
         mode: "welcome",
         title: "Welcome to Keplr",
-        paragraph: "Select the way you want to create your wallet",
+        paragraph: "Select how you want to create your wallet",
       });
     },
   });
@@ -38,7 +38,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
         <Column weight={1}>
           <Box minHeight="15.625rem">
             <RegisterH4 color={ColorPalette["gray-50"]}>
-              Via Recovery Phrase
+              Use Recovery Phrase
             </RegisterH4>
 
             <Gutter size="0.5rem" />

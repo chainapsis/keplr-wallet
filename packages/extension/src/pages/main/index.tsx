@@ -318,7 +318,7 @@ export const MainPage: FunctionComponent = observer(() => {
                       }
                     }
                   }}
-                  placeholder="Search for a chain"
+                  placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
                 />
               ) : null}
             </Stack>

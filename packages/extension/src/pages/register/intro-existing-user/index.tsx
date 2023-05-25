@@ -40,17 +40,16 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
         <Column weight={1}>
           <Box height="100%">
             <RegisterH4 color={ColorPalette["gray-50"]}>
-              Via Recovery Phrase or Private Key
+              Recovery Phrase or Private Key
             </RegisterH4>
             <Gutter size="0.5rem" />
             <Subtitle3 color={ColorPalette["gray-200"]}>
-              You can also import your wallets from other Interchain wallet
-              providers with this option.
+              Use an existing 12/24 word recovery phrase or private key. You can also import wallets from other wallet providers.
             </Subtitle3>
 
             <div style={{ flex: 1 }} />
             <Button
-              text="I have recovery phrase or private key"
+              text="Use recovery phrase or private key"
               size="large"
               left={<ArrowDownTrayIcon width="1rem" height="1rem" />}
               onClick={() => {
@@ -62,7 +61,7 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
         <Box width="1px" backgroundColor={ColorPalette["gray-400"]} />
         <Column weight={1}>
           <RegisterH4 color={ColorPalette["gray-50"]}>
-            Continue with Google or Apple
+            Use Google or Apple ID
           </RegisterH4>
 
           <Gutter size="3rem" />

@@ -77,7 +77,7 @@ export const MenuBar: FunctionComponent<{
         <Gutter size="1rem" />
 
         <Styles.MenuItem onClick={() => navigate("/setting/contacts/list")}>
-          Contacts
+          My Contacts
         </Styles.MenuItem>
 
         <Gutter size="1.75rem" />
