@@ -60,11 +60,14 @@ function defineUnwritablePropertyIfPossible(o: any, p: string, value: any) {
 
 export function injectKeplrToWindow(
   keplr: IKeplr,
-  fetchWallet: FetchBrowserWallet
+  fetchBrowserWallet: FetchBrowserWallet
 ): void {
   defineUnwritablePropertyIfPossible(window, "keplr", keplr);
-  defineUnwritablePropertyIfPossible(window, "fetchWallet", fetchWallet);
-
+  defineUnwritablePropertyIfPossible(
+    window,
+    "fetchBrowserWallet",
+    fetchBrowserWallet
+  );
   defineUnwritablePropertyIfPossible(
     window,
     "getOfflineSigner",
