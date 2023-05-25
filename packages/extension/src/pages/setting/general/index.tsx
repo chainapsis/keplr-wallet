@@ -69,7 +69,7 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
 
           <PageButton
             title="Manage Chain Visibility"
-            paragraph="Add or remove chains that are natively integrated with Keplr"
+            paragraph="Select chains (and its assets) to be shown for your current account"
             endIcon={<RightArrowIcon />}
             onClick={() => {
               if (keyRingStore.selectedKeyInfo) {
