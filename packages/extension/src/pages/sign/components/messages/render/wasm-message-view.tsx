@@ -52,7 +52,7 @@ export const WasmMessageView: FunctionComponent<{
           setWarningMsg("");
         } catch {
           setWarningMsg(
-            "Failed to decrypt Secret message. This may be due to Keplr viewing key not matching the transaction viewing key."
+            "Failed to decrypt Secret message. This may be due to Keplr's encrypt/decrypt seed not matching the transaction seed."
           );
         }
       })();
@@ -63,7 +63,9 @@ export const WasmMessageView: FunctionComponent<{
     <Box>
       {isOpen ? (
         <React.Fragment>
-          <pre style={{ width: "15rem" }}>{isOpen ? detailsMsg : ""}</pre>
+          <pre style={{ width: "15rem", margin: "0", marginBottom: "0.5rem" }}>
+            {isOpen ? detailsMsg : ""}
+          </pre>
           {warningMsg ? <div>{warningMsg}</div> : null}
         </React.Fragment>
       ) : null}

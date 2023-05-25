@@ -71,8 +71,8 @@ const DelegateMessagePretty: FunctionComponent<{
 });
 
 export const DelegateIcon: FunctionComponent<IconProps> = ({
-  width = 24,
-  height = 24,
+  width = "1.5rem",
+  height = "1.5rem",
   color,
 }) => {
   return (
