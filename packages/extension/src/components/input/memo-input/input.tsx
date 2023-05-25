@@ -17,11 +17,12 @@ export const MemoInput: FunctionComponent<{
   placeholder?: string;
 
   disabled?: boolean;
-}> = observer(({ memoConfig, ...others }) => {
+}> = observer(({ memoConfig, label, placeholder, ...others }) => {
   return (
     <Box>
       <TextInput
-        label="Memo"
+        label={label ?? "memo"}
+        placeholder={placeholder}
         onChange={(e) => {
           e.preventDefault();
           memoConfig.setValue(e.target.value);

@@ -58,7 +58,7 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
     return (
       <Box>
         <TextInput
-          label="Address"
+          label="Wallet Address"
           value={recipientConfig.value}
           autoComplete="off"
           onChange={(e) => {

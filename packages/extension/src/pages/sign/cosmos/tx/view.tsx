@@ -368,7 +368,7 @@ export const CosmosTxView: FunctionComponent<{
           }}
         >
           <Stack gutter="0.75rem">
-            <MemoInput memoConfig={memoConfig} />
+            <MemoInput memoConfig={memoConfig} label="Memo (Optional)" />
             <FeeControl
               feeConfig={feeConfig}
               senderConfig={senderConfig}
