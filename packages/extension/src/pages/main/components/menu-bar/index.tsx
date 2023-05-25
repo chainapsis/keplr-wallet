@@ -31,87 +31,50 @@ export const MenuBar: FunctionComponent<{
   const navigate = useNavigate();
 
   return (
-    <Box height="100%" alignX="left">
-      <Box
-        height="100%"
-        backgroundColor={ColorPalette["gray-600"]}
-        paddingTop="1.125rem"
-        paddingX="1.75rem"
-        paddingBottom="1.25rem"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Bleed horizontal="0.15rem">
-          {/*
+    <Box
+      height="100%"
+      width="fit-content"
+      alignX="left"
+      backgroundColor={ColorPalette["gray-600"]}
+      paddingTop="1.125rem"
+      paddingX="1.75rem"
+      paddingBottom="1.25rem"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Bleed horizontal="0.15rem">
+        {/*
             좀 이상한 구조지만 clickable area를 조절하고
             아이콘이 약간 오른쪽으로 치우져보이는 느낌을 없애기 위해서
             어쩔 수 없이 약간 복잡해짐
            */}
-          <Box alignX="left">
-            <Box onClick={close} cursor="pointer">
-              <CloseIcon width="1.5rem" height="1.5rem" />
-            </Box>
+        <Box alignX="left">
+          <Box onClick={close} cursor="pointer">
+            <CloseIcon width="1.5rem" height="1.5rem" />
           </Box>
-        </Bleed>
-        <Gutter size="1.25rem" />
+        </Box>
+      </Bleed>
+      <Gutter size="1.25rem" />
 
-        <Stack gutter="1.5rem">
-          <Styles.MenuItem
-            onClick={(e) => {
-              e.preventDefault();
-
-              if (keyRingStore.selectedKeyInfo) {
-                browser.tabs
-                  .create({
-                    url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
-                  })
-                  .then(() => {
-                    window.close();
-                  });
-              }
-            }}
-          >
-            Manage Chain Visibility
-          </Styles.MenuItem>
-
-          <Gutter size="1rem" />
-
-          <Box
-            width="6.5rem"
-            style={{ border: `1px solid ${ColorPalette["gray-400"]}` }}
-          />
-
-          <Gutter size="1rem" />
-
-          <Styles.MenuItem onClick={() => navigate("/setting/contacts/list")}>
-            My Contacts
-          </Styles.MenuItem>
-
-          <Styles.MenuItem onClick={() => navigate("/setting/token/list")}>
-            Add Token
-          </Styles.MenuItem>
-
-          <Styles.MenuItem
-            onClick={() => {
-              navigate("/setting");
-            }}
-          >
-            Settings
-          </Styles.MenuItem>
-        </Stack>
-
-        <Styles.Flex1 />
-
+      <Stack gutter="1.5rem">
         <Styles.MenuItem
           onClick={(e) => {
             e.preventDefault();
 
-            keyRingStore.lock();
+            if (keyRingStore.selectedKeyInfo) {
+              browser.tabs
+                .create({
+                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,
+                })
+                .then(() => {
+                  window.close();
+                });
+            }
           }}
         >
-          Lock Wallet
+          Manage Chain Visibility
         </Styles.MenuItem>
 
         <Gutter size="1rem" />
@@ -123,30 +86,67 @@ export const MenuBar: FunctionComponent<{
 
         <Gutter size="1rem" />
 
-        <Box
-          cursor="pointer"
-          onClick={(e) => {
-            e.preventDefault();
+        <Styles.MenuItem onClick={() => navigate("/setting/contacts/list")}>
+          My Contacts
+        </Styles.MenuItem>
 
-            browser.tabs.create({
-              url: "https://chains.keplr.app/",
-            });
+        <Styles.MenuItem onClick={() => navigate("/setting/token/list")}>
+          Add Token
+        </Styles.MenuItem>
+
+        <Styles.MenuItem
+          onClick={() => {
+            navigate("/setting");
           }}
         >
-          <XAxis alignY="center">
-            <Button2 color={ColorPalette["gray-300"]}>
-              Go to Keplr Chain Registry
-            </Button2>
+          Settings
+        </Styles.MenuItem>
+      </Stack>
 
-            <Gutter size="0.25rem" />
+      <Styles.Flex1 />
 
-            <LinkIcon
-              width="1.125rem"
-              height="1.125rem"
-              color={ColorPalette["gray-300"]}
-            />
-          </XAxis>
-        </Box>
+      <Styles.MenuItem
+        onClick={(e) => {
+          e.preventDefault();
+
+          keyRingStore.lock();
+        }}
+      >
+        Lock Wallet
+      </Styles.MenuItem>
+
+      <Gutter size="1rem" />
+
+      <Box
+        width="6.5rem"
+        style={{ border: `1px solid ${ColorPalette["gray-400"]}` }}
+      />
+
+      <Gutter size="1rem" />
+
+      <Box
+        cursor="pointer"
+        onClick={(e) => {
+          e.preventDefault();
+
+          browser.tabs.create({
+            url: "https://chains.keplr.app/",
+          });
+        }}
+      >
+        <XAxis alignY="center">
+          <Button2 color={ColorPalette["gray-300"]}>
+            Go to Keplr Chain Registry
+          </Button2>
+
+          <Gutter size="0.25rem" />
+
+          <LinkIcon
+            width="1.125rem"
+            height="1.125rem"
+            color={ColorPalette["gray-300"]}
+          />
+        </XAxis>
       </Box>
     </Box>
   );
