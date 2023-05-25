@@ -143,7 +143,7 @@ export const AddressBookModal: FunctionComponent<{
               color: ColorPalette["white"],
             }}
           >
-            Address List
+            Address Book
           </Subtitle1>
         </Box>
 

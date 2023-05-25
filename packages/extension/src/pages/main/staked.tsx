@@ -58,8 +58,18 @@ export const StakedTabView: FunctionComponent = observer(() => {
     lenAlwaysShown: number;
     tooltip?: string | React.ReactElement;
   }[] = [
-    { title: "Staked Balance", balance: delegations, lenAlwaysShown: 5 },
-    { title: "Unstaking Balance", balance: unbondings, lenAlwaysShown: 3 },
+    {
+      title: "Staked Balance",
+      balance: delegations,
+      lenAlwaysShown: 5,
+      tooltip: "Tokens that are delegated to validators and earning rewards.",
+    },
+    {
+      title: "Unstaking Balance",
+      balance: unbondings,
+      lenAlwaysShown: 3,
+      tooltip: "Tokens that are under the unbonding period.",
+    },
   ];
 
   return (

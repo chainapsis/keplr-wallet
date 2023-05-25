@@ -219,7 +219,11 @@ export const UnlockPage: FunctionComponent = observer(() => {
           type="button"
           size="small"
           color="faint"
-          onClick={() => {}}
+          onClick={() => {
+            browser.tabs.create({
+              url: `https://help.keplr.app/faq`,
+            });
+          }}
           style={{ width: "100%", color: ColorPalette["gray-300"] }}
         />
       </Box>
