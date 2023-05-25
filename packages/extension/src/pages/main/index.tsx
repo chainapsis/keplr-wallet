@@ -186,7 +186,7 @@ export const MainPage: FunctionComponent = observer(() => {
       }
       right={<ProfileButton />}
     >
-      <Box paddingX="0.75rem" paddingBottom="0.5rem">
+      <Box paddingX="0.75rem" paddingBottom="0.75rem">
         <Stack gutter="0.75rem">
           <StringToggle
             tabStatus={tabStatus}
