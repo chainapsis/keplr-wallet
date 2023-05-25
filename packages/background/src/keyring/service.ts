@@ -943,6 +943,101 @@ export class KeyRingService {
     );
   }
 
+  async exportKeyRingData(
+    password: string
+  ): Promise<Legacy.ExportKeyRingData[]> {
+    await this.vaultService.checkUserPassword(password);
+
+    const result: Legacy.ExportKeyRingData[] = [];
+
+    for (const keyInfo of this.getKeyInfos()) {
+      const meta: { [key: string]: string } = {
+        __id__: keyInfo.id,
+        name: keyInfo.name,
+      };
+
+      switch (keyInfo.type) {
+        case "mnemonic": {
+          const mnemonic = await this.showSensitiveKeyRingData(
+            keyInfo.id,
+            password
+          );
+
+          result.push({
+            bip44HDPath: (keyInfo.insensitive["bip44HDPath"] as any) ?? {
+              account: 0,
+              change: 0,
+              addressIndex: 0,
+            },
+            coinTypeForChain: (() => {
+              const res: {
+                [identifier: string]: number;
+              } = {};
+
+              for (const chainInfo of this.chainsService.getChainInfos()) {
+                const identifier = ChainIdHelper.parse(
+                  chainInfo.chainId
+                ).identifier;
+                const coinTypeTag = `keyRing-${identifier}-coinType`;
+                if (keyInfo.insensitive[coinTypeTag] != null) {
+                  res[identifier] = keyInfo.insensitive[coinTypeTag] as number;
+                }
+              }
+
+              return res;
+            })(),
+            key: mnemonic,
+            meta,
+            type: "mnemonic",
+          });
+
+          break;
+        }
+        case "private-key": {
+          if (
+            typeof keyInfo.insensitive === "object" &&
+            keyInfo.insensitive["keyRingMeta"] &&
+            typeof keyInfo.insensitive["keyRingMeta"] === "object" &&
+            keyInfo.insensitive["keyRingMeta"]["web3Auth"] &&
+            typeof keyInfo.insensitive["keyRingMeta"]["web3Auth"] === "object"
+          ) {
+            const web3Auth = keyInfo.insensitive["keyRingMeta"]["web3Auth"];
+            if (web3Auth["type"] === "google" && web3Auth["email"]) {
+              // TODO: Add apple?
+              meta["socialType"] = "google";
+              meta["email"] = web3Auth["email"] as string;
+            } else {
+              // Keplr mobile only supports google web3Auth.
+              continue;
+            }
+          }
+
+          const privateKey = (
+            await this.showSensitiveKeyRingData(keyInfo.id, password)
+          ).replace("0x", "");
+
+          result.push({
+            // bip44HDPath is not used
+            bip44HDPath: {
+              account: 0,
+              change: 0,
+              addressIndex: 0,
+            },
+            // coinTypeForChain is not used
+            coinTypeForChain: {},
+            key: privateKey,
+            meta,
+            type: "privateKey",
+          });
+
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
   protected getVaultKeyRing(vault: Vault): KeyRing {
     for (const keyRing of this.keyRings) {
       if (vault.insensitive["keyRingType"] === keyRing.supportedKeyRingType()) {
