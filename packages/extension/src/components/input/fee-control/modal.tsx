@@ -194,7 +194,7 @@ export const TransactionFeeModal: FunctionComponent<{
 
         <Button
           type="button"
-          text="Confirm"
+          text="Close"
           color="secondary"
           size="large"
           onClick={() => {
