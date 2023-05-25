@@ -4,7 +4,7 @@ import { useStore } from "../../../../stores";
 import { HeaderLayout } from "../../../../layouts/header";
 import { BackButton } from "../../../../layouts/header/components";
 import { Box } from "../../../../components/box";
-import { CloseIcon, PlusIcon } from "../../../../components/icon";
+import { CloseIcon, PlusIcon, QuestionIcon } from "../../../../components/icon";
 import { ColorPalette } from "../../../../styles";
 import { Stack } from "../../../../components/stack";
 import { Body1, Body3, Subtitle3 } from "../../../../components/typography";
@@ -13,6 +13,7 @@ import { Column, Columns } from "../../../../components/column";
 import { ChainImageFallback } from "../../../../components/image";
 import { EmptyView } from "../../../../components/empty-view";
 import { Gutter } from "../../../../components/gutter";
+import { Tooltip } from "../../../../components/tooltip";
 
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
@@ -84,7 +85,16 @@ const ChainItem: FunctionComponent<{
           />
         </Box>
         <Stack gutter="0.375rem">
-          <Body1 color={ColorPalette["gray-50"]}>{chainInfo.chainName}</Body1>
+          <Columns sum={1} alignY="center" gutter="0.25rem">
+            <Body1 color={ColorPalette["gray-50"]}>{chainInfo.chainName}</Body1>
+            <Tooltip content="The infrastructure and setting of this chain is not configured by Keplr team. Please reach out to the chain or website team for technical support.">
+              <QuestionIcon
+                width="1rem"
+                height="1rem"
+                color={ColorPalette["gray-300"]}
+              />
+            </Tooltip>
+          </Columns>
           <Body3 color={ColorPalette["gray-300"]}>
             {chainInfo.currencies[0].coinDenom}
           </Body3>
