@@ -42,7 +42,7 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
                   <ChainItem
                     key={chainInfo.chainIdentifier}
                     chainInfo={chainInfo}
-                    onClick={() => {
+                    onClickClose={() => {
                       chainStore.removeChainInfo(chainInfo.chainIdentifier);
                     }}
                   />
@@ -65,15 +65,14 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
 
 const ChainItem: FunctionComponent<{
   chainInfo: ChainInfo;
-  onClick?: () => void;
-}> = ({ chainInfo, onClick }) => {
+  onClickClose?: () => void;
+}> = ({ chainInfo, onClickClose }) => {
   return (
     <Box
       backgroundColor={ColorPalette["gray-600"]}
       borderRadius="0.375rem"
       paddingX="1rem"
       paddingY="1rem"
-      onClick={onClick}
     >
       <Columns sum={1} alignY="center" gutter="0.375rem">
         <Box borderRadius="50%">
@@ -102,7 +101,7 @@ const ChainItem: FunctionComponent<{
 
         <Column weight={1} />
 
-        <Box cursor="pointer">
+        <Box onClick={onClickClose} cursor="pointer">
           <CloseIcon />
         </Box>
       </Columns>
