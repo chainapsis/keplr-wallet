@@ -32,7 +32,7 @@ export const MenuBar: FunctionComponent<{
   return (
     <Box
       height="100%"
-      width="70%"
+      minWidth="15rem"
       maxWidth="20rem"
       backgroundColor={ColorPalette["gray-600"]}
       paddingTop="1.125rem"
@@ -64,7 +64,7 @@ export const MenuBar: FunctionComponent<{
             }
           }}
         >
-          Manage Chain List
+          Manage Chain Visibility
         </Styles.MenuItem>
 
         <Gutter size="1rem" />

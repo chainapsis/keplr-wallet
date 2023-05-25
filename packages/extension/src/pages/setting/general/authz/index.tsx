@@ -161,7 +161,7 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
   }, [chainId, grants]);
 
   return (
-    <HeaderLayout title="AuthZ List" left={<BackButton />}>
+    <HeaderLayout title="Manage Authz" left={<BackButton />}>
       <Box paddingX="0.75rem">
         <Box width="13rem" marginBottom="0.5rem">
           <Dropdown
