@@ -214,6 +214,8 @@ const Styles = {
   Container: styled(Stack)`
     padding: 0.875rem;
     background-color: ${ColorPalette["gray-600"]};
+
+    border-radius: 0.375rem;
   `,
   Title: styled(Subtitle3)`
     color: ${ColorPalette["gray-10"]};
@@ -228,7 +230,7 @@ const GrantView: FunctionComponent<{
   onClick?: () => void;
 }> = ({ grant, onClick }) => {
   return (
-    <Box onClick={onClick}>
+    <Box onClick={onClick} cursor="pointer">
       <Styles.Container gutter="0.5rem">
         <Styles.Title>{`You authorized ${Bech32Address.shortenAddress(
           grant.grantee,
