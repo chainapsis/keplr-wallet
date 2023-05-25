@@ -65,7 +65,7 @@ export const ConnectLedgerScene: FunctionComponent<{
           mode: "step",
           title: "Please connect your Hardware wallet",
           paragraphs: [
-            "You need to connect Ethereum app in Ledger software, if you wanna add chain(Evmos, Injective) to Keplr wallet",
+            "You need to connect Ethereum app in Ledger software, if you want to add EVM chains(Evmos, Injective) to Keplr",
           ],
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,

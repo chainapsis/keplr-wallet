@@ -72,7 +72,9 @@ export const EnableChainsScene: FunctionComponent<{
         header.setHeader({
           mode: "step",
           title: "Select Chains",
-          paragraphs: ["Don’t worry, you can change your selections anytime."],
+          paragraphs: [
+            "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
+          ],
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
         });

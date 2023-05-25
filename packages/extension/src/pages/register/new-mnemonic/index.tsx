@@ -163,7 +163,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
 
         <WarningBox
           title="Back up the phrase safely. "
-          paragraph="You will never be able to restore your account without your recovery phrase."
+          paragraph="You will never be able to restore your account without your recovery phrase. We recommend you always store it offline."
         />
       </Box>
 
