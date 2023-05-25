@@ -676,7 +676,7 @@ export const EnableChainsScene: FunctionComponent<{
                       keyType,
                       candidateAddresses: [],
                       isFresh: false,
-
+                      skipWelcome,
                       fallbackEthereumLedgerApp: true,
                       stepPrevious: stepPrevious,
                       stepTotal: stepTotal,

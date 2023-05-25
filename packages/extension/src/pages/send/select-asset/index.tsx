@@ -72,7 +72,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
       <Styles.Container gutter="0.5rem">
         <SearchTextInput
           ref={searchRef}
-          placeholder="Search for a chain"
+          placeholder="Search for asset or chain"
           value={search}
           onChange={(e) => {
             e.preventDefault();
