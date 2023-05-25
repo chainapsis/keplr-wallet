@@ -2,8 +2,8 @@ import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
 
 export const WarningIcon: FunctionComponent<IconProps> = ({
-  width = 24,
-  height = 24,
+  width = "1.5rem",
+  height = "1.5rem",
   color,
 }) => {
   return (

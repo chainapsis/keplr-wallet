@@ -2,9 +2,9 @@ import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
 
 export const RightArrowIcon: FunctionComponent<IconProps> = ({
-  width = 20,
-  height = 20,
-  color = "#72747B",
+  width = "1.5rem",
+  height = "1.5rem",
+  color,
 }) => {
   return (
     <svg
@@ -16,7 +16,7 @@ export const RightArrowIcon: FunctionComponent<IconProps> = ({
     >
       <path
         d="M7.1875 4.375L12.8125 10L7.1875 15.625"
-        stroke={color}
+        stroke={color || "currentColor"}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"

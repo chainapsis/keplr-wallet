@@ -288,6 +288,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   }, [
     gasSimulator.enabled,
     gasSimulator.gasAdjustment,
+    sendConfigs.amountConfig.fraction,
     sendConfigs.amountConfig.value,
     sendConfigs.feeConfig.fees,
     sendConfigs.feeConfig.type,

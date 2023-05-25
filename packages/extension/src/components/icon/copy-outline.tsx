@@ -2,8 +2,9 @@ import React, { FunctionComponent } from "react";
 import { IconProps } from "./types";
 
 export const CopyOutlineIcon: FunctionComponent<IconProps> = ({
-  width = 24,
-  height = 24,
+  width = "1.5rem",
+  height = "1.5rem",
+  color,
 }) => {
   return (
     <svg
@@ -15,7 +16,7 @@ export const CopyOutlineIcon: FunctionComponent<IconProps> = ({
     >
       <path
         d="M16 4H6.4C5.07452 4 4 5.07452 4 6.4V16"
-        stroke="currentColor"
+        stroke={color || "currentColor"}
         strokeWidth="2.4"
         strokeLinecap="round"
       />
@@ -25,7 +26,7 @@ export const CopyOutlineIcon: FunctionComponent<IconProps> = ({
         width="11.6"
         height="11.6"
         rx="1.2"
-        stroke="currentColor"
+        stroke={color || "currentColor"}
         strokeWidth="2.4"
       />
     </svg>
