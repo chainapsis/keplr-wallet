@@ -25,7 +25,7 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
 
   const [chainId, setChainId] = useState<string>(
-    chainStore.chainInfos[0].chainId
+    chainStore.chainInfosInUI[0].chainId
   );
 
   let grants = [] as AuthZ.Grant[];
