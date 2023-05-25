@@ -68,7 +68,7 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Manage Chain List"
+            title="Manage Chain Visibility"
             paragraph="Add or remove chains that are natively integrated with Keplr"
             endIcon={<RightArrowIcon />}
             onClick={() => {

@@ -177,8 +177,8 @@ export const CopyAddressModal: FunctionComponent<{
               style={{ textAlign: "center" }}
             >
               To use an address on certain chain, you may need to first visit
-              the &quot;Manage Chain List&quot; in the side menu and make the
-              chain visible on your wallet.
+              the &quot;Manage Chain Visibility&quot; in the side menu and make
+              the chain visible on your wallet.
             </Subtitle3>
           </Box>
         ) : null}

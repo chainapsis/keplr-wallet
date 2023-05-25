@@ -64,7 +64,7 @@ export const MenuBar: FunctionComponent<{
             }
           }}
         >
-          Manage Chain List
+          Manage Chain Visibility
         </Styles.MenuItem>
 
         <Gutter size="1rem" />
