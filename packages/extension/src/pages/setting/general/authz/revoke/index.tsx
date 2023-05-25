@@ -20,6 +20,8 @@ const Styles = {
   Card: styled(Stack)`
     padding: 0.875rem;
     background-color: ${ColorPalette["gray-600"]};
+
+    border-radius: 0.25rem;
   `,
   Title: styled(Subtitle3)`
     color: ${ColorPalette["gray-200"]};
