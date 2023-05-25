@@ -14,6 +14,7 @@ import { CopyOutlineIcon } from "../../../../../components/icon";
 import { Columns } from "../../../../../components/column";
 import { FormattedDate } from "react-intl";
 import { useNavigate } from "react-router";
+import { useNotification } from "../../../../../hooks/notification";
 
 const Styles = {
   Card: styled(Stack)`
@@ -39,6 +40,7 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const notification = useNotification();
 
   const state: { title: string; grant: AuthZ.Grant; chainId: string } =
     location.state;
@@ -90,6 +92,7 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
     const tx = account.cosmos.makeRevokeMsg(grant.grantee, messageType);
 
     try {
+      // TODO: Move to config
       let gas = 120000;
 
       // Gas adjustment is 1.5
@@ -107,11 +110,20 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
         "",
         {},
         {
-          onBroadcasted: () => {
-            navigate("/");
+          onFulfill: (tx: any) => {
+            if (tx.code != null && tx.code !== 0) {
+              console.log(tx.log ?? tx.raw_log);
+              notification.show("failed", "Transaction Failed", "");
+              return;
+            }
+            notification.show("success", "Transaction Success", "");
           },
         }
       );
+
+      navigate("/", {
+        replace: true,
+      });
     } catch (e) {
       if (e.message === "Request rejected") {
         if (location.pathname === "/setting/general/authz/revoke") {
@@ -122,7 +134,11 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
         return;
       }
 
-      navigate("/");
+      console.log(e);
+      notification.show("failed", "Transaction Failed", "");
+      navigate("/", {
+        replace: true,
+      });
     }
   };
 
