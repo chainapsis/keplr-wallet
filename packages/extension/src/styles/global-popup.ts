@@ -12,7 +12,6 @@ export const GlobalPopupStyle = createGlobalStyle`
   }
   
   body {
-    width: 100vw;
     min-height: ${Math.min(initialHeight, 600)}px;
     
     display: flex;

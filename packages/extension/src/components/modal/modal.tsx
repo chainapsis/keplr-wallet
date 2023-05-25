@@ -8,10 +8,6 @@ import React, {
 } from "react";
 import { useModalRoot } from "./internal";
 import ReactDOM from "react-dom";
-import {
-  lock as lockScroll,
-  unlock as unlockScroll,
-} from "tua-body-scroll-lock";
 import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
 import { ModalProps } from "./types";
@@ -62,18 +58,6 @@ export const Modal: FunctionComponent<ModalProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useLayoutEffect(() => {
-    if (isOpen) {
-      lockScroll(rootElement);
-
-      return () => {
-        unlockScroll(rootElement);
-      };
-    } else {
-      unlockScroll(rootElement);
-    }
-  }, [isOpen, rootElement]);
 
   if (!rootElement) {
     return null;

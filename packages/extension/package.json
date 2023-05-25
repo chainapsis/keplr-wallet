@@ -80,7 +80,6 @@
     "styled-components": "^5.3.5",
     "styled-normalize": "^8.0.7",
     "swiper": "^8.4.4",
-    "tua-body-scroll-lock": "^1.2.1",
     "utility-types": "^3.10.0",
     "webextension-polyfill": "^0.10.0"
   },
