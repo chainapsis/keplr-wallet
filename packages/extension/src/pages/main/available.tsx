@@ -108,7 +108,8 @@ export const AvailableTabView: FunctionComponent<{
       title: "Available Balance",
       balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
-      tooltip: "TODO: Lorem ipsum dolor sit amet",
+      tooltip:
+        "The amount of your assets that are available for use or transfer immediately, except for those that are currently staked or locked in LP pools.",
     },
   ];
 

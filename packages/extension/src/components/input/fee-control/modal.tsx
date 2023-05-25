@@ -67,7 +67,7 @@ export const TransactionFeeModal: FunctionComponent<{
 
   return (
     <Styles.Container>
-      <Subtitle1 style={{ marginBottom: "1.5rem" }}>Fee Set</Subtitle1>
+      <Subtitle1 style={{ marginBottom: "1.5rem" }}>Fee Options</Subtitle1>
 
       <Stack gutter="0.75rem">
         <Stack gutter="0.375rem">

@@ -27,7 +27,7 @@ export const IBCTransferView: FunctionComponent = () => {
 
             <Gutter size="0.25rem" />
 
-            <Tooltip content="If relayers are not online/active, the transfers might take longer time. ask in the corresponding community groups for the validators to clear the packets">
+            <Tooltip content="If relayers are not online/active, the transfers might take longer time. Ask in the corresponding community groups for the validators to clear the packets.">
               <QuestionIcon
                 width="1rem"
                 height="1rem"

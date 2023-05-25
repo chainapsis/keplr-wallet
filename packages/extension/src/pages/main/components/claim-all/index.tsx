@@ -289,7 +289,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   }${stakableReward.toCoin().denom}`
                 );
                 state.setFailedReason(
-                  new Error("TODO: 기대값보다 소모값이 더 높음")
+                  new Error(
+                    "Your claimable reward is smaller than the required fee."
+                  )
                 );
                 return;
               }
@@ -567,7 +569,7 @@ const ClaimTokenItem: FunctionComponent<{
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {
               const log = tx.log ?? tx.raw_log;
-              notification.show("failed", "Transaction Failed", log);
+              notification.show("failed", "Transaction Failed", "");
               return;
             }
             notification.show("success", "Transaction Success", "");
@@ -584,11 +586,7 @@ const ClaimTokenItem: FunctionComponent<{
       }
 
       console.log(e);
-      notification.show(
-        "failed",
-        "Transaction Failed",
-        e.message || e.toString()
-      );
+      notification.show("failed", "Transaction Failed", "");
       navigate("/", {
         replace: true,
       });

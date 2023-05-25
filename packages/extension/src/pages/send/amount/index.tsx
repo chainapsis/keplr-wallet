@@ -385,7 +385,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       const log = tx.log ?? tx.raw_log;
-                      notification.show("failed", "Transaction Failed", log);
+                      notification.show("failed", "Transaction Failed", "");
                       return;
                     }
                     notification.show("success", "Transaction Success", "");
@@ -406,11 +406,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             }
 
             console.log(e);
-            notification.show(
-              "failed",
-              "Transaction Failed",
-              e.message || e.toString()
-            );
+            notification.show("failed", "Transaction Failed", "");
             if (!isDetachedMode) {
               navigate("/", {
                 replace: true,
