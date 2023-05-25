@@ -61,8 +61,21 @@ export const LedgerGuideBox: FunctionComponent<{
                   app = "Terra";
                 }
 
-                if (appData["Ethereum"]) {
-                  app = "Ethereum";
+                if (
+                  "eip712" in interactionData.data &&
+                  interactionData.data.eip712
+                ) {
+                  if (appData["Ethereum"]) {
+                    app = "Ethereum";
+                  } else {
+                    return (
+                      <GuideBox
+                        color="warning"
+                        title="Error"
+                        paragraph="Please initialize ethereum app first"
+                      />
+                    );
+                  }
                 }
 
                 return (
