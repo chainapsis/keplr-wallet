@@ -70,7 +70,7 @@ const DelegateMessagePretty: FunctionComponent<{
   );
 });
 
-const DelegateIcon: FunctionComponent<IconProps> = ({
+export const DelegateIcon: FunctionComponent<IconProps> = ({
   width = 24,
   height = 24,
   color,

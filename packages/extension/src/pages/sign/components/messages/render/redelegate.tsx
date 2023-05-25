@@ -5,9 +5,9 @@ import { useStore } from "../../../../../stores";
 import { Staking } from "@keplr-wallet/stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MsgBeginRedelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
-import { CustomIcon } from "./custom-icon";
 import { Coin } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { DelegateIcon } from "./delegate";
 
 export const RedelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -36,7 +36,7 @@ export const RedelegateMessage: IMessageRenderer = {
 
     if (d) {
       return {
-        icon: <CustomIcon />,
+        icon: <DelegateIcon />,
         title: "Redelegate",
         content: (
           <RedelegateMessagePretty

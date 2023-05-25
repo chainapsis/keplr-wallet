@@ -11,7 +11,6 @@ import { MsgExecuteContract as MsgExecuteSecretContract } from "@keplr-wallet/pr
 import { Buffer } from "buffer/";
 import { WasmMessageView } from "./wasm-message-view";
 import { Gutter } from "../../../../../components/gutter";
-import { Subtitle3 } from "../../../../../components/typography";
 
 export const ExecuteContractMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -97,7 +96,6 @@ const ExecuteContractMessagePretty: FunctionComponent<{
           </b>
         </React.Fragment>
       ) : null}
-      {isSecretWasm ? <Subtitle3>Encrypted</Subtitle3> : null}
       <Gutter size="0.375rem" />
       <WasmMessageView
         chainId={chainId}
