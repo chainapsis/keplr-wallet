@@ -57,7 +57,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   const addresses = uiConfigStore.addressBookConfig.getAddressBook(chainId);
 
   return (
-    <HeaderLayout title="General" left={<BackButton />}>
+    <HeaderLayout title="Contacts" left={<BackButton />}>
       <Styles.Container>
         <Columns sum={1} alignY="bottom">
           <Box width="13rem">
@@ -97,7 +97,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
                   dropdownItems={[
                     {
                       key: "change-contact-label",
-                      label: "Change Contact Label",
+                      label: "Edit Contact",
                       onSelect: () =>
                         navigate(
                           `/setting/contacts/add?chainId=${chainId}&editIndex=${i}`

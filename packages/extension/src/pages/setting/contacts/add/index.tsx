@@ -80,7 +80,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={`${editIndex < 0 ? "Add" : "Edit"} Address`}
+      title={`${editIndex < 0 ? "Add" : "Edit"} Contact`}
       left={<BackButton />}
       onSubmit={(e) => {
         e.preventDefault();
@@ -110,8 +110,9 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     >
       <Styles.Container gutter="1rem">
         <TextInput
-          label="Name"
+          label="Label"
           value={name}
+          placeholder="A short nickname to identify the contact"
           onChange={(e) => {
             e.preventDefault();
 
@@ -122,7 +123,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
           recipientConfig={recipientConfig}
           hideAddressBookButton={true}
         />
-        <MemoInput memoConfig={memoConfig} />
+        <MemoInput
+          label="Memo (Optional)"
+          placeholder="Required for sending to centralized exchange"
+          memoConfig={memoConfig}
+        />
       </Styles.Container>
     </HeaderLayout>
   );
