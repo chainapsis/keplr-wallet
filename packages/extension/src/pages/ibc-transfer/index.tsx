@@ -182,7 +182,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   {
                     onFulfill: (tx) => {
                       if (tx.code != null && tx.code !== 0) {
-                        const log = tx.log ?? tx.raw_log;
+                        console.log(tx.log ?? tx.raw_log);
                         notification.show("failed", "Transaction Failed", "");
                         return;
                       }
