@@ -107,8 +107,8 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
         "",
         {},
         {
-          onBroadcasted: (txHash) => {
-            console.log(txHash);
+          onBroadcasted: () => {
+            navigate("/");
           },
         }
       );
