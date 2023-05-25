@@ -964,7 +964,7 @@ export class KeyRingService {
           );
 
           result.push({
-            bip44HDPath: (keyInfo.insensitive["bip44HDPath"] as any) ?? {
+            bip44HDPath: (keyInfo.insensitive["bip44Path"] as any) ?? {
               account: 0,
               change: 0,
               addressIndex: 0,
