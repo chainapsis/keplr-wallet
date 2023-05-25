@@ -195,6 +195,8 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
   protected static guessResponseTruncated(headers: any, data: string): boolean {
     return (
       headers &&
+      "get" in headers &&
+      typeof headers.get === "function" &&
       (headers.get("content-type") || "").startsWith("application/json") &&
       data.startsWith("{")
     );
