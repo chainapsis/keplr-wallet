@@ -4,6 +4,7 @@ const bip39 = require("bip39");
 import { ROUTE } from "./constants";
 import { KeyRingStatus, BIP44HDPath, KeyInfo } from "./types";
 import { PlainObject } from "../vault";
+import * as Legacy from "./legacy";
 
 export class GetKeyRingStatusMsg extends Message<{
   status: KeyRingStatus;
@@ -492,5 +493,29 @@ export class ChangeUserPasswordMsg extends Message<void> {
 
   type(): string {
     return ChangeUserPasswordMsg.type();
+  }
+}
+
+export class ExportKeyRingDataMsg extends Message<Legacy.ExportKeyRingData[]> {
+  public static type() {
+    return "export-keyring-data";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ExportKeyRingDataMsg.type();
   }
 }

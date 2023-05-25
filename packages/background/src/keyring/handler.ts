@@ -21,6 +21,7 @@ import {
   UnlockKeyRingMsg,
   ChangeUserPasswordMsg,
   ChangeKeyRingNameInteractiveMsg,
+  ExportKeyRingDataMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 
@@ -85,6 +86,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         return handleChangeKeyRingNameInteractiveMsg(service)(
           env,
           msg as ChangeKeyRingNameInteractiveMsg
+        );
+      case ExportKeyRingDataMsg:
+        return handleExportKeyRingDatasMsg(service)(
+          env,
+          msg as ExportKeyRingDataMsg
         );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
@@ -284,5 +290,13 @@ const handleChangeKeyRingNameInteractiveMsg: (
       msg.defaultName,
       msg.editable
     );
+  };
+};
+
+const handleExportKeyRingDatasMsg: (
+  service: KeyRingService
+) => InternalHandler<ExportKeyRingDataMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.exportKeyRingData(msg.password);
   };
 };
