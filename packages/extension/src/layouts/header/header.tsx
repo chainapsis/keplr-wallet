@@ -208,7 +208,11 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
                 type: type || onSubmit ? ("submit" as const) : undefined,
               };
 
-              return <Button {...props} />;
+              return (
+                <Skeleton isNotReady={isNotReady} type="button">
+                  <Button {...props} />
+                </Skeleton>
+              );
             }
           })()}
         </Box>
