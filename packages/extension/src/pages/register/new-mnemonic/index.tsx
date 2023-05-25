@@ -158,12 +158,12 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
       <Box>
         <WarningBox
           title="DO NOT share your recovery phrase with ANYONE."
-          paragraph="Anyone with your recovery phrase can have full control over your assets. Please stay vigilant against phishing attacks at all times."
+          paragraph="Anyone with your recovery phrase can take your assets. Please stay vigilant against phishing attacks at all times."
         />
 
         <WarningBox
-          title="Back up the phrase safely. "
-          paragraph="You will never be able to restore your account without your recovery phrase. We recommend you always store it offline."
+          title="Back up the phrase safely."
+          paragraph="You will lose your assets if you lose your recovery phrase. We recommend you always store it offline. Keplr does not store your recovery phrase."
         />
       </Box>
 

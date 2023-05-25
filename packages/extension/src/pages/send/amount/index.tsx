@@ -330,7 +330,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButton={{
         disabled: txConfigsValidate.interactionBlocked,
-        text: "Go to Sign",
+        text: "Next",
         color: "primary",
         size: "large",
         isLoading: accountStore.getAccount(chainId).isSendingMsg === "send",

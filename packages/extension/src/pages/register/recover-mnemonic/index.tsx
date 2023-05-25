@@ -65,17 +65,10 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
           <div key="paragraphs">
             Enter your recovery phrase here to restore your wallet.
             <br />
-            Click on any blank to paste the entire phrase.
+            or paste the entire phrase in any text input.
           </div>,
           <div key="paragraphs">
-            Please make sure that you have selected the right option.
-          </div>,
-          <div key="paragraphs">
-            If your recovery phrase is consisted of more than 12 words, please
-            select “24 words” and enter your phrase.
-          </div>,
-          <div key="paragraphs">
-            Type the words in small letters and in correct order only
+            Enter the phrase in the right order without capitalization, punctuation symbols, or spaces.
           </div>,
         ],
         stepCurrent: 1,

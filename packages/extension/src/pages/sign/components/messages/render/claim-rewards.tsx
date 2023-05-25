@@ -58,7 +58,7 @@ const ClaimRewardsMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      Claim pending staking reward from{" "}
+      Claim staking reward from{" "}
       <b>{moniker || Bech32Address.shortenAddress(validatorAddress, 28)}</b>
     </React.Fragment>
   );

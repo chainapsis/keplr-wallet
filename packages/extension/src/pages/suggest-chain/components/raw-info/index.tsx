@@ -110,7 +110,7 @@ export const RawInfoView: FunctionComponent<{
 
               <GuideBox
                 title="Before You Approve"
-                paragraph="Keplr recommends that ‘suggest chain’info be managed by the community. At this time, this chain’s info has not been registered."
+                paragraph="This chain’s info is not available on Keplr Chain Registry. Keplr recommends that ‘suggest chain’ info be managed by the community."
                 bottom={
                   <a
                     href={chainSuggestStore.communityChainInfoRepoUrl}

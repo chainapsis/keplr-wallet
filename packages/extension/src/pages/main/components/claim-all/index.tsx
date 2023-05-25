@@ -408,7 +408,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               <YAxis alignX="left">
                 <Skeleton layer={1} isNotReady={isNotReady}>
                   <Body2 style={{ color: ColorPalette["gray-300"] }}>
-                    Pending Staking Reward
+                    Unclaimed Staking Reward
                   </Body2>
                 </Skeleton>
               </YAxis>
