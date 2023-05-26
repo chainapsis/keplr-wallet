@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts/header";
 import { CommunityInfoView, RawInfoView } from "./components";
@@ -9,7 +9,8 @@ import { useInteractionInfo } from "../../hooks";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore, uiConfigStore } = useStore();
-  const [updateFromRepoDisabled, setUpdateFromRepoDisabled] = useState(false);
+  const [isRaw, setIsRaw] = useState(false);
+  const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
 
   const interactionInfo = useInteractionInfo(async () => {
     await chainSuggestStore.rejectAll();
@@ -20,25 +21,39 @@ export const SuggestChainPage: FunctionComponent = observer(() => {
         chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.chainId
       ).chainInfo
     : undefined;
+  const hasCommunityChainInfo: boolean = !!communityChainInfo;
 
-  const isCommunityChainInfo: boolean = !!communityChainInfo;
+  const isLoading = chainSuggestStore.getCommunityChainInfo(
+    chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo.chainId ?? ""
+  ).isLoading;
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsLoadingPlaceholder(false);
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoadingPlaceholder(false);
+    }, 1000);
+  }, []);
 
   return (
     <HeaderLayout
       fixedHeight
+      isNotReady={isLoadingPlaceholder}
       title={
-        isCommunityChainInfo && !updateFromRepoDisabled
+        hasCommunityChainInfo && !isRaw
           ? ""
           : `Add ${chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo.chainName} to Keplr`
       }
       left={
-        isCommunityChainInfo &&
-        uiConfigStore.isDeveloper &&
-        updateFromRepoDisabled ? (
+        hasCommunityChainInfo && uiConfigStore.isDeveloper && isRaw ? (
           <Box
             paddingLeft="1rem"
             cursor="pointer"
-            onClick={() => setUpdateFromRepoDisabled(!updateFromRepoDisabled)}
+            onClick={() => setIsRaw(!isRaw)}
           >
             <ArrowLeftIcon />
           </Box>
@@ -49,17 +64,15 @@ export const SuggestChainPage: FunctionComponent = observer(() => {
         size: "large",
         color: "primary",
         onClick: async () => {
-          const chainInfo = updateFromRepoDisabled
-            ? chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo
-            : communityChainInfo ||
-              chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo;
+          const chainInfo =
+            communityChainInfo ||
+            chainSuggestStore.waitingSuggestedChainInfo?.data.chainInfo;
 
           if (chainInfo && chainSuggestStore.waitingSuggestedChainInfo) {
             await chainSuggestStore.approveWithProceedNext(
               chainSuggestStore.waitingSuggestedChainInfo.id,
               {
                 ...chainInfo,
-                updateFromRepoDisabled,
               },
               () => {
                 if (
@@ -74,16 +87,16 @@ export const SuggestChainPage: FunctionComponent = observer(() => {
         },
       }}
     >
-      {isCommunityChainInfo && !updateFromRepoDisabled ? (
+      {(isLoadingPlaceholder || hasCommunityChainInfo) && !isRaw ? (
         <CommunityInfoView
-          updateFromRepoDisabled={updateFromRepoDisabled}
-          setUpdateFromRepoDisabled={setUpdateFromRepoDisabled}
+          isRaw={isRaw}
+          setIsRaw={() => setIsRaw(!isRaw)}
+          isNotReady={isLoadingPlaceholder}
         />
       ) : (
         <RawInfoView
-          isCommunityChainInfo={isCommunityChainInfo}
-          updateFromRepoDisabled={updateFromRepoDisabled}
-          setUpdateFromRepoDisabled={setUpdateFromRepoDisabled}
+          isCommunityChainInfo={hasCommunityChainInfo}
+          isNotReady={isLoadingPlaceholder}
         />
       )}
     </HeaderLayout>

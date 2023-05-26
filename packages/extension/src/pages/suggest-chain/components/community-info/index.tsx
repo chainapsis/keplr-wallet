@@ -10,6 +10,7 @@ import { ColorPalette } from "../../../../styles";
 import { RightArrowIcon } from "../../../../components/icon";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
+import { Skeleton } from "../../../../components/skeleton";
 
 const Styles = {
   Chip: styled.div`
@@ -38,9 +39,11 @@ const Styles = {
 };
 
 export const CommunityInfoView: FunctionComponent<{
-  updateFromRepoDisabled: boolean;
-  setUpdateFromRepoDisabled: (updateFromRepoDisabled: boolean) => void;
-}> = observer(({ updateFromRepoDisabled, setUpdateFromRepoDisabled }) => {
+  isNotReady?: boolean;
+  isRaw: boolean;
+  setIsRaw: () => void;
+}> = observer(({ isNotReady, setIsRaw }) => {
+  console.log("CommunityInfoView", isNotReady);
   const { chainSuggestStore, uiConfigStore } = useStore();
 
   const chainInfo = chainSuggestStore.waitingSuggestedChainInfo
@@ -48,10 +51,6 @@ export const CommunityInfoView: FunctionComponent<{
         chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.chainId
       ).chainInfo
     : undefined;
-
-  if (!chainInfo) {
-    return null;
-  }
 
   return (
     <Box
@@ -64,87 +63,110 @@ export const CommunityInfoView: FunctionComponent<{
       }}
     >
       <XAxis alignY="center">
-        <Image
-          width="80px"
-          height="80px"
-          alt="Chain Image"
-          defaultSrc={require("../../../../public/assets/img/chain-icon-alt.png")}
-          src={chainInfo.chainSymbolImageUrl}
-        />
+        <Skeleton isNotReady={isNotReady} type="circle">
+          <Image
+            width="80px"
+            height="80px"
+            alt="Chain Image"
+            defaultSrc={require("../../../../public/assets/img/chain-icon-alt.png")}
+            src={chainInfo?.chainSymbolImageUrl}
+            style={{ borderRadius: "50%" }}
+          />
+        </Skeleton>
 
         <Gutter size="1.25rem" />
 
         <Columns sum={1} gutter="0.75rem">
-          <DotIcon />
-          <DotIcon />
-          <DotIcon />
+          <Skeleton isNotReady={isNotReady} type="circle">
+            <DotIcon />
+          </Skeleton>
+          <Skeleton isNotReady={isNotReady} type="circle">
+            <DotIcon />
+          </Skeleton>
+          <Skeleton isNotReady={isNotReady} type="circle">
+            <DotIcon />
+          </Skeleton>
         </Columns>
 
         <Gutter size="1.25rem" />
 
-        <Image
-          width="80px"
-          height="80px"
-          alt="Chain Image"
-          style={{ borderRadius: "50%" }}
-          defaultSrc={require("../../../../public/assets/img/chain-icon-alt.png")}
-          src={require("../../../../public/assets/logo-256.png")}
-        />
+        <Skeleton isNotReady={isNotReady} type="circle">
+          <Image
+            width="80px"
+            height="80px"
+            alt="Chain Image"
+            style={{ borderRadius: "50%" }}
+            defaultSrc={require("../../../../public/assets/img/chain-icon-alt.png")}
+            src={require("../../../../public/assets/logo-256.png")}
+          />
+        </Skeleton>
       </XAxis>
 
       <Gutter size="2rem" />
 
-      <H1>Add {chainInfo.chainName} to Keplr</H1>
+      <Skeleton isNotReady={isNotReady}>
+        <H1 style={{ textAlign: "center" }}>
+          Add {chainInfo?.chainName} to Keplr
+        </H1>
+      </Skeleton>
 
       <Gutter size="0.75rem" />
 
       <a
-        href={chainSuggestStore.getCommunityChainInfoUrl(chainInfo.chainId)}
+        href={chainSuggestStore.getCommunityChainInfoUrl(
+          chainInfo?.chainId ?? ""
+        )}
         target="_blank"
         rel="noreferrer"
         style={{ textDecoration: "none" }}
       >
-        <Styles.Chip>
-          Community driven
-          <Box>
-            <GithubIcon />
-          </Box>
-        </Styles.Chip>
+        <Skeleton isNotReady={isNotReady}>
+          <Styles.Chip>
+            Community driven
+            <Box>
+              <GithubIcon />
+            </Box>
+          </Styles.Chip>
+        </Skeleton>
       </a>
 
       <Gutter size="1.15rem" />
 
       <Box paddingX="2.5rem">
-        <Styles.Paragraph>
-          <Styles.Bold>
-            {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
-          </Styles.Bold>
-          would like to add blockchain
-          <Styles.Bold>{chainInfo.chainId}</Styles.Bold> to Keplr.
-        </Styles.Paragraph>
+        <Skeleton isNotReady={isNotReady}>
+          <Styles.Paragraph>
+            <Styles.Bold>
+              {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
+            </Styles.Bold>
+            would like to add blockchain
+            <Styles.Bold>{chainInfo?.chainId}</Styles.Bold> to Keplr.
+          </Styles.Paragraph>
+        </Skeleton>
       </Box>
 
       <Box style={{ flex: 1 }} />
 
       {uiConfigStore.isDeveloper ? (
-        <Box
-          cursor="pointer"
-          style={{
-            color: ColorPalette["gray-100"],
-            paddingBottom: "1rem",
-            userSelect: "none",
-          }}
-          onClick={() => setUpdateFromRepoDisabled(!updateFromRepoDisabled)}
-        >
-          <XAxis alignY="center">
-            <H5>Add chain as suggested</H5>
-            <RightArrowIcon
-              width="1rem"
-              height="1rem"
-              color={ColorPalette["gray-100"]}
-            />
-          </XAxis>
-        </Box>
+        <Skeleton isNotReady={isNotReady}>
+          <Box
+            cursor="pointer"
+            style={{
+              color: ColorPalette["gray-100"],
+              paddingBottom: "1rem",
+              userSelect: "none",
+            }}
+            onClick={setIsRaw}
+          >
+            <XAxis alignY="center">
+              <H5>Add chain as suggested</H5>
+              <RightArrowIcon
+                width="1rem"
+                height="1rem"
+                color={ColorPalette["gray-100"]}
+              />
+            </XAxis>
+          </Box>
+        </Skeleton>
       ) : null}
     </Box>
   );
