@@ -80,9 +80,15 @@ export const CopyAddressModal: FunctionComponent<{
       const accountInfo = accountStore.getAccount(chainInfo.chainId);
 
       const bech32Address = accountInfo.bech32Address;
-      const ethereumAddress = accountInfo.hasEthereumHexAddress
-        ? accountInfo.ethereumHexAddress
-        : undefined;
+      const ethereumAddress = (() => {
+        if (chainInfo.chainId.startsWith("injective")) {
+          return undefined;
+        }
+
+        return accountInfo.hasEthereumHexAddress
+          ? accountInfo.ethereumHexAddress
+          : undefined;
+      })();
 
       return {
         chainInfo,
