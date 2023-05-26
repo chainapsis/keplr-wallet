@@ -52,6 +52,7 @@ module.exports = {
   entry: {
     popup: ["./src/index.tsx"],
     register: ["./src/register.tsx"],
+    blocklist: ["./src/pages/blocklist/index.tsx"],
     background: ["./src/background/background.ts"],
     contentScripts: ["./src/content-scripts/content-scripts.ts"],
     injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
@@ -72,6 +73,11 @@ module.exports = {
       cacheGroups: {
         popup: {
           maxSize: 3_000_000,
+        },
+        blocklist: {
+          maxSize: 3_000_000,
+          maxInitialRequests: 100,
+          maxAsyncRequests: 100,
         },
       },
     },
@@ -139,6 +145,11 @@ module.exports = {
       template: "./src/index.html",
       filename: "register.html",
       chunks: ["register"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "blocklist.html",
+      chunks: ["blocklist"],
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",
