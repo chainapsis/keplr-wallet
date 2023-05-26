@@ -6,6 +6,7 @@
 **/*.secret
 **/*.md
 **/*.webm
+**/*.css
 .DS_Store
 
 node_modules

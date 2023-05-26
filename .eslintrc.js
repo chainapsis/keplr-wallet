@@ -74,4 +74,5 @@ module.exports = {
       version: "detect",
     },
   },
+  ignorePatterns: ["**/*.css"],
 };

@@ -1,0 +1,4 @@
+.simplebar-scrollbar::before {
+  background-color: red;
+}
+
