@@ -19,7 +19,7 @@ import { Columns } from "../../components/column";
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
   const [isShowMigration, setIsShowMigration] = useState(
-    keyRingStore.isMigrating
+    keyRingStore.isMigrating || false
   );
 
   const interactionInfo = useInteractionInfo(() => {
@@ -42,6 +42,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
 
   const animContainerRef = useRef<HTMLDivElement | null>(null);
   const animRef = useRef<AnimationItem | null>(null);
+
   useEffect(() => {
     if (animContainerRef.current) {
       const anim = lottie.loadAnimation({
@@ -77,8 +78,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
   }, [isLoading]);
 
   useEffect(() => {
-    //나중에 true는 needMigration으로 수정
-    if (error && keyRingStore.needMigration) {
+    if (error) {
       console.log("error", error);
       setIsShowMigration(false);
     }
@@ -86,103 +86,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      {isShowMigration ? (
-        <Box
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-            paddingLeft: "1.5rem",
-            paddingRight: "1.5rem",
-          }}
-        >
-          <Box alignX="center">
-            <Gutter size="6rem" />
-            <div
-              ref={animContainerRef}
-              style={{
-                width: "12rem",
-                height: "9.5rem",
-              }}
-            />
-            <Box
-              minHeight="4.375rem"
-              alignY="center"
-              style={{
-                textAlign: "center",
-              }}
-            >
-              <React.Fragment>
-                <H1 color={ColorPalette["white"]}> 💫 Keplr 2.0 is here!</H1>
-                <Gutter size="0.5rem" />
-              </React.Fragment>
-            </Box>
-            <Gutter size="2rem" />
-            <GuideBox
-              title="Don’t close your browser during update"
-              color="warning"
-              paragraph={
-                <Box>
-                  Migration for users with many accounts can take up to several
-                  minutes.
-                </Box>
-              }
-            />
-            <Gutter size="2.125rem" />
-            {/* 나중에 keyRingStore.isMigrating 으로 변경되야함 */}
-            {keyRingStore.isMigrating ? (
-              <Columns sum={1} alignY="center" gutter="0.25rem">
-                <Subtitle4 color={ColorPalette["gray-200"]}>
-                  Upgrade in progress
-                </Subtitle4>
-                <LoadingIcon />
-              </Columns>
-            ) : (
-              <Button
-                type="submit"
-                text="Start Migration"
-                size="large"
-                disabled={password.length === 0}
-                style={{ width: "100%" }}
-                onClick={async () => {
-                  try {
-                    setIsLoading(true);
-
-                    await keyRingStore.unlock(password);
-
-                    if (interactionInfo.interaction) {
-                      // Approve all waiting interaction for the enabling key ring.
-                      const interactions =
-                        interactionStore.getAllData("unlock");
-                      await interactionStore.approveWithProceedNextV2(
-                        interactions.map((interaction) => interaction.id),
-                        {},
-                        (proceedNext) => {
-                          if (
-                            interactionInfo.interaction &&
-                            !interactionInfo.interactionInternal
-                          ) {
-                            if (!proceedNext) {
-                              window.close();
-                            }
-                          }
-                        }
-                      );
-                    }
-
-                    setError(undefined);
-                  } catch (e) {
-                    console.log(e);
-                    setError(e);
-                  } finally {
-                    setIsLoading(false);
-                  }
-                }}
-              />
-            )}
-          </Box>
-        </Box>
-      ) : (
+      {true ? (
         <form
           style={{
             display: "flex",
@@ -193,9 +97,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
           }}
           onSubmit={async (e) => {
             e.preventDefault();
-
-            //NOTE 나중에  keyRingStore.needMigration으로 변경해야함
-            if (keyRingStore.needMigration) {
+            if (!isShowMigration) {
               setIsShowMigration(true);
             } else {
               try {
@@ -234,7 +136,6 @@ export const UnlockPage: FunctionComponent = observer(() => {
         >
           <Box alignX="center">
             <Gutter size="6rem" />
-
             <div
               ref={animContainerRef}
               style={{
@@ -242,29 +143,31 @@ export const UnlockPage: FunctionComponent = observer(() => {
                 height: "9.5rem",
               }}
             />
-
             <Box
               minHeight="4.375rem"
-              alignY="center"
               style={{
                 textAlign: "center",
               }}
             >
-              {/* 나중에 keyRingStore.needMigration으로 변경해야함 */}
-              {keyRingStore.needMigration ? (
-                <React.Fragment>
-                  <H1 color={ColorPalette["white"]}>💫 Keplr 2.0 is here!</H1>
-                  <Gutter size="0.5rem" />
+              <React.Fragment>
+                <H1 color={ColorPalette["white"]}> 💫 Keplr 2.0 is here!</H1>
+                <Gutter size="0.5rem" />
+                {!isShowMigration ? (
                   <Subtitle4 color={ColorPalette["gray-200"]}>
                     Enter your password to upgrade.
                   </Subtitle4>
-                </React.Fragment>
-              ) : (
-                <H1 color={ColorPalette["white"]}>Welcome Back</H1>
-              )}
+                ) : null}
+              </React.Fragment>
             </Box>
 
-            <Box position="relative" width="100%">
+            <Gutter size="0.75rem" />
+            <Box
+              style={{
+                height: "7rem",
+                width: "100%",
+                position: "relative",
+              }}
+            >
               <Box
                 position="absolute"
                 alignY="center"
@@ -284,85 +187,289 @@ export const UnlockPage: FunctionComponent = observer(() => {
                   <div />
                 </Tooltip>
               </Box>
-
-              <Gutter size="0.75rem" />
-              <TextInput
-                ref={inputRef}
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  e.preventDefault();
-
-                  setPassword(e.target.value);
-
-                  // Clear error if the user is typing.
-                  setError(undefined);
-                }}
-                onBlur={() => {
-                  setIsOnCapsLock(false);
-                }}
-                onKeyUp={(e) => {
-                  if (e.getModifierState("CapsLock")) {
-                    setIsOnCapsLock(true);
-                  } else {
-                    setIsOnCapsLock(false);
+              {isShowMigration ? (
+                <GuideBox
+                  title="Don’t close your browser during update"
+                  color="warning"
+                  paragraph={
+                    <Box>
+                      Migration for users with many accounts can take up to
+                      several minutes.
+                    </Box>
                   }
-                }}
-                onKeyDown={(e) => {
-                  if (e.getModifierState("CapsLock")) {
-                    setIsOnCapsLock(true);
-                  } else {
+                />
+              ) : (
+                <TextInput
+                  ref={inputRef}
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    e.preventDefault();
+
+                    setPassword(e.target.value);
+
+                    // Clear error if the user is typing.
+                    setError(undefined);
+                  }}
+                  onBlur={() => {
                     setIsOnCapsLock(false);
-                  }
-                }}
-                error={error ? "Invalid password" : undefined}
-              />
+                  }}
+                  onKeyUp={(e) => {
+                    if (e.getModifierState("CapsLock")) {
+                      setIsOnCapsLock(true);
+                    } else {
+                      setIsOnCapsLock(false);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.getModifierState("CapsLock")) {
+                      setIsOnCapsLock(true);
+                    } else {
+                      setIsOnCapsLock(false);
+                    }
+                  }}
+                  error={error ? "Invalid password" : undefined}
+                />
+              )}
             </Box>
 
-            <Gutter size="2.125rem" />
+            {keyRingStore.isMigrating ? (
+              <Columns sum={1} alignY="center" gutter="0.5rem">
+                <Subtitle4 color={ColorPalette["gray-200"]}>
+                  Upgrade in progress
+                </Subtitle4>
+                <LoadingIcon />
+              </Columns>
+            ) : isShowMigration ? (
+              <Button
+                type="submit"
+                text="Start Migration"
+                size="large"
+                disabled={password.length === 0}
+                style={{ width: "100%" }}
+              />
+            ) : (
+              <React.Fragment>
+                <Button
+                  type="submit"
+                  text="Unlock"
+                  size="large"
+                  disabled={password.length === 0}
+                  style={{ width: "100%" }}
+                />
+                <Gutter size="3.125rem" />
 
-            <Button
-              type="submit"
-              text="Unlock"
-              size="large"
-              disabled={password.length === 0}
-              style={{ width: "100%" }}
-              isLoading={
-                isLoading ||
-                (() => {
-                  if (interactionInfo.interaction) {
-                    const interactions = interactionStore.getAllData("unlock");
-                    for (const interaction of interactions) {
-                      if (
-                        interactionStore.isObsoleteInteraction(interaction.id)
-                      ) {
-                        return true;
-                      }
-                    }
-                  }
-                  return false;
-                })()
-              }
-            />
-
-            <Gutter size="3.125rem" />
-
-            <TextButton
-              text="Forgot Password?"
-              type="button"
-              size="small"
-              color="faint"
-              onClick={() => {
-                browser.tabs.create({
-                  url: `https://help.keplr.app/faq`,
-                });
-              }}
-              style={{ width: "100%", color: ColorPalette["gray-300"] }}
-            />
+                <TextButton
+                  text="Forgot Password?"
+                  type="button"
+                  size="small"
+                  color="faint"
+                  onClick={() => {
+                    browser.tabs.create({
+                      url: `https://help.keplr.app/faq`,
+                    });
+                  }}
+                  style={{ width: "100%", color: ColorPalette["gray-300"] }}
+                />
+              </React.Fragment>
+            )}
           </Box>
         </form>
+      ) : (
+        <Box
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            paddingLeft: "1.5rem",
+            paddingRight: "1.5rem",
+          }}
+        >
+          <Box alignX="center">
+            <Gutter size="6rem" />
+            <div
+              ref={animContainerRef}
+              style={{
+                width: "12rem",
+                height: "9.5rem",
+              }}
+            />
+
+            <Box
+              minHeight="4.375rem"
+              alignY="center"
+              style={{
+                textAlign: "center",
+              }}
+            >
+              <H1 color={ColorPalette["white"]}>Welcome Back</H1>
+            </Box>
+            <UnLock interactionInfo={interactionInfo} />
+          </Box>
+        </Box>
       )}
     </React.Fragment>
   );
 });
+
+const UnLock: FunctionComponent<{
+  interactionInfo: {
+    interaction: boolean;
+    interactionInternal: boolean;
+  };
+}> = ({ interactionInfo }) => {
+  const { keyRingStore, interactionStore } = useStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | undefined>();
+  const [isOnCapsLock, setIsOnCapsLock] = useState(false);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (inputRef.current) {
+      // Focus the input element at start.
+      inputRef.current.focus();
+    }
+  }, []);
+  return (
+    <form
+      style={{
+        width: "100%",
+      }}
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        try {
+          setIsLoading(true);
+
+          await keyRingStore.unlock(password);
+
+          if (interactionInfo.interaction) {
+            // Approve all waiting interaction for the enabling key ring.
+            const interactions = interactionStore.getAllData("unlock");
+            await interactionStore.approveWithProceedNextV2(
+              interactions.map((interaction) => interaction.id),
+              {},
+              (proceedNext) => {
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  if (!proceedNext) {
+                    window.close();
+                  }
+                }
+              }
+            );
+          }
+
+          setError(undefined);
+        } catch (e) {
+          console.log(e);
+          setError(e);
+        } finally {
+          setIsLoading(false);
+        }
+      }}
+    >
+      <Box alignX="center">
+        <Box position="relative" width="100%">
+          <Box
+            position="absolute"
+            alignY="center"
+            style={{
+              top: 0,
+              left: 20,
+              bottom: 0,
+            }}
+          >
+            <Tooltip
+              content={
+                <div style={{ whiteSpace: "nowrap" }}>CapsLock is on</div>
+              }
+              enabled={false}
+              isAlwaysOpen={isOnCapsLock}
+            >
+              <div />
+            </Tooltip>
+          </Box>
+
+          <Gutter size="0.75rem" />
+          <TextInput
+            ref={inputRef}
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => {
+              e.preventDefault();
+
+              setPassword(e.target.value);
+
+              // Clear error if the user is typing.
+              setError(undefined);
+            }}
+            onBlur={() => {
+              setIsOnCapsLock(false);
+            }}
+            onKeyUp={(e) => {
+              if (e.getModifierState("CapsLock")) {
+                setIsOnCapsLock(true);
+              } else {
+                setIsOnCapsLock(false);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.getModifierState("CapsLock")) {
+                setIsOnCapsLock(true);
+              } else {
+                setIsOnCapsLock(false);
+              }
+            }}
+            error={error ? "Invalid password" : undefined}
+          />
+        </Box>
+
+        <Gutter size="2.125rem" />
+
+        <Button
+          type="submit"
+          text="Unlock"
+          size="large"
+          disabled={password.length === 0}
+          style={{ width: "100%" }}
+          isLoading={
+            isLoading ||
+            (() => {
+              if (interactionInfo.interaction) {
+                const interactions = interactionStore.getAllData("unlock");
+                for (const interaction of interactions) {
+                  if (interactionStore.isObsoleteInteraction(interaction.id)) {
+                    return true;
+                  }
+                }
+              }
+              return false;
+            })()
+          }
+        />
+
+        <Gutter size="3.125rem" />
+
+        <TextButton
+          text="Forgot Password?"
+          type="button"
+          size="small"
+          color="faint"
+          onClick={() => {
+            browser.tabs.create({
+              url: `https://help.keplr.app/faq`,
+            });
+          }}
+          style={{ width: "100%", color: ColorPalette["gray-300"] }}
+        />
+      </Box>
+    </form>
+  );
+};
