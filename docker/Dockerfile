@@ -36,7 +36,6 @@ ENV KEPLR_EXT_ANALYTICS_API_URL $KEPLR_EXT_ANALYTICS_API_URL
 ENV KEPLR_EXT_COINGECKO_ENDPOINT $KEPLR_EXT_COINGECKO_ENDPOINT
 ENV KEPLR_EXT_COINGECKO_GETPRICE $KEPLR_EXT_COINGECKO_GETPRICE
 
-RUN cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
 RUN yarn install --frozen-lockfile
 
 RUN yarn build
