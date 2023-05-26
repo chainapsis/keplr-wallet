@@ -59,6 +59,7 @@ export class AnalyticsService {
         ...params,
         event,
         analyticsId: this.analyticsId,
+        v2: true,
       })
     ).toString("base64");
     await simpleFetch(KEPLR_EXT_ANALYTICS_API_URL, `/log?msg=${loggingMsg}`, {

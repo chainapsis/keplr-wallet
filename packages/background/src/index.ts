@@ -143,7 +143,8 @@ export function init(
   const keyRingCosmosService = new KeyRingCosmos.KeyRingCosmosService(
     chainsService,
     keyRingV2Service,
-    interactionService
+    interactionService,
+    analyticsService
   );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),

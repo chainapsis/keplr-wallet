@@ -22,15 +22,20 @@ import { escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
 import { trimAminoSignDoc } from "./amino-sign-doc";
 import { InteractionService } from "../interaction";
 import { Buffer } from "buffer/";
-import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import {
+  SignDoc,
+  TxBody,
+} from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import Long from "long";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { AnalyticsService } from "../analytics";
 
 export class KeyRingCosmosService {
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,
-    protected readonly interactionService: InteractionService
+    protected readonly interactionService: InteractionService,
+    protected readonly analyticsService: AnalyticsService
   ) {}
 
   async init() {
@@ -253,6 +258,19 @@ export class KeyRingCosmosService {
           );
         }
 
+        const msgTypes = newSignDoc.msgs
+          .filter((msg) => msg.type)
+          .map((msg) => msg.type);
+
+        this.analyticsService.logEventIgnoreError("tx_signed", {
+          chainId,
+          isInternal: env.isInternalMsg,
+          origin,
+          signMode: "amino",
+          msgTypes,
+          isADR36SignDoc: false,
+        });
+
         return {
           signed: newSignDoc,
           signature: encodeSecp256k1Signature(key.pubKey, signature),
@@ -333,6 +351,14 @@ export class KeyRingCosmosService {
         serializeSignDoc(signDoc),
         isEthermintLike ? "keccak256" : "sha256"
       );
+
+      this.analyticsService.logEventIgnoreError("tx_signed", {
+        chainId,
+        isInternal: true,
+        origin: new URL(browser.runtime.getURL("")).origin,
+        signMode: "amino",
+        privileged: "withdrawRewards",
+      });
 
       return {
         signed: signDoc,
@@ -438,6 +464,19 @@ export class KeyRingCosmosService {
           );
         }
 
+        const msgTypes = newSignDoc.msgs
+          .filter((msg) => msg.type)
+          .map((msg) => msg.type);
+
+        this.analyticsService.logEventIgnoreError("tx_signed", {
+          chainId,
+          isInternal: env.isInternalMsg,
+          origin,
+          signMode: "amino",
+          msgTypes,
+          isADR36SignDoc: true,
+        });
+
         return {
           signed: newSignDoc,
           signature: encodeSecp256k1Signature(key.pubKey, signature),
@@ -512,6 +551,18 @@ export class KeyRingCosmosService {
             isEthermintLike ? "keccak256" : "sha256"
           );
         }
+
+        const msgTypes = TxBody.decode(newSignDoc.bodyBytes).messages.map(
+          (msg) => msg.typeUrl
+        );
+
+        this.analyticsService.logEventIgnoreError("tx_signed", {
+          chainId,
+          isInternal: env.isInternalMsg,
+          origin,
+          signMode: "direct",
+          msgTypes,
+        });
 
         return {
           signed: {
@@ -698,6 +749,18 @@ export class KeyRingCosmosService {
         if (!res.signature || res.signature.length === 0) {
           throw new Error("Frontend should provide signature if ledger");
         }
+
+        const msgTypes = newSignDoc.msgs
+          .filter((msg) => msg.type)
+          .map((msg) => msg.type);
+
+        this.analyticsService.logEventIgnoreError("tx_signed", {
+          chainId,
+          isInternal: env.isInternalMsg,
+          origin,
+          ethSignType: "eip-712",
+          msgTypes,
+        });
 
         return {
           signed: newSignDoc,
