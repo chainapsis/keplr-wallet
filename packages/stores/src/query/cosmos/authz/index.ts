@@ -21,7 +21,7 @@ export class ObservableQueryAuthZGranterInner extends ObservableChainQuery<Grant
     );
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return this.granter.length > 0;
   }
 }
