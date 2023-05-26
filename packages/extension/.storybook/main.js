@@ -9,6 +9,7 @@ module.exports = {
   core: {
     builder: "@storybook/builder-webpack5",
   },
+
   webpackFinal: async (config) => {
     config.resolve.fallback = {
       os: require.resolve("os-browserify/browser"),
@@ -19,6 +20,11 @@ module.exports = {
       stream: require.resolve("stream-browserify"),
       process: require.resolve("process/browser"),
     };
+
+    config.module.rules.push({
+      test: /\.tsx?$/,
+      loader: "ts-loader",
+    });
 
     return config;
   },
