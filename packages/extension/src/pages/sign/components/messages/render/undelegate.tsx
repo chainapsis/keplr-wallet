@@ -7,7 +7,7 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MsgUndelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
 import { Coin } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { DelegateIcon } from "./delegate";
+import { Image } from "../../../../../components/image";
 
 export const UndelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -32,7 +32,13 @@ export const UndelegateMessage: IMessageRenderer = {
 
     if (d) {
       return {
-        icon: <DelegateIcon />,
+        icon: (
+          <Image
+            alt="icns-icon"
+            src={require("../../../../../public/assets/img/sign-delegate.png")}
+            style={{ width: "3rem", height: "3rem" }}
+          />
+        ),
         title: "Undelegate",
         content: (
           <UndelegateMessagePretty
