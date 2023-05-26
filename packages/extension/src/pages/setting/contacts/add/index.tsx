@@ -33,7 +33,9 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const [name, setName] = useState("");
 
   const recipientConfig = useRecipientConfig(chainStore, chainId, {
-    allowHexAddressOnEthermint: true,
+    allowHexAddressOnEthermint: !chainStore
+      .getChain(chainId)
+      .chainId.startsWith("injective"),
     icns: uiConfigStore.icnsInfo,
   });
   const memoConfig = useMemoConfig(chainStore, chainId);

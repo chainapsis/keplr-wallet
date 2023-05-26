@@ -18,23 +18,24 @@ export async function checkRPCConnectivity(
     close(): void;
   }
 ): Promise<void> {
-  let resultStatus: SimpleFetchResponse<{
-    result: {
-      node_info: {
-        network: string;
-      };
-    };
-  }>;
-
-  try {
-    // Get the status to get the chain id.
-    resultStatus = await simpleFetch<{
-      result: {
+  let resultStatus: SimpleFetchResponse<
+    | {
+        result: {
+          node_info: {
+            network: string;
+          };
+        };
+      }
+    | {
         node_info: {
           network: string;
         };
-      };
-    }>(rpc, "/status");
+      }
+  >;
+
+  try {
+    // Get the status to get the chain id.
+    resultStatus = await simpleFetch(rpc, "/status");
   } catch (e) {
     console.log(e);
     throw new Error("Failed to get response /status from rpc endpoint");
@@ -42,20 +43,27 @@ export async function checkRPCConnectivity(
 
   const version = ChainIdHelper.parse(chainId);
 
+  const statusResult = (() => {
+    if ("result" in resultStatus.data) {
+      return resultStatus.data.result;
+    }
+    return resultStatus.data;
+  })();
+
   const versionFromRPCStatus = ChainIdHelper.parse(
-    resultStatus.data.result.node_info.network
+    statusResult.node_info.network
   );
 
   if (versionFromRPCStatus.identifier !== version.identifier) {
     throw new Error(
-      `RPC endpoint has different chain id (expected: ${chainId}, actual: ${resultStatus.data.result.node_info.network})`
+      `RPC endpoint has different chain id (expected: ${chainId}, actual: ${statusResult.node_info.network})`
     );
   } else if (versionFromRPCStatus.version !== version.version) {
     // In the form of {chain_identifier}-{chain_version}, if the identifier is the same but the version is different, it is strictly an error,
     // but it is actually the same chain but the chain version of the node is different.
     // In this case, it is possible to treat as a warning and proceed as it is, so this is separated with above error.
     throw new DifferentChainVersionError(
-      `RPC endpoint has different chain id (expected: ${chainId}, actual: ${resultStatus.data.result.node_info.network})`
+      `RPC endpoint has different chain id (expected: ${chainId}, actual: ${statusResult.node_info.network})`
     );
   }
 

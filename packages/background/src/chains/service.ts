@@ -389,15 +389,28 @@ export class ChainsService {
     const chainInfo = this.getChainInfoOrThrow(chainId);
 
     let chainIdUpdated = false;
-    const statusResponse = await simpleFetch<{
-      result: {
-        node_info: {
-          network: string;
-        };
-      };
-    }>(chainInfo.rpc, "/status");
+    const statusResponse = await simpleFetch<
+      | {
+          result: {
+            node_info: {
+              network: string;
+            };
+          };
+        }
+      | {
+          node_info: {
+            network: string;
+          };
+        }
+    >(chainInfo.rpc, "/status");
 
-    const chainIdFromRPC = statusResponse.data.result.node_info.network;
+    const statusResult = (() => {
+      if ("result" in statusResponse.data) {
+        return statusResponse.data.result;
+      }
+      return statusResponse.data;
+    })();
+    const chainIdFromRPC = statusResult.node_info.network;
     if (ChainIdHelper.parse(chainIdFromRPC).identifier !== chainIdentifier) {
       throw new Error(
         `Chain id is different from rpc: (expected: ${chainId}, actual: ${chainIdFromRPC})`

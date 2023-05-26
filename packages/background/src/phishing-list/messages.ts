@@ -1,6 +1,6 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import { parseDomainUntilSecondLevel } from "./utils";
+import { parseDomain } from "./utils";
 
 export class CheckURLIsPhishingMsg extends Message<boolean> {
   public static type() {
@@ -15,7 +15,7 @@ export class CheckURLIsPhishingMsg extends Message<boolean> {
     const url = new URL(this.origin);
 
     // Will throw an error if url has not second level domain.
-    parseDomainUntilSecondLevel(url.origin);
+    parseDomain(url.origin);
   }
 
   override approveExternal(): boolean {
@@ -43,7 +43,7 @@ export class URLTempAllowMsg extends Message<void> {
   validateBasic(): void {
     const url = new URL(this.url);
     // Will throw an error if url has not second level domain.
-    parseDomainUntilSecondLevel(url.origin);
+    parseDomain(url.origin);
   }
 
   route(): string {

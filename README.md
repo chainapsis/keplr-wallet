@@ -13,7 +13,7 @@ You can find the latest versions of the official managed releases on these links
 - [iOS App](https://apps.apple.com/us/app/keplr-wallet/id1567851089)
 - [Android App](https://play.google.com/store/apps/details?id=com.chainapsis.keplr)
 
-For help using Keplr Wallet, Visit our [User Support Site](https://keplr.crunch.help).
+For help using Keplr Wallet, Visit our [User Support Site](https://help.keplr.app/).
 
 ## Building browser extension locally
 This repo requires `protoc` to be installed. Check [Install protobuf](https://grpc.io/docs/protoc-installation/) for details.  

@@ -11,7 +11,7 @@ export class ObservableQueryAuthZGranterInner extends ObservableChainQuery<Grant
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
-    granter: string
+    protected readonly granter: string
   ) {
     super(
       sharedContext,
@@ -19,6 +19,10 @@ export class ObservableQueryAuthZGranterInner extends ObservableChainQuery<Grant
       chainGetter,
       `/cosmos/authz/v1beta1/grants/granter/${granter}?pagination.limit=1000`
     );
+  }
+
+  protected override canFetch(): boolean {
+    return this.granter.length > 0;
   }
 }
 

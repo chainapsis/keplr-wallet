@@ -1169,4 +1169,88 @@ describe("Test chain info schema", () => {
       await ChainInfoSchema.validateAsync(chainInfo);
     }, "Should throw error when the features has cosmwasm and secretwasm at the same time");
   });
+
+  it("test token currencies in chain info", async () => {
+    const generatePlainChainInfo = (): Mutable<ChainInfo> => {
+      return {
+        rpc: "http://test.com",
+        rest: "http://test.com",
+        chainId: "test-1",
+        chainName: "Test",
+        stakeCurrency: {
+          coinDenom: "TEST",
+          coinMinimalDenom: "utest",
+          coinDecimals: 6,
+        },
+        bip44: {
+          coinType: 118,
+        },
+        bech32Config: {
+          bech32PrefixAccAddr: "test",
+          bech32PrefixAccPub: "test",
+          bech32PrefixValAddr: "test",
+          bech32PrefixValPub: "test",
+          bech32PrefixConsAddr: "test",
+          bech32PrefixConsPub: "test",
+        },
+        currencies: [
+          {
+            coinDenom: "TEST",
+            coinMinimalDenom: "utest",
+            coinDecimals: 6,
+          },
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: "TEST",
+            coinMinimalDenom: "utest",
+            coinDecimals: 6,
+            gasPriceStep: {
+              low: 0.1,
+              average: 0.2,
+              high: 0.3,
+            },
+          },
+        ],
+        chainSymbolImageUrl: "https://test.com/image.png",
+      };
+    };
+
+    const chainInfo = generatePlainChainInfo();
+    const currencies = [
+      {
+        coinDenom: "EVMOS",
+        coinMinimalDenom: "aevmos",
+        coinDecimals: 18,
+        coinGeckoId: "evmos",
+      },
+      {
+        type: "cw20",
+        contractAddress:
+          "juno168ctmpyppk90d34p3jjy658zf5a5l3w8wk35wht6ccqj4mr0yv8s4j5awr",
+        coinDenom: "NETA",
+        coinMinimalDenom:
+          "cw20:juno168ctmpyppk90d34p3jjy658zf5a5l3w8wk35wht6ccqj4mr0yv8s4j5awr:NETA",
+        coinDecimals: 6,
+      },
+      {
+        type: "cw20",
+        contractAddress:
+          "juno1g2g7ucurum66d42g8k5twk34yegdq8c82858gz0tq2fc75zy7khssgnhjl",
+        coinDenom: "MARBLE",
+        coinMinimalDenom:
+          "cw20:juno1g2g7ucurum66d42g8k5twk34yegdq8c82858gz0tq2fc75zy7khssgnhjl:MARBLE",
+        coinDecimals: 3,
+      },
+    ];
+    chainInfo["currencies"] = currencies;
+    let r = await ChainInfoSchema.validateAsync(chainInfo, {
+      stripUnknown: true,
+    });
+    expect(r.currencies).toStrictEqual(currencies);
+    r = await ChainInfoSchema.validateAsync(chainInfo, {
+      stripUnknown: false,
+    });
+    expect(r.currencies).toStrictEqual(currencies);
+  });
 });

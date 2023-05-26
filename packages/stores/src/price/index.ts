@@ -166,6 +166,8 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
 
   protected _throttler: Throttler;
 
+  protected _optionUri: string;
+
   constructor(
     protected readonly kvStore: KVStore,
     supportedVsCurrencies: {
@@ -174,6 +176,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     defaultVsCurrency: string,
     options: {
       readonly baseURL?: string;
+      readonly uri?: string;
 
       // Default is 250ms
       readonly throttleDuration?: number;
@@ -184,8 +187,9 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
         responseDebounceMs: 0,
       }),
       options.baseURL || "https://api.coingecko.com/api/v3",
-      "/simple/price"
+      options.uri || "/simple/price"
     );
+    this._optionUri = options.uri || "/simple/price";
 
     this._isInitialized = false;
 
@@ -306,7 +310,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     const vsCurrenciesUpdated = this._vsCurrencies.add(...vsCurrencies);
 
     if (coinIdsUpdated || vsCurrenciesUpdated || forceSetUrl) {
-      const url = `/simple/price?ids=${this._coinIds.values.join(
+      const url = `${this._optionUri}?ids=${this._coinIds.values.join(
         ","
       )}&vs_currencies=${this._vsCurrencies.values.join(",")}`;
 
@@ -321,7 +325,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
   protected override getCacheKey(): string {
     // Because the uri of the coingecko would be changed according to the coin ids and vsCurrencies.
     // Therefore, just using the uri as the cache key is not useful.
-    return makeURL(this.baseURL, "/simple/price");
+    return makeURL(this.baseURL, this._optionUri);
   }
 
   getPrice(coinId: string, vsCurrency?: string): number | undefined {

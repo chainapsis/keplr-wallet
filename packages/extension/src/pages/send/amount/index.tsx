@@ -88,7 +88,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     // TODO: 이 값을 config 밑으로 빼자
     300000,
     {
-      allowHexAddressOnEthermint: true,
+      allowHexAddressOnEthermint: !chainStore
+        .getChain(chainId)
+        .chainId.startsWith("injective"),
       icns: ICNSInfo,
       computeTerraClassicTax: true,
     }
