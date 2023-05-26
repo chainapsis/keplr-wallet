@@ -34,7 +34,7 @@ export const TransferMessage: IMessageRenderer = {
       return {
         icon: (
           <Image
-            alt="icns-icon"
+            alt="sign-ibc-transfer-image"
             src={require("../../../../../public/assets/img/sign-ibc-transfer.png")}
             style={{ width: "3rem", height: "3rem" }}
           />

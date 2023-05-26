@@ -34,7 +34,7 @@ export const UndelegateMessage: IMessageRenderer = {
       return {
         icon: (
           <Image
-            alt="icns-icon"
+            alt="sign-undelegate-image"
             src={require("../../../../../public/assets/img/sign-delegate.png")}
             style={{ width: "3rem", height: "3rem" }}
           />

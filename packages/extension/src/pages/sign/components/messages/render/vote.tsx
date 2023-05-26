@@ -28,7 +28,7 @@ export const VoteMessage: IMessageRenderer = {
       return {
         icon: (
           <Image
-            alt="icns-icon"
+            alt="sign-vote-image"
             src={require("../../../../../public/assets/img/sign-vote.png")}
             style={{ width: "3rem", height: "3rem" }}
           />

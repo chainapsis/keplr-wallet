@@ -47,7 +47,7 @@ export const ExecuteContractMessage: IMessageRenderer = {
       return {
         icon: (
           <Image
-            alt="icns-icon"
+            alt="sign-execute-contract-image"
             src={require("../../../../../public/assets/img/sign-execute-contract.png")}
             style={{ width: "3rem", height: "3rem" }}
           />
