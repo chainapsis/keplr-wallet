@@ -9,6 +9,9 @@ export const GlobalPopupStyle = createGlobalStyle`
   html {
     width: ${Math.min(width, 800)}px;
     min-height: ${Math.min(initialHeight, 600)}px;
+
+    margin-left: auto;
+    margin-right: auto;
   }
   
   body {
