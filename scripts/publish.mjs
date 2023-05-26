@@ -60,9 +60,9 @@ const lerna = JSON.parse(lernaFile);
         await $`cd packages/extension/build/manifest-v3 && zip -r keplr-extension-manifest-v3-${foundedVersion}.zip .`;
         await $`cd packages/extension/build/firefox && zip -r keplr-extension-${foundedVersion}.firefox.zip .`;
         if (isPrelease) {
-          await $`gh release create ${foundedVersion} packages/extension/build/chrome/keplr-extension-manifest-v2-${foundedVersion}.zip packages/extension/build/chrome/keplr-extension-manifest-v3-${foundedVersion}.zip packages/extension/build/firefox/keplr-extension-${foundedVersion}.firefox.zip -t ${foundedVersion} --prerelease`;
+          await $`gh release create ${foundedVersion} packages/extension/build/manifest-v2/keplr-extension-manifest-v2-${foundedVersion}.zip packages/extension/build/manifest-v3/keplr-extension-manifest-v3-${foundedVersion}.zip packages/extension/build/firefox/keplr-extension-${foundedVersion}.firefox.zip -t ${foundedVersion} --prerelease`;
         } else {
-          await $`gh release create ${foundedVersion} packages/extension/build/chrome/keplr-extension-manifest-v2-${foundedVersion}.zip packages/extension/build/chrome/keplr-extension-manifest-v3-${foundedVersion}.zip packages/extension/build/firefox/keplr-extension-${foundedVersion}.firefox.zip -t ${foundedVersion}`;
+          await $`gh release create ${foundedVersion} packages/extension/build/manifest-v2/keplr-extension-manifest-v2-${foundedVersion}.zip packages/extension/build/manifest-v3/keplr-extension-manifest-v3-${foundedVersion}.zip packages/extension/build/firefox/keplr-extension-${foundedVersion}.firefox.zip -t ${foundedVersion}`;
         }
 
         console.log("Release created");
