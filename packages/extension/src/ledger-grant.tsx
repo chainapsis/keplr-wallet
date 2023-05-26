@@ -32,6 +32,7 @@ import { LedgerUtils } from "./utils";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
 import Transport from "@ledgerhq/hw-transport";
 import Eth from "@ledgerhq/hw-app-eth";
+import "simplebar-react/dist/simplebar.min.css";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
