@@ -23,7 +23,7 @@ const Styles = {
 
 export const SettingContactsAdd: FunctionComponent = observer(() => {
   const { chainStore, uiConfigStore } = useStore();
-  const labelRef = useRef<HTMLInputElement | null>();
+  const labelRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
   const [chainId, setChainId] = useState(chainStore.chainInfosInUI[0].chainId);
