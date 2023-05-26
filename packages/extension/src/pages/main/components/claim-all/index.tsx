@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useRef, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { Column, Columns } from "../../../../components/column";
 import { Button } from "../../../../components/button";
 import { Stack } from "../../../../components/stack";
@@ -400,6 +400,20 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       return false;
     })();
 
+    useEffect(() => {
+      if (isExpanded) {
+        if (!claimAllIsLoading) {
+          // Clear errors when collapsed.
+          for (const state of statesRef.current.values()) {
+            state.setFailedReason(undefined);
+          }
+        }
+      }
+      // 펼쳐지면서 그 때 loading 중이 아닐 경우에 에러를 지워준다.
+      // 펼쳐지는 순간에만 발생해야하기 때문에 claimAllIsLoading는 deps에서 없어야한다.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isExpanded]);
+
     return (
       <Styles.Container>
         <Box paddingX="1rem" paddingBottom="0.25rem">
@@ -483,9 +497,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           collapsed={!isExpanded}
           onTransitionEnd={() => {
             if (!isExpanded) {
-              // Clear errors when collapsed.
-              for (const state of statesRef.current.values()) {
-                state.setFailedReason(undefined);
+              if (!claimAllIsLoading) {
+                // Clear errors when collapsed.
+                for (const state of statesRef.current.values()) {
+                  state.setFailedReason(undefined);
+                }
               }
             }
           }}
