@@ -99,6 +99,26 @@ export class KeyRingService {
     await this.vaultService.unlock(password);
   }
 
+  async checkLegacyKeyRingPassword(password: string): Promise<void> {
+    if (!this._needMigration) {
+      throw new Error("Migration is not needed");
+    }
+
+    const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
+      "key-multi-store"
+    );
+    if (!multiKeyStore || multiKeyStore.length === 0) {
+      throw new Error("No key store to migrate");
+    }
+
+    // If password is invalid, error will be thrown.
+    await Legacy.Crypto.decrypt(
+      this.migrations.commonCrypto,
+      multiKeyStore[0],
+      password
+    );
+  }
+
   protected async migrate(password: string): Promise<void> {
     if (!this._needMigration) {
       throw new Error("Migration is not needed");

@@ -520,3 +520,27 @@ export class ExportKeyRingDataMsg extends Message<Legacy.ExportKeyRingData[]> {
     return ExportKeyRingDataMsg.type();
   }
 }
+
+export class CheckLegacyKeyRingPasswordMsg extends Message<void> {
+  public static type() {
+    return "CheckLegacyKeyRingPassword";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckLegacyKeyRingPasswordMsg.type();
+  }
+}

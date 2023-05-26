@@ -13,6 +13,7 @@ import {
   BIP44HDPath,
   ChangeKeyRingNameMsg,
   ChangeUserPasswordMsg,
+  CheckLegacyKeyRingPasswordMsg,
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
   DeleteKeyRingMsg,
   FinalizeMnemonicKeyCoinTypeMsg,
@@ -326,6 +327,11 @@ export class KeyRingStore {
     newUserPassword: string
   ): Promise<void> {
     const msg = new ChangeUserPasswordMsg(prevUserPassword, newUserPassword);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async checkLegacyKeyRingPassword(password: string): Promise<void> {
+    const msg = new CheckLegacyKeyRingPasswordMsg(password);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }
