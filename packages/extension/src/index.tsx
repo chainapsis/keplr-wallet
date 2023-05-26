@@ -22,7 +22,7 @@ import React, {
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
-import { GlobalPopupStyle, GlobalStyle } from "./styles";
+import { GlobalPopupStyle, GlobalStyle, ScrollBarStyle } from "./styles";
 import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 import { Keplr } from "@keplr-wallet/provider";
@@ -359,6 +359,7 @@ const App: FunctionComponent = () => {
           <NotificationProvider>
             <GlobalStyle />
             <GlobalPopupStyle />
+            <ScrollBarStyle />
             <ErrorBoundary>
               <RoutesAfterReady />
             </ErrorBoundary>
