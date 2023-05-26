@@ -96,7 +96,6 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
       <Button
         text="Import"
         size="large"
-        disabled={!isShowPrivate}
         onClick={() => {
           sceneTransition.replaceAll("finalize-key", {
             name: name,
