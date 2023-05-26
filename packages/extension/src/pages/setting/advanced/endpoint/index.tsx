@@ -155,7 +155,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
       })}
     >
       <Styles.Container gutter="1rem">
-        <Columns sum={1} alignY="bottom">
+        <Columns sum={1} alignY="center">
           <Box width="13rem">
             <Dropdown
               items={chainList}

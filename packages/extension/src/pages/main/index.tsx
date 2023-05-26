@@ -162,7 +162,13 @@ export const MainPage: FunctionComponent = observer(() => {
             <Columns sum={1} alignY="center" gutter="0.25rem">
               <Box>{name}</Box>
 
-              <Tooltip content={icnsPrimaryName}>
+              <Tooltip
+                content={
+                  <div style={{ whiteSpace: "nowrap" }}>
+                    ICNS : {icnsPrimaryName}
+                  </div>
+                }
+              >
                 <Image
                   alt="icns-icon"
                   src={require("../../public/assets/img/icns-icon.png")}

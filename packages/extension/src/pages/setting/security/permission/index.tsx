@@ -53,6 +53,9 @@ export const SettingSecurityPermissionPage: FunctionComponent = observer(() => {
             text="Disconnect All"
             color="secondary"
             size="extraSmall"
+            disabled={
+              Object.entries(permissionManagerStore.permissionData).length === 0
+            }
             onClick={async () => {
               await permissionManagerStore.clearAllPermissions();
             }}
