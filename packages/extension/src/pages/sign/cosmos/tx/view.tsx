@@ -322,6 +322,7 @@ export const CosmosTxView: FunctionComponent<{
         </Box>
 
         <Box
+          className="show-scrollbar"
           borderRadius="0.375rem"
           backgroundColor={ColorPalette["gray-600"]}
           style={{

@@ -6,7 +6,7 @@ import React, { FunctionComponent } from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import { StoreProvider } from "./stores";
-import { GlobalStyle } from "./styles";
+import { GlobalStyle, ScrollBarStyle } from "./styles";
 import { Keplr } from "@keplr-wallet/provider";
 import manifest from "./manifest.json";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -44,6 +44,7 @@ const App: FunctionComponent = () => {
       <ModalRootProvider>
         <ConfirmProvider>
           <GlobalStyle />
+          <ScrollBarStyle />
           <AutoLockMonitor />
           <AppIntlProvider>
             <HashRouter>
