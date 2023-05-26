@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 import { Stack } from "../../../../components/stack";
@@ -23,6 +23,7 @@ const Styles = {
 
 export const SettingContactsAdd: FunctionComponent = observer(() => {
   const { chainStore, uiConfigStore } = useStore();
+  const labelRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
   const [chainId, setChainId] = useState(chainStore.chainInfosInUI[0].chainId);
@@ -41,6 +42,13 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   // Param "chainId" is required.
   const paramChainId = searchParams.get("chainId");
   const paramEditIndex = searchParams.get("editIndex");
+
+  useEffect(() => {
+    if (labelRef.current) {
+      labelRef.current.focus();
+    }
+  }, []);
+
   useEffect(() => {
     if (!paramChainId) {
       throw new Error(`Param "chainId" is required`);
@@ -111,6 +119,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
       <Styles.Container gutter="1rem">
         <TextInput
           label="Label"
+          ref={labelRef}
           value={name}
           placeholder="A short nickname to identify the contact"
           onChange={(e) => {

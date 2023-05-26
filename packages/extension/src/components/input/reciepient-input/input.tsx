@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React from "react";
 import { TextInput } from "../text-input";
 import { observer } from "mobx-react-lite";
 import {
@@ -34,8 +34,8 @@ function numOfCharacter(str: string, c: string): number {
   return str.split(c).length - 1;
 }
 
-export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
-  (props) => {
+export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
+  (props, ref) => {
     const { recipientConfig, memoConfig } = props;
 
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
@@ -58,6 +58,7 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
     return (
       <Box>
         <TextInput
+          ref={ref}
           label="Wallet Address"
           value={recipientConfig.value}
           autoComplete="off"
@@ -123,5 +124,8 @@ export const RecipientInput: FunctionComponent<RecipientInputProps> = observer(
         ) : null}
       </Box>
     );
+  },
+  {
+    forwardRef: true,
   }
 );
