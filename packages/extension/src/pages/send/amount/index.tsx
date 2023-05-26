@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useMemo } from "react";
+import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -42,6 +42,8 @@ const Styles = {
 
 export const SendAmountPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore } = useStore();
+  const addressRef = useRef<HTMLInputElement | null>(null);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const notification = useNotification();
@@ -53,6 +55,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+
+  useEffect(() => {
+    if (addressRef.current) {
+      addressRef.current.focus();
+    }
+  }, []);
 
   useEffect(() => {
     if (!initialChainId || !initialCoinMinimalDenom) {
@@ -438,6 +446,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           </YAxis>
 
           <RecipientInput
+            innerRef={addressRef}
             historyType={historyType}
             recipientConfig={sendConfigs.recipientConfig}
             memoConfig={sendConfigs.memoConfig}
