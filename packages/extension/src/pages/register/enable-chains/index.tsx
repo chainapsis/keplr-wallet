@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { RegisterSceneBox } from "../components/register-scene-box";
@@ -185,6 +191,9 @@ export const EnableChainsScene: FunctionComponent<{
       return map;
     }, [candidateAddresses]);
 
+    // Select derivation scene으로 이동한 후에는 coin type을 여기서 자동으로 finalize 하지 않도록 보장한다.
+    const sceneMovedToSelectDerivation = useRef(false);
+
     // Handle coin type selection.
     useEffect(() => {
       if (!isFresh && candidateAddresses.length > 0) {
@@ -248,7 +257,11 @@ export const EnableChainsScene: FunctionComponent<{
                   }
                 }
 
-                if (!otherIsSelectable && mainAddress) {
+                if (
+                  !otherIsSelectable &&
+                  mainAddress &&
+                  !sceneMovedToSelectDerivation.current
+                ) {
                   console.log(
                     "Finalize mnemonic key coin type",
                     vaultId,
@@ -658,6 +671,7 @@ export const EnableChainsScene: FunctionComponent<{
               ]);
 
               if (needFinalizeCoinType.length > 0) {
+                sceneMovedToSelectDerivation.current = true;
                 sceneTransition.replace("select-derivation-path", {
                   vaultId,
                   chainIds: needFinalizeCoinType,

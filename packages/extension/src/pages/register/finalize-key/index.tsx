@@ -230,6 +230,11 @@ export const FinalizeKeyScene: FunctionComponent<{
             for (const bech32Address of candidateAddress.bech32Addresses) {
               // Prepare queries state to avoid UI flicker on next scene.
               promises.push(
+                queries.cosmos.queryAccount
+                  .getQueryBech32Address(bech32Address.address)
+                  .waitFreshResponse()
+              );
+              promises.push(
                 queries.queryBalances
                   .getQueryBech32Address(bech32Address.address)
                   .stakable.waitFreshResponse()
@@ -238,11 +243,6 @@ export const FinalizeKeyScene: FunctionComponent<{
                 queries.cosmos.queryDelegations
                   .getQueryBech32Address(bech32Address.address)
                   .waitFreshResponse()
-              );
-              promises.push(
-                queries.queryBalances
-                  .getQueryBech32Address(bech32Address.address)
-                  .stakable.waitFreshResponse()
               );
             }
           }
