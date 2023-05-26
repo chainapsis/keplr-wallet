@@ -17,8 +17,6 @@ export const MessageItem: FunctionComponent<{
           width="3rem"
           minWidth="3rem"
           height="3rem"
-          backgroundColor={ColorPalette["gray-400"]}
-          borderRadius="9999px"
           alignX="center"
           alignY="center"
         >
