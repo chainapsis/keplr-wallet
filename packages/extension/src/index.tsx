@@ -71,6 +71,9 @@ import { IBCTransferPage } from "./pages/ibc-transfer";
 import { SignCosmosICNSPage } from "./pages/sign/cosmos/icns";
 import { ErrorBoundary } from "./error-boundary";
 
+import "overlayscrollbars/overlayscrollbars.css";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+
 configure({
   enforceActions: "always", // Make mobx to strict mode.
 });
@@ -361,7 +364,19 @@ const App: FunctionComponent = () => {
             <GlobalPopupStyle />
             <ScrollBarStyle />
             <ErrorBoundary>
-              <RoutesAfterReady />
+              <OverlayScrollbarsComponent
+                defer
+                options={{
+                  scrollbars: {
+                    autoHide: "never",
+                    visibility: "visible",
+                    theme: "os-theme-light",
+                  },
+                }}
+                style={{ height: "100vh" }}
+              >
+                <RoutesAfterReady />
+              </OverlayScrollbarsComponent>
             </ErrorBoundary>
           </NotificationProvider>
         </ConfirmProvider>

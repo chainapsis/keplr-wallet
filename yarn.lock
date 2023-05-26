@@ -5302,6 +5302,7 @@ __metadata:
     "@types/color": ^3.0.3
     "@types/firefox-webext-browser": ^70.0.1
     "@types/js-yaml": ^4
+    "@types/overlayscrollbars": ^1.12.1
     "@types/react-is": ^16.7.2
     "@types/resize-observer-browser": ^0.1.7
     "@types/secp256k1": ^4.0.1
@@ -5318,6 +5319,7 @@ __metadata:
     color: ^4.2.3
     copy-webpack-plugin: ^11.0.0
     crypto-browserify: ^3.12.0
+    css-loader: ^6.7.4
     deepmerge: ^4.2.2
     delay: ^4.4.0
     fork-ts-checker-webpack-plugin: ^7.2.13
@@ -5329,6 +5331,8 @@ __metadata:
     keplr-wallet-private: "file:./noop-keplr-wallet-private"
     lottie-web: ^5.10.2
     os-browserify: ^0.3.0
+    overlayscrollbars: ^2.1.1
+    overlayscrollbars-react: ^0.5.0
     process: ^0.11.10
     qrcode: ^1.4.4
     qrcode.react: ^1.0.1
@@ -5345,6 +5349,7 @@ __metadata:
     sha.js: ^2.4.11
     stream-browserify: ^3.0.0
     stream-http: ^3.2.0
+    style-loader: ^3.3.3
     styled-components: ^5.3.5
     styled-normalize: ^8.0.7
     swiper: ^8.4.4
@@ -9410,6 +9415,13 @@ __metadata:
   version: 1.3.4
   resolution: "@types/object-hash@npm:1.3.4"
   checksum: fe4aa041427f3c69cbcf63434af6e788329b40d7208b30aa845cfc1aa6bf9b0c11b23fa33a567d85ba7f2574a95c3b4a227f4b9b9b55da1eaea68ab94b4058d9
+  languageName: node
+  linkType: hard
+
+"@types/overlayscrollbars@npm:^1.12.1":
+  version: 1.12.1
+  resolution: "@types/overlayscrollbars@npm:1.12.1"
+  checksum: 4d539db07ad5a268d6eb8f3af84f64126dd2e99831895f0a7a82839dae6d7405dbb7dacecc0ecd6f6aef403f6c5ae946f9d65dd1fa8fa44f0cb9926f01032f3c
   languageName: node
   linkType: hard
 
@@ -14177,6 +14189,24 @@ __metadata:
   peerDependencies:
     webpack: ^4.27.0 || ^5.0.0
   checksum: fb0742b30ac0919f94b99a323bdefe6d48ae46d66c7d966aae59031350532f368f8bba5951fcd268f2e053c5e6e4655551076268e9073ccb58e453f98ae58f8e
+  languageName: node
+  linkType: hard
+
+"css-loader@npm:^6.7.4":
+  version: 6.7.4
+  resolution: "css-loader@npm:6.7.4"
+  dependencies:
+    icss-utils: ^5.1.0
+    postcss: ^8.4.21
+    postcss-modules-extract-imports: ^3.0.0
+    postcss-modules-local-by-default: ^4.0.1
+    postcss-modules-scope: ^3.0.0
+    postcss-modules-values: ^4.0.0
+    postcss-value-parser: ^4.2.0
+    semver: ^7.3.8
+  peerDependencies:
+    webpack: ^5.0.0
+  checksum: 6021fa9e375d767b9675e295c1513f2ee4ae04f76d9de69a75b8446e05f6e02b2170407ea72939925b788dcd5aa308527f6b41be3870dc1f4b0bfff8d2532c6e
   languageName: node
   linkType: hard
 
@@ -22927,6 +22957,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nanoid@npm:^3.3.6":
+  version: 3.3.6
+  resolution: "nanoid@npm:3.3.6"
+  bin:
+    nanoid: bin/nanoid.cjs
+  checksum: 7d0eda657002738aa5206107bd0580aead6c95c460ef1bdd0b1a87a9c7ae6277ac2e9b945306aaa5b32c6dcb7feaf462d0f552e7f8b5718abfc6ead5c94a71b3
+  languageName: node
+  linkType: hard
+
 "nanomatch@npm:^1.2.9":
   version: 1.2.13
   resolution: "nanomatch@npm:1.2.13"
@@ -23897,6 +23936,23 @@ __metadata:
     os-homedir: ^1.0.0
     os-tmpdir: ^1.0.0
   checksum: 779d261920f2a13e5e18cf02446484f12747d3f2ff82280912f52b213162d43d312647a40c332373cbccd5e3fb8126915d3bfea8dde4827f70f82da76e52d359
+  languageName: node
+  linkType: hard
+
+"overlayscrollbars-react@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "overlayscrollbars-react@npm:0.5.0"
+  peerDependencies:
+    overlayscrollbars: ^2.0.0
+    react: ">=16.8.0"
+  checksum: 5b4aa87001d769c6fd60da9748c9b9cfa51d200295919a459ebdf5f55940a5b61856d977daac3341aa284632296d26b023f403a216b82574a6a6c40d4f86d892
+  languageName: node
+  linkType: hard
+
+"overlayscrollbars@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "overlayscrollbars@npm:2.1.1"
+  checksum: 7ecb38b3d7ca45f6143c469d9e06dcf761e138995c798f36ecb17a96dbb941019e308daaea4753b02ec94756ff8136164a59b03dbfde4f88473ca2a0a89d2a57
   languageName: node
   linkType: hard
 
@@ -24960,6 +25016,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postcss-modules-local-by-default@npm:^4.0.1":
+  version: 4.0.3
+  resolution: "postcss-modules-local-by-default@npm:4.0.3"
+  dependencies:
+    icss-utils: ^5.0.0
+    postcss-selector-parser: ^6.0.2
+    postcss-value-parser: ^4.1.0
+  peerDependencies:
+    postcss: ^8.1.0
+  checksum: 2f8083687f3d6067885f8863dd32dbbb4f779cfcc7e52c17abede9311d84faf6d3ed8760e7c54c6380281732ae1f78e5e56a28baf3c271b33f450a11c9e30485
+  languageName: node
+  linkType: hard
+
 "postcss-modules-scope@npm:1.1.0":
   version: 1.1.0
   resolution: "postcss-modules-scope@npm:1.1.0"
@@ -25236,6 +25305,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postcss-value-parser@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "postcss-value-parser@npm:4.2.0"
+  checksum: 819ffab0c9d51cf0acbabf8996dffbfafbafa57afc0e4c98db88b67f2094cb44488758f06e5da95d7036f19556a4a732525e84289a425f4f6fd8e412a9d7442f
+  languageName: node
+  linkType: hard
+
 "postcss@npm:6.0.1":
   version: 6.0.1
   resolution: "postcss@npm:6.0.1"
@@ -25309,6 +25385,17 @@ __metadata:
     picocolors: ^1.0.0
     source-map-js: ^1.0.2
   checksum: a6d9096dd711e17f7b1d18ff5dcb4fdedf3941d5a3dc8b0e4ea873b8f31972d57f73d6da9a8aed7ff389eb52190ed34f6a94f299a7f5ddc68b08a24a48f77eb9
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.4.21":
+  version: 8.4.23
+  resolution: "postcss@npm:8.4.23"
+  dependencies:
+    nanoid: ^3.3.6
+    picocolors: ^1.0.0
+    source-map-js: ^1.0.2
+  checksum: 8bb9d1b2ea6e694f8987d4f18c94617971b2b8d141602725fedcc2222fdc413b776a6e1b969a25d627d7b2681ca5aabb56f59e727ef94072e1b6ac8412105a2f
   languageName: node
   linkType: hard
 
@@ -29581,6 +29668,15 @@ __metadata:
   peerDependencies:
     webpack: ^4.0.0 || ^5.0.0
   checksum: 21425246a5a8f14d1625a657a3a56f8a323193fa341a71af818a2ed2a429efa2385a328b4381cf2f12c2d0e6380801eb9e0427ed9c3a10ff95c86e383184d632
+  languageName: node
+  linkType: hard
+
+"style-loader@npm:^3.3.3":
+  version: 3.3.3
+  resolution: "style-loader@npm:3.3.3"
+  peerDependencies:
+    webpack: ^5.0.0
+  checksum: f59c953f56f6a935bd6a1dfa409f1128fed2b66b48ce4a7a75b85862a7156e5e90ab163878962762f528ec4d510903d828da645e143fbffd26f055dc1c094078
   languageName: node
   linkType: hard
 
