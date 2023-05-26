@@ -26,7 +26,7 @@ const Styles = {
   Container: styled.div<{
     hasError: boolean;
   }>`
-    padding: 0.875rem 0.25rem 0.875rem 1rem;
+    padding: 1rem 0.25rem 1rem 1rem;
     background-color: ${ColorPalette["gray-600"]};
 
     border: ${({ hasError }) =>
