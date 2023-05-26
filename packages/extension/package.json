@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf dist; rm -rf build",
-    "build": "cross-env NODE_ENV=production webpack",
+    "build": "cross-env NODE_ENV=production BUILD_OUTPUT=build/manifest-v3 webpack && cross-env NODE_ENV=production BUILD_MANIFEST_V2=true BUILD_OUTPUT=build/manifest-v2 webpack",
     "build:noop": "tsc -p tsconfig.noop.json",
     "postbuild": "zx ./scripts/post-build.mjs",
     "dev": "cross-env NODE_ENV=development BUILD_MANIFEST_V2=true webpack",

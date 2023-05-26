@@ -60,7 +60,10 @@ module.exports = {
     injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
   },
   output: {
-    path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
+    path: path.resolve(
+      __dirname,
+      isEnvDevelopment ? "dist" : process.env.BUILD_OUTPUT || "build/default"
+    ),
     filename: "[name].bundle.js",
   },
   optimization: {
@@ -70,9 +73,13 @@ module.exports = {
           return false;
         }
 
-        return (
-          chunk.name !== "contentScripts" && chunk.name !== "injectedScript"
-        );
+        const servicePackages = ["contentScripts", "injectedScript"];
+
+        if (!isBuildManifestV2) {
+          servicePackages.push("background");
+        }
+
+        return !servicePackages.includes(chunk.name);
       },
       cacheGroups: {
         ...(() => {
