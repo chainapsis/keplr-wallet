@@ -123,6 +123,10 @@ module.exports = {
       SC_DISABLE_SPEEDY: false,
       KEPLR_EXT_ETHEREUM_ENDPOINT: "",
       KEPLR_EXT_AMPLITUDE_API_KEY: "",
+      KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: "",
+      KEPLR_EXT_ANALYTICS_API_URL: "",
+      KEPLR_EXT_COINGECKO_ENDPOINT: "",
+      KEPLR_EXT_COINGECKO_GETPRICE: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
