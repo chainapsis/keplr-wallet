@@ -15,9 +15,28 @@ import lottie, { AnimationItem } from "lottie-web";
 import { GuideBox } from "../../components/guide-box";
 import { LoadingIcon } from "../../components/icon";
 import { XAxis } from "../../components/axis";
+import { autorun } from "mobx";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
+
+  const [isStartWithMigrating] = useState(() => keyRingStore.isMigrating);
+  useEffect(() => {
+    // 계정이 많으면 migration이 오래 걸릴 수 있다.
+    // 이걸 못 참고 유저가 UI를 끄고 다시 킬수도 있기 때문에
+    // migration이 진행 중이라는 것에 대해서 우선적으로 UI를 처리해준다.
+    // 근데 이건 view에서만 처리해주고...
+    // background와의 통신이 단방향이기 때문에 migration이 끝났을 때 무슨 행동을 취하기가 어렵다.
+    // 어쨋든 이런 상황은 거의 발생하지 않기 때문에
+    // mobx를 통해서 추적하고 migration이 끝나면 그냥 window를 close한다.
+    if (isStartWithMigrating) {
+      autorun(() => {
+        if (!keyRingStore.isMigrating) {
+          window.close();
+        }
+      });
+    }
+  }, [isStartWithMigrating, keyRingStore.isMigrating]);
 
   const interactionInfo = useInteractionInfo(() => {
     interactionStore.rejectAll("unlock");
@@ -55,10 +74,11 @@ export const UnlockPage: FunctionComponent = observer(() => {
     }
   }, []);
 
+  const animLoading = isLoading || keyRingStore.isMigrating;
   useEffect(() => {
     // 현실적으로는 이 애니메이션은 마이그레이션 과정 중에서만 보이고 그게 의도이다.
     if (animRef.current) {
-      if (isLoading) {
+      if (animLoading) {
         animRef.current.goToAndPlay(0);
       } else {
         // page가 넘어가기 직전에 애니메이션이 멈추지 않도록 약간의 delay를 준다.
@@ -67,7 +87,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
         }, 50);
       }
     }
-  }, [isLoading]);
+  }, [animLoading]);
 
   const tryUnlock = async (password: string) => {
     try {
@@ -245,18 +265,20 @@ export const UnlockPage: FunctionComponent = observer(() => {
 
         <Gutter size="3.125rem" />
 
-        <TextButton
-          text="Forgot Password?"
-          type="button"
-          size="small"
-          color="faint"
-          onClick={() => {
-            browser.tabs.create({
-              url: `https://help.keplr.app/faq`,
-            });
-          }}
-          style={{ width: "100%", color: ColorPalette["gray-300"] }}
-        />
+        {!isMigrationSecondPhase && !keyRingStore.isMigrating ? (
+          <TextButton
+            text="Forgot Password?"
+            type="button"
+            size="small"
+            color="faint"
+            onClick={() => {
+              browser.tabs.create({
+                url: `https://help.keplr.app/faq`,
+              });
+            }}
+            style={{ width: "100%", color: ColorPalette["gray-300"] }}
+          />
+        ) : null}
       </form>
     </Box>
   );
