@@ -1225,24 +1225,22 @@ describe("Test chain info schema", () => {
         coinGeckoId: "evmos",
       },
       {
-        coinDenom: "WEVMOS",
+        type: "cw20",
+        contractAddress:
+          "juno168ctmpyppk90d34p3jjy658zf5a5l3w8wk35wht6ccqj4mr0yv8s4j5awr",
+        coinDenom: "NETA",
         coinMinimalDenom:
-          "erc20:0xD4949664cD82660AaE99bEdc034a0deA8A0bd517:WEVMOS",
-        coinDecimals: 18,
-        type: "erc20",
-        contractAddress: "0xD4949664cD82660AaE99bEdc034a0deA8A0bd517",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/cosmos/chain-registry/master/evmos/images/evmos.png",
+          "cw20:juno168ctmpyppk90d34p3jjy658zf5a5l3w8wk35wht6ccqj4mr0yv8s4j5awr:NETA",
+        coinDecimals: 6,
       },
       {
-        coinDenom: "ATOM",
+        type: "cw20",
+        contractAddress:
+          "juno1g2g7ucurum66d42g8k5twk34yegdq8c82858gz0tq2fc75zy7khssgnhjl",
+        coinDenom: "MARBLE",
         coinMinimalDenom:
-          "erc20:0xC5e00D3b04563950941f7137B5AfA3a534F0D6d6:ATOM",
-        coinDecimals: 6,
-        type: "erc20",
-        contractAddress: "0xC5e00D3b04563950941f7137B5AfA3a534F0D6d6",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.png",
+          "cw20:juno1g2g7ucurum66d42g8k5twk34yegdq8c82858gz0tq2fc75zy7khssgnhjl:MARBLE",
+        coinDecimals: 3,
       },
     ];
     chainInfo["currencies"] = currencies;
