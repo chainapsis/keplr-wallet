@@ -14,6 +14,7 @@ import { ChainsUIService } from "../chains-ui";
 
 export class KeyRingService {
   protected _needMigration = false;
+  protected _isMigrating = false;
 
   @observable
   protected _selectedVaultId: string | undefined = undefined;
@@ -86,6 +87,10 @@ export class KeyRingService {
     return this._needMigration;
   }
 
+  get isMigrating(): boolean {
+    return this._isMigrating;
+  }
+
   async unlockKeyRing(password: string): Promise<void> {
     if (this._needMigration) {
       await this.migrate(password);
@@ -94,176 +99,258 @@ export class KeyRingService {
     await this.vaultService.unlock(password);
   }
 
+  async checkLegacyKeyRingPassword(password: string): Promise<void> {
+    if (!this._needMigration) {
+      throw new Error("Migration is not needed");
+    }
+
+    const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
+      "key-multi-store"
+    );
+    if (!multiKeyStore || multiKeyStore.length === 0) {
+      throw new Error("No key store to migrate");
+    }
+
+    // If password is invalid, error will be thrown.
+    await Legacy.Crypto.decrypt(
+      this.migrations.commonCrypto,
+      multiKeyStore[0],
+      password
+    );
+  }
+
   protected async migrate(password: string): Promise<void> {
     if (!this._needMigration) {
       throw new Error("Migration is not needed");
     }
 
-    const legacySelectedKeyStore =
-      await this.migrations.kvStore.get<Legacy.KeyStore>("key-store");
-    const multiKeyStore = await this.migrations.kvStore.get<Legacy.KeyStore[]>(
-      "key-multi-store"
-    );
-
-    let selectingVaultId: string | undefined = undefined;
-    if (!multiKeyStore || multiKeyStore.length === 0) {
-      throw new Error("No key store to migrate");
+    if (this._isMigrating) {
+      throw new Error("Migration is already in progress");
     }
 
-    const disabledChainIdentifierMap = new Map<string, boolean>();
-    for (const chainIdentifier of await this.migrations.getDisabledChainIdentifiers()) {
-      if (!this.chainsService.hasChainInfo(chainIdentifier)) {
-        continue;
+    this._isMigrating = true;
+
+    try {
+      const legacySelectedKeyStore =
+        await this.migrations.kvStore.get<Legacy.KeyStore>("key-store");
+      const multiKeyStore = await this.migrations.kvStore.get<
+        Legacy.KeyStore[]
+      >("key-multi-store");
+
+      let selectingVaultId: string | undefined = undefined;
+      if (!multiKeyStore || multiKeyStore.length === 0) {
+        throw new Error("No key store to migrate");
       }
 
-      const identifier = ChainIdHelper.parse(chainIdentifier).identifier;
-      disabledChainIdentifierMap.set(identifier, true);
-    }
-
-    const checkChainDisabled = (chainId: string) => {
-      if (disabledChainIdentifierMap.size === 0) {
-        return false;
-      }
-      return (
-        disabledChainIdentifierMap.get(
-          ChainIdHelper.parse(chainId).identifier
-        ) === true
-      );
-    };
-
-    for (const keyStore of multiKeyStore) {
-      const keyStoreId = keyStore.meta?.["__id__"];
-      if (keyStoreId) {
-        const migrated = await this.kvStore.get<boolean>(
-          "migration/v1/keyStore/" + keyStoreId
-        );
-        if (migrated) {
+      const disabledChainIdentifierMap = new Map<string, boolean>();
+      for (const chainIdentifier of await this.migrations.getDisabledChainIdentifiers()) {
+        if (!this.chainsService.hasChainInfo(chainIdentifier)) {
           continue;
         }
+
+        const identifier = ChainIdHelper.parse(chainIdentifier).identifier;
+        disabledChainIdentifierMap.set(identifier, true);
       }
 
-      if (keyStore.type === "mnemonic") {
-        // If password is invalid, error will be thrown.
-        const mnemonic = Buffer.from(
-          await Legacy.Crypto.decrypt(
-            this.migrations.commonCrypto,
-            keyStore,
-            password
-          )
-        ).toString();
-        const vaultId = await this.createMnemonicKeyRing(
-          mnemonic,
-          keyStore.bip44HDPath ?? {
-            account: 0,
-            change: 0,
-            addressIndex: 0,
-          },
-          keyStore.meta?.["name"] ?? "Keplr Account",
-          password
-        );
-        if (keyStore.coinTypeForChain) {
-          for (const chainInfo of this.chainsService.getChainInfos()) {
-            const coinType =
-              keyStore.coinTypeForChain[
-                ChainIdHelper.parse(chainInfo.chainId).identifier
-              ];
-            if (
-              coinType != null &&
-              this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
-            ) {
-              this.finalizeMnemonicKeyCoinType(
-                vaultId,
-                chainInfo.chainId,
-                coinType
-              );
-            }
-          }
+      const checkChainDisabled = (chainId: string) => {
+        if (disabledChainIdentifierMap.size === 0) {
+          return false;
         }
+        return (
+          disabledChainIdentifierMap.get(
+            ChainIdHelper.parse(chainId).identifier
+          ) === true
+        );
+      };
 
-        for (const chainInfo of this.chainsService.getChainInfos()) {
-          if (checkChainDisabled(chainInfo.chainId)) {
+      for (const keyStore of multiKeyStore) {
+        const keyStoreId = keyStore.meta?.["__id__"];
+        if (keyStoreId) {
+          const migrated = await this.kvStore.get<boolean>(
+            "migration/v1/keyStore/" + keyStoreId
+          );
+          if (migrated) {
             continue;
           }
-
-          if (
-            !this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
-          ) {
-            this.migrations.chainsUIService.enableChain(
-              vaultId,
-              chainInfo.chainId
-            );
-          }
         }
 
-        if (
-          keyStore.meta?.["__id__"] === legacySelectedKeyStore?.meta?.["__id__"]
-        ) {
-          selectingVaultId = vaultId;
-        }
-      } else if (keyStore.type === "privateKey") {
-        // If password is invalid, error will be thrown.
-        const privateKey = Buffer.from(
-          Buffer.from(
+        if (keyStore.type === "mnemonic") {
+          // If password is invalid, error will be thrown.
+          const mnemonic = Buffer.from(
             await Legacy.Crypto.decrypt(
               this.migrations.commonCrypto,
               keyStore,
               password
             )
-          ).toString(),
-          "hex"
-        );
-        const meta: PlainObject = {};
-        if (keyStore.meta?.["email"]) {
-          const socialType = keyStore.meta["socialType"] || "google";
-          meta["web3Auth"] = {
-            email: keyStore.meta["email"],
-            type: socialType,
-          };
-        }
-        const vaultId = await this.createPrivateKeyKeyRing(
-          privateKey,
-          meta,
-          keyStore.meta?.["name"] ?? "Keplr Account",
-          password
-        );
-
-        for (const chainInfo of this.chainsService.getChainInfos()) {
-          if (checkChainDisabled(chainInfo.chainId)) {
-            continue;
+          ).toString();
+          const vaultId = await this.createMnemonicKeyRing(
+            mnemonic,
+            keyStore.bip44HDPath ?? {
+              account: 0,
+              change: 0,
+              addressIndex: 0,
+            },
+            keyStore.meta?.["name"] ?? "Keplr Account",
+            password
+          );
+          if (keyStore.coinTypeForChain) {
+            for (const chainInfo of this.chainsService.getChainInfos()) {
+              const coinType =
+                keyStore.coinTypeForChain[
+                  ChainIdHelper.parse(chainInfo.chainId).identifier
+                ];
+              if (
+                coinType != null &&
+                this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
+              ) {
+                this.finalizeMnemonicKeyCoinType(
+                  vaultId,
+                  chainInfo.chainId,
+                  coinType
+                );
+              }
+            }
           }
 
-          this.migrations.chainsUIService.enableChain(
-            vaultId,
-            chainInfo.chainId
+          for (const chainInfo of this.chainsService.getChainInfos()) {
+            if (checkChainDisabled(chainInfo.chainId)) {
+              continue;
+            }
+
+            if (
+              !this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
+            ) {
+              this.migrations.chainsUIService.enableChain(
+                vaultId,
+                chainInfo.chainId
+              );
+            }
+          }
+
+          if (
+            keyStore.meta?.["__id__"] ===
+            legacySelectedKeyStore?.meta?.["__id__"]
+          ) {
+            selectingVaultId = vaultId;
+          }
+        } else if (keyStore.type === "privateKey") {
+          // If password is invalid, error will be thrown.
+          const privateKey = Buffer.from(
+            Buffer.from(
+              await Legacy.Crypto.decrypt(
+                this.migrations.commonCrypto,
+                keyStore,
+                password
+              )
+            ).toString(),
+            "hex"
           );
-        }
+          const meta: PlainObject = {};
+          if (keyStore.meta?.["email"]) {
+            const socialType = keyStore.meta["socialType"] || "google";
+            meta["web3Auth"] = {
+              email: keyStore.meta["email"],
+              type: socialType,
+            };
+          }
+          const vaultId = await this.createPrivateKeyKeyRing(
+            privateKey,
+            meta,
+            keyStore.meta?.["name"] ?? "Keplr Account",
+            password
+          );
 
-        if (
-          keyStore.meta?.["__id__"] === legacySelectedKeyStore?.meta?.["__id__"]
-        ) {
-          selectingVaultId = vaultId;
-        }
-      } else if (keyStore.type === "ledger") {
-        // Attempt to decode the ciphertext as a JSON public key map. If that fails,
-        // try decoding as a single public key hex.
-        const cipherText = await Legacy.Crypto.decrypt(
-          this.migrations.commonCrypto,
-          keyStore,
-          password
-        );
+          for (const chainInfo of this.chainsService.getChainInfos()) {
+            if (checkChainDisabled(chainInfo.chainId)) {
+              continue;
+            }
 
-        try {
-          const encodedPubkeys = JSON.parse(Buffer.from(cipherText).toString());
-          if (encodedPubkeys["Cosmos"]) {
+            this.migrations.chainsUIService.enableChain(
+              vaultId,
+              chainInfo.chainId
+            );
+          }
+
+          if (
+            keyStore.meta?.["__id__"] ===
+            legacySelectedKeyStore?.meta?.["__id__"]
+          ) {
+            selectingVaultId = vaultId;
+          }
+        } else if (keyStore.type === "ledger") {
+          // Attempt to decode the ciphertext as a JSON public key map. If that fails,
+          // try decoding as a single public key hex.
+          const cipherText = await Legacy.Crypto.decrypt(
+            this.migrations.commonCrypto,
+            keyStore,
+            password
+          );
+
+          try {
+            const encodedPubkeys = JSON.parse(
+              Buffer.from(cipherText).toString()
+            );
+            if (encodedPubkeys["Cosmos"]) {
+              const pubKey = Buffer.from(
+                encodedPubkeys["Cosmos"] as string,
+                "hex"
+              );
+              const vaultId = await this.createLedgerKeyRing(
+                pubKey,
+                keyStore.meta?.["__ledger__cosmos_app_like__"] === "Terra"
+                  ? "Terra"
+                  : "Cosmos",
+                keyStore.bip44HDPath ?? {
+                  account: 0,
+                  change: 0,
+                  addressIndex: 0,
+                },
+                keyStore.meta?.["name"] ?? "Keplr Account",
+                password
+              );
+
+              let hasEthereum = false;
+              if (encodedPubkeys["Ethereum"]) {
+                const pubKey = Buffer.from(
+                  encodedPubkeys["Ethereum"] as string,
+                  "hex"
+                );
+                this.appendLedgerKeyRing(vaultId, pubKey, "Ethereum");
+
+                hasEthereum = true;
+              }
+
+              for (const chainInfo of this.chainsService.getChainInfos()) {
+                if (checkChainDisabled(chainInfo.chainId)) {
+                  continue;
+                }
+
+                if (KeyRingService.isEthermintLike(chainInfo) && !hasEthereum) {
+                  continue;
+                }
+
+                this.migrations.chainsUIService.enableChain(
+                  vaultId,
+                  chainInfo.chainId
+                );
+              }
+
+              if (
+                keyStore.meta?.["__id__"] ===
+                legacySelectedKeyStore?.meta?.["__id__"]
+              ) {
+                selectingVaultId = vaultId;
+              }
+            }
+          } catch (e) {
+            // Decode as bytes (Legacy representation)
             const pubKey = Buffer.from(
-              encodedPubkeys["Cosmos"] as string,
+              Buffer.from(cipherText).toString(),
               "hex"
             );
             const vaultId = await this.createLedgerKeyRing(
               pubKey,
-              keyStore.meta?.["__ledger__cosmos_app_like__"] === "Terra"
-                ? "Terra"
-                : "Cosmos",
+              "Cosmos",
               keyStore.bip44HDPath ?? {
                 account: 0,
                 change: 0,
@@ -273,23 +360,12 @@ export class KeyRingService {
               password
             );
 
-            let hasEthereum = false;
-            if (encodedPubkeys["Ethereum"]) {
-              const pubKey = Buffer.from(
-                encodedPubkeys["Ethereum"] as string,
-                "hex"
-              );
-              this.appendLedgerKeyRing(vaultId, pubKey, "Ethereum");
-
-              hasEthereum = true;
-            }
-
             for (const chainInfo of this.chainsService.getChainInfos()) {
               if (checkChainDisabled(chainInfo.chainId)) {
                 continue;
               }
 
-              if (KeyRingService.isEthermintLike(chainInfo) && !hasEthereum) {
+              if (KeyRingService.isEthermintLike(chainInfo)) {
                 continue;
               }
 
@@ -306,58 +382,25 @@ export class KeyRingService {
               selectingVaultId = vaultId;
             }
           }
-        } catch (e) {
-          // Decode as bytes (Legacy representation)
-          const pubKey = Buffer.from(Buffer.from(cipherText).toString(), "hex");
-          const vaultId = await this.createLedgerKeyRing(
-            pubKey,
-            "Cosmos",
-            keyStore.bip44HDPath ?? {
-              account: 0,
-              change: 0,
-              addressIndex: 0,
-            },
-            keyStore.meta?.["name"] ?? "Keplr Account",
-            password
-          );
-
-          for (const chainInfo of this.chainsService.getChainInfos()) {
-            if (checkChainDisabled(chainInfo.chainId)) {
-              continue;
-            }
-
-            if (KeyRingService.isEthermintLike(chainInfo)) {
-              continue;
-            }
-
-            this.migrations.chainsUIService.enableChain(
-              vaultId,
-              chainInfo.chainId
-            );
-          }
-
-          if (
-            keyStore.meta?.["__id__"] ===
-            legacySelectedKeyStore?.meta?.["__id__"]
-          ) {
-            selectingVaultId = vaultId;
-          }
+        } else {
+          throw new Error("Unexpected type of keyring");
         }
-      } else {
-        throw new Error("Unexpected type of keyring");
+
+        if (keyStoreId) {
+          await this.kvStore.set("migration/v1/keyStore/" + keyStoreId, true);
+        }
       }
 
-      if (keyStoreId) {
-        await this.kvStore.set("migration/v1/keyStore/" + keyStoreId, true);
+      if (selectingVaultId) {
+        this.selectKeyRing(selectingVaultId);
       }
-    }
 
-    if (selectingVaultId) {
-      this.selectKeyRing(selectingVaultId);
+      await this.kvStore.set("migration/v1", true);
+      this._needMigration = false;
+    } finally {
+      // Set the flag to false even if the migration is failed.
+      this._isMigrating = false;
     }
-
-    await this.kvStore.set("migration/v1", true);
-    this._needMigration = false;
   }
 
   @action

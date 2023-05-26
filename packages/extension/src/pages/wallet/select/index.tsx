@@ -12,7 +12,7 @@ import { Gutter } from "../../../components/gutter";
 import { Stack } from "../../../components/stack";
 import { Column, Columns } from "../../../components/column";
 import { useNavigate } from "react-router";
-import { EllipsisIcon } from "../../../components/icon";
+import { CheckIcon, EllipsisIcon } from "../../../components/icon";
 import { Button } from "../../../components/button";
 import styled from "styled-components";
 import { FloatingDropdown } from "../../../components/dropdown";
@@ -342,13 +342,25 @@ const KeyringItem: FunctionComponent<{
     >
       <Columns sum={1} alignY="center">
         <YAxis>
-          <Subtitle2
-            style={{
-              color: ColorPalette["gray-10"],
-            }}
-          >
-            {keyInfo.name}
-          </Subtitle2>
+          <XAxis alignY="center">
+            {isSelected ? (
+              <React.Fragment>
+                <CheckIcon
+                  width="1.25rem"
+                  height="1.25rem"
+                  color={ColorPalette["gray-200"]}
+                />
+                <Gutter size="0.25rem" />
+              </React.Fragment>
+            ) : null}
+            <Subtitle2
+              style={{
+                color: ColorPalette["gray-10"],
+              }}
+            >
+              {keyInfo.name}
+            </Subtitle2>
+          </XAxis>
           {paragraph ? (
             <React.Fragment>
               <Gutter size="0.375rem" />

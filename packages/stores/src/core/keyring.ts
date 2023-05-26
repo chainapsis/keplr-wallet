@@ -13,6 +13,7 @@ import {
   BIP44HDPath,
   ChangeKeyRingNameMsg,
   ChangeUserPasswordMsg,
+  CheckLegacyKeyRingPasswordMsg,
   ComputeNotFinalizedMnemonicKeyAddressesMsg,
   DeleteKeyRingMsg,
   FinalizeMnemonicKeyCoinTypeMsg,
@@ -42,6 +43,9 @@ export class KeyRingStore {
   @observable
   protected _needMigration: boolean = false;
 
+  @observable
+  protected _isMigrating: boolean = false;
+
   @observable.ref
   protected _keyInfos: KeyInfo[] = [];
 
@@ -63,6 +67,7 @@ export class KeyRingStore {
       this._status = result.status;
       this._keyInfos = result.keyInfos;
       this._needMigration = result.needMigration;
+      this._isMigrating = result.isMigrating;
 
       this._isInitialized = true;
     });
@@ -70,6 +75,10 @@ export class KeyRingStore {
 
   get needMigration(): boolean {
     return this._needMigration;
+  }
+
+  get isMigrating(): boolean {
+    return this._isMigrating;
   }
 
   get isInitialized(): boolean {
@@ -268,14 +277,23 @@ export class KeyRingStore {
 
   @flow
   *unlock(password: string) {
-    const msg = new UnlockKeyRingMsg(password);
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    this._status = result.status;
-    this._keyInfos = result.keyInfos;
+    if (this._needMigration) {
+      this._isMigrating = true;
+    }
 
-    this._needMigration = false;
+    try {
+      const msg = new UnlockKeyRingMsg(password);
+      const result = yield* toGenerator(
+        this.requester.sendMessage(BACKGROUND_PORT, msg)
+      );
+      this._status = result.status;
+      this._keyInfos = result.keyInfos;
+
+      this._needMigration = false;
+    } finally {
+      // Set the flag to false even if the migration is failed.
+      this._isMigrating = false;
+    }
   }
 
   @flow
@@ -309,6 +327,11 @@ export class KeyRingStore {
     newUserPassword: string
   ): Promise<void> {
     const msg = new ChangeUserPasswordMsg(prevUserPassword, newUserPassword);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async checkLegacyKeyRingPassword(password: string): Promise<void> {
+    const msg = new CheckLegacyKeyRingPasswordMsg(password);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

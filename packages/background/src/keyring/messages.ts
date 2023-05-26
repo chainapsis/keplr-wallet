@@ -10,6 +10,7 @@ export class GetKeyRingStatusMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
   needMigration: boolean;
+  isMigrating: boolean;
 }> {
   public static type() {
     return "get-keyring-status";
@@ -517,5 +518,29 @@ export class ExportKeyRingDataMsg extends Message<Legacy.ExportKeyRingData[]> {
 
   type(): string {
     return ExportKeyRingDataMsg.type();
+  }
+}
+
+export class CheckLegacyKeyRingPasswordMsg extends Message<void> {
+  public static type() {
+    return "CheckLegacyKeyRingPassword";
+  }
+
+  constructor(public readonly password: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.password) {
+      throw new Error("password not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return CheckLegacyKeyRingPasswordMsg.type();
   }
 }
