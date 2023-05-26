@@ -35,7 +35,7 @@ export const ClaimRewardsMessage: IMessageRenderer = {
       return {
         icon: (
           <Image
-            alt="icns-icon"
+            alt="sign-claim-image"
             src={require("../../../../../public/assets/img/sign-claim.png")}
             style={{ width: "3rem", height: "3rem" }}
           />

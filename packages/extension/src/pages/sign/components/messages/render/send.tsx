@@ -33,7 +33,7 @@ export const SendMessage: IMessageRenderer = {
       return {
         icon: (
           <Image
-            alt="icns-icon"
+            alt="sign-send-image"
             src={require("../../../../../public/assets/img/sign-send.png")}
             style={{ width: "3rem", height: "3rem" }}
           />
