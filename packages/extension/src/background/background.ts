@@ -1,7 +1,9 @@
 // Shim ------------
 require("setimmediate");
 // Shim ------------
-importScripts("browser-polyfill.js");
+if (typeof importScripts !== "undefined") {
+  importScripts("browser-polyfill.js");
+}
 
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import {

@@ -9,7 +9,7 @@
     "build": "cross-env NODE_ENV=production webpack",
     "build:noop": "tsc -p tsconfig.noop.json",
     "postbuild": "zx ./scripts/post-build.mjs",
-    "dev": "cross-env NODE_ENV=development webpack",
+    "dev": "cross-env NODE_ENV=development BUILD_MANIFEST_V2=true webpack",
     "dev:analyzer": "cross-env NODE_ENV=development ANALYZER=true webpack",
     "analyzer": "cross-env NODE_ENV=production ANALYZER=true DISABLE_SPLIT_CHUNKS=true webpack",
     "analyzer:chunks": "cross-env NODE_ENV=production ANALYZER=true webpack",

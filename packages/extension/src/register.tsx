@@ -8,7 +8,7 @@ import { HashRouter, Route, Routes } from "react-router-dom";
 import { StoreProvider } from "./stores";
 import { GlobalStyle, ScrollBarStyle } from "./styles";
 import { Keplr } from "@keplr-wallet/provider";
-import manifest from "./manifest.json";
+import manifest from "./manifest.v2.json";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { configure } from "mobx";
 import { ModalRootProvider } from "./components/modal";
