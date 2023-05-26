@@ -446,7 +446,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           </YAxis>
 
           <RecipientInput
-            innerRef={addressRef}
+            ref={addressRef}
             historyType={historyType}
             recipientConfig={sendConfigs.recipientConfig}
             memoConfig={sendConfigs.memoConfig}
