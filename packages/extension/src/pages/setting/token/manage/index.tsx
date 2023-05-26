@@ -87,7 +87,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
           Only for the tokens that can be added manually via contract addresses
         </Styles.Paragraph>
 
-        <Columns sum={1} alignY="bottom">
+        <Columns sum={1} alignY="center">
           <Box width="13rem">
             <Dropdown
               items={items}

@@ -59,7 +59,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   return (
     <HeaderLayout title="Contacts" left={<BackButton />}>
       <Styles.Container>
-        <Columns sum={1} alignY="bottom">
+        <Columns sum={1} alignY="center">
           <Box width="13rem">
             <Dropdown
               items={items}
