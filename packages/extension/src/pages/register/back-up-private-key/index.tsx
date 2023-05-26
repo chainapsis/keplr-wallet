@@ -85,8 +85,7 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
             <br />
             <br />
             If you lose an access to your Gmail Account, the only way to recover
-            your wallet is using your private key. So please keep this in a safe
-            place to forestall any problems.
+            your wallet is using your private key. Keep this in a safe place.
           </Box>
         }
       />
