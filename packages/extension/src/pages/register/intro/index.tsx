@@ -10,8 +10,11 @@ import { useRegisterHeader } from "../components/header";
 import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { TextButton } from "../../../components/button-text";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
 
-export const RegisterIntroScene: FunctionComponent = () => {
+export const RegisterIntroScene: FunctionComponent = observer(() => {
+  const { uiConfigStore } = useStore();
   const sceneTransition = useSceneTransition();
 
   const header = useRegisterHeader();
@@ -49,14 +52,16 @@ export const RegisterIntroScene: FunctionComponent = () => {
             sceneTransition.push("existing-user");
           }}
         />
-        <TextButton
-          text="Connect Hardware Wallet"
-          size="large"
-          onClick={() => {
-            sceneTransition.push("connect-hardware-wallet");
-          }}
-        />
+        {uiConfigStore.platform !== "firefox" ? (
+          <TextButton
+            text="Connect Hardware Wallet"
+            size="large"
+            onClick={() => {
+              sceneTransition.push("connect-hardware-wallet");
+            }}
+          />
+        ) : null}
       </Stack>
     </RegisterSceneBox>
   );
-};
+});
