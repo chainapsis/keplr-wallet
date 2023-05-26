@@ -8,6 +8,8 @@ const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const fs = require("fs");
 
+const isBuildManifestV2 = process.env.BUILD_MANIFEST_V2 === "true";
+
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
 const isDisableSplitChunks = process.env.DISABLE_SPLIT_CHUNKS === "true";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
@@ -58,7 +60,10 @@ module.exports = {
     injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
   },
   output: {
-    path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
+    path: path.resolve(
+      __dirname,
+      isEnvDevelopment ? "dist" : process.env.BUILD_OUTPUT || "build/default"
+    ),
     filename: "[name].bundle.js",
   },
   optimization: {
@@ -68,18 +73,44 @@ module.exports = {
           return false;
         }
 
-        return chunk.name === "popup" || chunk.name === "register";
+        const servicePackages = ["contentScripts", "injectedScript"];
+
+        if (!isBuildManifestV2) {
+          servicePackages.push("background");
+        }
+
+        return !servicePackages.includes(chunk.name);
       },
       cacheGroups: {
-        popup: {
-          maxSize: 3_000_000,
-        },
-        register: {
-          maxSize: 3_000_000,
-        },
-        blocklist: {
-          maxSize: 3_000_000,
-        },
+        ...(() => {
+          const res = {
+            popup: {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            },
+            register: {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            },
+            blocklist: {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            },
+          };
+
+          if (isBuildManifestV2) {
+            res.background = {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            };
+          }
+
+          return res;
+        })(),
       },
     },
   },
@@ -123,14 +154,31 @@ module.exports = {
       SC_DISABLE_SPEEDY: false,
       KEPLR_EXT_ETHEREUM_ENDPOINT: "",
       KEPLR_EXT_AMPLITUDE_API_KEY: "",
+      KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: "",
+      KEPLR_EXT_ANALYTICS_API_URL: "",
+      KEPLR_EXT_COINGECKO_ENDPOINT: "",
+      KEPLR_EXT_COINGECKO_GETPRICE: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
       patterns: [
-        {
-          from: "./src/manifest.json",
-          to: "./",
-        },
+        ...(() => {
+          if (isBuildManifestV2) {
+            return [
+              {
+                from: "./src/manifest.v2.json",
+                to: "./manifest.json",
+              },
+            ];
+          }
+
+          return [
+            {
+              from: "./src/manifest.v3.json",
+              to: "./manifest.json",
+            },
+          ];
+        })(),
         {
           from: "../../node_modules/webextension-polyfill/dist/browser-polyfill.js",
           to: "./",
@@ -152,6 +200,19 @@ module.exports = {
       filename: "blocklist.html",
       chunks: ["blocklist"],
     }),
+    ...(() => {
+      if (isBuildManifestV2) {
+        return [
+          new HtmlWebpackPlugin({
+            template: "./src/background.html",
+            filename: "background.html",
+            chunks: ["background"],
+          }),
+        ];
+      }
+
+      return [];
+    })(),
     new BundleAnalyzerPlugin({
       analyzerMode: isEnvAnalyzer ? "server" : "disabled",
     }),

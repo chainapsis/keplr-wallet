@@ -27,7 +27,7 @@ import { configure } from "mobx";
 import { observer } from "mobx-react-lite";
 import { Keplr } from "@keplr-wallet/provider";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import manifest from "./manifest.json";
+import manifest from "./manifest.v2.json";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { UnlockPage } from "./pages/unlock";
 import { MainPage } from "./pages/main";

@@ -9,11 +9,16 @@ const version = require("../package.json").version;
     const sementic = semver.parse(version);
     const versionWithoutPrerelease = `${sementic.major}.${sementic.minor}.${sementic.patch}`;
 
-    const manifestPath = path.join(__dirname, "../src/manifest.json");
-    await $`sed 's/"version": "[0-9.]*",/"version": "${versionWithoutPrerelease}",/' ${manifestPath} > manifest.temp`;
-    await $`mv manifest.temp ${manifestPath}`;
+    const manifestPaths = [
+      path.join(__dirname, "../src/manifest.v2.json"),
+      path.join(__dirname, "../src/manifest.v3.json"),
+    ];
+    for (const manifestPath of manifestPaths) {
+      await $`sed 's/"version": "[0-9.]*",/"version": "${versionWithoutPrerelease}",/' ${manifestPath} > manifest.temp`;
+      await $`mv manifest.temp ${manifestPath}`;
 
-    await $`git add ${manifestPath}`;
+      await $`git add ${manifestPath}`;
+    }
   } catch (e) {
     console.log(e);
     process.exit(1);
