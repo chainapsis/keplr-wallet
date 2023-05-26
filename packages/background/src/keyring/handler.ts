@@ -106,6 +106,7 @@ const handleGetKeyRingStatusMsg: (
       status: service.keyRingStatus,
       keyInfos: service.getKeyInfos(),
       needMigration: service.needMigration,
+      isMigrating: service.isMigrating,
     };
   };
 };

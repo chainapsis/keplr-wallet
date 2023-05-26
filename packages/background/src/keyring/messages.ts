@@ -10,6 +10,7 @@ export class GetKeyRingStatusMsg extends Message<{
   status: KeyRingStatus;
   keyInfos: KeyInfo[];
   needMigration: boolean;
+  isMigrating: boolean;
 }> {
   public static type() {
     return "get-keyring-status";
