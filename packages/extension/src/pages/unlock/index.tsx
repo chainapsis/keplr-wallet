@@ -86,7 +86,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
 
   return (
     <React.Fragment>
-      {true ? (
+      {keyRingStore.needMigration ? (
         <form
           style={{
             display: "flex",
