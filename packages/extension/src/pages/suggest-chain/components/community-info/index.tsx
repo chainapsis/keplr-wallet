@@ -4,13 +4,12 @@ import { XAxis } from "../../../../components/axis";
 import { Image } from "../../../../components/image";
 import { Gutter } from "../../../../components/gutter";
 import { Columns } from "../../../../components/column";
-import { H1, Body2, H5 } from "../../../../components/typography";
+import { H1, Body2 } from "../../../../components/typography";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
-import { RightArrowIcon } from "../../../../components/icon";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../../stores";
 import { Skeleton } from "../../../../components/skeleton";
+import { ChainInfo } from "@keplr-wallet/types";
 
 const Styles = {
   Chip: styled.div`
@@ -40,18 +39,11 @@ const Styles = {
 
 export const CommunityInfoView: FunctionComponent<{
   isNotReady?: boolean;
-  isRaw: boolean;
-  setIsRaw: () => void;
-}> = observer(({ isNotReady, setIsRaw }) => {
-  console.log("CommunityInfoView", isNotReady);
-  const { chainSuggestStore, uiConfigStore } = useStore();
 
-  const chainInfo = chainSuggestStore.waitingSuggestedChainInfo
-    ? chainSuggestStore.getCommunityChainInfo(
-        chainSuggestStore.waitingSuggestedChainInfo.data.chainInfo.chainId
-      ).chainInfo
-    : undefined;
-
+  communityChainInfoUrl: string;
+  origin: string;
+  chainInfo: ChainInfo;
+}> = observer(({ isNotReady, communityChainInfoUrl, origin, chainInfo }) => {
   return (
     <Box
       paddingTop="3.75rem"
@@ -69,7 +61,7 @@ export const CommunityInfoView: FunctionComponent<{
             height="80px"
             alt="Chain Image"
             defaultSrc={require("../../../../public/assets/img/chain-icon-alt.png")}
-            src={chainInfo?.chainSymbolImageUrl}
+            src={chainInfo.chainSymbolImageUrl}
             style={{ borderRadius: "50%" }}
           />
         </Skeleton>
@@ -106,16 +98,14 @@ export const CommunityInfoView: FunctionComponent<{
 
       <Skeleton isNotReady={isNotReady}>
         <H1 style={{ textAlign: "center" }}>
-          Add {chainInfo?.chainName} to Keplr
+          Add {chainInfo.chainName} to Keplr
         </H1>
       </Skeleton>
 
       <Gutter size="0.75rem" />
 
       <a
-        href={chainSuggestStore.getCommunityChainInfoUrl(
-          chainInfo?.chainId ?? ""
-        )}
+        href={communityChainInfoUrl}
         target="_blank"
         rel="noreferrer"
         style={{ textDecoration: "none" }}
@@ -135,39 +125,14 @@ export const CommunityInfoView: FunctionComponent<{
       <Box paddingX="2.5rem">
         <Skeleton isNotReady={isNotReady}>
           <Styles.Paragraph>
-            <Styles.Bold>
-              {chainSuggestStore.waitingSuggestedChainInfo?.data.origin}
-            </Styles.Bold>
-            would like to add blockchain
+            <Styles.Bold>{origin}</Styles.Bold>
+            would like to add blockchain{" "}
             <Styles.Bold>{chainInfo?.chainId}</Styles.Bold> to Keplr.
           </Styles.Paragraph>
         </Skeleton>
       </Box>
 
       <Box style={{ flex: 1 }} />
-
-      {uiConfigStore.isDeveloper ? (
-        <Skeleton isNotReady={isNotReady}>
-          <Box
-            cursor="pointer"
-            style={{
-              color: ColorPalette["gray-100"],
-              paddingBottom: "1rem",
-              userSelect: "none",
-            }}
-            onClick={setIsRaw}
-          >
-            <XAxis alignY="center">
-              <H5>Add chain as suggested</H5>
-              <RightArrowIcon
-                width="1rem"
-                height="1rem"
-                color={ColorPalette["gray-100"]}
-              />
-            </XAxis>
-          </Box>
-        </Skeleton>
-      ) : null}
     </Box>
   );
 });
