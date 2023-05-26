@@ -74,10 +74,11 @@ module.exports = {
         popup: {
           maxSize: 3_000_000,
         },
+        register: {
+          maxSize: 3_000_000,
+        },
         blocklist: {
           maxSize: 3_000_000,
-          maxInitialRequests: 100,
-          maxAsyncRequests: 100,
         },
       },
     },
