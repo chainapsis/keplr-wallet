@@ -308,7 +308,7 @@ export class KeyRingService {
               );
               const vaultId = await this.createLedgerKeyRing(
                 pubKey,
-                keyStore.meta?.["__ledger__cosmos_app_like__"] === "terra"
+                keyStore.meta?.["__ledger__cosmos_app_like__"] === "Terra"
                   ? "Terra"
                   : "Cosmos",
                 keyStore.bip44HDPath ?? {
@@ -321,9 +321,9 @@ export class KeyRingService {
               );
 
               let hasEthereum = false;
-              if (encodedPubkeys["Ethereum"]) {
+              if (encodedPubkeys["ethereum"]) {
                 const pubKey = Buffer.from(
-                  encodedPubkeys["Ethereum"] as string,
+                  encodedPubkeys["ethereum"] as string,
                   "hex"
                 );
                 this.appendLedgerKeyRing(vaultId, pubKey, "Ethereum");
