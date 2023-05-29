@@ -33,4 +33,8 @@ export const GlobalStyle = createGlobalStyle`
   *, *:before, *:after {
     box-sizing: inherit;
   }
+  
+  * {
+    font-feature-settings: "calt" 0
+  }
 `;

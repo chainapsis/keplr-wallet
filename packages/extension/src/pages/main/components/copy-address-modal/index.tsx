@@ -434,10 +434,7 @@ export const EthereumAddressItem: FunctionComponent<{
           </XAxis>
 
           <Gutter size="0.25rem" />
-          <Caption1
-            color={ColorPalette["gray-300"]}
-            style={{ fontFeatureSettings: `"calt" 0` }}
-          >
+          <Caption1 color={ColorPalette["gray-300"]}>
             {ethereumAddress.length === 42
               ? `${ethereumAddress.slice(0, 10)}...${ethereumAddress.slice(-8)}`
               : ethereumAddress}
