@@ -50,10 +50,8 @@ export class UIConfigStore {
       }
     | undefined = undefined;
 
-  // undefined means "automatic"
-  // If this value is undefined, the actual `fiatCurrency` getter should determine the fiat currency.
   @observable
-  protected _fiatCurrency: string | undefined = undefined;
+  protected _fiatCurrency: string = "usd";
 
   constructor(
     protected readonly kvStores: {
@@ -98,11 +96,7 @@ export class UIConfigStore {
   protected async init() {
     {
       const saved = await this.kvStore.get<string>("fiatCurrency");
-      if (saved) {
-        this.selectFiatCurrency(saved);
-      } else {
-        this.selectFiatCurrency(undefined);
-      }
+      this.selectFiatCurrency(saved || "usd");
       autorun(() => {
         this.kvStore.set("fiatCurrency", this._fiatCurrency);
       });
@@ -166,9 +160,7 @@ export class UIConfigStore {
   }
 
   @computed
-  get fiatCurrency(): FiatCurrency & {
-    isAutomatic?: boolean;
-  } {
+  get fiatCurrency(): FiatCurrency {
     let fiatCurrency = this._fiatCurrency;
     if (!fiatCurrency) {
       // TODO: How to handle "automatic"?
@@ -182,19 +174,13 @@ export class UIConfigStore {
         maxDecimals: 2,
         locale: "en-US",
       }),
-      isAutomatic: !this._fiatCurrency,
     };
   }
 
   @action
-  selectFiatCurrency(value: string | undefined) {
+  selectFiatCurrency(value: string) {
     this._fiatCurrency = value;
-    if (!value) {
-      // TODO: How to handle "automatic"?
-      this.priceStore.setDefaultVsCurrency("usd");
-    } else {
-      this.priceStore.setDefaultVsCurrency(value);
-    }
+    this.priceStore.setDefaultVsCurrency(value);
   }
 
   get supportedFiatCurrencies() {

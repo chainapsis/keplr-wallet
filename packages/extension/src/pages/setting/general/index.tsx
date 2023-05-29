@@ -28,11 +28,6 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           <PageButton
             title="Currency"
             paragraph={(() => {
-              const fiatCurrency = uiConfigStore.fiatCurrency;
-              if (fiatCurrency.isAutomatic) {
-                return `Automatic (${fiatCurrency.currency.toUpperCase()})`;
-              }
-
               return uiConfigStore.fiatCurrency.currency.toUpperCase();
             })()}
             endIcon={<RightArrowIcon />}

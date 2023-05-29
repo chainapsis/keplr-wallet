@@ -18,14 +18,6 @@ export const SettingGeneralFiatPage: FunctionComponent = observer(() => {
     <HeaderLayout title="General" left={<BackButton />}>
       <Box paddingX="0.75rem">
         <Stack gutter="0.5rem">
-          <PageButton
-            title="Automatic"
-            onClick={() => {
-              uiConfigStore.selectFiatCurrency(undefined);
-
-              navigate("/");
-            }}
-          />
           {Object.entries(uiConfigStore.supportedFiatCurrencies).map(
             ([fiat, fiatCurrency]) => {
               if (!fiatCurrency) {
