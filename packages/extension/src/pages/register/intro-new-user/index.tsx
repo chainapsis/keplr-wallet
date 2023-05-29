@@ -15,7 +15,7 @@ import { Gutter } from "../../../components/gutter";
 import { useRegisterHeader } from "../components/header";
 import { RegisterH4 } from "../components/typography";
 import { TextButton } from "../../../components/button-text";
-import { AppleIcon, GoogleIcon, KeyIcon } from "../../../components/icon";
+import { GoogleIcon, KeyIcon } from "../../../components/icon";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
 
 export const RegisterIntroNewUserScene: FunctionComponent = () => {
@@ -92,7 +92,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
         <Column weight={1}>
           <Box height="100%">
             <RegisterH4 color={ColorPalette["gray-50"]}>
-              Sign-up with Google or Apple
+              Sign-up with Google
             </RegisterH4>
             <Gutter size="0.5rem" />
             <Subtitle3 color={ColorPalette["gray-200"]}>
@@ -114,15 +114,6 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
                   } else {
                     alert("Not supported");
                   }
-                }}
-              />
-              <Button
-                text="Connect with Apple ID"
-                size="large"
-                color="secondary"
-                left={<AppleIcon />}
-                onClick={() => {
-                  alert("TODO: Not implemented yet");
                 }}
               />
             </Stack>

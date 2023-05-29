@@ -13,11 +13,7 @@ import { Subtitle3 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { useRegisterHeader } from "../components/header";
 import { RegisterH4 } from "../components/typography";
-import {
-  AppleIcon,
-  ArrowDownTrayIcon,
-  GoogleIcon,
-} from "../../../components/icon";
+import { ArrowDownTrayIcon, GoogleIcon } from "../../../components/icon";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
 
 export const RegisterIntroExistingUserScene: FunctionComponent = () => {
@@ -48,7 +44,7 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
               also import wallets from other wallet providers.
             </Subtitle3>
 
-            <div style={{ flex: 1 }} />
+            <Gutter size="1.5rem" />
             <Button
               text="Use recovery phrase or private key"
               size="large"
@@ -61,36 +57,27 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
         </Column>
         <Box width="1px" backgroundColor={ColorPalette["gray-400"]} />
         <Column weight={1}>
-          <RegisterH4 color={ColorPalette["gray-50"]}>
-            Use Google or Apple ID
-          </RegisterH4>
+          <Box height="100%">
+            <RegisterH4 color={ColorPalette["gray-50"]}>Use Google</RegisterH4>
 
-          <Gutter size="3rem" />
+            <div style={{ flex: 1 }} />
 
-          <Stack gutter="0.625rem">
-            <Button
-              text="Connect with Google"
-              size="large"
-              color="secondary"
-              left={<GoogleIcon />}
-              onClick={() => {
-                if (KeplrWalletPrivate.onGoogleSignInClick) {
-                  KeplrWalletPrivate.onGoogleSignInClick(sceneTransition);
-                } else {
-                  alert("Not supported");
-                }
-              }}
-            />
-            <Button
-              text="Connect with Apple ID"
-              size="large"
-              color="secondary"
-              left={<AppleIcon />}
-              onClick={() => {
-                alert("TODO: Not implemented yet");
-              }}
-            />
-          </Stack>
+            <Stack gutter="0.625rem">
+              <Button
+                text="Connect with Google"
+                size="large"
+                color="secondary"
+                left={<GoogleIcon />}
+                onClick={() => {
+                  if (KeplrWalletPrivate.onGoogleSignInClick) {
+                    KeplrWalletPrivate.onGoogleSignInClick(sceneTransition);
+                  } else {
+                    alert("Not supported");
+                  }
+                }}
+              />
+            </Stack>
+          </Box>
         </Column>
       </Columns>
     </RegisterSceneBox>
