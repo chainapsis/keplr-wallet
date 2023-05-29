@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 RUN apt-get update && apt -y install build-essential libusb-1.0-0-dev curl unzip
 
 # Install node 16
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt -y install nodejs
 
 # Install yarn
