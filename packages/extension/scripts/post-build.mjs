@@ -4,8 +4,8 @@ import "zx/globals";
 import deepmerge from "deepmerge";
 import fs from "fs";
 
-const baseManifest = require("../src/manifest.json");
-const firefoxManifestProperties = require("../src/manifest.firefox.json");
+const baseManifest = require("../src/manifest.v2.json");
+const firefoxManifestProperties = require("../src/manifest.v2.firefox.json");
 
 const firefoxManifest = deepmerge(baseManifest, firefoxManifestProperties, {
   arrayMerge: (_, source) => source,
@@ -13,12 +13,12 @@ const firefoxManifest = deepmerge(baseManifest, firefoxManifestProperties, {
 
 (async () => {
   try {
-    const chromePath = path.join(__dirname, "../build/chrome");
+    const manifestV2Path = path.join(__dirname, "../build/manifest-v2");
     const firefoxPath = path.join(__dirname, "../build/firefox");
     const firefoxManifestPath = path.join(firefoxPath, "manifest.json");
 
     await $`rm -rf ${firefoxPath}`;
-    await $`cp -pfR ${chromePath}/ ${firefoxPath}/`;
+    await $`cp -pfR ${manifestV2Path}/ ${firefoxPath}/`;
     await $`rm ${firefoxManifestPath}`;
 
     fs.writeFileSync(

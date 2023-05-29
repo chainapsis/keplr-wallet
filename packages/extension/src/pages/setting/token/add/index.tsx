@@ -1,19 +1,38 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
-import { HeaderLayout } from "../../../../layouts";
-import { useHistory } from "react-router";
-import { useIntl, FormattedMessage } from "react-intl";
-
-import style from "./style.module.scss";
-import { Button, Form } from "reactstrap";
-import { Input } from "../../../../components/form";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
+import { BackButton } from "../../../../layouts/header/components";
+import { HeaderLayout } from "../../../../layouts/header";
+import styled from "styled-components";
+import { Stack } from "../../../../components/stack";
+import { TextInput } from "../../../../components/input";
 import { useStore } from "../../../../stores";
-import useForm from "react-hook-form";
+import { Dropdown } from "../../../../components/dropdown";
+import { Box } from "../../../../components/box";
+import { autorun } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { CW20Currency, Secret20Currency } from "@keplr-wallet/types";
-import { useInteractionInfo } from "@keplr-wallet/hooks";
-import { useLoadingIndicator } from "../../../../components/loading-indicator";
-import { useNotification } from "../../../../components/notification";
+import { AppCurrency } from "@keplr-wallet/types";
+import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
+import { useInteractionInfo } from "../../../../hooks";
+import { ColorPalette } from "../../../../styles";
+import { Column, Columns } from "../../../../components/column";
+import { Body3, Subtitle2 } from "../../../../components/typography";
+import { Toggle } from "../../../../components/toggle";
+import { useForm } from "react-hook-form";
+import { useNotification } from "../../../../hooks/notification";
+
+const Styles = {
+  Container: styled(Stack)`
+    padding: 0 0.75rem;
+  `,
+};
 
 interface FormData {
   contractAddress: string;
@@ -21,318 +40,321 @@ interface FormData {
   viewingKey: string;
 }
 
-export const AddTokenPage: FunctionComponent = observer(() => {
-  const intl = useIntl();
-  const history = useHistory();
+export const SettingTokenAddPage: FunctionComponent = observer(() => {
+  const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
 
-  const { chainStore, queriesStore, accountStore, tokensStore } = useStore();
-  const tokensOf = tokensStore.getTokensOf(chainStore.current.chainId);
+  const navigate = useNavigate();
+  const notification = useNotification();
+  const [searchParams] = useSearchParams();
+  const paramChainId = searchParams.get("chainId");
 
-  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+  const { setValue, handleSubmit, register, formState, watch } =
+    useForm<FormData>({
+      defaultValues: {
+        contractAddress: searchParams.get("contractAddress") || "",
+        viewingKey: "",
+      },
+    });
 
+  const supportedChainInfos = useMemo(() => {
+    return chainStore.chainInfos.filter((chainInfo) => {
+      return (
+        chainInfo.features?.includes("cosmwasm") ||
+        chainInfo.features?.includes("secretwasm")
+      );
+    });
+  }, [chainStore.chainInfos]);
+
+  const [chainId, setChainId] = useState<string>(() => {
+    if (paramChainId) {
+      return paramChainId;
+    }
+
+    if (supportedChainInfos.length > 0) {
+      return supportedChainInfos[0].chainId;
+    } else {
+      return chainStore.chainInfos[0].chainId;
+    }
+  });
+
+  // secret20은 서명 페이지로 넘어가야하기 때문에 막아야함...
+  const blockRejectAll = useRef(false);
   const interactionInfo = useInteractionInfo(() => {
-    // When creating the secret20 viewing key, this page will be moved to "/sign" page to generate the signature.
-    // So, if it is creating phase, don't reject the waiting datas.
-    if (accountInfo.isSendingMsg !== "createSecret20ViewingKey") {
+    if (!blockRejectAll.current) {
       tokensStore.rejectAllSuggestedTokens();
     }
   });
 
-  const form = useForm<FormData>({
-    defaultValues: {
-      contractAddress: "",
-      viewingKey: "",
-    },
-  });
-
-  const contractAddress = form.watch("contractAddress");
-
-  useEffect(() => {
-    if (tokensStore.waitingSuggestedToken) {
-      chainStore.selectChain(tokensStore.waitingSuggestedToken.data.chainId);
-      if (
-        contractAddress !==
-        tokensStore.waitingSuggestedToken.data.contractAddress
-      ) {
-        form.setValue(
+  useLayoutEffect(() => {
+    if (interactionInfo.interaction) {
+      if (tokensStore.waitingSuggestedToken) {
+        setChainId(tokensStore.waitingSuggestedToken.data.chainId);
+        setValue(
           "contractAddress",
           tokensStore.waitingSuggestedToken.data.contractAddress
         );
       }
     }
-  }, [chainStore, contractAddress, form, tokensStore.waitingSuggestedToken]);
+  }, [interactionInfo, setValue, tokensStore.waitingSuggestedToken]);
 
-  const isSecret20 =
-    (chainStore.current.features ?? []).find(
-      (feature) => feature === "secretwasm"
-    ) != null;
+  useEffect(() => {
+    // secret20은 계정에 귀속되기 때문에 추가/삭제 등을 할때 먼저 초기화가 되어있어야만 가능하다.
+    // 이를 보장하기 위해서 이 로직이 추가됨...
+    const disposal = autorun(() => {
+      const account = accountStore.getAccount(chainId);
+      if (account.bech32Address === "") {
+        account.init();
+      }
+    });
 
-  const queries = queriesStore.get(chainStore.current.chainId);
-  const query = isSecret20
-    ? queries.secret.querySecret20ContractInfo
-    : queries.cosmwasm.querycw20ContractInfo;
-  const queryContractInfo = query.getQueryContract(contractAddress);
+    return () => {
+      if (disposal) {
+        disposal();
+      }
+    };
+  }, [accountStore, chainId]);
 
-  const tokenInfo = queryContractInfo.tokenInfo;
-  const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] = useState(
-    false
-  );
+  const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
+  const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
+    useState(false);
 
-  const notification = useNotification();
-  const loadingIndicator = useLoadingIndicator();
+  const items = supportedChainInfos.map((chainInfo) => {
+    return {
+      key: chainInfo.chainId,
+      label: chainInfo.chainName,
+    };
+  });
+
+  const contractAddress = watch("contractAddress").trim();
+  const queryContract = (() => {
+    if (isSecretWasm) {
+      return queriesStore
+        .get(chainId)
+        .secret.querySecret20ContractInfo.getQueryContract(contractAddress);
+    } else {
+      return queriesStore
+        .get(chainId)
+        .cosmwasm.querycw20ContractInfo.getQueryContract(contractAddress);
+    }
+  })();
 
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
-      accountInfo.secret
-        .createSecret20ViewingKey(
+      accountStore
+        .getAccount(chainId)
+        .secret.createSecret20ViewingKey(
           contractAddress,
           "",
           {},
           {},
-          (_, viewingKey) => {
-            loadingIndicator.setIsLoading("create-veiwing-key", false);
+          (tx, viewingKey) => {
+            if (tx.code != null && tx.code !== 0) {
+              reject(new Error(tx.raw_log));
+              return;
+            }
 
+            if (!viewingKey) {
+              reject(new Error("Viewing key is null"));
+              return;
+            }
             resolve(viewingKey);
           }
         )
-        .then(() => {
-          loadingIndicator.setIsLoading("create-veiwing-key", true);
-        })
         .catch(reject);
     });
   };
 
   return (
     <HeaderLayout
-      showChainName={false}
-      canChangeChainInfo={false}
-      alternativeTitle={intl.formatMessage({
-        id: "setting.token.add",
-      })}
-      onBackButton={
-        interactionInfo.interaction
-          ? undefined
-          : () => {
-              history.goBack();
-            }
+      title="Add Token Manually"
+      left={
+        <BackButton
+          hidden={
+            interactionInfo.interaction && !interactionInfo.interactionInternal
+          }
+        />
       }
-    >
-      <Form
-        className={style.container}
-        onSubmit={form.handleSubmit(async (data) => {
-          if (
-            tokenInfo?.decimals != null &&
-            tokenInfo.name &&
-            tokenInfo.symbol
-          ) {
-            if (!isSecret20) {
-              const currency: CW20Currency = {
-                type: "cw20",
-                contractAddress: data.contractAddress,
-                coinMinimalDenom: tokenInfo.name,
-                coinDenom: tokenInfo.symbol,
-                coinDecimals: tokenInfo.decimals,
-              };
+      bottomButton={{
+        text: "Confirm",
+        color: "secondary",
+        size: "large",
+        disabled:
+          contractAddress.length === 0 ||
+          !queryContract.tokenInfo ||
+          (isSecretWasm && !accountStore.getAccount(chainId).isReadyToSendTx),
+      }}
+      onSubmit={handleSubmit(async (data) => {
+        if (queryContract.tokenInfo) {
+          let currency: AppCurrency;
 
-              if (
-                interactionInfo.interaction &&
-                tokensStore.waitingSuggestedToken
-              ) {
-                await tokensStore.approveSuggestedToken(currency);
-              } else {
-                await tokensOf.addToken(currency);
+          if (isSecretWasm) {
+            let viewingKey = data.viewingKey;
+
+            if (!viewingKey && !isOpenSecret20ViewingKey) {
+              try {
+                blockRejectAll.current = true;
+                viewingKey = await createViewingKey();
+              } catch (e) {
+                notification.show(
+                  "failed",
+                  "Failed to create the viewing key",
+                  e.message || e.toString()
+                );
+
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+
+                window.close();
+                return;
               }
-            } else {
-              let viewingKey = data.viewingKey;
-              if (!viewingKey && !isOpenSecret20ViewingKey) {
-                try {
-                  viewingKey = await createViewingKey();
-                } catch (e) {
-                  notification.push({
-                    placement: "top-center",
-                    type: "danger",
-                    duration: 2,
-                    content: `Failed to create the viewing key: ${e.message}`,
-                    canDelete: true,
-                    transition: {
-                      duration: 0.25,
-                    },
-                  });
+            }
 
-                  if (
-                    interactionInfo.interaction &&
-                    tokensStore.waitingSuggestedToken
-                  ) {
-                    await tokensStore.rejectAllSuggestedTokens();
-                  }
+            currency = {
+              type: "secret20",
+              contractAddress,
+              viewingKey,
+              coinMinimalDenom: queryContract.tokenInfo.name,
+              coinDenom: queryContract.tokenInfo.symbol,
+              coinDecimals: queryContract.tokenInfo.decimals,
+            };
+          } else {
+            currency = {
+              type: "cw20",
+              contractAddress: contractAddress,
+              coinMinimalDenom: queryContract.tokenInfo.name,
+              coinDenom: queryContract.tokenInfo.symbol,
+              coinDecimals: queryContract.tokenInfo.decimals,
+            };
+          }
 
+          if (
+            interactionInfo.interaction &&
+            tokensStore.waitingSuggestedToken
+          ) {
+            await tokensStore.approveSuggestedTokenWithProceedNext(
+              tokensStore.waitingSuggestedToken.id,
+              currency,
+              (proceedNext) => {
+                if (!proceedNext) {
                   if (
                     interactionInfo.interaction &&
                     !interactionInfo.interactionInternal
                   ) {
                     window.close();
-                  } else {
-                    history.push({
-                      pathname: "/",
-                    });
                   }
-
-                  return;
                 }
-              }
-
-              if (!viewingKey) {
-                notification.push({
-                  placement: "top-center",
-                  type: "danger",
-                  duration: 2,
-                  content: "Failed to create the viewing key",
-                  canDelete: true,
-                  transition: {
-                    duration: 0.25,
-                  },
-                });
-              } else {
-                const currency: Secret20Currency = {
-                  type: "secret20",
-                  contractAddress: data.contractAddress,
-                  viewingKey,
-                  coinMinimalDenom: tokenInfo.name,
-                  coinDenom: tokenInfo.symbol,
-                  coinDecimals: tokenInfo.decimals,
-                };
 
                 if (
                   interactionInfo.interaction &&
-                  tokensStore.waitingSuggestedToken
+                  !interactionInfo.interactionInternal &&
+                  isSecretWasm
                 ) {
-                  await tokensStore.approveSuggestedToken(currency);
-                } else {
-                  await tokensOf.addToken(currency);
+                  // TODO: secret20의 경우는 서명 페이지로 페이지 자체가 넘어가기 때문에 proceedNext를 처리할 수가 없다.
+                  //       나중에 뭔가 해결법이 생기면 다시 생각해본다...
+                  window.close();
                 }
               }
-            }
+            );
+          } else {
+            await tokensStore.addToken(chainId, currency);
 
-            if (
-              interactionInfo.interaction &&
-              !interactionInfo.interactionInternal
-            ) {
-              window.close();
-            } else {
-              history.push({
-                pathname: "/",
-              });
-            }
+            navigate("/");
           }
-        })}
-      >
-        <Input
-          type="text"
-          label={intl.formatMessage({
-            id: "setting.token.add.contract-address",
-          })}
-          name="contractAddress"
-          autoComplete="off"
-          readOnly={tokensStore.waitingSuggestedToken != null}
-          ref={form.register({
-            required: "Contract address is required",
-            validate: (value: string): string | undefined => {
+        }
+      })}
+    >
+      <Styles.Container gutter="1rem">
+        {!interactionInfo.interaction ? (
+          <Box width="13rem">
+            <Dropdown
+              items={items}
+              selectedItemKey={chainId}
+              onSelect={setChainId}
+            />
+          </Box>
+        ) : null}
+
+        <TextInput
+          label="Contract Address"
+          isLoading={queryContract.isFetching}
+          readOnly={interactionInfo.interaction}
+          error={
+            formState.errors.contractAddress?.message ||
+            (queryContract.error?.data as any)?.message
+          }
+          {...register("contractAddress", {
+            required: true,
+            validate: (value): string | undefined => {
               try {
+                const chainInfo = chainStore.getChain(chainId);
                 Bech32Address.validate(
                   value,
-                  chainStore.current.bech32Config.bech32PrefixAccAddr
+                  chainInfo.bech32Config.bech32PrefixAccAddr
                 );
-              } catch {
-                return "Invalid address";
+              } catch (e) {
+                return e.message || e.toString();
               }
             },
           })}
-          error={
-            form.errors.contractAddress
-              ? form.errors.contractAddress.message
-              : tokenInfo == null
-              ? (queryContractInfo.error?.data as any)?.error ||
-                queryContractInfo.error?.message
-              : undefined
-          }
-          text={
-            queryContractInfo.isFetching ? (
-              <i className="fas fa-spinner fa-spin" />
-            ) : undefined
-          }
         />
-        <Input
-          type="text"
-          label={intl.formatMessage({
-            id: "setting.token.add.name",
-          })}
-          value={tokenInfo?.name ?? "-"}
-          readOnly={true}
+        <TextInput
+          label="Name"
+          value={queryContract.tokenInfo?.name || "-"}
+          disabled
         />
-        <Input
-          type="text"
-          label={intl.formatMessage({
-            id: "setting.token.add.symbol",
-          })}
-          value={tokenInfo?.symbol ?? "-"}
-          readOnly={true}
+        <TextInput
+          label="Symbol"
+          value={queryContract.tokenInfo?.symbol || "-"}
+          disabled
         />
-        <Input
-          type="text"
-          label={intl.formatMessage({
-            id: "setting.token.add.decimals",
-          })}
-          value={tokenInfo?.decimals ?? "-"}
-          readOnly={true}
+        <TextInput
+          label="Decimals"
+          value={queryContract.tokenInfo?.decimals || "-"}
+          disabled
         />
-        {isSecret20 && isOpenSecret20ViewingKey ? (
-          <Input
-            type="text"
-            label={intl.formatMessage({
-              id: "setting.token.add.secret20.viewing-key",
-            })}
-            name="viewingKey"
-            autoComplete="off"
-            ref={form.register({
-              required: "Viewing key is required",
-            })}
-            error={
-              form.errors.viewingKey
-                ? form.errors.viewingKey.message
-                : undefined
-            }
-          />
-        ) : null}
-        <div style={{ flex: 1 }} />
-        {isSecret20 ? (
-          <div className="custom-control custom-checkbox mb-2">
-            <input
-              className="custom-control-input"
-              id="viewing-key-checkbox"
-              type="checkbox"
-              checked={isOpenSecret20ViewingKey}
-              onChange={() => {
-                setIsOpenSecret20ViewingKey((value) => !value);
-              }}
-            />
-            <label
-              className="custom-control-label"
-              htmlFor="viewing-key-checkbox"
-              style={{ color: "#666666", paddingTop: "1px" }}
+
+        {isSecretWasm ? (
+          <Stack gutter="0.75rem">
+            <Box
+              backgroundColor={ColorPalette["gray-600"]}
+              borderRadius="0.375rem"
+              padding="1rem"
             >
-              <FormattedMessage id="setting.token.add.secret20.checkbox.import-viewing-key" />
-            </label>
-          </div>
+              <Columns sum={1} alignY="center" gutter="0.25rem">
+                <Column weight={1}>
+                  <Stack>
+                    <Subtitle2 color={ColorPalette["gray-50"]}>
+                      I have my own viewing key
+                    </Subtitle2>
+                    <Body3 color={ColorPalette["gray-200"]}>
+                      By enabling this toggle, you confirm that you have your
+                      viewing key and use it for adding this token.
+                    </Body3>
+                  </Stack>
+                </Column>
+
+                <Toggle
+                  isOpen={isOpenSecret20ViewingKey}
+                  setIsOpen={setIsOpenSecret20ViewingKey}
+                />
+              </Columns>
+            </Box>
+
+            {isOpenSecret20ViewingKey ? (
+              <TextInput
+                label="Viewing Key"
+                error={
+                  formState.errors.viewingKey
+                    ? formState.errors.viewingKey.message
+                    : undefined
+                }
+                {...register("viewingKey", {
+                  required: true,
+                })}
+              />
+            ) : null}
+          </Stack>
         ) : null}
-        <Button
-          type="submit"
-          color="primary"
-          disabled={tokenInfo == null || !accountInfo.isReadyToSendMsgs}
-          data-loading={accountInfo.isSendingMsg === "createSecret20ViewingKey"}
-        >
-          <FormattedMessage id="setting.token.add.button.submit" />
-        </Button>
-      </Form>
+      </Styles.Container>
     </HeaderLayout>
   );
 });

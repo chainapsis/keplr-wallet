@@ -1,0 +1,11 @@
+{
+  "name": "noop-keplr-wallet-private",
+  "version": "0.0.1",
+  "main": "build/index.js",
+  "sideEffects": false,
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17 || ^18",
+    "styled-components": "*"
+  }
+}

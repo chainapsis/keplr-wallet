@@ -1,8 +1,8 @@
 import { QueriesSetBase } from "../queries";
-import { ChainGetter } from "../../common";
-import { KVStore } from "@keplr-wallet/common";
+import { ChainGetter } from "../../chain";
 import { DeepReadonly } from "utility-types";
 import { ObservableQueryICNSNames } from "./names";
+import { QuerySharedContext } from "../../common";
 
 export interface ICNSQueries {
   icns: ICNSQueriesImpl;
@@ -11,20 +11,20 @@ export interface ICNSQueries {
 export const ICNSQueries = {
   use(): (
     queriesSetBase: QueriesSetBase,
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter
   ) => ICNSQueries {
     return (
       queriesSetBase: QueriesSetBase,
-      kvStore: KVStore,
+      sharedContext: QuerySharedContext,
       chainId: string,
       chainGetter: ChainGetter
     ) => {
       return {
         icns: new ICNSQueriesImpl(
           queriesSetBase,
-          kvStore,
+          sharedContext,
           chainId,
           chainGetter
         ),
@@ -38,12 +38,12 @@ export class ICNSQueriesImpl {
 
   constructor(
     _base: QueriesSetBase,
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter
   ) {
     this.queryICNSNames = new ObservableQueryICNSNames(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter
     );

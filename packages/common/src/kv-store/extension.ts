@@ -1,8 +1,12 @@
 import { BaseKVStore } from "./base";
-import { KVStoreProvider } from "./interface";
+import { KVStoreProvider, MultiGet } from "./interface";
 
-export class ExtensionKVStore extends BaseKVStore {
-  protected static KVStoreProvider: KVStoreProvider | undefined;
+export class ExtensionKVStore extends BaseKVStore implements MultiGet {
+  protected static KVStoreProvider:
+    | (KVStoreProvider & {
+        multiGet: (keys: string[]) => Promise<{ [key: string]: any }>;
+      })
+    | undefined;
 
   constructor(prefix: string) {
     if (!ExtensionKVStore.KVStoreProvider) {
@@ -18,6 +22,7 @@ export class ExtensionKVStore extends BaseKVStore {
         ExtensionKVStore.KVStoreProvider = {
           get: browser.storage.local.get,
           set: browser.storage.local.set,
+          multiGet: browser.storage.local.get,
         };
       }
     }
@@ -27,5 +32,24 @@ export class ExtensionKVStore extends BaseKVStore {
     }
 
     super(ExtensionKVStore.KVStoreProvider, prefix);
+  }
+
+  async multiGet(keys: string[]): Promise<{ [key: string]: any }> {
+    // Remove duplications
+    keys = Array.from(new Set(keys));
+
+    const res =
+      (await ExtensionKVStore.KVStoreProvider!.multiGet(
+        keys.map((k) => this.prefix() + "/" + k)
+      )) ?? {};
+    const prefixedKeys = Object.keys(res);
+    for (const prefixedKey of prefixedKeys) {
+      const key = prefixedKey.slice(this.prefix().length + 1);
+      res[key] = res[prefixedKey];
+
+      delete res[prefixedKey];
+    }
+
+    return res;
   }
 }

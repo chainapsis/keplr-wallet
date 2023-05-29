@@ -3,22 +3,22 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { UnbondingDelegation, UnbondingDelegations } from "./types";
-import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { ChainGetter } from "../../../chain";
+import { CoinPretty, Int, Dec } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQuery<UnbondingDelegations> {
   protected bech32Address: string;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     bech32Address: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/staking/v1beta1/delegators/${bech32Address}/unbonding_delegations?pagination.limit=1000`
@@ -28,7 +28,7 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
     this.bech32Address = bech32Address;
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
   }
@@ -44,7 +44,10 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
     let totalBalance = new Int(0);
     for (const unbondingDelegation of this.response.data.unbonding_responses) {
       for (const entry of unbondingDelegation.entries) {
-        totalBalance = totalBalance.add(new Int(entry.balance));
+        const amount = new Int(entry.balance);
+        if (amount.gt(new Int(0))) {
+          totalBalance = totalBalance.add(amount);
+        }
       }
     }
 
@@ -68,17 +71,22 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
     for (const unbonding of unbondings) {
       const entries = [];
       for (const entry of unbonding.entries) {
-        entries.push({
-          creationHeight: new Int(entry.creation_height),
-          completionTime: entry.completion_time,
-          balance: new CoinPretty(stakeCurrency, new Int(entry.balance)),
-        });
+        const balance = new CoinPretty(stakeCurrency, new Int(entry.balance));
+        if (balance.toDec().gt(new Dec(0))) {
+          entries.push({
+            creationHeight: new Int(entry.creation_height),
+            completionTime: entry.completion_time,
+            balance,
+          });
+        }
       }
 
-      result.push({
-        validatorAddress: unbonding.validator_address,
-        entries,
-      });
+      if (entries.length > 0) {
+        result.push({
+          validatorAddress: unbonding.validator_address,
+          entries,
+        });
+      }
     }
 
     return result;
@@ -96,13 +104,13 @@ export class ObservableQueryUnbondingDelegationsInner extends ObservableChainQue
 
 export class ObservableQueryUnbondingDelegations extends ObservableChainQueryMap<UnbondingDelegations> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
   ) {
-    super(kvStore, chainId, chainGetter, (bech32Address: string) => {
+    super(sharedContext, chainId, chainGetter, (bech32Address: string) => {
       return new ObservableQueryUnbondingDelegationsInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         bech32Address

@@ -2,20 +2,20 @@ import {
   ObservableChainQuery,
   ChainGetter,
   ObservableChainQueryMap,
+  QuerySharedContext,
 } from "@keplr-wallet/stores";
-import { KVStore } from "@keplr-wallet/common";
 import { TokenInfo } from "./types";
 
 export class ObservableQueryEVMTokenInfoInner extends ObservableChainQuery<TokenInfo> {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly _chain: string,
     protected readonly _denom: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/axelar/evm/v1beta1/token_info/${_chain}?asset=${_denom}`
@@ -53,17 +53,17 @@ export class ObservableQueryEVMTokenInfoInner extends ObservableChainQuery<Token
 
 export class ObservableQueryEVMTokenInfo extends ObservableChainQueryMap<TokenInfo> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
   ) {
-    super(kvStore, chainId, chainGetter, (key: string) => {
+    super(sharedContext, chainId, chainGetter, (key: string) => {
       const i = key.indexOf("/");
       const chain = key.slice(0, i);
       const denom = key.slice(i + 1);
 
       return new ObservableQueryEVMTokenInfoInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         chain,

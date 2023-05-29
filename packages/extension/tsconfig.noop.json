@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "noop-keplr-wallet-private",
+    "outDir": "noop-keplr-wallet-private/build",
+    "declaration": true,
+    "rootDir": "noop-keplr-wallet-private"
+  },
+  "include": ["noop-keplr-wallet-private/**/*"]
+}

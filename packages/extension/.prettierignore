@@ -1,8 +1,12 @@
 **/*.png
 **/*.svg
 **/*.ttf
+**/*.woff
+**/*.woff2
 **/*.secret
 **/*.md
+**/*.log
+**/*.webm
 .DS_Store
 
 .gitignore
@@ -12,6 +16,8 @@ node_modules
 dist/*
 prod/*
 build/*
+
+noop-keplr-wallet-private/build
 
 yarn.lock
 

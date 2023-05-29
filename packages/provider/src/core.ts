@@ -17,29 +17,13 @@ import {
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
   SecretUtils,
+  SettledResponses,
 } from "@keplr-wallet/types";
-import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
-  EnableAccessMsg,
-  SuggestChainInfoMsg,
-  GetKeyMsg,
-  SuggestTokenMsg,
-  SendTxMsg,
-  GetSecret20ViewingKey,
-  RequestSignAminoMsg,
-  RequestSignDirectMsg,
-  GetPubkeyMsg,
-  ReqeustEncryptMsg,
-  RequestDecryptMsg,
-  GetTxEncryptionKeyMsg,
-  RequestVerifyADR36AminoSignDoc,
-  RequestSignEIP712CosmosTxMsg_v0,
-  GetAnalyticsIdMsg,
-  RequestICNSAdr36SignaturesMsg,
-  GetChainInfosWithoutEndpointsMsg,
-  DisableAccessMsg,
-  ChangeKeyRingNameMsg,
-} from "./types";
+  BACKGROUND_PORT,
+  MessageRequester,
+  sendSimpleMessage,
+} from "@keplr-wallet/router";
 
 import { KeplrEnigmaUtils } from "./enigma";
 
@@ -65,9 +49,14 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       chainIds = [chainIds];
     }
 
-    await this.requester.sendMessage(
+    await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new EnableAccessMsg(chainIds)
+      "permission-interactive",
+      "enable-access",
+      {
+        chainIds,
+      }
     );
   }
 
@@ -76,9 +65,14 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       chainIds = [chainIds];
     }
 
-    await this.requester.sendMessage(
+    await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new DisableAccessMsg(chainIds ?? [])
+      "permission-interactive",
+      "disable-access",
+      {
+        chainIds: chainIds ?? [],
+      }
     );
   }
 
@@ -98,13 +92,15 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       const gasPriceStep = { ...chainInfo.gasPriceStep };
       for (const feeCurrency of chainInfo.feeCurrencies) {
         if (!feeCurrency.gasPriceStep) {
-          (feeCurrency as {
-            gasPriceStep?: {
-              readonly low: number;
-              readonly average: number;
-              readonly high: number;
-            };
-          }).gasPriceStep = gasPriceStep;
+          (
+            feeCurrency as {
+              gasPriceStep?: {
+                readonly low: number;
+                readonly average: number;
+                readonly high: number;
+              };
+            }
+          ).gasPriceStep = gasPriceStep;
         }
       }
       delete chainInfo.gasPriceStep;
@@ -114,18 +110,58 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       );
     }
 
-    const msg = new SuggestChainInfoMsg(chainInfo);
-    await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    if ((chainInfo as any).coinType) {
+      console.warn(
+        "The `coinType` field of the `ChainInfo` is removed. This is automatically handled as of right now, but the upcoming update would potentially cause errors."
+      );
+      delete (chainInfo as any).coinType;
+    }
+
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "chains",
+      "suggest-chain-info",
+      {
+        chainInfo,
+      }
+    );
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const msg = new GetKeyMsg(chainId);
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "get-cosmos-key",
+      {
+        chainId,
+      }
+    );
+  }
+
+  async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "get-cosmos-keys-settled",
+      {
+        chainIds,
+      }
+    );
   }
 
   async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
-    const msg = new GetChainInfosWithoutEndpointsMsg();
-    return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).chainInfos;
+    return (
+      await sendSimpleMessage(
+        this.requester,
+        BACKGROUND_PORT,
+        "chains",
+        "get-chain-infos-without-endpoints",
+        {}
+      )
+    ).chainInfos;
   }
 
   async sendTx(
@@ -133,8 +169,17 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     tx: StdTx | Uint8Array,
     mode: BroadcastMode
   ): Promise<Uint8Array> {
-    const msg = new SendTxMsg(chainId, tx, mode);
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "background-tx",
+      "send-tx-to-background",
+      {
+        chainId,
+        tx,
+        mode,
+      }
+    );
   }
 
   async signAmino(
@@ -143,13 +188,18 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    const msg = new RequestSignAminoMsg(
-      chainId,
-      signer,
-      signDoc,
-      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-cosmos-sign-amino",
+      {
+        chainId,
+        signer,
+        signDoc,
+        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+      }
     );
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   async signDirect(
@@ -163,20 +213,25 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     },
     signOptions: KeplrSignOptions = {}
   ): Promise<DirectSignResponse> {
-    const msg = new RequestSignDirectMsg(
-      chainId,
-      signer,
+    const response = await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-cosmos-sign-direct",
       {
-        bodyBytes: signDoc.bodyBytes,
-        authInfoBytes: signDoc.authInfoBytes,
-        chainId: signDoc.chainId,
-        accountNumber: signDoc.accountNumber
-          ? signDoc.accountNumber.toString()
-          : null,
-      },
-      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+        chainId,
+        signer,
+        signDoc: {
+          bodyBytes: signDoc.bodyBytes,
+          authInfoBytes: signDoc.authInfoBytes,
+          chainId: signDoc.chainId,
+          accountNumber: signDoc.accountNumber
+            ? signDoc.accountNumber.toString()
+            : null,
+        },
+        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+      }
     );
-    const response = await this.requester.sendMessage(BACKGROUND_PORT, msg);
 
     return {
       signed: {
@@ -194,14 +249,20 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signer: string,
     data: string | Uint8Array
   ): Promise<StdSignature> {
-    let isADR36WithString: boolean;
-    [data, isADR36WithString] = this.getDataForADR36(data);
-    const signDoc = this.getADR36SignDoc(signer, data);
-
-    const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
-      isADR36WithString,
-    });
-    return (await this.requester.sendMessage(BACKGROUND_PORT, msg)).signature;
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-cosmos-sign-amino-adr-36",
+      {
+        chainId,
+        signer,
+        data: typeof data === "string" ? Buffer.from(data) : data,
+        signOptions: {
+          isADR36WithString: typeof data === "string",
+        },
+      }
+    );
   }
 
   async verifyArbitrary(
@@ -214,51 +275,48 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       data = Buffer.from(data);
     }
 
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new RequestVerifyADR36AminoSignDoc(chainId, signer, data, signature)
+      "keyring-cosmos",
+      "verify-cosmos-sign-amino-adr-36",
+      {
+        chainId,
+        signer,
+        data,
+        signature,
+      }
     );
   }
 
   async signEthereum(
-    chainId: string,
-    signer: string,
-    data: string | Uint8Array,
-    type: EthSignType
+    _chainId: string,
+    _signer: string,
+    _data: string | Uint8Array,
+    _type: EthSignType
   ): Promise<Uint8Array> {
-    let isADR36WithString: boolean;
-    [data, isADR36WithString] = this.getDataForADR36(data);
-    const signDoc = this.getADR36SignDoc(signer, data);
-
-    if (data === "") {
-      throw new Error("Signing empty data is not supported.");
-    }
-
-    const msg = new RequestSignAminoMsg(chainId, signer, signDoc, {
-      isADR36WithString,
-      ethSignType: type,
-    });
-    const signature = (await this.requester.sendMessage(BACKGROUND_PORT, msg))
-      .signature;
-    return Buffer.from(signature.signature, "base64");
+    throw new Error("TODO");
   }
 
-  signICNSAdr36(
+  async signICNSAdr36(
     chainId: string,
     contractAddress: string,
     owner: string,
     username: string,
     addressChainIds: string[]
   ): Promise<ICNSAdr36Signatures> {
-    return this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new RequestICNSAdr36SignaturesMsg(
+      "keyring-cosmos",
+      "request-icns-adr-36-signatures-v2",
+      {
         chainId,
         contractAddress,
         owner,
         username,
-        addressChainIds
-      )
+        addressChainIds,
+      }
     );
   }
 
@@ -285,22 +343,44 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     contractAddress: string,
     viewingKey?: string
   ): Promise<void> {
-    const msg = new SuggestTokenMsg(chainId, contractAddress, viewingKey);
-    await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "token-cw20",
+      "SuggestTokenMsg",
+      {
+        chainId,
+        contractAddress,
+        viewingKey,
+      }
+    );
   }
 
   async getSecret20ViewingKey(
     chainId: string,
     contractAddress: string
   ): Promise<string> {
-    const msg = new GetSecret20ViewingKey(chainId, contractAddress);
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "token-cw20",
+      "get-secret20-viewing-key",
+      {
+        chainId,
+        contractAddress,
+      }
+    );
   }
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new GetPubkeyMsg(chainId)
+      "secret-wasm",
+      "get-pubkey-msg",
+      {
+        chainId,
+      }
     );
   }
 
@@ -308,9 +388,15 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     chainId: string,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new GetTxEncryptionKeyMsg(chainId, nonce)
+      "secret-wasm",
+      "get-tx-encryption-key-msg",
+      {
+        chainId,
+        nonce,
+      }
     );
   }
 
@@ -320,24 +406,38 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object
   ): Promise<Uint8Array> {
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new ReqeustEncryptMsg(chainId, contractCodeHash, msg)
+      "secret-wasm",
+      "request-encrypt-msg",
+      {
+        chainId,
+        contractCodeHash,
+        msg,
+      }
     );
   }
 
   async enigmaDecrypt(
     chainId: string,
-    ciphertext: Uint8Array,
+    cipherText: Uint8Array,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    if (!ciphertext || ciphertext.length === 0) {
+    if (!cipherText || cipherText.length === 0) {
       return new Uint8Array();
     }
 
-    return await this.requester.sendMessage(
+    return await sendSimpleMessage(
+      this.requester,
       BACKGROUND_PORT,
-      new RequestDecryptMsg(chainId, ciphertext, nonce)
+      "secret-wasm",
+      "request-decrypt-msg",
+      {
+        chainId,
+        cipherText,
+        nonce,
+      }
     );
   }
 
@@ -363,52 +463,29 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions = {}
   ): Promise<AminoSignResponse> {
-    const msg = new RequestSignEIP712CosmosTxMsg_v0(
-      chainId,
-      signer,
-      eip712,
-      signDoc,
-      deepmerge(this.defaultOptions.sign ?? {}, signOptions)
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-cosmos",
+      "request-sign-eip-712-cosmos-tx-v0",
+      {
+        chainId,
+        signer,
+        eip712,
+        signDoc,
+        signOptions: deepmerge(this.defaultOptions.sign ?? {}, signOptions),
+      }
     );
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
-  protected getDataForADR36(data: string | Uint8Array): [string, boolean] {
-    let isADR36WithString = false;
-    if (typeof data === "string") {
-      data = Buffer.from(data).toString("base64");
-      isADR36WithString = true;
-    } else {
-      data = Buffer.from(data).toString("base64");
-    }
-    return [data, isADR36WithString];
-  }
-
-  protected getADR36SignDoc(signer: string, data: string): StdSignDoc {
-    return {
-      chain_id: "",
-      account_number: "0",
-      sequence: "0",
-      fee: {
-        gas: "0",
-        amount: [],
-      },
-      msgs: [
-        {
-          type: "sign/MsgSignData",
-          value: {
-            signer,
-            data,
-          },
-        },
-      ],
-      memo: "",
-    };
-  }
-
-  __core__getAnalyticsId(): Promise<string> {
-    const msg = new GetAnalyticsIdMsg();
-    return this.requester.sendMessage(BACKGROUND_PORT, msg);
+  async __core__getAnalyticsId(): Promise<string> {
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "analytics",
+      "get-analytics-id",
+      {}
+    );
   }
 
   async changeKeyRingName({
@@ -418,8 +495,15 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     defaultName: string;
     editable?: boolean;
   }): Promise<string> {
-    const msg = new ChangeKeyRingNameMsg(defaultName, editable);
-
-    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-v2",
+      "change-keyring-name-interactive",
+      {
+        defaultName,
+        editable,
+      }
+    );
   }
 }

@@ -51,24 +51,15 @@ export class AnalyticsStore<
         eventName: string;
         eventProperties?: E;
       };
-    } = {},
-    protected readonly legacyAnalyticsClient?: AnalyticsClient
+    } = {}
   ) {}
 
   setUserId(id: string): void {
     this.analyticsClient.setUserId(id);
-
-    if (this.legacyAnalyticsClient) {
-      this.legacyAnalyticsClient.setUserId(id);
-    }
   }
 
   setUserProperties(userProperties: U): void {
     this.analyticsClient.setUserProperties(userProperties);
-
-    if (this.legacyAnalyticsClient) {
-      this.legacyAnalyticsClient.setUserProperties(userProperties);
-    }
   }
 
   logEvent(eventName: string, eventProperties?: E): void {
@@ -79,10 +70,6 @@ export class AnalyticsStore<
     }
 
     this.analyticsClient.logEvent(eventName, eventProperties);
-
-    if (this.legacyAnalyticsClient) {
-      this.legacyAnalyticsClient.logEvent(eventName, eventProperties);
-    }
   }
 
   logPageView(pageName: string, eventProperties?: E): void {

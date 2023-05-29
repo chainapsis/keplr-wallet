@@ -15,9 +15,7 @@ export const getHandler: (service: AnalyticsService) => Handler = (service) => {
 
 const handleGetAnalyticsIdMsg: (
   service: AnalyticsService
-) => InternalHandler<GetAnalyticsIdMsg> = (service: AnalyticsService) => (
-  env,
-  msg
-) => {
-  return service.getAnalyticsIdOnlyIfPrivileged(env, msg.origin);
-};
+) => InternalHandler<GetAnalyticsIdMsg> =
+  (service: AnalyticsService) => (env, msg) => {
+    return service.getAnalyticsIdOnlyIfPrivileged(env, msg.origin);
+  };

@@ -1,6 +1,7 @@
 import { InteractionService } from "../interaction";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import {
+  AllPermissionDataPerOrigin,
   getBasicAccessPermissionType,
   GlobalPermissionData,
   INTERACTION_TYPE_GLOBAL_PERMISSION,
@@ -9,78 +10,120 @@ import {
 } from "./types";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainsService } from "../chains";
-import { KeyRingService } from "../keyring";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { ChainInfo } from "@keplr-wallet/types";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
+import { migrate } from "./migrate";
+import { computedFn } from "mobx-utils";
+import { PermissionKeyHelper } from "./helper";
 
 export class PermissionService {
-  protected globalPermissionMap: {
-    [type: string]:
-      | {
-          [origin: string]: true | undefined;
-        }
-      | undefined;
-  } = {};
-
-  protected permissionMap: {
-    [chainIdentifier: string]:
-      | {
-          [type: string]:
-            | {
-                [origin: string]: true | undefined;
-              }
-            | undefined;
-        }
-      | undefined;
-  } = {};
+  @observable
+  protected permissionMap: Map<string, true> = new Map();
 
   protected privilegedOrigins: Map<string, boolean> = new Map();
 
-  protected interactionService!: InteractionService;
-  protected chainsService!: ChainsService;
-  protected keyRingService!: KeyRingService;
-
   constructor(
     protected readonly kvStore: KVStore,
-    privilegedOrigins: string[]
+    privilegedOrigins: string[],
+    protected readonly interactionService: InteractionService,
+    protected readonly chainsService: ChainsService
   ) {
+    makeObservable(this);
+
     for (const origin of privilegedOrigins) {
       this.privilegedOrigins.set(origin, true);
     }
 
-    this.restore();
-  }
-
-  init(
-    interactionService: InteractionService,
-    chainsService: ChainsService,
-    keyRingService: KeyRingService
-  ) {
-    this.interactionService = interactionService;
-    this.chainsService = chainsService;
-    this.keyRingService = keyRingService;
-
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
   }
 
-  protected readonly onChainRemoved = (chainId: string) => {
-    this.removeAllPermissions(chainId);
+  async init() {
+    const migration = await migrate(this.kvStore);
+    if (migration) {
+      runInAction(() => {
+        for (const key of Object.keys(migration)) {
+          const granted = migration[key];
+          if (granted) {
+            this.permissionMap.set(key, true);
+          }
+        }
+      });
+    } else {
+      const saved = await this.kvStore.get<Record<string, true | undefined>>(
+        "permissionMap/v1"
+      );
+      if (saved) {
+        runInAction(() => {
+          for (const key of Object.keys(saved)) {
+            const granted = saved[key];
+            if (granted) {
+              this.permissionMap.set(key, true);
+            }
+          }
+        });
+      }
+    }
+
+    autorun(() => {
+      this.kvStore.set(
+        "permissionMap/v1",
+        Object.fromEntries(this.permissionMap)
+      );
+    });
+  }
+
+  protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
+    this.removeAllPermissions(chainInfo.chainId);
   };
+
+  getAllPermissionDataPerOrigin(): AllPermissionDataPerOrigin {
+    const data: AllPermissionDataPerOrigin = {};
+
+    for (const key of this.permissionMap.keys()) {
+      const split = PermissionKeyHelper.splitPermissionKey(key);
+
+      const origin = split.origin;
+      if (!data[origin]) {
+        data[origin] = {
+          permissions: [],
+          globalPermissions: [],
+        };
+      }
+
+      if (!split.chainIdentifier) {
+        data[origin]!.globalPermissions.push({
+          type: split.type,
+        });
+      } else {
+        data[origin]!.permissions.push({
+          chainIdentifier: split.chainIdentifier,
+          type: split.type,
+        });
+      }
+    }
+
+    return data;
+  }
+
+  @action
+  clearAllPermissions() {
+    this.permissionMap.clear();
+  }
 
   async checkOrGrantBasicAccessPermission(
     env: Env,
     chainIds: string | string[],
     origin: string
   ) {
-    // Try to unlock the key ring before checking or granting the basic permission.
-    await this.keyRingService.enable(env);
-
     if (typeof chainIds === "string") {
       chainIds = [chainIds];
     }
 
     const ungrantedChainIds: string[] = [];
     for (const chainId of chainIds) {
-      if (!this.hasPermisson(chainId, getBasicAccessPermissionType(), origin)) {
+      if (
+        !this.hasPermission(chainId, getBasicAccessPermissionType(), origin)
+      ) {
         ungrantedChainIds.push(chainId);
       }
     }
@@ -89,51 +132,26 @@ export class PermissionService {
       await this.grantBasicAccessPermission(env, ungrantedChainIds, [origin]);
     }
 
-    await this.checkBasicAccessPermission(env, chainIds, origin);
-  }
-
-  async disable(env: Env, chainIds: string | string[], origin: string) {
-    // Delete permissions granted to origin.
-    // If chain ids are specified, only the permissions granted to each chain id are deleted (In this case, permissions such as getChainInfosWithoutEndpoints() are not deleted).
-    // Else, remove all permissions granted to origin (In this case, permissions that are not assigned to each chain, such as getChainInfosWithoutEndpoints(), are also deleted).
-
-    await this.keyRingService.enable(env);
-
-    if (typeof chainIds === "string") {
-      chainIds = [chainIds];
-    }
-
-    if (chainIds.length > 0) {
-      for (const chainId of chainIds) {
-        await this.removeAllTypePermissionToChainId(chainId, [origin]);
-      }
-    } else {
-      await this.removeAllTypePermission([origin]);
-      await this.removeAllTypeGlobalPermission([origin]);
-    }
+    this.checkBasicAccessPermission(env, chainIds, origin);
   }
 
   async checkOrGrantPermission(
     env: Env,
-    url: string,
     chainIds: string[],
     type: string,
     origin: string
   ) {
     // TODO: Merge with `checkOrGrantBasicAccessPermission` method
 
-    // Try to unlock the key ring before checking or granting the basic permission.
-    await this.keyRingService.enable(env);
-
     const ungrantedChainIds: string[] = [];
     for (const chainId of chainIds) {
-      if (!this.hasPermisson(chainId, type, origin)) {
+      if (!this.hasPermission(chainId, type, origin)) {
         ungrantedChainIds.push(chainId);
       }
     }
 
     if (ungrantedChainIds.length > 0) {
-      await this.grantPermission(env, url, ungrantedChainIds, type, [origin]);
+      await this.grantPermission(env, ungrantedChainIds, type, [origin]);
     }
 
     for (const chainId of chainIds) {
@@ -141,17 +159,9 @@ export class PermissionService {
     }
   }
 
-  async checkOrGrantGlobalPermission(
-    env: Env,
-    url: string,
-    type: string,
-    origin: string
-  ) {
-    // Try to unlock the key ring before checking or granting the basic permission.
-    await this.keyRingService.enable(env);
-
+  async checkOrGrantGlobalPermission(env: Env, type: string, origin: string) {
     if (!this.hasGlobalPermission(type, origin)) {
-      await this.grantGlobalPermission(env, url, type, [origin]);
+      await this.grantGlobalPermission(env, type, [origin]);
     }
 
     this.checkGlobalPermission(env, type, origin);
@@ -159,7 +169,6 @@ export class PermissionService {
 
   async grantPermission(
     env: Env,
-    url: string,
     chainIds: string[],
     type: string,
     origins: string[]
@@ -174,14 +183,15 @@ export class PermissionService {
       origins,
     };
 
-    await this.interactionService.waitApprove(
+    await this.interactionService.waitApproveV2(
       env,
-      url,
+      "/permission",
       INTERACTION_TYPE_PERMISSION,
-      permissionData
+      permissionData,
+      () => {
+        this.addPermission(chainIds, type, origins);
+      }
     );
-
-    await this.addPermission(chainIds, type, origins);
   }
 
   async grantBasicAccessPermission(
@@ -191,24 +201,18 @@ export class PermissionService {
   ) {
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
-      await this.chainsService.getChainInfo(chainId);
+      this.chainsService.getChainInfoOrThrow(chainId);
     }
 
     await this.grantPermission(
       env,
-      "/access",
       chainIds,
       getBasicAccessPermissionType(),
       origins
     );
   }
 
-  async grantGlobalPermission(
-    env: Env,
-    url: string,
-    type: string,
-    origins: string[]
-  ) {
+  async grantGlobalPermission(env: Env, type: string, origins: string[]) {
     if (env.isInternalMsg) {
       return;
     }
@@ -218,14 +222,15 @@ export class PermissionService {
       origins,
     };
 
-    await this.interactionService.waitApprove(
+    await this.interactionService.waitApproveV2(
       env,
-      url,
+      "/permission",
       INTERACTION_TYPE_GLOBAL_PERMISSION,
-      permissionData
+      permissionData,
+      () => {
+        this.addGlobalPermission(type, origins);
+      }
     );
-
-    await this.addGlobalPermission(type, origins);
   }
 
   checkPermission(env: Env, chainId: string, type: string, origin: string) {
@@ -233,19 +238,19 @@ export class PermissionService {
       return;
     }
 
-    if (!this.hasPermisson(chainId, type, origin)) {
+    if (!this.hasPermission(chainId, type, origin)) {
       throw new KeplrError("permission", 130, `${origin} is not permitted`);
     }
   }
 
-  async checkBasicAccessPermission(
-    env: Env,
-    chainIds: string[],
-    origin: string
-  ) {
+  checkBasicAccessPermission(env: Env, chainIds: string[], origin: string) {
+    if (chainIds.length === 0) {
+      throw new Error("Chain ids are empty");
+    }
+
     for (const chainId of chainIds) {
       // Make sure that the chain info is registered.
-      await this.chainsService.getChainInfo(chainId);
+      this.chainsService.getChainInfoOrThrow(chainId);
 
       this.checkPermission(
         env,
@@ -254,6 +259,32 @@ export class PermissionService {
         origin
       );
     }
+  }
+
+  hasBasicAccessPermission(
+    env: Env,
+    chainIds: string[],
+    origin: string
+  ): boolean {
+    if (chainIds.length === 0) {
+      throw new Error("Chain ids are empty");
+    }
+
+    if (env.isInternalMsg) {
+      return true;
+    }
+
+    for (const chainId of chainIds) {
+      // Make sure that the chain info is registered.
+      this.chainsService.getChainInfoOrThrow(chainId);
+
+      if (
+        !this.hasPermission(chainId, getBasicAccessPermissionType(), origin)
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   checkGlobalPermission(env: Env, type: string, origin: string) {
@@ -266,21 +297,17 @@ export class PermissionService {
     }
   }
 
-  hasPermisson(chainId: string, type: string, origin: string): boolean {
+  hasPermission(chainId: string, type: string, origin: string): boolean {
     // Privileged origin can pass the any permission.
     if (this.privilegedOrigins.get(origin)) {
       return true;
     }
 
-    const permissionsInChain = this.permissionMap[
-      ChainIdHelper.parse(chainId).identifier
-    ];
-    if (!permissionsInChain) {
-      return false;
-    }
-
-    const innerMap = permissionsInChain[type];
-    return !(!innerMap || !innerMap[origin]);
+    return (
+      this.permissionMap.get(
+        PermissionKeyHelper.getPermissionKey(chainId, type, origin)
+      ) ?? false
+    );
   }
 
   hasGlobalPermission(type: string, origin: string): boolean {
@@ -289,220 +316,195 @@ export class PermissionService {
       return true;
     }
 
-    const originMap = this.globalPermissionMap[type];
-    if (!originMap) {
-      return false;
-    }
-
-    return !!originMap[origin];
+    return (
+      this.permissionMap.get(
+        PermissionKeyHelper.getGlobalPermissionKey(type, origin)
+      ) ?? false
+    );
   }
 
-  getPermissionOrigins(chainId: string, type: string): string[] {
-    const origins = [];
+  getPermissionOrigins = computedFn(
+    (chainId: string, type: string): string[] => {
+      const origins = [];
 
-    const permissionsInChain = this.permissionMap[
-      ChainIdHelper.parse(chainId).identifier
-    ];
-    if (!permissionsInChain) {
-      return [];
-    }
-
-    const innerMap = permissionsInChain[type];
-    if (!innerMap) {
-      return [];
-    }
-
-    for (const origin of Object.keys(innerMap)) {
-      if (innerMap[origin]) {
-        origins.push(origin);
+      for (const key of this.permissionMap.keys()) {
+        const origin = PermissionKeyHelper.getOriginFromPermissionKey(
+          chainId,
+          type,
+          key
+        );
+        if (origin) {
+          origins.push(origin);
+        }
       }
+
+      return origins;
+    },
+    {
+      keepAlive: true,
     }
+  );
 
-    return origins;
-  }
+  getGlobalPermissionOrigins = computedFn(
+    (type: string): string[] => {
+      const origins = [];
 
-  getGlobalPermissionOrigins(type: string): string[] {
-    const originMap = {
-      ...this.globalPermissionMap[type],
-    };
+      for (const key of this.permissionMap.keys()) {
+        const origin = PermissionKeyHelper.getOriginFromGlobalPermissionKey(
+          type,
+          key
+        );
+        if (origin) {
+          origins.push(origin);
+        }
+      }
 
-    return Object.keys(originMap).filter((origin) => {
-      return originMap[origin];
-    });
-  }
+      return origins;
+    },
+    {
+      keepAlive: true,
+    }
+  );
 
-  getOriginPermittedChains(origin: string, type: string): string[] {
-    const chains: string[] = [];
+  getOriginPermittedChains = computedFn(
+    (origin: string, type: string): string[] => {
+      const chains: string[] = [];
 
-    for (const chain of Object.keys(this.permissionMap)) {
-      const permissionInChain = this.permissionMap[chain];
-
-      const originMap =
-        (permissionInChain ? permissionInChain[type] : undefined) ?? {};
-
-      for (const _origin of Object.keys(originMap)) {
-        if (_origin === origin && originMap[_origin]) {
+      for (const key of this.permissionMap.keys()) {
+        const chain = PermissionKeyHelper.getChainIdentifierFromPermissionKey(
+          type,
+          origin,
+          key
+        );
+        if (chain) {
           chains.push(chain);
         }
       }
+
+      return chains;
+    },
+    {
+      keepAlive: true,
     }
+  );
 
-    return chains;
-  }
-
-  async addPermission(chainIds: string[], type: string, origins: string[]) {
+  @action
+  addPermission(chainIds: string[], type: string, origins: string[]) {
     for (const chainId of chainIds) {
-      let permissionsInChain = this.permissionMap[
-        ChainIdHelper.parse(chainId).identifier
-      ];
-      if (!permissionsInChain) {
-        permissionsInChain = {};
-        this.permissionMap[
-          ChainIdHelper.parse(chainId).identifier
-        ] = permissionsInChain;
-      }
-
-      let innerMap = permissionsInChain[type];
-      if (!innerMap) {
-        innerMap = {};
-        permissionsInChain[type] = innerMap;
-      }
-
       for (const origin of origins) {
-        innerMap[origin] = true;
+        this.permissionMap.set(
+          PermissionKeyHelper.getPermissionKey(chainId, type, origin),
+          true
+        );
       }
     }
-
-    await this.save();
   }
 
-  async addGlobalPermission(type: string, origins: string[]) {
-    const originMap = {
-      ...this.globalPermissionMap[type],
-    };
-
+  @action
+  addGlobalPermission(type: string, origins: string[]) {
     for (const origin of origins) {
-      originMap[origin] = true;
+      this.permissionMap.set(
+        PermissionKeyHelper.getGlobalPermissionKey(type, origin),
+        true
+      );
     }
-
-    this.globalPermissionMap[type] = originMap;
-
-    await this.save();
   }
 
-  async removePermission(chainId: string, type: string, origins: string[]) {
-    const permissionsInChain = this.permissionMap[
-      ChainIdHelper.parse(chainId).identifier
-    ];
-    if (!permissionsInChain) {
-      return;
-    }
-
-    const innerMap = permissionsInChain[type];
-    if (!innerMap) {
-      return;
-    }
-
+  @action
+  removePermission(chainId: string, type: string, origins: string[]) {
     for (const origin of origins) {
-      delete innerMap[origin];
+      this.permissionMap.delete(
+        PermissionKeyHelper.getPermissionKey(chainId, type, origin)
+      );
     }
-
-    await this.save();
   }
 
-  async removeAllTypePermission(origins: string[]) {
-    for (const identifier of Object.keys(this.permissionMap)) {
-      const permissionsInChain = this.permissionMap[identifier];
-      if (!permissionsInChain) {
-        return;
-      }
+  @action
+  removeAllTypePermission(origins: string[]) {
+    const deletes: string[] = [];
 
-      for (const type of Object.keys(permissionsInChain)) {
-        const innerMap = permissionsInChain[type];
-        if (!innerMap) {
-          return;
-        }
-
-        for (const origin of origins) {
-          delete innerMap[origin];
+    for (const key of this.permissionMap.keys()) {
+      for (const origin of origins) {
+        const typeAndOrigin =
+          PermissionKeyHelper.getChainAndTypeFromPermissionKey(origin, key);
+        if (typeAndOrigin) {
+          deletes.push(key);
         }
       }
     }
 
-    await this.save();
+    for (const key of deletes) {
+      this.permissionMap.delete(key);
+    }
   }
 
-  async removeAllTypePermissionToChainId(chainId: string, origins: string[]) {
-    const permissionsInChain = this.permissionMap[
-      ChainIdHelper.parse(chainId).identifier
-    ];
-    if (!permissionsInChain) {
-      return;
-    }
+  @action
+  removeAllTypePermissionToChainId(chainId: string, origins: string[]) {
+    const deletes: string[] = [];
 
-    for (const type of Object.keys(permissionsInChain)) {
-      const innerMap = permissionsInChain[type];
-      if (!innerMap) {
-        return;
-      }
-
-      for (const origin of origins) {
-        delete innerMap[origin];
+    for (const key of this.permissionMap.keys()) {
+      const typeAndOrigin =
+        PermissionKeyHelper.getTypeAndOriginFromPermissionKey(chainId, key);
+      if (typeAndOrigin && origins.includes(typeAndOrigin.origin)) {
+        deletes.push(key);
       }
     }
 
-    await this.save();
-  }
-
-  async removeGlobalPermission(type: string, origins: string[]) {
-    const originMap = {
-      ...this.globalPermissionMap[type],
-    };
-
-    for (const origin of origins) {
-      delete originMap[origin];
+    for (const key of deletes) {
+      this.permissionMap.delete(key);
     }
-
-    this.globalPermissionMap[type] = originMap;
-
-    await this.save();
   }
 
-  async removeAllTypeGlobalPermission(origins: string[]) {
-    for (const type of Object.keys(this.globalPermissionMap)) {
-      const originMap = {
-        ...this.globalPermissionMap[type],
-      };
+  @action
+  removeGlobalPermission(type: string, origins: string[]) {
+    const deletes: string[] = [];
 
-      for (const origin of origins) {
-        delete originMap[origin];
+    for (const key of this.permissionMap.keys()) {
+      const typeAndOrigin =
+        PermissionKeyHelper.getTypeAndOriginFromGlobalPermissionKey(key);
+      if (
+        typeAndOrigin &&
+        typeAndOrigin.type === type &&
+        origins.includes(typeAndOrigin.origin)
+      ) {
+        deletes.push(key);
       }
-
-      this.globalPermissionMap[type] = originMap;
     }
 
-    await this.save();
-  }
-
-  async removeAllPermissions(chainId: string) {
-    this.permissionMap[ChainIdHelper.parse(chainId).identifier] = undefined;
-
-    await this.save();
-  }
-
-  protected async restore() {
-    const map = await this.kvStore.get<any>("permissionMap");
-    if (map) {
-      this.permissionMap = map;
-    }
-    const globalMap = await this.kvStore.get<any>("globalPermissionMap");
-    if (globalMap) {
-      this.globalPermissionMap = globalMap;
+    for (const key of deletes) {
+      this.permissionMap.delete(key);
     }
   }
 
-  protected async save() {
-    await this.kvStore.set("permissionMap", this.permissionMap);
-    await this.kvStore.set("globalPermissionMap", this.globalPermissionMap);
+  @action
+  removeAllTypeGlobalPermission(origins: string[]) {
+    const deletes: string[] = [];
+
+    for (const key of this.permissionMap.keys()) {
+      const typeAndOrigin =
+        PermissionKeyHelper.getTypeAndOriginFromGlobalPermissionKey(key);
+      if (typeAndOrigin && origins.includes(typeAndOrigin.origin)) {
+        deletes.push(key);
+      }
+    }
+
+    for (const key of deletes) {
+      this.permissionMap.delete(key);
+    }
+  }
+
+  @action
+  removeAllPermissions(chainId: string) {
+    const deletes: string[] = [];
+
+    for (const key of this.permissionMap.keys()) {
+      if (PermissionKeyHelper.getTypeAndOriginFromPermissionKey(chainId, key)) {
+        deletes.push(key);
+      }
+    }
+
+    for (const key of deletes) {
+      this.permissionMap.delete(key);
+    }
   }
 }

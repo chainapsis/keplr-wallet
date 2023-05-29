@@ -19,3 +19,12 @@ export interface GlobalPermissionData {
   type: string;
   origins: string[];
 }
+
+export interface AllPermissionDataPerOrigin {
+  [origin: string]:
+    | {
+        permissions: { chainIdentifier: string; type: string }[];
+        globalPermissions: { type: string }[];
+      }
+    | undefined;
+}

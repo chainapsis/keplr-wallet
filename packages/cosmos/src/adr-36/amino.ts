@@ -134,7 +134,7 @@ export function verifyADR36AminoSignDoc(
         bech32PrefixAccAddr
       );
     }
-    return new Bech32Address(cryptoPubKey.getAddress()).toBech32(
+    return new Bech32Address(cryptoPubKey.getCosmosAddress()).toBech32(
       bech32PrefixAccAddr
     );
   })();

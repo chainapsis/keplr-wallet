@@ -1,9 +1,7 @@
 import { ChainIdHelper } from "./cosmos";
 
 export class EthermintChainIdHelper {
-  static parse(
-    chainId: string
-  ): {
+  static parse(chainId: string): {
     identifier: string;
     version: number;
     ethChainId: number;

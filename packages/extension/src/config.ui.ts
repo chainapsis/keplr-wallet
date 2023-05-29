@@ -1,14 +1,7 @@
 // Seperate shared config from UI config to prevent code mixup between UI and background process code.
-import { RegisterOption } from "@keplr-wallet/hooks";
-import {
-  IntlMessages,
-  LanguageToFiatCurrency as TypeLanguageToFiatCurrency,
-} from "./languages";
 import { FiatCurrency } from "@keplr-wallet/types";
-import {
-  ADDITIONAL_SIGN_IN_PREPEND,
-  ADDITIONAL_INTL_MESSAGES,
-} from "alt-sign-in";
+
+export const HelpDeskUrl = "https://help.keplr.app";
 
 export const CoinGeckoAPIEndPoint =
   process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] ||
@@ -95,20 +88,6 @@ export const FiatCurrencies: FiatCurrency[] = [
   },
 ];
 
-export const LanguageToFiatCurrency: TypeLanguageToFiatCurrency = {
-  default: "usd",
-  ko: "krw",
-};
-
-export const AdditionalSignInPrepend:
-  | RegisterOption[]
-  | undefined = ADDITIONAL_SIGN_IN_PREPEND;
-
-export const AdditionalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
-
-export const LegacyAmplitudeApiKey =
-  process.env["KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY"] || "";
-
 export const AmplitudeApiKey = process.env["KEPLR_EXT_AMPLITUDE_API_KEY"] || "";
 
 export const ICNSInfo = {
@@ -116,9 +95,6 @@ export const ICNSInfo = {
   resolverContractAddress:
     "osmo1xk0s8xgktn9x5vwcgtjdxqzadg88fgn33p8u9cnpdxwemvxscvast52cdd",
 };
-
-// If not needed, just set as empty string ("")
-export const ICNSFrontendLink: string = "https://app.icns.xyz";
 
 export interface FiatOnRampServiceInfo {
   serviceId: string;

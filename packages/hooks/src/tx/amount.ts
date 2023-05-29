@@ -1,6 +1,11 @@
-import { IAmountConfig, IFeeConfig } from "./types";
+import {
+  IAmountConfig,
+  IFeeConfig,
+  ISenderConfig,
+  UIProperties,
+} from "./types";
 import { TxChainSetter } from "./chain";
-import { ChainGetter, CoinPrimitive } from "@keplr-wallet/stores";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
 import { AppCurrency } from "@keplr-wallet/types";
 import {
@@ -10,119 +15,59 @@ import {
   NegativeAmountError,
   ZeroAmountError,
 } from "./errors";
-import { Dec, DecUtils } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
 import { useState } from "react";
 import { QueriesStore } from "./internal";
 
 export class AmountConfig extends TxChainSetter implements IAmountConfig {
   @observable.ref
-  protected feeConfig?: IFeeConfig;
+  protected _currency?: AppCurrency = undefined;
 
   @observable
-  protected _sender: string;
+  protected _value: string = "";
+
+  @observable
+  protected _fraction: number = 0;
 
   @observable.ref
-  protected _sendCurrency?: AppCurrency = undefined;
-
-  @observable
-  protected _amount: string;
-
-  @observable
-  protected _fraction: number | undefined = undefined;
+  protected _feeConfig: IFeeConfig | undefined = undefined;
 
   constructor(
     chainGetter: ChainGetter,
     protected readonly queriesStore: QueriesStore,
     initialChainId: string,
-    sender: string,
-    feeConfig: IFeeConfig | undefined
+    protected readonly senderConfig: ISenderConfig
   ) {
     super(chainGetter, initialChainId);
-
-    this._sender = sender;
-    this.feeConfig = feeConfig;
-    this._amount = "";
 
     makeObservable(this);
   }
 
-  @action
-  setFeeConfig(feeConfig: IFeeConfig) {
-    this.feeConfig = feeConfig;
+  get feeConfig(): IFeeConfig | undefined {
+    return this._feeConfig;
   }
 
   @action
-  setSender(sender: string) {
-    this._sender = sender;
-  }
-
-  @action
-  setSendCurrency(currency: AppCurrency | undefined) {
-    if (currency?.coinMinimalDenom !== this._sendCurrency?.coinMinimalDenom) {
-      this._amount = "";
-      if (this.fraction != null) {
-        this.setFraction(undefined);
-      }
-    }
-
-    this._sendCurrency = currency;
-  }
-
-  @action
-  setAmount(amount: string) {
-    if (amount.startsWith(".")) {
-      amount = "0" + amount;
-    }
-
-    if (this.fraction != null) {
-      this.setFraction(undefined);
-    }
-    this._amount = amount;
-  }
-
-  @action
-  setIsMax(isMax: boolean) {
-    this._fraction = isMax ? 1 : undefined;
-  }
-
-  @action
-  toggleIsMax() {
-    this.setIsMax(!this.isMax);
-  }
-
-  get isMax(): boolean {
-    return this._fraction === 1;
-  }
-
-  get sender(): string {
-    return this._sender;
-  }
-
-  get fraction(): number | undefined {
-    return this._fraction;
-  }
-
-  @action
-  setFraction(value: number | undefined) {
-    this._fraction = value;
+  setFeeConfig(feeConfig: IFeeConfig | undefined) {
+    this._feeConfig = feeConfig;
   }
 
   @computed
-  get amount(): string {
-    if (this.fraction != null) {
-      const balance = this.queriesStore
+  get value(): string {
+    if (this.fraction > 0) {
+      let result = this.queriesStore
         .get(this.chainId)
-        .queryBalances.getQueryBech32Address(this.sender)
-        .getBalanceFromCurrency(this.sendCurrency);
-
-      const result = this.feeConfig?.fee
-        ? balance.sub(this.feeConfig.fee)
-        : balance;
+        .queryBalances.getQueryBech32Address(this.senderConfig.sender)
+        .getBalanceFromCurrency(this.currency);
+      if (this.feeConfig) {
+        for (const fee of this.feeConfig.fees) {
+          result = result.sub(fee);
+        }
+      }
       if (result.toDec().lte(new Dec(0))) {
         return "0";
       }
 
-      // Remember that the `CoinPretty`'s sub method do nothing if the currencies are different.
       return result
         .mul(new Dec(this.fraction))
         .trim(true)
@@ -131,47 +76,51 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         .toString();
     }
 
-    return this._amount;
+    return this._value;
   }
 
-  getAmountPrimitive(): CoinPrimitive {
-    const amountStr = this.amount;
-    const sendCurrency = this.sendCurrency;
-
-    if (!amountStr) {
-      return {
-        denom: sendCurrency.coinMinimalDenom,
-        amount: "0",
-      };
+  @action
+  setValue(value: string): void {
+    if (value.startsWith(".")) {
+      value = "0" + value;
     }
 
-    try {
-      return {
-        denom: sendCurrency.coinMinimalDenom,
-        amount: new Dec(amountStr)
-          .mul(DecUtils.getPrecisionDec(sendCurrency.coinDecimals))
-          .truncate()
-          .toString(),
-      };
-    } catch {
-      return {
-        denom: sendCurrency.coinMinimalDenom,
-        amount: "0",
-      };
-    }
+    this._value = value;
+
+    this.setFraction(0);
   }
 
   @computed
-  get sendCurrency(): AppCurrency {
+  get amount(): CoinPretty[] {
+    let amount: Dec;
+    try {
+      if (this.value.trim() === "") {
+        amount = new Dec(0);
+      } else {
+        amount = new Dec(this.value);
+      }
+    } catch {
+      amount = new Dec(0);
+    }
+
+    return [
+      new CoinPretty(
+        this.currency,
+        amount
+          .mul(DecUtils.getTenExponentN(this.currency.coinDecimals))
+          .truncate()
+      ),
+    ];
+  }
+
+  @computed
+  get currency(): AppCurrency {
     const chainInfo = this.chainInfo;
 
-    if (this._sendCurrency) {
-      const find = chainInfo.currencies.find(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (cur) => cur.coinMinimalDenom === this._sendCurrency!.coinMinimalDenom
-      );
+    if (this._currency) {
+      const find = chainInfo.findCurrency(this._currency.coinMinimalDenom);
       if (find) {
-        return this._sendCurrency;
+        return find;
       }
     }
 
@@ -182,45 +131,99 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     return chainInfo.currencies[0];
   }
 
-  get sendableCurrencies(): AppCurrency[] {
+  @action
+  setCurrency(currency: AppCurrency | undefined) {
+    if (currency?.coinMinimalDenom !== this._currency?.coinMinimalDenom) {
+      this._value = "";
+      this.setFraction(0);
+    }
+
+    this._currency = currency;
+  }
+
+  get fraction(): number {
+    return this._fraction;
+  }
+
+  @action
+  setFraction(fraction: number): void {
+    this._fraction = fraction;
+  }
+
+  get selectableCurrencies(): AppCurrency[] {
     return this.chainInfo.currencies;
   }
 
   @computed
-  get error(): Error | undefined {
-    const sendCurrency = this.sendCurrency;
-    if (!sendCurrency) {
-      return new Error("Currency to send not set");
+  get uiProperties(): UIProperties {
+    if (!this.currency) {
+      return {
+        error: new Error("Currency to send not set"),
+      };
     }
-    if (this.amount === "") {
-      return new EmptyAmountError("Amount is empty");
+
+    if (this.value.trim() === "") {
+      return {
+        error: new EmptyAmountError("Amount is empty"),
+      };
     }
-    if (Number.isNaN(parseFloat(this.amount))) {
-      return new InvalidNumberAmountError("Invalid form of number");
-    }
-    let dec;
+
     try {
-      dec = new Dec(this.amount);
+      const dec = new Dec(this.value);
       if (dec.equals(new Dec(0))) {
-        return new ZeroAmountError("Amount is zero");
+        return {
+          error: new ZeroAmountError("Amount is zero"),
+        };
+      }
+      if (dec.lt(new Dec(0))) {
+        return {
+          error: new NegativeAmountError("Amount is negative"),
+        };
       }
     } catch {
-      return new InvalidNumberAmountError("Invalid form of number");
-    }
-    if (new Dec(this.amount).lt(new Dec(0))) {
-      return new NegativeAmountError("Amount is negative");
-    }
-
-    const balance = this.queriesStore
-      .get(this.chainId)
-      .queryBalances.getQueryBech32Address(this.sender)
-      .getBalanceFromCurrency(this.sendCurrency);
-    const balanceDec = balance.toDec();
-    if (dec.gt(balanceDec)) {
-      return new InsufficientAmountError("Insufficient amount");
+      return {
+        error: new InvalidNumberAmountError("Invalid form of number"),
+      };
     }
 
-    return;
+    for (const amount of this.amount) {
+      const currency = amount.currency;
+      const bal = this.queriesStore
+        .get(this.chainId)
+        .queryBalances.getQueryBech32Address(this.senderConfig.sender)
+        .balances.find(
+          (bal) => bal.currency.coinMinimalDenom === currency.coinMinimalDenom
+        );
+
+      if (!bal) {
+        return {
+          warning: new Error(
+            `Can't parse the balance for ${currency.coinMinimalDenom}`
+          ),
+        };
+      }
+
+      if (bal.error) {
+        return {
+          warning: new Error("Failed to fetch balance"),
+        };
+      }
+
+      if (!bal.response) {
+        return {
+          loadingState: "loading-block",
+        };
+      }
+
+      if (bal.balance.toDec().lt(amount.toDec())) {
+        return {
+          error: new InsufficientAmountError("Insufficient amount"),
+          loadingState: bal.isFetching ? "loading" : undefined,
+        };
+      }
+    }
+
+    return {};
   }
 }
 
@@ -228,14 +231,12 @@ export const useAmountConfig = (
   chainGetter: ChainGetter,
   queriesStore: QueriesStore,
   chainId: string,
-  sender: string
+  senderConfig: ISenderConfig
 ) => {
   const [txConfig] = useState(
-    () =>
-      new AmountConfig(chainGetter, queriesStore, chainId, sender, undefined)
+    () => new AmountConfig(chainGetter, queriesStore, chainId, senderConfig)
   );
   txConfig.setChain(chainId);
-  txConfig.setSender(sender);
 
   return txConfig;
 };

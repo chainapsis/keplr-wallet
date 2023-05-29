@@ -1,173 +1,276 @@
-import { HasMapStore } from "../common";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
   AddTokenMsg,
-  GetTokensMsg,
+  GetAllTokenInfosMsg,
   RemoveTokenMsg,
-  SuggestTokenMsg,
+  TokenInfo,
 } from "@keplr-wallet/background";
-import { autorun, flow, makeObservable, observable } from "mobx";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
-import { DeepReadonly } from "utility-types";
-import { ChainStore } from "../chain";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
+import { AppCurrency } from "@keplr-wallet/types";
+import { IChainStore } from "../chain";
 import { InteractionStore } from "./interaction";
-import { toGenerator } from "@keplr-wallet/common";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
+import { Buffer } from "buffer/";
+import { IAccountStore } from "../account";
+import { KeyRingStore } from "./keyring";
 
-export class TokensStoreInner {
+export class TokensStore {
+  @observable
+  protected _isInitialized: boolean = false;
+
   @observable.ref
-  protected _tokens: AppCurrency[] = [];
+  protected tokenMap: ReadonlyMap<string, ReadonlyArray<TokenInfo>> = new Map();
+  // No need to be observable.
+  protected prevTokenMap: ReadonlyMap<string, ReadonlyArray<TokenInfo>> =
+    new Map();
 
   constructor(
     protected readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
     },
-    protected readonly chainStore: ChainStore<any>,
-    protected readonly chainId: string,
-    protected readonly requester: MessageRequester
+    protected readonly requester: MessageRequester,
+    protected readonly chainStore: IChainStore,
+    protected readonly accountStore: IAccountStore,
+    protected readonly keyRingStore: KeyRingStore,
+    protected readonly interactionStore: InteractionStore
   ) {
     makeObservable(this);
 
-    this.refreshTokens();
+    this.init();
+  }
 
-    // If key store in the keplr extension is unlocked, this event will be dispatched.
-    // This is needed becuase the token such as secret20 exists according to the account.
-    this.eventListener.addEventListener("keplr_keystoreunlock", () => {
-      this.refreshTokens();
-    });
+  async init(): Promise<void> {
+    await this.refreshTokens();
 
     // If key store in the keplr extension is changed, this event will be dispatched.
     // This is needed becuase the token such as secret20 exists according to the account.
     this.eventListener.addEventListener("keplr_keystorechange", () => {
+      this.clearTokensFromChainInfos();
       this.refreshTokens();
+    });
+
+    autorun(() => {
+      // Account가 변경되었을때, 체인 정보가 변경되었을때 등에 반응해야하기 때문에 autorun 안에 넣는다.
+      this.updateChainInfos();
+    });
+
+    runInAction(() => {
+      this._isInitialized = true;
     });
   }
 
-  get tokens(): DeepReadonly<AppCurrency[]> {
-    return this._tokens;
+  protected async refreshTokens() {
+    const msg = new GetAllTokenInfosMsg();
+    const tokens = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    runInAction(() => {
+      const map = new Map<string, TokenInfo[]>();
+      for (const [key, value] of Object.entries(tokens)) {
+        if (value) {
+          map.set(key, value);
+        }
+      }
+      this.tokenMap = map;
+    });
   }
 
-  @flow
-  *refreshTokens() {
-    const chainInfo = this.chainStore.getChain(this.chainId);
+  @action
+  protected clearTokensFromChainInfos() {
+    const chainInfos = this.chainStore.chainInfos;
+    for (const chainInfo of chainInfos) {
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
 
-    if (
-      chainInfo.features &&
-      // Tokens service is only needed for secretwasm and cosmwasm,
-      // so, there is no need to fetch the registered token if the chain doesn't support the secretwasm and cosmwasm.
-      (chainInfo.features.includes("secretwasm") ||
-        chainInfo.features.includes("cosmwasm"))
-    ) {
-      const msg = new GetTokensMsg(this.chainId);
-      this._tokens = yield* toGenerator(
-        this.requester.sendMessage(BACKGROUND_PORT, msg)
+      // Tokens should be changed whenever the account changed.
+      // But, the added currencies are not removed automatically.
+      // So, we should remove the prev token currencies from the chain info.
+      const prevTokens =
+        this.prevTokenMap.get(chainIdentifier.identifier) ?? [];
+      chainInfo.removeCurrencies(
+        ...prevTokens.map((token) => token.currency.coinMinimalDenom)
       );
-    } else {
-      this._tokens = [];
     }
   }
 
-  @flow
-  *addToken(currency: AppCurrency) {
-    const msg = new AddTokenMsg(this.chainId, currency);
-    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
-    yield this.refreshTokens();
+  protected updateChainInfos() {
+    const chainInfos = this.chainStore.chainInfos;
+    for (const chainInfo of chainInfos) {
+      const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
+
+      const tokens = this.tokenMap.get(chainIdentifier.identifier) ?? [];
+
+      const adds: AppCurrency[] = [];
+
+      for (const token of tokens) {
+        if (!token.associatedAccountAddress) {
+          adds.push(token.currency);
+        } else if (
+          this.keyRingStore.status === "unlocked" &&
+          this.accountStore.getAccount(chainInfo.chainId).bech32Address
+        ) {
+          if (
+            Buffer.from(
+              Bech32Address.fromBech32(
+                this.accountStore.getAccount(chainInfo.chainId).bech32Address
+              ).address
+            ).toString("hex") === token.associatedAccountAddress
+          ) {
+            adds.push(token.currency);
+          }
+        }
+      }
+
+      chainInfo.addCurrencies(...adds);
+    }
+
+    this.prevTokenMap = this.tokenMap;
   }
 
-  @flow
-  *removeToken(currency: AppCurrency) {
-    const msg = new RemoveTokenMsg(this.chainId, currency);
-    yield this.requester.sendMessage(BACKGROUND_PORT, msg);
-    yield this.refreshTokens();
+  get isInitialized(): boolean {
+    return this._isInitialized;
   }
-}
 
-export class TokensStore<
-  C extends ChainInfo = ChainInfo
-> extends HasMapStore<TokensStoreInner> {
-  protected prevTokens: Map<string, AppCurrency[]> = new Map();
+  async waitUntilInitialized(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
 
-  constructor(
-    protected readonly eventListener: {
-      addEventListener: (type: string, fn: () => unknown) => void;
-    },
-    protected readonly chainStore: ChainStore<C>,
-    protected readonly requester: MessageRequester,
-    protected readonly interactionStore: InteractionStore
-  ) {
-    super((chainId: string) => {
-      return new TokensStoreInner(
-        this.eventListener,
-        this.chainStore,
-        chainId,
-        this.requester
-      );
-    });
-    makeObservable(this);
+    return new Promise((resolve) => {
+      const disposal = autorun(() => {
+        if (this.isInitialized) {
+          resolve();
 
-    this.chainStore.addSetChainInfoHandler((chainInfoInner) => {
-      autorun(() => {
-        const chainIdentifier = ChainIdHelper.parse(chainInfoInner.chainId);
-
-        // Tokens should be changed whenever the account changed.
-        // But, the added currencies are not removed automatically.
-        // So, we should remove the prev token currencies from the chain info.
-        const prevToken = this.prevTokens.get(chainIdentifier.identifier) ?? [];
-        chainInfoInner.removeCurrencies(
-          ...prevToken.map((token) => token.coinMinimalDenom)
-        );
-
-        const inner = this.getTokensOf(chainInfoInner.chainId);
-        chainInfoInner.addCurrencies(...inner.tokens);
-
-        this.prevTokens.set(
-          chainIdentifier.identifier,
-          inner.tokens as AppCurrency[]
-        );
+          if (disposal) {
+            disposal();
+          }
+        }
       });
     });
   }
 
-  getTokensOf(chainId: string) {
-    return this.get(chainId);
+  getTokens(chainId: string): ReadonlyArray<TokenInfo> {
+    const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
+    const chainInfo = this.chainStore.getChain(chainId);
+    const associatedAccountAddress = bech32Address
+      ? Buffer.from(
+          Bech32Address.fromBech32(
+            bech32Address,
+            chainInfo.bech32Config.bech32PrefixAccAddr
+          ).address
+        ).toString("hex")
+      : "";
+
+    const tokens =
+      this.tokenMap.get(ChainIdHelper.parse(chainId).identifier) ?? [];
+
+    return tokens.filter((token) => {
+      if (
+        token.associatedAccountAddress &&
+        token.associatedAccountAddress !== associatedAccountAddress
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  async addToken(chainId: string, currency: AppCurrency): Promise<void> {
+    const bech32Address = this.accountStore.getAccount(chainId).bech32Address;
+    if (!bech32Address) {
+      throw new Error("Account not initialized");
+    }
+    const chainInfo = this.chainStore.getChain(chainId);
+    const associatedAccountAddress = Buffer.from(
+      Bech32Address.fromBech32(
+        bech32Address,
+        chainInfo.bech32Config.bech32PrefixAccAddr
+      ).address
+    ).toString("hex");
+
+    const msg = new AddTokenMsg(chainId, associatedAccountAddress, currency);
+    const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    runInAction(() => {
+      const map = new Map<string, TokenInfo[]>();
+      for (const [key, value] of Object.entries(res)) {
+        if (value) {
+          map.set(key, value);
+        }
+      }
+      this.tokenMap = map;
+    });
+  }
+
+  async removeToken(chainId: string, tokenInfo: TokenInfo): Promise<void> {
+    const contractAddress = (() => {
+      if ("contractAddress" in tokenInfo.currency) {
+        return tokenInfo.currency.contractAddress;
+      }
+
+      throw new Error("Token info is not for contract");
+    })();
+
+    const msg = new RemoveTokenMsg(
+      chainId,
+      tokenInfo.associatedAccountAddress ?? "",
+      contractAddress
+    );
+    const res = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    runInAction(() => {
+      // Remove 이후에는 지워진 토큰에 대한 싱크를 맞추기 위해서 clearTokensFromChainInfos를 호출한다.
+      // 그냥 다 지우고 다시 다 설정하는 방식임.
+      this.clearTokensFromChainInfos();
+
+      const map = new Map<string, TokenInfo[]>();
+      for (const [key, value] of Object.entries(res)) {
+        if (value) {
+          map.set(key, value);
+        }
+      }
+      this.tokenMap = map;
+    });
   }
 
   get waitingSuggestedToken() {
-    const datas = this.interactionStore.getDatas<{
+    const datas = this.interactionStore.getAllData<{
       chainId: string;
       contractAddress: string;
       viewingKey?: string;
-    }>(SuggestTokenMsg.type());
+    }>("suggest-token-cw20");
 
     if (datas.length > 0) {
       return datas[0];
     }
   }
 
-  @flow
-  *approveSuggestedToken(appCurrency: AppCurrency) {
-    const data = this.waitingSuggestedToken;
-    if (data) {
-      yield this.interactionStore.approve(
-        SuggestTokenMsg.type(),
-        data.id,
-        appCurrency
-      );
-
-      yield this.getTokensOf(data.data.chainId).refreshTokens();
+  async approveSuggestedTokenWithProceedNext(
+    id: string,
+    appCurrency: AppCurrency,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    const d = this.interactionStore.getData<{
+      chainId: string;
+      contractAddress: string;
+      viewingKey?: string;
+    }>(id);
+    if (!d) {
+      return;
     }
+
+    await this.interactionStore.approveWithProceedNext(
+      id,
+      appCurrency,
+      afterFn
+    );
+    this.refreshTokens();
   }
 
-  @flow
-  *rejectSuggestedToken() {
-    const data = this.waitingSuggestedToken;
-    if (data) {
-      yield this.interactionStore.reject(SuggestTokenMsg.type(), data.id);
-    }
+  async rejectSuggestedToken(
+    id: string,
+    afterFn: (proceedNext: boolean) => void | Promise<void>
+  ) {
+    await this.interactionStore.rejectWithProceedNext(id, afterFn);
   }
 
-  @flow
-  *rejectAllSuggestedTokens() {
-    yield this.interactionStore.rejectAll(SuggestTokenMsg.type());
+  async rejectAllSuggestedTokens() {
+    await this.interactionStore.rejectAll("suggest-token-cw20");
   }
 }

@@ -3,23 +3,23 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { Delegation, Delegations } from "./types";
-import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
-import { CoinPretty, Int } from "@keplr-wallet/unit";
+import { ChainGetter } from "../../../chain";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
 import { computedFn } from "mobx-utils";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delegations> {
   protected bech32Address: string;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     bech32Address: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/staking/v1beta1/delegations/${bech32Address}?pagination.limit=1000`
@@ -29,7 +29,7 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
     this.bech32Address = bech32Address;
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
   }
@@ -44,7 +44,10 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
 
     let totalBalance = new Int(0);
     for (const delegation of this.response.data.delegation_responses) {
-      totalBalance = totalBalance.add(new Int(delegation.balance.amount));
+      const amount = new Int(delegation.balance.amount);
+      if (amount.gt(new Int(0))) {
+        totalBalance = totalBalance.add(amount);
+      }
     }
 
     return new CoinPretty(stakeCurrency, totalBalance);
@@ -64,13 +67,16 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
     const result = [];
 
     for (const delegation of this.response.data.delegation_responses) {
-      result.push({
-        validatorAddress: delegation.delegation.validator_address,
-        balance: new CoinPretty(
-          stakeCurrency,
-          new Int(delegation.balance.amount)
-        ),
-      });
+      const balance = new CoinPretty(
+        stakeCurrency,
+        new Int(delegation.balance.amount)
+      );
+      if (balance.toDec().gt(new Dec(0))) {
+        result.push({
+          validatorAddress: delegation.delegation.validator_address,
+          balance,
+        });
+      }
     }
 
     return result;
@@ -89,8 +95,9 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
     (validatorAddress: string): CoinPretty => {
       const delegations = this.delegations;
 
-      const stakeCurrency = this.chainGetter.getChain(this.chainId)
-        .stakeCurrency;
+      const stakeCurrency = this.chainGetter.getChain(
+        this.chainId
+      ).stakeCurrency;
 
       if (!this.response) {
         return new CoinPretty(stakeCurrency, new Int(0)).ready(false);
@@ -112,13 +119,13 @@ export class ObservableQueryDelegationsInner extends ObservableChainQuery<Delega
 
 export class ObservableQueryDelegations extends ObservableChainQueryMap<Delegations> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
   ) {
-    super(kvStore, chainId, chainGetter, (bech32Address: string) => {
+    super(sharedContext, chainId, chainGetter, (bech32Address: string) => {
       return new ObservableQueryDelegationsInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         bech32Address

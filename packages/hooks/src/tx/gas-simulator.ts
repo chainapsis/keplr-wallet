@@ -1,4 +1,4 @@
-import { IFeeConfig, IGasConfig, IGasSimulator } from "./types";
+import { IFeeConfig, IGasConfig, IGasSimulator, UIProperties } from "./types";
 import {
   action,
   autorun,
@@ -14,7 +14,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
 import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
 import { Coin, StdFee } from "@keplr-wallet/types";
-import Axios, { AxiosResponse } from "axios";
+import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 
 type TxSimulate = Pick<MakeTxResponse, "simulate">;
 export type SimulateGasFn = () => TxSimulate;
@@ -28,12 +28,17 @@ class GasSimulatorState {
   protected _initialGasEstimated: number | null = null;
 
   @observable
+  protected _isInitialized: boolean = false;
+
+  @observable
   protected _recentGasEstimated: number | undefined = undefined;
 
   @observable.ref
   protected _tx: TxSimulate | undefined = undefined;
   @observable.ref
   protected _stdFee: StdFee | undefined = undefined;
+  @observable.ref
+  protected _error: Error | undefined = undefined;
 
   constructor() {
     makeObservable(this);
@@ -41,6 +46,15 @@ class GasSimulatorState {
 
   get outdatedCosmosSdk(): boolean {
     return this._outdatedCosmosSdk;
+  }
+
+  @action
+  setIsInitialized(value: boolean) {
+    this._isInitialized = value;
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
   }
 
   @action
@@ -84,6 +98,15 @@ class GasSimulatorState {
     this._stdFee = fee;
   }
 
+  get error(): Error | undefined {
+    return this._error;
+  }
+
+  @action
+  setError(error: Error | undefined) {
+    this._error = error;
+  }
+
   static isZeroFee(amount: readonly Coin[] | undefined): boolean {
     if (!amount) {
       return true;
@@ -104,7 +127,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   protected _key: string;
 
   @observable
-  protected _gasAdjustmentRaw: string = "1.3";
+  protected _gasAdjustmentValue: string = "1.3";
 
   @observable
   protected _enabled: boolean = false;
@@ -136,7 +159,6 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   ) {
     super(chainGetter, initialChainId);
 
-    this._chainId = initialChainId;
     this._key = initialKey;
 
     makeObservable(this);
@@ -215,6 +237,12 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     return state.outdatedCosmosSdk;
   }
 
+  get error(): Error | undefined {
+    const key = this.storeKey;
+    const state = this.getState(key);
+    return state.error;
+  }
+
   get gasEstimated(): number | undefined {
     const key = this.storeKey;
     const state = this.getState(key);
@@ -230,11 +258,11 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
   }
 
   get gasAdjustment(): number {
-    if (this._gasAdjustmentRaw === "") {
+    if (this._gasAdjustmentValue === "") {
       return 0;
     }
 
-    const num = parseFloat(this._gasAdjustmentRaw);
+    const num = parseFloat(this._gasAdjustmentValue);
     if (Number.isNaN(num) || num < 0) {
       return 0;
     }
@@ -242,28 +270,28 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     return num;
   }
 
-  get gasAdjustmentRaw(): string {
-    return this._gasAdjustmentRaw;
+  get gasAdjustmentValue(): string {
+    return this._gasAdjustmentValue;
   }
 
   @action
-  setGasAdjustment(gasAdjustment: string | number) {
+  setGasAdjustmentValue(gasAdjustment: string | number) {
     if (typeof gasAdjustment === "number") {
       if (gasAdjustment < 0 || gasAdjustment > 2) {
         return;
       }
 
-      this._gasAdjustmentRaw = gasAdjustment.toString();
+      this._gasAdjustmentValue = gasAdjustment.toString();
       return;
     }
 
     if (gasAdjustment === "") {
-      this._gasAdjustmentRaw = "";
+      this._gasAdjustmentValue = "";
       return;
     }
 
     if (gasAdjustment.startsWith(".")) {
-      this._gasAdjustmentRaw = "0" + gasAdjustment;
+      this._gasAdjustmentValue = "0" + gasAdjustment;
     }
 
     const num = parseFloat(gasAdjustment);
@@ -271,7 +299,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
       return;
     }
 
-    this._gasAdjustmentRaw = gasAdjustment;
+    this._gasAdjustmentValue = gasAdjustment;
   }
 
   protected init() {
@@ -288,6 +316,8 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
           if (saved) {
             state.setInitialGasEstimated(saved);
           }
+
+          state.setIsInitialized(true);
         });
       })
     );
@@ -299,7 +329,6 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     // Even though the implementation is not intuitive, the goals are
     // - Every time the observable used in simulateGasFn is updated, the simulation is refreshed.
     // - The simulation is refreshed only when changing from zero fee to paying fee or vice versa.
-    // - The simulation is refreshed only when changing fee's denom
     this._disposers.push(
       autorun(() => {
         if (!this.enabled) {
@@ -307,37 +336,30 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
         }
 
         try {
-          const tx = this.simulateGasFn();
-
           const key = this.storeKey;
           const state = this.getState(key);
 
-          state.refreshTx(tx);
+          if (!state.isInitialized) {
+            return;
+          }
+
+          const tx = this.simulateGasFn();
+          const fee = this.feeConfig.toStdFee();
+
+          runInAction(() => {
+            if (
+              ((state.recentGasEstimated == null || state.error != null) &&
+                !state.outdatedCosmosSdk) ||
+              GasSimulatorState.isZeroFee(state.stdFee?.amount) !==
+                GasSimulatorState.isZeroFee(fee.amount)
+            ) {
+              state.refreshTx(tx);
+              state.refreshStdFee(fee);
+            }
+          });
         } catch (e) {
           console.log(e);
           return;
-        }
-      })
-    );
-
-    this._disposers.push(
-      autorun(() => {
-        if (!this.enabled) {
-          return;
-        }
-
-        const fee = this.feeConfig.toStdFee();
-
-        const key = this.storeKey;
-        const state = this.getState(key);
-
-        if (
-          GasSimulatorState.isZeroFee(state.stdFee?.amount) !==
-            GasSimulatorState.isZeroFee(fee.amount) ||
-          state.stdFee?.amount.map((a) => a.denom).join(",") !==
-            fee.amount.map((a) => a.denom).join(",")
-        ) {
-          state.refreshStdFee(fee);
         }
       })
     );
@@ -375,14 +397,16 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
             }
 
             state.setOutdatedCosmosSdk(false);
+            state.setError(undefined);
 
             this.kvStore.set(key, gasUsed).catch((e) => {
               console.log(e);
             });
           })
           .catch((e) => {
-            if (Axios.isAxiosError(e) && e.response) {
-              const response = e.response as AxiosResponse;
+            console.log(e);
+            if (isSimpleFetchError(e) && e.response) {
+              const response = e.response;
               if (
                 response.status === 400 &&
                 response.data?.message &&
@@ -390,10 +414,37 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
                 response.data.message.includes("invalid empty tx")
               ) {
                 state.setOutdatedCosmosSdk(true);
+                return;
+              }
+
+              let message = "";
+              const contentType: string = e.response.headers
+                ? e.response.headers.get("content-type") || ""
+                : "";
+              // Try to figure out the message from the response.
+              // If the contentType in the header is specified, try to use the message from the response.
+              if (
+                contentType.startsWith("text/plain") &&
+                typeof e.response.data === "string"
+              ) {
+                message = e.response.data;
+              }
+              // If the response is an object and "message" field exists, it is used as a message.
+              if (
+                contentType.startsWith("application/json") &&
+                e.response.data?.message &&
+                typeof e.response.data?.message === "string"
+              ) {
+                message = e.response.data.message;
+              }
+
+              if (message !== "") {
+                state.setError(new Error(message));
+                return;
               }
             }
 
-            console.log(e);
+            state.setError(e);
           })
           .finally(() => {
             runInAction(() => {
@@ -406,7 +457,7 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     this._disposers.push(
       autorun(() => {
         if (this.enabled && this.gasEstimated != null) {
-          this.gasConfig.setGas(this.gasEstimated * this.gasAdjustment);
+          this.gasConfig.setValue(this.gasEstimated * this.gasAdjustment);
         }
       })
     );
@@ -416,6 +467,39 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     for (const disposer of this._disposers) {
       disposer();
     }
+  }
+
+  get uiProperties(): UIProperties {
+    const key = this.storeKey;
+    const state = this.getState(key);
+
+    return {
+      warning: (() => {
+        if (this.outdatedCosmosSdk) {
+          return new Error("Outdated Cosmos SDK");
+        }
+
+        if (this.forceDisableReason) {
+          return this.forceDisableReason;
+        }
+
+        if (this.error) {
+          return this.error;
+        }
+      })(),
+      loadingState: (() => {
+        if (!this.enabled) {
+          return;
+        }
+
+        if (this.isSimulating) {
+          // If there is no saved result of the last simulation, user interaction is blocked.
+          return state.initialGasEstimated == null
+            ? "loading-block"
+            : "loading";
+        }
+      })(),
+    };
   }
 
   protected getState(key: string): GasSimulatorState {

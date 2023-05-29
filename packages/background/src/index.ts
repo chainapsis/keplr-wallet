@@ -1,40 +1,49 @@
 import { MessageRequester, Router } from "@keplr-wallet/router";
 
-import * as PersistentMemory from "./persistent-memory/internal";
+import * as KeyRingLegacy from "./keyring/legacy";
+
 import * as Chains from "./chains/internal";
-import * as Ledger from "./ledger/internal";
-import * as Keystone from "./keystone/internal";
-import * as KeyRing from "./keyring/internal";
+import * as ChainsUI from "./chains-ui/internal";
+import * as ChainsUpdate from "./chains-update/internal";
 import * as SecretWasm from "./secret-wasm/internal";
 import * as BackgroundTx from "./tx/internal";
-import * as Updater from "./updater/internal";
-import * as Tokens from "./tokens/internal";
+import * as TokenCW20 from "./token-cw20/internal";
 import * as Interaction from "./interaction/internal";
 import * as Permission from "./permission/internal";
 import * as PhishingList from "./phishing-list/internal";
 import * as AutoLocker from "./auto-lock-account/internal";
 import * as Analytics from "./analytics/internal";
+import * as Vault from "./vault/internal";
+import * as KeyRingV2 from "./keyring/internal";
+import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
+import * as KeyRingLedger from "./keyring-ledger/internal";
+import * as KeyRingPrivateKey from "./keyring-private-key/internal";
+import * as KeyRingCosmos from "./keyring-cosmos/internal";
+import * as PermissionInteractive from "./permission-interactive/internal";
+import * as TokenScan from "./token-scan/internal";
+import * as RecentSendHistory from "./recent-send-history/internal";
 
-export * from "./persistent-memory";
 export * from "./chains";
-export * from "./ledger";
-export * from "./keystone";
-export * from "./keyring";
+export * from "./chains-ui";
+export * from "./chains-update";
 export * from "./secret-wasm";
 export * from "./tx";
-export * from "./updater";
-export * from "./tokens";
+export * from "./token-cw20";
 export * from "./interaction";
 export * from "./permission";
 export * from "./phishing-list";
 export * from "./auto-lock-account";
 export * from "./analytics";
+export * from "./permission-interactive";
+export * from "./keyring";
+export * from "./vault";
+export * from "./keyring-cosmos";
+export * from "./token-scan";
+export * from "./recent-send-history";
 
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
-import { CommonCrypto } from "./keyring";
 import { Notification } from "./tx";
-import { LedgerOptions } from "./ledger/options";
 
 export function init(
   router: Router,
@@ -50,66 +59,44 @@ export function init(
     readonly repoName: string;
     readonly branchName: string;
   },
-  commonCrypto: CommonCrypto,
   notification: Notification,
-  ledgerOptions: Partial<LedgerOptions> = {},
-  experimentalOptions: Partial<{
-    suggestChain: Partial<{
-      // Chains registered as suggest chains are managed in memory.
-      // In other words, it disappears when the app is closed.
-      // General operation should be fine. This is a temporary solution for the mobile app.
-      useMemoryKVStore: boolean;
-    }>;
-  }> = {}
-) {
+  keyRingMigrations: {
+    commonCrypto: KeyRingLegacy.CommonCrypto;
+    readonly getDisabledChainIdentifiers: () => Promise<string[]>;
+  }
+): {
+  initFn: () => Promise<void>;
+} {
   const interactionService = new Interaction.InteractionService(
-    eventMsgRequester,
-    commonCrypto.rng
+    eventMsgRequester
   );
 
-  const persistentMemoryService = new PersistentMemory.PersistentMemoryService();
+  const chainsService = new Chains.ChainsService(
+    storeCreator("chains-v2"),
+    {
+      kvStore: storeCreator("chains"),
+      updaterKVStore: storeCreator("updator"),
+    },
+    embedChainInfos,
+    communityChainInfoRepo,
+    interactionService
+  );
+
+  const tokenCW20Service = new TokenCW20.TokenCW20Service(
+    storeCreator("tokens"),
+    chainsService,
+    interactionService
+  );
 
   const permissionService = new Permission.PermissionService(
     storeCreator("permission"),
-    privilegedOrigins
-  );
-
-  const chainUpdaterService = new Updater.ChainUpdaterService(
-    storeCreator("updator"),
-    communityChainInfoRepo
-  );
-
-  const tokensService = new Tokens.TokensService(storeCreator("tokens"));
-
-  const chainsService = new Chains.ChainsService(
-    storeCreator("chains"),
-    embedChainInfos,
-    {
-      useMemoryKVStoreForSuggestChain:
-        experimentalOptions.suggestChain?.useMemoryKVStore,
-    }
-  );
-
-  const ledgerService = new Ledger.LedgerService(
-    storeCreator("ledger"),
-    ledgerOptions
-  );
-
-  const keystoneService = new Keystone.KeystoneService(
-    storeCreator("keystone")
-  );
-
-  const keyRingService = new KeyRing.KeyRingService(
-    storeCreator("keyring"),
-    embedChainInfos,
-    commonCrypto
-  );
-
-  const secretWasmService = new SecretWasm.SecretWasmService(
-    storeCreator("secretwasm")
+    privilegedOrigins,
+    interactionService,
+    chainsService
   );
 
   const backgroundTxService = new BackgroundTx.BackgroundTxService(
+    chainsService,
     notification
   );
 
@@ -122,58 +109,134 @@ export function init(
     retryIntervalMs: 10 * 60 * 1000, // 10 mins,
     allowTimeoutMs: 10 * 60 * 1000, // 10 mins,
   });
-  const autoLockAccountService = new AutoLocker.AutoLockAccountService(
-    storeCreator("auto-lock-account")
-  );
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
-    commonCrypto.rng,
     analyticsPrivilegedOrigins
   );
 
-  persistentMemoryService.init();
-  permissionService.init(interactionService, chainsService, keyRingService);
-  chainUpdaterService.init(chainsService);
-  tokensService.init(
-    interactionService,
-    permissionService,
+  const vaultService = new Vault.VaultService(storeCreator("vault"));
+
+  const chainsUIService = new ChainsUI.ChainsUIService(
+    storeCreator("chains-ui"),
     chainsService,
-    keyRingService
+    vaultService
   );
-  chainsService.init(
-    chainUpdaterService,
-    interactionService,
-    permissionService
-  );
-  ledgerService.init(interactionService);
-  keystoneService.init(interactionService);
-  keyRingService.init(
-    interactionService,
+
+  const keyRingV2Service = new KeyRingV2.KeyRingService(
+    storeCreator("keyring-v2"),
+    {
+      kvStore: storeCreator("keyring"),
+      commonCrypto: keyRingMigrations.commonCrypto,
+      getDisabledChainIdentifiers:
+        keyRingMigrations.getDisabledChainIdentifiers,
+      chainsUIService,
+    },
     chainsService,
-    permissionService,
-    ledgerService,
-    keystoneService,
+    interactionService,
+    vaultService,
+    [
+      new KeyRingMnemonic.KeyRingMnemonicService(vaultService),
+      new KeyRingLedger.KeyRingLedgerService(),
+      new KeyRingPrivateKey.KeyRingPrivateKeyService(vaultService),
+    ]
+  );
+  const keyRingCosmosService = new KeyRingCosmos.KeyRingCosmosService(
+    chainsService,
+    keyRingV2Service,
+    interactionService,
     analyticsService
   );
-  secretWasmService.init(chainsService, keyRingService, permissionService);
-  backgroundTxService.init(chainsService, permissionService);
-  phishingListService.init();
-  // No need to wait because user can't interact with app right after launch.
-  autoLockAccountService.init(keyRingService);
-  // No need to wait because user can't interact with app right after launch.
-  analyticsService.init();
+  const autoLockAccountService = new AutoLocker.AutoLockAccountService(
+    storeCreator("auto-lock-account"),
+    keyRingV2Service
+  );
+  const permissionInteractiveService =
+    new PermissionInteractive.PermissionInteractiveService(
+      permissionService,
+      keyRingV2Service
+    );
+
+  const chainsUpdateService = new ChainsUpdate.ChainsUpdateService(
+    storeCreator("chains-update"),
+    chainsService,
+    chainsUIService
+  );
+
+  const secretWasmService = new SecretWasm.SecretWasmService(
+    storeCreator("secretwasm"),
+    chainsService,
+    keyRingCosmosService
+  );
+
+  const tokenScanService = new TokenScan.TokenScanService(
+    storeCreator("token-scan"),
+    chainsService,
+    chainsUIService,
+    vaultService,
+    keyRingV2Service,
+    keyRingCosmosService
+  );
+
+  const recentSendHistoryService =
+    new RecentSendHistory.RecentSendHistoryService(
+      storeCreator("recent-send-history"),
+      chainsService,
+      backgroundTxService
+    );
 
   Interaction.init(router, interactionService);
-  PersistentMemory.init(router, persistentMemoryService);
   Permission.init(router, permissionService);
-  Updater.init(router, chainUpdaterService);
-  Tokens.init(router, tokensService);
-  Chains.init(router, chainsService);
-  Ledger.init(router, ledgerService);
-  KeyRing.init(router, keyRingService);
-  SecretWasm.init(router, secretWasmService);
-  BackgroundTx.init(router, backgroundTxService);
+  Chains.init(
+    router,
+    chainsService,
+    permissionService,
+    permissionInteractiveService
+  );
+  BackgroundTx.init(router, backgroundTxService, permissionInteractiveService);
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
   Analytics.init(router, analyticsService);
+  KeyRingV2.init(router, keyRingV2Service);
+  KeyRingCosmos.init(
+    router,
+    keyRingCosmosService,
+    permissionInteractiveService
+  );
+  PermissionInteractive.init(router, permissionInteractiveService);
+  ChainsUI.init(router, chainsUIService);
+  ChainsUpdate.init(router, chainsUpdateService);
+  TokenCW20.init(
+    router,
+    tokenCW20Service,
+    permissionInteractiveService,
+    keyRingCosmosService
+  );
+  SecretWasm.init(router, secretWasmService, permissionInteractiveService);
+  TokenScan.init(router, tokenScanService);
+  RecentSendHistory.init(router, recentSendHistoryService);
+
+  return {
+    initFn: async () => {
+      await chainsService.init();
+      await vaultService.init();
+      await chainsUIService.init();
+      await chainsUpdateService.init();
+      await keyRingV2Service.init();
+      await keyRingCosmosService.init();
+      await permissionService.init();
+      await tokenCW20Service.init();
+
+      await backgroundTxService.init();
+      await phishingListService.init();
+      await autoLockAccountService.init();
+      await analyticsService.init();
+      await permissionInteractiveService.init();
+
+      await secretWasmService.init();
+
+      await tokenScanService.init();
+
+      await recentSendHistoryService.init();
+    },
+  };
 }

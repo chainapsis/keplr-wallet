@@ -1,10 +1,9 @@
 {
   "name": "@keplr-wallet/types",
-  "version": "0.11.64",
+  "version": "0.12.0-rc.2",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
-  "private": false,
   "publishConfig": {
     "access": "public"
   },
@@ -17,7 +16,6 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "axios": "^0.27.2",
     "long": "^4.0.0"
   }
 }

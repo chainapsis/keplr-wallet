@@ -1,9 +1,7 @@
-import Axios from "axios";
 import { ChainsService } from "../chains";
-import { PermissionService } from "../permission";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Notification } from "./types";
-
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Buffer } from "buffer/";
 
 interface CosmosSdkError {
@@ -20,34 +18,33 @@ interface ABCIMessageLog {
 }
 
 export class BackgroundTxService {
-  protected chainsService!: ChainsService;
-  public permissionService!: PermissionService;
+  constructor(
+    protected readonly chainsService: ChainsService,
+    protected readonly notification: Notification
+  ) {}
 
-  constructor(protected readonly notification: Notification) {}
-
-  init(chainsService: ChainsService, permissionService: PermissionService) {
-    this.chainsService = chainsService;
-    this.permissionService = permissionService;
+  async init(): Promise<void> {
+    // noop
   }
 
   async sendTx(
     chainId: string,
     tx: unknown,
-    mode: "async" | "sync" | "block"
+    mode: "async" | "sync" | "block",
+    options: {
+      silent?: boolean;
+      onFulfill?: (tx: any) => void;
+    }
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfo(chainId);
-    const restInstance = Axios.create({
-      ...{
-        baseURL: chainInfo.rest,
-      },
-      ...chainInfo.restConfig,
-    });
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
 
-    this.notification.create({
-      iconRelativeUrl: "assets/logo-256.png",
-      title: "Tx is pending...",
-      message: "Wait a second",
-    });
+    if (!options.silent) {
+      this.notification.create({
+        iconRelativeUrl: "assets/logo-256.png",
+        title: "Tx is pending...",
+        message: "Wait a second",
+      });
+    }
 
     const isProtoTx = Buffer.isBuffer(tx) || tx instanceof Uint8Array;
 
@@ -73,9 +70,16 @@ export class BackgroundTxService {
         };
 
     try {
-      const result = await restInstance.post(
+      const result = await simpleFetch<any>(
+        chainInfo.rest,
         isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
-        params
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
       );
 
       const txResponse = isProtoTx ? result.data["tx_response"] : result.data;
@@ -89,13 +93,25 @@ export class BackgroundTxService {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
       txTracer.traceTx(txHash).then((tx) => {
         txTracer.close();
-        BackgroundTxService.processTxResultNotification(this.notification, tx);
+
+        if (options.onFulfill) {
+          options.onFulfill(tx);
+        }
+
+        if (!options.silent) {
+          BackgroundTxService.processTxResultNotification(
+            this.notification,
+            tx
+          );
+        }
       });
 
       return txHash;
     } catch (e) {
       console.log(e);
-      BackgroundTxService.processTxErrorNotification(this.notification, e);
+      if (!options.silent) {
+        BackgroundTxService.processTxErrorNotification(this.notification, e);
+      }
       throw e;
     }
   }

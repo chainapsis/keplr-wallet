@@ -1,328 +1,269 @@
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import {
-  AddLedgerKeyMsg,
-  AddMnemonicKeyMsg,
-  AddPrivateKeyMsg,
+  autorun,
+  computed,
+  flow,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
+import { toGenerator } from "@keplr-wallet/common";
+import {
+  AppendLedgerKeyAppMsg,
   BIP44HDPath,
-  ChangeKeyRingMsg,
-  CreateLedgerKeyMsg,
-  CreateMnemonicKeyMsg,
-  CreatePrivateKeyMsg,
+  ChangeKeyRingNameMsg,
+  ChangeUserPasswordMsg,
+  CheckLegacyKeyRingPasswordMsg,
+  ComputeNotFinalizedMnemonicKeyAddressesMsg,
   DeleteKeyRingMsg,
-  UpdateNameKeyRingMsg,
-  GetIsKeyStoreCoinTypeSetMsg,
-  GetMultiKeyStoreInfoMsg,
+  FinalizeMnemonicKeyCoinTypeMsg,
+  GetKeyRingStatusMsg,
+  GetKeyRingStatusOnlyMsg,
+  KeyInfo,
   KeyRingStatus,
   LockKeyRingMsg,
-  MultiKeyStoreInfoWithSelected,
-  RestoreKeyRingMsg,
-  SetKeyStoreCoinTypeMsg,
-  ShowKeyRingMsg,
+  NewLedgerKeyMsg,
+  NewMnemonicKeyMsg,
+  NewPrivateKeyKeyMsg,
+  PlainObject,
+  SelectKeyRingMsg,
+  ShowSensitiveKeyRingDataMsg,
   UnlockKeyRingMsg,
-  KeyRing,
-  CheckPasswordMsg,
-  ExportKeyRingData,
-  ExportKeyRingDatasMsg,
-  CreateKeystoneKeyMsg,
-  AddKeystoneKeyMsg,
 } from "@keplr-wallet/background";
+import { ChainInfo } from "@keplr-wallet/types";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-import { computed, flow, makeObservable, observable, runInAction } from "mobx";
-
-import { InteractionStore } from "./interaction";
-import { ChainGetter } from "../common";
-import { BIP44 } from "@keplr-wallet/types";
-import { DeepReadonly } from "utility-types";
-import { toGenerator } from "@keplr-wallet/common";
-
-export class KeyRingSelectablesStore {
-  @observable
-  isInitializing: boolean = false;
-
-  @observable
-  protected _isKeyStoreCoinTypeSet: boolean = false;
-
-  @observable.ref
-  _selectables: {
-    path: BIP44;
-    bech32Address: string;
-  }[] = [];
-
-  constructor(
-    protected readonly chainGetter: ChainGetter,
-    protected readonly requester: MessageRequester,
-    protected readonly chainId: string,
-    protected readonly keyRingStore: KeyRingStore
-  ) {
-    makeObservable(this);
-
-    this.refresh();
-  }
-
-  @computed
-  get needSelectCoinType(): boolean {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    if (
-      !chainInfo.alternativeBIP44s ||
-      chainInfo.alternativeBIP44s.length === 0
-    ) {
-      return false;
-    }
-    return !this.isInitializing && !this._isKeyStoreCoinTypeSet;
-  }
-
-  get selectables(): DeepReadonly<
-    {
-      path: BIP44;
-      bech32Address: string;
-    }[]
-  > {
-    return this._selectables;
-  }
-
-  @flow
-  *refresh() {
-    // No need to set the coin type if the key store type is not mnemonic.
-    if (this.keyRingStore.keyRingType !== "mnemonic") {
-      this.isInitializing = false;
-      this._isKeyStoreCoinTypeSet = true;
-      this._selectables = [];
-
-      return;
-    }
-
-    this.isInitializing = true;
-
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-
-    const msg = new GetIsKeyStoreCoinTypeSetMsg(this.chainId, [
-      chainInfo.bip44,
-      ...(chainInfo.alternativeBIP44s ?? []),
-    ]);
-    const seletables = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-
-    if (seletables.length === 0) {
-      this._isKeyStoreCoinTypeSet = true;
-    } else if (seletables.length === 1) {
-      yield this.keyRingStore.setKeyStoreCoinType(
-        this.chainId,
-        seletables[0].path.coinType
-      );
-      this._isKeyStoreCoinTypeSet = true;
-    } else {
-      this._selectables = seletables;
-      this._isKeyStoreCoinTypeSet = false;
-    }
-
-    this.isInitializing = false;
-  }
-}
-
-/*
- Actual key ring logic is managed in persistent background. Refer "src/common/message" and "src/background/keyring"
- This store only interact with key ring in persistent background.
- */
 export class KeyRingStore {
   @observable
-  status: KeyRingStatus = KeyRingStatus.NOTLOADED;
+  protected _isInitialized: boolean = false;
 
   @observable
-  multiKeyStoreInfo: MultiKeyStoreInfoWithSelected = [];
+  protected _status: KeyRingStatus | "not-loaded" = "not-loaded";
 
-  @observable.shallow
-  protected selectablesMap: Map<string, KeyRingSelectablesStore> = new Map();
+  @observable
+  protected _needMigration: boolean = false;
 
-  protected keyStoreChangedListeners: (() => void)[] = [];
+  @observable
+  protected _isMigrating: boolean = false;
+
+  @observable.ref
+  protected _keyInfos: KeyInfo[] = [];
 
   constructor(
     protected readonly eventDispatcher: {
       dispatchEvent: (type: string) => void;
     },
-    public readonly defaultKdf: "scrypt" | "sha256" | "pbkdf2",
-    protected readonly chainGetter: ChainGetter,
-    protected readonly requester: MessageRequester,
-    protected readonly interactionStore: InteractionStore
+    protected readonly requester: MessageRequester
   ) {
     makeObservable(this);
 
-    this.restore();
+    this.init();
   }
 
-  get waitingNameData() {
-    const data = this.interactionStore.getDatas<{
-      defaultName: string;
-      editable: boolean;
-      isExternal: boolean;
-    }>("change-keyring-name");
+  async init(): Promise<void> {
+    const msg = new GetKeyRingStatusMsg();
+    const result = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    runInAction(() => {
+      this._status = result.status;
+      this._keyInfos = result.keyInfos;
+      this._needMigration = result.needMigration;
+      this._isMigrating = result.isMigrating;
 
-    if (data.length > 0) {
-      return data[0];
+      this._isInitialized = true;
+    });
+  }
+
+  get needMigration(): boolean {
+    return this._needMigration;
+  }
+
+  get isMigrating(): boolean {
+    return this._isMigrating;
+  }
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
+
+  async waitUntilInitialized(): Promise<void> {
+    if (this.isInitialized) {
+      return;
     }
+
+    return new Promise((resolve) => {
+      const disposal = autorun(() => {
+        if (this.isInitialized) {
+          resolve();
+
+          if (disposal) {
+            disposal();
+          }
+        }
+      });
+    });
+  }
+
+  get status(): KeyRingStatus | "not-loaded" {
+    return this._status;
+  }
+
+  get keyInfos(): KeyInfo[] {
+    return this._keyInfos;
+  }
+
+  async fetchKeyRingStatus(): Promise<KeyRingStatus> {
+    const msg = new GetKeyRingStatusOnlyMsg();
+    const result = await this.requester.sendMessage(BACKGROUND_PORT, msg);
+    return result.status;
   }
 
   @computed
-  get keyRingType(): string {
-    const keyStore = this.multiKeyStoreInfo.find(
-      (keyStore) => keyStore.selected
-    );
+  get selectedKeyInfo(): KeyInfo | undefined {
+    return this._keyInfos.find((keyInfo) => keyInfo.isSelected);
+  }
 
-    if (!keyStore) {
-      return "none";
-    } else {
-      return KeyRing.getTypeOfKeyStore(keyStore);
+  get isEmpty(): boolean {
+    return this._status === "empty";
+  }
+
+  @flow
+  *selectKeyRing(vaultId: string) {
+    const msg = new SelectKeyRingMsg(vaultId);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+  }
+
+  needMnemonicKeyCoinTypeFinalize(
+    vaultId: string,
+    chainInfo: ChainInfo
+  ): boolean {
+    const keyInfo = this.keyInfos.find((keyInfo) => keyInfo.id === vaultId);
+    if (!keyInfo) {
+      return false;
     }
+
+    if (keyInfo.type !== "mnemonic") {
+      return false;
+    }
+
+    const coinTypeTag = `keyRing-${
+      ChainIdHelper.parse(chainInfo.chainId).identifier
+    }-coinType`;
+
+    return keyInfo.insensitive[coinTypeTag] == null;
   }
 
-  @flow
-  *approveChangeName(changedName: string) {
-    const data = this.interactionStore.getDatas("change-keyring-name")[0];
-
-    yield this.interactionStore.approve(
-      "change-keyring-name",
-      data.id,
-      changedName
+  async computeNotFinalizedMnemonicKeyAddresses(
+    vaultId: string,
+    chainId: string
+  ): Promise<
+    {
+      coinType: number;
+      bech32Address: string;
+    }[]
+  > {
+    const msg = new ComputeNotFinalizedMnemonicKeyAddressesMsg(
+      vaultId,
+      chainId
     );
 
-    this.dispatchKeyStoreChangeEvent();
-    this.selectablesMap.forEach((selectables) => selectables.refresh());
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
+  }
+
+  async showKeyRing(vaultId: string, password: string) {
+    const msg = new ShowSensitiveKeyRingDataMsg(vaultId, password);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
   @flow
-  *createMnemonicKey(
+  *finalizeMnemonicKeyCoinType(
+    vaultId: string,
+    chainId: string,
+    coinType: number
+  ) {
+    const msg = new FinalizeMnemonicKeyCoinTypeMsg(vaultId, chainId, coinType);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+  }
+
+  @flow
+  *newMnemonicKey(
     mnemonic: string,
-    password: string,
-    meta: Record<string, string>,
     bip44HDPath: BIP44HDPath,
-    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
+    name: string,
+    password: string | undefined
   ) {
-    const msg = new CreateMnemonicKeyMsg(
-      kdf,
-      mnemonic,
-      password,
-      meta,
-      bip44HDPath
-    );
+    const msg = new NewMnemonicKeyMsg(mnemonic, bip44HDPath, name, password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.status = result.status;
-    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+
+    return result.vaultId;
   }
 
   @flow
-  *createPrivateKey(
+  *newLedgerKey(
+    pubKey: Uint8Array,
+    app: string,
+    bip44HDPath: BIP44HDPath,
+    name: string,
+    password: string | undefined
+  ) {
+    const msg = new NewLedgerKeyMsg(pubKey, app, bip44HDPath, name, password);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+
+    return result.vaultId;
+  }
+
+  @flow
+  *appendLedgerKeyApp(vaultId: string, pubKey: Uint8Array, app: string) {
+    const msg = new AppendLedgerKeyAppMsg(vaultId, pubKey, app);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+  }
+
+  @flow
+  *newPrivateKeyKey(
     privateKey: Uint8Array,
-    password: string,
-    meta: Record<string, string>,
-    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
+    meta: PlainObject,
+    name: string,
+    password: string | undefined
   ) {
-    const msg = new CreatePrivateKeyMsg(kdf, privateKey, password, meta);
+    const msg = new NewPrivateKeyKeyMsg(privateKey, meta, name, password);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.status = result.status;
-    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
-  }
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
 
-  @flow
-  *createKeystoneKey(
-    password: string,
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath,
-    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
-  ) {
-    const msg = new CreateKeystoneKeyMsg(kdf, password, meta, bip44HDPath);
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    this.status = result.status;
-    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
-  }
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
 
-  @flow
-  *createLedgerKey(
-    password: string,
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath,
-    cosmosLikeApp: string,
-    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
-  ) {
-    const msg = new CreateLedgerKeyMsg(
-      kdf,
-      password,
-      meta,
-      bip44HDPath,
-      cosmosLikeApp
-    );
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    this.status = result.status;
-    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
-  }
-
-  @flow
-  *addMnemonicKey(
-    mnemonic: string,
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath,
-    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
-  ) {
-    const msg = new AddMnemonicKeyMsg(kdf, mnemonic, meta, bip44HDPath);
-    this.multiKeyStoreInfo = (yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    )).multiKeyStoreInfo;
-  }
-
-  @flow
-  *addPrivateKey(
-    privateKey: Uint8Array,
-    meta: Record<string, string>,
-    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
-  ) {
-    const msg = new AddPrivateKeyMsg(kdf, privateKey, meta);
-    this.multiKeyStoreInfo = (yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    )).multiKeyStoreInfo;
-  }
-
-  @flow
-  *addKeystoneKey(
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath,
-    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
-  ) {
-    const msg = new AddKeystoneKeyMsg(kdf, meta, bip44HDPath);
-    this.multiKeyStoreInfo = (yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    )).multiKeyStoreInfo;
-  }
-
-  @flow
-  *addLedgerKey(
-    meta: Record<string, string>,
-    bip44HDPath: BIP44HDPath,
-    cosmosLikeApp: string,
-    kdf: "scrypt" | "sha256" | "pbkdf2" = this.defaultKdf
-  ) {
-    const msg = new AddLedgerKeyMsg(kdf, meta, bip44HDPath, cosmosLikeApp);
-    this.multiKeyStoreInfo = (yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    )).multiKeyStoreInfo;
-  }
-
-  @flow
-  *changeKeyRing(index: number) {
-    const msg = new ChangeKeyRingMsg(index);
-    this.multiKeyStoreInfo = (yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    )).multiKeyStoreInfo;
-
-    // Emit the key store changed event manually.
-    this.dispatchKeyStoreChangeEvent();
-    this.selectablesMap.forEach((selectables) => selectables.refresh());
+    return result.vaultId;
   }
 
   @flow
@@ -331,152 +272,66 @@ export class KeyRingStore {
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.status = result.status;
+    this._status = result.status;
   }
 
   @flow
   *unlock(password: string) {
-    const msg = new UnlockKeyRingMsg(password);
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    this.status = result.status;
-
-    // Approve all waiting interaction for the enabling key ring.
-    for (const interaction of this.interactionStore.getDatas("unlock")) {
-      yield this.interactionStore.approve("unlock", interaction.id, {});
+    if (this._needMigration) {
+      this._isMigrating = true;
     }
 
-    this.dispatchKeyStoreChangeEvent();
-    this.selectablesMap.forEach((selectables) => selectables.refresh());
+    try {
+      const msg = new UnlockKeyRingMsg(password);
+      const result = yield* toGenerator(
+        this.requester.sendMessage(BACKGROUND_PORT, msg)
+      );
+      this._status = result.status;
+      this._keyInfos = result.keyInfos;
+
+      this._needMigration = false;
+    } finally {
+      // Set the flag to false even if the migration is failed.
+      this._isMigrating = false;
+    }
   }
 
   @flow
-  *rejectAll() {
-    yield this.interactionStore.rejectAll("unlock");
-  }
-
-  @flow
-  protected *restore() {
-    const msg = new RestoreKeyRingMsg();
+  *changeKeyRingName(vaultId: string, name: string) {
+    const msg = new ChangeKeyRingNameMsg(vaultId, name);
     const result = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
-    this.status = result.status;
-    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
   }
 
-  async showKeyRing(index: number, password: string) {
-    const msg = new ShowKeyRingMsg(index, password);
+  @flow
+  *deleteKeyRing(vaultId: string, password: string) {
+    const msg = new DeleteKeyRingMsg(vaultId, password);
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = result.keyInfos;
+
+    if (result.wasSelected && result.status === "unlocked") {
+      this.eventDispatcher.dispatchEvent("keplr_keystorechange");
+    }
+  }
+
+  async changeUserPassword(
+    prevUserPassword: string,
+    newUserPassword: string
+  ): Promise<void> {
+    const msg = new ChangeUserPasswordMsg(prevUserPassword, newUserPassword);
     return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 
-  @flow
-  *deleteKeyRing(index: number, password: string) {
-    const selectedIndex = this.multiKeyStoreInfo.findIndex(
-      (keyStore) => keyStore.selected
-    );
-    const msg = new DeleteKeyRingMsg(index, password);
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    this.status = result.status;
-    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
-
-    // Selected keystore may be changed if the selected one is deleted.
-    if (selectedIndex === index) {
-      this.dispatchKeyStoreChangeEvent();
-      this.selectablesMap.forEach((selectables) => selectables.refresh());
-    }
-  }
-
-  @flow
-  *updateNameKeyRing(index: number, name: string) {
-    const msg = new UpdateNameKeyRingMsg(index, name);
-    const result = yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, msg)
-    );
-    this.multiKeyStoreInfo = result.multiKeyStoreInfo;
-    const selectedIndex = this.multiKeyStoreInfo.findIndex(
-      (keyStore) => keyStore.selected
-    );
-    // If selectedIndex and index are same, name could be changed, so dispatch keystore event
-    if (selectedIndex === index) {
-      this.dispatchKeyStoreChangeEvent();
-    }
-  }
-
-  async checkPassword(password: string): Promise<boolean> {
-    return await this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new CheckPasswordMsg(password)
-    );
-  }
-
-  getKeyStoreSelectables(chainId: string): KeyRingSelectablesStore {
-    if (!this.selectablesMap.has(chainId)) {
-      runInAction(() => {
-        this.selectablesMap.set(
-          chainId,
-          new KeyRingSelectablesStore(
-            this.chainGetter,
-            this.requester,
-            chainId,
-            this
-          )
-        );
-      });
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.selectablesMap.get(chainId)!;
-  }
-
-  // Set the coin type to current key store.
-  // And, save it, refresh the key store.
-  @flow
-  *setKeyStoreCoinType(chainId: string, coinType: number) {
-    const status = yield* toGenerator(
-      this.requester.sendMessage(
-        BACKGROUND_PORT,
-        new SetKeyStoreCoinTypeMsg(chainId, coinType)
-      )
-    );
-
-    this.multiKeyStoreInfo = (yield* toGenerator(
-      this.requester.sendMessage(BACKGROUND_PORT, new GetMultiKeyStoreInfoMsg())
-    )).multiKeyStoreInfo;
-
-    this.status = status;
-
-    // Emit the key store changed event manually.
-    this.dispatchKeyStoreChangeEvent();
-    this.selectablesMap.forEach((selectables) => selectables.refresh());
-  }
-
-  async exportKeyRingDatas(password: string): Promise<ExportKeyRingData[]> {
-    return await this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new ExportKeyRingDatasMsg(password)
-    );
-  }
-
-  protected dispatchKeyStoreChangeEvent() {
-    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
-
-    for (const listener of this.keyStoreChangedListeners) {
-      listener();
-    }
-  }
-
-  addKeyStoreChangedListener(listener: () => void) {
-    this.keyStoreChangedListeners.push(listener);
-  }
-
-  removeKeyStoreChangedListener(listener: () => void) {
-    const i = this.keyStoreChangedListeners.indexOf(listener);
-    if (i >= 0) {
-      this.keyStoreChangedListeners.splice(i, 1);
-    }
+  async checkLegacyKeyRingPassword(password: string): Promise<void> {
+    const msg = new CheckLegacyKeyRingPasswordMsg(password);
+    return await this.requester.sendMessage(BACKGROUND_PORT, msg);
   }
 }

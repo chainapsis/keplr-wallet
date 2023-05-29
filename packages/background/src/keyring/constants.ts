@@ -1,1 +1,1 @@
-export const ROUTE = "keyring";
+export const ROUTE = "keyring-v2";
