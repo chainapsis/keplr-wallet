@@ -128,6 +128,10 @@ export class KeyRingService {
       throw new Error("Migration is already in progress");
     }
 
+    if (this.vaultService.isSignedUp && this.vaultService.isLocked) {
+      await this.vaultService.unlock(password);
+    }
+
     this._isMigrating = true;
 
     try {
