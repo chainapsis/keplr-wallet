@@ -1875,7 +1875,13 @@ export const EmbedChainInfos: ChainInfo[] = [
         },
       },
     ],
-    features: ["ibc-transfer", "ibc-go", "eth-address-gen", "eth-key-sign"],
+    features: [
+      "ibc-transfer",
+      "ibc-go",
+      "eth-address-gen",
+      "eth-key-sign",
+      "evmos-stake-fee",
+    ],
   },
   {
     rpc: "https://rpc-injective.keplr.app",

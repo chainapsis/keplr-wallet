@@ -14,6 +14,7 @@ export const SupportedChainFeatures = [
   "ibc-go",
   "eth-address-gen",
   "eth-key-sign",
+  "evmos-stake-fee",
   "query:/cosmos/bank/v1beta1/spendable_balances",
   "axelar-evm-bridge",
   "osmosis-txfees",
