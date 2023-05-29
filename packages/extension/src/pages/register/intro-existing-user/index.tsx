@@ -60,7 +60,13 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
           <Box height="100%">
             <RegisterH4 color={ColorPalette["gray-50"]}>Use Google</RegisterH4>
 
-            <div style={{ flex: 1 }} />
+            <Gutter size="0.5rem" />
+            <div style={{ flex: 1 }}>
+              <Subtitle3 color={ColorPalette["gray-200"]}>
+                Log in with the same email address to import an existing account
+                to Keplr.
+              </Subtitle3>
+            </div>
 
             <Stack gutter="0.625rem">
               <Button
