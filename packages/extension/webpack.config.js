@@ -158,6 +158,9 @@ module.exports = {
       KEPLR_EXT_ANALYTICS_API_URL: "",
       KEPLR_EXT_COINGECKO_ENDPOINT: "",
       KEPLR_EXT_COINGECKO_GETPRICE: "",
+      KEPLR_EXT_TRANSAK_API_KEY: "",
+      KEPLR_EXT_MOONPAY_API_KEY: "",
+      KEPLR_EXT_KADO_API_KEY: "",
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
