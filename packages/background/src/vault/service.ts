@@ -25,9 +25,11 @@ export class VaultService {
   protected _isSignedUp: boolean = false;
 
   protected password: Uint8Array = new Uint8Array();
+  protected aesCounter: Uint8Array = new Uint8Array();
   protected decryptedCache: Map<string, PlainObject> = new Map();
 
-  protected cryptoRandom: Uint8Array = new Uint8Array();
+  protected userPasswordSalt: Uint8Array = new Uint8Array();
+  protected aesCounterSalt: Uint8Array = new Uint8Array();
 
   constructor(protected readonly kvStore: KVStore) {
     makeObservable(this);
@@ -38,16 +40,29 @@ export class VaultService {
       this._isSignedUp = true;
     }
 
-    const cryptoRandom = await this.kvStore.get<string>("cryptoRandom");
-    if (cryptoRandom) {
-      this.cryptoRandom = Buffer.from(cryptoRandom, "hex");
+    const userPasswordSalt = await this.kvStore.get<string>("userPasswordSalt");
+    if (userPasswordSalt) {
+      this.userPasswordSalt = Buffer.from(userPasswordSalt, "hex");
     } else {
       const rand = new Uint8Array(16);
       crypto.getRandomValues(rand);
-      this.cryptoRandom = rand;
+      this.userPasswordSalt = rand;
       await this.kvStore.set<string>(
-        "cryptoRandom",
-        Buffer.from(this.cryptoRandom).toString("hex")
+        "userPasswordSalt",
+        Buffer.from(this.userPasswordSalt).toString("hex")
+      );
+    }
+
+    const aesCounterSalt = await this.kvStore.get<string>("aesCounterSalt");
+    if (aesCounterSalt) {
+      this.aesCounterSalt = Buffer.from(aesCounterSalt, "hex");
+    } else {
+      const rand = new Uint8Array(16);
+      crypto.getRandomValues(rand);
+      this.aesCounterSalt = rand;
+      await this.kvStore.set<string>(
+        "aesCounterSalt",
+        Buffer.from(this.aesCounterSalt).toString("hex")
       );
     }
 
@@ -82,20 +97,40 @@ export class VaultService {
       throw new Error("Vault is already unlocked");
     }
 
-    if (this.cryptoRandom.length === 0) {
-      throw new Error("Crypto random not initialized");
+    if (this.userPasswordSalt.length === 0) {
+      throw new Error("User password salt not initialized");
     }
 
-    if (this.isSignedUp || (await this.getPasswordCryptoState())) {
+    if (this.aesCounterSalt.length === 0) {
+      throw new Error("AES counter salt not initialized");
+    }
+
+    if (
+      this.isSignedUp ||
+      (await this.getPasswordCryptoState()) ||
+      (await this.kvStore.get("aesCounterCipher"))
+    ) {
       throw new Error("Vault is already signed up");
     }
 
     const encrypted = await VaultService.generatePassword(
       userPassword,
-      this.cryptoRandom
+      this.userPasswordSalt
     );
 
     await this.setPasswordCryptoState(encrypted.cipher, encrypted.mac);
+
+    const aesCounter = new Uint8Array(16);
+    crypto.getRandomValues(aesCounter);
+    const aesCounterCipher = VaultService.aesEncrypt(
+      encrypted.password,
+      this.aesCounterSalt,
+      aesCounter
+    );
+    await this.kvStore.set(
+      "aesCounterCipher",
+      Buffer.from(aesCounterCipher).toString("hex")
+    );
 
     this._isSignedUp = true;
 
@@ -107,8 +142,8 @@ export class VaultService {
       throw new Error("Vault is not unlocked");
     }
 
-    if (this.cryptoRandom.length === 0) {
-      throw new Error("Crypto random not initialized");
+    if (this.userPasswordSalt.length === 0) {
+      throw new Error("User password salt not initialized");
     }
 
     const prevEncrypted = await this.getPasswordCryptoState();
@@ -119,7 +154,7 @@ export class VaultService {
     // Make sure to prev user password is valid
     const password = await VaultService.decryptPassword(
       userPassword,
-      this.cryptoRandom,
+      this.userPasswordSalt,
       prevEncrypted.mac,
       prevEncrypted.cipher
     );
@@ -140,7 +175,7 @@ export class VaultService {
 
     const newEncrypted = await VaultService.encryptPassword(
       newUserPassword,
-      this.cryptoRandom,
+      this.userPasswordSalt,
       this.password
     );
 
@@ -157,8 +192,17 @@ export class VaultService {
       throw new Error("Vault is already unlocked");
     }
 
-    if (this.cryptoRandom.length === 0) {
-      throw new Error("Crypto random not initialized");
+    if (this.userPasswordSalt.length === 0) {
+      throw new Error("User password salt not initialized");
+    }
+
+    if (this.aesCounterSalt.length === 0) {
+      throw new Error("AES counter salt not initialized");
+    }
+
+    const aesCounterCipher = await this.kvStore.get<string>("aesCounterCipher");
+    if (!aesCounterCipher) {
+      throw new Error("AES counter cipher not found");
     }
 
     const encrypted = await this.getPasswordCryptoState();
@@ -169,9 +213,14 @@ export class VaultService {
 
     this.password = await VaultService.decryptPassword(
       userPassword,
-      this.cryptoRandom,
+      this.userPasswordSalt,
       encrypted.mac,
       encrypted.cipher
+    );
+    this.aesCounter = VaultService.aesDecrypt(
+      this.password,
+      this.aesCounterSalt,
+      Buffer.from(aesCounterCipher, "hex")
     );
   }
 
@@ -269,7 +318,7 @@ export class VaultService {
 
     return VaultService.aesEncrypt(
       this.password,
-      this.cryptoRandom,
+      this.aesCounter,
       Buffer.from(JSON.stringify(sensitive))
     );
   }
@@ -285,7 +334,7 @@ export class VaultService {
 
     const decrypted = JSON.parse(
       Buffer.from(
-        VaultService.aesDecrypt(this.password, this.cryptoRandom, sensitive)
+        VaultService.aesDecrypt(this.password, this.aesCounter, sensitive)
       ).toString()
     );
     this.decryptedCache.set(str, decrypted);
@@ -298,8 +347,12 @@ export class VaultService {
       throw new Error("Vault is not unlocked");
     }
 
-    if (this.cryptoRandom.length === 0) {
-      throw new Error("Crypto random not initialized");
+    if (this.userPasswordSalt.length === 0) {
+      throw new Error("User password salt not initialized");
+    }
+
+    if (this.aesCounter.length === 0) {
+      throw new Error("AES counter is null");
     }
   }
 
@@ -379,11 +432,16 @@ export class VaultService {
   ): Promise<{
     cipher: Uint8Array;
     mac: Uint8Array;
+
+    password: Uint8Array;
   }> {
     const password = new Uint8Array(32);
     crypto.getRandomValues(password);
 
-    return await VaultService.encryptPassword(userPassword, salt, password);
+    return {
+      ...(await VaultService.encryptPassword(userPassword, salt, password)),
+      password,
+    };
   }
 
   protected static async encryptPassword(
