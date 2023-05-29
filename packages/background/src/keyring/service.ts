@@ -286,7 +286,15 @@ export class KeyRingService {
             password
           );
 
+          let isObj = false;
           try {
+            Buffer.from(Buffer.from(cipherText).toString(), "hex");
+            isObj = false;
+          } catch {
+            isObj = true;
+          }
+
+          if (isObj) {
             const encodedPubkeys = JSON.parse(
               Buffer.from(cipherText).toString()
             );
@@ -342,7 +350,7 @@ export class KeyRingService {
                 selectingVaultId = vaultId;
               }
             }
-          } catch (e) {
+          } else {
             // Decode as bytes (Legacy representation)
             const pubKey = Buffer.from(
               Buffer.from(cipherText).toString(),
