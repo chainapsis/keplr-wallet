@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/router-extension",
-  "version": "0.12.0-alpha.8",
+  "version": "0.12.0-alpha.9",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -16,8 +16,8 @@
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/common": "0.12.0-alpha.8",
-    "@keplr-wallet/popup": "0.12.0-alpha.8",
-    "@keplr-wallet/router": "0.12.0-alpha.8"
+    "@keplr-wallet/common": "0.12.0-alpha.9",
+    "@keplr-wallet/popup": "0.12.0-alpha.9",
+    "@keplr-wallet/router": "0.12.0-alpha.9"
   }
 }
