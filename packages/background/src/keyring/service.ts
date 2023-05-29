@@ -288,8 +288,11 @@ export class KeyRingService {
 
           let isObj = false;
           try {
-            Buffer.from(Buffer.from(cipherText).toString(), "hex");
-            isObj = false;
+            isObj =
+              Buffer.from(Buffer.from(cipherText).toString(), "hex")
+                .toString()
+                .toLowerCase() !==
+              Buffer.from(cipherText).toString().toLowerCase();
           } catch {
             isObj = true;
           }
@@ -298,14 +301,14 @@ export class KeyRingService {
             const encodedPubkeys = JSON.parse(
               Buffer.from(cipherText).toString()
             );
-            if (encodedPubkeys["Cosmos"]) {
+            if (encodedPubkeys["cosmos"]) {
               const pubKey = Buffer.from(
-                encodedPubkeys["Cosmos"] as string,
+                encodedPubkeys["cosmos"] as string,
                 "hex"
               );
               const vaultId = await this.createLedgerKeyRing(
                 pubKey,
-                keyStore.meta?.["__ledger__cosmos_app_like__"] === "Terra"
+                keyStore.meta?.["__ledger__cosmos_app_like__"] === "terra"
                   ? "Terra"
                   : "Cosmos",
                 keyStore.bip44HDPath ?? {
