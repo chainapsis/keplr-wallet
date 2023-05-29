@@ -1,13 +1,17 @@
-import { ChainGetter } from "../../../../common";
+import { ChainGetter } from "../../../../chain";
 import { ObservableChainQuery } from "../../../chain-query";
 import { MintParmas } from "./types";
-import { KVStore } from "@keplr-wallet/common";
 import { computed, makeObservable } from "mobx";
 import { Dec } from "@keplr-wallet/unit";
+import { QuerySharedContext } from "../../../../common";
 
 export class ObservableQueryOsmosisMintParmas extends ObservableChainQuery<MintParmas> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, `/osmosis/mint/v1beta1/params`);
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(sharedContext, chainId, chainGetter, `/osmosis/mint/v1beta1/params`);
 
     makeObservable(this);
   }

@@ -21,6 +21,7 @@ import {
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
   SecretUtils,
+  SettledResponses,
 } from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
@@ -35,9 +36,7 @@ import { IndexedDBKVStore, KVStore } from "@keplr-wallet/common";
 // The chainID should be in the form: `{identifier}-{version}`
 const ChainVersionFormatRegExp = /(.+)-([\d]+)/;
 
-function parseChainId(
-  chainId: string
-): {
+function parseChainId(chainId: string): {
   identifier: string;
   version: number;
 } {
@@ -331,6 +330,10 @@ export class KeplrWalletConnectV1 implements Keplr {
       name: response.name,
       pubKey: Buffer.from(response.pubKey, "hex"),
     };
+  }
+
+  getKeysSettled(_chainIds: string[]): Promise<SettledResponses<Key>> {
+    throw new Error("Not yet implemented");
   }
 
   protected getKeyLastSeenKey() {

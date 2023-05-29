@@ -44,9 +44,10 @@ export class Dec {
     return multiplier;
   }
 
-  protected static reduceDecimalsFromString(
-    str: string
-  ): { res: string; isDownToZero: boolean } {
+  protected static reduceDecimalsFromString(str: string): {
+    res: string;
+    isDownToZero: boolean;
+  } {
     const decimalPointIndex = str.indexOf(".");
     if (decimalPointIndex < 0) {
       return {

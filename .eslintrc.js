@@ -4,8 +4,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
     "plugin:prettier/recommended",
-    "prettier/react",
-    "prettier/standard",
+    "prettier",
     "plugin:import/typescript",
   ],
   plugins: ["react-hooks", "unicorn", "import", "unused-imports"],
@@ -17,7 +16,6 @@ module.exports = {
     },
   },
   rules: {
-    "prettier/prettier": "error",
     "react/prop-types": "off",
     "react/self-closing-comp": "error",
     "react/jsx-fragments": ["error", "element"],
@@ -27,6 +25,7 @@ module.exports = {
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/no-empty-function": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-loss-of-precision": "off",
     "@typescript-eslint/camelcase": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
@@ -43,6 +42,7 @@ module.exports = {
           "**/*.spec.ts",
           "**/*.spec.js",
           "**/webpack.config.js",
+          "**/*.stories.tsx",
         ],
       },
     ],
@@ -50,6 +50,26 @@ module.exports = {
     "import/no-useless-path-segments": "error",
     "unused-imports/no-unused-imports": "error",
   },
+  overrides: [
+    {
+      files: ["**/*.stories.tsx"],
+      rules: {
+        "import/no-default-export": "off",
+      },
+    },
+    {
+      // Make options for codes and MDX files separate
+      files: ["**/*.stories.mdx"],
+      extends: ["plugin:mdx/recommended"],
+      plugins: [],
+      rules: {
+        "import/no-extraneous-dependencies": "off",
+      },
+      settings: {
+        "mdx/code-blocks": true,
+      },
+    },
+  ],
   settings: {
     react: {
       version: "detect",

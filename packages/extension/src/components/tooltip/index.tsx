@@ -1,175 +1,109 @@
-import React, { CSSProperties } from "react";
+import React, { FunctionComponent, useRef, useState } from "react";
+import {
+  arrow,
+  FloatingArrow,
+  offset,
+  size,
+  useFloating,
+  useHover,
+  useInteractions,
+} from "@floating-ui/react";
+import { ColorPalette } from "../../styles";
+import { Caption2 } from "../typography";
+import { autoPlacement, shift } from "@floating-ui/react-dom";
 
-import Popper, { PopperOptions } from "popper.js";
-import classNames from "classnames";
+export const Tooltip: FunctionComponent<{
+  enabled?: boolean;
+  content?: string | React.ReactElement;
+  isAlwaysOpen?: boolean;
+}> = ({ enabled, content, isAlwaysOpen = false, children }) => {
+  const [_isOpen, setIsOpen] = useState(false);
+  const isOpen = _isOpen || isAlwaysOpen;
 
-import style from "./tooltip.module.scss";
+  const arrowRef = useRef(null);
+  const { x, y, strategy, refs, context } = useFloating({
+    middleware: [
+      offset(9),
+      autoPlacement({
+        allowedPlacements: ["top", "bottom"],
+      }),
+      shift({
+        padding: 10,
+      }),
+      size({
+        padding: 10,
+        apply(size) {
+          // Do things with the data, e.g.
+          Object.assign(size.elements.floating.style, {
+            maxWidth: `${size.availableWidth}px`,
+          });
+        },
+      }),
+      arrow({
+        element: arrowRef,
+      }),
+    ],
+    open: isOpen,
+    onOpenChange: setIsOpen,
+  });
 
-export interface ToolTipProps {
-  tooltip: React.ReactNode;
-  theme: "dark" | "bright";
-  options?: PopperOptions;
-  trigger: "hover" | "click" | "static"; // If trigger is staic, visibilitiy is handled by show props.
-  show?: boolean;
-  childrenStyle?: CSSProperties;
-}
+  const hover = useHover(context, {
+    enabled,
+  });
 
-interface ToolTipState {
-  show: boolean;
-}
+  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
-export class ToolTip extends React.Component<ToolTipProps, ToolTipState> {
-  static defaultProps = {
-    theme: "dark",
-  };
-
-  state = {
-    show: false,
-  };
-
-  private ref = React.createRef<HTMLDivElement>();
-  private popper: Popper | null = null;
-  private tooltipRef = React.createRef<HTMLDivElement>();
-  private componentRef = React.createRef<HTMLDivElement>();
-
-  private hover = false;
-  private bodyClicked = false;
-
-  componentDidMount(): void {
-    const tooltip = this.tooltipRef.current;
-    const component = this.componentRef.current;
-
-    if (tooltip && component) {
-      let { options } = this.props;
-      if (!options) {
-        options = {};
-      }
-      if (!options.modifiers) {
-        options.modifiers = {};
-        options.modifiers.arrow = {
-          enabled: true,
-        };
-      }
-
-      this.popper = new Popper(component, tooltip, options);
-    }
-
-    document.addEventListener("click", this.handleClickOutside);
-  }
-
-  handleClickOutside = (e: any) => {
-    if (
-      this.props.trigger === "click" &&
-      this.state.show &&
-      this.ref &&
-      this.ref.current &&
-      !this.ref.current.contains(e.target)
-    ) {
-      this.setState({ show: false });
-    }
-  };
-
-  componentDidUpdate(): void {
-    if (this.popper) {
-      this.popper.update();
-    }
-  }
-
-  componentWillUnmount(): void {
-    if (this.popper) {
-      this.popper.destroy();
-    }
-
-    document.removeEventListener("click", this.handleClickOutside);
-  }
-
-  render() {
-    const { theme, tooltip, trigger, children, childrenStyle } = this.props;
-
-    const show =
-      this.props.trigger === "static" ? this.props.show : this.state.show;
-
-    return (
+  return (
+    <React.Fragment>
       <div
-        ref={this.ref}
-        className={classNames({
-          [style.bright]: theme === "bright",
-          show: show,
-        })}
-        onMouseEnter={this.onMouseEnter}
-        onMouseLeave={this.onMouseLeave}
-        onClick={this.onClick}
+        ref={refs.setReference}
+        style={{
+          // 상위에 Box 컴포넌트가 있고 그 위에 세로로 정렬시키는 컴포넌트가 있을 경우
+          // 밑의 스타일이 없으면 이 div의 height가 상위 컴포넌트를 다 채우는 height로 설정된다.
+          // 이유는 모르겠는데 일단 이렇게 처리한다.
+          display: "flex",
+          flexDirection: "column",
+        }}
+        {...getReferenceProps()}
       >
-        {/* Screen click capture for click trigger */}
-        {trigger === "click" && show && (
-          <div
-            style={{
-              position: "fixed",
-              width: "100%",
-              height: "100%",
-              top: 0,
-              left: 0,
-            }}
-          />
-        )}
-        {/* Parent div of tooltip */}
-        <div
-          ref={this.tooltipRef}
-          className="popper"
-          style={{
-            visibility: show ? "visible" : "hidden",
-            opacity: show ? 1 : 0,
-          }}
-        >
-          <div x-arrow="" />
-          {tooltip}
-        </div>
-        <div style={childrenStyle} ref={this.componentRef}>
-          {children}
-        </div>
+        {children}
       </div>
-    );
-  }
+      {content && (isAlwaysOpen || ((enabled == null || enabled) && isOpen)) ? (
+        <div
+          ref={refs.setFloating}
+          style={{
+            position: strategy,
+            top: y ?? 0,
+            left: x ?? 0,
 
-  // This doesn't work if trigger is static
-  public toggle = () => {
-    this.setState({
-      show: !this.state.show,
-    });
-  };
+            backgroundColor: ColorPalette["gray-500"],
+            padding: "0.625rem",
+            borderRadius: "0.375rem",
 
-  onClick = () => {
-    if (this.props.trigger !== "click") return;
+            borderStyle: "solid",
+            borderWidth: "1px",
+            borderColor: ColorPalette["gray-400"],
 
-    this.setState({
-      show: !this.state.show,
-    });
-
-    if (this.bodyClicked) {
-      this.bodyClicked = false;
-    }
-  };
-
-  onMouseEnter = () => {
-    if (this.props.trigger !== "hover") return;
-
-    this.hover = true;
-    this.setState({
-      show: true,
-    });
-  };
-
-  onMouseLeave = () => {
-    if (this.props.trigger !== "hover") return;
-
-    this.hover = false;
-    // Delay to check mouse is hovering in order to keep tooltip a little bit further.
-    setTimeout(() => {
-      if (!this.hover) {
-        this.setState({
-          show: false,
-        });
-      }
-    }, 150);
-  };
-}
+            zIndex: 9999999,
+          }}
+          {...getFloatingProps()}
+        >
+          <FloatingArrow
+            ref={arrowRef}
+            context={context}
+            fill={ColorPalette["gray-500"]}
+            stroke={ColorPalette["gray-400"]}
+            strokeWidth={1}
+          />
+          <Caption2
+            style={{
+              color: ColorPalette["white"],
+            }}
+          >
+            {content}
+          </Caption2>
+        </div>
+      ) : null}
+    </React.Fragment>
+  );
+};

@@ -8,7 +8,7 @@ import {
 import { Keplr, InjectedKeplr } from "@keplr-wallet/provider";
 import { initEvents } from "./events";
 
-import manifest from "../manifest.json";
+import manifest from "../manifest.v2.json";
 
 InjectedKeplr.startProxy(
   new Keplr(manifest.version, "core", new InExtensionMessageRequester())
@@ -40,7 +40,7 @@ export class CheckURLIsPhishingMsg extends Message<boolean> {
     // Will be checked in background process
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -66,7 +66,7 @@ export class CheckBadTwitterIdMsg extends Message<boolean> {
     // noop
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

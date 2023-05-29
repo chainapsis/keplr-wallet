@@ -1,7 +1,8 @@
 import {
   AddPermissionOrigin,
-  DisableAccessMsg,
-  EnableAccessMsg,
+  ClearAllPermissionsMsg,
+  ClearOriginPermissionMsg,
+  GetAllPermissionDataPerOriginMsg,
   GetGlobalPermissionOriginsMsg,
   GetOriginPermittedChainsMsg,
   GetPermissionOriginsMsg,
@@ -22,10 +23,6 @@ export const getHandler: (service: PermissionService) => Handler = (
 ) => {
   return (env: Env, msg: Message<unknown>) => {
     switch (msg.constructor) {
-      case EnableAccessMsg:
-        return handleEnableAccessMsg(service)(env, msg as EnableAccessMsg);
-      case DisableAccessMsg:
-        return handleDisableAccessMsg(service)(env, msg as DisableAccessMsg);
       case GetPermissionOriginsMsg:
         return handleGetPermissionOriginsMsg(service)(
           env,
@@ -56,29 +53,24 @@ export const getHandler: (service: PermissionService) => Handler = (
           env,
           msg as RemoveGlobalPermissionOriginMsg
         );
+      case ClearOriginPermissionMsg:
+        return handleClearOriginPermissionMsg(service)(
+          env,
+          msg as ClearOriginPermissionMsg
+        );
+      case ClearAllPermissionsMsg:
+        return handleClearAllPermissionsMsg(service)(
+          env,
+          msg as ClearAllPermissionsMsg
+        );
+      case GetAllPermissionDataPerOriginMsg:
+        return handleGetAllPermissionDataPerOriginMsg(service)(
+          env,
+          msg as GetAllPermissionDataPerOriginMsg
+        );
       default:
         throw new KeplrError("permission", 120, "Unknown msg type");
     }
-  };
-};
-
-const handleEnableAccessMsg: (
-  service: PermissionService
-) => InternalHandler<EnableAccessMsg> = (service) => {
-  return async (env, msg) => {
-    return await service.checkOrGrantBasicAccessPermission(
-      env,
-      msg.chainIds,
-      msg.origin
-    );
-  };
-};
-
-const handleDisableAccessMsg: (
-  service: PermissionService
-) => InternalHandler<EnableAccessMsg> = (service) => {
-  return async (env, msg) => {
-    return await service.disable(env, msg.chainIds, msg.origin);
   };
 };
 
@@ -104,8 +96,8 @@ const handleGetOriginPermittedChainsMsg: (
 const handleAddPermissionOrigin: (
   service: PermissionService
 ) => InternalHandler<AddPermissionOrigin> = (service) => {
-  return async (_, msg) => {
-    await service.addPermission([msg.chainId], msg.permissionType, [
+  return (_, msg) => {
+    service.addPermission([msg.chainId], msg.permissionType, [
       msg.permissionOrigin,
     ]);
   };
@@ -114,8 +106,8 @@ const handleAddPermissionOrigin: (
 const handleRemovePermissionOrigin: (
   service: PermissionService
 ) => InternalHandler<RemovePermissionOrigin> = (service) => {
-  return async (_, msg) => {
-    await service.removePermission(msg.chainId, msg.permissionType, [
+  return (_, msg) => {
+    service.removePermission(msg.chainId, msg.permissionType, [
       msg.permissionOrigin,
     ]);
   };
@@ -124,7 +116,7 @@ const handleRemovePermissionOrigin: (
 const handleGetGlobalPermissionOrigins: (
   service: PermissionService
 ) => InternalHandler<GetGlobalPermissionOriginsMsg> = (service) => {
-  return async (_, msg) => {
+  return (_, msg) => {
     return service.getGlobalPermissionOrigins(msg.permissionType);
   };
 };
@@ -132,9 +124,34 @@ const handleGetGlobalPermissionOrigins: (
 const handleRemoveGlobalPermissionOrigin: (
   service: PermissionService
 ) => InternalHandler<RemoveGlobalPermissionOriginMsg> = (service) => {
-  return async (_, msg) => {
+  return (_, msg) => {
     return service.removeGlobalPermission(msg.permissionType, [
       msg.permissionOrigin,
     ]);
+  };
+};
+
+const handleClearOriginPermissionMsg: (
+  service: PermissionService
+) => InternalHandler<ClearOriginPermissionMsg> = (service) => {
+  return (_, msg) => {
+    service.removeAllTypePermission([msg.permissionOrigin]);
+    service.removeAllTypeGlobalPermission([msg.permissionOrigin]);
+  };
+};
+
+const handleClearAllPermissionsMsg: (
+  service: PermissionService
+) => InternalHandler<ClearAllPermissionsMsg> = (service) => {
+  return () => {
+    service.clearAllPermissions();
+  };
+};
+
+const handleGetAllPermissionDataPerOriginMsg: (
+  service: PermissionService
+) => InternalHandler<GetAllPermissionDataPerOriginMsg> = (service) => {
+  return () => {
+    return service.getAllPermissionDataPerOrigin();
   };
 };

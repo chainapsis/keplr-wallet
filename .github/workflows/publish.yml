@@ -17,7 +17,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '18'
           registry-url: "https://registry.npmjs.org"
       - run: npm install --global yarn
       - run: sudo apt-get update
@@ -25,20 +25,19 @@ jobs:
       - run: sudo apt-get install curl
       - run: curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-x86_64.zip
       - run: unzip protoc-21.3-linux-x86_64.zip -d $HOME/protoc && echo $HOME/protoc/bin >> $GITHUB_PATH
-      - run: cd packages/extension/src/keplr-torus-signin && yarn install --frozen-lockfile
+      - run: yarn install --immutable
       - run: yarn ci-lint
       - run: yarn ci
         env:
           KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
-          KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY }}
           KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
           KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: ${{ secrets.KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN }}
           KEPLR_EXT_ANALYTICS_API_URL: ${{ secrets.KEPLR_EXT_ANALYTICS_API_URL }}
+          KEPLR_EXT_COINGECKO_ENDPOINT: ${{ secrets.KEPLR_EXT_COINGECKO_ENDPOINT }}
+          KEPLR_EXT_COINGECKO_GETPRICE: ${{ secrets.KEPLR_EXT_COINGECKO_GETPRICE }}
           KEPLR_EXT_TRANSAK_API_KEY: ${{ secrets.KEPLR_EXT_TRANSAK_API_KEY }}
           KEPLR_EXT_MOONPAY_API_KEY: ${{ secrets.KEPLR_EXT_MOONPAY_API_KEY }}
           KEPLR_EXT_KADO_API_KEY: ${{ secrets.KEPLR_EXT_KADO_API_KEY }}
-          KEPLR_EXT_COINGECKO_ENDPOINT: ${{ secrets.KEPLR_EXT_COINGECKO_ENDPOINT }}
-          KEPLR_EXT_COINGECKO_GETPRICE: ${{ secrets.KEPLR_EXT_COINGECKO_GETPRICE }}
       - run: sudo apt-get install gh
       - run: npx zx ./scripts/publish.mjs
         env:
@@ -57,25 +56,24 @@ jobs:
     - name: Setup node
       uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: '18'
     - run: docker build -f ./docker/create-firefox-archive/Dockerfile -t archiver .
     - run: docker run -v $(pwd):/data archiver
     - run: cp ./build/firefox-archive.tar.gz ../firefox-archive.tar.gz
     - run: mkdir temp && tar xvzf firefox-archive.tar.gz -C temp
       working-directory: ..
-    - run: docker build -f ./docker/Dockerfile -t builder --build-arg KEPLR_EXT_ETHEREUM_ENDPOINT=$KEPLR_EXT_ETHEREUM_ENDPOINT --build-arg KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY=$KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY --build-arg KEPLR_EXT_AMPLITUDE_API_KEY=$KEPLR_EXT_AMPLITUDE_API_KEY --build-arg KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN=$KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN --build-arg KEPLR_EXT_ANALYTICS_API_URL=$KEPLR_EXT_ANALYTICS_API_URL --build-arg KEPLR_EXT_TRANSAK_API_KEY=$KEPLR_EXT_TRANSAK_API_KEY --build-arg KEPLR_EXT_MOONPAY_API_KEY=$KEPLR_EXT_MOONPAY_API_KEY --build-arg KEPLR_EXT_KADO_API_KEY=$KEPLR_EXT_KADO_API_KEY --build-arg KEPLR_EXT_COINGECKO_ENDPOINT=$KEPLR_EXT_COINGECKO_ENDPOINT --build-arg KEPLR_EXT_COINGECKO_GETPRICE=$KEPLR_EXT_COINGECKO_GETPRICE .
+    - run: docker build -f ./docker/Dockerfile -t builder --build-arg KEPLR_EXT_ETHEREUM_ENDPOINT=$KEPLR_EXT_ETHEREUM_ENDPOINT --build-arg KEPLR_EXT_AMPLITUDE_API_KEY=$KEPLR_EXT_AMPLITUDE_API_KEY --build-arg KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN=$KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN --build-arg KEPLR_EXT_ANALYTICS_API_URL=$KEPLR_EXT_ANALYTICS_API_URL --build-arg KEPLR_EXT_COINGECKO_ENDPOINT=KEPLR_EXT_COINGECKO_ENDPOINT --build-arg KEPLR_EXT_COINGECKO_GETPRICE=KEPLR_EXT_COINGECKO_GETPRICE --build-arg KEPLR_EXT_TRANSAK_API_KEY=KEPLR_EXT_TRANSAK_API_KEY --build-arg KEPLR_EXT_MOONPAY_API_KEY=KEPLR_EXT_MOONPAY_API_KEY --build-arg KEPLR_EXT_KADO_API_KEY=KEPLR_EXT_KADO_API_KEY .
       working-directory: ../temp
       env:
         KEPLR_EXT_ETHEREUM_ENDPOINT: ${{ secrets.KEPLR_EXT_ETHEREUM_ENDPOINT }}
-        KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY }}
         KEPLR_EXT_AMPLITUDE_API_KEY: ${{ secrets.KEPLR_EXT_AMPLITUDE_API_KEY }}
         KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: ${{ secrets.KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN }}
         KEPLR_EXT_ANALYTICS_API_URL: ${{ secrets.KEPLR_EXT_ANALYTICS_API_URL }}
+        KEPLR_EXT_COINGECKO_ENDPOINT: ${{ secrets.KEPLR_EXT_COINGECKO_ENDPOINT }}
+        KEPLR_EXT_COINGECKO_GETPRICE: ${{ secrets.KEPLR_EXT_COINGECKO_GETPRICE }}
         KEPLR_EXT_TRANSAK_API_KEY: ${{ secrets.KEPLR_EXT_TRANSAK_API_KEY }}
         KEPLR_EXT_MOONPAY_API_KEY: ${{ secrets.KEPLR_EXT_MOONPAY_API_KEY }}
         KEPLR_EXT_KADO_API_KEY: ${{ secrets.KEPLR_EXT_KADO_API_KEY }}
-        KEPLR_EXT_COINGECKO_ENDPOINT: ${{ secrets.KEPLR_EXT_COINGECKO_ENDPOINT }}
-        KEPLR_EXT_COINGECKO_GETPRICE: ${{ secrets.KEPLR_EXT_COINGECKO_GETPRICE }}
     - run: docker run -v $(pwd):/data builder
       working-directory: ../temp
     - run: sudo apt-get update

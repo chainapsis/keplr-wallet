@@ -1,13 +1,22 @@
-import { KVStore } from "@keplr-wallet/common";
 import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
-import { ChainGetter } from "../../../../common";
+import { ChainGetter } from "../../../../chain";
 import { ObservableChainQuery } from "../../../chain-query";
 import { EpochProvisions } from "../types";
+import { QuerySharedContext } from "../../../../common";
 
 export class ObservableQueryStrideEpochProvisions extends ObservableChainQuery<EpochProvisions> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, `/mint/v1beta1/epoch_provisions`);
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      `/mint/v1beta1/epoch_provisions`
+    );
 
     makeObservable(this);
   }

@@ -1,7 +1,7 @@
-import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { ObservableChainQueryRPC } from "../../chain-rpc-query";
 import { Int } from "@keplr-wallet/unit";
+import { QuerySharedContext } from "../../../common";
 
 type RPCStatusResult = {
   node_info: {
@@ -50,8 +50,12 @@ export class ObservableQueryRPCStatus extends ObservableChainQueryRPC<
     }
   | RPCStatusResult
 > {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, "/status");
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(sharedContext, chainId, chainGetter, "/status");
   }
 
   get network(): string | undefined {

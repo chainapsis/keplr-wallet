@@ -1,19 +1,10 @@
 import { Currency, AppCurrency, FeeCurrency } from "./currency";
 import { BIP44 } from "./bip44";
-import { AxiosRequestConfig } from "axios";
 import { Bech32Config } from "./bech32";
 
 export interface ChainInfo {
   readonly rpc: string;
-  /**
-   * @deprecated Do not use
-   */
-  readonly rpcConfig?: AxiosRequestConfig;
   readonly rest: string;
-  /**
-   * @deprecated Do not use
-   */
-  readonly restConfig?: AxiosRequestConfig;
   readonly nodeProvider?: {
     readonly name: string;
     readonly email: string;
@@ -38,15 +29,6 @@ export interface ChainInfo {
    * You can get actual currency information from Currencies.
    */
   readonly feeCurrencies: FeeCurrency[];
-  /**
-   * This is the coin type in slip-044.
-   * This is used for fetching address from ENS if this field is set.
-   *
-   * ** Use the `bip44.coinType` field to set the coin type to generate the address. **
-   *
-   * @deprecated This field is likely to be changed. ENS will continue to be supported, but will change in the future to use other methods than this field. Because of the low usage of the ENS feature, the change is a low priority and it is not yet clear how it will change.
-   */
-  readonly coinType?: number;
 
   /**
    * Indicate the features supported by this chain. Ex) cosmwasm, secretwasm ...

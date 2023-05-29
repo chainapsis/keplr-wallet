@@ -1,9 +1,5 @@
-import {
-  MessageRequester,
-  Message,
-  JSONUint8Array,
-  KeplrError,
-} from "@keplr-wallet/router";
+import { MessageRequester, Message, KeplrError } from "@keplr-wallet/router";
+import { JSONUint8Array } from "@keplr-wallet/common";
 import { getKeplrExtensionRouterId } from "../utils";
 
 export class InExtensionMessageRequester implements MessageRequester {
@@ -16,7 +12,7 @@ export class InExtensionMessageRequester implements MessageRequester {
     // Set message's origin.
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    msg["origin"] = window.location.origin;
+    msg["origin"] = globalThis.location.origin;
     msg.routerMeta = {
       ...msg.routerMeta,
       routerId: getKeplrExtensionRouterId(),
@@ -59,7 +55,7 @@ export class InExtensionMessageRequester implements MessageRequester {
     // Set message's origin.
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    msg["origin"] = window.location.origin;
+    msg["origin"] = globalThis.location.origin;
     msg.routerMeta = {
       ...msg.routerMeta,
       routerId: getKeplrExtensionRouterId(),

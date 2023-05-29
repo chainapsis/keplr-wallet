@@ -3,11 +3,11 @@ import { ChainInfoWithCoreTypes } from "./types";
 import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
 import { ROUTE } from "./constants";
 
-export class GetChainInfosMsg extends Message<{
+export class GetChainInfosWithCoreTypesMsg extends Message<{
   chainInfos: ChainInfoWithCoreTypes[];
 }> {
   public static type() {
-    return "get-chain-infos";
+    return "get-chain-infos-with-core-types";
   }
 
   validateBasic(): void {
@@ -19,7 +19,7 @@ export class GetChainInfosMsg extends Message<{
   }
 
   type(): string {
-    return GetChainInfosMsg.type();
+    return GetChainInfosWithCoreTypesMsg.type();
   }
 }
 
@@ -34,7 +34,7 @@ export class GetChainInfosWithoutEndpointsMsg extends Message<{
     // noop
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -62,7 +62,7 @@ export class SuggestChainInfoMsg extends Message<void> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -98,5 +98,143 @@ export class RemoveSuggestedChainInfoMsg extends Message<
 
   type(): string {
     return RemoveSuggestedChainInfoMsg.type();
+  }
+}
+
+export class SetChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
+  public static type() {
+    return "set-chain-endpoints";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly rpc: string | undefined,
+    public readonly rest: string | undefined
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Empty chain id");
+    }
+
+    if (this.rpc) {
+      // Make sure that rpc is valid url form
+      const url = new URL(this.rpc);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new Error(`RPC has invalid protocol: ${url.protocol}`);
+      }
+    }
+    if (this.rest) {
+      // Make sure that rest is valid url form
+      const url = new URL(this.rest);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new Error(`LCD has invalid protocol: ${url.protocol}`);
+      }
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SetChainEndpointsMsg.type();
+  }
+}
+
+export class ClearChainEndpointsMsg extends Message<ChainInfoWithCoreTypes[]> {
+  public static type() {
+    return "clear-chain-endpoints";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Empty chain id");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearChainEndpointsMsg.type();
+  }
+}
+
+export class GetChainOriginalEndpointsMsg extends Message<{
+  rpc: string;
+  rest: string;
+}> {
+  public static type() {
+    return "get-chain-original-endpoints";
+  }
+
+  constructor(public readonly chainId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("Empty chain id");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetChainOriginalEndpointsMsg.type();
+  }
+}
+
+export class ClearAllSuggestedChainInfosMsg extends Message<void> {
+  public static type() {
+    return "clear-all-suggested-chain-infos";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    //noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllSuggestedChainInfosMsg.type();
+  }
+}
+
+export class ClearAllChainEndpointsMsg extends Message<void> {
+  public static type() {
+    return "clear-all-chain-endpoints";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    //noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllChainEndpointsMsg.type();
   }
 }

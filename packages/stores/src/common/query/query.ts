@@ -1,7 +1,6 @@
 import {
   action,
   autorun,
-  computed,
   flow,
   makeObservable,
   observable,
@@ -9,11 +8,10 @@ import {
   onBecomeUnobserved,
   reaction,
 } from "mobx";
-import Axios, { AxiosInstance } from "axios";
-import { KVStore, toGenerator } from "@keplr-wallet/common";
-import { DeepReadonly } from "utility-types";
+import { toGenerator } from "@keplr-wallet/common";
 import { HasMapStore } from "../map";
-import EventEmitter from "eventemitter3";
+import { makeURL, simpleFetch } from "@keplr-wallet/simple-fetch";
+import { QuerySharedContext } from "./context";
 
 export type QueryOptions = {
   // millisec
@@ -35,9 +33,9 @@ export type QueryError<E> = {
 };
 
 export type QueryResponse<T> = {
-  status: number;
   data: T;
   staled: boolean;
+  local: boolean;
   timestamp: number;
 };
 
@@ -140,62 +138,55 @@ class FlowCanceler {
   }
 }
 
-export class DeferInitialQueryController {
-  @observable
-  protected _isReady: boolean = false;
+class FunctionQueue {
+  protected queue: (() => void | Promise<void>)[] = [];
+  protected isPendingPromise = false;
 
-  constructor() {
-    makeObservable(this);
+  enqueue(fn: () => void | Promise<void>) {
+    this.queue.push(fn);
+
+    this.handleQueue();
   }
 
-  @action
-  ready() {
-    this._isReady = true;
-  }
-
-  wait(): Promise<void> {
-    if (this.isReady) {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve) => {
-      const disposer = autorun(() => {
-        if (this.isReady) {
-          resolve();
-          if (disposer) {
-            disposer();
-          }
+  protected handleQueue() {
+    if (!this.isPendingPromise && this.queue.length > 0) {
+      const fn = this.queue.shift();
+      if (fn) {
+        const r = fn();
+        if (typeof r === "object" && "then" in r) {
+          this.isPendingPromise = true;
+          r.then(() => {
+            this.isPendingPromise = false;
+            this.handleQueue();
+          });
+        } else {
+          this.handleQueue();
         }
-      });
-    });
+      }
+    }
   }
+}
 
-  get isReady(): boolean {
-    return this._isReady;
-  }
+export interface IObservableQuery<T = unknown, E = unknown> {
+  isObserved: boolean;
+  isStarted: boolean;
+
+  response?: Readonly<QueryResponse<T>>;
+  error?: Readonly<QueryError<E>>;
+  isFetching: boolean;
+
+  fetch(): Generator<unknown, any, any> | Promise<void>;
+  waitResponse(): Promise<Readonly<QueryResponse<T>> | undefined>;
+  waitFreshResponse(): Promise<Readonly<QueryResponse<T>> | undefined>;
 }
 
 /**
  * Base of the observable query classes.
- * This recommends to use the Axios to query the response.
+ * This recommends to use the fetch to query the response.
  */
-export abstract class ObservableQueryBase<T = unknown, E = unknown> {
-  /**
-   * Allows to decide when to start the first query.
-   *
-   * This is a temporarily added feature to implement custom rpc/lcd feature in keplr extension or mobile.
-   * Because custom rpc/lcd are handled in the background process and the front-end cannot synchronously get those values,
-   * Rather than not showing the UI to the user during the delay, the UI is shown and the start of the query is delayed immediately after getting those values.
-   *
-   * XXX: Having a global field for this feature doesn't seem desirable in the long run.
-   *      Unless it's a keplr extension or mobile, you don't need to care about this field.
-   *      This field will soon be removed and can be replaced by other implementation.
-   *
-   */
-  public static experimentalDeferInitialQueryController:
-    | DeferInitialQueryController
-    | undefined = undefined;
-
+export abstract class ObservableQuery<T = unknown, E = unknown>
+  implements IObservableQuery<T, E>
+{
   protected static suspectedResponseDatasWithInvalidValue: string[] = [
     "The network connection was lost.",
     "The request timed out.",
@@ -204,8 +195,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   protected static guessResponseTruncated(headers: any, data: string): boolean {
     return (
       headers &&
-      typeof headers["content-type"] === "string" &&
-      headers["content-type"].startsWith("application/json") &&
+      "get" in headers &&
+      typeof headers.get === "function" &&
+      (headers.get("content-type") || "").startsWith("application/json") &&
       data.startsWith("{")
     );
   }
@@ -225,11 +217,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   @observable
   private _isStarted: boolean = false;
 
-  private _pendingOnStart: boolean = false;
-
+  private stateQueue = new FunctionQueue();
+  private pendingOnStart = false;
   private readonly queryCanceler: FlowCanceler;
-  private readonly onStartCanceler: FlowCanceler;
-  private readonly queryControllerConceler: FlowCanceler;
 
   private observedCount: number = 0;
 
@@ -238,25 +228,30 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   // If environment is NodeJS, intervalId should be NodeJS.Timeout.
   private intervalId: number | NodeJS.Timeout | undefined = undefined;
 
-  @observable.ref
-  protected _instance: AxiosInstance;
+  @observable
+  protected baseURL: string;
+
+  @observable
+  protected _url: string = "";
 
   protected constructor(
-    instance: AxiosInstance,
-    options: Partial<QueryOptions>
+    protected readonly sharedContext: QuerySharedContext,
+    baseURL: string,
+    url: string,
+    options: Partial<QueryOptions> = {}
   ) {
     this.options = {
       ...defaultOptions,
       ...options,
     };
 
-    this._instance = instance;
+    this.baseURL = baseURL;
 
     this.queryCanceler = new FlowCanceler();
-    this.onStartCanceler = new FlowCanceler();
-    this.queryControllerConceler = new FlowCanceler();
 
     makeObservable(this);
+
+    this.setUrl(url);
 
     onBecomeObserved(this, "_response", this.becomeObserved);
     onBecomeObserved(this, "_isFetching", this.becomeObserved);
@@ -289,46 +284,28 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
   private start() {
     if (!this._isStarted) {
       this._isStarted = true;
-      const promise = this.onStart();
-      if (promise) {
-        this.handleAsyncOnStart(promise);
-      } else {
-        this.postStart();
-      }
-    }
-  }
-
-  @flow
-  private *handleAsyncOnStart(promise: PromiseLike<void>) {
-    this._pendingOnStart = true;
-    this._isFetching = true;
-
-    try {
-      yield this.onStartCanceler.callOrCanceledWithPromise(promise);
-      if (this._isStarted) {
-        this._pendingOnStart = false;
-        this.postStart();
-      }
-    } catch (e) {
-      if (e instanceof FlowCancelerError) {
-        return;
-      }
-      throw e;
+      // For async onStart() method, set isFetching as true in advance.
+      this._isFetching = true;
+      this.pendingOnStart = true;
+      this.stateQueue.enqueue(() => {
+        return this.onStart();
+      });
+      this.stateQueue.enqueue(() => {
+        this.pendingOnStart = false;
+      });
+      this.stateQueue.enqueue(() => {
+        return this.postStart();
+      });
     }
   }
 
   @action
   private stop() {
     if (this._isStarted) {
-      if (this.onStartCanceler.hasCancelable) {
-        this.onStartCanceler.cancel();
-      }
-
       if (this.isFetching && this.queryCanceler.hasCancelable) {
         this.cancel();
       }
 
-      this._pendingOnStart = false;
       this._isFetching = false;
 
       if (this.intervalId != null) {
@@ -336,7 +313,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
       }
       this.intervalId = undefined;
 
-      this.onStop();
+      this.stateQueue.enqueue(() => {
+        return this.onStop();
+      });
       this._isStarted = false;
     }
   }
@@ -367,7 +346,7 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     // Override this if you need something to do whenever starting.
   }
 
-  protected onStop() {
+  protected onStop(): void {
     // noop yet.
     // Override this if you need something to do whenever starting.
   }
@@ -380,51 +359,17 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     return this._isFetching;
   }
 
-  // Return the instance.
-  // You can memorize this by using @computed if you need to override this.
-  // NOTE: If this getter returns the different instance with previous instance.
-  // It will be used in the latter fetching.
-  @computed
-  protected get instance(): DeepReadonly<AxiosInstance> {
-    return this._instance;
-  }
-
   @flow
   *fetch(): Generator<unknown, any, any> {
     // If not started, do nothing.
-    if (!this.isStarted || this._pendingOnStart) {
+    if (!this.isStarted || this.pendingOnStart) {
       return;
     }
 
-    if (
-      ObservableQueryBase.experimentalDeferInitialQueryController &&
-      !ObservableQueryBase.experimentalDeferInitialQueryController.isReady
-    ) {
-      this._isFetching = true;
-
-      if (this.queryControllerConceler.hasCancelable) {
-        this.queryControllerConceler.cancel();
-      }
-
-      try {
-        yield this.queryControllerConceler.callOrCanceled(
-          () =>
-            ObservableQueryBase.experimentalDeferInitialQueryController?.wait() ??
-            Promise.resolve()
-        );
-      } catch (e) {
-        if (e instanceof FlowCancelerError) {
-          return;
-        }
-        throw e;
-      }
-
-      // Recheck
-      if (!this.isStarted) {
-        return;
-      }
-    }
     if (!this.canFetch()) {
+      if (this._isFetching) {
+        this._isFetching = false;
+      }
       return;
     }
 
@@ -438,33 +383,18 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     if (!this._response) {
       this._isFetching = true;
 
-      const promise = this.loadStaledResponse();
-
-      const handleStaledResponse = (
-        staledResponse: QueryResponse<T> | undefined
-      ) => {
-        if (staledResponse && !this._response) {
-          if (
-            this.options.cacheMaxAge <= 0 ||
-            staledResponse.timestamp > Date.now() - this.options.cacheMaxAge
-          ) {
-            this.setResponse(staledResponse);
-            return true;
-          }
-        }
-        return false;
-      };
+      let satisfyCache = false;
 
       // When first load, try to load the last response from disk.
       // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
+      const promise = this.loadStabledResponse().then((value) => {
+        satisfyCache = value;
+      });
       if (this.options.cacheMaxAge <= 0) {
         // To improve performance, don't wait the loading to proceed if cache age not set.
-        promise.then((staledResponse) => {
-          handleStaledResponse(staledResponse);
-        });
       } else {
-        const staledResponse = yield* toGenerator(promise);
-        if (handleStaledResponse(staledResponse)) {
+        yield promise;
+        if (satisfyCache) {
           this._isFetching = false;
           return;
         }
@@ -488,12 +418,9 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
 
     const abortController = new AbortController();
 
-    let fetchingProceedNext = false;
-    let skipAxiosCancelError = false;
-
     try {
       let hasStarted = false;
-      let { response, headers } = yield* toGenerator(
+      let { data, headers } = yield* toGenerator(
         this.queryCanceler.callOrCanceled(
           () => {
             hasStarted = true;
@@ -507,13 +434,13 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         )
       );
       if (
-        response.data &&
-        typeof response.data === "string" &&
-        (response.data.startsWith("stream was reset:") ||
+        data &&
+        typeof data === "string" &&
+        (data.startsWith("stream was reset:") ||
           ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
-            response.data
+            data
           ) ||
-          ObservableQuery.guessResponseTruncated(headers, response.data))
+          ObservableQuery.guessResponseTruncated(headers, data))
       ) {
         // In some devices, it is a http ok code, but a strange response is sometimes returned.
         // It's not that they can't query at all, it seems that they get weird response from time to time.
@@ -546,37 +473,46 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
             }
           )
         );
-        response = refetched.response;
+        data = refetched.data;
         headers = refetched.headers;
 
-        if (response.data && typeof response.data === "string") {
+        if (data && typeof data === "string") {
           if (
-            response.data.startsWith("stream was reset:") ||
+            data.startsWith("stream was reset:") ||
             ObservableQuery.suspectedResponseDatasWithInvalidValue.includes(
-              response.data
+              data
             )
           ) {
-            throw new Error(response.data);
+            throw new Error(data);
           }
 
-          if (ObservableQuery.guessResponseTruncated(headers, response.data)) {
+          if (ObservableQuery.guessResponseTruncated(headers, data)) {
             throw new Error("The response data seems to be truncated");
           }
         }
       }
-      this.setResponse(response);
-      // Clear the error if fetching succeeds.
-      this.setError(undefined);
 
+      const response: QueryResponse<T> = {
+        data,
+        staled: false,
+        local: false,
+        timestamp: Date.now(),
+      };
       // Should not wait.
       this.saveResponse(response);
-    } catch (e) {
-      // If axios canceled, do nothing.
-      if (Axios.isCancel(e)) {
-        skipAxiosCancelError = true;
-        return;
-      }
 
+      this.onReceiveResponse(response);
+      yield this.sharedContext.handleResponse(() => {
+        this.setResponse(response);
+        // Clear the error if fetching succeeds.
+        this.setError(undefined);
+
+        // Do not use finally block.
+        // Because finally block is called after the next yield and it makes re-render.
+        this._isFetching = false;
+      });
+    } catch (e) {
+      let fetchingProceedNext = false;
       if (e instanceof FlowCancelerError) {
         // When cancel for the next fetching, it behaves differently from other explicit cancels because fetching continues.
         if (e.message === "__fetching__proceed__next__") {
@@ -585,14 +521,13 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
         return;
       }
 
-      // If error is from Axios, and get response.
+      // If error is from simple fetch, and get response.
       if (e.response) {
         // Default is status text
         let message: string = e.response.statusText;
-        const contentType: string =
-          typeof e.response.headers?.["content-type"] === "string"
-            ? e.response.headers["content-type"]
-            : "";
+        const contentType: string = e.response.headers
+          ? e.response.headers.get("content-type") || ""
+          : "";
         // Try to figure out the message from the response.
         // If the contentType in the header is specified, try to use the message from the response.
         if (
@@ -617,7 +552,15 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           data: e.response.data,
         };
 
-        this.setError(error);
+        yield this.sharedContext.handleResponse(() => {
+          this.setError(error);
+
+          // Do not use finally block.
+          // Because finally block is called after the next yield and it makes re-render.
+          if (!fetchingProceedNext) {
+            this._isFetching = false;
+          }
+        });
       } else if (e.request) {
         // if can't get the response.
         const error: QueryError<E> = {
@@ -626,7 +569,15 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           message: "Failed to get response",
         };
 
-        this.setError(error);
+        yield this.sharedContext.handleResponse(() => {
+          this.setError(error);
+
+          // Do not use finally block.
+          // Because finally block is called after the next yield and it makes re-render.
+          if (!fetchingProceedNext) {
+            this._isFetching = false;
+          }
+        });
       } else {
         const error: QueryError<E> = {
           status: 0,
@@ -635,13 +586,15 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
           data: e,
         };
 
-        this.setError(error);
-      }
-    } finally {
-      if (!skipAxiosCancelError) {
-        if (!fetchingProceedNext) {
-          this._isFetching = false;
-        }
+        yield this.sharedContext.handleResponse(() => {
+          this.setError(error);
+
+          // Do not use finally block.
+          // Because finally block is called after the next yield and it makes re-render.
+          if (!fetchingProceedNext) {
+            this._isFetching = false;
+          }
+        });
       }
     }
   }
@@ -654,6 +607,41 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     return this._error;
   }
 
+  protected loadStabledResponse(): Promise<boolean> {
+    // When first load, try to load the last response from disk.
+    // Use the last saved response if the last saved response exists and the current response hasn't been set yet.
+    return new Promise<boolean>((resolve) => {
+      this.sharedContext.loadStore<QueryResponse<T>>(
+        this.getCacheKey(),
+        (res) => {
+          if (res.status === "rejected") {
+            console.warn("Failed to get the last response from disk.");
+            resolve(false);
+          } else {
+            const staledResponse = res.value;
+            if (staledResponse && !this._response) {
+              if (
+                this.options.cacheMaxAge <= 0 ||
+                staledResponse.timestamp > Date.now() - this.options.cacheMaxAge
+              ) {
+                const response = {
+                  ...staledResponse,
+                  staled: true,
+                  local: true,
+                };
+                this.onReceiveResponse(response);
+                this.setResponse(response);
+                resolve(true);
+                return;
+              }
+            }
+            resolve(false);
+          }
+        }
+      );
+    });
+  }
+
   @action
   protected setResponse(response: Readonly<QueryResponse<T>>) {
     this._response = response;
@@ -664,8 +652,29 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     this._error = error;
   }
 
+  // Invoked when response received from local or query without considering debouncing.
+  // If debouncing is enabled, the response is set after debouncing is finished.
+  // Thus, it have a little delay.
+  // If you want to use the response without debouncing delay, override onReceivedResponse() instead.
+  protected onReceiveResponse(_: Readonly<QueryResponse<T>>): void {
+    // noop.
+    // Override this if needed.
+  }
+
   private cancel(message?: string): void {
     this.queryCanceler.cancel(message);
+  }
+
+  get url(): string {
+    return this._url;
+  }
+
+  @action
+  protected setUrl(url: string) {
+    if (this._url !== url) {
+      this._url = url;
+      this.fetch();
+    }
   }
 
   /**
@@ -748,9 +757,21 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
     });
   }
 
-  protected abstract fetchResponse(
+  protected getCacheKey(): string {
+    return makeURL(this.baseURL, this.url);
+  }
+
+  protected async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }>;
+  ): Promise<{ headers: any; data: T }> {
+    const result = await simpleFetch<T>(this.baseURL, this.url, {
+      signal: abortController.signal,
+    });
+    return {
+      headers: result.headers,
+      data: result.data,
+    };
+  }
 
   /**
    * Used for saving the last response to disk.
@@ -758,131 +779,11 @@ export abstract class ObservableQueryBase<T = unknown, E = unknown> {
    * @param response
    * @protected
    */
-  protected abstract saveResponse(
-    response: Readonly<QueryResponse<T>>
-  ): Promise<void>;
-
-  /**
-   * Used for loading the last response from disk.
-   * @protected
-   */
-  protected abstract loadStaledResponse(): Promise<
-    QueryResponse<T> | undefined
-  >;
-}
-
-/**
- * ObservableQuery defines the event class to query the result from endpoint.
- * This supports the stale state if previous query exists.
- */
-export class ObservableQuery<
-  T = unknown,
-  E = unknown
-> extends ObservableQueryBase<T, E> {
-  protected static eventListener: EventEmitter = new EventEmitter();
-
-  public static refreshAllObserved() {
-    ObservableQuery.eventListener.emit("refresh");
-  }
-
-  public static refreshAllObservedIfError() {
-    ObservableQuery.eventListener.emit("refresh", {
-      ifError: true,
-    });
-  }
-
-  @observable
-  protected _url: string = "";
-
-  constructor(
-    protected readonly kvStore: KVStore,
-    instance: AxiosInstance,
-    url: string,
-    options: Partial<QueryOptions> = {}
-  ) {
-    super(instance, options);
-    makeObservable(this);
-
-    this.setUrl(url);
-  }
-
-  protected onStart() {
-    super.onStart();
-
-    ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
-  }
-
-  protected onStop() {
-    super.onStop();
-
-    ObservableQuery.eventListener.addListener("refresh", this.refreshHandler);
-  }
-
-  protected readonly refreshHandler = (data: any) => {
-    const ifError = data?.ifError;
-    if (ifError) {
-      if (this.error) {
-        this.fetch();
-      }
-    } else {
-      this.fetch();
-    }
-  };
-
-  get url(): string {
-    return this._url;
-  }
-
-  @action
-  protected setUrl(url: string) {
-    if (this._url !== url) {
-      this._url = url;
-      this.fetch();
-    }
-  }
-
-  protected async fetchResponse(
-    abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }> {
-    const result = await this.instance.get<T>(this.url, {
-      signal: abortController.signal,
-    });
-    return {
-      headers: result.headers,
-      response: {
-        data: result.data,
-        status: result.status,
-        staled: false,
-        timestamp: Date.now(),
-      },
-    };
-  }
-
-  protected getCacheKey(): string {
-    return `${this.instance.name}-${
-      this.instance.defaults.baseURL
-    }${this.instance.getUri({
-      url: this.url,
-    })}`;
-  }
-
   protected async saveResponse(
     response: Readonly<QueryResponse<T>>
   ): Promise<void> {
     const key = this.getCacheKey();
-    await this.kvStore.set(key, response);
-  }
-
-  protected async loadStaledResponse(): Promise<QueryResponse<T> | undefined> {
-    const key = this.getCacheKey();
-    const response = await this.kvStore.get<QueryResponse<T>>(key);
-    if (response) {
-      return {
-        ...response,
-        staled: true,
-      };
-    }
-    return undefined;
+    await this.sharedContext.saveResponse(key, response);
   }
 }
 

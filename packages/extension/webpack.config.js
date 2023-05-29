@@ -2,31 +2,32 @@
 const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const WriteFilePlugin = require("write-file-webpack-plugin");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
-  .BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const fs = require("fs");
 
+const isBuildManifestV2 = process.env.BUILD_MANIFEST_V2 === "true";
+
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
+const isDisableSplitChunks = process.env.DISABLE_SPLIT_CHUNKS === "true";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
 const commonResolve = (dir) => ({
-  extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss"],
+  extensions: [".ts", ".tsx", ".js", ".jsx"],
   alias: {
     assets: path.resolve(__dirname, dir),
   },
 });
 const altResolve = () => {
-  const p = path.resolve(__dirname, "./src/keplr-torus-signin/index.ts");
+  const p = path.resolve(__dirname, "./src/keplr-wallet-private/index.ts");
 
   if (fs.existsSync(p)) {
     return {
       alias: {
-        "alt-sign-in": path.resolve(
+        "keplr-wallet-private": path.resolve(
           __dirname,
-          "./src/keplr-torus-signin/index.ts"
+          "./src/keplr-wallet-private/index.ts"
         ),
       },
     };
@@ -34,204 +35,189 @@ const altResolve = () => {
 
   return {};
 };
-const sassRule = {
-  test: /(\.s?css)|(\.sass)$/,
-  oneOf: [
-    // if ext includes module as prefix, it perform by css loader.
-    {
-      test: /.module(\.s?css)|(\.sass)$/,
-      use: [
-        "style-loader",
-        {
-          loader: "css-loader",
-          options: {
-            modules: {
-              localIdentName: "[local]-[hash:base64]",
-            },
-            localsConvention: "camelCase",
-          },
-        },
-        {
-          loader: "sass-loader",
-          options: {
-            implementation: require("sass"),
-          },
-        },
-      ],
-    },
-    {
-      use: [
-        "style-loader",
-        { loader: "css-loader", options: { modules: false } },
-        {
-          loader: "sass-loader",
-          options: {
-            implementation: require("sass"),
-          },
-        },
-      ],
-    },
-  ],
-};
 const tsRule = { test: /\.tsx?$/, loader: "ts-loader" };
 const fileRule = {
-  test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
-  use: [
-    {
-      loader: "file-loader",
-      options: {
-        name: "[name].[ext]",
-        publicPath: "assets",
-        outputPath: "assets",
-      },
-    },
-  ],
+  test: /\.(svg|png|webm|mp4|jpe?g|gif|woff|woff2|eot|ttf)$/i,
+  type: "asset/resource",
+  generator: {
+    filename: "assets/[name][ext]",
+  },
 };
 
-const extensionConfig = (env, args) => {
-  return {
-    name: "extension",
-    mode: isEnvDevelopment ? "development" : "production",
-    // In development environment, turn on source map.
-    devtool: isEnvDevelopment ? "cheap-source-map" : false,
-    // In development environment, webpack watch the file changes, and recompile
-    watch: isEnvDevelopment,
-    entry: {
-      background: ["./src/background/background.ts"],
-      popup: ["./src/index.tsx"],
-      blocklist: ["./src/pages/blocklist/index.tsx"],
-      ledgerGrant: ["./src/pages/ledger-grant/index.tsx"],
-      contentScripts: ["./src/content-scripts/content-scripts.ts"],
-      injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
-    },
-    output: {
-      path: path.resolve(__dirname, isEnvDevelopment ? "dist" : "build/chrome"),
-      filename: "[name].bundle.js",
-    },
-    optimization: {
-      splitChunks: {
-        chunks(chunk) {
-          if (chunk.name === "reactChartJS") {
-            return false;
+module.exports = {
+  name: "extension",
+  mode: isEnvDevelopment ? "development" : "production",
+  // In development environment, turn on source map.
+  devtool: isEnvDevelopment ? "cheap-source-map" : false,
+  // In development environment, webpack watch the file changes, and recompile
+  watch: isEnvDevelopment,
+  entry: {
+    popup: ["./src/index.tsx"],
+    register: ["./src/register.tsx"],
+    blocklist: ["./src/pages/blocklist/index.tsx"],
+    background: ["./src/background/background.ts"],
+    contentScripts: ["./src/content-scripts/content-scripts.ts"],
+    injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
+  },
+  output: {
+    path: path.resolve(
+      __dirname,
+      isEnvDevelopment ? "dist" : process.env.BUILD_OUTPUT || "build/default"
+    ),
+    filename: "[name].bundle.js",
+  },
+  optimization: {
+    splitChunks: {
+      chunks(chunk) {
+        if (isDisableSplitChunks) {
+          return false;
+        }
+
+        const servicePackages = ["contentScripts", "injectedScript"];
+
+        if (!isBuildManifestV2) {
+          servicePackages.push("background");
+        }
+
+        return !servicePackages.includes(chunk.name);
+      },
+      cacheGroups: {
+        ...(() => {
+          const res = {
+            popup: {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            },
+            register: {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            },
+            blocklist: {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            },
+          };
+
+          if (isBuildManifestV2) {
+            res.background = {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            };
           }
 
-          return (
-            chunk.name !== "contentScripts" && chunk.name !== "injectedScript"
-          );
-        },
-
-        cacheGroups: {
-          background: {
-            maxSize: 3_000_000,
-            maxInitialRequests: 100,
-            maxAsyncRequests: 100,
-          },
-          popup: {
-            maxSize: 3_000_000,
-            maxInitialRequests: 100,
-            maxAsyncRequests: 100,
-          },
-          blocklist: {
-            maxSize: 3_000_000,
-            maxInitialRequests: 100,
-            maxAsyncRequests: 100,
-          },
-          ledgerGrant: {
-            maxSize: 3_000_000,
-            maxInitialRequests: 100,
-            maxAsyncRequests: 100,
-          },
-        },
+          return res;
+        })(),
       },
     },
-    resolve: {
-      ...commonResolve("src/public/assets"),
-      ...altResolve(),
+  },
+  resolve: {
+    ...commonResolve("src/public/assets"),
+    ...altResolve(),
+    fallback: {
+      os: require.resolve("os-browserify/browser"),
+      buffer: require.resolve("buffer/"),
+      http: require.resolve("stream-http"),
+      https: require.resolve("https-browserify"),
+      crypto: require.resolve("crypto-browserify"),
+      stream: require.resolve("stream-browserify"),
+      process: require.resolve("process/browser"),
     },
-    module: {
-      rules: [sassRule, tsRule, fileRule],
-    },
-    plugins: [
-      // Remove all and write anyway
-      // TODO: Optimizing build process
-      new CleanWebpackPlugin(),
-      new ForkTsCheckerWebpackPlugin(),
-      new CopyWebpackPlugin(
-        [
-          {
-            from: "./src/manifest.json",
-            to: "./",
-          },
-          {
-            from:
-              "../../node_modules/webextension-polyfill/dist/browser-polyfill.js",
-          },
-        ],
-        { copyUnmodified: true }
-      ),
-      new HtmlWebpackPlugin({
-        template: "./src/background.html",
-        filename: "background.html",
-        excludeChunks: [
-          "popup",
-          "blocklist",
-          "ledgerGrant",
-          "contentScripts",
-          "injectedScript",
-        ],
-      }),
-      new HtmlWebpackPlugin({
-        template: "./src/index.html",
-        filename: "popup.html",
-        excludeChunks: [
-          "background",
-          "blocklist",
-          "ledgerGrant",
-          "contentScripts",
-          "injectedScript",
-        ],
-      }),
-      new HtmlWebpackPlugin({
-        template: "./src/index.html",
-        filename: "blocklist.html",
-        excludeChunks: [
-          "background",
-          "popup",
-          "ledgerGrant",
-          "contentScripts",
-          "injectedScript",
-        ],
-      }),
-      new HtmlWebpackPlugin({
-        template: "./src/index.html",
-        filename: "ledger-grant.html",
-        excludeChunks: [
-          "background",
-          "popup",
-          "blocklist",
-          "contentScripts",
-          "injectedScript",
-        ],
-      }),
-      new WriteFilePlugin(),
-      new webpack.EnvironmentPlugin([
-        "NODE_ENV",
-        "KEPLR_EXT_ETHEREUM_ENDPOINT",
-        "KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY",
-        "KEPLR_EXT_AMPLITUDE_API_KEY",
-        "KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN",
-        "KEPLR_EXT_ANALYTICS_API_URL",
-        "KEPLR_EXT_TRANSAK_API_KEY",
-        "KEPLR_EXT_MOONPAY_API_KEY",
-        "KEPLR_EXT_KADO_API_KEY",
-        "KEPLR_EXT_COINGECKO_ENDPOINT",
-        "KEPLR_EXT_COINGECKO_GETPRICE",
-      ]),
-      new BundleAnalyzerPlugin({
-        analyzerMode: isEnvAnalyzer ? "server" : "disabled",
-      }),
+  },
+  module: {
+    rules: [
+      tsRule,
+      fileRule,
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ],
-  };
-};
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: "process/browser",
+      Buffer: ["buffer", "Buffer"],
+    }),
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: isEnvDevelopment ? "development" : "production",
+      // XXX: SC_DISABLE_SPEEDY is used for force enabling speedy mode for styled-components.
+      //      According to the document, styled-components injects stylings to <style /> tag for each class name if development mode.
+      //      However, on production mode, it injects stylings by using CSSOM.
+      //      Probably, if development mode, this difference makes the blinking styling for transition components which changes the styling by JS code.
+      //      At present, rather than fixing this for development mode, We fix this by forcing cssom to be enabled, and will fix this later when we have time.
+      SC_DISABLE_SPEEDY: false,
+      KEPLR_EXT_ETHEREUM_ENDPOINT: "",
+      KEPLR_EXT_AMPLITUDE_API_KEY: "",
+      KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN: "",
+      KEPLR_EXT_ANALYTICS_API_URL: "",
+      KEPLR_EXT_COINGECKO_ENDPOINT: "",
+      KEPLR_EXT_COINGECKO_GETPRICE: "",
+      KEPLR_EXT_TRANSAK_API_KEY: "",
+      KEPLR_EXT_MOONPAY_API_KEY: "",
+      KEPLR_EXT_KADO_API_KEY: "",
+    }),
+    new ForkTsCheckerWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        ...(() => {
+          if (isBuildManifestV2) {
+            return [
+              {
+                from: "./src/manifest.v2.json",
+                to: "./manifest.json",
+              },
+            ];
+          }
 
-module.exports = extensionConfig;
+          return [
+            {
+              from: "./src/manifest.v3.json",
+              to: "./manifest.json",
+            },
+          ];
+        })(),
+        {
+          from: "../../node_modules/webextension-polyfill/dist/browser-polyfill.js",
+          to: "./",
+        },
+      ],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "popup.html",
+      chunks: ["popup"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "register.html",
+      chunks: ["register"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "blocklist.html",
+      chunks: ["blocklist"],
+    }),
+    ...(() => {
+      if (isBuildManifestV2) {
+        return [
+          new HtmlWebpackPlugin({
+            template: "./src/background.html",
+            filename: "background.html",
+            chunks: ["background"],
+          }),
+        ];
+      }
+
+      return [];
+    })(),
+    new BundleAnalyzerPlugin({
+      analyzerMode: isEnvAnalyzer ? "server" : "disabled",
+    }),
+  ],
+};

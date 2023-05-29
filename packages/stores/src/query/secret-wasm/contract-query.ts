@@ -1,12 +1,13 @@
 import { ObservableChainQuery } from "../chain-query";
-import { KVStore, toGenerator } from "@keplr-wallet/common";
-import { ChainGetter } from "../../common";
+import { toGenerator } from "@keplr-wallet/common";
+import { ChainGetter } from "../../chain";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { computed, flow, makeObservable, observable } from "mobx";
 import { Keplr } from "@keplr-wallet/types";
-import { QueryResponse } from "../../common";
+import { QuerySharedContext } from "../../common";
 
 import { Buffer } from "buffer/";
+import { makeURL } from "@keplr-wallet/simple-fetch";
 
 export class ObservableSecretContractChainQuery<
   T
@@ -20,7 +21,7 @@ export class ObservableSecretContractChainQuery<
   protected _isIniting: boolean = false;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly apiGetter: () => Promise<Keplr | undefined>,
@@ -30,11 +31,11 @@ export class ObservableSecretContractChainQuery<
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
     // Don't need to set the url initially because it can't request without encyption.
-    super(kvStore, chainId, chainGetter, ``);
+    super(sharedContext, chainId, chainGetter, ``);
     makeObservable(this);
   }
 
-  protected async onStart() {
+  protected override async onStart() {
     super.onStart();
 
     if (!this.keplr) {
@@ -52,7 +53,7 @@ export class ObservableSecretContractChainQuery<
     await this.init();
   }
 
-  get isFetching(): boolean {
+  override get isFetching(): boolean {
     return (
       this.querySecretContractCodeHash.getQueryContract(this.contractAddress)
         .isFetching ||
@@ -62,7 +63,7 @@ export class ObservableSecretContractChainQuery<
     );
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     if (
       !this.querySecretContractCodeHash.getQueryContract(this.contractAddress)
         .response
@@ -96,20 +97,21 @@ export class ObservableSecretContractChainQuery<
     this._isIniting = false;
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<T>; headers: any }> {
-    let response: QueryResponse<T>;
+  ): Promise<{ headers: any; data: T }> {
+    let data: T;
     let headers: any;
     try {
       const fetched = await super.fetchResponse(abortController);
-      response = fetched.response;
+      data = fetched.data;
       headers = fetched.headers;
     } catch (e) {
       if (e.response?.data?.error) {
         const encryptedError = e.response.data.error;
 
-        const errorMessageRgx = /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
+        const errorMessageRgx =
+          /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
 
         const rgxMatches = errorMessageRgx.exec(encryptedError);
         if (rgxMatches != null && rgxMatches.length === 4) {
@@ -131,7 +133,7 @@ export class ObservableSecretContractChainQuery<
       throw e;
     }
 
-    const encResult = (response.data as unknown) as
+    const encResult = data as unknown as
       | {
           data: string;
         }
@@ -161,12 +163,7 @@ export class ObservableSecretContractChainQuery<
     const obj = JSON.parse(message);
     return {
       headers,
-      response: {
-        data: obj as T,
-        status: response.status,
-        staled: false,
-        timestamp: Date.now(),
-      },
+      data: obj as T,
     };
   }
 
@@ -177,15 +174,11 @@ export class ObservableSecretContractChainQuery<
 
   // Actually, the url of fetching the secret20 balance will be changed every time.
   // So, we should save it with deterministic key.
-  protected getCacheKey(): string {
-    return `${this.instance.name}-${
-      this.instance.defaults.baseURL
-    }${this.instance.getUri({
-      url: this.getSecretWasmUrl(
-        this.contractAddress,
-        JSON.stringify(this.obj)
-      ),
-    })}`;
+  protected override getCacheKey(): string {
+    return makeURL(
+      this.baseURL,
+      this.getSecretWasmUrl(this.contractAddress, JSON.stringify(this.obj))
+    );
   }
 
   @computed

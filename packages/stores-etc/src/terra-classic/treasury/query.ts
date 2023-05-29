@@ -1,13 +1,25 @@
-import { ObservableChainQuery, ChainGetter } from "@keplr-wallet/stores";
+import {
+  ObservableChainQuery,
+  ChainGetter,
+  QuerySharedContext,
+} from "@keplr-wallet/stores";
 import { TaxCaps, TaxRate } from "./types";
-import { KVStore } from "@keplr-wallet/common";
 import { computed, makeObservable } from "mobx";
 import { RatePretty, Int } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
 
 export class ObservableQueryTaxCaps extends ObservableChainQuery<TaxCaps> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, "/terra/treasury/v1beta1/tax_caps");
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      "/terra/treasury/v1beta1/tax_caps"
+    );
 
     makeObservable(this);
   }
@@ -27,8 +39,17 @@ export class ObservableQueryTaxCaps extends ObservableChainQuery<TaxCaps> {
 }
 
 export class ObservableQueryTaxRate extends ObservableChainQuery<TaxRate> {
-  constructor(kvStore: KVStore, chainId: string, chainGetter: ChainGetter) {
-    super(kvStore, chainId, chainGetter, "/terra/treasury/v1beta1/tax_rate");
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
+  ) {
+    super(
+      sharedContext,
+      chainId,
+      chainGetter,
+      "/terra/treasury/v1beta1/tax_rate"
+    );
 
     makeObservable(this);
   }

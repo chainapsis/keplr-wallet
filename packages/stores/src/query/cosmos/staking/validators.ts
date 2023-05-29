@@ -3,11 +3,9 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { BondStatus, Validators, Validator } from "./types";
-import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { computed, makeObservable, observable, runInAction } from "mobx";
-import { ObservableQuery, QueryResponse } from "../../../common";
-import Axios from "axios";
+import { ObservableQuery, QuerySharedContext } from "../../../common";
 import PQueue from "p-queue";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
@@ -44,14 +42,10 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
 
   protected readonly validator: Validator;
 
-  constructor(kvStore: KVStore, validator: Validator) {
-    const instance = Axios.create({
-      baseURL: "https://keybase.io/",
-    });
-
+  constructor(sharedContext: QuerySharedContext, validator: Validator) {
     super(
-      kvStore,
-      instance,
+      sharedContext,
+      "https://keybase.io/",
       `_/api/1.0/user/lookup.json?fields=pictures&key_suffix=${validator.description.identity}`
     );
     makeObservable(this);
@@ -59,13 +53,13 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
     this.validator = validator;
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return this.validator.description.identity !== "";
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
-  ): Promise<{ response: QueryResponse<KeybaseResult>; headers: any }> {
+  ): Promise<{ headers: any; data: KeybaseResult }> {
     return await ObservableQueryValidatorThumbnail.fetchingThumbnailQueue.add(
       () => {
         return super.fetchResponse(abortController);
@@ -87,19 +81,17 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
 
 export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validators> {
   @observable.shallow
-  protected thumbnailMap: Map<
-    string,
-    ObservableQueryValidatorThumbnail
-  > = new Map();
+  protected thumbnailMap: Map<string, ObservableQueryValidatorThumbnail> =
+    new Map();
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly status: BondStatus
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/staking/v1beta1/validators?pagination.limit=1000&status=${(() => {
@@ -127,13 +119,15 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
     return this.response.data.validators;
   }
 
-  readonly getValidator = computedFn((validatorAddress: string):
-    | Validator
-    | undefined => {
-    const validators = this.validators;
+  readonly getValidator = computedFn(
+    (validatorAddress: string): Validator | undefined => {
+      const validators = this.validators;
 
-    return validators.find((val) => val.operator_address === validatorAddress);
-  });
+      return validators.find(
+        (val) => val.operator_address === validatorAddress
+      );
+    }
+  );
 
   @computed
   get validatorsSortedByVotingPower(): Validator[] {
@@ -163,7 +157,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
         runInAction(() => {
           this.thumbnailMap.set(
             identity,
-            new ObservableQueryValidatorThumbnail(this.kvStore, validator)
+            new ObservableQueryValidatorThumbnail(this.sharedContext, validator)
           );
         });
       }
@@ -176,35 +170,35 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
   /**
    * Return the validator's voting power as human friendly (considering the coin decimals).
    */
-  readonly getValidatorShare = computedFn((operatorAddress: string):
-    | CoinPretty
-    | undefined => {
-    const validators = this.validators;
-    const validator = validators.find(
-      (val) => val.operator_address === operatorAddress
-    );
-    if (!validator) {
-      return;
+  readonly getValidatorShare = computedFn(
+    (operatorAddress: string): CoinPretty | undefined => {
+      const validators = this.validators;
+      const validator = validators.find(
+        (val) => val.operator_address === operatorAddress
+      );
+      if (!validator) {
+        return;
+      }
+
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const stakeCurrency = chainInfo.stakeCurrency;
+
+      const power = new Dec(validator.tokens).truncate();
+
+      return new CoinPretty(stakeCurrency, power);
     }
-
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const stakeCurrency = chainInfo.stakeCurrency;
-
-    const power = new Dec(validator.tokens).truncate();
-
-    return new CoinPretty(stakeCurrency, power);
-  });
+  );
 }
 
 export class ObservableQueryValidators extends ObservableChainQueryMap<Validators> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
   ) {
-    super(kvStore, chainId, chainGetter, (status: string) => {
+    super(sharedContext, chainId, chainGetter, (status: string) => {
       return new ObservableQueryValidatorsInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         status as BondStatus

@@ -3,22 +3,22 @@ import {
   ObservableChainQueryMap,
 } from "../../chain-query";
 import { ProposalVoter } from "./types";
-import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryProposalVoteInner extends ObservableChainQuery<ProposalVoter> {
   protected proposalId: string;
   protected bech32Address: string;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     proposalsId: string,
     bech32Address: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/gov/v1beta1/proposals/${proposalsId}/votes/${bech32Address}`
@@ -47,7 +47,7 @@ export class ObservableQueryProposalVoteInner extends ObservableChainQuery<Propo
     }
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
   }
@@ -55,15 +55,15 @@ export class ObservableQueryProposalVoteInner extends ObservableChainQuery<Propo
 
 export class ObservableQueryProposalVote extends ObservableChainQueryMap<ProposalVoter> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
   ) {
-    super(kvStore, chainId, chainGetter, (param: string) => {
+    super(sharedContext, chainId, chainGetter, (param: string) => {
       const { proposalId, voter } = JSON.parse(param);
 
       return new ObservableQueryProposalVoteInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         proposalId,

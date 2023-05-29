@@ -1,50 +1,38 @@
-import { IAmountConfig, TxChainSetter } from "../tx";
 import {
-  ChainGetter,
-  CoinPrimitive,
-  CosmosMsgOpts,
-  IAccountStore,
-} from "@keplr-wallet/stores";
-import { AppCurrency, Msg } from "@keplr-wallet/types";
+  IBaseAmountConfig,
+  ISenderConfig,
+  TxChainSetter,
+  UIProperties,
+} from "../tx";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { action, computed, makeObservable, observable } from "mobx";
-import { Coin, CoinPretty, Int } from "@keplr-wallet/unit";
+import { CoinPretty } from "@keplr-wallet/unit";
 import { SignDocHelper } from "./index";
 import { useState } from "react";
-import { computedFn } from "mobx-utils";
+import { Msg } from "@keplr-wallet/types";
+import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { MsgDelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/tx";
-import { AnyWithUnpacked, UnknownMessage } from "@keplr-wallet/cosmos";
-
-export type AccountStore = IAccountStore<{
-  cosmos: {
-    readonly msgOpts: CosmosMsgOpts;
-  };
-}>;
 
 // This config helps the fee config to calculate that the fee is enough to send with considering
 // the amount in the sign doc.
 // This sets the amount as the sum of the messages in the sign doc if the message is known and can be parsed.
 export class SignDocAmountConfig
   extends TxChainSetter
-  implements IAmountConfig {
+  implements IBaseAmountConfig
+{
   @observable.ref
   protected signDocHelper?: SignDocHelper = undefined;
-
-  @observable
-  protected _sender: string;
 
   @observable
   protected _disableBalanceCheck: boolean = false;
 
   constructor(
     chainGetter: ChainGetter,
-    protected readonly accountStore: AccountStore,
     initialChainId: string,
-    sender: string
+    protected readonly senderConfig: ISenderConfig
   ) {
     super(chainGetter, initialChainId);
-
-    this._sender = sender;
 
     makeObservable(this);
   }
@@ -55,104 +43,64 @@ export class SignDocAmountConfig
   }
 
   @computed
-  get amount(): string {
-    const primitive = this.getAmountPrimitive();
-
-    return new CoinPretty(
-      this.sendCurrency,
-      new Int(primitive.amount)
-    ).toString();
-  }
-
-  get sendCurrency(): AppCurrency {
-    const chainInfo = this.chainInfo;
-    if (chainInfo.feeCurrencies.length > 0) {
-      return chainInfo.feeCurrencies[0];
+  get amount(): CoinPretty[] {
+    if (
+      this.disableBalanceCheck ||
+      !this.signDocHelper?.signDocWrapper ||
+      this.chainInfo.feeCurrencies.length === 0
+    ) {
+      return [];
     }
 
-    return chainInfo.currencies[0];
-  }
-
-  get sendableCurrencies(): AppCurrency[] {
-    return [this.sendCurrency];
-  }
-
-  @action
-  setSender(sender: string): void {
-    this._sender = sender;
-  }
-
-  get sender(): string {
-    return this._sender;
-  }
-
-  getAmountPrimitive = computedFn(
-    (): CoinPrimitive => {
-      if (
-        this.disableBalanceCheck ||
-        !this.signDocHelper?.signDocWrapper ||
-        this.chainInfo.feeCurrencies.length === 0
-      ) {
-        return {
-          amount: "0",
-          denom: this.sendCurrency.coinMinimalDenom,
-        };
-      }
-
-      if (this.signDocHelper.signDocWrapper.mode === "amino") {
-        return this.computeAmountInAminoMsgs(
-          this.signDocHelper.signDocWrapper.aminoSignDoc.msgs
-        );
-      } else {
-        return this.computeAmountInProtoMsgs(
-          this.signDocHelper.signDocWrapper.protoSignDoc.txMsgs
-        );
-      }
+    if (this.signDocHelper.signDocWrapper.mode === "amino") {
+      return this.computeAmountInAminoMsgs(
+        this.signDocHelper.signDocWrapper.aminoSignDoc.msgs
+      );
+    } else {
+      return this.computeAmountInProtoMsgs(
+        this.signDocHelper.signDocWrapper.protoSignDoc.txMsgs
+      );
     }
-  );
+  }
 
-  protected computeAmountInAminoMsgs(msgs: readonly Msg[]) {
-    const amount = new Coin(this.sendCurrency.coinMinimalDenom, new Int(0));
-
-    const account = this.accountStore.getAccount(this.chainId);
+  protected computeAmountInAminoMsgs(msgs: readonly Msg[]): CoinPretty[] {
+    const amount: CoinPretty[] = [];
 
     for (const msg of msgs) {
       try {
+        // TODO: msg.type이 다른 체인들이 몇개 있다. 이런 얘들에 대해서 좀 더 편리하게 처리해줄 방법을 찾아본다.
+        //       이 기능이 사용자의 자산을 잃게 만들리는 없기 때문에 나중에 처리해준다.
         switch (msg.type) {
-          case account.cosmos.msgOpts.send.native.type:
+          case "cosmos-sdk/MsgSend":
             if (
               msg.value.from_address &&
-              msg.value.from_address !== this.sender
+              msg.value.from_address === this.senderConfig.sender
             ) {
-              return {
-                amount: "0",
-                denom: this.sendCurrency.coinMinimalDenom,
-              };
-            }
-            if (msg.value.amount && Array.isArray(msg.value.amount)) {
-              for (const amountInMsg of msg.value.amount) {
-                if (amountInMsg.denom === amount.denom) {
-                  amount.amount = amount.amount.add(
-                    new Int(amountInMsg.amount)
+              if (msg.value.amount && Array.isArray(msg.value.amount)) {
+                for (const amountInMsg of msg.value.amount) {
+                  amount.push(
+                    new CoinPretty(
+                      this.chainInfo.forceFindCurrency(amountInMsg.denom),
+                      amountInMsg.amount
+                    )
                   );
                 }
               }
             }
             break;
-          case account.cosmos.msgOpts.delegate.type:
+          case "cosmos-sdk/MsgDelegate":
             if (
               msg.value.delegator_address &&
-              msg.value.delegator_address !== this.sender
+              msg.value.delegator_address === this.senderConfig.sender
             ) {
-              return {
-                amount: "0",
-                denom: this.sendCurrency.coinMinimalDenom,
-              };
-            }
-            if (msg.value.amount && msg.value.amount.denom === amount.denom) {
-              amount.amount = amount.amount.add(
-                new Int(msg.value.amount.amount)
-              );
+              if (msg.value.amount && msg.value.amount.denom) {
+                amount.push(
+                  new CoinPretty(
+                    this.chainInfo.forceFindCurrency(msg.value.amount.denom),
+                    msg.value.amount
+                  )
+                );
+              }
             }
             break;
         }
@@ -163,14 +111,11 @@ export class SignDocAmountConfig
       }
     }
 
-    return {
-      amount: amount.amount.toString(),
-      denom: amount.denom,
-    };
+    return this.mergeDuplicatedAmount(amount);
   }
 
   protected computeAmountInProtoMsgs(msgs: AnyWithUnpacked[]) {
-    const amount = new Coin(this.sendCurrency.coinMinimalDenom, new Int(0));
+    const amount: CoinPretty[] = [];
 
     for (const msg of msgs) {
       try {
@@ -178,16 +123,16 @@ export class SignDocAmountConfig
           switch (msg.typeUrl) {
             case "/cosmos.bank.v1beta1.MsgSend": {
               const sendMsg = msg.unpacked as MsgSend;
-              if (sendMsg.fromAddress && sendMsg.fromAddress !== this.sender) {
-                return {
-                  amount: "0",
-                  denom: this.sendCurrency.coinMinimalDenom,
-                };
-              }
-              for (const amountInMsg of sendMsg.amount) {
-                if (amountInMsg.denom === amount.denom && amountInMsg.amount) {
-                  amount.amount = amount.amount.add(
-                    new Int(amountInMsg.amount)
+              if (
+                sendMsg.fromAddress &&
+                sendMsg.fromAddress === this.senderConfig.sender
+              ) {
+                for (const amountInMsg of sendMsg.amount) {
+                  amount.push(
+                    new CoinPretty(
+                      this.chainInfo.forceFindCurrency(amountInMsg.denom),
+                      amountInMsg.amount
+                    )
                   );
                 }
               }
@@ -197,20 +142,18 @@ export class SignDocAmountConfig
               const delegateMsg = msg.unpacked as MsgDelegate;
               if (
                 delegateMsg.delegatorAddress &&
-                delegateMsg.delegatorAddress !== this.sender
+                delegateMsg.delegatorAddress === this.senderConfig.sender
               ) {
-                return {
-                  amount: "0",
-                  denom: this.sendCurrency.coinMinimalDenom,
-                };
-              }
-              if (
-                delegateMsg.amount?.denom === amount.denom &&
-                delegateMsg.amount.amount
-              ) {
-                amount.amount = amount.amount.add(
-                  new Int(delegateMsg.amount.amount)
-                );
+                if (delegateMsg.amount) {
+                  amount.push(
+                    new CoinPretty(
+                      this.chainInfo.forceFindCurrency(
+                        delegateMsg.amount.denom
+                      ),
+                      delegateMsg.amount.amount
+                    )
+                  );
+                }
               }
               break;
             }
@@ -223,43 +166,29 @@ export class SignDocAmountConfig
       }
     }
 
-    return {
-      amount: amount.amount.toString(),
-      denom: amount.denom,
-    };
+    return this.mergeDuplicatedAmount(amount);
   }
 
-  get error(): Error | undefined {
-    return undefined;
+  protected mergeDuplicatedAmount(amount: CoinPretty[]): CoinPretty[] {
+    const mergedMap = new Map<string, CoinPretty>();
+
+    for (const amt of amount) {
+      let merged = mergedMap.get(amt.currency.coinMinimalDenom);
+      if (!merged) {
+        merged = amt;
+        mergedMap.set(amt.currency.coinMinimalDenom, merged);
+      } else {
+        merged = merged.add(amt);
+        mergedMap.set(amt.currency.coinMinimalDenom, merged);
+      }
+    }
+
+    return Array.from(mergedMap.values());
   }
 
-  setIsMax(_: boolean): void {
-    // noop
-  }
-  toggleIsMax(): void {
-    // noop
-  }
-
-  get isMax(): boolean {
-    // noop
-    return false;
-  }
-
-  get fraction(): number | undefined {
-    // noop
-    return undefined;
-  }
-
-  setFraction(_: number | undefined) {
-    // noop
-  }
-
-  setAmount(): void {
-    // noop
-  }
-
-  setSendCurrency(): void {
-    // noop
+  @computed
+  get uiProperties(): UIProperties {
+    return {};
   }
 
   @action
@@ -274,15 +203,13 @@ export class SignDocAmountConfig
 
 export const useSignDocAmountConfig = (
   chainGetter: ChainGetter,
-  accountStore: AccountStore,
   chainId: string,
-  sender: string
+  senderConfig: ISenderConfig
 ) => {
   const [config] = useState(
-    () => new SignDocAmountConfig(chainGetter, accountStore, chainId, sender)
+    () => new SignDocAmountConfig(chainGetter, chainId, senderConfig)
   );
   config.setChain(chainId);
-  config.setSender(sender);
 
   return config;
 };

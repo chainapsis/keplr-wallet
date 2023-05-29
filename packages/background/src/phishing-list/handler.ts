@@ -31,26 +31,21 @@ export const getHandler: (service: PhishingListService) => Handler = (
 
 const handleCheckURLIsPhishingMsg: (
   service: PhishingListService
-) => InternalHandler<CheckURLIsPhishingMsg> = (
-  service: PhishingListService
-) => (_, msg) => {
-  return service.checkURLIsPhishing(msg.origin);
-};
+) => InternalHandler<CheckURLIsPhishingMsg> =
+  (service: PhishingListService) => (_, msg) => {
+    return service.checkURLIsPhishing(msg.origin);
+  };
 
 const handleURLTempAllow: (
   service: PhishingListService
-) => InternalHandler<URLTempAllowMsg> = (service: PhishingListService) => (
-  _,
-  msg
-) => {
-  service.allowUrlTemp(msg.url);
-};
+) => InternalHandler<URLTempAllowMsg> =
+  (service: PhishingListService) => (_, msg) => {
+    service.allowUrlTemp(msg.url);
+  };
 
 const handleCheckBadTwitterId: (
   service: PhishingListService
-) => InternalHandler<CheckBadTwitterIdMsg> = (service: PhishingListService) => (
-  _,
-  msg
-) => {
-  return service.checkBadTwitterId(msg.id);
-};
+) => InternalHandler<CheckBadTwitterIdMsg> =
+  (service: PhishingListService) => (_, msg) => {
+    return service.checkBadTwitterId(msg.id);
+  };

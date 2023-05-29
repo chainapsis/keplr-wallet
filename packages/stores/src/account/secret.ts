@@ -1,7 +1,8 @@
 import { AccountSetBase, AccountSetBaseSuper, MsgOpt } from "./base";
 import { SecretQueries, QueriesSetBase, IQueriesStore } from "../query";
 import { Buffer } from "buffer/";
-import { ChainGetter, CoinPrimitive } from "../common";
+import { CoinPrimitive } from "../common";
+import { ChainGetter } from "../chain";
 import { DenomHelper } from "@keplr-wallet/common";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/secret/compute/v1beta1/msg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -400,9 +401,10 @@ export class SecretAccountImpl {
     // eslint-disable-next-line @typescript-eslint/ban-types
     obj: object
   ): Promise<Uint8Array> {
-    const queryContractCodeHashResponse = await this.queries.secret.querySecretContractCodeHash
-      .getQueryContract(contractAddress)
-      .waitResponse();
+    const queryContractCodeHashResponse =
+      await this.queries.secret.querySecretContractCodeHash
+        .getQueryContract(contractAddress)
+        .waitResponse();
 
     if (!queryContractCodeHashResponse) {
       throw new Error(

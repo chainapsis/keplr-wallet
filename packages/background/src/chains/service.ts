@@ -1,190 +1,485 @@
 import {
-  ChainInfoWithCoreTypes,
-  ChainInfoWithRepoUpdateOptions,
-} from "./types";
-import { ChainInfo, ChainInfoWithoutEndpoints } from "@keplr-wallet/types";
-import { KVStore, Debouncer, MemoryKVStore } from "@keplr-wallet/common";
-import { ChainUpdaterService } from "../updater";
-import { InteractionService } from "../interaction";
-import { Env, KeplrError } from "@keplr-wallet/router";
-import { SuggestChainInfoMsg } from "./messages";
+  KVStore,
+  PrefixKVStore,
+  sortedJsonByKeyStringify,
+} from "@keplr-wallet/common";
+import { ChainInfo } from "@keplr-wallet/types";
+import {
+  action,
+  autorun,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { validateBasicChainInfoType } from "@keplr-wallet/chain-validator";
-import { getBasicAccessPermissionType, PermissionService } from "../permission";
-import { Mutable, Optional } from "utility-types";
+import { ChainInfoWithCoreTypes, ChainInfoWithSuggestedOptions } from "./types";
+import { computedFn } from "mobx-utils";
+import {
+  checkChainFeatures,
+  validateBasicChainInfoType,
+} from "@keplr-wallet/chain-validator";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { InteractionService } from "../interaction";
+import { Env } from "@keplr-wallet/router";
+import { SuggestChainInfoMsg } from "./messages";
 
-type ChainRemovedHandler = (chainId: string, identifier: string) => void;
+type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
+type ChainSuggestedHandler = (chainInfo: ChainInfo) => void;
+type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
+  @observable.ref
+  protected updatedChainInfos: UpdatedChainInfo[] = [];
+  protected updatedChainInfoKVStore: KVStore;
+
+  @observable.ref
+  protected suggestedChainInfos: ChainInfoWithSuggestedOptions[] = [];
+  protected suggestedChainInfoKVStore: KVStore;
+
+  @observable.ref
+  protected repoChainInfos: ChainInfo[] = [];
+  protected repoChainInfoKVStore: KVStore;
+
+  @observable.ref
+  protected endpoints: {
+    chainId: string;
+    rpc?: string;
+    rest?: string;
+  }[] = [];
+  protected endpointsKVStore: KVStore;
+
   protected onChainRemovedHandlers: ChainRemovedHandler[] = [];
-
-  protected cachedChainInfos: ChainInfoWithCoreTypes[] | undefined;
-
-  protected chainUpdaterService!: ChainUpdaterService;
-  protected interactionService!: InteractionService;
-  public permissionService!: PermissionService;
-
-  protected readonly kvStoreForSuggestChain: KVStore;
+  protected onChainSuggestedHandlers: ChainSuggestedHandler[] = [];
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly embedChainInfos: ChainInfo[],
-    protected readonly experimentalOptions: Partial<{
-      useMemoryKVStoreForSuggestChain: boolean;
-    }> = {}
+    protected readonly migrationKVStore: {
+      kvStore: KVStore;
+      updaterKVStore: KVStore;
+    },
+    // embedChainInfos는 실행 이후에 변경되어서는 안된다.
+    protected readonly embedChainInfos: ReadonlyArray<ChainInfoWithCoreTypes>,
+    protected readonly communityChainInfoRepo: {
+      readonly organizationName: string;
+      readonly repoName: string;
+      readonly branchName: string;
+    },
+    protected readonly interactionService: InteractionService
   ) {
-    if (experimentalOptions?.useMemoryKVStoreForSuggestChain) {
-      this.kvStoreForSuggestChain = new MemoryKVStore("suggest-chain");
-    } else {
-      this.kvStoreForSuggestChain = kvStore;
-    }
+    this.updatedChainInfoKVStore = new PrefixKVStore(
+      kvStore,
+      "updatedChainInfo"
+    );
+    this.suggestedChainInfoKVStore = new PrefixKVStore(
+      kvStore,
+      "suggestedChainInfo"
+    );
+    this.repoChainInfoKVStore = new PrefixKVStore(kvStore, "repoChainInfo");
+    this.endpointsKVStore = new PrefixKVStore(kvStore, "endpoints");
+
+    makeObservable(this);
   }
 
-  init(
-    chainUpdaterService: ChainUpdaterService,
-    interactionService: InteractionService,
-    permissionService: PermissionService
-  ) {
-    this.chainUpdaterService = chainUpdaterService;
-    this.interactionService = interactionService;
-    this.permissionService = permissionService;
-  }
+  async init(): Promise<void> {
+    const migrated = await this.kvStore.get<boolean>("migration/v1");
+    if (!migrated) {
+      const legacySuggestedChainInfos = await this.migrationKVStore.kvStore.get<
+        ChainInfoWithSuggestedOptions[]
+      >("chain-infos");
 
-  readonly getChainInfos: () => Promise<
-    ChainInfoWithCoreTypes[]
-  > = Debouncer.promise(async () => {
-    if (this.cachedChainInfos) {
-      return this.cachedChainInfos;
+      if (legacySuggestedChainInfos) {
+        const filtered = legacySuggestedChainInfos.filter((chainInfo) => {
+          return !this.embedChainInfos.some(
+            (embed) =>
+              ChainIdHelper.parse(embed.chainId).identifier ===
+              ChainIdHelper.parse(chainInfo.chainId).identifier
+          );
+        });
+
+        for (const chainInfo of filtered) {
+          this.addSuggestedChainInfo(chainInfo, true);
+        }
+
+        const chainInfos = this.embedChainInfos.concat(filtered);
+
+        for (const chainInfo of chainInfos) {
+          const chainIdentifier = ChainIdHelper.parse(
+            chainInfo.chainId
+          ).identifier;
+
+          const repoUpdatedChainInfo =
+            await this.migrationKVStore.updaterKVStore.get<ChainInfo>(
+              "updated-chain-info/" + chainIdentifier
+            );
+
+          if (repoUpdatedChainInfo) {
+            try {
+              const validated = await validateBasicChainInfoType(
+                repoUpdatedChainInfo
+              );
+              runInAction(() => {
+                this.repoChainInfos = [...this.repoChainInfos, validated];
+              });
+            } catch (e) {
+              console.log(e);
+            }
+          }
+
+          const localUpdatedChainInfo =
+            await this.migrationKVStore.updaterKVStore.get<Partial<ChainInfo>>(
+              chainIdentifier
+            );
+          if (localUpdatedChainInfo) {
+            this.setUpdatedChainInfo(chainInfo.chainId, {
+              chainId: localUpdatedChainInfo.chainId,
+              features: localUpdatedChainInfo.features,
+            });
+          }
+
+          const endpoints = await this.migrationKVStore.updaterKVStore.get<{
+            rpc: string | undefined;
+            rest: string | undefined;
+          }>("chain-info-endpoints/" + chainIdentifier);
+
+          if (endpoints) {
+            this.setEndpoint(chainInfo.chainId, endpoints);
+          }
+        }
+      }
+
+      await this.kvStore.set("migration/v1", true);
     }
 
-    const chainInfos = this.embedChainInfos.map((chainInfo) => {
-      return {
-        ...chainInfo,
-        embeded: true,
-      };
-    });
-    const embedChainInfoIdentifierMap: Map<
-      string,
-      true | undefined
-    > = new Map();
-    for (const embedChainInfo of chainInfos) {
-      embedChainInfoIdentifierMap.set(
-        ChainIdHelper.parse(embedChainInfo.chainId).identifier,
-        true
+    {
+      const chainInfos = await this.updatedChainInfoKVStore.get<
+        UpdatedChainInfo[]
+      >("chainInfos");
+      if (chainInfos) {
+        runInAction(() => {
+          this.updatedChainInfos = chainInfos;
+        });
+      }
+
+      autorun(() => {
+        this.updatedChainInfoKVStore.set("chainInfos", this.updatedChainInfos);
+      });
+    }
+
+    {
+      const chainInfos = await this.suggestedChainInfoKVStore.get<ChainInfo[]>(
+        "chainInfos"
       );
+      if (chainInfos) {
+        runInAction(() => {
+          // embedChainInfos에 있는 chainInfo는 suggestedChainInfos에 넣지 않는다.
+          // embedChainInfos는 실행 이후에 변경되지 않기 때문에 여기서 처리해도 안전하다.
+          this.suggestedChainInfos = chainInfos.filter(
+            (chainInfo) =>
+              !this.embedChainInfos.some(
+                (embedChainInfo) =>
+                  ChainIdHelper.parse(chainInfo.chainId).identifier ===
+                  ChainIdHelper.parse(embedChainInfo.chainId).identifier
+              )
+          );
+        });
+      }
+
+      autorun(() => {
+        this.suggestedChainInfoKVStore.set(
+          "chainInfos",
+          this.suggestedChainInfos
+        );
+      });
     }
 
-    const suggestedChainInfos: ChainInfoWithCoreTypes[] = (
-      await this.getSuggestedChainInfos()
-    )
-      .filter((chainInfo) => {
-        // Filter the overlaped chain info with the embeded chain infos.
-        return !embedChainInfoIdentifierMap.get(
-          ChainIdHelper.parse(chainInfo.chainId).identifier
-        );
-      })
-      .map((chainInfo: ChainInfo) => {
+    {
+      const chainInfos = await this.repoChainInfoKVStore.get<ChainInfo[]>(
+        "chainInfos"
+      );
+      if (chainInfos) {
+        runInAction(() => {
+          this.repoChainInfos = chainInfos;
+        });
+      }
+
+      autorun(() => {
+        this.repoChainInfoKVStore.set("chainInfos", this.repoChainInfos);
+      });
+    }
+
+    {
+      const endpoints = await this.endpointsKVStore.get<
+        {
+          chainId: string;
+          rpc?: string;
+          rest?: string;
+        }[]
+      >("endpoints");
+      if (endpoints) {
+        runInAction(() => {
+          this.endpoints = endpoints;
+        });
+      }
+
+      autorun(() => {
+        this.endpointsKVStore.set("endpoints", this.endpoints);
+      });
+    }
+  }
+
+  getChainInfos = computedFn(
+    (): ChainInfo[] => {
+      return this.mergeChainInfosWithDynamics(
+        this.embedChainInfos.concat(this.suggestedChainInfos)
+      );
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
+  getChainInfosWithoutEndpoints = computedFn(
+    (): Omit<ChainInfo, "rpc" | "rest">[] => {
+      return this.mergeChainInfosWithDynamics(
+        this.embedChainInfos.concat(this.suggestedChainInfos)
+      ).map((chainInfo) => {
         return {
           ...chainInfo,
-          embeded: false,
+          rpc: undefined,
+          rest: undefined,
+          nodeProvider: undefined,
+          updateFromRepoDisabled: undefined,
+          embedded: undefined,
         };
       });
+    },
+    {
+      keepAlive: true,
+    }
+  );
 
-    let result: ChainInfoWithCoreTypes[] = chainInfos.concat(
-      suggestedChainInfos
-    );
+  getChainInfo = computedFn(
+    (chainId: string): ChainInfo | undefined => {
+      return this.chainInfoMap.get(ChainIdHelper.parse(chainId).identifier);
+    },
+    {
+      keepAlive: true,
+    }
+  );
 
-    // Set the updated property of the chain.
-    result = await Promise.all(
-      result.map(async (chainInfo) => {
-        const updated: ChainInfo = await this.chainUpdaterService.replaceChainInfo(
-          chainInfo
-        );
-
-        return {
-          ...updated,
-          embeded: chainInfo.embeded,
-        };
-      })
-    );
-
-    this.cachedChainInfos = result;
-
-    return result;
-  });
-
-  async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
-    return (await this.getChainInfos()).map<ChainInfoWithoutEndpoints>(
-      (chainInfo) => {
-        const chainInfoMutable: Mutable<
-          Optional<
-            ChainInfoWithCoreTypes,
-            "rpc" | "rest" | "updateFromRepoDisabled" | "embeded"
-          >
-        > = {
-          ...chainInfo,
-        };
-
-        // Should remove fields not related to `ChainInfoWithoutEndpoints`
-        delete chainInfoMutable.rpc;
-        delete chainInfoMutable.rpcConfig;
-        delete chainInfoMutable.rest;
-        delete chainInfoMutable.restConfig;
-        delete chainInfoMutable.nodeProvider;
-
-        delete chainInfoMutable.updateFromRepoDisabled;
-        delete chainInfoMutable.embeded;
-
-        return chainInfoMutable;
-      }
-    );
+  hasChainInfo(chainId: string): boolean {
+    return this.getChainInfo(chainId) != null;
   }
 
-  clearCachedChainInfos() {
-    this.cachedChainInfos = undefined;
-  }
-
-  async getChainInfo(chainId: string): Promise<ChainInfoWithCoreTypes> {
-    const chainInfo = (await this.getChainInfos()).find((chainInfo) => {
-      return (
-        ChainIdHelper.parse(chainInfo.chainId).identifier ===
-        ChainIdHelper.parse(chainId).identifier
-      );
-    });
-
+  getChainInfoOrThrow(chainId: string): ChainInfo {
+    const chainInfo = this.getChainInfo(chainId);
     if (!chainInfo) {
-      throw new KeplrError(
-        "chains",
-        411,
-        `There is no chain info for ${chainId}`
-      );
+      throw new Error(`There in no chain info for ${chainId}`);
     }
     return chainInfo;
   }
 
-  async getChainCoinType(chainId: string): Promise<number> {
-    const chainInfo = await this.getChainInfo(chainId);
+  getChainInfosWithCoreTypes = computedFn(
+    (): ChainInfoWithCoreTypes[] => {
+      return this.mergeChainInfosWithDynamics(
+        this.embedChainInfos
+          .map((chainInfo) => {
+            return {
+              ...chainInfo,
+              embedded: true,
+            };
+          })
+          .concat(
+            this.suggestedChainInfos.map((chainInfo) => {
+              return {
+                ...chainInfo,
+                beta: true,
+                embedded: false,
+              };
+            })
+          )
+      );
+    },
+    {
+      keepAlive: true,
+    }
+  );
 
-    if (!chainInfo) {
-      throw new KeplrError(
-        "chains",
-        411,
-        `There is no chain info for ${chainId}`
+  getChainInfoWithCoreTypes = computedFn(
+    (chainId: string): ChainInfoWithCoreTypes | undefined => {
+      return this.chainInfoMapWithCoreTypes.get(
+        ChainIdHelper.parse(chainId).identifier
+      );
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
+  async tryUpdateChainInfoFromRepo(chainId: string): Promise<boolean> {
+    if (!this.hasChainInfo(chainId)) {
+      throw new Error(`${chainId} is not registered`);
+    }
+
+    if (
+      (this.getChainInfoOrThrow(chainId) as ChainInfoWithCoreTypes)
+        .updateFromRepoDisabled
+    ) {
+      return false;
+    }
+
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+
+    const res = await simpleFetch<ChainInfo>(
+      `https://raw.githubusercontent.com/${this.communityChainInfoRepo.organizationName}/${this.communityChainInfoRepo.repoName}/${this.communityChainInfoRepo.branchName}`,
+      `/cosmos/${chainIdentifier}.json`
+    );
+    let chainInfo: ChainInfo = res.data;
+
+    const fetchedChainIdentifier = ChainIdHelper.parse(
+      chainInfo.chainId
+    ).identifier;
+    if (chainIdentifier !== fetchedChainIdentifier) {
+      throw new Error(
+        `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
       );
     }
 
-    return chainInfo.bip44.coinType;
+    chainInfo = await validateBasicChainInfoType(chainInfo);
+
+    if (!this.hasChainInfo(chainId)) {
+      throw new Error(`${chainId} became unregistered after fetching`);
+    }
+
+    const prevChainInfoFromRepo = this.getRepoChainInfo(chainId);
+    if (
+      !prevChainInfoFromRepo ||
+      sortedJsonByKeyStringify(prevChainInfoFromRepo) !==
+        sortedJsonByKeyStringify(chainInfo)
+    ) {
+      const i = this.repoChainInfos.findIndex(
+        (c) => ChainIdHelper.parse(c.chainId).identifier === chainIdentifier
+      );
+      runInAction(() => {
+        if (i >= 0) {
+          const newChainInfos = this.repoChainInfos.slice();
+          newChainInfos[i] = chainInfo;
+          this.repoChainInfos = newChainInfos;
+        } else {
+          const newChainInfos = this.repoChainInfos.slice();
+          newChainInfos.push(chainInfo);
+          this.repoChainInfos = newChainInfos;
+        }
+      });
+
+      return true;
+    }
+
+    return false;
   }
 
-  async hasChainInfo(chainId: string): Promise<boolean> {
-    return (
-      (await this.getChainInfos()).find((chainInfo) => {
-        return (
-          ChainIdHelper.parse(chainInfo.chainId).identifier ===
-          ChainIdHelper.parse(chainId).identifier
-        );
-      }) != null
+  async tryUpdateChainInfoFromRpcOrRest(chainId: string): Promise<boolean> {
+    if (!this.hasChainInfo(chainId)) {
+      throw new Error(`${chainId} is not registered`);
+    }
+
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+
+    const chainInfo = this.getChainInfoOrThrow(chainId);
+
+    let chainIdUpdated = false;
+    const statusResponse = await simpleFetch<
+      | {
+          result: {
+            node_info: {
+              network: string;
+            };
+          };
+        }
+      | {
+          node_info: {
+            network: string;
+          };
+        }
+    >(chainInfo.rpc, "/status");
+
+    const statusResult = (() => {
+      if ("result" in statusResponse.data) {
+        return statusResponse.data.result;
+      }
+      return statusResponse.data;
+    })();
+    const chainIdFromRPC = statusResult.node_info.network;
+    if (ChainIdHelper.parse(chainIdFromRPC).identifier !== chainIdentifier) {
+      throw new Error(
+        `Chain id is different from rpc: (expected: ${chainId}, actual: ${chainIdFromRPC})`
+      );
+    }
+    if (chainInfo.chainId !== chainIdFromRPC) {
+      chainIdUpdated = true;
+
+      if (!this.hasChainInfo(chainId)) {
+        throw new Error(`${chainId} became unregistered after fetching`);
+      }
+
+      this.setUpdatedChainInfo(chainId, {
+        chainId: chainIdFromRPC,
+      });
+    }
+
+    const toUpdateFeatures = await checkChainFeatures(chainInfo);
+
+    const featuresUpdated = toUpdateFeatures.length !== 0;
+    if (featuresUpdated) {
+      if (!this.hasChainInfo(chainId)) {
+        throw new Error(`${chainId} became unregistered after fetching`);
+      }
+
+      const features = [
+        ...new Set([...toUpdateFeatures, ...(chainInfo.features ?? [])]),
+      ];
+
+      this.setUpdatedChainInfo(chainId, {
+        features,
+      });
+    }
+
+    return chainIdUpdated || featuresUpdated;
+  }
+
+  @action
+  protected setUpdatedChainInfo(
+    chainId: string,
+    chainInfo: Partial<Pick<UpdatedChainInfo, "chainId" | "features">>
+  ): void {
+    if (!this.hasChainInfo(chainId)) {
+      throw new Error(`${chainId} is not registered`);
+    }
+
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    const i = this.updatedChainInfos.findIndex(
+      (c) => ChainIdHelper.parse(c.chainId).identifier === chainIdentifier
     );
+    if (i >= 0) {
+      const prev = this.updatedChainInfos[i];
+      const newChainInfos = this.updatedChainInfos.slice();
+      newChainInfos[i] = {
+        ...prev,
+        ...chainInfo,
+      };
+
+      this.updatedChainInfos = newChainInfos;
+    } else {
+      const original = this.getChainInfoOrThrow(chainId);
+      const newChainInfos = this.updatedChainInfos.slice();
+      newChainInfos.push({
+        chainId: chainInfo.chainId || original.chainId,
+        features: chainInfo.features || original.features,
+      });
+
+      this.updatedChainInfos = newChainInfos;
+    }
   }
 
   async suggestChainInfo(
@@ -194,118 +489,381 @@ export class ChainsService {
   ): Promise<void> {
     chainInfo = await validateBasicChainInfoType(chainInfo);
 
-    let receivedChainInfo = (await this.interactionService.waitApprove(
+    await this.interactionService.waitApproveV2(
       env,
       "/suggest-chain",
       SuggestChainInfoMsg.type(),
       {
         chainInfo,
         origin,
+      },
+      async (receivedChainInfo: ChainInfoWithSuggestedOptions) => {
+        const validChainInfo = {
+          ...(await validateBasicChainInfoType(receivedChainInfo)),
+          beta: chainInfo.beta,
+          updateFromRepoDisabled: receivedChainInfo.updateFromRepoDisabled,
+        };
+
+        if (validChainInfo.updateFromRepoDisabled) {
+          console.log(
+            `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added with updateFromRepoDisabled`
+          );
+        } else {
+          console.log(
+            `Chain ${validChainInfo.chainName}(${validChainInfo.chainId}) added`
+          );
+        }
+
+        await this.addSuggestedChainInfo(validChainInfo);
       }
-    )) as ChainInfoWithRepoUpdateOptions;
+    );
+  }
 
-    receivedChainInfo = {
-      ...(await validateBasicChainInfoType(receivedChainInfo)),
-      // Beta should be from suggested chain info itself.
-      beta: chainInfo.beta,
-      updateFromRepoDisabled: receivedChainInfo.updateFromRepoDisabled,
-    };
+  @action
+  addSuggestedChainInfo(
+    chainInfo: ChainInfoWithSuggestedOptions,
+    // Used for migration
+    notInvokeHandlers?: boolean
+  ): void {
+    const i = this.suggestedChainInfos.findIndex(
+      (c) =>
+        ChainIdHelper.parse(c.chainId).identifier ===
+        ChainIdHelper.parse(chainInfo.chainId).identifier
+    );
+    if (i < 0) {
+      const newChainInfos = this.suggestedChainInfos.slice();
+      newChainInfos.push(chainInfo);
+      this.suggestedChainInfos = newChainInfos;
 
-    if (receivedChainInfo.updateFromRepoDisabled) {
-      console.log(
-        `Chain ${receivedChainInfo.chainName}(${receivedChainInfo.chainId}) added with updateFromRepoDisabled`
-      );
+      if (!notInvokeHandlers) {
+        for (const handler of this.onChainSuggestedHandlers) {
+          handler(chainInfo);
+        }
+      }
     } else {
-      console.log(
-        `Chain ${receivedChainInfo.chainName}(${receivedChainInfo.chainId}) added`
-      );
+      throw new Error(`There is already chain info for ${chainInfo.chainId}`);
     }
-
-    await this.permissionService.addPermission(
-      [chainInfo.chainId],
-      getBasicAccessPermissionType(),
-      [origin]
-    );
-
-    await this.addChainInfo(receivedChainInfo);
   }
 
-  async getSuggestedChainInfos(): Promise<ChainInfoWithRepoUpdateOptions[]> {
-    return (
-      (await this.kvStoreForSuggestChain.get<ChainInfoWithRepoUpdateOptions[]>(
-        "chain-infos"
-      )) ?? []
-    );
-  }
-
-  async addChainInfo(chainInfo: ChainInfoWithRepoUpdateOptions): Promise<void> {
-    if (await this.hasChainInfo(chainInfo.chainId)) {
-      throw new KeplrError("chains", 121, "Same chain is already registered");
-    }
-
-    const savedChainInfos =
-      (await this.kvStoreForSuggestChain.get<ChainInfoWithRepoUpdateOptions[]>(
-        "chain-infos"
-      )) ?? [];
-
-    savedChainInfos.push(chainInfo);
-
-    await this.kvStoreForSuggestChain.set<ChainInfoWithRepoUpdateOptions[]>(
-      "chain-infos",
-      savedChainInfos
-    );
-
-    this.clearCachedChainInfos();
-  }
-
-  async removeChainInfo(chainId: string): Promise<void> {
-    if (!(await this.hasChainInfo(chainId))) {
-      throw new KeplrError("chains", 120, "Chain is not registered");
-    }
-
-    if ((await this.getChainInfo(chainId)).embeded) {
-      throw new KeplrError("chains", 122, "Can't remove the embedded chain");
-    }
-
-    const savedChainInfos =
-      (await this.kvStoreForSuggestChain.get<ChainInfoWithRepoUpdateOptions[]>(
-        "chain-infos"
-      )) ?? [];
-
-    const resultChainInfo = savedChainInfos.filter((chainInfo) => {
-      return (
-        ChainIdHelper.parse(chainInfo.chainId).identifier !==
+  @action
+  removeSuggestedChainInfo(chainId: string): void {
+    const i = this.suggestedChainInfos.findIndex(
+      (c) =>
+        ChainIdHelper.parse(c.chainId).identifier ===
         ChainIdHelper.parse(chainId).identifier
-      );
-    });
-
-    await this.kvStoreForSuggestChain.set<ChainInfoWithRepoUpdateOptions[]>(
-      "chain-infos",
-      resultChainInfo
     );
+    if (i >= 0) {
+      const chainInfo = this.suggestedChainInfos[i];
 
-    // Clear the updated chain info.
-    await this.chainUpdaterService.clearUpdatedProperty(chainId);
+      const newChainInfos = this.suggestedChainInfos.slice();
+      newChainInfos.splice(i, 1);
+      this.suggestedChainInfos = newChainInfos;
 
-    for (const chainRemovedHandler of this.onChainRemovedHandlers) {
-      chainRemovedHandler(chainId, ChainIdHelper.parse(chainId).identifier);
+      this.onChainRemoved(chainInfo);
+    } else {
+      throw new Error(`There is no chain info for ${chainId}`);
     }
-
-    this.clearCachedChainInfos();
   }
 
-  async getChainEthereumKeyFeatures(
-    chainId: string
-  ): Promise<{ address: boolean; signing: boolean }> {
-    const chainInfo = await this.getChainInfo(chainId);
+  @action
+  clearAllSuggestedChainInfos(): void {
+    const prev = this.suggestedChainInfos.slice();
 
-    return {
-      address: chainInfo.features?.includes("eth-address-gen") ?? false,
-      signing: chainInfo.features?.includes("eth-key-sign") ?? false,
+    this.suggestedChainInfos = [];
+
+    for (const chainInfo of prev) {
+      for (const handler of this.onChainRemovedHandlers) {
+        handler(chainInfo);
+      }
+    }
+  }
+
+  @computed({
+    keepAlive: true,
+  })
+  protected get chainInfoMap(): Map<string, ChainInfo> {
+    const map: Map<string, ChainInfo> = new Map();
+    for (const chainInfo of this.getChainInfos()) {
+      map.set(ChainIdHelper.parse(chainInfo.chainId).identifier, chainInfo);
+    }
+    return map;
+  }
+
+  @computed({
+    keepAlive: true,
+  })
+  protected get chainInfoMapWithCoreTypes(): Map<
+    string,
+    ChainInfoWithCoreTypes
+  > {
+    const map: Map<string, ChainInfoWithCoreTypes> = new Map();
+    for (const chainInfo of this.getChainInfosWithCoreTypes()) {
+      map.set(ChainIdHelper.parse(chainInfo.chainId).identifier, chainInfo);
+    }
+    return map;
+  }
+
+  @computed({
+    keepAlive: true,
+  })
+  protected get updatedChainInfoMap(): Map<string, UpdatedChainInfo> {
+    const map: Map<string, UpdatedChainInfo> = new Map();
+    for (const chainInfo of this.updatedChainInfos) {
+      map.set(ChainIdHelper.parse(chainInfo.chainId).identifier, chainInfo);
+    }
+    return map;
+  }
+
+  protected getUpdatedChainInfo(chainId: string): UpdatedChainInfo | undefined {
+    return this.updatedChainInfoMap.get(
+      ChainIdHelper.parse(chainId).identifier
+    );
+  }
+
+  @computed({
+    keepAlive: true,
+  })
+  protected get repoChainInfoMap(): Map<string, ChainInfo> {
+    const map: Map<string, ChainInfo> = new Map();
+    for (const chainInfo of this.repoChainInfos) {
+      map.set(ChainIdHelper.parse(chainInfo.chainId).identifier, chainInfo);
+    }
+    return map;
+  }
+
+  protected getRepoChainInfo(chainId: string): ChainInfo | undefined {
+    return this.repoChainInfoMap.get(ChainIdHelper.parse(chainId).identifier);
+  }
+
+  @action
+  setEndpoint(
+    chainId: string,
+    endpoint: {
+      rpc?: string;
+      rest?: string;
+    }
+  ): void {
+    const trim = {
+      ...endpoint,
     };
+    // "undefined"/"null" itself can affect the logic.
+    // Make sure to delete field if it is null.
+    if (!trim.rpc) {
+      delete trim.rpc;
+    }
+    if (!trim.rest) {
+      delete trim.rest;
+    }
+
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    const i = this.endpoints.findIndex(
+      (endpoint) =>
+        ChainIdHelper.parse(endpoint.chainId).identifier === chainIdentifier
+    );
+    if (i >= 0) {
+      const newEndpoints = this.endpoints.slice();
+      newEndpoints[i] = {
+        chainId,
+        ...trim,
+      };
+      this.endpoints = newEndpoints;
+    } else {
+      const newEndpoints = this.endpoints.slice();
+      newEndpoints.push({
+        chainId,
+        ...trim,
+      });
+      this.endpoints = newEndpoints;
+    }
+  }
+
+  @action
+  clearEndpoint(chainId: string): void {
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    const i = this.endpoints.findIndex(
+      (endpoint) =>
+        ChainIdHelper.parse(endpoint.chainId).identifier === chainIdentifier
+    );
+    if (i >= 0) {
+      const newEndpoints = this.endpoints.slice();
+      newEndpoints.splice(i, 1);
+      this.endpoints = newEndpoints;
+    }
+  }
+
+  @action
+  clearAllEndpoints(): void {
+    this.endpoints = [];
+  }
+
+  getOriginalEndpoint = computedFn(
+    (
+      chainId: string
+    ): {
+      rpc: string;
+      rest: string;
+    } => {
+      const identifier = ChainIdHelper.parse(chainId).identifier;
+      const originalChainInfos = this.embedChainInfos.concat(
+        this.suggestedChainInfos
+      );
+      const chainInfo = originalChainInfos.find(
+        (c) => ChainIdHelper.parse(c.chainId).identifier === identifier
+      );
+      if (chainInfo) {
+        return {
+          rpc: chainInfo.rpc,
+          rest: chainInfo.rest,
+        };
+      }
+
+      throw new Error(`Unknown chain: ${chainId}`);
+    },
+    {
+      keepAlive: true,
+    }
+  );
+
+  protected getEndpoint(chainId: string):
+    | {
+        chainId: string;
+        rpc?: string;
+        rest?: string;
+      }
+    | undefined {
+    return this.endpointMap.get(ChainIdHelper.parse(chainId).identifier);
+  }
+
+  @computed({
+    keepAlive: true,
+  })
+  protected get endpointMap(): Map<
+    string,
+    {
+      chainId: string;
+      rpc?: string;
+      rest?: string;
+    }
+  > {
+    const map: Map<
+      string,
+      {
+        chainId: string;
+        rpc?: string;
+        rest?: string;
+      }
+    > = new Map();
+    for (const endpoint of this.endpoints) {
+      map.set(ChainIdHelper.parse(endpoint.chainId).identifier, endpoint);
+    }
+    return map;
+  }
+
+  protected mergeChainInfosWithDynamics<C extends ChainInfo>(
+    chainInfos: C[]
+  ): C[] {
+    return chainInfos.map((chainInfo) => {
+      let newChainInfo = {
+        ...chainInfo,
+      };
+
+      if (!(chainInfo as ChainInfoWithCoreTypes).updateFromRepoDisabled) {
+        const repoChainInfo = this.getRepoChainInfo(chainInfo.chainId);
+        if (repoChainInfo) {
+          newChainInfo = {
+            ...newChainInfo,
+            ...repoChainInfo,
+            walletUrlForStaking:
+              repoChainInfo.walletUrlForStaking ||
+              newChainInfo.walletUrlForStaking,
+            features: [
+              ...new Set([
+                ...(repoChainInfo.features ?? []),
+                ...(newChainInfo.features ?? []),
+              ]),
+            ],
+            beta: newChainInfo.beta,
+          };
+        }
+      }
+
+      const updatedChainInfo = this.getUpdatedChainInfo(chainInfo.chainId);
+      if (updatedChainInfo) {
+        newChainInfo = {
+          ...newChainInfo,
+          chainId: updatedChainInfo.chainId,
+          features: [
+            ...new Set([
+              ...(updatedChainInfo.features ?? []),
+              ...(newChainInfo.features ?? []),
+            ]),
+          ],
+        };
+      }
+
+      const endpoint = this.getEndpoint(chainInfo.chainId);
+      if (endpoint) {
+        newChainInfo = {
+          ...newChainInfo,
+          rpc: endpoint.rpc || newChainInfo.rpc,
+          rest: endpoint.rest || newChainInfo.rest,
+        };
+      }
+
+      return newChainInfo;
+    });
+  }
+
+  @action
+  onChainRemoved(chainInfo: ChainInfo): void {
+    const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
+
+    {
+      const newChainInfos = this.updatedChainInfos.slice();
+      newChainInfos.filter(
+        (chainInfo) =>
+          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
+      );
+      this.updatedChainInfos = newChainInfos;
+    }
+
+    {
+      const newChainInfos = this.suggestedChainInfos.slice();
+      newChainInfos.filter(
+        (chainInfo) =>
+          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
+      );
+      this.suggestedChainInfos = newChainInfos;
+    }
+
+    {
+      const newChainInfos = this.repoChainInfos.slice();
+      newChainInfos.filter(
+        (chainInfo) =>
+          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
+      );
+      this.repoChainInfos = newChainInfos;
+    }
+
+    {
+      const newEndpoints = this.endpoints.slice();
+      newEndpoints.filter(
+        (endpoint) =>
+          ChainIdHelper.parse(endpoint.chainId).identifier !== chainIdentifier
+      );
+      this.endpoints = newEndpoints;
+    }
+
+    for (const handler of this.onChainRemovedHandlers) {
+      handler(chainInfo);
+    }
   }
 
   addChainRemovedHandler(handler: ChainRemovedHandler) {
     this.onChainRemovedHandlers.push(handler);
+  }
+
+  addChainSuggestedHandler(handler: ChainRemovedHandler) {
+    this.onChainSuggestedHandlers.push(handler);
   }
 }

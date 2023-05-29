@@ -2,21 +2,21 @@ import {
   ObservableChainQuery,
   ObservableChainQueryMap,
 } from "../../chain-query";
-import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { AuthAccount } from "./types";
 import { computed, makeObservable } from "mobx";
 import { BaseAccount } from "@keplr-wallet/cosmos";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccount> {
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly bech32Address: string
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       `/cosmos/auth/v1beta1/accounts/${bech32Address}`
@@ -25,7 +25,7 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
     makeObservable(this);
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
   }
@@ -64,13 +64,13 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
 
 export class ObservableQueryAccount extends ObservableChainQueryMap<AuthAccount> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    chainGetter: ChainGetter
   ) {
-    super(kvStore, chainId, chainGetter, (bech32Address) => {
+    super(sharedContext, chainId, chainGetter, (bech32Address) => {
       return new ObservableQueryAccountInner(
-        this.kvStore,
+        this.sharedContext,
         this.chainId,
         this.chainGetter,
         bech32Address

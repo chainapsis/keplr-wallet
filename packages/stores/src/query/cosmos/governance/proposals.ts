@@ -6,13 +6,13 @@ import {
   ObservableQueryGovParamTally,
   ObservableQueryGovParamVoting,
 } from "./params";
-import { KVStore } from "@keplr-wallet/common";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { DeepReadonly } from "utility-types";
 import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { computedFn } from "mobx-utils";
 import { ObservableQueryProposal } from "./proposal";
 import { ObservableQueryStakingPool } from "../staking";
+import { QuerySharedContext } from "../../../common";
 
 export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals> {
   @observable.ref
@@ -23,13 +23,13 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
   protected paramTally?: ObservableQueryGovParamTally = undefined;
 
   constructor(
-    kvStore: KVStore,
+    sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     protected readonly _queryPool: ObservableQueryStakingPool
   ) {
     super(
-      kvStore,
+      sharedContext,
       chainId,
       chainGetter,
       // TODO: Handle pagination
@@ -46,7 +46,7 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     if (!this.paramDeposit) {
       runInAction(() => {
         this.paramDeposit = new ObservableQueryGovParamDeposit(
-          this.kvStore,
+          this.sharedContext,
           this.chainId,
           this.chainGetter
         );
@@ -61,7 +61,7 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     if (!this.paramVoting) {
       runInAction(() => {
         this.paramVoting = new ObservableQueryGovParamVoting(
-          this.kvStore,
+          this.sharedContext,
           this.chainId,
           this.chainGetter
         );
@@ -76,7 +76,7 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     if (!this.paramTally) {
       runInAction(() => {
         this.paramTally = new ObservableQueryGovParamTally(
-          this.kvStore,
+          this.sharedContext,
           this.chainId,
           this.chainGetter
         );
@@ -113,7 +113,7 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     for (const raw of this.response.data.proposals) {
       result.push(
         new ObservableQueryProposal(
-          this.kvStore,
+          this.sharedContext,
           this.chainId,
           this.chainGetter,
           raw,
@@ -125,9 +125,9 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     return result.reverse();
   }
 
-  readonly getProposal = computedFn((id: string):
-    | DeepReadonly<ObservableQueryProposal>
-    | undefined => {
-    return this.proposals.find((proposal) => proposal.id === id);
-  });
+  readonly getProposal = computedFn(
+    (id: string): DeepReadonly<ObservableQueryProposal> | undefined => {
+      return this.proposals.find((proposal) => proposal.id === id);
+    }
+  );
 }

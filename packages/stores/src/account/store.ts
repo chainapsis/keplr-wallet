@@ -1,12 +1,14 @@
 import {
   ChainedFunctionifyTuple,
-  ChainGetter,
   HasMapStore,
   IObject,
   mergeStores,
 } from "../common";
+import { ChainGetter } from "../chain";
 import { AccountSetBase, AccountSetBaseSuper, AccountSetOpts } from "./base";
 import { DeepReadonly, UnionToIntersection } from "utility-types";
+import { AccountSharedContext } from "./context";
+import { Keplr } from "@keplr-wallet/types";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export interface IAccountStore<T extends IObject = {}> {
@@ -31,6 +33,7 @@ export class AccountStore<
       removeEventListener: (type: string, fn: () => unknown) => void;
     },
     protected readonly chainGetter: ChainGetter,
+    protected readonly getKeplr: () => Promise<Keplr | undefined>,
     protected readonly storeOptsCreator: (chainId: string) => AccountSetOpts,
     ...accountSetCreators: ChainedFunctionifyTuple<
       AccountSetBaseSuper,
@@ -40,11 +43,14 @@ export class AccountStore<
       Injects
     >
   ) {
+    const sharedContext = new AccountSharedContext(getKeplr);
+
     super((chainId: string) => {
       const accountSetBase = new AccountSetBaseSuper(
         eventListener,
         chainGetter,
         chainId,
+        sharedContext,
         storeOptsCreator(chainId)
       );
 
@@ -59,10 +65,12 @@ export class AccountStore<
   }
 
   getAccount(chainId: string): AccountSetReturn {
-    return this.get(chainId);
+    // chain identifier를 통한 접근도 허용하기 위해서 chainGetter를 통해 접근하도록 함.
+    return this.get(this.chainGetter.getChain(chainId).chainId);
   }
 
   hasAccount(chainId: string): boolean {
-    return this.has(chainId);
+    // chain identifier를 통한 접근도 허용하기 위해서 chainGetter를 통해 접근하도록 함.
+    return this.has(this.chainGetter.getChain(chainId).chainId);
   }
 }

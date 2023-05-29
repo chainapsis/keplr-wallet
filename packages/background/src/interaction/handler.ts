@@ -5,7 +5,12 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { ApproveInteractionMsg, RejectInteractionMsg } from "./messages";
+import {
+  ApproveInteractionMsg,
+  RejectInteractionMsg,
+  ApproveInteractionV2Msg,
+  RejectInteractionV2Msg,
+} from "./messages";
 import { InteractionService } from "./service";
 
 export const getHandler: (service: InteractionService) => Handler = (
@@ -23,6 +28,16 @@ export const getHandler: (service: InteractionService) => Handler = (
           env,
           msg as RejectInteractionMsg
         );
+      case ApproveInteractionV2Msg:
+        return handleApproveInteractionV2Msg(service)(
+          env,
+          msg as ApproveInteractionV2Msg
+        );
+      case RejectInteractionV2Msg:
+        return handleRejectInteractionV2Msg(service)(
+          env,
+          msg as RejectInteractionV2Msg
+        );
       default:
         throw new KeplrError("interaction", 100, "Unknown msg type");
     }
@@ -37,10 +52,26 @@ const handleApproveInteractionMsg: (
   };
 };
 
+const handleApproveInteractionV2Msg: (
+  service: InteractionService
+) => InternalHandler<ApproveInteractionV2Msg> = (service) => {
+  return (_, msg) => {
+    return service.approveV2(msg.id, msg.result);
+  };
+};
+
 const handleRejectInteractionMsg: (
   service: InteractionService
 ) => InternalHandler<RejectInteractionMsg> = (service) => {
   return (_, msg) => {
     return service.reject(msg.id);
+  };
+};
+
+const handleRejectInteractionV2Msg: (
+  service: InteractionService
+) => InternalHandler<RejectInteractionV2Msg> = (service) => {
+  return (_, msg) => {
+    return service.rejectV2(msg.id);
   };
 };

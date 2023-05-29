@@ -4,6 +4,10 @@ export interface KVStore {
   prefix(): string;
 }
 
+export interface MultiGet {
+  multiGet(keys: string[]): Promise<{ [key: string]: any }>;
+}
+
 export interface KVStoreProvider {
   get(): Promise<{ [key: string]: any }>;
   set(items: { [key: string]: any }): Promise<void>;

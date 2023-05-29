@@ -1,5 +1,5 @@
-import Axios, { AxiosResponse } from "axios";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { simpleFetch, SimpleFetchResponse } from "@keplr-wallet/simple-fetch";
 
 export class DifferentChainVersionError extends Error {
   constructor(m: string) {
@@ -12,19 +12,13 @@ export class DifferentChainVersionError extends Error {
 export async function checkRPCConnectivity(
   chainId: string,
   rpc: string,
-  wsObject?: (
-    url: string
-  ) => {
+  wsObject?: (url: string) => {
     readonly readyState: number;
     onerror: ((event: any) => void) | null;
     close(): void;
   }
 ): Promise<void> {
-  const rpcInstance = Axios.create({
-    baseURL: rpc,
-  });
-
-  let resultStatus: AxiosResponse<
+  let resultStatus: SimpleFetchResponse<
     | {
         result: {
           node_info: {
@@ -41,7 +35,7 @@ export async function checkRPCConnectivity(
 
   try {
     // Get the status to get the chain id.
-    resultStatus = await rpcInstance.get("/status");
+    resultStatus = await simpleFetch(rpc, "/status");
   } catch (e) {
     console.log(e);
     throw new Error("Failed to get response /status from rpc endpoint");
@@ -115,11 +109,7 @@ export async function checkRestConnectivity(
   chainId: string,
   rest: string
 ): Promise<void> {
-  const restInstance = Axios.create({
-    baseURL: rest,
-  });
-
-  let resultLCDNodeInfo: AxiosResponse<{
+  let resultLCDNodeInfo: SimpleFetchResponse<{
     default_node_info: {
       network: string;
     };
@@ -127,11 +117,11 @@ export async function checkRestConnectivity(
 
   try {
     // Get the node info to get the chain id.
-    resultLCDNodeInfo = await restInstance.get<{
+    resultLCDNodeInfo = await simpleFetch<{
       default_node_info: {
         network: string;
       };
-    }>("/cosmos/base/tendermint/v1beta1/node_info");
+    }>(rest, "/cosmos/base/tendermint/v1beta1/node_info");
   } catch (e) {
     console.log(e);
     throw new Error(

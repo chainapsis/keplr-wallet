@@ -41,17 +41,21 @@ import {
 import { BondStatus } from "../query/cosmos/staking/types";
 import { CosmosQueries, IQueriesStore, QueriesSetBase } from "../query";
 import { DeepPartial, DeepReadonly, Mutable } from "utility-types";
-import { ChainGetter } from "../common";
-import Axios, { AxiosInstance } from "axios";
+import { ChainGetter } from "../chain";
 import deepmerge from "deepmerge";
 import { Buffer } from "buffer/";
-import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
+import {
+  KeplrSignOptionsWithAltSignMethods,
+  MakeTxResponse,
+  ProtoMsgsOrWithAminoMsgs,
+} from "./types";
 import {
   getEip712TypedDataBasedOnChainId,
   txEventsWithPreOnFulfill,
 } from "./utils";
 import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
 import { MsgRevoke } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -349,7 +353,7 @@ export class CosmosAccountImpl {
       | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
     memo: string = "",
     fee: StdFee,
-    signOptions?: KeplrSignOptions,
+    signOptions?: KeplrSignOptionsWithAltSignMethods,
     onTxEvents?:
       | ((tx: any) => void)
       | {
@@ -458,7 +462,7 @@ export class CosmosAccountImpl {
     msgs: ProtoMsgsOrWithAminoMsgs,
     fee: StdFee,
     memo: string = "",
-    signOptions?: KeplrSignOptions,
+    signOptions?: KeplrSignOptionsWithAltSignMethods,
     mode: "block" | "async" | "sync" = "async"
   ): Promise<{
     txHash: Uint8Array;
@@ -481,7 +485,7 @@ export class CosmosAccountImpl {
     }
 
     const account = await BaseAccount.fetchFromRest(
-      this.instance,
+      this.chainGetter.getChain(this.chainId).rest,
       this.base.bech32Address,
       true
     );
@@ -518,7 +522,8 @@ export class CosmosAccountImpl {
       if (chainIsInjective) {
         // Due to injective's problem, it should exist if injective with ledger.
         // There is currently no effective way to handle this in keplr. Just set a very large number.
-        (signDocRaw as Mutable<StdSignDoc>).timeout_height = Number.MAX_SAFE_INTEGER.toString();
+        (signDocRaw as Mutable<StdSignDoc>).timeout_height =
+          Number.MAX_SAFE_INTEGER.toString();
       } else {
         // If not injective (evmos), they require fee payer.
         // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
@@ -532,9 +537,23 @@ export class CosmosAccountImpl {
 
     const signDoc = sortObjectByKey(signDocRaw);
 
+    // Should use bind to avoid "this" problem
+    let signAmino = keplr.signAmino.bind(keplr);
+    if (signOptions?.signAmino) {
+      signAmino = signOptions.signAmino;
+    }
+
+    // Should use bind to avoid "this" problem
+    let experimentalSignEIP712CosmosTx_v0 =
+      keplr.experimentalSignEIP712CosmosTx_v0.bind(keplr);
+    if (signOptions?.experimentalSignEIP712CosmosTx_v0) {
+      experimentalSignEIP712CosmosTx_v0 =
+        signOptions.experimentalSignEIP712CosmosTx_v0;
+    }
+
     const signResponse: AminoSignResponse = await (async () => {
       if (!eip712Signing) {
-        return await keplr.signAmino(
+        return await signAmino(
           this.chainId,
           this.base.bech32Address,
           signDoc,
@@ -542,7 +561,7 @@ export class CosmosAccountImpl {
         );
       }
 
-      return await keplr.experimentalSignEIP712CosmosTx_v0(
+      return await experimentalSignEIP712CosmosTx_v0(
         this.chainId,
         this.base.bech32Address,
         getEip712TypedDataBasedOnChainId(this.chainId, msgs),
@@ -636,8 +655,14 @@ export class CosmosAccountImpl {
           : [new Uint8Array(0)],
     }).finish();
 
+    // Should use bind to avoid "this" problem
+    let sendTx = keplr.sendTx.bind(keplr);
+    if (signOptions?.sendTx) {
+      sendTx = signOptions.sendTx;
+    }
+
     return {
-      txHash: await keplr.sendTx(this.chainId, signedTx, mode as BroadcastMode),
+      txHash: await sendTx(this.chainId, signedTx, mode as BroadcastMode),
       signDoc: signResponse.signed,
     };
   }
@@ -667,7 +692,7 @@ export class CosmosAccountImpl {
     gasUsed: number;
   }> {
     const account = await BaseAccount.fetchFromRest(
-      this.instance,
+      this.chainGetter.getChain(this.chainId).rest,
       this.base.bech32Address,
       true
     );
@@ -705,9 +730,20 @@ export class CosmosAccountImpl {
       signatures: [new Uint8Array(64)],
     }).finish();
 
-    const result = await this.instance.post("/cosmos/tx/v1beta1/simulate", {
-      tx_bytes: Buffer.from(unsignedTx).toString("base64"),
-    });
+    // TODO: Add response type
+    const result = await simpleFetch<any>(
+      this.chainGetter.getChain(this.chainId).rest,
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          tx_bytes: Buffer.from(unsignedTx).toString("base64"),
+        }),
+      }
+    );
 
     const gasUsed = parseInt(result.data.gas_info.gas_used);
     if (Number.isNaN(gasUsed)) {
@@ -757,7 +793,7 @@ export class CosmosAccountImpl {
         };
       },
       memo: string = "",
-      signOptions?: KeplrSignOptions,
+      signOptions?: KeplrSignOptionsWithAltSignMethods,
       onTxEvents?:
         | ((tx: any) => void)
         | {
@@ -812,7 +848,7 @@ export class CosmosAccountImpl {
           };
         },
         memo: string = "",
-        signOptions?: KeplrSignOptions,
+        signOptions?: KeplrSignOptionsWithAltSignMethods,
         onTxEvents?:
           | ((tx: any) => void)
           | {
@@ -849,7 +885,7 @@ export class CosmosAccountImpl {
       send: async (
         fee: StdFee,
         memo: string = "",
-        signOptions?: KeplrSignOptions,
+        signOptions?: KeplrSignOptionsWithAltSignMethods,
         onTxEvents?:
           | ((tx: any) => void)
           | {
@@ -869,16 +905,6 @@ export class CosmosAccountImpl {
       },
       sendWithGasPrice,
     };
-  }
-
-  get instance(): AxiosInstance {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return Axios.create({
-      ...{
-        baseURL: chainInfo.rest,
-      },
-      ...chainInfo.restConfig,
-    });
   }
 
   makeIBCTransferTx(

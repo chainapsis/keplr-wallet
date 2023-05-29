@@ -1,90 +1,73 @@
 import { KVStore } from "@keplr-wallet/common";
-import { KeyRingStatus } from "../keyring";
+import { KeyRingService } from "../keyring";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 
 export class AutoLockAccountService {
-  protected keyringService!: {
-    lock: () => void;
-    readonly keyRingStatus: KeyRingStatus;
-  };
-
   // Unit: ms
+  // Zero means disabled
+  // auto lock duration이 설정되면 컴퓨터가 sleep 모드가 되면 lock된다.
+  @observable
   protected autoLockDuration: number = 0;
-
-  protected appStateCheckTimer: NodeJS.Timeout | null = null;
+  // auto lock duration이 설정되어 있지 않더라도 sleep 모드가 되면 lock된다.
+  @observable
+  protected lockOnSleep: boolean = false;
 
   protected autoLockTimer: NodeJS.Timeout | null = null;
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly opts: {
-      readonly monitoringInterval: number;
-    } = {
-      monitoringInterval: 10000,
-    }
-  ) {}
+    protected readonly keyRingService: KeyRingService
+  ) {
+    makeObservable(this);
+  }
 
-  async init(keyringService: {
-    lock: () => void;
-    readonly keyRingStatus: KeyRingStatus;
-  }) {
-    this.keyringService = keyringService;
+  async init() {
+    const duration = await this.kvStore.get<number>("autoLockDuration");
+    runInAction(() => {
+      if (duration == null || Number.isNaN(duration)) {
+        this.autoLockDuration = 0;
+      } else {
+        this.autoLockDuration = duration;
+      }
+    });
+
+    autorun(() => {
+      this.kvStore.set<number>("autoLockDuration", this.autoLockDuration);
+    });
+
+    const lockOnSleep = await this.kvStore.get<boolean>("lockOnSleep");
+    runInAction(() => {
+      if (lockOnSleep) {
+        this.lockOnSleep = true;
+      } else {
+        this.lockOnSleep = false;
+      }
+    });
+
+    autorun(() => {
+      this.kvStore.set<boolean>("lockOnSleep", this.lockOnSleep);
+    });
 
     browser.idle.onStateChanged.addListener((idle) => {
       this.stateChangedHandler(idle);
     });
-
-    await this.loadDuration();
   }
 
   private stateChangedHandler(newState: browser.idle.IdleState) {
-    if (this.autoLockDuration > 0) {
-      if ((newState as any) === "locked") {
-        this.stopAppStateCheckTimer();
+    if ((newState as any) === "locked") {
+      if (this.autoLockDuration > 0) {
         this.stopAutoLockTimer();
+        this.lock();
+      } else if (this.lockOnSleep) {
         this.lock();
       }
     }
   }
 
   startAppStateCheckTimer() {
-    this.stopAppStateCheckTimer();
-    if (this.autoLockDuration > 0 && this.keyRingIsUnlocked) {
-      this.appStateCheckTimer = setTimeout(() => {
-        const isAppActive = this.checkAppIsActive();
-        if (isAppActive) {
-          this.stopAutoLockTimer();
-          this.startAppStateCheckTimer();
-        } else {
-          if (this.keyRingIsUnlocked) {
-            this.startAutoLockTimer();
-          }
-          this.stopAppStateCheckTimer();
-        }
-      }, this.opts.monitoringInterval);
-    }
-  }
+    this.stopAutoLockTimer();
 
-  private stopAppStateCheckTimer() {
-    if (this.appStateCheckTimer != null) {
-      clearTimeout(this.appStateCheckTimer);
-      this.appStateCheckTimer = null;
-    }
-  }
-
-  public checkAppIsActive(): boolean {
-    const background = browser.extension.getBackgroundPage();
-    const views = browser.extension.getViews();
-    if (background) {
-      for (const view of views) {
-        if (background.location.href !== view.location.href) {
-          return true;
-        }
-      }
-    } else if (views.length > 0) {
-      return true;
-    }
-
-    return false;
+    this.startAutoLockTimer();
   }
 
   private startAutoLockTimer() {
@@ -97,7 +80,6 @@ export class AutoLockAccountService {
     }
 
     this.autoLockTimer = setTimeout(() => {
-      this.stopAppStateCheckTimer();
       this.stopAutoLockTimer();
       this.lock();
     }, this.autoLockDuration);
@@ -112,50 +94,33 @@ export class AutoLockAccountService {
 
   private lock() {
     if (this.keyRingIsUnlocked) {
-      this.keyringService.lock();
-
-      const background = browser.extension.getBackgroundPage();
-      const views = browser.extension.getViews();
-      for (const view of views) {
-        // Possibly, keyring can be locked with UI opened. Ex) when device sleep.
-        // In this case, to simplify the UI logic, just close all UI.
-        if (!background || background.location.href !== view.location.href) {
-          view.close();
-        }
-      }
+      this.keyRingService.lockKeyRing();
     }
   }
 
   get keyRingIsUnlocked(): boolean {
-    if (this.keyringService == null) {
-      throw new Error("Keyring service is null");
-    }
-
-    return this.keyringService.keyRingStatus === KeyRingStatus.UNLOCKED;
+    return this.keyRingService.keyRingStatus === "unlocked";
   }
 
   public getAutoLockDuration(): number {
     return this.autoLockDuration;
   }
 
-  public setDuration(duration: number): Promise<void> {
+  @action
+  public setDuration(duration: number) {
     this.autoLockDuration = duration;
 
     if (duration <= 0) {
-      this.stopAppStateCheckTimer();
       this.stopAutoLockTimer();
     }
-
-    return this.kvStore.set("autoLockDuration", duration);
   }
 
-  private async loadDuration() {
-    const duration = await this.kvStore.get<number>("autoLockDuration");
+  public getLockOnSleep(): boolean {
+    return this.lockOnSleep;
+  }
 
-    if (duration == null) {
-      this.autoLockDuration = 0;
-    } else {
-      this.autoLockDuration = duration;
-    }
+  @action
+  public setLockOnSleep(lockOnSleep: boolean) {
+    this.lockOnSleep = lockOnSleep;
   }
 }

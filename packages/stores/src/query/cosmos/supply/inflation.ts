@@ -1,6 +1,6 @@
 import { Dec, DecUtils, Int, IntPretty } from "@keplr-wallet/unit";
 import { computed, makeObservable } from "mobx";
-import { ChainGetter } from "../../../common";
+import { ChainGetter } from "../../../chain";
 import { ObservableChainQuery } from "../../chain-query";
 import { ObservableQueryDistributionParams } from "../distribution";
 import { ObservableQueryStakingPool } from "../staking";
@@ -91,8 +91,8 @@ export class ObservableQueryInflation {
             mintParams.epochIdentifier
           ).duration;
           if (epochDuration) {
-            const epochProvision = this._queryOsmosisEpochProvisions
-              .epochProvisions;
+            const epochProvision =
+              this._queryOsmosisEpochProvisions.epochProvisions;
             if (
               epochProvision &&
               this._querySupplyTotal.getQueryStakeDenom().response
@@ -135,11 +135,12 @@ export class ObservableQueryInflation {
           return new IntPretty(dec);
         }
       } else if (chainInfo.chainId.startsWith("stride")) {
-        const annualProvisions = this._queryStrideEpochProvisions.epochProvisions.mul(
-          new Dec(365 * 24)
-        );
-        const stakingProportion = this._queryStrideMintParams
-          .distributionProportions.staking;
+        const annualProvisions =
+          this._queryStrideEpochProvisions.epochProvisions.mul(
+            new Dec(365 * 24)
+          );
+        const stakingProportion =
+          this._queryStrideMintParams.distributionProportions.staking;
         const bondedTokens = this._queryPool.bondedTokens;
 
         if (bondedTokens.toDec().isZero()) {
@@ -173,16 +174,11 @@ export class ObservableQueryInflation {
             return DecUtils.getPrecisionDec(8 + 6).toString();
           }
 
-          if (
-            chainInfo.chainId.startsWith("umee") ||
-            chainInfo.chainId.startsWith("quasar") ||
-            chainInfo.chainId.startsWith("crypto-org-chain-mainnet") ||
-            chainInfo.chainId.startsWith("quicksilver") ||
-            chainInfo.chainId.startsWith("regen")
-          ) {
-            const supplyTotalRes = this._querySupplyTotal.getQueryDenomByQueryString(
-              chainInfo.stakeCurrency.coinMinimalDenom
-            ).response;
+          if (chainInfo.chainId.startsWith("umee")) {
+            const supplyTotalRes =
+              this._querySupplyTotal.getQueryDenomByQueryString(
+                chainInfo.stakeCurrency.coinMinimalDenom
+              ).response;
 
             if (!supplyTotalRes) {
               return "0";
@@ -191,8 +187,8 @@ export class ObservableQueryInflation {
             }
           }
 
-          const supplyTotalRes = this._querySupplyTotal.getQueryStakeDenom()
-            .response;
+          const supplyTotalRes =
+            this._querySupplyTotal.getQueryStakeDenom().response;
           if (!supplyTotalRes) {
             return "0";
           } else {

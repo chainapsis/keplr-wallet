@@ -1,10 +1,8 @@
 import { Message } from "../message";
 
 export class MessageRegistry {
-  private registeredMsgType: Map<
-    string,
-    { new (): Message<unknown> }
-  > = new Map();
+  private registeredMsgType: Map<string, { new (): Message<unknown> }> =
+    new Map();
 
   registerMessage(
     msgCls: { new (...args: any): Message<unknown> } & { type(): string }

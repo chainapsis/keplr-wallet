@@ -3,9 +3,7 @@ export class ChainIdHelper {
   // The chainID should be in the form: `{identifier}-{version}`
   static readonly VersionFormatRegExp = /(.+)-([\d]+)/;
 
-  static parse(
-    chainId: string
-  ): {
+  static parse(chainId: string): {
     identifier: string;
     version: number;
   } {

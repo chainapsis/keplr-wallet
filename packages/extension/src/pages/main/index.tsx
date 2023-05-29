@@ -1,244 +1,382 @@
-import React, { FunctionComponent, useEffect, useRef } from "react";
-
-import { HeaderLayout } from "../../layouts";
-
-import { Card, CardBody } from "reactstrap";
-
-import style from "./style.module.scss";
-import { Menu } from "./menu";
-import { AccountView } from "./account";
-import { TxButtonView } from "./tx-button";
-import { AssetView } from "./asset";
-import { StakeView } from "./stake";
-
-import classnames from "classnames";
-import { useHistory } from "react-router";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
-import { TokensView } from "./token";
-import { BIP44SelectModal } from "./bip44-select-modal";
-import { useIntl } from "react-intl";
-import { useConfirm } from "../../components/confirm";
-import { IBCTransferView } from "./ibc-transfer";
-import { DenomHelper } from "@keplr-wallet/common";
-import { Dec } from "@keplr-wallet/unit";
-import { WalletStatus } from "@keplr-wallet/stores";
-import { VestingInfo } from "./vesting-info";
-import { LedgerAppModal } from "./ledger-app-modal";
-import { EvmosDashboardView } from "./evmos-dashboard";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { AuthZView } from "./authz";
+import { HeaderLayout } from "../../layouts/header";
+import { ProfileButton } from "../../layouts/header/components";
+import {
+  Buttons,
+  ClaimAll,
+  MenuBar,
+  StringToggle,
+  TabStatus,
+  CopyAddress,
+  CopyAddressModal,
+  IBCTransferView,
+  BuyCryptoModal,
+  StakeWithKeplrDashboardButton,
+} from "./components";
+import { Stack } from "../../components/stack";
+import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
+import { ChainInfo } from "@keplr-wallet/types";
+import { ArrowTopRightOnSquareIcon, MenuIcon } from "../../components/icon";
+import { Box } from "../../components/box";
+import { Modal } from "../../components/modal";
+import { DualChart } from "./components/chart";
+import { Gutter } from "../../components/gutter";
+import { H1, Subtitle3 } from "../../components/typography";
+import { ColorPalette } from "../../styles";
+import { AvailableTabView } from "./available";
+import { StakedTabView } from "./staked";
+import { SearchTextInput } from "../../components/input";
+import { useSpringValue } from "@react-spring/web";
+import { defaultSpringConfig } from "../../styles/spring";
+import { Columns } from "../../components/column";
+import { Tooltip } from "../../components/tooltip";
+import { Image } from "../../components/image";
+import { QueryError } from "@keplr-wallet/stores";
+import { Skeleton } from "../../components/skeleton";
+
+export interface ViewToken {
+  token: CoinPretty;
+  chainInfo: ChainInfo;
+  isFetching: boolean;
+  error: QueryError<any> | undefined;
+}
+
+export const useIsNotReady = () => {
+  const { chainStore, queriesStore } = useStore();
+
+  const query = queriesStore.get(chainStore.chainInfos[0].chainId).cosmos
+    .queryRPCStatus;
+
+  return query.response == null && query.error == null;
+};
 
 export const MainPage: FunctionComponent = observer(() => {
-  const history = useHistory();
-  const intl = useIntl();
-
   const {
+    keyRingStore,
+    hugeQueriesStore,
+    uiConfigStore,
     chainStore,
     accountStore,
     queriesStore,
-    uiConfigStore,
-    keyRingStore,
-    analyticsStore,
   } = useStore();
 
-  useEffect(() => {
-    analyticsStore.setUserProperties({
-      totalAccounts: keyRingStore.multiKeyStoreInfo.length,
-    });
-  }, [analyticsStore, keyRingStore.multiKeyStoreInfo.length]);
+  const isNotReady = useIsNotReady();
 
-  const confirm = useConfirm();
+  const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
-  const current = chainStore.current;
-  const currentChainId = current.chainId;
-  const prevChainId = useRef<string | undefined>();
-  useEffect(() => {
-    if (!chainStore.isInitializing && prevChainId.current !== currentChainId) {
-      (async () => {
-        try {
-          await chainStore.tryUpdateChain(chainStore.current.chainId);
-        } catch (e) {
-          console.log(e);
-        }
-      })();
-
-      prevChainId.current = currentChainId;
-    }
-  }, [chainStore, confirm, chainStore.isInitializing, currentChainId, intl]);
-
-  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
-
-  const queryAccount = queriesStore
-    .get(chainStore.current.chainId)
-    .cosmos.queryAccount.getQueryBech32Address(accountInfo.bech32Address);
-  // Show the spendable balances if the account is vesting account.
-  const showVestingInfo = (() => {
-    // If the chain can't query /cosmos/bank/v1beta1/spendable_balances/{account},
-    // no need to show the vesting info because its query always fails.
+  const icnsPrimaryName = (() => {
     if (
-      !current.features ||
-      !current.features.includes(
-        "query:/cosmos/bank/v1beta1/spendable_balances"
-      )
+      uiConfigStore.icnsInfo &&
+      chainStore.hasChain(uiConfigStore.icnsInfo.chainId)
     ) {
-      return false;
-    }
+      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
+      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
+        uiConfigStore.icnsInfo.resolverContractAddress,
+        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
+      );
 
-    return !!(
-      !queryAccount.error &&
-      queryAccount.response &&
-      queryAccount.isVestingAccount
-    );
+      return icnsQuery.primaryName.split(".")[0];
+    }
   })();
 
-  const queryBalances = queriesStore
-    .get(chainStore.current.chainId)
-    .queryBalances.getQueryBech32Address(accountInfo.bech32Address);
-
-  const queryAuthZGrants = queriesStore
-    .get(chainStore.current.chainId)
-    .cosmos.queryAuthZGranter.getGranter(accountInfo.bech32Address);
-
-  const tokens = queryBalances.unstakables.filter((bal) => {
-    if (
-      chainStore.current.features &&
-      chainStore.current.features.includes("terra-classic-fee")
-    ) {
-      // At present, can't handle stability tax well if it is not registered native token.
-      // So, for terra classic, disable other tokens.
-      const denom = new DenomHelper(bal.currency.coinMinimalDenom);
-      if (denom.type !== "native" || denom.denom.startsWith("ibc/")) {
-        return false;
-      }
-
-      if (denom.type === "native") {
-        return bal.balance.toDec().gt(new Dec("0"));
+  const availableTotalPrice = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.allKnownBalances) {
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
       }
     }
-
-    // Temporary implementation for trimming the 0 balanced native tokens.
-    // TODO: Remove this part.
-    if (new DenomHelper(bal.currency.coinMinimalDenom).type === "native") {
-      return bal.balance.toDec().gt(new Dec("0"));
+    return result;
+  }, [hugeQueriesStore.allKnownBalances]);
+  const availableChartWeight = availableTotalPrice
+    ? Number.parseFloat(availableTotalPrice.toDec().toString())
+    : 0;
+  const stakedTotalPrice = useMemo(() => {
+    let result: PricePretty | undefined;
+    for (const bal of hugeQueriesStore.delegations) {
+      if (bal.price) {
+        if (!result) {
+          result = bal.price;
+        } else {
+          result = result.add(bal.price);
+        }
+      }
     }
-    return true;
+    for (const bal of hugeQueriesStore.unbondings) {
+      if (bal.viewToken.price) {
+        if (!result) {
+          result = bal.viewToken.price;
+        } else {
+          result = result.add(bal.viewToken.price);
+        }
+      }
+    }
+    return result;
+  }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
+  const stakedChartWeight = stakedTotalPrice
+    ? Number.parseFloat(stakedTotalPrice.toDec().toString())
+    : 0;
+
+  const [isOpenMenu, setIsOpenMenu] = React.useState(false);
+  const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
+  const [isOpenBuy, setIsOpenBuy] = React.useState(false);
+
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const [search, setSearch] = useState("");
+  useEffect(() => {
+    // Give focus whenever available tab is selected.
+    if (!isNotReady && tabStatus === "available") {
+      // And clear search text.
+      setSearch("");
+
+      if (searchRef.current) {
+        searchRef.current.focus();
+      }
+    }
+  }, [tabStatus, isNotReady]);
+
+  const searchScrollAnim = useSpringValue(0, {
+    config: defaultSpringConfig,
   });
-
-  const hasTokens = tokens.length > 0;
 
   return (
     <HeaderLayout
-      showChainName
-      canChangeChainInfo
-      menuRenderer={<Menu />}
-      rightRenderer={
-        <div
-          style={{
-            height: "64px",
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            paddingRight: "20px",
-          }}
-        >
-          <i
-            className="fas fa-user"
-            style={{
-              cursor: "pointer",
-              padding: "4px",
-            }}
-            onClick={(e) => {
-              e.preventDefault();
+      isNotReady={isNotReady}
+      title={(() => {
+        const name = keyRingStore.selectedKeyInfo?.name || "Keplr Account";
 
-              history.push("/setting/set-keyring");
-            }}
-          />
-        </div>
+        if (icnsPrimaryName !== "") {
+          return (
+            <Columns sum={1} alignY="center" gutter="0.25rem">
+              <Box>{name}</Box>
+
+              <Tooltip
+                content={
+                  <div style={{ whiteSpace: "nowrap" }}>
+                    ICNS : {icnsPrimaryName}
+                  </div>
+                }
+              >
+                <Image
+                  alt="icns-icon"
+                  src={require("../../public/assets/img/icns-icon.png")}
+                  style={{ width: "1rem", height: "1rem" }}
+                />
+              </Tooltip>
+            </Columns>
+          );
+        }
+
+        return name;
+      })()}
+      left={
+        <Box
+          paddingLeft="1rem"
+          onClick={() => setIsOpenMenu(true)}
+          cursor="pointer"
+        >
+          <MenuIcon />
+        </Box>
       }
+      right={<ProfileButton />}
     >
-      <BIP44SelectModal />
-      <LedgerAppModal />
-      <Card
-        className={classnames(style.card, "shadow")}
-        style={{
-          marginBottom: "12px",
-        }}
-      >
-        <CardBody>
-          <div className={style.containerAccountInner}>
-            <AccountView />
-            <AssetView />
-            {accountInfo.walletStatus !== WalletStatus.Rejected && (
-              <TxButtonView />
-            )}
-          </div>
-        </CardBody>
-      </Card>
-      {uiConfigStore.needShowICNSFrontendLink(current.chainId) ? (
-        <a
-          href={uiConfigStore.icnsFrontendLink}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <img
-            src={require("../../public/assets/img/icns-banner.png")}
-            style={{ width: "100%", marginBottom: "12px" }}
+      <Box paddingX="0.75rem" paddingBottom="0.75rem">
+        <Stack gutter="0.75rem">
+          <StringToggle
+            tabStatus={tabStatus}
+            setTabStatus={setTabStatus}
+            isNotReady={isNotReady}
           />
-        </a>
-      ) : null}
-      {ChainIdHelper.parse(current.chainId).identifier === "stargaze" ? (
-        <a
-          href="https://www.stargaze.zone/names"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <img
-            src={require("../../public/assets/img/stargaze_banner.png")}
-            style={{
-              width: "100%",
-              marginBottom: "12px",
-              borderRadius: "4px",
-            }}
+          <CopyAddress
+            onClick={() => setIsOpenCopyAddress(true)}
+            isNotReady={isNotReady}
           />
-        </a>
-      ) : null}
+          <Box position="relative">
+            <DualChart
+              first={{
+                weight: availableChartWeight,
+              }}
+              second={{
+                weight: stakedChartWeight,
+              }}
+              highlight={tabStatus === "available" ? "first" : "second"}
+            />
+            <Box
+              position="absolute"
+              style={{
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
 
-      {showVestingInfo ? <VestingInfo /> : null}
-      {chainStore.current.walletUrlForStaking ? (
-        <Card className={classnames(style.card, "shadow")}>
-          <CardBody>
-            <StakeView />
-          </CardBody>
-        </Card>
-      ) : null}
-      {hasTokens ? (
-        <Card className={classnames(style.card, "shadow")}>
-          <CardBody>{<TokensView />}</CardBody>
-        </Card>
-      ) : null}
-      {chainStore.current.chainId === "evmos_9001-2" && (
-        <Card className={classnames(style.card, "shadow")}>
-          <CardBody>
-            <EvmosDashboardView />
-          </CardBody>
-        </Card>
-      )}
-      {uiConfigStore.isDeveloper &&
-      chainStore.current.features?.includes("ibc-transfer") ? (
-        <Card className={classnames(style.card, "shadow")}>
-          <CardBody>
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Gutter size="2rem" />
+              <Skeleton isNotReady={isNotReady}>
+                <Subtitle3
+                  style={{
+                    color: ColorPalette["gray-300"],
+                  }}
+                >
+                  {tabStatus === "available"
+                    ? "Total Available"
+                    : "Total Staked"}
+                </Subtitle3>
+              </Skeleton>
+              <Gutter size="0.5rem" />
+              <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
+                <H1
+                  style={{
+                    color: ColorPalette["gray-10"],
+                  }}
+                >
+                  {tabStatus === "available"
+                    ? availableTotalPrice?.toString() || "-"
+                    : stakedTotalPrice?.toString() || "-"}
+                </H1>
+              </Skeleton>
+            </Box>
+          </Box>
+          {tabStatus === "available" ? (
+            <Buttons
+              onClickDeposit={() => setIsOpenCopyAddress(true)}
+              onClickBuy={() => setIsOpenBuy(true)}
+              isNotReady={isNotReady}
+            />
+          ) : null}
+
+          {tabStatus === "staked" && !isNotReady ? (
+            <StakeWithKeplrDashboardButton
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+
+                browser.tabs.create({
+                  url: "https://wallet.keplr.app",
+                });
+              }}
+            >
+              Stake with Keplr Dashboard
+              <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
+                <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
+              </Box>
+            </StakeWithKeplrDashboardButton>
+          ) : null}
+
+          <ClaimAll isNotReady={isNotReady} />
+
+          {tabStatus === "available" && !isNotReady ? (
+            <StakeWithKeplrDashboardButton
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+
+                browser.tabs.create({
+                  url: "https://wallet.keplr.app",
+                });
+              }}
+            >
+              Manage Portfolio in Keplr Dashboard
+              <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
+                <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
+              </Box>
+            </StakeWithKeplrDashboardButton>
+          ) : null}
+          {!isNotReady ? (
+            <Stack gutter="0.75rem">
+              {tabStatus === "available" ? (
+                <SearchTextInput
+                  ref={searchRef}
+                  value={search}
+                  onChange={(e) => {
+                    e.preventDefault();
+
+                    setSearch(e.target.value);
+
+                    if (e.target.value.trim().length > 0) {
+                      if (document.documentElement.scrollTop < 218) {
+                        searchScrollAnim.start(218, {
+                          from: document.documentElement.scrollTop,
+                          onChange: (anim: any) => {
+                            // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
+                            const v = anim.value != null ? anim.value : anim;
+                            if (typeof v === "number") {
+                              document.documentElement.scrollTop = v;
+                            }
+                          },
+                        });
+                      }
+                    }
+                  }}
+                  placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
+                />
+              ) : null}
+            </Stack>
+          ) : null}
+
+          {/*
+            AvailableTabView, StakedTabView가 컴포넌트로 빠지면서 밑의 얘들의 각각의 item들에는 stack이 안먹힌다는 걸 주의
+            각 컴포넌트에서 알아서 gutter를 처리해야한다.
+           */}
+          {tabStatus === "available" ? (
+            <AvailableTabView
+              search={search}
+              isNotReady={isNotReady}
+              onClickGetStarted={() => {
+                setIsOpenCopyAddress(true);
+              }}
+            />
+          ) : (
+            <StakedTabView />
+          )}
+
+          {tabStatus === "available" &&
+          uiConfigStore.isDeveloper &&
+          !isNotReady ? (
             <IBCTransferView />
-          </CardBody>
-        </Card>
-      ) : null}
-      {queryAuthZGrants.response?.data.grants.length ? (
-        <Card className={classnames(style.card, "shadow")}>
-          <CardBody>
-            <AuthZView grants={queryAuthZGrants.response.data.grants} />
-          </CardBody>
-        </Card>
-      ) : null}
+          ) : null}
+        </Stack>
+      </Box>
+
+      <Modal
+        isOpen={isOpenMenu}
+        align="left"
+        close={() => setIsOpenMenu(false)}
+      >
+        <MenuBar close={() => setIsOpenMenu(false)} />
+      </Modal>
+
+      <Modal
+        isOpen={isOpenCopyAddress}
+        align="bottom"
+        close={() => setIsOpenCopyAddress(false)}
+      >
+        <CopyAddressModal close={() => setIsOpenCopyAddress(false)} />
+      </Modal>
+
+      <Modal
+        isOpen={isOpenBuy}
+        align="bottom"
+        close={() => setIsOpenBuy(false)}
+      >
+        <BuyCryptoModal close={() => setIsOpenBuy(false)} />
+      </Modal>
     </HeaderLayout>
   );
 });

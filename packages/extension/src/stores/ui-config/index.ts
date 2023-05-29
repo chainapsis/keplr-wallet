@@ -1,19 +1,41 @@
 /**
  * Store the config related to UI.
  */
-import { action, makeObservable, observable, runInAction, toJS } from "mobx";
+import {
+  action,
+  autorun,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+  toJS,
+} from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { computedFn } from "mobx-utils";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
+import { FiatCurrency } from "@keplr-wallet/types";
+import { CopyAddressConfig } from "./copy-address";
+import { ChainStore } from "../chain";
+import { AddressBookConfig } from "./address-book";
+import { MessageRequester } from "@keplr-wallet/router";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
+  hideLowBalance: boolean;
 }
 
 export class UIConfigStore {
-  @observable.deep
-  protected options: UIConfigOptions = {
+  protected readonly kvStore: KVStore;
+
+  public readonly copyAddressConfig: CopyAddressConfig;
+  public readonly addressBookConfig: AddressBookConfig;
+
+  @observable
+  protected _isInitialized: boolean = false;
+
+  @observable
+  protected _options: UIConfigOptions = {
     isDeveloperMode: false,
+    hideLowBalance: false,
   };
 
   protected _isBeta: boolean;
@@ -29,79 +51,86 @@ export class UIConfigStore {
     | undefined = undefined;
 
   @observable
-  protected _icnsFrontendLink: string = "";
-
-  @observable
-  protected _icnsFrontendAllowlistChains: string = "";
+  protected _fiatCurrency: string = "usd";
 
   constructor(
-    protected readonly kvStore: KVStore,
+    protected readonly kvStores: {
+      kvStore: KVStore;
+      addressBookKVStore: KVStore;
+    },
+    protected readonly messageRequester: MessageRequester,
+    protected readonly chainStore: ChainStore,
+    protected readonly priceStore: CoinGeckoPriceStore,
     _icnsInfo?: {
       readonly chainId: string;
       readonly resolverContractAddress: string;
-    },
-    _icnsFrontendLink?: string
+    }
   ) {
+    this.kvStore = kvStores.kvStore;
+    this.copyAddressConfig = new CopyAddressConfig(
+      kvStores.kvStore,
+      chainStore
+    );
+    this.addressBookConfig = new AddressBookConfig(
+      kvStores.addressBookKVStore,
+      messageRequester,
+      chainStore
+    );
+
     this._isBeta = navigator.userAgent.includes("Firefox");
     this._platform = navigator.userAgent.includes("Firefox")
       ? "firefox"
       : "chrome";
 
     this._icnsInfo = _icnsInfo;
-    this._icnsFrontendLink = _icnsFrontendLink || "";
 
     makeObservable(this);
 
     this.init();
   }
 
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
+
   protected async init() {
-    // There is no guarantee that this value will contain all options fields, as the options field may be added later.
-    // showAdvancedIBCTransfer is legacy value
-    const data = await this.kvStore.get<
-      Partial<UIConfigOptions & { showAdvancedIBCTransfer: boolean }>
-    >("options");
-
-    if (data?.showAdvancedIBCTransfer) {
-      // remove showAdvancedIBCTransfer legacy value
-      await this.kvStore.set("options", { isDeveloperMode: true });
-
-      this.options.isDeveloperMode = true;
+    {
+      const saved = await this.kvStore.get<string>("fiatCurrency");
+      this.selectFiatCurrency(saved || "usd");
+      autorun(() => {
+        this.kvStore.set("fiatCurrency", this._fiatCurrency);
+      });
     }
+
+    {
+      const saved = await this.kvStore.get<Partial<UIConfigOptions>>("options");
+      if (saved) {
+        runInAction(() => {
+          for (const [key, value] of Object.entries(saved)) {
+            if (value != null) {
+              (this._options as any)[key] = value;
+            }
+          }
+        });
+      }
+
+      autorun(() => {
+        this.kvStore.set("options", toJS(this._options));
+      });
+    }
+
+    await Promise.all([
+      this.copyAddressConfig.init(),
+      this.addressBookConfig.init(),
+    ]);
 
     runInAction(() => {
-      this.options = {
-        ...this.options,
-        ...data,
-      };
+      this._isInitialized = true;
     });
+  }
 
-    if (this.icnsFrontendLink) {
-      try {
-        const prev = await this.kvStore.get<string>("______icns___allowlist");
-        if (prev) {
-          runInAction(() => {
-            this._icnsFrontendAllowlistChains = prev;
-          });
-        }
-
-        const icnsAllowlistRes = await fetch(
-          new URL("/api/allowlist", this.icnsFrontendLink).toString()
-        );
-
-        if (icnsAllowlistRes.ok && icnsAllowlistRes.status === 200) {
-          const res = await icnsAllowlistRes.json();
-          const chains = res?.chains || "";
-
-          runInAction(() => {
-            this._icnsFrontendAllowlistChains = chains;
-          });
-          await this.kvStore.set("______icns___allowlist", chains);
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    }
+  get options(): UIConfigOptions {
+    return this._options;
   }
 
   get isBeta(): boolean {
@@ -119,51 +148,46 @@ export class UIConfigStore {
   @action
   setDeveloperMode(value: boolean) {
     this.options.isDeveloperMode = value;
+  }
 
-    // No need to await
-    this.save();
+  get isHideLowBalance(): boolean {
+    return this.options.hideLowBalance;
+  }
+
+  @action
+  setHideLowBalance(value: boolean) {
+    this.options.hideLowBalance = value;
+  }
+
+  @computed
+  get fiatCurrency(): FiatCurrency {
+    let fiatCurrency = this._fiatCurrency;
+    if (!fiatCurrency) {
+      // TODO: How to handle "automatic"?
+      fiatCurrency = "usd";
+    }
+
+    return {
+      ...(this.priceStore.supportedVsCurrencies[fiatCurrency] ?? {
+        currency: "usd",
+        symbol: "$",
+        maxDecimals: 2,
+        locale: "en-US",
+      }),
+    };
+  }
+
+  @action
+  selectFiatCurrency(value: string) {
+    this._fiatCurrency = value;
+    this.priceStore.setDefaultVsCurrency(value);
+  }
+
+  get supportedFiatCurrencies() {
+    return this.priceStore.supportedVsCurrencies;
   }
 
   get icnsInfo() {
     return this._icnsInfo;
-  }
-
-  get icnsFrontendLink(): string {
-    return this._icnsFrontendLink;
-  }
-
-  needShowICNSFrontendLink = computedFn((chainId: string): boolean => {
-    if (!this.icnsFrontendLink) {
-      return false;
-    }
-
-    if (!this._icnsFrontendAllowlistChains) {
-      return true;
-    }
-
-    try {
-      const allowIdentifiers = this._icnsFrontendAllowlistChains
-        .split(",")
-        .map((str) => str.trim())
-        .filter((str) => str.length > 0)
-        .map((chainId) => ChainIdHelper.parse(chainId).identifier);
-
-      const allowIdentifierMap = new Map<string, boolean | undefined>();
-      for (const identifier of allowIdentifiers) {
-        allowIdentifierMap.set(identifier, true);
-      }
-
-      return (
-        allowIdentifierMap.get(ChainIdHelper.parse(chainId).identifier) === true
-      );
-    } catch (e) {
-      console.log(e);
-      return false;
-    }
-  });
-
-  async save() {
-    const data = toJS(this.options);
-    await this.kvStore.set("options", data);
   }
 }

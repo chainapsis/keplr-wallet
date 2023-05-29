@@ -1,12 +1,11 @@
+import { ChainGetter, IQueriesStore } from "@keplr-wallet/stores";
 import {
-  ChainGetter,
-  IAccountStore,
-  IQueriesStore,
-  MsgOpt,
-} from "@keplr-wallet/stores";
-import { useFeeConfig, useMemoConfig } from "../tx";
+  useFeeConfig,
+  useGasConfig,
+  useMemoConfig,
+  useSenderConfig,
+} from "../tx";
 import { useIBCAmountConfig } from "./amount";
-import { useIBCTransferGasConfig } from "./gas";
 import { useIBCChannelConfig } from "./channel";
 import { useIBCRecipientConfig } from "./reciepient";
 
@@ -14,7 +13,7 @@ import { useIBCRecipientConfig } from "./reciepient";
  * useIBCTransferConfig returns the configs for IBC transfer.
  * The recipient config's chain id should be the destination chain id for IBC.
  * But, actually, the recipient config's chain id would be set as the sending chain id if the channel not set.
- * So, you should remember that the recipient config's chain id is equalt to the sending chain id, if channel not set.
+ * So, you should remember that the recipient config's chain id is equal to the sending chain id, if channel not set.
  * @param chainGetter
  * @param queriesStore
  * @param accountStore
@@ -25,15 +24,9 @@ import { useIBCRecipientConfig } from "./reciepient";
 export const useIBCTransferConfig = (
   chainGetter: ChainGetter,
   queriesStore: IQueriesStore,
-  accountStore: IAccountStore<{
-    cosmos: {
-      readonly msgOpts: {
-        readonly ibcTransfer: MsgOpt;
-      };
-    };
-  }>,
   chainId: string,
   sender: string,
+  initialGas: number,
   options: {
     allowHexAddressOnEthermint?: boolean;
     icns?: {
@@ -42,25 +35,26 @@ export const useIBCTransferConfig = (
     };
   } = {}
 ) => {
+  const senderConfig = useSenderConfig(chainGetter, chainId, sender);
+
   const amountConfig = useIBCAmountConfig(
     chainGetter,
     queriesStore,
     chainId,
-    sender
+    senderConfig
   );
 
   const memoConfig = useMemoConfig(chainGetter, chainId);
-  const gasConfig = useIBCTransferGasConfig(chainGetter, accountStore, chainId);
+  const gasConfig = useGasConfig(chainGetter, chainId, initialGas);
   const feeConfig = useFeeConfig(
     chainGetter,
     queriesStore,
     chainId,
-    sender,
+    senderConfig,
     amountConfig,
     gasConfig
   );
-  // Due to the circular references between the amount config and gas/fee configs,
-  // set the fee config of the amount config after initing the gas/fee configs.
+
   amountConfig.setFeeConfig(feeConfig);
 
   const channelConfig = useIBCChannelConfig();
@@ -79,5 +73,6 @@ export const useIBCTransferConfig = (
     feeConfig,
     recipientConfig,
     channelConfig,
+    senderConfig,
   };
 };

@@ -18,8 +18,10 @@ import {
   ICNSAdr36Signatures,
   ChainInfoWithoutEndpoints,
   SecretUtils,
+  SettledResponses,
 } from "@keplr-wallet/types";
-import { Result, JSONUint8Array } from "@keplr-wallet/router";
+import { Result } from "@keplr-wallet/router";
+import { JSONUint8Array } from "@keplr-wallet/common";
 import { KeplrEnigmaUtils } from "./enigma";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";
@@ -351,6 +353,10 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
 
   async getKey(chainId: string): Promise<Key> {
     return await this.requestMethod("getKey", [chainId]);
+  }
+
+  async getKeysSettled(chainIds: string[]): Promise<SettledResponses<Key>> {
+    return await this.requestMethod("getKeysSettled", [chainIds]);
   }
 
   async sendTx(

@@ -72,3 +72,72 @@ export class StartAutoLockMonitoringMsg extends Message<void> {
     return StartAutoLockMonitoringMsg.type();
   }
 }
+
+export class GetLockOnSleepMsg extends Message<boolean> {
+  public static type() {
+    return "get-lock-on-sleep";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetLockOnSleepMsg.type();
+  }
+}
+
+export class SetLockOnSleepMsg extends Message<void> {
+  public static type() {
+    return "set-lock-on-sleep";
+  }
+
+  constructor(public readonly lockOnSleep: boolean) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SetLockOnSleepMsg.type();
+  }
+}
+
+export class GetAutoLockStateMsg extends Message<{
+  duration: number;
+  lockOnSleep: boolean;
+}> {
+  public static type() {
+    return "get-auto-lock-state";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetAutoLockStateMsg.type();
+  }
+}

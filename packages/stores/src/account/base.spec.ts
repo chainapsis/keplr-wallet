@@ -2,6 +2,7 @@ import { AccountSetBase, WalletStatus } from "./base";
 import { ChainStore } from "../chain";
 import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
 import { MockKeplr } from "@keplr-wallet/provider-mock";
+import { AccountSharedContext } from "./context";
 
 describe("Test Account set base", () => {
   test("Account set base should be inited automatically if `autoInit` is true", async () => {
@@ -30,18 +31,18 @@ describe("Test Account set base", () => {
       },
       chainStore,
       "test",
+      new AccountSharedContext(async () => {
+        return new MockKeplr(
+          async () => {
+            return new Uint8Array(0);
+          },
+          chainInfos,
+          "curious kitchen brief change imitate open close knock cause romance trim offer"
+        );
+      }),
       {
         suggestChain: false,
         autoInit: true,
-        getKeplr: async () => {
-          return new MockKeplr(
-            async () => {
-              return new Uint8Array(0);
-            },
-            chainInfos,
-            "curious kitchen brief change imitate open close knock cause romance trim offer"
-          );
-        },
       }
     );
 
@@ -87,18 +88,18 @@ describe("Test Account set base", () => {
       },
       chainStore,
       "test",
+      new AccountSharedContext(async () => {
+        return new MockKeplr(
+          async () => {
+            return new Uint8Array(0);
+          },
+          chainInfos,
+          "curious kitchen brief change imitate open close knock cause romance trim offer"
+        );
+      }),
       {
         suggestChain: false,
         autoInit: false,
-        getKeplr: async () => {
-          return new MockKeplr(
-            async () => {
-              return new Uint8Array(0);
-            },
-            chainInfos,
-            "curious kitchen brief change imitate open close knock cause romance trim offer"
-          );
-        },
       }
     );
 

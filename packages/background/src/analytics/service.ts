@@ -1,18 +1,16 @@
 import { KVStore } from "@keplr-wallet/common";
-import { RNG } from "@keplr-wallet/crypto";
 import { Env } from "@keplr-wallet/router";
-import Axios from "axios";
 import {
   KEPLR_EXT_ANALYTICS_API_URL,
   KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
 } from "./constants";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 export class AnalyticsService {
   protected analyticsId: string = "";
 
   constructor(
     protected readonly kvStore: KVStore,
-    protected readonly rng: RNG,
     protected readonly privilegedOrigins: string[]
   ) {}
 
@@ -23,7 +21,8 @@ export class AnalyticsService {
       return;
     }
     const bytes = new Uint8Array(20);
-    const rand: string = Array.from(await this.rng(bytes))
+    crypto.getRandomValues(bytes);
+    const rand: string = Array.from(bytes)
       .map((value) => {
         let v = value.toString(16);
         if (v.length === 1) {
@@ -36,10 +35,7 @@ export class AnalyticsService {
     await this.kvStore.set<string>("analyticsId", rand);
   }
 
-  async getAnalyticsIdOnlyIfPrivileged(
-    env: Env,
-    origin: string
-  ): Promise<string> {
+  getAnalyticsIdOnlyIfPrivileged(env: Env, origin: string): string {
     if (!env.isInternalMsg && !this.privilegedOrigins.includes(origin)) {
       throw new Error("Rejected");
     }
@@ -58,17 +54,15 @@ export class AnalyticsService {
       return;
     }
 
-    const loggerInstance = Axios.create({
-      baseURL: KEPLR_EXT_ANALYTICS_API_URL,
-    });
     const loggingMsg = Buffer.from(
       JSON.stringify({
         ...params,
         event,
         analyticsId: this.analyticsId,
+        v2: true,
       })
     ).toString("base64");
-    await loggerInstance.get(`/log?msg=${loggingMsg}`, {
+    await simpleFetch(KEPLR_EXT_ANALYTICS_API_URL, `/log?msg=${loggingMsg}`, {
       headers: {
         Authorization: KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
       },
