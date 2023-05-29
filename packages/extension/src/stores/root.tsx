@@ -48,9 +48,19 @@ import {
 import { APP_PORT } from "@keplr-wallet/router";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
-import { FeeType } from "@keplr-wallet/hooks";
-import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
-import Amplitude from "amplitude-js";
+import {
+  AnalyticsClient,
+  AnalyticsStore,
+  NoopAnalyticsClient,
+  Properties,
+} from "@keplr-wallet/analytics";
+import {
+  Identify as AmplitudeIdentify,
+  init as amplitudeInit,
+  setUserId as amplitudeSetUserId,
+  track as amplitudeTrack,
+  identify as amplitudeIdentify,
+} from "@amplitude/analytics-browser";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 
@@ -94,20 +104,21 @@ export class RootStore {
   public readonly analyticsStore: AnalyticsStore<
     {
       chainId?: string;
+      chainIds?: string[];
+      chainIdentifier?: string;
+      chainIdentifiers?: string[];
       chainName?: string;
-      toChainId?: string;
-      toChainName?: string;
-      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
-      feeType?: FeeType | undefined;
-      isIbc?: boolean;
-      rpc?: string;
-      rest?: string;
+      chainNames?: string[];
+      inputValue?: string;
+      isFavorite?: boolean;
+      onRampProvider?: string;
+      pageName?: string;
     },
     {
-      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
-      accountType?: "mnemonic" | "privateKey" | "ledger" | "keystone";
-      currency?: string;
-      language?: string;
+      accountCount: number;
+      isDeveloperMode: boolean;
+      visibleNativeChainIdentifiers: string[];
+      visibleNonNativeChainIdentifiers: string[];
     }
   >;
 
@@ -378,32 +389,52 @@ export class RootStore {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
-          const amplitudeClient = Amplitude.getInstance();
-          amplitudeClient.init(AmplitudeApiKey, undefined, {
-            saveEvents: true,
-            platform: "Extension",
-          });
+          const amplitudeClient = new (class ExtensionAmplitudeClient
+            implements AnalyticsClient
+          {
+            setUserId(userId: string): void {
+              amplitudeSetUserId(userId);
+            }
+            logEvent(eventName: string, eventProperties?: Properties): void {
+              amplitudeTrack(eventName, eventProperties);
+            }
+            setUserProperties(properties: Properties): void {
+              const identify = Object.entries(properties).reduce(
+                (identify, [propertyKey, propertyValue]) => {
+                  if (propertyValue !== undefined && propertyValue !== null) {
+                    return identify.set(propertyKey, propertyValue);
+                  }
+
+                  return identify;
+                },
+                new AmplitudeIdentify()
+              );
+              amplitudeIdentify(identify);
+            }
+          })();
+
+          amplitudeInit(AmplitudeApiKey);
 
           return amplitudeClient;
         }
       })(),
       {
         logEvent: (eventName, eventProperties) => {
-          if (eventProperties?.chainId || eventProperties?.toChainId) {
+          if (eventProperties?.chainId || eventProperties?.chainIds) {
             eventProperties = {
               ...eventProperties,
             };
 
             if (eventProperties.chainId) {
-              eventProperties.chainId = ChainIdHelper.parse(
+              eventProperties.chainIdentifier = ChainIdHelper.parse(
                 eventProperties.chainId
               ).identifier;
             }
 
-            if (eventProperties.toChainId) {
-              eventProperties.toChainId = ChainIdHelper.parse(
-                eventProperties.toChainId
-              ).identifier;
+            if (eventProperties.chainIds) {
+              eventProperties.chainIdentifiers = eventProperties.chainIds.map(
+                (chainId) => ChainIdHelper.parse(chainId).identifier
+              );
             }
           }
 
