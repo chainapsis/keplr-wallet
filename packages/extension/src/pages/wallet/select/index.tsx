@@ -228,14 +228,9 @@ const KeyringItem: FunctionComponent<{
   const paragraph = useMemo(() => {
     if (keyInfo.insensitive["bip44Path"]) {
       const bip44Path = keyInfo.insensitive["bip44Path"] as any;
-      if (
-        bip44Path.account === 0 &&
-        bip44Path.change === 0 &&
-        bip44Path.addressIndex === 0
-      ) {
-        return;
-      }
 
+      const isLedgerWithTerra =
+        keyInfo.type === "ledger" && keyInfo.insensitive["Terra"] != null;
       // -1 means it can be multiple coin type.
       let coinType = -1;
       if (keyInfo.type === "ledger") {
@@ -253,9 +248,18 @@ const KeyringItem: FunctionComponent<{
         }
       }
 
+      if (
+        !isLedgerWithTerra &&
+        bip44Path.account === 0 &&
+        bip44Path.change === 0 &&
+        bip44Path.addressIndex === 0
+      ) {
+        return;
+      }
+
       return `m/44'/${coinType >= 0 ? coinType : "-"}'/${bip44Path.account}'/${
         bip44Path.change
-      }/${bip44Path.addressIndex}`;
+      }/${bip44Path.addressIndex}${isLedgerWithTerra ? " (Terra)" : ""}`;
     }
 
     if (
