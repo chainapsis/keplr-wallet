@@ -10,6 +10,7 @@ import {
 import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { ChainInfo } from "@keplr-wallet/types";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 const Styles = {
   Container: styled.div`
@@ -61,13 +62,11 @@ export const BuyCryptoModal: FunctionComponent<{
 
   useEffect(() => {
     (async () => {
-      const response: { list: FiatOnRampServiceInfo[] } = await (
-        await fetch(
-          "https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json"
-        )
-      ).json();
+      const response = await simpleFetch<{ list: FiatOnRampServiceInfo[] }>(
+        "https://raw.githubusercontent.com/chainapsis/keplr-fiat-on-off-ramp-registry/main/fiat-on-off-ramp-list.json"
+      );
 
-      setFiatOnRampServiceInfos(response.list);
+      setFiatOnRampServiceInfos(response.data.list);
     })();
   }, []);
 
@@ -76,28 +75,32 @@ export const BuyCryptoModal: FunctionComponent<{
       serviceInfo.buySupportCoinDenomsByChainId
     );
 
-    const buySupportDefaultChainId = buySupportChainIds[0];
-    const buySupportDefaultChainAccount = chainStore.chainInfosInUI.find(
-      (chainAccount) => chainAccount.chainId === buySupportDefaultChainId
-    );
+    const buySupportDefaultChainInfo = (() => {
+      if (
+        buySupportChainIds.length > 0 &&
+        chainStore.hasChain(buySupportChainIds[0])
+      ) {
+        return chainStore.getChain(buySupportChainIds[0]);
+      }
+    })();
 
-    const buySupportChainAccounts: {
-      chainInfo: ChainInfo;
-      bech32Address: string;
-    }[] = chainStore.chainInfosInUI
-      .map((chainInfo) => {
-        return {
-          chainInfo,
-          bech32Address: accountStore.getAccount(chainInfo.chainId)
-            .bech32Address,
-        };
-      })
-      .filter((chainAccount) =>
-        buySupportChainIds.some(
-          (buySupportChainId) =>
-            buySupportChainId === chainAccount.chainInfo.chainId
-        )
-      );
+    const buySupportChainAccounts = (() => {
+      const res: {
+        chainInfo: ChainInfo;
+        bech32Address: string;
+      }[] = [];
+
+      for (const chainId of buySupportChainIds) {
+        if (chainStore.hasChain(chainId)) {
+          res.push({
+            chainInfo: chainStore.getChain(chainId),
+            bech32Address: accountStore.getAccount(chainId).bech32Address,
+          });
+        }
+      }
+
+      return res;
+    })();
 
     const buyUrlParams = (() => {
       switch (serviceInfo.serviceId) {
@@ -118,9 +121,9 @@ export const BuyCryptoModal: FunctionComponent<{
                 )
               )
             ),
-            ...(buySupportDefaultChainAccount && {
+            ...(buySupportDefaultChainInfo && {
               defaultCurrencyCode:
-                buySupportDefaultChainAccount.stakeCurrency.coinDenom.toLowerCase(),
+                buySupportDefaultChainInfo.stakeCurrency.coinDenom.toLowerCase(),
             }),
           };
         case "transak":
@@ -146,9 +149,9 @@ export const BuyCryptoModal: FunctionComponent<{
                 (chainAccount) => chainAccount.chainInfo.stakeCurrency.coinDenom
               )
               .join(","),
-            ...(buySupportDefaultChainAccount && {
+            ...(buySupportDefaultChainInfo && {
               defaultCryptoCurrency:
-                buySupportDefaultChainAccount.stakeCurrency.coinDenom,
+                buySupportDefaultChainInfo.stakeCurrency.coinDenom,
             }),
           };
         case "kado":
