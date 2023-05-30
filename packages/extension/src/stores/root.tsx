@@ -48,21 +48,10 @@ import {
 import { APP_PORT } from "@keplr-wallet/router";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
-import {
-  AnalyticsClient,
-  AnalyticsStore,
-  NoopAnalyticsClient,
-  Properties,
-} from "@keplr-wallet/analytics";
-import {
-  Identify as AmplitudeIdentify,
-  init as amplitudeInit,
-  setUserId as amplitudeSetUserId,
-  track as amplitudeTrack,
-  identify as amplitudeIdentify,
-} from "@amplitude/analytics-browser";
+import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
+import { ExtensionAnalyticsClient } from "../analytics";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -389,33 +378,7 @@ export class RootStore {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
-          const amplitudeClient = new (class ExtensionAmplitudeClient
-            implements AnalyticsClient
-          {
-            setUserId(userId: string): void {
-              amplitudeSetUserId(userId);
-            }
-            logEvent(eventName: string, eventProperties?: Properties): void {
-              amplitudeTrack(eventName, eventProperties);
-            }
-            setUserProperties(properties: Properties): void {
-              const identify = Object.entries(properties).reduce(
-                (identify, [propertyKey, propertyValue]) => {
-                  if (propertyValue !== undefined && propertyValue !== null) {
-                    return identify.set(propertyKey, propertyValue);
-                  }
-
-                  return identify;
-                },
-                new AmplitudeIdentify()
-              );
-              amplitudeIdentify(identify);
-            }
-          })();
-
-          amplitudeInit(AmplitudeApiKey);
-
-          return amplitudeClient;
+          return new ExtensionAnalyticsClient(AmplitudeApiKey);
         }
       })(),
       {
