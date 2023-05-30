@@ -131,7 +131,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
         </Box>
       }
       bottomButton={{
-        text: isSelectChannelPhase ? "Next" : "Go to sign",
+        text: "Next",
         size: "large",
         onClick: async () => {
           if (isSelectChannelPhase) {
