@@ -255,7 +255,6 @@ export const ConnectLedgerScene: FunctionComponent<{
                 {(() => {
                   switch (propApp) {
                     case "Terra":
-                      // TODO
                       return <TerraIcon />;
                     case "Ethereum":
                       return <EthereumIcon />;
