@@ -56,6 +56,7 @@ export const FormNamePassword: FunctionComponent<
           <TextInput
             label="Create Keplr Password"
             type="password"
+            placeholder="At least 8 characters in length"
             {...register("password", {
               required: true,
               validate: (password: string): string | undefined => {
@@ -69,6 +70,7 @@ export const FormNamePassword: FunctionComponent<
           <TextInput
             label="Confirm Keplr Password"
             type="password"
+            placeholder="At least 8 characters in length"
             {...register("confirmPassword", {
               required: true,
               validate: (confirmPassword: string): string | undefined => {
