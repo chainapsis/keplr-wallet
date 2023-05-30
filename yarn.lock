@@ -20619,11 +20619,11 @@ __metadata:
 
 "keplr-wallet-private@file:./noop-keplr-wallet-private::locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension":
   version: 0.0.1
-  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=ad2675&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
+  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=62d7fb&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18
     styled-components: "*"
-  checksum: d85f33b4601c7f7d9e5a701a34ed82015d6aeb5d2f61e881048168b3e1d00738f39c37650219b3d2cb80f0b8181c0bb718001cb9bcfb05b269b1d28ab0cc534b
+  checksum: efd06473d052f24c1e5896d480d810e43c3237c0aa8acfe3b05a89ab03a8e3cb42171821189965a241bb91a064c3bfee7bf384b14083bdfe4be0cf40af8b0636
   languageName: node
   linkType: hard
 
@@ -20808,8 +20808,8 @@ __metadata:
 
 "libsodium-wrappers@file:./etc/noop::locator=keplr%40workspace%3A.":
   version: 0.0.1
-  resolution: "libsodium-wrappers@file:./etc/noop#./etc/noop::hash=8909f8&locator=keplr%40workspace%3A."
-  checksum: e96456d5ccb39a23d8d9731a22f58dc4a0923f17f1bbc4d9211569616b231684df4a812c22ccf16cdb0c99f6ae3b4325ae542f04761f1062c8ae35af1b0bc9c4
+  resolution: "libsodium-wrappers@file:./etc/noop#./etc/noop::hash=e4bfa9&locator=keplr%40workspace%3A."
+  checksum: 3574db90e4e6b9fd6000ee62fbdd689bb10f633c4101687c14daafed1547bfc7cb6281406a1ab08a04d6a65c892fa90cbae81a845d1ef5ac2a9d8fdb85c6fb8c
   languageName: node
   linkType: hard
 
