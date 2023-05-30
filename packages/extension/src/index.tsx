@@ -70,6 +70,7 @@ import { Splash } from "./components/splash";
 import { IBCTransferPage } from "./pages/ibc-transfer";
 import { SignCosmosICNSPage } from "./pages/sign/cosmos/icns";
 import { ErrorBoundary } from "./error-boundary";
+import { useMatchPopupSize } from "./popup-size";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -352,6 +353,8 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
 });
 
 const App: FunctionComponent = () => {
+  useMatchPopupSize();
+
   return (
     <StoreProvider>
       <ModalRootProvider>
