@@ -48,7 +48,7 @@ export const FormNamePassword: FunctionComponent<
         {...register("name", {
           required: true,
         })}
-        placeholder="e.g. Trading, NFT Vault, Investment.."
+        placeholder="e.g. Trading, NFT Vault, Investment"
         error={formState.errors.name?.message}
       />
       {needPassword ? (
