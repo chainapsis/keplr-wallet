@@ -26,7 +26,7 @@ const Styles = {
 export const MenuBar: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const { keyRingStore } = useStore();
+  const { analyticsStore, keyRingStore } = useStore();
 
   const navigate = useNavigate();
 
@@ -64,6 +64,7 @@ export const MenuBar: FunctionComponent<{
             e.preventDefault();
 
             if (keyRingStore.selectedKeyInfo) {
+              analyticsStore.logEvent("click_menu_manageChainVisibility");
               browser.tabs
                 .create({
                   url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true`,

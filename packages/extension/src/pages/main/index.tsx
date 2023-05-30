@@ -60,6 +60,7 @@ export const useIsNotReady = () => {
 
 export const MainPage: FunctionComponent = observer(() => {
   const {
+    analyticsStore,
     keyRingStore,
     hugeQueriesStore,
     uiConfigStore,
@@ -135,6 +136,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
+  const [isEnteredSearch, setIsEnteredSearch] = useState(false);
   useEffect(() => {
     // Give focus whenever available tab is selected.
     if (!isNotReady && tabStatus === "available") {
@@ -146,6 +148,29 @@ export const MainPage: FunctionComponent = observer(() => {
       }
     }
   }, [tabStatus, isNotReady]);
+  useEffect(() => {
+    // Log if a search term is entered at least once.
+    if (isEnteredSearch) {
+      analyticsStore.logEvent("input_searchAssetOrChain", {
+        pageName: "main",
+      });
+    }
+  }, [analyticsStore, isEnteredSearch]);
+  useEffect(() => {
+    // Log a search term with delay.
+    const handler = setTimeout(() => {
+      if (isEnteredSearch && search) {
+        analyticsStore.logEvent("input_searchAssetOrChain", {
+          inputValue: search,
+          pageName: "main",
+        });
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [analyticsStore, search, isEnteredSearch]);
 
   const searchScrollAnim = useSpringValue(0, {
     config: defaultSpringConfig,
@@ -200,7 +225,10 @@ export const MainPage: FunctionComponent = observer(() => {
             isNotReady={isNotReady}
           />
           <CopyAddress
-            onClick={() => setIsOpenCopyAddress(true)}
+            onClick={() => {
+              analyticsStore.logEvent("click_copyAddress");
+              setIsOpenCopyAddress(true);
+            }}
             isNotReady={isNotReady}
           />
           <Box position="relative">
@@ -255,7 +283,10 @@ export const MainPage: FunctionComponent = observer(() => {
           </Box>
           {tabStatus === "available" ? (
             <Buttons
-              onClickDeposit={() => setIsOpenCopyAddress(true)}
+              onClickDeposit={() => {
+                setIsOpenCopyAddress(true);
+                analyticsStore.logEvent("click_deposit");
+              }}
               onClickBuy={() => setIsOpenBuy(true)}
               isNotReady={isNotReady}
             />
@@ -266,6 +297,9 @@ export const MainPage: FunctionComponent = observer(() => {
               type="button"
               onClick={(e) => {
                 e.preventDefault();
+                analyticsStore.logEvent("click_keplrDashboard", {
+                  tabName: tabStatus,
+                });
 
                 browser.tabs.create({
                   url: "https://wallet.keplr.app",
@@ -286,6 +320,9 @@ export const MainPage: FunctionComponent = observer(() => {
               type="button"
               onClick={(e) => {
                 e.preventDefault();
+                analyticsStore.logEvent("click_keplrDashboard", {
+                  tabName: tabStatus,
+                });
 
                 browser.tabs.create({
                   url: "https://wallet.keplr.app",
@@ -310,6 +347,10 @@ export const MainPage: FunctionComponent = observer(() => {
                     setSearch(e.target.value);
 
                     if (e.target.value.trim().length > 0) {
+                      if (!isEnteredSearch) {
+                        setIsEnteredSearch(true);
+                      }
+
                       if (document.documentElement.scrollTop < 218) {
                         searchScrollAnim.start(218, {
                           from: document.documentElement.scrollTop,

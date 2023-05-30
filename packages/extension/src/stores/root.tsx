@@ -113,6 +113,8 @@ export class RootStore {
       isFavorite?: boolean;
       onRampProvider?: string;
       pageName?: string;
+      tabName?: string;
+      isClaimAll?: boolean;
     },
     {
       accountCount: number;

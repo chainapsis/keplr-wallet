@@ -10,8 +10,10 @@ import { XAxis } from "../../../../components/axis";
 import { QuestionIcon } from "../../../../components/icon";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
+import { useStore } from "../../../../stores";
 
 export const IBCTransferView: FunctionComponent = () => {
+  const { analyticsStore } = useStore();
   const navigate = useNavigate();
 
   return (
@@ -44,7 +46,10 @@ export const IBCTransferView: FunctionComponent = () => {
         <Button
           text="Transfer"
           size="small"
-          onClick={() => navigate("/send/select-asset?isIBCTransfer=true")}
+          onClick={() => {
+            analyticsStore.logEvent("click_ibcTransfer");
+            navigate("/send/select-asset?isIBCTransfer=true");
+          }}
         />
       </Columns>
     </Box>
