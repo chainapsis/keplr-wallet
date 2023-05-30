@@ -117,10 +117,8 @@ export class RootStore {
       isClaimAll?: boolean;
     },
     {
-      accountCount: number;
-      isDeveloperMode: boolean;
-      visibleNativeChainIdentifiers: string[];
-      visibleNonNativeChainIdentifiers: string[];
+      accountCount?: number;
+      isDeveloperMode?: boolean;
     }
   >;
 
