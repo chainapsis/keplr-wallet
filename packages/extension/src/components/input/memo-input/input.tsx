@@ -21,7 +21,7 @@ export const MemoInput: FunctionComponent<{
   return (
     <Box>
       <TextInput
-        label={label ?? "memo"}
+        label={label ?? "Memo"}
         placeholder={placeholder}
         onChange={(e) => {
           e.preventDefault();
