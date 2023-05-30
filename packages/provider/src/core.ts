@@ -261,6 +261,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
     contractAddress: string
   ): Promise<{ permit: any | undefined; viewing_key: string | undefined }> {
     return {
+      // todo: once support for saving permits is implemented, getting a saved permit should be implemented here
       permit: null,
       viewing_key: await this.getSecret20ViewingKey(chainId, contractAddress),
     };
