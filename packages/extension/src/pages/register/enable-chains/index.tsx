@@ -32,6 +32,7 @@ import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { TextButton } from "../../../components/button-text";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -735,6 +736,12 @@ export const EnableChainsScene: FunctionComponent<{
               }
             }}
           />
+          {fallbackEthereumLedgerApp ? (
+            <React.Fragment>
+              <Gutter size="0.75rem" />
+              <TextButton text="Skip" onClick={() => replaceToWelcomePage()} />
+            </React.Fragment>
+          ) : null}
         </Box>
       </RegisterSceneBox>
     );
