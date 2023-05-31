@@ -294,7 +294,7 @@ export class KeyRingService {
           try {
             isObj =
               Buffer.from(Buffer.from(cipherText).toString(), "hex")
-                .toString()
+                .toString("hex")
                 .toLowerCase() !==
               Buffer.from(cipherText).toString().toLowerCase();
           } catch {
