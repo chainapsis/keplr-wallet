@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/router",
-  "version": "0.12.3",
+  "version": "0.12.4",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
@@ -8,7 +8,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@keplr-wallet/common": "0.12.3"
+    "@keplr-wallet/common": "0.12.4"
   },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
