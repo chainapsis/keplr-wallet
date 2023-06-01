@@ -52,6 +52,10 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     }
   );
 
+  ibcTransferConfigs.amountConfig.setCurrency(
+    chainStore.getChain(chainId).forceFindCurrency(coinMinimalDenom)
+  );
+
   const gasSimulator = useGasSimulator(
     new ExtensionKVStore("gas-simulator.ibc.transfer"),
     chainStore,
