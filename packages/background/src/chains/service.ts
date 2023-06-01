@@ -810,6 +810,29 @@ export class ChainsService {
         };
       }
 
+      // Reduce the confusion from different coin type on ecosystem.
+      // Unite coin type for all chain to 118 with allowing alternatives.
+      // (If coin type is 60, it is probably to be compatible with metamask. So, in this case, do nothing.)
+      if (
+        newChainInfo.bip44.coinType !== 118 &&
+        newChainInfo.bip44.coinType !== 60
+      ) {
+        newChainInfo = {
+          ...newChainInfo,
+          alternativeBIP44s: (() => {
+            let res = newChainInfo.alternativeBIP44s ?? [];
+
+            if (res.find((c) => c.coinType === 118)) {
+              return res;
+            }
+
+            res = [...res, { coinType: 118 }];
+
+            return res;
+          })(),
+        };
+      }
+
       return newChainInfo;
     });
   }
