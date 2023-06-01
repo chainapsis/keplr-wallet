@@ -398,7 +398,7 @@ export class KeyRingService {
             }
           }
         } else {
-          throw new Error("Unexpected type of keyring");
+          console.log("Unknown key store type", keyStore.type);
         }
 
         if (keyStoreId) {
@@ -406,7 +406,10 @@ export class KeyRingService {
         }
       }
 
-      if (selectingVaultId) {
+      if (
+        selectingVaultId &&
+        this.vaultService.getVault("keyRing", selectingVaultId)
+      ) {
         this.selectKeyRing(selectingVaultId);
       }
 
