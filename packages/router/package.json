@@ -7,9 +7,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
-    "@keplr-wallet/common": "0.12.4"
-  },
+  "dependencies": {},
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",

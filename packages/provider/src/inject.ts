@@ -20,8 +20,7 @@ import {
   SecretUtils,
   SettledResponses,
 } from "@keplr-wallet/types";
-import { Result } from "@keplr-wallet/router";
-import { JSONUint8Array } from "@keplr-wallet/common";
+import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { KeplrEnigmaUtils } from "./enigma";
 import { CosmJSOfflineSigner, CosmJSOfflineSignerOnlyAmino } from "./cosmjs";
 import deepmerge from "deepmerge";

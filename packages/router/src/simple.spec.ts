@@ -1,5 +1,5 @@
 import { SimpleMessage } from "./simple";
-import { JSONUint8Array } from "@keplr-wallet/common";
+import { JSONUint8Array } from "./uint8-array";
 
 describe("Test simple message", () => {
   it("test simple message", () => {
