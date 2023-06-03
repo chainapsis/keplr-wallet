@@ -1,5 +1,9 @@
-import { MessageRequester, Message, KeplrError } from "@keplr-wallet/router";
-import { JSONUint8Array } from "@keplr-wallet/common";
+import {
+  MessageRequester,
+  Message,
+  KeplrError,
+  JSONUint8Array,
+} from "@keplr-wallet/router";
 import { getKeplrExtensionRouterId } from "../utils";
 
 export class InExtensionMessageRequester implements MessageRequester {

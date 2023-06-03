@@ -3,8 +3,8 @@ import {
   Message,
   Result,
   KeplrError,
+  JSONUint8Array,
 } from "@keplr-wallet/router";
-import { JSONUint8Array } from "@keplr-wallet/common";
 import { MockRouter } from "../router";
 
 export class MockMessageRequester implements MessageRequester {

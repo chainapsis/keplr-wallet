@@ -2,7 +2,7 @@ import { Message } from "../message";
 import { Handler } from "../handler";
 import { EnvProducer, Guard, MessageSender } from "../types";
 import { MessageRegistry } from "../encoding";
-import { JSONUint8Array } from "@keplr-wallet/common";
+import { JSONUint8Array } from "../uint8-array";
 
 export abstract class Router {
   protected msgRegistry: MessageRegistry = new MessageRegistry();

@@ -1,4 +1,5 @@
-import { JSONUint8Array, KVStore } from "@keplr-wallet/common";
+import { KVStore } from "@keplr-wallet/common";
+import { JSONUint8Array } from "@keplr-wallet/router";
 import {
   action,
   autorun,
