@@ -103,5 +103,5 @@
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop"
   },
-  "packageManager": "yarn@3.4.1"
+  "packageManager": "yarn@3.6.0"
 }
