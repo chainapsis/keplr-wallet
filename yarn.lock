@@ -5446,7 +5446,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/provider@workspace:packages/provider"
   dependencies:
-    "@keplr-wallet/common": 0.12.4
     "@keplr-wallet/router": 0.12.4
     "@keplr-wallet/types": 0.12.4
     buffer: ^6.0.3
@@ -5459,7 +5458,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/router-extension@workspace:packages/router-extension"
   dependencies:
-    "@keplr-wallet/common": 0.12.4
     "@keplr-wallet/popup": 0.12.4
     "@keplr-wallet/router": 0.12.4
   languageName: unknown
@@ -5469,7 +5467,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/router-mock@workspace:packages/router-mock"
   dependencies:
-    "@keplr-wallet/common": 0.12.4
     "@keplr-wallet/router": 0.12.4
     "@keplr-wallet/router-extension": 0.12.4
   languageName: unknown
@@ -5478,8 +5475,6 @@ __metadata:
 "@keplr-wallet/router@0.12.4, @keplr-wallet/router@workspace:packages/router":
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/router@workspace:packages/router"
-  dependencies:
-    "@keplr-wallet/common": 0.12.4
   languageName: unknown
   linkType: soft
 

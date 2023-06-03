@@ -7,7 +7,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {},
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "tsc",
