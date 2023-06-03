@@ -5201,7 +5201,7 @@ __metadata:
     joi: ^17.5.0
     long: ^4.0.0
     miscreant: 0.3.2
-    mobx: ^6.1.7
+    mobx: 6.1.7
     mobx-utils: ^6.0.3
     pbkdf2: ^3.1.2
     utility-types: ^3.10.0
@@ -5228,7 +5228,7 @@ __metadata:
     "@keplr-wallet/types": 0.12.4
     buffer: ^6.0.3
     delay: ^4.4.0
-    mobx: ^6.1.7
+    mobx: 6.1.7
   languageName: unknown
   linkType: soft
 
@@ -5499,7 +5499,7 @@ __metadata:
     "@keplr-wallet/stores": 0.12.4
     "@keplr-wallet/types": 0.12.4
     "@keplr-wallet/unit": 0.12.4
-    mobx: ^6.1.7
+    mobx: 6.1.7
     mobx-utils: ^6.0.3
     utility-types: ^3.10.0
   languageName: unknown
@@ -5522,7 +5522,7 @@ __metadata:
     buffer: ^6.0.3
     deepmerge: ^4.2.2
     eventemitter3: ^4.0.7
-    mobx: ^6.1.7
+    mobx: 6.1.7
     mobx-utils: ^6.0.3
     p-queue: ^6.6.2
     utility-types: ^3.10.0
@@ -20670,7 +20670,7 @@ __metadata:
     jest: ^29.4.3
     lerna: ^3.22.1
     lint-staged: ^10.5.4
-    mobx: ^6.1.7
+    mobx: 6.1.7
     mobx-react-lite: ^3.2.0
     mobx-utils: ^6.0.3
     node-gyp: ^9.3.1
@@ -22828,7 +22828,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx@npm:^6.1.7":
+"mobx@npm:6.1.7":
   version: 6.1.7
   resolution: "mobx@npm:6.1.7"
   checksum: c6cd7fedf4ce4fa058c3173ba1f24b5c2a52d8a0792ae23a5d0618ee9c9ef95f9262aef622de51b2f836184a2b212ace95f8f5c27aafd137492bd2b44880c91f

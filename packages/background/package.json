@@ -60,7 +60,7 @@
     "joi": "^17.5.0",
     "long": "^4.0.0",
     "miscreant": "0.3.2",
-    "mobx": "^6.1.7",
+    "mobx": "6.1.7",
     "mobx-utils": "^6.0.3",
     "pbkdf2": "^3.1.2",
     "utility-types": "^3.10.0"

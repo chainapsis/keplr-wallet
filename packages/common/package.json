@@ -20,6 +20,6 @@
     "@keplr-wallet/types": "0.12.4",
     "buffer": "^6.0.3",
     "delay": "^4.4.0",
-    "mobx": "^6.1.7"
+    "mobx": "6.1.7"
   }
 }
