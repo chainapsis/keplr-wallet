@@ -1,0 +1,85 @@
+diff --git a/node_modules/mobx/dist/mobx.cjs.development.js b/node_modules/mobx/dist/mobx.cjs.development.js
+index 1cba90b..0349ef4 100644
+--- a/node_modules/mobx/dist/mobx.cjs.development.js
++++ b/node_modules/mobx/dist/mobx.cjs.development.js
+@@ -5345,11 +5345,15 @@ function inherit(ctor, proto) {
+   }
+ }
+ 
+-inherit(StubArray, Array.prototype); // Weex proto freeze protection was here,
++// PATCH hack to leave Array.prototype alone
++// inherit(StubArray, Array.prototype); // Weex proto freeze protection was here,
+ // but it is unclear why the hack is need as MobX never changed the prototype
+ // anyway, so removed it in V6
+ 
+ var LegacyObservableArray = /*#__PURE__*/function (_StubArray) {
++  // PATCH prevent use of LegacyObservableArray
++  throw new Error('LegacyObservableArray disabled');
++
+   _inheritsLoose(LegacyObservableArray, _StubArray);
+ 
+   function LegacyObservableArray(initialValues, enhancer, name, owned) {
+diff --git a/node_modules/mobx/dist/mobx.esm.development.js b/node_modules/mobx/dist/mobx.esm.development.js
+index 1c2f57b..c76e26a 100644
+--- a/node_modules/mobx/dist/mobx.esm.development.js
++++ b/node_modules/mobx/dist/mobx.esm.development.js
+@@ -5341,12 +5341,14 @@ function inherit(ctor, proto) {
+   }
+ }
+ 
+-inherit(StubArray, Array.prototype); // Weex proto freeze protection was here,
++// PATCH hack to leave Array.prototype alone
++// inherit(StubArray, Array.prototype); // Weex proto freeze protection was here,
+ // but it is unclear why the hack is need as MobX never changed the prototype
+ // anyway, so removed it in V6
+ 
+ var LegacyObservableArray = /*#__PURE__*/function (_StubArray) {
+-  _inheritsLoose(LegacyObservableArray, _StubArray);
++  // PATCH prevent use of LegacyObservableArray
++  throw new Error('LegacyObservableArray disabled');
+ 
+   function LegacyObservableArray(initialValues, enhancer, name, owned) {
+     var _this;
+diff --git a/node_modules/mobx/dist/mobx.esm.js b/node_modules/mobx/dist/mobx.esm.js
+index 71040ba..3870389 100644
+--- a/node_modules/mobx/dist/mobx.esm.js
++++ b/node_modules/mobx/dist/mobx.esm.js
+@@ -5355,12 +5355,14 @@ function inherit(ctor, proto) {
+   }
+ }
+ 
+-inherit(StubArray, Array.prototype); // Weex proto freeze protection was here,
++// PATCH hack to leave Array.prototype alone
++// inherit(StubArray, Array.prototype); // Weex proto freeze protection was here,
+ // but it is unclear why the hack is need as MobX never changed the prototype
+ // anyway, so removed it in V6
+ 
+ var LegacyObservableArray = /*#__PURE__*/function (_StubArray) {
+-  _inheritsLoose(LegacyObservableArray, _StubArray);
++  // PATCH prevent use of LegacyObservableArray
++  throw new Error('LegacyObservableArray disabled');
+ 
+   function LegacyObservableArray(initialValues, enhancer, name, owned) {
+     var _this;
+diff --git a/node_modules/mobx/dist/mobx.umd.development.js b/node_modules/mobx/dist/mobx.umd.development.js
+index 737aa06..7e221d8 100644
+--- a/node_modules/mobx/dist/mobx.umd.development.js
++++ b/node_modules/mobx/dist/mobx.umd.development.js
+@@ -5347,12 +5347,14 @@
+       }
+     }
+ 
+-    inherit(StubArray, Array.prototype); // Weex proto freeze protection was here,
++    // PATCH hack to leave Array.prototype alone
++    // inherit(StubArray, Array.prototype); // Weex proto freeze protection was here,
+     // but it is unclear why the hack is need as MobX never changed the prototype
+     // anyway, so removed it in V6
+ 
+     var LegacyObservableArray = /*#__PURE__*/function (_StubArray) {
+-      _inheritsLoose(LegacyObservableArray, _StubArray);
++      // PATCH prevent use of LegacyObservableArray
++      throw new Error('LegacyObservableArray disabled');
+ 
+       function LegacyObservableArray(initialValues, enhancer, name, owned) {
+         var _this;
+
