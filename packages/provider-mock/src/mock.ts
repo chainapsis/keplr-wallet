@@ -26,7 +26,7 @@ import {
   CosmJSOfflineSigner,
   CosmJSOfflineSignerOnlyAmino,
 } from "@keplr-wallet/provider";
-import { Mnemonic, PrivKeySecp256k1 } from "@keplr-wallet/crypto";
+import { Hash, Mnemonic, PrivKeySecp256k1 } from "@keplr-wallet/crypto";
 import Long from "long";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
@@ -207,13 +207,15 @@ export class MockKeplr implements Keplr {
       throw new Error("Unmatched signer");
     }
 
-    const signature = wallet.sign(serializeSignDoc(signDoc));
+    const signature = wallet.signDigest32(
+      Hash.sha256(serializeSignDoc(signDoc))
+    );
 
     return {
       signed: signDoc,
       signature: encodeSecp256k1Signature(
         wallet.getPubKey().toBytes(),
-        signature
+        new Uint8Array([...signature.r, ...signature.s])
       ),
     };
   }
@@ -243,15 +245,17 @@ export class MockKeplr implements Keplr {
       throw new Error("Unmatched signer");
     }
 
-    const signature = wallet.sign(
-      SignDoc.encode(
-        SignDoc.fromPartial({
-          bodyBytes: signDoc.bodyBytes!,
-          authInfoBytes: signDoc.authInfoBytes!,
-          chainId: signDoc.chainId!,
-          accountNumber: signDoc.accountNumber!.toString(),
-        })
-      ).finish()
+    const signature = wallet.signDigest32(
+      Hash.sha256(
+        SignDoc.encode(
+          SignDoc.fromPartial({
+            bodyBytes: signDoc.bodyBytes!,
+            authInfoBytes: signDoc.authInfoBytes!,
+            chainId: signDoc.chainId!,
+            accountNumber: signDoc.accountNumber!.toString(),
+          })
+        ).finish()
+      )
     );
 
     return {
@@ -263,7 +267,10 @@ export class MockKeplr implements Keplr {
       },
       signature: encodeSecp256k1Signature(
         wallet.getPubKey().toBytes(),
-        signature
+        new Uint8Array([
+          ...signature.r.map((b) => (Math.random() > 0.5 ? 0 : b)),
+          ...signature.s.map((b) => (Math.random() > 0.5 ? 0 : b)),
+        ])
       ),
     };
   }

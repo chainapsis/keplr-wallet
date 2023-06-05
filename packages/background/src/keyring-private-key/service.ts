@@ -67,6 +67,7 @@ export class KeyRingPrivateKeyService {
         throw new Error(`Unknown digest method: ${digestMethod}`);
     }
 
-    return privateKey.signDigest32(digest);
+    const signature = privateKey.signDigest32(digest);
+    return new Uint8Array([...signature.r, ...signature.s]);
   }
 }

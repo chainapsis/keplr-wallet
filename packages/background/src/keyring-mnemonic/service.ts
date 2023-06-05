@@ -101,7 +101,8 @@ export class KeyRingMnemonicService {
         throw new Error(`Unknown digest method: ${digestMethod}`);
     }
 
-    return privKey.signDigest32(digest);
+    const signature = privKey.signDigest32(digest);
+    return new Uint8Array([...signature.r, ...signature.s]);
   }
 
   protected getPrivKey(vault: Vault, coinType: number): PrivKeySecp256k1 {

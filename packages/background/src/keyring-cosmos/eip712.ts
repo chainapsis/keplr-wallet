@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { _TypedDataEncoder as TypedDataEncoder } from "@ethersproject/hash";
 
 // https://eips.ethereum.org/EIPS/eip-712
 
@@ -90,8 +91,6 @@ export const EIP712MessageValidator = Joi.object<{
   domain: Joi.object().required(),
   message: Joi.object().required(),
 });
-
-import { _TypedDataEncoder as TypedDataEncoder } from "@ethersproject/hash";
 
 export const domainHash = (message: {
   types: Record<string, { name: string; type: string }[]>;
