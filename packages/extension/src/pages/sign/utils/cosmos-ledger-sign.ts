@@ -11,6 +11,7 @@ import { LedgerUtils } from "../../../utils";
 import Eth from "@ledgerhq/hw-app-eth";
 import { EIP712MessageValidator } from "@keplr-wallet/background";
 import { domainHash, messageHash } from "@keplr-wallet/background";
+import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 
 export const ErrModule = "ledger-sign";
 export const ErrFailedInit = 1;
@@ -22,6 +23,7 @@ export const ErrFailedSign = 6;
 export const ErrSignRejected = 7;
 
 export const connectAndSignEIP712WithLedger = async (
+  useWebHID: boolean,
   expectedPubKey: Uint8Array,
   bip44Path: {
     account: number;
@@ -37,7 +39,9 @@ export const connectAndSignEIP712WithLedger = async (
 ): Promise<Uint8Array> => {
   let transport: Transport;
   try {
-    transport = await TransportWebUSB.create();
+    transport = useWebHID
+      ? await TransportWebHID.create()
+      : await TransportWebUSB.create();
   } catch (e) {
     throw new KeplrError(ErrModule, ErrFailedInit, "Failed to init transport");
   }
@@ -144,6 +148,7 @@ export const connectAndSignEIP712WithLedger = async (
 };
 
 export const connectAndSignWithLedger = async (
+  useWebHID: boolean,
   propApp: string,
   expectedPubKey: Uint8Array,
   bip44Path: {
@@ -163,7 +168,9 @@ export const connectAndSignWithLedger = async (
 
   let transport: Transport;
   try {
-    transport = await TransportWebUSB.create();
+    transport = useWebHID
+      ? await TransportWebHID.create()
+      : await TransportWebUSB.create();
   } catch (e) {
     throw new KeplrError(ErrModule, ErrFailedInit, "Failed to init transport");
   }

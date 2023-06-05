@@ -49,7 +49,8 @@ import { GuideBox } from "../../../../components/guide-box";
 export const CosmosTxView: FunctionComponent<{
   interactionData: NonNullable<SignInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { chainStore, queriesStore, signInteractionStore } = useStore();
+  const { chainStore, queriesStore, signInteractionStore, uiConfigStore } =
+    useStore();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -202,6 +203,7 @@ export const CosmosTxView: FunctionComponent<{
 
       try {
         const signature = await handleCosmosPreSign(
+          uiConfigStore.useWebHIDLedger,
           interactionData,
           signDocHelper.signDocWrapper
         );
