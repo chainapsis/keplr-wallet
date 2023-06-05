@@ -17,7 +17,6 @@ import { ErrModule } from "../utils/cosmos-ledger-sign";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
 import { IconProps } from "../../../components/icon/types";
-import { Image } from "../../../components/image";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore } = useStore();
@@ -198,29 +197,16 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           borderRadius="0.375rem"
         >
           <XAxis alignY="center">
-            {typeof JSON.parse(content) === "object" &&
-            JSON.parse(content).hasOwnProperty("imageUrl") ? (
-              <Image
-                alt="sign-adr36-image"
-                src={JSON.parse(content).imageUrl}
-                style={{
-                  width: "3rem",
-                  height: "3rem",
-                  borderRadius: "50%",
-                }}
-              />
-            ) : (
-              <Box
-                width="3rem"
-                height="3rem"
-                borderRadius="50%"
-                alignX="center"
-                alignY="center"
-                backgroundColor={ColorPalette["gray-400"]}
-              >
-                <ADR36SignIcon />
-              </Box>
-            )}
+            <Box
+              width="3rem"
+              height="3rem"
+              borderRadius="50%"
+              alignX="center"
+              alignY="center"
+              backgroundColor={ColorPalette["gray-400"]}
+            >
+              <ADR36SignIcon />
+            </Box>
             <Gutter size="0.75rem" />
             <YAxis>
               <H5 color={ColorPalette["gray-10"]}>
