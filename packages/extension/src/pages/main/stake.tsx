@@ -193,26 +193,23 @@ export const StakeView: FunctionComponent = observer(() => {
           )}
         </div>
         <div style={{ flex: 1 }} />
-        <a
-          href={chainStore.current.walletUrlForStaking}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => {
+
+        <Button
+          className={styleStake.button}
+          color="primary"
+          size="sm"
+          outline={isRewardExist}
+          onClick={(e) => {
+            e.preventDefault();
             analyticsStore.logEvent("Stake button clicked", {
               chainId: chainStore.current.chainId,
               chainName: chainStore.current.chainName,
             });
+            history.push("/validators");
           }}
         >
-          <Button
-            className={styleStake.button}
-            color="primary"
-            size="sm"
-            outline={isRewardExist}
-          >
-            <FormattedMessage id="main.stake.button.stake" />
-          </Button>
-        </a>
+          <FormattedMessage id="main.stake.button.stake" />
+        </Button>
       </div>
     </div>
   );

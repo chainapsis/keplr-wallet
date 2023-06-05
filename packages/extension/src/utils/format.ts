@@ -28,3 +28,17 @@ export const formatTokenName = (name: string) => {
 
   return name;
 };
+
+export const shortenNumber = (value: string) => {
+  const number = parseFloat(value) / 10 ** 18;
+  let result = "";
+  if (number >= 1000000) {
+    result = (number / 1000000).toFixed(1) + "M";
+  } else if (number >= 1000) {
+    result = (number / 1000).toFixed(1) + "K";
+  } else {
+    result = number.toFixed(0);
+  }
+
+  return result;
+};

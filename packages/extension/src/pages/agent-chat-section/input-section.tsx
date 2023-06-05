@@ -8,6 +8,7 @@ import ReactTextareaAutosize from "react-textarea-autosize";
 import { InputGroup } from "reactstrap";
 import { AGENT_COMMANDS } from "../../config.ui.var";
 import style from "./style.module.scss";
+import { FormattedMessage } from "react-intl";
 
 export const InactiveAgentMessage = () => {
   return (
@@ -86,46 +87,56 @@ export const InputField = ({
   };
 
   return (
-    <InputGroup className={style.inputText}>
-      <CommandsDropdown
-        newMessage={newMessage}
-        showDropdown={showCommandDropdown}
-        handleClick={handleCommand}
-      />
-
-      <ReactTextareaAutosize
-        ref={messageInput}
-        maxRows={3}
-        className={`${style.inputArea}`}
-        placeholder={"Ask a question or type '/' for commands"}
-        value={newMessage}
-        onChange={handleChange}
-        onKeyDown={handleKeydown}
-        disabled={disabled}
-      />
-      <div className={style["send-message-icon"]}>
-        {newMessage?.length && newMessage.trim() !== "" ? (
-          <img
-            src={paperAirplaneIcon}
-            alt=""
-            draggable="false"
-            onClick={(e) => {
-              setShowCommandDropdown(false);
-              handleSendMessage(e);
-              enterKeyCount = 0;
-            }}
-          />
-        ) : (
-          <img
-            src={agentCommandIcon}
-            alt=""
-            draggable="false"
-            onClick={() =>
-              setShowCommandDropdown(!showCommandDropdown && !disabled)
-            }
-          />
-        )}
+    <div className={style.inputSection}>
+      <div className={style.messageDisappear}>
+        <img
+          src={require("@assets/svg/ic-clock.svg")}
+          draggable={false}
+          alt="clock"
+        />
+        <FormattedMessage id="chat.disappear-message" />
       </div>
-    </InputGroup>
+      <InputGroup className={style.inputText}>
+        <CommandsDropdown
+          newMessage={newMessage}
+          showDropdown={showCommandDropdown}
+          handleClick={handleCommand}
+        />
+
+        <ReactTextareaAutosize
+          ref={messageInput}
+          maxRows={3}
+          className={`${style.inputArea}`}
+          placeholder={"Ask a question or type '/' for commands"}
+          value={newMessage}
+          onChange={handleChange}
+          onKeyDown={handleKeydown}
+          disabled={disabled}
+        />
+        <div className={style["send-message-icon"]}>
+          {newMessage?.length && newMessage.trim() !== "" ? (
+            <img
+              src={paperAirplaneIcon}
+              alt=""
+              draggable="false"
+              onClick={(e) => {
+                setShowCommandDropdown(false);
+                handleSendMessage(e);
+                enterKeyCount = 0;
+              }}
+            />
+          ) : (
+            <img
+              src={agentCommandIcon}
+              alt=""
+              draggable="false"
+              onClick={() =>
+                setShowCommandDropdown(!showCommandDropdown && !disabled)
+              }
+            />
+          )}
+        </div>
+      </InputGroup>
+    </div>
   );
 };

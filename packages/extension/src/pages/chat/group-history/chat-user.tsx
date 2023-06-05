@@ -9,6 +9,8 @@ import { decryptMessage } from "@utils/decrypt-message";
 import style from "../style.module.scss";
 import amplitude from "amplitude-js";
 import { Group, GroupAddress } from "@chatTypes";
+import { processHyperlinks } from "@utils/process-hyperlinks";
+import parse from "react-html-parser";
 
 export const ChatUser: React.FC<{
   chainId: string;
@@ -152,7 +154,14 @@ export const ChatUser: React.FC<{
       </div>
       <div className={style.messageInner}>
         <div className={style.name}>{contactName}</div>
-        <div className={style.messageText}>{message}</div>
+        <div
+          className={style.messageText}
+          onClick={(e) => {
+            e.preventDefault();
+          }}
+        >
+          {parse(processHyperlinks(message))}
+        </div>
       </div>
       <div>
         <img src={rightArrowIcon} style={{ width: "80%" }} alt="message" />

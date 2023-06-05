@@ -24,6 +24,8 @@ import activeReward from "@assets/icon/activeReward.png";
 import activeStake from "@assets/icon/activeStake.png";
 import activeSend from "@assets/icon/activeSend.png";
 import { DepositModal } from "./qr-code";
+import { Link } from "react-router-dom";
+import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 
 export const TxButtonView: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore, analyticsStore } = useStore();
@@ -60,6 +62,9 @@ export const TxButtonView: FunctionComponent = observer(() => {
 
   const isRewardExist = rewards.stakableReward.toDec().gt(new Dec(0));
 
+  const isStakableInApp = [CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB].includes(
+    chainStore.current.chainId
+  );
   const isStakableExist = useMemo(() => {
     return stakable.balance.toDec().gt(new Dec(0));
   }, [stakable.balance]);
@@ -186,10 +191,13 @@ export const TxButtonView: FunctionComponent = observer(() => {
         />
         <FormattedMessage id="main.stake.button.claim-rewards" />
       </Button>
-      <a
-        href={chainStore.current.walletUrlForStaking}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        to={
+          isStakableInApp
+            ? "/validators"
+            : chainStore.current.walletUrlForStaking || ""
+        }
+        target={!isStakableInApp ? "_blank" : ""}
         style={
           !isStakableExist || !chainStore.current.walletUrlForStaking
             ? {
@@ -230,7 +238,7 @@ export const TxButtonView: FunctionComponent = observer(() => {
           />
           <FormattedMessage id="main.stake.button.stake" />
         </Button>
-      </a>
+      </Link>
       {!hasAssets ? (
         <Tooltip
           placement="bottom"

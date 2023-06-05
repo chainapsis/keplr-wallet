@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, ReactElement, useState } from "react";
 
 import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
@@ -23,7 +23,7 @@ import { userDetails } from "@chatStore/user-slice";
 import { useNotification } from "@components/notification";
 
 export const TokenDropdown: FunctionComponent<{
-  label: string;
+  label: ReactElement<any>[];
   disabled: boolean;
   ibc?: boolean;
 }> = observer(({ label, disabled, ibc }) => {

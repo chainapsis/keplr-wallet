@@ -8,6 +8,8 @@ import { decryptGroupMessage } from "@utils/decrypt-group";
 import { GroupMessageType } from "@utils/encrypt-group";
 import { getUserName, getEventMessage } from "@utils/index";
 import { useStore } from "../../../stores";
+import parse from "react-html-parser";
+import { processHyperlinks } from "@utils/process-hyperlinks";
 
 export const ChatGroupUser: React.FC<{
   chainId: string;
@@ -86,16 +88,23 @@ export const ChatGroupUser: React.FC<{
       </div>
       <div className={style.messageInner}>
         <div className={style.name}>{group.name}</div>
-        <div className={style.messageText}>
+        <div
+          className={style.messageText}
+          onClick={(e) => {
+            e.preventDefault();
+          }}
+        >
           {decryptedMessage &&
           (decryptedMessage.type == GroupMessageType.event.toString() ||
             decryptedMessage.type === GroupMessageType[GroupMessageType.event])
-            ? getEventMessage(
-                accountInfo.bech32Address,
-                addresses,
-                decryptedMessage.message
+            ? parse(
+                getEventMessage(
+                  accountInfo.bech32Address,
+                  addresses,
+                  processHyperlinks(decryptedMessage.message)
+                )
               )
-            : getLastMessage()}
+            : parse(processHyperlinks(getLastMessage()))}
         </div>
       </div>
       <div>

@@ -14,6 +14,10 @@ import { IBCChainSelector } from "@components/agents/ibc-chain-selector";
 import { SignTransaction } from "@components/agents/sign-transaction";
 import { MessageFeedBack } from "@components/chat-message-feedback";
 import { useHistory } from "react-router";
+import parse from "react-html-parser";
+import { processHyperlinks } from "@utils/process-hyperlinks";
+import { RecipientAddressInput } from "@components/agents/address-input";
+import { AGENT_ADDRESS } from "../../config.ui.var";
 
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp);
@@ -78,51 +82,93 @@ export const AgentChatMessage = ({
 
     if (!decryptedMessage) return messageView;
 
+    const messageContent = decryptedMessage.content.text;
     if (decryptedMessage.type === 1) {
       messageView = (
-        <div className={style.message}>{decryptedMessage.content.text}</div>
+        <div className={style.message}>
+          {typeof messageContent == "string"
+            ? parse(processHyperlinks(messageContent))
+            : messageContent}
+        </div>
       );
       if (setIsInputType2 && !disabled) setIsInputType2(false);
     } else {
-      const messageObj = JSON.parse(decryptedMessage.content.text);
-
-      switch (messageObj.method) {
-        case "signTransaction":
-          messageView = (
-            <SignTransaction
-              rawText={messageObj.message}
-              chainId={chainId}
-              disabled={disabled}
-            />
-          );
-          break;
-        case "inputToken":
-          messageView = (
-            <TokenDropdown label={messageObj.message} disabled={disabled} />
-          );
-          break;
-        case "inputIBCToken":
-          messageView = (
-            <TokenDropdown label={messageObj.message} ibc disabled={disabled} />
-          );
-          break;
-        case "inputChannel":
-          messageView = (
-            <IBCChainSelector label={messageObj.message} disabled={disabled} />
-          );
-          break;
-        default:
+      const messageObj = JSON.parse(messageContent);
+      const messageLabel =
+        typeof messageObj.message == "string"
+          ? parse(processHyperlinks(messageObj.message))
+          : messageObj.message;
+      if (disabled) {
+        if (messageObj.method === "signTransaction")
           messageView = (
             <div className={style.message}>
-              {messageObj?.message || "Cant Parse Message"}
+              Please recheck parameters of the transaction in Data Tab before
+              approving the transaction.
             </div>
           );
-          break;
-      }
+        else messageView = <div className={style.message}>{messageLabel}</div>;
+      } else
+        switch (messageObj.method) {
+          case "signTransaction":
+            messageView = (
+              <SignTransaction
+                rawText={messageObj.message}
+                chainId={chainId}
+                disabled={disabled}
+              />
+            );
+            break;
+          case "inputToken":
+            messageView = (
+              <TokenDropdown label={messageLabel} disabled={disabled} />
+            );
+            break;
+          case "inputIBCToken":
+            messageView = (
+              <TokenDropdown label={messageLabel} ibc disabled={disabled} />
+            );
+            break;
+          case "inputChannel":
+            messageView = (
+              <IBCChainSelector label={messageLabel} disabled={disabled} />
+            );
+            break;
+          case "inputAddress":
+            messageView = (
+              <RecipientAddressInput label={messageLabel} disabled={disabled} />
+            );
+            break;
+          default:
+            messageView = (
+              <div className={style.message}>
+                {messageObj?.message || "Cant Parse Message"}
+              </div>
+            );
+            break;
+        }
       if (setIsInputType2 && !disabled) setIsInputType2(true);
     }
     return messageView;
   }
+
+  const decideFeedbackView = () => {
+    const feedbackView = (
+      <div className={style.timestamp}>
+        {isHovered && (
+          <MessageFeedBack
+            messageId={messageId}
+            chainId={chainId}
+            targetAddress={targetAddress}
+          />
+        )}
+      </div>
+    );
+    if (isSender) return null;
+    if (targetAddress !== AGENT_ADDRESS[chainId]) return null;
+    if (!decryptedMessage) return null;
+    if (decryptedMessage.type === 1) return feedbackView;
+    else if (disabled) return feedbackView;
+  };
 
   return (
     <React.Fragment>
@@ -142,15 +188,7 @@ export const AgentChatMessage = ({
         >
           {decideMessageView()}
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div className={style.timestamp}>
-              {!isSender && isHovered && (
-                <MessageFeedBack
-                  messageId={messageId}
-                  chainId={chainId}
-                  targetAddress={targetAddress}
-                />
-              )}
-            </div>
+            <div className={style.timestamp}>{decideFeedbackView()}</div>
             <div className={style.timestamp}>
               {formatTime(timestamp)}
               {isSender && groupLastSeenTimestamp < timestamp && (

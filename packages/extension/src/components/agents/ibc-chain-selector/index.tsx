@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, ReactElement, useState } from "react";
 import {
   Button,
   ButtonDropdown,
@@ -33,7 +33,7 @@ interface ChannelDetails extends Channel {
 }
 
 export const IBCChainSelector: FunctionComponent<{
-  label: string;
+  label: ReactElement<any>[];
   disabled: boolean;
 }> = observer(({ label, disabled }) => {
   const {

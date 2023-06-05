@@ -10,6 +10,33 @@
   flex-direction: row;
 }
 
+.input-section {
+  margin-left: -12px;
+  margin-right: -12px;
+  margin-bottom: -12px;
+  background: white;
+  padding: 12px;
+
+  .message-disappear {
+    font-weight: 400;
+    font-size: 15px;
+    color: #525f7f;
+    height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 21px;
+    max-height: 48px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    img {
+      height: 20px;
+      vertical-align: sub;
+    }
+  }
+}
+
 .overlay {
   position: absolute;
   top: 0;

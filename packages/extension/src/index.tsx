@@ -86,6 +86,9 @@ import { ICNSAdr36SignPage } from "./pages/icns/sign";
 import { SignPage } from "./pages/sign";
 import { ChainSuggestedPage } from "./pages/chain/suggest";
 import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
+import { ValidatorList } from "./pages/validator-list";
+import { Validator } from "./pages/validator";
+import { StakeComplete } from "./pages/validator/stake-complete";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -386,6 +389,21 @@ const Application: FunctionComponent = () => {
                         exact
                         path="/setting/chat/readRecipt"
                         component={ReadRecipt}
+                      />
+                      <Route
+                        exact
+                        path="/validators"
+                        component={ValidatorList}
+                      />
+                      <Route
+                        exact
+                        path="/validators/:validator_address/:operation"
+                        component={Validator}
+                      />
+                      <Route
+                        exact
+                        path="/stake-complete/:validator_address"
+                        component={StakeComplete}
                       />
                       <Route path="*" component={StateRenderer} />
                     </Switch>

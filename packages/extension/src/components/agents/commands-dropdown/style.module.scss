@@ -8,6 +8,8 @@
   margin-left: 3px;
   bottom: 30px;
   z-index: 2;
+  max-height: 300px;
+  overflow-y: scroll;
 }
 
 .enabled {
