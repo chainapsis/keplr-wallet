@@ -4,13 +4,12 @@ import { CoinPrimitive } from "../common";
 import { ChainGetter } from "../chain";
 import { DenomHelper } from "@keplr-wallet/common";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
-import { AppCurrency, KeplrSignOptions, StdFee } from "@keplr-wallet/types";
-import { DeepPartial, DeepReadonly, Optional } from "utility-types";
+import { AppCurrency } from "@keplr-wallet/types";
+import { DeepPartial, DeepReadonly } from "utility-types";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/cosmwasm/wasm/v1/tx";
 import { Buffer } from "buffer/";
 import deepmerge from "deepmerge";
 import { CosmosAccount } from "./cosmos";
-import { txEventsWithPreOnFulfill } from "./utils";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 
 export interface CosmwasmAccount {
@@ -84,7 +83,6 @@ export class CosmwasmAccountImpl {
     protected readonly _msgOpts: CosmwasmMsgOpts
   ) {
     this.base.registerMakeSendTokenFn(this.processMakeSendTokenTx.bind(this));
-    this.base.registerSendTokenFn(this.processSendToken.bind(this));
   }
 
   /**
@@ -147,75 +145,6 @@ export class CosmwasmAccountImpl {
     }
   }
 
-  /**
-   * @deprecated
-   */
-  protected async processSendToken(
-    amount: string,
-    currency: AppCurrency,
-    recipient: string,
-    memo: string,
-    stdFee: Partial<StdFee>,
-    signOptions?: KeplrSignOptions,
-    onTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-  ): Promise<boolean> {
-    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-
-    switch (denomHelper.type) {
-      case "cw20":
-        const actualAmount = (() => {
-          let dec = new Dec(amount);
-          dec = dec.mul(DecUtils.getPrecisionDec(currency.coinDecimals));
-          return dec.truncate().toString();
-        })();
-
-        if (!("type" in currency) || currency.type !== "cw20") {
-          throw new Error("Currency is not cw20");
-        }
-        await this.sendExecuteContractMsg(
-          "send",
-          currency.contractAddress,
-          {
-            transfer: {
-              recipient: recipient,
-              amount: actualAmount,
-            },
-          },
-          [],
-          memo,
-          {
-            amount: stdFee.amount ?? [],
-            gas: stdFee.gas ?? this.msgOpts.send.cw20.gas.toString(),
-          },
-          signOptions,
-          txEventsWithPreOnFulfill(onTxEvents, (tx) => {
-            if (tx.code == null || tx.code === 0) {
-              // After succeeding to send token, refresh the balance.
-              const queryBalance = this.queries.queryBalances
-                .getQueryBech32Address(this.base.bech32Address)
-                .balances.find((bal) => {
-                  return (
-                    bal.currency.coinMinimalDenom === currency.coinMinimalDenom
-                  );
-                });
-
-              if (queryBalance) {
-                queryBalance.fetch();
-              }
-            }
-          })
-        );
-        return true;
-    }
-
-    return false;
-  }
-
   makeExecuteContractTx(
     // This arg can be used to override the type of sending tx if needed.
     type: keyof CosmwasmMsgOpts | "unknown" = "executeWasm",
@@ -262,62 +191,6 @@ export class CosmwasmAccountImpl {
         ],
       },
       preOnTxEvents
-    );
-  }
-
-  /**
-   * @deprecated
-   */
-  async sendExecuteContractMsg(
-    // This arg can be used to override the type of sending tx if needed.
-    type: keyof CosmwasmMsgOpts | "unknown" = "executeWasm",
-    contractAddress: string,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    obj: object,
-    funds: CoinPrimitive[],
-    memo: string = "",
-    stdFee: Optional<StdFee, "amount">,
-    signOptions?: KeplrSignOptions,
-    onTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-  ): Promise<void> {
-    const msg = {
-      type: this.msgOpts.executeWasm.type,
-      value: {
-        sender: this.base.bech32Address,
-        contract: contractAddress,
-        msg: obj,
-        funds,
-      },
-    };
-
-    await this.base.cosmos.sendMsgs(
-      type,
-      {
-        aminoMsgs: [msg],
-        protoMsgs: [
-          {
-            typeUrl: "/cosmwasm.wasm.v1.MsgExecuteContract",
-            value: MsgExecuteContract.encode({
-              sender: msg.value.sender,
-              contract: msg.value.contract,
-              msg: Buffer.from(JSON.stringify(msg.value.msg)),
-              funds: msg.value.funds,
-            }).finish(),
-          },
-        ],
-      },
-      memo,
-      {
-        amount: stdFee.amount ?? [],
-        gas: stdFee.gas,
-      },
-      signOptions,
-      onTxEvents
     );
   }
 

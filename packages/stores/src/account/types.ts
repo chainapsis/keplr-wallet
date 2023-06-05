@@ -56,7 +56,6 @@ export interface MakeTxResponse {
     onTxEvents?:
       | ((tx: any) => void)
       | {
-          onBroadcastFailed?: (e?: Error) => void;
           onBroadcasted?: (txHash: Uint8Array) => void;
           onFulfill?: (tx: any) => void;
         }
@@ -68,7 +67,6 @@ export interface MakeTxResponse {
     onTxEvents?:
       | ((tx: any) => void)
       | {
-          onBroadcastFailed?: (e?: Error) => void;
           onBroadcasted?: (txHash: Uint8Array) => void;
           onFulfill?: (tx: any) => void;
         }
@@ -86,7 +84,6 @@ export interface MakeTxResponse {
     onTxEvents?:
       | ((tx: any) => void)
       | {
-          onBroadcastFailed?: (e?: Error) => void;
           onBroadcasted?: (txHash: Uint8Array) => void;
           onFulfill?: (tx: any) => void;
         }
