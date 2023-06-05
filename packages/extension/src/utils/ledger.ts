@@ -1,7 +1,6 @@
 import Transport from "@ledgerhq/hw-transport";
 import { CosmosApp, getAppInfo } from "@keplr-wallet/ledger-cosmos";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
-import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 
 export const LedgerUtils = {
   tryAppOpen: async (transport: Transport, app: string): Promise<Transport> => {
@@ -25,11 +24,7 @@ export const LedgerUtils = {
         while (i < maxRetry) {
           // Reinstantiate the app with the new transport.
           // This is needed because the connection can be closed if app opened. (Maybe ledger's permission system handles dashboard, and each app differently.)
-          if (transport instanceof TransportWebHID) {
-            transport = await TransportWebHID.create();
-          } else {
-            transport = await TransportWebUSB.create();
-          }
+          transport = await TransportWebUSB.create();
 
           const appInfo = await getAppInfo(transport);
           if (

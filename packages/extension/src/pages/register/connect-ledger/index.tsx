@@ -8,7 +8,7 @@ import { useRegisterHeader } from "../components/header";
 import { Gutter } from "../../../components/gutter";
 import { Box } from "../../../components/box";
 import { XAxis, YAxis } from "../../../components/axis";
-import { Body1, H2, Subtitle1 } from "../../../components/typography";
+import { Body1, H2 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Stack } from "../../../components/stack";
 import { Button } from "../../../components/button";
@@ -22,8 +22,6 @@ import Eth from "@ledgerhq/hw-app-eth";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { LedgerUtils } from "../../../utils";
-import { Checkbox } from "../../../components/checkbox";
-import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -75,7 +73,7 @@ export const ConnectLedgerScene: FunctionComponent<{
       },
     });
 
-    const { chainStore, keyRingStore, uiConfigStore } = useStore();
+    const { chainStore, keyRingStore } = useStore();
 
     const navigate = useNavigate();
 
@@ -86,11 +84,8 @@ export const ConnectLedgerScene: FunctionComponent<{
       setIsLoading(true);
 
       let transport: Transport;
-
       try {
-        transport = uiConfigStore.useWebHIDLedger
-          ? await TransportWebHID.create()
-          : await TransportWebUSB.create();
+        transport = await TransportWebUSB.create();
       } catch {
         setStep("unknown");
         setIsLoading(false);
@@ -273,25 +268,6 @@ export const ConnectLedgerScene: FunctionComponent<{
             completed={step === "app"}
           />
         </Stack>
-
-        {window.navigator.hid ? (
-          <React.Fragment>
-            <Gutter size="0.5rem" />
-
-            <YAxis alignX="center">
-              <XAxis alignY="center">
-                <Checkbox
-                  checked={uiConfigStore.useWebHIDLedger}
-                  onChange={(checked) => {
-                    uiConfigStore.setUseWebHIDLedger(checked);
-                  }}
-                />
-                <Gutter size="0.5rem" />
-                <Subtitle1>Use webhid</Subtitle1>
-              </XAxis>
-            </YAxis>
-          </React.Fragment>
-        ) : null}
 
         <Gutter size="1.25rem" />
 
