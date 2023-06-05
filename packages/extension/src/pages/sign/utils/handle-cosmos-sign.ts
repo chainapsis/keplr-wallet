@@ -7,6 +7,7 @@ import { SignInteractionStore } from "@keplr-wallet/stores";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 
 export const handleCosmosPreSign = async (
+  useWebHID: boolean,
   interactionData: NonNullable<SignInteractionStore["waitingData"]>,
   signDocWrapper: SignDocWrapper
 ): Promise<Uint8Array | undefined> => {
@@ -39,6 +40,7 @@ export const handleCosmosPreSign = async (
         }
 
         return await connectAndSignEIP712WithLedger(
+          useWebHID,
           publicKey,
           bip44Path,
           signDocWrapper.aminoSignDoc,
@@ -65,6 +67,7 @@ export const handleCosmosPreSign = async (
       }
 
       return await connectAndSignWithLedger(
+        useWebHID,
         ledgerApp,
         publicKey,
         bip44Path,
