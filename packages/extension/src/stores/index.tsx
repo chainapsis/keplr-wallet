@@ -21,11 +21,15 @@ export const StoreProvider: FunctionComponent = ({ children }) => {
         if (keplr && keplr.__core__getAnalyticsId) {
           keplr.__core__getAnalyticsId().then((id) => {
             stores.analyticsStore.setUserId(id);
+            stores.analyticsStore.setUserProperties({
+              accountCount: stores.keyRingStore.keyInfos.length,
+              isDeveloperMode: stores.uiConfigStore.isDeveloper,
+            });
           });
         }
       }
     );
-  }, [stores.analyticsStore]);
+  }, [stores.analyticsStore, stores.uiConfigStore, stores.keyRingStore]);
 
   return (
     <storeContext.Provider value={stores}>{children}</storeContext.Provider>

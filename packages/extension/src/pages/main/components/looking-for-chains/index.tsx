@@ -35,7 +35,7 @@ export const LookingForChains: FunctionComponent<{
 export const LookingForChainItem: FunctionComponent<{
   chainInfo: ChainInfo;
 }> = observer(({ chainInfo }) => {
-  const { keyRingStore } = useStore();
+  const { analyticsStore, keyRingStore } = useStore();
 
   return (
     <Box
@@ -77,6 +77,11 @@ export const LookingForChainItem: FunctionComponent<{
           color="secondary"
           onClick={() => {
             if (keyRingStore.selectedKeyInfo) {
+              analyticsStore.logEvent("click_enableChain", {
+                chainId: chainInfo.chainId,
+                chainName: chainInfo.chainName,
+              });
+
               browser.tabs
                 .create({
                   url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,

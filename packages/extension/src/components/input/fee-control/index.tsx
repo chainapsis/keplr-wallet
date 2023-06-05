@@ -68,7 +68,7 @@ export const FeeControl: FunctionComponent<{
     gasSimulator,
     disableAutomaticFeeSet,
   }) => {
-    const { queriesStore, priceStore } = useStore();
+    const { analyticsStore, queriesStore, priceStore } = useStore();
 
     useLayoutEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -178,7 +178,10 @@ export const FeeControl: FunctionComponent<{
             feeConfig.uiProperties.error != null ||
             gasConfig.uiProperties.error != null
           }
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            analyticsStore.logEvent("click_txFeeSet");
+            setIsModalOpen(true);
+          }}
         >
           <Columns sum={1} alignY="center">
             <Columns sum={1} alignY="center">

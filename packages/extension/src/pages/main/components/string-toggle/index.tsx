@@ -4,6 +4,7 @@ import { Columns } from "../../../../components/column";
 import { ColorPalette } from "../../../../styles";
 import { Caption1, Caption2 } from "../../../../components/typography";
 import { Skeleton } from "../../../../components/skeleton";
+import { useStore } from "../../../../stores";
 
 export const StringToggleRadius = "12rem";
 
@@ -60,6 +61,17 @@ export const StringToggle: FunctionComponent<{
   setTabStatus: (tabStatus: TabStatus) => void;
   isNotReady?: boolean;
 }> = ({ tabStatus, setTabStatus, isNotReady }) => {
+  const { analyticsStore } = useStore();
+
+  const onClickTab = () => {
+    const newTabStatus: TabStatus =
+      tabStatus === "available" ? "staked" : "available";
+    analyticsStore.logEvent("click_main_tab", {
+      tabName: newTabStatus,
+    });
+    setTabStatus(newTabStatus);
+  };
+
   return (
     <Columns sum={1} alignY="center" columnAlign="center">
       {tabStatus === "available" ? (
@@ -68,16 +80,12 @@ export const StringToggle: FunctionComponent<{
             <Skeleton type="stringToggle" layer={1} isNotReady={isNotReady}>
               <Styles.Selected>Available</Styles.Selected>
             </Skeleton>
-            <Styles.UnSelected onClick={() => setTabStatus("staked")}>
-              Staked
-            </Styles.UnSelected>
+            <Styles.UnSelected onClick={onClickTab}>Staked</Styles.UnSelected>
           </Styles.Container>
         </Skeleton>
       ) : (
         <Styles.Container>
-          <Styles.UnSelected onClick={() => setTabStatus("available")}>
-            Available
-          </Styles.UnSelected>
+          <Styles.UnSelected onClick={onClickTab}>Available</Styles.UnSelected>
           <Styles.Selected>Staked</Styles.Selected>
         </Styles.Container>
       )}

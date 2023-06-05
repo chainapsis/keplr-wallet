@@ -104,8 +104,14 @@ const zeroDec = new Dec(0);
 
 export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
   ({ isNotReady }) => {
-    const { chainStore, accountStore, queriesStore, priceStore, keyRingStore } =
-      useStore();
+    const {
+      analyticsStore,
+      chainStore,
+      accountStore,
+      queriesStore,
+      priceStore,
+      keyRingStore,
+    } = useStore();
 
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -190,6 +196,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       keyRingStore.selectedKeyInfo.type === "ledger";
 
     const claimAll = () => {
+      analyticsStore.logEvent("click_claimAll");
+
       if (viewTokens.length > 0) {
         setIsExpanded(true);
       }
@@ -333,6 +341,13 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   },
                 },
                 {
+                  onBroadcasted: () => {
+                    analyticsStore.logEvent("complete_claim", {
+                      chainId: viewToken.chainInfo.chainId,
+                      chainName: viewToken.chainInfo.chainName,
+                      isClaimAll: true,
+                    });
+                  },
                   onFulfill: (tx: any) => {
                     // Tx가 성공한 이후에 rewards가 다시 쿼리되면서 여기서 빠지는게 의도인데...
                     // 쿼리하는 동안 시간차가 있기 때문에 훼이크로 그냥 1초 더 기다린다.
@@ -473,6 +488,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
           alignX="center"
           viewTokenCount={viewTokens.length}
           onClick={() => {
+            analyticsStore.logEvent("click_claimExpandButton");
             if (viewTokens.length > 0) {
               setIsExpanded(!isExpanded);
             }
@@ -525,7 +541,7 @@ const ClaimTokenItem: FunctionComponent<{
   viewToken: ViewToken;
   state: ClaimAllEachState;
 }> = observer(({ viewToken, state }) => {
-  const { accountStore, queriesStore } = useStore();
+  const { analyticsStore, accountStore, queriesStore } = useStore();
 
   const navigate = useNavigate();
   const notification = useNotification();
@@ -536,6 +552,11 @@ const ClaimTokenItem: FunctionComponent<{
   const defaultGasPerDelegation = 140000;
 
   const claim = async () => {
+    analyticsStore.logEvent("click_claim", {
+      chainId: viewToken.chainInfo.chainId,
+      chainName: viewToken.chainInfo.chainName,
+    });
+
     if (state.failedReason) {
       state.setFailedReason(undefined);
       return;
@@ -582,6 +603,12 @@ const ClaimTokenItem: FunctionComponent<{
         "",
         {},
         {
+          onBroadcasted: () => {
+            analyticsStore.logEvent("complete_claim", {
+              chainId: viewToken.chainInfo.chainId,
+              chainName: viewToken.chainInfo.chainName,
+            });
+          },
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {
               console.log(tx.log ?? tx.raw_log);
