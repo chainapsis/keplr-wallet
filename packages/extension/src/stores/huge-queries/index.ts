@@ -155,6 +155,14 @@ export class HugeQueriesStore {
   filterLowBalanceTokens = computedFn(
     (viewTokens: ViewToken[]): ViewToken[] => {
       return viewTokens.filter((viewToken) => {
+        // Hide the unknown ibc tokens.
+        if (
+          "paths" in viewToken.token.currency &&
+          !viewToken.token.currency.originCurrency
+        ) {
+          return false;
+        }
+
         const notSmallPrice =
           this.priceStore
             .calculatePrice(viewToken.token, "usd")
