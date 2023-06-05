@@ -21,15 +21,32 @@ export const StoreProvider: FunctionComponent = ({ children }) => {
         if (keplr && keplr.__core__getAnalyticsId) {
           keplr.__core__getAnalyticsId().then((id) => {
             stores.analyticsStore.setUserId(id);
-            stores.analyticsStore.setUserProperties({
-              accountCount: stores.keyRingStore.keyInfos.length,
-              isDeveloperMode: stores.uiConfigStore.isDeveloper,
-            });
           });
         }
       }
     );
-  }, [stores.analyticsStore, stores.uiConfigStore, stores.keyRingStore]);
+  }, [stores.analyticsStore]);
+
+  useEffect(() => {
+    if (!stores.keyRingStore.isInitialized) {
+      return;
+    }
+
+    if (!stores.uiConfigStore.isInitialized) {
+      return;
+    }
+
+    stores.analyticsStore.setUserProperties({
+      accountCount: stores.keyRingStore.keyInfos.length,
+      isDeveloperMode: stores.uiConfigStore.isDeveloper,
+    });
+  }, [
+    stores.analyticsStore,
+    stores.keyRingStore.isInitialized,
+    stores.keyRingStore.keyInfos.length,
+    stores.uiConfigStore.isDeveloper,
+    stores.uiConfigStore.isInitialized,
+  ]);
 
   return (
     <storeContext.Provider value={stores}>{children}</storeContext.Provider>
