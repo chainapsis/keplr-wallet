@@ -932,9 +932,9 @@ export class KeyRingService {
       chainInfo
     );
 
-    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vault.id, {
-      coinTypeTag: coinType,
-    });
+    if (this.needMnemonicKeyCoinTypeFinalize(vault.id, chainId)) {
+      this.finalizeMnemonicKeyCoinType(vault.id, chainId, coinType);
+    }
 
     return signature;
   }
