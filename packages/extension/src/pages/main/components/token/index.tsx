@@ -192,166 +192,149 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         }}
       >
         <Columns sum={1} gutter="0.5rem" alignY="center">
-          <Box maxWidth="50%" style={{ flexDirection: "row" }}>
-            <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
-              <ChainImageFallback
-                style={{
-                  width: "2rem",
-                  height: "2rem",
-                }}
-                src={viewToken.token.currency.coinImageUrl}
-                alt={viewToken.token.currency.coinDenom}
-              />
-            </Skeleton>
+          <Skeleton type="circle" layer={1} isNotReady={isNotReady}>
+            <ChainImageFallback
+              style={{
+                width: "2rem",
+                height: "2rem",
+              }}
+              src={viewToken.token.currency.coinImageUrl}
+              alt={viewToken.token.currency.coinDenom}
+            />
+          </Skeleton>
 
-            <Gutter size="0.75rem" />
+          <Gutter size="0.75rem" />
 
-            <Stack gutter="0.25rem">
-              <XAxis alignY="center">
-                <Skeleton
-                  layer={1}
-                  isNotReady={isNotReady}
-                  dummyMinWidth="3.25rem"
+          <Stack gutter="0.25rem">
+            <XAxis alignY="center">
+              <Skeleton
+                layer={1}
+                isNotReady={isNotReady}
+                dummyMinWidth="3.25rem"
+              >
+                <Subtitle2
+                  style={{
+                    wordBreak: "break-all",
+                  }}
                 >
-                  <Subtitle2
-                    style={{
-                      wordBreak: "break-all",
-                      display: "-webkit-box",
-                      WebkitBoxOrient: "vertical",
-                      WebkitLineClamp: 3,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {coinDenom}
-                  </Subtitle2>
-                </Skeleton>
+                  {coinDenom}
+                </Subtitle2>
+              </Skeleton>
 
-                {tag ? (
-                  <React.Fragment>
-                    <Gutter size="0.25rem" />
-                    <Box alignY="center" height="1px">
-                      <Tag text={tag.text} tooltip={tag.tooltip} />
-                    </Box>
-                  </React.Fragment>
-                ) : null}
-                {viewToken.isFetching ? (
-                  // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
-                  // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
-                  // 일괄적으로 로딩을 보여줄 필요가 없다.
-                  // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
-                  // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
-                  <DelayedLoadingRender isFetching={viewToken.isFetching}>
-                    <Box
-                      marginLeft="0.25rem"
-                      style={{
-                        color: ColorPalette["gray-300"],
-                      }}
-                    >
-                      <LoadingIcon width="1rem" height="1rem" />
-                    </Box>
-                  </DelayedLoadingRender>
-                ) : viewToken.error ? (
+              {tag ? (
+                <React.Fragment>
+                  <Gutter size="0.25rem" />
+                  <Box alignY="center" height="1px">
+                    <Tag text={tag.text} tooltip={tag.tooltip} />
+                  </Box>
+                </React.Fragment>
+              ) : null}
+              {viewToken.isFetching ? (
+                // 처음에는 무조건 로딩이 발생하는데 일반적으로 쿼리는 100ms 정도면 끝난다.
+                // 이정도면 유저가 별 문제를 느끼기 힘들기 때문에
+                // 일괄적으로 로딩을 보여줄 필요가 없다.
+                // 그러므로 로딩 상태가 500ms 이상 지속되면 로딩을 표시힌다.
+                // 근데 또 문제가 있어서 추가 사항이 있는데 그건 DelayedLoadingRender의 주석을 참고
+                <DelayedLoadingRender isFetching={viewToken.isFetching}>
                   <Box
                     marginLeft="0.25rem"
                     style={{
-                      color: ColorPalette["yellow-400"],
+                      color: ColorPalette["gray-300"],
                     }}
                   >
-                    <Tooltip content={viewToken.error.message}>
-                      <ErrorIcon size="1rem" />
-                    </Tooltip>
+                    <LoadingIcon width="1rem" height="1rem" />
                   </Box>
-                ) : undefined}
-              </XAxis>
+                </DelayedLoadingRender>
+              ) : viewToken.error ? (
+                <Box
+                  marginLeft="0.25rem"
+                  style={{
+                    color: ColorPalette["yellow-400"],
+                  }}
+                >
+                  <Tooltip content={viewToken.error.message}>
+                    <ErrorIcon size="1rem" />
+                  </Tooltip>
+                </Box>
+              ) : undefined}
+            </XAxis>
+            <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
+              <Caption1 style={{ color: ColorPalette["gray-300"] }}>
+                {isIBC
+                  ? `on ${viewToken.chainInfo.chainName}`
+                  : viewToken.chainInfo.chainName}
+              </Caption1>
+            </Skeleton>
+          </Stack>
+
+          <Column weight={1} />
+
+          <Columns sum={1} gutter="0.25rem" alignY="center">
+            <Stack gutter="0.25rem" alignX="right">
+              <Skeleton
+                layer={1}
+                isNotReady={isNotReady}
+                dummyMinWidth="3.25rem"
+              >
+                <Subtitle3>
+                  {viewToken.token
+                    .hideDenom(true)
+                    .maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .shrink(true)
+                    .toString()}
+                </Subtitle3>
+              </Skeleton>
               <Skeleton
                 layer={1}
                 isNotReady={isNotReady}
                 dummyMinWidth="4.5rem"
               >
-                <Caption1
-                  style={{
-                    color: ColorPalette["gray-300"],
-                  }}
-                >
-                  {isIBC
-                    ? `on ${viewToken.chainInfo.chainName}`
-                    : viewToken.chainInfo.chainName}
-                </Caption1>
+                {viewToken.error?.data &&
+                viewToken.error.data instanceof WrongViewingKeyError ? (
+                  <Box position="relative" alignX="right">
+                    <Subtitle3
+                      color={ColorPalette["gray-100"]}
+                      style={{
+                        textDecoration: "underline",
+                        position: "absolute",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Set your viewing key
+                    </Subtitle3>
+                    <Subtitle3
+                      style={{
+                        textDecoration: "underline",
+                        whiteSpace: "nowrap",
+                        opacity: 0,
+                      }}
+                    >
+                      &nbps;
+                    </Subtitle3>
+                  </Box>
+                ) : (
+                  <Subtitle3 color={ColorPalette["gray-300"]}>
+                    {(() => {
+                      if (altSentence) {
+                        return altSentence;
+                      }
+
+                      return pricePretty
+                        ? pricePretty.inequalitySymbol(true).toString()
+                        : "-";
+                    })()}
+                  </Subtitle3>
+                )}
               </Skeleton>
             </Stack>
-          </Box>
 
-          <Column weight={1} />
-
-          <Box maxWidth="50%">
-            <Columns sum={1} gutter="0.25rem" alignY="center">
-              <Stack gutter="0.25rem" alignX="right">
-                <Skeleton
-                  layer={1}
-                  isNotReady={isNotReady}
-                  dummyMinWidth="3.25rem"
-                >
-                  <Subtitle3 style={{ wordBreak: "break-all" }}>
-                    {viewToken.token
-                      .hideDenom(true)
-                      .maxDecimals(6)
-                      .inequalitySymbol(true)
-                      .shrink(true)
-                      .toString()}
-                  </Subtitle3>
-                </Skeleton>
-                <Skeleton
-                  layer={1}
-                  isNotReady={isNotReady}
-                  dummyMinWidth="4.5rem"
-                >
-                  {viewToken.error?.data &&
-                  viewToken.error.data instanceof WrongViewingKeyError ? (
-                    <Box position="relative" alignX="right">
-                      <Subtitle3
-                        color={ColorPalette["gray-100"]}
-                        style={{
-                          textDecoration: "underline",
-                          position: "absolute",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        Set your viewing key
-                      </Subtitle3>
-                      <Subtitle3
-                        style={{
-                          textDecoration: "underline",
-                          whiteSpace: "nowrap",
-                          opacity: 0,
-                        }}
-                      >
-                        &nbps;
-                      </Subtitle3>
-                    </Box>
-                  ) : (
-                    <Subtitle3 color={ColorPalette["gray-300"]}>
-                      {(() => {
-                        if (altSentence) {
-                          return altSentence;
-                        }
-
-                        return pricePretty
-                          ? pricePretty.inequalitySymbol(true).toString()
-                          : "-";
-                      })()}
-                    </Subtitle3>
-                  )}
-                </Skeleton>
-              </Stack>
-
-              {forChange ? (
-                <Styles.IconContainer>
-                  <ArrowRightIcon />
-                </Styles.IconContainer>
-              ) : null}
-            </Columns>
-          </Box>
+            {forChange ? (
+              <Styles.IconContainer>
+                <ArrowRightIcon />
+              </Styles.IconContainer>
+            ) : null}
+          </Columns>
         </Columns>
       </Styles.Container>
     );
