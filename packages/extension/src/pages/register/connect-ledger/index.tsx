@@ -24,6 +24,7 @@ import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { LedgerUtils } from "../../../utils";
 import { Checkbox } from "../../../components/checkbox";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import { useConfirm } from "../../../hooks/confirm";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -78,6 +79,7 @@ export const ConnectLedgerScene: FunctionComponent<{
     const { chainStore, keyRingStore, uiConfigStore } = useStore();
 
     const navigate = useNavigate();
+    const confirm = useConfirm();
 
     const [step, setStep] = useState<Step>("unknown");
     const [isLoading, setIsLoading] = useState(false);
@@ -274,24 +276,34 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
         </Stack>
 
-        {window.navigator.hid ? (
-          <React.Fragment>
-            <Gutter size="0.5rem" />
+        <Gutter size="0.5rem" />
+        <YAxis alignX="center">
+          <XAxis alignY="center">
+            <Checkbox
+              checked={uiConfigStore.useWebHIDLedger}
+              onChange={async (checked) => {
+                if (checked && !window.navigator.hid) {
+                  await confirm.confirm(
+                    "Unable to use Web HID",
+                    "Please enable ‘experimental web platform features’ to use Web HID",
+                    {
+                      forceYes: true,
+                    }
+                  );
+                  await browser.tabs.create({
+                    url: "chrome://flags/#enable-experimental-web-platform-features",
+                  });
+                  window.close();
+                  return;
+                }
 
-            <YAxis alignX="center">
-              <XAxis alignY="center">
-                <Checkbox
-                  checked={uiConfigStore.useWebHIDLedger}
-                  onChange={(checked) => {
-                    uiConfigStore.setUseWebHIDLedger(checked);
-                  }}
-                />
-                <Gutter size="0.5rem" />
-                <Subtitle1>Use webhid</Subtitle1>
-              </XAxis>
-            </YAxis>
-          </React.Fragment>
-        ) : null}
+                uiConfigStore.setUseWebHIDLedger(checked);
+              }}
+            />
+            <Gutter size="0.5rem" />
+            <Subtitle1>Use alternative USB connection method(HID)</Subtitle1>
+          </XAxis>
+        </YAxis>
 
         <Gutter size="1.25rem" />
 
