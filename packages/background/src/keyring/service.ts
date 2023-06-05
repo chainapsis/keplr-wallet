@@ -207,11 +207,18 @@ export class KeyRingService {
                 coinType != null &&
                 this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
               ) {
-                this.finalizeMnemonicKeyCoinType(
-                  vaultId,
-                  chainInfo.chainId,
-                  coinType
-                );
+                if (
+                  chainInfo.bip44.coinType === coinType ||
+                  (chainInfo.alternativeBIP44s ?? []).find(
+                    (path) => path.coinType === coinType
+                  )
+                ) {
+                  this.finalizeMnemonicKeyCoinType(
+                    vaultId,
+                    chainInfo.chainId,
+                    coinType
+                  );
+                }
               }
             }
           }
