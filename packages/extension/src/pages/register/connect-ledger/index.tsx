@@ -276,7 +276,7 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
         </Stack>
 
-        <Gutter size="0.5rem" />
+        <Gutter size="1.25rem" />
         <YAxis alignX="center">
           <XAxis alignY="center">
             <Checkbox
