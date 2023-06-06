@@ -8,7 +8,7 @@ import { useRegisterHeader } from "../components/header";
 import { Gutter } from "../../../components/gutter";
 import { Box } from "../../../components/box";
 import { XAxis, YAxis } from "../../../components/axis";
-import { Body1, H2, Subtitle1 } from "../../../components/typography";
+import { Body1, H2, Subtitle2 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Stack } from "../../../components/stack";
 import { Button } from "../../../components/button";
@@ -301,7 +301,9 @@ export const ConnectLedgerScene: FunctionComponent<{
               }}
             />
             <Gutter size="0.5rem" />
-            <Subtitle1>Use alternative USB connection method(HID)</Subtitle1>
+            <Subtitle2 color={ColorPalette["gray-300"]}>
+              Use alternative USB connection method(HID)
+            </Subtitle2>
           </XAxis>
         </YAxis>
 
