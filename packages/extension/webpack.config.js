@@ -12,6 +12,21 @@ const fs = require("fs");
 
 const isEnvDevelopment = process.env.NODE_ENV !== "production";
 const isEnvAnalyzer = process.env.ANALYZER === "true";
+
+const envDefaults = {
+  NODE_ENV: process.env.NODE_ENV,
+  PROD_AMPLITUDE_API_KEY: process.env["PROD_AMPLITUDE_API_KEY"] || "",
+  DEV_AMPLITUDE_API_KEY: process.env["DEV_AMPLITUDE_API_KEY"] || "",
+  KEPLR_EXT_ETHEREUM_ENDPOINT: process.env["KEPLR_EXT_ETHEREUM_ENDPOINT"] || "",
+  KEPLR_EXT_TRANSAK_API_KEY: process.env["KEPLR_EXT_TRANSAK_API_KEY"] || "",
+  KEPLR_EXT_MOONPAY_API_KEY: process.env["KEPLR_EXT_MOONPAY_API_KEY"] || "",
+  KEPLR_EXT_KADO_API_KEY: process.env["KEPLR_EXT_KADO_API_KEY"] || "",
+  KEPLR_EXT_COINGECKO_ENDPOINT:
+    process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] ||
+    "https://api.coingecko.com/api/v3",
+  KEPLR_EXT_COINGECKO_GETPRICE:
+    process.env["KEPLR_EXT_COINGECKO_GETPRICE"] || "/simple/price",
+};
 const commonResolve = () => ({
   extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss", ".svg", ".wasm"],
   alias: {
@@ -81,6 +96,10 @@ const sassRule = {
   ],
 };
 const tsRule = { test: /\.tsx?$/, loader: "ts-loader" };
+const wasmRule = {
+  test: /\.wasm$/,
+  type: "webassembly/async", // or 'webassembly/sync' for sync modules
+};
 const fileRule = {
   test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
   use: [
@@ -104,10 +123,10 @@ const extensionConfig = () => {
     // In development environment, webpack watch the file changes, and recompile
     watch: isEnvDevelopment,
     entry: {
-      popup: ["./src/bootstrap.tsx"],
-      background: ["./src/background/bootstrap.ts"],
-      blocklist: ["./src/pages/blocklist/bootstrap.tsx"],
-      ledgerGrant: ["./src/pages/ledger-grant/bootstrap.tsx"],
+      background: ["./src/background/background.ts"],
+      popup: ["./src/index.tsx"],
+      blocklist: ["./src/pages/blocklist/index.tsx"],
+      ledgerGrant: ["./src/pages/ledger-grant/index.tsx"],
       contentScripts: ["./src/content-scripts/content-scripts.ts"],
       injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
     },
@@ -153,9 +172,15 @@ const extensionConfig = () => {
     resolve: {
       ...commonResolve(),
       ...altResolve(),
+      fallback: {
+        process: false,
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        path: require.resolve("path-browserify"),
+      },
     },
     module: {
-      rules: [sassRule, tsRule, fileRule],
+      rules: [sassRule, tsRule, fileRule, wasmRule],
     },
     plugins: [
       // Remove all and write anyway
@@ -220,24 +245,19 @@ const extensionConfig = () => {
         ],
       }),
       new WriteFilePlugin(),
-      new webpack.EnvironmentPlugin([
-        "NODE_ENV",
-        "USER_ENV",
-        "PROD_AMPLITUDE_API_KEY",
-        "DEV_AMPLITUDE_API_KEY",
-        "KEPLR_EXT_ETHEREUM_ENDPOINT",
-        "KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY",
-        "KEPLR_EXT_TRANSAK_API_KEY",
-        "KEPLR_EXT_MOONPAY_API_KEY",
-        "KEPLR_EXT_KADO_API_KEY",
-        "KEPLR_EXT_COINGECKO_ENDPOINT",
-        "KEPLR_EXT_COINGECKO_GETPRICE",
-      ]),
+      new webpack.EnvironmentPlugin(envDefaults),
       new BundleAnalyzerPlugin({
         analyzerMode: isEnvAnalyzer ? "server" : "disabled",
       }),
-      new webpack.IgnorePlugin(/^(fs|process)$/),
+      new webpack.ProvidePlugin({
+        process: "process/browser",
+        Buffer: ["buffer", "Buffer"],
+      }),
+      new webpack.IgnorePlugin({ resourceRegExp: /^(fs|process)$/ }),
     ],
+    experiments: {
+      asyncWebAssembly: true,
+    },
   };
 };
 

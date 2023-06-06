@@ -11,6 +11,12 @@ import {
   ADDITIONAL_INTL_MESSAGES,
 } from "alt-sign-in";
 
+export const KeplrExtMoonPayAPIKey =
+  process.env["KEPLR_EXT_MOONPAY_API_KEY"] || "";
+export const KeplrExtTransakAPIKey =
+  process.env["KEPLR_EXT_TRANSAK_API_KEY"] || "";
+export const KeplrExtKadoAPIKey = process.env["KEPLR_EXT_KADO_API_KEY"] || "";
+
 export const CoinGeckoAPIEndPoint =
   process.env["KEPLR_EXT_COINGECKO_ENDPOINT"] ||
   "https://api.coingecko.com/api/v3";
@@ -106,9 +112,6 @@ export const AdditionalSignInPrepend:
   | undefined = ADDITIONAL_SIGN_IN_PREPEND;
 
 export const AdditionalIntlMessages: IntlMessages = ADDITIONAL_INTL_MESSAGES;
-
-export const LegacyAmplitudeApiKey =
-  process.env["KEPLR_EXT_LEGACY_AMPLITUDE_API_KEY"] || "";
 
 export const AmplitudeApiKey =
   process.env.NODE_ENV === "production"

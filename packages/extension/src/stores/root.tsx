@@ -8,7 +8,6 @@ import {
   FiatCurrencies,
   ICNSFrontendLink,
   ICNSInfo,
-  LegacyAmplitudeApiKey,
 } from "../config.ui";
 import {
   AccountStore,
@@ -433,11 +432,11 @@ export class RootStore {
         },
       },
       (() => {
-        if (!LegacyAmplitudeApiKey) {
+        if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
           const amplitudeClient = Amplitude.getInstance("legacy");
-          amplitudeClient.init(LegacyAmplitudeApiKey, undefined, {
+          amplitudeClient.init(AmplitudeApiKey, undefined, {
             saveEvents: true,
             platform: "Extension",
           });

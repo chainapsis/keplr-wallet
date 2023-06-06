@@ -2,9 +2,10 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import React, { FunctionComponent } from "react";
 import { URLTempAllowMsg } from "@keplr-wallet/background";
+import ReactDOM from "react-dom";
 import style from "./style.module.scss";
 
-const BlocklistPage: FunctionComponent = () => {
+export const BlocklistPage: FunctionComponent = () => {
   const origin =
     new URLSearchParams(window.location.search).get("origin") || "";
 
@@ -39,5 +40,4 @@ const BlocklistPage: FunctionComponent = () => {
   );
 };
 
-// eslint-disable-next-line import/no-default-export
-export default BlocklistPage;
+ReactDOM.render(<BlocklistPage />, document.getElementById("app"));

@@ -8,6 +8,7 @@ import {
   LedgerWebHIDIniter,
   LedgerWebUSBIniter,
 } from "@keplr-wallet/background";
+import ReactDOM from "react-dom";
 import style from "./style.module.scss";
 import { Buffer } from "buffer/";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
@@ -129,7 +130,7 @@ const FailedLoading: FunctionComponent = () => {
   );
 };
 
-const LedgerGrantFullScreenPage: FunctionComponent = () => {
+export const LedgerGrantFullScreenPage: FunctionComponent = () => {
   const request: {
     app: LedgerApp;
     cosmosLikeApp: string;
@@ -301,5 +302,4 @@ const LedgerGrantFullScreenPage: FunctionComponent = () => {
   );
 };
 
-// eslint-disable-next-line import/no-default-export
-export default LedgerGrantFullScreenPage;
+ReactDOM.render(<LedgerGrantFullScreenPage />, document.getElementById("app"));

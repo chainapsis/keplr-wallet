@@ -1,7 +1,13 @@
 import Axios from "axios";
 import { useEffect, useState } from "react";
 
-import { FiatOnRampServiceInfo, FiatOnRampServiceInfos } from "../config.ui";
+import {
+  FiatOnRampServiceInfo,
+  FiatOnRampServiceInfos,
+  KeplrExtKadoAPIKey,
+  KeplrExtMoonPayAPIKey,
+  KeplrExtTransakAPIKey,
+} from "../config.ui";
 import { useStore } from "../stores";
 
 export interface BuySupportServiceInfo extends FiatOnRampServiceInfo {
@@ -46,8 +52,7 @@ export const useBuy = () => {
         switch (serviceInfo.serviceId) {
           case "moonpay":
             return {
-              apiKey:
-                process.env["KEPLR_EXT_MOONPAY_API_KEY"] ?? serviceInfo.apiKey,
+              apiKey: KeplrExtMoonPayAPIKey ?? serviceInfo.apiKey,
               showWalletAddressForm: "true",
               walletAddress: encodeURIComponent(
                 JSON.stringify({
@@ -58,16 +63,14 @@ export const useBuy = () => {
             };
           case "transak":
             return {
-              apiKey:
-                process.env["KEPLR_EXT_TRANSAK_API_KEY"] ?? serviceInfo.apiKey,
+              apiKey: KeplrExtTransakAPIKey ?? serviceInfo.apiKey,
               hideMenu: "true",
               walletAddress: currentChainAccount.bech32Address ?? "",
               cryptoCurrencyCode: currentChainInfo.stakeCurrency.coinDenom,
             };
           case "kado":
             return {
-              apiKey:
-                process.env["KEPLR_EXT_KADO_API_KEY"] ?? serviceInfo.apiKey,
+              apiKey: KeplrExtKadoAPIKey ?? serviceInfo.apiKey,
               product: "BUY",
               networkList: chainStore.chainInfos
                 .filter((chainInfo) =>
