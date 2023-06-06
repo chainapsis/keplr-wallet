@@ -218,6 +218,25 @@ export class KeyRingService {
                     chainInfo.chainId,
                     coinType
                   );
+                } else {
+                  // Add some info for handling further debugging or migration.
+                  const prev =
+                    (await this.kvStore.get<
+                      {
+                        chainId: string;
+                        coinType: number;
+                      }[]
+                    >("__migrate_skip_coin_type")) || [];
+                  prev.push({
+                    chainId: chainInfo.chainId,
+                    coinType,
+                  });
+                  await this.kvStore.set<
+                    {
+                      chainId: string;
+                      coinType: number;
+                    }[]
+                  >("__migrate_skip_coin_type", prev);
                 }
               }
             }
