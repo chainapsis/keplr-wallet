@@ -316,8 +316,6 @@ export class CosmosAccountImpl {
       }
     }
 
-    console.log(onTxEvents, onBroadcasted, onFulfill);
-
     if (this.txOpts.preTxEvents?.onBroadcasted) {
       this.txOpts.preTxEvents.onBroadcasted(this.chainId, txHash);
     }
