@@ -42,7 +42,13 @@ const Styles = {
 export const CopyAddressModal: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
-  const { chainStore, accountStore, keyRingStore, uiConfigStore } = useStore();
+  const {
+    analyticsStore,
+    chainStore,
+    accountStore,
+    keyRingStore,
+    uiConfigStore,
+  } = useStore();
 
   const [search, setSearch] = useState("");
 
@@ -231,6 +237,10 @@ export const CopyAddressModal: FunctionComponent<{
                 }}
                 blockInteraction={hasCopied}
                 afterCopied={() => {
+                  analyticsStore.logEvent("click_copyAddress_copy", {
+                    chainId: address.chainInfo.chainId,
+                    chainName: address.chainInfo.chainName,
+                  });
                   setHasCopied(true);
 
                   setTimeout(() => {
@@ -281,6 +291,8 @@ export const ChainAddressItem: FunctionComponent<{
   blockInteraction,
   afterCopied,
 }) => {
+  const { analyticsStore } = useStore();
+
   const [hasCopied, setHasCopied] = useState(false);
 
   return (
@@ -328,7 +340,15 @@ export const ChainAddressItem: FunctionComponent<{
               return;
             }
 
-            setBookmarked(!isBookmarked);
+            const newIsBookmarked = !isBookmarked;
+
+            analyticsStore.logEvent("click_favoriteChain", {
+              chainId: chainInfo.chainId,
+              chainName: chainInfo.chainName,
+              isFavorite: newIsBookmarked,
+            });
+
+            setBookmarked(newIsBookmarked);
           }}
         >
           <StarIcon width="1.25rem" height="1.25rem" />

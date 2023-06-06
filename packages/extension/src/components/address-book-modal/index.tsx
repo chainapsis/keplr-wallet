@@ -45,7 +45,7 @@ export const AddressBookModal: FunctionComponent<{
   recipientConfig: IRecipientConfig;
   memoConfig: IMemoConfig;
 }> = observer(({ isOpen, close, historyType, recipientConfig, memoConfig }) => {
-  const { uiConfigStore, keyRingStore } = useStore();
+  const { analyticsStore, uiConfigStore, keyRingStore } = useStore();
 
   // TODO: Implement "recent"
   const [type, setType] = useState<Type>("recent");
@@ -167,6 +167,9 @@ export const AddressBookModal: FunctionComponent<{
             ]}
             selectedKey={type}
             onSelect={(key) => {
+              analyticsStore.logEvent("click_addressBook_tab", {
+                tabName: key,
+              });
               setType(key as Type);
             }}
           />

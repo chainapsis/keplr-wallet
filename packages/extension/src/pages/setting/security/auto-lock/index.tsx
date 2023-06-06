@@ -44,18 +44,24 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
   const watchTimer = watch("timer");
   const watchTimerParsed = parseInt(watchTimer);
 
-  const animDivRef = useRef<HTMLDivElement | null>(null);
+  const [lockOnSleep, setLockOnSleep] = useState(false);
 
   useEffect(() => {
-    const msg = new GetAutoLockAccountDurationMsg();
     new InExtensionMessageRequester()
-      .sendMessage(BACKGROUND_PORT, msg)
+      .sendMessage(BACKGROUND_PORT, new GetAutoLockAccountDurationMsg())
       .then(function (duration) {
         setValue("timer", Math.floor(duration / 60000).toString());
       });
+
+    new InExtensionMessageRequester()
+      .sendMessage(BACKGROUND_PORT, new GetLockOnSleepMsg())
+      .then((lockOnSleep) => {
+        setLockOnSleep(lockOnSleep);
+      });
   }, [setValue]);
 
-  const [lockOnSleep, setLockOnSleep] = useState(false);
+  const animDivRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     setFocus("timer");
 
@@ -72,13 +78,6 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
         anim.destroy();
       };
     }
-
-    const msg = new GetLockOnSleepMsg();
-    new InExtensionMessageRequester()
-      .sendMessage(BACKGROUND_PORT, msg)
-      .then((lockOnSleep) => {
-        setLockOnSleep(lockOnSleep);
-      });
   }, []);
 
   return (
@@ -104,17 +103,23 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
           );
 
           if (duration === 0) {
-            const msg = new SetLockOnSleepMsg(lockOnSleep);
             await new InExtensionMessageRequester().sendMessage(
               BACKGROUND_PORT,
-              msg
+              new UpdateAutoLockAccountDurationMsg(0)
+            );
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              new SetLockOnSleepMsg(lockOnSleep)
             );
           }
         } else {
-          const msg = new SetLockOnSleepMsg(lockOnSleep);
           await new InExtensionMessageRequester().sendMessage(
             BACKGROUND_PORT,
-            msg
+            new UpdateAutoLockAccountDurationMsg(0)
+          );
+          await new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            new SetLockOnSleepMsg(lockOnSleep)
           );
         }
 

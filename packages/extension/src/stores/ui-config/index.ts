@@ -21,6 +21,8 @@ import { MessageRequester } from "@keplr-wallet/router";
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
   hideLowBalance: boolean;
+
+  useWebHIDLedger: boolean;
 }
 
 export class UIConfigStore {
@@ -36,6 +38,8 @@ export class UIConfigStore {
   protected _options: UIConfigOptions = {
     isDeveloperMode: false,
     hideLowBalance: false,
+
+    useWebHIDLedger: false,
   };
 
   protected _isBeta: boolean;
@@ -157,6 +161,19 @@ export class UIConfigStore {
   @action
   setHideLowBalance(value: boolean) {
     this.options.hideLowBalance = value;
+  }
+
+  get useWebHIDLedger(): boolean {
+    if (!window.navigator.hid) {
+      return false;
+    }
+
+    return this.options.useWebHIDLedger;
+  }
+
+  @action
+  setUseWebHIDLedger(value: boolean) {
+    this.options.useWebHIDLedger = value;
   }
 
   @computed

@@ -41,7 +41,7 @@ const Styles = {
 };
 
 export const SendAmountPage: FunctionComponent = observer(() => {
-  const { accountStore, chainStore, queriesStore } = useStore();
+  const { analyticsStore, accountStore, chainStore, queriesStore } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -337,6 +337,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             onClick={async (e) => {
               e.preventDefault();
 
+              analyticsStore.logEvent("click_popOutButton");
               const url = window.location.href + "&detached=true";
 
               await openPopupWindow(url, undefined);

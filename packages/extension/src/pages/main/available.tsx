@@ -61,11 +61,12 @@ export const AvailableTabView: FunctionComponent<{
     });
   }, [allBalances, trimSearch]);
 
+  const hasLowBalanceTokens =
+    hugeQueriesStore.filterLowBalanceTokens(allBalances).length > 0;
   const lowBalanceFilteredAllBalancesSearchFiltered =
     hugeQueriesStore.filterLowBalanceTokens(_allBalancesSearchFiltered);
   const allBalancesSearchFiltered =
-    uiConfigStore.isHideLowBalance &&
-    lowBalanceFilteredAllBalancesSearchFiltered.length > 0
+    uiConfigStore.isHideLowBalance && hasLowBalanceTokens
       ? lowBalanceFilteredAllBalancesSearchFiltered
       : _allBalancesSearchFiltered;
 
@@ -171,8 +172,7 @@ export const AvailableTabView: FunctionComponent<{
                         title={title}
                         tooltip={tooltip}
                         right={
-                          lowBalanceFilteredAllBalancesSearchFiltered.length >
-                          0 ? (
+                          hasLowBalanceTokens ? (
                             <React.Fragment>
                               <Caption2
                                 style={{ cursor: "pointer" }}

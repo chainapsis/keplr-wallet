@@ -27,6 +27,27 @@ export const StoreProvider: FunctionComponent = ({ children }) => {
     );
   }, [stores.analyticsStore]);
 
+  useEffect(() => {
+    if (!stores.keyRingStore.isInitialized) {
+      return;
+    }
+
+    if (!stores.uiConfigStore.isInitialized) {
+      return;
+    }
+
+    stores.analyticsStore.setUserProperties({
+      accountCount: stores.keyRingStore.keyInfos.length,
+      isDeveloperMode: stores.uiConfigStore.isDeveloper,
+    });
+  }, [
+    stores.analyticsStore,
+    stores.keyRingStore.isInitialized,
+    stores.keyRingStore.keyInfos.length,
+    stores.uiConfigStore.isDeveloper,
+    stores.uiConfigStore.isInitialized,
+  ]);
+
   return (
     <storeContext.Provider value={stores}>{children}</storeContext.Provider>
   );

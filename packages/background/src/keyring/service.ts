@@ -207,11 +207,37 @@ export class KeyRingService {
                 coinType != null &&
                 this.needMnemonicKeyCoinTypeFinalize(vaultId, chainInfo.chainId)
               ) {
-                this.finalizeMnemonicKeyCoinType(
-                  vaultId,
-                  chainInfo.chainId,
-                  coinType
-                );
+                if (
+                  chainInfo.bip44.coinType === coinType ||
+                  (chainInfo.alternativeBIP44s ?? []).find(
+                    (path) => path.coinType === coinType
+                  )
+                ) {
+                  this.finalizeMnemonicKeyCoinType(
+                    vaultId,
+                    chainInfo.chainId,
+                    coinType
+                  );
+                } else {
+                  // Add some info for handling further debugging or migration.
+                  const prev =
+                    (await this.kvStore.get<
+                      {
+                        chainId: string;
+                        coinType: number;
+                      }[]
+                    >("__migrate_skip_coin_type")) || [];
+                  prev.push({
+                    chainId: chainInfo.chainId,
+                    coinType,
+                  });
+                  await this.kvStore.set<
+                    {
+                      chainId: string;
+                      coinType: number;
+                    }[]
+                  >("__migrate_skip_coin_type", prev);
+                }
               }
             }
           }
@@ -925,9 +951,9 @@ export class KeyRingService {
       chainInfo
     );
 
-    this.vaultService.setAndMergeInsensitiveToVault("keyRing", vault.id, {
-      coinTypeTag: coinType,
-    });
+    if (this.needMnemonicKeyCoinTypeFinalize(vault.id, chainId)) {
+      this.finalizeMnemonicKeyCoinType(vault.id, chainId, coinType);
+    }
 
     return signature;
   }

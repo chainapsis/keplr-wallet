@@ -1,10 +1,5 @@
 import { action, computed, flow, makeObservable, observable } from "mobx";
-import {
-  AppCurrency,
-  Keplr,
-  KeplrSignOptions,
-  StdFee,
-} from "@keplr-wallet/types";
+import { AppCurrency, Keplr } from "@keplr-wallet/types";
 import { ChainGetter } from "../chain";
 import { DenomHelper, toGenerator } from "@keplr-wallet/common";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -60,22 +55,6 @@ export class AccountSetBase {
 
   protected hasInited = false;
 
-  protected sendTokenFns: ((
-    amount: string,
-    currency: AppCurrency,
-    recipient: string,
-    memo: string,
-    stdFee: Partial<StdFee>,
-    signOptions?: KeplrSignOptions,
-    onTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcastFailed?: (e?: Error) => void;
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-  ) => Promise<boolean>)[] = [];
-
   protected makeSendTokenTxFns: ((
     amount: string,
     currency: AppCurrency,
@@ -103,25 +82,6 @@ export class AccountSetBase {
 
   getKeplr(): Promise<Keplr | undefined> {
     return this.sharedContext.getKeplr();
-  }
-
-  registerSendTokenFn(
-    fn: (
-      amount: string,
-      currency: AppCurrency,
-      recipient: string,
-      memo: string,
-      stdFee: Partial<StdFee>,
-      signOptions?: KeplrSignOptions,
-      onTxEvents?:
-        | ((tx: any) => void)
-        | {
-            onBroadcasted?: (txHash: Uint8Array) => void;
-            onFulfill?: (tx: any) => void;
-          }
-    ) => Promise<boolean>
-  ) {
-    this.sendTokenFns.push(fn);
   }
 
   registerMakeSendTokenFn(
@@ -274,43 +234,6 @@ export class AccountSetBase {
       const res = fn(amount, currency, recipient);
       if (res) {
         return res;
-      }
-    }
-
-    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-
-    throw new Error(`Unsupported type of currency (${denomHelper.type})`);
-  }
-
-  async sendToken(
-    amount: string,
-    currency: AppCurrency,
-    recipient: string,
-    memo: string = "",
-    stdFee: Partial<StdFee> = {},
-    signOptions?: KeplrSignOptions,
-    onTxEvents?:
-      | ((tx: any) => void)
-      | {
-          onBroadcasted?: (txHash: Uint8Array) => void;
-          onFulfill?: (tx: any) => void;
-        }
-  ) {
-    for (let i = 0; i < this.sendTokenFns.length; i++) {
-      const fn = this.sendTokenFns[i];
-
-      if (
-        await fn(
-          amount,
-          currency,
-          recipient,
-          memo,
-          stdFee,
-          signOptions,
-          onTxEvents
-        )
-      ) {
-        return;
       }
     }
 

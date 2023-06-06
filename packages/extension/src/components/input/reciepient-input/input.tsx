@@ -12,6 +12,7 @@ import { Box } from "../../box";
 import { AddressBookModal } from "../../address-book-modal";
 import { IconButton } from "../../icon-button";
 import { ColorPalette } from "../../../styles";
+import { useStore } from "../../../stores";
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
@@ -36,6 +37,7 @@ function numOfCharacter(str: string, c: string): number {
 
 export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
   (props, ref) => {
+    const { analyticsStore } = useStore();
     const { recipientConfig, memoConfig } = props;
 
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
@@ -84,7 +86,10 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
           right={
             memoConfig ? (
               <IconButton
-                onClick={() => setIsAddressBookModalOpen(true)}
+                onClick={() => {
+                  analyticsStore.logEvent("click_addressBookButton");
+                  setIsAddressBookModalOpen(true);
+                }}
                 hoverColor={ColorPalette["gray-500"]}
                 padding="0.25rem"
               >

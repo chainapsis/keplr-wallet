@@ -48,11 +48,10 @@ import {
 import { APP_PORT } from "@keplr-wallet/router";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { UIConfigStore } from "./ui-config";
-import { FeeType } from "@keplr-wallet/hooks";
 import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
-import Amplitude from "amplitude-js";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
+import { ExtensionAnalyticsClient } from "../analytics";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -94,20 +93,21 @@ export class RootStore {
   public readonly analyticsStore: AnalyticsStore<
     {
       chainId?: string;
+      chainIds?: string[];
+      chainIdentifier?: string;
+      chainIdentifiers?: string[];
       chainName?: string;
-      toChainId?: string;
-      toChainName?: string;
-      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
-      feeType?: FeeType | undefined;
-      isIbc?: boolean;
-      rpc?: string;
-      rest?: string;
+      chainNames?: string[];
+      inputValue?: string;
+      isFavorite?: boolean;
+      onRampProvider?: string;
+      pageName?: string;
+      tabName?: string;
+      isClaimAll?: boolean;
     },
     {
-      registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";
-      accountType?: "mnemonic" | "privateKey" | "ledger" | "keystone";
-      currency?: string;
-      language?: string;
+      accountCount?: number;
+      isDeveloperMode?: boolean;
     }
   >;
 
@@ -378,32 +378,26 @@ export class RootStore {
         if (!AmplitudeApiKey) {
           return new NoopAnalyticsClient();
         } else {
-          const amplitudeClient = Amplitude.getInstance();
-          amplitudeClient.init(AmplitudeApiKey, undefined, {
-            saveEvents: true,
-            platform: "Extension",
-          });
-
-          return amplitudeClient;
+          return new ExtensionAnalyticsClient(AmplitudeApiKey);
         }
       })(),
       {
         logEvent: (eventName, eventProperties) => {
-          if (eventProperties?.chainId || eventProperties?.toChainId) {
+          if (eventProperties?.chainId || eventProperties?.chainIds) {
             eventProperties = {
               ...eventProperties,
             };
 
             if (eventProperties.chainId) {
-              eventProperties.chainId = ChainIdHelper.parse(
+              eventProperties.chainIdentifier = ChainIdHelper.parse(
                 eventProperties.chainId
               ).identifier;
             }
 
-            if (eventProperties.toChainId) {
-              eventProperties.toChainId = ChainIdHelper.parse(
-                eventProperties.toChainId
-              ).identifier;
+            if (eventProperties.chainIds) {
+              eventProperties.chainIdentifiers = eventProperties.chainIds.map(
+                (chainId) => ChainIdHelper.parse(chainId).identifier
+              );
             }
           }
 

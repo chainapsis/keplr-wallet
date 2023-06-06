@@ -206,9 +206,15 @@ const ServiceItem: FunctionComponent<{
   serviceInfo: FiatOnRampServiceInfo & { buyUrl?: string };
   close: () => void;
 }> = ({ serviceInfo, close }) => {
+  const { analyticsStore } = useStore();
+
   return (
     <Styles.ItemContainer
       onClick={async () => {
+        analyticsStore.logEvent("click_buy_onrampProvider", {
+          onRampProvider: serviceInfo.serviceName,
+        });
+
         await browser.tabs.create({
           url: serviceInfo.buyUrl,
         });

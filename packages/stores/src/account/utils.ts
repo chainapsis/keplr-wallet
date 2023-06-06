@@ -12,12 +12,14 @@ export function txEventsWithPreOnFulfill(
   preOnTxEvents:
     | ((tx: any) => void)
     | {
+        onBroadcastFailed?: (e?: Error) => void;
         onBroadcasted?: (txHash: Uint8Array) => void;
         onFulfill?: (tx: any) => void;
       }
     | undefined
 ):
   | {
+      onBroadcastFailed?: (e?: Error) => void;
       onBroadcasted?: (txHash: Uint8Array) => void;
       onFulfill?: (tx: any) => void;
     }
@@ -44,11 +46,11 @@ export function txEventsWithPreOnFulfill(
       : preOnTxEvents.onFulfill
     : undefined;
 
-  if (!onBroadcasted && !onFulfill && !onPreBroadcasted && !onPreFulfill) {
-    return undefined;
-  }
-
   return {
+    onBroadcastFailed:
+      typeof preOnTxEvents === "function"
+        ? undefined
+        : preOnTxEvents?.onBroadcastFailed,
     onBroadcasted:
       onBroadcasted || onPreBroadcasted
         ? (txHash: Uint8Array) => {

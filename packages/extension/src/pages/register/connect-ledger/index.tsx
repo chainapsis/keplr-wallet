@@ -8,7 +8,7 @@ import { useRegisterHeader } from "../components/header";
 import { Gutter } from "../../../components/gutter";
 import { Box } from "../../../components/box";
 import { XAxis, YAxis } from "../../../components/axis";
-import { Body1, H2 } from "../../../components/typography";
+import { Body1, H2, Subtitle2 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Stack } from "../../../components/stack";
 import { Button } from "../../../components/button";
@@ -22,6 +22,9 @@ import Eth from "@ledgerhq/hw-app-eth";
 import { Buffer } from "buffer/";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { LedgerUtils } from "../../../utils";
+import { Checkbox } from "../../../components/checkbox";
+import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import { useConfirm } from "../../../hooks/confirm";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -73,9 +76,10 @@ export const ConnectLedgerScene: FunctionComponent<{
       },
     });
 
-    const { chainStore, keyRingStore } = useStore();
+    const { chainStore, keyRingStore, uiConfigStore } = useStore();
 
     const navigate = useNavigate();
+    const confirm = useConfirm();
 
     const [step, setStep] = useState<Step>("unknown");
     const [isLoading, setIsLoading] = useState(false);
@@ -84,8 +88,11 @@ export const ConnectLedgerScene: FunctionComponent<{
       setIsLoading(true);
 
       let transport: Transport;
+
       try {
-        transport = await TransportWebUSB.create();
+        transport = uiConfigStore.useWebHIDLedger
+          ? await TransportWebHID.create()
+          : await TransportWebUSB.create();
       } catch {
         setStep("unknown");
         setIsLoading(false);
@@ -268,6 +275,37 @@ export const ConnectLedgerScene: FunctionComponent<{
             completed={step === "app"}
           />
         </Stack>
+
+        <Gutter size="1.25rem" />
+        <YAxis alignX="center">
+          <XAxis alignY="center">
+            <Checkbox
+              checked={uiConfigStore.useWebHIDLedger}
+              onChange={async (checked) => {
+                if (checked && !window.navigator.hid) {
+                  await confirm.confirm(
+                    "Unable to use Web HID",
+                    "Please enable ‘experimental web platform features’ to use Web HID",
+                    {
+                      forceYes: true,
+                    }
+                  );
+                  await browser.tabs.create({
+                    url: "chrome://flags/#enable-experimental-web-platform-features",
+                  });
+                  window.close();
+                  return;
+                }
+
+                uiConfigStore.setUseWebHIDLedger(checked);
+              }}
+            />
+            <Gutter size="0.5rem" />
+            <Subtitle2 color={ColorPalette["gray-300"]}>
+              Use alternative USB connection method(HID)
+            </Subtitle2>
+          </XAxis>
+        </YAxis>
 
         <Gutter size="1.25rem" />
 
