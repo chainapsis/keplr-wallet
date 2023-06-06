@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useLayoutEffect, useState } from "react";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { Gutter } from "../../../components/gutter";
 import { GuideBox } from "../../../components/guide-box";
@@ -18,6 +18,25 @@ export const LedgerGuideBox: FunctionComponent<{
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;
 }> = ({ isLedgerInteracting, ledgerInteractingError, interactionData }) => {
+  const [transportErrorCount, setTransportErrorCount] = useState(0);
+
+  useLayoutEffect(() => {
+    if (ledgerInteractingError) {
+      if (
+        ledgerInteractingError instanceof KeplrError &&
+        ledgerInteractingError.module === ErrModule
+      ) {
+        switch (ledgerInteractingError.code) {
+          case ErrFailedInit:
+            setTransportErrorCount((c) => c + 1);
+            break;
+          default:
+            setTransportErrorCount(0);
+        }
+      }
+    }
+  }, [ledgerInteractingError]);
+
   return (
     <VerticalCollapseTransition
       collapsed={!isLedgerInteracting && ledgerInteractingError == null}
@@ -32,11 +51,45 @@ export const LedgerGuideBox: FunctionComponent<{
           ) {
             switch (ledgerInteractingError.code) {
               case ErrFailedInit:
+                if (transportErrorCount < 3) {
+                  return (
+                    <GuideBox
+                      color="warning"
+                      title="Error"
+                      paragraph="Connect and unlock your Ledger device."
+                    />
+                  );
+                }
+
                 return (
                   <GuideBox
                     color="warning"
                     title="Error"
-                    paragraph="Connect and unlock your Ledger device."
+                    paragraph={
+                      <React.Fragment>
+                        Keplr may have lost its USB permission by an unknown
+                        reason. Visit{" "}
+                        <a
+                          style={{
+                            cursor: "pointer",
+                            fontWeight: "bold",
+                          }}
+                          onClick={async (e) => {
+                            e.preventDefault();
+
+                            await browser.tabs.create({
+                              url: "/ledger-grant.html",
+                            });
+
+                            window.close();
+                            return;
+                          }}
+                        >
+                          this page
+                        </a>{" "}
+                        to regain the permission.
+                      </React.Fragment>
+                    }
                   />
                 );
               case ErrCodeDeviceLocked:

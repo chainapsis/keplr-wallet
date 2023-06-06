@@ -77,10 +77,9 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
         </RegisterH2>
         <Gutter size="1rem" />
         <H3 color={ColorPalette["gray-300"]}>
-          We’ve identified a Chrome related bug where attempting to connect a
-          hardware wallet in a popup may cause browser to crash. As a temporary
-          measure, you can give Ledger permission in this page. Click the button
-          below then try again.
+          You need to reapprove connection to your Ledger. Select the
+          appropriate app, and after successfully connecting with your Ledger
+          device, close this page and retry your previous transaction (signing).
         </H3>
 
         <Gutter size="1.625rem" />
