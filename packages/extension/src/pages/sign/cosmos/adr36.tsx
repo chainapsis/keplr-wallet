@@ -19,7 +19,7 @@ import { GuideBox } from "../../../components/guide-box";
 import { IconProps } from "../../../components/icon/types";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
-  const { chainStore, signInteractionStore } = useStore();
+  const { chainStore, signInteractionStore, uiConfigStore } = useStore();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -128,6 +128,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
             try {
               const signature = await handleCosmosPreSign(
+                uiConfigStore.useWebHIDLedger,
                 signInteractionStore.waitingData,
                 signDocWrapper
               );

@@ -55,6 +55,7 @@ module.exports = {
     popup: ["./src/index.tsx"],
     register: ["./src/register.tsx"],
     blocklist: ["./src/pages/blocklist/index.tsx"],
+    ledgerGrant: ["./src/ledger-grant.tsx"],
     background: ["./src/background/background.ts"],
     contentScripts: ["./src/content-scripts/content-scripts.ts"],
     injectedScript: ["./src/content-scripts/inject/injected-script.ts"],
@@ -95,6 +96,11 @@ module.exports = {
               maxAsyncRequests: 100,
             },
             blocklist: {
+              maxSize: 3_000_000,
+              maxInitialRequests: 100,
+              maxAsyncRequests: 100,
+            },
+            ledgerGrant: {
               maxSize: 3_000_000,
               maxInitialRequests: 100,
               maxAsyncRequests: 100,
@@ -202,6 +208,11 @@ module.exports = {
       template: "./src/index.html",
       filename: "blocklist.html",
       chunks: ["blocklist"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html",
+      filename: "ledger-grant.html",
+      chunks: ["ledgerGrant"],
     }),
     ...(() => {
       if (isBuildManifestV2) {
