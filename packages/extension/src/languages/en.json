@@ -143,5 +143,8 @@
   "pages.register.pages.welcome.pin-view.paragraph-2": "Locate Keplr then click the ‘Pin’",
   "pages.register.pages.welcome.pin-view.button-text": "button",
 
+  "page.register.google.title": "Sign in with Google",
+  "page.register.google.paragraph": "Create a wallet linked to your Google account.",
+
   "setting.language": "Language"
 }
