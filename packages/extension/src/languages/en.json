@@ -21,5 +21,14 @@
   "pages.register.intro-new-user.sign-up-apple-button": "Connect with Apple ID",
   "pages.register.intro-new-user.more-convenience-text": "More Convenience",
 
+  "pages.register.intro-existing-user.title": "Welcome Back to Keplr",
+  "pages.register.intro-existing-user.paragraph": "Glad you’re back! 🫶",
+  "pages.register.intro-existing-user.recovery-title": "Recovery Phrase or Private Key",
+  "pages.register.intro-existing-user.recovery-paragraph": "Use an existing 12/24 word recovery phrase or private key. You can also import wallets from other wallet providers.",
+  "pages.register.intro-existing-user.recovery-button": "Use recovery phrase or private key",
+  "pages.register.intro-existing-user.social-recovery-title": "Use Google",
+  "pages.register.intro-existing-user.social-recovery-paragraph": "Log in with the same email address to import an existing account to Keplr.",
+  "pages.register.intro-existing-user.social-recovery-google-button": "Connect with Google",
+
   "setting.language": "Language"
 }
