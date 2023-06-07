@@ -13,7 +13,7 @@ import { ColorPalette } from "../../../styles";
 import { ViewDataButton } from "../components/view-data-button";
 import { handleCosmosPreSign } from "../utils/handle-cosmos-sign";
 import { KeplrError } from "@keplr-wallet/router";
-import { ErrModule } from "../utils/cosmos-ledger-sign";
+import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
 
@@ -150,7 +150,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               console.log(e);
 
               if (e instanceof KeplrError) {
-                if (e.module === ErrModule) {
+                if (e.module === ErrModuleLedgerSign) {
                   setLedgerInteractingError(e);
                 } else {
                   setLedgerInteractingError(undefined);
@@ -271,7 +271,13 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
         {signInteractionStore.waitingData ? (
           <LedgerGuideBox
-            interactionData={signInteractionStore.waitingData}
+            data={{
+              keyInsensitive:
+                signInteractionStore.waitingData.data.keyInsensitive,
+              isEthereum:
+                "eip712" in signInteractionStore.waitingData.data &&
+                signInteractionStore.waitingData.data.eip712 != null,
+            }}
             isLedgerInteracting={isLedgerInteracting}
             ledgerInteractingError={ledgerInteractingError}
           />

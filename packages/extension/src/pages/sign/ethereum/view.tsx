@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useMemo, useState } from "react";
 import { SignEthereumInteractionStore } from "@keplr-wallet/stores";
 import { Box } from "../../../components/box";
 import { XAxis } from "../../../components/axis";
@@ -10,8 +10,11 @@ import { BackButton } from "../../../layouts/header/components";
 import { HeaderLayout } from "../../../layouts/header";
 import { useInteractionInfo } from "../../../hooks";
 import { KeplrError } from "@keplr-wallet/router";
-import { ErrModule } from "../utils/cosmos-ledger-sign";
+import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { Buffer } from "buffer/";
+import { LedgerGuideBox } from "../components/ledger-guide-box";
+import { EthSignType } from "@keplr-wallet/types";
+import { handleEthereumPreSign } from "../utils/handle-eth-sign";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -24,7 +27,30 @@ export const EthereumSigningView: FunctionComponent<{
 }> = observer(({ interactionData }) => {
   const { chainStore, signEthereumInteractionStore } = useStore();
 
-  const interactionInfo = useInteractionInfo();
+  const interactionInfo = useInteractionInfo(() => {
+    signEthereumInteractionStore.rejectAll();
+  });
+
+  const messageText = useMemo(() => {
+    switch (interactionData.data.signType) {
+      case EthSignType.MESSAGE:
+        return Buffer.from(interactionData.data.message).toString("hex");
+      case EthSignType.TRANSACTION:
+        return JSON.stringify(
+          JSON.parse(Buffer.from(interactionData.data.message).toString()),
+          null,
+          2
+        );
+      case EthSignType.EIP712:
+        return JSON.stringify(
+          JSON.parse(Buffer.from(interactionData.data.message).toString()),
+          null,
+          2
+        );
+      default:
+        return Buffer.from(interactionData.data.message).toString("hex");
+    }
+  }, [interactionData.data]);
 
   const [isLedgerInteracting, setIsLedgerInteracting] = useState(false);
   const [ledgerInteractingError, setLedgerInteractingError] = useState<
@@ -57,14 +83,11 @@ export const EthereumSigningView: FunctionComponent<{
           }
 
           try {
-            // const signature = await handleCosmosPreSign(
-            //   signInteractionStore.waitingData,
-            //   signDocWrapper
-            // );
+            const signature = await handleEthereumPreSign(interactionData);
 
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,
-              undefined,
+              signature,
               (proceedNext) => {
                 if (!proceedNext) {
                   if (
@@ -80,7 +103,7 @@ export const EthereumSigningView: FunctionComponent<{
             console.log(e);
 
             if (e instanceof KeplrError) {
-              if (e.module === ErrModule) {
+              if (e.module === ErrModuleLedgerSign) {
                 setLedgerInteractingError(e);
               } else {
                 setLedgerInteractingError(undefined);
@@ -104,7 +127,7 @@ export const EthereumSigningView: FunctionComponent<{
         }}
       >
         <Box
-          height="13rem"
+          height="17.5rem"
           padding="1rem"
           backgroundColor={ColorPalette["gray-600"]}
           borderRadius="0.375rem"
@@ -119,7 +142,7 @@ export const EthereumSigningView: FunctionComponent<{
               margin: 0,
             }}
           >
-            {Buffer.from(interactionData.data.message).toString("hex")}
+            {messageText}
           </pre>
         </Box>
 
@@ -138,11 +161,14 @@ export const EthereumSigningView: FunctionComponent<{
           </XAxis>
         </Box>
 
-        {/*<LedgerGuideBox*/}
-        {/*  interactionData={signInteractionStore.waitingData}*/}
-        {/*  isLedgerInteracting={isLedgerInteracting}*/}
-        {/*  ledgerInteractingError={ledgerInteractingError}*/}
-        {/*/>*/}
+        <LedgerGuideBox
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+            isEthereum: true,
+          }}
+          isLedgerInteracting={isLedgerInteracting}
+          ledgerInteractingError={ledgerInteractingError}
+        />
       </Box>
     </HeaderLayout>
   );

@@ -30,7 +30,7 @@ import { defaultRegistry } from "../../components/messages/registry";
 import { useUnmount } from "../../../../hooks/use-unmount";
 import { handleCosmosPreSign } from "../../utils/handle-cosmos-sign";
 import { KeplrError } from "@keplr-wallet/router";
-import { ErrModule } from "../../utils/cosmos-ledger-sign";
+import { ErrModuleLedgerSign } from "../../utils/ledger-types";
 import { LedgerGuideBox } from "../../components/ledger-guide-box";
 import { Gutter } from "../../../../components/gutter";
 import { GuideBox } from "../../../../components/guide-box";
@@ -244,7 +244,7 @@ export const CosmosTxView: FunctionComponent<{
         console.log(e);
 
         if (e instanceof KeplrError) {
-          if (e.module === ErrModule) {
+          if (e.module === ErrModuleLedgerSign) {
             setLedgerInteractingError(e);
           } else {
             setLedgerInteractingError(undefined);
@@ -404,7 +404,12 @@ export const CosmosTxView: FunctionComponent<{
         ) : null}
 
         <LedgerGuideBox
-          interactionData={interactionData}
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+            isEthereum:
+              "eip712" in interactionData.data &&
+              interactionData.data.eip712 != null,
+          }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
         />

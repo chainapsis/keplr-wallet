@@ -11,15 +11,16 @@ import { LedgerUtils } from "../../../utils";
 import Eth from "@ledgerhq/hw-app-eth";
 import { EIP712MessageValidator } from "@keplr-wallet/background";
 import { domainHash, messageHash } from "@keplr-wallet/background";
-
-export const ErrModule = "ledger-sign";
-export const ErrFailedInit = 1;
-export const ErrCodeUnsupportedApp = 2;
-export const ErrCodeDeviceLocked = 3;
-export const ErrFailedGetPublicKey = 4;
-export const ErrPublicKeyUnmatched = 5;
-export const ErrFailedSign = 6;
-export const ErrSignRejected = 7;
+import {
+  ErrModuleLedgerSign,
+  ErrFailedInit,
+  ErrCodeUnsupportedApp,
+  ErrCodeDeviceLocked,
+  ErrFailedGetPublicKey,
+  ErrPublicKeyUnmatched,
+  ErrFailedSign,
+  ErrSignRejected,
+} from "./ledger-types";
 
 export const connectAndSignEIP712WithLedger = async (
   expectedPubKey: Uint8Array,
@@ -39,7 +40,11 @@ export const connectAndSignEIP712WithLedger = async (
   try {
     transport = await TransportWebUSB.create();
   } catch (e) {
-    throw new KeplrError(ErrModule, ErrFailedInit, "Failed to init transport");
+    throw new KeplrError(
+      ErrModuleLedgerSign,
+      ErrFailedInit,
+      "Failed to init transport"
+    );
   }
 
   let ethApp = new Eth(transport);
@@ -52,7 +57,11 @@ export const connectAndSignEIP712WithLedger = async (
   } catch (e) {
     // Device is locked
     if (e?.message.includes("(0x6b0c)")) {
-      throw new KeplrError(ErrModule, ErrCodeDeviceLocked, "Device is locked");
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrCodeDeviceLocked,
+        "Device is locked"
+      );
     } else if (
       // User is in home sceen or other app.
       e?.message.includes("(0x6511)") ||
@@ -79,7 +88,7 @@ export const connectAndSignEIP712WithLedger = async (
       pubKey = new PubKeySecp256k1(Buffer.from(res.publicKey, "hex"));
     } catch (e) {
       throw new KeplrError(
-        ErrModule,
+        ErrModuleLedgerSign,
         ErrFailedGetPublicKey,
         e.message || e.toString()
       );
@@ -91,7 +100,7 @@ export const connectAndSignEIP712WithLedger = async (
       ) !== Buffer.from(pubKey.toBytes()).toString("hex")
     ) {
       throw new KeplrError(
-        ErrModule,
+        ErrModuleLedgerSign,
         ErrPublicKeyUnmatched,
         "Public key unmatched"
       );
@@ -115,7 +124,11 @@ export const connectAndSignEIP712WithLedger = async (
     } catch (e) {
       console.log(e);
 
-      throw new KeplrError(ErrModule, ErrFailedSign, e.message || e.toString());
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrFailedSign,
+        e.message || e.toString()
+      );
     }
 
     try {
@@ -130,13 +143,17 @@ export const connectAndSignEIP712WithLedger = async (
     } catch (e) {
       if (e?.message.includes("(0x6985)")) {
         throw new KeplrError(
-          ErrModule,
+          ErrModuleLedgerSign,
           ErrSignRejected,
           "User rejected signing"
         );
       }
 
-      throw new KeplrError(ErrModule, ErrFailedSign, e.message || e.toString());
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrFailedSign,
+        e.message || e.toString()
+      );
     }
   } finally {
     await transport.close();
@@ -155,7 +172,7 @@ export const connectAndSignWithLedger = async (
 ): Promise<Uint8Array> => {
   if (propApp !== "Cosmos" && propApp !== "Terra") {
     throw new KeplrError(
-      ErrModule,
+      ErrModuleLedgerSign,
       ErrCodeUnsupportedApp,
       `Unsupported app: ${propApp}`
     );
@@ -165,14 +182,22 @@ export const connectAndSignWithLedger = async (
   try {
     transport = await TransportWebUSB.create();
   } catch (e) {
-    throw new KeplrError(ErrModule, ErrFailedInit, "Failed to init transport");
+    throw new KeplrError(
+      ErrModuleLedgerSign,
+      ErrFailedInit,
+      "Failed to init transport"
+    );
   }
   let app = new CosmosApp(propApp, transport);
 
   try {
     const version = await app.getVersion();
     if (version.device_locked) {
-      throw new KeplrError(ErrModule, ErrCodeDeviceLocked, "Device is locked");
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrCodeDeviceLocked,
+        "Device is locked"
+      );
     }
   } catch (e) {
     await transport.close();
@@ -197,7 +222,7 @@ export const connectAndSignWithLedger = async (
         Buffer.from(expected.toBytes()).toString()
       ) {
         throw new KeplrError(
-          ErrModule,
+          ErrModuleLedgerSign,
           ErrPublicKeyUnmatched,
           "Public key unmatched"
         );
@@ -214,20 +239,24 @@ export const connectAndSignWithLedger = async (
       } else {
         if (signResponse.error_message === "Transaction rejected") {
           throw new KeplrError(
-            ErrModule,
+            ErrModuleLedgerSign,
             ErrSignRejected,
             signResponse.error_message
           );
         }
 
         throw new KeplrError(
-          ErrModule,
+          ErrModuleLedgerSign,
           ErrFailedSign,
           signResponse.error_message
         );
       }
     } else {
-      throw new KeplrError(ErrModule, ErrFailedGetPublicKey, res.error_message);
+      throw new KeplrError(
+        ErrModuleLedgerSign,
+        ErrFailedGetPublicKey,
+        res.error_message
+      );
     }
   } finally {
     await transport.close();
