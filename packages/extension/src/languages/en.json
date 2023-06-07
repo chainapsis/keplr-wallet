@@ -1,6 +1,8 @@
 {
   "error.not-supported-error": "Not supported",
   "error.unknown-word-type": "Unknown words type: {type}",
+  "error.key-info-not-found": "KeyInfo not found",
+  "error.bip44-path-not-found": "bip44Path not found",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -73,6 +75,12 @@
   "pages.register.verify-mnemonic.mnemonic-empty-error": "Empty mnemonic",
   "pages.register.verify-mnemonic.verify-box-ref-error": "Ref of verify box is null",
   "pages.register.verify-mnemonic.verifying-box.word": "Word #{index}",
+
+  "pages.register.enable-chains.title": "Select Chains",
+  "pages.register.enable-chains.paragraph": "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
+  "pages.register.enable-chains.search-input-placeholder": "Search networks",
+  "pages.register.enable-chains.save-button": "Save",
+  "pages.register.enable-chains.chain-selected-count": "{numSelected} chain(s) selected",
 
   "setting.language": "Language"
 }

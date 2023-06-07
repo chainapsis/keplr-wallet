@@ -33,6 +33,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
+import { FormattedMessage, useIntl } from "react-intl";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -72,15 +73,20 @@ export const EnableChainsScene: FunctionComponent<{
       useStore();
 
     const navigate = useNavigate();
+    const intl = useIntl();
 
     const header = useRegisterHeader();
     useSceneEvents({
       onWillVisible: () => {
         header.setHeader({
           mode: "step",
-          title: "Select Chains",
+          title: intl.formatMessage({
+            id: "pages.register.enable-chains.title",
+          }),
           paragraphs: [
-            "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
+            intl.formatMessage({
+              id: "pages.register.enable-chains.paragraph",
+            }),
           ],
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
@@ -93,7 +99,7 @@ export const EnableChainsScene: FunctionComponent<{
         (keyInfo) => keyInfo.id === vaultId
       );
       if (!keyInfo) {
-        throw new Error("KeyInfo not found");
+        throw new Error(intl.formatMessage({ id: "error.key-info-not-found" }));
       }
 
       return keyInfo.type;
@@ -512,7 +518,9 @@ export const EnableChainsScene: FunctionComponent<{
       <RegisterSceneBox>
         <SearchTextInput
           ref={searchRef}
-          placeholder="Search networks"
+          placeholder={intl.formatMessage({
+            id: "pages.register.enable-chains.search-input-placeholder",
+          })}
           value={search}
           onChange={(e) => {
             e.preventDefault();
@@ -526,7 +534,10 @@ export const EnableChainsScene: FunctionComponent<{
             textAlign: "center",
           }}
         >
-          {numSelected} chain(s) selected
+          <FormattedMessage
+            id="pages.register.enable-chains.chain-selected-count"
+            values={{ numSelected }}
+          />
         </Subtitle3>
         <Gutter size="0.75rem" />
         <Box
@@ -587,7 +598,9 @@ export const EnableChainsScene: FunctionComponent<{
         <Gutter size="1.25rem" />
         <Box width="22.5rem" marginX="auto">
           <Button
-            text="Save"
+            text={intl.formatMessage({
+              id: "pages.register.enable-chains.save-button",
+            })}
             size="large"
             onClick={async () => {
               const enables: string[] = [];
@@ -701,7 +714,9 @@ export const EnableChainsScene: FunctionComponent<{
                       (keyInfo) => keyInfo.id === vaultId
                     );
                     if (!keyInfo) {
-                      throw new Error("Key info not found");
+                      throw new Error(
+                        intl.formatMessage({ id: "error.key-info-not-found" })
+                      );
                     }
                     if (keyInfo.insensitive["Ethereum"]) {
                       await chainStore.enableChainInfoInUI(
@@ -711,7 +726,11 @@ export const EnableChainsScene: FunctionComponent<{
                     } else {
                       const bip44Path = keyInfo.insensitive["bip44Path"];
                       if (!bip44Path) {
-                        throw new Error("bip44Path not found");
+                        throw new Error(
+                          intl.formatMessage({
+                            id: "error.bip44-path-not-found",
+                          })
+                        );
                       }
                       sceneTransition.replaceAll("connect-ledger", {
                         name: "",
@@ -739,7 +758,12 @@ export const EnableChainsScene: FunctionComponent<{
           {fallbackEthereumLedgerApp ? (
             <React.Fragment>
               <Gutter size="0.75rem" />
-              <TextButton text="Skip" onClick={() => replaceToWelcomePage()} />
+              <TextButton
+                text={intl.formatMessage({
+                  id: "pages.register.enable-chains.skip-button",
+                })}
+                onClick={() => replaceToWelcomePage()}
+              />
             </React.Fragment>
           ) : null}
         </Box>
