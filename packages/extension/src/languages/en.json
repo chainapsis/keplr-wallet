@@ -82,5 +82,26 @@
   "pages.register.enable-chains.save-button": "Save",
   "pages.register.enable-chains.chain-selected-count": "{numSelected} chain(s) selected",
 
+  "pages.register.pages.welcome.title": "Account Created!",
+  "pages.register.pages.welcome.sub-title": "You may close this page",
+  "pages.register.pages.welcome.paragraph": "Ready to explore the Interchain?",
+  "pages.register.pages.welcome.osmosis-link.title": "Osmosis",
+  "pages.register.pages.welcome.osmosis-link.paragraph": "Trade Tokens",
+  "pages.register.pages.welcome.kado-link.title": "Kado",
+  "pages.register.pages.welcome.kado-link.paragraph": "Buy Crypto",
+  "pages.register.pages.welcome.stargaze-link.title": "Stargaze",
+  "pages.register.pages.welcome.stargaze-link.paragraph": "Buy & Mint NFTs",
+  "pages.register.pages.welcome.dashboard-link.title": "Keplr Dashboard",
+  "pages.register.pages.welcome.dashboard-link.paragraph": "Manage Portfolio and Stake Assets",
+  "pages.register.pages.welcome.icns-link.title": "Interchain Name Service (ICNS)",
+  "pages.register.pages.welcome.icns-link.paragraph": "Simplify Your Crypto Address",
+  "pages.register.pages.welcome.finish-button": "Finish",
+  "pages.register.pages.welcome.follow-twitter.title": "Follow Keplr on Twitter",
+  "pages.register.pages.welcome.follow-twitter.paragraph": "For all important information and updates on Keplr.",
+  "pages.register.pages.welcome.pin-view.title": "Pin Keplr for easy access",
+  "pages.register.pages.welcome.pin-view.paragraph-1": "Click the ‘Extensions’ ",
+  "pages.register.pages.welcome.pin-view.paragraph-2": "Locate Keplr then click the ‘Pin’",
+  "pages.register.pages.welcome.pin-view.button-text": "button",
+
   "setting.language": "Language"
 }
