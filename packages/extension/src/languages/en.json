@@ -1,3 +1,6 @@
 {
+  "pages.register.components.header.intro-title": "Your Interchain Gateway",
+  "pages.register.components.header.header-step.title": "Step",
+
   "setting.language": "Language"
 }

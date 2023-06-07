@@ -17,8 +17,9 @@ import { Body1, H4, Subtitle3 } from "../../../../components/typography";
 import { useRegisterHeader } from "./context";
 import { Gutter } from "../../../../components/gutter";
 import { ColorPalette } from "../../../../styles";
-import { RegisterH1, RegisterH2, RegisterH3 } from "../typography";
+import { RegisterH1, RegisterH4, RegisterH3 } from "../typography";
 import { HelpDeskButton } from "../help-desk-button";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const RegisterHeader: FunctionComponent<{
   sceneRef: MutableRefObject<SceneTransitionRef | null>;
@@ -180,9 +181,9 @@ const HeaderIntro: FunctionComponent = () => {
 
         <Gutter size="1.25rem" />
 
-        <RegisterH2 color={ColorPalette["gray-50"]}>
-          Your Interchain Gateway
-        </RegisterH2>
+        <RegisterH4 color={ColorPalette["gray-200"]}>
+          <FormattedMessage id="pages.register.components.header.intro-title" />
+        </RegisterH4>
       </YAxis>
     </Box>
   );
@@ -209,14 +210,15 @@ const HeaderStep: FunctionComponent<{
   stepCurrent: number;
   stepTotal: number;
 }> = ({ title, paragraphs, stepCurrent, stepTotal }) => {
+  const intl = useIntl();
   return (
     <Box position="relative">
       <YAxis alignX="center">
         {stepCurrent <= 0 && stepTotal <= 0 ? null : (
           <React.Fragment>
-            <Subtitle3
-              color={ColorPalette["gray-200"]}
-            >{`Step ${stepCurrent}/${stepTotal}`}</Subtitle3>
+            <Subtitle3 color={ColorPalette["gray-200"]}>{`${intl.formatMessage({
+              id: "pages.register.components.header.header-step.title",
+            })} ${stepCurrent}/${stepTotal}`}</Subtitle3>
             <Gutter size="0.75rem" />
           </React.Fragment>
         )}
