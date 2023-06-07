@@ -107,12 +107,20 @@ export class KeyRingEthereumService {
         } else {
           switch (signType) {
             case EthSignType.MESSAGE: {
-              return await this.keyRingService.sign(
+              const signature = await this.keyRingService.sign(
                 chainId,
                 vaultId,
                 Buffer.from(hashMessage(message).replace("0x", ""), "hex"),
                 "keccak256"
               );
+              return Buffer.concat([
+                signature.r,
+                signature.s,
+                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                signature.v
+                  ? Buffer.from("1c", "hex")
+                  : Buffer.from("1b", "hex"),
+              ]);
             }
             case EthSignType.TRANSACTION: {
               const tx = JSON.parse(Buffer.from(message).toString());
@@ -122,10 +130,14 @@ export class KeyRingEthereumService {
                 Buffer.from(serialize(tx).replace("0x", ""), "hex"),
                 "keccak256"
               );
-              return Buffer.from(
-                serialize(tx, signature).replace("0x", ""),
-                "hex"
-              );
+              return Buffer.concat([
+                signature.r,
+                signature.s,
+                // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+                signature.v
+                  ? Buffer.from("1c", "hex")
+                  : Buffer.from("1b", "hex"),
+              ]);
             }
             case EthSignType.EIP712: {
               const data = await EIP712MessageValidator.validateAsync(
@@ -147,14 +159,13 @@ export class KeyRingEthereumService {
                 "keccak256"
               );
               return Buffer.concat([
-                Buffer.from(signature.r.replace("0x", ""), "hex"),
-                Buffer.from(signature.s.replace("0x", ""), "hex"),
+                signature.r,
+                signature.s,
                 // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
-                signature.recoveryParam
+                signature.v
                   ? Buffer.from("1c", "hex")
                   : Buffer.from("1b", "hex"),
               ]);
-              return signature;
             }
             default:
               throw new Error(`Unknown sign type: ${signType}`);

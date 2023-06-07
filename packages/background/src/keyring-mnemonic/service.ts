@@ -86,7 +86,11 @@ export class KeyRingMnemonicService {
     coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256"
-  ): Uint8Array {
+  ): {
+    readonly r: Uint8Array;
+    readonly s: Uint8Array;
+    readonly v: number | null;
+  } {
     const privKey = this.getPrivKey(vault, coinType);
 
     let digest = new Uint8Array();
@@ -101,8 +105,7 @@ export class KeyRingMnemonicService {
         throw new Error(`Unknown digest method: ${digestMethod}`);
     }
 
-    const signature = privKey.signDigest32(digest);
-    return new Uint8Array([...signature.r, ...signature.s]);
+    return privKey.signDigest32(digest);
   }
 
   protected getPrivKey(vault: Vault, coinType: number): PrivKeySecp256k1 {
