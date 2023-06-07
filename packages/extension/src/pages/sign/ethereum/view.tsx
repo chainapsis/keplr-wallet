@@ -25,7 +25,8 @@ import { handleEthereumPreSign } from "../utils/handle-eth-sign";
 export const EthereumSigningView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { chainStore, signEthereumInteractionStore } = useStore();
+  const { chainStore, uiConfigStore, signEthereumInteractionStore } =
+    useStore();
 
   const interactionInfo = useInteractionInfo(() => {
     signEthereumInteractionStore.rejectAll();
@@ -83,7 +84,10 @@ export const EthereumSigningView: FunctionComponent<{
           }
 
           try {
-            const signature = await handleEthereumPreSign(interactionData);
+            const signature = await handleEthereumPreSign(
+              uiConfigStore.useWebHIDLedger,
+              interactionData
+            );
 
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,

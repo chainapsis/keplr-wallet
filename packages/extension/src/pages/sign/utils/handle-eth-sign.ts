@@ -22,8 +22,10 @@ import {
   messageHash,
 } from "@keplr-wallet/background";
 import { serialize } from "@ethersproject/transactions";
+import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 
 export const handleEthereumPreSign = async (
+  useWebHID: boolean,
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>
 ): Promise<Uint8Array | undefined> => {
   switch (interactionData.data.keyType) {
@@ -54,6 +56,7 @@ export const handleEthereumPreSign = async (
       }
 
       return connectAndSignEthWithLedger(
+        useWebHID,
         publicKey,
         bip44Path,
         interactionData.data.message,
@@ -66,6 +69,7 @@ export const handleEthereumPreSign = async (
 };
 
 export const connectAndSignEthWithLedger = async (
+  useWebHID: boolean,
   expectedPubKey: Uint8Array,
   bip44Path: {
     account: number;
@@ -77,7 +81,9 @@ export const connectAndSignEthWithLedger = async (
 ): Promise<Uint8Array> => {
   let transport: Transport;
   try {
-    transport = await TransportWebUSB.create();
+    transport = useWebHID
+      ? await TransportWebHID.create()
+      : await TransportWebUSB.create();
   } catch (e) {
     throw new KeplrError(
       ErrModuleLedgerSign,
