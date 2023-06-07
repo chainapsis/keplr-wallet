@@ -5,6 +5,8 @@
   "error.bip44-path-not-found": "bip44Path not found",
   "error.mnemonic-private-key-both-provided": "Both mnemonic and private key are provided",
   "error.bip44-path-required": "BIP44 path should be provided",
+  "error.unsupported-app": "Unsupported app: ${app}",
+  "error.device-is-locked": "Device is locked",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -84,6 +86,16 @@
   "pages.register.name-password-hardware.title": "Set Up Your Wallet",
   "pages.register.name-password-hardware.use-terra-app-button": "Use Terra Ledger app",
   "pages.register.name-password-hardware.advanced-button": "Advanced",
+
+  "pages.register.connect-ledger.title": "Please connect your Hardware wallet",
+  "pages.register.connect-ledger.paragraph": "You need to connect Ethereum app in Ledger software, if you want to add EVM chains(Evmos, Injective) to Keplr",
+  "pages.register.connect-ledger.step-text": "Step {step}",
+  "pages.register.connect-ledger.connect-ledger-step-paragraph": "Connect and unlock your Ledger.",
+  "pages.register.connect-ledger.open-app-step-paragraph": "Open the {app} app on your Ledger device.",
+  "pages.register.connect-ledger.use-hid-text": "Use alternative USB connection method(HID)",
+  "pages.register.connect-ledger.use-hid-confirm-title": "Unable to use Web HID",
+  "pages.register.connect-ledger.use-hid-confirm-paragraph": "Please enable ‘experimental web platform features’ to use Web HID",
+  "pages.register.connect-ledger.next-button": "Next",
 
   "pages.register.enable-chains.title": "Select Chains",
   "pages.register.enable-chains.paragraph": "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
