@@ -110,7 +110,13 @@ export const FormNamePassword: FunctionComponent<
       ) : (
         <Gutter size="2.5rem" />
       )}
-      <Button size="large" text="Next" type="submit" />
+      <Button
+        size="large"
+        text={intl.formatMessage({
+          id: "pages.register.components.form.name-password.next-button",
+        })}
+        type="submit"
+      />
       {appendButton}
     </Stack>
   );

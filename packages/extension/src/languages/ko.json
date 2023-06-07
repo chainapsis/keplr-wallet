@@ -3,6 +3,8 @@
   "error.unknown-word-type": "Unknown words type: {type}",
   "error.key-info-not-found": "KeyInfo not found",
   "error.bip44-path-not-found": "bip44Path not found",
+  "error.mnemonic-private-key-both-provided": "Both mnemonic and private key are provided",
+  "error.bip44-path-required": "BIP44 path should be provided",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -25,6 +27,7 @@
   "pages.register.components.form.name-password.confirm-password-placeholder": "At least 8 characters in length",
   "pages.register.components.form.name-password.short-password-error": "Too short password",
   "pages.register.components.form.name-password.password-not-match-error": "Password should match",
+  "pages.register.components.form.name-password.next-button": "Next",
 
   "pages.register.intro.create-wallet-button": "Create a new wallet",
   "pages.register.intro.import-wallet-button": "Import an existing wallet",
@@ -75,6 +78,12 @@
   "pages.register.verify-mnemonic.mnemonic-empty-error": "Empty mnemonic",
   "pages.register.verify-mnemonic.verify-box-ref-error": "Ref of verify box is null",
   "pages.register.verify-mnemonic.verifying-box.word": "Word #{index}",
+
+  "pages.register.name-password.title": "Set Up Your Wallet",
+
+  "pages.register.name-password-hardware.title": "Set Up Your Wallet",
+  "pages.register.name-password-hardware.use-terra-app-button": "Use Terra Ledger app",
+  "pages.register.name-password-hardware.advanced-button": "Advanced",
 
   "pages.register.enable-chains.title": "Select Chains",
   "pages.register.enable-chains.paragraph": "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",

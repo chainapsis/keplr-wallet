@@ -13,18 +13,22 @@ import { Button } from "../../../components/button";
 import { Gutter } from "../../../components/gutter";
 import { observer } from "mobx-react-lite";
 import { TextButton } from "../../../components/button-text";
+import { useIntl } from "react-intl";
 
 export const RegisterNamePasswordHardwareScene: FunctionComponent<{
   type: string;
 }> = observer(({ type }) => {
   const sceneTransition = useSceneTransition();
+  const intl = useIntl();
 
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Set Up Your Wallet",
+        title: intl.formatMessage({
+          id: "pages.register.name-password-hardware.title",
+        }),
         stepCurrent: 1,
         stepTotal: 3,
       });
@@ -58,7 +62,9 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
           {...form}
           appendButton={
             <TextButton
-              text="Use Terra Ledger app"
+              text={intl.formatMessage({
+                id: "pages.register.name-password-hardware.use-terra-app-button",
+              })}
               onClick={form.handleSubmit((data) => {
                 sceneTransition.push("connect-ledger", {
                   name: data.name,
@@ -78,7 +84,9 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               <Button
                 size="small"
                 color="secondary"
-                text="Advanced"
+                text={intl.formatMessage({
+                  id: "pages.register.name-password-hardware.advanced-button",
+                })}
                 onClick={() => {
                   setIsBIP44CardOpen(true);
                 }}
