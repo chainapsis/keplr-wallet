@@ -380,7 +380,10 @@ export class RootStore {
     // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
       (() => {
-        if (!AmplitudeApiKey) {
+        if (
+          !AmplitudeApiKey ||
+          localStorage.getItem("using-analytics") === "false"
+        ) {
           return new NoopAnalyticsClient();
         } else {
           return new ExtensionAnalyticsClient(AmplitudeApiKey);

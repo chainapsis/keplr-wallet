@@ -6,6 +6,7 @@ import { PageButton } from "../components";
 import { RightArrowIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
 import { Box } from "../../../components/box";
+import { Toggle } from "../../../components/toggle";
 
 export const SettingSecurityPage: FunctionComponent = () => {
   const navigate = useNavigate();
@@ -31,6 +32,26 @@ export const SettingSecurityPage: FunctionComponent = () => {
             title="Change Password"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/change-password")}
+          />
+
+          <PageButton
+            title="Using Analytics"
+            paragraph="Help us improve the extension by sending anonymous usage data"
+            endIcon={
+              <Toggle
+                isOpen={localStorage.getItem("using-analytics") !== "false"}
+                setIsOpen={() => {
+                  localStorage.setItem(
+                    "using-analytics",
+                    localStorage.getItem("using-analytics") !== "false"
+                      ? "false"
+                      : "true"
+                  );
+
+                  window.location.reload();
+                }}
+              />
+            }
           />
         </Stack>
       </Box>
