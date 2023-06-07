@@ -15,6 +15,14 @@
   "pages.register.components.bip-44-path.paragraph-unfamiliar": "If you're unfamiliar with this feature, skip or undo this step -> ",
   "pages.register.components.bip-44-path.reset": "Reset Settings",
   "pages.register.components.bip-44-path.hd-path-subtitle": "HD Derivation Path",
+  "pages.register.components.form.name-password.wallet-name-label": "Wallet Name",
+  "pages.register.components.form.name-password.wallet-name-placeholder": "e.g. Trading, NFT Vault, Investment",
+  "pages.register.components.form.name-password.password-label": "Create Keplr Password",
+  "pages.register.components.form.name-password.password-placeholder": "At least 8 characters in length",
+  "pages.register.components.form.name-password.confirm-password-label": "Confirm Keplr Password",
+  "pages.register.components.form.name-password.confirm-password-placeholder": "At least 8 characters in length",
+  "pages.register.components.form.name-password.short-password-error": "Too short password",
+  "pages.register.components.form.name-password.password-not-match-error": "Password should match",
 
   "pages.register.intro.create-wallet-button": "Create a new wallet",
   "pages.register.intro.import-wallet-button": "Import an existing wallet",
@@ -58,6 +66,13 @@
   "pages.register.new-mnemonic.advanced-button": "Advanced",
   "pages.register.new-mnemonic.next-button": "Next",
   "pages.register.new-mnemonic.agree-button": "I understood. Show my phrase.",
+
+  "pages.register.verify-mnemonic.title": "Verify Your Recovery Phrase",
+  "pages.register.verify-mnemonic.paragraph": "Fill out the words according to their numbers to verify that you have stored your phrase safely.",
+  "pages.register.verify-mnemonic.no-mnemonic-provider-error": "Mnemonic and bip44Path should be provided",
+  "pages.register.verify-mnemonic.mnemonic-empty-error": "Empty mnemonic",
+  "pages.register.verify-mnemonic.verify-box-ref-error": "Ref of verify box is null",
+  "pages.register.verify-mnemonic.verifying-box.word": "Word #{index}",
 
   "setting.language": "Language"
 }
