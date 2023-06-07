@@ -1,10 +1,20 @@
 {
   "error.not-supported-error": "Not supported",
+  "error.unknown-word-type": "Unknown words type: {type}",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
   "pages.register.components.help-desk-button.title": "Help Desk",
   "pages.register.components.help-desk-button.question": "?",
+  "pages.register.components.copy-to-clipboard.button-before": "Copy to clipboard",
+  "pages.register.components.copy-to-clipboard.button-after": "Copied",
+  "pages.register.components.bip-44-path.confirm-paragraph": "Closing this box will reset the HD Path. Are you sure you want to proceed?",
+  "pages.register.components.bip-44-path.title": "Set Custom Derivation Path",
+  "pages.register.components.bip-44-path.paragraph-from-one-recovery-path": "You can create multiple addresses from one recovery phrase",
+  "pages.register.components.bip-44-path.paragraph-lost": "A lost path cannot be recovered",
+  "pages.register.components.bip-44-path.paragraph-unfamiliar": "If you're unfamiliar with this feature, skip or undo this step -> ",
+  "pages.register.components.bip-44-path.reset": "Reset Settings",
+  "pages.register.components.bip-44-path.hd-path-subtitle": "HD Derivation Path",
 
   "pages.register.intro.create-wallet-button": "Create a new wallet",
   "pages.register.intro.import-wallet-button": "Import an existing wallet",
@@ -37,6 +47,17 @@
   "pages.register.connect-hardware.content.title": "Select a hardware wallet that you would like to use with Keplr",
   "pages.register.connect-hardware.connect-ledger-button": "Connect Ledger",
   "pages.register.connect-hardware.connect-keystone-button": "Connect Keystone (Coming Soon)",
+
+  "pages.register.new-mnemonic.title": "New Recovery Phrase",
+  "pages.register.new-mnemonic.12-words-tab": "12 words",
+  "pages.register.new-mnemonic.24-words-tab": "24 words",
+  "pages.register.new-mnemonic.recovery-warning-box-title": "DO NOT share your recovery phrase with ANYONE.",
+  "pages.register.new-mnemonic.recovery-warning-box-paragraph": "Anyone with your recovery phrase can have full control over your assets. Please stay vigilant against phishing attacks at all times.",
+  "pages.register.new-mnemonic.back-up-warning-box-title": "Back up the phrase safely.",
+  "pages.register.new-mnemonic.back-up-warning-box-paragraph": "You will never be able to restore your account without your recovery phrase.",
+  "pages.register.new-mnemonic.advanced-button": "Advanced",
+  "pages.register.new-mnemonic.next-button": "Next",
+  "pages.register.new-mnemonic.agree-button": "I understood. Show my phrase.",
 
   "setting.language": "언어"
 }
