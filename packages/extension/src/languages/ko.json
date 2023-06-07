@@ -1,10 +1,25 @@
 {
+  "error.not-supported-error": "Not supported",
+
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
 
   "pages.register.intro.create-wallet-button": "Create a new wallet",
   "pages.register.intro.import-wallet-button": "Import an existing wallet",
   "pages.register.intro.connect-hardware-wallet-button": "Connect Hardware Wallet",
+
+  "pages.register.intro-new-user.title": "Welcome to Keplr",
+  "pages.register.intro-new-user.paragraph": "Select the way you want to create your wallet",
+  "pages.register.intro-new-user.recovery-path-title": "Use Recovery Phrase",
+  "pages.register.intro-new-user.recovery-path-paragraph": "Maximum control & high compatibility across all wallets",
+  "pages.register.intro-new-user.new-recovery-path-button": "Create new recovery phrase",
+  "pages.register.intro-new-user.import-recovery-path-button": "Import existing recovery phrase",
+  "pages.register.intro-new-user.high-security-text": "Higher Security",
+  "pages.register.intro-new-user.sign-up-social-title": "Sign-up with Google",
+  "pages.register.intro-new-user.sign-up-social-paragraph": "Simple & easy registration",
+  "pages.register.intro-new-user.sign-up-google-button": "Connect with Google",
+  "pages.register.intro-new-user.sign-up-apple-button": "Connect with Apple ID",
+  "pages.register.intro-new-user.more-convenience-text": "More Convenience",
 
   "setting.language": "언어"
 }
