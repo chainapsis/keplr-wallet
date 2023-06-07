@@ -20642,11 +20642,11 @@ __metadata:
 
 "keplr-wallet-private@file:./noop-keplr-wallet-private::locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension":
   version: 0.0.1
-  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=62d7fb&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
+  resolution: "keplr-wallet-private@file:./noop-keplr-wallet-private#./noop-keplr-wallet-private::hash=ad2675&locator=%40keplr-wallet%2Fextension%40workspace%3Apackages%2Fextension"
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18
     styled-components: "*"
-  checksum: efd06473d052f24c1e5896d480d810e43c3237c0aa8acfe3b05a89ab03a8e3cb42171821189965a241bb91a064c3bfee7bf384b14083bdfe4be0cf40af8b0636
+  checksum: d85f33b4601c7f7d9e5a701a34ed82015d6aeb5d2f61e881048168b3e1d00738f39c37650219b3d2cb80f0b8181c0bb718001cb9bcfb05b269b1d28ab0cc534b
   languageName: node
   linkType: hard
 
@@ -20831,8 +20831,8 @@ __metadata:
 
 "libsodium-wrappers@file:./etc/noop::locator=keplr%40workspace%3A.":
   version: 0.0.1
-  resolution: "libsodium-wrappers@file:./etc/noop#./etc/noop::hash=e4bfa9&locator=keplr%40workspace%3A."
-  checksum: 3574db90e4e6b9fd6000ee62fbdd689bb10f633c4101687c14daafed1547bfc7cb6281406a1ab08a04d6a65c892fa90cbae81a845d1ef5ac2a9d8fdb85c6fb8c
+  resolution: "libsodium-wrappers@file:./etc/noop#./etc/noop::hash=8909f8&locator=keplr%40workspace%3A."
+  checksum: e96456d5ccb39a23d8d9731a22f58dc4a0923f17f1bbc4d9211569616b231684df4a812c22ccf16cdb0c99f6ae3b4325ae542f04761f1062c8ae35af1b0bc9c4
   languageName: node
   linkType: hard
 
@@ -22607,17 +22607,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.1.1, minimist@npm:^1.1.3, minimist@npm:^1.2.0, minimist@npm:^1.2.5":
-  version: 1.2.5
-  resolution: "minimist@npm:1.2.5"
-  checksum: 86706ce5b36c16bfc35c5fe3dbb01d5acdc9a22f2b6cc810b6680656a1d2c0e44a0159c9a3ba51fb072bb5c203e49e10b51dcd0eec39c481f4c42086719bae52
-  languageName: node
-  linkType: hard
-
-"minimist@npm:^1.2.6":
-  version: 1.2.7
-  resolution: "minimist@npm:1.2.7"
-  checksum: 7346574a1038ca23c32e02252f603801f09384dd1d78b69a943a4e8c2c28730b80e96193882d3d3b22a063445f460e48316b29b8a25addca2d7e5e8f75478bec
+"minimist@npm:^1.1.1, minimist@npm:^1.1.3, minimist@npm:^1.2.0, minimist@npm:^1.2.5, minimist@npm:^1.2.6":
+  version: 1.2.8
+  resolution: "minimist@npm:1.2.8"
+  checksum: 75a6d645fb122dad29c06a7597bddea977258957ed88d7a6df59b5cd3fe4a527e253e9bbf2e783e4b73657f9098b96a5fe96ab8a113655d4109108577ecf85b0
   languageName: node
   linkType: hard
 
