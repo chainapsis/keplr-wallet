@@ -6,7 +6,7 @@ COPY ./ /app
 
 WORKDIR /app
 
-# Remove all .DS_Store fils which exist only in OSX
+# Remove all .DS_Store files which exist only in OSX
 RUN find . -name .DS_Store -exec rm {} \;
 
 RUN tar cvzf firefox-archive.tar.gz *
