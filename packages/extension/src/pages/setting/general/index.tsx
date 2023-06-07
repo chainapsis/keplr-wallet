@@ -8,9 +8,12 @@ import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { Box } from "../../../components/box";
+import { useLanguage } from "../../../languages";
 
 export const SettingGeneralPage: FunctionComponent = observer(() => {
   const { keyRingStore, uiConfigStore } = useStore();
+
+  const language = useLanguage();
 
   const navigate = useNavigate();
 
@@ -18,12 +21,12 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
     <HeaderLayout title="General" left={<BackButton />}>
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
-          {/*<PageButton*/}
-          {/*  title="Language"*/}
-          {/*  paragraph={language.languageFullName}*/}
-          {/*  endIcon={<RightArrowIcon />}*/}
-          {/*  onClick={() => navigate("/setting/general/language")}*/}
-          {/*/>*/}
+          <PageButton
+            title="Language"
+            paragraph={language.languageFullName}
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/language")}
+          />
 
           <PageButton
             title="Currency"
