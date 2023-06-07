@@ -11,17 +11,24 @@ import { Stack } from "../../../components/stack";
 import { RegisterH4 } from "../components/typography";
 import { Box } from "../../../components/box";
 import { Image } from "../../../components/image";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const ConnectHardwareWalletScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
+
+  const intl = useIntl();
 
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "welcome",
-        title: "Connect Hardware Wallet",
-        paragraph: "Want even more security? 😎",
+        title: intl.formatMessage({
+          id: "pages.register.connect-hardware.header.title",
+        }),
+        paragraph: intl.formatMessage({
+          id: "pages.register.connect-hardware.header.paragraph",
+        }),
       });
     },
   });
@@ -30,9 +37,7 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
     <RegisterSceneBox>
       <RegisterH4 color={ColorPalette["gray-50"]}>
         <Box style={{ textAlign: "center" }}>
-          Select a hardware wallet that you
-          <br />
-          would like to use with Keplr
+          <FormattedMessage id="pages.register.connect-hardware.content.title" />
         </Box>
       </RegisterH4>
       <Box alignX="center" paddingY="3.125rem">
@@ -47,7 +52,9 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
       </Box>
       <Stack gutter="1.25rem">
         <Button
-          text="Connect Ledger"
+          text={intl.formatMessage({
+            id: "pages.register.connect-hardware.connect-ledger-button",
+          })}
           size="large"
           color="secondary"
           left={<LedgerIcon />}
@@ -58,7 +65,9 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           }}
         />
         <Button
-          text="Connect Keystone (Coming Soon)"
+          text={intl.formatMessage({
+            id: "pages.register.connect-hardware.connect-keystone-button",
+          })}
           size="large"
           color="secondary"
           disabled={true}

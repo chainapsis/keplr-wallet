@@ -30,5 +30,11 @@
   "pages.register.intro-existing-user.social-recovery-paragraph": "Log in with the same email address to import an existing account to Keplr.",
   "pages.register.intro-existing-user.social-recovery-google-button": "Connect with Google",
 
+  "pages.register.connect-hardware.header.title": "Connect Hardware Wallet",
+  "pages.register.connect-hardware.header.paragraph": "Want even more security? 😎",
+  "pages.register.connect-hardware.content.title": "Select a hardware wallet that you would like to use with Keplr",
+  "pages.register.connect-hardware.connect-ledger-button": "Connect Ledger",
+  "pages.register.connect-hardware.connect-keystone-button": "Connect Keystone (Coming Soon)",
+
   "setting.language": "언어"
 }
