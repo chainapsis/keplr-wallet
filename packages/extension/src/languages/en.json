@@ -122,6 +122,13 @@
   "pages.register.enable-chains.save-button": "Save",
   "pages.register.enable-chains.skip-button": "Skip",
 
+  "pages.register.select-derivation-path.title": "Select Account Derivation Path",
+  "pages.register.select-derivation-path.paragraph": "To use both paths, you need to go through the import process twice.",
+  "pages.register.select-derivation-path.chain-step": "Chains {currentStep}/{totalStep}",
+  "pages.register.select-derivation-path.path-item.balance": "Balance",
+  "pages.register.select-derivation-path.path-item.previous-txs": "Previous txs",
+  "pages.register.select-derivation-path.import-button": "Import",
+
   "pages.register.pages.welcome.title": "Account Created!",
   "pages.register.pages.welcome.sub-title": "You may close this page",
   "pages.register.pages.welcome.paragraph": "Ready to explore the Interchain?",
