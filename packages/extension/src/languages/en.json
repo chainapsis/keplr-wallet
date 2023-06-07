@@ -98,6 +98,13 @@
   "pages.register.recover-mnemonic.advanced-button": "Advanced",
   "pages.register.recover-mnemonic.import-button": "Import",
 
+  "pages.register.back-up-private-key.title": "Back up private key",
+  "pages.register.back-up-private-key.blur-text": "Click here to see private key",
+  "pages.register.back-up-private-key.warning-title": "Backup your private key securely.",
+  "pages.register.back-up-private-key.warning-paragraph-1": "Anyone with your private key can have access to your assets.",
+  "pages.register.back-up-private-key.warning-paragraph-2": "If you lose an access to your Gmail Account, the only way to recover your wallet is using your private key. Keep this in a safe place.",
+  "pages.register.back-up-private-key.import-button": "Import",
+
   "pages.register.connect-ledger.title": "Please connect your Hardware wallet",
   "pages.register.connect-ledger.paragraph": "You need to connect Ethereum app in Ledger software, if you want to add EVM chains(Evmos, Injective) to Keplr",
   "pages.register.connect-ledger.step-text": "Step {step}",

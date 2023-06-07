@@ -15,6 +15,7 @@ import { Body1, Subtitle3 } from "../../../components/typography";
 import { CopyToClipboard } from "../components/copy-to-clipboard";
 import { Buffer } from "buffer/";
 import { PlainObject } from "@keplr-wallet/background";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const BackUpPrivateKeyScene: FunctionComponent<{
   name: string;
@@ -27,13 +28,16 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
   stepTotal: number;
 }> = observer(({ name, password, privateKey, stepPrevious, stepTotal }) => {
   const sceneTransition = useSceneTransition();
+  const intl = useIntl();
 
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Back up private key",
+        title: intl.formatMessage({
+          id: "pages.register.back-up-private-key.title",
+        }),
         stepCurrent: stepPrevious + 1,
         stepTotal: stepTotal,
       });
@@ -57,7 +61,7 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
           <Box cursor="pointer" onClick={() => setIsShowPrivate(true)}>
             <BlurBackdrop>
               <Subtitle3 color={ColorPalette["gray-300"]}>
-                Click here to see private key
+                <FormattedMessage id="pages.register.back-up-private-key.blur-text" />
               </Subtitle3>
             </BlurBackdrop>
           </Box>
@@ -78,14 +82,15 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
       <Gutter size="1.25rem" />
 
       <WarningBox
-        title="Backup your private key securely."
+        title={intl.formatMessage({
+          id: "pages.register.back-up-private-key.warning-title",
+        })}
         paragraph={
           <Box>
-            Anyone with your private key can have access to your assets.
+            <FormattedMessage id="pages.register.back-up-private-key.warning-paragraph-1" />
             <br />
             <br />
-            If you lose an access to your Gmail Account, the only way to recover
-            your wallet is using your private key. Keep this in a safe place.
+            <FormattedMessage id="pages.register.back-up-private-key.warning-paragraph-2" />
           </Box>
         }
       />
@@ -93,7 +98,9 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
       <Gutter size="1.5rem" />
 
       <Button
-        text="Import"
+        text={intl.formatMessage({
+          id: "pages.register.back-up-private-key.import-button",
+        })}
         size="large"
         onClick={() => {
           sceneTransition.replaceAll("finalize-key", {
