@@ -72,7 +72,11 @@ export class KeyRingLedgerService {
     return new PubKeySecp256k1(bytes);
   }
 
-  sign(): Uint8Array {
+  sign(): {
+    readonly r: Uint8Array;
+    readonly s: Uint8Array;
+    readonly v: number | null;
+  } {
     throw new Error(
       "Ledger can't sign message in background. You should provide the signature from frontend."
     );

@@ -86,7 +86,11 @@ export class KeyRingMnemonicService {
     coinType: number,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256"
-  ): Uint8Array {
+  ): {
+    readonly r: Uint8Array;
+    readonly s: Uint8Array;
+    readonly v: number | null;
+  } {
     const privKey = this.getPrivKey(vault, coinType);
 
     let digest = new Uint8Array();

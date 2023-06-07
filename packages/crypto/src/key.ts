@@ -29,15 +29,11 @@ export class PrivKeySecp256k1 {
     );
   }
 
-  /**
-   * @deprecated Use `signDigest32(Hash.sha256(data))` instead.
-   * @param msg
-   */
-  sign(msg: Uint8Array): Uint8Array {
-    return this.signDigest32(Hash.sha256(msg));
-  }
-
-  signDigest32(digest: Uint8Array): Uint8Array {
+  signDigest32(digest: Uint8Array): {
+    readonly r: Uint8Array;
+    readonly s: Uint8Array;
+    readonly v: number | null;
+  } {
     if (digest.length !== 32) {
       throw new Error(`Invalid length of digest to sign: ${digest.length}`);
     }
@@ -49,9 +45,11 @@ export class PrivKeySecp256k1 {
       canonical: true,
     });
 
-    return new Uint8Array(
-      signature.r.toArray("be", 32).concat(signature.s.toArray("be", 32))
-    );
+    return {
+      r: new Uint8Array(signature.r.toArray("be", 32)),
+      s: new Uint8Array(signature.s.toArray("be", 32)),
+      v: signature.recoveryParam,
+    };
   }
 }
 
@@ -113,14 +111,6 @@ export class PubKeySecp256k1 {
       Buffer.from(this.pubKey).toString("hex"),
       "hex"
     );
-  }
-
-  /**
-   * @deprecated Use `verifyDigest32(Hash.sha256(data))` instead.
-   * @param msg
-   */
-  verify(msg: Uint8Array, signature: Uint8Array): boolean {
-    return this.verifyDigest32(Hash.sha256(msg), signature);
   }
 
   verifyDigest32(digest: Uint8Array, signature: Uint8Array): boolean {

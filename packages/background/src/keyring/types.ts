@@ -35,5 +35,15 @@ export interface KeyRing {
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256",
     chainInfo: ChainInfo
-  ): Uint8Array | Promise<Uint8Array>;
+  ):
+    | {
+        readonly r: Uint8Array;
+        readonly s: Uint8Array;
+        readonly v: number | null;
+      }
+    | Promise<{
+        readonly r: Uint8Array;
+        readonly s: Uint8Array;
+        readonly v: number | null;
+      }>;
 }

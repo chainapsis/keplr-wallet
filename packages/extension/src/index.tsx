@@ -71,6 +71,7 @@ import { IBCTransferPage } from "./pages/ibc-transfer";
 import { SignCosmosICNSPage } from "./pages/sign/cosmos/icns";
 import { ErrorBoundary } from "./error-boundary";
 import { useMatchPopupSize } from "./popup-size";
+import { SignEthereumTxPage } from "./pages/sign/ethereum";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -330,6 +331,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 path="/sign-cosmos-icns"
                 element={<SignCosmosICNSPage />}
               />
+              <Route path="/sign-ethereum" element={<SignEthereumTxPage />} />
               <Route path="/wallet/select" element={<WalletSelectPage />} />
               <Route path="/wallet/delete" element={<WalletDeletePage />} />
               <Route
