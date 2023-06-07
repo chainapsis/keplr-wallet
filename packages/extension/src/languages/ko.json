@@ -7,6 +7,8 @@
   "error.bip44-path-required": "BIP44 path should be provided",
   "error.unsupported-app": "Unsupported app: ${app}",
   "error.device-is-locked": "Device is locked",
+  "error.too-short-mnemonic": "Too short mnemonic",
+  "error.invalid-mnemonic": "Invalid mnemonic",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -86,6 +88,15 @@
   "pages.register.name-password-hardware.title": "Set Up Your Wallet",
   "pages.register.name-password-hardware.use-terra-app-button": "Use Terra Ledger app",
   "pages.register.name-password-hardware.advanced-button": "Advanced",
+
+  "pages.register.recover-mnemonic.title": "Import Existing Wallet",
+  "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase here to restore your wallet. or paste the entire phrase in any text input.",
+  "pages.register.recover-mnemonic.paragraph-2": "Enter the phrase in the right order without capitalization, punctuation symbols, or spaces.",
+  "pages.register.recover-mnemonic.12-words-tab": "12 words",
+  "pages.register.recover-mnemonic.24-words-tab": "24 words",
+  "pages.register.recover-mnemonic.private-key-tab": "Private key",
+  "pages.register.recover-mnemonic.advanced-button": "Advanced",
+  "pages.register.recover-mnemonic.import-button": "Import",
 
   "pages.register.connect-ledger.title": "Please connect your Hardware wallet",
   "pages.register.connect-ledger.paragraph": "You need to connect Ethereum app in Ledger software, if you want to add EVM chains(Evmos, Injective) to Keplr",
