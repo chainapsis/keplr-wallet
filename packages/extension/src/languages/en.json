@@ -283,6 +283,15 @@
   "page.setting.contacts.add.memo-label": "Memo (Optional)",
   "page.setting.contacts.add.memo-placeholder": "Required for sending to centralized exchange",
 
+  "page.suggest-chain.title": "Add {chainName} to Keplr",
+  "page.suggest-chain.approve-button": "Approve",
+  "page.suggest-chain.community-info-view.community-driven-chip": "Community driven",
+  "page.suggest-chain.community-info-view.paragraph-1": "would like to add blockchain ",
+  "page.suggest-chain.community-info-view.paragraph-2": " to Keplr.",
+  "page.suggest-chain.raw-info-view.guide-title": "Before You Approve",
+  "page.suggest-chain.raw-info-view.guide-paragraph": "This chain’s info is not available on Keplr Chain Registry. Keplr recommends that ‘suggest chain’ info be managed by the community.",
+  "page.suggest-chain.raw-info-view.chain-registry-link-text": "Click here to update chain info on Github",
+
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address"
 }

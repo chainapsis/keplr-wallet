@@ -10,6 +10,7 @@ import { ColorPalette } from "../../../../styles";
 import { observer } from "mobx-react-lite";
 import { Skeleton } from "../../../../components/skeleton";
 import { ChainInfo } from "@keplr-wallet/types";
+import { FormattedMessage } from "react-intl";
 
 const Styles = {
   Chip: styled.div`
@@ -98,7 +99,10 @@ export const CommunityInfoView: FunctionComponent<{
 
       <Skeleton isNotReady={isNotReady}>
         <H1 style={{ textAlign: "center" }}>
-          Add {chainInfo.chainName} to Keplr
+          <FormattedMessage
+            id="page.suggest-chain.title"
+            values={{ chainName: chainInfo.chainName }}
+          />
         </H1>
       </Skeleton>
 
@@ -112,7 +116,7 @@ export const CommunityInfoView: FunctionComponent<{
       >
         <Skeleton isNotReady={isNotReady}>
           <Styles.Chip>
-            Community driven
+            <FormattedMessage id="page.suggest-chain.community-info-view.community-driven-chip" />
             <Box>
               <GithubIcon />
             </Box>
@@ -126,8 +130,9 @@ export const CommunityInfoView: FunctionComponent<{
         <Skeleton isNotReady={isNotReady}>
           <Styles.Paragraph>
             <Styles.Bold>{origin}</Styles.Bold>
-            would like to add blockchain{" "}
-            <Styles.Bold>{chainInfo?.chainId}</Styles.Bold> to Keplr.
+            <FormattedMessage id="page.suggest-chain.community-info-view.paragraph-1" />
+            <Styles.Bold>{chainInfo?.chainId}</Styles.Bold>
+            <FormattedMessage id="page.suggest-chain.community-info-view.paragraph-2" />
           </Styles.Paragraph>
         </Skeleton>
       </Box>
