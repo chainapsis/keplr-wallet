@@ -21,6 +21,7 @@ import { useConfirm } from "../../../../hooks/confirm";
 import { GetChainOriginalEndpointsMsg } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -37,6 +38,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
   const notification = useNotification();
   const confirm = useConfirm();
+  const intl = useIntl();
 
   const [chainId, setChainId] = useState<string>(
     chainStore.chainInfos[0].chainId
@@ -87,11 +89,15 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Change Endpoints"
+      title={intl.formatMessage({
+        id: "page.setting.advanced.change-endpoints-title",
+      })}
       fixedHeight={true}
       left={<BackButton />}
       bottomButton={{
-        text: "Confirm",
+        text: intl.formatMessage({
+          id: "page.setting.advanced.endpoint.confirm-button",
+        }),
         color: "secondary",
         size: "large",
         isLoading,
@@ -120,7 +126,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
               notification.show(
                 "failed",
-                "Failed to set endpoints",
+                intl.formatMessage({ id: "error.failed-to-set-endpoints" }),
                 e.message || e.toString()
               );
 
@@ -139,8 +145,12 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           }
 
           await confirm.confirm(
-            "Set endpoints",
-            "You need to restart Keplr to apply changes",
+            intl.formatMessage({
+              id: "page.setting.advanced.endpoint.confirm-title",
+            }),
+            intl.formatMessage({
+              id: "page.setting.advanced.endpoint.confirm-paragraph",
+            }),
             {
               forceYes: true,
             }
@@ -167,7 +177,9 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           <Column weight={1} />
           <Button
             size="extraSmall"
-            text="Reset"
+            text={intl.formatMessage({
+              id: "page.setting.advanced.endpoint.reset-button",
+            })}
             color="secondary"
             disabled={(() => {
               if (!originalEndpoint) {
@@ -194,14 +206,15 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
         <Styles.Flex1 />
 
         <GuideBox
-          title="Experimental Feature"
+          title={intl.formatMessage({
+            id: "page.setting.advanced.endpoint.warning-title",
+          })}
           paragraph={
             <Box>
-              Please get in touch with the endpoint providers to address any
-              issues that may arise from changes to the endpoint(s).
+              <FormattedMessage id="page.setting.advanced.endpoint.warning-paragraph-1" />
               <br />
               <br />
-              Restart Keplr to apply changes.
+              <FormattedMessage id="page.setting.advanced.endpoint.warning-paragraph-2" />
             </Box>
           }
         />

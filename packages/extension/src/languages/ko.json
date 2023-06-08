@@ -9,6 +9,7 @@
   "error.device-is-locked": "Device is locked",
   "error.too-short-mnemonic": "Too short mnemonic",
   "error.invalid-mnemonic": "Invalid mnemonic",
+  "error.failed-to-set-endpoints": "Failed to set endpoints",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -162,6 +163,18 @@
   "page.setting.security-privacy-paragraph": "Connected Websites, Auto-Lock",
   "page.setting.manage-token-list-title": "Manage Token List",
   "page.setting.manage-token-list-paragraph": "Only for the tokens that can be added manually via contract addresses",
+
+  "page.setting.advanced.developer-mode-title": "Developer Mode",
+  "page.setting.advanced.developer-mode-paragraph": "Feeling techie today? :)",
+  "page.setting.advanced.change-endpoints-title": "Change Endpoints",
+
+  "page.setting.advanced.endpoint.confirm-button": "Confirm",
+  "page.setting.advanced.endpoint.confirm-title": "Set endpoints",
+  "page.setting.advanced.endpoint.confirm-paragraph": "You need to restart Keplr to apply changes",
+  "page.setting.advanced.endpoint.reset-button": "Reset",
+  "page.setting.advanced.endpoint.warning-title": "Experimental Feature",
+  "page.setting.advanced.endpoint.warning-paragraph-1": "Please get in touch with the endpoint providers to address any issues that may arise from changes to the endpoint(s).",
+  "page.setting.advanced.endpoint.warning-paragraph-2": "Restart Keplr to apply changes.",
 
   "setting.language": "언어"
 }
