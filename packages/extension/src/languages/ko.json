@@ -153,5 +153,15 @@
   "page.register.google.title": "Sign in with Google",
   "page.register.google.paragraph": "Create a wallet linked to your Google account.",
 
+  "page.setting.title": "Settings",
+  "page.setting.general-title": "General",
+  "page.setting.general-paragraph": "Language, Currency, Contacts...",
+  "page.setting.advanced-title": "Advanced",
+  "page.setting.advanced-paragraph": "Developer Mode, Change Endpoints...",
+  "page.setting.security-privacy-title": "Security & Privacy",
+  "page.setting.security-privacy-paragraph": "Connected Websites, Auto-Lock",
+  "page.setting.manage-token-list-title": "Manage Token List",
+  "page.setting.manage-token-list-paragraph": "Only for the tokens that can be added manually via contract addresses",
+
   "setting.language": "언어"
 }
