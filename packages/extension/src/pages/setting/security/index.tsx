@@ -35,22 +35,24 @@ export const SettingSecurityPage: FunctionComponent = () => {
           />
 
           <PageButton
-            title="Using Analytics"
-            paragraph="Help us improve the extension by sending anonymous usage data"
+            title="Share anonymous data"
+            paragraph="Help us improve the performance and quality of Keplr"
             endIcon={
-              <Toggle
-                isOpen={localStorage.getItem("using-analytics") !== "false"}
-                setIsOpen={() => {
-                  localStorage.setItem(
-                    "using-analytics",
-                    localStorage.getItem("using-analytics") !== "false"
-                      ? "false"
-                      : "true"
-                  );
+              <Box marginLeft="0.5rem">
+                <Toggle
+                  isOpen={localStorage.getItem("using-analytics") !== "false"}
+                  setIsOpen={() => {
+                    localStorage.setItem(
+                      "using-analytics",
+                      localStorage.getItem("using-analytics") !== "false"
+                        ? "false"
+                        : "true"
+                    );
 
-                  window.location.reload();
-                }}
-              />
+                    window.location.reload();
+                  }}
+                />
+              </Box>
             }
           />
         </Stack>
