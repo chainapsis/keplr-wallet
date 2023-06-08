@@ -12,6 +12,10 @@
   "error.failed-to-set-endpoints": "Failed to set endpoints",
   "error.transaction-failed": "Transaction Failed",
   "error.invalid-password": "Invalid password",
+  "error.duration-type": "The duration should be an integer.",
+  "error.duration-lange": "The duration should be between {minDuration} and {maxDuration} minutes.",
+  "error.password-too-short": "Too short password",
+  "error.password-should-match": "Password should match",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -219,6 +223,27 @@
 
   "page.setting.general.delete-suggest-chain.empty-text": "Hmm.. Nothing Here!",
   "page.setting.general.delete-suggest-chain.chain-item.tooltip-text": "The infrastructure and setting of this chain is not configured by Keplr team. Please reach out to the chain or website team for technical support.",
+
+  "page.setting.security.connected-websites-title": "Connected Websites",
+  "page.setting.security.connected-websites-paragraph": "Websites that can view your address and make requests for signing",
+  "page.setting.security.auto-lock-title": "Auto-Lock",
+  "page.setting.security.change-password-title": "Change Password",
+
+  "page.setting.security.permission.search-placeholder": "Search",
+  "page.setting.security.permission.disconnect-all-button": "Disconnect All",
+  "page.setting.security.permission.origin-view.all-text": "All",
+
+  "page.setting.security.auto-lock.confirm-button": "Confirm",
+  "page.setting.security.auto-lock.paragraph": "You can set how long it takes Keplr to automatically lock.",
+  "page.setting.security.auto-lock.timer-input-label": "Set Timer (unit: minutes)",
+  "page.setting.security.auto-lock.sleep-mode-title": "Lock Keplr on Sleep Mode",
+  "page.setting.security.auto-lock.sleep-mode-paragraph-1": "Lock Keplr when the device is",
+  "page.setting.security.auto-lock.sleep-mode-paragraph-2": "in sleep mode",
+
+  "page.setting.security.change-password.next-button": "Next",
+  "page.setting.security.change-password.current-password-label": "Current Keplr Password",
+  "page.setting.security.change-password.new-password-label": "New Keplr Password",
+  "page.setting.security.change-password.confirm-password-label": "Confirm New Keplr Password",
 
   "components.empty-view.text": "No {subject} Yet"
 }
