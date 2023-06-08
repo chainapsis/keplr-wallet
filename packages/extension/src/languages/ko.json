@@ -176,5 +176,15 @@
   "page.setting.advanced.endpoint.warning-paragraph-1": "Please get in touch with the endpoint providers to address any issues that may arise from changes to the endpoint(s).",
   "page.setting.advanced.endpoint.warning-paragraph-2": "Restart Keplr to apply changes.",
 
+  "page.setting.general.language-title": "Language",
+  "page.setting.general.currency-title": "Currency",
+  "page.setting.general.contacts-title": "Contacts",
+  "page.setting.general.manage-authz-title": "Manage AuthZ",
+  "page.setting.general.link-kpelr-mobile-title": "Link Keplr Mobile",
+  "page.setting.general.manage-non-native-chains-title": "Manage Non-Native Chains",
+  "page.setting.general.manage-non-native-chains-paragraph": "Add or remove non-native chains operated by external parties",
+  "page.setting.general.manage-chain-visibility-title": "Manage Chain Visibility",
+  "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and its assets) to be shown for your current account",
+
   "setting.language": "언어"
 }

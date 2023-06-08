@@ -9,27 +9,36 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { Box } from "../../../components/box";
 import { useLanguage } from "../../../languages";
+import { useIntl } from "react-intl";
 
 export const SettingGeneralPage: FunctionComponent = observer(() => {
   const { keyRingStore, uiConfigStore } = useStore();
 
+  const intl = useIntl();
   const language = useLanguage();
 
   const navigate = useNavigate();
 
   return (
-    <HeaderLayout title="General" left={<BackButton />}>
+    <HeaderLayout
+      title={intl.formatMessage({ id: "page.setting.general-title" })}
+      left={<BackButton />}
+    >
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
-            title="Language"
+            title={intl.formatMessage({
+              id: "page.setting.general.language-title",
+            })}
             paragraph={language.languageFullName}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/language")}
           />
 
           <PageButton
-            title="Currency"
+            title={intl.formatMessage({
+              id: "page.setting.general.currency-title",
+            })}
             paragraph={(() => {
               return uiConfigStore.fiatCurrency.currency.toUpperCase();
             })()}
@@ -38,33 +47,47 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title="Contacts"
+            title={intl.formatMessage({
+              id: "page.setting.general.contacts-title",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/contacts/list")}
           />
 
           <PageButton
-            title="Manage AuthZ"
+            title={intl.formatMessage({
+              id: "page.setting.general.manage-authz-title",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/authz")}
           />
 
           <PageButton
-            title="Link Keplr Mobile"
+            title={intl.formatMessage({
+              id: "page.setting.general.link-kpelr-mobile-title",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/link-keplr-mobile")}
           />
 
           <PageButton
-            title="Manage Non-Native Chains"
-            paragraph="Add or remove non-native chains operated by external parties"
+            title={intl.formatMessage({
+              id: "page.setting.general.manage-non-native-chains-title",
+            })}
+            paragraph={intl.formatMessage({
+              id: "page.setting.general.manage-non-native-chains-paragraph",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/general/delete-suggest-chain")}
           />
 
           <PageButton
-            title="Manage Chain Visibility"
-            paragraph="Select chains (and its assets) to be shown for your current account"
+            title={intl.formatMessage({
+              id: "page.setting.general.manage-chain-visibility-title",
+            })}
+            paragraph={intl.formatMessage({
+              id: "page.setting.general.manage-chain-visibility-paragraph",
+            })}
             endIcon={<RightArrowIcon />}
             onClick={() => {
               if (keyRingStore.selectedKeyInfo) {
