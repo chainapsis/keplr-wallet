@@ -10,6 +10,7 @@
   "error.too-short-mnemonic": "Too short mnemonic",
   "error.invalid-mnemonic": "Invalid mnemonic",
   "error.failed-to-set-endpoints": "Failed to set endpoints",
+  "error.transaction-failed": "Transaction Failed",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -186,5 +187,21 @@
   "page.setting.general.manage-chain-visibility-title": "Manage Chain Visibility",
   "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and its assets) to be shown for your current account",
 
-  "setting.language": "언어"
+  "page.setting.general.language.automatic-title": "Automatic (Browser default)",
+  "page.setting.general.language.english-title": "English",
+  "page.setting.general.language.korean-title": "Korean",
+
+  "page.setting.general.authz.empty-subject": "Authz",
+  "page.setting.general.authz.grant-view.grantee-authorized": "You authorized {grantee}",
+  "page.setting.general.authz.grant-view.expiration-date": "Expiration Date: ",
+  "page.setting.general.authz.grant-view.expired": "Expired",
+  "page.setting.general.authz.grant-view.no-expiration": "No expiration",
+
+  "page.setting.general.authz.revoke.title": "Authz Details",
+  "page.setting.general.authz.revoke.grantee-address": "Grantee Address",
+  "page.setting.general.authz.revoke.expiration-dates": "Expiration dates",
+  "page.setting.general.authz.revoke.transaction-success": "Transaction Success",
+  "page.setting.general.authz.revoke.revoke-button": "Revoke",
+
+  "components.empty-view.text": "No {subject} Yet"
 }
