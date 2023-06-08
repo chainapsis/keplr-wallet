@@ -207,14 +207,14 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
 
         <GuideBox
           title={intl.formatMessage({
-            id: "page.setting.advanced.endpoint.warning-title",
+            id: "page.setting.advanced.endpoint.guide-title",
           })}
           paragraph={
             <Box>
-              <FormattedMessage id="page.setting.advanced.endpoint.warning-paragraph-1" />
+              <FormattedMessage id="page.setting.advanced.endpoint.guide-paragraph-1" />
               <br />
               <br />
-              <FormattedMessage id="page.setting.advanced.endpoint.warning-paragraph-2" />
+              <FormattedMessage id="page.setting.advanced.endpoint.guide-paragraph-2" />
             </Box>
           }
         />
