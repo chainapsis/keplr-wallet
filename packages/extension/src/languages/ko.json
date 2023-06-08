@@ -292,6 +292,19 @@
   "page.suggest-chain.raw-info-view.guide-paragraph": "This chain’s info is not available on Keplr Chain Registry. Keplr recommends that ‘suggest chain’ info be managed by the community.",
   "page.suggest-chain.raw-info-view.chain-registry-link-text": "Click here to update chain info on Github",
 
+  "page.unlock.star-migration-button": "Start Migration",
+  "page.unlock.upgrade-in-progress": "Upgrade in progress",
+  "page.unlock.unlock-button": "Unlock",
+  "page.unlock.forgot-password-button": "Forgot Password?",
+
+  "page.unlock.paragraph-section.keplr-here": "💫 Keplr 2.0 is here!",
+  "page.unlock.paragraph-section.enter-password-to-upgrade": "Enter your password to upgrade.",
+  "page.unlock.paragraph-section.welcome-back": "Welcome Back",
+  "page.unlock.bottom-section.capslock-tooltip": "CapsLock is on",
+  "page.unlock.bottom-section.password-input-label": "Password",
+  "page.unlock.bottom-section.guide-title": "Don’t close your browser during update",
+  "page.unlock.bottom-section.guide-paragraph": "Migration for users with many accounts can take up to several minutes.",
+
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address"
 }
