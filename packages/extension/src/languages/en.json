@@ -16,6 +16,8 @@
   "error.duration-lange": "The duration should be between {minDuration} and {maxDuration} minutes.",
   "error.password-too-short": "Too short password",
   "error.password-should-match": "Password should match",
+  "error.viewing-key-null": "Viewing key is null",
+  "error.failed-to-create-viewing-key": "Failed to create the viewing key",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -244,6 +246,26 @@
   "page.setting.security.change-password.current-password-label": "Current Keplr Password",
   "page.setting.security.change-password.new-password-label": "New Keplr Password",
   "page.setting.security.change-password.confirm-password-label": "Confirm New Keplr Password",
+
+  "page.setting.token.manage.paragraph": "Only for the tokens that can be added manually via contract addresses",
+  "page.setting.token.manage.add-token-button": "Add Token",
+  "page.setting.token.manage.empty-subject": "Token",
+  "page.setting.token.manage.token-view.copy-viewing-key-tooltip": "Copy Viewing Key",
+  "page.setting.token.manage.token-view.viewing-key-copied": "Viewing key copied",
+  "page.setting.token.manage.token-view.copy-contract-address-tooltip": "Copy Contract Address",
+  "page.setting.token.manage.token-view.contract-address-copied": "Contract address copied",
+  "page.setting.token.manage.token-view.disable-token-tooltip": "Disable Token",
+  "page.setting.token.manage.token-view.disable-token-confirm": "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again.",
+
+  "page.setting.token.add.title": "Add Token Manually",
+  "page.setting.token.add.confirm-button": "Confirm",
+  "page.setting.token.add.contract-address-label": "Contract Address",
+  "page.setting.token.add.name-label": "Name",
+  "page.setting.token.add.symbol-label": "Symbol",
+  "page.setting.token.add.decimal-label": "Decimal",
+  "page.setting.token.add.viewing-key-info-title": "I have my own viewing key",
+  "page.setting.token.add.viewing-key-info-paragraph": "By enabling this toggle, you confirm that you have your viewing key and use it for adding this token.",
+  "page.setting.token.add.viewing-key-label": "Viewing Key",
 
   "components.empty-view.text": "No {subject} Yet"
 }
