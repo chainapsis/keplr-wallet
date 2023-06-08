@@ -305,6 +305,34 @@
   "page.unlock.bottom-section.guide-title": "Don’t close your browser during update",
   "page.unlock.bottom-section.guide-paragraph": "Migration for users with many accounts can take up to several minutes.",
 
+  "page.wallet.title": "Select Wallet",
+  "page.wallet.add-wallet-button": "Add Wallet",
+  "page.wallet.recovery-phrase-title": "Recovery Phrase",
+  "page.wallet.connect-with-social-account-title": "Connected with {social} Account",
+  "page.wallet.private-key-title": "Private key",
+  "page.wallet.ledger-title": "Ledger",
+  "page.wallet.unknown-title": "Unknown",
+  "page.wallet.keyring-item.bip44-path-terra-text": " (Terra)",
+  "page.wallet.keyring-item.dropdown.change-wallet-name-title": "Change Wallet Name",
+  "page.wallet.keyring-item.dropdown.delete-wallet-title": "Delete Wallet",
+  "page.wallet.keyring-item.dropdown.view-recovery-path-title": "View Recovery Phrase",
+  "page.wallet.keyring-item.dropdown.view-private-key-title": "View Private key",
+
+  "page.wallet.change-name.save-button": "Save",
+  "page.wallet.change-name.previous-name-input-label": "Previous Wallet Name",
+  "page.wallet.change-name.new-name-input-label": "New Wallet Name",
+
+  "page.wallet.delete.confirm-button": "Confirm",
+  "page.wallet.delete.warning-title": "Alert",
+  "page.wallet.delete.warning-paragraph": "Make sure that you’ve backed up your recovery phrase and private key.",
+  "page.wallet.delete.warning-link-text": "Back Up My Wallet",
+  "page.wallet.delete.paragraph": "After deletion, you will be required to import your wallet to restore\n  your access to it.",
+  "page.wallet.delete.password-input-label": "Password",
+
+  "page.wallet.show-sensitive.confirm-button": "Confirm",
+  "page.wallet.show-sensitive.close-button": "Close",
+  "page.wallet.show-sensitive.paragraph": "Please type in your password to proceed",
+
   "components.empty-view.text": "No {subject} Yet",
   "components.input.recipient-input.wallet-address-label": "Wallet Address"
 }
