@@ -11,6 +11,7 @@
   "error.invalid-mnemonic": "Invalid mnemonic",
   "error.failed-to-set-endpoints": "Failed to set endpoints",
   "error.transaction-failed": "Transaction Failed",
+  "error.invalid-password": "Invalid password",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -202,6 +203,19 @@
   "page.setting.general.authz.revoke.expiration-dates": "Expiration dates",
   "page.setting.general.authz.revoke.transaction-success": "Transaction Success",
   "page.setting.general.authz.revoke.revoke-button": "Revoke",
+
+  "page.setting.general.link-keplr-mobile.confirm-title": "Export Failed",
+  "page.setting.general.link-keplr-mobile.confirm-paragraph-1": "You cannot export Ledger-based accounts to Keplr Mobile. These must be imported to your mobile device directly from the Ledger.",
+  "page.setting.general.link-keplr-mobile.confirm-paragraph-2": "Accounts that are created via social logins that are not supported by Keplr Mobile cannot be exported.",
+  "page.setting.general.link-keplr-mobile.enter-password-view.confirm-button": "Confirm",
+  "page.setting.general.link-keplr-mobile.enter-password-view.guide-title": "Only scan on Keplr Mobile",
+  "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph": "Scanning the QR code outside of Keplr Mobile can lead to loss of funds",
+  "page.setting.general.link-keplr-mobile.enter-password-view.paragraph": "Scan QR code to export accounts to Keplr Mobile. The process may take several minutes.",
+  "page.setting.general.link-keplr-mobile.enter-password-view.password-label": "Password",
+
+  "page.setting.general.link-keplr-mobile.qr-code-view.session-expired": "Session expired",
+  "page.setting.general.link-keplr-mobile.qr-code-view.paragraph": "Scan the QR code to sync with Keplr Mobile. The process may take several minutes.",
+  "page.setting.general.link-keplr-mobile.qr-code-view.expired": "Expired",
 
   "components.empty-view.text": "No {subject} Yet"
 }
