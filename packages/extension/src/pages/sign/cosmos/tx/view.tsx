@@ -34,6 +34,7 @@ import { ErrModuleLedgerSign } from "../../utils/ledger-types";
 import { LedgerGuideBox } from "../../components/ledger-guide-box";
 import { Gutter } from "../../../../components/gutter";
 import { GuideBox } from "../../../../components/guide-box";
+import SimpleBar from "simplebar-react";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -333,14 +334,16 @@ export const CosmosTxView: FunctionComponent<{
           </Columns>
         </Box>
 
-        <Box
-          className="show-scrollbar"
-          borderRadius="0.375rem"
-          backgroundColor={ColorPalette["gray-600"]}
+        <SimpleBar
+          autoHide={false}
           style={{
+            display: "flex",
+            flexDirection: "column",
             flex: !isViewData ? "0 1 auto" : 1,
             overflow: "auto",
             opacity: isLedgerAndDirect ? 0.5 : undefined,
+            borderRadius: "0.375rem",
+            backgroundColor: ColorPalette["gray-600"],
           }}
         >
           <Box>
@@ -378,7 +381,7 @@ export const CosmosTxView: FunctionComponent<{
               </Box>
             )}
           </Box>
-        </Box>
+        </SimpleBar>
 
         {!isViewData ? <div style={{ flex: 1 }} /> : null}
         <Box height="0" minHeight="1rem" />
