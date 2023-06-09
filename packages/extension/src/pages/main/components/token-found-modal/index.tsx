@@ -21,6 +21,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TokenScan } from "@keplr-wallet/background";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Gutter } from "../../../../components/gutter";
+import SimpleBar from "simplebar-react";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -137,7 +138,14 @@ export const TokenFoundModal: FunctionComponent<{
         </Subtitle1>
       </Box>
 
-      <Box maxHeight="22rem" style={{ overflowY: "auto" }}>
+      <SimpleBar
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          maxHeight: "22rem",
+          overflowY: "auto",
+        }}
+      >
         <Stack gutter="0.75rem">
           {chainStore.tokenScans.map((tokenScan) => {
             return (
@@ -167,7 +175,7 @@ export const TokenFoundModal: FunctionComponent<{
             );
           })}
         </Stack>
-      </Box>
+      </SimpleBar>
 
       {keyRingStore.selectedKeyInfo?.type === "ledger" ? (
         <React.Fragment>

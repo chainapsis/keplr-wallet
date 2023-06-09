@@ -12,6 +12,9 @@ import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
 import { ModalProps } from "./types";
 import Color from "color";
+import SimpleBar from "simplebar-react";
+
+const AnimatedSimpleBar = animated(SimpleBar);
 
 export const Modal: FunctionComponent<ModalProps> = ({
   isOpen,
@@ -145,6 +148,8 @@ const ModalChild: FunctionComponent<{
         e.preventDefault();
         e.stopPropagation();
 
+        console.log("!!!!");
+
         if (
           innerContainerRef.current &&
           innerContainerRef.current !== e.target &&
@@ -158,8 +163,10 @@ const ModalChild: FunctionComponent<{
         }
       }}
     >
-      <animated.div
-        ref={innerContainerRef}
+      <AnimatedSimpleBar
+        scrollableNodeProps={{
+          ref: innerContainerRef,
+        }}
         style={{
           // 화면을 다 가릴수는 없게 만든다.
           // align이 left일때는 (사실은 sidebar에서만 left align이 사용됨)
@@ -206,7 +213,7 @@ const ModalChild: FunctionComponent<{
         }}
       >
         {children}
-      </animated.div>
+      </AnimatedSimpleBar>
     </animated.div>
   );
 };
