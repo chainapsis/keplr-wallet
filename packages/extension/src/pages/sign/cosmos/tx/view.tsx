@@ -105,20 +105,10 @@ export const CosmosTxView: FunctionComponent<{
     ) {
       feeConfig.setFee(
         data.data.signDocWrapper.fees.map((fee) => {
-          const feeCurrency = chainStore
-            .getChain(chainId)
-            .feeCurrencies.find((cur) => cur.coinMinimalDenom === fee.denom);
-
           const currency = chainStore
             .getChain(data.data.chainId)
             .forceFindCurrency(fee.denom);
-          return new CoinPretty(
-            {
-              ...feeCurrency,
-              ...currency,
-            },
-            new Int(fee.amount)
-          );
+          return new CoinPretty(currency, new Int(fee.amount));
         })
       );
     }

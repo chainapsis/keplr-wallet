@@ -210,24 +210,14 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     const initialFeeCurrency = searchParams.get("initialFeeCurrency");
     const initialFeeType = searchParams.get("initialFeeType");
     if (initialFeeCurrency && initialFeeType) {
-      const feeCurrency = chainStore
-        .getChain(chainId)
-        .feeCurrencies.find(
-          (cur) => cur.coinMinimalDenom === initialFeeCurrency
-        );
       const currency = chainStore
         .getChain(chainId)
-        .findCurrency(initialFeeCurrency);
-      if (currency) {
-        sendConfigs.feeConfig.setFee({
-          currency: {
-            ...feeCurrency,
-            ...currency,
-          },
-          // XXX: 일단 귀찮아서 any로 처리...
-          type: initialFeeType as any,
-        });
-      }
+        .forceFindCurrency(initialFeeCurrency);
+      sendConfigs.feeConfig.setFee({
+        currency,
+        // XXX: 일단 귀찮아서 any로 처리...
+        type: initialFeeType as any,
+      });
     }
 
     const initialGasAmount = searchParams.get("initialGasAmount");
