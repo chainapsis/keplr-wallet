@@ -17,12 +17,6 @@ export const GlobalStyle = createGlobalStyle`
     font-family: 'Inter', sans-serif;
     color: ${ColorPalette.white};
     background-color: ${ColorPalette["gray-700"]};
-
-    // Scroll to back, forward를 막는다.
-    // 특히 background interaction과 관련되었을때
-    // history를 완전히 처리하지 못하는 문제가 있기 때문에
-    // 제스쳐에 의한 history 변경을 막는다.
-    overscroll-behavior-x: none;
   }
   
   pre {
