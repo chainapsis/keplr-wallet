@@ -9,7 +9,7 @@ export interface IMessageRenderer {
   ):
     | {
         icon: React.ReactElement;
-        title: string;
+        title: string | React.ReactElement;
         content: string | React.ReactElement;
       }
     | undefined;
@@ -23,7 +23,7 @@ export interface IMessageRenderRegistry {
     msg: Msg | AnyWithUnpacked
   ): {
     icon: React.ReactElement;
-    title: string;
+    title: string | React.ReactElement;
     content: string | React.ReactElement;
   };
 }
