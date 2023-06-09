@@ -19,6 +19,7 @@ import { AppIntlProvider } from "./languages";
 import { observer } from "mobx-react-lite";
 import { useLoadFonts } from "./use-load-fonts";
 import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
+import "simplebar-react/dist/simplebar.min.css";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.

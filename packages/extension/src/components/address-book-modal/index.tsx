@@ -2,13 +2,11 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { Modal } from "../modal";
 import { Box } from "../box";
 import { ColorPalette } from "../../styles";
-import styled from "styled-components";
 import { Subtitle1, Subtitle3 } from "../typography";
 import { Gutter } from "../gutter";
 import { HorizontalRadioGroup } from "../radio-group";
 import { YAxis } from "../axis";
 import { Stack } from "../stack";
-import Color from "color";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
 import { Key } from "@keplr-wallet/types";
@@ -16,24 +14,7 @@ import { IMemoConfig, IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
 import { AddressItem } from "../address-item";
-
-const Styles = {
-  Container: styled.div`
-    display: flex;
-    flex-direction: column;
-  `,
-  ListContainer: styled.div`
-    flex: 1;
-    overflow-y: auto;
-  `,
-
-  AddressItemContainer: styled(Box)`
-    background-color: ${ColorPalette["gray-600"]};
-    &:hover {
-      background-color: ${Color(ColorPalette["gray-500"]).alpha(0.5).string()};
-    }
-  `,
-};
+import SimpleBar from "simplebar-react";
 
 type Type = "recent" | "contacts" | "accounts";
 
@@ -178,7 +159,12 @@ export const AddressBookModal: FunctionComponent<{
         <Gutter size="0.75rem" />
 
         {datas.length > 0 ? (
-          <Styles.ListContainer>
+          <SimpleBar
+            style={{
+              flex: "1",
+              overflowY: "auto",
+            }}
+          >
             <Stack gutter="0.75rem">
               {datas.map((data, i) => {
                 return (
@@ -199,7 +185,7 @@ export const AddressBookModal: FunctionComponent<{
               })}
               <Gutter size="0.75rem" />
             </Stack>
-          </Styles.ListContainer>
+          </SimpleBar>
         ) : (
           <Box
             alignX="center"
