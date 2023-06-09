@@ -18,6 +18,8 @@ export interface RecipientInputWithAddressBookProps {
   historyType: string;
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
   memoConfig: IMemoConfig;
+
+  permitAddressBookSelfKeyInfo?: boolean;
 }
 
 export interface RecipientInputWithoutAddressBookProps {
@@ -125,6 +127,7 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
             historyType={props.historyType}
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
+            permitSelfKeyInfo={props.permitAddressBookSelfKeyInfo}
           />
         ) : null}
       </Box>

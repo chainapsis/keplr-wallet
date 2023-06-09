@@ -136,6 +136,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
             historyType={historyType}
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
+            permitAddressBookSelfKeyInfo={true}
           />
         </Stack>
 

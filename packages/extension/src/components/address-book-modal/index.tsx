@@ -2,7 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { Modal } from "../modal";
 import { Box } from "../box";
 import { ColorPalette } from "../../styles";
-import { Subtitle1, Subtitle3 } from "../typography";
+import { BaseTypography, Subtitle1, Subtitle3 } from "../typography";
 import { Gutter } from "../gutter";
 import { HorizontalRadioGroup } from "../radio-group";
 import { YAxis } from "../axis";
@@ -15,8 +15,17 @@ import { Bleed } from "../bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
 import { AddressItem } from "../address-item";
 import SimpleBar from "simplebar-react";
+import styled from "styled-components";
 
 type Type = "recent" | "contacts" | "accounts";
+
+const AltTypography = styled(BaseTypography)`
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1.25;
+
+  margin-left: 0.25rem;
+`;
 
 export const AddressBookModal: FunctionComponent<{
   isOpen: boolean;
@@ -25,198 +34,263 @@ export const AddressBookModal: FunctionComponent<{
   historyType: string;
   recipientConfig: IRecipientConfig;
   memoConfig: IMemoConfig;
-}> = observer(({ isOpen, close, historyType, recipientConfig, memoConfig }) => {
-  const { analyticsStore, uiConfigStore, keyRingStore } = useStore();
 
-  // TODO: Implement "recent"
-  const [type, setType] = useState<Type>("recent");
+  permitSelfKeyInfo?: boolean;
+}> = observer(
+  ({
+    isOpen,
+    close,
+    historyType,
+    recipientConfig,
+    memoConfig,
+    permitSelfKeyInfo,
+  }) => {
+    const { analyticsStore, uiConfigStore, keyRingStore } = useStore();
 
-  const [recents, setRecents] = useState<RecentSendHistory[]>([]);
-  const [accounts, setAccounts] = useState<Key[]>([]);
+    const [type, setType] = useState<Type>("recent");
 
-  useEffect(() => {
-    uiConfigStore.addressBookConfig
-      .getRecentSendHistory(recipientConfig.chainId, historyType)
-      .then((res) => {
-        setRecents(res);
-      });
-  }, [historyType, recipientConfig.chainId, uiConfigStore.addressBookConfig]);
+    const [recents, setRecents] = useState<RecentSendHistory[]>([]);
+    const [accounts, setAccounts] = useState<
+      (Key & {
+        vaultId: string;
+      })[]
+    >([]);
 
-  useEffect(() => {
-    uiConfigStore.addressBookConfig
-      .getEnabledVaultCosmosKeysSettled(
-        recipientConfig.chainId,
-        keyRingStore.selectedKeyInfo?.id
-      )
-      .then((keys) => {
-        setAccounts(
-          keys
-            .filter((res) => {
-              return res.status === "fulfilled";
-            })
-            .map((res) => {
-              if (res.status === "fulfilled") {
-                return res.value;
-              }
-              throw new Error("Unexpected status");
-            })
-        );
-      });
-  }, [
-    keyRingStore.selectedKeyInfo?.id,
-    recipientConfig.chainId,
-    uiConfigStore.addressBookConfig,
-  ]);
-
-  const datas: {
-    timestamp?: number;
-    name?: string;
-    address: string;
-    memo?: string;
-  }[] = (() => {
-    switch (type) {
-      case "recent": {
-        return recents.map((recent) => {
-          return {
-            timestamp: recent.timestamp,
-            address: recent.recipient,
-            memo: recent.memo,
-          };
+    useEffect(() => {
+      uiConfigStore.addressBookConfig
+        .getRecentSendHistory(recipientConfig.chainId, historyType)
+        .then((res) => {
+          setRecents(res);
         });
-      }
-      case "contacts": {
-        return uiConfigStore.addressBookConfig
-          .getAddressBook(recipientConfig.chainId)
-          .map((addressData) => {
+    }, [historyType, recipientConfig.chainId, uiConfigStore.addressBookConfig]);
+
+    useEffect(() => {
+      uiConfigStore.addressBookConfig
+        .getEnabledVaultCosmosKeysSettled(
+          recipientConfig.chainId,
+          permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
+        )
+        .then((keys) => {
+          setAccounts(
+            keys
+              .filter((res) => {
+                return res.status === "fulfilled";
+              })
+              .map((res) => {
+                if (res.status === "fulfilled") {
+                  return res.value;
+                }
+                throw new Error("Unexpected status");
+              })
+          );
+        });
+    }, [
+      keyRingStore.selectedKeyInfo?.id,
+      permitSelfKeyInfo,
+      recipientConfig.chainId,
+      uiConfigStore.addressBookConfig,
+    ]);
+
+    const datas: {
+      timestamp?: number;
+      name?: string;
+      address: string;
+      memo?: string;
+
+      isSelf?: boolean;
+    }[] = (() => {
+      switch (type) {
+        case "recent": {
+          return recents.map((recent) => {
             return {
-              name: addressData.name,
-              address: addressData.address,
-              memo: addressData.memo,
+              timestamp: recent.timestamp,
+              address: recent.recipient,
+              memo: recent.memo,
             };
           });
+        }
+        case "contacts": {
+          return uiConfigStore.addressBookConfig
+            .getAddressBook(recipientConfig.chainId)
+            .map((addressData) => {
+              return {
+                name: addressData.name,
+                address: addressData.address,
+                memo: addressData.memo,
+              };
+            });
+        }
+        case "accounts": {
+          return accounts.map((account) => {
+            const isSelf = keyRingStore.selectedKeyInfo?.id === account.vaultId;
+
+            return {
+              name: account.name,
+              address: account.bech32Address,
+
+              isSelf,
+            };
+          });
+        }
+        default: {
+          return [];
+        }
       }
-      case "accounts": {
-        return accounts.map((account) => {
-          return {
-            name: account.name,
-            address: account.bech32Address,
-          };
-        });
-      }
-      default: {
-        return [];
-      }
-    }
-  })();
+    })();
 
-  return (
-    <Modal isOpen={isOpen} close={close} align="bottom">
-      <Box
-        maxHeight="30.625rem"
-        minHeight="21.5rem"
-        backgroundColor={ColorPalette["gray-600"]}
-        paddingX="0.75rem"
-        paddingTop="1rem"
-      >
-        <Box paddingX="0.5rem" paddingY="0.375rem">
-          <Subtitle1
-            style={{
-              color: ColorPalette["white"],
-            }}
-          >
-            Address Book
-          </Subtitle1>
-        </Box>
-
-        <Gutter size="0.75rem" />
-
-        <YAxis alignX="left">
-          <HorizontalRadioGroup
-            items={[
-              {
-                key: "recent",
-                text: "Recent",
-              },
-              {
-                key: "contacts",
-                text: "Contacts",
-              },
-              {
-                key: "accounts",
-                text: "My account",
-              },
-            ]}
-            selectedKey={type}
-            onSelect={(key) => {
-              analyticsStore.logEvent("click_addressBook_tab", {
-                tabName: key,
-              });
-              setType(key as Type);
-            }}
-          />
-        </YAxis>
-
-        <Gutter size="0.75rem" />
-
-        {datas.length > 0 ? (
-          <SimpleBar
-            style={{
-              flex: "1",
-              overflowY: "auto",
-            }}
-          >
-            <Stack gutter="0.75rem">
-              {datas.map((data, i) => {
-                return (
-                  <AddressItem
-                    key={i}
-                    timestamp={data.timestamp}
-                    name={data.name}
-                    address={data.address}
-                    memo={data.memo}
-                    isShowMemo={type !== "accounts"}
-                    onClick={() => {
-                      recipientConfig.setValue(data.address);
-                      memoConfig.setValue(data.memo ?? "");
-                      close();
-                    }}
-                  />
-                );
-              })}
-              <Gutter size="0.75rem" />
-            </Stack>
-          </SimpleBar>
-        ) : (
-          <Box
-            alignX="center"
-            alignY="center"
-            style={{
-              flex: 1,
-              color: ColorPalette["gray-400"],
-            }}
-          >
-            <Bleed top="3rem">
-              <YAxis alignX="center">
-                <EmptyIcon size="4.5rem" />
-                <Gutter size="1.25rem" />
-                <Subtitle3>
-                  {(() => {
-                    switch (type) {
-                      case "accounts":
-                        return "No other wallet found";
-                      default:
-                        return "No Data Yet";
-                    }
-                  })()}
-                </Subtitle3>
-              </YAxis>
-            </Bleed>
+    return (
+      <Modal isOpen={isOpen} close={close} align="bottom">
+        <Box
+          maxHeight="30.625rem"
+          minHeight="21.5rem"
+          backgroundColor={ColorPalette["gray-600"]}
+          paddingX="0.75rem"
+          paddingTop="1rem"
+        >
+          <Box paddingX="0.5rem" paddingY="0.375rem">
+            <Subtitle1
+              style={{
+                color: ColorPalette["white"],
+              }}
+            >
+              Address Book
+            </Subtitle1>
           </Box>
-        )}
-      </Box>
-    </Modal>
-  );
-});
+
+          <Gutter size="0.75rem" />
+
+          <YAxis alignX="left">
+            <HorizontalRadioGroup
+              items={[
+                {
+                  key: "recent",
+                  text: "Recent",
+                },
+                {
+                  key: "contacts",
+                  text: "Contacts",
+                },
+                {
+                  key: "accounts",
+                  text: "My account",
+                },
+              ]}
+              selectedKey={type}
+              onSelect={(key) => {
+                analyticsStore.logEvent("click_addressBook_tab", {
+                  tabName: key,
+                });
+                setType(key as Type);
+              }}
+            />
+          </YAxis>
+
+          <Gutter size="0.75rem" />
+
+          {datas.length > 0 ? (
+            <SimpleBar
+              style={{
+                flex: 1,
+                overflowY: "auto",
+              }}
+            >
+              <Stack gutter="0.75rem">
+                {(() => {
+                  if (type !== "accounts" || !permitSelfKeyInfo) {
+                    return datas.map((data, i) => {
+                      return (
+                        <AddressItem
+                          key={i}
+                          timestamp={data.timestamp}
+                          name={data.name}
+                          address={data.address}
+                          memo={data.memo}
+                          isShowMemo={type !== "accounts"}
+                          onClick={() => {
+                            recipientConfig.setValue(data.address);
+                            memoConfig.setValue(data.memo ?? "");
+                            close();
+                          }}
+                        />
+                      );
+                    });
+                  }
+
+                  const selfAccount = datas.find((data) => data.isSelf);
+                  const otherAccounts = datas.filter((data) => !data.isSelf);
+
+                  return (
+                    <React.Fragment>
+                      {selfAccount ? (
+                        <React.Fragment>
+                          <AltTypography>Current Wallet</AltTypography>
+                          <AddressItem
+                            name={selfAccount.name}
+                            address={selfAccount.address}
+                            isShowMemo={false}
+                            onClick={() => {
+                              recipientConfig.setValue(selfAccount.address);
+                              close();
+                            }}
+                            highlight={true}
+                          />
+                          <Gutter size="1.375rem" />
+                        </React.Fragment>
+                      ) : null}
+
+                      <AltTypography>Other Wallets</AltTypography>
+                      {otherAccounts.map((data, i) => {
+                        return (
+                          <AddressItem
+                            key={i}
+                            name={data.name}
+                            address={data.address}
+                            isShowMemo={false}
+                            onClick={() => {
+                              recipientConfig.setValue(data.address);
+                              close();
+                            }}
+                          />
+                        );
+                      })}
+                    </React.Fragment>
+                  );
+                })()}
+                <Gutter size="0.75rem" />
+              </Stack>
+            </SimpleBar>
+          ) : (
+            <Box
+              alignX="center"
+              alignY="center"
+              style={{
+                flex: 1,
+                color: ColorPalette["gray-400"],
+              }}
+            >
+              <Bleed top="3rem">
+                <YAxis alignX="center">
+                  <EmptyIcon size="4.5rem" />
+                  <Gutter size="1.25rem" />
+                  <Subtitle3>
+                    {(() => {
+                      switch (type) {
+                        case "accounts":
+                          return "No other wallet found";
+                        default:
+                          return "No Data Yet";
+                      }
+                    })()}
+                  </Subtitle3>
+                </YAxis>
+              </Bleed>
+            </Box>
+          )}
+        </Box>
+      </Modal>
+    );
+  }
+);
 const EmptyIcon: FunctionComponent<{
   size: string;
 }> = ({ size }) => {
