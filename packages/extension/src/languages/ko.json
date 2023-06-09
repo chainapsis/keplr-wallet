@@ -365,6 +365,12 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "Source Channel ID",
   "page.ibc-transfer.add-channel-modal.save-button": "Save",
 
+  "page.permission.unknown-permission": "Unknown permission",
+  "page.permission.approve-button": "Approve",
+  "page.permission.requesting-connection-title": "Requesting Connection",
+  "page.permission.paragraph-1": "By approving this request, the website will:",
+  "page.permission.paragraph-2": "• Get the list of all chain on your Keplr Wallet",
+
   "page.send.select-asset.title": "Select Asset",
   "page.send.select-asset.search-placeholder": "Search for asset or chain",
   "page.send.select-asset.hide-ibc-token": "Hide IBC token",
