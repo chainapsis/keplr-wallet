@@ -148,8 +148,6 @@ const ModalChild: FunctionComponent<{
         e.preventDefault();
         e.stopPropagation();
 
-        console.log("!!!!");
-
         if (
           innerContainerRef.current &&
           innerContainerRef.current !== e.target &&
