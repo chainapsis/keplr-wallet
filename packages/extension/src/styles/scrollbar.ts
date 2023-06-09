@@ -21,10 +21,10 @@ export const ScrollBarStyle = createGlobalStyle`
   }
 
   .simplebar-track.simplebar-vertical {
-    width: 0.5rem;
+    width: 0.625rem;
   }
 
   .simplebar-track.simplebar-horizontal {
-    height: 0.5rem;
+    height: 0.625rem;
   }
 `;
