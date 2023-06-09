@@ -18,6 +18,7 @@ import { IBCAddChannelModal } from "../add-channel-modal";
 import { Columns } from "../../../components/column";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useNavigate } from "react-router";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const IBCTransferSelectChannelView: FunctionComponent<{
   historyType: string;
@@ -39,6 +40,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
     const { accountStore, chainStore, queriesStore, ibcChannelStore } =
       useStore();
     const navigate = useNavigate();
+    const intl = useIntl();
 
     const ibcChannelInfo = ibcChannelStore.get(chainId);
 
@@ -69,7 +71,9 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
       >
         <Stack gutter="0.75rem">
           <Stack gutter="0.375rem">
-            <Subtitle3>Asset</Subtitle3>
+            <Subtitle3>
+              <FormattedMessage id="page.ibc-transfer.select-channel.asset-title" />
+            </Subtitle3>
             <TokenItem
               viewToken={{
                 token: queryBalance?.balance ?? new CoinPretty(currency, "0"),
@@ -85,7 +89,9 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
           <Stack gutter="0.375rem">
             <Dropdown
               size="large"
-              label="Destination Chain"
+              label={intl.formatMessage({
+                id: "page.ibc-transfer.select-channel.destination-chain-label",
+              })}
               items={ibcChannelInfo
                 .getTransferChannels()
                 .filter((channel) =>
@@ -106,12 +112,17 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
                     key: "add-channel",
                     label: (
                       <Columns sum={1} alignY="center" gutter="0.25rem">
-                        <PlusFillIcon /> <Body2>New IBC Transfer Channel</Body2>
+                        <PlusFillIcon />
+                        <Body2>
+                          <FormattedMessage id="page.ibc-transfer.select-channel.new-ibc-channel-item" />
+                        </Body2>
                       </Columns>
                     ),
                   },
                 ])}
-              placeholder="Select Chain"
+              placeholder={intl.formatMessage({
+                id: "page.ibc-transfer.select-channel.destination-chain-placeholder",
+              })}
               selectedItemKey={selectedChannelId}
               onSelect={(key) => {
                 if (key === "add-channel") {
@@ -142,8 +153,12 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
         <div style={{ flex: 1 }} />
         <GuideBox
           color="danger"
-          title=" Most of the centralized exchanges do not support IBC transfers"
-          paragraph="We advise you not to perform IBC transfers to these exchanges, as your assets may be lost. Please check with the exchange's policies before initiating any IBC transfers. "
+          title={intl.formatMessage({
+            id: "page.ibc-transfer.select-channel.warning-title",
+          })}
+          paragraph={intl.formatMessage({
+            id: "page.ibc-transfer.select-channel.warning-paragraph",
+          })}
         />
 
         <Modal

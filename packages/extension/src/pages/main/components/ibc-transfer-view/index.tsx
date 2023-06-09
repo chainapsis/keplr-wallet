@@ -11,10 +11,12 @@ import { QuestionIcon } from "../../../../components/icon";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { useStore } from "../../../../stores";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const IBCTransferView: FunctionComponent = () => {
   const { analyticsStore } = useStore();
   const navigate = useNavigate();
+  const intl = useIntl();
 
   return (
     <Box
@@ -25,11 +27,17 @@ export const IBCTransferView: FunctionComponent = () => {
       <Columns sum={1} alignY="center">
         <Stack gutter="0.5rem">
           <XAxis alignY="center">
-            <Subtitle2 color={ColorPalette["gray-10"]}>IBC Transfer</Subtitle2>
+            <Subtitle2 color={ColorPalette["gray-10"]}>
+              <FormattedMessage id="page.main.components.ibc-transfer-view.title" />
+            </Subtitle2>
 
             <Gutter size="0.25rem" />
 
-            <Tooltip content="Transfers might take longer if relayers are inactive. Ask in the corresponding community groups for help in reaching the relaying validators.">
+            <Tooltip
+              content={intl.formatMessage({
+                id: "page.main.components.ibc-transfer-view.tooltip",
+              })}
+            >
               <QuestionIcon
                 width="1rem"
                 height="1rem"
@@ -38,13 +46,17 @@ export const IBCTransferView: FunctionComponent = () => {
             </Tooltip>
           </XAxis>
 
-          <Body3 color={ColorPalette["gray-300"]}>Send tokens over IBC</Body3>
+          <Body3 color={ColorPalette["gray-300"]}>
+            <FormattedMessage id="page.main.components.ibc-transfer-view.paragraph" />
+          </Body3>
         </Stack>
 
         <Column weight={1} />
 
         <Button
-          text="Transfer"
+          text={intl.formatMessage({
+            id: "page.main.components.ibc-transfer-view.transfer-button",
+          })}
           size="small"
           onClick={() => {
             analyticsStore.logEvent("click_ibcTransfer");

@@ -16,6 +16,7 @@ import { IMemoConfig, IRecipientConfig } from "@keplr-wallet/hooks";
 import { Bleed } from "../bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
 import { AddressItem } from "../address-item";
+import { useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -46,6 +47,7 @@ export const AddressBookModal: FunctionComponent<{
   memoConfig: IMemoConfig;
 }> = observer(({ isOpen, close, historyType, recipientConfig, memoConfig }) => {
   const { analyticsStore, uiConfigStore, keyRingStore } = useStore();
+  const intl = useIntl();
 
   // TODO: Implement "recent"
   const [type, setType] = useState<Type>("recent");
@@ -77,7 +79,9 @@ export const AddressBookModal: FunctionComponent<{
               if (res.status === "fulfilled") {
                 return res.value;
               }
-              throw new Error("Unexpected status");
+              throw new Error(
+                intl.formatMessage({ id: "error.unexpected-status" })
+              );
             })
         );
       });
@@ -154,15 +158,21 @@ export const AddressBookModal: FunctionComponent<{
             items={[
               {
                 key: "recent",
-                text: "Recent",
+                text: intl.formatMessage({
+                  id: "components.address-book-modal.recent-tab",
+                }),
               },
               {
                 key: "contacts",
-                text: "Contacts",
+                text: intl.formatMessage({
+                  id: "components.address-book-modal.contacts-tab",
+                }),
               },
               {
                 key: "accounts",
-                text: "My account",
+                text: intl.formatMessage({
+                  id: "components.address-book-modal.my-account-tab",
+                }),
               },
             ]}
             selectedKey={type}
@@ -217,9 +227,13 @@ export const AddressBookModal: FunctionComponent<{
                   {(() => {
                     switch (type) {
                       case "accounts":
-                        return "No other wallet found";
+                        return intl.formatMessage({
+                          id: "components.address-book-modal.empty-view-accounts",
+                        });
                       default:
-                        return "No Data Yet";
+                        return intl.formatMessage({
+                          id: "components.address-book-modal.empty-view-default",
+                        });
                     }
                   })()}
                 </Subtitle3>

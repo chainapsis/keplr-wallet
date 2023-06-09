@@ -34,6 +34,7 @@ import { Skeleton } from "../../../../components/skeleton";
 import { WrongViewingKeyError } from "@keplr-wallet/stores";
 import { useNavigate } from "react-router";
 import { Secret20Currency } from "@keplr-wallet/types";
+import { FormattedMessage } from "react-intl";
 
 const Styles = {
   Container: styled.div<{
@@ -301,7 +302,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                         whiteSpace: "nowrap",
                       }}
                     >
-                      Set your viewing key
+                      <FormattedMessage id="page.main.components.token.set-your-viewing-key" />
                     </Subtitle3>
                     <Subtitle3
                       style={{

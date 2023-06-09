@@ -21,6 +21,7 @@ import { Gutter } from "../../gutter";
 import Color from "color";
 import { Box } from "../../box";
 import { VerticalResizeTransition } from "../../transition";
+import { FormattedMessage } from "react-intl";
 
 const Styles = {
   Container: styled.div<{
@@ -185,7 +186,9 @@ export const FeeControl: FunctionComponent<{
         >
           <Columns sum={1} alignY="center">
             <Columns sum={1} alignY="center">
-              <Subtitle4>Transaction Fee</Subtitle4>
+              <Subtitle4>
+                <FormattedMessage id="components.input.fee-control.title" />
+              </Subtitle4>
               <Gutter size="0.25rem" />
               {feeConfig.uiProperties.loadingState ||
               gasSimulator?.uiProperties.loadingState ? (
