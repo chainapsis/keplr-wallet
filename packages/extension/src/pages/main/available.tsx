@@ -25,6 +25,7 @@ import { YAxis } from "../../components/axis";
 import { Checkbox } from "../../components/checkbox";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const zeroDec = new Dec(0);
 
@@ -38,6 +39,7 @@ export const AvailableTabView: FunctionComponent<{
 }> = observer(({ search, isNotReady, onClickGetStarted }) => {
   const { hugeQueriesStore, chainStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
   const allBalancesNonZero = useMemo(() => {
@@ -106,11 +108,12 @@ export const AvailableTabView: FunctionComponent<{
     tooltip?: string | React.ReactElement;
   }[] = [
     {
-      title: "Available Balance",
+      title: intl.formatMessage({
+        id: "page.main.available.available-balance-title",
+      }),
       balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
-      tooltip:
-        "The amount of your assets that are available for use or transfer immediately, except for those that are currently staked or locked in LP pools.",
+      tooltip: "page.main.available.available-balance-tooltip",
     },
   ];
 
@@ -183,7 +186,7 @@ export const AvailableTabView: FunctionComponent<{
                                 }}
                                 color={ColorPalette["gray-300"]}
                               >
-                                Hide Low Balance
+                                <FormattedMessage id="page.main.available.hide-low-balance" />
                               </Caption2>
 
                               <Gutter size="0.25rem" />
@@ -231,8 +234,12 @@ export const AvailableTabView: FunctionComponent<{
             <Box marginY="2rem">
               <EmptyView>
                 <Stack alignX="center" gutter="0.1rem">
-                  <Subtitle3 style={{ fontWeight: 700 }}>Oops!</Subtitle3>
-                  <Subtitle3>No Result Found</Subtitle3>
+                  <Subtitle3 style={{ fontWeight: 700 }}>
+                    <FormattedMessage id="page.main.available.search-empty-view-title" />
+                  </Subtitle3>
+                  <Subtitle3>
+                    <FormattedMessage id="page.main.available.search-empty-view-paragraph" />
+                  </Subtitle3>
                 </Stack>
               </EmptyView>
             </Box>
@@ -248,11 +255,17 @@ export const AvailableTabView: FunctionComponent<{
                   alt="empty balance image"
                 />
               }
-              paragraph="Gear up yourself by topping up your wallet! "
-              title="Ready to Explore the Interchain?"
+              paragraph={intl.formatMessage({
+                id: "page.main.available.empty-view-paragraph",
+              })}
+              title={intl.formatMessage({
+                id: "page.main.available.empty-view-title",
+              })}
               button={
                 <Button
-                  text="Get Started"
+                  text={intl.formatMessage({
+                    id: "page.main.available.get-started-button",
+                  })}
                   color="primary"
                   size="small"
                   onClick={onClickGetStarted}
@@ -265,7 +278,10 @@ export const AvailableTabView: FunctionComponent<{
             <Box padding="0.75rem">
               <YAxis alignX="center">
                 <TextButton
-                  text={`${numFoundToken} new token(s) found`}
+                  text={intl.formatMessage(
+                    { id: "page.main.available.new-token-found" },
+                    { numFoundToken }
+                  )}
                   size="small"
                   onClick={() => setIsFoundTokenModalOpen(true)}
                 />

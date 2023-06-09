@@ -20,6 +20,7 @@ import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainImageFallback, Image } from "../../../../components/image";
 import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
 import { Tag } from "../../../../components/tag";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -50,6 +51,7 @@ export const CopyAddressModal: FunctionComponent<{
     uiConfigStore,
   } = useStore();
 
+  const intl = useIntl();
   const [search, setSearch] = useState("");
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
@@ -146,7 +148,7 @@ export const CopyAddressModal: FunctionComponent<{
   return (
     <Styles.Container>
       <Subtitle1 style={{ color: ColorPalette["white"], textAlign: "center" }}>
-        Copy Address
+        <FormattedMessage id="page.main.components.copy-address-modal.title" />
       </Subtitle1>
 
       <Gutter size="0.75rem" />
@@ -158,7 +160,9 @@ export const CopyAddressModal: FunctionComponent<{
 
           setSearch(e.target.value);
         }}
-        placeholder="Search for a chain"
+        placeholder={intl.formatMessage({
+          id: "page.main.components.copy-address-modal.search-placeholder",
+        })}
       />
       <Gutter size="0.75rem" />
 
@@ -188,9 +192,7 @@ export const CopyAddressModal: FunctionComponent<{
               color={ColorPalette["gray-300"]}
               style={{ textAlign: "center" }}
             >
-              To use an address on certain chain, you may need to first visit
-              the &quot;Manage Chain Visibility&quot; in the side menu and make
-              the chain visible on your wallet.
+              <FormattedMessage id="page.main.components.copy-address-modal.empty-text" />
             </Subtitle3>
           </Box>
         ) : null}
@@ -292,6 +294,7 @@ export const ChainAddressItem: FunctionComponent<{
   afterCopied,
 }) => {
   const { analyticsStore } = useStore();
+  const intl = useIntl();
 
   const [hasCopied, setHasCopied] = useState(false);
 
@@ -382,7 +385,13 @@ export const ChainAddressItem: FunctionComponent<{
               : ColorPalette["gray-10"],
           }}
         >
-          {hasCopied ? "Copied" : "Copy"}
+          {hasCopied
+            ? intl.formatMessage({
+                id: "page.main.components.copy-address-modal.copied-button",
+              })
+            : intl.formatMessage({
+                id: "page.main.components.copy-address-modal.copy-button",
+              })}
         </Styles.TextButton>
       </Columns>
     </Box>
@@ -397,6 +406,7 @@ export const EthereumAddressItem: FunctionComponent<{
   afterCopied: () => void;
 }> = ({ chainInfo, ethereumAddress, blockInteraction, afterCopied }) => {
   const [hasCopied, setHasCopied] = useState(false);
+  const intl = useIntl();
 
   return (
     <Box
@@ -448,7 +458,12 @@ export const EthereumAddressItem: FunctionComponent<{
             {/* Make evm tag not occupy spaces */}
             <Box position="relative" height="1px" alignY="center">
               <Box position="absolute">
-                <Tag text="EVM Address" whiteSpace="nowrap" />
+                <Tag
+                  text={intl.formatMessage({
+                    id: "page.main.components.copy-address-modal.evm-address-tag",
+                  })}
+                  whiteSpace="nowrap"
+                />
               </Box>
             </Box>
           </XAxis>
@@ -469,7 +484,13 @@ export const EthereumAddressItem: FunctionComponent<{
               : ColorPalette["gray-10"],
           }}
         >
-          {hasCopied ? "Copied" : "Copy"}
+          {hasCopied
+            ? intl.formatMessage({
+                id: "page.main.components.copy-address-modal.copied-button",
+              })
+            : intl.formatMessage({
+                id: "page.main.components.copy-address-modal.copy-button",
+              })}
         </Styles.TextButton>
       </Columns>
     </Box>
