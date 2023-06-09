@@ -26,7 +26,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 export const EthereumSigningView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
 }> = observer(({ interactionData }) => {
-  const { chainStore, signEthereumInteractionStore } = useStore();
+  const { chainStore, uiConfigStore, signEthereumInteractionStore } =
+    useStore();
   const intl = useIntl();
 
   const interactionInfo = useInteractionInfo(() => {
@@ -85,7 +86,10 @@ export const EthereumSigningView: FunctionComponent<{
           }
 
           try {
-            const signature = await handleEthereumPreSign(interactionData);
+            const signature = await handleEthereumPreSign(
+              uiConfigStore.useWebHIDLedger,
+              interactionData
+            );
 
             await signEthereumInteractionStore.approveWithProceedNext(
               interactionData.id,

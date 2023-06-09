@@ -21,6 +21,7 @@ import { ChainImageFallback, Image } from "../../../../components/image";
 import { useFocusOnMount } from "../../../../hooks/use-focus-on-mount";
 import { Tag } from "../../../../components/tag";
 import { FormattedMessage, useIntl } from "react-intl";
+import SimpleBar from "simplebar-react";
 
 const Styles = {
   Container: styled.div`
@@ -166,10 +167,12 @@ export const CopyAddressModal: FunctionComponent<{
       />
       <Gutter size="0.75rem" />
 
-      <Box
-        height="21.5rem"
+      <SimpleBar
         style={{
+          display: "flex",
+          flexDirection: "column",
           overflowY: "auto",
+          height: "21.5rem",
         }}
       >
         {addresses.length === 0 ? (
@@ -267,7 +270,7 @@ export const CopyAddressModal: FunctionComponent<{
             </YAxis>
           );
         })}
-      </Box>
+      </SimpleBar>
     </Styles.Container>
   );
 });

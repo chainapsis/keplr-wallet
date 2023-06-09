@@ -20,7 +20,7 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
       title={intl.formatMessage({ id: "page.setting.general.language-title" })}
       left={<BackButton />}
     >
-      <Box paddingX="0.75rem">
+      <Box paddingX="0.75rem" paddingBottom="0.75rem">
         <Stack gutter="0.5rem">
           <PageButton
             title={intl.formatMessage({

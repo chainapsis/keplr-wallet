@@ -14,4 +14,5 @@ export interface DropdownProps {
   style?: CSSProperties;
   size?: "small" | "large";
   label?: string;
+  menuContainerMaxHeight?: string;
 }

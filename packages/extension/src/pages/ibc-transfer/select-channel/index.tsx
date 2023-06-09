@@ -92,6 +92,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
               label={intl.formatMessage({
                 id: "page.ibc-transfer.select-channel.destination-chain-label",
               })}
+              menuContainerMaxHeight="10rem"
               items={ibcChannelInfo
                 .getTransferChannels()
                 .filter((channel) =>
@@ -147,6 +148,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
             historyType={historyType}
             recipientConfig={recipientConfig}
             memoConfig={memoConfig}
+            permitAddressBookSelfKeyInfo={true}
           />
         </Stack>
 

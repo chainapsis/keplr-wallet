@@ -2447,6 +2447,51 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: [],
   },
+  {
+    rpc: "https://rpc-likecoin.keplr.app",
+    rest: "https://lcd-likecoin.keplr.app",
+    chainId: "likecoin-mainnet-2",
+    chainName: "Likecoin",
+    stakeCurrency: {
+      coinDenom: "LIKE",
+      coinMinimalDenom: "nanolike",
+      coinDecimals: 9,
+      coinGeckoId: "likecoin",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "like",
+      bech32PrefixAccPub: "likepub",
+      bech32PrefixValAddr: "likevaloper",
+      bech32PrefixValPub: "likevaloperpub",
+      bech32PrefixConsAddr: "likevalcons",
+      bech32PrefixConsPub: "likevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LIKE",
+        coinMinimalDenom: "nanolike",
+        coinDecimals: 9,
+        coinGeckoId: "likecoin",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LIKE",
+        coinMinimalDenom: "nanolike",
+        coinDecimals: 9,
+        coinGeckoId: "likecoin",
+        gasPriceStep: {
+          low: 1,
+          average: 2,
+          high: 3,
+        },
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

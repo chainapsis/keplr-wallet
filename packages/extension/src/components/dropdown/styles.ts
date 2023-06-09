@@ -2,6 +2,7 @@ import styled, { css } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { DropdownProps } from "./types";
 import { Body2 } from "../typography";
+import SimpleBar from "simplebar-react";
 
 export const Styles = {
   Container: styled.div`
@@ -32,11 +33,15 @@ export const Styles = {
     color: ${({ selectedItemKey }) =>
       selectedItemKey ? ColorPalette["gray-50"] : ColorPalette["gray-300"]};
   `,
-  MenuContainer: styled.div<{ isOpen: boolean }>`
+  MenuContainer: styled(SimpleBar)<{
+    isOpen: boolean;
+    menuContainerMaxHeight?: string;
+  }>`
     position: absolute;
 
     width: 100%;
-    max-height: 13rem;
+    max-height: ${({ menuContainerMaxHeight }) =>
+      menuContainerMaxHeight || "13rem"};
     overflow: auto;
 
     margin-top: 0.375rem;

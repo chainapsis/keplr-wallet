@@ -50,6 +50,7 @@ export const IBCAddChannelModal: FunctionComponent<{
           placeholder={intl.formatMessage({
             id: "page.ibc-transfer.add-channel-modal.destination-chain-placeholder",
           })}
+          menuContainerMaxHeight="10rem"
           selectedItemKey={selectedChainId}
           items={chainStore.chainInfosInUI
             .filter(
