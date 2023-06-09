@@ -25,6 +25,9 @@
   "error.channel-is-not-open-state": "Channel is not on OPEN STATE",
   "error.client-is-not-for-chain": "Client is not for {chainId}",
   "error.unexpected-status": "Unexpected status",
+  "error.send-currency-not-set": "Send currency not set",
+  "error.simulating-secret-wasm-not-supported": "Simulating secret wasm not supported",
+  "error.simulating-secret-20-not-supported": "Simulating secret20 is not supported",
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
@@ -356,6 +359,14 @@
   "page.ibc-transfer.add-channel-modal.channel-id-label": "Channel Id",
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "Source Channel ID",
   "page.ibc-transfer.add-channel-modal.save-button": "Save",
+
+  "page.send.select-asset.title": "Select Asset",
+  "page.send.select-asset.search-placeholder": "Search for asset or chain",
+  "page.send.select-asset.hide-ibc-token": "Hide IBC token",
+  "page.send.amount.title": "Send",
+  "page.send.amount.next-button": "Next",
+  "page.send.amount.transaction-success": "Transaction Success",
+  "page.send.amount.asset-title": "Asset",
 
   "page.main.components.ibc-transfer-view.title": "IBC Transfer",
   "page.main.components.ibc-transfer-view.tooltip": "Transfers might take longer if relayers are inactive. Ask in the corresponding community groups for help in reaching the relaying validators.",
