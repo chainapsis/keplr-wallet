@@ -1,4 +1,5 @@
 import { createGlobalStyle } from "styled-components";
+import { ColorPalette } from "./colors";
 
 export const ScrollBarStyle = createGlobalStyle`
   * {
@@ -11,6 +12,19 @@ export const ScrollBarStyle = createGlobalStyle`
   }
 
   .simplebar-scrollbar::before {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: ${ColorPalette["gray-400"]};
+    border-radius: 0;
+  }
+
+  .simplebar-scrollbar.simplebar-visible:before {
+    opacity: 1;
+  }
+
+  .simplebar-track.simplebar-vertical {
+    width: 0.5rem;
+  }
+
+  .simplebar-track.simplebar-horizontal {
+    height: 0.5rem;
   }
 `;
