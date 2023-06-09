@@ -86,6 +86,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
             <Dropdown
               size="large"
               label="Destination Chain"
+              menuContainerMaxHeight="10rem"
               items={ibcChannelInfo
                 .getTransferChannels()
                 .filter((channel) =>

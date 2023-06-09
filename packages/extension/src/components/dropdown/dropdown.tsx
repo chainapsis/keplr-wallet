@@ -15,6 +15,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   onSelect,
   size = "small",
   label,
+  menuContainerMaxHeight,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const wrapperRef = useRef<HTMLInputElement>(null);
@@ -57,7 +58,10 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
           <ArrowDropDownIcon width="1.25rem" height="1.25rem" />
         </Columns>
       </Styles.SelectedContainer>
-      <Styles.MenuContainer isOpen={isOpen}>
+      <Styles.MenuContainer
+        isOpen={isOpen}
+        menuContainerMaxHeight={menuContainerMaxHeight}
+      >
         {items.map((item) => (
           <Styles.MenuItem
             key={item.key}

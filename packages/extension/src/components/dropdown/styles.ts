@@ -33,11 +33,15 @@ export const Styles = {
     color: ${({ selectedItemKey }) =>
       selectedItemKey ? ColorPalette["gray-50"] : ColorPalette["gray-300"]};
   `,
-  MenuContainer: styled(SimpleBar)<{ isOpen: boolean }>`
+  MenuContainer: styled(SimpleBar)<{
+    isOpen: boolean;
+    menuContainerMaxHeight?: string;
+  }>`
     position: absolute;
 
     width: 100%;
-    max-height: 13rem;
+    max-height: ${({ menuContainerMaxHeight }) =>
+      menuContainerMaxHeight || "13rem"};
     overflow: auto;
 
     margin-top: 0.375rem;
