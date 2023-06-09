@@ -141,8 +141,6 @@ export const AddressBookModal: FunctionComponent<{
     return (
       <Modal isOpen={isOpen} close={close} align="bottom">
         <Box
-          maxHeight="30.625rem"
-          minHeight="21.5rem"
           backgroundColor={ColorPalette["gray-600"]}
           paddingX="0.75rem"
           paddingTop="1rem"
@@ -190,7 +188,8 @@ export const AddressBookModal: FunctionComponent<{
           {datas.length > 0 ? (
             <SimpleBar
               style={{
-                flex: 1,
+                maxHeight: "23.625rem",
+                minHeight: "14.875rem",
                 overflowY: "auto",
               }}
             >
@@ -264,7 +263,7 @@ export const AddressBookModal: FunctionComponent<{
               alignX="center"
               alignY="center"
               style={{
-                flex: 1,
+                height: "14.875rem",
                 color: ColorPalette["gray-400"],
               }}
             >
