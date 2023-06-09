@@ -55,6 +55,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
     walletUrlForStaking: "https://browse-fetchhub.fetch.ai/validators",
+    govUrl: "https://fetchstation.azoyalabs.com/mainnet/governance/",
   },
   {
     rpc: "https://rpc-cosmoshub.keplr.app",
@@ -2489,6 +2490,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     ],
     features: ["cosmwasm"],
     walletUrlForStaking: "https://browse-dorado.fetch.ai/validators",
+    govUrl: "https://fetchstation.azoyalabs.com/dorado/governance/",
   },
 ];
 

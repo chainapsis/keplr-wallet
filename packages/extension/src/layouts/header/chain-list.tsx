@@ -14,7 +14,7 @@ import { messageAndGroupListenerUnsubscribe } from "@graphQL/messages-api";
 import { useStore } from "../../stores";
 import style from "./chain-list.module.scss";
 import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
-
+import { resetProposals } from "../../stores/chats/proposal-slice";
 const ChainElement: FunctionComponent<{
   chainInfo: ChainInfoWithCoreTypes;
 }> = observer(({ chainInfo }) => {
@@ -43,6 +43,8 @@ const ChainElement: FunctionComponent<{
         chainStore.selectChain(chainInfo.chainId);
         chainStore.saveLastViewChainId();
         store.dispatch(resetUser({}));
+        store.dispatch(resetProposals({}));
+
         store.dispatch(resetChatList({}));
         store.dispatch(setIsChatSubscriptionActive(false));
         messageAndGroupListenerUnsubscribe();

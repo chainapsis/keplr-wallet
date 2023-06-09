@@ -4,6 +4,7 @@ import localStorage from "redux-persist/lib/storage";
 import { messageStore } from "./messages-slice";
 import { newGroupStore } from "./new-group-slice";
 import { userStore } from "./user-slice";
+import { proposalStore } from "./proposal-slice";
 
 const messagesConfig = {
   key: "messages",
@@ -33,6 +34,7 @@ export const store = configureStore({
     messages: persistedMessages,
     user: persistedUserDetails,
     newGroup: persistedNewGroupDetails,
+    proposal: proposalStore,
   },
   middleware: customizedMiddleware,
 });

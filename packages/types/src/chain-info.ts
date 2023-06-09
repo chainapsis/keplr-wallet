@@ -21,6 +21,7 @@ export interface ChainInfo {
   };
   readonly chainId: string;
   readonly chainName: string;
+  readonly govUrl?: string;
   /**
    * This indicates the type of coin that can be used for stake.
    * You can get actual currency information from Currencies.

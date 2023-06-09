@@ -21,6 +21,7 @@ import {
   setIsChatSubscriptionActive,
 } from "@chatStore/messages-slice";
 import { messageAndGroupListenerUnsubscribe } from "@graphQL/messages-api";
+import { resetProposals } from "@chatStore/proposal-slice";
 
 export const SetKeyRingPage: FunctionComponent = observer(() => {
   const intl = useIntl();
@@ -142,6 +143,7 @@ export const SetKeyRingPage: FunctionComponent = observer(() => {
                         analyticsStore.logEvent("Account changed");
                         loadingIndicator.setIsLoading("keyring", false);
                         store.dispatch(resetUser({}));
+                        store.dispatch(resetProposals({}));
                         store.dispatch(resetChatList({}));
                         store.dispatch(setIsChatSubscriptionActive(false));
                         messageAndGroupListenerUnsubscribe();

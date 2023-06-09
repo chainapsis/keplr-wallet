@@ -1,0 +1,42 @@
+.proposal {
+  display: flex;
+  line-height: 20px;
+  justify-content: space-between;
+  margin: 12px 0;
+  background: #ffffff;
+  cursor: pointer;
+  .pContent {
+    width: 65%;
+    .pTitle {
+      font-weight: 400;
+      font-size: 16px;
+      color: #525f7f;
+      margin: 0;
+      line-height: 22px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 10px;
+      &::first-letter {
+        text-transform: capitalize;
+      }
+    }
+
+    .pDesc {
+      font-weight: 400;
+      font-size: 15px;
+      color: #808da0;
+      margin: 0;
+      line-height: 22px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .govStatus {
+    display: flex;
+    width: 30%;
+    justify-content: space-between;
+  }
+}

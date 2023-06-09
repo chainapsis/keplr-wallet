@@ -1,0 +1,65 @@
+.pButtonContainer {
+  .button {
+    width: 100%;
+    padding: 8px;
+    color: #fff;
+    text-align: center;
+    border: 1px solid #3b82f6;
+    border-radius: 4px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.875rem;
+    line-height: 19px;
+    display: flex;
+    width: 100%;
+    margin: 8px 0 0;
+  }
+
+  .invertedButton {
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+    width: 100%;
+    padding: 8px;
+    &:hover {
+      background-color: #3b82f6;
+      color: #fff;
+    }
+  }
+}
+
+.pContainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .pCenter {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+
+    .pImage {
+      height: 160px;
+      width: 160px;
+      margin: 0 auto;
+    }
+
+    .pTitle {
+      color: #525f7f;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 100%;
+      text-align: center;
+      &::first-letter {
+        text-transform: capitalize;
+      }
+    }
+    .voteText {
+      text-align: center;
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 30px;
+      margin-top: 8px;
+    }
+  }
+}

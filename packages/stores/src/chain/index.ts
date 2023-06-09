@@ -276,6 +276,10 @@ export class ChainInfoInner<C extends ChainInfo = ChainInfo>
   get walletUrlForStaking(): string | undefined {
     return this.raw.walletUrlForStaking;
   }
+
+  get govUrl(): string | undefined {
+    return this.raw.govUrl;
+  }
 }
 
 export type ChainInfoOverrider<C extends ChainInfo = ChainInfo> = (

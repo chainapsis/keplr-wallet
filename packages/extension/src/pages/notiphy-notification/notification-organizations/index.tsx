@@ -17,7 +17,7 @@ import {
   NotyphiOrganisation,
   NotyphiOrganisations,
 } from "@notificationTypes";
-import { NotificationSearchInput } from "@components/notification-search-input";
+import { SearchInput } from "@components/notification-search-input";
 import { notificationsDetails, setNotifications } from "@chatStore/user-slice";
 import { store } from "@chatStore/index";
 import { useSelector } from "react-redux";
@@ -168,7 +168,7 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
       <div className={style.heading}>
         <FormattedMessage id="notification.organisation.header-message" />
       </div>
-      <NotificationSearchInput
+      <SearchInput
         handleSearch={handleSearch}
         inputVal={inputVal}
         setInputVal={setInputVal}
@@ -184,11 +184,11 @@ export const NotificationOrganizations: FunctionComponent = observer(() => {
             {!orgList.length && (
               <div className={style.resultText}>
                 <p>
-                  No results found.
+                  <FormattedMessage id="search.no-result-found" />
                   {inputVal !== "" && (
                     <React.Fragment>
                       <br />
-                      Please refine your search.
+                      <FormattedMessage id="search.refine.search" />
                     </React.Fragment>
                   )}
                 </p>

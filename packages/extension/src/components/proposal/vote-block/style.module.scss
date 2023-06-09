@@ -1,0 +1,40 @@
+.voteBlock {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 5px;
+  cursor: pointer;
+
+  border-radius: 4px;
+
+  .voteImage {
+    width: 20px;
+    height: 20px;
+  }
+
+  .voteText {
+    margin: 0;
+    text-align: center;
+    font-weight: 700;
+    line-height: 14px;
+    color: #525f7f;
+    font-size: 14px;
+  }
+}
+
+.voteTick {
+  background: rgba(106, 183, 122, 0.3);
+}
+
+.voteCross {
+  background: rgba(220, 100, 97, 0.3);
+}
+
+.voteAbstain {
+  background: rgba(236, 170, 93, 0.3);
+}
+
+.voteNoVeto {
+  background: rgba(62, 100, 196, 0.3);
+}

@@ -90,6 +90,9 @@ import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant
 import { ValidatorList } from "./pages/validator-list";
 import { Validator } from "./pages/validator";
 import { StakeComplete } from "./pages/validator/stake-complete";
+import { Proposals } from "./pages/proposals";
+import { ProposalDetail } from "./pages/proposals/proposal-detail";
+import { PropsalVoteStatus } from "./pages/proposals/proposal-vote-status";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -400,6 +403,17 @@ ReactDOM.render(
                       exact
                       path="/stake-complete/:validator_address"
                       component={StakeComplete}
+                    />
+                    <Route exact path="/proposal" component={Proposals} />
+                    <Route
+                      exact
+                      path="/proposal-detail/:id"
+                      component={ProposalDetail}
+                    />
+                    <Route
+                      exact
+                      path="/proposal-vote-status/:votedOn/:id"
+                      component={PropsalVoteStatus}
                     />
                     <Route path="*" component={StateRenderer} />
                   </Switch>

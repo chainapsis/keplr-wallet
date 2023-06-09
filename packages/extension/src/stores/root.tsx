@@ -106,6 +106,8 @@ export class RootStore {
       isIbc?: boolean;
       rpc?: string;
       rest?: string;
+      proposalId?: string;
+      proposalTitle?: string;
     },
     {
       registerType?: "seed" | "google" | "ledger" | "keystone" | "qr";

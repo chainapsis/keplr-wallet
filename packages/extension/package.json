@@ -94,7 +94,8 @@
     "swiper": "^8.4.4",
     "type-graphql": "^1.1.1",
     "utility-types": "^3.10.0",
-    "webextension-polyfill": "^0.7.0"
+    "webextension-polyfill": "^0.7.0",
+    "moment": "^2.10.2"
   },
   "devDependencies": {
     "@types/amplitude-js": "^8.0.1",
