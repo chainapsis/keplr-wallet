@@ -5,16 +5,38 @@ import {
   KEPLR_EXT_ANALYTICS_API_AUTH_TOKEN,
 } from "./constants";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { action, autorun, makeObservable, observable, runInAction } from "mobx";
 
 export class AnalyticsService {
   protected analyticsId: string = "";
 
+  @observable
+  protected disabled: boolean = false;
+
   constructor(
     protected readonly kvStore: KVStore,
     protected readonly privilegedOrigins: string[]
-  ) {}
+  ) {
+    makeObservable(this);
+  }
 
   async init() {
+    const analyticsDisabled = await this.kvStore.get<boolean>(
+      "analyticsDisabled"
+    );
+
+    runInAction(() => {
+      if (analyticsDisabled) {
+        this.disabled = true;
+      } else {
+        this.disabled = false;
+      }
+    });
+
+    autorun(() => {
+      this.kvStore.set<boolean>("analyticsDisabled", this.disabled);
+    });
+
     const saved = await this.kvStore.get<string>("analyticsId");
     if (saved) {
       this.analyticsId = saved;
@@ -54,6 +76,10 @@ export class AnalyticsService {
       return;
     }
 
+    if (this.disabled) {
+      return;
+    }
+
     const loggingMsg = Buffer.from(
       JSON.stringify({
         ...params,
@@ -77,5 +103,11 @@ export class AnalyticsService {
     >
   ): void {
     this.logEvent(event, params).catch((e) => console.log(e));
+  }
+
+  @action
+  public setDisabled(disabled: boolean) {
+    this.disabled = disabled;
+    return this.disabled;
   }
 }

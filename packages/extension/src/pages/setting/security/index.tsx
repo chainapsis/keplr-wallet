@@ -7,6 +7,9 @@ import { RightArrowIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
 import { Box } from "../../../components/box";
 import { Toggle } from "../../../components/toggle";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { SetDisableAnalyticsMsg } from "@keplr-wallet/background";
 
 export const SettingSecurityPage: FunctionComponent = () => {
   const navigate = useNavigate();
@@ -42,14 +45,22 @@ export const SettingSecurityPage: FunctionComponent = () => {
                 <Toggle
                   isOpen={localStorage.getItem("using-analytics") !== "false"}
                   setIsOpen={() => {
-                    localStorage.setItem(
-                      "using-analytics",
-                      localStorage.getItem("using-analytics") !== "false"
-                        ? "false"
-                        : "true"
-                    );
+                    const usingAnalytics =
+                      localStorage.getItem("using-analytics") !== "false";
 
-                    window.location.reload();
+                    new InExtensionMessageRequester()
+                      .sendMessage(
+                        BACKGROUND_PORT,
+                        new SetDisableAnalyticsMsg(usingAnalytics)
+                      )
+                      .then((analyticsDisabled) => {
+                        localStorage.setItem(
+                          "using-analytics",
+                          analyticsDisabled ? "false" : "true"
+                        );
+
+                        window.location.reload();
+                      });
                   }}
                 />
               </Box>
