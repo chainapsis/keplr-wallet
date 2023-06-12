@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { Box } from "../../../../components/box";
 import {
+  Body2,
   Button2,
   Caption1,
   Subtitle1,
@@ -22,6 +23,7 @@ import { TokenScan } from "@keplr-wallet/background";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Gutter } from "../../../../components/gutter";
 import SimpleBar from "simplebar-react";
+import { XAxis } from "../../../../components/axis";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -176,6 +178,41 @@ export const TokenFoundModal: FunctionComponent<{
           })}
         </Stack>
       </SimpleBar>
+
+      <Gutter size="0.75rem" />
+
+      <Box
+        alignX="center"
+        cursor="pointer"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (chainStore.tokenScans.length === checkedChainIdentifiers.length) {
+            setCheckedChainIdentifiers([]);
+          } else {
+            setCheckedChainIdentifiers(
+              chainStore.tokenScans.map((tokenScan) => {
+                return ChainIdHelper.parse(tokenScan.chainId).identifier;
+              })
+            );
+          }
+        }}
+      >
+        <XAxis alignY="center">
+          <Body2 color={ColorPalette["gray-300"]}>Select All</Body2>
+
+          <Gutter size="0.25rem" />
+
+          <Checkbox
+            size="small"
+            checked={
+              chainStore.tokenScans.length === checkedChainIdentifiers.length
+            }
+            onChange={() => {}}
+          />
+        </XAxis>
+      </Box>
 
       {keyRingStore.selectedKeyInfo?.type === "ledger" ? (
         <React.Fragment>
