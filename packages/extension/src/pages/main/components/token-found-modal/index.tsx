@@ -186,7 +186,6 @@ export const TokenFoundModal: FunctionComponent<{
         cursor="pointer"
         onClick={(e) => {
           e.preventDefault();
-          e.stopPropagation();
 
           if (chainStore.tokenScans.length === checkedChainIdentifiers.length) {
             setCheckedChainIdentifiers([]);
