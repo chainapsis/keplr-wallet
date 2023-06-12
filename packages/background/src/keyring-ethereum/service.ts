@@ -12,7 +12,6 @@ import {
   KeyRingCosmosService,
   messageHash,
 } from "../keyring-cosmos";
-import { hashMessage } from "@ethersproject/hash";
 import { serialize } from "@ethersproject/transactions";
 
 export class KeyRingEthereumService {
@@ -110,7 +109,11 @@ export class KeyRingEthereumService {
               const signature = await this.keyRingService.sign(
                 chainId,
                 vaultId,
-                Buffer.from(hashMessage(message).replace("0x", ""), "hex"),
+                Buffer.concat([
+                  Buffer.from("\x19Ethereum Signed Message:\n"),
+                  Buffer.from(message.length.toString()),
+                  message,
+                ]),
                 "keccak256"
               );
               return Buffer.concat([
