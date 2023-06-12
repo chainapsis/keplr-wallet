@@ -75,6 +75,7 @@
     "secp256k1": "^5.0.0",
     "setimmediate": "^1.0.5",
     "sha.js": "^2.4.11",
+    "simplebar-core": "^1.2.4",
     "simplebar-react": "^3.2.4",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
