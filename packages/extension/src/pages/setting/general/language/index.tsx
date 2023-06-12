@@ -19,7 +19,7 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
       title={<FormattedMessage id="setting.language" />}
       left={<BackButton />}
     >
-      <Box paddingX="0.75rem">
+      <Box paddingX="0.75rem" paddingBottom="0.75rem">
         <Stack gutter="0.5rem">
           <PageButton
             title="Automatic (Browser default)"

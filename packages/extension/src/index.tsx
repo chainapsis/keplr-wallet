@@ -72,6 +72,8 @@ import { SignCosmosICNSPage } from "./pages/sign/cosmos/icns";
 import { ErrorBoundary } from "./error-boundary";
 import { useMatchPopupSize } from "./popup-size";
 import { SignEthereumTxPage } from "./pages/sign/ethereum";
+import "simplebar-react/dist/simplebar.min.css";
+import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -366,7 +368,9 @@ const App: FunctionComponent = () => {
             <GlobalPopupStyle />
             <ScrollBarStyle />
             <ErrorBoundary>
-              <RoutesAfterReady />
+              <GlobalSimpleBarProvider style={{ height: "100vh" }}>
+                <RoutesAfterReady />
+              </GlobalSimpleBarProvider>
             </ErrorBoundary>
           </NotificationProvider>
         </ConfirmProvider>

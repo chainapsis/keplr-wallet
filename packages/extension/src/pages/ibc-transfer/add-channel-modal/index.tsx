@@ -44,6 +44,7 @@ export const IBCAddChannelModal: FunctionComponent<{
           size="large"
           label="Destination Chain"
           placeholder="Select Chain"
+          menuContainerMaxHeight="10rem"
           selectedItemKey={selectedChainId}
           items={chainStore.chainInfosInUI
             .filter(

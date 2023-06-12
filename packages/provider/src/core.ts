@@ -292,7 +292,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   async signEthereum(
     chainId: string,
     signer: string,
-    message: Uint8Array,
+    message: string | Uint8Array,
     signType: EthSignType
   ): Promise<Uint8Array> {
     return await sendSimpleMessage(
@@ -303,7 +303,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       {
         chainId,
         signer,
-        message,
+        message: typeof message === "string" ? Buffer.from(message) : message,
         signType,
       }
     );

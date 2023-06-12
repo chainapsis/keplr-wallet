@@ -82,15 +82,64 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   get type(): FeeType | "manual" {
-    if (!this._fee) {
+    if (!this.fee) {
       return "manual";
     }
 
-    if ("type" in this._fee) {
-      return this._fee.type;
+    if ("type" in this.fee) {
+      return this.fee.type;
     }
 
     return "manual";
+  }
+
+  @computed
+  protected get fee():
+    | {
+        type: FeeType;
+        currency: Currency;
+      }
+    | CoinPretty[]
+    | undefined {
+    if (!this._fee) {
+      return undefined;
+    }
+
+    if ("type" in this._fee) {
+      const coinMinimalDenom = this._fee.currency.coinMinimalDenom;
+      const feeCurrency = this.chainGetter
+        .getChain(this.chainId)
+        .feeCurrencies.find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
+      const currency = this.chainGetter
+        .getChain(this.chainId)
+        .forceFindCurrency(coinMinimalDenom);
+
+      return {
+        type: this._fee.type,
+        currency: {
+          ...feeCurrency,
+          ...currency,
+        },
+      };
+    }
+
+    return this._fee.map((coin) => {
+      const coinMinimalDenom = coin.currency.coinMinimalDenom;
+      const feeCurrency = this.chainGetter
+        .getChain(this.chainId)
+        .feeCurrencies.find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
+      const currency = this.chainGetter
+        .getChain(this.chainId)
+        .forceFindCurrency(coinMinimalDenom);
+
+      return new CoinPretty(
+        {
+          ...feeCurrency,
+          ...currency,
+        },
+        coin.toCoin().amount
+      );
+    });
   }
 
   @action
@@ -219,20 +268,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     }[] = [];
 
     // If there is no fee currency, just return with empty fee amount.
-    if (!this._fee) {
+    if (!this.fee) {
       res = [];
-    } else if ("type" in this._fee) {
+    } else if ("type" in this.fee) {
       res = [
         {
           amount: this.getFeeTypePrettyForFeeCurrency(
-            this._fee.currency,
-            this._fee.type
+            this.fee.currency,
+            this.fee.type
           ).toCoin().amount,
-          currency: this._fee.currency,
+          currency: this.fee.currency,
         },
       ];
     } else {
-      res = this._fee.map((fee) => {
+      res = this.fee.map((fee) => {
         return {
           amount: fee.toCoin().amount,
           currency: fee.currency,

@@ -41,6 +41,7 @@ import { Tooltip } from "../../components/tooltip";
 import { Image } from "../../components/image";
 import { QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
+import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -175,6 +176,7 @@ export const MainPage: FunctionComponent = observer(() => {
   const searchScrollAnim = useSpringValue(0, {
     config: defaultSpringConfig,
   });
+  const globalSimpleBar = useGlobarSimpleBar();
 
   return (
     <HeaderLayout
@@ -351,14 +353,19 @@ export const MainPage: FunctionComponent = observer(() => {
                         setIsEnteredSearch(true);
                       }
 
-                      if (document.documentElement.scrollTop < 218) {
+                      const simpleBarScrollRef =
+                        globalSimpleBar.ref.current?.getScrollElement();
+                      if (
+                        simpleBarScrollRef &&
+                        simpleBarScrollRef.scrollTop < 218
+                      ) {
                         searchScrollAnim.start(218, {
-                          from: document.documentElement.scrollTop,
+                          from: simpleBarScrollRef.scrollTop,
                           onChange: (anim: any) => {
                             // XXX: 이거 실제 파라미터랑 타입스크립트 인터페이스가 다르다...???
                             const v = anim.value != null ? anim.value : anim;
                             if (typeof v === "number") {
-                              document.documentElement.scrollTop = v;
+                              simpleBarScrollRef.scrollTop = v;
                             }
                           },
                         });
