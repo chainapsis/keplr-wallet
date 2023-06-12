@@ -144,7 +144,8 @@ export const TokenFoundModal: FunctionComponent<{
         style={{
           display: "flex",
           flexDirection: "column",
-          maxHeight: "22rem",
+          // 이 크기보다 커지면 아이템 갯수가 5개 넘어갔을 때 전체 스크롤이 생겨서 전체 스크롤이 생기지 않을 크기로 조절했습니다.
+          maxHeight: "19.5rem",
           overflowY: "auto",
         }}
       >
