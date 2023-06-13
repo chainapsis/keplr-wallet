@@ -39,11 +39,6 @@ export class SetDisableAnalyticsMsg extends Message<boolean> {
   validateBasic(): void {
     // noop
   }
-
-  override approveExternal(): boolean {
-    return true;
-  }
-
   route(): string {
     return ROUTE;
   }
