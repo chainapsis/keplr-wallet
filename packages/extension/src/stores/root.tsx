@@ -382,7 +382,7 @@ export class RootStore {
       (() => {
         if (
           !AmplitudeApiKey ||
-          localStorage.getItem("using-analytics") === "false"
+          localStorage.getItem("disable-analytics") === "true"
         ) {
           return new NoopAnalyticsClient();
         } else {

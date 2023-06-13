@@ -43,20 +43,20 @@ export const SettingSecurityPage: FunctionComponent = () => {
             endIcon={
               <Box marginLeft="0.5rem">
                 <Toggle
-                  isOpen={localStorage.getItem("using-analytics") !== "false"}
+                  isOpen={localStorage.getItem("disable-analytics") !== "true"}
                   setIsOpen={() => {
-                    const usingAnalytics =
-                      localStorage.getItem("using-analytics") !== "false";
+                    const disableAnalytics =
+                      localStorage.getItem("disable-analytics") === "true";
 
                     new InExtensionMessageRequester()
                       .sendMessage(
                         BACKGROUND_PORT,
-                        new SetDisableAnalyticsMsg(usingAnalytics)
+                        new SetDisableAnalyticsMsg(!disableAnalytics)
                       )
                       .then((analyticsDisabled) => {
                         localStorage.setItem(
-                          "using-analytics",
-                          analyticsDisabled ? "false" : "true"
+                          "disable-analytics",
+                          analyticsDisabled ? "true" : "false"
                         );
 
                         window.location.reload();
