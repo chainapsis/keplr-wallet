@@ -14,6 +14,10 @@ import { SetDisableAnalyticsMsg } from "@keplr-wallet/background";
 export const SettingSecurityPage: FunctionComponent = () => {
   const navigate = useNavigate();
 
+  const [disableAnalytics, setDisableAnalytics] = React.useState<boolean>(
+    localStorage.getItem("disable-analytics") === "true"
+  );
+
   return (
     <HeaderLayout title="Security & Privacy" left={<BackButton />}>
       <Box padding="0.75rem" paddingTop="0">
@@ -43,7 +47,7 @@ export const SettingSecurityPage: FunctionComponent = () => {
             endIcon={
               <Box marginLeft="0.5rem">
                 <Toggle
-                  isOpen={localStorage.getItem("disable-analytics") !== "true"}
+                  isOpen={!disableAnalytics}
                   setIsOpen={() => {
                     const disableAnalytics =
                       localStorage.getItem("disable-analytics") === "true";
@@ -59,7 +63,7 @@ export const SettingSecurityPage: FunctionComponent = () => {
                           analyticsDisabled ? "true" : "false"
                         );
 
-                        window.location.reload();
+                        setDisableAnalytics(analyticsDisabled);
                       });
                   }}
                 />
