@@ -6,6 +6,7 @@ const initialState = {
     votedProposals: [],
     activeProposals: [],
     closedProposals: [],
+    allProposals: [],
   } as ProposalSetup,
 };
 

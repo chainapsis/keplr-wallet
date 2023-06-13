@@ -9,13 +9,14 @@ import { VoteBlock } from "@components/proposal/vote-block";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { useProposals } from "@chatStore/proposal-slice";
-import parse from "react-html-parser";
-import { processHyperlinks } from "@utils/process-hyperlinks";
 import { useStore } from "../../../stores";
 import { useNotification } from "@components/notification";
 import classNames from "classnames";
 import { proposalOptions } from "../index";
 import { FormattedMessage, useIntl } from "react-intl";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 const voteArr = ["Unspecified", "Yes", "Abstain", "No", "NoWithVeto"];
 
 export const ProposalDetail: FunctionComponent = () => {
@@ -156,7 +157,6 @@ export const ProposalDetail: FunctionComponent = () => {
         id: "main.proposals.title",
       })}
       onBackButton={() => {
-        history.replace(`/proposal?id=${category}`);
         history.goBack();
       }}
       showBottomMenu={false}
@@ -202,8 +202,15 @@ export const ProposalDetail: FunctionComponent = () => {
                 </div>
               </div>
               <p className={style.pDesc}>
-                {proposal &&
-                  parse(processHyperlinks(proposal.content.description))}
+                {proposal && (
+                  <ReactMarkdown
+                    linkTarget={"_blank"}
+                    skipHtml={true}
+                    remarkPlugins={[remarkGfm]}
+                  >
+                    {proposal.content.description}
+                  </ReactMarkdown>
+                )}
               </p>
             </div>
 

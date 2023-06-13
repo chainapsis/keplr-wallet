@@ -14,9 +14,9 @@ export const PropsalVoteStatus: FunctionComponent = () => {
   const { votedOn, id } = useParams<{ votedOn?: string; id?: string }>();
   const [proposal, setProposal] = useState<ProposalType>();
   const reduxProposals: ProposalSetup = useSelector(useProposals);
-  let icon = "";
-  let color = "";
-  let text = "";
+  let icon: string;
+  let color: string;
+  let text: string;
 
   switch (votedOn) {
     case "1":
@@ -74,9 +74,6 @@ export const PropsalVoteStatus: FunctionComponent = () => {
         id: "main.proposals.title",
       })}
       onBackButton={() => {
-        if (history.location.search === "?true") {
-          history.replace(`/proposal?id=3`);
-        }
         history.goBack();
       }}
       showBottomMenu={false}
@@ -84,7 +81,11 @@ export const PropsalVoteStatus: FunctionComponent = () => {
       <div className={style.pContainer}>
         <div className={style.pCenter}>
           <p className={style.pTitle}>{proposal?.content.title}</p>
-          <img src={require(`@assets/svg/${icon}`)} className={style.pImage} />
+          <img
+            src={require(`@assets/svg/${icon}`)}
+            className={style.pImage}
+            alt={"Proposal_icon"}
+          />
           <p className={style.voteText} style={{ color: color }}>
             {`Voted ${text}`}
           </p>
