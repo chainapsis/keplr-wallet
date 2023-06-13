@@ -21,7 +21,11 @@ import { Column, Columns } from "../../../components/column";
 import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
-import { Subtitle2, Subtitle3 } from "../../../components/typography";
+import {
+  Subtitle2,
+  Subtitle3,
+  Subtitle4,
+} from "../../../components/typography";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
@@ -33,6 +37,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
+import { Tag } from "../../../components/tag";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -581,6 +586,38 @@ export const EnableChainsScene: FunctionComponent<{
                 />
               );
             })}
+
+            {!fallbackEthereumLedgerApp &&
+              keyType === "ledger" &&
+              chainStore.chainInfos
+                .filter((chainInfo) => {
+                  const trimSearch = search.trim();
+                  return (
+                    chainInfo.chainName
+                      .toLowerCase()
+                      .includes(trimSearch.toLowerCase()) ||
+                    chainInfo.stakeCurrency.coinDenom
+                      .toLowerCase()
+                      .includes(trimSearch.toLowerCase())
+                  );
+                })
+                .map((chainInfo) => {
+                  const isEthermintLike =
+                    chainInfo.bip44.coinType === 60 ||
+                    !!chainInfo.features?.includes("eth-address-gen") ||
+                    !!chainInfo.features?.includes("eth-key-sign");
+
+                  if (isEthermintLike) {
+                    return (
+                      <NextStepEvmChainItem
+                        key={chainInfo.chainId}
+                        chainInfo={chainInfo}
+                      />
+                    );
+                  }
+
+                  return null;
+                })}
           </Stack>
         </Box>
 
@@ -830,3 +867,47 @@ const ChainItem: FunctionComponent<{
     );
   }
 );
+
+const NextStepEvmChainItem: FunctionComponent<{
+  chainInfo: ChainInfo;
+}> = ({ chainInfo }) => {
+  return (
+    <Box
+      paddingX="1rem"
+      paddingY="0.75rem"
+      cursor="not-allowed"
+      style={{ opacity: 0.5 }}
+    >
+      <Columns sum={1}>
+        <XAxis alignY="center">
+          <ChainImageFallback
+            style={{
+              width: "3rem",
+              height: "3rem",
+            }}
+            src={chainInfo.chainSymbolImageUrl}
+            alt={chainInfo.chainId}
+          />
+
+          <Gutter size="0.5rem" />
+
+          <YAxis>
+            <XAxis alignY="center">
+              <Subtitle2>{chainInfo.chainName}</Subtitle2>
+
+              <Gutter size="0.375rem" />
+
+              <Tag text="EVM" />
+            </XAxis>
+
+            <Gutter size="0.25rem" />
+
+            <Subtitle4 color={ColorPalette["gray-300"]}>
+              You can select EVM chains in the next step.
+            </Subtitle4>
+          </YAxis>
+        </XAxis>
+      </Columns>
+    </Box>
+  );
+};
