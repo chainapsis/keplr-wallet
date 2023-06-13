@@ -16,7 +16,6 @@ import { useStore } from "../../../../stores";
 import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { autorun } from "mobx";
-import { Bech32Address } from "@keplr-wallet/cosmos";
 import { AppCurrency } from "@keplr-wallet/types";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
@@ -27,6 +26,7 @@ import { Body3, Subtitle2 } from "../../../../components/typography";
 import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
 import { useNotification } from "../../../../hooks/notification";
+import { ContractAddressInput } from "../../../../components/input/contract-input";
 
 const Styles = {
   Container: styled(Stack)`
@@ -273,28 +273,16 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           </Box>
         ) : null}
 
-        <TextInput
-          label="Contract Address"
+        <ContractAddressInput
+          chainId={chainId}
           isLoading={queryContract.isFetching}
           readOnly={interactionInfo.interaction}
           error={
             formState.errors.contractAddress?.message ||
             (queryContract.error?.data as any)?.message
           }
-          {...register("contractAddress", {
-            required: true,
-            validate: (value): string | undefined => {
-              try {
-                const chainInfo = chainStore.getChain(chainId);
-                Bech32Address.validate(
-                  value,
-                  chainInfo.bech32Config.bech32PrefixAccAddr
-                );
-              } catch (e) {
-                return e.message || e.toString();
-              }
-            },
-          })}
+          setValue={setValue}
+          register={register}
         />
         <TextInput
           label="Name"
