@@ -22,6 +22,7 @@ import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
 import {
+  Body2,
   Subtitle2,
   Subtitle3,
   Subtitle4,
@@ -513,6 +514,21 @@ export const EnableChainsScene: FunctionComponent<{
       }
     };
 
+    const enabledChainIdentifiersInPage = useMemo(() => {
+      return enabledChainIdentifiers.filter((chainIdentifier) =>
+        chainInfos.some(
+          (chainInfo) => chainIdentifier === chainInfo.chainIdentifier
+        )
+      );
+    }, [enabledChainIdentifiers, chainInfos]);
+
+    const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
+      useState<string[]>(
+        enabledChainIdentifiersInPage.length === chainInfos.length
+          ? [chainStore.chainInfos[0].chainIdentifier]
+          : enabledChainIdentifiersInPage
+      );
+
     return (
       <RegisterSceneBox>
         <SearchTextInput
@@ -620,6 +636,49 @@ export const EnableChainsScene: FunctionComponent<{
                 })}
           </Stack>
         </Box>
+
+        {!fallbackEthereumLedgerApp ? (
+          <React.Fragment>
+            <Gutter size="1.25rem" />
+
+            <YAxis alignX="center">
+              <Box
+                alignX="center"
+                cursor="pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  if (
+                    chainInfos.length === enabledChainIdentifiersInPage.length
+                  ) {
+                    setEnabledChainIdentifiers(preSelectedChainIdentifiers);
+                  } else {
+                    setPreSelectedChainIdentifiers([
+                      ...enabledChainIdentifiersInPage,
+                    ]);
+                    setEnabledChainIdentifiers(
+                      chainInfos.map((chainInfo) => chainInfo.chainIdentifier)
+                    );
+                  }
+                }}
+              >
+                <XAxis alignY="center">
+                  <Body2 color={ColorPalette["gray-300"]}>Select All</Body2>
+
+                  <Gutter size="0.25rem" />
+
+                  <Checkbox
+                    size="small"
+                    checked={
+                      chainInfos.length === enabledChainIdentifiersInPage.length
+                    }
+                    onChange={() => {}}
+                  />
+                </XAxis>
+              </Box>
+            </YAxis>
+          </React.Fragment>
+        ) : null}
 
         <Gutter size="1.25rem" />
         <Box width="22.5rem" marginX="auto">
