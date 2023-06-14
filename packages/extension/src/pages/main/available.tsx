@@ -113,7 +113,9 @@ export const AvailableTabView: FunctionComponent<{
       }),
       balance: allBalancesSearchFiltered,
       lenAlwaysShown: 10,
-      tooltip: "page.main.available.available-balance-tooltip",
+      tooltip: intl.formatMessage({
+        id: "page.main.available.available-balance-tooltip",
+      }),
     },
   ];
 

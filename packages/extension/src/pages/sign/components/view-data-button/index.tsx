@@ -24,7 +24,7 @@ export const ViewDataButton: FunctionComponent<{
     >
       <XAxis alignY="center">
         <Button2>
-          <FormattedMessage id="page.sign.tx.view-data-button" />
+          <FormattedMessage id="page.sign.cosmos.tx.view-data-button" />
         </Button2>
         <Gutter size="0.25rem" />
         {isViewData ? <IconClose size="0.75rem" /> : <IconXML size="0.75rem" />}
