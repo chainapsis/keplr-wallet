@@ -387,7 +387,7 @@
 
   "page.sign.adr36.title": "Prove Ownership",
   "page.sign.adr36.approve-button": "Approve",
-  "Prove account ownership to": "page.sign.adr36.prove-account-ownership-to",
+  "page.sign.adr36.prove-account-ownership-to": "Prove account ownership to",
   "page.sign.adr36.requested-network": "Requested Network",
   "page.sign.adr36.warning-title": "Incompatible Signing Requested",
   "page.sign.adr36.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
@@ -398,21 +398,19 @@
 
   "page.sign.components.messages.custom.title": "Custom",
   "page.sign.components.messages.claim-rewards.title": "Claim Rewards",
-  "page.sign.components.messages.claim-rewards.paragraph": "Claim staking reward from ",
+  "page.sign.components.messages.claim-rewards.paragraph": "Claim staking reward from <b>{validator}</b>",
   "page.sign.components.messages.delegate.title": "Delegate",
-  "page.sign.components.messages.delegate.paragraph": "Delegate <b>{coin}</b> to ",
+  "page.sign.components.messages.delegate.paragraph": "Delegate <b>{amount}</b> to <b>{validator}</b>",
   "page.sign.components.messages.execute-wasm-contract.title": "Execute Wasm Contract",
-  "page.sign.components.messages.execute-wasm-contract.paragraph": "Execute contract <b>{address}</b>",
-  "page.sign.components.messages.execute-wasm-contract.coins-paragraph": " by sending <b>{coins}</b>",
+  "page.sign.components.messages.execute-wasm-contract.paragraph": "Execute contract <b>{address}</b><only-sent-exist> by sending <b>{sent}</b></only-sent-exist>",
   "page.sign.components.messages.redelegate.title": "Redelegate",
   "page.sign.components.messages.redelegate.paragraph": "Redelegate <b>{coin}</b> from <b>{from}</b> to <b>{to}</b>",
   "page.sign.components.messages.send.title": "Send",
-  "page.sign.components.messages.send.paragraph": "<b>{address}</b> will receive",
+  "page.sign.components.messages.send.paragraph": "<b>{recipient}</b> will receive <b>{amount}</b>",
   "page.sign.components.messages.transfer.title": "IBC Transfer",
   "page.sign.components.messages.transfer.paragraph": "Send <b>{coin}</b> to <b>{address}</b> on <b>{channelId}</b>",
   "page.sign.components.messages.undelegate.title": "Undelegate",
-  "page.sign.components.messages.undelegate.paragraph": "Undelegate <b>{coin}</b> from <b>{from}</b>",
-  "page.sign.components.messages.undelegate.paragraph2": "Asset will be liquid after unbonding period",
+  "page.sign.components.messages.undelegate.paragraph": "Undelegate <b>{coin}</b> from <b>{from}</b> Asset will be liquid after unbonding period",
   "page.sign.components.messages.vote.title": "Vote",
   "page.sign.components.messages.vote.empty": "Empty",
   "page.sign.components.messages.vote.yes": "Yes",
@@ -530,5 +528,8 @@
   "components.address-item.empty-memo": "(Empty Memo)",
 
   "components.collapsible-list.view-more-tokens": "View {remain} more tokens",
-  "components.collapsible-list.collapse": "Collapse"
+  "components.collapsible-list.collapse": "Collapse",
+
+  "hooks.confirm.cancel-button": "Cancel",
+  "hooks.confirm.yes-button": "Yes"
 }
