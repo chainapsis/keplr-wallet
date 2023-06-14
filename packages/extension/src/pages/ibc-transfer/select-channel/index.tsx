@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../../components/stack";
 import { Body2, Subtitle3 } from "../../../components/typography";
@@ -48,6 +48,14 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
     const [selectedChannelId, setSelectedChannelId] = useState<
       string | undefined
     >(channelConfig.channel?.channelId);
+
+    useEffect(() => {
+      if (channelConfig.channel?.channelId !== selectedChannelId) {
+        // channel이 다른 컴포넌트에서 바꼈을때를 대비해서
+        // 여기서 selectedChannelId를 업데이트 해준다.
+        setSelectedChannelId(channelConfig.channel?.channelId);
+      }
+    }, [channelConfig.channel?.channelId, selectedChannelId]);
 
     const sender = accountStore.getAccount(
       chainStore.getChain(chainId).chainId

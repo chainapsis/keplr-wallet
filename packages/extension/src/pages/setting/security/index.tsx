@@ -7,6 +7,10 @@ import { RightArrowIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
 import { Box } from "../../../components/box";
 import { useIntl } from "react-intl";
+import { Toggle } from "../../../components/toggle";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { SetDisableAnalyticsMsg } from "@keplr-wallet/background";
 
 export const SettingSecurityPage: FunctionComponent = () => {
   const navigate = useNavigate();
@@ -41,6 +45,36 @@ export const SettingSecurityPage: FunctionComponent = () => {
             })}
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/change-password")}
+          />
+
+          <PageButton
+            title="Share anonymous data"
+            paragraph="Help us improve the performance and quality of Keplr"
+            endIcon={
+              <Box marginLeft="0.5rem">
+                <Toggle
+                  isOpen={localStorage.getItem("disable-analytics") !== "true"}
+                  setIsOpen={() => {
+                    const disableAnalytics =
+                      localStorage.getItem("disable-analytics") === "true";
+
+                    new InExtensionMessageRequester()
+                      .sendMessage(
+                        BACKGROUND_PORT,
+                        new SetDisableAnalyticsMsg(!disableAnalytics)
+                      )
+                      .then((analyticsDisabled) => {
+                        localStorage.setItem(
+                          "disable-analytics",
+                          analyticsDisabled ? "true" : "false"
+                        );
+
+                        window.location.reload();
+                      });
+                  }}
+                />
+              </Box>
+            }
           />
         </Stack>
       </Box>

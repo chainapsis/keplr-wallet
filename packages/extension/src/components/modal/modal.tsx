@@ -116,6 +116,33 @@ const ModalChild: FunctionComponent<{
 
   const innerContainerRef = useRef<HTMLDivElement>(null);
 
+  const renderContainer = (
+    ref: React.RefObject<HTMLDivElement>,
+    style: React.ComponentProps<typeof AnimatedSimpleBar>["style"],
+    children: any
+  ) => {
+    if (align === "left") {
+      // align left는 사실 sidebar로만 쓰이는데...
+      // SimpleBar를 사용하면 height를 결정하기 힘든 문제가 있어서 대충 처리한다
+      return (
+        <animated.div ref={ref} style={style}>
+          {children}
+        </animated.div>
+      );
+    }
+
+    return (
+      <AnimatedSimpleBar
+        scrollableNodeProps={{
+          ref,
+        }}
+        style={style}
+      >
+        {children}
+      </AnimatedSimpleBar>
+    );
+  };
+
   return (
     <animated.div
       style={{
@@ -161,11 +188,9 @@ const ModalChild: FunctionComponent<{
         }
       }}
     >
-      <AnimatedSimpleBar
-        scrollableNodeProps={{
-          ref: innerContainerRef,
-        }}
-        style={{
+      {renderContainer(
+        innerContainerRef,
+        {
           // 화면을 다 가릴수는 없게 만든다.
           // align이 left일때는 (사실은 sidebar에서만 left align이 사용됨)
           // 그냥 냅두고 알아서 처리하게 한다.
@@ -208,10 +233,9 @@ const ModalChild: FunctionComponent<{
                   : transition.to((t) => `translateY(${(1 - t) * 100}%)`),
             };
           })(),
-        }}
-      >
-        {children}
-      </AnimatedSimpleBar>
+        },
+        children
+      )}
     </animated.div>
   );
 };

@@ -58,21 +58,22 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
           <ArrowDropDownIcon width="1.25rem" height="1.25rem" />
         </Columns>
       </Styles.SelectedContainer>
-      <Styles.MenuContainer
-        isOpen={isOpen}
-        menuContainerMaxHeight={menuContainerMaxHeight}
-      >
-        {items.map((item) => (
-          <Styles.MenuItem
-            key={item.key}
-            onClick={() => {
-              onSelect(item.key);
-              setIsOpen(false);
-            }}
-          >
-            {item.label}
-          </Styles.MenuItem>
-        ))}
+      <Styles.MenuContainer isOpen={isOpen}>
+        <Styles.MenuContainerScroll
+          menuContainerMaxHeight={menuContainerMaxHeight}
+        >
+          {items.map((item) => (
+            <Styles.MenuItem
+              key={item.key}
+              onClick={() => {
+                onSelect(item.key);
+                setIsOpen(false);
+              }}
+            >
+              {item.label}
+            </Styles.MenuItem>
+          ))}
+        </Styles.MenuContainerScroll>
       </Styles.MenuContainer>
     </Styles.Container>
   );
