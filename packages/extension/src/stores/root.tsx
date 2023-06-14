@@ -342,6 +342,7 @@ export class RootStore {
       },
       new InExtensionMessageRequester(),
       this.chainStore,
+      this.keyRingStore,
       this.priceStore,
       ICNSInfo
     );
