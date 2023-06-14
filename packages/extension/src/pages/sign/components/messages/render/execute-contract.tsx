@@ -96,24 +96,15 @@ const ExecuteContractMessagePretty: FunctionComponent<{
         values={{
           address: Bech32Address.shortenAddress(contract, 26),
           b: (...chunks: any) => <b>{chunks}</b>,
+          ["only-sent-exist"]: (...chunks: any[]) =>
+            coins.length > 0 ? chunks : "",
+          sent: coins
+            .map((coinPretty) => {
+              return coinPretty.trim(true).toString();
+            })
+            .join(","),
         }}
       />
-
-      {coins.length > 0 ? (
-        <React.Fragment>
-          <FormattedMessage
-            id="page.sign.components.messages.execute-wasm-contract.coins-paragraph"
-            values={{
-              coins: coins
-                .map((coinPretty) => {
-                  return coinPretty.trim(true).toString();
-                })
-                .join(", "),
-              b: (...chunks: any) => <b>{chunks}</b>,
-            }}
-          />
-        </React.Fragment>
-      ) : null}
       <Gutter size="0.375rem" />
       <WasmMessageView
         chainId={chainId}

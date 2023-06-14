@@ -68,8 +68,14 @@ const ClaimRewardsMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <FormattedMessage id="page.sign.components.messages.claim-rewards.paragraph" />
-      <b>{moniker || Bech32Address.shortenAddress(validatorAddress, 28)}</b>
+      <FormattedMessage
+        id="page.sign.components.messages.claim-rewards.paragraph"
+        values={{
+          validator:
+            moniker || Bech32Address.shortenAddress(validatorAddress, 28),
+          b: (...chunks: any) => <b>{chunks}</b>,
+        }}
+      />
     </React.Fragment>
   );
 });

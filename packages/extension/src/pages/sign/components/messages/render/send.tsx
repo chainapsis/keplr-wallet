@@ -72,17 +72,15 @@ const SendMessagePretty: FunctionComponent<{
         id="page.sign.components.messages.send.paragraph"
         values={{
           address: Bech32Address.shortenAddress(toAddress, 20),
+          amount: coins
+            .map((coinPretty) => {
+              return coinPretty.trim(true).toString();
+            })
+            .join(", "),
           b: (...chunks: any) => <b>{chunks}</b>,
+          br: <br />,
         }}
       />
-      <br />
-      <b>
-        {coins
-          .map((coinPretty) => {
-            return coinPretty.trim(true).toString();
-          })
-          .join(", ")}
-      </b>
     </React.Fragment>
   );
 });

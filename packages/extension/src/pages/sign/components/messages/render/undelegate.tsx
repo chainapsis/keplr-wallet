@@ -78,10 +78,9 @@ const UndelegateMessagePretty: FunctionComponent<{
           coin: coinPretty.trim(true).toString(),
           from: moniker || Bech32Address.shortenAddress(validatorAddress, 28),
           b: (...chunks: any) => <b>{chunks}</b>,
+          br: <br />,
         }}
       />
-      <br />
-      <FormattedMessage id="page.sign.components.messages.undelegate.paragraph2" />
     </React.Fragment>
   );
 });

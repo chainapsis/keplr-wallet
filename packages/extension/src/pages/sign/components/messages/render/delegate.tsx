@@ -76,11 +76,12 @@ const DelegateMessagePretty: FunctionComponent<{
       <FormattedMessage
         id="page.sign.components.messages.delegate.paragraph"
         values={{
-          coin: coinpretty.trim(true).toString(),
+          validator:
+            moniker || Bech32Address.shortenAddress(validatorAddress, 28),
+          amount: coinpretty.trim(true).toString(),
           b: (...chunks: any) => <b>{chunks}</b>,
         }}
       />
-      <b>{moniker || Bech32Address.shortenAddress(validatorAddress, 28)}</b>
     </React.Fragment>
   );
 });
