@@ -146,6 +146,7 @@ export function init(
     chainsService,
     keyRingV2Service,
     interactionService,
+    chainsUIService,
     analyticsService
   );
   const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(

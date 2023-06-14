@@ -194,6 +194,12 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                     },
                   },
                   {
+                    onBroadcasted: () => {
+                      chainStore.enableVaultsWithCosmosAddress(
+                        ibcTransferConfigs.recipientConfig.chainId,
+                        ibcTransferConfigs.recipientConfig.recipient
+                      );
+                    },
                     onFulfill: (tx) => {
                       if (tx.code != null && tx.code !== 0) {
                         console.log(tx.log ?? tx.raw_log);
