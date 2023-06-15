@@ -360,8 +360,7 @@ export class RootStore {
       this.chainStore,
       this.accountStore,
       this.keyRingStore,
-      this.interactionStore,
-      this.contractStore
+      this.interactionStore
     );
 
     this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
