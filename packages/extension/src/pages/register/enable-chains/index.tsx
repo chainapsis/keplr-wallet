@@ -523,11 +523,7 @@ export const EnableChainsScene: FunctionComponent<{
     }, [enabledChainIdentifiers, chainInfos]);
 
     const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
-      useState<string[]>(
-        enabledChainIdentifiersInPage.length === chainInfos.length
-          ? [chainStore.chainInfos[0].chainIdentifier]
-          : enabledChainIdentifiersInPage
-      );
+      useState<string[]>([]);
 
     return (
       <RegisterSceneBox>
@@ -651,14 +647,31 @@ export const EnableChainsScene: FunctionComponent<{
                   if (
                     chainInfos.length === enabledChainIdentifiersInPage.length
                   ) {
-                    setEnabledChainIdentifiers(preSelectedChainIdentifiers);
+                    if (preSelectedChainIdentifiers.length > 0) {
+                      setEnabledChainIdentifiers(preSelectedChainIdentifiers);
+                    } else {
+                      setEnabledChainIdentifiers([
+                        chainStore.chainInfos[0].chainIdentifier,
+                      ]);
+                    }
                   } else {
                     setPreSelectedChainIdentifiers([
-                      ...enabledChainIdentifiersInPage,
+                      ...enabledChainIdentifiers,
                     ]);
-                    setEnabledChainIdentifiers(
-                      chainInfos.map((chainInfo) => chainInfo.chainIdentifier)
-                    );
+                    const newEnabledChainIdentifiers: string[] =
+                      enabledChainIdentifiers.slice();
+                    for (const chainInfo of chainInfos) {
+                      if (
+                        !newEnabledChainIdentifiers.includes(
+                          chainInfo.chainIdentifier
+                        )
+                      ) {
+                        newEnabledChainIdentifiers.push(
+                          chainInfo.chainIdentifier
+                        );
+                      }
+                    }
+                    setEnabledChainIdentifiers(newEnabledChainIdentifiers);
                   }
                 }}
               >
