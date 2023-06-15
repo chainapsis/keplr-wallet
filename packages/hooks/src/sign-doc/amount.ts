@@ -93,11 +93,15 @@ export class SignDocAmountConfig
               msg.value.delegator_address &&
               msg.value.delegator_address === this.senderConfig.sender
             ) {
-              if (msg.value.amount && msg.value.amount.denom) {
+              if (
+                msg.value.amount &&
+                msg.value.amount.amount &&
+                msg.value.amount.denom
+              ) {
                 amount.push(
                   new CoinPretty(
                     this.chainInfo.forceFindCurrency(msg.value.amount.denom),
-                    msg.value.amount
+                    msg.value.amount.amount
                   )
                 );
               }

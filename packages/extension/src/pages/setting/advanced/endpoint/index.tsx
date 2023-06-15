@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import {
   checkRestConnectivity,
   checkRPCConnectivity,
+  DifferentChainVersionError,
 } from "@keplr-wallet/chain-validator";
 import { useNotification } from "../../../../hooks/notification";
 import { useConfirm } from "../../../../hooks/confirm";
@@ -110,10 +111,48 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           ) {
             try {
               if (originalEndpoint?.rpc !== data.rpc) {
-                await checkRPCConnectivity(chainId, data.rpc);
+                try {
+                  await checkRPCConnectivity(chainId, data.rpc);
+                } catch (e) {
+                  if (
+                    // In the case of this error, the chain version is different.
+                    // It gives a warning and handles it if the user wants.
+                    e instanceof DifferentChainVersionError
+                  ) {
+                    if (
+                      !(await confirm.confirm(
+                        "Different chain id",
+                        "The RPC endpoint of the node might have different version with the registered chain. Do you want to proceed?"
+                      ))
+                    ) {
+                      throw e;
+                    }
+                  } else {
+                    throw e;
+                  }
+                }
               }
               if (originalEndpoint?.rest !== data.lcd) {
-                await checkRestConnectivity(chainId, data.lcd);
+                try {
+                  await checkRestConnectivity(chainId, data.lcd);
+                } catch (e) {
+                  if (
+                    // In the case of this error, the chain version is different.
+                    // It gives a warning and handles it if the user wants.
+                    e instanceof DifferentChainVersionError
+                  ) {
+                    if (
+                      !(await confirm.confirm(
+                        "Different chain id",
+                        "The LCD endpoint of the node might have different version with the registered chain. Do you want to proceed?"
+                      ))
+                    ) {
+                      throw e;
+                    }
+                  } else {
+                    throw e;
+                  }
+                }
               }
             } catch (e) {
               console.error(e);

@@ -275,7 +275,7 @@ export class ChainsService {
   getChainInfoOrThrow(chainId: string): ChainInfo {
     const chainInfo = this.getChainInfo(chainId);
     if (!chainInfo) {
-      throw new Error(`There in no chain info for ${chainId}`);
+      throw new Error(`There is no chain info for ${chainId}`);
     }
     return chainInfo;
   }

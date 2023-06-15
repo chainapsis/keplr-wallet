@@ -15,6 +15,7 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   onSelect,
   size = "small",
   label,
+  menuContainerMaxHeight,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const wrapperRef = useRef<HTMLInputElement>(null);
@@ -58,17 +59,21 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
         </Columns>
       </Styles.SelectedContainer>
       <Styles.MenuContainer isOpen={isOpen}>
-        {items.map((item) => (
-          <Styles.MenuItem
-            key={item.key}
-            onClick={() => {
-              onSelect(item.key);
-              setIsOpen(false);
-            }}
-          >
-            {item.label}
-          </Styles.MenuItem>
-        ))}
+        <Styles.MenuContainerScroll
+          menuContainerMaxHeight={menuContainerMaxHeight}
+        >
+          {items.map((item) => (
+            <Styles.MenuItem
+              key={item.key}
+              onClick={() => {
+                onSelect(item.key);
+                setIsOpen(false);
+              }}
+            >
+              {item.label}
+            </Styles.MenuItem>
+          ))}
+        </Styles.MenuContainerScroll>
       </Styles.MenuContainer>
     </Styles.Container>
   );

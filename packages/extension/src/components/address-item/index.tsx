@@ -21,6 +21,8 @@ export const AddressItem: FunctionComponent<{
   onClick?: () => void;
 
   dropdownItems?: FloatingDropdownItem[];
+  // true면 border를 추가함.
+  highlight?: boolean;
 }> = ({
   timestamp,
   name,
@@ -29,6 +31,7 @@ export const AddressItem: FunctionComponent<{
   isShowMemo,
   onClick,
   dropdownItems,
+  highlight,
 }) => {
   const intl = useIntl();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -41,6 +44,8 @@ export const AddressItem: FunctionComponent<{
         backgroundColor: onClick ? ColorPalette["gray-550"] : undefined,
       }}
       borderRadius="0.375rem"
+      borderWidth={highlight ? "1px" : undefined}
+      borderColor={highlight ? ColorPalette["gray-400"] : undefined}
       cursor={onClick ? "pointer" : undefined}
       onClick={(e) => {
         e.preventDefault();

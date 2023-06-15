@@ -27,12 +27,12 @@ import { useNotification } from "../../../hooks/notification";
 import { DenomHelper, ExtensionKVStore } from "@keplr-wallet/common";
 import { ICNSInfo } from "../../../config.ui";
 import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
-import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SendTxAndRecordMsg } from "@keplr-wallet/background";
+import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
 
 const Styles = {
   Flex1: styled.div`
@@ -44,7 +44,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const { analyticsStore, accountStore, chainStore, queriesStore } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const notification = useNotification();
 
@@ -180,141 +180,10 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     }
   }, [gasSimulator, sendConfigs.amountConfig.currency, sendConfigs.gasConfig]);
 
-  useEffectOnce(() => {
-    const initialAmountFraction = searchParams.get("initialAmountFraction");
-    if (
-      initialAmountFraction &&
-      !Number.isNaN(parseFloat(initialAmountFraction))
-    ) {
-      sendConfigs.amountConfig.setFraction(
-        Number.parseFloat(initialAmountFraction)
-      );
-    }
-    const initialAmount = searchParams.get("initialAmount");
-    if (initialAmount) {
-      // AmountInput에는 price based 모드가 있다.
-      // 하지만 이 state는 AmountInput Component에서 다뤄지므로 여기서 처리하기가 힘들다.
-      // 어쨋든 처음에는 non price mode로 시작히므로 이렇게 해도 큰 문제는 없다.
-      // TODO: 나중에 해결한다.
-      sendConfigs.amountConfig.setValue(initialAmount);
-    }
-    const initialRecipient = searchParams.get("initialRecipient");
-    if (initialRecipient) {
-      sendConfigs.recipientConfig.setValue(initialRecipient);
-    }
-    const initialMemo = searchParams.get("initialMemo");
-    if (initialMemo) {
-      sendConfigs.memoConfig.setValue(initialMemo);
-    }
-
-    const initialFeeCurrency = searchParams.get("initialFeeCurrency");
-    const initialFeeType = searchParams.get("initialFeeType");
-    if (initialFeeCurrency && initialFeeType) {
-      const feeCurrency = chainStore
-        .getChain(chainId)
-        .feeCurrencies.find(
-          (cur) => cur.coinMinimalDenom === initialFeeCurrency
-        );
-      const currency = chainStore
-        .getChain(chainId)
-        .findCurrency(initialFeeCurrency);
-      if (currency) {
-        sendConfigs.feeConfig.setFee({
-          currency: {
-            ...feeCurrency,
-            ...currency,
-          },
-          // XXX: 일단 귀찮아서 any로 처리...
-          type: initialFeeType as any,
-        });
-      }
-    }
-
-    const initialGasAmount = searchParams.get("initialGasAmount");
-    if (initialGasAmount) {
-      sendConfigs.gasConfig.setValue(initialGasAmount);
-      gasSimulator.setEnabled(false);
-    } else {
-      const initialGasAdjustment = searchParams.get("initialGasAdjustment");
-      if (initialGasAdjustment) {
-        gasSimulator.setGasAdjustmentValue(initialGasAdjustment);
-        gasSimulator.setEnabled(true);
-      }
-    }
+  useTxConfigsQueryString(chainId, {
+    ...sendConfigs,
+    gasSimulator,
   });
-
-  useEffect(() => {
-    setSearchParams(
-      (prev) => {
-        if (sendConfigs.recipientConfig.value.trim().length > 0) {
-          prev.set("initialRecipient", sendConfigs.recipientConfig.value);
-        } else {
-          prev.delete("initialRecipient");
-        }
-        // Fraction and amount value are exclusive
-        if (sendConfigs.amountConfig.fraction <= 0) {
-          prev.delete("initialAmountFraction");
-          if (sendConfigs.amountConfig.value.trim().length > 0) {
-            prev.set("initialAmount", sendConfigs.amountConfig.value);
-          } else {
-            prev.delete("initialAmount");
-          }
-        } else {
-          prev.delete("initialAmount");
-          prev.set(
-            "initialAmountFraction",
-            sendConfigs.amountConfig.fraction.toString()
-          );
-        }
-        if (sendConfigs.memoConfig.value.trim().length > 0) {
-          prev.set("initialMemo", sendConfigs.memoConfig.value);
-        } else {
-          prev.delete("initialMemo");
-        }
-
-        // XXX: Manual type에 대해서는 처리하지 않음.
-        if (
-          sendConfigs.feeConfig.fees.length > 0 &&
-          sendConfigs.feeConfig.type !== "manual"
-        ) {
-          prev.set(
-            "initialFeeCurrency",
-            sendConfigs.feeConfig.fees[0].currency.coinMinimalDenom
-          );
-          prev.set("initialFeeType", sendConfigs.feeConfig.type);
-        } else {
-          prev.delete("initialFeeCurrency");
-          prev.delete("initialFeeType");
-        }
-
-        if (gasSimulator.enabled) {
-          prev.set(
-            "initialGasAdjustment",
-            gasSimulator.gasAdjustment.toString()
-          );
-          prev.delete("initialGasAmount");
-        } else {
-          prev.set("initialGasAmount", sendConfigs.gasConfig.value.toString());
-          prev.delete("initialGasAdjustment");
-        }
-        return prev;
-      },
-      {
-        replace: true,
-      }
-    );
-  }, [
-    gasSimulator.enabled,
-    gasSimulator.gasAdjustment,
-    sendConfigs.amountConfig.fraction,
-    sendConfigs.amountConfig.value,
-    sendConfigs.feeConfig.fees,
-    sendConfigs.feeConfig.type,
-    sendConfigs.gasConfig.value,
-    sendConfigs.memoConfig.value,
-    sendConfigs.recipientConfig.value,
-    setSearchParams,
-  ]);
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,

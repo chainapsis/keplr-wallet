@@ -843,7 +843,11 @@ export class KeyRingService {
     chainId: string,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256"
-  ): Promise<Uint8Array> {
+  ): Promise<{
+    readonly r: Uint8Array;
+    readonly s: Uint8Array;
+    readonly v: number | null;
+  }> {
     return this.sign(chainId, this.selectedVaultId, data, digestMethod);
   }
 
@@ -919,7 +923,11 @@ export class KeyRingService {
     vaultId: string,
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256"
-  ): Promise<Uint8Array> {
+  ): Promise<{
+    readonly r: Uint8Array;
+    readonly s: Uint8Array;
+    readonly v: number | null;
+  }> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }
@@ -978,7 +986,11 @@ export class KeyRingService {
     data: Uint8Array,
     digestMethod: "sha256" | "keccak256",
     chainInfo: ChainInfo
-  ): Promise<Uint8Array> {
+  ): Promise<{
+    readonly r: Uint8Array;
+    readonly s: Uint8Array;
+    readonly v: number | null;
+  }> {
     if (this.vaultService.isLocked) {
       throw new Error("KeyRing is locked");
     }

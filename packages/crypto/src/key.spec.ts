@@ -29,10 +29,13 @@ describe("Test priv key", () => {
 
     const data = new Uint8Array([1, 2, 3]);
     const signature = privKey.signDigest32(Hash.sha256(data));
-    expect(signature).toStrictEqual(privKey.sign(data));
 
-    expect(pubKey.verify(data, signature)).toBe(true);
-    expect(pubKey.verifyDigest32(Hash.sha256(data), signature)).toBe(true);
+    expect(
+      pubKey.verifyDigest32(
+        Hash.sha256(data),
+        new Uint8Array([...signature.r, ...signature.s])
+      )
+    ).toBe(true);
   });
 
   it("test assertions", () => {

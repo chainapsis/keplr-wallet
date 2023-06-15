@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { Box } from "../../../../components/box";
 import {
+  Body2,
   Button2,
   Caption1,
   Subtitle1,
@@ -21,6 +22,8 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TokenScan } from "@keplr-wallet/background";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Gutter } from "../../../../components/gutter";
+import SimpleBar from "simplebar-react";
+import { XAxis, YAxis } from "../../../../components/axis";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -137,7 +140,15 @@ export const TokenFoundModal: FunctionComponent<{
         </Subtitle1>
       </Box>
 
-      <Box maxHeight="22rem" style={{ overflowY: "auto" }}>
+      <SimpleBar
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          // 이 크기보다 커지면 아이템 갯수가 5개 넘어갔을 때 전체 스크롤이 생겨서 전체 스크롤이 생기지 않을 크기로 조절했습니다.
+          maxHeight: "19.5rem",
+          overflowY: "auto",
+        }}
+      >
         <Stack gutter="0.75rem">
           {chainStore.tokenScans.map((tokenScan) => {
             return (
@@ -167,7 +178,45 @@ export const TokenFoundModal: FunctionComponent<{
             );
           })}
         </Stack>
-      </Box>
+      </SimpleBar>
+
+      <Gutter size="0.75rem" />
+
+      <YAxis alignX="center">
+        <Box
+          alignX="center"
+          cursor="pointer"
+          onClick={(e) => {
+            e.preventDefault();
+
+            if (
+              chainStore.tokenScans.length === checkedChainIdentifiers.length
+            ) {
+              setCheckedChainIdentifiers([]);
+            } else {
+              setCheckedChainIdentifiers(
+                chainStore.tokenScans.map((tokenScan) => {
+                  return ChainIdHelper.parse(tokenScan.chainId).identifier;
+                })
+              );
+            }
+          }}
+        >
+          <XAxis alignY="center">
+            <Body2 color={ColorPalette["gray-300"]}>Select All</Body2>
+
+            <Gutter size="0.25rem" />
+
+            <Checkbox
+              size="small"
+              checked={
+                chainStore.tokenScans.length === checkedChainIdentifiers.length
+              }
+              onChange={() => {}}
+            />
+          </XAxis>
+        </Box>
+      </YAxis>
 
       {keyRingStore.selectedKeyInfo?.type === "ledger" ? (
         <React.Fragment>

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts/header";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
 import {
   useGasSimulator,
@@ -19,11 +19,14 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { SendTxAndRecordMsg } from "@keplr-wallet/background";
 import { DecUtils } from "@keplr-wallet/unit";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
+import { useIBCChannelConfigQueryString } from "../../hooks/use-ibc-channel-config-query-string";
 
 export const IBCTransferPage: FunctionComponent = observer(() => {
   const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const notification = useNotification();
 
   const chainId = searchParams.get("chainId");
@@ -107,6 +110,12 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     _isSelectChannelInteractionBlocked,
     ibcTransferConfigs.channelConfig.error,
   ]);
+
+  useTxConfigsQueryString(chainId, {
+    ...ibcTransferConfigs,
+    gasSimulator,
+  });
+  useIBCChannelConfigQueryString(ibcTransferConfigs.channelConfig);
 
   const isAmountInteractionBlocked = useTxConfigsValidate({
     ...ibcTransferConfigs,
@@ -196,6 +205,15 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   }
                 );
               } catch (e) {
+                if (e.message === "Request rejected") {
+                  if (location.pathname === "/ibc-transfer") {
+                    return;
+                  }
+
+                  navigate(-1);
+                  return;
+                }
+
                 notification.show("failed", "Transaction Failed", "");
               }
 

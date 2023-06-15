@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 # Install dependencies for build
 RUN apt-get update && apt -y install build-essential libusb-1.0-0-dev curl unzip
 
-# Install node 16
+# Install node 18
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt -y install nodejs
 

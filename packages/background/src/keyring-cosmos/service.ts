@@ -250,12 +250,13 @@ export class KeyRingCosmosService {
           }
           signature = res.signature;
         } else {
-          signature = await this.keyRingService.sign(
+          const _sig = await this.keyRingService.sign(
             chainId,
             vaultId,
             serializeSignDoc(newSignDoc),
             isEthermintLike ? "keccak256" : "sha256"
           );
+          signature = new Uint8Array([..._sig.r, ..._sig.s]);
         }
 
         const msgTypes = newSignDoc.msgs
@@ -345,12 +346,13 @@ export class KeyRingCosmosService {
     }
 
     try {
-      const signature = await this.keyRingService.sign(
+      const _sig = await this.keyRingService.sign(
         chainId,
         vaultId,
         serializeSignDoc(signDoc),
         isEthermintLike ? "keccak256" : "sha256"
       );
+      const signature = new Uint8Array([..._sig.r, ..._sig.s]);
 
       this.analyticsService.logEventIgnoreError("tx_signed", {
         chainId,
@@ -456,12 +458,13 @@ export class KeyRingCosmosService {
           }
           signature = res.signature;
         } else {
-          signature = await this.keyRingService.sign(
+          const _sig = await this.keyRingService.sign(
             chainId,
             vaultId,
             serializeSignDoc(newSignDoc),
             isEthermintLike ? "keccak256" : "sha256"
           );
+          signature = new Uint8Array([..._sig.r, ..._sig.s]);
         }
 
         const msgTypes = newSignDoc.msgs
@@ -544,12 +547,13 @@ export class KeyRingCosmosService {
           }
           signature = res.signature;
         } else {
-          signature = await this.keyRingService.sign(
+          const _sig = await this.keyRingService.sign(
             chainId,
             vaultId,
             newSignDocBytes,
             isEthermintLike ? "keccak256" : "sha256"
           );
+          signature = new Uint8Array([..._sig.r, ..._sig.s]);
         }
 
         const msgTypes = TxBody.decode(newSignDoc.bodyBytes).messages.map(
@@ -920,12 +924,13 @@ Salt: ${salt}`;
               data
             );
 
-            const signature = await this.keyRingService.sign(
+            const _sig = await this.keyRingService.sign(
               accountInfo.chainId,
               vaultId,
               serializeSignDoc(signDoc),
               isEthermintLike ? "keccak256" : "sha256"
             );
+            const signature = new Uint8Array([..._sig.r, ..._sig.s]);
 
             r.push({
               chainId: accountInfo.chainId,
@@ -967,7 +972,7 @@ Salt: ${salt}`;
     chainId: string,
     memo: string
   ): Promise<Uint8Array> {
-    return await this.keyRingService.sign(
+    const _sig = await this.keyRingService.sign(
       chainId,
       this.keyRingService.selectedVaultId,
       Buffer.from(
@@ -982,6 +987,7 @@ Salt: ${salt}`;
       ),
       "sha256"
     );
+    return new Uint8Array([..._sig.r, ..._sig.s]);
   }
 
   // XXX: There are other way to handle tx with ethermint on ledger.

@@ -19,6 +19,7 @@ import * as KeyRingMnemonic from "./keyring-mnemonic/internal";
 import * as KeyRingLedger from "./keyring-ledger/internal";
 import * as KeyRingPrivateKey from "./keyring-private-key/internal";
 import * as KeyRingCosmos from "./keyring-cosmos/internal";
+import * as KeyRingEthereum from "./keyring-ethereum/internal";
 import * as PermissionInteractive from "./permission-interactive/internal";
 import * as TokenScan from "./token-scan/internal";
 import * as RecentSendHistory from "./recent-send-history/internal";
@@ -38,6 +39,7 @@ export * from "./permission-interactive";
 export * from "./keyring";
 export * from "./vault";
 export * from "./keyring-cosmos";
+export * from "./keyring-ethereum";
 export * from "./token-scan";
 export * from "./recent-send-history";
 
@@ -146,6 +148,13 @@ export function init(
     interactionService,
     analyticsService
   );
+  const keyRingEthereumService = new KeyRingEthereum.KeyRingEthereumService(
+    chainsService,
+    keyRingV2Service,
+    keyRingCosmosService,
+    interactionService,
+    analyticsService
+  );
   const autoLockAccountService = new AutoLocker.AutoLockAccountService(
     storeCreator("auto-lock-account"),
     keyRingV2Service
@@ -202,6 +211,11 @@ export function init(
     keyRingCosmosService,
     permissionInteractiveService
   );
+  KeyRingEthereum.init(
+    router,
+    keyRingEthereumService,
+    permissionInteractiveService
+  );
   PermissionInteractive.init(router, permissionInteractiveService);
   ChainsUI.init(router, chainsUIService);
   ChainsUpdate.init(router, chainsUpdateService);
@@ -223,6 +237,7 @@ export function init(
       await chainsUpdateService.init();
       await keyRingV2Service.init();
       await keyRingCosmosService.init();
+      await keyRingEthereumService.init();
       await permissionService.init();
       await tokenCW20Service.init();
 

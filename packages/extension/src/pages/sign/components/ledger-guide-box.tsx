@@ -7,24 +7,27 @@ import {
   ErrCodeDeviceLocked,
   ErrFailedGetPublicKey,
   ErrFailedInit,
-  ErrModule,
+  ErrModuleLedgerSign,
   ErrPublicKeyUnmatched,
   ErrSignRejected,
-} from "../utils/cosmos-ledger-sign";
-import { SignInteractionStore } from "@keplr-wallet/stores";
+} from "../utils/ledger-types";
+import { PlainObject } from "@keplr-wallet/background";
 
 export const LedgerGuideBox: FunctionComponent<{
-  interactionData: NonNullable<SignInteractionStore["waitingData"]>;
+  data: {
+    keyInsensitive: PlainObject;
+    isEthereum: boolean;
+  };
   isLedgerInteracting: boolean;
   ledgerInteractingError: Error | undefined;
-}> = ({ isLedgerInteracting, ledgerInteractingError, interactionData }) => {
+}> = ({ isLedgerInteracting, ledgerInteractingError, data }) => {
   const [transportErrorCount, setTransportErrorCount] = useState(0);
 
   useLayoutEffect(() => {
     if (ledgerInteractingError) {
       if (
         ledgerInteractingError instanceof KeplrError &&
-        ledgerInteractingError.module === ErrModule
+        ledgerInteractingError.module === ErrModuleLedgerSign
       ) {
         switch (ledgerInteractingError.code) {
           case ErrFailedInit:
@@ -47,7 +50,7 @@ export const LedgerGuideBox: FunctionComponent<{
         if (ledgerInteractingError) {
           if (
             ledgerInteractingError instanceof KeplrError &&
-            ledgerInteractingError.module === ErrModule
+            ledgerInteractingError.module === ErrModuleLedgerSign
           ) {
             switch (ledgerInteractingError.code) {
               case ErrFailedInit:
@@ -103,7 +106,7 @@ export const LedgerGuideBox: FunctionComponent<{
               case ErrFailedGetPublicKey: {
                 let app = "Cosmos";
 
-                const appData = interactionData.data.keyInsensitive;
+                const appData = data.keyInsensitive;
                 if (!appData) {
                   throw new Error("Invalid ledger app data");
                 }
@@ -114,10 +117,7 @@ export const LedgerGuideBox: FunctionComponent<{
                   app = "Terra";
                 }
 
-                if (
-                  "eip712" in interactionData.data &&
-                  interactionData.data.eip712
-                ) {
+                if (data.isEthereum) {
                   if (appData["Ethereum"]) {
                     app = "Ethereum";
                   } else {

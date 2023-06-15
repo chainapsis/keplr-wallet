@@ -290,12 +290,23 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   }
 
   async signEthereum(
-    _chainId: string,
-    _signer: string,
-    _data: string | Uint8Array,
-    _type: EthSignType
+    chainId: string,
+    signer: string,
+    message: string | Uint8Array,
+    signType: EthSignType
   ): Promise<Uint8Array> {
-    throw new Error("TODO");
+    return await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "keyring-ethereum",
+      "request-sign-ethereum",
+      {
+        chainId,
+        signer,
+        message: typeof message === "string" ? Buffer.from(message) : message,
+        signType,
+      }
+    );
   }
 
   async signICNSAdr36(

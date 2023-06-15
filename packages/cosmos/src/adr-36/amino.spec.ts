@@ -487,10 +487,15 @@ describe("Test ADR-36 Amino Sign Doc", () => {
 
     const msg = serializeSignDoc(signDoc);
 
-    const signature = privKey.sign(msg);
+    const signature = privKey.signDigest32(Hash.sha256(msg));
 
     expect(
-      verifyADR36AminoSignDoc("osmo", signDoc, pubKey.toBytes(), signature)
+      verifyADR36AminoSignDoc(
+        "osmo",
+        signDoc,
+        pubKey.toBytes(),
+        new Uint8Array([...signature.r, ...signature.s])
+      )
     ).toBe(true);
 
     expect(() =>
@@ -528,7 +533,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
           memo: "",
         },
         pubKey.toBytes(),
-        signature
+        new Uint8Array([...signature.r, ...signature.s])
       )
     ).toThrow();
 
@@ -538,7 +543,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         signer,
         new Uint8Array([1, 2, 3]),
         pubKey.toBytes(),
-        signature
+        new Uint8Array([...signature.r, ...signature.s])
       )
     ).toBe(true);
 
@@ -549,7 +554,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         "osmo1ymk637a7wljvt4w7q9lnrw95mg9sr37yatxd9h",
         new Uint8Array([1, 2, 3]),
         pubKey.toBytes(),
-        signature
+        new Uint8Array([...signature.r, ...signature.s])
       )
     ).toThrow();
 
@@ -560,7 +565,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         "invalid1ymk637a7wljvt4w7q9lnrw95mg9sr37yatxd9h",
         new Uint8Array([1, 2, 3]),
         pubKey.toBytes(),
-        signature
+        new Uint8Array([...signature.r, ...signature.s])
       )
     ).toThrow();
 
@@ -569,7 +574,10 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         "osmo",
         signDoc,
         pubKey.toBytes(),
-        signature.slice().map((b) => (Math.random() > 0.5 ? 0 : b))
+        new Uint8Array([
+          ...signature.r.map((b) => (Math.random() > 0.5 ? 0 : b)),
+          ...signature.s.map((b) => (Math.random() > 0.5 ? 0 : b)),
+        ])
       )
     ).toBe(false);
 
@@ -579,7 +587,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         signer,
         new Uint8Array([1, 2]),
         pubKey.toBytes(),
-        signature
+        new Uint8Array([...signature.r, ...signature.s])
       )
     ).toBe(false);
   });
@@ -600,7 +608,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         "eth",
         signDoc,
         pubKey.toBytes(),
-        signature,
+        new Uint8Array([...signature.r, ...signature.s]),
         "ethsecp256k1"
       )
     ).toBe(true);
@@ -611,7 +619,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         signer,
         new Uint8Array([1, 2, 3]),
         pubKey.toBytes(),
-        signature,
+        new Uint8Array([...signature.r, ...signature.s]),
         "ethsecp256k1"
       )
     ).toBe(true);
@@ -623,7 +631,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         new Bech32Address(pubKey.getAddress()).toBech32("eth"),
         new Uint8Array([1, 2, 3]),
         pubKey.toBytes(),
-        signature,
+        new Uint8Array([...signature.r, ...signature.s]),
         "ethsecp256k1"
       )
     ).toThrow();
@@ -635,7 +643,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         "invalid1ymk637a7wljvt4w7q9lnrw95mg9sr37yatxd9h",
         new Uint8Array([1, 2, 3]),
         pubKey.toBytes(),
-        signature,
+        new Uint8Array([...signature.r, ...signature.s]),
         "ethsecp256k1"
       )
     ).toThrow();
@@ -645,7 +653,10 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         "eth",
         signDoc,
         pubKey.toBytes(),
-        signature.slice().map((b) => (Math.random() > 0.5 ? 0 : b)),
+        new Uint8Array([
+          ...signature.r.map((b) => (Math.random() > 0.5 ? 0 : b)),
+          ...signature.s.map((b) => (Math.random() > 0.5 ? 0 : b)),
+        ]),
         "ethsecp256k1"
       )
     ).toBe(false);
@@ -656,7 +667,7 @@ describe("Test ADR-36 Amino Sign Doc", () => {
         signer,
         new Uint8Array([1, 2]),
         pubKey.toBytes(),
-        signature,
+        new Uint8Array([...signature.r, ...signature.s]),
         "ethsecp256k1"
       )
     ).toBe(false);

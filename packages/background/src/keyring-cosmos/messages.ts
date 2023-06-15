@@ -14,7 +14,8 @@ import {
   EthermintChainIdHelper,
 } from "@keplr-wallet/cosmos";
 import { SignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import { BigNumber } from "@ethersproject/bignumber";
+import { Int } from "@keplr-wallet/unit";
+import bigInteger from "big-integer";
 
 export class GetCosmosKeyMsg extends Message<Key> {
   public static type() {
@@ -475,7 +476,14 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
 
       const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
 
-      if (!BigNumber.from(this.eip712.domain["chainId"]).eq(ethChainId)) {
+      const ethChainIdInMsg: Int = (() => {
+        const value = this.eip712.domain["chainId"];
+        if (typeof value === "string" && value.startsWith("0x")) {
+          return new Int(bigInteger(value.replace("0x", ""), 16).toString());
+        }
+        return new Int(value);
+      })();
+      if (!ethChainIdInMsg.equals(new Int(ethChainId))) {
         throw new Error(
           `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${this.eip712.domain["chainId"]})`
         );

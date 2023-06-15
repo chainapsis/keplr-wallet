@@ -30,10 +30,11 @@ import { defaultRegistry } from "../../components/messages/registry";
 import { useUnmount } from "../../../../hooks/use-unmount";
 import { handleCosmosPreSign } from "../../utils/handle-cosmos-sign";
 import { KeplrError } from "@keplr-wallet/router";
-import { ErrModule } from "../../utils/cosmos-ledger-sign";
+import { ErrModuleLedgerSign } from "../../utils/ledger-types";
 import { LedgerGuideBox } from "../../components/ledger-guide-box";
 import { Gutter } from "../../../../components/gutter";
 import { GuideBox } from "../../../../components/guide-box";
+import SimpleBar from "simplebar-react";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -246,7 +247,7 @@ export const CosmosTxView: FunctionComponent<{
         console.log(e);
 
         if (e instanceof KeplrError) {
-          if (e.module === ErrModule) {
+          if (e.module === ErrModuleLedgerSign) {
             setLedgerInteractingError(e);
           } else {
             setLedgerInteractingError(undefined);
@@ -323,14 +324,16 @@ export const CosmosTxView: FunctionComponent<{
           </Columns>
         </Box>
 
-        <Box
-          className="show-scrollbar"
-          borderRadius="0.375rem"
-          backgroundColor={ColorPalette["gray-600"]}
+        <SimpleBar
+          autoHide={false}
           style={{
+            display: "flex",
+            flexDirection: "column",
             flex: !isViewData ? "0 1 auto" : 1,
             overflow: "auto",
             opacity: isLedgerAndDirect ? 0.5 : undefined,
+            borderRadius: "0.375rem",
+            backgroundColor: ColorPalette["gray-600"],
           }}
         >
           <Box>
@@ -368,7 +371,7 @@ export const CosmosTxView: FunctionComponent<{
               </Box>
             )}
           </Box>
-        </Box>
+        </SimpleBar>
 
         {!isViewData ? <div style={{ flex: 1 }} /> : null}
         <Box height="0" minHeight="1rem" />
@@ -406,7 +409,12 @@ export const CosmosTxView: FunctionComponent<{
         ) : null}
 
         <LedgerGuideBox
-          interactionData={interactionData}
+          data={{
+            keyInsensitive: interactionData.data.keyInsensitive,
+            isEthereum:
+              "eip712" in interactionData.data &&
+              interactionData.data.eip712 != null,
+          }}
           isLedgerInteracting={isLedgerInteracting}
           ledgerInteractingError={ledgerInteractingError}
         />
