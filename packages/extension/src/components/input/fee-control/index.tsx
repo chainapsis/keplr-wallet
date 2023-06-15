@@ -177,6 +177,7 @@ export const FeeControl: FunctionComponent<{
         disposer();
       };
     }, [
+      chainStore,
       disableAutomaticFeeSet,
       feeConfig,
       feeConfig.chainId,
