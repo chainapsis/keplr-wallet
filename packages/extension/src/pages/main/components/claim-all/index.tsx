@@ -528,6 +528,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                 viewToken={viewToken}
                 state={getClaimAllEachState(viewToken.chainInfo.chainId)}
+                itemsLength={viewTokens.length}
               />
             );
           })}
@@ -540,7 +541,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 const ClaimTokenItem: FunctionComponent<{
   viewToken: ViewToken;
   state: ClaimAllEachState;
-}> = observer(({ viewToken, state }) => {
+
+  itemsLength: number;
+}> = observer(({ viewToken, state, itemsLength }) => {
   const { analyticsStore, accountStore, queriesStore } = useStore();
 
   const navigate = useNavigate();
@@ -678,6 +681,11 @@ const ClaimTokenItem: FunctionComponent<{
           content={
             state.failedReason?.message || state.failedReason?.toString()
           }
+          // 아이템이 한개만 있으면 tooltip이 VerticalCollapseTransition가 overflow: hidden이라
+          // 위/아래로 나타나면 가려져서 유저가 오류 메세지를 볼 방법이 없다.
+          // VerticalCollapseTransition가 overflow: hidden이여야 하는건 필수적이므로 이 부분을 수정할 순 없기 때문에
+          // 대충 아이템이 한개면 tooltip이 왼족에 나타나도록 한다.
+          allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
         >
           <Button
             text="Claim"
