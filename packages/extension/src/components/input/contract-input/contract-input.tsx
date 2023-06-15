@@ -10,6 +10,7 @@ import { useStore } from "../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { ContractAddressBookModal } from "../../contract-address-book-modal";
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
+import { toTokenContractInfo } from "@keplr-wallet/stores";
 
 export type ContractAddressInputProps = {
   chainId: string;
@@ -30,12 +31,14 @@ export const ContractAddressInput = observer<
   HTMLInputElement
 >(
   (props) => {
-    const { chainStore } = useStore();
-
+    const { chainStore, contractStore } = useStore();
     const { chainId, isLoading, readOnly, error, setValue, register } = props;
-
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
       React.useState(false);
+
+    const contracts = contractStore
+      .getCommunityTokenContractsInfo(chainId)
+      .contractInfo.map(toTokenContractInfo);
 
     return (
       <Box>
@@ -45,7 +48,7 @@ export const ContractAddressInput = observer<
           readOnly={readOnly}
           error={error}
           right={
-            chainId === "secret-4" ? (
+            contracts.length > 0 ? (
               <IconButton
                 onClick={() => {
                   setIsAddressBookModalOpen(true);
@@ -73,13 +76,14 @@ export const ContractAddressInput = observer<
           })}
         />
 
-        {chainId === "secret-4" ? (
+        {contracts.length > 0 ? (
           <ContractAddressBookModal
             isOpen={isAddressBookModalOpen}
             onSelect={(address: string) => {
               setValue("contractAddress", address);
               setIsAddressBookModalOpen(false);
             }}
+            contracts={contracts}
           />
         ) : null}
       </Box>

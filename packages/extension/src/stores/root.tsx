@@ -1,5 +1,9 @@
 import { ChainStore } from "./chain";
-import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
+import {
+  CommunityChainInfoRepo,
+  CommunityContractsInfoRepo,
+  EmbedChainInfos,
+} from "../config";
 import {
   AmplitudeApiKey,
   CoinGeckoAPIEndPoint,
@@ -31,6 +35,7 @@ import {
   ICNSInteractionStore,
   ICNSQueries,
   PermissionManagerStore,
+  ContractStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -84,6 +89,7 @@ export class RootStore {
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
 
+  public readonly contractStore: ContractStore;
   public readonly tokensStore: TokensStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
@@ -341,13 +347,16 @@ export class RootStore {
       ICNSInfo
     );
 
+    this.contractStore = new ContractStore(CommunityContractsInfoRepo);
+
     this.tokensStore = new TokensStore(
       window,
       new InExtensionMessageRequester(),
       this.chainStore,
       this.accountStore,
       this.keyRingStore,
-      this.interactionStore
+      this.interactionStore,
+      this.contractStore
     );
 
     this.ibcCurrencyRegistrar = new IBCCurrencyRegistrar(
