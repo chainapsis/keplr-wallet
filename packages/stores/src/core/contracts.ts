@@ -4,10 +4,15 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { toGenerator } from "@keplr-wallet/common";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
+export interface ContractCodeInfo {
+  [codeId: string]: {
+    types: string[];
+    features: string[];
+  };
+}
+
 export interface ContractInfo {
   contractAddress: string;
-  types: string[];
-  features: string[];
   imageUrl?: string;
   cw20?: {
     name: string;
@@ -41,11 +46,12 @@ export interface CosmosContractInfo extends ContractInfo {
   label: string;
 }
 
-export type AppContractInfo = CosmosContractInfo | ContractInfo;
+export type AppContractInfo = CosmosContractInfo; // | ContractInfo;
 
 export interface ContractRegistryData {
   chainId: string;
   virtualMachineType: string;
+  codeIds: ContractCodeInfo;
   contracts: AppContractInfo[];
 }
 
@@ -58,6 +64,9 @@ export class ContractStore {
       isLoading: boolean;
     }
   > = new Map();
+
+  protected communityContractCodeInfo: Map<string, ContractCodeInfo> =
+    new Map();
 
   constructor(
     protected readonly communityContractInfoRepo: {
@@ -100,9 +109,17 @@ export class ContractStore {
       return { contractInfo, isLoading };
     }
 
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    const codeInfo = this.communityContractCodeInfo.get(chainIdentifier);
+
     return {
       contractInfo: contractInfo.filter(
-        (c) => c.types.includes("cw20") && c.cw20
+        (c) =>
+          c.cw20 &&
+          codeInfo &&
+          ["cw20", "snip20"].some((tokenType) =>
+            codeInfo[c.codeId.toString()]?.types.includes(tokenType)
+          )
       ),
       isLoading,
     };
@@ -120,6 +137,8 @@ export class ContractStore {
       isLoading: true,
       contractInfo: [],
     });
+
+    this.communityContractCodeInfo.set(chainIdentifier, {});
 
     try {
       const response = yield* toGenerator(
@@ -148,6 +167,11 @@ export class ContractStore {
         isLoading: false,
         contractInfo: response.data.contracts,
       });
+
+      this.communityContractCodeInfo.set(
+        chainIdentifier,
+        response.data.codeIds
+      );
     } catch (e) {
       console.log(e);
       this.communityContractInfo.set(chainIdentifier, {
