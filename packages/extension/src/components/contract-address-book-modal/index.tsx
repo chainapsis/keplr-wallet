@@ -31,6 +31,17 @@ export const ContractAddressBookModal: FunctionComponent<{
   const [search, setSearch] = useState("");
   const searchRef = useFocusOnMount<HTMLInputElement>();
 
+  const filtered = !search
+    ? contracts
+    : contracts.filter(
+        (contract) =>
+          contract.name.toLowerCase().includes(search.toLowerCase()) ||
+          contract.symbol.toLowerCase().includes(search.toLowerCase()) ||
+          contract.contractAddress
+            .toLowerCase()
+            .startsWith(search.toLowerCase())
+      );
+
   return (
     <Modal isOpen={isOpen} close={close} align="bottom">
       <Styles.Container>
@@ -58,7 +69,7 @@ export const ContractAddressBookModal: FunctionComponent<{
             overflowY: "auto",
           }}
         >
-          {contracts.map((contract) => {
+          {filtered.map((contract) => {
             return (
               <YAxis key={contract.contractAddress}>
                 <ContractAddressItem
