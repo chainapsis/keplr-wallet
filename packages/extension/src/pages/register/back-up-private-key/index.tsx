@@ -87,10 +87,10 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
         })}
         paragraph={
           <Box>
-            <FormattedMessage id="pages.register.back-up-private-key.warning-paragraph-1" />
-            <br />
-            <br />
-            <FormattedMessage id="pages.register.back-up-private-key.warning-paragraph-2" />
+            <FormattedMessage
+              id="pages.register.back-up-private-key.warning-paragraph"
+              values={{ br: <br /> }}
+            />
           </Box>
         }
       />

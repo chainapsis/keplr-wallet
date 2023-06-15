@@ -52,7 +52,7 @@ export const PinView: FunctionComponent = () => {
             </Styles.Paragraph>
             <PuzzleIcon size="1rem" />
             <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.button-text" />
+              <FormattedMessage id="pages.register.pages.welcome.pin-view.button-text-1" />
             </Styles.Paragraph>
           </Columns>
 
@@ -62,7 +62,7 @@ export const PinView: FunctionComponent = () => {
             </Styles.Paragraph>
             <PinIcon size="1rem" />
             <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.button-text" />
+              <FormattedMessage id="pages.register.pages.welcome.pin-view.button-text-2" />
             </Styles.Paragraph>
           </Columns>
         </Stack>

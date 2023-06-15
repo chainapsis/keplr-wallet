@@ -250,10 +250,10 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
           })}
           paragraph={
             <Box>
-              <FormattedMessage id="page.setting.advanced.endpoint.guide-paragraph-1" />
-              <br />
-              <br />
-              <FormattedMessage id="page.setting.advanced.endpoint.guide-paragraph-2" />
+              <FormattedMessage
+                id="page.setting.advanced.endpoint.guide-paragraph"
+                values={{ br: <br /> }}
+              />
             </Box>
           }
         />

@@ -152,7 +152,9 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
               </Subtitle3>
             </Box>
             <TextInput
-              label="Password"
+              label={intl.formatMessage({
+                id: "page.wallet.show-sensitive.password-label",
+              })}
               type="password"
               error={errors.password && errors.password.message}
               {...register("password", { required: true })}

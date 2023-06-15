@@ -17,7 +17,10 @@ export const SettingSecurityPage: FunctionComponent = () => {
   const intl = useIntl();
 
   return (
-    <HeaderLayout title="Security & Privacy" left={<BackButton />}>
+    <HeaderLayout
+      title={intl.formatMessage({ id: "page.setting.security-privacy-title" })}
+      left={<BackButton />}
+    >
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="1rem">
           <PageButton
@@ -48,8 +51,12 @@ export const SettingSecurityPage: FunctionComponent = () => {
           />
 
           <PageButton
-            title="Share anonymous data"
-            paragraph="Help us improve the performance and quality of Keplr"
+            title={intl.formatMessage({
+              id: "page.setting.security.analytics-title",
+            })}
+            paragraph={intl.formatMessage({
+              id: "page.setting.security.analytics-paragraph",
+            })}
             endIcon={
               <Box marginLeft="0.5rem">
                 <Toggle

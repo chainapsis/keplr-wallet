@@ -208,9 +208,10 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
                   <FormattedMessage id="page.setting.security.auto-lock.sleep-mode-title" />
                 </Subtitle2>
                 <Body3 color={ColorPalette["gray-200"]}>
-                  <FormattedMessage id="page.setting.security.auto-lock.sleep-mode-paragraph-1" />
-                  <br />
-                  <FormattedMessage id="page.setting.security.auto-lock.sleep-mode-paragraph-2" />
+                  <FormattedMessage
+                    id="page.setting.security.auto-lock.sleep-mode-paragraph"
+                    values={{ br: <br /> }}
+                  />
                 </Body3>
               </Stack>
             </Column>

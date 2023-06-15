@@ -249,7 +249,9 @@ export const AddressBookModal: FunctionComponent<{
                         </React.Fragment>
                       ) : null}
 
-                      <AltTypography>Other Wallets</AltTypography>
+                      <AltTypography>
+                        <FormattedMessage id="components.address-book-modal.other-wallet" />
+                      </AltTypography>
                       {otherAccounts.map((data, i) => {
                         return (
                           <AddressItem

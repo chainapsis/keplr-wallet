@@ -68,9 +68,10 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
                 id: "page.setting.general.link-keplr-mobile.confirm-title",
               }),
               <React.Fragment>
-                <FormattedMessage id="page.setting.general.link-keplr-mobile.confirm-paragraph-1" />
-                <br />
-                <FormattedMessage id="page.setting.general.link-keplr-mobile.confirm-paragraph-2" />
+                <FormattedMessage
+                  id="page.setting.general.link-keplr-mobile.confirm-paragraph"
+                  values={{ br: <br /> }}
+                />
               </React.Fragment>,
               {
                 forceYes: true,

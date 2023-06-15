@@ -364,7 +364,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <MemoInput
             memoConfig={sendConfigs.memoConfig}
-            placeholder="Required for sending to centralized exchanges"
+            placeholder={intl.formatMessage({
+              id: "page.send.amount.memo-placeholder",
+            })}
           />
 
           <Styles.Flex1 />

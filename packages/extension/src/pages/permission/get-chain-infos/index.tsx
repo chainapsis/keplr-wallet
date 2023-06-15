@@ -86,9 +86,12 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
               lineHeight: 1.215,
             }}
           >
-            <FormattedMessage id="page.permission.paragraph-1" />
-            <br />
-            <FormattedMessage id="page.permission.paragraph-2" />
+            <FormattedMessage
+              id="page.permission.paragraph"
+              values={{
+                br: <br />,
+              }}
+            />
           </Body2>
         </Box>
       </Box>
