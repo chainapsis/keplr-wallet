@@ -13,11 +13,6 @@ import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import { IAccountStore } from "../account";
 import { KeyRingStore } from "./keyring";
-import {
-  ContractStore,
-  TokenContractInfo,
-  toTokenContractInfo,
-} from "./contracts";
 
 export class TokensStore {
   @observable
@@ -37,8 +32,7 @@ export class TokensStore {
     protected readonly chainStore: IChainStore,
     protected readonly accountStore: IAccountStore,
     protected readonly keyRingStore: KeyRingStore,
-    protected readonly interactionStore: InteractionStore,
-    protected readonly contractStore: ContractStore
+    protected readonly interactionStore: InteractionStore
   ) {
     makeObservable(this);
 
@@ -177,17 +171,6 @@ export class TokensStore {
 
       return true;
     });
-  }
-
-  getPotentialTokens(chainId: string): ReadonlyArray<TokenContractInfo> {
-    const chainInfo = this.chainStore.getChain(chainId);
-    const contractData = this.contractStore.getCommunityTokenContractsInfo(
-      chainInfo.chainId
-    );
-
-    if (contractData.isLoading) return [];
-
-    return contractData.contractInfo.map(toTokenContractInfo);
   }
 
   async addToken(chainId: string, currency: AppCurrency): Promise<void> {
