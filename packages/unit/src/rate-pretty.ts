@@ -20,7 +20,7 @@ export class RatePretty {
     symbol: "%",
   };
 
-  constructor(protected amount: Dec | { toDec(): Dec } | bigInteger.BigNumber) {
+  constructor(amount: Dec | { toDec(): Dec } | bigInteger.BigNumber) {
     this.intPretty = new IntPretty(amount);
 
     this.intPretty = this.intPretty
@@ -155,7 +155,7 @@ export class RatePretty {
   }
 
   clone(): RatePretty {
-    const pretty = new RatePretty(this.amount);
+    const pretty = new RatePretty(0);
     pretty._options = {
       ...this._options,
     };
