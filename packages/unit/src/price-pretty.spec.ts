@@ -24,32 +24,6 @@ describe("Test PricePretty", () => {
     expect(pretty.mul(new Dec("0.1")).toString()).toBe("$1.21");
     expect(pretty.quo(new Dec("0.1")).toString()).toBe("$121");
 
-    expect(pretty.add(new Dec("2")).toDec().toString()).toBe(
-      pretty.add(new Dec("2")).amountToString()
-    );
-    expect(pretty.sub(new Dec("2")).toDec().toString()).toBe(
-      pretty.sub(new Dec("2")).amountToString()
-    );
-    expect(pretty.mul(new Dec("2")).toDec().toString()).toBe(
-      pretty.mul(new Dec("2")).amountToString()
-    );
-    expect(pretty.quo(new Dec("2")).toDec().toString()).toBe(
-      pretty.quo(new Dec("2")).amountToString()
-    );
-
-    expect(pretty.add(new Dec("0.01")).toDec().toString()).toBe(
-      pretty.add(new Dec("0.01")).amountToString()
-    );
-    expect(pretty.sub(new Dec("0.01")).toDec().toString()).toBe(
-      pretty.sub(new Dec("0.01")).amountToString()
-    );
-    expect(pretty.mul(new Dec("0.01")).toDec().toString()).toBe(
-      pretty.mul(new Dec("0.01")).amountToString()
-    );
-    expect(pretty.quo(new Dec("0.01")).toDec().toString()).toBe(
-      pretty.quo(new Dec("0.01")).amountToString()
-    );
-
     expect(
       new PricePretty(
         {

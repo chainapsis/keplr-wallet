@@ -24,7 +24,7 @@ export class PricePretty {
 
   constructor(
     protected _fiatCurrency: FiatCurrency,
-    protected amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
+    amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
   ) {
     this.intPretty = new IntPretty(amount)
       .maxDecimals(_fiatCurrency.maxDecimals)
@@ -153,85 +153,31 @@ export class PricePretty {
   }
 
   add(target: Dec | { toDec(): Dec }): PricePretty {
-    if (!(target instanceof Dec)) {
-      target = target.toDec();
-    }
-
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.add(target);
-
-    if (pretty.amount instanceof Dec) {
-      pretty.amount = pretty.amount.add(target);
-    } else if (typeof pretty.amount === "object" && "toDec" in pretty.amount) {
-      pretty.amount = pretty.amount.toDec().add(target);
-    } else if (!(pretty.amount instanceof Dec)) {
-      pretty.amount = new Dec(pretty.amount).add(target);
-    }
-
     return pretty;
   }
 
   sub(target: Dec | { toDec(): Dec }): PricePretty {
-    if (!(target instanceof Dec)) {
-      target = target.toDec();
-    }
-
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.sub(target);
-
-    if (pretty.amount instanceof Dec) {
-      pretty.amount = pretty.amount.sub(target);
-    } else if (typeof pretty.amount === "object" && "toDec" in pretty.amount) {
-      pretty.amount = pretty.amount.toDec().sub(target);
-    } else if (!(pretty.amount instanceof Dec)) {
-      pretty.amount = new Dec(pretty.amount).sub(target);
-    }
-
     return pretty;
   }
 
   mul(target: Dec | { toDec(): Dec }): PricePretty {
-    if (!(target instanceof Dec)) {
-      target = target.toDec();
-    }
-
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.mul(target);
-
-    if (pretty.amount instanceof Dec) {
-      pretty.amount = pretty.amount.mul(target);
-    } else if (typeof pretty.amount === "object" && "toDec" in pretty.amount) {
-      pretty.amount = pretty.amount.toDec().mul(target);
-    } else if (!(pretty.amount instanceof Dec)) {
-      pretty.amount = new Dec(pretty.amount).mul(target);
-    }
     return pretty;
   }
 
   quo(target: Dec | { toDec(): Dec }): PricePretty {
-    if (!(target instanceof Dec)) {
-      target = target.toDec();
-    }
-
     const pretty = this.clone();
     pretty.intPretty = pretty.intPretty.quo(target);
-
-    if (pretty.amount instanceof Dec) {
-      pretty.amount = pretty.amount.quo(target);
-    } else if (typeof pretty.amount === "object" && "toDec" in pretty.amount) {
-      pretty.amount = pretty.amount.toDec().quo(target);
-    } else if (!(pretty.amount instanceof Dec)) {
-      pretty.amount = new Dec(pretty.amount).quo(target);
-    }
     return pretty;
   }
 
   toDec(): Dec {
     return this.intPretty.toDec();
-  }
-
-  amountToString() {
-    return this.amount.toString();
   }
 
   toString(): string {
@@ -275,7 +221,7 @@ export class PricePretty {
   }
 
   clone(): PricePretty {
-    const pretty = new PricePretty(this._fiatCurrency, this.amount);
+    const pretty = new PricePretty(this._fiatCurrency, 0);
     pretty._options = {
       ...this._options,
     };
