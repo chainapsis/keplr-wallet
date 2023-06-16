@@ -251,10 +251,7 @@ export class RootStore {
             };
           }
 
-          if (
-            chainId.startsWith("evmos_") ||
-            chainId.startsWith("planq_")
-          ) {
+          if (chainId.startsWith("evmos_") || chainId.startsWith("planq_")) {
             return {
               send: {
                 native: {
