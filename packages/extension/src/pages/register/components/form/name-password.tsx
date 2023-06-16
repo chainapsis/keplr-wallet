@@ -8,6 +8,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { YAxis } from "../../../../components/axis";
 import { Box } from "../../../../components/box";
+import { useIntl } from "react-intl";
 
 export interface FormDataNamePassword {
   name: string;
@@ -31,6 +32,7 @@ export const FormNamePassword: FunctionComponent<
   }
 > = observer(({ children, register, formState, getValues, appendButton }) => {
   const { keyRingStore } = useStore();
+  const intl = useIntl();
 
   const needPassword = keyRingStore.keyInfos.length === 0;
 
@@ -44,38 +46,54 @@ export const FormNamePassword: FunctionComponent<
         </YAxis>
       ) : null}
       <TextInput
-        label="Wallet Name"
+        label={intl.formatMessage({
+          id: "pages.register.components.form.name-password.wallet-name-label",
+        })}
         {...register("name", {
           required: true,
         })}
-        placeholder="e.g. Trading, NFT Vault, Investment"
+        placeholder={intl.formatMessage({
+          id: "pages.register.components.form.name-password.wallet-name-placeholder",
+        })}
         error={formState.errors.name?.message}
       />
       {needPassword ? (
         <React.Fragment>
           <TextInput
-            label="Create Keplr Password"
+            label={intl.formatMessage({
+              id: "pages.register.components.form.name-password.password-label",
+            })}
             type="password"
-            placeholder="At least 8 characters in length"
+            placeholder={intl.formatMessage({
+              id: "pages.register.components.form.name-password.password-placeholder",
+            })}
             {...register("password", {
               required: true,
               validate: (password: string): string | undefined => {
                 if (password.length < 8) {
-                  return "Too short password";
+                  return intl.formatMessage({
+                    id: "pages.register.components.form.name-password.short-password-error",
+                  });
                 }
               },
             })}
             error={formState.errors.password?.message}
           />
           <TextInput
-            label="Confirm Keplr Password"
+            label={intl.formatMessage({
+              id: "pages.register.components.form.name-password.confirm-password-label",
+            })}
             type="password"
-            placeholder="At least 8 characters in length"
+            placeholder={intl.formatMessage({
+              id: "pages.register.components.form.name-password.confirm-password-placeholder",
+            })}
             {...register("confirmPassword", {
               required: true,
               validate: (confirmPassword: string): string | undefined => {
                 if (confirmPassword !== getValues("password")) {
-                  return "Password should match";
+                  return intl.formatMessage({
+                    id: "pages.register.components.form.name-password.password-not-match-error",
+                  });
                 }
               },
             })}
@@ -92,7 +110,13 @@ export const FormNamePassword: FunctionComponent<
       ) : (
         <Gutter size="2.5rem" />
       )}
-      <Button size="large" text="Next" type="submit" />
+      <Button
+        size="large"
+        text={intl.formatMessage({
+          id: "pages.register.components.form.name-password.next-button",
+        })}
+        type="submit"
+      />
       {appendButton}
     </Stack>
   );

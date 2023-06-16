@@ -12,9 +12,11 @@ import { Styles } from "./styled";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Button } from "../../../../components/button";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const WelcomePage: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
+  const intl = useIntl();
   const [isDesktop, setIsDesktop] = React.useState(true);
 
   const osmosisInfo = chainStore.chainInfos.find(
@@ -66,7 +68,7 @@ export const WelcomePage: FunctionComponent = observer(() => {
           <Columns sum={1} gutter="0.625rem">
             <CheckIcon />
             <Subtitle2 color={ColorPalette["green-400"]}>
-              You may close this page
+              <FormattedMessage id="pages.register.pages.welcome.sub-title" />
             </Subtitle2>
           </Columns>
         </Box>
@@ -80,13 +82,13 @@ export const WelcomePage: FunctionComponent = observer(() => {
                 width="31.25rem"
                 style={{ fontWeight: 600, fontSize: "3.5rem" }}
               >
-                Account Created!
+                <FormattedMessage id="pages.register.pages.welcome.title" />
               </Box>
 
               <Gutter size="2.25rem" />
 
               <Box style={{ fontWeight: 500, fontSize: "1.25rem" }}>
-                Ready to explore the Interchain?
+                <FormattedMessage id="pages.register.pages.welcome.paragraph" />
               </Box>
 
               <Gutter size="1.5rem" />
@@ -96,24 +98,36 @@ export const WelcomePage: FunctionComponent = observer(() => {
                   <Columns sum={1} gutter="0.5rem">
                     <Column weight={1}>
                       <LinkItem
-                        title="Osmosis"
-                        paragraph="Trade Tokens"
+                        title={intl.formatMessage({
+                          id: "pages.register.pages.welcome.osmosis-link.title",
+                        })}
+                        paragraph={intl.formatMessage({
+                          id: "pages.register.pages.welcome.osmosis-link.paragraph",
+                        })}
                         src={osmosisInfo?.chainSymbolImageUrl}
                         url="https://app.osmosis.zone/"
                       />
                     </Column>
                     <Column weight={1}>
                       <LinkItem
-                        title="Kado"
-                        paragraph="Buy Crypto"
+                        title={intl.formatMessage({
+                          id: "pages.register.pages.welcome.kado-link.title",
+                        })}
+                        paragraph={intl.formatMessage({
+                          id: "pages.register.pages.welcome.kado-link.paragraph",
+                        })}
                         src={require("../../../../public/assets/img/fiat-on-ramp/kado.svg")}
                         url="https://www.kado.money/"
                       />
                     </Column>
                     <Column weight={1}>
                       <LinkItem
-                        title="Stargaze"
-                        paragraph="Buy & Mint NFTs"
+                        title={intl.formatMessage({
+                          id: "pages.register.pages.welcome.stargaze-link.title",
+                        })}
+                        paragraph={intl.formatMessage({
+                          id: "pages.register.pages.welcome.stargaze-link.paragraph",
+                        })}
                         src={stargazeInfo?.chainSymbolImageUrl}
                         url="https://www.stargaze.zone/"
                       />
@@ -123,16 +137,24 @@ export const WelcomePage: FunctionComponent = observer(() => {
                   <Columns sum={1} gutter="0.5rem">
                     <Column weight={1}>
                       <LinkItem
-                        title="Keplr Dashboard"
-                        paragraph="Manage Portfolio and Stake Assets"
+                        title={intl.formatMessage({
+                          id: "pages.register.pages.welcome.dashboard-link.title",
+                        })}
+                        paragraph={intl.formatMessage({
+                          id: "pages.register.pages.welcome.dashboard-link.paragraph",
+                        })}
                         src={require("../../../../public/assets/logo-256.png")}
                         url="https://wallet.keplr.app/"
                       />
                     </Column>
                     <Column weight={1}>
                       <LinkItem
-                        title="Interchain Name Service (ICNS)"
-                        paragraph="Simplify Your Crypto Address"
+                        title={intl.formatMessage({
+                          id: "pages.register.pages.welcome.icns-link.title",
+                        })}
+                        paragraph={intl.formatMessage({
+                          id: "pages.register.pages.welcome.icns-link.paragraph",
+                        })}
                         src={require("../../../../public/assets/icns-logo.png")}
                         url="https://icns.xyz/"
                       />
@@ -150,7 +172,9 @@ export const WelcomePage: FunctionComponent = observer(() => {
 
         <XAxis alignY="center">
           <Button
-            text="Finish"
+            text={intl.formatMessage({
+              id: "pages.register.pages.welcome.finish-button",
+            })}
             size="large"
             style={{ width: "10rem" }}
             onClick={() => {
@@ -187,7 +211,7 @@ export const WelcomePage: FunctionComponent = observer(() => {
                   fontSize: "0.875rem",
                 }}
               >
-                Follow Keplr on Twitter
+                <FormattedMessage id="pages.register.pages.welcome.follow-twitter.title" />
               </Box>
 
               <Gutter size="1rem" />
@@ -200,7 +224,7 @@ export const WelcomePage: FunctionComponent = observer(() => {
                   color: ColorPalette["gray-200"],
                 }}
               >
-                For all important information and updates on Keplr.
+                <FormattedMessage id="pages.register.pages.welcome.follow-twitter.paragraph" />
               </Box>
             </XAxis>
           </Box>

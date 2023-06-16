@@ -7,6 +7,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Dec } from "@keplr-wallet/unit";
 import { Skeleton } from "../../../../components/skeleton";
+import { useIntl } from "react-intl";
 
 export const Buttons: FunctionComponent<{
   onClickDeposit: () => void;
@@ -15,6 +16,7 @@ export const Buttons: FunctionComponent<{
 }> = observer(({ onClickDeposit, onClickBuy, isNotReady }) => {
   const { hugeQueriesStore } = useStore();
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const balances = hugeQueriesStore.getAllBalances(true);
   const hasBalance = useMemo(() => {
@@ -26,20 +28,34 @@ export const Buttons: FunctionComponent<{
       <Columns sum={1} gutter="0.625rem">
         <Column weight={1}>
           <Skeleton type="button" isNotReady={isNotReady}>
-            <Button text="Deposit" color="secondary" onClick={onClickDeposit} />
-          </Skeleton>
-        </Column>
-
-        <Column weight={1}>
-          <Skeleton type="button" isNotReady={isNotReady}>
-            <Button text="Buy" color="secondary" onClick={onClickBuy} />
+            <Button
+              text={intl.formatMessage({
+                id: "page.main.components.buttons.deposit-button",
+              })}
+              color="secondary"
+              onClick={onClickDeposit}
+            />
           </Skeleton>
         </Column>
 
         <Column weight={1}>
           <Skeleton type="button" isNotReady={isNotReady}>
             <Button
-              text="Send"
+              text={intl.formatMessage({
+                id: "page.main.components.buttons.buy-button",
+              })}
+              color="secondary"
+              onClick={onClickBuy}
+            />
+          </Skeleton>
+        </Column>
+
+        <Column weight={1}>
+          <Skeleton type="button" isNotReady={isNotReady}>
+            <Button
+              text={intl.formatMessage({
+                id: "page.main.components.buttons.send-button",
+              })}
               disabled={!hasBalance}
               onClick={() => navigate("/send/select-asset")}
             />

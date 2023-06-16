@@ -8,6 +8,7 @@ import { MsgBeginRedelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1b
 import { Coin } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Image } from "../../../../../components/image";
+import { FormattedMessage } from "react-intl";
 
 export const RedelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -43,7 +44,9 @@ export const RedelegateMessage: IMessageRenderer = {
             style={{ width: "3rem", height: "3rem" }}
           />
         ),
-        title: "Redelegate",
+        title: (
+          <FormattedMessage id="page.sign.components.messages.redelegate.title" />
+        ),
         content: (
           <RedelegateMessagePretty
             chainId={chainId}
@@ -83,14 +86,19 @@ const RedelegateMessagePretty: FunctionComponent<{
 
     return (
       <React.Fragment>
-        Redelegate <b>{coinPretty.trim(true).toString()}</b> from{" "}
-        <b>
-          {srcMoniker || Bech32Address.shortenAddress(validatorSrcAddress, 28)}
-        </b>{" "}
-        to{" "}
-        <b>
-          {sdstMoniker || Bech32Address.shortenAddress(validatorDstAddress, 28)}
-        </b>
+        <FormattedMessage
+          id="page.sign.components.messages.redelegate.paragraph"
+          values={{
+            coin: coinPretty.trim(true).toString(),
+            from:
+              srcMoniker ||
+              Bech32Address.shortenAddress(validatorSrcAddress, 28),
+            to:
+              sdstMoniker ||
+              Bech32Address.shortenAddress(validatorDstAddress, 28),
+            b: (...chunks: any) => <b>{chunks}</b>,
+          }}
+        />
       </React.Fragment>
     );
   }

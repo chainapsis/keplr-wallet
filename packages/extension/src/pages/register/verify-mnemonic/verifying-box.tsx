@@ -8,6 +8,7 @@ import { XAxis, YAxis } from "../../../components/axis";
 import { ColorPalette } from "../../../styles";
 import styled from "styled-components";
 import { Gutter } from "../../../components/gutter";
+import { FormattedMessage } from "react-intl";
 
 const Styles = {
   IndexText: styled.div`
@@ -75,9 +76,12 @@ export const VerifyingMnemonicBox = forwardRef<
             return (
               <React.Fragment key={word.index}>
                 <XAxis alignY="center">
-                  <Styles.IndexText>{`Word #${
-                    word.index + 1
-                  }.`}</Styles.IndexText>
+                  <Styles.IndexText>
+                    <FormattedMessage
+                      id="pages.register.verify-mnemonic.verifying-box.word"
+                      values={{ index: word.index + 1 }}
+                    />
+                  </Styles.IndexText>
                   <VerifyingWordInput
                     value={inputs[word.index] ?? ""}
                     onChange={(e) => {

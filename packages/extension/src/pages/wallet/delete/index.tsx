@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import lottie from "lottie-web";
 import AnimSeed from "../../../public/assets/lottie/wallet/delete.json";
 import { YAxis } from "../../../components/axis";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -45,6 +46,7 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const vaultId = searchParams.get("id");
 
@@ -82,11 +84,13 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Delete Wallet"
+      title={intl.formatMessage({
+        id: "page.wallet.keyring-item.dropdown.delete-wallet-title",
+      })}
       fixedHeight={true}
       left={<BackButton />}
       bottomButton={{
-        text: "Confirm",
+        text: intl.formatMessage({ id: "page.wallet.delete.confirm-button" }),
         color: "secondary",
         size: "large",
         type: "submit",
@@ -102,7 +106,7 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
           console.log("Fail to decrypt: " + e.message);
           setError("password", {
             type: "custom",
-            message: "Invalid password",
+            message: intl.formatMessage({ id: "error.invalid-password" }),
           });
         }
       })}
@@ -120,11 +124,17 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
             return (
               <GuideBox
                 color="warning"
-                title="Alert"
-                paragraph="Make sure that you’ve backed up your recovery phrase and private key."
+                title={intl.formatMessage({
+                  id: "page.wallet.delete.warning-title",
+                })}
+                paragraph={intl.formatMessage({
+                  id: "page.wallet.delete.warning-paragraph",
+                })}
                 bottom={
                   <Link to={`/wallet/show-sensitive?id=${keyInfo.id}`}>
-                    <Styles.BackUp>Back Up My Wallet</Styles.BackUp>
+                    <Styles.BackUp>
+                      <FormattedMessage id="page.wallet.delete.warning-link-text" />
+                    </Styles.BackUp>
                   </Link>
                 }
               />
@@ -145,14 +155,15 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
         </YAxis>
 
         <Styles.Paragraph>
-          After deletion, you will be required to import your wallet to restore
-          your access to it.
+          <FormattedMessage id="page.wallet.delete.paragraph" />
         </Styles.Paragraph>
 
         <Styles.Flex1 />
 
         <TextInput
-          label="Password"
+          label={intl.formatMessage({
+            id: "page.wallet.delete.password-input-label",
+          })}
           type="password"
           error={errors.password && errors.password.message}
           {...register("password", { required: true })}

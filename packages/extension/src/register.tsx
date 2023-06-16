@@ -42,21 +42,22 @@ const App: FunctionComponent = () => {
 
   return (
     <StoreProvider>
-      <ModalRootProvider>
-        <ConfirmProvider>
-          <GlobalStyle />
-          <ScrollBarStyle />
-          <AutoLockMonitor />
-          <AppIntlProvider>
+      <AppIntlProvider>
+        <ModalRootProvider>
+          <ConfirmProvider>
+            <GlobalStyle />
+            <ScrollBarStyle />
+            <AutoLockMonitor />
+
             <HashRouter>
               <Routes>
                 <Route path="/" element={<RegisterPage />} />
                 <Route path="/welcome" element={<WelcomePage />} />
               </Routes>
             </HashRouter>
-          </AppIntlProvider>
-        </ConfirmProvider>
-      </ModalRootProvider>
+          </ConfirmProvider>
+        </ModalRootProvider>
+      </AppIntlProvider>
     </StoreProvider>
   );
 };

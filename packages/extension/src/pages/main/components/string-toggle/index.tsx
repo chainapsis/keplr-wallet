@@ -5,6 +5,7 @@ import { ColorPalette } from "../../../../styles";
 import { Caption1, Caption2 } from "../../../../components/typography";
 import { Skeleton } from "../../../../components/skeleton";
 import { useStore } from "../../../../stores";
+import { FormattedMessage } from "react-intl";
 
 export const StringToggleRadius = "12rem";
 
@@ -78,15 +79,23 @@ export const StringToggle: FunctionComponent<{
         <Skeleton type="stringToggle" isNotReady={isNotReady}>
           <Styles.Container>
             <Skeleton type="stringToggle" layer={1} isNotReady={isNotReady}>
-              <Styles.Selected>Available</Styles.Selected>
+              <Styles.Selected>
+                <FormattedMessage id="page.main.components.string-toggle.available-tab" />
+              </Styles.Selected>
             </Skeleton>
-            <Styles.UnSelected onClick={onClickTab}>Staked</Styles.UnSelected>
+            <Styles.UnSelected onClick={onClickTab}>
+              <FormattedMessage id="page.main.components.string-toggle.staked-tab" />
+            </Styles.UnSelected>
           </Styles.Container>
         </Skeleton>
       ) : (
         <Styles.Container>
-          <Styles.UnSelected onClick={onClickTab}>Available</Styles.UnSelected>
-          <Styles.Selected>Staked</Styles.Selected>
+          <Styles.UnSelected onClick={onClickTab}>
+            <FormattedMessage id="page.main.components.string-toggle.available-tab" />
+          </Styles.UnSelected>
+          <Styles.Selected>
+            <FormattedMessage id="page.main.components.string-toggle.staked-tab" />
+          </Styles.Selected>
         </Styles.Container>
       )}
     </Columns>

@@ -32,6 +32,7 @@ import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SendTxAndRecordMsg } from "@keplr-wallet/background";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
 
 const Styles = {
@@ -47,6 +48,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const notification = useNotification();
+  const intl = useIntl();
 
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -126,7 +128,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     gasSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
-        throw new Error("Send currency not set");
+        throw new Error(
+          intl.formatMessage({ id: "error.send-currency-not-set" })
+        );
       }
 
       // Prefer not to use the gas config or fee config,
@@ -140,7 +144,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           "loading-block" ||
         sendConfigs.recipientConfig.uiProperties.error != null
       ) {
-        throw new Error("Not ready to simulate tx");
+        throw new Error(
+          intl.formatMessage({ id: "error.not-ready-to-simulate-tx" })
+        );
       }
 
       const denomHelper = new DenomHelper(
@@ -148,7 +154,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       );
       // I don't know why, but simulation does not work for secret20
       if (denomHelper.type === "secret20") {
-        throw new Error("Simulating secret wasm not supported");
+        throw new Error(
+          intl.formatMessage({
+            id: "error.simulating-secret-wasm-not-supported",
+          })
+        );
       }
 
       return account.makeSendTokenTx(
@@ -168,7 +178,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         .type === "secret20"
     ) {
       gasSimulator.forceDisable(
-        new Error("Simulating secret20 is not supported")
+        new Error(
+          intl.formatMessage({ id: "error.simulating-secret-20-not-supported" })
+        )
       );
       sendConfigs.gasConfig.setValue(
         // TODO: 이 값을 config 밑으로 빼자
@@ -196,7 +208,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Send"
+      title={intl.formatMessage({ id: "page.send.amount.title" })}
       left={<BackButton />}
       right={
         !isDetachedMode ? (
@@ -219,7 +231,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButton={{
         disabled: txConfigsValidate.interactionBlocked,
-        text: "Next",
+        text: intl.formatMessage({ id: "page.send.amount.next-button" }),
         color: "primary",
         size: "large",
         isLoading: accountStore.getAccount(chainId).isSendingMsg === "send",
@@ -280,10 +292,20 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx.log ?? tx.raw_log);
-                      notification.show("failed", "Transaction Failed", "");
+                      notification.show(
+                        "failed",
+                        intl.formatMessage({ id: "error.transaction-failed" }),
+                        ""
+                      );
                       return;
                     }
-                    notification.show("success", "Transaction Success", "");
+                    notification.show(
+                      "success",
+                      intl.formatMessage({
+                        id: "page.send.amount.transaction-success",
+                      }),
+                      ""
+                    );
                   },
                 }
               );
@@ -301,7 +323,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             }
 
             console.log(e);
-            notification.show("failed", "Transaction Failed", "");
+            notification.show(
+              "failed",
+              intl.formatMessage({ id: "error.transaction-failed" }),
+              ""
+            );
             if (!isDetachedMode) {
               navigate("/", {
                 replace: true,
@@ -317,7 +343,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       <Box paddingX="0.75rem" paddingBottom="0.75rem">
         <Stack gutter="0.75rem">
           <YAxis>
-            <Subtitle3>Asset</Subtitle3>
+            <Subtitle3>
+              <FormattedMessage id="page.send.amount.asset-title" />
+            </Subtitle3>
             <Gutter size="0.375rem" />
             <TokenItem
               viewToken={{
@@ -342,7 +370,9 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
           <MemoInput
             memoConfig={sendConfigs.memoConfig}
-            placeholder="Required for sending to centralized exchanges"
+            placeholder={intl.formatMessage({
+              id: "page.send.amount.memo-placeholder",
+            })}
           />
 
           <Styles.Flex1 />

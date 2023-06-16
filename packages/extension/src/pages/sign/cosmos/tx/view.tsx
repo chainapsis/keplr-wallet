@@ -34,6 +34,7 @@ import { ErrModuleLedgerSign } from "../../utils/ledger-types";
 import { LedgerGuideBox } from "../../components/ledger-guide-box";
 import { Gutter } from "../../../../components/gutter";
 import { GuideBox } from "../../../../components/guide-box";
+import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 
 /**
@@ -52,6 +53,8 @@ export const CosmosTxView: FunctionComponent<{
 }> = observer(({ interactionData }) => {
   const { chainStore, queriesStore, signInteractionStore, uiConfigStore } =
     useStore();
+
+  const intl = useIntl();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -84,7 +87,7 @@ export const CosmosTxView: FunctionComponent<{
     const data = interactionData;
     if (data.data.chainId !== data.data.signDocWrapper.chainId) {
       // Validate the requested chain id and the chain id in the sign doc are same.
-      throw new Error("Chain id unmatched");
+      throw new Error(intl.formatMessage({ id: "error.chain-id-unmatched" }));
     }
     signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
     gasConfig.setValue(data.data.signDocWrapper.gas);
@@ -263,7 +266,7 @@ export const CosmosTxView: FunctionComponent<{
 
   return (
     <HeaderLayout
-      title="Confirm Transaction"
+      title={intl.formatMessage({ id: "page.sign.cosmos.tx.title" })}
       fixedHeight={true}
       left={
         <BackButton
@@ -275,7 +278,7 @@ export const CosmosTxView: FunctionComponent<{
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButton={{
         isSpecial: true,
-        text: "Approve",
+        text: intl.formatMessage({ id: "page.sign.cosmos.tx.approve-button" }),
         size: "large",
         disabled: buttonDisabled,
         isLoading:
@@ -313,7 +316,7 @@ export const CosmosTxView: FunctionComponent<{
                   color: ColorPalette["gray-50"],
                 }}
               >
-                Messages
+                <FormattedMessage id="page.sign.cosmos.tx.messages" />
               </H5>
             </XAxis>
             <Column weight={1} />
@@ -402,8 +405,12 @@ export const CosmosTxView: FunctionComponent<{
             <Gutter size="0.75rem" />
             <GuideBox
               color="warning"
-              title="Incompatible Signing Requested"
-              paragraph="Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue."
+              title={intl.formatMessage({
+                id: "page.sign.cosmos.tx.warning-title",
+              })}
+              paragraph={intl.formatMessage({
+                id: "page.sign.cosmos.tx.warning-paragraph",
+              })}
             />
           </React.Fragment>
         ) : null}
@@ -446,7 +453,9 @@ const ReadonlyMemo: FunctionComponent<{
             textOverflow: "ellipsis",
           }}
         >
-          {memo || "(Empty)"}
+          {memo || (
+            <FormattedMessage id="page.sign.cosmos.tx.readonly-memo.empty" />
+          )}
         </Subtitle3>
       </XAxis>
     </Box>

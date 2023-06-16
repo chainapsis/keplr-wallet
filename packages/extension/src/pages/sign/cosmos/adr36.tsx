@@ -16,10 +16,12 @@ import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Image } from "../../../components/image";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
+  const intl = useIntl();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -31,7 +33,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     signInteractionStore.waitingData &&
     !signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc
   ) {
-    throw new Error("Sign doc is not for adr36");
+    throw new Error(
+      intl.formatMessage({ id: "error.sign-doc-is-not-for-adr36" })
+    );
   }
 
   const signDocWrapper = signInteractionStore.waitingData?.data.signDocWrapper;
@@ -53,12 +57,16 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     }
 
     if (signDocWrapper.aminoSignDoc.msgs.length !== 1) {
-      throw new Error("Sign doc is improper ADR-36");
+      throw new Error(
+        intl.formatMessage({ id: "error.sign-doc-is-improper-adr36" })
+      );
     }
 
     const msg = signDocWrapper.aminoSignDoc.msgs[0];
     if (msg.type !== "sign/MsgSignData") {
-      throw new Error("Sign doc is improper ADR-36");
+      throw new Error(
+        intl.formatMessage({ id: "error.sign-doc-is-improper-adr36" })
+      );
     }
 
     if (isADR36WithString) {
@@ -86,7 +94,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Prove Ownership"
+      title={intl.formatMessage({ id: "page.sign.adr36.title" })}
       fixedHeight={true}
       left={
         <BackButton
@@ -96,7 +104,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         />
       }
       bottomButton={{
-        text: "Approve",
+        text: intl.formatMessage({ id: "page.sign.adr36.approve-button" }),
         color: "primary",
         size: "large",
         disabled: signInteractionStore.waitingData == null,
@@ -118,7 +126,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 ).bech32Config.bech32PrefixAccAddr
               )
             ) {
-              throw new Error("Invalid sign doc for adr36");
+              throw new Error(
+                intl.formatMessage({ id: "error.invalid-sign-doc-for-adr36" })
+              );
             }
 
             if (signInteractionStore.waitingData.data.keyType === "ledger") {
@@ -206,7 +216,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             <Gutter size="0.75rem" />
             <YAxis>
               <H5 color={ColorPalette["gray-10"]}>
-                Prove account ownership to
+                <FormattedMessage id="Prove account ownership to" />
               </H5>
               <Gutter size="2px" />
               <Body3 color={ColorPalette["gray-200"]}>
@@ -252,7 +262,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           borderRadius="0.375rem"
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-200"]}>Requested Network</Body2>
+            <Body2 color={ColorPalette["gray-200"]}>
+              <FormattedMessage id="page.sign.adr36.requested-network" />
+            </Body2>
             <div style={{ flex: 1 }} />
             <Subtitle3 color={ColorPalette["gray-50"]}>
               {signInteractionStore.waitingData?.data.chainId
@@ -269,8 +281,12 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             <Gutter size="0.75rem" />
             <GuideBox
               color="warning"
-              title="Incompatible Signing Requested"
-              paragraph="Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue."
+              title={intl.formatMessage({
+                id: "page.sign.adr36.warning-title",
+              })}
+              paragraph={intl.formatMessage({
+                id: "page.sign.adr36.warning-paragraph",
+              })}
             />
           </React.Fragment>
         ) : null}

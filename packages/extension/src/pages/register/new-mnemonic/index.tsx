@@ -23,16 +23,19 @@ import { HorizontalRadioGroup } from "../../../components/radio-group";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 import { WarningBox } from "../../../components/warning-box";
 import { CopyToClipboard } from "../components/copy-to-clipboard";
+import { useIntl } from "react-intl";
 
 type WordsType = "12words" | "24words";
 
 export const NewMnemonicScene: FunctionComponent = observer(() => {
+  const intl = useIntl();
+
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "New Recovery Phrase",
+        title: intl.formatMessage({ id: "pages.register.new-mnemonic.title" }),
         stepCurrent: 1,
         stepTotal: 3,
       });
@@ -95,7 +98,12 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
     } else if (wordsType === "24words") {
       Mnemonic.generateSeed(rng, 256).then((str) => setWords(str.split(" ")));
     } else {
-      throw new Error(`Unknown words type: ${wordsType}`);
+      throw new Error(
+        intl.formatMessage(
+          { id: "error.unknown-word-type" },
+          { type: wordsType }
+        )
+      );
     }
   }, [wordsType]);
 
@@ -123,11 +131,15 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
             items={[
               {
                 key: "12words",
-                text: "12 words",
+                text: intl.formatMessage({
+                  id: "pages.register.new-mnemonic.12-words-tab",
+                }),
               },
               {
                 key: "24words",
-                text: "24 words",
+                text: intl.formatMessage({
+                  id: "pages.register.new-mnemonic.24-words-tab",
+                }),
               },
             ]}
             itemMinWidth="6.25rem"
@@ -157,13 +169,21 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
 
       <Box>
         <WarningBox
-          title="DO NOT share your recovery phrase with ANYONE."
-          paragraph="Anyone with your recovery phrase can take your assets. Please stay vigilant against phishing attacks at all times."
+          title={intl.formatMessage({
+            id: "pages.register.new-mnemonic.recovery-warning-box-title",
+          })}
+          paragraph={intl.formatMessage({
+            id: "pages.register.new-mnemonic.recovery-warning-box-paragraph",
+          })}
         />
 
         <WarningBox
-          title="Back up the phrase safely."
-          paragraph="You will lose your assets if you lose your recovery phrase. We recommend you always store it offline. Keplr does not store your recovery phrase."
+          title={intl.formatMessage({
+            id: "pages.register.new-mnemonic.back-up-warning-box-title",
+          })}
+          paragraph={intl.formatMessage({
+            id: "pages.register.new-mnemonic.back-up-warning-box-paragraph",
+          })}
         />
       </Box>
 
@@ -175,7 +195,9 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
             <Button
               size="small"
               color="secondary"
-              text="Advanced"
+              text={intl.formatMessage({
+                id: "pages.register.new-mnemonic.advanced-button",
+              })}
               disabled={!policyVerified}
               onClick={() => {
                 setIsBIP44CardOpen(true);
@@ -196,7 +218,9 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
       <Box width="22.5rem" marginX="auto">
         {policyVerified ? (
           <Button
-            text="Next"
+            text={intl.formatMessage({
+              id: "pages.register.new-mnemonic.next-button",
+            })}
             size="large"
             onClick={() => {
               if (words.join(" ").trim() !== "") {
@@ -211,7 +235,9 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
           />
         ) : (
           <Button
-            text={`I understood. Show my phrase.${
+            text={`${intl.formatMessage({
+              id: "pages.register.new-mnemonic.agree-button",
+            })} ${
               policyDelayRemaining > 0
                 ? ` (${Math.ceil(policyDelayRemaining / 1000)})`
                 : ""

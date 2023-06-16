@@ -13,6 +13,7 @@ import { Body2, Body3, Button1 } from "../../typography";
 import { ColorPalette } from "../../../styles";
 import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
 import { Columns } from "../../column";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
@@ -26,6 +27,7 @@ export const AmountInput: FunctionComponent<{
   }
 
   const { chainStore, priceStore } = useStore();
+  const intl = useIntl();
 
   const price = (() => {
     return priceStore.calculatePrice(amountConfig.amount[0]);
@@ -46,7 +48,9 @@ export const AmountInput: FunctionComponent<{
   return (
     <TextInput
       ref={inputRef}
-      label="Amount"
+      label={intl.formatMessage({
+        id: "components.input.amount-input.amount-label",
+      })}
       type="number"
       value={(() => {
         if (isPriceBased) {
@@ -329,7 +333,9 @@ const MaxButton: FunctionComponent<{
         }
       }}
     >
-      <Button1>max</Button1>
+      <Button1>
+        <FormattedMessage id="components.input.amount-input.max-button" />
+      </Button1>
     </Box>
   );
 });
