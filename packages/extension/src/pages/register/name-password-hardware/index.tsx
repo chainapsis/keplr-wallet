@@ -71,6 +71,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               })}
             />
           }
+          autoFocus={true}
         >
           <Gutter size="1.625rem" />
           <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
