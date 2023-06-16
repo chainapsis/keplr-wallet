@@ -8,7 +8,6 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { Coin } from "@keplr-wallet/types";
 import { Image } from "../../../../../components/image";
-import { FormattedMessage } from "react-intl";
 
 export const SendMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -39,9 +38,7 @@ export const SendMessage: IMessageRenderer = {
             style={{ width: "3rem", height: "3rem" }}
           />
         ),
-        title: (
-          <FormattedMessage id="page.sign.components.messages.send.title" />
-        ),
+        title: "Send",
         content: (
           <SendMessagePretty
             chainId={chainId}
@@ -68,19 +65,15 @@ const SendMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <FormattedMessage
-        id="page.sign.components.messages.send.paragraph"
-        values={{
-          address: Bech32Address.shortenAddress(toAddress, 20),
-          amount: coins
-            .map((coinPretty) => {
-              return coinPretty.trim(true).toString();
-            })
-            .join(", "),
-          b: (...chunks: any) => <b>{chunks}</b>,
-          br: <br />,
-        }}
-      />
+      <b>{Bech32Address.shortenAddress(toAddress, 20)}</b> will receive
+      <br />
+      <b>
+        {coins
+          .map((coinPretty) => {
+            return coinPretty.trim(true).toString();
+          })
+          .join(", ")}
+      </b>
     </React.Fragment>
   );
 });

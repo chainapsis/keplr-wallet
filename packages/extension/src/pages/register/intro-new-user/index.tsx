@@ -17,23 +17,17 @@ import { RegisterH4 } from "../components/typography";
 import { TextButton } from "../../../components/button-text";
 import { GoogleIcon, KeyIcon } from "../../../components/icon";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const RegisterIntroNewUserScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
-  const intl = useIntl();
 
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "welcome",
-        title: intl.formatMessage({
-          id: "pages.register.intro-new-user.title",
-        }),
-        paragraph: intl.formatMessage({
-          id: "pages.register.intro-new-user.paragraph",
-        }),
+        title: "Welcome to Keplr",
+        paragraph: "Select how you want to create your wallet",
       });
     },
   });
@@ -44,22 +38,20 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
         <Column weight={1}>
           <Box minHeight="15.625rem">
             <RegisterH4 color={ColorPalette["gray-50"]}>
-              <FormattedMessage id="pages.register.intro-new-user.recovery-path-title" />
+              Use Recovery Phrase
             </RegisterH4>
 
             <Gutter size="0.5rem" />
 
             <Subtitle3 color={ColorPalette["gray-200"]}>
-              <FormattedMessage id="pages.register.intro-new-user.recovery-path-paragraph" />
+              Maximum control & high compatibility across all wallets
             </Subtitle3>
 
             <Gutter size="1.5rem" />
 
             <Stack gutter="0.625rem">
               <Button
-                text={intl.formatMessage({
-                  id: "pages.register.intro-new-user.new-recovery-path-button",
-                })}
+                text="Create new recovery phrase"
                 left={
                   <KeyIcon
                     width="1rem"
@@ -73,9 +65,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
                 }}
               />
               <TextButton
-                text={intl.formatMessage({
-                  id: "pages.register.intro-new-user.import-recovery-path-button",
-                })}
+                text="Import existing recovery phrase"
                 size="large"
                 onClick={() => {
                   sceneTransition.replace("existing-user");
@@ -93,7 +83,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
               </XAxis>
 
               <Caption1 color={ColorPalette["gray-200"]}>
-                <FormattedMessage id="pages.register.intro-new-user.high-security-text" />
+                Higher Security
               </Caption1>
             </Columns>
           </Box>
@@ -102,11 +92,11 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
         <Column weight={1}>
           <Box height="100%">
             <RegisterH4 color={ColorPalette["gray-50"]}>
-              <FormattedMessage id="pages.register.intro-new-user.sign-up-social-title" />
+              Sign-up with Google
             </RegisterH4>
             <Gutter size="0.5rem" />
             <Subtitle3 color={ColorPalette["gray-200"]}>
-              <FormattedMessage id="pages.register.intro-new-user.sign-up-social-paragraph" />
+              Simple & easy registration
               <br />
               <br />
             </Subtitle3>
@@ -114,9 +104,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
 
             <Stack gutter="0.625rem">
               <Button
-                text={intl.formatMessage({
-                  id: "pages.register.intro-new-user.sign-up-google-button",
-                })}
+                text="Connect with Google"
                 size="large"
                 color="secondary"
                 left={<GoogleIcon />}
@@ -124,9 +112,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
                   if (KeplrWalletPrivate.onGoogleSignInClick) {
                     KeplrWalletPrivate.onGoogleSignInClick(sceneTransition);
                   } else {
-                    alert(
-                      intl.formatMessage({ id: "error.not-supported-error" })
-                    );
+                    alert("Not supported");
                   }
                 }}
               />
@@ -142,7 +128,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
               </XAxis>
 
               <Caption1 color={ColorPalette["gray-200"]}>
-                <FormattedMessage id="pages.register.intro-new-user.more-convenience-text" />
+                More Convenience
               </Caption1>
             </Columns>
           </Box>

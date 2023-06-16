@@ -37,7 +37,6 @@ import { YAxis } from "../../../../components/axis";
 import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
 import { Gutter } from "../../../../components/gutter";
-import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -113,7 +112,6 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       priceStore,
       keyRingStore,
     } = useStore();
-    const intl = useIntl();
 
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -271,11 +269,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
               if (!balance) {
                 state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.can-not-find-balance-for-fee-currency",
-                    })
-                  )
+                  new Error("Can't find balance for fee currency")
                 );
                 return;
               }
@@ -286,11 +280,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 new Dec(balance.balance.toCoin().amount).lt(new Dec(fee.amount))
               ) {
                 state.setFailedReason(
-                  new Error(
-                    intl.formatMessage({
-                      id: "error.not-enough-balance-to-pay-fee",
-                    })
-                  )
+                  new Error("Not enough balance to pay fee")
                 );
                 return;
               }
@@ -308,9 +298,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 );
                 state.setFailedReason(
                   new Error(
-                    intl.formatMessage({
-                      id: "error.claimable-reward-is-smaller-than-the-required-fee",
-                    })
+                    "Your claimable reward is smaller than the required fee."
                   )
                 );
                 return;
@@ -395,11 +383,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             }
           } else {
             state.setFailedReason(
-              new Error(
-                intl.formatMessage({
-                  id: "error.can-not-pay-for-fee-by-stake-currency",
-                })
-              )
+              new Error("Can't pay for fee by stake currency")
             );
             return;
           }
@@ -453,7 +437,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
               <YAxis alignX="left">
                 <Skeleton layer={1} isNotReady={isNotReady}>
                   <Body2 style={{ color: ColorPalette["gray-300"] }}>
-                    <FormattedMessage id="page.main.components.claim-all.title" />
+                    Unclaimed Staking Reward
                   </Body2>
                 </Skeleton>
               </YAxis>
@@ -480,9 +464,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                */}
               {isLedger ? (
                 <Button
-                  text={intl.formatMessage({
-                    id: "page.main.components.claim-all.button",
-                  })}
+                  text="Claim All"
                   size="small"
                   isLoading={claimAllIsLoading}
                   disabled={claimAllDisabled}
@@ -490,9 +472,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 />
               ) : (
                 <SpecialButton
-                  text={intl.formatMessage({
-                    id: "page.main.components.claim-all.button",
-                  })}
+                  text="Claim All"
                   size="small"
                   isLoading={claimAllIsLoading}
                   disabled={claimAllDisabled}
@@ -566,7 +546,6 @@ const ClaimTokenItem: FunctionComponent<{
 }> = observer(({ viewToken, state, itemsLength }) => {
   const { analyticsStore, accountStore, queriesStore } = useStore();
 
-  const intl = useIntl();
   const navigate = useNavigate();
   const notification = useNotification();
 
@@ -636,20 +615,10 @@ const ClaimTokenItem: FunctionComponent<{
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {
               console.log(tx.log ?? tx.raw_log);
-              notification.show(
-                "failed",
-                intl.formatMessage({ id: "error.transaction-failed" }),
-                ""
-              );
+              notification.show("failed", "Transaction Failed", "");
               return;
             }
-            notification.show(
-              "success",
-              intl.formatMessage({
-                id: "page.main.components.claim-all.transaction-success",
-              }),
-              ""
-            );
+            notification.show("success", "Transaction Success", "");
           },
         }
       );
@@ -663,11 +632,7 @@ const ClaimTokenItem: FunctionComponent<{
       }
 
       console.log(e);
-      notification.show(
-        "failed",
-        intl.formatMessage({ id: "error.transaction-failed" }),
-        ""
-      );
+      notification.show("failed", "Transaction Failed", "");
       navigate("/", {
         replace: true,
       });
@@ -723,9 +688,7 @@ const ClaimTokenItem: FunctionComponent<{
           allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
         >
           <Button
-            text={intl.formatMessage({
-              id: "page.main.components.claim-all.claim-button",
-            })}
+            text="Claim"
             size="small"
             color="secondary"
             isLoading={isLoading}

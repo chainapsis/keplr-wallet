@@ -6,26 +6,23 @@ import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { PageButton } from "../../components";
 import { CheckIcon } from "../../../../components/icon";
-import { useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { useLanguage } from "../../../../languages";
 import { useNavigate } from "react-router";
 
 export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
   const language = useLanguage();
   const navigate = useNavigate();
-  const intl = useIntl();
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.general.language-title" })}
+      title={<FormattedMessage id="setting.language" />}
       left={<BackButton />}
     >
       <Box paddingX="0.75rem" paddingBottom="0.75rem">
         <Stack gutter="0.5rem">
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.general.language.automatic-title",
-            })}
+            title="Automatic (Browser default)"
             endIcon={
               language.automatic ? (
                 <CheckIcon width="1.25rem" height="1.25rem" />
@@ -37,9 +34,7 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
             }}
           />
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.general.language.english-title",
-            })}
+            title="English"
             endIcon={
               !language.automatic && language.language === "en" ? (
                 <CheckIcon width="1.25rem" height="1.25rem" />
@@ -51,9 +46,7 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
             }}
           />
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.general.language.korean-title",
-            })}
+            title="Korean"
             endIcon={
               !language.automatic && language.language === "ko" ? (
                 <CheckIcon width="1.25rem" height="1.25rem" />

@@ -19,7 +19,6 @@ import { useStore } from "../../../stores";
 import { GuideBox } from "../../guide-box";
 import { Dec } from "@keplr-wallet/unit";
 import { Box } from "../../box";
-import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -47,7 +46,6 @@ export const TransactionFeeModal: FunctionComponent<{
   gasSimulator?: IGasSimulator;
 }> = observer(({ close, senderConfig, feeConfig, gasConfig, gasSimulator }) => {
   const { queriesStore } = useStore();
-  const intl = useIntl();
 
   const isGasSimulatorUsable = (() => {
     if (!gasSimulator) {
@@ -69,23 +67,17 @@ export const TransactionFeeModal: FunctionComponent<{
 
   return (
     <Styles.Container>
-      <Subtitle1 style={{ marginBottom: "1.5rem" }}>
-        <FormattedMessage id="components.input.fee-control.modal.title" />
-      </Subtitle1>
+      <Subtitle1 style={{ marginBottom: "1.5rem" }}>Fee Options</Subtitle1>
 
       <Stack gutter="0.75rem">
         <Stack gutter="0.375rem">
-          <Subtitle3>
-            <FormattedMessage id="components.input.fee-control.modal.fee-title" />
-          </Subtitle3>
+          <Subtitle3>Fee</Subtitle3>
           <FeeSelector feeConfig={feeConfig} />
         </Stack>
 
         <Stack gutter="0.375rem">
           <Dropdown
-            label={intl.formatMessage({
-              id: "components.input.fee-control.modal.fee-token-dropdown-label",
-            })}
+            label="Fee Token"
             items={feeConfig.selectableFeeCurrencies
               .filter((cur, i) => {
                 if (i === 0) {
@@ -131,17 +123,13 @@ export const TransactionFeeModal: FunctionComponent<{
         <Styles.Divider />
 
         <Columns sum={1} alignY="center">
-          <Subtitle3 style={{ color: ColorPalette["gray-200"] }}>
-            <FormattedMessage id="components.input.fee-control.modal.gas-title" />
-          </Subtitle3>
+          <Subtitle3 style={{ color: ColorPalette["gray-200"] }}>Gas</Subtitle3>
 
           <Column weight={1} />
 
           {isGasSimulatorUsable && gasSimulator ? (
             <Columns sum={1} gutter="0.5rem" alignY="center">
-              <Subtitle3>
-                <FormattedMessage id="components.input.fee-control.modal.auto-title" />
-              </Subtitle3>
+              <Subtitle3>Auto</Subtitle3>
               <Toggle
                 isOpen={gasSimulator.enabled}
                 setIsOpen={(isOpen) => {
@@ -158,9 +146,7 @@ export const TransactionFeeModal: FunctionComponent<{
               return (
                 <GuideBox
                   color="danger"
-                  title={intl.formatMessage({
-                    id: "components.input.fee-control.modal.guide-title",
-                  })}
+                  title="Tx simulation failed"
                   paragraph={
                     gasSimulator.uiProperties.error.message ||
                     gasSimulator.uiProperties.error.toString()
@@ -173,9 +159,7 @@ export const TransactionFeeModal: FunctionComponent<{
               return (
                 <GuideBox
                   color="warning"
-                  title={intl.formatMessage({
-                    id: "components.input.fee-control.modal.guide-title",
-                  })}
+                  title="Tx simulation failed"
                   paragraph={
                     gasSimulator.uiProperties.warning.message ||
                     gasSimulator.uiProperties.warning.toString()
@@ -188,9 +172,7 @@ export const TransactionFeeModal: FunctionComponent<{
 
         {isGasSimulatorEnabled ? (
           <TextInput
-            label={intl.formatMessage({
-              id: "components.input.fee-control.modal.gas-adjustment-label",
-            })}
+            label="Gas Adjustment"
             value={gasSimulator?.gasAdjustmentValue}
             onChange={(e) => {
               e.preventDefault();
@@ -200,9 +182,7 @@ export const TransactionFeeModal: FunctionComponent<{
           />
         ) : (
           <TextInput
-            label={intl.formatMessage({
-              id: "components.input.fee-control.modal.gas-amount-label",
-            })}
+            label="Gas Amount"
             value={gasConfig.value}
             onChange={(e) => {
               e.preventDefault();
@@ -214,9 +194,7 @@ export const TransactionFeeModal: FunctionComponent<{
 
         <Button
           type="button"
-          text={intl.formatMessage({
-            id: "components.input.fee-control.modal.close-button",
-          })}
+          text="Close"
           color="secondary"
           size="large"
           onClick={() => {
@@ -291,7 +269,7 @@ const FeeSelector: FunctionComponent<{
           {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
           <Box width="1px" alignX="center">
             <FeeSelectorStyle.Title selected={feeConfig.type === "low"}>
-              <FormattedMessage id="components.input.fee-control.modal.fee-selector.low" />
+              Low
             </FeeSelectorStyle.Title>
             {feeCurrency.coinGeckoId ? (
               <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
@@ -328,7 +306,7 @@ const FeeSelector: FunctionComponent<{
           {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
           <Box width="1px" alignX="center">
             <FeeSelectorStyle.Title selected={feeConfig.type === "average"}>
-              <FormattedMessage id="components.input.fee-control.modal.fee-selector.average" />
+              Average
             </FeeSelectorStyle.Title>
             {feeCurrency.coinGeckoId ? (
               <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
@@ -372,7 +350,7 @@ const FeeSelector: FunctionComponent<{
           {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
           <Box width="1px" alignX="center">
             <FeeSelectorStyle.Title selected={feeConfig.type === "high"}>
-              <FormattedMessage id="components.input.fee-control.modal.fee-selector.high" />
+              High
             </FeeSelectorStyle.Title>
             {feeCurrency.coinGeckoId ? (
               <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>

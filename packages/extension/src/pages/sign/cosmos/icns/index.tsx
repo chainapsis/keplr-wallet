@@ -9,11 +9,9 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useInteractionInfo } from "../../../../hooks";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const { icnsInteractionStore } = useStore();
-  const intl = useIntl();
 
   const interactionInfo = useInteractionInfo(() => {
     icnsInteractionStore.rejectAll();
@@ -24,7 +22,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
       title=""
       fixedHeight={true}
       bottomButton={{
-        text: intl.formatMessage({ id: "page.sign.cosmos.tx.approve-button" }),
+        text: "Approve",
         size: "large",
         isLoading: (() => {
           if (
@@ -68,9 +66,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
 
           <Gutter size="1.125rem" />
 
-          <H2 color={ColorPalette["gray-10"]}>
-            <FormattedMessage id="page.sign.icns.title" />
-          </H2>
+          <H2 color={ColorPalette["gray-10"]}>Request Registration</H2>
 
           <Gutter size="1rem" />
 

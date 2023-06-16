@@ -10,7 +10,6 @@ import { VerticalCollapseTransition } from "../transition/vertical-collapse";
 import { Gutter } from "../gutter";
 import { XAxis } from "../axis";
 import styled from "styled-components";
-import { useIntl } from "react-intl";
 
 const Styles = {
   MoreViewContainer: styled.div`
@@ -36,8 +35,6 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   if (!lenAlwaysShown || lenAlwaysShown < 0) {
     lenAlwaysShown = items.length;
   }
-
-  const intl = useIntl();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -82,14 +79,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
           <Gutter size="0.75rem" />
           <XAxis alignY="center">
             <Button2>
-              {isCollapsed
-                ? intl.formatMessage(
-                    { id: "components.collapsible-list.view-more-tokens" },
-                    { remain: hidden.length }
-                  )
-                : intl.formatMessage({
-                    id: "components.collapsible-list.collapse",
-                  })}
+              {isCollapsed ? `View ${hidden.length} more tokens` : "Collapse"}
             </Button2>
 
             <Gutter size="0.25rem" />

@@ -8,19 +8,14 @@ import { useStore } from "../../../../stores";
 import { useNavigate } from "react-router";
 import { Box } from "../../../../components/box";
 import { CheckIcon } from "../../../../components/icon";
-import { useIntl } from "react-intl";
 
 export const SettingGeneralFiatPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
 
   const navigate = useNavigate();
-  const intl = useIntl();
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.general.currency-title" })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title="General" left={<BackButton />}>
       <Box paddingX="0.75rem" paddingBottom="0.75rem">
         <Stack gutter="0.5rem">
           {Object.entries(uiConfigStore.supportedFiatCurrencies).map(

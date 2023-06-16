@@ -12,13 +12,11 @@ import { Image } from "../../../components/image";
 import { Gutter } from "../../../components/gutter";
 import { Body1, Body2, H2 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
   data: InteractionWaitingData<GlobalPermissionData>;
 }> = observer(({ data }) => {
   const { permissionStore } = useStore();
-  const intl = useIntl();
 
   const interactionInfo = useInteractionInfo();
 
@@ -27,9 +25,7 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
       title=""
       fixedHeight={true}
       bottomButton={{
-        text: intl.formatMessage({
-          id: "page.permission.approve-button",
-        }),
+        text: "Approve",
         size: "large",
         isLoading: permissionStore.isObsoleteInteraction(data.id),
       }}
@@ -62,9 +58,7 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
 
           <Gutter size="1.125rem" />
 
-          <H2 color={ColorPalette["gray-10"]}>
-            <FormattedMessage id="page.permission.requesting-connection-title" />
-          </H2>
+          <H2 color={ColorPalette["gray-10"]}>Requesting Connection</H2>
 
           <Gutter size="1rem" />
 
@@ -86,12 +80,8 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
               lineHeight: 1.215,
             }}
           >
-            <FormattedMessage
-              id="page.permission.paragraph"
-              values={{
-                br: <br />,
-              }}
-            />
+            By approving this request, the website will:
+            <br />• Get the list of all chian on your Keplr Wallet
           </Body2>
         </Box>
       </Box>

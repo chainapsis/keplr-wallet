@@ -16,7 +16,6 @@ import { CheckIcon, EllipsisIcon } from "../../../components/icon";
 import { Button } from "../../../components/button";
 import styled from "styled-components";
 import { FloatingDropdown } from "../../../components/dropdown";
-import { useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -34,7 +33,6 @@ const Styles = {
 
 export const WalletSelectPage: FunctionComponent = observer(() => {
   const { keyRingStore } = useStore();
-  const intl = useIntl();
 
   const mnemonicKeys = useMemo(() => {
     return keyRingStore.keyInfos.filter((keyInfo) => {
@@ -141,14 +139,11 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
   }, [socialPrivateKeyInfos]);
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({ id: "page.wallet.title" })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title="Select Wallet" left={<BackButton />}>
       <Styles.Container>
         <Styles.AddButton>
           <Button
-            text={intl.formatMessage({ id: "page.wallet.add-wallet-button" })}
+            text="Add Wallet"
             size="extraSmall"
             color="secondary"
             onClick={async () => {
@@ -161,53 +156,33 @@ export const WalletSelectPage: FunctionComponent = observer(() => {
 
         <Styles.Content gutter="1.25rem">
           {mnemonicKeys.length > 0 ? (
-            <KeyInfoList
-              title={intl.formatMessage({
-                id: "page.wallet.recovery-phrase-title",
-              })}
-              keyInfos={mnemonicKeys}
-            />
+            <KeyInfoList title="Recovery Phrase" keyInfos={mnemonicKeys} />
           ) : null}
 
           {socialPrivateKeyInfoByType.map((info) => {
             return (
               <KeyInfoList
                 key={info.type}
-                title={intl.formatMessage(
-                  { id: "page.wallet.connect-with-social-account-title" },
-                  {
-                    social:
-                      info.type.length > 0
-                        ? info.type[0].toUpperCase() + info.type.slice(1)
-                        : info.type,
-                  }
-                )}
+                title={`Connected with ${
+                  info.type.length > 0
+                    ? info.type[0].toUpperCase() + info.type.slice(1)
+                    : info.type
+                } Account`}
                 keyInfos={info.keyInfos}
               />
             );
           })}
 
           {privateKeyInfos.length > 0 ? (
-            <KeyInfoList
-              title={intl.formatMessage({
-                id: "page.wallet.private-key-title",
-              })}
-              keyInfos={privateKeyInfos}
-            />
+            <KeyInfoList title="Private key" keyInfos={privateKeyInfos} />
           ) : null}
 
           {ledgerKeys.length > 0 ? (
-            <KeyInfoList
-              title={intl.formatMessage({ id: "page.wallet.ledger-title" })}
-              keyInfos={ledgerKeys}
-            />
+            <KeyInfoList title="Ledger" keyInfos={ledgerKeys} />
           ) : null}
 
           {unknownKeys.length > 0 ? (
-            <KeyInfoList
-              title={intl.formatMessage({ id: "page.wallet.unknown-title" })}
-              keyInfos={unknownKeys}
-            />
+            <KeyInfoList title="Unknown" keyInfos={unknownKeys} />
           ) : null}
         </Styles.Content>
       </Styles.Container>
@@ -245,7 +220,6 @@ const KeyringItem: FunctionComponent<{
   keyInfo: KeyInfo;
 }> = observer(({ keyInfo }) => {
   const { chainStore, keyRingStore } = useStore();
-  const intl = useIntl();
 
   const navigate = useNavigate();
 
@@ -285,13 +259,7 @@ const KeyringItem: FunctionComponent<{
 
       return `m/44'/${coinType >= 0 ? coinType : "-"}'/${bip44Path.account}'/${
         bip44Path.change
-      }/${bip44Path.addressIndex}${
-        isLedgerWithTerra
-          ? intl.formatMessage({
-              id: "page.wallet.keyring-item.bip44-path-terra-text",
-            })
-          : ""
-      }`;
+      }/${bip44Path.addressIndex}${isLedgerWithTerra ? " (Terra)" : ""}`;
     }
 
     if (
@@ -318,16 +286,12 @@ const KeyringItem: FunctionComponent<{
     const defaults = [
       {
         key: "change-wallet-name",
-        label: intl.formatMessage({
-          id: "page.wallet.keyring-item.dropdown.change-wallet-name-title",
-        }),
+        label: "Change Wallet Name",
         onSelect: () => navigate(`/wallet/change-name?id=${keyInfo.id}`),
       },
       {
         key: "delete-wallet",
-        label: intl.formatMessage({
-          id: "page.wallet.keyring-item.dropdown.delete-wallet-title",
-        }),
+        label: "Delete Wallet",
         onSelect: () => navigate(`/wallet/delete?id=${keyInfo.id}`),
       },
     ];
@@ -336,9 +300,7 @@ const KeyringItem: FunctionComponent<{
       case "mnemonic": {
         defaults.unshift({
           key: "view-recovery-phrase",
-          label: intl.formatMessage({
-            id: "page.wallet.keyring-item.dropdown.view-recovery-path-title",
-          }),
+          label: "View Recovery Phrase",
           onSelect: () => navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
         });
         break;
@@ -346,9 +308,7 @@ const KeyringItem: FunctionComponent<{
       case "private-key": {
         defaults.unshift({
           key: "view-recovery-phrase",
-          label: intl.formatMessage({
-            id: "page.wallet.keyring-item.dropdown.view-private-key-title",
-          }),
+          label: "View Private key",
           onSelect: () => navigate(`/wallet/show-sensitive?id=${keyInfo.id}`),
         });
         break;

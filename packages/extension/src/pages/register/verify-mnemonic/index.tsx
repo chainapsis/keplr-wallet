@@ -10,7 +10,6 @@ import {
 } from "../../../components/transition";
 import { Box } from "../../../components/box";
 import { FormNamePassword, useFormNamePassword } from "../components/form";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const VerifyMnemonicScene: FunctionComponent<{
   mnemonic?: string;
@@ -22,13 +21,8 @@ export const VerifyMnemonicScene: FunctionComponent<{
   stepPrevious: number;
   stepTotal: number;
 }> = observer(({ mnemonic, bip44Path, stepPrevious, stepTotal }) => {
-  const intl = useIntl();
   if (!mnemonic || !bip44Path) {
-    throw new Error(
-      intl.formatMessage({
-        id: "pages.register.verify-mnemonic.no-mnemonic-provider-error",
-      })
-    );
+    throw new Error("Mnemonic and bip44Path should be provided");
   }
 
   const sceneTransition = useSceneTransition();
@@ -38,12 +32,12 @@ export const VerifyMnemonicScene: FunctionComponent<{
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: intl.formatMessage({
-          id: "pages.register.verify-mnemonic.title",
-        }),
+        title: "Verify Your Recovery Phrase",
         paragraphs: [
           <div key="paragraphs">
-            <FormattedMessage id="pages.register.verify-mnemonic.paragraph" />
+            Fill out the words according to their numbers to
+            <br />
+            verify that you have stored your phrase safely.
           </div>,
         ],
         stepCurrent: stepPrevious + 1,
@@ -54,11 +48,7 @@ export const VerifyMnemonicScene: FunctionComponent<{
 
   const verifyingWords = useMemo(() => {
     if (mnemonic.trim() === "") {
-      throw new Error(
-        intl.formatMessage({
-          id: "pages.register.verify-mnemonic.mnemonic-empty-error",
-        })
-      );
+      throw new Error("Empty mnemonic");
     }
 
     const words = mnemonic.split(" ").map((w) => w.trim());
@@ -95,11 +85,7 @@ export const VerifyMnemonicScene: FunctionComponent<{
       <form
         onSubmit={form.handleSubmit((data) => {
           if (!verifyingBoxRef.current) {
-            throw new Error(
-              intl.formatMessage({
-                id: "pages.register.verify-mnemonic.verify-box-ref-error",
-              })
-            );
+            throw new Error("Ref of verify box is null");
           }
 
           if (verifyingBoxRef.current.validate()) {

@@ -41,7 +41,6 @@ import { Tooltip } from "../../components/tooltip";
 import { Image } from "../../components/image";
 import { QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
-import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 
 export interface ViewToken {
@@ -72,7 +71,6 @@ export const MainPage: FunctionComponent = observer(() => {
   } = useStore();
 
   const isNotReady = useIsNotReady();
-  const intl = useIntl();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
@@ -267,8 +265,8 @@ export const MainPage: FunctionComponent = observer(() => {
                   }}
                 >
                   {tabStatus === "available"
-                    ? intl.formatMessage({ id: "page.main.chart.available" })
-                    : intl.formatMessage({ id: "page.main.chart.staked" })}
+                    ? "Total Available"
+                    : "Total Staked"}
                 </Subtitle3>
               </Skeleton>
               <Gutter size="0.5rem" />
@@ -310,7 +308,7 @@ export const MainPage: FunctionComponent = observer(() => {
                 });
               }}
             >
-              <FormattedMessage id="page.main.chart.stake-with-keplr-dashboard-button" />
+              Stake with Keplr Dashboard
               <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
                 <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
               </Box>
@@ -333,7 +331,7 @@ export const MainPage: FunctionComponent = observer(() => {
                 });
               }}
             >
-              <FormattedMessage id="page.main.chart.manage-portfolio-in-keplr-dashboard" />
+              Manage Portfolio in Keplr Dashboard
               <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
                 <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
               </Box>
@@ -374,9 +372,7 @@ export const MainPage: FunctionComponent = observer(() => {
                       }
                     }
                   }}
-                  placeholder={intl.formatMessage({
-                    id: "page.main.search-placeholder",
-                  })}
+                  placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
                 />
               ) : null}
             </Stack>

@@ -4,7 +4,6 @@ import { Button2 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { Box } from "../../../../components/box";
 import { Gutter } from "../../../../components/gutter";
-import { FormattedMessage } from "react-intl";
 
 export const ViewDataButton: FunctionComponent<{
   isViewData: boolean;
@@ -23,9 +22,7 @@ export const ViewDataButton: FunctionComponent<{
       }}
     >
       <XAxis alignY="center">
-        <Button2>
-          <FormattedMessage id="page.sign.cosmos.tx.view-data-button" />
-        </Button2>
+        <Button2>View data</Button2>
         <Gutter size="0.25rem" />
         {isViewData ? <IconClose size="0.75rem" /> : <IconXML size="0.75rem" />}
       </XAxis>

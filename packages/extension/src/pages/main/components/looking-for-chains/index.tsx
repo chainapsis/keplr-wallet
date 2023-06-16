@@ -13,20 +13,13 @@ import Color from "color";
 import { Button } from "../../../../components/button";
 import { useStore } from "../../../../stores";
 import { observer } from "mobx-react-lite";
-import { useIntl } from "react-intl";
 
 export const LookingForChains: FunctionComponent<{
   chainInfos: ChainInfo[];
 }> = ({ chainInfos }) => {
-  const intl = useIntl();
-
   return (
     <Box>
-      <TokenTitleView
-        title={intl.formatMessage({
-          id: "page.main.components.looking-for-chains.title",
-        })}
-      />
+      <TokenTitleView title="Looking for a chain?" />
 
       <Gutter size="0.5rem" />
 
@@ -43,7 +36,6 @@ export const LookingForChainItem: FunctionComponent<{
   chainInfo: ChainInfo;
 }> = observer(({ chainInfo }) => {
   const { analyticsStore, keyRingStore } = useStore();
-  const intl = useIntl();
 
   return (
     <Box
@@ -80,9 +72,7 @@ export const LookingForChainItem: FunctionComponent<{
         <Column weight={1} />
 
         <Button
-          text={intl.formatMessage({
-            id: "page.main.components.looking-for-chains.enable-button",
-          })}
+          text="Enable"
           size="small"
           color="secondary"
           onClick={() => {

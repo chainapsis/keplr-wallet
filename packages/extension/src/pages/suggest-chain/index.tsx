@@ -6,7 +6,6 @@ import { useStore } from "../../stores";
 import { useInteractionInfo } from "../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { ChainInfo } from "@keplr-wallet/types";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const SuggestChainPage: FunctionComponent = observer(() => {
   const { chainSuggestStore } = useStore();
@@ -36,7 +35,6 @@ const SuggestChainPageImpl: FunctionComponent<{
   const { chainSuggestStore } = useStore();
   const [isLoadingPlaceholder, setIsLoadingPlaceholder] = useState(true);
 
-  const intl = useIntl();
   const interactionInfo = useInteractionInfo();
 
   const queryCommunityChainInfo = chainSuggestStore.getCommunityChainInfo(
@@ -61,15 +59,12 @@ const SuggestChainPageImpl: FunctionComponent<{
       fixedHeight
       isNotReady={isLoadingPlaceholder}
       title={
-        isLoadingPlaceholder || communityChainInfo != null ? undefined : (
-          <FormattedMessage
-            id="page.suggest-chain.title"
-            values={{ chainName: waitingData.data.chainInfo.chainName }}
-          />
-        )
+        isLoadingPlaceholder || communityChainInfo != null
+          ? undefined
+          : `Add ${waitingData.data.chainInfo.chainName} to Keplr`
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.suggest-chain.approve-button" }),
+        text: "Approve",
         size: "large",
         color: "primary",
         onClick: async () => {

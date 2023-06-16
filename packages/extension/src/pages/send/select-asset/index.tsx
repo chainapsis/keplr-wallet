@@ -15,7 +15,6 @@ import { Dec } from "@keplr-wallet/unit";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
-import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -26,7 +25,6 @@ const Styles = {
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const { hugeQueriesStore } = useStore();
   const navigate = useNavigate();
-  const intl = useIntl();
   const [searchParams] = useSearchParams();
   const paramIsIBCTransfer = searchParams.get("isIBCTransfer");
 
@@ -70,16 +68,11 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   }, [paramIsIBCTransfer, search, tokens]);
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({ id: "page.send.select-asset.title" })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title="Select Asset" left={<BackButton />}>
       <Styles.Container gutter="0.5rem">
         <SearchTextInput
           ref={searchRef}
-          placeholder={intl.formatMessage({
-            id: "page.send.select-asset.search-placeholder",
-          })}
+          placeholder="Search for asset or chain"
           value={search}
           onChange={(e) => {
             e.preventDefault();
@@ -94,7 +87,7 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
             onClick={() => setHideIBCToken(!hideIBCToken)}
             style={{ color: ColorPalette["gray-300"], cursor: "pointer" }}
           >
-            <FormattedMessage id="page.send.select-asset.hide-ibc-token" />
+            Hide IBC token
           </Body2>
           <Checkbox
             size="small"

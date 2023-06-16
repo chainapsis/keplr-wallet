@@ -6,7 +6,6 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../../stores";
 import { Staking } from "@keplr-wallet/stores";
 import { Image } from "../../../../../components/image";
-import { FormattedMessage } from "react-intl";
 
 export const ClaimRewardsMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -41,9 +40,7 @@ export const ClaimRewardsMessage: IMessageRenderer = {
             style={{ width: "3rem", height: "3rem" }}
           />
         ),
-        title: (
-          <FormattedMessage id="page.sign.components.messages.claim-rewards.title" />
-        ),
+        title: "Claim Rewards",
         content: (
           <ClaimRewardsMessagePretty
             chainId={chainId}
@@ -68,14 +65,8 @@ const ClaimRewardsMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <FormattedMessage
-        id="page.sign.components.messages.claim-rewards.paragraph"
-        values={{
-          validator:
-            moniker || Bech32Address.shortenAddress(validatorAddress, 28),
-          b: (...chunks: any) => <b>{chunks}</b>,
-        }}
-      />
+      Claim staking reward from{" "}
+      <b>{moniker || Bech32Address.shortenAddress(validatorAddress, 28)}</b>
     </React.Fragment>
   );
 });

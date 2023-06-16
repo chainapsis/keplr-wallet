@@ -15,7 +15,6 @@ import { AddressItem } from "../../../../components/address-item";
 import { useConfirm } from "../../../../hooks/confirm";
 import { EmptyView } from "../../../../components/empty-view";
 import { Gutter } from "../../../../components/gutter";
-import { useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -29,7 +28,6 @@ const Styles = {
 export const SettingContactsList: FunctionComponent = observer(() => {
   const { chainStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
-  const intl = useIntl();
 
   const [searchParams, setSearchParams] = useSearchParams();
   // Handle "chainId" state by search params to persist the state between page changes.
@@ -59,10 +57,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   const addresses = uiConfigStore.addressBookConfig.getAddressBook(chainId);
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.general.contacts-title" })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title="Contacts" left={<BackButton />}>
       <Styles.Container>
         <Columns sum={1} alignY="center">
           <Box width="13rem">
@@ -85,9 +80,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
           <Button
             color="secondary"
             size="extraSmall"
-            text={intl.formatMessage({
-              id: "page.setting.contacts.list.add-new-button",
-            })}
+            text="Add New"
             onClick={() => navigate(`/setting/contacts/add?chainId=${chainId}`)}
           />
         </Columns>
@@ -105,9 +98,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
                   dropdownItems={[
                     {
                       key: "change-contact-label",
-                      label: intl.formatMessage({
-                        id: "page.setting.contacts.list.dropdown.edit-contact-label",
-                      }),
+                      label: "Edit Contact",
                       onSelect: () =>
                         navigate(
                           `/setting/contacts/add?chainId=${chainId}&editIndex=${i}`
@@ -115,18 +106,12 @@ export const SettingContactsList: FunctionComponent = observer(() => {
                     },
                     {
                       key: "delete-contact",
-                      label: intl.formatMessage({
-                        id: "page.setting.contacts.list.dropdown.delete-contact-label",
-                      }),
+                      label: "Delete Contact",
                       onSelect: async () => {
                         if (
                           await confirm.confirm(
-                            intl.formatMessage({
-                              id: "page.setting.contacts.list.dropdown.delete-contact-confirm-title",
-                            }),
-                            intl.formatMessage({
-                              id: "page.setting.contacts.list.dropdown.delete-contact-confirm-paragraph",
-                            })
+                            "Delete Contact",
+                            "Are you sure you want to delete this contact?"
                           )
                         ) {
                           uiConfigStore.addressBookConfig.removeAddressBookAt(
@@ -143,11 +128,7 @@ export const SettingContactsList: FunctionComponent = observer(() => {
           ) : (
             <React.Fragment>
               <Gutter size="7.5rem" direction="vertical" />
-              <EmptyView
-                subject={intl.formatMessage({
-                  id: "page.setting.contacts.list.empty-view-subject",
-                })}
-              />
+              <EmptyView subject="Contacts" />
             </React.Fragment>
           )}
         </Styles.ItemList>

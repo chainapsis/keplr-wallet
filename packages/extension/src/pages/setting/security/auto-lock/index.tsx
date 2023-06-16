@@ -23,12 +23,10 @@ import { useNavigate } from "react-router";
 import { YAxis } from "../../../../components/axis";
 import lottie from "lottie-web";
 import AnimShield from "../../../../public/assets/lottie/wallet/shield.json";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const intl = useIntl();
 
   const minDuration = 0;
   const maxDuration = 4320;
@@ -84,14 +82,10 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({
-        id: "page.setting.security.auto-lock-title",
-      })}
+      title="Auto Lock"
       left={<BackButton />}
       bottomButton={{
-        text: intl.formatMessage({
-          id: "page.setting.security.auto-lock.confirm-button",
-        }),
+        text: "Confirm",
         color: "secondary",
         size: "large",
         isLoading,
@@ -139,7 +133,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
           color={ColorPalette["gray-200"]}
           style={{ textAlign: "center", padding: "2rem 1.25rem" }}
         >
-          <FormattedMessage id="page.setting.security.auto-lock.paragraph" />
+          You can set how long it takes Keplr to automatically lock.
         </Body2>
 
         <YAxis alignX="center">
@@ -158,9 +152,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
 
         <Box width="100%">
           <TextInput
-            label={intl.formatMessage({
-              id: "page.setting.security.auto-lock.timer-input-label",
-            })}
+            label="Set Timer (unit: minutes)"
             type="number"
             error={formState.errors.timer && formState.errors.timer.message}
             {...register("timer", {
@@ -170,7 +162,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
                 }
 
                 if (input.includes(".")) {
-                  return intl.formatMessage({ id: "error.duration-type" });
+                  return "The duration should be an integer.";
                 }
 
                 const duration = parseInt(input);
@@ -180,13 +172,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
                 }
 
                 if (duration < minDuration || duration > maxDuration) {
-                  return intl.formatMessage(
-                    { id: "error.duration-lange" },
-                    {
-                      minDuration,
-                      maxDuration,
-                    }
-                  );
+                  return `The duration should be between ${minDuration} and ${maxDuration} minutes.`;
                 }
               },
             })}
@@ -205,13 +191,11 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
             <Column weight={1}>
               <Stack gutter="0.375rem">
                 <Subtitle2 color={ColorPalette["gray-50"]}>
-                  <FormattedMessage id="page.setting.security.auto-lock.sleep-mode-title" />
+                  Lock Keplr on Sleep Mode
                 </Subtitle2>
                 <Body3 color={ColorPalette["gray-200"]}>
-                  <FormattedMessage
-                    id="page.setting.security.auto-lock.sleep-mode-paragraph"
-                    values={{ br: <br /> }}
-                  />
+                  Lock Keplr when the device is
+                  <br /> in sleep mode
                 </Body3>
               </Stack>
             </Column>

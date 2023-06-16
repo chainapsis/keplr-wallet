@@ -5,7 +5,6 @@ import { ColorPalette } from "../../../../styles";
 import { Box } from "../../../../components/box";
 import styled from "styled-components";
 import { HelpDeskUrl } from "../../../../config.ui";
-import { FormattedMessage } from "react-intl";
 
 const Container = styled.div`
   position: fixed;
@@ -43,9 +42,7 @@ export const HelpDeskButton: FunctionComponent = () => {
     <a href={HelpDeskUrl} target="_blank" rel="noreferrer">
       <Container>
         <Columns sum={1} gutter="0.5rem" alignY="center">
-          <Styles.Title>
-            <FormattedMessage id="pages.register.components.help-desk-button.title" />
-          </Styles.Title>
+          <Styles.Title>Help Desk</Styles.Title>
           <Styles.QuestionBox
             width="2.375rem"
             height="2.375rem"
@@ -53,9 +50,7 @@ export const HelpDeskButton: FunctionComponent = () => {
             alignX="center"
             alignY="center"
           >
-            <Styles.QuestionText>
-              <FormattedMessage id="pages.register.components.help-desk-button.question" />
-            </Styles.QuestionText>
+            <Styles.QuestionText>?</Styles.QuestionText>
           </Styles.QuestionBox>
         </Columns>
       </Container>

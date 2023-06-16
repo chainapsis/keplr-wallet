@@ -27,7 +27,6 @@ import { Body3, Subtitle2 } from "../../../../components/typography";
 import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
 import { useNotification } from "../../../../hooks/notification";
-import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -44,7 +43,6 @@ interface FormData {
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
 
-  const intl = useIntl();
   const navigate = useNavigate();
   const notification = useNotification();
   const [searchParams] = useSearchParams();
@@ -156,9 +154,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             }
 
             if (!viewingKey) {
-              reject(
-                new Error(intl.formatMessage({ id: "error.viewing-key-null" }))
-              );
+              reject(new Error("Viewing key is null"));
               return;
             }
             resolve(viewingKey);
@@ -170,7 +166,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.token.add.title" })}
+      title="Add Token Manually"
       left={
         <BackButton
           hidden={
@@ -179,9 +175,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         />
       }
       bottomButton={{
-        text: intl.formatMessage({
-          id: "page.setting.token.add.confirm-button",
-        }),
+        text: "Confirm",
         color: "secondary",
         size: "large",
         disabled:
@@ -203,9 +197,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               } catch (e) {
                 notification.show(
                   "failed",
-                  intl.formatMessage({
-                    id: "error.failed-to-create-viewing-key",
-                  }),
+                  "Failed to create the viewing key",
                   e.message || e.toString()
                 );
 
@@ -282,9 +274,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         ) : null}
 
         <TextInput
-          label={intl.formatMessage({
-            id: "page.setting.token.add.contract-address-label",
-          })}
+          label="Contract Address"
           isLoading={queryContract.isFetching}
           readOnly={interactionInfo.interaction}
           error={
@@ -307,23 +297,17 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           })}
         />
         <TextInput
-          label={intl.formatMessage({
-            id: "page.setting.token.add.name-label",
-          })}
+          label="Name"
           value={queryContract.tokenInfo?.name || "-"}
           disabled
         />
         <TextInput
-          label={intl.formatMessage({
-            id: "page.setting.token.add.symbol-label",
-          })}
+          label="Symbol"
           value={queryContract.tokenInfo?.symbol || "-"}
           disabled
         />
         <TextInput
-          label={intl.formatMessage({
-            id: "page.setting.token.add.decimal-label",
-          })}
+          label="Decimals"
           value={queryContract.tokenInfo?.decimals || "-"}
           disabled
         />
@@ -339,10 +323,11 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                 <Column weight={1}>
                   <Stack>
                     <Subtitle2 color={ColorPalette["gray-50"]}>
-                      <FormattedMessage id="page.setting.token.add.viewing-key-info-title" />
+                      I have my own viewing key
                     </Subtitle2>
                     <Body3 color={ColorPalette["gray-200"]}>
-                      <FormattedMessage id="page.setting.token.add.viewing-key-info-paragraph" />
+                      By enabling this toggle, you confirm that you have your
+                      viewing key and use it for adding this token.
                     </Body3>
                   </Stack>
                 </Column>
@@ -356,9 +341,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
             {isOpenSecret20ViewingKey ? (
               <TextInput
-                label={intl.formatMessage({
-                  id: "page.setting.token.add.viewing-key-label",
-                })}
+                label="Viewing Key"
                 error={
                   formState.errors.viewingKey
                     ? formState.errors.viewingKey.message

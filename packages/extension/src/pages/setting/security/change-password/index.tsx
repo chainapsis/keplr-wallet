@@ -8,7 +8,6 @@ import { Stack } from "../../../../components/stack";
 import { useForm } from "react-hook-form";
 import { useStore } from "../../../../stores";
 import { useNavigate } from "react-router";
-import { useIntl } from "react-intl";
 
 interface FormData {
   password: string;
@@ -19,7 +18,6 @@ interface FormData {
 export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
   () => {
     const { keyRingStore } = useStore();
-    const intl = useIntl();
 
     const form = useForm<FormData>({
       defaultValues: {
@@ -35,14 +33,10 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
 
     return (
       <HeaderLayout
-        title={intl.formatMessage({
-          id: "page.setting.security.change-password-title",
-        })}
+        title="Change Password"
         left={<BackButton />}
         bottomButton={{
-          text: intl.formatMessage({
-            id: "page.setting.security.change-password.next-button",
-          }),
+          text: "Next",
           color: "secondary",
           size: "large",
           isLoading,
@@ -62,10 +56,7 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
 
             form.setError(
               "password",
-              {
-                type: "custom",
-                message: intl.formatMessage({ id: "error.invalid-password" }),
-              },
+              { type: "custom", message: "Invalid password" },
               {
                 shouldFocus: true,
               }
@@ -78,9 +69,7 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
         <Box paddingX="0.75rem">
           <Stack gutter="1rem">
             <TextInput
-              label={intl.formatMessage({
-                id: "page.setting.security.change-password.current-password-label",
-              })}
+              label="Current Keplr Password"
               type="password"
               {...form.register("password", {
                 required: true,
@@ -89,17 +78,13 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
             />
 
             <TextInput
-              label={intl.formatMessage({
-                id: "page.setting.security.change-password.new-password-label",
-              })}
+              label="New Keplr Password"
               type="password"
               {...form.register("newPassword", {
                 required: true,
                 validate: (password: string): string | undefined => {
                   if (password.length < 8) {
-                    return intl.formatMessage({
-                      id: "error.password-too-short",
-                    });
+                    return "Too short password";
                   }
                 },
               })}
@@ -107,17 +92,13 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
             />
 
             <TextInput
-              label={intl.formatMessage({
-                id: "page.setting.security.change-password.confirm-password-label",
-              })}
+              label="Confirm New Keplr Password"
               type="password"
               {...form.register("confirmNewPassword", {
                 required: true,
                 validate: (confirmPassword: string): string | undefined => {
                   if (confirmPassword !== form.getValues("newPassword")) {
-                    return intl.formatMessage({
-                      id: "error.password-should-match",
-                    });
+                    return "Password should match";
                   }
                 },
               })}

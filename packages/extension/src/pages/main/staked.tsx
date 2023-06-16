@@ -59,24 +59,16 @@ export const StakedTabView: FunctionComponent = observer(() => {
     tooltip?: string | React.ReactElement;
   }[] = [
     {
-      title: intl.formatMessage({
-        id: "page.main.staked.staked-balance-title",
-      }),
+      title: "Staked Balance",
       balance: delegations,
       lenAlwaysShown: 5,
-      tooltip: intl.formatMessage({
-        id: "page.main.staked.staked-balance-tooltip",
-      }),
+      tooltip: "Tokens that are delegated to validators and earning rewards.",
     },
     {
-      title: intl.formatMessage({
-        id: "page.main.staked.unstaking-balance-title",
-      }),
+      title: "Unstaking Balance",
       balance: unbondings,
       lenAlwaysShown: 3,
-      tooltip: intl.formatMessage({
-        id: "page.main.staked.unstaking-balance-tooltip",
-      }),
+      tooltip: "Tokens that are under the unbonding period.",
     },
   ];
 
@@ -147,17 +139,11 @@ export const StakedTabView: FunctionComponent = observer(() => {
               alt="empty staking image"
             />
           }
-          title={intl.formatMessage({
-            id: "page.main.staked.empty-view-title",
-          })}
-          paragraph={intl.formatMessage({
-            id: "page.main.staked.empty-view-paragraph",
-          })}
+          title="Ready to Start Staking?"
+          paragraph="Stake your assets to earn rewards and contribute to maintaining the networks!"
           button={
             <TextButton
-              text={intl.formatMessage({
-                id: "page.main.staked.go-to-dashboard-button",
-              })}
+              text="Go to Dashboard"
               size="small"
               right={
                 <ArrowRightSolidIcon

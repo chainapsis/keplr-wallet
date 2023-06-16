@@ -21,7 +21,6 @@ import { useConfirm } from "../../../../hooks/confirm";
 import { useNotification } from "../../../../hooks/notification";
 import { Gutter } from "../../../../components/gutter";
 import { Tooltip } from "../../../../components/tooltip";
-import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -37,7 +36,6 @@ const Styles = {
 export const SettingTokenListPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, tokensStore } = useStore();
 
-  const intl = useIntl();
   const navigate = useNavigate();
 
   const supportedChainInfos = useMemo(() => {
@@ -83,13 +81,10 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
   const tokens = tokensStore.getTokens(chainId);
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.manage-token-list-title" })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title="Manage Token List" left={<BackButton />}>
       <Styles.Container gutter="0.5rem">
         <Styles.Paragraph>
-          <FormattedMessage id="page.setting.token.manage.paragraph" />
+          Only for the tokens that can be added manually via contract addresses
         </Styles.Paragraph>
 
         <Columns sum={1} alignY="center">
@@ -106,9 +101,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
           <Button
             color="secondary"
             size="extraSmall"
-            text={intl.formatMessage({
-              id: "page.setting.token.manage.add-token-button",
-            })}
+            text="Add Token"
             onClick={() => navigate(`/setting/token/add?chainId=${chainId}`)}
           />
         </Columns>
@@ -116,11 +109,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
         {tokens.length === 0 ? (
           <React.Fragment>
             <Gutter size="7.5rem" direction="vertical" />
-            <EmptyView
-              subject={intl.formatMessage({
-                id: "page.setting.token.manage.empty-subject",
-              })}
-            />
+            <EmptyView subject="Token" />
           </React.Fragment>
         ) : (
           tokens.map((token) => {
@@ -162,7 +151,6 @@ const TokenItem: FunctionComponent<{
 }> = observer(({ chainId, tokenInfo }) => {
   const { tokensStore } = useStore();
   const notification = useNotification();
-  const intl = useIntl();
 
   const isSecret20 = (() => {
     if ("type" in tokenInfo.currency) {
@@ -195,11 +183,7 @@ const TokenItem: FunctionComponent<{
 
         <Columns sum={1} gutter="0.5rem" alignY="center">
           {isSecret20 ? (
-            <Tooltip
-              content={intl.formatMessage({
-                id: "page.setting.token.manage.token-view.copy-viewing-key-tooltip",
-              })}
-            >
+            <Tooltip content="Copy Viewing Key">
               <ItemStyles.Icon
                 onClick={async (e) => {
                   e.preventDefault();
@@ -212,13 +196,7 @@ const TokenItem: FunctionComponent<{
                       tokenInfo.currency.viewingKey
                     );
 
-                    notification.show(
-                      "success",
-                      intl.formatMessage({
-                        id: "page.setting.token.manage.token-view.viewing-key-copied",
-                      }),
-                      ""
-                    );
+                    notification.show("success", "Viewing key copied", "");
                   }
                 }}
               >
@@ -227,11 +205,7 @@ const TokenItem: FunctionComponent<{
             </Tooltip>
           ) : null}
 
-          <Tooltip
-            content={intl.formatMessage({
-              id: "page.setting.token.manage.token-view.copy-contract-address-tooltip",
-            })}
-          >
+          <Tooltip content="Copy Contract Address">
             <ItemStyles.Icon
               onClick={async (e) => {
                 e.preventDefault();
@@ -241,13 +215,7 @@ const TokenItem: FunctionComponent<{
                     tokenInfo.currency.contractAddress
                   );
 
-                  notification.show(
-                    "success",
-                    intl.formatMessage({
-                      id: "page.setting.token.manage.token-view.contract-address-copied",
-                    }),
-                    ""
-                  );
+                  notification.show("success", "Contract address copied", "");
                 }
               }}
             >
@@ -255,11 +223,7 @@ const TokenItem: FunctionComponent<{
             </ItemStyles.Icon>
           </Tooltip>
 
-          <Tooltip
-            content={intl.formatMessage({
-              id: "page.setting.token.manage.token-view.disable-token-tooltip",
-            })}
-          >
+          <Tooltip content="Disable Token">
             <ItemStyles.Icon
               onClick={async (e) => {
                 e.preventDefault();
@@ -267,9 +231,7 @@ const TokenItem: FunctionComponent<{
                 if (
                   await confirm.confirm(
                     "",
-                    intl.formatMessage({
-                      id: "page.setting.token.manage.token-view.disable-token-confirm",
-                    })
+                    "Are you sure you’d like to disable this token? You will not be able to see your balance or transfer until you add it again."
                   )
                 ) {
                   await tokensStore.removeToken(chainId, tokenInfo);

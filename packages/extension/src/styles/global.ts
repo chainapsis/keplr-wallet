@@ -17,11 +17,6 @@ export const GlobalStyle = createGlobalStyle`
     font-family: 'Inter', sans-serif;
     color: ${ColorPalette.white};
     background-color: ${ColorPalette["gray-700"]};
-
-    &[data-lang="ko"] {
-      word-break: keep-all;
-      word-wrap: break-word;
-    }
   }
   
   pre {

@@ -8,7 +8,6 @@ import styled from "styled-components";
 import { observer } from "mobx-react-lite";
 import { ChainInfo } from "@keplr-wallet/types";
 import { InteractionWaitingData } from "@keplr-wallet/background";
-import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Chip: styled.div`
@@ -28,7 +27,6 @@ export const RawInfoView: FunctionComponent<{
   }>;
 }> = observer(({ waitingData, communityChainInfoRepoUrl }) => {
   const chainInfo = waitingData.data.chainInfo;
-  const intl = useIntl();
 
   return (
     <Box paddingX="0.75rem" height="100%">
@@ -64,12 +62,8 @@ export const RawInfoView: FunctionComponent<{
           <Box style={{ flex: 1 }} />
 
           <GuideBox
-            title={intl.formatMessage({
-              id: "page.suggest-chain.raw-info-view.guide-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.suggest-chain.raw-info-view.guide-paragraph",
-            })}
+            title="Before You Approve"
+            paragraph="This chain’s info is not available on Keplr Chain Registry. Keplr recommends that ‘suggest chain’ info be managed by the community."
             bottom={
               <a
                 href={communityChainInfoRepoUrl}
@@ -80,7 +74,7 @@ export const RawInfoView: FunctionComponent<{
                   color={ColorPalette["gray-100"]}
                   style={{ textDecoration: "underline" }}
                 >
-                  <FormattedMessage id="page.suggest-chain.raw-info-view.chain-registry-link-text" />
+                  Click here to update chain info on Github
                 </Subtitle4>
               </a>
             }

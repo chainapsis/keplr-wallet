@@ -11,7 +11,6 @@ import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
 import { useInteractionInfo } from "../../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
-import { useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -33,7 +32,6 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const intl = useIntl();
 
   const vaultId = searchParams.get("id");
   const walletName = useMemo(() => {
@@ -79,9 +77,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({
-        id: "page.wallet.keyring-item.dropdown.change-wallet-name-title",
-      })}
+      title="Change Wallet Name"
       left={
         <BackButton
           hidden={
@@ -90,7 +86,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
         />
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.wallet.change-name.save-button" }),
+        text: "Save",
         color: "secondary",
         size: "large",
         type: "submit",
@@ -133,17 +129,13 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
     >
       <Styles.Container>
         <TextInput
-          label={intl.formatMessage({
-            id: "page.wallet.change-name.previous-name-input-label",
-          })}
+          label="Previous Wallet Name"
           disabled
           value={walletName?.name}
         />
 
         <TextInput
-          label={intl.formatMessage({
-            id: "page.wallet.change-name.new-name-input-label",
-          })}
+          label="New Wallet Name"
           error={errors.name && errors.name.message}
           disabled={notEditable}
           {...register("name", { required: true })}

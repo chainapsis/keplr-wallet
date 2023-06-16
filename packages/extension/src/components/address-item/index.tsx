@@ -7,7 +7,7 @@ import { EllipsisIcon, ProfileIcon, DocumentTextIcon } from "../icon";
 import { FloatingDropdown, FloatingDropdownItem } from "../dropdown";
 import { ColorPalette } from "../../styles";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useIntl } from "react-intl";
 import { Gutter } from "../gutter";
 import { IconButton } from "../icon-button";
 import { XAxis, YAxis } from "../axis";
@@ -64,16 +64,11 @@ export const AddressItem: FunctionComponent<{
                     color: ColorPalette["gray-10"],
                   }}
                 >
-                  <FormattedMessage
-                    id="components.address-item.sent-on-date"
-                    values={{
-                      date: intl.formatDate(new Date(timestamp), {
-                        year: "numeric",
-                        month: "long",
-                        day: "2-digit",
-                      }),
-                    }}
-                  />
+                  {`Sent on ${intl.formatDate(new Date(timestamp), {
+                    year: "numeric",
+                    month: "long",
+                    day: "2-digit",
+                  })}`}
                 </H5>
                 <Gutter size="0.5rem" />
               </React.Fragment>
@@ -131,7 +126,7 @@ export const AddressItem: FunctionComponent<{
                       color: ColorPalette["gray-300"],
                     }}
                   >
-                    <FormattedMessage id="components.address-item.empty-memo" />
+                    (Empty Memo)
                   </Body2>
                 )}
               </XAxis>

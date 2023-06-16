@@ -6,7 +6,6 @@ import { ColorPalette } from "../../../../styles";
 import { BIP44PathState } from "./state";
 import { observer } from "mobx-react-lite";
 import { useConfirm } from "../../../../hooks/confirm";
-import { FormattedMessage, useIntl } from "react-intl";
 
 const CloseSvg: FunctionComponent<{ size: number | string; color: string }> = ({
   size,
@@ -39,7 +38,6 @@ export const SetBip44PathCard: FunctionComponent<{
   onClose: () => void;
 }> = observer(({ coinType, state, onClose }) => {
   const confirm = useConfirm();
-  const intl = useIntl();
 
   const onClickReset = async (e: MouseEvent) => {
     e.preventDefault();
@@ -47,9 +45,7 @@ export const SetBip44PathCard: FunctionComponent<{
     if (
       await confirm.confirm(
         "",
-        intl.formatMessage({
-          id: "pages.register.components.bip-44-path.confirm-paragraph",
-        })
+        "Closing this box will reset the HD Path. Are you sure you want to proceed?"
       )
     ) {
       state.reset();
@@ -59,22 +55,17 @@ export const SetBip44PathCard: FunctionComponent<{
 
   return (
     <Styles.Container>
-      <Styles.Title>
-        <FormattedMessage id="pages.register.components.bip-44-path.title" />
-      </Styles.Title>
+      <Styles.Title>Set Custom Derivation Path</Styles.Title>
       <Styles.CloseContainer onClick={onClickReset}>
         <CloseSvg size="1.5rem" color={ColorPalette["gray-300"]} />
       </Styles.CloseContainer>
       <Gutter size="1.125rem" />
       <ul>
+        <li>You can create multiple addresses from one recovery phrase</li>
+        <li>A lost path cannot be recovered</li>
         <li>
-          <FormattedMessage id="pages.register.components.bip-44-path.paragraph-from-one-recovery-path" />
-        </li>
-        <li>
-          <FormattedMessage id="pages.register.components.bip-44-path.paragraph-lost" />
-        </li>
-        <li>
-          <FormattedMessage id="pages.register.components.bip-44-path.paragraph-unfamiliar" />
+          If you{`'`}re unfamiliar with this feature, skip or undo this step{" "}
+          {`->`}{" "}
           <span
             style={{
               fontWeight: 700,
@@ -83,14 +74,12 @@ export const SetBip44PathCard: FunctionComponent<{
             }}
             onClick={onClickReset}
           >
-            <FormattedMessage id="pages.register.components.bip-44-path.reset" />
+            Reset Settings
           </span>
         </li>
       </ul>
       <Gutter size="1.5rem" />
-      <Styles.SubTitle>
-        <FormattedMessage id="pages.register.components.bip-44-path.hd-path-subtitle" />
-      </Styles.SubTitle>
+      <Styles.SubTitle>HD Derivation Path</Styles.SubTitle>
       <Gutter size="0.5rem" />
       <Styles.InputsContainer>
         <div>{`m/44'/${coinType != null ? coinType : "..."}'`}</div>

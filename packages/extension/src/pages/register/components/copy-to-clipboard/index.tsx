@@ -5,7 +5,6 @@ import { TextButton } from "../../../../components/button-text";
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import lottie from "lottie-web";
 import AnimCheck from "../../../../public/assets/lottie/register/check_circle-icon.json";
-import { FormattedMessage } from "react-intl";
 
 export const CopyToClipboard: FunctionComponent<{ text: string }> = ({
   text,
@@ -35,16 +34,14 @@ export const CopyToClipboard: FunctionComponent<{ text: string }> = ({
       text={
         hasCopied ? (
           <Columns sum={1} gutter="0.25rem">
-            <Button1 color={ColorPalette["green-400"]}>
-              <FormattedMessage id="pages.register.components.copy-to-clipboard.button-after" />
-            </Button1>
+            <Button1 color={ColorPalette["green-400"]}>Copied</Button1>
             <div
               style={{ width: "1.125rem", height: "1.125rem" }}
               ref={checkAnimDivRef}
             />
           </Columns>
         ) : (
-          <FormattedMessage id="pages.register.components.copy-to-clipboard.button-before" />
+          "Copy to clipboard"
         )
       }
       size="large"

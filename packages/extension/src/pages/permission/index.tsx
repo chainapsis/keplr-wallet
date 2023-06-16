@@ -6,7 +6,6 @@ import { GlobalPermissionData, PermissionData } from "@keplr-wallet/background";
 import { Splash } from "../../components/splash";
 import { GlobalPermissionGetChainInfosPage } from "./get-chain-infos";
 import { useInteractionInfo } from "../../hooks";
-import { FormattedMessage } from "react-intl";
 
 const UnknownPermissionPage: FunctionComponent<{
   data: {
@@ -15,9 +14,7 @@ const UnknownPermissionPage: FunctionComponent<{
 }> = observer(({ data }) => {
   return (
     <div>
-      <div>
-        <FormattedMessage id="page.permission.unknown-permission" />
-      </div>
+      <div>Unknown permission</div>
       <div>{JSON.stringify(data)}</div>
     </div>
   );
@@ -28,9 +25,7 @@ const UnknownGlobalPermissionPage: FunctionComponent<{
 }> = observer(({ data }) => {
   return (
     <div>
-      <div>
-        <FormattedMessage id="page.permission.unknown-permission" />
-      </div>
+      <div>Unknown permission</div>
       <div>{JSON.stringify(data)}</div>
     </div>
   );

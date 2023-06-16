@@ -12,7 +12,7 @@ import { ColorPalette } from "../../../../../styles";
 import { Body3, H4, Subtitle3 } from "../../../../../components/typography";
 import { CopyOutlineIcon } from "../../../../../components/icon";
 import { Columns } from "../../../../../components/column";
-import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
+import { FormattedDate } from "react-intl";
 import { useNavigate } from "react-router";
 import { useNotification } from "../../../../../hooks/notification";
 
@@ -40,7 +40,6 @@ const Styles = {
 export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
   const { accountStore } = useStore();
 
-  const intl = useIntl();
   const location = useLocation();
   const navigate = useNavigate();
   const notification = useNotification();
@@ -116,20 +115,10 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {
               console.log(tx.log ?? tx.raw_log);
-              notification.show(
-                "failed",
-                intl.formatMessage({ id: "error.transaction-failed" }),
-                ""
-              );
+              notification.show("failed", "Transaction Failed", "");
               return;
             }
-            notification.show(
-              "success",
-              intl.formatMessage({
-                id: "page.setting.general.authz.revoke.transaction-success",
-              }),
-              ""
-            );
+            notification.show("success", "Transaction Success", "");
           },
         }
       );
@@ -157,14 +146,10 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({
-        id: "page.setting.general.authz.revoke.title",
-      })}
+      title="Authz Details"
       left={<BackButton />}
       bottomButton={{
-        text: intl.formatMessage({
-          id: "page.setting.general.authz.revoke.revoke-button",
-        }),
+        text: "Revoke",
         color: "danger",
         size: "large",
         onClick: () => onClickRevokeButton(state.grant),
@@ -174,9 +159,7 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
         <Stack gutter="0.5rem">
           <H4 style={{ color: ColorPalette["gray-50"] }}>{state.title}</H4>
           <Styles.Card gutter="0.5rem">
-            <Styles.Title>
-              <FormattedMessage id="page.setting.general.authz.revoke.grantee-address" />
-            </Styles.Title>
+            <Styles.Title>Grantee Address</Styles.Title>
             <Styles.Paragraph>
               {state.grant.grantee}
               <CopyOutlineIcon width="0.875rem" height="0.875rem" />
@@ -184,9 +167,7 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
           </Styles.Card>
 
           <Styles.Card gutter="0.5rem">
-            <Styles.Title>
-              <FormattedMessage id="page.setting.general.authz.revoke.expiration-dates" />
-            </Styles.Title>
+            <Styles.Title>Expiration dates</Styles.Title>
             <Styles.Paragraph>
               {state.grant.expiration ? (
                 new Date() < new Date(state.grant.expiration) ? (
@@ -203,7 +184,7 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
                   </Columns>
                 ) : null
               ) : (
-                <FormattedMessage id="page.setting.general.authz.grant-view.no-expiration" />
+                "No expiration"
               )}
             </Styles.Paragraph>
           </Styles.Card>

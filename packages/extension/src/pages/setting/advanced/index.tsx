@@ -9,28 +9,19 @@ import { Stack } from "../../../components/stack";
 import { Toggle } from "../../../components/toggle";
 import { useStore } from "../../../stores";
 import { useNavigate } from "react-router";
-import { useIntl } from "react-intl";
 
 export const SettingAdvancedPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
-  const intl = useIntl();
 
   const navigate = useNavigate();
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.advanced-title" })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title="Advanced" left={<BackButton />}>
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="0.5rem">
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.advanced.developer-mode-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.advanced.developer-mode-paragraph",
-            })}
+            title="Developer Mode"
+            paragraph="Feeling techie today? :)"
             endIcon={
               <Toggle
                 isOpen={uiConfigStore.isDeveloper}
@@ -42,9 +33,7 @@ export const SettingAdvancedPage: FunctionComponent = observer(() => {
           />
 
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.advanced.change-endpoints-title",
-            })}
+            title="Change Endpoints"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/advanced/endpoint")}
           />

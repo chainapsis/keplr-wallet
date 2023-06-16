@@ -3,7 +3,6 @@ import React, { FunctionComponent } from "react";
 import { MsgVote } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/tx";
 import { VoteOption } from "@keplr-wallet/proto-types/cosmos/gov/v1beta1/gov";
 import { Image } from "../../../../../components/image";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const VoteMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -34,9 +33,7 @@ export const VoteMessage: IMessageRenderer = {
             style={{ width: "3rem", height: "3rem" }}
           />
         ),
-        title: (
-          <FormattedMessage id="page.sign.components.messages.vote.title" />
-        ),
+        title: "Vote",
         content: (
           <VoteMessagePretty
             chainId={chainId}
@@ -56,7 +53,6 @@ const VoteMessagePretty: FunctionComponent<{
   voter: string;
   option: VoteOption | string;
 }> = ({ proposalId, option }) => {
-  const intl = useIntl();
   const textualOption = (() => {
     if (typeof option === "string") {
       return option;
@@ -64,42 +60,23 @@ const VoteMessagePretty: FunctionComponent<{
 
     switch (option) {
       case 0:
-        return intl.formatMessage({
-          id: "page.sign.components.messages.vote.empty",
-        });
+        return "Empty";
       case 1:
-        return intl.formatMessage({
-          id: "page.sign.components.messages.vote.yes",
-        });
+        return "Yes";
       case 2:
-        return intl.formatMessage({
-          id: "page.sign.components.messages.vote.abstain",
-        });
+        return "Abstain";
       case 3:
-        return intl.formatMessage({
-          id: "page.sign.components.messages.vote.no",
-        });
+        return "No";
       case 4:
-        return intl.formatMessage({
-          id: "page.sign.components.messages.vote.no-with-veto",
-        });
+        return "No with veto";
       default:
-        return intl.formatMessage({
-          id: "page.sign.components.messages.vote.unspecified",
-        });
+        return "Unspecified";
     }
   })();
 
   return (
     <React.Fragment>
-      <FormattedMessage
-        id="page.sign.components.messages.vote.paragraph"
-        values={{
-          textualOption,
-          proposalId,
-          b: (...chunks: any) => <b>{chunks}</b>,
-        }}
-      />
+      Vote <b>{textualOption}</b> on <b>Proposal {proposalId}</b>
     </React.Fragment>
   );
 };

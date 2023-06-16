@@ -15,23 +15,17 @@ import { useRegisterHeader } from "../components/header";
 import { RegisterH4 } from "../components/typography";
 import { ArrowDownTrayIcon, GoogleIcon } from "../../../components/icon";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const RegisterIntroExistingUserScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
-  const intl = useIntl();
 
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "welcome",
-        title: intl.formatMessage({
-          id: "pages.register.intro-existing-user.title",
-        }),
-        paragraph: intl.formatMessage({
-          id: "pages.register.intro-existing-user.paragraph",
-        }),
+        title: "Welcome Back to Keplr",
+        paragraph: "Glad you’re back! 🫶",
       });
     },
   });
@@ -42,18 +36,17 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
         <Column weight={1}>
           <Box height="100%">
             <RegisterH4 color={ColorPalette["gray-50"]}>
-              <FormattedMessage id="pages.register.intro-existing-user.recovery-title" />
+              Recovery Phrase or Private Key
             </RegisterH4>
             <Gutter size="0.5rem" />
             <Subtitle3 color={ColorPalette["gray-200"]}>
-              <FormattedMessage id="pages.register.intro-existing-user.recovery-paragraph" />
+              Use an existing 12/24 word recovery phrase or private key. You can
+              also import wallets from other wallet providers.
             </Subtitle3>
 
             <Gutter size="1.5rem" />
             <Button
-              text={intl.formatMessage({
-                id: "pages.register.intro-existing-user.recovery-button",
-              })}
+              text="Use recovery phrase or private key"
               size="large"
               left={<ArrowDownTrayIcon width="1rem" height="1rem" />}
               onClick={() => {
@@ -65,22 +58,19 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
         <Box width="1px" backgroundColor={ColorPalette["gray-400"]} />
         <Column weight={1}>
           <Box height="100%">
-            <RegisterH4 color={ColorPalette["gray-50"]}>
-              <FormattedMessage id="pages.register.intro-existing-user.social-recovery-title" />
-            </RegisterH4>
+            <RegisterH4 color={ColorPalette["gray-50"]}>Use Google</RegisterH4>
 
             <Gutter size="0.5rem" />
             <div style={{ flex: 1 }}>
               <Subtitle3 color={ColorPalette["gray-200"]}>
-                <FormattedMessage id="pages.register.intro-existing-user.social-recovery-paragraph" />
+                Log in with the same email address to import an existing account
+                to Keplr.
               </Subtitle3>
             </div>
 
             <Stack gutter="0.625rem">
               <Button
-                text={intl.formatMessage({
-                  id: "pages.register.intro-existing-user.social-recovery-google-button",
-                })}
+                text="Connect with Google"
                 size="large"
                 color="secondary"
                 left={<GoogleIcon />}
@@ -88,9 +78,7 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
                   if (KeplrWalletPrivate.onGoogleSignInClick) {
                     KeplrWalletPrivate.onGoogleSignInClick(sceneTransition);
                   } else {
-                    alert(
-                      intl.formatMessage({ id: "error.not-supported-error" })
-                    );
+                    alert("Not supported");
                   }
                 }}
               />

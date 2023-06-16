@@ -8,7 +8,6 @@ import { CoinPrimitive, Staking } from "@keplr-wallet/stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Image } from "../../../../../components/image";
-import { FormattedMessage } from "react-intl";
 
 export const DelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -42,9 +41,7 @@ export const DelegateMessage: IMessageRenderer = {
             style={{ width: "3rem", height: "3rem" }}
           />
         ),
-        title: (
-          <FormattedMessage id="page.sign.components.messages.delegate.title" />
-        ),
+        title: "Delegate",
         content: (
           <DelegateMessagePretty
             chainId={chainId}
@@ -73,15 +70,8 @@ const DelegateMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <FormattedMessage
-        id="page.sign.components.messages.delegate.paragraph"
-        values={{
-          validator:
-            moniker || Bech32Address.shortenAddress(validatorAddress, 28),
-          amount: coinpretty.trim(true).toString(),
-          b: (...chunks: any) => <b>{chunks}</b>,
-        }}
-      />
+      Delegate <b>{coinpretty.trim(true).toString()}</b> to{" "}
+      <b>{moniker || Bech32Address.shortenAddress(validatorAddress, 28)}</b>
     </React.Fragment>
   );
 });

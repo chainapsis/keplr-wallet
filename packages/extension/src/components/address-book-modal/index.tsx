@@ -16,7 +16,6 @@ import { RecentSendHistory } from "@keplr-wallet/background";
 import { AddressItem } from "../address-item";
 import SimpleBar from "simplebar-react";
 import styled from "styled-components";
-import { FormattedMessage, useIntl } from "react-intl";
 
 type Type = "recent" | "contacts" | "accounts";
 
@@ -47,7 +46,6 @@ export const AddressBookModal: FunctionComponent<{
     permitSelfKeyInfo,
   }) => {
     const { analyticsStore, uiConfigStore, keyRingStore } = useStore();
-    const intl = useIntl();
 
     const [type, setType] = useState<Type>("recent");
 
@@ -82,9 +80,7 @@ export const AddressBookModal: FunctionComponent<{
                 if (res.status === "fulfilled") {
                   return res.value;
                 }
-                throw new Error(
-                  intl.formatMessage({ id: "error.unexpected-status" })
-                );
+                throw new Error("Unexpected status");
               })
           );
         });
@@ -155,7 +151,7 @@ export const AddressBookModal: FunctionComponent<{
                 color: ColorPalette["white"],
               }}
             >
-              <FormattedMessage id="components.address-book-modal.title" />
+              Address Book
             </Subtitle1>
           </Box>
 
@@ -166,21 +162,15 @@ export const AddressBookModal: FunctionComponent<{
               items={[
                 {
                   key: "recent",
-                  text: intl.formatMessage({
-                    id: "components.address-book-modal.recent-tab",
-                  }),
+                  text: "Recent",
                 },
                 {
                   key: "contacts",
-                  text: intl.formatMessage({
-                    id: "components.address-book-modal.contacts-tab",
-                  }),
+                  text: "Contacts",
                 },
                 {
                   key: "accounts",
-                  text: intl.formatMessage({
-                    id: "components.address-book-modal.my-account-tab",
-                  }),
+                  text: "My account",
                 },
               ]}
               selectedKey={type}
@@ -232,9 +222,7 @@ export const AddressBookModal: FunctionComponent<{
                     <React.Fragment>
                       {selfAccount ? (
                         <React.Fragment>
-                          <AltTypography>
-                            <FormattedMessage id="components.address-book-modal.current-wallet" />
-                          </AltTypography>
+                          <AltTypography>Current Wallet</AltTypography>
                           <AddressItem
                             name={selfAccount.name}
                             address={selfAccount.address}
@@ -249,9 +237,7 @@ export const AddressBookModal: FunctionComponent<{
                         </React.Fragment>
                       ) : null}
 
-                      <AltTypography>
-                        <FormattedMessage id="components.address-book-modal.other-wallet" />
-                      </AltTypography>
+                      <AltTypography>Other Wallets</AltTypography>
                       {otherAccounts.map((data, i) => {
                         return (
                           <AddressItem
@@ -289,13 +275,9 @@ export const AddressBookModal: FunctionComponent<{
                     {(() => {
                       switch (type) {
                         case "accounts":
-                          return intl.formatMessage({
-                            id: "components.address-book-modal.empty-view-accounts",
-                          });
+                          return "No other wallet found";
                         default:
-                          return intl.formatMessage({
-                            id: "components.address-book-modal.empty-view-default",
-                          });
+                          return "No Data Yet";
                       }
                     })()}
                   </Subtitle3>

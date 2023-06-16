@@ -6,7 +6,6 @@ import { CopyOutlineIcon } from "../../../../components/icon";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { Skeleton } from "../../../../components/skeleton";
-import { FormattedMessage } from "react-intl";
 
 export const CopyAddressRadius = "16rem";
 
@@ -45,7 +44,7 @@ export const CopyAddress: FunctionComponent<{
         <Skeleton type="copyAddress" isNotReady={isNotReady}>
           <Styles.Container onClick={onClick}>
             <Caption1 style={{ color: ColorPalette["gray-300"] }}>
-              <FormattedMessage id="page.main.components.copy-address.title" />
+              Copy Address
             </Caption1>
             <Gutter size="2px" />
             <CopyOutlineIcon width="1rem" height="1rem" />

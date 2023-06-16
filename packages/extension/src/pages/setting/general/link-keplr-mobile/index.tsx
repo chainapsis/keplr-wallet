@@ -26,7 +26,6 @@ import { AddressBookData } from "../../../../stores/ui-config/address-book";
 import { toJS } from "mobx";
 import { Box } from "../../../../components/box";
 import { Gutter } from "../../../../components/gutter";
-import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -50,7 +49,6 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
     >([]);
 
     const confirm = useConfirm();
-    const intl = useIntl();
 
     return keyRingData.length === 0 ? (
       <EnterPasswordView
@@ -64,14 +62,13 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
 
           if (res.length === 0) {
             confirm.confirm(
-              intl.formatMessage({
-                id: "page.setting.general.link-keplr-mobile.confirm-title",
-              }),
+              "Export Failed",
               <React.Fragment>
-                <FormattedMessage
-                  id="page.setting.general.link-keplr-mobile.confirm-paragraph"
-                  values={{ br: <br /> }}
-                />
+                You cannot export Ledger-based accounts to Keplr Mobile. These
+                must be imported to your mobile device directly from the Ledger.
+                <br />
+                Accounts that are created via social logins that are not
+                supported by Keplr Mobile cannot be exported.
               </React.Fragment>,
               {
                 forceYes: true,
@@ -97,7 +94,6 @@ const EnterPasswordView: FunctionComponent<{
   onSubmit: (password: string) => Promise<void>;
 }> = observer(({ onSubmit }) => {
   const animDivRef = useRef<HTMLDivElement | null>(null);
-  const intl = useIntl();
 
   useEffect(() => {
     if (animDivRef.current) {
@@ -122,15 +118,11 @@ const EnterPasswordView: FunctionComponent<{
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({
-        id: "page.setting.general.link-kpelr-mobile-title",
-      })}
+      title="Link Keplr Mobile"
       left={<BackButton />}
       bottomButton={{
         color: "secondary",
-        text: intl.formatMessage({
-          id: "page.setting.general.link-keplr-mobile.enter-password-view.confirm-button",
-        }),
+        text: "Confirm",
         size: "large",
         isLoading,
         disabled: password.length === 0,
@@ -152,12 +144,13 @@ const EnterPasswordView: FunctionComponent<{
     >
       <Styles.Container gutter="0.75rem">
         <GuideBox
-          title={intl.formatMessage({
-            id: "page.setting.general.link-keplr-mobile.enter-password-view.guide-title",
-          })}
-          paragraph={intl.formatMessage({
-            id: "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph",
-          })}
+          title="Only scan on Keplr Mobile"
+          paragraph={
+            <div>
+              Scanning the QR code outside of Keplr Mobile can lead to loss of
+              funds
+            </div>
+          }
         />
 
         <YAxis alignX="center">
@@ -173,20 +166,15 @@ const EnterPasswordView: FunctionComponent<{
         </YAxis>
 
         <Styles.Paragraph>
-          <FormattedMessage id="page.setting.general.link-keplr-mobile.enter-password-view.paragraph" />
+          Scan QR code to export accounts to Keplr Mobile. The process may take
+          several minutes.
         </Styles.Paragraph>
 
         <TextInput
-          label={intl.formatMessage({
-            id: "page.setting.general.link-keplr-mobile.enter-password-view.password-label",
-          })}
+          label="Password"
           type="password"
           value={password}
-          error={
-            isFailed
-              ? intl.formatMessage({ id: "error.invalid-password" })
-              : undefined
-          }
+          error={isFailed ? "Invalid password" : undefined}
           onChange={(e) => {
             e.preventDefault();
 
@@ -229,7 +217,6 @@ const QRCodeView: FunctionComponent<{
 
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const intl = useIntl();
 
   const [connector, setConnector] = useState<WalletConnect | undefined>();
   const [qrCodeData, setQRCodeData] = useState<QRCodeSharedData | undefined>();
@@ -246,15 +233,9 @@ const QRCodeView: FunctionComponent<{
       // Hide qr code after 30 seconds.
       setIsExpired(true);
       confirm
-        .confirm(
-          "",
-          intl.formatMessage({
-            id: "page.setting.general.link-keplr-mobile.qr-code-view.session-expired",
-          }),
-          {
-            forceYes: true,
-          }
-        )
+        .confirm("", "Session expired", {
+          forceYes: true,
+        })
         .then(() => {
           cancelRef.current();
         });
@@ -403,17 +384,13 @@ const QRCodeView: FunctionComponent<{
   }, [connector]);
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({
-        id: "page.setting.general.link-kpelr-mobile-title",
-      })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title="Link Keplr Mobile" left={<BackButton />}>
       <Styles.Container>
         <Box padding="1.5rem">
           <YAxis alignX="center">
             <Styles.Paragraph>
-              <FormattedMessage id="page.setting.general.link-keplr-mobile.qr-code-view.paragraph" />
+              Scan the QR code to sync with Keplr Mobile. The process may take
+              several minutes.
             </Styles.Paragraph>
             <Gutter size="3.375rem" direction="vertical" />
             <Box
@@ -425,9 +402,7 @@ const QRCodeView: FunctionComponent<{
                 size={180}
                 value={(() => {
                   if (isExpired) {
-                    return intl.formatMessage({
-                      id: "page.setting.general.link-keplr-mobile.qr-code-view.expired",
-                    });
+                    return "Expired";
                   }
 
                   if (qrCodeData) {

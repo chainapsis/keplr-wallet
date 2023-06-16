@@ -7,7 +7,6 @@ import { Stack } from "../../../../../../components/stack";
 import styled from "styled-components";
 import { PuzzleIcon } from "../puzzle-icon";
 import { Gutter } from "../../../../../../components/gutter";
-import { FormattedMessage } from "react-intl";
 
 const Styles = {
   Title: styled.div`
@@ -40,30 +39,22 @@ export const PinView: FunctionComponent = () => {
         </Box>
 
         <Stack gutter="0.25rem">
-          <Styles.Title>
-            <FormattedMessage id="pages.register.pages.welcome.pin-view.title" />
-          </Styles.Title>
+          <Styles.Title>Pin Keplr for easy access</Styles.Title>
 
           <Gutter size="0.25rem" />
 
           <Columns sum={1} alignY="center" gutter="0.25rem">
-            <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.paragraph-1" />
-            </Styles.Paragraph>
+            <Styles.Paragraph>Click the ‘Extensions’ </Styles.Paragraph>
             <PuzzleIcon size="1rem" />
-            <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.button-text-1" />
-            </Styles.Paragraph>
+            <Styles.Paragraph>button</Styles.Paragraph>
           </Columns>
 
           <Columns sum={1} alignY="center" gutter="0.25rem">
             <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.paragraph-2" />
+              Locate Keplr then click the ‘Pin’
             </Styles.Paragraph>
             <PinIcon size="1rem" />
-            <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.button-text-2" />
-            </Styles.Paragraph>
+            <Styles.Paragraph>button</Styles.Paragraph>
           </Columns>
         </Stack>
       </Columns>

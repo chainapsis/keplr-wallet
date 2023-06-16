@@ -2,7 +2,6 @@ import React, { FunctionComponent } from "react";
 import styled from "styled-components";
 import { ColorPalette } from "../../styles";
 import { Subtitle3 } from "../typography";
-import { FormattedMessage } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -43,14 +42,7 @@ export const EmptyView: FunctionComponent<{ subject?: string }> = ({
         </svg>
       </Styles.Icon>
       <Subtitle3 color={ColorPalette["gray-400"]}>
-        {subject ? (
-          <FormattedMessage
-            id="components.empty-view.text"
-            values={{ subject }}
-          />
-        ) : (
-          children
-        )}
+        {subject ? `No ${subject} Yet` : children}
       </Subtitle3>
     </Styles.Container>
   );

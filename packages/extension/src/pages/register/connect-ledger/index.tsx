@@ -25,7 +25,6 @@ import { LedgerUtils } from "../../../utils";
 import { Checkbox } from "../../../components/checkbox";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import { useConfirm } from "../../../hooks/confirm";
-import { FormattedMessage, useIntl } from "react-intl";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -56,12 +55,8 @@ export const ConnectLedgerScene: FunctionComponent<{
     stepPrevious,
     stepTotal,
   }) => {
-    const intl = useIntl();
-
     if (propApp !== "Cosmos" && propApp !== "Terra" && propApp !== "Ethereum") {
-      throw new Error(
-        intl.formatMessage({ id: "error.unsupported-app" }, { app: propApp })
-      );
+      throw new Error(`Unsupported app: ${propApp}`);
     }
 
     const sceneTransition = useSceneTransition();
@@ -71,13 +66,9 @@ export const ConnectLedgerScene: FunctionComponent<{
       onWillVisible: () => {
         header.setHeader({
           mode: "step",
-          title: intl.formatMessage({
-            id: "pages.register.connect-ledger.title",
-          }),
+          title: "Please connect your Hardware wallet",
           paragraphs: [
-            intl.formatMessage({
-              id: "pages.register.connect-ledger.paragraph",
-            }),
+            "You need to connect Ethereum app in Ledger software, if you want to add EVM chains(Evmos, Injective) to Keplr",
           ],
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
@@ -188,7 +179,7 @@ export const ConnectLedgerScene: FunctionComponent<{
       try {
         const version = await app.getVersion();
         if (version.device_locked) {
-          throw new Error(intl.formatMessage({ id: "error.device-is-locked" }));
+          throw new Error("Device is locked");
         }
 
         // XXX: You must not check "error_message".
@@ -254,9 +245,7 @@ export const ConnectLedgerScene: FunctionComponent<{
         <Stack gutter="1.25rem">
           <StepView
             step={1}
-            paragraph={intl.formatMessage({
-              id: "pages.register.connect-ledger.connect-ledger-step-paragraph",
-            })}
+            paragraph="Connect and unlock your Ledger."
             icon={
               <Box style={{ opacity: step !== "unknown" ? 0.5 : 1 }}>
                 <LedgerIcon />
@@ -267,10 +256,7 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
           <StepView
             step={2}
-            paragraph={intl.formatMessage(
-              { id: "pages.register.connect-ledger.open-app-step-paragraph" },
-              { app: propApp }
-            )}
+            paragraph={`Open the ${propApp} app on your Ledger device.`}
             icon={
               <Box style={{ opacity: step !== "connected" ? 0.5 : 1 }}>
                 {(() => {
@@ -298,12 +284,8 @@ export const ConnectLedgerScene: FunctionComponent<{
               onChange={async (checked) => {
                 if (checked && !window.navigator.hid) {
                   await confirm.confirm(
-                    intl.formatMessage({
-                      id: "pages.register.connect-ledger.use-hid-confirm-title",
-                    }),
-                    intl.formatMessage({
-                      id: "pages.register.connect-ledger.use-hid-confirm-paragraph",
-                    }),
+                    "Unable to use Web HID",
+                    "Please enable ‘experimental web platform features’ to use Web HID",
                     {
                       forceYes: true,
                     }
@@ -320,7 +302,7 @@ export const ConnectLedgerScene: FunctionComponent<{
             />
             <Gutter size="0.5rem" />
             <Subtitle2 color={ColorPalette["gray-300"]}>
-              <FormattedMessage id="pages.register.connect-ledger.use-hid-text" />
+              Use alternative USB connection method(HID)
             </Subtitle2>
           </XAxis>
         </YAxis>
@@ -329,9 +311,7 @@ export const ConnectLedgerScene: FunctionComponent<{
 
         <Box width="22.5rem" marginX="auto">
           <Button
-            text={intl.formatMessage({
-              id: "pages.register.connect-ledger.next-button",
-            })}
+            text="Next"
             size="large"
             isLoading={isLoading}
             onClick={connectLedger}
@@ -369,10 +349,7 @@ const StepView: FunctionComponent<{
                   : ColorPalette["gray-300"],
               }}
             >
-              <FormattedMessage
-                id="pages.register.connect-ledger.step-text"
-                values={{ step }}
-              />
+              Step {step}
             </H2>
             {completed ? (
               <React.Fragment>

@@ -11,7 +11,6 @@ import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { ChainInfo } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { FormattedMessage } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -187,7 +186,7 @@ export const BuyCryptoModal: FunctionComponent<{
   return (
     <Styles.Container>
       <Subtitle1 style={{ color: ColorPalette["white"], textAlign: "center" }}>
-        <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
+        Buy Crypto
       </Subtitle1>
 
       {buySupportServiceInfos.map((serviceInfo) => {

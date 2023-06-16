@@ -6,7 +6,6 @@ import { Bech32Address } from "@keplr-wallet/cosmos";
 import { MsgTransfer } from "@keplr-wallet/proto-types/ibc/applications/transfer/v1/tx";
 import { Coin, CoinPretty } from "@keplr-wallet/unit";
 import { Image } from "../../../../../components/image";
-import { FormattedMessage } from "react-intl";
 
 export const TransferMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -40,9 +39,7 @@ export const TransferMessage: IMessageRenderer = {
             style={{ width: "3rem", height: "3rem" }}
           />
         ),
-        title: (
-          <FormattedMessage id="page.sign.components.messages.transfer.title" />
-        ),
+        title: "IBC Transfer",
         content: (
           <TransferMessagePretty
             chainId={chainId}
@@ -69,15 +66,8 @@ const TransferMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <FormattedMessage
-        id="page.sign.components.messages.transfer.paragraph"
-        values={{
-          coin: coinPretty.trim(true).toString(),
-          address: Bech32Address.shortenAddress(receiver, 20),
-          channelId,
-          b: (...chunks: any) => <b>{chunks}</b>,
-        }}
-      />
+      Send <b>{coinPretty.trim(true).toString()}</b> to{" "}
+      <b>{Bech32Address.shortenAddress(receiver, 20)}</b> on <b>{channelId}</b>
     </React.Fragment>
   );
 });

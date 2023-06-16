@@ -19,7 +19,6 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { SendTxAndRecordMsg } from "@keplr-wallet/background";
 import { DecUtils } from "@keplr-wallet/unit";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
-import { useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { useIBCChannelConfigQueryString } from "../../hooks/use-ibc-channel-config-query-string";
 
@@ -29,7 +28,6 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const notification = useNotification();
-  const intl = useIntl();
 
   const chainId = searchParams.get("chainId");
   const coinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -70,7 +68,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     "native",
     () => {
       if (!ibcTransferConfigs.channelConfig.channel) {
-        throw new Error(intl.formatMessage({ id: "error.channel-not-set" }));
+        throw new Error("Channel not set yet");
       }
 
       // Prefer not to use the gas config or fee config,
@@ -84,9 +82,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           "loading-block" ||
         ibcTransferConfigs.recipientConfig.uiProperties.error != null
       ) {
-        throw new Error(
-          intl.formatMessage({ id: "error.not-ready-to-simulate-tx" })
-        );
+        throw new Error("Not ready to simulate tx");
       }
 
       return accountInfo.cosmos.makeIBCTransferTx(
@@ -130,7 +126,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.ibc-transfer.title" })}
+      title="IBC Transfer"
       fixedHeight={true}
       left={
         <Box
@@ -148,7 +144,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
         </Box>
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.ibc-transfer.next-button" }),
+        text: "Next",
         size: "large",
         onClick: async () => {
           if (isSelectChannelPhase) {
@@ -207,22 +203,10 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                     onFulfill: (tx) => {
                       if (tx.code != null && tx.code !== 0) {
                         console.log(tx.log ?? tx.raw_log);
-                        notification.show(
-                          "failed",
-                          intl.formatMessage({
-                            id: "error.transaction-failed",
-                          }),
-                          ""
-                        );
+                        notification.show("failed", "Transaction Failed", "");
                         return;
                       }
-                      notification.show(
-                        "success",
-                        intl.formatMessage({
-                          id: "page.ibc-transfer.transaction-success",
-                        }),
-                        ""
-                      );
+                      notification.show("success", "Transaction Success", "");
                     },
                   }
                 );
@@ -236,13 +220,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   return;
                 }
 
-                notification.show(
-                  "failed",
-                  intl.formatMessage({
-                    id: "error.transaction-failed",
-                  }),
-                  ""
-                );
+                notification.show("failed", "Transaction Failed", "");
               }
 
               navigate("/", {

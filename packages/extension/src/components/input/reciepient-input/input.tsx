@@ -13,7 +13,6 @@ import { AddressBookModal } from "../../address-book-modal";
 import { IconButton } from "../../icon-button";
 import { ColorPalette } from "../../../styles";
 import { useStore } from "../../../stores";
-import { useIntl } from "react-intl";
 
 export interface RecipientInputWithAddressBookProps {
   historyType: string;
@@ -41,7 +40,6 @@ function numOfCharacter(str: string, c: string): number {
 export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
   (props, ref) => {
     const { analyticsStore } = useStore();
-    const intl = useIntl();
     const { recipientConfig, memoConfig } = props;
 
     const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
@@ -65,9 +63,7 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
       <Box>
         <TextInput
           ref={ref}
-          label={intl.formatMessage({
-            id: "components.input.recipient-input.wallet-address-label",
-          })}
+          label="Wallet Address"
           value={recipientConfig.value}
           autoComplete="off"
           onChange={(e) => {

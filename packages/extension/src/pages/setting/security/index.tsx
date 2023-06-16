@@ -6,7 +6,6 @@ import { PageButton } from "../components";
 import { RightArrowIcon } from "../../../components/icon";
 import { useNavigate } from "react-router";
 import { Box } from "../../../components/box";
-import { useIntl } from "react-intl";
 import { Toggle } from "../../../components/toggle";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
@@ -14,53 +13,37 @@ import { SetDisableAnalyticsMsg } from "@keplr-wallet/background";
 
 export const SettingSecurityPage: FunctionComponent = () => {
   const navigate = useNavigate();
-  const intl = useIntl();
 
   const [disableAnalytics, setDisableAnalytics] = React.useState<boolean>(
     localStorage.getItem("disable-analytics") === "true"
   );
 
   return (
-    <HeaderLayout
-      title={intl.formatMessage({ id: "page.setting.security-privacy-title" })}
-      left={<BackButton />}
-    >
+    <HeaderLayout title="Security & Privacy" left={<BackButton />}>
       <Box padding="0.75rem" paddingTop="0">
         <Stack gutter="1rem">
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.security.connected-websites-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.security.connected-websites-paragraph",
-            })}
+            title="Connected Websites"
+            paragraph="Websites that can view your address and make requests for signing"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/permission")}
           />
 
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.security.auto-lock-title",
-            })}
+            title="Auto-Lock"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/auto-lock")}
           />
 
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.security.change-password-title",
-            })}
+            title="Change Password"
             endIcon={<RightArrowIcon />}
             onClick={() => navigate("/setting/security/change-password")}
           />
 
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.security.analytics-title",
-            })}
-            paragraph={intl.formatMessage({
-              id: "page.setting.security.analytics-paragraph",
-            })}
+            title="Share anonymous data"
+            paragraph="Help us improve the performance and quality of Keplr"
             endIcon={
               <Box marginLeft="0.5rem">
                 <Toggle

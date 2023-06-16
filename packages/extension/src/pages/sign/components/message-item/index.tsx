@@ -7,7 +7,7 @@ import { Body3, H5 } from "../../../../components/typography";
 
 export const MessageItem: FunctionComponent<{
   icon: React.ReactElement;
-  title: string | React.ReactElement;
+  title: string;
   content: string | React.ReactElement;
 }> = ({ icon, title, content }) => {
   return (

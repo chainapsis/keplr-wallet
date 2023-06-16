@@ -7,7 +7,6 @@ import { ColorPalette } from "../../styles";
 import { Body2, Subtitle1 } from "../../components/typography";
 import { Gutter } from "../../components/gutter";
 import { Button } from "../../components/button";
-import { FormattedMessage } from "react-intl";
 
 export const ConfirmProvider: FunctionComponent = ({ children }) => {
   const [confirms, setConfirms] = useState<
@@ -151,9 +150,7 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
                           <Button
                             size="small"
                             color="secondary"
-                            text={
-                              <FormattedMessage id="hooks.confirm.cancel-button" />
-                            }
+                            text="Cancel"
                             style={{
                               minWidth: "4.875rem",
                             }}
@@ -164,9 +161,7 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
                       ) : null}
                       <Button
                         size="small"
-                        text={
-                          <FormattedMessage id="hooks.confirm.yes-button" />
-                        }
+                        text="Yes"
                         style={{
                           minWidth: "4.875rem",
                         }}

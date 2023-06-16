@@ -15,7 +15,6 @@ import { Buffer } from "buffer/";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { EthSignType } from "@keplr-wallet/types";
 import { handleEthereumPreSign } from "../utils/handle-eth-sign";
-import { FormattedMessage, useIntl } from "react-intl";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -28,7 +27,6 @@ export const EthereumSigningView: FunctionComponent<{
 }> = observer(({ interactionData }) => {
   const { chainStore, uiConfigStore, signEthereumInteractionStore } =
     useStore();
-  const intl = useIntl();
 
   const interactionInfo = useInteractionInfo(() => {
     signEthereumInteractionStore.rejectAll();
@@ -62,7 +60,7 @@ export const EthereumSigningView: FunctionComponent<{
 
   return (
     <HeaderLayout
-      title={intl.formatMessage({ id: "page.sign.ethereum.title" })}
+      title="Sign Ethereum"
       fixedHeight={true}
       left={
         <BackButton
@@ -72,7 +70,7 @@ export const EthereumSigningView: FunctionComponent<{
         />
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.sign.ethereum.approve-button" }),
+        text: "Approve",
         color: "primary",
         size: "large",
         isLoading:
@@ -159,9 +157,7 @@ export const EthereumSigningView: FunctionComponent<{
           borderRadius="0.375rem"
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-200"]}>
-              <FormattedMessage id="page.sign.ethereum.requested-network" />
-            </Body2>
+            <Body2 color={ColorPalette["gray-200"]}>Requested Network</Body2>
             <div style={{ flex: 1 }} />
             <Subtitle3 color={ColorPalette["gray-50"]}>
               {chainStore.getChain(interactionData.data.chainId).chainName}

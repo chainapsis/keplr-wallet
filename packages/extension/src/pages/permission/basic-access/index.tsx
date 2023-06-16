@@ -9,7 +9,6 @@ import { Image } from "../../../components/image";
 import { Body1, H2, Subtitle3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
-import { FormattedMessage, useIntl } from "react-intl";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: {
@@ -17,7 +16,6 @@ export const PermissionBasicAccessPage: FunctionComponent<{
   } & PermissionData;
 }> = observer(({ data }) => {
   const { chainStore, permissionStore } = useStore();
-  const intl = useIntl();
 
   const interactionInfo = useInteractionInfo();
 
@@ -26,9 +24,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
       title=""
       fixedHeight={true}
       bottomButton={{
-        text: intl.formatMessage({
-          id: "page.permission.approve-button",
-        }),
+        text: "Approve",
         size: "large",
         isLoading: (() => {
           const obsolete = data.ids.find((id) => {
@@ -65,9 +61,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
 
           <Gutter size="1.125rem" />
 
-          <H2 color={ColorPalette["gray-10"]}>
-            <FormattedMessage id="page.permission.requesting-connection-title" />
-          </H2>
+          <H2 color={ColorPalette["gray-10"]}>Requesting Connection</H2>
 
           <Gutter size="1rem" />
 

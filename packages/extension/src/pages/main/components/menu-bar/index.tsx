@@ -11,7 +11,6 @@ import { useStore } from "../../../../stores";
 import { Button2, H3 } from "../../../../components/typography";
 import { XAxis } from "../../../../components/axis";
 import { Bleed } from "../../../../components/bleed";
-import { FormattedMessage } from "react-intl";
 
 const Styles = {
   MenuItem: styled(H3)`
@@ -76,7 +75,7 @@ export const MenuBar: FunctionComponent<{
             }
           }}
         >
-          <FormattedMessage id="page.main.components.menu-bar.manage-chain-visibility-title" />
+          Manage Chain Visibility
         </Styles.MenuItem>
 
         <Gutter size="1rem" />
@@ -89,11 +88,11 @@ export const MenuBar: FunctionComponent<{
         <Gutter size="1rem" />
 
         <Styles.MenuItem onClick={() => navigate("/setting/contacts/list")}>
-          <FormattedMessage id="page.main.components.menu-bar.my-contacts-title" />
+          My Contacts
         </Styles.MenuItem>
 
         <Styles.MenuItem onClick={() => navigate("/setting/token/list")}>
-          <FormattedMessage id="page.main.components.menu-bar.add-token-title" />
+          Add Token
         </Styles.MenuItem>
 
         <Styles.MenuItem
@@ -101,7 +100,7 @@ export const MenuBar: FunctionComponent<{
             navigate("/setting");
           }}
         >
-          <FormattedMessage id="page.main.components.menu-bar.setting-title" />
+          Settings
         </Styles.MenuItem>
       </Stack>
 
@@ -114,7 +113,7 @@ export const MenuBar: FunctionComponent<{
           keyRingStore.lock();
         }}
       >
-        <FormattedMessage id="page.main.components.menu-bar.lock-wallet-title" />
+        Lock Wallet
       </Styles.MenuItem>
 
       <Gutter size="1rem" />
@@ -138,7 +137,7 @@ export const MenuBar: FunctionComponent<{
       >
         <XAxis alignY="center">
           <Button2 color={ColorPalette["gray-300"]}>
-            <FormattedMessage id="page.main.components.menu-bar.go-to-keplr-chain-registry" />
+            Go to Keplr Chain Registry
           </Button2>
 
           <Gutter size="0.25rem" />

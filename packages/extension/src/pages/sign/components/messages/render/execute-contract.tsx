@@ -11,7 +11,6 @@ import { Buffer } from "buffer/";
 import { WasmMessageView } from "./wasm-message-view";
 import { Gutter } from "../../../../../components/gutter";
 import { Image } from "../../../../../components/image";
-import { FormattedMessage } from "react-intl";
 
 export const ExecuteContractMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -53,9 +52,7 @@ export const ExecuteContractMessage: IMessageRenderer = {
             style={{ width: "3rem", height: "3rem" }}
           />
         ),
-        title: (
-          <FormattedMessage id="page.sign.components.messages.execute-wasm-contract.title" />
-        ),
+        title: "Execute Wasm Contract",
         content: (
           <ExecuteContractMessagePretty
             chainId={chainId}
@@ -91,20 +88,20 @@ const ExecuteContractMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <FormattedMessage
-        id="page.sign.components.messages.execute-wasm-contract.paragraph"
-        values={{
-          address: Bech32Address.shortenAddress(contract, 26),
-          b: (...chunks: any) => <b>{chunks}</b>,
-          ["only-sent-exist"]: (...chunks: any[]) =>
-            coins.length > 0 ? chunks : "",
-          sent: coins
-            .map((coinPretty) => {
-              return coinPretty.trim(true).toString();
-            })
-            .join(","),
-        }}
-      />
+      Execute contract <b>{Bech32Address.shortenAddress(contract, 26)}</b>
+      {coins.length > 0 ? (
+        <React.Fragment>
+          {" "}
+          by sending{" "}
+          <b>
+            {coins
+              .map((coinPretty) => {
+                return coinPretty.trim(true).toString();
+              })
+              .join(", ")}
+          </b>
+        </React.Fragment>
+      ) : null}
       <Gutter size="0.375rem" />
       <WasmMessageView
         chainId={chainId}
