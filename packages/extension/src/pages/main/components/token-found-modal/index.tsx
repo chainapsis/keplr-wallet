@@ -2,9 +2,10 @@ import React, { FunctionComponent, useMemo, useState } from "react";
 import { Box } from "../../../../components/box";
 import {
   Body2,
+  Body3,
   Button2,
-  Caption1,
   Subtitle1,
+  Subtitle2,
   Subtitle3,
 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
@@ -305,12 +306,10 @@ const FoundChainView: FunctionComponent<{
         </Box>
 
         <Stack gutter="0.25rem">
-          <Subtitle1 color={ColorPalette["gray-10"]}>
+          <Subtitle2 color={ColorPalette["gray-10"]}>
             {chainStore.getChain(tokenScan.chainId).chainName}
-          </Subtitle1>
-          <Caption1 color={ColorPalette["gray-300"]}>
-            {numTokens} Tokens
-          </Caption1>
+          </Subtitle2>
+          <Body3 color={ColorPalette["gray-300"]}>{numTokens} Tokens</Body3>
         </Stack>
 
         <Column weight={1} />
