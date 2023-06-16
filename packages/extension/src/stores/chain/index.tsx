@@ -21,6 +21,7 @@ import {
   ClearChainEndpointsMsg,
   DisableChainsMsg,
   EnableChainsMsg,
+  EnableVaultsWithCosmosAddressMsg,
   GetChainInfosWithCoreTypesMsg,
   GetEnabledChainIdentifiersMsg,
   GetTokenScansMsg,
@@ -268,6 +269,21 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
     this.setEmbeddedChainInfos(result.chainInfos);
+  }
+
+  @flow
+  *enableVaultsWithCosmosAddress(chainId: string, bech32Address: string) {
+    const msg = new EnableVaultsWithCosmosAddressMsg(chainId, bech32Address);
+    const res = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+
+    const changed = res.find(
+      (r) => r.vaultId === this.keyRingStore.selectedKeyInfo?.id
+    );
+    if (changed) {
+      this._enabledChainIdentifiers = changed.newEnabledChains as string[];
+    }
   }
 
   @flow

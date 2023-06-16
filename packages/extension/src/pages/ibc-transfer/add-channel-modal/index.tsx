@@ -46,7 +46,7 @@ export const IBCAddChannelModal: FunctionComponent<{
           placeholder="Select Chain"
           menuContainerMaxHeight="10rem"
           selectedItemKey={selectedChainId}
-          items={chainStore.chainInfosInUI
+          items={chainStore.chainInfos
             .filter(
               (chainInfo) =>
                 chainInfo.chainId !== chainId &&

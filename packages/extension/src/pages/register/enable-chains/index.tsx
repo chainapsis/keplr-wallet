@@ -21,7 +21,12 @@ import { Column, Columns } from "../../../components/column";
 import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
-import { Subtitle2, Subtitle3 } from "../../../components/typography";
+import {
+  Body2,
+  Subtitle2,
+  Subtitle3,
+  Subtitle4,
+} from "../../../components/typography";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
@@ -33,6 +38,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
+import { Tag } from "../../../components/tag";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -508,6 +514,17 @@ export const EnableChainsScene: FunctionComponent<{
       }
     };
 
+    const enabledChainIdentifiersInPage = useMemo(() => {
+      return enabledChainIdentifiers.filter((chainIdentifier) =>
+        chainInfos.some(
+          (chainInfo) => chainIdentifier === chainInfo.chainIdentifier
+        )
+      );
+    }, [enabledChainIdentifiers, chainInfos]);
+
+    const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
+      useState<string[]>([]);
+
     return (
       <RegisterSceneBox>
         <SearchTextInput
@@ -581,8 +598,100 @@ export const EnableChainsScene: FunctionComponent<{
                 />
               );
             })}
+
+            {!fallbackEthereumLedgerApp &&
+              keyType === "ledger" &&
+              chainStore.chainInfos
+                .filter((chainInfo) => {
+                  const trimSearch = search.trim();
+                  return (
+                    chainInfo.chainName
+                      .toLowerCase()
+                      .includes(trimSearch.toLowerCase()) ||
+                    chainInfo.stakeCurrency.coinDenom
+                      .toLowerCase()
+                      .includes(trimSearch.toLowerCase())
+                  );
+                })
+                .map((chainInfo) => {
+                  const isEthermintLike =
+                    chainInfo.bip44.coinType === 60 ||
+                    !!chainInfo.features?.includes("eth-address-gen") ||
+                    !!chainInfo.features?.includes("eth-key-sign");
+
+                  if (isEthermintLike) {
+                    return (
+                      <NextStepEvmChainItem
+                        key={chainInfo.chainId}
+                        chainInfo={chainInfo}
+                      />
+                    );
+                  }
+
+                  return null;
+                })}
           </Stack>
         </Box>
+
+        {!fallbackEthereumLedgerApp ? (
+          <React.Fragment>
+            <Gutter size="1.25rem" />
+
+            <YAxis alignX="center">
+              <Box
+                alignX="center"
+                cursor="pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  if (
+                    chainInfos.length === enabledChainIdentifiersInPage.length
+                  ) {
+                    if (preSelectedChainIdentifiers.length > 0) {
+                      setEnabledChainIdentifiers(preSelectedChainIdentifiers);
+                    } else {
+                      setEnabledChainIdentifiers([
+                        chainStore.chainInfos[0].chainIdentifier,
+                      ]);
+                    }
+                  } else {
+                    setPreSelectedChainIdentifiers([
+                      ...enabledChainIdentifiers,
+                    ]);
+                    const newEnabledChainIdentifiers: string[] =
+                      enabledChainIdentifiers.slice();
+                    for (const chainInfo of chainInfos) {
+                      if (
+                        !newEnabledChainIdentifiers.includes(
+                          chainInfo.chainIdentifier
+                        )
+                      ) {
+                        newEnabledChainIdentifiers.push(
+                          chainInfo.chainIdentifier
+                        );
+                      }
+                    }
+                    setEnabledChainIdentifiers(newEnabledChainIdentifiers);
+                  }
+                }}
+              >
+                <XAxis alignY="center">
+                  <Body2 color={ColorPalette["gray-300"]}>Select All</Body2>
+
+                  <Gutter size="0.25rem" />
+
+                  <Checkbox
+                    size="small"
+                    checked={
+                      chainInfos.length === enabledChainIdentifiersInPage.length
+                    }
+                    onChange={() => {}}
+                  />
+                </XAxis>
+              </Box>
+            </YAxis>
+          </React.Fragment>
+        ) : null}
 
         <Gutter size="1.25rem" />
         <Box width="22.5rem" marginX="auto">
@@ -830,3 +939,47 @@ const ChainItem: FunctionComponent<{
     );
   }
 );
+
+const NextStepEvmChainItem: FunctionComponent<{
+  chainInfo: ChainInfo;
+}> = ({ chainInfo }) => {
+  return (
+    <Box
+      paddingX="1rem"
+      paddingY="0.75rem"
+      cursor="not-allowed"
+      style={{ opacity: 0.5 }}
+    >
+      <Columns sum={1}>
+        <XAxis alignY="center">
+          <ChainImageFallback
+            style={{
+              width: "3rem",
+              height: "3rem",
+            }}
+            src={chainInfo.chainSymbolImageUrl}
+            alt={chainInfo.chainId}
+          />
+
+          <Gutter size="0.5rem" />
+
+          <YAxis>
+            <XAxis alignY="center">
+              <Subtitle2>{chainInfo.chainName}</Subtitle2>
+
+              <Gutter size="0.375rem" />
+
+              <Tag text="EVM" />
+            </XAxis>
+
+            <Gutter size="0.25rem" />
+
+            <Subtitle4 color={ColorPalette["gray-300"]}>
+              You can select EVM chains in the next step.
+            </Subtitle4>
+          </YAxis>
+        </XAxis>
+      </Columns>
+    </Box>
+  );
+};

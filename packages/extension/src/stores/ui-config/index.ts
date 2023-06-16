@@ -11,7 +11,7 @@ import {
   toJS,
 } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
+import { CoinGeckoPriceStore, KeyRingStore } from "@keplr-wallet/stores";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { CopyAddressConfig } from "./copy-address";
 import { ChainStore } from "../chain";
@@ -64,6 +64,7 @@ export class UIConfigStore {
     },
     protected readonly messageRequester: MessageRequester,
     protected readonly chainStore: ChainStore,
+    protected readonly keyRingStore: KeyRingStore,
     protected readonly priceStore: CoinGeckoPriceStore,
     _icnsInfo?: {
       readonly chainId: string;
@@ -78,7 +79,8 @@ export class UIConfigStore {
     this.addressBookConfig = new AddressBookConfig(
       kvStores.addressBookKVStore,
       messageRequester,
-      chainStore
+      chainStore,
+      keyRingStore
     );
 
     this._isBeta = navigator.userAgent.includes("Firefox");

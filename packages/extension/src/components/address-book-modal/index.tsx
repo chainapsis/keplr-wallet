@@ -66,7 +66,7 @@ export const AddressBookModal: FunctionComponent<{
 
     useEffect(() => {
       uiConfigStore.addressBookConfig
-        .getEnabledVaultCosmosKeysSettled(
+        .getVaultCosmosKeysSettled(
           recipientConfig.chainId,
           permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
         )

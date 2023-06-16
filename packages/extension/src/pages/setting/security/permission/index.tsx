@@ -91,6 +91,7 @@ const OriginStyle = {
   `,
   Item: styled(Box)`
     padding: 0.625rem;
+    margin-right: 0.625rem;
     color: ${ColorPalette["gray-100"]};
     background-color: ${ColorPalette["gray-500"]};
 

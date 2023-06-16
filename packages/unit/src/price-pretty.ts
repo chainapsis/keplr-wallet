@@ -24,7 +24,7 @@ export class PricePretty {
 
   constructor(
     protected _fiatCurrency: FiatCurrency,
-    protected amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
+    amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
   ) {
     this.intPretty = new IntPretty(amount)
       .maxDecimals(_fiatCurrency.maxDecimals)
@@ -221,7 +221,7 @@ export class PricePretty {
   }
 
   clone(): PricePretty {
-    const pretty = new PricePretty(this._fiatCurrency, this.amount);
+    const pretty = new PricePretty(this._fiatCurrency, 0);
     pretty._options = {
       ...this._options,
     };

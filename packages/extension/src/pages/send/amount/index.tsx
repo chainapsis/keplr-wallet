@@ -271,6 +271,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                   },
                 },
                 {
+                  onBroadcasted: () => {
+                    chainStore.enableVaultsWithCosmosAddress(
+                      sendConfigs.recipientConfig.chainId,
+                      sendConfigs.recipientConfig.recipient
+                    );
+                  },
                   onFulfill: (tx: any) => {
                     if (tx.code != null && tx.code !== 0) {
                       console.log(tx.log ?? tx.raw_log);
