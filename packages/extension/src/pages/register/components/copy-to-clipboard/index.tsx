@@ -5,6 +5,21 @@ import { TextButton } from "../../../../components/button-text";
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import lottie from "lottie-web";
 import AnimCheck from "../../../../public/assets/lottie/register/check_circle-icon.json";
+import styled from "styled-components";
+
+const SVGNoneTextButton = styled(TextButton)`
+  svg {
+    fill: none;
+    stroke: none;
+  }
+
+  :hover {
+    svg {
+      fill: none;
+      stroke: none;
+    }
+  }
+`;
 
 export const CopyToClipboard: FunctionComponent<{ text: string }> = ({
   text,
@@ -30,7 +45,7 @@ export const CopyToClipboard: FunctionComponent<{ text: string }> = ({
   }, [hasCopied]);
 
   return (
-    <TextButton
+    <SVGNoneTextButton
       text={
         hasCopied ? (
           <Columns sum={1} gutter="0.25rem">
