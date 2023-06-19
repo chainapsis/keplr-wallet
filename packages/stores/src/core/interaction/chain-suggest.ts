@@ -112,7 +112,11 @@ export class ChainSuggestStore {
     chainInfo: ChainInfoWithSuggestedOptions,
     afterFn: (proceedNext: boolean) => void | Promise<void>
   ) {
-    await this.interactionStore.approveWithProceedNext(id, chainInfo, afterFn);
+    await this.interactionStore.approveWithProceedNextV2(
+      id,
+      chainInfo,
+      afterFn
+    );
   }
 
   async rejectWithProceedNext(
