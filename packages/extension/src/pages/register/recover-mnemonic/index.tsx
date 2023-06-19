@@ -1,5 +1,11 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  forwardRef,
+  FunctionComponent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { RegisterSceneBox } from "../components/register-scene-box";
 import { Button } from "../../../components/button";
 import { HorizontalRadioGroup } from "../../../components/radio-group";
@@ -55,6 +61,8 @@ function validatePrivateKey(value: string): boolean {
 type SeedType = "12words" | "24words" | "private-key";
 
 export const RecoverMnemonicScene: FunctionComponent = observer(() => {
+  const firstTextInputRef = useRef<HTMLInputElement | null>(null);
+
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
@@ -75,6 +83,11 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         stepCurrent: 1,
         stepTotal: 3,
       });
+    },
+    onDidVisible: () => {
+      if (firstTextInputRef.current) {
+        firstTextInputRef.current.focus();
+      }
     },
   });
 
@@ -287,6 +300,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
                     <XAxis key={i} alignY="center">
                       <Styles.IndexText>{i + 1}.</Styles.IndexText>
                       <FocusVisiblePasswordInput
+                        ref={i === 0 ? firstTextInputRef : undefined}
                         value={word}
                         onChange={(e) => {
                           e.preventDefault();
@@ -351,17 +365,20 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
   );
 });
 
-const FocusVisiblePasswordInput: FunctionComponent<
+// eslint-disable-next-line react/display-name
+const FocusVisiblePasswordInput = forwardRef<
+  HTMLInputElement,
   Omit<TextInputProps, "type" | "autoComplete" | "onFocus" | "onBlur"> &
     React.InputHTMLAttributes<HTMLInputElement> & {
       disableShowPassword?: boolean;
     }
-> = (props) => {
+>((props, ref) => {
   const [focused, setFocused] = useState(false);
 
   return (
     <TextInput
       {...props}
+      ref={ref}
       type={(() => {
         if (props.disableShowPassword) {
           return "password";
@@ -378,4 +395,4 @@ const FocusVisiblePasswordInput: FunctionComponent<
       }}
     />
   );
-};
+});
