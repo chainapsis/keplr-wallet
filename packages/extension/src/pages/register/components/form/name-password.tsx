@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useRef } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { TextInput } from "../../../../components/input";
 import { Gutter } from "../../../../components/gutter";
@@ -8,6 +8,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { YAxis } from "../../../../components/axis";
 import { Box } from "../../../../components/box";
+import { useSceneEvents } from "../../../../components/transition";
 
 export interface FormDataNamePassword {
   name: string;
@@ -28,75 +29,94 @@ export const useFormNamePassword = () => {
 export const FormNamePassword: FunctionComponent<
   UseFormReturn<FormDataNamePassword> & {
     appendButton?: React.ReactNode;
+    autoFocus?: boolean;
   }
-> = observer(({ children, register, formState, getValues, appendButton }) => {
-  const { keyRingStore } = useStore();
+> = observer(
+  ({ children, register, formState, getValues, appendButton, autoFocus }) => {
+    const { keyRingStore } = useStore();
 
-  const needPassword = keyRingStore.keyInfos.length === 0;
+    const needPassword = keyRingStore.keyInfos.length === 0;
 
-  return (
-    <Stack gutter="1rem">
-      {!needPassword ? (
-        <YAxis alignX="center">
-          <Gutter size="1rem" />
-          <AddWalletImg />
-          <Gutter size="1rem" />
-        </YAxis>
-      ) : null}
-      <TextInput
-        label="Wallet Name"
-        {...register("name", {
-          required: true,
-        })}
-        placeholder="e.g. Trading, NFT Vault, Investment"
-        error={formState.errors.name?.message}
-      />
-      {needPassword ? (
-        <React.Fragment>
-          <TextInput
-            label="Create Keplr Password"
-            type="password"
-            placeholder="At least 8 characters in length"
-            {...register("password", {
-              required: true,
-              validate: (password: string): string | undefined => {
-                if (password.length < 8) {
-                  return "Too short password";
-                }
-              },
-            })}
-            error={formState.errors.password?.message}
-          />
-          <TextInput
-            label="Confirm Keplr Password"
-            type="password"
-            placeholder="At least 8 characters in length"
-            {...register("confirmPassword", {
-              required: true,
-              validate: (confirmPassword: string): string | undefined => {
-                if (confirmPassword !== getValues("password")) {
-                  return "Password should match";
-                }
-              },
-            })}
-            error={formState.errors.confirmPassword?.message}
-          />
-        </React.Fragment>
-      ) : null}
-      {children ? (
-        <React.Fragment>
-          <Gutter size="0" />
-          <Box>{children}</Box>
-          <Gutter size="0" />
-        </React.Fragment>
-      ) : (
-        <Gutter size="2.5rem" />
-      )}
-      <Button size="large" text="Next" type="submit" />
-      {appendButton}
-    </Stack>
-  );
-});
+    const { ref: nameRegisterRef, ...nameRegisterProps } = register("name", {
+      required: true,
+    });
+
+    const nameTextInputRef = useRef<HTMLInputElement | null>(null);
+
+    useSceneEvents({
+      onDidVisible: () => {
+        if (autoFocus && nameTextInputRef.current) {
+          nameTextInputRef.current.focus();
+        }
+      },
+    });
+
+    return (
+      <Stack gutter="1rem">
+        {!needPassword ? (
+          <YAxis alignX="center">
+            <Gutter size="1rem" />
+            <AddWalletImg />
+            <Gutter size="1rem" />
+          </YAxis>
+        ) : null}
+        <TextInput
+          label="Wallet Name"
+          ref={(ref) => {
+            nameRegisterRef(ref);
+            nameTextInputRef.current = ref;
+          }}
+          {...nameRegisterProps}
+          placeholder="e.g. Trading, NFT Vault, Investment"
+          error={formState.errors.name?.message}
+        />
+        {needPassword ? (
+          <React.Fragment>
+            <TextInput
+              label="Create Keplr Password"
+              type="password"
+              placeholder="At least 8 characters in length"
+              {...register("password", {
+                required: true,
+                validate: (password: string): string | undefined => {
+                  if (password.length < 8) {
+                    return "Too short password";
+                  }
+                },
+              })}
+              error={formState.errors.password?.message}
+            />
+            <TextInput
+              label="Confirm Keplr Password"
+              type="password"
+              placeholder="At least 8 characters in length"
+              {...register("confirmPassword", {
+                required: true,
+                validate: (confirmPassword: string): string | undefined => {
+                  if (confirmPassword !== getValues("password")) {
+                    return "Password should match";
+                  }
+                },
+              })}
+              error={formState.errors.confirmPassword?.message}
+            />
+          </React.Fragment>
+        ) : null}
+        {children ? (
+          <React.Fragment>
+            <Gutter size="0" />
+            <Box>{children}</Box>
+            <Gutter size="0" />
+          </React.Fragment>
+        ) : (
+          <Gutter size="2.5rem" />
+        )}
+        <Button size="large" text="Next" type="submit" />
+        {appendButton}
+      </Stack>
+    );
+  }
+);
 
 const AddWalletImg: FunctionComponent = () => {
   return (
