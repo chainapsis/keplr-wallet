@@ -3,6 +3,7 @@ import { Stack } from "../stack";
 import { ColorPalette } from "../../styles";
 import { Body3, Subtitle4 } from "../typography";
 import { GuideBoxProps } from "./types";
+import Color from "color";
 
 export const Styles = {
   Container: styled(Stack)<Pick<GuideBoxProps, "color">>`
@@ -20,9 +21,11 @@ export const Styles = {
           `;
         case "danger":
           return css`
-            background-color: rgba(91, 10, 26, 0.4);
+            background-color: ${Color(ColorPalette["red-400"])
+              .alpha(0.1)
+              .string()};
             svg {
-              color: ${ColorPalette["red-400"]};
+              color: ${ColorPalette["red-300"]};
             }
           `;
         default:
@@ -41,7 +44,7 @@ export const Styles = {
         case "warning":
           return ColorPalette["yellow-400"];
         case "danger":
-          return ColorPalette["red-400"];
+          return ColorPalette["red-300"];
         default:
           return ColorPalette["gray-100"];
       }
@@ -53,7 +56,7 @@ export const Styles = {
         case "warning":
           return ColorPalette["yellow-500"];
         case "danger":
-          return ColorPalette["red-500"];
+          return ColorPalette["red-300"];
         default:
           return ColorPalette["gray-300"];
       }
