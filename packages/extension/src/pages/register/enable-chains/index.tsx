@@ -35,7 +35,6 @@ import { ChainImageFallback } from "../../../components/image";
 import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
-import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
 import { Tag } from "../../../components/tag";
@@ -79,6 +78,8 @@ export const EnableChainsScene: FunctionComponent<{
 
     const navigate = useNavigate();
 
+    const searchRef = useRef<HTMLInputElement | null>(null);
+
     const header = useRegisterHeader();
     useSceneEvents({
       onWillVisible: () => {
@@ -91,6 +92,11 @@ export const EnableChainsScene: FunctionComponent<{
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
         });
+      },
+      onDidVisible: () => {
+        if (searchRef.current) {
+          searchRef.current.focus();
+        }
       },
     });
 
@@ -366,8 +372,6 @@ export const EnableChainsScene: FunctionComponent<{
     const [sortPriorityChainIdentifierMap] = useState(
       enabledChainIdentifierMap
     );
-
-    const searchRef = useFocusOnMount<HTMLInputElement>();
 
     const [search, setSearch] = useState<string>(initialSearchValue ?? "");
 
