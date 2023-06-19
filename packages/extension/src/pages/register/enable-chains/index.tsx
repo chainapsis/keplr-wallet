@@ -38,6 +38,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
 import { Tag } from "../../../components/tag";
+import SimpleBar from "simplebar-react";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -550,9 +551,11 @@ export const EnableChainsScene: FunctionComponent<{
           {numSelected} chain(s) selected
         </Subtitle3>
         <Gutter size="0.75rem" />
-        <Box
-          height="25.5rem"
+        <SimpleBar
           style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "25.5rem",
             overflowY: "auto",
           }}
         >
@@ -635,7 +638,7 @@ export const EnableChainsScene: FunctionComponent<{
                   return null;
                 })}
           </Stack>
-        </Box>
+        </SimpleBar>
 
         {!fallbackEthereumLedgerApp ? (
           <React.Fragment>
