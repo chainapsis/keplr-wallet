@@ -650,9 +650,11 @@ export const EnableChainsScene: FunctionComponent<{
                     if (preSelectedChainIdentifiers.length > 0) {
                       setEnabledChainIdentifiers(preSelectedChainIdentifiers);
                     } else {
-                      setEnabledChainIdentifiers([
-                        chainStore.chainInfos[0].chainIdentifier,
-                      ]);
+                      if (chainInfos.length > 0) {
+                        setEnabledChainIdentifiers([
+                          chainInfos[0].chainIdentifier,
+                        ]);
+                      }
                     }
                   } else {
                     setPreSelectedChainIdentifiers([
