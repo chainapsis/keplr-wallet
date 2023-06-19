@@ -88,6 +88,7 @@ export const SetBip44PathCard: FunctionComponent<{
           <TextInput
             type="number"
             min={0}
+            max={2147483647}
             value={state.accountText}
             onChange={(e) => {
               e.preventDefault();
@@ -121,6 +122,7 @@ export const SetBip44PathCard: FunctionComponent<{
           <TextInput
             type="number"
             min={0}
+            max={4294967295}
             value={state.addressIndexText}
             onChange={(e) => {
               e.preventDefault();

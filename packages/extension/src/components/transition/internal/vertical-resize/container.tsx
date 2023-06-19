@@ -20,6 +20,8 @@ export const VerticalResizeContainer = forwardRef<
         height: heightPx.to((heightPx) =>
           heightPx < 0 ? "auto" : `${heightPx}px`
         ),
+        // Should not shrink under flex container
+        flexShrink: 0,
       }}
     >
       <animated.div

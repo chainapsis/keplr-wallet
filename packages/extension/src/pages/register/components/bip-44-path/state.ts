@@ -79,6 +79,9 @@ export class BIP44PathState {
     if (validated < 0) {
       return false;
     }
+    if (validated > 2147483647) {
+      return false;
+    }
     return true;
   }
 
@@ -104,6 +107,9 @@ export class BIP44PathState {
 
     const validated = this.validatePositiveOrZeroText(this.addressIndexText);
     if (validated < 0) {
+      return false;
+    }
+    if (validated > 4294967295) {
       return false;
     }
     return true;

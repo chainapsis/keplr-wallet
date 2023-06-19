@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { Box } from "../../../components/box";
 import {
   TextInput,
@@ -8,6 +13,7 @@ import { XAxis, YAxis } from "../../../components/axis";
 import { ColorPalette } from "../../../styles";
 import styled from "styled-components";
 import { Gutter } from "../../../components/gutter";
+import { useSceneEvents } from "../../../components/transition";
 
 const Styles = {
   IndexText: styled.div`
@@ -43,6 +49,13 @@ export const VerifyingMnemonicBox = forwardRef<
     }[];
   }
 >(({ words }, ref) => {
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
+  useSceneEvents({
+    onDidVisible: () => {
+      firstInputRef.current?.focus();
+    },
+  });
+
   const [inputs, setInputs] = useState<Record<number, string | undefined>>({});
 
   const [validatingStarted, setValidatingStarted] = useState<boolean>(false);
@@ -79,6 +92,7 @@ export const VerifyingMnemonicBox = forwardRef<
                     word.index + 1
                   }.`}</Styles.IndexText>
                   <VerifyingWordInput
+                    ref={i === 0 ? firstInputRef : undefined}
                     value={inputs[word.index] ?? ""}
                     onChange={(e) => {
                       e.preventDefault();

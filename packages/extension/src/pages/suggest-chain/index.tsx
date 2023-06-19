@@ -75,12 +75,14 @@ const SuggestChainPageImpl: FunctionComponent<{
             {
               ...chainInfo,
             },
-            () => {
-              if (
-                interactionInfo.interaction &&
-                !interactionInfo.interactionInternal
-              ) {
-                window.close();
+            (proceedNext) => {
+              if (!proceedNext) {
+                if (
+                  interactionInfo.interaction &&
+                  !interactionInfo.interactionInternal
+                ) {
+                  window.close();
+                }
               }
             }
           );

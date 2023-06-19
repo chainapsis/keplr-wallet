@@ -35,10 +35,10 @@ import { ChainImageFallback } from "../../../components/image";
 import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
-import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
 import { Tag } from "../../../components/tag";
+import SimpleBar from "simplebar-react";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -79,6 +79,8 @@ export const EnableChainsScene: FunctionComponent<{
 
     const navigate = useNavigate();
 
+    const searchRef = useRef<HTMLInputElement | null>(null);
+
     const header = useRegisterHeader();
     useSceneEvents({
       onWillVisible: () => {
@@ -91,6 +93,11 @@ export const EnableChainsScene: FunctionComponent<{
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
         });
+      },
+      onDidVisible: () => {
+        if (searchRef.current) {
+          searchRef.current.focus();
+        }
       },
     });
 
@@ -367,8 +374,6 @@ export const EnableChainsScene: FunctionComponent<{
       enabledChainIdentifierMap
     );
 
-    const searchRef = useFocusOnMount<HTMLInputElement>();
-
     const [search, setSearch] = useState<string>(initialSearchValue ?? "");
 
     // 검색 뿐만 아니라 로직에 따른 선택할 수 있는 체인 목록을 가지고 있다.
@@ -546,9 +551,11 @@ export const EnableChainsScene: FunctionComponent<{
           {numSelected} chain(s) selected
         </Subtitle3>
         <Gutter size="0.75rem" />
-        <Box
-          height="25.5rem"
+        <SimpleBar
           style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "25.5rem",
             overflowY: "auto",
           }}
         >
@@ -631,7 +638,7 @@ export const EnableChainsScene: FunctionComponent<{
                   return null;
                 })}
           </Stack>
-        </Box>
+        </SimpleBar>
 
         {!fallbackEthereumLedgerApp ? (
           <React.Fragment>
@@ -650,9 +657,11 @@ export const EnableChainsScene: FunctionComponent<{
                     if (preSelectedChainIdentifiers.length > 0) {
                       setEnabledChainIdentifiers(preSelectedChainIdentifiers);
                     } else {
-                      setEnabledChainIdentifiers([
-                        chainStore.chainInfos[0].chainIdentifier,
-                      ]);
+                      if (chainInfos.length > 0) {
+                        setEnabledChainIdentifiers([
+                          chainInfos[0].chainIdentifier,
+                        ]);
+                      }
                     }
                   } else {
                     setPreSelectedChainIdentifiers([
