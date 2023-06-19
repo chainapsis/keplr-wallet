@@ -2,11 +2,11 @@ export * from "./scene";
 export * from "./types";
 export * from "./fixed-width";
 
-export {
+export type {
   SceneTransitionContext,
   SceneTransitionRef,
   Scene,
   SceneProps,
-  useSceneTransition,
-  useSceneEvents,
 } from "./internal";
+
+export { useSceneTransition, useSceneEvents } from "./internal";
