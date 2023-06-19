@@ -79,7 +79,6 @@ export const VerifyingMnemonicBox = forwardRef<
                     word.index + 1
                   }.`}</Styles.IndexText>
                   <VerifyingWordInput
-                    autoFocus={i === 0}
                     value={inputs[word.index] ?? ""}
                     onChange={(e) => {
                       e.preventDefault();

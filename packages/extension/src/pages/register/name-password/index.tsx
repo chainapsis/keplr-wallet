@@ -87,7 +87,7 @@ export const RegisterNamePasswordScene: FunctionComponent<{
             }
           })}
         >
-          <FormNamePassword {...form} autoFocus={true} />
+          <FormNamePassword {...form} />
         </form>
       </RegisterSceneBox>
     );
