@@ -8,17 +8,22 @@ import { BalanceRegistry, IObservableQueryBalanceImpl } from "../balances";
 import { ObservableSecretContractChainQuery } from "./contract-query";
 import { WrongViewingKeyError } from "./errors";
 import { AppCurrency, Keplr } from "@keplr-wallet/types";
+import {
+  PermitQueryAuthorization,
+  QueryAuthorization,
+} from "@keplr-wallet/background/build/secret-wasm/query-authorization";
 
 export class ObservableQuerySecret20BalanceImpl
   extends ObservableSecretContractChainQuery<{
     balance: { amount: string };
+    // todo: handle permit errors
     ["viewing_key_error"]?: {
       msg: string;
     };
   }>
   implements IObservableQueryBalanceImpl
 {
-  protected readonly viewingKey: string;
+  protected readonly queryAuth?: QueryAuthorization;
 
   constructor(
     sharedContext: QuerySharedContext,
@@ -35,9 +40,24 @@ export class ObservableQuerySecret20BalanceImpl
     const currency = chainGetter
       .getChain(chainId)
       .forceFindCurrency(denomHelper.denom);
-    let viewingKey = "";
+    let msg = {};
+    let queryAuth: QueryAuthorization | undefined;
     if ("type" in currency && currency.type === "secret20") {
-      viewingKey = currency.viewingKey;
+      queryAuth = QueryAuthorization.fromInput(currency.authorizationStr);
+      if (queryAuth instanceof PermitQueryAuthorization) {
+        msg = {
+          with_permit: {
+            query: {
+              balance: {},
+            },
+            permit: queryAuth.permit,
+          },
+        };
+      } else {
+        msg = {
+          balance: { address: bech32Address, key: queryAuth },
+        };
+      }
     }
     super(
       sharedContext,
@@ -45,28 +65,28 @@ export class ObservableQuerySecret20BalanceImpl
       chainGetter,
       apiGetter,
       denomHelper.contractAddress,
-      {
-        balance: { address: bech32Address, key: viewingKey },
-      },
+      msg,
       querySecretContractCodeHash
     );
 
-    this.viewingKey = viewingKey;
+    this.queryAuth = queryAuth;
 
     makeObservable(this);
 
-    if (!viewingKey) {
+    if (!queryAuth) {
       this.setError({
         status: 0,
-        statusText: "Viewing key is empty",
-        message: "Viewing key is empty",
+        statusText: "Viewing key or Permit is empty",
+        message: "Viewing key or Permit is empty",
       });
     }
   }
 
   protected override canFetch(): boolean {
     return (
-      super.canFetch() && this.bech32Address !== "" && this.viewingKey !== ""
+      super.canFetch() &&
+      this.bech32Address !== "" &&
+      this.queryAuth !== undefined
     );
   }
 
@@ -77,7 +97,7 @@ export class ObservableQuerySecret20BalanceImpl
     headers: any;
   }> {
     const { data, headers } = await super.fetchResponse(abortController);
-
+    // todo: handle permit errors
     if (data["viewing_key_error"]) {
       throw new WrongViewingKeyError(data["viewing_key_error"]?.msg);
     }

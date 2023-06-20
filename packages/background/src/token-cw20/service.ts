@@ -24,6 +24,7 @@ import {
 import { computedFn } from "mobx-utils";
 import { TokenInfo } from "./types";
 import { Buffer } from "buffer/";
+import { QueryAuthorization } from "../secret-wasm/query-authorization";
 
 export class TokenCW20Service {
   protected readonly legacyKVStore: KVStore;
@@ -147,7 +148,7 @@ export class TokenCW20Service {
     contractAddress: string,
     // Should be hex encoded. (not bech32)
     associatedAccountAddress: string,
-    viewingKey?: string
+    authorization?: QueryAuthorization
   ) {
     this.validateAssociatedAccountAddress(associatedAccountAddress);
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
@@ -162,18 +163,19 @@ export class TokenCW20Service {
     // If the same currency is already registered, do nothing.
     if (existing) {
       // If the secret20 token,
-      // just try to change the viewing key.
-      if (viewingKey) {
+      // just try to change the viewing key or permit.
+      if (authorization) {
+        const authorizationStr = authorization.toString();
         if (
           "type" in existing.currency &&
           existing.currency.type === "secret20" &&
-          existing.currency.viewingKey !== viewingKey
+          existing.currency.authorizationStr !== authorizationStr
         ) {
           await this.setToken(
             chainId,
             {
               ...existing.currency,
-              viewingKey,
+              authorizationStr,
             },
             associatedAccountAddress
           );
@@ -192,7 +194,7 @@ export class TokenCW20Service {
     const params = {
       chainId,
       contractAddress,
-      viewingKey,
+      authorization,
     };
 
     const appCurrency = (await this.interactionService.waitApprove(
@@ -261,8 +263,8 @@ export class TokenCW20Service {
       throw new Error("Unknown type of currency");
     }
 
-    if (currency.type === "secret20" && !currency.viewingKey) {
-      throw new Error("Viewing key must be set");
+    if (currency.type === "secret20" && !currency.authorizationStr) {
+      throw new Error("Viewing key or Permit must be set");
     }
 
     const contractAddress = currency.contractAddress;
@@ -330,7 +332,7 @@ export class TokenCW20Service {
       tokens.splice(findIndex, 1);
     }
   }
-
+  //todo rename?
   getSecret20ViewingKey(
     chainId: string,
     contractAddress: string,
@@ -344,14 +346,17 @@ export class TokenCW20Service {
       contractAddress,
       associatedAccountAddress
     );
-
     if (token) {
       if ("type" in token.currency && token.currency.type === "secret20") {
-        return token.currency.viewingKey;
+        return token.currency.authorizationStr;
       }
     }
 
-    throw new KeplrError("token-cw20", 111, "There is no matched secret20");
+    throw new KeplrError(
+      "token-cw20",
+      111,
+      "There is no matched secret20 viewing key"
+    );
   }
 
   static async validateCurrency(

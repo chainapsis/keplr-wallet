@@ -17,7 +17,7 @@ import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { autorun } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, Permit } from "@keplr-wallet/types";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { useInteractionInfo } from "../../../../hooks";
@@ -27,6 +27,11 @@ import { Body3, Subtitle2 } from "../../../../components/typography";
 import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
 import { useNotification } from "../../../../hooks/notification";
+import {
+  PermitQueryAuthorization,
+  QueryAuthorization,
+  ViewingKeyAuthorization,
+} from "@keplr-wallet/background/build/secret-wasm/query-authorization";
 
 const Styles = {
   Container: styled(Stack)`
@@ -37,7 +42,7 @@ const Styles = {
 interface FormData {
   contractAddress: string;
   // For the secret20
-  viewingKey: string;
+  authorization: QueryAuthorization;
 }
 
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
@@ -52,7 +57,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     useForm<FormData>({
       defaultValues: {
         contractAddress: searchParams.get("contractAddress") || "",
-        viewingKey: "",
+        authorization: "",
       },
     });
 
@@ -138,6 +143,28 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     }
   })();
 
+  const createPermit = async (): Promise<Permit> => {
+    return new Promise((resolve, reject) => {
+      const account = accountStore.getAccount(chainId);
+      account.secret
+        .createSecret20Permit(
+          account.bech32Address,
+          chainId,
+          "permit-name",
+          [contractAddress],
+          ["history", "balance", "allowance"],
+          (permit) => {
+            if (!permit) {
+              reject(new Error("Permit is null"));
+              return;
+            }
+            resolve(permit);
+          }
+        )
+        .catch(reject);
+    });
+  };
+
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
       accountStore
@@ -188,16 +215,17 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           let currency: AppCurrency;
 
           if (isSecretWasm) {
-            let viewingKey = data.viewingKey;
+            let authorization = data.authorization;
 
-            if (!viewingKey && !isOpenSecret20ViewingKey) {
+            if (!authorization && !isOpenSecret20ViewingKey) {
               try {
-                blockRejectAll.current = true;
-                viewingKey = await createViewingKey();
+                authorization = new PermitQueryAuthorization(
+                  await createPermit()
+                );
               } catch (e) {
                 notification.show(
                   "failed",
-                  "Failed to create the viewing key",
+                  "Failed to create the permit",
                   e.message || e.toString()
                 );
 
@@ -206,12 +234,31 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                 window.close();
                 return;
               }
-            }
 
+              if (!authorization) {
+                try {
+                  blockRejectAll.current = true;
+                  authorization = new ViewingKeyAuthorization(
+                    await createViewingKey()
+                  );
+                } catch (e) {
+                  notification.show(
+                    "failed",
+                    "Failed to create the viewing key",
+                    e.message || e.toString()
+                  );
+
+                  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+                  window.close();
+                  return;
+                }
+              }
+            }
             currency = {
               type: "secret20",
               contractAddress,
-              viewingKey,
+              authorizationStr: authorization.toString(),
               coinMinimalDenom: queryContract.tokenInfo.name,
               coinDenom: queryContract.tokenInfo.symbol,
               coinDecimals: queryContract.tokenInfo.decimals,
@@ -343,11 +390,11 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               <TextInput
                 label="Viewing Key"
                 error={
-                  formState.errors.viewingKey
-                    ? formState.errors.viewingKey.message
+                  formState.errors.authorization
+                    ? formState.errors.authorization.message
                     : undefined
                 }
-                {...register("viewingKey", {
+                {...register("authorization", {
                   required: true,
                 })}
               />
