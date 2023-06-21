@@ -32,6 +32,7 @@ import {
   QueryAuthorization,
   ViewingKeyAuthorization,
 } from "@keplr-wallet/background/build/secret-wasm/query-authorization";
+import { Buffer } from "buffer";
 
 const Styles = {
   Container: styled(Stack)`
@@ -144,13 +145,16 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   })();
 
   const createPermit = async (): Promise<Permit> => {
+    const random = new Uint8Array(32);
+    crypto.getRandomValues(random);
+    const permitName = Buffer.from(random).toString("hex");
     return new Promise((resolve, reject) => {
       const account = accountStore.getAccount(chainId);
       account.secret
         .createSecret20Permit(
           account.bech32Address,
           chainId,
-          "permit-name",
+          permitName,
           [contractAddress],
           ["history", "balance", "allowance"],
           (permit) => {
