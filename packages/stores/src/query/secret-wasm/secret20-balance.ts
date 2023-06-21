@@ -17,7 +17,6 @@ import {
 export class ObservableQuerySecret20BalanceImpl
   extends ObservableSecretContractChainQuery<{
     balance: { amount: string };
-    // todo: handle permit errors
     ["viewing_key_error"]?: {
       msg: string;
     };
@@ -98,7 +97,6 @@ export class ObservableQuerySecret20BalanceImpl
     headers: any;
   }> {
     const { data, headers } = await super.fetchResponse(abortController);
-    // todo: handle permit errors
     if (data["viewing_key_error"]) {
       throw new WrongViewingKeyError(data["viewing_key_error"]?.msg);
     }
