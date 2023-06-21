@@ -1042,7 +1042,10 @@ export class CosmosAccountImpl {
           if (!this.base.isNanoLedger) {
             if (
               this.chainId.startsWith("injective") ||
-              this.chainId.startsWith("stride")
+              this.chainId.startsWith("stride") ||
+              this.chainGetter
+                .getChain(this.chainId)
+                .hasFeature("ibc-go-v7-hot-fix")
             ) {
               return true;
             }
