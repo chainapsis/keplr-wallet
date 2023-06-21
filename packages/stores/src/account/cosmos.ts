@@ -4,8 +4,10 @@ import {
   AppCurrency,
   BroadcastMode,
   Coin,
+  Keplr,
   KeplrSignOptions,
   Msg,
+  SignDoc,
   StdFee,
   StdSignDoc,
 } from "@keplr-wallet/types";
@@ -56,6 +58,7 @@ import {
 import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
 import { MsgRevoke } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import Long from "long";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -277,7 +280,7 @@ export class CosmosAccountImpl {
     this.base.setTxTypeInProgress(type);
 
     let txHash: Uint8Array;
-    let signDoc: StdSignDoc;
+    let signDoc: StdSignDoc | SignDoc;
     try {
       if (typeof msgs === "function") {
         msgs = await msgs();
@@ -336,12 +339,20 @@ export class CosmosAccountImpl {
       this.base.setTxTypeInProgress("");
 
       // After sending tx, the balances is probably changed due to the fee.
-      for (const feeAmount of signDoc.fee.amount) {
+      const feeDenoms: string[] = (() => {
+        if ("fee" in signDoc) {
+          return signDoc.fee.amount.map((amount) => amount.denom);
+        } else if ("authInfoBytes" in signDoc) {
+          const authInfo = AuthInfo.decode(signDoc.authInfoBytes);
+          return authInfo.fee?.amount.map((amount) => amount.denom) ?? [];
+        } else {
+          return [];
+        }
+      })();
+      for (const feeDenom of feeDenoms) {
         const bal = this.queries.queryBalances
           .getQueryBech32Address(this.base.bech32Address)
-          .balances.find(
-            (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
-          );
+          .balances.find((bal) => bal.currency.coinMinimalDenom === feeDenom);
 
         if (bal) {
           bal.fetch();
@@ -371,22 +382,25 @@ export class CosmosAccountImpl {
     signOptions?: KeplrSignOptionsWithAltSignMethods
   ): Promise<{
     txHash: Uint8Array;
-    signDoc: StdSignDoc;
+    signDoc: StdSignDoc | SignDoc;
   }> {
     if (this.base.walletStatus !== WalletStatus.Loaded) {
       throw new Error(`Wallet is not loaded: ${this.base.walletStatus}`);
     }
 
-    const aminoMsgs: Msg[] = msgs.aminoMsgs;
+    const isDirectSign = !msgs.aminoMsgs || msgs.aminoMsgs.length === 0;
+
+    const aminoMsgs: Msg[] = msgs.aminoMsgs || [];
     const protoMsgs: Any[] = msgs.protoMsgs;
 
-    // TODO: Make proto sign doc if `aminoMsgs` is empty or null
-    if (aminoMsgs.length === 0 || protoMsgs.length === 0) {
+    if (protoMsgs.length === 0) {
       throw new Error("There is no msg to send");
     }
 
-    if (aminoMsgs.length !== protoMsgs.length) {
-      throw new Error("The length of aminoMsgs and protoMsgs are different");
+    if (!isDirectSign) {
+      if (aminoMsgs.length !== protoMsgs.length) {
+        throw new Error("The length of aminoMsgs and protoMsgs are different");
+      }
     }
 
     const account = await BaseAccount.fetchFromRest(
@@ -409,156 +423,176 @@ export class CosmosAccountImpl {
       );
     }
 
+    if (eip712Signing && isDirectSign) {
+      throw new Error("EIP712 signing is not supported for proto signing");
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
-    const signDocRaw: StdSignDoc = {
-      chain_id: this.chainId,
-      account_number: account.getAccountNumber().toString(),
-      sequence: account.getSequence().toString(),
-      fee: fee,
-      msgs: aminoMsgs,
-      memo: escapeHTML(memo),
-    };
-
-    const chainIsInjective = this.chainId.startsWith("injective");
-
-    if (eip712Signing) {
-      if (chainIsInjective) {
-        // Due to injective's problem, it should exist if injective with ledger.
-        // There is currently no effective way to handle this in keplr. Just set a very large number.
-        (signDocRaw as Mutable<StdSignDoc>).timeout_height =
-          Number.MAX_SAFE_INTEGER.toString();
-      } else {
-        // If not injective (evmos), they require fee payer.
-        // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
-        //      That means this part is not standard.
-        (signDocRaw as Mutable<StdSignDoc>).fee = {
-          ...signDocRaw.fee,
-          feePayer: this.base.bech32Address,
-        };
-      }
-    }
-
-    const signDoc = sortObjectByKey(signDocRaw);
-
-    // Should use bind to avoid "this" problem
-    let signAmino = keplr.signAmino.bind(keplr);
-    if (signOptions?.signAmino) {
-      signAmino = signOptions.signAmino;
-    }
-
-    // Should use bind to avoid "this" problem
-    let experimentalSignEIP712CosmosTx_v0 =
-      keplr.experimentalSignEIP712CosmosTx_v0.bind(keplr);
-    if (signOptions?.experimentalSignEIP712CosmosTx_v0) {
-      experimentalSignEIP712CosmosTx_v0 =
-        signOptions.experimentalSignEIP712CosmosTx_v0;
-    }
-
-    const signResponse: AminoSignResponse = await (async () => {
-      if (!eip712Signing) {
-        return await signAmino(
-          this.chainId,
-          this.base.bech32Address,
-          signDoc,
+    const signedTx = await (async () => {
+      if (isDirectSign) {
+        return await this.createSignedTxWithDirectSign(
+          keplr,
+          account,
+          msgs.protoMsgs,
+          fee,
+          memo,
           signOptions
         );
-      }
+      } else {
+        const signDocRaw: StdSignDoc = {
+          chain_id: this.chainId,
+          account_number: account.getAccountNumber().toString(),
+          sequence: account.getSequence().toString(),
+          fee: fee,
+          msgs: aminoMsgs,
+          memo: escapeHTML(memo),
+        };
 
-      return await experimentalSignEIP712CosmosTx_v0(
-        this.chainId,
-        this.base.bech32Address,
-        getEip712TypedDataBasedOnChainId(this.chainId, msgs),
-        signDoc,
-        signOptions
-      );
-    })();
+        const chainIsInjective = this.chainId.startsWith("injective");
 
-    const signedTx = TxRaw.encode({
-      bodyBytes: TxBody.encode(
-        TxBody.fromPartial({
-          messages: protoMsgs,
-          timeoutHeight: signResponse.signed.timeout_height,
-          memo: signResponse.signed.memo,
-          extensionOptions: eip712Signing
-            ? [
+        if (eip712Signing) {
+          if (chainIsInjective) {
+            // Due to injective's problem, it should exist if injective with ledger.
+            // There is currently no effective way to handle this in keplr. Just set a very large number.
+            (signDocRaw as Mutable<StdSignDoc>).timeout_height =
+              Number.MAX_SAFE_INTEGER.toString();
+          } else {
+            // If not injective (evmos), they require fee payer.
+            // XXX: "feePayer" should be "payer". But, it maybe from ethermint team's mistake.
+            //      That means this part is not standard.
+            (signDocRaw as Mutable<StdSignDoc>).fee = {
+              ...signDocRaw.fee,
+              feePayer: this.base.bech32Address,
+            };
+          }
+        }
+
+        const signDoc = sortObjectByKey(signDocRaw);
+
+        // Should use bind to avoid "this" problem
+        let signAmino = keplr.signAmino.bind(keplr);
+        if (signOptions?.signAmino) {
+          signAmino = signOptions.signAmino;
+        }
+
+        // Should use bind to avoid "this" problem
+        let experimentalSignEIP712CosmosTx_v0 =
+          keplr.experimentalSignEIP712CosmosTx_v0.bind(keplr);
+        if (signOptions?.experimentalSignEIP712CosmosTx_v0) {
+          experimentalSignEIP712CosmosTx_v0 =
+            signOptions.experimentalSignEIP712CosmosTx_v0;
+        }
+
+        const signResponse: AminoSignResponse = await (async () => {
+          if (!eip712Signing) {
+            return await signAmino(
+              this.chainId,
+              this.base.bech32Address,
+              signDoc,
+              signOptions
+            );
+          }
+
+          return await experimentalSignEIP712CosmosTx_v0(
+            this.chainId,
+            this.base.bech32Address,
+            getEip712TypedDataBasedOnChainId(this.chainId, msgs),
+            signDoc,
+            signOptions
+          );
+        })();
+
+        return {
+          tx: TxRaw.encode({
+            bodyBytes: TxBody.encode(
+              TxBody.fromPartial({
+                messages: protoMsgs,
+                timeoutHeight: signResponse.signed.timeout_height,
+                memo: signResponse.signed.memo,
+                extensionOptions: eip712Signing
+                  ? [
+                      {
+                        typeUrl: (() => {
+                          if (chainIsInjective) {
+                            return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
+                          }
+
+                          return "/ethermint.types.v1.ExtensionOptionsWeb3Tx";
+                        })(),
+                        value: ExtensionOptionsWeb3Tx.encode(
+                          ExtensionOptionsWeb3Tx.fromPartial({
+                            typedDataChainId: EthermintChainIdHelper.parse(
+                              this.chainId
+                            ).ethChainId.toString(),
+                            feePayer: !chainIsInjective
+                              ? signResponse.signed.fee.feePayer
+                              : undefined,
+                            feePayerSig: !chainIsInjective
+                              ? Buffer.from(
+                                  signResponse.signature.signature,
+                                  "base64"
+                                )
+                              : undefined,
+                          })
+                        ).finish(),
+                      },
+                    ]
+                  : undefined,
+              })
+            ).finish(),
+            authInfoBytes: AuthInfo.encode({
+              signerInfos: [
                 {
-                  typeUrl: (() => {
-                    if (chainIsInjective) {
-                      return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
-                    }
+                  publicKey: {
+                    typeUrl: (() => {
+                      if (!useEthereumSign) {
+                        return "/cosmos.crypto.secp256k1.PubKey";
+                      }
 
-                    return "/ethermint.types.v1.ExtensionOptionsWeb3Tx";
-                  })(),
-                  value: ExtensionOptionsWeb3Tx.encode(
-                    ExtensionOptionsWeb3Tx.fromPartial({
-                      typedDataChainId: EthermintChainIdHelper.parse(
-                        this.chainId
-                      ).ethChainId.toString(),
-                      feePayer: !chainIsInjective
-                        ? signResponse.signed.fee.feePayer
-                        : undefined,
-                      feePayerSig: !chainIsInjective
-                        ? Buffer.from(
-                            signResponse.signature.signature,
-                            "base64"
-                          )
-                        : undefined,
-                    })
-                  ).finish(),
+                      if (chainIsInjective) {
+                        return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+                      }
+
+                      return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+                    })(),
+                    value: PubKey.encode({
+                      key: Buffer.from(
+                        signResponse.signature.pub_key.value,
+                        "base64"
+                      ),
+                    }).finish(),
+                  },
+                  modeInfo: {
+                    single: {
+                      mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+                    },
+                    multi: undefined,
+                  },
+                  sequence: signResponse.signed.sequence,
                 },
-              ]
-            : undefined,
-        })
-      ).finish(),
-      authInfoBytes: AuthInfo.encode({
-        signerInfos: [
-          {
-            publicKey: {
-              typeUrl: (() => {
-                if (!useEthereumSign) {
-                  return "/cosmos.crypto.secp256k1.PubKey";
-                }
-
-                if (chainIsInjective) {
-                  return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
-                }
-
-                return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
-              })(),
-              value: PubKey.encode({
-                key: Buffer.from(
-                  signResponse.signature.pub_key.value,
-                  "base64"
-                ),
-              }).finish(),
-            },
-            modeInfo: {
-              single: {
-                mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
-              },
-              multi: undefined,
-            },
-            sequence: signResponse.signed.sequence,
-          },
-        ],
-        fee: Fee.fromPartial({
-          amount: signResponse.signed.fee.amount as Coin[],
-          gasLimit: signResponse.signed.fee.gas,
-          payer:
-            eip712Signing && !chainIsInjective
-              ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-                signResponse.signed.fee.feePayer
-              : undefined,
-        }),
-      }).finish(),
-      signatures:
-        // Injective needs the signature in the signatures list even if eip712
-        !eip712Signing || chainIsInjective
-          ? [Buffer.from(signResponse.signature.signature, "base64")]
-          : [new Uint8Array(0)],
-    }).finish();
+              ],
+              fee: Fee.fromPartial({
+                amount: signResponse.signed.fee.amount as Coin[],
+                gasLimit: signResponse.signed.fee.gas,
+                payer:
+                  eip712Signing && !chainIsInjective
+                    ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
+                      signResponse.signed.fee.feePayer
+                    : undefined,
+              }),
+            }).finish(),
+            signatures:
+              // Injective needs the signature in the signatures list even if eip712
+              !eip712Signing || chainIsInjective
+                ? [Buffer.from(signResponse.signature.signature, "base64")]
+                : [new Uint8Array(0)],
+          }).finish(),
+          signDoc: signResponse.signed,
+        };
+      }
+    })();
 
     // Should use bind to avoid "this" problem
     let sendTx = keplr.sendTx.bind(keplr);
@@ -567,8 +601,96 @@ export class CosmosAccountImpl {
     }
 
     return {
-      txHash: await sendTx(this.chainId, signedTx, "sync" as BroadcastMode),
-      signDoc: signResponse.signed,
+      txHash: await sendTx(this.chainId, signedTx.tx, "sync" as BroadcastMode),
+      signDoc: signedTx.signDoc,
+    };
+  }
+
+  protected async createSignedTxWithDirectSign(
+    keplr: Keplr,
+    account: BaseAccount,
+    protoMsgs: Any[],
+    fee: StdFee,
+    memo: string,
+    signOptions: KeplrSignOptionsWithAltSignMethods | undefined
+  ): Promise<{
+    tx: Uint8Array;
+    signDoc: SignDoc;
+  }> {
+    const useEthereumSign =
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-key-sign") === true;
+
+    const chainIsInjective = this.chainId.startsWith("injective");
+
+    // Should use bind to avoid "this" problem
+    let signDirect = keplr.signDirect.bind(keplr);
+    if (signOptions?.signDirect) {
+      signDirect = signOptions.signDirect;
+    }
+
+    const signed = await signDirect(
+      this.chainId,
+      this.base.bech32Address,
+      {
+        bodyBytes: TxBody.encode(
+          TxBody.fromPartial({
+            messages: protoMsgs,
+            memo,
+          })
+        ).finish(),
+        authInfoBytes: AuthInfo.encode({
+          signerInfos: [
+            {
+              publicKey: {
+                typeUrl: (() => {
+                  if (!useEthereumSign) {
+                    return "/cosmos.crypto.secp256k1.PubKey";
+                  }
+
+                  if (chainIsInjective) {
+                    return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+                  }
+
+                  return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+                })(),
+                value: PubKey.encode({
+                  key: this.base.pubKey,
+                }).finish(),
+              },
+              modeInfo: {
+                single: {
+                  mode: SignMode.SIGN_MODE_DIRECT,
+                },
+                multi: undefined,
+              },
+              sequence: account.getSequence().toString(),
+            },
+          ],
+          fee: Fee.fromPartial({
+            amount: fee.amount.map((coin) => {
+              return {
+                denom: coin.denom,
+                amount: coin.amount.toString(),
+              };
+            }),
+            gasLimit: fee.gas,
+          }),
+        }).finish(),
+        chainId: this.chainId,
+        accountNumber: Long.fromString(account.getAccountNumber().toString()),
+      },
+      signOptions
+    );
+
+    return {
+      tx: TxRaw.encode({
+        bodyBytes: signed.signed.bodyBytes,
+        authInfoBytes: signed.signed.authInfoBytes,
+        signatures: [Buffer.from(signed.signature.signature, "base64")],
+      }).finish(),
+      signDoc: signed.signed,
     };
   }
 
@@ -916,8 +1038,23 @@ export class CosmosAccountImpl {
           delete msg.value.timeout_timestamp;
         }
 
+        const forceDirectSign = (() => {
+          if (!this.base.isNanoLedger) {
+            if (
+              this.chainId.startsWith("injective") ||
+              this.chainId.startsWith("stride") ||
+              this.chainGetter
+                .getChain(this.chainId)
+                .hasFeature("ibc-go-v7-hot-fix")
+            ) {
+              return true;
+            }
+          }
+          return false;
+        })();
+
         return {
-          aminoMsgs: [msg],
+          aminoMsgs: forceDirectSign ? undefined : [msg],
           protoMsgs: [
             {
               typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
