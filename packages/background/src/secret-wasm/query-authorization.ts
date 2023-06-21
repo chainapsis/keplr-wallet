@@ -33,15 +33,15 @@ export class PermitQueryAuthorization extends QueryAuthorization {
 }
 
 export class ViewingKeyAuthorization extends QueryAuthorization {
-  constructor(public value: string) {
+  constructor(public viewingKey: string) {
     super();
   }
 
   getId(): string {
-    return this.value;
+    return this.viewingKey;
   }
 
   toString(): string {
-    return this.value;
+    return this.viewingKey;
   }
 }

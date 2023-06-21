@@ -11,6 +11,7 @@ import { AppCurrency, Keplr } from "@keplr-wallet/types";
 import {
   PermitQueryAuthorization,
   QueryAuthorization,
+  ViewingKeyAuthorization,
 } from "@keplr-wallet/background/build/secret-wasm/query-authorization";
 
 export class ObservableQuerySecret20BalanceImpl
@@ -53,9 +54,9 @@ export class ObservableQuerySecret20BalanceImpl
             permit: queryAuth.permit,
           },
         };
-      } else {
+      } else if (queryAuth instanceof ViewingKeyAuthorization) {
         msg = {
-          balance: { address: bech32Address, key: queryAuth },
+          balance: { address: bech32Address, key: queryAuth.viewingKey },
         };
       }
     }
