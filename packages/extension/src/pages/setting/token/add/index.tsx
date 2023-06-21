@@ -85,6 +85,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     }
   });
 
+  const [permitButtonLabel, setPermitButtonLabel] = useState<string>(() => {
+    return "Permit";
+  });
+
   // secret20은 서명 페이지로 넘어가야하기 때문에 막아야함...
   const blockRejectAll = useRef(false);
   const interactionInfo = useInteractionInfo(() => {
@@ -123,7 +127,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   }, [accountStore, chainId]);
 
   const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
-  const [isUseSecret20Permit, setIsUseSecret20Permit] = useState(true);
+  const [isSecret20PermitSupported, setIsSecret20PermitSupported] = useState<
+    boolean | undefined
+  >(undefined);
+  const [isUseSecret20Permit, setIsUseSecret20Permit] = useState(false);
   const [secret20PermitPermissions, onChangeSecret20PermitPermissions] =
     useState("allowance, balance, history");
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
@@ -148,6 +155,57 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         .cosmwasm.querycw20ContractInfo.getQueryContract(contractAddress);
     }
   })();
+
+  async function checkPermitSupport() {
+    console.log("checkPermitSupport");
+    if (queryContract.tokenInfo) {
+      console.log("checkPermitSupport", queryContract.tokenInfo);
+      await tokensStore.addToken(chainId, {
+        type: "secret20",
+        contractAddress,
+        authorizationStr: new PermitQueryAuthorization({
+          params: {
+            permit_name: "fake",
+            allowed_tokens: ["fake"],
+            chain_id: "fake",
+            permissions: [],
+          },
+          signature: {
+            pub_key: {
+              type: "fake",
+              value: "fake",
+            },
+            signature: "fake",
+          },
+        }).toString(),
+        coinMinimalDenom: queryContract.tokenInfo.name,
+        coinDenom: queryContract.tokenInfo.symbol,
+        coinDecimals: queryContract.tokenInfo.decimals,
+      });
+      const getBalance = queriesStore
+        .get(chainId)
+        .queryBalances.getQueryBech32Address(
+          accountStore.getAccount(chainId).bech32Address
+        )
+        .getBalance({
+          coinMinimalDenom: `secret20:${contractAddress}:${queryContract.tokenInfo.name}`,
+          coinDenom: queryContract.tokenInfo.symbol,
+          coinDecimals: queryContract.tokenInfo.decimals,
+        });
+      console.log("balance isFetching", getBalance?.isFetching);
+      console.log("balance error", getBalance?.error);
+      const permitsUnsupported =
+        getBalance?.error?.message?.includes("parse_err") === true;
+      setIsSecret20PermitSupported(!permitsUnsupported);
+      if (permitsUnsupported) {
+        setPermitButtonLabel("Permit (Unsupported)");
+      }
+    }
+  }
+  useEffect(() => {
+    console.log("useEffect checkPermitSupport", contractAddress);
+    checkPermitSupport().then();
+  }, [queryContract.tokenInfo]);
 
   const createPermit = async (permissions: Permission[]): Promise<Permit> => {
     const random = new Uint8Array(32);
@@ -385,9 +443,12 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                 <Column weight={1}>
                   <Skeleton type="button">
                     <Button
-                      text="Permit"
+                      text={permitButtonLabel}
                       color="secondary"
-                      disabled={isUseSecret20Permit}
+                      disabled={
+                        isUseSecret20Permit ||
+                        isSecret20PermitSupported !== true
+                      }
                       onClick={() => {
                         setIsUseSecret20Permit(true);
                         setIsOpenSecret20ViewingKey(false);
