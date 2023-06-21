@@ -9,9 +9,7 @@ import {
 } from "@keplr-wallet/types";
 
 export type ProtoMsgsOrWithAminoMsgs = {
-  // TODO: Make `aminoMsgs` nullable
-  //       And, make proto sign doc if `aminoMsgs` is null
-  aminoMsgs: Msg[];
+  aminoMsgs?: Msg[];
   protoMsgs: Any[];
 
   // Add rlp types data if you need to support ethermint with ledger.
@@ -27,6 +25,7 @@ export type ProtoMsgsOrWithAminoMsgs = {
 
 export interface KeplrSignOptionsWithAltSignMethods extends KeplrSignOptions {
   readonly signAmino?: Keplr["signAmino"];
+  readonly signDirect?: Keplr["signDirect"];
   readonly experimentalSignEIP712CosmosTx_v0?: Keplr["experimentalSignEIP712CosmosTx_v0"];
   readonly sendTx?: (
     chainId: string,
