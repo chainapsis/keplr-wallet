@@ -1,5 +1,5 @@
 import { AccountSetBaseSuper, MsgOpt, WalletStatus } from "./base";
-import { AppCurrency, KeplrSignOptions } from "@keplr-wallet/types";
+import { AppCurrency, Keplr, KeplrSignOptions } from "@keplr-wallet/types";
 import {
   BroadcastMode,
   makeSignDoc,
@@ -16,6 +16,7 @@ import {
   TxBody,
   Fee,
   SignerInfo,
+  SignDoc,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
@@ -46,6 +47,7 @@ import { isAddress } from "@ethersproject/address";
 import { Buffer } from "buffer/";
 import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
 import { txEventsWithPreOnFulfill } from "./utils";
+import Long from "long";
 
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
@@ -379,7 +381,7 @@ export class CosmosAccountImpl {
     this.base.setTxTypeInProgress(type);
 
     let txHash: Uint8Array;
-    let signDoc: StdSignDoc;
+    let signDoc: StdSignDoc | SignDoc;
     try {
       if (typeof msgs === "function") {
         msgs = await msgs();
@@ -444,12 +446,20 @@ export class CosmosAccountImpl {
       this.base.setTxTypeInProgress("");
 
       // After sending tx, the balances is probably changed due to the fee.
-      for (const feeAmount of signDoc.fee.amount) {
+      const feeDenoms: string[] = (() => {
+        if ("fee" in signDoc) {
+          return signDoc.fee.amount.map((amount) => amount.denom);
+        } else if ("authInfoBytes" in signDoc) {
+          const authInfo = AuthInfo.decode(signDoc.authInfoBytes);
+          return authInfo.fee?.amount.map((amount) => amount.denom) ?? [];
+        } else {
+          return [];
+        }
+      })();
+      for (const feeDenom of feeDenoms) {
         const bal = this.queries.queryBalances
           .getQueryBech32Address(this.base.bech32Address)
-          .balances.find(
-            (bal) => bal.currency.coinMinimalDenom === feeAmount.denom
-          );
+          .balances.find((bal) => bal.currency.coinMinimalDenom === feeDenom);
 
         if (bal) {
           bal.fetch();
@@ -480,22 +490,25 @@ export class CosmosAccountImpl {
     mode: "block" | "async" | "sync" = "async"
   ): Promise<{
     txHash: Uint8Array;
-    signDoc: StdSignDoc;
+    signDoc: StdSignDoc | SignDoc;
   }> {
     if (this.base.walletStatus !== WalletStatus.Loaded) {
       throw new Error(`Wallet is not loaded: ${this.base.walletStatus}`);
     }
 
-    const aminoMsgs: Msg[] = msgs.aminoMsgs;
+    const isDirectSign = !msgs.aminoMsgs || msgs.aminoMsgs.length === 0;
+
+    const aminoMsgs: Msg[] = msgs.aminoMsgs || [];
     const protoMsgs: Any[] = msgs.protoMsgs;
 
-    // TODO: Make proto sign doc if `aminoMsgs` is empty or null
-    if (aminoMsgs.length === 0 || protoMsgs.length === 0) {
+    if (protoMsgs.length === 0) {
       throw new Error("There is no msg to send");
     }
 
-    if (aminoMsgs.length !== protoMsgs.length) {
-      throw new Error("The length of aminoMsgs and protoMsgs are different");
+    if (!isDirectSign) {
+      if (aminoMsgs.length !== protoMsgs.length) {
+        throw new Error("The length of aminoMsgs and protoMsgs are different");
+      }
     }
 
     const account = await BaseAccount.fetchFromRest(
@@ -511,71 +524,175 @@ export class CosmosAccountImpl {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
-    const signDoc = makeSignDoc(
-      aminoMsgs,
-      fee,
-      this.chainId,
-      escapeHTML(memo),
-      account.getAccountNumber().toString(),
-      account.getSequence().toString()
-    );
+    const signedTx = await (async () => {
+      if (isDirectSign) {
+        return await this.createSignedTxWithDirectSign(
+          keplr,
+          account,
+          msgs.protoMsgs,
+          fee,
+          memo,
+          signOptions
+        );
+      }
 
-    const signResponse = await keplr.signAmino(
+      const signDoc = makeSignDoc(
+        aminoMsgs,
+        fee,
+        this.chainId,
+        escapeHTML(memo),
+        account.getAccountNumber().toString(),
+        account.getSequence().toString()
+      );
+
+      const signResponse = await keplr.signAmino(
+        this.chainId,
+        this.base.bech32Address,
+        signDoc,
+        signOptions
+      );
+
+      const signedTx = TxRaw.encode({
+        bodyBytes: TxBody.encode(
+          TxBody.fromPartial({
+            messages: protoMsgs,
+            memo: signResponse.signed.memo,
+          })
+        ).finish(),
+        authInfoBytes: AuthInfo.encode({
+          signerInfos: [
+            {
+              publicKey: {
+                typeUrl: (() => {
+                  if (!useEthereumSign) {
+                    return "/cosmos.crypto.secp256k1.PubKey";
+                  }
+
+                  if (this.chainId.startsWith("injective")) {
+                    return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+                  }
+
+                  return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+                })(),
+                value: PubKey.encode({
+                  key: Buffer.from(
+                    signResponse.signature.pub_key.value,
+                    "base64"
+                  ),
+                }).finish(),
+              },
+              modeInfo: {
+                single: {
+                  mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+                },
+                multi: undefined,
+              },
+              sequence: signResponse.signed.sequence,
+            },
+          ],
+          fee: Fee.fromPartial({
+            amount: signResponse.signed.fee.amount as Coin[],
+            gasLimit: signResponse.signed.fee.gas,
+          }),
+        }).finish(),
+        signatures: [Buffer.from(signResponse.signature.signature, "base64")],
+      }).finish();
+
+      return {
+        tx: signedTx,
+        signDoc: signResponse.signed,
+      };
+    })();
+
+    return {
+      txHash: await keplr.sendTx(
+        this.chainId,
+        signedTx.tx,
+        mode as BroadcastMode
+      ),
+      signDoc: signedTx.signDoc,
+    };
+  }
+
+  protected async createSignedTxWithDirectSign(
+    keplr: Keplr,
+    account: BaseAccount,
+    protoMsgs: Any[],
+    fee: StdFee,
+    memo: string,
+    signOptions: KeplrSignOptions | undefined
+  ): Promise<{
+    tx: Uint8Array;
+    signDoc: SignDoc;
+  }> {
+    const useEthereumSign =
+      this.chainGetter
+        .getChain(this.chainId)
+        .features?.includes("eth-key-sign") === true;
+
+    const chainIsInjective = this.chainId.startsWith("injective");
+
+    const signed = await keplr.signDirect(
       this.chainId,
       this.base.bech32Address,
-      signDoc,
+      {
+        bodyBytes: TxBody.encode(
+          TxBody.fromPartial({
+            messages: protoMsgs,
+            memo,
+          })
+        ).finish(),
+        authInfoBytes: AuthInfo.encode({
+          signerInfos: [
+            {
+              publicKey: {
+                typeUrl: (() => {
+                  if (!useEthereumSign) {
+                    return "/cosmos.crypto.secp256k1.PubKey";
+                  }
+
+                  if (chainIsInjective) {
+                    return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+                  }
+
+                  return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+                })(),
+                value: PubKey.encode({
+                  key: this.base.pubKey,
+                }).finish(),
+              },
+              modeInfo: {
+                single: {
+                  mode: SignMode.SIGN_MODE_DIRECT,
+                },
+                multi: undefined,
+              },
+              sequence: account.getSequence().toString(),
+            },
+          ],
+          fee: Fee.fromPartial({
+            amount: fee.amount.map((coin) => {
+              return {
+                denom: coin.denom,
+                amount: coin.amount.toString(),
+              };
+            }),
+            gasLimit: fee.gas,
+          }),
+        }).finish(),
+        chainId: this.chainId,
+        accountNumber: Long.fromString(account.getAccountNumber().toString()),
+      },
       signOptions
     );
 
-    const signedTx = TxRaw.encode({
-      bodyBytes: TxBody.encode(
-        TxBody.fromPartial({
-          messages: protoMsgs,
-          memo: signResponse.signed.memo,
-        })
-      ).finish(),
-      authInfoBytes: AuthInfo.encode({
-        signerInfos: [
-          {
-            publicKey: {
-              typeUrl: (() => {
-                if (!useEthereumSign) {
-                  return "/cosmos.crypto.secp256k1.PubKey";
-                }
-
-                if (this.chainId.startsWith("injective")) {
-                  return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
-                }
-
-                return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
-              })(),
-              value: PubKey.encode({
-                key: Buffer.from(
-                  signResponse.signature.pub_key.value,
-                  "base64"
-                ),
-              }).finish(),
-            },
-            modeInfo: {
-              single: {
-                mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
-              },
-              multi: undefined,
-            },
-            sequence: signResponse.signed.sequence,
-          },
-        ],
-        fee: Fee.fromPartial({
-          amount: signResponse.signed.fee.amount as Coin[],
-          gasLimit: signResponse.signed.fee.gas,
-        }),
-      }).finish(),
-      signatures: [Buffer.from(signResponse.signature.signature, "base64")],
-    }).finish();
-
     return {
-      txHash: await keplr.sendTx(this.chainId, signedTx, mode as BroadcastMode),
-      signDoc: signResponse.signed,
+      tx: TxRaw.encode({
+        bodyBytes: signed.signed.bodyBytes,
+        authInfoBytes: signed.signed.authInfoBytes,
+        signatures: [Buffer.from(signed.signature.signature, "base64")],
+      }).finish(),
+      signDoc: signed.signed as any,
     };
   }
 
@@ -898,8 +1015,20 @@ export class CosmosAccountImpl {
           delete msg.value.timeout_height.revision_number;
         }
 
+        const forceDirectSign = (() => {
+          if (!this.base.isNanoLedger) {
+            if (
+              this.chainId.startsWith("injective") ||
+              this.chainId.startsWith("stride")
+            ) {
+              return true;
+            }
+          }
+          return false;
+        })();
+
         return {
-          aminoMsgs: [msg],
+          aminoMsgs: forceDirectSign ? undefined : [msg],
           protoMsgs: [
             {
               typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
@@ -1030,8 +1159,20 @@ export class CosmosAccountImpl {
           delete msg.value.timeout_height.revision_number;
         }
 
+        const forceDirectSign = (() => {
+          if (!this.base.isNanoLedger) {
+            if (
+              this.chainId.startsWith("injective") ||
+              this.chainId.startsWith("stride")
+            ) {
+              return true;
+            }
+          }
+          return false;
+        })();
+
         return {
-          aminoMsgs: [msg],
+          aminoMsgs: forceDirectSign ? undefined : [msg],
           protoMsgs: [
             {
               typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",

@@ -4,9 +4,7 @@ import { Dec } from "@keplr-wallet/unit";
 import { KeplrSignOptions } from "@keplr-wallet/types";
 
 export type ProtoMsgsOrWithAminoMsgs = {
-  // TODO: Make `aminoMsgs` nullable
-  //       And, make proto sign doc if `aminoMsgs` is null
-  aminoMsgs: Msg[];
+  aminoMsgs?: Msg[];
   protoMsgs: Any[];
 };
 

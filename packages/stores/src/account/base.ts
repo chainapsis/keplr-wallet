@@ -44,11 +44,13 @@ export class AccountSetBase {
 
   @observable
   protected _bech32Address: string = "";
+  @observable
+  protected _isNanoLedger: boolean = false;
 
   @observable
   protected _txTypeInProgress: string = "";
 
-  protected pubKey: Uint8Array;
+  public pubKey: Uint8Array;
 
   protected hasInited = false;
 
@@ -187,6 +189,7 @@ export class AccountSetBase {
     try {
       const key = yield* toGenerator(keplr.getKey(this.chainId));
       this._bech32Address = key.bech32Address;
+      this._isNanoLedger = key.isNanoLedger;
       this._name = key.name;
       this.pubKey = key.pubKey;
 
@@ -197,6 +200,7 @@ export class AccountSetBase {
       // Caught error loading key
       // Reset properties, and set status to Rejected
       this._bech32Address = "";
+      this._isNanoLedger = false;
       this._name = "";
       this.pubKey = new Uint8Array(0);
 
@@ -219,6 +223,7 @@ export class AccountSetBase {
       this.handleInit
     );
     this._bech32Address = "";
+    this._isNanoLedger = false;
     this._name = "";
     this.pubKey = new Uint8Array(0);
   }
@@ -314,6 +319,10 @@ export class AccountSetBase {
 
   get bech32Address(): string {
     return this._bech32Address;
+  }
+
+  get isNanoLedger(): boolean {
+    return this._isNanoLedger;
   }
 
   /**
