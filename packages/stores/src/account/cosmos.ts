@@ -1038,8 +1038,20 @@ export class CosmosAccountImpl {
           delete msg.value.timeout_timestamp;
         }
 
+        const forceDirectSign = (() => {
+          if (!this.base.isNanoLedger) {
+            if (
+              this.chainId.startsWith("injective") ||
+              this.chainId.startsWith("stride")
+            ) {
+              return true;
+            }
+          }
+          return false;
+        })();
+
         return {
-          aminoMsgs: [msg],
+          aminoMsgs: forceDirectSign ? undefined : [msg],
           protoMsgs: [
             {
               typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
