@@ -17,13 +17,13 @@ import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { autorun } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { AppCurrency, Permit } from "@keplr-wallet/types";
+import { AppCurrency, Permission, Permit } from "@keplr-wallet/types";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { useInteractionInfo } from "../../../../hooks";
 import { ColorPalette } from "../../../../styles";
 import { Column, Columns } from "../../../../components/column";
-import { Body3, Subtitle2 } from "../../../../components/typography";
+import { Body3, Subtitle2, Subtitle3 } from "../../../../components/typography";
 import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
 import { useNotification } from "../../../../hooks/notification";
@@ -32,6 +32,8 @@ import {
   QueryAuthorization,
   ViewingKeyAuthorization,
 } from "@keplr-wallet/background/build/secret-wasm/query-authorization";
+import { Skeleton } from "../../../../components/skeleton";
+import { Button } from "../../../../components/button";
 import { Buffer } from "buffer";
 
 const Styles = {
@@ -121,6 +123,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   }, [accountStore, chainId]);
 
   const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
+  const [isUseSecret20Permit, setIsUseSecret20Permit] = useState(true);
+  const [secret20PermitPermissions, onChangeSecret20PermitPermissions] =
+    useState("allowance, balance, history");
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
     useState(false);
 
@@ -144,7 +149,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     }
   })();
 
-  const createPermit = async (): Promise<Permit> => {
+  const createPermit = async (permissions: Permission[]): Promise<Permit> => {
     const random = new Uint8Array(32);
     crypto.getRandomValues(random);
     const permitName = Buffer.from(random).toString("hex");
@@ -156,7 +161,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           chainId,
           permitName,
           [contractAddress],
-          ["history", "balance", "allowance"],
+          permissions,
           (permit) => {
             if (!permit) {
               reject(new Error("Permit is null"));
@@ -222,24 +227,31 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             let authorization = data.authorization;
 
             if (!authorization && !isOpenSecret20ViewingKey) {
-              try {
-                authorization = new PermitQueryAuthorization(
-                  await createPermit()
-                );
-              } catch (e) {
-                notification.show(
-                  "failed",
-                  "Failed to create the permit",
-                  e.message || e.toString()
-                );
+              if (isUseSecret20Permit) {
+                try {
+                  authorization = new PermitQueryAuthorization(
+                    await createPermit(
+                      secret20PermitPermissions
+                        // remove leading or trailing commas or whitespace
+                        .replace(RegExp(/(^[,\s]+)|([,\s]+$)/g), "")
+                        // split at commas or whitespace
+                        .split(RegExp("[ ,]+"))
+                        .map((p) => p as Permission)
+                    )
+                  );
+                } catch (e) {
+                  notification.show(
+                    "failed",
+                    "Failed to create the permit",
+                    e.message || e.toString()
+                  );
 
-                await new Promise((resolve) => setTimeout(resolve, 2000));
+                  await new Promise((resolve) => setTimeout(resolve, 2000));
 
-                window.close();
-                return;
-              }
-
-              if (!authorization) {
+                  window.close();
+                  return;
+                }
+              } else {
                 try {
                   blockRejectAll.current = true;
                   authorization = new ViewingKeyAuthorization(
@@ -365,30 +377,74 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
         {isSecretWasm ? (
           <Stack gutter="0.75rem">
-            <Box
-              backgroundColor={ColorPalette["gray-600"]}
-              borderRadius="0.375rem"
-              padding="1rem"
-            >
-              <Columns sum={1} alignY="center" gutter="0.25rem">
+            <Subtitle3 color={ColorPalette["gray-50"]}>
+              Query Authorization Type
+            </Subtitle3>
+            <Box>
+              <Columns sum={1} gutter="0.625rem">
                 <Column weight={1}>
-                  <Stack>
-                    <Subtitle2 color={ColorPalette["gray-50"]}>
-                      I have my own viewing key
-                    </Subtitle2>
-                    <Body3 color={ColorPalette["gray-200"]}>
-                      By enabling this toggle, you confirm that you have your
-                      viewing key and use it for adding this token.
-                    </Body3>
-                  </Stack>
+                  <Skeleton type="button">
+                    <Button
+                      text="Permit"
+                      color="secondary"
+                      disabled={isUseSecret20Permit}
+                      onClick={() => {
+                        setIsUseSecret20Permit(true);
+                        setIsOpenSecret20ViewingKey(false);
+                      }}
+                    />
+                  </Skeleton>
                 </Column>
 
-                <Toggle
-                  isOpen={isOpenSecret20ViewingKey}
-                  setIsOpen={setIsOpenSecret20ViewingKey}
-                />
+                <Column weight={1}>
+                  <Skeleton type="button">
+                    <Button
+                      text="Viewing Key"
+                      color="secondary"
+                      disabled={!isUseSecret20Permit}
+                      onClick={() => setIsUseSecret20Permit(false)}
+                    />
+                  </Skeleton>
+                </Column>
               </Columns>
             </Box>
+            {isUseSecret20Permit ? (
+              <TextInput
+                label="Permit Permissions"
+                placeholder="e.g. allowance, balance, history"
+                onChange={(e) => {
+                  e.preventDefault();
+
+                  onChangeSecret20PermitPermissions(e.target.value);
+                }}
+                value={secret20PermitPermissions}
+              />
+            ) : (
+              <Box
+                backgroundColor={ColorPalette["gray-600"]}
+                borderRadius="0.375rem"
+                padding="1rem"
+              >
+                <Columns sum={1} alignY="center" gutter="0.25rem">
+                  <Column weight={1}>
+                    <Stack>
+                      <Subtitle2 color={ColorPalette["gray-50"]}>
+                        I have my own viewing key
+                      </Subtitle2>
+                      <Body3 color={ColorPalette["gray-200"]}>
+                        By enabling this toggle, you confirm that you have your
+                        viewing key and use it for adding this token.
+                      </Body3>
+                    </Stack>
+                  </Column>
+
+                  <Toggle
+                    isOpen={isOpenSecret20ViewingKey}
+                    setIsOpen={setIsOpenSecret20ViewingKey}
+                  />
+                </Columns>
+              </Box>
+            )}
 
             {isOpenSecret20ViewingKey ? (
               <TextInput
