@@ -19,6 +19,8 @@ export const GlobalStyle = createGlobalStyle`
     background-color: ${ColorPalette["gray-700"]};
 
     &[data-lang="ko"] {
+      font-family: 'NotoSansKR', sans-serif;
+      
       word-break: keep-all;
       word-wrap: break-word;
     }
@@ -29,6 +31,10 @@ export const GlobalStyle = createGlobalStyle`
     font-weight: 400;
     font-size: 0.8125rem;
     color: ${ColorPalette["gray-200"]};
+
+    &[data-lang="ko"] {
+      font-family: 'NotoSansKR', sans-serif;
+    }
   }
 
   // Set border-box as default for convenience.
