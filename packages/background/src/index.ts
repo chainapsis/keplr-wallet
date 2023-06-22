@@ -68,6 +68,7 @@ export function init(
   }
 ): {
   initFn: () => Promise<void>;
+  keyRingService: KeyRingV2.KeyRingService;
 } {
   const interactionService = new Interaction.InteractionService(
     eventMsgRequester
@@ -254,5 +255,6 @@ export function init(
 
       await recentSendHistoryService.init();
     },
+    keyRingService: keyRingV2Service,
   };
 }
