@@ -90,6 +90,7 @@ import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant
 import { ValidatorList } from "./pages/validator-list";
 import { Validator } from "./pages/validator";
 import { StakeComplete } from "./pages/validator/stake-complete";
+import { ActivityPage } from "./pages/activity";
 import { Proposals } from "./pages/proposals";
 import { ProposalDetail } from "./pages/proposals/proposal-detail";
 import { PropsalVoteStatus } from "./pages/proposals/proposal-vote-status";
@@ -242,6 +243,7 @@ ReactDOM.render(
                       path="/setting/address-book"
                       component={AddressBookPage}
                     />
+                    <Route exact path="/activity" component={ActivityPage} />
                     <Route
                       exact
                       path="/setting/export-to-mobile"

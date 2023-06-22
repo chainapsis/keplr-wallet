@@ -132,7 +132,7 @@ export const Unstake: FunctionComponent<{
 
               amountConfig.toggleIsMax();
             }}
-          >{`Balance: ${balance.trim(true).maxDecimals(6).toString()}`}</div>
+          >{`Balance: ${balance.trim(true).maxDecimals(18).toString()}`}</div>
         </Label>
         <Input
           className="form-control-alternative"

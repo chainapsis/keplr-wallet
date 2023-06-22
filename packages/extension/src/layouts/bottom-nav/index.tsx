@@ -15,11 +15,14 @@ import moreTabBlueIcon from "@assets/icon/more-blue.png";
 import moreTabGreyIcon from "@assets/icon/more-grey.png";
 import bellOnGreyIcon from "@assets/icon/bell-on.png";
 import bellOnBlueIcon from "@assets/icon/bell-off.png";
+import activityBlueIcon from "@assets/icon/lightning-bolt-active.png";
+import activitygreyIcon from "@assets/icon/lightning-bolt.png";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
 import { Tab } from "./tab";
 import { NotificationSetup } from "@notificationTypes";
 import { store } from "@chatStore/index";
+import { CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 
 const bottomNav = [
   {
@@ -45,6 +48,7 @@ export const BottomNav = () => {
       <HomeTab />
       <NotificationTab />
       <ChatTab />
+      <ActivityTab />
       <MoreTab />
     </div>
   );
@@ -108,6 +112,7 @@ const ChatTab = () => {
   const { keyRingStore, chainStore } = useStore();
   const { hasFET, enabledChainIds } = useSelector(userDetails);
   const config: WalletConfig = useSelector(walletConfig);
+  const current = chainStore.current;
   const [chatTooltip, setChatTooltip] = useState("");
   const [chatDisabled, setChatDisabled] = useState(false);
 
@@ -127,12 +132,18 @@ const ChatTab = () => {
       setChatDisabled(false);
     }
 
-    if (!enabledChainIds.includes(chainStore.current?.chainId)) {
+    if (!enabledChainIds.includes(current.chainId)) {
       setChatTooltip("Feature not available on this network");
       setChatDisabled(true);
       return;
     }
-  }, [chainStore, hasFET, enabledChainIds, config.requiredNative]);
+  }, [
+    hasFET,
+    enabledChainIds,
+    config.requiredNative,
+    keyRingStore.keyRingType,
+    current.chainId,
+  ]);
 
   return (
     <Tab
@@ -142,6 +153,39 @@ const ChatTab = () => {
       path={"/chat"}
       disabled={chatDisabled}
       tooltip={chatTooltip}
+    />
+  );
+};
+
+const ActivityTab = () => {
+  const { keyRingStore, chainStore } = useStore();
+  const current = chainStore.current;
+  const [activityTooltip, setActivityTooltip] = useState("");
+  const [activityDisabled, setActivityDisabled] = useState(false);
+
+  useEffect(() => {
+    if (keyRingStore.keyRingType === "ledger") {
+      setActivityTooltip("Coming soon for ledger");
+      setActivityDisabled(true);
+      return;
+    }
+    if (![CHAIN_ID_FETCHHUB].includes(current.chainId)) {
+      setActivityTooltip("Feature not available on this network");
+      setActivityDisabled(true);
+    } else {
+      setActivityTooltip("");
+      setActivityDisabled(false);
+    }
+  }, [current.chainId, keyRingStore.keyRingType]);
+
+  return (
+    <Tab
+      title={"Activity"}
+      icon={activitygreyIcon}
+      activeTabIcon={activityBlueIcon}
+      path={"/activity"}
+      disabled={activityDisabled}
+      tooltip={activityTooltip}
     />
   );
 };

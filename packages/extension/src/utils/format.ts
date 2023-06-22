@@ -42,3 +42,8 @@ export const shortenNumber = (value: string) => {
 
   return result;
 };
+
+export const formatActivityHash = (address: string) => {
+  if (address?.length > 12) return address.substring(0, 10) + "...";
+  else return address;
+};

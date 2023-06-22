@@ -45,7 +45,16 @@ if (process.env.NODE_ENV === "production") {
   NOTYPHI_BASE_URL = "https://api-staging.notyphi.com/v1";
 }
 
-export const GRAPHQL_URL = { SUBSCRIPTION_SERVER, MESSAGING_SERVER };
+const ACTIVITY_SERVER: { [key: string]: string } = {
+  [CHAIN_ID_DORADO]: "https://subquery-dorado.fetch.ai/",
+  [CHAIN_ID_FETCHHUB]: "https://subquery.fetch.ai/",
+};
+
+export const GRAPHQL_URL = {
+  SUBSCRIPTION_SERVER,
+  MESSAGING_SERVER,
+  ACTIVITY_SERVER,
+};
 
 let FETCHHUB_AGENT, DORADO_AGENT;
 let FETCHHUB_FEEDBACK, DORADO_FEEDBACK;
