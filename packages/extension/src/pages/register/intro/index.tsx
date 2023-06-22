@@ -12,10 +12,12 @@ import { Gutter } from "../../../components/gutter";
 import { TextButton } from "../../../components/button-text";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
+import { useIntl } from "react-intl";
 
 export const RegisterIntroScene: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
   const sceneTransition = useSceneTransition();
+  const intl = useIntl();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -38,14 +40,18 @@ export const RegisterIntroScene: FunctionComponent = observer(() => {
       <Gutter size="3.125rem" />
       <Stack gutter="1.25rem">
         <Button
-          text="Create a new wallet"
+          text={intl.formatMessage({
+            id: "pages.register.intro.create-wallet-button",
+          })}
           size="large"
           onClick={() => {
             sceneTransition.push("new-user");
           }}
         />
         <Button
-          text="Import an existing wallet"
+          text={intl.formatMessage({
+            id: "pages.register.intro.import-wallet-button",
+          })}
           size="large"
           color="secondary"
           onClick={() => {
@@ -54,7 +60,9 @@ export const RegisterIntroScene: FunctionComponent = observer(() => {
         />
         {uiConfigStore.platform !== "firefox" ? (
           <TextButton
-            text="Connect Hardware Wallet"
+            text={intl.formatMessage({
+              id: "pages.register.intro.connect-hardware-wallet-button",
+            })}
             size="large"
             onClick={() => {
               sceneTransition.push("connect-hardware-wallet");

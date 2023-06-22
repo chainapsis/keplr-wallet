@@ -15,6 +15,7 @@ import {
   UndelegateMessage,
   VoteMessage,
 } from "./render";
+import { FormattedMessage } from "react-intl";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -28,7 +29,7 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
     msg: Msg | AnyWithUnpacked
   ): {
     icon: React.ReactElement;
-    title: string;
+    title: string | React.ReactElement;
     content: string | React.ReactElement;
   } {
     try {
@@ -65,7 +66,9 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
 
     return {
       icon: <CustomIcon />,
-      title: "Custom",
+      title: (
+        <FormattedMessage id="page.sign.components.messages.custom.title" />
+      ),
       content: <pre style={{ margin: 0 }}>{prettyMsg}</pre>,
     };
   }

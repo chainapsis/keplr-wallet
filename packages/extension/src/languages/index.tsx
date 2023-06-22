@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { IntlProvider } from "react-intl";
 import MessagesEn from "./en.json";
-// import MessagesKo from "./ko.json";
+import MessagesKo from "./ko.json";
 
 interface Language {
   language: string;
@@ -74,8 +74,8 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
 
   const getMessages = () => {
     switch (language) {
-      // case "ko":
-      //   return MessagesKo;
+      case "ko":
+        return MessagesKo;
       default:
         return MessagesEn;
     }

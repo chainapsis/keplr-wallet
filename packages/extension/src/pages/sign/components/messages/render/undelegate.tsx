@@ -8,6 +8,7 @@ import { MsgUndelegate } from "@keplr-wallet/proto-types/cosmos/staking/v1beta1/
 import { Coin } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Image } from "../../../../../components/image";
+import { FormattedMessage } from "react-intl";
 
 export const UndelegateMessage: IMessageRenderer = {
   process(chainId: string, msg) {
@@ -39,7 +40,9 @@ export const UndelegateMessage: IMessageRenderer = {
             style={{ width: "3rem", height: "3rem" }}
           />
         ),
-        title: "Undelegate",
+        title: (
+          <FormattedMessage id="page.sign.components.messages.undelegate.title" />
+        ),
         content: (
           <UndelegateMessagePretty
             chainId={chainId}
@@ -69,10 +72,15 @@ const UndelegateMessagePretty: FunctionComponent<{
 
   return (
     <React.Fragment>
-      Undelegate <b>{coinPretty.trim(true).toString()}</b> from{" "}
-      <b>{moniker || Bech32Address.shortenAddress(validatorAddress, 28)}</b>
-      <br />
-      Asset will be liquid after unbonding period
+      <FormattedMessage
+        id="page.sign.components.messages.undelegate.paragraph"
+        values={{
+          coin: coinPretty.trim(true).toString(),
+          from: moniker || Bech32Address.shortenAddress(validatorAddress, 28),
+          b: (...chunks: any) => <b>{chunks}</b>,
+          br: <br />,
+        }}
+      />
     </React.Fragment>
   );
 });
