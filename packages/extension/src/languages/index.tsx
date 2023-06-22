@@ -2,7 +2,7 @@ import React, {
   createContext,
   FunctionComponent,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
 import { IntlProvider } from "react-intl";
@@ -53,7 +53,7 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
     setAutomatic(true);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.body.setAttribute("data-lang", language);
   }, [language]);
 

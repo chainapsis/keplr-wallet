@@ -316,25 +316,32 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
   );
 });
 
-const App: FunctionComponent = () => {
+const AppRouter: FunctionComponent = () => {
   useLoadFonts();
 
   return (
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<LedgerGrantPage />} />
+      </Routes>
+    </HashRouter>
+  );
+};
+
+const App: FunctionComponent = () => {
+  return (
     <StoreProvider>
-      <ModalRootProvider>
-        <ConfirmProvider>
-          <GlobalStyle />
-          <ScrollBarStyle />
-          <AutoLockMonitor />
-          <AppIntlProvider>
-            <HashRouter>
-              <Routes>
-                <Route path="/" element={<LedgerGrantPage />} />
-              </Routes>
-            </HashRouter>
-          </AppIntlProvider>
-        </ConfirmProvider>
-      </ModalRootProvider>
+      <AppIntlProvider>
+        <ModalRootProvider>
+          <ConfirmProvider>
+            <GlobalStyle />
+            <ScrollBarStyle />
+            <AutoLockMonitor />
+
+            <AppRouter />
+          </ConfirmProvider>
+        </ModalRootProvider>
+      </AppIntlProvider>
     </StoreProvider>
   );
 };
