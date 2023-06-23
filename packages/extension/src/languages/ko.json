@@ -206,7 +206,6 @@
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
-  "page.setting.general.language.korean-title": "한국어",
 
   "page.setting.general.authz.empty-subject": "AuthZ",
   "page.setting.general.authz.grant-view.grantee-authorized": "{grantee}에게 권한을 주었습니다.",

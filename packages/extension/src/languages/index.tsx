@@ -26,6 +26,7 @@ const getMessages = (language: string): IntlMessage => {
 interface Language {
   language: string;
   languageFullName: string;
+  getLanguageFullName: (language: string) => string;
   setLanguage: (language: string) => void;
   automatic: boolean;
   clearLanguage: () => void;
@@ -80,7 +81,7 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
     setAutomatic(false);
   };
 
-  const languageFullName = () => {
+  const getLanguageFullName = (language: string) => {
     switch (language) {
       case "ko":
         return "한국어";
@@ -93,7 +94,8 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
     <LanguageContext.Provider
       value={{
         language,
-        languageFullName: languageFullName(),
+        getLanguageFullName,
+        languageFullName: getLanguageFullName(language),
         setLanguage,
         automatic,
         clearLanguage,

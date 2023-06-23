@@ -37,9 +37,7 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
             }}
           />
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.general.language.english-title",
-            })}
+            title={language.getLanguageFullName("en")}
             endIcon={
               !language.automatic && language.language === "en" ? (
                 <CheckIcon width="1.25rem" height="1.25rem" />
@@ -51,9 +49,7 @@ export const SettingGeneralLanguagePage: FunctionComponent = observer(() => {
             }}
           />
           <PageButton
-            title={intl.formatMessage({
-              id: "page.setting.general.language.korean-title",
-            })}
+            title={language.getLanguageFullName("ko")}
             endIcon={
               !language.automatic && language.language === "ko" ? (
                 <CheckIcon width="1.25rem" height="1.25rem" />

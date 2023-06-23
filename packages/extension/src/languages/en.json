@@ -206,8 +206,6 @@
   "page.setting.general.manage-chain-visibility-paragraph": "Select chains (and its assets) to be shown for your current account",
 
   "page.setting.general.language.automatic-title": "Automatic (Browser default)",
-  "page.setting.general.language.english-title": "English",
-  "page.setting.general.language.korean-title": "한국어",
 
   "page.setting.general.authz.empty-subject": "Authz",
   "page.setting.general.authz.grant-view.grantee-authorized": "You authorized {grantee}",
