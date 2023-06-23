@@ -116,7 +116,7 @@ export const EnableChainsScene: FunctionComponent<{
       }
 
       return keyInfo.type;
-    }, [keyRingStore.keyInfos, vaultId]);
+    }, [intl, keyRingStore.keyInfos, vaultId]);
 
     const [candidateAddresses, setCandidateAddresses] = useState<
       {

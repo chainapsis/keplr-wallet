@@ -312,7 +312,7 @@ const KeyringItem: FunctionComponent<{
         return web3Auth["email"];
       }
     }
-  }, [keyInfo.insensitive, keyInfo.type]);
+  }, [intl, keyInfo.insensitive, keyInfo.type]);
 
   const dropdownItems = (() => {
     const defaults = [

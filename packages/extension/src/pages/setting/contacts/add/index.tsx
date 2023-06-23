@@ -78,6 +78,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
     setEditIndex(-1);
   }, [
+    intl,
     memoConfig,
     paramChainId,
     paramEditIndex,

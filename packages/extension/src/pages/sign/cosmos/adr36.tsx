@@ -81,7 +81,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     } else {
       return msg.value.data as string;
     }
-  }, [isADR36WithString, signDocWrapper]);
+  }, [intl, isADR36WithString, signDocWrapper]);
 
   const isLedgerAndDirect =
     signInteractionStore.waitingData?.data.keyType === "ledger" &&

@@ -263,7 +263,7 @@ const QRCodeView: FunctionComponent<{
     return () => {
       clearTimeout(id);
     };
-  }, [confirm]);
+  }, [confirm, intl]);
 
   useEffect(() => {
     (async () => {

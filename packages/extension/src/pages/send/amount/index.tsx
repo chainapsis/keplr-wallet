@@ -190,7 +190,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       gasSimulator.forceDisable(false);
       gasSimulator.setEnabled(true);
     }
-  }, [gasSimulator, sendConfigs.amountConfig.currency, sendConfigs.gasConfig]);
+  }, [
+    gasSimulator,
+    intl,
+    sendConfigs.amountConfig.currency,
+    sendConfigs.gasConfig,
+  ]);
 
   useTxConfigsQueryString(chainId, {
     ...sendConfigs,

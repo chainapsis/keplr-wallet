@@ -24,6 +24,7 @@ import { YAxis } from "../../../../components/axis";
 import lottie from "lottie-web";
 import AnimShield from "../../../../public/assets/lottie/wallet/shield.json";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useEffectOnce } from "../../../../hooks/use-effect-once";
 
 export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +65,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
 
   const animDivRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     setFocus("timer");
 
     if (animDivRef.current) {
@@ -80,7 +81,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
         anim.destroy();
       };
     }
-  }, []);
+  });
 
   return (
     <HeaderLayout

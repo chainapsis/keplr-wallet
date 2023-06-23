@@ -89,6 +89,7 @@ export const AddressBookModal: FunctionComponent<{
           );
         });
     }, [
+      intl,
       keyRingStore.selectedKeyInfo?.id,
       permitSelfKeyInfo,
       recipientConfig.chainId,

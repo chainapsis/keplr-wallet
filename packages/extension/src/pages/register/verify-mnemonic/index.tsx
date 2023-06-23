@@ -84,7 +84,7 @@ export const VerifyMnemonicScene: FunctionComponent<{
     ].sort((word1, word2) => {
       return word1.index < word2.index ? -1 : 1;
     });
-  }, [mnemonic]);
+  }, [intl, mnemonic]);
 
   const verifyingBoxRef = useRef<VerifyingMnemonicBoxRef | null>(null);
 

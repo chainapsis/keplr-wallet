@@ -135,6 +135,7 @@ export const CosmosTxView: FunctionComponent<{
     feeConfig,
     gasConfig,
     interactionData,
+    intl,
     memoConfig,
     signDocHelper,
   ]);
