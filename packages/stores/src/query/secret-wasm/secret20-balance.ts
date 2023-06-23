@@ -24,23 +24,36 @@ export class ObservableQuerySecret20BalanceImpl
   implements IObservableQueryBalanceImpl
 {
   protected readonly queryAuth?: QueryAuthorization;
+  protected readonly denomHelper: DenomHelper;
 
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     apiGetter: () => Promise<Keplr | undefined>,
-    protected readonly denomHelper: DenomHelper,
     protected readonly bech32Address: string,
     querySecretContractCodeHash: ObservableQuerySecretContractCodeHash,
-    test_currency?: Secret20Currency
+    denomHelper?: DenomHelper,
+    unsavedCurrency?: Secret20Currency
   ) {
+    let currency: AppCurrency;
+    if (denomHelper) {
+      currency = chainGetter
+        .getChain(chainId)
+        .forceFindCurrency(denomHelper.denom);
+    } else {
+      if (!unsavedCurrency) {
+        throw new Error(
+          "Denom helper for a saved currency or an unsaved currency object must be provided"
+        );
+      }
+      currency = unsavedCurrency;
+      denomHelper = new DenomHelper(unsavedCurrency.coinMinimalDenom);
+    }
+
     if (denomHelper.type !== "secret20") {
       throw new Error(`Denom helper must be secret20: ${denomHelper.denom}`);
     }
-    const currency =
-      test_currency ??
-      chainGetter.getChain(chainId).forceFindCurrency(denomHelper.denom);
     let msg = {};
     let queryAuth: QueryAuthorization | undefined;
     if ("type" in currency && currency.type === "secret20") {
@@ -69,6 +82,7 @@ export class ObservableQuerySecret20BalanceImpl
       msg,
       querySecretContractCodeHash
     );
+    this.denomHelper = denomHelper;
 
     this.queryAuth = queryAuth;
 
@@ -156,9 +170,9 @@ export class ObservableQuerySecret20BalanceRegistry implements BalanceRegistry {
         chainId,
         chainGetter,
         this.apiGetter,
-        denomHelper,
         bech32Address,
-        this.querySecretContractCodeHash
+        this.querySecretContractCodeHash,
+        denomHelper
       );
     }
   }

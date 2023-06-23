@@ -9,7 +9,6 @@ import {
 } from "./secret20-balance";
 import { Keplr, Secret20Currency } from "@keplr-wallet/types";
 import { QuerySharedContext } from "../../common";
-import { DenomHelper } from "@keplr-wallet/common";
 
 export interface SecretQueries {
   secret: SecretQueriesImpl;
@@ -82,15 +81,14 @@ export class SecretQueriesImpl {
     bech32Address: string,
     currency: Secret20Currency
   ): ObservableQuerySecret20BalanceImpl {
-    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
     return new ObservableQuerySecret20BalanceImpl(
       this.sharedContext,
       this.chainId,
       this.chainGetter,
       this.apiGetter,
-      denomHelper,
       bech32Address,
       this.querySecretContractCodeHash,
+      undefined,
       currency
     );
   }
