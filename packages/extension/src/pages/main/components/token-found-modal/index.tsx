@@ -211,7 +211,9 @@ export const TokenFoundModal: FunctionComponent<{
           }}
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-300"]}>Select All</Body2>
+            <Body2 color={ColorPalette["gray-300"]}>
+              <FormattedMessage id="text-button.select-all" />
+            </Body2>
 
             <Gutter size="0.25rem" />
 

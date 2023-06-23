@@ -24,7 +24,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
       title=""
       fixedHeight={true}
       bottomButton={{
-        text: intl.formatMessage({ id: "page.sign.cosmos.tx.approve-button" }),
+        text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
         isLoading: (() => {
           if (

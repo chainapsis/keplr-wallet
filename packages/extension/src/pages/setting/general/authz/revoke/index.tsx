@@ -126,7 +126,7 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
             notification.show(
               "success",
               intl.formatMessage({
-                id: "page.setting.general.authz.revoke.transaction-success",
+                id: "notification.transaction-success",
               }),
               ""
             );

@@ -86,7 +86,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
                 size="small"
                 color="secondary"
                 text={intl.formatMessage({
-                  id: "pages.register.name-password-hardware.advanced-button",
+                  id: "button.advanced",
                 })}
                 onClick={() => {
                   setIsBIP44CardOpen(true);

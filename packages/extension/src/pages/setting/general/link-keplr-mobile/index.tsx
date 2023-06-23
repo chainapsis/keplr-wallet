@@ -129,7 +129,7 @@ const EnterPasswordView: FunctionComponent<{
       bottomButton={{
         color: "secondary",
         text: intl.formatMessage({
-          id: "page.setting.general.link-keplr-mobile.enter-password-view.confirm-button",
+          id: "button.confirm",
         }),
         size: "large",
         isLoading,

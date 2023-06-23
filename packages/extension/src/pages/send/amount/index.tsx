@@ -231,7 +231,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       }
       bottomButton={{
         disabled: txConfigsValidate.interactionBlocked,
-        text: intl.formatMessage({ id: "page.send.amount.next-button" }),
+        text: intl.formatMessage({ id: "button.next" }),
         color: "primary",
         size: "large",
         isLoading: accountStore.getAccount(chainId).isSendingMsg === "send",
@@ -302,7 +302,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
                     notification.show(
                       "success",
                       intl.formatMessage({
-                        id: "page.send.amount.transaction-success",
+                        id: "notification.transaction-success",
                       }),
                       ""
                     );

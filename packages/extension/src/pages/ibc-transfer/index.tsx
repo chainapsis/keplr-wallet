@@ -148,7 +148,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
         </Box>
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.ibc-transfer.next-button" }),
+        text: intl.formatMessage({ id: "button.next" }),
         size: "large",
         onClick: async () => {
           if (isSelectChannelPhase) {
@@ -219,7 +219,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                       notification.show(
                         "success",
                         intl.formatMessage({
-                          id: "page.ibc-transfer.transaction-success",
+                          id: "notification.transaction-success",
                         }),
                         ""
                       );

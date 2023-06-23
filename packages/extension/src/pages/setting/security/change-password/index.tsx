@@ -41,7 +41,7 @@ export const SettingSecurityChangePasswordPage: FunctionComponent = observer(
         left={<BackButton />}
         bottomButton={{
           text: intl.formatMessage({
-            id: "page.setting.security.change-password.next-button",
+            id: "button.next",
           }),
           color: "secondary",
           size: "large",

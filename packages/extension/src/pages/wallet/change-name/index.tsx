@@ -90,7 +90,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
         />
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.wallet.change-name.save-button" }),
+        text: intl.formatMessage({ id: "button.save" }),
         color: "secondary",
         size: "large",
         type: "submit",

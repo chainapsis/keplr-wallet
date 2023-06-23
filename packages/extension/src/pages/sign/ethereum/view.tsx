@@ -72,7 +72,7 @@ export const EthereumSigningView: FunctionComponent<{
         />
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.sign.ethereum.approve-button" }),
+        text: intl.formatMessage({ id: "button.approve" }),
         color: "primary",
         size: "large",
         isLoading:

@@ -132,7 +132,7 @@ export const FormNamePassword: FunctionComponent<
         <Button
           size="large"
           text={intl.formatMessage({
-            id: "pages.register.components.form.name-password.next-button",
+            id: "button.next",
           })}
           type="submit"
         />

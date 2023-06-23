@@ -119,7 +119,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
       }}
       bottomButton={{
         text: intl.formatMessage({
-          id: "page.setting.contacts.add.confirm-button",
+          id: "button.confirm",
         }),
         color: "secondary",
         size: "large",

@@ -69,7 +69,7 @@ const SuggestChainPageImpl: FunctionComponent<{
         )
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.suggest-chain.approve-button" }),
+        text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
         color: "primary",
         onClick: async () => {
