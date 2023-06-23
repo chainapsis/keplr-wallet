@@ -3,9 +3,13 @@ import { ChainGetter } from "../../chain";
 import { ObservableQuerySecretContractCodeHash } from "./contract-hash";
 import { ObservableQuerySecret20ContractInfo } from "./secret20-contract-info";
 import { DeepReadonly } from "utility-types";
-import { ObservableQuerySecret20BalanceRegistry } from "./secret20-balance";
-import { Keplr } from "@keplr-wallet/types";
+import {
+  ObservableQuerySecret20BalanceImpl,
+  ObservableQuerySecret20BalanceRegistry,
+} from "./secret20-balance";
+import { Keplr, Secret20Currency } from "@keplr-wallet/types";
 import { QuerySharedContext } from "../../common";
+import { DenomHelper } from "@keplr-wallet/common";
 
 export interface SecretQueries {
   secret: SecretQueriesImpl;
@@ -45,10 +49,10 @@ export class SecretQueriesImpl {
 
   constructor(
     base: QueriesSetBase,
-    sharedContext: QuerySharedContext,
-    chainId: string,
-    chainGetter: ChainGetter,
-    apiGetter: () => Promise<Keplr | undefined>
+    protected sharedContext: QuerySharedContext,
+    protected chainId: string,
+    protected chainGetter: ChainGetter,
+    protected apiGetter: () => Promise<Keplr | undefined>
   ) {
     this.querySecretContractCodeHash =
       new ObservableQuerySecretContractCodeHash(
@@ -71,6 +75,23 @@ export class SecretQueriesImpl {
       chainGetter,
       apiGetter,
       this.querySecretContractCodeHash
+    );
+  }
+
+  querySecret20ContractBalance(
+    bech32Address: string,
+    currency: Secret20Currency
+  ): ObservableQuerySecret20BalanceImpl {
+    const denomHelper = new DenomHelper(currency.coinMinimalDenom);
+    return new ObservableQuerySecret20BalanceImpl(
+      this.sharedContext,
+      this.chainId,
+      this.chainGetter,
+      this.apiGetter,
+      denomHelper,
+      bech32Address,
+      this.querySecretContractCodeHash,
+      currency
     );
   }
 }

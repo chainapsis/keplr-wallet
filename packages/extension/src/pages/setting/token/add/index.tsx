@@ -155,48 +155,43 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (isSecretWasm && queryContract.tokenInfo) {
-      const random = new Uint8Array(32);
-      crypto.getRandomValues(random);
-      const randomSignature = Buffer.from(random).toString("hex");
-      const currency = {
-        coinMinimalDenom: `secret20:${contractAddress}:${queryContract.tokenInfo.name}`,
-        coinDenom: queryContract.tokenInfo.symbol,
-        coinDecimals: queryContract.tokenInfo.decimals,
-      };
-      tokensStore
-        .addToken(chainId, {
-          type: "secret20",
-          contractAddress,
-          authorizationStr: new PermitQueryAuthorization({
-            params: {
-              permit_name: "fake",
-              allowed_tokens: ["fake"],
-              chain_id: "fake",
-              permissions: [],
-            },
-            signature: {
-              pub_key: {
-                type: "fake",
-                value: "fake",
+      const getBalance = queriesStore
+        .get(chainId)
+        .secret.querySecret20ContractBalance(
+          accountStore.getAccount(chainId).bech32Address,
+          {
+            type: "secret20",
+            contractAddress,
+            authorizationStr: new PermitQueryAuthorization({
+              params: {
+                permit_name: "fake",
+                allowed_tokens: ["fake"],
+                chain_id: "fake",
+                permissions: [],
               },
-              signature: randomSignature,
-            },
-          }).toString(),
-          coinMinimalDenom: queryContract.tokenInfo.name,
-          coinDenom: queryContract.tokenInfo.symbol,
-          coinDecimals: queryContract.tokenInfo.decimals,
-        })
-        .then(() => {
-          const getBalance = queriesStore
-            .get(chainId)
-            .queryBalances.getQueryBech32Address(
-              accountStore.getAccount(chainId).bech32Address
-            )
-            .getBalance(currency);
-          setSecret20TestPermitQuery(getBalance);
-        });
+              signature: {
+                pub_key: {
+                  type: "fake",
+                  value: "fake",
+                },
+                signature: "fake",
+              },
+            }).toString(),
+            coinMinimalDenom: `secret20:${contractAddress}:${queryContract.tokenInfo.name}`,
+            coinDenom: queryContract.tokenInfo.symbol,
+            coinDecimals: queryContract.tokenInfo.decimals,
+          }
+        );
+      setSecret20TestPermitQuery(getBalance);
     }
-  }, [queryContract.tokenInfo]);
+  }, [
+    accountStore,
+    chainId,
+    contractAddress,
+    isSecretWasm,
+    queriesStore,
+    queryContract.tokenInfo,
+  ]);
 
   const isSecret20PermitSupported = useMemo(() => {
     return !(

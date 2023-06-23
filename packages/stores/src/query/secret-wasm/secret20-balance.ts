@@ -7,7 +7,7 @@ import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, IObservableQueryBalanceImpl } from "../balances";
 import { ObservableSecretContractChainQuery } from "./contract-query";
 import { WrongViewingKeyError } from "./errors";
-import { AppCurrency, Keplr } from "@keplr-wallet/types";
+import { AppCurrency, Keplr, Secret20Currency } from "@keplr-wallet/types";
 import {
   PermitQueryAuthorization,
   QueryAuthorization,
@@ -32,14 +32,15 @@ export class ObservableQuerySecret20BalanceImpl
     apiGetter: () => Promise<Keplr | undefined>,
     protected readonly denomHelper: DenomHelper,
     protected readonly bech32Address: string,
-    querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
+    querySecretContractCodeHash: ObservableQuerySecretContractCodeHash,
+    test_currency?: Secret20Currency
   ) {
     if (denomHelper.type !== "secret20") {
       throw new Error(`Denom helper must be secret20: ${denomHelper.denom}`);
     }
-    const currency = chainGetter
-      .getChain(chainId)
-      .forceFindCurrency(denomHelper.denom);
+    const currency =
+      test_currency ??
+      chainGetter.getChain(chainId).forceFindCurrency(denomHelper.denom);
     let msg = {};
     let queryAuth: QueryAuthorization | undefined;
     if ("type" in currency && currency.type === "secret20") {
