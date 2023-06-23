@@ -60,7 +60,6 @@
   "pages.register.components.form.name-password.confirm-password-placeholder": "최소 8자리 이상",
   "pages.register.components.form.name-password.short-password-error": "비밀번호가 너무 짧습니다.",
   "pages.register.components.form.name-password.password-not-match-error": "비밀번호가 일치하지 않습니다.",
-  "pages.register.components.form.name-password.next-button": "다음",
 
   "pages.register.intro.create-wallet-button": "새 지갑 생성하기",
   "pages.register.intro.import-wallet-button": "기존 지갑 불러오기",
@@ -101,8 +100,6 @@
   "pages.register.new-mnemonic.recovery-warning-box-paragraph": "복구 문구를 가진 누구나 자산에 접근하고 이를 탈취할 수 있습니다. 항상 피싱 공격이나 스캠꾼들에게 당하지 않도록 주의하시길 바랍니다.",
   "pages.register.new-mnemonic.back-up-warning-box-title": "복구 문구를 안전한 곳에 보관하세요.",
   "pages.register.new-mnemonic.back-up-warning-box-paragraph": "복구 문구를 분실하시면 다시는 계정을 복구할 수 없게 됩니다.",
-  "pages.register.new-mnemonic.advanced-button": "고급",
-  "pages.register.new-mnemonic.next-button": "다음",
   "pages.register.new-mnemonic.agree-button": "이해했습니다. 복구 문구를 보여주세요.",
 
   "pages.register.verify-mnemonic.title": "복구 문구 확인",
@@ -116,7 +113,6 @@
 
   "pages.register.name-password-hardware.title": "지갑 셋팅하기",
   "pages.register.name-password-hardware.use-terra-app-button": "렛저에서 테라 앱 사용하기",
-  "pages.register.name-password-hardware.advanced-button": "고급",
 
   "pages.register.recover-mnemonic.title": "기존 지갑 불러오기",
   "pages.register.recover-mnemonic.paragraph-1": "복구 문구를 통해 지갑을 불러올 수 있습니다. 아무 칸이나 선택해서 전체 복구 문구를 붙여 넣어보세요.",
@@ -124,7 +120,6 @@
   "pages.register.recover-mnemonic.12-words-tab": "12 단어",
   "pages.register.recover-mnemonic.24-words-tab": "24 단어",
   "pages.register.recover-mnemonic.private-key-tab": "프라이빗키",
-  "pages.register.recover-mnemonic.advanced-button": "고급",
   "pages.register.recover-mnemonic.import-button": "불러오기",
 
   "pages.register.back-up-private-key.title": "프라이빗키 저장하기",
@@ -141,13 +136,11 @@
   "pages.register.connect-ledger.use-hid-text": " 다른 USB 연결방식 사용하기 (HID)",
   "pages.register.connect-ledger.use-hid-confirm-title": "웹 HID를 사용할 수 없습니다.",
   "pages.register.connect-ledger.use-hid-confirm-paragraph": "웹 HID를 사용하시려면, ‘실험적 웹 플랫폼 기능’을 활성화해야 합니다.",
-  "pages.register.connect-ledger.next-button": "다음",
 
   "pages.register.enable-chains.title": "체인 선택하기",
   "pages.register.enable-chains.paragraph": "걱정마세요! 언제든지 사이드바 메뉴에 있는 ‘체인 표시’를 방문해서 설정을 변경할 수 있습니다.",
   "pages.register.enable-chains.search-input-placeholder": "네트워크 검색하기",
   "pages.register.enable-chains.chain-selected-count": "{numSelected}개의 체인이 선택됨",
-  "pages.register.enable-chains.save-button": "저장",
   "pages.register.enable-chains.skip-button": "스킵",
 
   "pages.register.select-derivation-path.title": "계정 파생 경로(Derivation Path) 선택하기",
@@ -196,7 +189,6 @@
   "page.setting.advanced.developer-mode-paragraph": "오늘은 내가 바로 개발자? :)",
   "page.setting.advanced.change-endpoints-title": "노드 주소 변경",
 
-  "page.setting.advanced.endpoint.confirm-button": "확인",
   "page.setting.advanced.endpoint.confirm-title": "노드 주소 설정",
   "page.setting.advanced.endpoint.confirm-paragraph": "변경사항이 적용되려면 케플러를 다시 시작해야 합니다.",
   "page.setting.advanced.endpoint.reset-button": "초기화",
@@ -214,7 +206,6 @@
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
-  "page.setting.general.language.english-title": "영어",
   "page.setting.general.language.korean-title": "한국어",
 
   "page.setting.general.authz.empty-subject": "AuthZ",
@@ -226,12 +217,10 @@
   "page.setting.general.authz.revoke.title": "AuthZ 상세",
   "page.setting.general.authz.revoke.grantee-address": "받은 사람 주소",
   "page.setting.general.authz.revoke.expiration-dates": "만료 날짜",
-  "page.setting.general.authz.revoke.transaction-success": "트랜잭션 성공",
   "page.setting.general.authz.revoke.revoke-button": "권한 회수하기",
 
   "page.setting.general.link-keplr-mobile.confirm-title": "내보내기 실패",
   "page.setting.general.link-keplr-mobile.confirm-paragraph": "렛저 계정들은 케플러 모바일로 내보낼 수 없습니다. 모바일 장치에서 렛저 계정을 직접 불러와야 합니다.{br}케플러 모바일에서 지원하지 않는 소셜 로그인으로 생성된 계정들은 내보낼 수 없습니다.",
-  "page.setting.general.link-keplr-mobile.enter-password-view.confirm-button": "확인",
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-title": "케플러 모바일 앱으로만 스캔하세요!",
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph": "케플러 모바일이 아닌 다른 앱으로 QR 코드를 스캔하면 자산을 잃을 수 있습니다.",
   "page.setting.general.link-keplr-mobile.enter-password-view.paragraph": "QR 코드를 스캔해서 케플러 모바일에 계정을 내보낼 수 있습니다. 이 프로세스는 몇 분 정도 걸릴 수 있습니다.",
@@ -255,13 +244,11 @@
   "page.setting.security.permission.disconnect-all-button": "모든 연결 끊기",
   "page.setting.security.permission.origin-view.all-text": "전체",
 
-  "page.setting.security.auto-lock.confirm-button": "확인",
   "page.setting.security.auto-lock.paragraph": "케플러가 자동으로 잠기는 데 걸리는 시간을 설정할 수 있습니다. ",
   "page.setting.security.auto-lock.timer-input-label": "타이머 설정 (단위: 분)",
   "page.setting.security.auto-lock.sleep-mode-title": "슬립모드 잠금 기능",
   "page.setting.security.auto-lock.sleep-mode-paragraph": "장치가 슬립모드일 때{br}케플러를 잠급니다.",
 
-  "page.setting.security.change-password.next-button": "다음",
   "page.setting.security.change-password.current-password-label": "현재 비밀번호",
   "page.setting.security.change-password.new-password-label": "새로운 비밀번호",
   "page.setting.security.change-password.confirm-password-label": "비밀번호 확인",
@@ -295,14 +282,12 @@
 
   "page.setting.contacts.add.add-title": "새 연락처 추가",
   "page.setting.contacts.add.edit-title": "연락처 편집",
-  "page.setting.contacts.add.confirm-button": "확인",
   "page.setting.contacts.add.label-label": "연락처 이름",
   "page.setting.contacts.add.label-placeholder": "연락처를 구분할 수 있는 짧은 닉네임을 붙여주세요!",
   "page.setting.contacts.add.memo-label": "메모 (선택)",
   "page.setting.contacts.add.memo-placeholder": "중앙화 거래소로 보낼 때는 필수입니다.",
 
   "page.suggest-chain.title": "{chainName} 체인 추가",
-  "page.suggest-chain.approve-button": "승인",
   "page.suggest-chain.community-info-view.community-driven-chip": "커뮤니티 레포",
   "page.suggest-chain.community-info-view.paragraph-1": "에 있는 ",
   "page.suggest-chain.community-info-view.paragraph-2": " 체인을 케플러에 추가합니다.",
@@ -336,25 +321,19 @@
   "page.wallet.keyring-item.dropdown.view-recovery-path-title": "복구 문구 보기",
   "page.wallet.keyring-item.dropdown.view-private-key-title": "프라이빗키 보기",
 
-  "page.wallet.change-name.save-button": "저장",
   "page.wallet.change-name.previous-name-input-label": "현재 지갑 이름",
   "page.wallet.change-name.new-name-input-label": "새로운 지갑 이름",
 
-  "page.wallet.delete.confirm-button": "확인",
   "page.wallet.delete.warning-title": "경고",
   "page.wallet.delete.warning-paragraph": "지갑을 삭제하기 전에 복구 문구와 프라이빗키를 반드시 백업해두세요. ",
   "page.wallet.delete.warning-link-text": "백업하러 가기",
   "page.wallet.delete.paragraph": "삭제하고 나면 지갑을 다시 불러오기 전까지 지갑을 사용할 수 없습니다.",
   "page.wallet.delete.password-input-label": "비밀번호",
 
-  "page.wallet.show-sensitive.confirm-button": "확인",
-  "page.wallet.show-sensitive.close-button": "닫기",
   "page.wallet.show-sensitive.paragraph": "계속 진행하려면 비밀번호를 입력해주세요.",
   "page.wallet.show-sensitive.password-label": "비밀번호",
 
   "page.ibc-transfer.title": "IBC 전송",
-  "page.ibc-transfer.next-button": "다음",
-  "page.ibc-transfer.transaction-success": "트랜잭션 성공",
 
   "page.ibc-transfer.select-channel.asset-title": "토큰",
   "page.ibc-transfer.select-channel.destination-chain-label": "수신할 체인",
@@ -368,14 +347,11 @@
   "page.ibc-transfer.add-channel-modal.destination-chain-placeholder": "체인을 선택하세요",
   "page.ibc-transfer.add-channel-modal.channel-id-label": "발신하는 체인의 채널 ID",
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "채널 ID를 입력하세요",
-  "page.ibc-transfer.add-channel-modal.save-button": "저장",
 
   "page.permission.unknown-permission": "알수없는 권한",
-  "page.permission.approve-button": "허락",
   "page.permission.requesting-connection-title": "연결 요청",
   "page.permission.paragraph": "승인시 해당 웹사이트에서 아래와 같은 권한을 받습니다 :{br}• 유저의 케플러 지갑에 있는 모든 체인 리스트 조회, 사용",
 
-  "page.sign.cosmos.tx.approve-button": "승인",
   "page.sign.cosmos.tx.title": "트랜잭션 확인",
   "page.sign.cosmos.tx.messages": "메세지",
   "page.sign.cosmos.tx.warning-title": "호환되지 않는 서명이 요청됨",
@@ -385,14 +361,12 @@
   "page.sign.cosmos.icns.title": "ICNS 등록 요청",
 
   "page.sign.adr36.title": "소유권 증명",
-  "page.sign.adr36.approve-button": "승인",
   "page.sign.adr36.prove-account-ownership-to": "아래의 웹사이트에 계정 소유자임을 증명합니다.",
   "page.sign.adr36.requested-network": "요청한 네트워크",
   "page.sign.adr36.warning-title": "호환되지 않는 서명이 요청됨",
   "page.sign.adr36.warning-paragraph": "오류: SIGN_MODE_DIRECT는 렛저에서 서명할 수 없습니다. 이슈 해결을 위해 해당 웹 앱의 관리자에게 연락하시길 바랍니다.",
 
   "page.sign.ethereum.title": "이더리움 서명",
-  "page.sign.ethereum.approve-button": "승인",
   "page.sign.ethereum.requested-network": "요청한 네트워크",
 
   "page.sign.components.messages.custom.title": "커스텀",
@@ -439,8 +413,6 @@
   "page.send.select-asset.search-placeholder": "자산이나 체인 이름 검색",
   "page.send.select-asset.hide-ibc-token": "IBC 토큰 숨기기",
   "page.send.amount.title": "전송",
-  "page.send.amount.next-button": "다음",
-  "page.send.amount.transaction-success": "트랜잭션 성공",
   "page.send.amount.asset-title": "토큰",
   "page.send.amount.memo-placeholder": "중앙화 거래소로 보낼 때는 필수입니다.",
 
@@ -479,7 +451,6 @@
   "page.main.components.buttons.send-button": "보내기",
   "page.main.components.claim-all.title": "아직 받지 않은 리워드",
   "page.main.components.claim-all.button": "한번에 받기",
-  "page.main.components.claim-all.transaction-success": "트랜잭션 성공",
   "page.main.components.claim-all.claim-button": "받기",
   "page.main.components.menu-bar.manage-chain-visibility-title": "체인 표시",
   "page.main.components.menu-bar.my-contacts-title": "연락처",
@@ -514,7 +485,6 @@
   "components.input.fee-control.modal.guide-title": "Tx simulation failed",
   "components.input.fee-control.modal.gas-adjustment-label": "가스 조정",
   "components.input.fee-control.modal.gas-amount-label": "가스량",
-  "components.input.fee-control.modal.close-button": "닫기",
   "components.input.fee-control.modal.fee-selector.low": "느림",
   "components.input.fee-control.modal.fee-selector.average": "평균",
   "components.input.fee-control.modal.fee-selector.high": "빠름",
@@ -532,6 +502,16 @@
 
   "components.collapsible-list.view-more-tokens": "{remain}개의 토큰 더보기",
   "components.collapsible-list.collapse": "접기",
+
+  "button.confirm": "확인",
+  "button.next": "다음",
+  "button.advanced": "고급",
+  "button.approve": "승인",
+  "button.save": "저장",
+  "button.close": "닫기",
+  "text-button.select-all": "전체 선택",
+
+  "notification.transaction-success": "트랜잭션 성공",
 
   "hooks.confirm.cancel-button": "취소",
   "hooks.confirm.yes-button": "예"

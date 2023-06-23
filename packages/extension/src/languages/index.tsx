@@ -9,6 +9,18 @@ import { IntlProvider } from "react-intl";
 import MessagesEn from "./en.json";
 import MessagesKo from "./ko.json";
 
+export type IntlMessage = Record<string, string>;
+export type IntlMessages = { [lang: string]: Record<string, string> };
+
+const messages: IntlMessages = {
+  en: MessagesEn,
+  ko: MessagesKo,
+};
+
+const getMessages = (language: string): IntlMessage => {
+  return Object.assign({}, MessagesEn, messages[language]);
+};
+
 interface Language {
   language: string;
   languageFullName: string;
@@ -45,6 +57,8 @@ export const useLanguage = (): Language => {
 
 export const AppIntlProvider: FunctionComponent = ({ children }) => {
   const [language, _setLanguage] = useState<string>(() => initLanguage());
+  const [messages, setMessages] = useState(getMessages(language));
+
   const [automatic, setAutomatic] = useState(!localStorage.getItem("language"));
 
   const clearLanguage = () => {
@@ -55,6 +69,7 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
 
   useLayoutEffect(() => {
     document.body.setAttribute("data-lang", language);
+    setMessages(getMessages(language));
   }, [language]);
 
   const setLanguage = (language: string) => {
@@ -66,32 +81,23 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
   const languageFullName = () => {
     switch (language) {
       case "ko":
-        return "Korean";
+        return "한국어";
       default:
         return "English";
-    }
-  };
-
-  const getMessages = () => {
-    switch (language) {
-      case "ko":
-        return MessagesKo;
-      default:
-        return MessagesEn;
     }
   };
 
   return (
     <LanguageContext.Provider
       value={{
-        language: language,
+        language,
         languageFullName: languageFullName(),
         setLanguage,
         automatic,
         clearLanguage,
       }}
     >
-      <IntlProvider locale={language} messages={getMessages()} key={language}>
+      <IntlProvider locale={language} messages={messages} key={language}>
         {children}
       </IntlProvider>
     </LanguageContext.Provider>

@@ -330,7 +330,7 @@ export const ConnectLedgerScene: FunctionComponent<{
         <Box width="22.5rem" marginX="auto">
           <Button
             text={intl.formatMessage({
-              id: "pages.register.connect-ledger.next-button",
+              id: "button.next",
             })}
             size="large"
             isLoading={isLoading}

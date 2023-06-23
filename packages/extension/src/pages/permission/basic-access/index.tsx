@@ -27,7 +27,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
       fixedHeight={true}
       bottomButton={{
         text: intl.formatMessage({
-          id: "page.permission.approve-button",
+          id: "button.approve",
         }),
         size: "large",
         isLoading: (() => {

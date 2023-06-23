@@ -696,7 +696,9 @@ export const EnableChainsScene: FunctionComponent<{
                 }}
               >
                 <XAxis alignY="center">
-                  <Body2 color={ColorPalette["gray-300"]}>Select All</Body2>
+                  <Body2 color={ColorPalette["gray-300"]}>
+                    <FormattedMessage id="text-button.select-all" />
+                  </Body2>
 
                   <Gutter size="0.25rem" />
 
@@ -717,7 +719,7 @@ export const EnableChainsScene: FunctionComponent<{
         <Box width="22.5rem" marginX="auto">
           <Button
             text={intl.formatMessage({
-              id: "pages.register.enable-chains.save-button",
+              id: "button.save",
             })}
             size="large"
             onClick={async () => {

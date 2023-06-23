@@ -196,7 +196,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
               size="small"
               color="secondary"
               text={intl.formatMessage({
-                id: "pages.register.new-mnemonic.advanced-button",
+                id: "button.advanced",
               })}
               disabled={!policyVerified}
               onClick={() => {
@@ -219,7 +219,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
         {policyVerified ? (
           <Button
             text={intl.formatMessage({
-              id: "pages.register.new-mnemonic.next-button",
+              id: "button.next",
             })}
             size="large"
             onClick={() => {

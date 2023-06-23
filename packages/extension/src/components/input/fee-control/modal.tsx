@@ -215,7 +215,7 @@ export const TransactionFeeModal: FunctionComponent<{
         <Button
           type="button"
           text={intl.formatMessage({
-            id: "components.input.fee-control.modal.close-button",
+            id: "button.close",
           })}
           color="secondary"
           size="large"

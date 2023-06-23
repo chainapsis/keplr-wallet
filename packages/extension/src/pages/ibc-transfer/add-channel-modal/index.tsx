@@ -91,7 +91,7 @@ export const IBCAddChannelModal: FunctionComponent<{
 
         <Button
           text={intl.formatMessage({
-            id: "page.ibc-transfer.add-channel-modal.save-button",
+            id: "button.save",
           })}
           disabled={
             selectedChainId === "" || value.trim() === "" || error !== ""

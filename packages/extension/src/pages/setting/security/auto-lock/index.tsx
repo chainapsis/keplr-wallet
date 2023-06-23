@@ -90,7 +90,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
       left={<BackButton />}
       bottomButton={{
         text: intl.formatMessage({
-          id: "page.setting.security.auto-lock.confirm-button",
+          id: "button.confirm",
         }),
         color: "secondary",
         size: "large",

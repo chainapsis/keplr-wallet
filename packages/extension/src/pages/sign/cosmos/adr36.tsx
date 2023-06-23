@@ -104,7 +104,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         />
       }
       bottomButton={{
-        text: intl.formatMessage({ id: "page.sign.adr36.approve-button" }),
+        text: intl.formatMessage({ id: "button.approve" }),
         color: "primary",
         size: "large",
         disabled: signInteractionStore.waitingData == null,

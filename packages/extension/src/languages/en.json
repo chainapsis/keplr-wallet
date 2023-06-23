@@ -60,7 +60,6 @@
   "pages.register.components.form.name-password.confirm-password-placeholder": "At least 8 characters in length",
   "pages.register.components.form.name-password.short-password-error": "Too short password",
   "pages.register.components.form.name-password.password-not-match-error": "Password should match",
-  "pages.register.components.form.name-password.next-button": "Next",
 
   "pages.register.intro.create-wallet-button": "Create a new wallet",
   "pages.register.intro.import-wallet-button": "Import an existing wallet",
@@ -101,8 +100,6 @@
   "pages.register.new-mnemonic.recovery-warning-box-paragraph": "Anyone with your recovery phrase can have full control over your assets. Please stay vigilant against phishing attacks at all times.",
   "pages.register.new-mnemonic.back-up-warning-box-title": "Back up the phrase safely.",
   "pages.register.new-mnemonic.back-up-warning-box-paragraph": "You will never be able to restore your account without your recovery phrase.",
-  "pages.register.new-mnemonic.advanced-button": "Advanced",
-  "pages.register.new-mnemonic.next-button": "Next",
   "pages.register.new-mnemonic.agree-button": "I understood. Show my phrase.",
 
   "pages.register.verify-mnemonic.title": "Verify Your Recovery Phrase",
@@ -116,7 +113,6 @@
 
   "pages.register.name-password-hardware.title": "Set Up Your Wallet",
   "pages.register.name-password-hardware.use-terra-app-button": "Use Terra Ledger app",
-  "pages.register.name-password-hardware.advanced-button": "Advanced",
 
   "pages.register.recover-mnemonic.title": "Import Existing Wallet",
   "pages.register.recover-mnemonic.paragraph-1": "Enter your recovery phrase here to restore your wallet. or paste the entire phrase in any text input.",
@@ -124,7 +120,6 @@
   "pages.register.recover-mnemonic.12-words-tab": "12 words",
   "pages.register.recover-mnemonic.24-words-tab": "24 words",
   "pages.register.recover-mnemonic.private-key-tab": "Private key",
-  "pages.register.recover-mnemonic.advanced-button": "Advanced",
   "pages.register.recover-mnemonic.import-button": "Import",
 
   "pages.register.back-up-private-key.title": "Back up private key",
@@ -141,13 +136,11 @@
   "pages.register.connect-ledger.use-hid-text": "Use alternative USB connection method(HID)",
   "pages.register.connect-ledger.use-hid-confirm-title": "Unable to use Web HID",
   "pages.register.connect-ledger.use-hid-confirm-paragraph": "Please enable ‘experimental web platform features’ to use Web HID",
-  "pages.register.connect-ledger.next-button": "Next",
 
   "pages.register.enable-chains.title": "Select Chains",
   "pages.register.enable-chains.paragraph": "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
   "pages.register.enable-chains.search-input-placeholder": "Search networks",
   "pages.register.enable-chains.chain-selected-count": "{numSelected} chain(s) selected",
-  "pages.register.enable-chains.save-button": "Save",
   "pages.register.enable-chains.skip-button": "Skip",
 
   "pages.register.select-derivation-path.title": "Select Account Derivation Path",
@@ -196,7 +189,6 @@
   "page.setting.advanced.developer-mode-paragraph": "Feeling techie today? :)",
   "page.setting.advanced.change-endpoints-title": "Change Endpoints",
 
-  "page.setting.advanced.endpoint.confirm-button": "Confirm",
   "page.setting.advanced.endpoint.confirm-title": "Set endpoints",
   "page.setting.advanced.endpoint.confirm-paragraph": "You need to restart Keplr to apply changes",
   "page.setting.advanced.endpoint.reset-button": "Reset",
@@ -215,7 +207,7 @@
 
   "page.setting.general.language.automatic-title": "Automatic (Browser default)",
   "page.setting.general.language.english-title": "English",
-  "page.setting.general.language.korean-title": "Korean",
+  "page.setting.general.language.korean-title": "한국어",
 
   "page.setting.general.authz.empty-subject": "Authz",
   "page.setting.general.authz.grant-view.grantee-authorized": "You authorized {grantee}",
@@ -226,12 +218,10 @@
   "page.setting.general.authz.revoke.title": "Authz Details",
   "page.setting.general.authz.revoke.grantee-address": "Grantee Address",
   "page.setting.general.authz.revoke.expiration-dates": "Expiration dates",
-  "page.setting.general.authz.revoke.transaction-success": "Transaction Success",
   "page.setting.general.authz.revoke.revoke-button": "Revoke",
 
   "page.setting.general.link-keplr-mobile.confirm-title": "Export Failed",
   "page.setting.general.link-keplr-mobile.confirm-paragraph": "You cannot export Ledger-based accounts to Keplr Mobile. These must be imported to your mobile device directly from the Ledger.{br}Accounts that are created via social logins that are not supported by Keplr Mobile cannot be exported.",
-  "page.setting.general.link-keplr-mobile.enter-password-view.confirm-button": "Confirm",
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-title": "Only scan on Keplr Mobile",
   "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph": "Scanning the QR code outside of Keplr Mobile can lead to loss of funds",
   "page.setting.general.link-keplr-mobile.enter-password-view.paragraph": "Scan QR code to export accounts to Keplr Mobile. The process may take several minutes.",
@@ -255,13 +245,11 @@
   "page.setting.security.permission.disconnect-all-button": "Disconnect All",
   "page.setting.security.permission.origin-view.all-text": "All",
 
-  "page.setting.security.auto-lock.confirm-button": "Confirm",
   "page.setting.security.auto-lock.paragraph": "You can set how long it takes Keplr to automatically lock.",
   "page.setting.security.auto-lock.timer-input-label": "Set Timer (unit: minutes)",
   "page.setting.security.auto-lock.sleep-mode-title": "Lock Keplr on Sleep Mode",
   "page.setting.security.auto-lock.sleep-mode-paragraph": "Lock Keplr when the device is{br}in sleep mode",
 
-  "page.setting.security.change-password.next-button": "Next",
   "page.setting.security.change-password.current-password-label": "Current Keplr Password",
   "page.setting.security.change-password.new-password-label": "New Keplr Password",
   "page.setting.security.change-password.confirm-password-label": "Confirm New Keplr Password",
@@ -295,14 +283,12 @@
 
   "page.setting.contacts.add.add-title": "Add Contact",
   "page.setting.contacts.add.edit-title": "Edit Contact",
-  "page.setting.contacts.add.confirm-button": "Confirm",
   "page.setting.contacts.add.label-label": "Label",
   "page.setting.contacts.add.label-placeholder": "A short nickname to identify the contact",
   "page.setting.contacts.add.memo-label": "Memo (Optional)",
   "page.setting.contacts.add.memo-placeholder": "Required for sending to centralized exchange",
 
   "page.suggest-chain.title": "Add {chainName} to Keplr",
-  "page.suggest-chain.approve-button": "Approve",
   "page.suggest-chain.community-info-view.community-driven-chip": "Community driven",
   "page.suggest-chain.community-info-view.paragraph-1": "would like to add blockchain ",
   "page.suggest-chain.community-info-view.paragraph-2": " to Keplr.",
@@ -336,25 +322,19 @@
   "page.wallet.keyring-item.dropdown.view-recovery-path-title": "View Recovery Phrase",
   "page.wallet.keyring-item.dropdown.view-private-key-title": "View Private key",
 
-  "page.wallet.change-name.save-button": "Save",
   "page.wallet.change-name.previous-name-input-label": "Previous Wallet Name",
   "page.wallet.change-name.new-name-input-label": "New Wallet Name",
 
-  "page.wallet.delete.confirm-button": "Confirm",
   "page.wallet.delete.warning-title": "Alert",
   "page.wallet.delete.warning-paragraph": "Make sure that you’ve backed up your recovery phrase and private key.",
   "page.wallet.delete.warning-link-text": "Back Up My Wallet",
   "page.wallet.delete.paragraph": "After deletion, you will be required to import your wallet to restore\n  your access to it.",
   "page.wallet.delete.password-input-label": "Password",
 
-  "page.wallet.show-sensitive.confirm-button": "Confirm",
-  "page.wallet.show-sensitive.close-button": "Close",
   "page.wallet.show-sensitive.paragraph": "Please type in your password to proceed",
   "page.wallet.show-sensitive.password-label": "Password",
 
   "page.ibc-transfer.title": "IBC Transfer",
-  "page.ibc-transfer.next-button": "Next",
-  "page.ibc-transfer.transaction-success": "Transaction Success",
 
   "page.ibc-transfer.select-channel.asset-title": "Asset",
   "page.ibc-transfer.select-channel.destination-chain-label": "Destination Chain",
@@ -368,14 +348,11 @@
   "page.ibc-transfer.add-channel-modal.destination-chain-placeholder": "Select Chain",
   "page.ibc-transfer.add-channel-modal.channel-id-label": "Channel Id",
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "Source Channel ID",
-  "page.ibc-transfer.add-channel-modal.save-button": "Save",
 
   "page.permission.unknown-permission": "Unknown permission",
-  "page.permission.approve-button": "Approve",
   "page.permission.requesting-connection-title": "Requesting Connection",
   "page.permission.paragraph": "By approving this request, the website will:{br}• Get the list of all chain on your Keplr Wallet",
 
-  "page.sign.cosmos.tx.approve-button": "Approve",
   "page.sign.cosmos.tx.title": "Confirm Transaction",
   "page.sign.cosmos.tx.messages": "Messages",
   "page.sign.cosmos.tx.warning-title": "Incompatible Signing Requested",
@@ -385,14 +362,12 @@
   "page.sign.cosmos.icns.title": "Request Registration",
 
   "page.sign.adr36.title": "Prove Ownership",
-  "page.sign.adr36.approve-button": "Approve",
   "page.sign.adr36.prove-account-ownership-to": "Prove account ownership to",
   "page.sign.adr36.requested-network": "Requested Network",
   "page.sign.adr36.warning-title": "Incompatible Signing Requested",
   "page.sign.adr36.warning-paragraph": "Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue.",
 
   "page.sign.ethereum.title": "Sign Ethereum",
-  "page.sign.ethereum.approve-button": "Approve",
   "page.sign.ethereum.requested-network": "Requested Network",
 
   "page.sign.components.messages.custom.title": "Custom",
@@ -405,7 +380,7 @@
   "page.sign.components.messages.redelegate.title": "Redelegate",
   "page.sign.components.messages.redelegate.paragraph": "Redelegate <b>{coin}</b> from <b>{from}</b> to <b>{to}</b>",
   "page.sign.components.messages.send.title": "Send",
-  "page.sign.components.messages.send.paragraph": "<b>{recipient}</b> will receive <b>{amount}</b>",
+  "page.sign.components.messages.send.paragraph": "<b>{address}</b> will receive <b>{amount}</b>",
   "page.sign.components.messages.transfer.title": "IBC Transfer",
   "page.sign.components.messages.transfer.paragraph": "Send <b>{coin}</b> to <b>{address}</b> on <b>{channelId}</b>",
   "page.sign.components.messages.undelegate.title": "Undelegate",
@@ -439,8 +414,6 @@
   "page.send.select-asset.search-placeholder": "Search for asset or chain",
   "page.send.select-asset.hide-ibc-token": "Hide IBC token",
   "page.send.amount.title": "Send",
-  "page.send.amount.next-button": "Next",
-  "page.send.amount.transaction-success": "Transaction Success",
   "page.send.amount.asset-title": "Asset",
   "page.send.amount.memo-placeholder": "Required for sending to centralized exchanges",
 
@@ -479,7 +452,6 @@
   "page.main.components.buttons.send-button": "Send",
   "page.main.components.claim-all.title": "Unclaimed Staking Reward",
   "page.main.components.claim-all.button": "Claim All",
-  "page.main.components.claim-all.transaction-success": "Transaction Success",
   "page.main.components.claim-all.claim-button": "Claim",
   "page.main.components.menu-bar.manage-chain-visibility-title": "Manage Chain Visibility",
   "page.main.components.menu-bar.my-contacts-title": "My Contacts",
@@ -514,7 +486,6 @@
   "components.input.fee-control.modal.guide-title": "Tx simulation failed",
   "components.input.fee-control.modal.gas-adjustment-label": "Gas Adjustment",
   "components.input.fee-control.modal.gas-amount-label": "Gas Amount",
-  "components.input.fee-control.modal.close-button": "Close",
   "components.input.fee-control.modal.fee-selector.low": "Low",
   "components.input.fee-control.modal.fee-selector.average": "Average",
   "components.input.fee-control.modal.fee-selector.high": "High",
@@ -532,6 +503,14 @@
 
   "components.collapsible-list.view-more-tokens": "View {remain} more tokens",
   "components.collapsible-list.collapse": "Collapse",
+
+  "button.confirm": "Confirm",
+  "button.next": "Next",
+  "button.advanced": "Advanced",
+  "button.approve": "Approve",
+  "button.save": "Save",
+  "button.close": "Close",
+  "text-button.select-all": "Select All",
 
   "hooks.confirm.cancel-button": "Cancel",
   "hooks.confirm.yes-button": "Yes"

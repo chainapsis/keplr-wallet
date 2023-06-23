@@ -85,7 +85,7 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
           ? {
               color: "secondary",
               text: intl.formatMessage({
-                id: "page.wallet.show-sensitive.confirm-button",
+                id: "button.confirm",
               }),
               size: "large",
               type: "submit",
@@ -93,7 +93,7 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
           : {
               color: "secondary",
               text: intl.formatMessage({
-                id: "page.wallet.show-sensitive.close-button",
+                id: "button.close",
               }),
               size: "large",
               type: "button",

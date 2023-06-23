@@ -90,7 +90,7 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
       fixedHeight={true}
       left={<BackButton />}
       bottomButton={{
-        text: intl.formatMessage({ id: "page.wallet.delete.confirm-button" }),
+        text: intl.formatMessage({ id: "button.confirm" }),
         color: "secondary",
         size: "large",
         type: "submit",

@@ -345,7 +345,7 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
                     size="small"
                     color="secondary"
                     text={intl.formatMessage({
-                      id: "pages.register.recover-mnemonic.advanced-button",
+                      id: "button.advanced",
                     })}
                     onClick={() => {
                       setIsBIP44CardOpen(true);

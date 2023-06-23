@@ -646,7 +646,7 @@ const ClaimTokenItem: FunctionComponent<{
             notification.show(
               "success",
               intl.formatMessage({
-                id: "page.main.components.claim-all.transaction-success",
+                id: "notification.transaction-success",
               }),
               ""
             );

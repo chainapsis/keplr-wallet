@@ -97,7 +97,7 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
       left={<BackButton />}
       bottomButton={{
         text: intl.formatMessage({
-          id: "page.setting.advanced.endpoint.confirm-button",
+          id: "button.confirm",
         }),
         color: "secondary",
         size: "large",
