@@ -81,7 +81,7 @@ export const AppIntlProvider: FunctionComponent = ({ children }) => {
   const languageFullName = () => {
     switch (language) {
       case "ko":
-        return "Korean";
+        return "한국어";
       default:
         return "English";
     }
