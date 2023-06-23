@@ -9,7 +9,7 @@ import { TokenCW20Service } from "./service";
 import {
   GetAllTokenInfosMsg,
   AddTokenMsg,
-  GetSecret20ViewingKey,
+  GetSecret20QueryAuthorization,
   RemoveTokenMsg,
   SuggestTokenMsg,
 } from "./messages";
@@ -44,12 +44,12 @@ export const getHandler: (
         return handleAddTokenMsg(service)(env, msg as AddTokenMsg);
       case RemoveTokenMsg:
         return handleRemoveTokenMsg(service)(env, msg as RemoveTokenMsg);
-      case GetSecret20ViewingKey:
-        return handleGetSecret20ViewingKey(
+      case GetSecret20QueryAuthorization:
+        return handleGetSecret20QueryAuthorization(
           service,
           permissionInteractionService,
           keyRingCosmosService
-        )(env, msg as GetSecret20ViewingKey);
+        )(env, msg as GetSecret20QueryAuthorization);
       default:
         throw new KeplrError("tokens", 120, "Unknown msg type");
     }
@@ -123,11 +123,11 @@ const handleRemoveTokenMsg: (
   };
 };
 
-const handleGetSecret20ViewingKey: (
+const handleGetSecret20QueryAuthorization: (
   service: TokenCW20Service,
   permissionInteractionService: PermissionInteractiveService,
   keyRingCosmosService: KeyRingCosmosService
-) => InternalHandler<GetSecret20ViewingKey> = (
+) => InternalHandler<GetSecret20QueryAuthorization> = (
   service,
   permissionInteractionService,
   keyRingCosmosService
@@ -142,10 +142,11 @@ const handleGetSecret20ViewingKey: (
     const key = await keyRingCosmosService.getKeySelected(msg.chainId);
     const associatedAccountAddress = Buffer.from(key.address).toString("hex");
 
-    return service.getSecret20ViewingKey(
+    return service.getSecret20QueryAuthorization(
       msg.chainId,
       msg.contractAddress,
-      associatedAccountAddress
+      associatedAccountAddress,
+      msg.queryAuthorizationType
     );
   };
 };

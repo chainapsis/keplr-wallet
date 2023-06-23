@@ -375,10 +375,11 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       this.requester,
       BACKGROUND_PORT,
       "token-cw20",
-      "get-secret20-viewing-key",
+      "get-secret20-query-authorization",
       {
         chainId,
         contractAddress,
+        queryAuthorizationType: "viewing_key",
       }
     );
   }

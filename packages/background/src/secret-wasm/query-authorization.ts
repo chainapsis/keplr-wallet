@@ -1,6 +1,9 @@
 import { Permit } from "@keplr-wallet/types";
 
+export type QueryAuthorizationType = "permit" | "viewing_key";
+
 export abstract class QueryAuthorization {
+  abstract type: QueryAuthorizationType;
   abstract getId(): string;
   abstract toString(): string;
 
@@ -19,6 +22,8 @@ export abstract class QueryAuthorization {
 }
 
 export class PermitQueryAuthorization extends QueryAuthorization {
+  type: QueryAuthorizationType = "permit";
+
   constructor(public permit: Permit) {
     super();
   }
@@ -33,6 +38,7 @@ export class PermitQueryAuthorization extends QueryAuthorization {
 }
 
 export class ViewingKeyAuthorization extends QueryAuthorization {
+  type: QueryAuthorizationType = "viewing_key";
   constructor(public viewingKey: string) {
     super();
   }

@@ -2,6 +2,7 @@ import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { TokenInfo } from "./types";
 import { AppCurrency } from "@keplr-wallet/types";
+import { QueryAuthorizationType } from "../secret-wasm/query-authorization";
 
 export class GetAllTokenInfosMsg extends Message<
   Record<string, TokenInfo[] | undefined>
@@ -125,14 +126,15 @@ export class RemoveTokenMsg extends Message<
   }
 }
 
-export class GetSecret20ViewingKey extends Message<string> {
+export class GetSecret20QueryAuthorization extends Message<string> {
   public static type() {
-    return "get-secret20-viewing-key";
+    return "get-secret20-query-authorization";
   }
 
   constructor(
     public readonly chainId: string,
-    public readonly contractAddress: string
+    public readonly contractAddress: string,
+    public readonly queryAuthorizationType: QueryAuthorizationType | undefined
   ) {
     super();
   }
@@ -156,6 +158,6 @@ export class GetSecret20ViewingKey extends Message<string> {
   }
 
   type(): string {
-    return GetSecret20ViewingKey.type();
+    return GetSecret20QueryAuthorization.type();
   }
 }

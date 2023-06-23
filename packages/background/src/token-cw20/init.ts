@@ -3,7 +3,7 @@ import {
   GetAllTokenInfosMsg,
   AddTokenMsg,
   RemoveTokenMsg,
-  GetSecret20ViewingKey,
+  GetSecret20QueryAuthorization,
   SuggestTokenMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
@@ -22,7 +22,7 @@ export function init(
   router.registerMessage(SuggestTokenMsg);
   router.registerMessage(AddTokenMsg);
   router.registerMessage(RemoveTokenMsg);
-  router.registerMessage(GetSecret20ViewingKey);
+  router.registerMessage(GetSecret20QueryAuthorization);
 
   router.addHandler(
     ROUTE,

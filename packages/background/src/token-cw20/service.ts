@@ -24,7 +24,10 @@ import {
 import { computedFn } from "mobx-utils";
 import { TokenInfo } from "./types";
 import { Buffer } from "buffer/";
-import { QueryAuthorization } from "../secret-wasm/query-authorization";
+import {
+  QueryAuthorization,
+  QueryAuthorizationType,
+} from "../secret-wasm/query-authorization";
 
 export class TokenCW20Service {
   protected readonly legacyKVStore: KVStore;
@@ -332,12 +335,13 @@ export class TokenCW20Service {
       tokens.splice(findIndex, 1);
     }
   }
-  //todo rename?
-  getSecret20ViewingKey(
+
+  getSecret20QueryAuthorization(
     chainId: string,
     contractAddress: string,
     // Should be hex encoded. (not bech32)
-    associatedAccountAddress: string
+    associatedAccountAddress: string,
+    queryAuthorizationTypeFilter: QueryAuthorizationType | undefined
   ): string {
     this.validateAssociatedAccountAddress(associatedAccountAddress);
 
@@ -348,14 +352,22 @@ export class TokenCW20Service {
     );
     if (token) {
       if ("type" in token.currency && token.currency.type === "secret20") {
-        return token.currency.authorizationStr;
+        if (!queryAuthorizationTypeFilter) {
+          return token.currency.authorizationStr;
+        }
+        const queryAuthorization = QueryAuthorization.fromInput(
+          token.currency.authorizationStr
+        );
+        if (queryAuthorization.type === queryAuthorizationTypeFilter) {
+          return token.currency.authorizationStr;
+        }
       }
     }
 
     throw new KeplrError(
       "token-cw20",
       111,
-      "There is no matched secret20 viewing key"
+      "There is no matched secret20 viewing key or permit"
     );
   }
 
