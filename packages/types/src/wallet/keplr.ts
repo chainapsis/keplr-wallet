@@ -139,7 +139,8 @@ export interface Keplr {
   suggestToken(
     chainId: string,
     contractAddress: string,
-    viewingKey?: string
+    viewingKey?: string,
+    suggestViewingKey?: boolean
   ): Promise<void>;
   getSecret20ViewingKey(
     chainId: string,

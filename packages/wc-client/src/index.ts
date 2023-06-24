@@ -499,7 +499,8 @@ export class KeplrWalletConnectV1 implements Keplr {
   suggestToken(
     _chainId: string,
     _contractAddress: string,
-    _viewingKey?: string
+    _viewingKey?: string,
+    _suggestViewingKey: boolean = true
   ): Promise<void> {
     throw new Error("Not yet implemented");
   }

@@ -106,6 +106,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           "viewingKey",
           tokensStore.waitingSuggestedToken.data.authorization?.toString() ?? ""
         );
+        setIsUseSecret20Permit(
+          tokensStore.waitingSuggestedToken.data
+            .suggestedQueryAuthorizationType === "permit"
+        );
       }
     }
   }, [interactionInfo, setValue, tokensStore.waitingSuggestedToken]);
@@ -128,7 +132,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   }, [accountStore, chainId]);
 
   const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
-  const [isUseSecret20Permit, setIsUseSecret20Permit] = useState(false);
+  const [isUseSecret20Permit, setIsUseSecret20Permit] = useState(true);
   const [secret20PermitPermissions, onChangeSecret20PermitPermissions] =
     useState("allowance, balance, history");
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =

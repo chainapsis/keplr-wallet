@@ -352,7 +352,8 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
   async suggestToken(
     chainId: string,
     contractAddress: string,
-    viewingKey?: string
+    viewingKey?: string,
+    suggestViewingKey: boolean = true
   ): Promise<void> {
     return await sendSimpleMessage(
       this.requester,
@@ -362,6 +363,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       {
         chainId,
         contractAddress,
+        suggestViewingKey,
         viewingKey,
       }
     );

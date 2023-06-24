@@ -13,7 +13,10 @@ import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
 import { IAccountStore } from "../account";
 import { KeyRingStore } from "./keyring";
-import { QueryAuthorization } from "@keplr-wallet/background/build/secret-wasm/query-authorization";
+import {
+  QueryAuthorization,
+  QueryAuthorizationType,
+} from "@keplr-wallet/background/build/secret-wasm/query-authorization";
 
 export class TokensStore {
   @observable
@@ -234,6 +237,7 @@ export class TokensStore {
     const datas = this.interactionStore.getAllData<{
       chainId: string;
       contractAddress: string;
+      suggestedQueryAuthorizationType: QueryAuthorizationType;
       authorization?: QueryAuthorization;
     }>("suggest-token-cw20");
 

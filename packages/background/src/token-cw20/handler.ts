@@ -82,17 +82,17 @@ const handleSuggestTokenMsg: (
 
     const key = await keyRingCosmosService.getKeySelected(msg.chainId);
     const associatedAccountAddress = Buffer.from(key.address).toString("hex");
-    let authorization: QueryAuthorization | undefined = undefined;
+    let queryAuthorization: QueryAuthorization | undefined = undefined;
     if (msg.authorizationStr) {
-      authorization = QueryAuthorization.fromInput(msg.authorizationStr);
+      queryAuthorization = QueryAuthorization.fromInput(msg.authorizationStr);
     }
-
     await service.suggestToken(
       env,
       msg.chainId,
       msg.contractAddress,
       associatedAccountAddress,
-      authorization
+      msg.suggestViewingKey ? "viewing_key" : "permit",
+      queryAuthorization
     );
   };
 };

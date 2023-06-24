@@ -151,7 +151,8 @@ export class TokenCW20Service {
     contractAddress: string,
     // Should be hex encoded. (not bech32)
     associatedAccountAddress: string,
-    authorization?: QueryAuthorization
+    suggestedQueryAuthorizationType: QueryAuthorizationType,
+    queryAuthorization?: QueryAuthorization
   ) {
     this.validateAssociatedAccountAddress(associatedAccountAddress);
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
@@ -163,17 +164,16 @@ export class TokenCW20Service {
       associatedAccountAddress
     );
 
-    // If the same currency is already registered, do nothing.
-    if (existing) {
-      // If the secret20 token,
+    if (
+      existing &&
+      "type" in existing.currency &&
+      existing.currency.type === "secret20"
+    ) {
+      // If is an existing secret20 token, and query authorization is provided,
       // just try to change the viewing key or permit.
-      if (authorization) {
-        const authorizationStr = authorization.toString();
-        if (
-          "type" in existing.currency &&
-          existing.currency.type === "secret20" &&
-          existing.currency.authorizationStr !== authorizationStr
-        ) {
+      if (queryAuthorization) {
+        const authorizationStr = queryAuthorization.toString();
+        if (existing.currency.authorizationStr !== authorizationStr) {
           await this.setToken(
             chainId,
             {
@@ -184,7 +184,26 @@ export class TokenCW20Service {
           );
         }
         return;
+      } else {
+        // If is an existing secret20 token, and query authorization is not
+        // provided and the query authorization types do not differ, do nothing.
+        // Otherwise, continue to the add token screen.
+        const existingQueryAuthorization = QueryAuthorization.fromInput(
+          existing.currency.authorizationStr
+        );
+        console.log(
+          "existingQueryAuthorization vs suggestedQueryAuthorizationType",
+          existingQueryAuthorization.type,
+          suggestedQueryAuthorizationType
+        );
+        if (
+          existingQueryAuthorization.type == suggestedQueryAuthorizationType
+        ) {
+          return;
+        }
       }
+    } else if (existing) {
+      // If the same non-secret currency is already registered, do nothing.
       return;
     }
 
@@ -197,7 +216,8 @@ export class TokenCW20Service {
     const params = {
       chainId,
       contractAddress,
-      authorization,
+      suggestedQueryAuthorizationType,
+      queryAuthorization,
     };
 
     const appCurrency = (await this.interactionService.waitApprove(
