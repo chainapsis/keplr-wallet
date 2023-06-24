@@ -393,7 +393,6 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               }
             );
           } else {
-            console.log("add token", currency);
             await tokensStore.addToken(chainId, currency);
 
             navigate("/");
