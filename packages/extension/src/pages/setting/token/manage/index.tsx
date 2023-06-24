@@ -169,7 +169,7 @@ const TokenItem: FunctionComponent<{
       tokenInfo.currency.type === "secret20"
     ) {
       const queryAuthorization = QueryAuthorization.fromInput(
-        tokenInfo.currency.authorizationStr
+        tokenInfo.currency.queryAuthorizationStr
       );
       if (queryAuthorization instanceof PermitQueryAuthorization) {
         return "Permit";
@@ -214,7 +214,7 @@ const TokenItem: FunctionComponent<{
                     tokenInfo.currency.type === "secret20"
                   ) {
                     await navigator.clipboard.writeText(
-                      tokenInfo.currency.authorizationStr
+                      tokenInfo.currency.queryAuthorizationStr
                     );
 
                     notification.show("success", "Viewing key copied", "");

@@ -104,7 +104,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         );
         setValue(
           "viewingKey",
-          tokensStore.waitingSuggestedToken.data.authorization?.toString() ?? ""
+          tokensStore.waitingSuggestedToken.data.queryAuthorization?.toString() ??
+            ""
         );
         setUseSecret20Permit(
           tokensStore.waitingSuggestedToken.data
@@ -170,7 +171,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           {
             type: "secret20",
             contractAddress,
-            authorizationStr: new PermitQueryAuthorization({
+            queryAuthorizationStr: new PermitQueryAuthorization({
               params: {
                 permit_name: "fake",
                 allowed_tokens: ["fake"],
@@ -346,7 +347,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             currency = {
               type: "secret20",
               contractAddress,
-              authorizationStr: queryAuthorization.toString(),
+              queryAuthorizationStr: queryAuthorization.toString(),
               coinMinimalDenom: queryContract.tokenInfo.name,
               coinDenom: queryContract.tokenInfo.symbol,
               coinDecimals: queryContract.tokenInfo.decimals,

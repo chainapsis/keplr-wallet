@@ -57,7 +57,7 @@ export class ObservableQuerySecret20BalanceImpl
     let msg = {};
     let queryAuth: QueryAuthorization | undefined;
     if ("type" in currency && currency.type === "secret20") {
-      queryAuth = QueryAuthorization.fromInput(currency.authorizationStr);
+      queryAuth = QueryAuthorization.fromInput(currency.queryAuthorizationStr);
       if (queryAuth instanceof PermitQueryAuthorization) {
         msg = {
           with_permit: {

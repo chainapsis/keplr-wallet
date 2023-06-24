@@ -172,13 +172,13 @@ export class TokenCW20Service {
       // If is an existing secret20 token, and query authorization is provided,
       // just try to change the viewing key or permit.
       if (queryAuthorization) {
-        const authorizationStr = queryAuthorization.toString();
-        if (existing.currency.authorizationStr !== authorizationStr) {
+        const queryAuthorizationStr = queryAuthorization.toString();
+        if (existing.currency.queryAuthorizationStr !== queryAuthorizationStr) {
           await this.setToken(
             chainId,
             {
               ...existing.currency,
-              authorizationStr,
+              queryAuthorizationStr,
             },
             associatedAccountAddress
           );
@@ -189,7 +189,7 @@ export class TokenCW20Service {
         // provided and the query authorization types do not differ, do nothing.
         // Otherwise, continue to the add token screen.
         const existingQueryAuthorization = QueryAuthorization.fromInput(
-          existing.currency.authorizationStr
+          existing.currency.queryAuthorizationStr
         );
         console.log(
           "existingQueryAuthorization vs suggestedQueryAuthorizationType",
@@ -286,7 +286,7 @@ export class TokenCW20Service {
       throw new Error("Unknown type of currency");
     }
 
-    if (currency.type === "secret20" && !currency.authorizationStr) {
+    if (currency.type === "secret20" && !currency.queryAuthorizationStr) {
       throw new Error("Viewing key or Permit must be set");
     }
 
@@ -373,13 +373,13 @@ export class TokenCW20Service {
     if (token) {
       if ("type" in token.currency && token.currency.type === "secret20") {
         if (!queryAuthorizationTypeFilter) {
-          return token.currency.authorizationStr;
+          return token.currency.queryAuthorizationStr;
         }
         const queryAuthorization = QueryAuthorization.fromInput(
-          token.currency.authorizationStr
+          token.currency.queryAuthorizationStr
         );
         if (queryAuthorization.type === queryAuthorizationTypeFilter) {
-          return token.currency.authorizationStr;
+          return token.currency.queryAuthorizationStr;
         }
       }
     }

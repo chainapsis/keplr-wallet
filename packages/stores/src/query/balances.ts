@@ -51,7 +51,7 @@ export class ObservableQueryBalancesImplMap {
     // If the currency is secret20, it will be different according to not only the minimal denom but also the viewing key of the currency.
     if ("type" in currency && currency.type === "secret20") {
       const authorization = QueryAuthorization.fromInput(
-        currency.authorizationStr
+        currency.queryAuthorizationStr
       );
       key = currency.coinMinimalDenom + "/" + authorization.getId();
     }

@@ -83,8 +83,10 @@ const handleSuggestTokenMsg: (
     const key = await keyRingCosmosService.getKeySelected(msg.chainId);
     const associatedAccountAddress = Buffer.from(key.address).toString("hex");
     let queryAuthorization: QueryAuthorization | undefined = undefined;
-    if (msg.authorizationStr) {
-      queryAuthorization = QueryAuthorization.fromInput(msg.authorizationStr);
+    if (msg.queryAuthorizationStr) {
+      queryAuthorization = QueryAuthorization.fromInput(
+        msg.queryAuthorizationStr
+      );
     }
     await service.suggestToken(
       env,

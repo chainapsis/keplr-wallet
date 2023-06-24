@@ -238,7 +238,7 @@ export class TokensStore {
       chainId: string;
       contractAddress: string;
       suggestedQueryAuthorizationType: QueryAuthorizationType;
-      authorization?: QueryAuthorization;
+      queryAuthorization?: QueryAuthorization;
     }>("suggest-token-cw20");
 
     if (datas.length > 0) {
@@ -254,7 +254,7 @@ export class TokensStore {
     const d = this.interactionStore.getData<{
       chainId: string;
       contractAddress: string;
-      authorization?: QueryAuthorization;
+      queryAuthorization?: QueryAuthorization;
     }>(id);
     if (!d) {
       return;

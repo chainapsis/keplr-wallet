@@ -37,7 +37,7 @@ export class SuggestTokenMsg extends Message<void> {
     public readonly chainId: string,
     public readonly contractAddress: string,
     public readonly suggestViewingKey: boolean,
-    public readonly authorizationStr?: string
+    public readonly queryAuthorizationStr?: string
   ) {
     super();
   }
