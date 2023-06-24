@@ -217,7 +217,11 @@ const TokenItem: FunctionComponent<{
                       tokenInfo.currency.queryAuthorizationStr
                     );
 
-                    notification.show("success", "Viewing key copied", "");
+                    notification.show(
+                      "success",
+                      `${secret20AuthorizationType} copied`,
+                      ""
+                    );
                   }
                 }}
               >
