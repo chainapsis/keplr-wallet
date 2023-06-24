@@ -46,7 +46,7 @@ const Styles = {
 interface FormData {
   contractAddress: string;
   // For the secret20
-  authorization: QueryAuthorization;
+  viewingKey: string;
 }
 
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
@@ -61,7 +61,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     useForm<FormData>({
       defaultValues: {
         contractAddress: searchParams.get("contractAddress") || "",
-        authorization: "",
+        viewingKey: "",
       },
     });
 
@@ -101,6 +101,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         setValue(
           "contractAddress",
           tokensStore.waitingSuggestedToken.data.contractAddress
+        );
+        setValue(
+          "viewingKey",
+          tokensStore.waitingSuggestedToken.data.authorization?.toString() ?? ""
         );
       }
     }
@@ -282,12 +286,13 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           let currency: AppCurrency;
 
           if (isSecretWasm) {
-            let authorization = data.authorization;
+            let queryAuthorization: QueryAuthorization;
 
-            if (!authorization && !isOpenSecret20ViewingKey) {
+            if (!isOpenSecret20ViewingKey) {
+              blockRejectAll.current = true;
               if (isUseSecret20Permit) {
                 try {
-                  authorization = new PermitQueryAuthorization(
+                  queryAuthorization = new PermitQueryAuthorization(
                     await createPermit(
                       secret20PermitPermissions
                         // remove leading or trailing commas or whitespace
@@ -311,8 +316,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                 }
               } else {
                 try {
-                  blockRejectAll.current = true;
-                  authorization = new ViewingKeyAuthorization(
+                  queryAuthorization = new ViewingKeyAuthorization(
                     await createViewingKey()
                   );
                 } catch (e) {
@@ -328,11 +332,13 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                   return;
                 }
               }
+            } else {
+              queryAuthorization = new ViewingKeyAuthorization(data.viewingKey);
             }
             currency = {
               type: "secret20",
               contractAddress,
-              authorizationStr: authorization.toString(),
+              authorizationStr: queryAuthorization.toString(),
               coinMinimalDenom: queryContract.tokenInfo.name,
               coinDenom: queryContract.tokenInfo.symbol,
               coinDecimals: queryContract.tokenInfo.decimals,
@@ -507,11 +513,11 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               <TextInput
                 label="Viewing Key"
                 error={
-                  formState.errors.authorization
-                    ? formState.errors.authorization.message
+                  formState.errors.viewingKey
+                    ? formState.errors.viewingKey.message
                     : undefined
                 }
-                {...register("authorization", {
+                {...register("viewingKey", {
                   required: true,
                 })}
               />
