@@ -22,6 +22,7 @@ import {
   ChainInfoWithoutEndpoints,
   SecretUtils,
   SettledResponses,
+  Permit,
 } from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
@@ -437,6 +438,16 @@ export class KeplrWalletConnectV1 implements Keplr {
     _chainId: string,
     _contractAddress: string
   ): Promise<string> {
+    throw new Error("Not yet implemented");
+  }
+
+  getSecret20QueryAuthorization(
+    _chainId: string,
+    _contractAddress: string
+  ): Promise<{
+    permit: Permit | undefined;
+    viewing_key: string | undefined;
+  }> {
     throw new Error("Not yet implemented");
   }
 

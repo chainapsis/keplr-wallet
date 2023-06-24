@@ -16,6 +16,7 @@ import {
   ChainInfoWithoutEndpoints,
   SecretUtils,
   SettledResponses,
+  Permit,
 } from "@keplr-wallet/types";
 import {
   Bech32Address,
@@ -183,6 +184,16 @@ export class MockKeplr implements Keplr {
   }
 
   getSecret20ViewingKey(): Promise<string> {
+    throw new Error("Not implemented");
+  }
+
+  getSecret20QueryAuthorization(
+    _chainId: string,
+    _contractAddress: string
+  ): Promise<{
+    permit: Permit | undefined;
+    viewing_key: string | undefined;
+  }> {
     throw new Error("Not implemented");
   }
 

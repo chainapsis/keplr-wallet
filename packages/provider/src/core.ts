@@ -1,23 +1,24 @@
 import {
+  AminoSignResponse,
+  BroadcastMode,
   ChainInfo,
+  ChainInfoWithoutEndpoints,
+  DirectSignResponse,
   EthSignType,
+  ICNSAdr36Signatures,
   Keplr as IKeplr,
   KeplrIntereactionOptions,
   KeplrMode,
   KeplrSignOptions,
   Key,
-  BroadcastMode,
-  AminoSignResponse,
-  StdSignDoc,
-  StdTx,
   OfflineAminoSigner,
-  StdSignature,
-  DirectSignResponse,
   OfflineDirectSigner,
-  ICNSAdr36Signatures,
-  ChainInfoWithoutEndpoints,
+  Permit,
   SecretUtils,
   SettledResponses,
+  StdSignature,
+  StdSignDoc,
+  StdTx,
 } from "@keplr-wallet/types";
 import {
   BACKGROUND_PORT,
@@ -384,6 +385,35 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         queryAuthorizationType: "viewing_key",
       }
     );
+  }
+
+  async getSecret20QueryAuthorization(
+    chainId: string,
+    contractAddress: string
+  ): Promise<{ permit: Permit | undefined; viewing_key: string | undefined }> {
+    const queryAuthorizationStr = await sendSimpleMessage(
+      this.requester,
+      BACKGROUND_PORT,
+      "token-cw20",
+      "get-secret20-query-authorization",
+      {
+        chainId,
+        contractAddress,
+        queryAuthorizationType: "viewing_key",
+      }
+    );
+    try {
+      const permit: Permit = JSON.parse(queryAuthorizationStr);
+      return {
+        permit,
+        viewing_key: undefined,
+      };
+    } catch (error) {
+      return {
+        permit: undefined,
+        viewing_key: queryAuthorizationStr,
+      };
+    }
   }
 
   async getEnigmaPubKey(chainId: string): Promise<Uint8Array> {

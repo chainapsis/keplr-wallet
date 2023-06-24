@@ -9,7 +9,7 @@ import {
   DirectSignResponse,
   OfflineDirectSigner,
 } from "../cosmjs";
-import { SecretUtils } from "../secretjs";
+import { Permit, SecretUtils } from "../secretjs";
 import Long from "long";
 import { SettledResponses } from "../settled";
 
@@ -146,6 +146,10 @@ export interface Keplr {
     chainId: string,
     contractAddress: string
   ): Promise<string>;
+  getSecret20QueryAuthorization(
+    chainId: string,
+    contractAddress: string
+  ): Promise<{ permit: Permit | undefined; viewing_key: string | undefined }>;
   getEnigmaUtils(chainId: string): SecretUtils;
 
   // Related to Enigma.
