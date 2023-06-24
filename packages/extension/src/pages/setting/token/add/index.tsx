@@ -106,7 +106,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           "viewingKey",
           tokensStore.waitingSuggestedToken.data.authorization?.toString() ?? ""
         );
-        setIsUseSecret20Permit(
+        setUseSecret20Permit(
           tokensStore.waitingSuggestedToken.data
             .suggestedQueryAuthorizationType === "permit"
         );
@@ -132,7 +132,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   }, [accountStore, chainId]);
 
   const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
-  const [isUseSecret20Permit, setIsUseSecret20Permit] = useState(true);
+  const [useSecret20Permit, setUseSecret20Permit] = useState(true);
   const [secret20PermitPermissions, onChangeSecret20PermitPermissions] =
     useState("allowance, balance, history");
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
@@ -202,9 +202,13 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   ]);
 
   const isSecret20PermitSupported = useMemo(() => {
-    return !(
+    const supported = !(
       secret20TestPermitQuery?.error?.message?.includes("parse_err") === true
     );
+    if (!supported) {
+      setUseSecret20Permit(false);
+    }
+    return supported;
   }, [secret20TestPermitQuery?.error]);
 
   const permitButtonLabel = useMemo(() => {
@@ -294,7 +298,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
             if (!isOpenSecret20ViewingKey) {
               blockRejectAll.current = true;
-              if (isUseSecret20Permit) {
+              if (useSecret20Permit) {
                 try {
                   queryAuthorization = new PermitQueryAuthorization(
                     await createPermit(
@@ -454,10 +458,10 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                   <Skeleton type="button">
                     <Button
                       text={permitButtonLabel}
-                      color={isUseSecret20Permit ? "primary" : "secondary"}
+                      color={useSecret20Permit ? "primary" : "secondary"}
                       disabled={!isSecret20PermitSupported}
                       onClick={() => {
-                        setIsUseSecret20Permit(true);
+                        setUseSecret20Permit(true);
                         setIsOpenSecret20ViewingKey(false);
                       }}
                     />
@@ -468,14 +472,14 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
                   <Skeleton type="button">
                     <Button
                       text="Viewing Key"
-                      color={!isUseSecret20Permit ? "primary" : "secondary"}
-                      onClick={() => setIsUseSecret20Permit(false)}
+                      color={!useSecret20Permit ? "primary" : "secondary"}
+                      onClick={() => setUseSecret20Permit(false)}
                     />
                   </Skeleton>
                 </Column>
               </Columns>
             </Box>
-            {isUseSecret20Permit ? (
+            {useSecret20Permit ? (
               <TextInput
                 label="Permit Permissions"
                 placeholder="e.g. allowance, balance, history"
