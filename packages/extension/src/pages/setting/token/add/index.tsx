@@ -133,7 +133,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   }, [accountStore, chainId]);
 
   const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
-  const [useSecret20Permit, setUseSecret20Permit] = useState(true);
+  const [useSecret20Permit, setUseSecret20Permit] = useState(
+    !(searchParams.get("suggestedQueryAuthorizationType") === "viewing_key")
+  );
   const [secret20PermitPermissions, onChangeSecret20PermitPermissions] =
     useState("allowance, balance, history");
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
@@ -391,6 +393,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               }
             );
           } else {
+            console.log("add token", currency);
             await tokensStore.addToken(chainId, currency);
 
             navigate("/");
