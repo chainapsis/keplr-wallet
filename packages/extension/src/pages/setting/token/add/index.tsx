@@ -104,8 +104,11 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         );
         setValue(
           "viewingKey",
-          tokensStore.waitingSuggestedToken.data.queryAuthorization?.toString() ??
-            ""
+          tokensStore.waitingSuggestedToken.data.queryAuthorizationStr ?? ""
+        );
+        setIsOpenSecret20ViewingKey(
+          tokensStore.waitingSuggestedToken.data.queryAuthorizationStr !==
+            undefined
         );
         setUseSecret20Permit(
           tokensStore.waitingSuggestedToken.data

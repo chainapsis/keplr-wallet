@@ -238,7 +238,7 @@ export class TokensStore {
       chainId: string;
       contractAddress: string;
       suggestedQueryAuthorizationType: QueryAuthorizationType;
-      queryAuthorization?: QueryAuthorization;
+      queryAuthorizationStr?: string;
     }>("suggest-token-cw20");
 
     if (datas.length > 0) {

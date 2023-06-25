@@ -212,7 +212,7 @@ export class TokenCW20Service {
       chainId,
       contractAddress,
       suggestedQueryAuthorizationType,
-      queryAuthorization,
+      queryAuthorizationStr: queryAuthorization?.toString(),
     };
 
     const appCurrency = (await this.interactionService.waitApprove(
