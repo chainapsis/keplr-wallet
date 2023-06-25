@@ -191,11 +191,6 @@ export class TokenCW20Service {
         const existingQueryAuthorization = QueryAuthorization.fromInput(
           existing.currency.queryAuthorizationStr
         );
-        console.log(
-          "existingQueryAuthorization vs suggestedQueryAuthorizationType",
-          existingQueryAuthorization.type,
-          suggestedQueryAuthorizationType
-        );
         if (
           existingQueryAuthorization.type == suggestedQueryAuthorizationType
         ) {
