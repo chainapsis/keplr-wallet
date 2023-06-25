@@ -365,7 +365,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
         chainId,
         contractAddress,
         suggestViewingKey,
-        viewingKey,
+        queryAuthorizationStr: viewingKey,
       }
     );
   }

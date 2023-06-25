@@ -507,12 +507,14 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   async suggestToken(
     chainId: string,
     contractAddress: string,
-    viewingKey?: string
+    viewingKey?: string,
+    suggestViewingKey: boolean = true
   ): Promise<void> {
     return await this.requestMethod("suggestToken", [
       chainId,
       contractAddress,
       viewingKey,
+      suggestViewingKey,
     ]);
   }
 
