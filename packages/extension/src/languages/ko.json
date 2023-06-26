@@ -80,8 +80,8 @@
 
   "pages.register.intro-existing-user.title": "다시 만나서 반가워요!",
   "pages.register.intro-existing-user.paragraph": "기다리고 있었어요. 🫶",
-  "pages.register.intro-existing-user.recovery-title": "복구 문구 또는 프라이빗키 사용",
-  "pages.register.intro-existing-user.recovery-paragraph": "기존의 12/24 단어의 복구 문구나 프라이빗키를 사용하기. 다른 지갑 서비스 제공자들의 지갑 또한 불러올 수 있습니다.",
+  "pages.register.intro-existing-user.recovery-title": "복구 문구 또는 프라이빗키 사용하기",
+  "pages.register.intro-existing-user.recovery-paragraph": "기존의 12/24 단어의 복구 문구나 프라이빗키를 사용합니다. 다른 지갑 서비스 제공자들의 지갑 또한 불러올 수 있습니다.",
   "pages.register.intro-existing-user.recovery-button": "복구 문구 또는 프라이빗키 사용하기",
   "pages.register.intro-existing-user.social-recovery-title": "Google 계정 사용하기",
   "pages.register.intro-existing-user.social-recovery-paragraph": "기존 케플러 지갑에서 사용했던 구글 계정으로 연결해주세요.",
@@ -142,6 +142,7 @@
   "pages.register.enable-chains.search-input-placeholder": "네트워크 검색하기",
   "pages.register.enable-chains.chain-selected-count": "{numSelected}개의 체인이 선택됨",
   "pages.register.enable-chains.skip-button": "스킵",
+  "pages.register.enable-chains.guide.can-select-evm-next-step": "EVM 체인 선택은 다음 단계에서 진행할 수 있습니다.",
 
   "pages.register.select-derivation-path.title": "계정 파생 경로(Derivation Path) 선택하기",
   "pages.register.select-derivation-path.paragraph": "두 가지 경로를 모두 사용하려면, 각각에 대해 불러오기 과정을 한번씩 거쳐야 합니다.",
@@ -312,7 +313,7 @@
   "page.wallet.recovery-phrase-title": "복구 문구 기반",
   "page.wallet.connect-with-social-account-title": "{social} 계정으로 연결",
   "page.wallet.private-key-title": "프라이빗키 기반",
-  "page.wallet.ledger-title": "렛저",
+  "page.wallet.ledger-title": "렛저 기반",
   "page.wallet.unknown-title": "알 수 없음",
   "page.wallet.keyring-item.bip44-path-terra-text": " (테라)",
   "page.wallet.keyring-item.dropdown.change-wallet-name-title": "지갑 이름 변경",

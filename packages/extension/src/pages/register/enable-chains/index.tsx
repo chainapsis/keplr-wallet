@@ -1010,7 +1010,7 @@ const NextStepEvmChainItem: FunctionComponent<{
             <Gutter size="0.25rem" />
 
             <Subtitle4 color={ColorPalette["gray-300"]}>
-              You can select EVM chains in the next step.
+              <FormattedMessage id="pages.register.enable-chains.guide.can-select-evm-next-step" />
             </Subtitle4>
           </YAxis>
         </XAxis>
