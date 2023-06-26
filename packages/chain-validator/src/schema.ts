@@ -54,7 +54,7 @@ export const Secret20CurrencySchema = (
   .keys({
     type: Joi.string().equal("secret20").required(),
     contractAddress: Joi.string().required(),
-    viewingKey: Joi.string().required(),
+    queryAuthorizationStr: Joi.string().required(),
   })
   .custom((value: Secret20Currency) => {
     if (

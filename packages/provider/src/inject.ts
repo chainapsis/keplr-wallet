@@ -19,6 +19,7 @@ import {
   ChainInfoWithoutEndpoints,
   SecretUtils,
   SettledResponses,
+  Permit,
 } from "@keplr-wallet/types";
 import { Result, JSONUint8Array } from "@keplr-wallet/router";
 import { KeplrEnigmaUtils } from "./enigma";
@@ -506,12 +507,14 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
   async suggestToken(
     chainId: string,
     contractAddress: string,
-    viewingKey?: string
+    viewingKey?: string,
+    suggestViewingKey: boolean = true
   ): Promise<void> {
     return await this.requestMethod("suggestToken", [
       chainId,
       contractAddress,
       viewingKey,
+      suggestViewingKey,
     ]);
   }
 
@@ -520,6 +523,19 @@ export class InjectedKeplr implements IKeplr, KeplrCoreTypes {
     contractAddress: string
   ): Promise<string> {
     return await this.requestMethod("getSecret20ViewingKey", [
+      chainId,
+      contractAddress,
+    ]);
+  }
+
+  async getSecret20QueryAuthorization(
+    chainId: string,
+    contractAddress: string
+  ): Promise<{
+    permit: Permit | undefined;
+    viewing_key: string | undefined;
+  }> {
+    return await this.requestMethod("getSecret20QueryAuthorization", [
       chainId,
       contractAddress,
     ]);

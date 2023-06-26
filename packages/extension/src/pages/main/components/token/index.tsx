@@ -180,7 +180,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 viewToken.chainInfo.chainId
               }&contractAddress=${
                 (viewToken.token.currency as Secret20Currency).contractAddress
-              }`
+              }&suggestedQueryAuthorizationType=viewing_key`
             );
 
             return;

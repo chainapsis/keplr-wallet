@@ -1,0 +1,53 @@
+import { Permit } from "@keplr-wallet/types";
+
+export type QueryAuthorizationType = "permit" | "viewing_key";
+
+export abstract class QueryAuthorization {
+  abstract type: QueryAuthorizationType;
+  abstract getId(): string;
+  abstract toString(): string;
+
+  static fromInput(input: string | Permit): QueryAuthorization {
+    if (typeof input === "string") {
+      try {
+        const permit: Permit = JSON.parse(input);
+        return new PermitQueryAuthorization(permit);
+      } catch (error) {
+        return new ViewingKeyAuthorization(input);
+      }
+    } else {
+      return new PermitQueryAuthorization(input);
+    }
+  }
+}
+
+export class PermitQueryAuthorization extends QueryAuthorization {
+  type: QueryAuthorizationType = "permit";
+
+  constructor(public permit: Permit) {
+    super();
+  }
+
+  getId(): string {
+    return this.permit.signature.signature;
+  }
+
+  toString(): string {
+    return JSON.stringify(this.permit);
+  }
+}
+
+export class ViewingKeyAuthorization extends QueryAuthorization {
+  type: QueryAuthorizationType = "viewing_key";
+  constructor(public viewingKey: string) {
+    super();
+  }
+
+  getId(): string {
+    return this.viewingKey;
+  }
+
+  toString(): string {
+    return this.viewingKey;
+  }
+}

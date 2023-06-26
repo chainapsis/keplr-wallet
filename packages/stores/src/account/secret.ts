@@ -7,7 +7,13 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { MsgExecuteContract } from "@keplr-wallet/proto-types/secret/compute/v1beta1/msg";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Dec, DecUtils } from "@keplr-wallet/unit";
-import { AppCurrency, KeplrSignOptions, StdFee } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  KeplrSignOptions,
+  Permission,
+  Permit,
+  StdFee,
+} from "@keplr-wallet/types";
 import { DeepPartial, DeepReadonly, Optional } from "utility-types";
 import { CosmosAccount } from "./cosmos";
 import deepmerge from "deepmerge";
@@ -148,6 +154,60 @@ export class SecretAccountImpl {
         }
       );
     }
+  }
+
+  async createSecret20Permit(
+    owner: string,
+    chainId: string,
+    permitName: string,
+    allowedTokens: string[],
+    permissions: Permission[],
+    onFulfill?: (permit: Permit) => void
+  ) {
+    const keplr = await this.base.getKeplr();
+    if (!keplr) {
+      throw new Error("Can't get the Keplr API");
+    }
+    const response = await keplr.signAmino(
+      chainId,
+      owner,
+      {
+        chain_id: chainId,
+        account_number: "0", // Must be 0
+        sequence: "0", // Must be 0
+        fee: {
+          amount: [{ amount: "0", denom: "uscrt" }], // Must be 0 uscrt
+          gas: "1", // Must be 1
+        },
+        msgs: [
+          {
+            type: "query_permit", // Must be "query_permit"
+            value: {
+              permit_name: permitName,
+              allowed_tokens: allowedTokens,
+              permissions: permissions,
+            },
+          },
+        ],
+        memo: "", // Must be empty
+      },
+      {
+        preferNoSetFee: true, // Fee must be 0, so hide it from the user
+        preferNoSetMemo: true, // Memo must be empty, so hide it from the user
+      }
+    );
+    if (onFulfill) {
+      onFulfill({
+        params: {
+          chain_id: chainId,
+          permit_name: permitName,
+          allowed_tokens: allowedTokens,
+          permissions,
+        },
+        signature: response.signature,
+      });
+    }
+    return;
   }
 
   async createSecret20ViewingKey(

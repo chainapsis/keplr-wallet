@@ -26,7 +26,7 @@ export interface CW20Currency extends Currency {
 export interface Secret20Currency extends Currency {
   readonly type: "secret20";
   readonly contractAddress: string;
-  readonly viewingKey: string;
+  readonly queryAuthorizationStr: string;
 }
 
 /**

@@ -107,15 +107,15 @@ export class ObservableSecretContractChainQuery<
       data = fetched.data;
       headers = fetched.headers;
     } catch (e) {
-      if (e.response?.data?.error) {
-        const encryptedError = e.response.data.error;
+      if (e.response?.data?.message) {
+        const encryptedError = e.response.data.message;
 
         const errorMessageRgx =
-          /rpc error: code = (.+) = encrypted: (.+): (.+)/g;
+          /encrypted: (.+?): (?:instantiate|execute|query|reply to) contract failed/g;
 
         const rgxMatches = errorMessageRgx.exec(encryptedError);
-        if (rgxMatches != null && rgxMatches.length === 4) {
-          const errorCipherB64 = rgxMatches[2];
+        if (rgxMatches != null && rgxMatches.length === 2) {
+          const errorCipherB64 = rgxMatches[1];
           const errorCipherBz = Buffer.from(errorCipherB64, "base64");
 
           if (this.keplr && this.nonce) {

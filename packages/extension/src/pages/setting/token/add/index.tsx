@@ -17,16 +17,25 @@ import { Dropdown } from "../../../../components/dropdown";
 import { Box } from "../../../../components/box";
 import { autorun } from "mobx";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, Permission, Permit } from "@keplr-wallet/types";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { useInteractionInfo } from "../../../../hooks";
 import { ColorPalette } from "../../../../styles";
 import { Column, Columns } from "../../../../components/column";
-import { Body3, Subtitle2 } from "../../../../components/typography";
+import { Body3, Subtitle2, Subtitle3 } from "../../../../components/typography";
 import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
 import { useNotification } from "../../../../hooks/notification";
+import {
+  PermitQueryAuthorization,
+  QueryAuthorization,
+  ViewingKeyAuthorization,
+} from "@keplr-wallet/background/build/secret-wasm/query-authorization";
+import { Skeleton } from "../../../../components/skeleton";
+import { Button } from "../../../../components/button";
+import { Buffer } from "buffer";
+import { IObservableQueryBalanceImpl } from "@keplr-wallet/stores";
 
 const Styles = {
   Container: styled(Stack)`
@@ -93,6 +102,18 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           "contractAddress",
           tokensStore.waitingSuggestedToken.data.contractAddress
         );
+        setValue(
+          "viewingKey",
+          tokensStore.waitingSuggestedToken.data.queryAuthorizationStr ?? ""
+        );
+        setIsOpenSecret20ViewingKey(
+          tokensStore.waitingSuggestedToken.data.queryAuthorizationStr !==
+            undefined
+        );
+        setUseSecret20Permit(
+          tokensStore.waitingSuggestedToken.data
+            .suggestedQueryAuthorizationType === "permit"
+        );
       }
     }
   }, [interactionInfo, setValue, tokensStore.waitingSuggestedToken]);
@@ -115,8 +136,16 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   }, [accountStore, chainId]);
 
   const isSecretWasm = chainStore.getChain(chainId).hasFeature("secretwasm");
+  const [useSecret20Permit, setUseSecret20Permit] = useState(
+    !(searchParams.get("suggestedQueryAuthorizationType") === "viewing_key")
+  );
+  const [secret20PermitPermissions, onChangeSecret20PermitPermissions] =
+    useState("allowance, balance, history");
   const [isOpenSecret20ViewingKey, setIsOpenSecret20ViewingKey] =
     useState(false);
+  const [secret20TestPermitQuery, setSecret20TestPermitQuery] = useState<
+    IObservableQueryBalanceImpl | undefined
+  >(undefined);
 
   const items = supportedChainInfos.map((chainInfo) => {
     return {
@@ -137,6 +166,89 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         .cosmwasm.querycw20ContractInfo.getQueryContract(contractAddress);
     }
   })();
+
+  useEffect(() => {
+    if (isSecretWasm && queryContract.tokenInfo) {
+      const getBalance = queriesStore
+        .get(chainId)
+        .secret.querySecret20ContractBalance(
+          accountStore.getAccount(chainId).bech32Address,
+          {
+            type: "secret20",
+            contractAddress,
+            queryAuthorizationStr: new PermitQueryAuthorization({
+              params: {
+                permit_name: "fake",
+                allowed_tokens: ["fake"],
+                chain_id: "fake",
+                permissions: [],
+              },
+              signature: {
+                pub_key: {
+                  type: "fake",
+                  value: "fake",
+                },
+                signature: "fake",
+              },
+            }).toString(),
+            coinMinimalDenom: `secret20:${contractAddress}:${queryContract.tokenInfo.name}`,
+            coinDenom: queryContract.tokenInfo.symbol,
+            coinDecimals: queryContract.tokenInfo.decimals,
+          }
+        );
+      setSecret20TestPermitQuery(getBalance);
+    }
+  }, [
+    accountStore,
+    chainId,
+    contractAddress,
+    isSecretWasm,
+    queriesStore,
+    queryContract.tokenInfo,
+  ]);
+
+  const isSecret20PermitSupported = useMemo(() => {
+    const supported = !(
+      secret20TestPermitQuery?.error?.message?.includes("parse_err") === true
+    );
+    if (!supported) {
+      setUseSecret20Permit(false);
+    }
+    return supported;
+  }, [secret20TestPermitQuery?.error]);
+
+  const permitButtonLabel = useMemo(() => {
+    if (isSecret20PermitSupported) {
+      return "Permit";
+    } else {
+      return "Permit (Unsupported)";
+    }
+  }, [isSecret20PermitSupported]);
+
+  const createPermit = async (permissions: Permission[]): Promise<Permit> => {
+    const random = new Uint8Array(32);
+    crypto.getRandomValues(random);
+    const permitName = Buffer.from(random).toString("hex");
+    return new Promise((resolve, reject) => {
+      const account = accountStore.getAccount(chainId);
+      account.secret
+        .createSecret20Permit(
+          account.bech32Address,
+          chainId,
+          permitName,
+          [contractAddress],
+          permissions,
+          (permit) => {
+            if (!permit) {
+              reject(new Error("Permit is null"));
+              return;
+            }
+            resolve(permit);
+          }
+        )
+        .catch(reject);
+    });
+  };
 
   const createViewingKey = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -188,30 +300,59 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           let currency: AppCurrency;
 
           if (isSecretWasm) {
-            let viewingKey = data.viewingKey;
+            let queryAuthorization: QueryAuthorization;
 
-            if (!viewingKey && !isOpenSecret20ViewingKey) {
-              try {
-                blockRejectAll.current = true;
-                viewingKey = await createViewingKey();
-              } catch (e) {
-                notification.show(
-                  "failed",
-                  "Failed to create the viewing key",
-                  e.message || e.toString()
-                );
+            if (!isOpenSecret20ViewingKey) {
+              blockRejectAll.current = true;
+              if (useSecret20Permit) {
+                try {
+                  queryAuthorization = new PermitQueryAuthorization(
+                    await createPermit(
+                      secret20PermitPermissions
+                        // remove leading or trailing commas or whitespace
+                        .replace(RegExp(/(^[,\s]+)|([,\s]+$)/g), "")
+                        // split at commas or whitespace
+                        .split(RegExp("[ ,]+"))
+                        .map((p) => p as Permission)
+                    )
+                  );
+                } catch (e) {
+                  notification.show(
+                    "failed",
+                    "Failed to create the permit",
+                    e.message || e.toString()
+                  );
 
-                await new Promise((resolve) => setTimeout(resolve, 2000));
+                  await new Promise((resolve) => setTimeout(resolve, 2000));
 
-                window.close();
-                return;
+                  window.close();
+                  return;
+                }
+              } else {
+                try {
+                  queryAuthorization = new ViewingKeyAuthorization(
+                    await createViewingKey()
+                  );
+                } catch (e) {
+                  notification.show(
+                    "failed",
+                    "Failed to create the viewing key",
+                    e.message || e.toString()
+                  );
+
+                  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+                  window.close();
+                  return;
+                }
               }
+            } else {
+              queryAuthorization = new ViewingKeyAuthorization(data.viewingKey);
             }
-
             currency = {
               type: "secret20",
               contractAddress,
-              viewingKey,
+              queryAuthorizationStr: queryAuthorization.toString(),
               coinMinimalDenom: queryContract.tokenInfo.name,
               coinDenom: queryContract.tokenInfo.symbol,
               coinDecimals: queryContract.tokenInfo.decimals,
@@ -314,30 +455,73 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
         {isSecretWasm ? (
           <Stack gutter="0.75rem">
-            <Box
-              backgroundColor={ColorPalette["gray-600"]}
-              borderRadius="0.375rem"
-              padding="1rem"
-            >
-              <Columns sum={1} alignY="center" gutter="0.25rem">
+            <Subtitle3 color={ColorPalette["gray-50"]}>
+              Query Authorization Type
+            </Subtitle3>
+            <Box>
+              <Columns sum={1} gutter="0.625rem">
                 <Column weight={1}>
-                  <Stack>
-                    <Subtitle2 color={ColorPalette["gray-50"]}>
-                      I have my own viewing key
-                    </Subtitle2>
-                    <Body3 color={ColorPalette["gray-200"]}>
-                      By enabling this toggle, you confirm that you have your
-                      viewing key and use it for adding this token.
-                    </Body3>
-                  </Stack>
+                  <Skeleton type="button">
+                    <Button
+                      text={permitButtonLabel}
+                      color={useSecret20Permit ? "primary" : "secondary"}
+                      disabled={!isSecret20PermitSupported}
+                      onClick={() => {
+                        setUseSecret20Permit(true);
+                        setIsOpenSecret20ViewingKey(false);
+                      }}
+                    />
+                  </Skeleton>
                 </Column>
 
-                <Toggle
-                  isOpen={isOpenSecret20ViewingKey}
-                  setIsOpen={setIsOpenSecret20ViewingKey}
-                />
+                <Column weight={1}>
+                  <Skeleton type="button">
+                    <Button
+                      text="Viewing Key"
+                      color={!useSecret20Permit ? "primary" : "secondary"}
+                      onClick={() => setUseSecret20Permit(false)}
+                    />
+                  </Skeleton>
+                </Column>
               </Columns>
             </Box>
+            {useSecret20Permit ? (
+              <TextInput
+                label="Permit Permissions"
+                placeholder="e.g. allowance, balance, history"
+                onChange={(e) => {
+                  e.preventDefault();
+
+                  onChangeSecret20PermitPermissions(e.target.value);
+                }}
+                value={secret20PermitPermissions}
+              />
+            ) : (
+              <Box
+                backgroundColor={ColorPalette["gray-600"]}
+                borderRadius="0.375rem"
+                padding="1rem"
+              >
+                <Columns sum={1} alignY="center" gutter="0.25rem">
+                  <Column weight={1}>
+                    <Stack>
+                      <Subtitle2 color={ColorPalette["gray-50"]}>
+                        I have my own viewing key
+                      </Subtitle2>
+                      <Body3 color={ColorPalette["gray-200"]}>
+                        By enabling this toggle, you confirm that you have your
+                        viewing key and use it for adding this token.
+                      </Body3>
+                    </Stack>
+                  </Column>
+
+                  <Toggle
+                    isOpen={isOpenSecret20ViewingKey}
+                    setIsOpen={setIsOpenSecret20ViewingKey}
+                  />
+                </Columns>
+              </Box>
+            )}
 
             {isOpenSecret20ViewingKey ? (
               <TextInput

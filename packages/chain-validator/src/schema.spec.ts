@@ -273,7 +273,7 @@ describe("Test chain info schema", () => {
       let currency: Secret20Currency = {
         type: "secret20",
         contractAddress: "this should be validated in the keeper",
-        viewingKey: "Test viewingKey",
+        queryAuthorizationStr: "Test viewingKey",
         coinDenom: "TEST",
         coinMinimalDenom: "utest",
         coinDecimals: 0,
@@ -294,7 +294,7 @@ describe("Test chain info schema", () => {
       let currency: Secret20Currency = {
         type: "secret20",
         contractAddress: "this should be validated in the keeper",
-        viewingKey: "Test viewingKey",
+        queryAuthorizationStr: "Test viewingKey",
         coinDenom: "TEST",
         coinMinimalDenom:
           "secret20:this should be validated in the keeper:utest",

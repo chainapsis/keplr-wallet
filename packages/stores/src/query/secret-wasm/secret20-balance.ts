@@ -7,7 +7,12 @@ import { CoinPretty, Int } from "@keplr-wallet/unit";
 import { BalanceRegistry, IObservableQueryBalanceImpl } from "../balances";
 import { ObservableSecretContractChainQuery } from "./contract-query";
 import { WrongViewingKeyError } from "./errors";
-import { AppCurrency, Keplr } from "@keplr-wallet/types";
+import { AppCurrency, Keplr, Secret20Currency } from "@keplr-wallet/types";
+import {
+  PermitQueryAuthorization,
+  QueryAuthorization,
+  ViewingKeyAuthorization,
+} from "@keplr-wallet/background/build/secret-wasm/query-authorization";
 
 export class ObservableQuerySecret20BalanceImpl
   extends ObservableSecretContractChainQuery<{
@@ -18,26 +23,55 @@ export class ObservableQuerySecret20BalanceImpl
   }>
   implements IObservableQueryBalanceImpl
 {
-  protected readonly viewingKey: string;
+  protected readonly queryAuth?: QueryAuthorization;
+  protected readonly denomHelper: DenomHelper;
 
   constructor(
     sharedContext: QuerySharedContext,
     chainId: string,
     chainGetter: ChainGetter,
     apiGetter: () => Promise<Keplr | undefined>,
-    protected readonly denomHelper: DenomHelper,
     protected readonly bech32Address: string,
-    querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
+    querySecretContractCodeHash: ObservableQuerySecretContractCodeHash,
+    denomHelper?: DenomHelper,
+    unsavedCurrency?: Secret20Currency
   ) {
+    let currency: AppCurrency;
+    if (denomHelper) {
+      currency = chainGetter
+        .getChain(chainId)
+        .forceFindCurrency(denomHelper.denom);
+    } else {
+      if (!unsavedCurrency) {
+        throw new Error(
+          "Denom helper for a saved currency or an unsaved currency object must be provided"
+        );
+      }
+      currency = unsavedCurrency;
+      denomHelper = new DenomHelper(unsavedCurrency.coinMinimalDenom);
+    }
+
     if (denomHelper.type !== "secret20") {
       throw new Error(`Denom helper must be secret20: ${denomHelper.denom}`);
     }
-    const currency = chainGetter
-      .getChain(chainId)
-      .forceFindCurrency(denomHelper.denom);
-    let viewingKey = "";
+    let msg = {};
+    let queryAuth: QueryAuthorization | undefined;
     if ("type" in currency && currency.type === "secret20") {
-      viewingKey = currency.viewingKey;
+      queryAuth = QueryAuthorization.fromInput(currency.queryAuthorizationStr);
+      if (queryAuth instanceof PermitQueryAuthorization) {
+        msg = {
+          with_permit: {
+            query: {
+              balance: {},
+            },
+            permit: queryAuth.permit,
+          },
+        };
+      } else if (queryAuth instanceof ViewingKeyAuthorization) {
+        msg = {
+          balance: { address: bech32Address, key: queryAuth.viewingKey },
+        };
+      }
     }
     super(
       sharedContext,
@@ -45,28 +79,29 @@ export class ObservableQuerySecret20BalanceImpl
       chainGetter,
       apiGetter,
       denomHelper.contractAddress,
-      {
-        balance: { address: bech32Address, key: viewingKey },
-      },
+      msg,
       querySecretContractCodeHash
     );
+    this.denomHelper = denomHelper;
 
-    this.viewingKey = viewingKey;
+    this.queryAuth = queryAuth;
 
     makeObservable(this);
 
-    if (!viewingKey) {
+    if (!queryAuth) {
       this.setError({
         status: 0,
-        statusText: "Viewing key is empty",
-        message: "Viewing key is empty",
+        statusText: "Viewing key or Permit is empty",
+        message: "Viewing key or Permit is empty",
       });
     }
   }
 
   protected override canFetch(): boolean {
     return (
-      super.canFetch() && this.bech32Address !== "" && this.viewingKey !== ""
+      super.canFetch() &&
+      this.bech32Address !== "" &&
+      this.queryAuth !== undefined
     );
   }
 
@@ -77,7 +112,6 @@ export class ObservableQuerySecret20BalanceImpl
     headers: any;
   }> {
     const { data, headers } = await super.fetchResponse(abortController);
-
     if (data["viewing_key_error"]) {
       throw new WrongViewingKeyError(data["viewing_key_error"]?.msg);
     }
@@ -136,9 +170,9 @@ export class ObservableQuerySecret20BalanceRegistry implements BalanceRegistry {
         chainId,
         chainGetter,
         this.apiGetter,
-        denomHelper,
         bech32Address,
-        this.querySecretContractCodeHash
+        this.querySecretContractCodeHash,
+        denomHelper
       );
     }
   }

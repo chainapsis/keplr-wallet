@@ -22,6 +22,7 @@ import {
   ChainInfoWithoutEndpoints,
   SecretUtils,
   SettledResponses,
+  Permit,
 } from "@keplr-wallet/types";
 import {
   CosmJSOfflineSigner,
@@ -440,6 +441,16 @@ export class KeplrWalletConnectV1 implements Keplr {
     throw new Error("Not yet implemented");
   }
 
+  getSecret20QueryAuthorization(
+    _chainId: string,
+    _contractAddress: string
+  ): Promise<{
+    permit: Permit | undefined;
+    viewing_key: string | undefined;
+  }> {
+    throw new Error("Not yet implemented");
+  }
+
   /**
    * In the extension environment, this API let the extension to send the tx on behalf of the client.
    * But, in the wallet connect environment, in order to send the tx on behalf of the client, wallet should receive the tx data from remote.
@@ -499,7 +510,8 @@ export class KeplrWalletConnectV1 implements Keplr {
   suggestToken(
     _chainId: string,
     _contractAddress: string,
-    _viewingKey?: string
+    _viewingKey?: string,
+    _suggestViewingKey: boolean = true
   ): Promise<void> {
     throw new Error("Not yet implemented");
   }

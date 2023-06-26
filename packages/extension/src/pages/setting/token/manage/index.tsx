@@ -21,6 +21,10 @@ import { useConfirm } from "../../../../hooks/confirm";
 import { useNotification } from "../../../../hooks/notification";
 import { Gutter } from "../../../../components/gutter";
 import { Tooltip } from "../../../../components/tooltip";
+import {
+  PermitQueryAuthorization,
+  QueryAuthorization,
+} from "@keplr-wallet/background/build/secret-wasm/query-authorization";
 
 const Styles = {
   Container: styled(Stack)`
@@ -159,6 +163,23 @@ const TokenItem: FunctionComponent<{
     return false;
   })();
 
+  const secret20AuthorizationType = (() => {
+    if (
+      "type" in tokenInfo.currency &&
+      tokenInfo.currency.type === "secret20"
+    ) {
+      const queryAuthorization = QueryAuthorization.fromInput(
+        tokenInfo.currency.queryAuthorizationStr
+      );
+      if (queryAuthorization instanceof PermitQueryAuthorization) {
+        return "Permit";
+      } else {
+        return "Viewing Key";
+      }
+    }
+    return "";
+  })();
+
   const confirm = useConfirm();
 
   return (
@@ -183,7 +204,7 @@ const TokenItem: FunctionComponent<{
 
         <Columns sum={1} gutter="0.5rem" alignY="center">
           {isSecret20 ? (
-            <Tooltip content="Copy Viewing Key">
+            <Tooltip content={`Copy ${secret20AuthorizationType}`}>
               <ItemStyles.Icon
                 onClick={async (e) => {
                   e.preventDefault();
@@ -193,10 +214,14 @@ const TokenItem: FunctionComponent<{
                     tokenInfo.currency.type === "secret20"
                   ) {
                     await navigator.clipboard.writeText(
-                      tokenInfo.currency.viewingKey
+                      tokenInfo.currency.queryAuthorizationStr
                     );
 
-                    notification.show("success", "Viewing key copied", "");
+                    notification.show(
+                      "success",
+                      `${secret20AuthorizationType} copied`,
+                      ""
+                    );
                   }
                 }}
               >

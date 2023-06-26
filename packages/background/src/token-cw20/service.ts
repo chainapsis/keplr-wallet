@@ -24,6 +24,10 @@ import {
 import { computedFn } from "mobx-utils";
 import { TokenInfo } from "./types";
 import { Buffer } from "buffer/";
+import {
+  QueryAuthorization,
+  QueryAuthorizationType,
+} from "../secret-wasm/query-authorization";
 
 export class TokenCW20Service {
   protected readonly legacyKVStore: KVStore;
@@ -147,7 +151,8 @@ export class TokenCW20Service {
     contractAddress: string,
     // Should be hex encoded. (not bech32)
     associatedAccountAddress: string,
-    viewingKey?: string
+    suggestedQueryAuthorizationType: QueryAuthorizationType,
+    queryAuthorization?: QueryAuthorization
   ) {
     this.validateAssociatedAccountAddress(associatedAccountAddress);
     const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
@@ -159,27 +164,41 @@ export class TokenCW20Service {
       associatedAccountAddress
     );
 
-    // If the same currency is already registered, do nothing.
-    if (existing) {
-      // If the secret20 token,
-      // just try to change the viewing key.
-      if (viewingKey) {
-        if (
-          "type" in existing.currency &&
-          existing.currency.type === "secret20" &&
-          existing.currency.viewingKey !== viewingKey
-        ) {
+    if (
+      existing &&
+      "type" in existing.currency &&
+      existing.currency.type === "secret20"
+    ) {
+      // If is an existing secret20 token, and query authorization is provided,
+      // just try to change the viewing key or permit.
+      if (queryAuthorization) {
+        const queryAuthorizationStr = queryAuthorization.toString();
+        if (existing.currency.queryAuthorizationStr !== queryAuthorizationStr) {
           await this.setToken(
             chainId,
             {
               ...existing.currency,
-              viewingKey,
+              queryAuthorizationStr,
             },
             associatedAccountAddress
           );
         }
         return;
+      } else {
+        // If is an existing secret20 token, and query authorization is not
+        // provided and the query authorization types do not differ, do nothing.
+        // Otherwise, continue to the add token screen.
+        const existingQueryAuthorization = QueryAuthorization.fromInput(
+          existing.currency.queryAuthorizationStr
+        );
+        if (
+          existingQueryAuthorization.type == suggestedQueryAuthorizationType
+        ) {
+          return;
+        }
       }
+    } else if (existing) {
+      // If the same non-secret currency is already registered, do nothing.
       return;
     }
 
@@ -192,7 +211,8 @@ export class TokenCW20Service {
     const params = {
       chainId,
       contractAddress,
-      viewingKey,
+      suggestedQueryAuthorizationType,
+      queryAuthorizationStr: queryAuthorization?.toString(),
     };
 
     const appCurrency = (await this.interactionService.waitApprove(
@@ -261,8 +281,8 @@ export class TokenCW20Service {
       throw new Error("Unknown type of currency");
     }
 
-    if (currency.type === "secret20" && !currency.viewingKey) {
-      throw new Error("Viewing key must be set");
+    if (currency.type === "secret20" && !currency.queryAuthorizationStr) {
+      throw new Error("Viewing key or Permit must be set");
     }
 
     const contractAddress = currency.contractAddress;
@@ -331,11 +351,12 @@ export class TokenCW20Service {
     }
   }
 
-  getSecret20ViewingKey(
+  getSecret20QueryAuthorization(
     chainId: string,
     contractAddress: string,
     // Should be hex encoded. (not bech32)
-    associatedAccountAddress: string
+    associatedAccountAddress: string,
+    queryAuthorizationTypeFilter: QueryAuthorizationType | undefined
   ): string {
     this.validateAssociatedAccountAddress(associatedAccountAddress);
 
@@ -344,14 +365,25 @@ export class TokenCW20Service {
       contractAddress,
       associatedAccountAddress
     );
-
     if (token) {
       if ("type" in token.currency && token.currency.type === "secret20") {
-        return token.currency.viewingKey;
+        if (!queryAuthorizationTypeFilter) {
+          return token.currency.queryAuthorizationStr;
+        }
+        const queryAuthorization = QueryAuthorization.fromInput(
+          token.currency.queryAuthorizationStr
+        );
+        if (queryAuthorization.type === queryAuthorizationTypeFilter) {
+          return token.currency.queryAuthorizationStr;
+        }
       }
     }
 
-    throw new KeplrError("token-cw20", 111, "There is no matched secret20");
+    throw new KeplrError(
+      "token-cw20",
+      111,
+      "There is no matched secret20 viewing key or permit"
+    );
   }
 
   static async validateCurrency(

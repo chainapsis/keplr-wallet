@@ -5,6 +5,7 @@ import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
 import { HasMapStore, IObservableQuery, QuerySharedContext } from "../common";
 import { computedFn } from "mobx-utils";
+import { QueryAuthorization } from "@keplr-wallet/background/build/secret-wasm/query-authorization";
 
 export interface IObservableQueryBalanceImpl extends IObservableQuery {
   balance: CoinPretty;
@@ -49,7 +50,10 @@ export class ObservableQueryBalancesImplMap {
     let key = currency.coinMinimalDenom;
     // If the currency is secret20, it will be different according to not only the minimal denom but also the viewing key of the currency.
     if ("type" in currency && currency.type === "secret20") {
-      key = currency.coinMinimalDenom + "/" + currency.viewingKey;
+      const queryAuthorization = QueryAuthorization.fromInput(
+        currency.queryAuthorizationStr
+      );
+      key = currency.coinMinimalDenom + "/" + queryAuthorization.getId();
     }
 
     if (!this.balanceImplMap.has(key)) {
