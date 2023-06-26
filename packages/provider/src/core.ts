@@ -399,7 +399,7 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       {
         chainId,
         contractAddress,
-        queryAuthorizationType: "viewing_key",
+        queryAuthorizationType: undefined,
       }
     );
     try {
