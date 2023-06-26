@@ -53,56 +53,70 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               stepPrevious: 1,
               stepTotal: 3,
             });
-          } else {
-            alert("TODO");
+          } else if (type === "keystone") {
+            sceneTransition.push("connect-keystone", {
+              name: data.name,
+              password: data.password,
+              stepPrevious: 1,
+              stepTotal: 3,
+            });
           }
         })}
       >
         <FormNamePassword
           {...form}
           appendButton={
-            <TextButton
-              text={intl.formatMessage({
-                id: "pages.register.name-password-hardware.use-terra-app-button",
-              })}
-              onClick={form.handleSubmit((data) => {
-                sceneTransition.push("connect-ledger", {
-                  name: data.name,
-                  password: data.password,
-                  app: "Terra",
-                  bip44Path: bip44PathState.getPath(),
-                  stepPrevious: 1,
-                  stepTotal: 3,
-                });
-              })}
-            />
+            type === "ledger" && (
+              <TextButton
+                text={intl.formatMessage({
+                  id: "pages.register.name-password-hardware.use-terra-app-button",
+                })}
+                onClick={form.handleSubmit((data) => {
+                  sceneTransition.push("connect-ledger", {
+                    name: data.name,
+                    password: data.password,
+                    app: "Terra",
+                    bip44Path: bip44PathState.getPath(),
+                    stepPrevious: 1,
+                    stepTotal: 3,
+                  });
+                })}
+              />
+            )
           }
           autoFocus={true}
         >
-          <Gutter size="1.625rem" />
-          <VerticalCollapseTransition width="100%" collapsed={isBIP44CardOpen}>
-            <Box alignX="center">
-              <Button
-                size="small"
-                color="secondary"
-                text={intl.formatMessage({
-                  id: "button.advanced",
-                })}
-                onClick={() => {
-                  setIsBIP44CardOpen(true);
-                }}
-              />
-            </Box>
-          </VerticalCollapseTransition>
-          <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
-            <SetBip44PathCard
-              state={bip44PathState}
-              onClose={() => {
-                setIsBIP44CardOpen(false);
-              }}
-            />
-          </VerticalCollapseTransition>
-          <Gutter size="1.25rem" />
+          {type === "ledger" && (
+            <React.Fragment>
+              <Gutter size="1.625rem" />
+              <VerticalCollapseTransition
+                width="100%"
+                collapsed={isBIP44CardOpen}
+              >
+                <Box alignX="center">
+                  <Button
+                    size="small"
+                    color="secondary"
+                    text={intl.formatMessage({
+                      id: "button.advanced",
+                    })}
+                    onClick={() => {
+                      setIsBIP44CardOpen(true);
+                    }}
+                  />
+                </Box>
+              </VerticalCollapseTransition>
+              <VerticalCollapseTransition collapsed={!isBIP44CardOpen}>
+                <SetBip44PathCard
+                  state={bip44PathState}
+                  onClose={() => {
+                    setIsBIP44CardOpen(false);
+                  }}
+                />
+              </VerticalCollapseTransition>
+              <Gutter size="1.25rem" />
+            </React.Fragment>
+          )}
         </FormNamePassword>
       </form>
     </RegisterSceneBox>

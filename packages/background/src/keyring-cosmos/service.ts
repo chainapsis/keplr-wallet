@@ -85,8 +85,7 @@ export class KeyRingCosmosService {
         chainInfo.bech32Config.bech32PrefixAccAddr
       ),
       isNanoLedger: keyInfo.type === "ledger",
-      // TODO
-      isKeystone: false,
+      isKeystone: keyInfo.type === "keystone",
     };
   }
 

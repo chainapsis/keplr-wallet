@@ -70,7 +70,6 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           })}
           size="large"
           color="secondary"
-          disabled={true}
           left={
             <Image
               src={require("../../../public/assets/img/intro-keystone-logo.png")}
@@ -81,6 +80,11 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
               }}
             />
           }
+          onClick={() => {
+            sceneTransition.push("name-password-hardware", {
+              type: "keystone",
+            });
+          }}
         />
       </Stack>
     </RegisterSceneBox>

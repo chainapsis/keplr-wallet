@@ -17,6 +17,7 @@ import { WalletStatus } from "@keplr-wallet/stores";
 import AnimCreating from "../../../public/assets/lottie/register/creating.json";
 import lottie from "lottie-web";
 import { PlainObject } from "@keplr-wallet/background";
+import { MultiAccounts } from "@keystonehq/keystone-sdk";
 
 /**
  * FinalizeKeyScene is used to create the key (account).
@@ -50,6 +51,7 @@ export const FinalizeKeyScene: FunctionComponent<{
       addressIndex: number;
     };
   };
+  keystone?: MultiAccounts;
   stepPrevious: number;
   stepTotal: number;
 }> = observer(
@@ -59,6 +61,7 @@ export const FinalizeKeyScene: FunctionComponent<{
     mnemonic,
     privateKey,
     ledger,
+    keystone,
     stepPrevious,
     stepTotal,
   }) => {
@@ -118,6 +121,8 @@ export const FinalizeKeyScene: FunctionComponent<{
             name,
             password
           );
+        } else if (keystone) {
+          vaultId = await keyRingStore.newKeystoneKey(keystone, name, password);
         } else {
           throw new Error("Invalid props");
         }
