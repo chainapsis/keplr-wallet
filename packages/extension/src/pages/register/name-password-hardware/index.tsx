@@ -57,19 +57,34 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
         <FormNamePassword
           {...form}
           appendButton={
-            <TextButton
-              text="Use Terra Ledger app"
-              onClick={form.handleSubmit((data) => {
-                sceneTransition.push("connect-ledger", {
-                  name: data.name,
-                  password: data.password,
-                  app: "Terra",
-                  bip44Path: bip44PathState.getPath(),
-                  stepPrevious: 1,
-                  stepTotal: 3,
-                });
-              })}
-            />
+            <div style={{ marginBottom: "3px" }}>
+              <TextButton
+                text="Use Terra Ledger app"
+                onClick={form.handleSubmit((data) => {
+                  sceneTransition.push("connect-ledger", {
+                    name: data.name,
+                    password: data.password,
+                    app: "Terra",
+                    bip44Path: bip44PathState.getPath(),
+                    stepPrevious: 1,
+                    stepTotal: 3,
+                  });
+                })}
+              />
+              <TextButton
+                text="Use Secret Ledger app"
+                onClick={form.handleSubmit((data) => {
+                  sceneTransition.push("connect-ledger", {
+                    name: data.name,
+                    password: data.password,
+                    app: "Secret",
+                    bip44Path: bip44PathState.getPath(),
+                    stepPrevious: 1,
+                    stepTotal: 3,
+                  });
+                })}
+              />
+            </div>
           }
           autoFocus={true}
         >

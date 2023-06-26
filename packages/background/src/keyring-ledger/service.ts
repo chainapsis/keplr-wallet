@@ -56,9 +56,14 @@ export class KeyRingLedgerService {
       }
     }
 
-    if (app === "Cosmos" && vault.insensitive["Terra"]) {
-      // Use terra alternatively.
-      app = "Terra";
+    if (app === "Cosmos") {
+      if (vault.insensitive["Terra"]) {
+        // Use terra alternatively.
+        app = "Terra";
+      }
+      if (vault.insensitive["Secret"]) {
+        app = "Secret";
+      }
     }
 
     if (!vault.insensitive[app]) {

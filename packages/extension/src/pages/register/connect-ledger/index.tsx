@@ -28,10 +28,12 @@ import { useConfirm } from "../../../hooks/confirm";
 
 type Step = "unknown" | "connected" | "app";
 
+const SUPPORTED_APPS = ["Cosmos", "Terra", "Ethereum", "Secret"] as const;
+
 export const ConnectLedgerScene: FunctionComponent<{
   name: string;
   password: string;
-  app: string;
+  app: (typeof SUPPORTED_APPS)[number];
   bip44Path: {
     account: number;
     change: number;
@@ -55,7 +57,7 @@ export const ConnectLedgerScene: FunctionComponent<{
     stepPrevious,
     stepTotal,
   }) => {
-    if (propApp !== "Cosmos" && propApp !== "Terra" && propApp !== "Ethereum") {
+    if (!SUPPORTED_APPS.includes(propApp)) {
       throw new Error(`Unsupported app: ${propApp}`);
     }
 

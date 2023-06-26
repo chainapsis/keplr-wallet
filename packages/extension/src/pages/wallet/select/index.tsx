@@ -231,6 +231,8 @@ const KeyringItem: FunctionComponent<{
 
       const isLedgerWithTerra =
         keyInfo.type === "ledger" && keyInfo.insensitive["Terra"] != null;
+      const isLedgerWithSecret =
+        keyInfo.type === "ledger" && keyInfo.insensitive["Secret"] != null;
       // -1 means it can be multiple coin type.
       let coinType = -1;
       if (keyInfo.type === "ledger") {
@@ -238,6 +240,7 @@ const KeyringItem: FunctionComponent<{
           keyInfo.insensitive["Cosmos"] != null ||
           keyInfo.insensitive["Terra"] != null;
         const isEthereum = keyInfo.insensitive["Ethereum"] != null;
+        const isSecret = keyInfo.insensitive["Secret"] != null;
 
         if (isCosmos && isEthereum) {
           coinType = -1;
@@ -245,11 +248,14 @@ const KeyringItem: FunctionComponent<{
           coinType = 118;
         } else if (isEthereum) {
           coinType = 60;
+        } else if (isSecret) {
+          coinType = 529;
         }
       }
 
       if (
         !isLedgerWithTerra &&
+        !isLedgerWithSecret &&
         bip44Path.account === 0 &&
         bip44Path.change === 0 &&
         bip44Path.addressIndex === 0
@@ -257,9 +263,20 @@ const KeyringItem: FunctionComponent<{
         return;
       }
 
-      return `m/44'/${coinType >= 0 ? coinType : "-"}'/${bip44Path.account}'/${
-        bip44Path.change
-      }/${bip44Path.addressIndex}${isLedgerWithTerra ? " (Terra)" : ""}`;
+      switch (true) {
+        case isLedgerWithTerra:
+          return `m/44'/${coinType >= 0 ? coinType : "-"}'/${
+            bip44Path.account
+          }'/${bip44Path.change}/${bip44Path.addressIndex} (Terra)`;
+        case isLedgerWithSecret:
+          return `m/44'/${coinType >= 0 ? coinType : "-"}'/${
+            bip44Path.account
+          }'/${bip44Path.change}/${bip44Path.addressIndex} (Secret)`;
+        default:
+          return `m/44'/${coinType >= 0 ? coinType : "-"}'/${
+            bip44Path.account
+          }'/${bip44Path.change}/${bip44Path.addressIndex}`;
+      }
     }
 
     if (
