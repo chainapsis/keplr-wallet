@@ -19,6 +19,7 @@ import {
   PStakeItem,
   StreamSwapItem,
   IBCXItem,
+  IONDaoItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 
@@ -42,6 +43,7 @@ const WebpagesPerLabel: {
       RegenItem,
       StreamSwapItem,
       IBCXItem,
+      IONDaoItem,
     ],
   },
   {
@@ -65,7 +67,7 @@ const WebpagesPerLabel: {
   },
   {
     label: "DAO",
-    items: [DaoDaoItem],
+    items: [DaoDaoItem, IONDaoItem],
   },
   {
     label: "Refi",

@@ -125,6 +125,7 @@ import {
   PStakeWebpageScreen,
   StreamSwapScreen,
   IBCXWebpageScreen,
+  IONDaoWebpageScreen,
 } from "./screens/web/webpages";
 import { WebpageScreenScreenOptionsPreset } from "./screens/web/components/webpage-screen";
 import Bugsnag from "@bugsnag/react-native";
@@ -288,6 +289,9 @@ const {
       upperScreenName: "Web",
     },
     "Web.IBCX": {
+      upperScreenName: "Web",
+    },
+    "Web.IONDao": {
       upperScreenName: "Web",
     },
   }).withParams<{
@@ -904,6 +908,7 @@ export const WebNavigation: FunctionComponent = () => {
       <Stack.Screen name="Web.PStake" component={PStakeWebpageScreen} />
       <Stack.Screen name="Web.StreamSwap" component={StreamSwapScreen} />
       <Stack.Screen name="Web.IBCX" component={IBCXWebpageScreen} />
+      <Stack.Screen name="Web.IONDao" component={IONDaoWebpageScreen} />
     </Stack.Navigator>
   );
 };
