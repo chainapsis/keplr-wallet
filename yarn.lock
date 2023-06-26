@@ -3609,6 +3609,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bufbuild/protobuf@npm:^1.2.0":
+  version: 1.2.1
+  resolution: "@bufbuild/protobuf@npm:1.2.1"
+  checksum: c1258de903b04b38e151fa3ce4b7e9b81875a561f413b16646ffc11dd1d5b1daf367538e7163e0c888ec2fc79b71692b9c02314509bf7bbe278a9238ce1f2dcd
+  languageName: node
+  linkType: hard
+
 "@cnakazawa/watch@npm:^1.0.3":
   version: 1.0.4
   resolution: "@cnakazawa/watch@npm:1.0.4"
@@ -3943,6 +3950,15 @@ __metadata:
     crc-32: ^1.2.0
     ethereumjs-util: ^7.1.5
   checksum: 0143386f267ef01b7a8bb1847596f964ad58643c084e5fd8e3a0271a7bf8428605dbf38cbb92c84f6622080ad095abeb765f178c02d86ec52abf9e8a4c0e4ecf
+  languageName: node
+  linkType: hard
+
+"@ethereumjs/rlp@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@ethereumjs/rlp@npm:4.0.1"
+  bin:
+    rlp: bin/rlp
+  checksum: 30db19c78faa2b6ff27275ab767646929207bb207f903f09eb3e4c273ce2738b45f3c82169ddacd67468b4f063d8d96035f2bf36f02b6b7e4d928eefe2e3ecbc
   languageName: node
   linkType: hard
 
@@ -5236,6 +5252,7 @@ __metadata:
     "@keystonehq/bc-ur-registry-cosmos": ^0.1.1
     "@keystonehq/bc-ur-registry-eth": ^0.11.4
     "@keystonehq/cosmos-keyring": ^0.0.3
+    "@keystonehq/keystone-sdk": ^0.2.0
     "@ledgerhq/hw-app-eth": ^6.29.3
     "@ledgerhq/hw-transport": ^6.20.0
     "@ledgerhq/hw-transport-webhid": ^6.20.0
@@ -5350,6 +5367,7 @@ __metadata:
     "@keplr-wallet/types": 0.12.20
     "@keplr-wallet/unit": 0.12.20
     "@keystonehq/animated-qr": ^0.4.1
+    "@keystonehq/keystone-sdk": ^0.2.0
     "@ledgerhq/devices": ^6.20.0
     "@react-spring/web": ^9.6.1
     "@storybook/addon-actions": ^6.5.12
@@ -5680,6 +5698,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keystonehq/bc-ur-registry-aptos@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "@keystonehq/bc-ur-registry-aptos@npm:0.3.2"
+  dependencies:
+    "@keystonehq/bc-ur-registry": 0.5.4
+    bs58check: ^2.1.2
+    uuid: ^8.3.2
+  checksum: 25e9b2becda5851707ee9fbdbac72a3aee81a23033899e312668f36c53a5d9a1d84b1febea0613cd988d108621d5647164b4804fdf022203cd49d961d4cf749b
+  languageName: node
+  linkType: hard
+
+"@keystonehq/bc-ur-registry-arweave@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@keystonehq/bc-ur-registry-arweave@npm:0.4.0"
+  dependencies:
+    "@keystonehq/bc-ur-registry": 0.5.4
+    uuid: ^8.3.2
+  checksum: 064977661024e79205eee24f0bafac2651a888c20515689d9465dc8c38fc25f974d44ebac4ce129a1cbd67da27fd50198ebe9e65dcba19b5c190076e2300b73e
+  languageName: node
+  linkType: hard
+
+"@keystonehq/bc-ur-registry-cardano@npm:^0.2.0":
+  version: 0.2.2
+  resolution: "@keystonehq/bc-ur-registry-cardano@npm:0.2.2"
+  dependencies:
+    "@keystonehq/bc-ur-registry": ^0.5.4
+    uuid: ^8.3.2
+  checksum: 47638337459a8ae15fcb997facb02e4614e8a2a50d7bb43f0ba438100e650544003958c3a8c940957ddc9300207a7f179624c209faf1df2d7e35dfddd097d44b
+  languageName: node
+  linkType: hard
+
 "@keystonehq/bc-ur-registry-cosmos@npm:^0.1.1":
   version: 0.1.1
   resolution: "@keystonehq/bc-ur-registry-cosmos@npm:0.1.1"
@@ -5688,6 +5737,17 @@ __metadata:
     bs58check: ^2.1.2
     uuid: ^8.3.2
   checksum: 2a6f1d970c1d2bae8bd5ec990547367486c28eae1467b20696e0f07216bf59ab99ea361aa5cc9045ef83fe26dc42318da6ba2031d705d2e969f3b72625c48c36
+  languageName: node
+  linkType: hard
+
+"@keystonehq/bc-ur-registry-cosmos@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@keystonehq/bc-ur-registry-cosmos@npm:0.2.2"
+  dependencies:
+    "@keystonehq/bc-ur-registry": 0.5.4
+    bs58check: ^2.1.2
+    uuid: ^8.3.2
+  checksum: d1185b9e3b36d9241640f45a37683d72185334e51c7afaa51ed61f24aa5d7c60df0317c3bcfe6c86c9981f8c873924d489dab3e85e9a527bd57a7a9719084fa7
   languageName: node
   linkType: hard
 
@@ -5703,6 +5763,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keystonehq/bc-ur-registry-eth@npm:^0.15.2":
+  version: 0.15.2
+  resolution: "@keystonehq/bc-ur-registry-eth@npm:0.15.2"
+  dependencies:
+    "@ethereumjs/util": ^8.0.0
+    "@keystonehq/bc-ur-registry": 0.5.4
+    hdkey: ^2.0.1
+    uuid: ^8.3.2
+  checksum: 8541040c3eea59aa39d6a9b9f17acfe505956b01ffa977e54c51c14f45b6b8af4ca3dd594866934dd06939fbd752a3d5b1ba46e017df86362c2c67de52005860
+  languageName: node
+  linkType: hard
+
 "@keystonehq/bc-ur-registry-eth@npm:^0.6.12":
   version: 0.6.14
   resolution: "@keystonehq/bc-ur-registry-eth@npm:0.6.14"
@@ -5712,6 +5784,47 @@ __metadata:
     hdkey: ^2.0.1
     uuid: ^8.3.2
   checksum: 4adecaf45197b74f30e2180c06ccf44fc8f5cb748f6dbe2b51609797021151173b98b8192886a185d561abfb1185242b84ee5e0526819bf33febca7e46bd59de
+  languageName: node
+  linkType: hard
+
+"@keystonehq/bc-ur-registry-keystone@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@keystonehq/bc-ur-registry-keystone@npm:0.1.0"
+  dependencies:
+    "@keystonehq/bc-ur-registry": 0.5.4
+  checksum: 9a4d2372396c574945e04a18a583b37a1d38edff02d62c23e44e803ea0826d772768886dbaf83843a58473e9acd84c2e5f684f764837a65652e57ee6b150b8d3
+  languageName: node
+  linkType: hard
+
+"@keystonehq/bc-ur-registry-near@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "@keystonehq/bc-ur-registry-near@npm:0.8.0"
+  dependencies:
+    "@keystonehq/bc-ur-registry": 0.5.4
+    bs58check: ^2.1.2
+    uuid: ^8.3.2
+  checksum: 7254b6c2ffbfc015df2c2ac8aa4c39b20497fcd0f2544756d31ee8e708e330f2a297bc46de7293d5d8a02e91c360625db6a93554e2bed818031f831ac4fd1f7b
+  languageName: node
+  linkType: hard
+
+"@keystonehq/bc-ur-registry-sol@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "@keystonehq/bc-ur-registry-sol@npm:0.6.2"
+  dependencies:
+    "@keystonehq/bc-ur-registry": 0.5.4
+    bs58check: ^2.1.2
+    uuid: ^8.3.2
+  checksum: f0113dea76904b4f4328610764fb67fa2dc5fdb83c3b88517fa71fe05c224310e073a8f7565c4310e8643fce2ea9d75083bb71ed3f36a6d6d96632dab62f553d
+  languageName: node
+  linkType: hard
+
+"@keystonehq/bc-ur-registry-sui@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@keystonehq/bc-ur-registry-sui@npm:0.3.0"
+  dependencies:
+    "@keystonehq/bc-ur-registry": ^0.5.5
+    uuid: ^9.0.0
+  checksum: f2d0c024feae36711abb141766faa0c907dea076371bbba4cf07dda44b6506f7bc416d2ab7949c9bc437d9d88e7ec92f524d522c753e4d61782bf1d508dc9154
   languageName: node
   linkType: hard
 
@@ -5748,6 +5861,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keystonehq/bc-ur-registry@npm:^0.5.4, @keystonehq/bc-ur-registry@npm:^0.5.5":
+  version: 0.5.5
+  resolution: "@keystonehq/bc-ur-registry@npm:0.5.5"
+  dependencies:
+    "@ngraveio/bc-ur": ^1.1.5
+    bs58check: ^2.1.2
+    tslib: ^2.3.0
+  checksum: 0b2dc1dde95caa5f46f2a75bb0062dd7f3fea0a3015a3dde0a8b228e0f5d03d886ca340605911ddfeee5952b50b4186128fd3031a1cc33cc489c0ab134cc65bc
+  languageName: node
+  linkType: hard
+
+"@keystonehq/bc-ur-registry@npm:^0.6.3":
+  version: 0.6.3
+  resolution: "@keystonehq/bc-ur-registry@npm:0.6.3"
+  dependencies:
+    "@ngraveio/bc-ur": ^1.1.5
+    bs58check: ^2.1.2
+    tslib: ^2.3.0
+  checksum: ff4d936eefdc1a25e7383a9668f4dcdacebf7acdb293bc9c18357a30c60b31404e83c457510b07d2610badd435da6af5a3b8352081f863516f0cfb8e88ed3cc0
+  languageName: node
+  linkType: hard
+
 "@keystonehq/cosmos-keyring@npm:^0.0.3":
   version: 0.0.3
   resolution: "@keystonehq/cosmos-keyring@npm:0.0.3"
@@ -5757,6 +5892,30 @@ __metadata:
     "@keystonehq/sdk": ^0.15.2
     uuid: ^8.3.2
   checksum: 06fcd26a4d994467f36a9a38de15439a8f4cf4501e7475b7330b034a362d3fcd8200a9e6a40e5a6fb475a6c527653156225cc94d9e19ced5a38dcf65ccbe30da
+  languageName: node
+  linkType: hard
+
+"@keystonehq/keystone-sdk@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@keystonehq/keystone-sdk@npm:0.2.0"
+  dependencies:
+    "@bufbuild/protobuf": ^1.2.0
+    "@keystonehq/bc-ur-registry": ^0.6.3
+    "@keystonehq/bc-ur-registry-aptos": ^0.3.2
+    "@keystonehq/bc-ur-registry-arweave": ^0.4.0
+    "@keystonehq/bc-ur-registry-cardano": ^0.2.0
+    "@keystonehq/bc-ur-registry-cosmos": ^0.2.2
+    "@keystonehq/bc-ur-registry-eth": ^0.15.2
+    "@keystonehq/bc-ur-registry-keystone": ^0.1.0
+    "@keystonehq/bc-ur-registry-near": ^0.8.0
+    "@keystonehq/bc-ur-registry-sol": ^0.6.2
+    "@keystonehq/bc-ur-registry-sui": ^0.3.0
+    "@ngraveio/bc-ur": ^1.1.6
+    bs58check: ^3.0.1
+    pako: ^2.1.0
+    ripple-binary-codec: ^1.4.3
+    uuid: ^9.0.0
+  checksum: 3ca9f5c77331b93f23abc1793a2cb5d842008bddf352e4c8e17555d1dcc1a54254904ea065689d0cc67c3f63dd0ab724d6b3b0104c949e33e03fb8b329befc33
   languageName: node
   linkType: hard
 
@@ -6811,6 +6970,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:1.0.0, @noble/curves@npm:~1.0.0":
+  version: 1.0.0
+  resolution: "@noble/curves@npm:1.0.0"
+  dependencies:
+    "@noble/hashes": 1.3.0
+  checksum: 6bcef44d626c640dc8961819d68dd67dffb907e3b973b7c27efe0ecdd9a5c6ce62c7b9e3dfc930c66605dced7f1ec0514d191c09a2ce98d6d52b66e3315ffa79
+  languageName: node
+  linkType: hard
+
 "@noble/hashes@npm:1.0.0":
   version: 1.0.0
   resolution: "@noble/hashes@npm:1.0.0"
@@ -6818,10 +6986,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/hashes@npm:1.3.0":
+  version: 1.3.0
+  resolution: "@noble/hashes@npm:1.3.0"
+  checksum: d7ddb6d7c60f1ce1f87facbbef5b724cdea536fc9e7f59ae96e0fc9de96c8f1a2ae2bdedbce10f7dcc621338dfef8533daa73c873f2b5c87fa1a4e05a95c2e2e
+  languageName: node
+  linkType: hard
+
 "@noble/hashes@npm:^1, @noble/hashes@npm:^1.0.0":
   version: 1.1.3
   resolution: "@noble/hashes@npm:1.1.3"
   checksum: a6f9783d2a33fc528c8709532b1c26cc3f5866f79c66256e881b28c61a1585be3899b008aa4e5e2b4e01b95c713722f52591cbb18ec51aa0ec63e7eaece1b89c
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:^1.2.0, @noble/hashes@npm:~1.3.0":
+  version: 1.3.1
+  resolution: "@noble/hashes@npm:1.3.1"
+  checksum: 7fdefc0f7a0c1ec27acc6ff88841793e3f93ec4ce6b8a6a12bfc0dd70ae6b7c4c82fe305fdfeda1735d5ad4a9eebe761e6693b3d355689c559e91242f4bc95b1
   languageName: node
   linkType: hard
 
@@ -7452,6 +7634,34 @@ __metadata:
   version: 1.3.2
   resolution: "@remix-run/router@npm:1.3.2"
   checksum: ee2108b87d4a1241cdea137dd7e1741ee679228bd33fd81e22a6bb2940f81186cefe9a85e26d60cc49bbcc1bdbc57d1954b7d4d62f8a51ef69feddfc899f55fa
+  languageName: node
+  linkType: hard
+
+"@scure/base@npm:~1.1.0":
+  version: 1.1.1
+  resolution: "@scure/base@npm:1.1.1"
+  checksum: b4fc810b492693e7e8d0107313ac74c3646970c198bbe26d7332820886fa4f09441991023ec9aa3a2a51246b74409ab5ebae2e8ef148bbc253da79ac49130309
+  languageName: node
+  linkType: hard
+
+"@scure/bip32@npm:1.3.0":
+  version: 1.3.0
+  resolution: "@scure/bip32@npm:1.3.0"
+  dependencies:
+    "@noble/curves": ~1.0.0
+    "@noble/hashes": ~1.3.0
+    "@scure/base": ~1.1.0
+  checksum: 6eae997f9bdf41fe848134898960ac48e645fa10e63d579be965ca331afd0b7c1b8ebac170770d237ab4099dafc35e5a82995384510025ccf2abe669f85e8918
+  languageName: node
+  linkType: hard
+
+"@scure/bip39@npm:1.2.0":
+  version: 1.2.0
+  resolution: "@scure/bip39@npm:1.2.0"
+  dependencies:
+    "@noble/hashes": ~1.3.0
+    "@scure/base": ~1.1.0
+  checksum: 980d761f53e63de04a9e4db840eb13bfb1bd1b664ecb04a71824c12c190f4972fd84146f3ed89b2a8e4c6bd2c17c15f8b592b7ac029e903323b0f9e2dae6916b
   languageName: node
   linkType: hard
 
@@ -11882,6 +12092,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-x@npm:^3.0.9":
+  version: 3.0.9
+  resolution: "base-x@npm:3.0.9"
+  dependencies:
+    safe-buffer: ^5.0.1
+  checksum: 957101d6fd09e1903e846fd8f69fd7e5e3e50254383e61ab667c725866bec54e5ece5ba49ce385128ae48f9ec93a26567d1d5ebb91f4d56ef4a9cc0d5a5481e8
+  languageName: node
+  linkType: hard
+
+"base-x@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "base-x@npm:4.0.0"
+  checksum: b25db9e07eb1998472a20557c7f00c797dc0595f79df95155ab74274e7fa98b9f2659b3ee547ac8773666b7f69540656793aeb97ad2b1ceccdb6fa5faaf69ac0
+  languageName: node
+  linkType: hard
+
 "base58check@npm:^2.0.0":
   version: 2.0.0
   resolution: "base58check@npm:2.0.0"
@@ -12428,6 +12654,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bs58@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "bs58@npm:5.0.0"
+  dependencies:
+    base-x: ^4.0.0
+  checksum: 2475cb0684e07077521aac718e604a13e0f891d58cff923d437a2f7e9e28703ab39fce9f84c7c703ab369815a675f11e3bd394d38643bfe8969fbe42e6833d45
+  languageName: node
+  linkType: hard
+
 "bs58check@npm:<3.0.0, bs58check@npm:^2.1.1, bs58check@npm:^2.1.2":
   version: 2.1.2
   resolution: "bs58check@npm:2.1.2"
@@ -12436,6 +12671,16 @@ __metadata:
     create-hash: ^1.1.0
     safe-buffer: ^5.1.2
   checksum: 43bdf08a5dd04581b78f040bc4169480e17008da482ffe2a6507327bbc4fc5c28de0501f7faf22901cfe57fbca79cbb202ca529003fedb4cb8dccd265b38e54d
+  languageName: node
+  linkType: hard
+
+"bs58check@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "bs58check@npm:3.0.1"
+  dependencies:
+    "@noble/hashes": ^1.2.0
+    bs58: ^5.0.0
+  checksum: dbbecc7a09f3836e821149266c864c4bbd545539cea43c35f23f4c3c46b54c86c52b65d224b9ea2e916fa6d93bd2ce9fac5b6c6bfcf19621a9c209a5602f71c8
   languageName: node
   linkType: hard
 
@@ -12497,6 +12742,16 @@ __metadata:
   version: 1.0.3
   resolution: "buffer-xor@npm:1.0.3"
   checksum: 10c520df29d62fa6e785e2800e586a20fc4f6dfad84bcdbd12e1e8a83856de1cb75c7ebd7abe6d036bbfab738a6cf18a3ae9c8e5a2e2eb3167ca7399ce65373a
+  languageName: node
+  linkType: hard
+
+"buffer@npm:6.0.3, buffer@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "buffer@npm:6.0.3"
+  dependencies:
+    base64-js: ^1.3.1
+    ieee754: ^1.2.1
+  checksum: 5ad23293d9a731e4318e420025800b42bf0d264004c0286c8cc010af7a270c7a0f6522e84f54b9ad65cbd6db20b8badbfd8d2ebf4f80fa03dab093b89e68c3f9
   languageName: node
   linkType: hard
 
@@ -14630,6 +14885,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"decimal.js@npm:^10.2.0":
+  version: 10.4.3
+  resolution: "decimal.js@npm:10.4.3"
+  checksum: 796404dcfa9d1dbfdc48870229d57f788b48c21c603c3f6554a1c17c10195fc1024de338b0cf9e1efe0c7c167eeb18f04548979bcc5fdfabebb7cc0ae3287bae
+  languageName: node
+  linkType: hard
+
 "decode-named-character-reference@npm:^1.0.0":
   version: 1.0.2
   resolution: "decode-named-character-reference@npm:1.0.2"
@@ -16206,6 +16468,18 @@ __metadata:
     secp256k1: ^4.0.1
     setimmediate: ^1.0.5
   checksum: 54bae7a4a96bd81398cdc35c91cfcc74339f71a95ed1b5b694663782e69e8e3afd21357de3b8bac9ff4877fd6f043601e200a7ad9133d94be6fd7d898ee0a449
+  languageName: node
+  linkType: hard
+
+"ethereum-cryptography@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ethereum-cryptography@npm:2.0.0"
+  dependencies:
+    "@noble/curves": 1.0.0
+    "@noble/hashes": 1.3.0
+    "@scure/bip32": 1.3.0
+    "@scure/bip39": 1.2.0
+  checksum: 958f8aab2d1b32aa759fb27a27877b3647410e8bb9aca7d65d1d477db4864cf7fc46b918eb52a1e246c25e98ee0a35a632c88b496aeaefa13469ee767a76c8db
   languageName: node
   linkType: hard
 
@@ -21903,6 +22177,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"micro-ftch@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "micro-ftch@npm:0.3.1"
+  checksum: 0e496547253a36e98a83fb00c628c53c3fb540fa5aaeaf718438873785afd193244988c09d219bb1802984ff227d04938d9571ef90fe82b48bd282262586aaff
+  languageName: node
+  linkType: hard
+
 "microevent.ts@npm:~0.1.1":
   version: 0.1.1
   resolution: "microevent.ts@npm:0.1.1"
@@ -24098,6 +24379,13 @@ __metadata:
   version: 0.2.9
   resolution: "pako@npm:0.2.9"
   checksum: 055f9487cd57fbb78df84315873bbdd089ba286f3499daed47d2effdc6253e981f5db6898c23486de76d4a781559f890d643bd3a49f70f1b4a18019c98aa5125
+  languageName: node
+  linkType: hard
+
+"pako@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "pako@npm:2.1.0"
+  checksum: 71666548644c9a4d056bcaba849ca6fd7242c6cf1af0646d3346f3079a1c7f4a66ffec6f7369ee0dc88f61926c10d6ab05da3e1fca44b83551839e89edd75a3e
   languageName: node
   linkType: hard
 
@@ -27961,6 +28249,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ripple-address-codec@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "ripple-address-codec@npm:4.3.0"
+  dependencies:
+    base-x: ^3.0.9
+    create-hash: ^1.1.2
+  checksum: 445b10d4f13a061e0954532cf8f1b3467c9d0ff3aa549d0e5501ba4ae7963d5225cc437de0bdc466323174c11d891ac991cce40bf6a308f34630c82807df75d0
+  languageName: node
+  linkType: hard
+
+"ripple-binary-codec@npm:^1.4.3":
+  version: 1.6.0
+  resolution: "ripple-binary-codec@npm:1.6.0"
+  dependencies:
+    assert: ^2.0.0
+    big-integer: ^1.6.48
+    buffer: 6.0.3
+    create-hash: ^1.2.0
+    decimal.js: ^10.2.0
+    ripple-address-codec: ^4.3.0
+  checksum: acb3376c6df05d8bbcd924113708fadab0aea3f22f78acc8cf2e0333494d6e74c483045d9a35d0367041bfb024a34443fc984e9ec1ee2473168bb5458cc23fce
+  languageName: node
+  linkType: hard
+
 "rlp@npm:^2.2.4":
   version: 2.2.6
   resolution: "rlp@npm:2.2.6"
@@ -31476,6 +31788,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "uuid@npm:9.0.0"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 8dd2c83c43ddc7e1c71e36b60aea40030a6505139af6bee0f382ebcd1a56f6cd3028f7f06ffb07f8cf6ced320b76aea275284b224b002b289f89fe89c389b028
   languageName: node
   linkType: hard
 

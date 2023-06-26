@@ -78,7 +78,6 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
           })}
           size="large"
           color="secondary"
-          disabled={true}
           left={
             <Image
               src={require(theme.mode === "light"
@@ -91,6 +90,11 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
               }}
             />
           }
+          onClick={() => {
+            sceneTransition.push("name-password-hardware", {
+              type: "keystone",
+            });
+          }}
         />
       </Stack>
     </RegisterSceneBox>

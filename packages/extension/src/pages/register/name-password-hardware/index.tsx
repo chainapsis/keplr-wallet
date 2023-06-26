@@ -56,8 +56,13 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               stepPrevious: 1,
               stepTotal: 3,
             });
-          } else {
-            alert("TODO");
+          } else if (type === "keystone") {
+            sceneTransition.push("connect-keystone", {
+              name: data.name,
+              password: data.password,
+              stepPrevious: 1,
+              stepTotal: 3,
+            });
           }
         })}
       >

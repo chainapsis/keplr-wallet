@@ -44,6 +44,7 @@
     "@keystonehq/bc-ur-registry-cosmos": "^0.1.1",
     "@keystonehq/bc-ur-registry-eth": "^0.11.4",
     "@keystonehq/cosmos-keyring": "^0.0.3",
+    "@keystonehq/keystone-sdk": "^0.2.0",
     "@ledgerhq/hw-app-eth": "^6.29.3",
     "@ledgerhq/hw-transport": "^6.20.0",
     "@ledgerhq/hw-transport-webhid": "^6.20.0",
