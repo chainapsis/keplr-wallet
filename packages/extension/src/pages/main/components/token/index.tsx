@@ -34,7 +34,7 @@ import { Skeleton } from "../../../../components/skeleton";
 import { WrongViewingKeyError } from "@keplr-wallet/stores";
 import { useNavigate } from "react-router";
 import { Secret20Currency } from "@keplr-wallet/types";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div<{
@@ -124,6 +124,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
   ({ viewToken, onClick, disabled, forChange, isNotReady, altSentence }) => {
     const { priceStore } = useStore();
     const navigate = useNavigate();
+    const intl = useIntl();
 
     const pricePretty = priceStore.calculatePrice(viewToken.token);
 
@@ -253,7 +254,20 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                     color: ColorPalette["yellow-400"],
                   }}
                 >
-                  <Tooltip content={viewToken.error.message}>
+                  <Tooltip
+                    content={(() => {
+                      if (
+                        viewToken.error?.message ===
+                        "Wrong viewing key for this address or viewing key not set"
+                      ) {
+                        return intl.formatMessage({
+                          id: "page.main.components.token.wrong-viewing-key-error",
+                        });
+                      }
+
+                      return viewToken.error.message;
+                    })()}
+                  >
                     <ErrorIcon size="1rem" />
                   </Tooltip>
                 </Box>

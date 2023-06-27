@@ -14,6 +14,7 @@ import { ColorPalette } from "../../../styles";
 import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
 import { Columns } from "../../column";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useLanguage } from "../../../languages";
 
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
@@ -301,6 +302,7 @@ const MaxButton: FunctionComponent<{
   amountConfig: IAmountConfig;
 }> = observer(({ amountConfig }) => {
   const isMax = amountConfig.fraction === 1;
+  const language = useLanguage();
 
   return (
     <Box
@@ -333,7 +335,15 @@ const MaxButton: FunctionComponent<{
         }
       }}
     >
-      <Button1>
+      <Button1
+        style={
+          language.language === "ko"
+            ? {
+                fontSize: "0.85rem",
+              }
+            : undefined
+        }
+      >
         <FormattedMessage id="components.input.amount-input.max-button" />
       </Button1>
     </Box>
