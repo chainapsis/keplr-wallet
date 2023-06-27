@@ -256,19 +256,19 @@ export const App: FunctionComponent = observer(() => {
           account
             .getKeplr()
             .then((keplr) =>
-              keplr?.getSecret20ViewingKeyOrPermit(
+              keplr?.getSecret20QueryAuthorization(
                 chainInfo.chainId,
                 "secret1k6u0cy4feepm6pehnz804zmwakuwdapm69tuc4"
               )
             )
             .then((result) => {
               console.log(
-                `getSecret20ViewingKeyOrPermit: ${JSON.stringify(result)}`
+                `getSecret20QueryAuthorization: ${JSON.stringify(result)}`
               );
             });
         }}
       >
-        Test getSecret20ViewingKeyOrPermit
+        Test getSecret20QueryAuthorization
       </button>
     </div>
   );

@@ -148,7 +148,7 @@ export class MockKeplr implements Keplr {
     throw new Error("Not implemented");
   }
 
-  getSecret20ViewingKeyOrPermit(
+  getSecret20QueryAuthorization(
     _chainId: string,
     _contractAddress: string
   ): Promise<{ permit: any | undefined; viewing_key: string | undefined }> {

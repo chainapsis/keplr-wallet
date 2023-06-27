@@ -472,7 +472,7 @@ export class KeplrWalletConnectV1 implements Keplr {
     )[0];
   }
 
-  async getSecret20ViewingKeyOrPermit(
+  async getSecret20QueryAuthorization(
     chainId: string,
     contractAddress: string
   ): Promise<{ permit: any | undefined; viewing_key: string | undefined }> {
