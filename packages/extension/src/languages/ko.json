@@ -270,7 +270,7 @@
   "page.setting.token.add.symbol-label": "토큰 기호",
   "page.setting.token.add.decimal-label": "토큰 소수점",
   "page.setting.token.add.viewing-key-info-title": "뷰잉키가 이미 있습니다.",
-  "page.setting.token.add.viewing-key-info-paragraph": "이미 뷰잉키를 알고있는 사용자는 뷰잉키를 사용하여 토큰을 추가할 수 있습니다.",
+  "page.setting.token.add.viewing-key-info-paragraph": "이미 뷰잉키를 알고있는 경우, 해당 뷰잉키를 사용하여 토큰을 추가할 수 있습니다.",
   "page.setting.token.add.viewing-key-label": "뷰잉키",
 
   "page.setting.contacts.list.add-new-button": "새 연락처 추가",
