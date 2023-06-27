@@ -275,3 +275,24 @@ export const IBCXItem: Item = {
   key: "ibcx",
   component: IBCXImage,
 };
+
+const IONDaoImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+  const style = useStyle();
+
+  return (
+    <WebpageImageButton
+      name="ION DAO"
+      source={require("../../assets/image/webpage/iondao.png")}
+      overlayStyle={style.flatten(["opacity-50"])}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.IONDao", {});
+      }}
+    />
+  );
+};
+
+export const IONDaoItem: Item = {
+  key: "ION DAO",
+  component: IONDaoImage,
+};

@@ -10,3 +10,4 @@ export * from "./injective";
 export * from "./pstake";
 export * from "./streamswap";
 export * from "./ibcx";
+export * from "./ion-dao";

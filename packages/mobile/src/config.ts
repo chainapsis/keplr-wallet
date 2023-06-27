@@ -1234,40 +1234,6 @@ export const EmbedChainInfos: AppChainInfo[] = [
     hideInUI: true,
   },
   {
-    rpc: "https://mainnet-node.like.co/rpc",
-    rest: "https://mainnet-node.like.co",
-    chainId: "likecoin-mainnet-2",
-    chainName: "LikeCoin",
-    stakeCurrency: {
-      coinDenom: "LIKE",
-      coinMinimalDenom: "nanolike",
-      coinDecimals: 9,
-      coinGeckoId: "likecoin",
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config("like"),
-    currencies: [
-      {
-        coinDenom: "LIKE",
-        coinMinimalDenom: "nanolike",
-        coinDecimals: 9,
-        coinGeckoId: "likecoin",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "LIKE",
-        coinMinimalDenom: "nanolike",
-        coinDecimals: 9,
-        coinGeckoId: "likecoin",
-      },
-    ],
-    features: ["ibc-transfer", "ibc-go"],
-    hideInUI: true,
-  },
-  {
     rpc: "https://rpc.bitcanna.io",
     rest: "https://lcd.bitcanna.io",
     chainId: "bitcanna-1",
@@ -2321,6 +2287,113 @@ export const EmbedChainInfos: AppChainInfo[] = [
     features: ["cosmwasm"],
     chainSymbolImageUrl:
       "https://asset-icons.s3.us-west-2.amazonaws.com/white/neutron.png",
+  },
+  {
+    rpc: "https://rpc-gitopia.keplr.app",
+    rest: "https://lcd-gitopia.keplr.app",
+    chainId: "gitopia",
+    chainName: "Gitopia",
+    stakeCurrency: {
+      coinDenom: "LORE",
+      coinMinimalDenom: "ulore",
+      coinDecimals: 6,
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/gitopia.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "gitopia",
+      bech32PrefixAccPub: "gitopiapub",
+      bech32PrefixValAddr: "gitopiavaloper",
+      bech32PrefixValPub: "gitopiavaloperpub",
+      bech32PrefixConsAddr: "gitopiavalcons",
+      bech32PrefixConsPub: "gitopiavalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LORE",
+        coinMinimalDenom: "ulore",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/gitopia.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LORE",
+        coinMinimalDenom: "ulore",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/gitopia.png",
+        gasPriceStep: {
+          low: 0.0012,
+          average: 0.0016,
+          high: 0.0024,
+        },
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/gitopia.png",
+  },
+  {
+    rpc: "https://rpc-likecoin.keplr.app",
+    rest: "https://lcd-likecoin.keplr.app",
+    chainId: "likecoin-mainnet-2",
+    chainName: "Likecoin",
+    stakeCurrency: {
+      coinDenom: "LIKE",
+      coinMinimalDenom: "nanolike",
+      coinDecimals: 9,
+      coinGeckoId: "likecoin",
+      coinImageUrl:
+        "https://asset-icons.s3.us-west-2.amazonaws.com/white/likecoin.png",
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "like",
+      bech32PrefixAccPub: "likepub",
+      bech32PrefixValAddr: "likevaloper",
+      bech32PrefixValPub: "likevaloperpub",
+      bech32PrefixConsAddr: "likevalcons",
+      bech32PrefixConsPub: "likevalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "LIKE",
+        coinMinimalDenom: "nanolike",
+        coinDecimals: 9,
+        coinGeckoId: "likecoin",
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/likecoin.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "LIKE",
+        coinMinimalDenom: "nanolike",
+        coinDecimals: 9,
+        coinGeckoId: "likecoin",
+        coinImageUrl:
+          "https://asset-icons.s3.us-west-2.amazonaws.com/white/likecoin.png",
+        gasPriceStep: {
+          low: 1,
+          average: 2,
+          high: 3,
+        },
+      },
+    ],
+    features: [],
+    chainSymbolImageUrl:
+      "https://asset-icons.s3.us-west-2.amazonaws.com/white/likecoin.png",
+    txExplorer: {
+      name: "Mintscan",
+      txUrl: "https://www.mintscan.io/likecoin/txs/{txHash}",
+    },
   },
 ];
 

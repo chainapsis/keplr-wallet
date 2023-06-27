@@ -37,6 +37,7 @@ init(
     "https://cosmos.pstake.finance",
     "https://app.streamswap.io",
     "https://index.ion.wtf",
+    "https://ion.wtf",
   ],
   ["https://wallet.keplr.app"],
   CommunityChainInfoRepo,
