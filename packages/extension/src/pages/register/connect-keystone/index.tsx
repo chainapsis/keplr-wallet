@@ -37,7 +37,10 @@ export const ConnectKeystoneScene: FunctionComponent<{
   });
 
   const handleScan = (ur: { type: string; cbor: string }) => {
-    const accounts = KeystoneSDK.parseMultiAccounts(
+    const sdk = new KeystoneSDK({
+      origin: "Keplr Extension",
+    });
+    const accounts = sdk.parseMultiAccounts(
       new UR(Buffer.from(ur.cbor, "hex"), ur.type)
     );
     sceneTransition.replaceAll("finalize-key", {
