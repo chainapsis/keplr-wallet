@@ -6,6 +6,8 @@ import autoCompoundIcon from "@assets/icon/auto-compound.png";
 import closeIcon from "@assets/icon/close-grey.png";
 import restartIcon from "@assets/icon/undo.png";
 
+export const DEV_AUTH_CLIENT_ID = process.env["DEV_AUTH_CLIENT_ID"] || "";
+export const PROD_AUTH_CLIENT_ID = process.env["PROD_AUTH_CLIENT_ID"] || "";
 export const PROD_AMPLITUDE_API_KEY =
   process.env["PROD_AMPLITUDE_API_KEY"] || "";
 export const DEV_AMPLITUDE_API_KEY = process.env["DEV_AMPLITUDE_API_KEY"] || "";

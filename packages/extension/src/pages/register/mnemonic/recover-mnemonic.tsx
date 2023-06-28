@@ -26,7 +26,7 @@ import classnames from "classnames";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
-function isPrivateKey(str: string): boolean {
+export function isPrivateKey(str: string): boolean {
   if (str.startsWith("0x")) {
     return true;
   }

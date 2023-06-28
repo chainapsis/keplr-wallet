@@ -30,6 +30,12 @@ export class RegisterConfig {
   protected _type: string = "";
 
   @observable
+  protected _privateKey: string = "";
+
+  @observable
+  protected _email: string = "";
+
+  @observable
   protected _isFinalized: boolean = false;
 
   constructor(
@@ -54,6 +60,14 @@ export class RegisterConfig {
     return this._isLoading;
   }
 
+  get privateKey(): string {
+    return this._privateKey;
+  }
+
+  get email(): string {
+    return this._email;
+  }
+
   get isFinalized(): boolean {
     return this._isFinalized;
   }
@@ -74,6 +88,16 @@ export class RegisterConfig {
   @action
   setType(type: string) {
     this._type = type;
+  }
+
+  @action
+  setPrivateKey(privateKey: string) {
+    this._privateKey = privateKey;
+  }
+
+  @action
+  setEmail(email: string) {
+    this._email = email;
   }
 
   get type(): string {

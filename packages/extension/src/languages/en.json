@@ -399,7 +399,6 @@
   "notification.topic.header-message": "Select the topics you are interested in receiving notifications for",
   "notification.review.header-message": "You just set up your Notifications!",
   "notification.item.flag-message": "Thanks for flagging this. We'll take a look at it",
-
   "main.proposals.title": "Proposals",
   "main.proposals.paragraph": "View and vote on proposals",
   "main.proposals.button": "View",
@@ -408,7 +407,8 @@
   "proposal.change.vote": "Change Vote",
   "proposal.return.home": "Return Home",
   "proposal.view.more": "View more in Block Explorer ",
-
   "search.no-result-found": "No results found.",
-  "search.refine.search": "Please refine your search."
+  "search.refine.search": "Please refine your search.",
+  "sign.in.google": "Continue with Google",
+  "sign.in.auth-powered": "Powered by Web3Auth"
 }

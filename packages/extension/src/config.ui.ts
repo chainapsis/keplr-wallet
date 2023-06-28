@@ -1,14 +1,19 @@
 // Seperate shared config from UI config to prevent code mixup between UI and background process code.
 import { RegisterOption } from "@keplr-wallet/hooks";
-import { DEV_AMPLITUDE_API_KEY, PROD_AMPLITUDE_API_KEY } from "./config.ui.var";
+import {
+  DEV_AMPLITUDE_API_KEY,
+  DEV_AUTH_CLIENT_ID,
+  PROD_AMPLITUDE_API_KEY,
+  PROD_AUTH_CLIENT_ID,
+} from "./config.ui.var";
 import {
   IntlMessages,
   LanguageToFiatCurrency as TypeLanguageToFiatCurrency,
 } from "./languages";
 import { FiatCurrency } from "@keplr-wallet/types";
 import {
-  ADDITIONAL_SIGN_IN_PREPEND,
   ADDITIONAL_INTL_MESSAGES,
+  ADDITIONAL_SIGN_IN_PREPEND,
 } from "alt-sign-in";
 
 export const KeplrExtMoonPayAPIKey =
@@ -117,6 +122,11 @@ export const AmplitudeApiKey =
   process.env.NODE_ENV === "production"
     ? PROD_AMPLITUDE_API_KEY
     : DEV_AMPLITUDE_API_KEY;
+
+export const AuthApiKey =
+  process.env.NODE_ENV === "production"
+    ? PROD_AUTH_CLIENT_ID
+    : DEV_AUTH_CLIENT_ID;
 
 export const ICNSInfo = {
   chainId: "osmosis-1",

@@ -26,7 +26,10 @@ const envDefaults = {
     "https://api.coingecko.com/api/v3",
   KEPLR_EXT_COINGECKO_GETPRICE:
     process.env["KEPLR_EXT_COINGECKO_GETPRICE"] || "/simple/price",
+  DEV_AUTH_CLIENT_ID: process.env["DEV_AUTH_CLIENT_ID"] || "",
+  PROD_AUTH_CLIENT_ID: process.env["PROD_AUTH_CLIENT_ID"] || "",
 };
+
 const commonResolve = () => ({
   extensions: [".ts", ".tsx", ".js", ".jsx", ".css", ".scss", ".svg", ".wasm"],
   alias: {
@@ -40,6 +43,7 @@ const commonResolve = () => ({
     "@utils": path.resolve(__dirname, "src/utils"),
   },
 });
+
 const altResolve = () => {
   const p = path.resolve(__dirname, "./src/keplr-torus-signin/index.ts");
 
@@ -56,6 +60,7 @@ const altResolve = () => {
 
   return {};
 };
+
 const sassRule = {
   test: /(\.s?css)|(\.sass)$/,
   oneOf: [
@@ -95,23 +100,20 @@ const sassRule = {
     },
   ],
 };
+
 const tsRule = { test: /\.tsx?$/, loader: "ts-loader" };
+
 const wasmRule = {
   test: /\.wasm$/,
   type: "webassembly/async", // or 'webassembly/sync' for sync modules
 };
+
 const fileRule = {
-  test: /\.(svg|png|jpe?g|gif|woff|woff2|eot|ttf)$/i,
-  use: [
-    {
-      loader: "file-loader",
-      options: {
-        name: "[name].[ext]",
-        publicPath: "assets",
-        outputPath: "assets",
-      },
-    },
-  ],
+  test: /\.(svg|png|webm|mp4|jpe?g|gif|woff|woff2|eot|ttf)$/i,
+  type: "asset/resource",
+  generator: {
+    filename: "assets/[name][ext]",
+  },
 };
 
 const extensionConfig = () => {
@@ -177,6 +179,13 @@ const extensionConfig = () => {
         crypto: require.resolve("crypto-browserify"),
         stream: require.resolve("stream-browserify"),
         path: require.resolve("path-browserify"),
+        http: require.resolve("stream-http"),
+        https: require.resolve("https-browserify"),
+        zlib: require.resolve("browserify-zlib"),
+        fs: false,
+        assert: require.resolve("assert"),
+        os: require.resolve("os-browserify"),
+        url: require.resolve("url"),
       },
     },
     module: {
@@ -253,7 +262,7 @@ const extensionConfig = () => {
         process: "process/browser",
         Buffer: ["buffer", "Buffer"],
       }),
-      new webpack.IgnorePlugin({ resourceRegExp: /^(fs|process)$/ }),
+      new webpack.IgnorePlugin({ resourceRegExp: /^(process)$/ }),
     ],
     experiments: {
       asyncWebAssembly: true,
