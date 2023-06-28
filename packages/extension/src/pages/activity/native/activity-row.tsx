@@ -8,7 +8,7 @@ import cancel from "@assets/icon/cancel.png";
 import React from "react";
 import { formatActivityHash } from "@utils/format";
 import { AppCurrency } from "@keplr-wallet/types";
-import { useStore } from "../../stores";
+import { useStore } from "../../../stores";
 
 const getActivityIcon = (type: string): string => {
   switch (type) {

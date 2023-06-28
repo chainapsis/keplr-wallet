@@ -1,16 +1,18 @@
 import { gql } from "@apollo/client";
-import { blocks, transactions } from "./activity-queries";
+import { blocks, govProposals, transactions } from "./activity-queries";
 import { doradoActivityClient, fetchhubActivityClient } from "./client";
 import { CHAIN_ID_DORADO } from "../config.ui.var";
 
 export const fetchTransactions = async (
   chainId: string,
   after: string,
-  address: string
+  address: string,
+  filter: string[]
 ) => {
   const variables: any = {
     after,
     address,
+    filter,
   };
 
   const activityClient =
@@ -27,6 +29,35 @@ export const fetchTransactions = async (
     return null;
   }
   return data.account?.nativeBalanceChanges || null;
+};
+
+export const fetchGovProposalTransactions = async (
+  chainId: string,
+  after: string,
+  address: string,
+  filter: string[]
+) => {
+  const variables: any = {
+    after,
+    address,
+    filter,
+  };
+
+  const activityClient =
+    chainId === CHAIN_ID_DORADO ? doradoActivityClient : fetchhubActivityClient;
+
+  const { data, errors } = await activityClient.query({
+    query: gql(govProposals),
+    fetchPolicy: "no-cache",
+    variables,
+  });
+
+  if (errors) {
+    console.log("errors", errors);
+    return null;
+  }
+
+  return data.govProposalVotes || null;
 };
 
 export const fetchLatestBlock = async (chainId: string) => {

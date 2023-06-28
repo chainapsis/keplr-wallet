@@ -1,21 +1,9 @@
-.activityRow {
-  color: #808da0;
-  font-size: small;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
 .block {
   font-weight: bold;
   display: flex;
   color: black;
   align-items: center;
   font-size: 15px;
-}
-
-.activityRow:hover {
-  background: #f0f0f0;
 }
 
 .container {
@@ -32,25 +20,10 @@
   padding-bottom: 16px;
 }
 
-.activityCol {
-  font-size: small;
-  display: flex;
-  align-items: center;
-  margin: 3px;
-}
-
-.negative {
-  color: red;
-}
-
-.positive {
-  color: green;
-}
-
 .tabContainer {
   display: flex;
   flex-direction: row;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .tab {
@@ -68,4 +41,16 @@
 .tab.active {
   border-bottom: 2px solid #d43bf6;
   color: #d43bf6;
+}
+
+.activityMessage {
+  color: #808da0;
+  font-size: small;
+  text-align: center;
+  height: 50%;
+  width: 85%;
+  display: flex;
+  position: fixed;
+  align-items: center;
+  justify-content: center;
 }
