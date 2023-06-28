@@ -428,6 +428,13 @@ export const EnableChainsScene: FunctionComponent<{
         });
       }
 
+      if (keyType === "keystone") {
+        chainInfos = chainInfos.filter((chainInfo) => {
+          const account = accountStore.getAccount(chainInfo.chainId);
+          return !!account.bech32Address;
+        });
+      }
+
       const trimSearch = search.trim();
 
       if (!trimSearch) {
