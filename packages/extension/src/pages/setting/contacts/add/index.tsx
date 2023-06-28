@@ -55,7 +55,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
   useEffect(() => {
     if (!paramChainId) {
-      throw new Error(intl.formatMessage({ id: "error.chain-id-required" }));
+      throw new Error(`Param "chainId" is required`);
     }
 
     setChainId(paramChainId);

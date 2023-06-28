@@ -7,7 +7,7 @@ import { Stack } from "../../../../../../components/stack";
 import styled from "styled-components";
 import { PuzzleIcon } from "../puzzle-icon";
 import { Gutter } from "../../../../../../components/gutter";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Title: styled.div`
@@ -22,6 +22,8 @@ const Styles = {
 };
 
 export const PinView: FunctionComponent = () => {
+  const intl = useIntl();
+
   return (
     <Box
       position="absolute"
@@ -47,23 +49,31 @@ export const PinView: FunctionComponent = () => {
           <Gutter size="0.25rem" />
 
           <Columns sum={1} alignY="center" gutter="0.25rem">
-            <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.paragraph-1" />
-            </Styles.Paragraph>
-            <PuzzleIcon size="1rem" />
-            <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.button-text-1" />
-            </Styles.Paragraph>
+            {intl.formatMessage(
+              {
+                id: "pages.register.pages.welcome.pin-view.paragraph-1",
+              },
+              {
+                p: (...chunks: any) => (
+                  <Styles.Paragraph>{chunks}</Styles.Paragraph>
+                ),
+                icon: <PuzzleIcon size="1rem" />,
+              }
+            )}
           </Columns>
 
           <Columns sum={1} alignY="center" gutter="0.25rem">
-            <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.paragraph-2" />
-            </Styles.Paragraph>
-            <PinIcon size="1rem" />
-            <Styles.Paragraph>
-              <FormattedMessage id="pages.register.pages.welcome.pin-view.button-text-2" />
-            </Styles.Paragraph>
+            {intl.formatMessage(
+              {
+                id: "pages.register.pages.welcome.pin-view.paragraph-2",
+              },
+              {
+                p: (...chunks: any) => (
+                  <Styles.Paragraph>{chunks}</Styles.Paragraph>
+                ),
+                icon: <PinIcon size="1rem" />,
+              }
+            )}
           </Columns>
         </Stack>
       </Columns>

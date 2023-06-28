@@ -98,12 +98,7 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
     } else if (wordsType === "24words") {
       Mnemonic.generateSeed(rng, 256).then((str) => setWords(str.split(" ")));
     } else {
-      throw new Error(
-        intl.formatMessage(
-          { id: "error.unknown-word-type" },
-          { type: wordsType }
-        )
-      );
+      throw new Error(`Unknown words type: ${wordsType}`);
     }
   }, [wordsType]);
 

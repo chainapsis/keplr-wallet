@@ -50,11 +50,7 @@ export const RegisterNamePasswordScene: FunctionComponent<{
         <form
           onSubmit={form.handleSubmit((data) => {
             if (mnemonic && privateKey) {
-              throw new Error(
-                intl.formatMessage({
-                  id: "error.mnemonic-private-key-both-provided",
-                })
-              );
+              throw new Error("Both mnemonic and private key are provided");
             }
 
             if (mnemonic) {

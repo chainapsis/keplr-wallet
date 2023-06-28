@@ -119,14 +119,10 @@ export const LedgerGuideBox: FunctionComponent<{
 
                 const appData = data.keyInsensitive;
                 if (!appData) {
-                  throw new Error(
-                    intl.formatMessage({ id: "error.invalid-ledger-app-data" })
-                  );
+                  throw new Error("Invalid ledger app data");
                 }
                 if (typeof appData !== "object") {
-                  throw new Error(
-                    intl.formatMessage({ id: "error.invalid-ledger-app-data" })
-                  );
+                  throw new Error("Invalid ledger app data");
                 }
                 if (appData["Terra"]) {
                   app = "Terra";

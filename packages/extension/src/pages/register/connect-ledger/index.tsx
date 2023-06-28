@@ -59,9 +59,7 @@ export const ConnectLedgerScene: FunctionComponent<{
     const intl = useIntl();
 
     if (propApp !== "Cosmos" && propApp !== "Terra" && propApp !== "Ethereum") {
-      throw new Error(
-        intl.formatMessage({ id: "error.unsupported-app" }, { app: propApp })
-      );
+      throw new Error(`Unsupported app: ${propApp}`);
     }
 
     const sceneTransition = useSceneTransition();
@@ -188,7 +186,7 @@ export const ConnectLedgerScene: FunctionComponent<{
       try {
         const version = await app.getVersion();
         if (version.device_locked) {
-          throw new Error(intl.formatMessage({ id: "error.device-is-locked" }));
+          throw new Error("Device is locked");
         }
 
         // XXX: You must not check "error_message".

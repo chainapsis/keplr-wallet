@@ -74,17 +74,23 @@ export const SetBip44PathCard: FunctionComponent<{
           <FormattedMessage id="pages.register.components.bip-44-path.paragraph-lost" />
         </li>
         <li>
-          <FormattedMessage id="pages.register.components.bip-44-path.paragraph-unfamiliar" />
-          <span
-            style={{
-              fontWeight: 700,
-              textDecoration: "underline",
-              cursor: "pointer",
+          <FormattedMessage
+            id="pages.register.components.bip-44-path.paragraph-unfamiliar"
+            values={{
+              reset: (...chunks: any) => (
+                <span
+                  style={{
+                    fontWeight: 700,
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                  }}
+                  onClick={onClickReset}
+                >
+                  {chunks}
+                </span>
+              ),
             }}
-            onClick={onClickReset}
-          >
-            <FormattedMessage id="pages.register.components.bip-44-path.reset" />
-          </span>
+          />
         </li>
       </ul>
       <Gutter size="1.5rem" />

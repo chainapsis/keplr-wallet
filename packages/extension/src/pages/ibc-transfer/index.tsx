@@ -70,7 +70,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
     "native",
     () => {
       if (!ibcTransferConfigs.channelConfig.channel) {
-        throw new Error(intl.formatMessage({ id: "error.channel-not-set" }));
+        throw new Error("Channel not set yet");
       }
 
       // Prefer not to use the gas config or fee config,
@@ -84,9 +84,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
           "loading-block" ||
         ibcTransferConfigs.recipientConfig.uiProperties.error != null
       ) {
-        throw new Error(
-          intl.formatMessage({ id: "error.not-ready-to-simulate-tx" })
-        );
+        throw new Error("Not ready to simulate tx");
       }
 
       return accountInfo.cosmos.makeIBCTransferTx(

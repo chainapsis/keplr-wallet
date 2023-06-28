@@ -82,14 +82,11 @@ export const AddressBookModal: FunctionComponent<{
                 if (res.status === "fulfilled") {
                   return res.value;
                 }
-                throw new Error(
-                  intl.formatMessage({ id: "error.unexpected-status" })
-                );
+                throw new Error("Unexpected status");
               })
           );
         });
     }, [
-      intl,
       keyRingStore.selectedKeyInfo?.id,
       permitSelfKeyInfo,
       recipientConfig.chainId,

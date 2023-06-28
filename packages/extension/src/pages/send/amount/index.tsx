@@ -128,9 +128,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     gasSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
-        throw new Error(
-          intl.formatMessage({ id: "error.send-currency-not-set" })
-        );
+        throw new Error("Send currency not set");
       }
 
       // Prefer not to use the gas config or fee config,
@@ -144,9 +142,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           "loading-block" ||
         sendConfigs.recipientConfig.uiProperties.error != null
       ) {
-        throw new Error(
-          intl.formatMessage({ id: "error.not-ready-to-simulate-tx" })
-        );
+        throw new Error("Not ready to simulate tx");
       }
 
       const denomHelper = new DenomHelper(
@@ -154,11 +150,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       );
       // I don't know why, but simulation does not work for secret20
       if (denomHelper.type === "secret20") {
-        throw new Error(
-          intl.formatMessage({
-            id: "error.simulating-secret-wasm-not-supported",
-          })
-        );
+        throw new Error("Simulating secret wasm not supported");
       }
 
       return account.makeSendTokenTx(

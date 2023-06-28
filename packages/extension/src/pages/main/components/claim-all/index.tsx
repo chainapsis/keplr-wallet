@@ -383,7 +383,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   response.data.message.includes("invalid empty tx")
                 ) {
                   state.setFailedReason(
-                    new Error("cosmos-sdk 버전이 오래되서 지원되지 않음")
+                    new Error(
+                      intl.formatMessage({
+                        id: "error.outdated-cosmos-sdk",
+                      })
+                    )
                   );
                   return;
                 }

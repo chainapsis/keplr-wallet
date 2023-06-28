@@ -129,10 +129,14 @@ export const CommunityInfoView: FunctionComponent<{
       <Box paddingX="2.5rem">
         <Skeleton isNotReady={isNotReady}>
           <Styles.Paragraph>
-            <Styles.Bold>{origin}</Styles.Bold>
-            <FormattedMessage id="page.suggest-chain.community-info-view.paragraph-1" />
-            <Styles.Bold>{chainInfo?.chainId}</Styles.Bold>
-            <FormattedMessage id="page.suggest-chain.community-info-view.paragraph-2" />
+            <FormattedMessage
+              id="page.suggest-chain.community-info-view.paragraph"
+              values={{
+                b: (...chunks: any) => <b>{chunks}</b>,
+                origin,
+                chainId: chainInfo?.chainId,
+              }}
+            />
           </Styles.Paragraph>
         </Skeleton>
       </Box>

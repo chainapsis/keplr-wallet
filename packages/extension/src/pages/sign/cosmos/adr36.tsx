@@ -33,9 +33,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     signInteractionStore.waitingData &&
     !signInteractionStore.waitingData.data.signDocWrapper.isADR36SignDoc
   ) {
-    throw new Error(
-      intl.formatMessage({ id: "error.sign-doc-is-not-for-adr36" })
-    );
+    throw new Error("Sign doc is not for adr36");
   }
 
   const signDocWrapper = signInteractionStore.waitingData?.data.signDocWrapper;
@@ -57,16 +55,12 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     }
 
     if (signDocWrapper.aminoSignDoc.msgs.length !== 1) {
-      throw new Error(
-        intl.formatMessage({ id: "error.sign-doc-is-improper-adr36" })
-      );
+      throw new Error("Sign doc is improper ADR-36");
     }
 
     const msg = signDocWrapper.aminoSignDoc.msgs[0];
     if (msg.type !== "sign/MsgSignData") {
-      throw new Error(
-        intl.formatMessage({ id: "error.sign-doc-is-improper-adr36" })
-      );
+      throw new Error("Sign doc is improper ADR-36");
     }
 
     if (isADR36WithString) {
@@ -126,9 +120,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 ).bech32Config.bech32PrefixAccAddr
               )
             ) {
-              throw new Error(
-                intl.formatMessage({ id: "error.invalid-sign-doc-for-adr36" })
-              );
+              throw new Error("Invalid sign doc for adr36");
             }
 
             if (signInteractionStore.waitingData.data.keyType === "ledger") {

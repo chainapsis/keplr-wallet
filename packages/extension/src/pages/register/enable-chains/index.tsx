@@ -112,11 +112,11 @@ export const EnableChainsScene: FunctionComponent<{
         (keyInfo) => keyInfo.id === vaultId
       );
       if (!keyInfo) {
-        throw new Error(intl.formatMessage({ id: "error.key-info-not-found" }));
+        throw new Error("KeyInfo not found");
       }
 
       return keyInfo.type;
-    }, [intl, keyRingStore.keyInfos, vaultId]);
+    }, [keyRingStore.keyInfos, vaultId]);
 
     const [candidateAddresses, setCandidateAddresses] = useState<
       {
@@ -834,9 +834,7 @@ export const EnableChainsScene: FunctionComponent<{
                       (keyInfo) => keyInfo.id === vaultId
                     );
                     if (!keyInfo) {
-                      throw new Error(
-                        intl.formatMessage({ id: "error.key-info-not-found" })
-                      );
+                      throw new Error("KeyInfo not found");
                     }
                     if (keyInfo.insensitive["Ethereum"]) {
                       await chainStore.enableChainInfoInUI(
@@ -846,11 +844,7 @@ export const EnableChainsScene: FunctionComponent<{
                     } else {
                       const bip44Path = keyInfo.insensitive["bip44Path"];
                       if (!bip44Path) {
-                        throw new Error(
-                          intl.formatMessage({
-                            id: "error.bip44-path-not-found",
-                          })
-                        );
+                        throw new Error("bip44Path not found");
                       }
                       sceneTransition.replaceAll("connect-ledger", {
                         name: "",

@@ -87,7 +87,7 @@ export const CosmosTxView: FunctionComponent<{
     const data = interactionData;
     if (data.data.chainId !== data.data.signDocWrapper.chainId) {
       // Validate the requested chain id and the chain id in the sign doc are same.
-      throw new Error(intl.formatMessage({ id: "error.chain-id-unmatched" }));
+      throw new Error("Chain id unmatched");
     }
     signDocHelper.setSignDocWrapper(data.data.signDocWrapper);
     gasConfig.setValue(data.data.signDocWrapper.gas);

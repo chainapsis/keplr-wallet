@@ -60,7 +60,7 @@ export const TokenFoundModal: FunctionComponent<{
 
   const buttonClicked = async () => {
     if (!keyRingStore.selectedKeyInfo) {
-      throw new Error(intl.formatMessage({ id: "error.no-selected-keyring" }));
+      throw new Error("Unexpected error: no selected key ring");
     }
 
     const enables = checkedChainIdentifiers
