@@ -28,6 +28,8 @@ export const WebpageImageButton: FunctionComponent<{
   overlayStyle?: ViewStyle;
   nameAppend?: React.ReactElement;
   overrideInner?: React.ReactElement;
+
+  imageAlignCenter?: boolean;
 }> = ({
   name,
   source,
@@ -36,6 +38,7 @@ export const WebpageImageButton: FunctionComponent<{
   overlayStyle,
   nameAppend,
   overrideInner,
+  imageAlignCenter,
 }) => {
   const style = useStyle();
 
@@ -106,7 +109,12 @@ export const WebpageImageButton: FunctionComponent<{
       ])}
     >
       {source ? (
-        <View style={style.flatten(["absolute-fill", "items-end"])}>
+        <View
+          style={style.flatten(
+            ["absolute-fill", "items-end"],
+            [imageAlignCenter && "items-center"]
+          )}
+        >
           <Image
             ref={imageRef}
             style={

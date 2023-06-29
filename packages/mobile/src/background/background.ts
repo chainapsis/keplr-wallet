@@ -38,6 +38,7 @@ init(
     "https://app.streamswap.io",
     "https://index.ion.wtf",
     "https://ion.wtf",
+    "https://app.calculated.fi",
   ],
   ["https://wallet.keplr.app"],
   CommunityChainInfoRepo,

@@ -296,3 +296,23 @@ export const IONDaoItem: Item = {
   key: "ION DAO",
   component: IONDaoImage,
 };
+
+const CalcFiImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="Calc Finance"
+      source={require("../../assets/image/webpage/calc.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.Calc", {});
+      }}
+      imageAlignCenter={true}
+    />
+  );
+};
+
+export const CalcFiItem: Item = {
+  key: "CalcFi",
+  component: CalcFiImage,
+};

@@ -20,6 +20,7 @@ import {
   StreamSwapItem,
   IBCXItem,
   IONDaoItem,
+  CalcFiItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 
@@ -44,6 +45,7 @@ const WebpagesPerLabel: {
       StreamSwapItem,
       IBCXItem,
       IONDaoItem,
+      CalcFiItem,
     ],
   },
   {
@@ -59,6 +61,7 @@ const WebpagesPerLabel: {
       PStakeItem,
       StreamSwapItem,
       IBCXItem,
+      CalcFiItem,
     ],
   },
   {
