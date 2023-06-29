@@ -1,13 +1,15 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, ReactChild } from "react";
 import { useRegisterHeader } from "../components/header";
 import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../components/transition";
 import { RegisterSceneBox } from "../components/register-scene-box";
-import { AnimatedQRScanner, Purpose } from "@keystonehq/animated-qr";
-import KeystoneSDK, { UR } from "@keystonehq/keystone-sdk";
+import { Stack } from "../../../components/stack";
+import { Box } from "../../../components/box";
+import { Button } from "../../../components/button";
+import { ColorPalette } from "../../../styles";
 
 export const ConnectKeystoneScene: FunctionComponent<{
   name: string;
@@ -22,53 +24,118 @@ export const ConnectKeystoneScene: FunctionComponent<{
   stepTotal: number;
 }> = observer(({ name, password, stepPrevious, stepTotal }) => {
   const sceneTransition = useSceneTransition();
-
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Please connect your Hardware wallet",
-        paragraphs: ["You need to scan the QR code displayed on Keystone"],
+        title: "Please Connect Your Hardware Wallet",
+        paragraphs: [],
         stepCurrent: stepPrevious + 1,
         stepTotal: stepTotal,
       });
     },
   });
 
-  const handleScan = (ur: { type: string; cbor: string }) => {
-    const sdk = new KeystoneSDK({
-      origin: "Keplr Extension",
-    });
-    const accounts = sdk.parseMultiAccounts(
-      new UR(Buffer.from(ur.cbor, "hex"), ur.type)
-    );
-    sceneTransition.replaceAll("finalize-key", {
+  const sync = () => {
+    sceneTransition.push("scan-keystone", {
       name,
       password,
-      keystone: accounts,
       stepPrevious: stepPrevious + 1,
       stepTotal,
     });
   };
 
-  const handleError = (err: string) => {
-    console.error(err);
-  };
-
   return (
-    <RegisterSceneBox>
-      <p>Scan</p>
-      <AnimatedQRScanner
-        purpose={Purpose.COSMOS_SYNC}
-        handleScan={handleScan}
-        handleError={handleError}
-        options={{
-          width: 300,
-          height: 300,
-          blur: false,
+    <RegisterSceneBox style={{ alignItems: "center" }}>
+      <Stack gutter="1.5rem">
+        <Step
+          num="1"
+          text={
+            <span>
+              Tap “
+              <span style={{ color: ColorPalette.white }}>
+                Connect Software Wallet
+              </span>
+              ” at the bottom left corner on the Keystone device.
+            </span>
+          }
+        />
+        <Step
+          num="2"
+          text={
+            <span>
+              Select “
+              <span style={{ color: ColorPalette.white }}>Keplr Wallet</span>”.
+            </span>
+          }
+        />
+        <Step
+          num="3"
+          text={
+            <span>
+              Click on the “
+              <span style={{ color: ColorPalette.white }}>Sync Keystone</span>”
+              button below to scan the QR code displayed on the Keystone device.
+            </span>
+          }
+        />
+      </Stack>
+      <a
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          marginTop: "2rem",
+          color: ColorPalette.white,
+          textDecoration: "none",
+          fontSize: "1rem",
         }}
+      >
+        Click here to view detailed tutorial
+      </a>
+      <Button
+        onClick={sync}
+        text="Sync Keystone"
+        style={{ width: "22rem", marginTop: "3.5rem" }}
       />
     </RegisterSceneBox>
   );
 });
+
+const Step: FunctionComponent<{
+  num: string;
+  text: ReactChild;
+}> = ({ num, text }) => {
+  return (
+    <Box
+      backgroundColor={ColorPalette["gray-500"]}
+      borderRadius="0.5rem"
+      height="6.5rem"
+      paddingX="2.06rem"
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
+      <Box
+        style={{
+          fontSize: "1.25rem",
+          whiteSpace: "nowrap",
+          marginRight: "3rem",
+        }}
+      >
+        Step {num}
+      </Box>
+      <Box
+        style={{
+          fontSize: "1rem",
+          lineHeight: "1.5rem",
+          color: ColorPalette["gray-200"],
+        }}
+      >
+        {text}
+      </Box>
+    </Box>
+  );
+};

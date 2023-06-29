@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import {
   useSceneEvents,
   useSceneTransition,
@@ -12,10 +12,13 @@ import { RegisterH4 } from "../components/typography";
 import { Box } from "../../../components/box";
 import { Image } from "../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
+import { InformationPlainIcon, KeystoneIcon } from "../../../components/icon";
+import styled from "styled-components";
 import { useTheme } from "styled-components";
 
 export const ConnectHardwareWalletScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
+  const [isKeystoneInfoShow, setIsKeystoneInfoShow] = useState(false);
 
   const intl = useIntl();
   const theme = useTheme();
@@ -35,20 +38,33 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
     },
   });
 
+  const onKeystoneInformationClick: React.MouseEventHandler<HTMLSpanElement> = (
+    e
+  ) => {
+    e.stopPropagation();
+    setIsKeystoneInfoShow(!isKeystoneInfoShow);
+  };
+
   return (
     <RegisterSceneBox>
-      <RegisterH4
-        color={
-          theme.mode === "light"
-            ? ColorPalette["gray-400"]
-            : ColorPalette["gray-50"]
-        }
+      {!isKeystoneInfoShow && (
+        <RegisterH4
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-400"]
+              : ColorPalette["gray-50"]
+          }
+        >
+          <Box style={{ textAlign: "center" }}>
+            <FormattedMessage id="pages.register.connect-hardware.content.title" />
+          </Box>
+        </RegisterH4>
+      )}
+      <Box
+        alignX="center"
+        paddingBottom="3.125rem"
+        paddingTop={isKeystoneInfoShow ? "0" : "3.125rem"}
       >
-        <Box style={{ textAlign: "center" }}>
-          <FormattedMessage id="pages.register.connect-hardware.content.title" />
-        </Box>
-      </RegisterH4>
-      <Box alignX="center" paddingY="3.125rem">
         <img
           src={require("../../../public/assets/img/intro-hardware-wallet.png")}
           style={{
@@ -59,19 +75,21 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
         />
       </Box>
       <Stack gutter="1.25rem">
-        <Button
-          text={intl.formatMessage({
-            id: "pages.register.connect-hardware.connect-ledger-button",
-          })}
-          size="large"
-          color="secondary"
-          left={<LedgerIcon />}
-          onClick={() => {
-            sceneTransition.push("name-password-hardware", {
-              type: "ledger",
-            });
-          }}
-        />
+        {!isKeystoneInfoShow && (
+          <Button
+            text={intl.formatMessage({
+              id: "pages.register.connect-hardware.connect-ledger-button",
+            })}
+            size="large"
+            color="secondary"
+            left={<LedgerIcon />}
+            onClick={() => {
+              sceneTransition.push("name-password-hardware", {
+                type: "ledger",
+              });
+            }}
+          />
+        )}
         <Button
           text={intl.formatMessage({
             id: "pages.register.connect-hardware.connect-keystone-button",
@@ -90,12 +108,18 @@ export const ConnectHardwareWalletScene: FunctionComponent = () => {
               }}
             />
           }
+          right={
+            <KeystoneInformationIcon onClick={onKeystoneInformationClick}>
+              <InformationPlainIcon width="1.125rem" height="1.125rem" />
+            </KeystoneInformationIcon>
+          }
           onClick={() => {
             sceneTransition.push("name-password-hardware", {
               type: "keystone",
             });
           }}
         />
+        {isKeystoneInfoShow && <KeystoneInformation />}
       </Stack>
     </RegisterSceneBox>
   );
@@ -131,5 +155,64 @@ const LedgerIcon: FunctionComponent = () => {
         </clipPath>
       </defs>
     </svg>
+  );
+};
+
+const KeystoneInformationIcon = styled.span`
+  position: absolute;
+  right: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  z-index: 2;
+  line-height: 0;
+  :hover {
+    background-color: ${ColorPalette["gray-500"]};
+  }
+`;
+
+const KeystoneInformation: FunctionComponent = () => {
+  return (
+    <Box
+      padding="1.875rem"
+      backgroundColor={ColorPalette["gray-500"]}
+      borderRadius="0.375rem"
+    >
+      <Stack alignX="center" gutter="1rem">
+        <Box
+          width="3.42856rem"
+          height="3.42856rem"
+          borderRadius="50%"
+          backgroundColor={ColorPalette.black}
+          alignX="center"
+          alignY="center"
+        >
+          <KeystoneIcon width="2.74288rem" height="2.74288rem" />
+        </Box>
+        <Box
+          style={{
+            fontSize: "1rem",
+            textAlign: "center",
+            lineHeight: "1.5rem",
+          }}
+        >
+          A top-notch hardware wallet for optimal security, user-friendly
+          interface and extensive compatibility.
+        </Box>
+        <a
+          target="_blank"
+          href="https://keyst.one/"
+          style={{
+            color: ColorPalette["blue-400"],
+            fontSize: "0.875rem",
+            lineHeight: "1.375rem",
+            textUnderlineOffset: "3px",
+            fontWeight: 600,
+          }}
+          rel="noopener noreferrer"
+        >
+          Learn more
+        </a>
+      </Stack>
+    </Box>
   );
 };
