@@ -36,6 +36,7 @@ import { useSearchParams } from "react-router-dom";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
 import { BackUpPrivateKeyScene } from "./back-up-private-key";
 import { ConnectKeystoneScene } from "./connect-keystone";
+import { ScanKeystoneScene } from "./connect-keystone/scan";
 
 const Container = styled.div`
   min-width: 100vw;
@@ -223,6 +224,11 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
               name: "connect-keystone",
               element: ConnectKeystoneScene,
               width: "40rem",
+            },
+            {
+              name: "scan-keystone",
+              element: ScanKeystoneScene,
+              width: "31.25rem",
             },
             {
               name: "back-up-private-key",

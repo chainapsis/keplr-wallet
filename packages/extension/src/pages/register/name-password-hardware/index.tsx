@@ -30,7 +30,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
           id: "pages.register.name-password-hardware.title",
         }),
         stepCurrent: 1,
-        stepTotal: 3,
+        stepTotal: type === "keystone" ? 4 : 3,
       });
     },
   });
@@ -58,7 +58,7 @@ export const RegisterNamePasswordHardwareScene: FunctionComponent<{
               name: data.name,
               password: data.password,
               stepPrevious: 1,
-              stepTotal: 3,
+              stepTotal: 4,
             });
           }
         })}
