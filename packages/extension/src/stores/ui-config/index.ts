@@ -17,6 +17,7 @@ import { CopyAddressConfig } from "./copy-address";
 import { ChainStore } from "../chain";
 import { AddressBookConfig } from "./address-book";
 import { MessageRequester } from "@keplr-wallet/router";
+import manifest from "../../manifest.v2.json";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -100,6 +101,11 @@ export class UIConfigStore {
   }
 
   protected async init() {
+    // Set the last version to the kv store.
+    // At present, this is not used at all.
+    // For the future, this can be used to show the changelog.
+    await this.kvStore.set("lastVersion", manifest.version);
+
     {
       const saved = await this.kvStore.get<string>("fiatCurrency");
       this.selectFiatCurrency(saved || "usd");

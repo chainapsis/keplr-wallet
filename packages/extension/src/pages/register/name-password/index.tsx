@@ -8,6 +8,7 @@ import {
 } from "../../../components/transition";
 import { observer } from "mobx-react-lite";
 import { PlainObject } from "@keplr-wallet/background";
+import { useIntl } from "react-intl";
 
 export const RegisterNamePasswordScene: FunctionComponent<{
   mnemonic?: string;
@@ -26,13 +27,16 @@ export const RegisterNamePasswordScene: FunctionComponent<{
 }> = observer(
   ({ mnemonic, privateKey, bip44Path, stepPrevious, stepTotal }) => {
     const sceneTransition = useSceneTransition();
+    const intl = useIntl();
 
     const header = useRegisterHeader();
     useSceneEvents({
       onWillVisible: () => {
         header.setHeader({
           mode: "step",
-          title: "Set Up Your Wallet",
+          title: intl.formatMessage({
+            id: "pages.register.name-password.title",
+          }),
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
         });
@@ -51,7 +55,11 @@ export const RegisterNamePasswordScene: FunctionComponent<{
 
             if (mnemonic) {
               if (!bip44Path) {
-                throw new Error("BIP44 path should be provided");
+                throw new Error(
+                  intl.formatMessage({
+                    id: "error.bip44-path-required",
+                  })
+                );
               }
 
               sceneTransition.replaceAll("finalize-key", {

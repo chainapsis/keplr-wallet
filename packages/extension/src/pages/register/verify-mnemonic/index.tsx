@@ -10,6 +10,7 @@ import {
 } from "../../../components/transition";
 import { Box } from "../../../components/box";
 import { FormNamePassword, useFormNamePassword } from "../components/form";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const VerifyMnemonicScene: FunctionComponent<{
   mnemonic?: string;
@@ -21,8 +22,13 @@ export const VerifyMnemonicScene: FunctionComponent<{
   stepPrevious: number;
   stepTotal: number;
 }> = observer(({ mnemonic, bip44Path, stepPrevious, stepTotal }) => {
+  const intl = useIntl();
   if (!mnemonic || !bip44Path) {
-    throw new Error("Mnemonic and bip44Path should be provided");
+    throw new Error(
+      intl.formatMessage({
+        id: "pages.register.verify-mnemonic.no-mnemonic-provider-error",
+      })
+    );
   }
 
   const sceneTransition = useSceneTransition();
@@ -32,12 +38,12 @@ export const VerifyMnemonicScene: FunctionComponent<{
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Verify Your Recovery Phrase",
+        title: intl.formatMessage({
+          id: "pages.register.verify-mnemonic.title",
+        }),
         paragraphs: [
           <div key="paragraphs">
-            Fill out the words according to their numbers to
-            <br />
-            verify that you have stored your phrase safely.
+            <FormattedMessage id="pages.register.verify-mnemonic.paragraph" />
           </div>,
         ],
         stepCurrent: stepPrevious + 1,
@@ -48,7 +54,11 @@ export const VerifyMnemonicScene: FunctionComponent<{
 
   const verifyingWords = useMemo(() => {
     if (mnemonic.trim() === "") {
-      throw new Error("Empty mnemonic");
+      throw new Error(
+        intl.formatMessage({
+          id: "pages.register.verify-mnemonic.mnemonic-empty-error",
+        })
+      );
     }
 
     const words = mnemonic.split(" ").map((w) => w.trim());
@@ -74,7 +84,7 @@ export const VerifyMnemonicScene: FunctionComponent<{
     ].sort((word1, word2) => {
       return word1.index < word2.index ? -1 : 1;
     });
-  }, [mnemonic]);
+  }, [intl, mnemonic]);
 
   const verifyingBoxRef = useRef<VerifyingMnemonicBoxRef | null>(null);
 
@@ -85,7 +95,11 @@ export const VerifyMnemonicScene: FunctionComponent<{
       <form
         onSubmit={form.handleSubmit((data) => {
           if (!verifyingBoxRef.current) {
-            throw new Error("Ref of verify box is null");
+            throw new Error(
+              intl.formatMessage({
+                id: "pages.register.verify-mnemonic.verify-box-ref-error",
+              })
+            );
           }
 
           if (verifyingBoxRef.current.validate()) {

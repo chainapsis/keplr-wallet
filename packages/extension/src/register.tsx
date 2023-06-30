@@ -37,26 +37,33 @@ const AutoLockMonitor: FunctionComponent = observer(() => {
   return null;
 });
 
-const App: FunctionComponent = () => {
+const AppRouter: FunctionComponent = () => {
   useLoadFonts();
 
   return (
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<RegisterPage />} />
+        <Route path="/welcome" element={<WelcomePage />} />
+      </Routes>
+    </HashRouter>
+  );
+};
+
+const App: FunctionComponent = () => {
+  return (
     <StoreProvider>
-      <ModalRootProvider>
-        <ConfirmProvider>
-          <GlobalStyle />
-          <ScrollBarStyle />
-          <AutoLockMonitor />
-          <AppIntlProvider>
-            <HashRouter>
-              <Routes>
-                <Route path="/" element={<RegisterPage />} />
-                <Route path="/welcome" element={<WelcomePage />} />
-              </Routes>
-            </HashRouter>
-          </AppIntlProvider>
-        </ConfirmProvider>
-      </ModalRootProvider>
+      <AppIntlProvider>
+        <ModalRootProvider>
+          <ConfirmProvider>
+            <GlobalStyle />
+            <ScrollBarStyle />
+            <AutoLockMonitor />
+
+            <AppRouter />
+          </ConfirmProvider>
+        </ModalRootProvider>
+      </AppIntlProvider>
     </StoreProvider>
   );
 };

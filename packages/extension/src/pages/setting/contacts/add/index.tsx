@@ -14,6 +14,7 @@ import {
 import { useStore } from "../../../../stores";
 import { MemoInput } from "../../../../components/input/memo-input";
 import { useNavigate } from "react-router";
+import { useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -25,6 +26,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
   const { chainStore, uiConfigStore } = useStore();
   const labelRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const [chainId, setChainId] = useState(chainStore.chainInfosInUI[0].chainId);
   // If edit mode, this will be equal or greater than 0.
@@ -76,6 +78,7 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
     setEditIndex(-1);
   }, [
+    intl,
     memoConfig,
     paramChainId,
     paramEditIndex,
@@ -90,7 +93,11 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title={`${editIndex < 0 ? "Add" : "Edit"} Contact`}
+      title={
+        editIndex < 0
+          ? intl.formatMessage({ id: "page.setting.contacts.add.add-title" })
+          : intl.formatMessage({ id: "page.setting.contacts.add.edit-title" })
+      }
       left={<BackButton />}
       onSubmit={(e) => {
         e.preventDefault();
@@ -112,7 +119,9 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
         navigate(-1);
       }}
       bottomButton={{
-        text: "Confirm",
+        text: intl.formatMessage({
+          id: "button.confirm",
+        }),
         color: "secondary",
         size: "large",
         disabled: txConfigsValidate.interactionBlocked || name === "",
@@ -120,10 +129,14 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
     >
       <Styles.Container gutter="1rem">
         <TextInput
-          label="Label"
+          label={intl.formatMessage({
+            id: "page.setting.contacts.add.label-label",
+          })}
           ref={labelRef}
           value={name}
-          placeholder="A short nickname to identify the contact"
+          placeholder={intl.formatMessage({
+            id: "page.setting.contacts.add.label-placeholder",
+          })}
           onChange={(e) => {
             e.preventDefault();
 
@@ -135,8 +148,12 @@ export const SettingContactsAdd: FunctionComponent = observer(() => {
           hideAddressBookButton={true}
         />
         <MemoInput
-          label="Memo (Optional)"
-          placeholder="Required for sending to centralized exchange"
+          label={intl.formatMessage({
+            id: "page.setting.contacts.add.memo-label",
+          })}
+          placeholder={intl.formatMessage({
+            id: "page.setting.contacts.add.memo-placeholder",
+          })}
           memoConfig={memoConfig}
         />
       </Styles.Container>

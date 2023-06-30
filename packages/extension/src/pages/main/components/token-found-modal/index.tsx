@@ -23,6 +23,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TokenScan } from "@keplr-wallet/background";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Gutter } from "../../../../components/gutter";
+import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { XAxis, YAxis } from "../../../../components/axis";
 
@@ -30,6 +31,7 @@ export const TokenFoundModal: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
   const { chainStore, keyRingStore } = useStore();
+  const intl = useIntl();
 
   const [checkedChainIdentifiers, setCheckedChainIdentifiers] = useState<
     string[]
@@ -137,7 +139,12 @@ export const TokenFoundModal: FunctionComponent<{
     >
       <Box paddingTop="1.25rem" paddingBottom="0.75rem">
         <Subtitle1 style={{ textAlign: "center" }}>
-          {numFoundToken} New Token(s) Found
+          <FormattedMessage
+            id="page.main.components.token-found-modal.title"
+            values={{
+              numFoundToken,
+            }}
+          />
         </Subtitle1>
       </Box>
 
@@ -204,7 +211,9 @@ export const TokenFoundModal: FunctionComponent<{
           }}
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-300"]}>Select All</Body2>
+            <Body2 color={ColorPalette["gray-300"]}>
+              <FormattedMessage id="text-button.select-all" />
+            </Body2>
 
             <Gutter size="0.25rem" />
 
@@ -242,7 +251,7 @@ export const TokenFoundModal: FunctionComponent<{
               }}
             >
               <Button2 color={ColorPalette["gray-300"]}>
-                Add tokens on Injective and Evmos
+                <FormattedMessage id="page.main.components.token-found-modal.add-token-on-injective-and-evmos" />
               </Button2>
             </Box>
           </Box>
@@ -253,7 +262,9 @@ export const TokenFoundModal: FunctionComponent<{
       )}
 
       <Button
-        text="Add Chains"
+        text={intl.formatMessage({
+          id: "page.main.components.token-found-modal.add-chains",
+        })}
         size="large"
         disabled={checkedChainIdentifiers.length === 0}
         onClick={buttonClicked}

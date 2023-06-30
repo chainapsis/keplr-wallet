@@ -9,12 +9,14 @@ import { TextInput } from "../../../components/input";
 import { Button } from "../../../components/button";
 import { YAxis } from "../../../components/axis";
 import { useStore } from "../../../stores";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const IBCAddChannelModal: FunctionComponent<{
   chainId: string;
   close: () => void;
 }> = observer(({ chainId, close }) => {
   const { chainStore, queriesStore, ibcChannelStore } = useStore();
+  const intl = useIntl();
 
   const [selectedChainId, setSelectedChainId] = useState("");
   const [value, setValue] = useState("");
@@ -35,15 +37,19 @@ export const IBCAddChannelModal: FunctionComponent<{
             color: ColorPalette["gray-10"],
           }}
         >
-          Add IBC channel
+          <FormattedMessage id="page.ibc-transfer.add-channel-modal.title" />
         </Subtitle1>
 
         <Gutter size="1.125rem" />
 
         <Dropdown
           size="large"
-          label="Destination Chain"
-          placeholder="Select Chain"
+          label={intl.formatMessage({
+            id: "page.ibc-transfer.add-channel-modal.destination-chain-label",
+          })}
+          placeholder={intl.formatMessage({
+            id: "page.ibc-transfer.add-channel-modal.destination-chain-placeholder",
+          })}
           menuContainerMaxHeight="10rem"
           selectedItemKey={selectedChainId}
           items={chainStore.chainInfos
@@ -67,8 +73,12 @@ export const IBCAddChannelModal: FunctionComponent<{
         <Gutter size="1.125rem" />
 
         <TextInput
-          label="Channel Id"
-          placeholder="Source Channel ID"
+          label={intl.formatMessage({
+            id: "page.ibc-transfer.add-channel-modal.channel-id-label",
+          })}
+          placeholder={intl.formatMessage({
+            id: "page.ibc-transfer.add-channel-modal.channel-id-placeholder",
+          })}
           value={value}
           onChange={(e) => {
             setValue(e.target.value);
@@ -80,7 +90,9 @@ export const IBCAddChannelModal: FunctionComponent<{
         <Gutter size="1.375rem" />
 
         <Button
-          text="Save"
+          text={intl.formatMessage({
+            id: "button.save",
+          })}
           disabled={
             selectedChainId === "" || value.trim() === "" || error !== ""
           }
@@ -105,12 +117,16 @@ export const IBCAddChannelModal: FunctionComponent<{
             let error = "";
 
             if (!channel || !clientState) {
-              error = "Failed to fetch the channel";
+              error = intl.formatMessage({
+                id: "error.failed-to-fetch-the-channel",
+              });
             }
 
             if (channel) {
               if (channel.data.channel.state !== "STATE_OPEN") {
-                error = "Channel is not on OPEN STATE";
+                error = intl.formatMessage({
+                  id: "error.channel-is-not-open-state",
+                });
               }
             }
 
@@ -120,7 +136,10 @@ export const IBCAddChannelModal: FunctionComponent<{
                   "chain_id"
                 ] !== selectedChainId
               ) {
-                error = `Client is not for ${selectedChainId}`;
+                error = intl.formatMessage(
+                  { id: "error.client-is-not-for-chain" },
+                  { chainId: selectedChainId }
+                );
               }
             }
 

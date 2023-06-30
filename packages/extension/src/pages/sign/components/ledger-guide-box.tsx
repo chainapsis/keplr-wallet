@@ -12,6 +12,7 @@ import {
   ErrSignRejected,
 } from "../utils/ledger-types";
 import { PlainObject } from "@keplr-wallet/background";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const LedgerGuideBox: FunctionComponent<{
   data: {
@@ -22,6 +23,7 @@ export const LedgerGuideBox: FunctionComponent<{
   ledgerInteractingError: Error | undefined;
 }> = ({ isLedgerInteracting, ledgerInteractingError, data }) => {
   const [transportErrorCount, setTransportErrorCount] = useState(0);
+  const intl = useIntl();
 
   useLayoutEffect(() => {
     if (ledgerInteractingError) {
@@ -58,8 +60,12 @@ export const LedgerGuideBox: FunctionComponent<{
                   return (
                     <GuideBox
                       color="warning"
-                      title="Error"
-                      paragraph="Connect and unlock your Ledger device."
+                      title={intl.formatMessage({
+                        id: "page.sign.components.ledger-guide.box.error-title",
+                      })}
+                      paragraph={intl.formatMessage({
+                        id: "page.sign.components.ledger-guide.box.connect-and-unlock-ledger-paragraph",
+                      })}
                     />
                   );
                 }
@@ -67,11 +73,12 @@ export const LedgerGuideBox: FunctionComponent<{
                 return (
                   <GuideBox
                     color="warning"
-                    title="Error"
+                    title={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.error-title",
+                    })}
                     paragraph={
                       <React.Fragment>
-                        Keplr may have lost its USB permission by an unknown
-                        reason. Visit{" "}
+                        <FormattedMessage id="page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-1" />
                         <a
                           style={{
                             cursor: "pointer",
@@ -88,9 +95,9 @@ export const LedgerGuideBox: FunctionComponent<{
                             return;
                           }}
                         >
-                          this page
+                          <FormattedMessage id="page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-2" />
                         </a>{" "}
-                        to regain the permission.
+                        <FormattedMessage id="page.sign.components.ledger-guide.box.usb-permission-unknown-paragraph-3" />
                       </React.Fragment>
                     }
                   />
@@ -99,8 +106,12 @@ export const LedgerGuideBox: FunctionComponent<{
                 return (
                   <GuideBox
                     color="warning"
-                    title="Error"
-                    paragraph="Unlock your Ledger device."
+                    title={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.error-title",
+                    })}
+                    paragraph={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.unlock-ledger-paragraph",
+                    })}
                   />
                 );
               case ErrFailedGetPublicKey: {
@@ -124,8 +135,12 @@ export const LedgerGuideBox: FunctionComponent<{
                     return (
                       <GuideBox
                         color="warning"
-                        title="Error"
-                        paragraph="Please initialize ethereum app first"
+                        title={intl.formatMessage({
+                          id: "page.sign.components.ledger-guide.box.error-title",
+                        })}
+                        paragraph={intl.formatMessage({
+                          id: "page.sign.components.ledger-guide.box.initialize-ethereum-app-first-paragraph",
+                        })}
                       />
                     );
                   }
@@ -134,8 +149,15 @@ export const LedgerGuideBox: FunctionComponent<{
                 return (
                   <GuideBox
                     color="warning"
-                    title="Error"
-                    paragraph={`Open the ${app} app on Ledger and try again.`}
+                    title={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.error-title",
+                    })}
+                    paragraph={intl.formatMessage(
+                      {
+                        id: "page.sign.components.ledger-guide.box.open-app-on-ledger-paragraph",
+                      },
+                      { app }
+                    )}
                   />
                 );
               }
@@ -144,16 +166,24 @@ export const LedgerGuideBox: FunctionComponent<{
                 return (
                   <GuideBox
                     color="warning"
-                    title="Error"
-                    paragraph="Please try again with the same ledger device/account that you've connected with this wallet."
+                    title={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.error-title",
+                    })}
+                    paragraph={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.try-again-with-same-ledger-paragraph",
+                    })}
                   />
                 );
               case ErrSignRejected:
                 return (
                   <GuideBox
                     color="warning"
-                    title="Error"
-                    paragraph="You've rejected signing the transaction on Ledger."
+                    title={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.error-title",
+                    })}
+                    paragraph={intl.formatMessage({
+                      id: "page.sign.components.ledger-guide.box.rejected-signing-on-ledger-paragraph",
+                    })}
                   />
                 );
             }
@@ -162,7 +192,9 @@ export const LedgerGuideBox: FunctionComponent<{
           return (
             <GuideBox
               color="warning"
-              title="Unknown error"
+              title={intl.formatMessage({
+                id: "page.sign.components.ledger-guide.box.unknown-error-title",
+              })}
               paragraph={
                 ledgerInteractingError.message ||
                 ledgerInteractingError.toString()
@@ -174,8 +206,12 @@ export const LedgerGuideBox: FunctionComponent<{
         return (
           <GuideBox
             color="default"
-            title="Sign on Ledger"
-            paragraph="To proceed, please review and approve the transaction on your Ledger device."
+            title={intl.formatMessage({
+              id: "page.sign.components.ledger-guide.box.sign-on-ledger-title",
+            })}
+            paragraph={intl.formatMessage({
+              id: "page.sign.components.ledger-guide.box.sign-on-ledger-paragraph",
+            })}
           />
         );
       })()}

@@ -14,9 +14,11 @@ import { ChainImageFallback } from "../../../../components/image";
 import { EmptyView } from "../../../../components/empty-view";
 import { Gutter } from "../../../../components/gutter";
 import { Tooltip } from "../../../../components/tooltip";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
+    const intl = useIntl();
     const { chainStore } = useStore();
     const suggestedChains = chainStore.chainInfos.filter(
       (chainInfo) => !chainInfo.embedded.embedded
@@ -24,7 +26,9 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
 
     return (
       <HeaderLayout
-        title="Manage Non-Native Chains"
+        title={intl.formatMessage({
+          id: "page.setting.general.manage-non-native-chains-title",
+        })}
         left={<BackButton />}
         right={
           <a href="https://chains.keplr.app/" target="_blank" rel="noreferrer">
@@ -52,7 +56,9 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
               <React.Fragment>
                 <Gutter size="9.25rem" direction="vertical" />
                 <EmptyView>
-                  <Subtitle3>Hmm.. Nothing Here!</Subtitle3>
+                  <Subtitle3>
+                    <FormattedMessage id="page.setting.general.delete-suggest-chain.empty-text" />
+                  </Subtitle3>
                 </EmptyView>
               </React.Fragment>
             )}
@@ -67,6 +73,7 @@ const ChainItem: FunctionComponent<{
   chainInfo: ChainInfo;
   onClickClose?: () => void;
 }> = ({ chainInfo, onClickClose }) => {
+  const intl = useIntl();
   return (
     <Box
       backgroundColor={ColorPalette["gray-600"]}
@@ -86,7 +93,11 @@ const ChainItem: FunctionComponent<{
         <Stack gutter="0.375rem">
           <Columns sum={1} alignY="center" gutter="0.25rem">
             <Body1 color={ColorPalette["gray-50"]}>{chainInfo.chainName}</Body1>
-            <Tooltip content="The infrastructure and setting of this chain is not configured by Keplr team. Please reach out to the chain or website team for technical support.">
+            <Tooltip
+              content={intl.formatMessage({
+                id: "page.setting.general.delete-suggest-chain.chain-item.tooltip-text",
+              })}
+            >
               <QuestionIcon
                 width="1rem"
                 height="1rem"

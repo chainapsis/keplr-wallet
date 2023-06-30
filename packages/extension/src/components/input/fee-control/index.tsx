@@ -4,6 +4,7 @@ import {
   IFeeConfig,
   IGasConfig,
   IGasSimulator,
+  InsufficientFeeError,
   ISenderConfig,
 } from "@keplr-wallet/hooks";
 import styled from "styled-components";
@@ -21,6 +22,7 @@ import { Gutter } from "../../gutter";
 import Color from "color";
 import { Box } from "../../box";
 import { VerticalResizeTransition } from "../../transition";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div<{
@@ -69,6 +71,8 @@ export const FeeControl: FunctionComponent<{
     disableAutomaticFeeSet,
   }) => {
     const { analyticsStore, queriesStore, priceStore, chainStore } = useStore();
+
+    const intl = useIntl();
 
     useLayoutEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -201,7 +205,9 @@ export const FeeControl: FunctionComponent<{
         >
           <Columns sum={1} alignY="center">
             <Columns sum={1} alignY="center">
-              <Subtitle4>Transaction Fee</Subtitle4>
+              <Subtitle4>
+                <FormattedMessage id="components.input.fee-control.title" />
+              </Subtitle4>
               <Gutter size="0.25rem" />
               {feeConfig.uiProperties.loadingState ||
               gasSimulator?.uiProperties.loadingState ? (
@@ -286,6 +292,15 @@ export const FeeControl: FunctionComponent<{
               <Caption1 color={ColorPalette["yellow-400"]}>
                 {(() => {
                   if (feeConfig.uiProperties.error) {
+                    if (
+                      feeConfig.uiProperties.error instanceof
+                      InsufficientFeeError
+                    ) {
+                      return intl.formatMessage({
+                        id: "components.input.fee-control.error.insufficient-fee",
+                      });
+                    }
+
                     return (
                       feeConfig.uiProperties.error.message ||
                       feeConfig.uiProperties.error.toString()

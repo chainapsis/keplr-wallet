@@ -5,6 +5,7 @@ import { Buffer } from "buffer/";
 import { Button } from "../../../../../components/button";
 import { Box } from "../../../../../components/box";
 import { XAxis } from "../../../../../components/axis";
+import { FormattedMessage } from "react-intl";
 
 export const WasmMessageView: FunctionComponent<{
   chainId: string;
@@ -73,7 +74,13 @@ export const WasmMessageView: FunctionComponent<{
         <Button
           size="extraSmall"
           color="secondary"
-          text={isOpen ? "Close" : "Details"}
+          text={
+            isOpen ? (
+              <FormattedMessage id="page.sign.components.messages.wasm-message-view.close-button" />
+            ) : (
+              <FormattedMessage id="page.sign.components.messages.wasm-message-view.details-button" />
+            )
+          }
           onClick={() => {
             toggleOpen();
           }}

@@ -26,6 +26,7 @@ import { AddressBookData } from "../../../../stores/ui-config/address-book";
 import { toJS } from "mobx";
 import { Box } from "../../../../components/box";
 import { Gutter } from "../../../../components/gutter";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -49,6 +50,7 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
     >([]);
 
     const confirm = useConfirm();
+    const intl = useIntl();
 
     return keyRingData.length === 0 ? (
       <EnterPasswordView
@@ -62,13 +64,14 @@ export const SettingGeneralLinkKeplrMobilePage: FunctionComponent = observer(
 
           if (res.length === 0) {
             confirm.confirm(
-              "Export Failed",
+              intl.formatMessage({
+                id: "page.setting.general.link-keplr-mobile.confirm-title",
+              }),
               <React.Fragment>
-                You cannot export Ledger-based accounts to Keplr Mobile. These
-                must be imported to your mobile device directly from the Ledger.
-                <br />
-                Accounts that are created via social logins that are not
-                supported by Keplr Mobile cannot be exported.
+                <FormattedMessage
+                  id="page.setting.general.link-keplr-mobile.confirm-paragraph"
+                  values={{ br: <br /> }}
+                />
               </React.Fragment>,
               {
                 forceYes: true,
@@ -94,6 +97,7 @@ const EnterPasswordView: FunctionComponent<{
   onSubmit: (password: string) => Promise<void>;
 }> = observer(({ onSubmit }) => {
   const animDivRef = useRef<HTMLDivElement | null>(null);
+  const intl = useIntl();
 
   useEffect(() => {
     if (animDivRef.current) {
@@ -118,11 +122,15 @@ const EnterPasswordView: FunctionComponent<{
 
   return (
     <HeaderLayout
-      title="Link Keplr Mobile"
+      title={intl.formatMessage({
+        id: "page.setting.general.link-kpelr-mobile-title",
+      })}
       left={<BackButton />}
       bottomButton={{
         color: "secondary",
-        text: "Confirm",
+        text: intl.formatMessage({
+          id: "button.confirm",
+        }),
         size: "large",
         isLoading,
         disabled: password.length === 0,
@@ -144,13 +152,12 @@ const EnterPasswordView: FunctionComponent<{
     >
       <Styles.Container gutter="0.75rem">
         <GuideBox
-          title="Only scan on Keplr Mobile"
-          paragraph={
-            <div>
-              Scanning the QR code outside of Keplr Mobile can lead to loss of
-              funds
-            </div>
-          }
+          title={intl.formatMessage({
+            id: "page.setting.general.link-keplr-mobile.enter-password-view.guide-title",
+          })}
+          paragraph={intl.formatMessage({
+            id: "page.setting.general.link-keplr-mobile.enter-password-view.guide-paragraph",
+          })}
         />
 
         <YAxis alignX="center">
@@ -166,15 +173,20 @@ const EnterPasswordView: FunctionComponent<{
         </YAxis>
 
         <Styles.Paragraph>
-          Scan QR code to export accounts to Keplr Mobile. The process may take
-          several minutes.
+          <FormattedMessage id="page.setting.general.link-keplr-mobile.enter-password-view.paragraph" />
         </Styles.Paragraph>
 
         <TextInput
-          label="Password"
+          label={intl.formatMessage({
+            id: "page.setting.general.link-keplr-mobile.enter-password-view.password-label",
+          })}
           type="password"
           value={password}
-          error={isFailed ? "Invalid password" : undefined}
+          error={
+            isFailed
+              ? intl.formatMessage({ id: "error.invalid-password" })
+              : undefined
+          }
           onChange={(e) => {
             e.preventDefault();
 
@@ -217,6 +229,7 @@ const QRCodeView: FunctionComponent<{
 
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const intl = useIntl();
 
   const [connector, setConnector] = useState<WalletConnect | undefined>();
   const [qrCodeData, setQRCodeData] = useState<QRCodeSharedData | undefined>();
@@ -233,9 +246,15 @@ const QRCodeView: FunctionComponent<{
       // Hide qr code after 30 seconds.
       setIsExpired(true);
       confirm
-        .confirm("", "Session expired", {
-          forceYes: true,
-        })
+        .confirm(
+          "",
+          intl.formatMessage({
+            id: "page.setting.general.link-keplr-mobile.qr-code-view.session-expired",
+          }),
+          {
+            forceYes: true,
+          }
+        )
         .then(() => {
           cancelRef.current();
         });
@@ -244,7 +263,7 @@ const QRCodeView: FunctionComponent<{
     return () => {
       clearTimeout(id);
     };
-  }, [confirm]);
+  }, [confirm, intl]);
 
   useEffect(() => {
     (async () => {
@@ -384,13 +403,17 @@ const QRCodeView: FunctionComponent<{
   }, [connector]);
 
   return (
-    <HeaderLayout title="Link Keplr Mobile" left={<BackButton />}>
+    <HeaderLayout
+      title={intl.formatMessage({
+        id: "page.setting.general.link-kpelr-mobile-title",
+      })}
+      left={<BackButton />}
+    >
       <Styles.Container>
         <Box padding="1.5rem">
           <YAxis alignX="center">
             <Styles.Paragraph>
-              Scan the QR code to sync with Keplr Mobile. The process may take
-              several minutes.
+              <FormattedMessage id="page.setting.general.link-keplr-mobile.qr-code-view.paragraph" />
             </Styles.Paragraph>
             <Gutter size="3.375rem" direction="vertical" />
             <Box
@@ -402,7 +425,9 @@ const QRCodeView: FunctionComponent<{
                 size={180}
                 value={(() => {
                   if (isExpired) {
-                    return "Expired";
+                    return intl.formatMessage({
+                      id: "page.setting.general.link-keplr-mobile.qr-code-view.expired",
+                    });
                   }
 
                   if (qrCodeData) {

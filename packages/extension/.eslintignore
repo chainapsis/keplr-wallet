@@ -10,6 +10,7 @@
 **/*.md
 **/*.log
 **/*.webm
+**/*.txt
 .DS_Store
 
 .gitignore

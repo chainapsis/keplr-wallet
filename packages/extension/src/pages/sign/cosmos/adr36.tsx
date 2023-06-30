@@ -16,10 +16,12 @@ import { KeplrError } from "@keplr-wallet/router";
 import { ErrModuleLedgerSign } from "../utils/ledger-types";
 import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Image } from "../../../components/image";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
+  const intl = useIntl();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -73,7 +75,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     } else {
       return msg.value.data as string;
     }
-  }, [isADR36WithString, signDocWrapper]);
+  }, [intl, isADR36WithString, signDocWrapper]);
 
   const isLedgerAndDirect =
     signInteractionStore.waitingData?.data.keyType === "ledger" &&
@@ -86,7 +88,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Prove Ownership"
+      title={intl.formatMessage({ id: "page.sign.adr36.title" })}
       fixedHeight={true}
       left={
         <BackButton
@@ -96,7 +98,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         />
       }
       bottomButton={{
-        text: "Approve",
+        text: intl.formatMessage({ id: "button.approve" }),
         color: "primary",
         size: "large",
         disabled: signInteractionStore.waitingData == null,
@@ -206,7 +208,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             <Gutter size="0.75rem" />
             <YAxis>
               <H5 color={ColorPalette["gray-10"]}>
-                Prove account ownership to
+                <FormattedMessage id="Prove account ownership to" />
               </H5>
               <Gutter size="2px" />
               <Body3 color={ColorPalette["gray-200"]}>
@@ -252,7 +254,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           borderRadius="0.375rem"
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-200"]}>Requested Network</Body2>
+            <Body2 color={ColorPalette["gray-200"]}>
+              <FormattedMessage id="page.sign.adr36.requested-network" />
+            </Body2>
             <div style={{ flex: 1 }} />
             <Subtitle3 color={ColorPalette["gray-50"]}>
               {signInteractionStore.waitingData?.data.chainId
@@ -269,8 +273,12 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             <Gutter size="0.75rem" />
             <GuideBox
               color="warning"
-              title="Incompatible Signing Requested"
-              paragraph="Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue."
+              title={intl.formatMessage({
+                id: "page.sign.adr36.warning-title",
+              })}
+              paragraph={intl.formatMessage({
+                id: "page.sign.adr36.warning-paragraph",
+              })}
             />
           </React.Fragment>
         ) : null}

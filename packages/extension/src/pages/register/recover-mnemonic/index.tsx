@@ -26,6 +26,7 @@ import { XAxis } from "../../../components/axis";
 import { TextInput, TextInputProps } from "../../../components/input";
 import { Mnemonic } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
+import { FormattedMessage, useIntl } from "react-intl";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bip39 = require("bip39");
 
@@ -64,20 +65,20 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
   const firstTextInputRef = useRef<HTMLInputElement | null>(null);
 
   const header = useRegisterHeader();
+  const intl = useIntl();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Import Existing Wallet",
+        title: intl.formatMessage({
+          id: "pages.register.recover-mnemonic.title",
+        }),
         paragraphs: [
           <div key="paragraphs">
-            Enter your recovery phrase here to restore your wallet.
-            <br />
-            or paste the entire phrase in any text input.
+            <FormattedMessage id="pages.register.recover-mnemonic.paragraph-1" />
           </div>,
           <div key="paragraphs">
-            Enter the phrase in the right order without capitalization,
-            punctuation symbols, or spaces.
+            <FormattedMessage id="pages.register.recover-mnemonic.paragraph-2" />
           </div>,
         ],
         stepCurrent: 1,
@@ -228,13 +229,13 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
             }
 
             if (words.length <= 9) {
-              alert("Too short mnemonic");
+              alert(intl.formatMessage({ id: "error.too-short-mnemonic" }));
               return;
             }
 
             const text = words.map((w) => w.trim()).join(" ");
             if (!Mnemonic.validateMnemonic(text)) {
-              alert("Invalid mnemonic");
+              alert(intl.formatMessage({ id: "error.invalid-mnemonic" }));
               return;
             }
             sceneTransition.push("name-password", {
@@ -256,15 +257,21 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
             items={[
               {
                 key: "12words",
-                text: "12 words",
+                text: intl.formatMessage({
+                  id: "pages.register.recover-mnemonic.12-words-tab",
+                }),
               },
               {
                 key: "24words",
-                text: "24 words",
+                text: intl.formatMessage({
+                  id: "pages.register.recover-mnemonic.24-words-tab",
+                }),
               },
               {
                 key: "private-key",
-                text: "Private key",
+                text: intl.formatMessage({
+                  id: "pages.register.recover-mnemonic.private-key-tab",
+                }),
               },
             ]}
             itemMinWidth="6.25rem"
@@ -337,7 +344,9 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
                   <Button
                     size="small"
                     color="secondary"
-                    text="Advanced"
+                    text={intl.formatMessage({
+                      id: "button.advanced",
+                    })}
                     onClick={() => {
                       setIsBIP44CardOpen(true);
                     }}
@@ -358,7 +367,13 @@ export const RecoverMnemonicScene: FunctionComponent = observer(() => {
         ) : null}
 
         <Box width="22.5rem" marginX="auto">
-          <Button text="Import" size="large" type="submit" />
+          <Button
+            text={intl.formatMessage({
+              id: "pages.register.recover-mnemonic.import-button",
+            })}
+            size="large"
+            type="submit"
+          />
         </Box>
       </form>
     </RegisterSceneBox>
