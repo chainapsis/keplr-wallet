@@ -14,6 +14,7 @@ import { Button } from "../../../../components/button";
 import { useStore } from "../../../../stores";
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const LookingForChains: FunctionComponent<{
   chainInfos: ChainInfo[];
@@ -44,10 +45,15 @@ export const LookingForChainItem: FunctionComponent<{
 }> = observer(({ chainInfo }) => {
   const { analyticsStore, keyRingStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   return (
     <Box
-      backgroundColor={Color(ColorPalette["gray-600"]).alpha(0.6).string()}
+      backgroundColor={Color(
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      )
+        .alpha(0.6)
+        .string()}
       paddingX="1rem"
       paddingY="0.875rem"
       borderRadius="0.375rem"
@@ -66,7 +72,15 @@ export const LookingForChainItem: FunctionComponent<{
         <Gutter size="0.75rem" />
 
         <YAxis>
-          <Subtitle2 color={Color(ColorPalette["gray-10"]).alpha(0.6).string()}>
+          <Subtitle2
+            color={Color(
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["gray-10"]
+            )
+              .alpha(0.6)
+              .string()}
+          >
             {chainInfo.chainName}
           </Subtitle2>
 

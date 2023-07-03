@@ -21,7 +21,15 @@ const Styles = {
     padding: 0 0.125rem;
     border-radius: ${StringToggleRadius};
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
+
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
   `,
   Selected: styled(Caption1)`
     display: flex;
@@ -32,7 +40,15 @@ const Styles = {
     width: 5.75rem;
     border-radius: ${StringToggleRadius};
 
-    background-color: ${ColorPalette["gray-400"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["blue-400"]
+        : ColorPalette.white};
+
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["blue-50"]
+        : ColorPalette["gray-400"]};
 
     cursor: pointer;
 

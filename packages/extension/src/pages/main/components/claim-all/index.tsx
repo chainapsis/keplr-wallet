@@ -7,7 +7,7 @@ import { VerticalCollapseTransition } from "../../../../components/transition/ve
 import { Body2, Subtitle2, Subtitle3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { ViewToken } from "../../index";
-import styled, { css } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -40,8 +40,18 @@ import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
-  Container: styled.div`
-    background-color: ${ColorPalette["gray-600"]};
+  Container: styled.div<{ isNotReady?: boolean }>`
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? props.isNotReady
+          ? ColorPalette["gray-100"]
+          : ColorPalette.white
+        : ColorPalette["gray-600"]};
+
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
     padding: 0.75rem 0 0 0;
     border-radius: 0.375rem;
   `,
@@ -62,15 +72,17 @@ const Styles = {
 
       return css`
         :hover {
-          background-color: ${Color(ColorPalette["gray-500"])
-            .alpha(0.5)
-            .toString()};
+          background-color: ${(props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : Color(ColorPalette["gray-500"]).alpha(0.5).toString()};
         }
 
         :active {
-          background-color: ${Color(ColorPalette["gray-500"])
-            .alpha(0.2)
-            .toString()};
+          background-color: ${(props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : Color(ColorPalette["gray-500"]).alpha(0.2).toString()};
         }
       `;
     }};
@@ -114,6 +126,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       keyRingStore,
     } = useStore();
     const intl = useIntl();
+    const theme = useTheme();
 
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -450,7 +463,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
     }, [isExpanded]);
 
     return (
-      <Styles.Container>
+      <Styles.Container isNotReady={isNotReady}>
         <Box paddingX="1rem" paddingBottom="0.25rem">
           <Columns sum={1} alignY="center">
             <Stack gutter="0.5rem">
@@ -468,7 +481,14 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   isNotReady={isNotReady}
                   dummyMinWidth="5.125rem"
                 >
-                  <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
+                  <Subtitle2
+                    style={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["gray-10"],
+                    }}
+                  >
                     {totalPrice ? totalPrice.separator(" ").toString() : "?"}
                   </Subtitle2>
                 </Skeleton>
@@ -571,6 +591,7 @@ const ClaimTokenItem: FunctionComponent<{
   const { analyticsStore, accountStore, queriesStore } = useStore();
 
   const intl = useIntl();
+  const theme = useTheme();
   const navigate = useNavigate();
   const notification = useNotification();
 
@@ -701,10 +722,24 @@ const ClaimTokenItem: FunctionComponent<{
 
         <Column weight={1}>
           <Stack gutter="0.375rem">
-            <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
+            <Subtitle3
+              style={{
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["gray-300"],
+              }}
+            >
               {viewToken.token.currency.coinDenom}
             </Subtitle3>
-            <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
+            <Subtitle2
+              style={{
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-10"],
+              }}
+            >
               {viewToken.token
                 .maxDecimals(6)
                 .shrink(true)

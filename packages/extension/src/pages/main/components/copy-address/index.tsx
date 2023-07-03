@@ -18,13 +18,19 @@ const Styles = {
 
     padding: 3.5px 0.5rem;
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
     border-radius: ${CopyAddressRadius};
 
     cursor: pointer;
 
     :hover {
-      background-color: ${ColorPalette["gray-500"]};
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]};
     }
 
     svg {

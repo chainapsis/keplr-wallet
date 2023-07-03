@@ -12,22 +12,38 @@ import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { useStore } from "../../../../stores";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const IBCTransferView: FunctionComponent = () => {
   const { analyticsStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
+  const theme = useTheme();
 
   return (
     <Box
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      }
       borderRadius="0.375rem"
       padding="1rem"
+      style={{
+        boxShadow:
+          theme.mode === "light"
+            ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+            : "none",
+      }}
     >
       <Columns sum={1} alignY="center">
         <Stack gutter="0.5rem">
           <XAxis alignY="center">
-            <Subtitle2 color={ColorPalette["gray-10"]}>
+            <Subtitle2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-10"]
+              }
+            >
               <FormattedMessage id="page.main.components.ibc-transfer-view.title" />
             </Subtitle2>
 
