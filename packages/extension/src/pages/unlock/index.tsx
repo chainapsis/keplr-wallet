@@ -11,16 +11,19 @@ import { ColorPalette } from "../../styles";
 import { H1, Subtitle4 } from "../../components/typography";
 import { Tooltip } from "../../components/tooltip";
 import AnimLogo from "../../public/assets/lottie/unlock/logo.json";
+import AnimLogoLight from "../../public/assets/lottie/unlock/logo-light.json";
 import lottie, { AnimationItem } from "lottie-web";
 import { GuideBox } from "../../components/guide-box";
 import { LoadingIcon } from "../../components/icon";
 import { XAxis } from "../../components/axis";
 import { autorun } from "mobx";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const [isStartWithMigrating] = useState(() => keyRingStore.isMigrating);
   useEffect(() => {
@@ -63,7 +66,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
         renderer: "svg",
         loop: true,
         autoplay: false,
-        animationData: AnimLogo,
+        animationData: theme.mode === "light" ? AnimLogoLight : AnimLogo,
       });
 
       animRef.current = anim;
@@ -225,7 +228,13 @@ export const UnlockPage: FunctionComponent = observer(() => {
                     alignY="center"
                   >
                     <XAxis alignY="center">
-                      <Subtitle4 color={ColorPalette["gray-200"]}>
+                      <Subtitle4
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-300"]
+                            : ColorPalette["gray-200"]
+                        }
+                      >
                         <FormattedMessage id="page.unlock.upgrade-in-progress" />
                       </Subtitle4>
                       <Gutter size="0.5rem" />
@@ -294,6 +303,8 @@ const ParagraphSection: FunctionComponent<{
   needMigration: boolean;
   isMigrationSecondPhase: boolean;
 }> = ({ needMigration, isMigrationSecondPhase }) => {
+  const theme = useTheme();
+
   return (
     <React.Fragment>
       <Box
@@ -306,7 +317,13 @@ const ParagraphSection: FunctionComponent<{
       >
         {needMigration ? (
           <React.Fragment>
-            <H1 color={ColorPalette["white"]}>
+            <H1
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
               <FormattedMessage id="page.unlock.paragraph-section.keplr-here" />
             </H1>
             <Gutter size="0.75rem" />
@@ -323,8 +340,14 @@ const ParagraphSection: FunctionComponent<{
             <Gutter size="1.25rem" />
           </React.Fragment>
         ) : (
-          <H1 color={ColorPalette["white"]}>
-            <FormattedMessage id="page.unlock.paragraph-section.welcome-back" />{" "}
+          <H1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["white"]
+            }
+          >
+            <FormattedMessage id="page.unlock.paragraph-section.welcome-back" />
           </H1>
         )}
       </Box>
