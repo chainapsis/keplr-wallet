@@ -25,7 +25,15 @@ const Styles = {
   HeaderContainer: styled.div`
     height: 3.75rem;
 
-    background-color: ${ColorPalette["gray-700"]};
+    background: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["light-gradient"]
+        : ColorPalette["gray-700"]};
+
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-10"]};
 
     position: fixed;
     top: 0;
@@ -46,6 +54,11 @@ const Styles = {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-600"]
+        : ColorPalette["white"]};
   `,
   HeaderLeft: styled.div`
     height: 3.75rem;
