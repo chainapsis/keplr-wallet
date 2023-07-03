@@ -74,6 +74,7 @@ import { useMatchPopupSize } from "./popup-size";
 import { SignEthereumTxPage } from "./pages/sign/ethereum";
 import "simplebar-react/dist/simplebar.min.css";
 import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
+import { AppThemeProvider } from "./theme";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -350,22 +351,24 @@ const App: FunctionComponent = () => {
 
   return (
     <StoreProvider>
-      <AppIntlProvider>
-        <ModalRootProvider>
-          <ConfirmProvider>
-            <NotificationProvider>
-              <GlobalStyle />
-              <GlobalPopupStyle />
-              <ScrollBarStyle />
-              <ErrorBoundary>
-                <GlobalSimpleBarProvider style={{ height: "100vh" }}>
-                  <RoutesAfterReady />
-                </GlobalSimpleBarProvider>
-              </ErrorBoundary>
-            </NotificationProvider>
-          </ConfirmProvider>
-        </ModalRootProvider>
-      </AppIntlProvider>
+      <AppThemeProvider>
+        <AppIntlProvider>
+          <ModalRootProvider>
+            <ConfirmProvider>
+              <NotificationProvider>
+                <GlobalStyle />
+                <GlobalPopupStyle />
+                <ScrollBarStyle />
+                <ErrorBoundary>
+                  <GlobalSimpleBarProvider style={{ height: "100vh" }}>
+                    <RoutesAfterReady />
+                  </GlobalSimpleBarProvider>
+                </ErrorBoundary>
+              </NotificationProvider>
+            </ConfirmProvider>
+          </ModalRootProvider>
+        </AppIntlProvider>
+      </AppThemeProvider>
     </StoreProvider>
   );
 };

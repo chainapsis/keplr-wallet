@@ -20,6 +20,7 @@ import { observer } from "mobx-react-lite";
 import { useLoadFonts } from "./use-load-fonts";
 import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 import "simplebar-react/dist/simplebar.min.css";
+import { AppThemeProvider } from "./theme";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -53,17 +54,18 @@ const AppRouter: FunctionComponent = () => {
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
-      <AppIntlProvider>
-        <ModalRootProvider>
-          <ConfirmProvider>
-            <GlobalStyle />
-            <ScrollBarStyle />
-            <AutoLockMonitor />
-
-            <AppRouter />
-          </ConfirmProvider>
-        </ModalRootProvider>
-      </AppIntlProvider>
+      <AppThemeProvider>
+        <AppIntlProvider>
+          <ModalRootProvider>
+            <ConfirmProvider>
+              <GlobalStyle />
+              <ScrollBarStyle />
+              <AutoLockMonitor />
+              <AppRouter />
+            </ConfirmProvider>
+          </ModalRootProvider>
+        </AppIntlProvider>
+      </AppThemeProvider>
     </StoreProvider>
   );
 };
