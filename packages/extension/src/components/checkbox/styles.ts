@@ -31,11 +31,15 @@ export const Styles = {
       return ColorPalette["white"];
     }};
 
-    background-color: ${({ checked, disabled }) =>
+    background-color: ${({ checked, disabled, theme }) =>
       disabled
-        ? ColorPalette["gray-400"]
+        ? theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-400"]
         : checked
         ? ColorPalette["blue-400"]
+        : theme.mode === "light"
+        ? ColorPalette["gray-100"]
         : ColorPalette["gray-400"]};
     border-radius: ${({ size }) => {
       switch (size) {

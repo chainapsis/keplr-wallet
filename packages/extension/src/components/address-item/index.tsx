@@ -11,6 +11,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Gutter } from "../gutter";
 import { IconButton } from "../icon-button";
 import { XAxis, YAxis } from "../axis";
+import { useTheme } from "styled-components";
 
 export const AddressItem: FunctionComponent<{
   timestamp?: number;
@@ -34,12 +35,17 @@ export const AddressItem: FunctionComponent<{
   highlight,
 }) => {
   const intl = useIntl();
+  const theme = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   return (
     <Box
       padding="1rem"
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-600"]
+      }
       hover={{
         backgroundColor: onClick ? ColorPalette["gray-550"] : undefined,
       }}
@@ -83,7 +89,10 @@ export const AddressItem: FunctionComponent<{
               <React.Fragment>
                 <H5
                   style={{
-                    color: ColorPalette["gray-10"],
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"],
                     width: "16rem",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
@@ -97,11 +106,22 @@ export const AddressItem: FunctionComponent<{
             ) : null}
 
             <XAxis alignY="center">
-              <ProfileIcon width="0.75rem" height="0.75rem" />
+              <ProfileIcon
+                width="0.75rem"
+                height="0.75rem"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              />
               <Gutter size="0.25rem" />
               <Body2
                 style={{
-                  color: ColorPalette["gray-200"],
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"],
                 }}
               >
                 {Bech32Address.shortenAddress(address, 30)}
@@ -111,12 +131,23 @@ export const AddressItem: FunctionComponent<{
             <Gutter size="0.25rem" />
             {isShowMemo ? (
               <XAxis alignY="center">
-                <DocumentTextIcon width="0.75rem" height="0.75rem" />
+                <DocumentTextIcon
+                  width="0.75rem"
+                  height="0.75rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                />
                 <Gutter size="0.25rem" />
                 {memo ? (
                   <Body2
                     style={{
-                      color: ColorPalette["gray-200"],
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-300"]
+                          : ColorPalette["gray-200"],
                       width: "15rem",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
@@ -147,7 +178,11 @@ export const AddressItem: FunctionComponent<{
           >
             <IconButton
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              color={ColorPalette["gray-10"]}
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-10"]
+              }
             >
               <EllipsisIcon width="1.5rem" height="1.5rem" />
             </IconButton>

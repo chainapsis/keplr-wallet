@@ -3,12 +3,14 @@ import { Box } from "../box";
 import { ColorPalette } from "../../styles";
 import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
+import { useTheme } from "styled-components";
 
 // This is the splash screen that is shown when the extension is loaded.
 // 일반적으로 이 화면은 아주 잠깐만 뜨는게 목표기 때문에
 // 로고는 1초 이후에 보여준다.
 // 로고가 보이게 되면 사실 뭔가 잘못된거다.
 export const Splash: FunctionComponent = () => {
+  const theme = useTheme();
   const opacity = useSpringValue(0, {
     config: defaultSpringConfig,
   });
@@ -26,7 +28,11 @@ export const Splash: FunctionComponent = () => {
   return (
     <Box
       position="fixed"
-      backgroundColor={ColorPalette["gray-700"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["white"]
+          : ColorPalette["gray-700"]
+      }
       style={{
         top: 0,
         bottom: 0,

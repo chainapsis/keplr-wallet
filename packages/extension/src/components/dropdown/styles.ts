@@ -21,17 +21,35 @@ export const Styles = {
 
     padding: 0 1rem;
 
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette.white};
+
     border: 1px solid
-      ${({ isOpen }) =>
-        isOpen ? ColorPalette["gray-200"] : ColorPalette["gray-500"]};
+      ${({ isOpen, theme }) =>
+        isOpen
+          ? theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"]
+          : theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]};
     border-radius: 0.5rem;
-    background-color: ${ColorPalette["gray-700"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-700"]};
 
     cursor: pointer;
   `,
   Text: styled(Body2)<Pick<DropdownProps, "selectedItemKey">>`
-    color: ${({ selectedItemKey }) =>
-      selectedItemKey ? ColorPalette["gray-50"] : ColorPalette["gray-300"]};
+    color: ${({ selectedItemKey, theme }) =>
+      selectedItemKey
+        ? theme.mode === "light"
+          ? ColorPalette["gray-400"]
+          : ColorPalette["gray-50"]
+        : ColorPalette["gray-300"]};
   `,
   MenuContainer: styled.div.withConfig<{
     isOpen: boolean;
@@ -51,12 +69,24 @@ export const Styles = {
 
     z-index: 1;
 
-    border: 1px solid ${ColorPalette["gray-500"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-500"]};
+
+    border: 1px solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]};
     border-radius: 0.375rem;
 
     overflow: hidden;
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-50"]
+        : ColorPalette["gray-600"]};
 
     ${({ isOpen }) => {
       if (isOpen) {
@@ -93,8 +123,16 @@ export const Styles = {
 
     padding: 0 1.5rem;
 
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette.white};
+
     :hover {
-      background-color: ${ColorPalette["gray-500"]};
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]};
     }
 
     cursor: pointer;

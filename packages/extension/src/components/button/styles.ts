@@ -1,6 +1,12 @@
 import styled, { css, FlattenSimpleInterpolation } from "styled-components";
 import { ColorPalette } from "../../styles";
-import { ButtonProps, ButtonColor, ButtonMode, ButtonSize } from "./types";
+import {
+  ButtonProps,
+  ButtonColor,
+  ButtonMode,
+  ButtonSize,
+  ButtonTheme,
+} from "./types";
 
 export const ButtonRadius = "0.375rem";
 
@@ -44,85 +50,172 @@ export const getLoadingColor = (
 
 const buttonStyleFromColorAndMode: Record<
   ButtonColor,
-  Record<ButtonMode, Record<"enabled" | "disabled", FlattenSimpleInterpolation>>
+  Record<
+    ButtonTheme,
+    Record<
+      ButtonMode,
+      Record<"enabled" | "disabled", FlattenSimpleInterpolation>
+    >
+  >
 > = {
   primary: {
-    fill: {
-      enabled: css`
-        background-color: ${ColorPalette["blue-400"]};
+    light: {
+      fill: {
+        enabled: css`
+          background-color: ${ColorPalette["blue-400"]};
 
-        ${makeTextAndSvgColor(ColorPalette["white"])}
+          ${makeTextAndSvgColor(ColorPalette["white"])}
 
-        :hover {
-          ::after {
-            background-color: ${ColorPalette["gray-500"]};
-            opacity: 0.3;
+          :hover {
+            ::after {
+              background-color: ${ColorPalette["gray-500"]};
+              opacity: 0.1;
+            }
           }
-        }
-      `,
-      disabled: css`
-        background-color: ${ColorPalette["blue-400"]};
+        `,
+        disabled: css`
+          background-color: ${ColorPalette["blue-400"]};
 
-        ::after {
-          background-color: ${ColorPalette["gray-600"]};
-          opacity: 0.5;
-        }
+          ::after {
+            background-color: ${ColorPalette["gray-300"]};
+            opacity: 0.2;
+          }
 
-        ${makeTextAndSvgColor(ColorPalette["white"])}
-      `,
+          ${makeTextAndSvgColor(ColorPalette["white"])}
+        `,
+      },
+    },
+    dark: {
+      fill: {
+        enabled: css`
+          background-color: ${ColorPalette["blue-400"]};
+
+          ${makeTextAndSvgColor(ColorPalette["white"])}
+
+          :hover {
+            ::after {
+              background-color: ${ColorPalette["gray-500"]};
+              opacity: 0.3;
+            }
+          }
+        `,
+        disabled: css`
+          background-color: ${ColorPalette["blue-400"]};
+
+          ::after {
+            background-color: ${ColorPalette["gray-600"]};
+            opacity: 0.5;
+          }
+
+          ${makeTextAndSvgColor(ColorPalette["white"])}
+        `,
+      },
     },
   },
   secondary: {
-    fill: {
-      enabled: css`
-        background-color: ${ColorPalette["gray-400"]};
+    light: {
+      fill: {
+        enabled: css`
+          background-color: ${ColorPalette["blue-50"]};
 
-        ${makeTextAndSvgColor(ColorPalette["white"])}
+          ${makeTextAndSvgColor(ColorPalette["blue-400"])}
 
-        :hover {
-          ::after {
-            background-color: ${ColorPalette["gray-500"]};
-            opacity: 0.2;
+          :hover {
+            ::after {
+              background-color: ${ColorPalette["gray-500"]};
+              opacity: 0.02;
+            }
           }
-        }
-      `,
+        `,
 
-      disabled: css`
-        background-color: ${ColorPalette["gray-400"]};
+        disabled: css`
+          background-color: ${ColorPalette["blue-50"]};
 
-        ::after {
-          background-color: ${ColorPalette["gray-600"]};
-          opacity: 0.5;
-        }
+          ${makeTextAndSvgColor(ColorPalette["blue-200"])}
+        `,
+      },
+    },
+    dark: {
+      fill: {
+        enabled: css`
+          background-color: ${ColorPalette["gray-400"]};
 
-        ${makeTextAndSvgColor(ColorPalette["white"])}
-      `,
+          ${makeTextAndSvgColor(ColorPalette["white"])}
+
+          :hover {
+            ::after {
+              background-color: ${ColorPalette["gray-500"]};
+              opacity: 0.2;
+            }
+          }
+        `,
+
+        disabled: css`
+          background-color: ${ColorPalette["gray-400"]};
+
+          ::after {
+            background-color: ${ColorPalette["gray-600"]};
+            opacity: 0.5;
+          }
+
+          ${makeTextAndSvgColor(ColorPalette["white"])}
+        `,
+      },
     },
   },
   danger: {
-    fill: {
-      enabled: css`
-        background-color: rgba(166, 31, 58, 0.3);
+    light: {
+      fill: {
+        enabled: css`
+          background-color: ${ColorPalette["red-100"]};
 
-        ${makeTextAndSvgColor(ColorPalette["red-400"])}
+          ${makeTextAndSvgColor(ColorPalette["red-400"])}
 
-        :hover {
-          ::after {
-            background-color: ${ColorPalette["gray-500"]};
-            opacity: 0.2;
+          :hover {
+            ::after {
+              background-color: ${ColorPalette["gray-500"]};
+              opacity: 0.05;
+            }
           }
-        }
-      `,
-      disabled: css`
-        background-color: rgba(166, 31, 58, 0.3);
+        `,
+        disabled: css`
+          background-color: ${ColorPalette["red-100"]};
 
-        ::after {
-          background-color: ${ColorPalette["gray-600"]};
-          opacity: 0.5;
-        }
+          ::after {
+            background-color: ${ColorPalette["gray-300"]};
+            opacity: 0.1;
+          }
 
-        ${makeTextAndSvgColor(ColorPalette["red-400"])}
-      `,
+          ${makeTextAndSvgColor(ColorPalette["red-400"])}
+        `,
+      },
+    },
+    dark: {
+      fill: {
+        enabled: css`
+          background-color: ${ColorPalette["red-100"]};
+
+          ${makeTextAndSvgColor(ColorPalette["red-400"])}
+
+          :hover {
+            ::after {
+              background-color: ${ColorPalette["gray-500"]};
+              opacity: 0.2;
+            }
+          }
+        `,
+
+        disabled: css`
+          background-color: ${ColorPalette["gray-400"]};
+
+          ::after {
+            background-color: ${ColorPalette["gray-600"]};
+            opacity: 0.5;
+          }
+
+          ${makeTextAndSvgColor(ColorPalette["white"])}
+        `,
+      },
     },
   },
 };
@@ -182,10 +275,10 @@ export const Styles = {
       right: 0;
     }
 
-    ${({ color, mode, disabled }) =>
-      buttonStyleFromColorAndMode[color || "primary"][mode || "fill"][
-        disabled ? "disabled" : "enabled"
-      ]}
+    ${({ color, theme, mode, disabled }) =>
+      buttonStyleFromColorAndMode[color || "primary"][theme.mode || "dark"][
+        mode || "fill"
+      ][disabled ? "disabled" : "enabled"]}
   `,
   Left: styled.span`
     height: 100%;
