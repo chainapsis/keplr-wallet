@@ -9,7 +9,7 @@ import React, {
 import { observer } from "mobx-react-lite";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Stack } from "../../../../components/stack";
 import { TextInput } from "../../../../components/input";
 import { useStore } from "../../../../stores";
@@ -45,6 +45,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
 
   const intl = useIntl();
+  const theme = useTheme();
   const navigate = useNavigate();
   const notification = useNotification();
   const [searchParams] = useSearchParams();
@@ -331,17 +332,33 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         {isSecretWasm ? (
           <Stack gutter="0.75rem">
             <Box
-              backgroundColor={ColorPalette["gray-600"]}
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-10"]
+                  : ColorPalette["gray-600"]
+              }
               borderRadius="0.375rem"
               padding="1rem"
             >
               <Columns sum={1} alignY="center" gutter="0.25rem">
                 <Column weight={1}>
                   <Stack>
-                    <Subtitle2 color={ColorPalette["gray-50"]}>
+                    <Subtitle2
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["gray-50"]
+                      }
+                    >
                       <FormattedMessage id="page.setting.token.add.viewing-key-info-title" />
                     </Subtitle2>
-                    <Body3 color={ColorPalette["gray-200"]}>
+                    <Body3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-300"]
+                          : ColorPalette["gray-200"]
+                      }
+                    >
                       <FormattedMessage id="page.setting.token.add.viewing-key-info-paragraph" />
                     </Body3>
                   </Stack>

@@ -15,6 +15,7 @@ import { EmptyView } from "../../../../components/empty-view";
 import { Gutter } from "../../../../components/gutter";
 import { Tooltip } from "../../../../components/tooltip";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
@@ -74,9 +75,15 @@ const ChainItem: FunctionComponent<{
   onClickClose?: () => void;
 }> = ({ chainInfo, onClickClose }) => {
   const intl = useIntl();
+  const theme = useTheme();
+
   return (
     <Box
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-600"]
+      }
       borderRadius="0.375rem"
       paddingX="1rem"
       paddingY="1rem"
@@ -92,7 +99,15 @@ const ChainItem: FunctionComponent<{
         </Box>
         <Stack gutter="0.375rem">
           <Columns sum={1} alignY="center" gutter="0.25rem">
-            <Body1 color={ColorPalette["gray-50"]}>{chainInfo.chainName}</Body1>
+            <Body1
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-50"]
+              }
+            >
+              {chainInfo.chainName}
+            </Body1>
             <Tooltip
               content={intl.formatMessage({
                 id: "page.setting.general.delete-suggest-chain.chain-item.tooltip-text",
@@ -101,7 +116,11 @@ const ChainItem: FunctionComponent<{
               <QuestionIcon
                 width="1rem"
                 height="1rem"
-                color={ColorPalette["gray-300"]}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"]
+                }
               />
             </Tooltip>
           </Columns>
@@ -113,7 +132,7 @@ const ChainItem: FunctionComponent<{
         <Column weight={1} />
 
         <Box onClick={onClickClose} cursor="pointer">
-          <CloseIcon />
+          <CloseIcon color={ColorPalette["gray-300"]} />
         </Box>
       </Columns>
     </Box>

@@ -38,7 +38,10 @@ const Styles = {
   `,
   Paragraph: styled(Subtitle3)`
     text-align: center;
-    color: ${ColorPalette["gray-200"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-200"]};
     padding: 0 0.625rem;
   `,
 };

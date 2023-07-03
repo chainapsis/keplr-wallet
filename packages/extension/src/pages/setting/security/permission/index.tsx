@@ -6,7 +6,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Button } from "../../../../components/button";
 import { Box } from "../../../../components/box";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { SearchTextInput } from "../../../../components/input";
 import {
   ArrowDownIcon,
@@ -92,25 +92,40 @@ export const SettingSecurityPermissionPage: FunctionComponent = observer(() => {
 const OriginStyle = {
   Background: styled(Box)`
     padding: 0.75rem;
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-100"]
+        : ColorPalette["gray-600"]};
     gap: 0.75rem;
 
     border-radius: 0.375rem;
   `,
   All: styled.div`
-    color: ${ColorPalette["gray-300"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-200"]
+        : ColorPalette["gray-300"]};
   `,
   Item: styled(Box)`
     padding: 0.625rem;
     margin-right: 0.625rem;
-    color: ${ColorPalette["gray-100"]};
-    background-color: ${ColorPalette["gray-500"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-700"]
+        : ColorPalette["gray-100"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-500"]};
 
     border-radius: 0.375rem;
   `,
   Count: styled(Box)`
     cursor: pointer;
-    color: ${ColorPalette["gray-200"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-200"]};
   `,
 };
 
@@ -124,6 +139,7 @@ const OriginView: FunctionComponent<{
     | undefined;
 }> = observer(({ origin, value }) => {
   const { permissionManagerStore } = useStore();
+  const theme = useTheme();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -183,7 +199,13 @@ const OriginView: FunctionComponent<{
                 sum={1}
                 key={`${permission.chainIdentifier}/${permission.type}`}
               >
-                <TreeIcon />
+                <TreeIcon
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-400"]
+                  }
+                />
                 <OriginStyle.Item
                   cursor="pointer"
                   onClick={async (e) => {
@@ -198,12 +220,24 @@ const OriginView: FunctionComponent<{
                   }}
                 >
                   <Columns sum={1} gutter="0.75rem" alignY="center">
-                    <Body2 style={{ color: ColorPalette["gray-100"] }}>
+                    <Body2
+                      style={{
+                        color:
+                          theme.mode === "light"
+                            ? ColorPalette["gray-700"]
+                            : ColorPalette["gray-100"],
+                      }}
+                    >
                       {permission.chainIdentifier}
                     </Body2>
                     <Box
                       cursor="pointer"
-                      style={{ color: ColorPalette["gray-300"] }}
+                      style={{
+                        color:
+                          theme.mode === "light"
+                            ? ColorPalette["gray-200"]
+                            : ColorPalette["gray-300"],
+                      }}
                     >
                       <CloseIcon width="1rem" height="1rem" />
                     </Box>
@@ -215,7 +249,13 @@ const OriginView: FunctionComponent<{
           {value.globalPermissions.map((globalPermission) => {
             return (
               <Columns sum={1} key={globalPermission.type}>
-                <TreeIcon />
+                <TreeIcon
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-400"]
+                  }
+                />
                 <OriginStyle.Item
                   cursor="pointer"
                   onClick={async (e) => {
@@ -229,7 +269,14 @@ const OriginView: FunctionComponent<{
                   }}
                 >
                   <Columns sum={1} gutter="0.75rem" alignY="center">
-                    <Body2 style={{ color: ColorPalette["gray-100"] }}>
+                    <Body2
+                      style={{
+                        color:
+                          theme.mode === "light"
+                            ? ColorPalette["gray-700"]
+                            : ColorPalette["gray-100"],
+                      }}
+                    >
                       {(() => {
                         switch (globalPermission.type) {
                           case "get-chain-infos":
@@ -241,7 +288,12 @@ const OriginView: FunctionComponent<{
                     </Body2>
                     <Box
                       cursor="pointer"
-                      style={{ color: ColorPalette["gray-300"] }}
+                      style={{
+                        color:
+                          theme.mode === "light"
+                            ? ColorPalette["gray-200"]
+                            : ColorPalette["gray-300"],
+                      }}
                     >
                       <CloseIcon width="1rem" height="1rem" />
                     </Box>

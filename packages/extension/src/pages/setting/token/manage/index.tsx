@@ -28,7 +28,10 @@ const Styles = {
     padding: 0 0.75rem;
   `,
   Paragraph: styled(Body2)`
-    color: ${ColorPalette["gray-200"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-200"]};
     text-align: center;
     margin-bottom: 0.75rem;
   `,
@@ -141,17 +144,29 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
 const ItemStyles = {
   Container: styled.div`
     padding: 1rem;
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-600"]};
     border-radius: 0.375rem;
   `,
   Denom: styled(H5)`
-    color: ${ColorPalette["gray-10"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-700"]
+        : ColorPalette["gray-10"]};
   `,
   Address: styled(Body2)`
-    color: ${ColorPalette["gray-200"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-200"]};
   `,
   Icon: styled.div`
-    color: ${ColorPalette["gray-10"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-10"]};
     cursor: pointer;
   `,
 };
