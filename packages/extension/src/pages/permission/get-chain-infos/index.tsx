@@ -13,12 +13,14 @@ import { Gutter } from "../../../components/gutter";
 import { Body1, Body2, H2 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
   data: InteractionWaitingData<GlobalPermissionData>;
 }> = observer(({ data }) => {
   const { permissionStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const interactionInfo = useInteractionInfo();
 
@@ -62,13 +64,25 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
 
           <Gutter size="1.125rem" />
 
-          <H2 color={ColorPalette["gray-10"]}>
+          <H2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-600"]
+                : ColorPalette["gray-10"]
+            }
+          >
             <FormattedMessage id="page.permission.requesting-connection-title" />
           </H2>
 
           <Gutter size="1rem" />
 
-          <Body1 color={ColorPalette["gray-200"]}>
+          <Body1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
             {data.data.origins.join(", ")}
           </Body1>
         </Box>
@@ -81,7 +95,11 @@ export const GlobalPermissionGetChainInfosPage: FunctionComponent<{
           }}
         >
           <Body2
-            color={ColorPalette["gray-200"]}
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
             style={{
               lineHeight: 1.215,
             }}

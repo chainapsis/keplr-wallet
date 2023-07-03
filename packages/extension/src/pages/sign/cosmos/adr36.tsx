@@ -18,10 +18,12 @@ import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Image } from "../../../components/image";
+import { useTheme } from "styled-components";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
   const { chainStore, signInteractionStore, uiConfigStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -196,8 +198,18 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
         <Box
           padding="1rem"
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
           borderRadius="0.375rem"
+          style={{
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
+          }}
         >
           <XAxis alignY="center">
             <Image
@@ -207,11 +219,23 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             />
             <Gutter size="0.75rem" />
             <YAxis>
-              <H5 color={ColorPalette["gray-10"]}>
+              <H5
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-10"]
+                }
+              >
                 <FormattedMessage id="Prove account ownership to" />
               </H5>
               <Gutter size="2px" />
-              <Body3 color={ColorPalette["gray-200"]}>
+              <Body3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              >
                 {signInteractionStore.waitingData?.data.origin || ""}
               </Body3>
             </YAxis>
@@ -223,15 +247,26 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         <Box
           height="13rem"
           padding="1rem"
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
           borderRadius="0.375rem"
           style={{
             overflow: "auto",
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
           }}
         >
           <pre
             style={{
-              color: ColorPalette["gray-10"],
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-10"],
               // Remove normalized style of pre tag
               margin: 0,
             }}
@@ -250,15 +285,37 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         <div style={{ flex: 1 }} />
         <Box
           padding="1rem"
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
           borderRadius="0.375rem"
+          style={{
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
+          }}
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-200"]}>
+            <Body2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
               <FormattedMessage id="page.sign.adr36.requested-network" />
             </Body2>
             <div style={{ flex: 1 }} />
-            <Subtitle3 color={ColorPalette["gray-50"]}>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-50"]
+              }
+            >
               {signInteractionStore.waitingData?.data.chainId
                 ? chainStore.getChain(
                     signInteractionStore.waitingData?.data.chainId
