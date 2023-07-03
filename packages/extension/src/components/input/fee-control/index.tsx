@@ -29,11 +29,18 @@ const Styles = {
     hasError: boolean;
   }>`
     padding: 1rem 0.25rem 1rem 1rem;
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
 
-    border: ${({ hasError }) =>
+    border: ${({ hasError, theme }) =>
       hasError
-        ? `1.5px solid ${Color(ColorPalette["yellow-400"])
+        ? `1.5px solid ${Color(
+            theme.mode === "light"
+              ? ColorPalette["orange-400"]
+              : ColorPalette["yellow-400"]
+          )
             .alpha(0.5)
             .toString()}`
         : `1.5px solid ${Color(ColorPalette["blue-400"])
@@ -42,16 +49,23 @@ const Styles = {
     border-radius: 0.375rem;
 
     :hover {
-      border: ${({ hasError }) =>
+      border: ${({ hasError, theme }) =>
         hasError
-          ? `1.5px solid ${ColorPalette["yellow-500"]}`
+          ? `1.5px solid ${
+              theme.mode === "light"
+                ? ColorPalette["orange-400"]
+                : ColorPalette["yellow-500"]
+            }`
           : `1.5px solid ${ColorPalette["blue-500"]};`};
     }
 
     cursor: pointer;
   `,
   IconContainer: styled.div`
-    color: ${ColorPalette["gray-300"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-200"]
+        : ColorPalette["gray-300"]};
   `,
 };
 
@@ -211,9 +225,17 @@ export const FeeControl: FunctionComponent<{
               <Gutter size="0.25rem" />
               {feeConfig.uiProperties.loadingState ||
               gasSimulator?.uiProperties.loadingState ? (
-                <LoadingIcon width="1rem" height="1rem" />
+                <LoadingIcon
+                  width="1rem"
+                  height="1rem"
+                  color={ColorPalette["gray-200"]}
+                />
               ) : (
-                <SettingIcon width="1rem" height="1rem" />
+                <SettingIcon
+                  width="1rem"
+                  height="1rem"
+                  color={ColorPalette["gray-200"]}
+                />
               )}
             </Columns>
 

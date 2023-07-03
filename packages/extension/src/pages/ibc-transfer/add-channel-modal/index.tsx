@@ -10,6 +10,7 @@ import { Button } from "../../../components/button";
 import { YAxis } from "../../../components/axis";
 import { useStore } from "../../../stores";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const IBCAddChannelModal: FunctionComponent<{
   chainId: string;
@@ -17,6 +18,7 @@ export const IBCAddChannelModal: FunctionComponent<{
 }> = observer(({ chainId, close }) => {
   const { chainStore, queriesStore, ibcChannelStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const [selectedChainId, setSelectedChainId] = useState("");
   const [value, setValue] = useState("");
@@ -29,14 +31,12 @@ export const IBCAddChannelModal: FunctionComponent<{
         width="90%"
         maxWidth="22.5rem"
         padding="1.5rem 1rem"
-        backgroundColor={ColorPalette["gray-600"]}
+        backgroundColor={
+          theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+        }
         borderRadius="0.5rem"
       >
-        <Subtitle1
-          style={{
-            color: ColorPalette["gray-10"],
-          }}
-        >
+        <Subtitle1>
           <FormattedMessage id="page.ibc-transfer.add-channel-modal.title" />
         </Subtitle1>
 

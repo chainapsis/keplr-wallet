@@ -32,7 +32,10 @@ export const Styles = {
               .alpha(0.1)
               .string()};
             svg {
-              color: ${ColorPalette["red-300"]};
+              color: ${(props) =>
+                props.theme.mode === "light"
+                  ? ColorPalette["red-400"]
+                  : ColorPalette["red-300"]};
             }
           `;
         default:
@@ -60,7 +63,10 @@ export const Styles = {
               ? ColorPalette["orange-400"]
               : ColorPalette["yellow-400"];
         case "danger":
-          return ColorPalette["red-300"];
+          return (props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["red-400"]
+              : ColorPalette["red-300"];
         default:
           return (props) =>
             props.theme.mode === "light"
@@ -78,7 +84,10 @@ export const Styles = {
               ? ColorPalette["orange-400"]
               : ColorPalette["yellow-500"];
         case "danger":
-          return ColorPalette["red-300"];
+          return (props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["red-400"]
+              : ColorPalette["red-300"];
         default:
           return ColorPalette["gray-300"];
       }

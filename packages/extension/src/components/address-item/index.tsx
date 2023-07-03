@@ -47,7 +47,11 @@ export const AddressItem: FunctionComponent<{
           : ColorPalette["gray-600"]
       }
       hover={{
-        backgroundColor: onClick ? ColorPalette["gray-550"] : undefined,
+        backgroundColor: onClick
+          ? theme.mode === "light"
+            ? ColorPalette["gray-100"]
+            : ColorPalette["gray-550"]
+          : undefined,
       }}
       borderRadius="0.375rem"
       borderWidth={highlight ? "1px" : undefined}
@@ -67,7 +71,10 @@ export const AddressItem: FunctionComponent<{
               <React.Fragment>
                 <H5
                   style={{
-                    color: ColorPalette["gray-10"],
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"],
                   }}
                 >
                   <FormattedMessage
