@@ -19,6 +19,7 @@ export const SupportedChainFeatures = [
   "osmosis-txfees",
   "terra-classic-fee",
   "ibc-go-v7-hot-fix",
+  "ibc-pfm",
 ];
 
 /**
@@ -77,6 +78,24 @@ export const RecognizableChainFeaturesMethod: {
         result.data.params.receive_enabled &&
         result.data.params.send_enabled
       );
+    },
+  },
+  {
+    feature: "ibc-pfm",
+    fetch: async (features, _rpc, rest) => {
+      if (features.includes("ibc-go") && features.includes("ibc-transfer")) {
+        const result = await simpleFetch(rest, "/ibc/apps/router/v1/params", {
+          validateStatus: (status) => {
+            return status === 200 || status === 501;
+          },
+        });
+
+        if (result.status === 200) {
+          return true;
+        }
+      }
+
+      return false;
     },
   },
   {
