@@ -44,6 +44,16 @@ export const ColorPalette = {
   "pink-300": "#F891C4",
   "pink-400": "#FF6BB8",
 
+  "orange-50": "#FFF6F1",
+  "orange-100": "#FFD1B8",
+  "orange-200": "#FFAD80",
+  "orange-300": "#FC8441",
+  "orange-400": "#FA6410",
+  "orange-500": "#D7560E",
+  "orange-600": "#8F3A0A",
+  "orange-700": "#58270B",
+  "orange-800": "#2D1609",
+
   "yellow-50": "#F8F2E3",
   "yellow-100": "#F2E6C7",
   "yellow-200": "#EDD18A",
@@ -68,4 +78,6 @@ export const ColorPalette = {
   black: "#020202",
 
   transparent: "rgba(255,255,255,0)",
+
+  "light-gradient": "linear-gradient(90deg, #FCFAFF 2.44%, #FBFBFF 96.83%)",
 };
