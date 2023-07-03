@@ -13,10 +13,12 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { Button } from "../../../../components/button";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const WelcomePage: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
   const [isDesktop, setIsDesktop] = React.useState(true);
 
   const osmosisInfo = chainStore.chainInfos.find(
@@ -61,13 +63,29 @@ export const WelcomePage: FunctionComponent = observer(() => {
         <Box
           padding="0.5rem 1rem"
           borderRadius="1.5rem"
-          backgroundColor={Color(ColorPalette["green-600"])
+          backgroundColor={Color(
+            theme.mode === "light"
+              ? ColorPalette["green-50"]
+              : ColorPalette["green-600"]
+          )
             .alpha(0.25)
             .toString()}
         >
           <Columns sum={1} gutter="0.625rem">
-            <CheckIcon />
-            <Subtitle2 color={ColorPalette["green-400"]}>
+            <CheckIcon
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["green-500"]
+                  : ColorPalette["green-400"]
+              }
+            />
+            <Subtitle2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["green-500"]
+                  : ColorPalette["green-400"]
+              }
+            >
               <FormattedMessage id="pages.register.pages.welcome.sub-title" />
             </Subtitle2>
           </Columns>
@@ -197,7 +215,11 @@ export const WelcomePage: FunctionComponent = observer(() => {
             <XAxis alignY="center">
               <Box
                 padding="0.375rem"
-                backgroundColor={ColorPalette["gray-500"]}
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-500"]
+                }
                 borderRadius="50%"
               >
                 <TwitterIcon />
@@ -209,6 +231,10 @@ export const WelcomePage: FunctionComponent = observer(() => {
                 style={{
                   fontWeight: 600,
                   fontSize: "0.875rem",
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette.white,
                 }}
               >
                 <FormattedMessage id="pages.register.pages.welcome.follow-twitter.title" />

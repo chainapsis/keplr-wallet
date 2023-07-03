@@ -16,10 +16,12 @@ import { RegisterH4 } from "../components/typography";
 import { ArrowDownTrayIcon, GoogleIcon } from "../../../components/icon";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const RegisterIntroExistingUserScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
   const intl = useIntl();
+  const theme = useTheme();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -41,7 +43,13 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
       <Columns sum={2} gutter="2.5rem">
         <Column weight={1}>
           <Box height="100%">
-            <RegisterH4 color={ColorPalette["gray-50"]}>
+            <RegisterH4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-50"]
+              }
+            >
               <FormattedMessage id="pages.register.intro-existing-user.recovery-title" />
             </RegisterH4>
             <Gutter size="0.5rem" />
@@ -65,7 +73,13 @@ export const RegisterIntroExistingUserScene: FunctionComponent = () => {
         <Box width="1px" backgroundColor={ColorPalette["gray-400"]} />
         <Column weight={1}>
           <Box height="100%">
-            <RegisterH4 color={ColorPalette["gray-50"]}>
+            <RegisterH4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-50"]
+              }
+            >
               <FormattedMessage id="pages.register.intro-existing-user.social-recovery-title" />
             </RegisterH4>
 

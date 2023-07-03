@@ -26,6 +26,7 @@ import { Checkbox } from "../../../components/checkbox";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import { useConfirm } from "../../../hooks/confirm";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -348,12 +349,22 @@ const StepView: FunctionComponent<{
   focused: boolean;
   completed: boolean;
 }> = ({ step, paragraph, icon, focused, completed }) => {
+  const theme = useTheme();
+
   return (
     <Box
       paddingX="2rem"
       paddingY="1.25rem"
       borderRadius="1.125rem"
-      backgroundColor={focused ? ColorPalette["gray-500"] : "transparent"}
+      backgroundColor={
+        focused
+          ? theme.mode === "light"
+            ? ColorPalette["gray-50"]
+            : ColorPalette["gray-500"]
+          : theme.mode === "light"
+          ? "none"
+          : "transparent"
+      }
     >
       <XAxis alignY="center">
         <div>{icon}</div>
@@ -363,7 +374,11 @@ const StepView: FunctionComponent<{
             <H2
               style={{
                 color: focused
-                  ? ColorPalette["gray-10"]
+                  ? theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-10"]
+                  : theme.mode === "light"
+                  ? ColorPalette["gray-200"]
                   : ColorPalette["gray-300"],
               }}
             >
@@ -387,6 +402,10 @@ const StepView: FunctionComponent<{
           <Body1
             style={{
               color: focused
+                ? theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+                : theme.mode === "light"
                 ? ColorPalette["gray-200"]
                 : ColorPalette["gray-300"],
             }}

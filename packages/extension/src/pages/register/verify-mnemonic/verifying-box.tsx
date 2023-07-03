@@ -11,7 +11,7 @@ import {
 } from "../../../components/input";
 import { XAxis, YAxis } from "../../../components/axis";
 import { ColorPalette } from "../../../styles";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Gutter } from "../../../components/gutter";
 import { useSceneEvents } from "../../../components/transition";
 import { FormattedMessage } from "react-intl";
@@ -21,7 +21,10 @@ const Styles = {
     font-weight: 500;
     font-size: 0.875rem;
     text-align: right;
-    color: ${ColorPalette["gray-100"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-500"]
+        : ColorPalette["gray-100"]};
 
     margin-right: 0.25rem;
   `,
@@ -50,6 +53,7 @@ export const VerifyingMnemonicBox = forwardRef<
     }[];
   }
 >(({ words }, ref) => {
+  const theme = useTheme();
   const firstInputRef = useRef<HTMLInputElement | null>(null);
   useSceneEvents({
     onDidVisible: () => {
@@ -80,7 +84,11 @@ export const VerifyingMnemonicBox = forwardRef<
   return (
     <Box
       paddingY="1.5rem"
-      backgroundColor={ColorPalette["gray-500"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-500"]
+      }
       borderRadius="0.5rem"
     >
       <YAxis alignX="center">
