@@ -131,6 +131,7 @@ module.exports = {
       crypto: require.resolve("crypto-browserify"),
       stream: require.resolve("stream-browserify"),
       process: require.resolve("process/browser"),
+      zlib: require.resolve("browserify-zlib"),
     },
   },
   module: {

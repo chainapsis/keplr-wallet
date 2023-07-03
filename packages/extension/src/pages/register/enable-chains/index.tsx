@@ -568,6 +568,13 @@ export const EnableChainsScene: FunctionComponent<{
             values={{ numSelected }}
           />
         </Subtitle3>
+        <Subtitle4
+          color={ColorPalette["gray-300"]}
+          style={{ marginTop: "0.5rem", textAlign: "center" }}
+        >
+          Note that the ‘Suggest Chain’ feature will only work for 118 coin
+          type.
+        </Subtitle4>
         <Gutter size="0.75rem" />
         <SimpleBar
           style={{

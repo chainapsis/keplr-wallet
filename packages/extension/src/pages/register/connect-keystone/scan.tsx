@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { useRegisterHeader } from "../components/header";
 import {
   useSceneEvents,
@@ -10,7 +10,11 @@ import KeystoneSDK, { UR } from "@keystonehq/keystone-sdk";
 import { Box } from "../../../components/box";
 import { ColorPalette } from "../../../styles";
 import { CameraIcon } from "../../../components/icon";
-import { AnimatedQRScanner, Purpose } from "@keystonehq/animated-qr";
+import { Purpose, useAnimatedQRScanner } from "@keystonehq/animated-qr";
+import { GuideBox } from "../../../components/guide-box";
+import { Modal } from "../../../components/modal";
+import { Body2, Subtitle1 } from "../../../components/typography";
+import { Button } from "../../../components/button";
 
 export const ScanKeystoneScene: FunctionComponent<{
   name: string;
@@ -25,6 +29,10 @@ export const ScanKeystoneScene: FunctionComponent<{
   stepTotal: number;
 }> = observer(({ name, password, stepPrevious, stepTotal }) => {
   const sceneTransition = useSceneTransition();
+  const { AnimatedQRScanner, hasPermission, setIsDone } = useAnimatedQRScanner(
+    {}
+  );
+  const [isErrorOpen, setIsErrorOpen] = useState(false);
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -57,10 +65,12 @@ export const ScanKeystoneScene: FunctionComponent<{
 
   const handleError = (err: string) => {
     console.error(err);
+    setIsErrorOpen(true);
   };
 
-  const handleLoaded = (canPlay: boolean) => {
-    console.log(canPlay);
+  const handleClose = () => {
+    setIsErrorOpen(false);
+    setIsDone(false);
   };
 
   return (
@@ -69,8 +79,8 @@ export const ScanKeystoneScene: FunctionComponent<{
         backgroundColor={ColorPalette["gray-500"]}
         borderRadius="0.5rem"
         style={{ overflow: "hidden", position: "relative" }}
-        width="21.25rem"
-        height="21.25rem"
+        width="23.5rem"
+        height="23.5rem"
       >
         <Box
           style={{
@@ -90,25 +100,85 @@ export const ScanKeystoneScene: FunctionComponent<{
           purpose={Purpose.COSMOS_SYNC}
           handleScan={handleScan}
           handleError={handleError}
-          videoLoaded={handleLoaded}
           options={{
-            width: "21.25rem",
-            height: "21.25rem",
+            width: "23.5rem",
+            height: "23.5rem",
             blur: false,
           }}
         />
       </Box>
-      <Box
-        color={ColorPalette["gray-200"]}
-        style={{
-          fontSize: "1.125rem",
-          lineHeight: "1.625rem",
-          textAlign: "center",
-          marginTop: "2rem",
-        }}
-      >
-        Position the QR code in front of your camera.
-      </Box>
+      {hasPermission ? (
+        <Box
+          color={ColorPalette["gray-200"]}
+          style={{
+            fontSize: "1.125rem",
+            lineHeight: "1.625rem",
+            textAlign: "center",
+            marginTop: "2rem",
+          }}
+        >
+          Position the QR code in front of your camera.
+        </Box>
+      ) : (
+        <Box width="23.5rem" marginTop="2rem">
+          <GuideBox
+            color="warning"
+            title="No camera permission"
+            paragraph="Please enable your camera permission via [Settings]"
+          />
+        </Box>
+      )}
+      <Modal isOpen={isErrorOpen} close={handleClose} align="center">
+        <Box
+          width="18.6875rem"
+          marginX="auto"
+          backgroundColor={ColorPalette["gray-600"]}
+          padding="1.5rem 1.25rem 1.25rem"
+          borderRadius="0.5rem"
+        >
+          <Subtitle1>Invalid QR code</Subtitle1>
+          <Body2
+            color={ColorPalette["gray-200"]}
+            style={{ marginTop: "0.5rem" }}
+          >
+            Please ensure you have selected a valid QR code from your Keystone
+            device.
+          </Body2>
+          <Box
+            marginTop="2rem"
+            alignX="right"
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "flex-end",
+            }}
+          >
+            <a
+              href="https://support.keyst.one/3rd-party-wallets/cosmos-wallets/keplr-extension?utm_source=keplr&utm_medium=moredetails&utm_id=20230419"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                marginRight: "1.75rem",
+                color: ColorPalette.white,
+                textDecoration: "none",
+                fontSize: "0.875rem",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              Tutorial
+            </a>
+            <Button
+              size="small"
+              text="OK"
+              style={{ width: "4.8125rem" }}
+              onClick={handleClose}
+            />
+          </Box>
+        </Box>
+      </Modal>
     </RegisterSceneBox>
   );
 });

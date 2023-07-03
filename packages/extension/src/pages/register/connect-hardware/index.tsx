@@ -190,7 +190,7 @@ const KeystoneInformation: FunctionComponent = () => {
         </Box>
         <a
           target="_blank"
-          href="https://keyst.one/"
+          href="https://keyst.one/?utm_source=keplr&utm_medium=learnmore&utm_id=20230419"
           style={{
             color: ColorPalette["blue-400"],
             fontSize: "0.875rem",
