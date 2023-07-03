@@ -4,10 +4,11 @@ import { ColorPalette } from "../../../../styles";
 import { TextButton } from "../../../../components/button-text";
 import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import lottie from "lottie-web";
-import AnimCheck from "../../../../public/assets/lottie/register/check_circle-icon.json";
+import AnimCheck from "../../../../public/assets/lottie/register/check-circle-icon.json";
+import AnimCheckLight from "../../../../public/assets/lottie/register/check-circle-icon-light.json";
 import { FormattedMessage } from "react-intl";
 
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 const SVGNoneTextButton = styled(TextButton)`
   svg {
@@ -30,6 +31,8 @@ export const CopyToClipboard: FunctionComponent<{ text: string }> = ({
 
   const checkAnimDivRef = useRef<HTMLDivElement | null>(null);
 
+  const theme = useTheme();
+
   useEffect(() => {
     if (checkAnimDivRef.current) {
       const anim = lottie.loadAnimation({
@@ -37,7 +40,7 @@ export const CopyToClipboard: FunctionComponent<{ text: string }> = ({
         renderer: "svg",
         autoplay: true,
         loop: false,
-        animationData: AnimCheck,
+        animationData: theme.mode === "light" ? AnimCheckLight : AnimCheck,
       });
 
       return () => {

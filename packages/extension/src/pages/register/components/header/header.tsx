@@ -20,6 +20,7 @@ import { ColorPalette } from "../../../../styles";
 import { RegisterH1, RegisterH4, RegisterH3 } from "../typography";
 import { HelpDeskButton } from "../help-desk-button";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const RegisterHeader: FunctionComponent<{
   sceneRef: MutableRefObject<SceneTransitionRef | null>;
@@ -168,11 +169,15 @@ export const RegisterHeader: FunctionComponent<{
 };
 
 const HeaderIntro: FunctionComponent = () => {
+  const theme = useTheme();
+
   return (
     <Box paddingY="0.25rem">
       <YAxis alignX="center">
         <img
-          src={require("../../../../public/assets/img/intro-logo.png")}
+          src={require(theme.mode === "light"
+            ? "../../../../public/assets/img/intro-logo-light.png"
+            : "../../../../public/assets/img/intro-logo.png")}
           style={{
             height: "3.125rem",
           }}
@@ -181,7 +186,13 @@ const HeaderIntro: FunctionComponent = () => {
 
         <Gutter size="1.25rem" />
 
-        <RegisterH4 color={ColorPalette["gray-200"]}>
+        <RegisterH4
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-200"]
+              : ColorPalette["gray-50"]
+          }
+        >
           <FormattedMessage id="pages.register.components.header.intro-title" />
         </RegisterH4>
       </YAxis>
@@ -193,12 +204,22 @@ const HeaderWelcome: FunctionComponent<{
   title: string;
   paragraph: string;
 }> = ({ title, paragraph }) => {
+  const theme = useTheme();
+
   return (
     <Box position="relative">
       <YAxis alignX="center">
         <RegisterH1>{title}</RegisterH1>
         <Gutter size="0.75rem" />
-        <H4 color={ColorPalette["gray-200"]}>{paragraph}</H4>
+        <H4
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"]
+          }
+        >
+          {paragraph}
+        </H4>
       </YAxis>
     </Box>
   );
@@ -211,12 +232,19 @@ const HeaderStep: FunctionComponent<{
   stepTotal: number;
 }> = ({ title, paragraphs, stepCurrent, stepTotal }) => {
   const intl = useIntl();
+  const theme = useTheme();
   return (
     <Box position="relative">
       <YAxis alignX="center">
         {stepCurrent <= 0 && stepTotal <= 0 ? null : (
           <React.Fragment>
-            <Subtitle3 color={ColorPalette["gray-200"]}>{`${intl.formatMessage({
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >{`${intl.formatMessage({
               id: "pages.register.components.header.header-step.title",
             })} ${stepCurrent}/${stepTotal}`}</Subtitle3>
             <Gutter size="0.75rem" />
@@ -278,12 +306,17 @@ const HeaderStep: FunctionComponent<{
 const BackButton: FunctionComponent<{
   sceneRef: MutableRefObject<SceneTransitionRef | null>;
 }> = ({ sceneRef }) => {
+  const theme = useTheme();
+
   return (
     <div
       style={{
         width: "2.5rem",
         height: "2.5rem",
-        backgroundColor: ColorPalette["gray-500"],
+        backgroundColor:
+          theme.mode === "light"
+            ? ColorPalette["gray-50"]
+            : ColorPalette["gray-500"],
         borderRadius: "100000px",
         cursor: "pointer",
 
