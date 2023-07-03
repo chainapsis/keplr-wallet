@@ -39,7 +39,7 @@
     "@keplr-wallet/simple-fetch": "0.12.20",
     "@keplr-wallet/types": "0.12.20",
     "@keplr-wallet/unit": "0.12.20",
-    "@keystonehq/keystone-sdk": "^0.2.0",
+    "@keystonehq/keystone-sdk": "^0.2.1",
     "@ledgerhq/hw-app-eth": "^6.29.3",
     "@ledgerhq/hw-transport": "^6.20.0",
     "@ledgerhq/hw-transport-webhid": "^6.20.0",

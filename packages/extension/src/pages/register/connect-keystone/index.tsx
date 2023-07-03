@@ -82,7 +82,7 @@ export const ConnectKeystoneScene: FunctionComponent<{
         />
       </Stack>
       <a
-        href="#"
+        href="https://support.keyst.one/3rd-party-wallets/cosmos-wallets/keplr-extension?utm_source=keplr&utm_medium=moredetails&utm_id=20230419"
         target="_blank"
         rel="noopener noreferrer"
         style={{
