@@ -38,8 +38,11 @@ export const useAppTheme = () => {
 
 export const AppThemeProvider: FunctionComponent = ({ children }) => {
   const [option, _setOption] = useState<ThemeOption>(() => initOption());
+  const [displayTheme, setDisplayTheme] = useState<"dark" | "light">(() => {
+    if (!option) {
+      return "dark";
+    }
 
-  const getTheme = () => {
     if (option === "auto") {
       return window.matchMedia("(prefers-color-scheme: light)").matches
         ? "light"
@@ -47,10 +50,21 @@ export const AppThemeProvider: FunctionComponent = ({ children }) => {
     }
 
     return option;
-  };
+  });
 
   const setTheme = (option: ThemeOption) => {
     localStorage.setItem("theme-option", option);
+
+    if (option === "auto") {
+      setDisplayTheme(
+        window.matchMedia("(prefers-color-scheme: light)").matches
+          ? "light"
+          : "dark"
+      );
+    } else {
+      setDisplayTheme(option);
+    }
+
     _setOption(option);
   };
 
@@ -61,7 +75,7 @@ export const AppThemeProvider: FunctionComponent = ({ children }) => {
         const newColorScheme = event.matches ? "dark" : "light";
 
         if (option === "auto") {
-          setTheme(newColorScheme);
+          setDisplayTheme(newColorScheme);
         }
       });
   }, [option]);
@@ -73,7 +87,7 @@ export const AppThemeProvider: FunctionComponent = ({ children }) => {
         setTheme,
       }}
     >
-      <ThemeProvider theme={{ mode: getTheme() }}>{children}</ThemeProvider>
+      <ThemeProvider theme={{ mode: displayTheme }}>{children}</ThemeProvider>
     </AppThemeContext.Provider>
   );
 };
