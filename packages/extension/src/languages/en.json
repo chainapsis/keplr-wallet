@@ -73,7 +73,7 @@
   "pages.register.connect-hardware.header.paragraph": "Want even more security? 😎",
   "pages.register.connect-hardware.content.title": "Select a hardware wallet that you would like to use with Keplr",
   "pages.register.connect-hardware.connect-ledger-button": "Connect Ledger",
-  "pages.register.connect-hardware.connect-keystone-button": "Connect Keystone (Coming Soon)",
+  "pages.register.connect-hardware.connect-keystone-button": "Connect Keystone",
 
   "pages.register.new-mnemonic.title": "New Recovery Phrase",
   "pages.register.new-mnemonic.12-words-tab": "12 words",
