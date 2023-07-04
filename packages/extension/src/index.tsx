@@ -382,7 +382,7 @@ const LightModeBackground: FunctionComponent = () => {
     }
   }, [location.pathname, theme]);
 
-  return <React.Fragment />;
+  return null;
 };
 
 const App: FunctionComponent = () => {
