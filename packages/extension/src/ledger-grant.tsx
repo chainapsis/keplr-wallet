@@ -1,5 +1,5 @@
 // Shim ------------
-import { Box } from "./components/box";
+import { useTheme } from "styled-components";
 
 require("setimmediate");
 // Shim ------------
@@ -22,6 +22,7 @@ import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 import { Gutter } from "./components/gutter";
 import { RegisterH2 } from "./pages/register/components/typography";
 import { Body1, H3, Subtitle2 } from "./components/typography";
+import { Box } from "./components/box";
 import { Button } from "./components/button";
 import { Columns } from "./components/column";
 import { XAxis } from "./components/axis";
@@ -30,6 +31,7 @@ import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { LedgerUtils } from "./utils";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
+import { AppThemeProvider } from "./theme";
 import Transport from "@ledgerhq/hw-transport";
 import Eth from "@ledgerhq/hw-app-eth";
 import "simplebar-react/dist/simplebar.min.css";
@@ -52,6 +54,7 @@ const AutoLockMonitor: FunctionComponent = observer(() => {
 
 const LedgerGrantPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
+  const theme = useTheme();
 
   const confirm = useConfirm();
 
@@ -65,7 +68,9 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
     <Box width="100vw" height="100vh" alignX="center" alignY="center">
       <Box maxWidth="47.75rem">
         <img
-          src={require("./public/assets/img/intro-logo.png")}
+          src={require(theme.mode === "light"
+            ? "./public/assets/img/intro-logo-light.png"
+            : "./public/assets/img/intro-logo.png")}
           alt="Keplr logo"
           style={{
             width: "10.625rem",
@@ -73,11 +78,23 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
           }}
         />
         <Gutter size="2.25rem" />
-        <RegisterH2 color={ColorPalette["gray-50"]}>
+        <RegisterH2
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-700"]
+              : ColorPalette["gray-50"]
+          }
+        >
           Allow Browser to Connect to Ledger
         </RegisterH2>
         <Gutter size="1rem" />
-        <H3 color={ColorPalette["gray-300"]}>
+        <H3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-200"]
+              : ColorPalette["gray-300"]
+          }
+        >
           You need to reapprove connection to your Ledger. Select the
           appropriate app, and after successfully connecting with your Ledger
           device, close this page and retry your previous transaction (signing).
@@ -331,17 +348,19 @@ const AppRouter: FunctionComponent = () => {
 const App: FunctionComponent = () => {
   return (
     <StoreProvider>
-      <AppIntlProvider>
-        <ModalRootProvider>
-          <ConfirmProvider>
-            <GlobalStyle />
-            <ScrollBarStyle />
-            <AutoLockMonitor />
+      <AppThemeProvider>
+        <AppIntlProvider>
+          <ModalRootProvider>
+            <ConfirmProvider>
+              <GlobalStyle />
+              <ScrollBarStyle />
+              <AutoLockMonitor />
 
-            <AppRouter />
-          </ConfirmProvider>
-        </ModalRootProvider>
-      </AppIntlProvider>
+              <AppRouter />
+            </ConfirmProvider>
+          </ModalRootProvider>
+        </AppIntlProvider>
+      </AppThemeProvider>
     </StoreProvider>
   );
 };
