@@ -198,7 +198,9 @@ export const CopyAddressModal: FunctionComponent<{
             <Image
               width="140px"
               height="160px"
-              src={require("../../../../public/assets/img/copy-address-no-search-result.png")}
+              src={require(theme.mode === "light"
+                ? "../../../../public/assets/img/copy-address-no-search-result-light.png"
+                : "../../../../public/assets/img/copy-address-no-search-result.png")}
               alt="copy-address-no-search-result-image"
             />
             <Gutter size="0.75rem" />
