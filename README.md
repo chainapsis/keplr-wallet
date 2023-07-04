@@ -22,7 +22,7 @@ For help using Keplr Wallet, Visit our [User Support Site](https://help.keplr.ap
 
 ### Requirements
 
-- protoc v21.3  
+- protoc v21.3 (recommended)
 
   ```sh
     # This script is example for mac arm64 user. for other OS, replace URL(starts with https://..) to be matched with your OS from https://github.com/protocolbuffers/protobuf/releases/tag/v21.3
@@ -33,7 +33,6 @@ For help using Keplr Wallet, Visit our [User Support Site](https://help.keplr.ap
   ```
   
 - [Node.js v18+](https://nodejs.org/)
-- [Yarn v3+](https://yarnpkg.com/getting-started/install)
   
 Clone this repo and run:
 
@@ -41,7 +40,7 @@ Clone this repo and run:
 yarn && yarn build
 ```
 
-Browser extension's build output is placed in `packages/extension/build/manifest-v3`, and you can check out [this page](https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked) for installing the developing version.
+Browser extension's build output is placed in `packages/extension/build/manifest-v3`. this output is only worked on Chrome so we recommend other build output(in `packages/extension/build/manifest-v2`, `packages/extension/build/firefox` for Firefox) for other browser. you can check out [this page](https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked) for installing the developing version.
 
 ## Building mobile app locally
 
