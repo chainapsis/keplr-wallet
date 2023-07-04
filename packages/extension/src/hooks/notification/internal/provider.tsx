@@ -12,6 +12,7 @@ import { Box } from "../../../components/box";
 import { ColorPalette } from "../../../styles";
 import { Body3, Subtitle4 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
+import { useTheme } from "styled-components";
 
 export const NotificationProvider: FunctionComponent = ({ children }) => {
   const [notifications, setNotifications] = useState<
@@ -141,6 +142,7 @@ const NotificationView: FunctionComponent<{
   onTransitionEnd: () => void;
 }> = ({ detached, mode, title, paragraph, onTransitionEnd }) => {
   const [visible, setVisible] = useState(false);
+  const theme = useTheme();
 
   // XXX: VerticalCollapseTransition의 고질적인 문제로 인해서
   //      처음에 false로 시작한 후 그 직후 렌더링에서 바로 true로 했을 경우
@@ -168,9 +170,11 @@ const NotificationView: FunctionComponent<{
   const backgroundColor = (() => {
     switch (mode) {
       case "success":
-        return ColorPalette["green-700"];
+        return theme.mode === "light"
+          ? ColorPalette["green-100"]
+          : ColorPalette["green-700"];
       case "failed":
-        return "#705512";
+        return theme.mode === "light" ? ColorPalette["red-100"] : "#705512";
       default:
         return ColorPalette["gray-500"];
     }
@@ -178,9 +182,9 @@ const NotificationView: FunctionComponent<{
   const titleColor = (() => {
     switch (mode) {
       case "success":
-        return "white";
+        return theme.mode === "light" ? ColorPalette["green-500"] : "white";
       case "failed":
-        return "white";
+        return theme.mode === "light" ? ColorPalette["orange-400"] : "white";
       default:
         return "white";
     }
