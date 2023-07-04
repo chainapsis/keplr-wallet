@@ -492,6 +492,8 @@
   "button.close": "Close",
   "text-button.select-all": "Select All",
 
+  "notification.transaction-success": "Transaction Success",
+
   "hooks.confirm.cancel-button": "Cancel",
   "hooks.confirm.yes-button": "Yes"
 }
