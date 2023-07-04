@@ -73,7 +73,7 @@
   "pages.register.connect-hardware.header.paragraph": "더 강력한 보안성을 원하세요? 😎",
   "pages.register.connect-hardware.content.title": "케플러와 연결하고 싶은 하드웨어 지갑을 선택해주세요.",
   "pages.register.connect-hardware.connect-ledger-button": "렛저 계정 연결하기",
-  "pages.register.connect-hardware.connect-keystone-button": "키스톤 계정 연결하기 (준비중)",
+  "pages.register.connect-hardware.connect-keystone-button": "키스톤 계정 연결하기",
 
   "pages.register.new-mnemonic.title": "새로운 복구 문구",
   "pages.register.new-mnemonic.12-words-tab": "12 단어",
