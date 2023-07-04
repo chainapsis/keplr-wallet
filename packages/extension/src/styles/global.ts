@@ -31,6 +31,13 @@ export const GlobalStyle = createGlobalStyle`
       props.theme.mode === "light"
         ? ColorPalette["light-gradient"]
         : ColorPalette["gray-700"]};
+
+    &[data-white-background="true"] {
+      background: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette.white
+          : ColorPalette["gray-700"]};
+    }
   }
   
   pre {
