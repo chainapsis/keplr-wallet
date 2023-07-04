@@ -23,17 +23,26 @@ const Styles = {
     }
   `,
   QuestionBox: styled(Box)`
-    background-color: ${ColorPalette["gray-500"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-50"]
+        : ColorPalette["gray-500"]};
 
     ${Container}:hover & {
-      background-color: ${ColorPalette["gray-400"]};
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-400"]};
     }
   `,
   QuestionText: styled(H2)`
     color: ${ColorPalette["gray-300"]};
 
     ${Container}:hover & {
-      color: ${ColorPalette["gray-100"]};
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-100"]};
     }
   `,
 };

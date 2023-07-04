@@ -4,16 +4,22 @@ import { ColorPalette } from "../../../../../../styles";
 import { YAxis } from "../../../../../../components/axis";
 import { Image } from "../../../../../../components/image";
 import { Gutter } from "../../../../../../components/gutter";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 const Styles = {
   Container: styled.div`
     padding: 1rem 1.5rem 1.5rem 1.5rem;
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
     border-radius: 1rem;
 
     :hover {
-      background-color: ${ColorPalette["gray-550"]};
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-550"]};
     }
 
     cursor: pointer;
@@ -26,6 +32,8 @@ export const LinkItem: FunctionComponent<{
   src?: string;
   url?: string;
 }> = ({ title, paragraph, src, url }) => {
+  const theme = useTheme();
+
   return (
     <Styles.Container
       onClick={(e) => {
@@ -48,7 +56,10 @@ export const LinkItem: FunctionComponent<{
           style={{
             fontWeight: 500,
             fontSize: "0.875rem",
-            color: ColorPalette["gray-200"],
+            color:
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"],
           }}
         >
           {title}
@@ -60,7 +71,10 @@ export const LinkItem: FunctionComponent<{
           style={{
             fontWeight: 600,
             fontSize: "0.875rem",
-            color: ColorPalette["white"],
+            color:
+              theme.mode === "light"
+                ? ColorPalette["gray-500"]
+                : ColorPalette["white"],
           }}
         >
           {paragraph}

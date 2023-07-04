@@ -8,7 +8,10 @@ import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
   Title: styled(Subtitle1)`
-    color: ${ColorPalette.white};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette.white};
   `,
   Paragraph: styled(Body3)`
     padding: 0 1.875rem;

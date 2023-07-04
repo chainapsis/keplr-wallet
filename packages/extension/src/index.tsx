@@ -34,6 +34,7 @@ import { MainPage } from "./pages/main";
 import { SettingPage } from "./pages/setting";
 import { SettingGeneralPage } from "./pages/setting/general";
 import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
+import { SettingGeneralThemePage } from "./pages/setting/general/theme";
 import { SettingGeneralAuthZPage } from "./pages/setting/general/authz";
 import { SettingGeneralAuthZRevokePage } from "./pages/setting/general/authz/revoke";
 import { SettingGeneralDeleteSuggestChainPage } from "./pages/setting/general/delete-suggest-chain";
@@ -74,6 +75,7 @@ import { useMatchPopupSize } from "./popup-size";
 import { SignEthereumTxPage } from "./pages/sign/ethereum";
 import "simplebar-react/dist/simplebar.min.css";
 import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
+import { AppThemeProvider } from "./theme";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -267,6 +269,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
               element={<SettingGeneralFiatPage />}
             />
             <Route
+              path="/setting/general/theme"
+              element={<SettingGeneralThemePage />}
+            />
+            <Route
               path="/setting/general/authz"
               element={<SettingGeneralAuthZPage />}
             />
@@ -350,22 +356,24 @@ const App: FunctionComponent = () => {
 
   return (
     <StoreProvider>
-      <AppIntlProvider>
-        <ModalRootProvider>
-          <ConfirmProvider>
-            <NotificationProvider>
-              <GlobalStyle />
-              <GlobalPopupStyle />
-              <ScrollBarStyle />
-              <ErrorBoundary>
-                <GlobalSimpleBarProvider style={{ height: "100vh" }}>
-                  <RoutesAfterReady />
-                </GlobalSimpleBarProvider>
-              </ErrorBoundary>
-            </NotificationProvider>
-          </ConfirmProvider>
-        </ModalRootProvider>
-      </AppIntlProvider>
+      <AppThemeProvider>
+        <AppIntlProvider>
+          <ModalRootProvider>
+            <ConfirmProvider>
+              <NotificationProvider>
+                <GlobalStyle />
+                <GlobalPopupStyle />
+                <ScrollBarStyle />
+                <ErrorBoundary>
+                  <GlobalSimpleBarProvider style={{ height: "100vh" }}>
+                    <RoutesAfterReady />
+                  </GlobalSimpleBarProvider>
+                </ErrorBoundary>
+              </NotificationProvider>
+            </ConfirmProvider>
+          </ModalRootProvider>
+        </AppIntlProvider>
+      </AppThemeProvider>
     </StoreProvider>
   );
 };

@@ -43,6 +43,7 @@ import { QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { useTheme } from "styled-components";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -73,6 +74,7 @@ export const MainPage: FunctionComponent = observer(() => {
 
   const isNotReady = useIsNotReady();
   const intl = useIntl();
+  const theme = useTheme();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
@@ -200,7 +202,9 @@ export const MainPage: FunctionComponent = observer(() => {
               >
                 <Image
                   alt="icns-icon"
-                  src={require("../../public/assets/img/icns-icon.png")}
+                  src={require(theme.mode === "light"
+                    ? "../../public/assets/img/icns-icon-light.png"
+                    : "../../public/assets/img/icns-icon.png")}
                   style={{ width: "1rem", height: "1rem" }}
                 />
               </Tooltip>
@@ -275,7 +279,10 @@ export const MainPage: FunctionComponent = observer(() => {
               <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
                 <H1
                   style={{
-                    color: ColorPalette["gray-10"],
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"],
                   }}
                 >
                   {tabStatus === "available"

@@ -27,11 +27,17 @@ const Styles = {
     flex: 1;
   `,
   BackUp: styled(Subtitle4)`
-    color: ${ColorPalette["yellow-400"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["orange-400"]
+        : ColorPalette["yellow-400"]};
     text-decoration: underline;
   `,
   Paragraph: styled(Subtitle3)`
-    color: ${ColorPalette["gray-200"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-200"]};
     text-align: center;
 
     padding: 0 0.5rem;

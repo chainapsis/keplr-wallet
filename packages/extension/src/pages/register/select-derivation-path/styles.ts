@@ -14,9 +14,15 @@ export const Styles = {
     border-radius: 0.5rem;
     cursor: pointer;
 
-    border: 2px solid ${ColorPalette["gray-500"]};
+    border: ${(props) =>
+      props.theme.mode === "light"
+        ? "none"
+        : `2px solid ${ColorPalette["gray-500"]}`};
 
-    background-color: ${ColorPalette["gray-500"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-500"]};
 
     opacity: ${({ isSelected }) => (isSelected ? 1 : 0.5)};
   `,

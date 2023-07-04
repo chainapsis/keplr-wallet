@@ -14,6 +14,7 @@ import lottie from "lottie-web";
 import AniMnemonic from "../../../public/assets/lottie/wallet/mnemonic.json";
 import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 interface FormData {
   password: string;
@@ -25,6 +26,7 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
 
   const navigate = useNavigate();
   const intl = useIntl();
+  const theme = useTheme();
 
   const animDivRef = useRef<HTMLDivElement | null>(null);
 
@@ -138,7 +140,8 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
               <div
                 ref={animDivRef}
                 style={{
-                  backgroundColor: ColorPalette["gray-600"],
+                  backgroundColor:
+                    theme.mode === "light" ? "none" : ColorPalette["gray-600"],
                   borderRadius: "2.5rem",
                   width: "8.5rem",
                   height: "8.5rem",
@@ -147,7 +150,13 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
 
               <Gutter size="2rem" />
 
-              <Subtitle3 color={ColorPalette["gray-200"]}>
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              >
                 <FormattedMessage id="page.wallet.show-sensitive.paragraph" />
               </Subtitle3>
             </Box>
@@ -164,15 +173,31 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
           <Box
             paddingX="1.75rem"
             paddingY="1.25rem"
-            backgroundColor={ColorPalette["gray-600"]}
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"]
+            }
             borderRadius="0.5rem"
             minHeight="10.25rem"
             style={{
+              border:
+                theme.mode === "light"
+                  ? `1px solid ${ColorPalette["gray-100"]}`
+                  : "none",
               textAlign: "center",
               lineBreak: sensitive.trim().includes(" ") ? "auto" : "anywhere",
             }}
           >
-            <Subtitle3 color={ColorPalette["gray-50"]}>{sensitive}</Subtitle3>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-50"]
+              }
+            >
+              {sensitive}
+            </Subtitle3>
           </Box>
         )}
       </Box>

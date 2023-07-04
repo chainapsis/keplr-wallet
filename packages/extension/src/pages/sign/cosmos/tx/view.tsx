@@ -36,6 +36,7 @@ import { Gutter } from "../../../../components/gutter";
 import { GuideBox } from "../../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
+import { useTheme } from "styled-components";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -55,6 +56,7 @@ export const CosmosTxView: FunctionComponent<{
     useStore();
 
   const intl = useIntl();
+  const theme = useTheme();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -314,7 +316,10 @@ export const CosmosTxView: FunctionComponent<{
               </H5>
               <H5
                 style={{
-                  color: ColorPalette["gray-50"],
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-50"],
                 }}
               >
                 <FormattedMessage id="page.sign.cosmos.tx.messages" />
@@ -337,7 +342,14 @@ export const CosmosTxView: FunctionComponent<{
             overflow: "auto",
             opacity: isLedgerAndDirect ? 0.5 : undefined,
             borderRadius: "0.375rem",
-            backgroundColor: ColorPalette["gray-600"],
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"],
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
           }}
         >
           <Box>
@@ -349,6 +361,10 @@ export const CosmosTxView: FunctionComponent<{
                 margin="0"
                 style={{
                   width: "fit-content",
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-200"],
                 }}
               >
                 {JSON.stringify(signDocHelper.signDocJson, null, 2)}
@@ -434,17 +450,37 @@ export const CosmosTxView: FunctionComponent<{
 const ReadonlyMemo: FunctionComponent<{
   memo: string;
 }> = ({ memo }) => {
+  const theme = useTheme();
+
   return (
     <Box
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      }
       padding="1rem"
       borderRadius="0.375rem"
     >
       <XAxis alignY="center">
-        <Subtitle3 color={ColorPalette["gray-200"]}>Memo</Subtitle3>
+        <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-500"]
+              : ColorPalette["gray-200"]
+          }
+        >
+          Memo
+        </Subtitle3>
         <Gutter size="1.5rem" direction="horizontal" />
         <Subtitle3
-          color={memo ? ColorPalette["gray-50"] : ColorPalette["gray-300"]}
+          color={
+            memo
+              ? theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-50"]
+              : theme.mode === "light"
+              ? ColorPalette["gray-200"]
+              : ColorPalette["gray-300"]
+          }
           style={{
             flex: 1,
 

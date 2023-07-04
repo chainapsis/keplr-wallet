@@ -10,7 +10,10 @@ export const Styles = {
     align-items: center;
     justify-content: center;
 
-    background-color: ${ColorPalette["gray-700"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-50"]
+        : ColorPalette["gray-700"]};
 
     ${({ size }) => {
       switch (size) {
@@ -46,14 +49,23 @@ export const Styles = {
       if (selected) {
         return css`
           cursor: auto;
-          background-color: ${ColorPalette["gray-600"]};
-          color: ${ColorPalette["gray-50"]};
+          background-color: ${(props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["white"]
+              : ColorPalette["gray-600"]};
+          color: ${(props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-50"]};
           font-weight: 500;
         `;
       }
       return css`
         cursor: pointer;
-        background-color: ${ColorPalette["gray-700"]};
+        background-color: ${(props) =>
+          props.theme.mode === "light"
+            ? ColorPalette["gray-50"]
+            : ColorPalette["gray-700"]};
         color: ${ColorPalette["gray-300"]};
         font-weight: 400;
       `;

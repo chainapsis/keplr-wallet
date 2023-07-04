@@ -14,7 +14,7 @@ import { Column, Columns } from "../../../components/column";
 import { useNavigate } from "react-router";
 import { CheckIcon, EllipsisIcon } from "../../../components/icon";
 import { Button } from "../../../components/button";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { FloatingDropdown } from "../../../components/dropdown";
 import { useIntl } from "react-intl";
 
@@ -246,6 +246,7 @@ const KeyringItem: FunctionComponent<{
 }> = observer(({ keyInfo }) => {
   const { chainStore, keyRingStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const navigate = useNavigate();
 
@@ -364,7 +365,11 @@ const KeyringItem: FunctionComponent<{
     <Box
       padding="1rem"
       minHeight="4.625rem"
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-600"]
+      }
       borderRadius="0.375rem"
       alignY="center"
       cursor={!isSelected ? "pointer" : undefined}
@@ -399,7 +404,10 @@ const KeyringItem: FunctionComponent<{
             ) : null}
             <Subtitle2
               style={{
-                color: ColorPalette["gray-10"],
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["gray-10"],
               }}
             >
               {keyInfo.name}
@@ -436,7 +444,15 @@ const KeyringItem: FunctionComponent<{
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 style={{ color: ColorPalette["gray-10"] }}
               >
-                <EllipsisIcon width="1.5rem" height="1.5rem" />
+                <EllipsisIcon
+                  width="1.5rem"
+                  height="1.5rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-200"]
+                      : ColorPalette["gray-10"]
+                  }
+                />
               </Box>
             </FloatingDropdown>
           </Box>

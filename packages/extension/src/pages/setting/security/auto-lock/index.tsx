@@ -23,13 +23,16 @@ import { useNavigate } from "react-router";
 import { YAxis } from "../../../../components/axis";
 import lottie from "lottie-web";
 import AnimShield from "../../../../public/assets/lottie/wallet/shield.json";
+import AnimShieldLight from "../../../../public/assets/lottie/wallet/shield-light.json";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useEffectOnce } from "../../../../hooks/use-effect-once";
+import { useTheme } from "styled-components";
 
 export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const intl = useIntl();
+  const theme = useTheme();
 
   const minDuration = 0;
   const maxDuration = 4320;
@@ -74,7 +77,7 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
         renderer: "svg",
         loop: true,
         autoplay: true,
-        animationData: AnimShield,
+        animationData: theme.mode === "light" ? AnimShieldLight : AnimShield,
       });
 
       return () => {
@@ -137,7 +140,11 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
     >
       <Box paddingX="0.75rem" alignX="center">
         <Body2
-          color={ColorPalette["gray-200"]}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"]
+          }
           style={{ textAlign: "center", padding: "2rem 1.25rem" }}
         >
           <FormattedMessage id="page.setting.security.auto-lock.paragraph" />
@@ -147,7 +154,8 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
           <div
             ref={animDivRef}
             style={{
-              backgroundColor: ColorPalette["gray-600"],
+              backgroundColor:
+                theme.mode === "light" ? "none" : ColorPalette["gray-600"],
               borderRadius: "2.5rem",
               width: "8.5rem",
               height: "8.5rem",
@@ -197,7 +205,11 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
         <Gutter size="1rem" />
 
         <Box
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-600"]
+          }
           borderRadius="0.375rem"
           padding="1rem"
           width="100%"
@@ -205,7 +217,13 @@ export const SettingSecurityAutoLockPage: FunctionComponent = observer(() => {
           <Columns sum={1} alignY="center">
             <Column weight={1}>
               <Stack gutter="0.375rem">
-                <Subtitle2 color={ColorPalette["gray-50"]}>
+                <Subtitle2
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["gray-50"]
+                  }
+                >
                   <FormattedMessage id="page.setting.security.auto-lock.sleep-mode-title" />
                 </Subtitle2>
                 <Body3 color={ColorPalette["gray-200"]}>

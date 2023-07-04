@@ -14,7 +14,10 @@ export const StakeWithKeplrDashboardButton = styled.button`
 
   height: 3rem;
 
-  color: ${ColorPalette["gray-10"]};
+  color: ${(props) =>
+    props.theme.mode === "light"
+      ? ColorPalette["gray-500"]
+      : ColorPalette["gray-10"]};
 
   cursor: pointer;
   // Remove normalized css properties.
@@ -33,7 +36,10 @@ export const StakeWithKeplrDashboardButton = styled.button`
 
   :hover {
     :before {
-      background: ${ColorPalette["gray-550"]};
+      background: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-550"]};
     }
   }
 
@@ -48,6 +54,9 @@ export const StakeWithKeplrDashboardButton = styled.button`
     z-index: -1;
     margin: 1px;
     border-radius: inherit;
-    background: ${ColorPalette["gray-600"]};
+    background: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
   }
 `;

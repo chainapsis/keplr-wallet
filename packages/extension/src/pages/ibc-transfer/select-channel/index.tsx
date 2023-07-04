@@ -19,6 +19,8 @@ import { Columns } from "../../../components/column";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useNavigate } from "react-router";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
+import { ColorPalette } from "../../../styles";
 
 export const IBCTransferSelectChannelView: FunctionComponent<{
   historyType: string;
@@ -41,6 +43,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
       useStore();
     const navigate = useNavigate();
     const intl = useIntl();
+    const theme = useTheme();
 
     const ibcChannelInfo = ibcChannelStore.get(chainId);
 
@@ -79,7 +82,13 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
       >
         <Stack gutter="0.75rem">
           <Stack gutter="0.375rem">
-            <Subtitle3>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-100"]
+              }
+            >
               <FormattedMessage id="page.ibc-transfer.select-channel.asset-title" />
             </Subtitle3>
             <TokenItem

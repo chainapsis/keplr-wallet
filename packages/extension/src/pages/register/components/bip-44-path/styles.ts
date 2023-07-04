@@ -7,10 +7,16 @@ export const Styles = {
 
     padding: 1.5rem 1.75rem 1.25rem;
 
-    background-color: ${ColorPalette["gray-500"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-500"]};
     border-radius: 1rem;
 
-    color: ${ColorPalette["gray-100"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-100"]};
     font-size: 0.875rem;
 
     ul {
@@ -21,7 +27,10 @@ export const Styles = {
     }
   `,
   Title: styled.div`
-    color: ${ColorPalette["white"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-500"]
+        : ColorPalette["white"]};
 
     font-size: 0.875rem;
     line-height: 1.125rem;
@@ -37,7 +46,10 @@ export const Styles = {
     cursor: pointer;
   `,
   SubTitle: styled.div`
-    color: ${ColorPalette["gray-100"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-500"]
+        : ColorPalette["gray-100"]};
 
     font-size: 0.875rem;
     line-height: 1.05rem;
@@ -51,12 +63,18 @@ export const Styles = {
     font-size: 1rem;
     line-height: 1.2;
     letter-spacing: 0.2px;
-    color: ${ColorPalette["gray-100"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-100"]};
   `,
   InputContainer: styled.div`
     flex: 1;
   `,
   LightText: styled.div`
-    color: ${ColorPalette["gray-100"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-100"]};
   `,
 };

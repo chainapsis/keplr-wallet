@@ -14,7 +14,10 @@ export const Styles = {
     font-weight: 500;
     font-size: 0.875rem;
     text-align: right;
-    color: ${ColorPalette["gray-100"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-100"]};
 
     min-width: 1.875rem;
     margin-right: 0.375rem;

@@ -5,11 +5,13 @@ import { ColorPalette } from "../../../../styles";
 import { Box } from "../../../../components/box";
 import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const ViewDataButton: FunctionComponent<{
   isViewData: boolean;
   setIsViewData: (value: boolean) => void;
 }> = ({ isViewData, setIsViewData }) => {
+  const theme = useTheme();
   return (
     <Box
       cursor="pointer"
@@ -19,7 +21,10 @@ export const ViewDataButton: FunctionComponent<{
         setIsViewData(!isViewData);
       }}
       style={{
-        color: ColorPalette["gray-100"],
+        color:
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-100"],
       }}
     >
       <XAxis alignY="center">

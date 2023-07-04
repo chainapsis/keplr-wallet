@@ -22,7 +22,7 @@ import {
   LoadingIcon,
   QuestionIcon,
 } from "../../../../components/icon";
-import styled, { css } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 import { ChainImageFallback } from "../../../../components/image";
 import { Tooltip } from "../../../../components/tooltip";
 import { DenomHelper } from "@keplr-wallet/common";
@@ -41,8 +41,14 @@ const Styles = {
     forChange: boolean | undefined;
     isError: boolean;
     disabled?: boolean;
+    isNotReady?: boolean;
   }>`
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? props.isNotReady
+          ? ColorPalette["gray-100"]
+          : ColorPalette.white
+        : ColorPalette["gray-600"]};
     padding ${({ forChange }) =>
       forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "1rem 0.875rem"};
     border-radius: 0.375rem;
@@ -54,12 +60,19 @@ const Styles = {
             .alpha(0.5)
             .toString()}`
         : undefined};
+
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};;
     
-    ${({ disabled }) => {
+    ${({ disabled, theme }) => {
       if (!disabled) {
         return css`
           &:hover {
-            background-color: ${ColorPalette["gray-550"]};
+            background-color: ${theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-550"]};
           }
         `;
       }
@@ -77,6 +90,8 @@ export const TokenTitleView: FunctionComponent<{
 
   right?: React.ReactElement;
 }> = ({ title, tooltip, right }) => {
+  const theme = useTheme();
+
   return (
     <Box
       style={{
@@ -84,7 +99,14 @@ export const TokenTitleView: FunctionComponent<{
       }}
     >
       <Columns sum={1} alignY="center">
-        <Subtitle4 style={{ color: ColorPalette["gray-200"] }}>
+        <Subtitle4
+          style={{
+            color:
+              theme.mode === "light"
+                ? ColorPalette["gray-500"]
+                : ColorPalette["gray-200"],
+          }}
+        >
           {title}
         </Subtitle4>
         {tooltip ? (
@@ -93,7 +115,11 @@ export const TokenTitleView: FunctionComponent<{
               <QuestionIcon
                 width="1rem"
                 height="1rem"
-                color={ColorPalette["gray-300"]}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"]
+                }
               />
             </Tooltip>
           </Box>
@@ -125,6 +151,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     const { priceStore } = useStore();
     const navigate = useNavigate();
     const intl = useIntl();
+    const theme = useTheme();
 
     const pricePretty = priceStore.calculatePrice(viewToken.token);
 
@@ -170,6 +197,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         forChange={forChange}
         isError={viewToken.error != null}
         disabled={disabled}
+        isNotReady={isNotReady}
         onClick={async (e) => {
           e.preventDefault();
 
@@ -215,6 +243,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 dummyMinWidth="3.25rem"
               >
                 <Subtitle2
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["gray-300"]
+                  }
                   style={{
                     wordBreak: "break-all",
                   }}
@@ -291,7 +324,13 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 isNotReady={isNotReady}
                 dummyMinWidth="3.25rem"
               >
-                <Subtitle3>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-700"]
+                      : ColorPalette["gray-300"]
+                  }
+                >
                   {viewToken.token
                     .hideDenom(true)
                     .maxDecimals(6)
@@ -309,7 +348,11 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                 viewToken.error.data instanceof WrongViewingKeyError ? (
                   <Box position="relative" alignX="right">
                     <Subtitle3
-                      color={ColorPalette["gray-100"]}
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-200"]
+                          : ColorPalette["gray-100"]
+                      }
                       style={{
                         textDecoration: "underline",
                         position: "absolute",

@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { Caption1, Caption2, H5, Subtitle1, Subtitle3 } from "../../typography";
 import { ColorPalette } from "../../../styles";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Stack } from "../../stack";
 import { Dropdown } from "../../dropdown";
 import { Column, Columns } from "../../column";
@@ -31,10 +31,17 @@ const Styles = {
     padding: 1.25rem;
     gap: 0.75rem;
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
   `,
   Divider: styled.div`
-    border: 1px solid ${ColorPalette["gray-500"]};
+    border-bottom: 1px solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]};
   `,
 };
 
@@ -48,6 +55,7 @@ export const TransactionFeeModal: FunctionComponent<{
 }> = observer(({ close, senderConfig, feeConfig, gasConfig, gasSimulator }) => {
   const { queriesStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const isGasSimulatorUsable = (() => {
     if (!gasSimulator) {
@@ -75,7 +83,13 @@ export const TransactionFeeModal: FunctionComponent<{
 
       <Stack gutter="0.75rem">
         <Stack gutter="0.375rem">
-          <Subtitle3>
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-100"]
+            }
+          >
             <FormattedMessage id="components.input.fee-control.modal.fee-title" />
           </Subtitle3>
           <FeeSelector feeConfig={feeConfig} />
@@ -139,7 +153,7 @@ export const TransactionFeeModal: FunctionComponent<{
 
           {isGasSimulatorUsable && gasSimulator ? (
             <Columns sum={1} gutter="0.5rem" alignY="center">
-              <Subtitle3>
+              <Subtitle3 color={ColorPalette["gray-200"]}>
                 <FormattedMessage id="components.input.fee-control.modal.auto-title" />
               </Subtitle3>
               <Toggle
@@ -237,18 +251,32 @@ const FeeSelectorStyle = {
 
     cursor: pointer;
 
-    background-color: ${({ selected }) =>
-      selected ? ColorPalette["blue-400"] : ColorPalette["gray-500"]};
+    background-color: ${({ selected, theme }) =>
+      selected
+        ? ColorPalette["blue-400"]
+        : theme.mode === "light"
+        ? ColorPalette["blue-50"]
+        : ColorPalette["gray-500"]};
   `,
   Title: styled(H5)<{ selected: boolean }>`
-    color: ${({ selected }) =>
-      selected ? ColorPalette["white"] : ColorPalette["gray-50"]};
+    color: ${({ selected, theme }) =>
+      selected
+        ? theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-50"]
+        : theme.mode === "light"
+        ? ColorPalette["blue-400"]
+        : ColorPalette["gray-50"]};
   `,
   Price: styled(Caption2)<{ selected: boolean }>`
     white-space: nowrap;
     margin-top: 0.25rem;
-    color: ${({ selected }) =>
-      selected ? ColorPalette["blue-200"] : ColorPalette["gray-300"]};
+    color: ${({ selected, theme }) =>
+      selected
+        ? ColorPalette["blue-200"]
+        : theme.mode === "light"
+        ? ColorPalette["blue-500"]
+        : ColorPalette["gray-300"]};
   `,
   Amount: styled(Caption1)<{ selected: boolean }>`
     white-space: nowrap;
@@ -262,6 +290,7 @@ const FeeSelector: FunctionComponent<{
   feeConfig: IFeeConfig;
 }> = observer(({ feeConfig }) => {
   const { priceStore } = useStore();
+  const theme = useTheme();
 
   const feeCurrency =
     feeConfig.fees.length > 0
@@ -278,7 +307,11 @@ const FeeSelector: FunctionComponent<{
         <FeeSelectorStyle.Item
           style={{
             borderRadius: "0.5rem 0 0 0.5rem",
-            borderRight: `1px solid ${ColorPalette["gray-400"]}`,
+            borderRight: `1px solid ${
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-400"]
+            }`,
           }}
           onClick={() => {
             feeConfig.setFee({
@@ -359,7 +392,11 @@ const FeeSelector: FunctionComponent<{
         <FeeSelectorStyle.Item
           style={{
             borderRadius: "0 0.5rem 0.5rem 0",
-            borderLeft: `1px solid ${ColorPalette["gray-400"]}`,
+            borderLeft: `1px solid ${
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-400"]
+            }`,
           }}
           onClick={() => {
             feeConfig.setFee({

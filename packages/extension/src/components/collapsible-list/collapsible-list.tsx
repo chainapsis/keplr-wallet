@@ -9,7 +9,7 @@ import { Columns } from "../column";
 import { VerticalCollapseTransition } from "../transition/vertical-collapse";
 import { Gutter } from "../gutter";
 import { XAxis } from "../axis";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { useIntl } from "react-intl";
 
 const Styles = {
@@ -38,6 +38,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   }
 
   const intl = useIntl();
+  const theme = useTheme();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -54,7 +55,14 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         }}
       >
         <Columns sum={1} alignY="center">
-          <Subtitle4 style={{ color: ColorPalette["gray-50"] }}>
+          <Subtitle4
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-50"],
+            }}
+          >
             {items.length}
           </Subtitle4>
 
@@ -81,7 +89,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         >
           <Gutter size="0.75rem" />
           <XAxis alignY="center">
-            <Button2>
+            <Button2 color={ColorPalette["gray-300"]}>
               {isCollapsed
                 ? intl.formatMessage(
                     { id: "components.collapsible-list.view-more-tokens" },

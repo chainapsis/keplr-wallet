@@ -24,6 +24,7 @@ import { VerticalCollapseTransition } from "../../../components/transition/verti
 import { WarningBox } from "../../../components/warning-box";
 import { CopyToClipboard } from "../components/copy-to-clipboard";
 import { useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 type WordsType = "12words" | "24words";
 
@@ -250,6 +251,8 @@ export const NewMnemonicScene: FunctionComponent = observer(() => {
 });
 
 const BlurBackdrop: FunctionComponent = ({ children }) => {
+  const theme = useTheme();
+
   return (
     <div
       style={{
@@ -258,7 +261,9 @@ const BlurBackdrop: FunctionComponent = ({ children }) => {
         bottom: 0,
         left: "-1rem",
         right: "-1rem",
-        backgroundImage: `url(${require("../../../public/assets/img/register-new-recovery-phrase-blur.png")})`,
+        backgroundImage: `url(${require(theme.mode === "light"
+          ? "../../../public/assets/img/register-new-recovery-phrase-blur-light.png"
+          : "../../../public/assets/img/register-new-recovery-phrase-blur.png")})`,
         backgroundSize: "cover",
         borderRadius: "1rem",
         zIndex: 1000,

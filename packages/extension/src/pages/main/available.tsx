@@ -13,7 +13,7 @@ import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { Button } from "../../components/button";
 import { useStore } from "../../stores";
-import { TextButton } from "../../components/button-text";
+import { Styles, TextButton } from "../../components/button-text";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
@@ -26,8 +26,18 @@ import { Checkbox } from "../../components/checkbox";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
+import styled from "styled-components";
 
 const zeroDec = new Dec(0);
+
+const NewTokenFoundButton = styled(TextButton)`
+  ${Styles.Button} {
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["blue-400"]
+        : ColorPalette["gray-50"]};
+  }
+`;
 
 export const AvailableTabView: FunctionComponent<{
   search: string;
@@ -279,7 +289,7 @@ export const AvailableTabView: FunctionComponent<{
           {numFoundToken > 0 ? (
             <Box padding="0.75rem">
               <YAxis alignX="center">
-                <TextButton
+                <NewTokenFoundButton
                   text={intl.formatMessage(
                     { id: "page.main.available.new-token-found" },
                     { numFoundToken }

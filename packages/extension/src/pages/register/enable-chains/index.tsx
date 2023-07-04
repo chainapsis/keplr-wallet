@@ -40,6 +40,7 @@ import { TextButton } from "../../../components/button-text";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Tag } from "../../../components/tag";
 import SimpleBar from "simplebar-react";
+import { useTheme } from "styled-components";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -80,6 +81,7 @@ export const EnableChainsScene: FunctionComponent<{
 
     const navigate = useNavigate();
     const intl = useIntl();
+    const theme = useTheme();
 
     const searchRef = useRef<HTMLInputElement | null>(null);
 
@@ -552,6 +554,11 @@ export const EnableChainsScene: FunctionComponent<{
         />
         <Gutter size="0.75rem" />
         <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-600"]
+              : ColorPalette.white
+          }
           style={{
             textAlign: "center",
           }}
@@ -696,7 +703,13 @@ export const EnableChainsScene: FunctionComponent<{
                 }}
               >
                 <XAxis alignY="center">
-                  <Body2 color={ColorPalette["gray-300"]}>
+                  <Body2
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
+                  >
                     <FormattedMessage id="text-button.select-all" />
                   </Body2>
 
@@ -899,6 +912,7 @@ const ChainItem: FunctionComponent<{
 }> = observer(
   ({ chainInfo, balance, enabled, blockInteraction, onClick, isFresh }) => {
     const { priceStore } = useStore();
+    const theme = useTheme();
 
     const price = priceStore.calculatePrice(balance);
 
@@ -908,8 +922,13 @@ const ChainItem: FunctionComponent<{
         paddingX="1rem"
         paddingY="0.75rem"
         backgroundColor={
-          // TODO: Add alpha if needed.
-          enabled ? ColorPalette["gray-500"] : ColorPalette["gray-600"]
+          enabled
+            ? theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-500"]
+            : theme.mode === "light"
+            ? ColorPalette.white
+            : ColorPalette["gray-600"]
         }
         cursor={blockInteraction ? "not-allowed" : "pointer"}
         onClick={() => {
@@ -939,7 +958,13 @@ const ChainItem: FunctionComponent<{
           <XAxis alignY="center">
             {isFresh ? null : (
               <YAxis alignX="right">
-                <Subtitle3>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-600"]
+                      : ColorPalette.white
+                  }
+                >
                   {balance
                     .maxDecimals(6)
                     .shrink(true)
