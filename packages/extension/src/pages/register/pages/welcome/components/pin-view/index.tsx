@@ -36,7 +36,14 @@ export const PinView: FunctionComponent = () => {
       }
       borderRadius="1.5rem"
       padding="1.5rem 1rem"
-      style={{ top: "1.25rem", right: "1.25rem" }}
+      style={{
+        top: "1.25rem",
+        right: "1.25rem",
+        boxShadow:
+          theme.mode === "light"
+            ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+            : "none",
+      }}
     >
       <Columns sum={1} alignY="top" gutter="1rem">
         <Box
