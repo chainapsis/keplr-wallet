@@ -179,6 +179,7 @@
   "page.setting.general.language-title": "언어",
   "page.setting.general.currency-title": "통화",
   "page.setting.general.contacts-title": "연락처",
+  "page.setting.general.theme-title": "테마",
   "page.setting.general.manage-authz-title": "AuthZ 관리",
   "page.setting.general.link-kpelr-mobile-title": "케플러 모바일과 연결하기",
   "page.setting.general.manage-non-native-chains-title": "선택형 체인 관리",
@@ -187,6 +188,10 @@
   "page.setting.general.manage-chain-visibility-paragraph": "현재 계정에 표시될 체인(해당 체인의 자산 포함)을 선택해주세요.",
 
   "page.setting.general.language.automatic-title": "자동 (브라우저 언어)",
+
+  "page.setting.general.theme.dark-mode": "다크 모드",
+  "page.setting.general.theme.light-mode": "라이트 모드",
+  "page.setting.general.theme.auto": "자동 (시스템 설정)",
 
   "page.setting.general.authz.empty-subject": "AuthZ",
   "page.setting.general.authz.grant-view.grantee-authorized": "{grantee}에게 권한을 주었습니다.",

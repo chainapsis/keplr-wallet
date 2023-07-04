@@ -34,6 +34,7 @@ import { MainPage } from "./pages/main";
 import { SettingPage } from "./pages/setting";
 import { SettingGeneralPage } from "./pages/setting/general";
 import { SettingGeneralFiatPage } from "./pages/setting/general/fiat";
+import { SettingGeneralThemePage } from "./pages/setting/general/theme";
 import { SettingGeneralAuthZPage } from "./pages/setting/general/authz";
 import { SettingGeneralAuthZRevokePage } from "./pages/setting/general/authz/revoke";
 import { SettingGeneralDeleteSuggestChainPage } from "./pages/setting/general/delete-suggest-chain";
@@ -266,6 +267,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             <Route
               path="/setting/general/fiat"
               element={<SettingGeneralFiatPage />}
+            />
+            <Route
+              path="/setting/general/theme"
+              element={<SettingGeneralThemePage />}
             />
             <Route
               path="/setting/general/authz"

@@ -56,6 +56,14 @@ export const SettingGeneralPage: FunctionComponent = observer(() => {
 
           <PageButton
             title={intl.formatMessage({
+              id: "page.setting.general.theme-title",
+            })}
+            endIcon={<RightArrowIcon />}
+            onClick={() => navigate("/setting/general/theme")}
+          />
+
+          <PageButton
+            title={intl.formatMessage({
               id: "page.setting.general.manage-authz-title",
             })}
             endIcon={<RightArrowIcon />}
