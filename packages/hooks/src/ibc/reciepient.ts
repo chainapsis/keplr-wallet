@@ -19,8 +19,9 @@ export class IBCRecipientConfig extends RecipientConfig {
   }
 
   override get chainId(): string {
-    return this.channelConfig.channel
-      ? this.channelConfig.channel.counterpartyChainId
+    return this.channelConfig.channels.length > 0
+      ? this.channelConfig.channels[this.channelConfig.channels.length - 1]
+          .counterpartyChainId
       : super.chainId;
   }
 }

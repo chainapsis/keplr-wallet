@@ -45,18 +45,29 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
 
+    if (channelConfig.channels.length > 1) {
+      throw new Error("IBC channel config must have only one channel");
+    }
+
     const [isOpenSelectChannel, setIsOpenSelectChannel] = useState(false);
     const [selectedChannelId, setSelectedChannelId] = useState<
       string | undefined
-    >(channelConfig.channel?.channelId);
+    >(
+      channelConfig.channels.length === 1
+        ? channelConfig.channels[0].channelId
+        : undefined
+    );
 
     useEffect(() => {
-      if (channelConfig.channel?.channelId !== selectedChannelId) {
+      if (
+        channelConfig.channels.length === 1 &&
+        channelConfig.channels[0].channelId !== selectedChannelId
+      ) {
         // channel이 다른 컴포넌트에서 바꼈을때를 대비해서
         // 여기서 selectedChannelId를 업데이트 해준다.
-        setSelectedChannelId(channelConfig.channel?.channelId);
+        setSelectedChannelId(channelConfig.channels[0].channelId);
       }
-    }, [channelConfig.channel?.channelId, selectedChannelId]);
+    }, [channelConfig.channels, selectedChannelId]);
 
     const sender = accountStore.getAccount(
       chainStore.getChain(chainId).chainId
@@ -148,10 +159,10 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
                     .getTransferChannels(chainId)
                     .find((channel) => channel.channelId === key);
                   if (channel) {
-                    channelConfig.setChannel(channel);
+                    channelConfig.setChannels([channel]);
                     setSelectedChannelId(key);
                   } else {
-                    channelConfig.setChannel(undefined);
+                    channelConfig.setChannels([]);
                     setSelectedChannelId(undefined);
                   }
                 }

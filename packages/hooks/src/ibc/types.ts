@@ -5,8 +5,8 @@ export interface Channel {
 }
 
 export interface IIBCChannelConfig {
-  channel: Channel | undefined;
-  setChannel(channel: Channel | undefined): void;
+  channels: Channel[];
+  setChannels(channels: Channel[]): void;
 
   error: Error | undefined;
 }

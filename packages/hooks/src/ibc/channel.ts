@@ -5,27 +5,27 @@ import { useState } from "react";
 
 export class IBCChannelConfig implements IIBCChannelConfig {
   @observable.ref
-  protected _channel: Channel | undefined = undefined;
+  protected _channels: Channel[] = [];
 
   constructor() {
     makeObservable(this);
   }
 
-  get channel(): Channel | undefined {
-    return this._channel;
+  get channels(): Channel[] {
+    return this._channels;
   }
 
   @computed
   get error(): Error | undefined {
-    if (!this._channel) {
+    if (this._channels.length === 0) {
       return new ChannelNotSetError("Channel not set");
     }
     return undefined;
   }
 
   @action
-  setChannel(channel: Channel | undefined): void {
-    this._channel = channel;
+  setChannels(channels: Channel[]): void {
+    this._channels = [...channels];
   }
 }
 
