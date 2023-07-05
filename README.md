@@ -7,7 +7,7 @@
 
 ## Official Releases
 
-> NOTE: We do not accept native integrations to the official releases through pull requests. Please feel free to check out Keplr's [suggest chain](https://docs.keplr.app/api/suggest-chain.html) feature for permissionless integrations to your chain.
+> NOTE: We do not accept native integrations to the official releases through pull requests. Please feel free to check out [Keplr Chain Registry repo](https://github.com/chainapsis/keplr-chain-registry) for permissionless integrations with your chain.
 
 You can find the latest versions of the official managed releases on these links:
 
@@ -40,7 +40,7 @@ Clone this repo and run:
 yarn && yarn build
 ```
 
-Browser extension's build output is placed in `packages/extension/build/manifest-v3`. this output is only worked on Chrome so we recommend other build output(in `packages/extension/build/manifest-v2`, `packages/extension/build/firefox` for Firefox) for other browser. you can check out [this page](https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked) for installing the developing version.
+You can find the build output of Keplr Extension in packages/extension/build/manifest-v3. This output only works on Chrome now, so we recommend using other build outputs (in packages/extension/build/manifest-v2 or packages/extension/build/firefox) for other browsers. You can visit [this page](https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked) for instructions on loading the build output on Chrome.
 
 ## Building mobile app locally
 
