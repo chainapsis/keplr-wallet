@@ -192,7 +192,7 @@ const KeystoneInformation: FunctionComponent = () => {
           target="_blank"
           href="https://keyst.one/?utm_source=keplr&utm_medium=learnmore&utm_id=20230419"
           style={{
-            color: ColorPalette["blue-400"],
+            color: ColorPalette["blue-300"],
             fontSize: "0.875rem",
             lineHeight: "1.375rem",
             textUnderlineOffset: "3px",
