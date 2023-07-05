@@ -45,8 +45,6 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
     const intl = useIntl();
     const theme = useTheme();
 
-    const ibcChannelInfo = ibcChannelStore.get(chainId);
-
     const [isOpenSelectChannel, setIsOpenSelectChannel] = useState(false);
     const [selectedChannelId, setSelectedChannelId] = useState<
       string | undefined
@@ -110,8 +108,8 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
                 id: "page.ibc-transfer.select-channel.destination-chain-label",
               })}
               menuContainerMaxHeight="10rem"
-              items={ibcChannelInfo
-                .getTransferChannels()
+              items={ibcChannelStore
+                .getTransferChannels(chainId)
                 .filter((channel) =>
                   chainStore.hasChain(channel.counterpartyChainId)
                 )
@@ -146,8 +144,8 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
                 if (key === "add-channel") {
                   setIsOpenSelectChannel(true);
                 } else {
-                  const channel = ibcChannelInfo
-                    .getTransferChannels()
+                  const channel = ibcChannelStore
+                    .getTransferChannels(chainId)
                     .find((channel) => channel.channelId === key);
                   if (channel) {
                     channelConfig.setChannel(channel);

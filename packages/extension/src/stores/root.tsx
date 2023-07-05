@@ -148,7 +148,8 @@ export class RootStore {
     );
 
     this.ibcChannelStore = new IBCChannelStore(
-      new ExtensionKVStore("store_ibc_channel")
+      new ExtensionKVStore("store_ibc_channel"),
+      this.chainStore
     );
 
     this.permissionStore = new PermissionStore(
