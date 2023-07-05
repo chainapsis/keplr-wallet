@@ -193,6 +193,7 @@ export class ObservableQueryBalancesImplMap {
 
 export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalancesImplMap> {
   protected balanceRegistries: BalanceRegistry[] = [];
+  private refreshInterval: NodeJS.Timer | null = null;
 
   constructor(
     protected readonly sharedContext: QuerySharedContext,
@@ -207,6 +208,30 @@ export class ObservableQueryBalances extends HasMapStore<ObservableQueryBalances
         this.balanceRegistries,
         bech32Address
       );
+    });
+
+    this.startAutoRefresh();
+  }
+
+  startAutoRefresh() {
+    this.stopAutoRefresh();
+
+    this.refreshInterval = setInterval(() => {
+      this.fetchAll();
+    }, 60000);
+  }
+
+  stopAutoRefresh() {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+      this.refreshInterval = null;
+    }
+  }
+
+  fetchAll() {
+    this.map.forEach((balances) => {
+      console.log(balances);
+      balances.fetch();
     });
   }
 

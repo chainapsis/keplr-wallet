@@ -26,6 +26,17 @@ import { Checkbox } from "../../components/checkbox";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
+import { RefreshIcon } from "../../components/icon";
+import styled from "styled-components";
+
+const Styles = {
+  IconContainer: styled.div`
+    color: ${ColorPalette["gray-300"]};
+    &:hover {
+      color: ${ColorPalette["white"]};
+    }
+  `,
+};
 
 const zeroDec = new Dec(0);
 
@@ -37,9 +48,12 @@ export const AvailableTabView: FunctionComponent<{
   // 근데 컴포넌트가 분리되어있는데 이거 하려고 context api 쓰긴 귀찮아서 그냥 prop으로 대충 처리한다.
   onClickGetStarted: () => void;
 }> = observer(({ search, isNotReady, onClickGetStarted }) => {
-  const { hugeQueriesStore, chainStore, uiConfigStore } = useStore();
+  const { hugeQueriesStore, chainStore, uiConfigStore, queriesStore } =
+    useStore();
+
   const navigate = useNavigate();
   const intl = useIntl();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
   const allBalancesNonZero = useMemo(() => {
@@ -71,6 +85,12 @@ export const AvailableTabView: FunctionComponent<{
     uiConfigStore.isHideLowBalance && hasLowBalanceTokens
       ? lowBalanceFilteredAllBalancesSearchFiltered
       : _allBalancesSearchFiltered;
+
+  const enabledChains = useMemo(() => {
+    return chainStore.chainInfos.filter((chainInfo) => {
+      return chainStore.isEnabledChain(chainInfo.chainId);
+    });
+  }, [chainStore]);
 
   const lookingForChains = (() => {
     return chainStore.chainInfos.filter((chainInfo) => {
@@ -202,6 +222,36 @@ export const AvailableTabView: FunctionComponent<{
                                   );
                                 }}
                               />
+
+                              <Styles.IconContainer
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  setIsRefreshing(true);
+                                  enabledChains.flatMap((chainInfo) => {
+                                    Array.from(
+                                      queriesStore
+                                        .get(chainInfo.chainId)
+                                        .queryBalances["map"].values()
+                                    ).map((queryBalance) => {
+                                      queryBalance.fetch();
+                                    });
+                                  });
+
+                                  await new Promise((resolve) =>
+                                    setTimeout(resolve, 1000)
+                                  );
+
+                                  setIsRefreshing(false);
+                                }}
+                                style={{
+                                  WebkitMask: `url(${RefreshIcon}) no-repeat center / contain`,
+                                  marginLeft: "0.3rem",
+                                  cursor: "pointer",
+                                }}
+                                color={ColorPalette["gray-300"]}
+                              >
+                                <RefreshIcon animate={isRefreshing} />
+                              </Styles.IconContainer>
                             </React.Fragment>
                           ) : undefined
                         }
