@@ -83,7 +83,7 @@ export const RecognizableChainFeaturesMethod: {
   {
     feature: "ibc-pfm",
     fetch: async (features, _rpc, rest) => {
-      if (features.includes("ibc-go") && features.includes("ibc-transfer")) {
+      if (features.includes("ibc-go")) {
         const result = await simpleFetch(rest, "/ibc/apps/router/v1/params", {
           validateStatus: (status) => {
             return status === 200 || status === 501;
