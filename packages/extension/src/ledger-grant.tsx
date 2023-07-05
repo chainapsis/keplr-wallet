@@ -33,6 +33,7 @@ import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
 import Transport from "@ledgerhq/hw-transport";
 import Eth from "@ledgerhq/hw-app-eth";
 import "simplebar-react/dist/simplebar.min.css";
+import { FormattedMessage, useIntl } from "react-intl";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -54,6 +55,7 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
 
   const confirm = useConfirm();
+  const intl = useIntl();
 
   const [appIsLoading, setAppIsLoading] = useState("");
 
@@ -74,13 +76,11 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
         />
         <Gutter size="2.25rem" />
         <RegisterH2 color={ColorPalette["gray-50"]}>
-          Allow Browser to Connect to Ledger
+          <FormattedMessage id="page.ledger-grant.title" />
         </RegisterH2>
         <Gutter size="1rem" />
         <H3 color={ColorPalette["gray-300"]}>
-          You need to reapprove connection to your Ledger. Select the
-          appropriate app, and after successfully connecting with your Ledger
-          device, close this page and retry your previous transaction (signing).
+          <FormattedMessage id="page.ledger-grant.paragraph" />
         </H3>
 
         <Gutter size="1.625rem" />
@@ -134,8 +134,12 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                       onChange={async (checked) => {
                         if (checked && !window.navigator.hid) {
                           await confirm.confirm(
-                            "Unable to use Web HID",
-                            "Please enable ‘experimental web platform features’ to use Web HID",
+                            intl.formatMessage({
+                              id: "pages.register.connect-ledger.use-hid-confirm-title",
+                            }),
+                            intl.formatMessage({
+                              id: "pages.register.connect-ledger.use-hid-confirm-paragraph",
+                            }),
                             {
                               forceYes: true,
                             }
@@ -152,7 +156,7 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                     />
                     <Gutter size="0.5rem" />
                     <Subtitle2 color={ColorPalette["gray-300"]}>
-                      Use alternative USB connection method(HID)
+                      <FormattedMessage id="pages.register.connect-ledger.use-hid-text" />
                     </Subtitle2>
                   </XAxis>
 
