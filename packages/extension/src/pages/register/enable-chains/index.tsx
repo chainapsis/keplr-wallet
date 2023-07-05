@@ -428,13 +428,6 @@ export const EnableChainsScene: FunctionComponent<{
         });
       }
 
-      if (keyType === "keystone") {
-        chainInfos = chainInfos.filter((chainInfo) => {
-          const account = accountStore.getAccount(chainInfo.chainId);
-          return !!account.bech32Address;
-        });
-      }
-
       const trimSearch = search.trim();
 
       if (!trimSearch) {
@@ -479,7 +472,7 @@ export const EnableChainsScene: FunctionComponent<{
 
         return new CoinPretty(
           chainStore.getChain(a.chainId).stakeCurrency,
-          "0"
+          "-1"
         );
       })();
       const bBalance = (() => {
@@ -493,7 +486,7 @@ export const EnableChainsScene: FunctionComponent<{
 
         return new CoinPretty(
           chainStore.getChain(b.chainId).stakeCurrency,
-          "0"
+          "-1"
         );
       })();
 
@@ -545,6 +538,11 @@ export const EnableChainsScene: FunctionComponent<{
     const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
       useState<string[]>([]);
 
+    const unsupportedChains = chainInfos.filter((chainInfo) => {
+      const account = accountStore.getAccount(chainInfo.chainId);
+      return account.bech32Address === "";
+    });
+
     return (
       <RegisterSceneBox>
         <SearchTextInput
@@ -575,13 +573,30 @@ export const EnableChainsScene: FunctionComponent<{
             values={{ numSelected }}
           />
         </Subtitle3>
-        <Subtitle4
-          color={ColorPalette["gray-300"]}
-          style={{ marginTop: "0.5rem", textAlign: "center" }}
-        >
-          Note that the ‘Suggest Chain’ feature will only work for 118 coin
-          type.
-        </Subtitle4>
+        {keyType === "keystone" && (
+          <React.Fragment>
+            <Subtitle4
+              color={ColorPalette["gray-300"]}
+              style={{ marginTop: "0.5rem", textAlign: "center" }}
+            >
+              Please note that when adding specific chains to your wallet, the
+              ‘Suggest Chain’ feature may not work.
+            </Subtitle4>
+            <Box alignX="center" marginTop="0.5rem">
+              <a
+                href="https://support.keyst.one/3rd-party-wallets/cosmos-wallets/keplr-extension?utm_source=keplr&utm_medium=moredetails&utm_id=20230419"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: ColorPalette["blue-300"],
+                  textUnderlineOffset: "3px",
+                }}
+              >
+                Learn More
+              </a>
+            </Box>
+          </React.Fragment>
+        )}
         <Gutter size="0.75rem" />
         <SimpleBar
           style={{
@@ -617,6 +632,7 @@ export const EnableChainsScene: FunctionComponent<{
                   enabled={enabled}
                   blockInteraction={blockInteraction}
                   isFresh={isFresh || account.bech32Address === ""}
+                  isSupported={!unsupportedChains.includes(chainInfo)}
                   onClick={() => {
                     if (
                       enabledChainIdentifierMap.get(chainInfo.chainIdentifier)
@@ -684,7 +700,8 @@ export const EnableChainsScene: FunctionComponent<{
                   e.preventDefault();
 
                   if (
-                    chainInfos.length === enabledChainIdentifiersInPage.length
+                    chainInfos.length - unsupportedChains.length ===
+                    enabledChainIdentifiersInPage.length
                   ) {
                     if (preSelectedChainIdentifiers.length > 0) {
                       setEnabledChainIdentifiers(preSelectedChainIdentifiers);
@@ -703,6 +720,7 @@ export const EnableChainsScene: FunctionComponent<{
                       enabledChainIdentifiers.slice();
                     for (const chainInfo of chainInfos) {
                       if (
+                        !unsupportedChains.includes(chainInfo) &&
                         !newEnabledChainIdentifiers.includes(
                           chainInfo.chainIdentifier
                         )
@@ -732,7 +750,8 @@ export const EnableChainsScene: FunctionComponent<{
                   <Checkbox
                     size="small"
                     checked={
-                      chainInfos.length === enabledChainIdentifiersInPage.length
+                      chainInfos.length - unsupportedChains.length ===
+                      enabledChainIdentifiersInPage.length
                     }
                     onChange={() => {}}
                   />
@@ -919,16 +938,30 @@ const ChainItem: FunctionComponent<{
 
   enabled: boolean;
   blockInteraction: boolean;
+  isSupported: boolean;
 
   onClick: () => void;
 
   isFresh: boolean;
 }> = observer(
-  ({ chainInfo, balance, enabled, blockInteraction, onClick, isFresh }) => {
+  ({
+    chainInfo,
+    balance,
+    enabled,
+    blockInteraction,
+    isSupported,
+    onClick,
+    isFresh,
+  }) => {
     const { priceStore } = useStore();
     const theme = useTheme();
 
     const price = priceStore.calculatePrice(balance);
+
+    const disableInteraction = useMemo(
+      () => blockInteraction || !isSupported,
+      [blockInteraction, isSupported]
+    );
 
     return (
       <Box
@@ -944,9 +977,9 @@ const ChainItem: FunctionComponent<{
             ? ColorPalette.white
             : ColorPalette["gray-600"]
         }
-        cursor={blockInteraction ? "not-allowed" : "pointer"}
+        cursor={disableInteraction ? "not-allowed" : "pointer"}
         onClick={() => {
-          if (!blockInteraction) {
+          if (!disableInteraction) {
             onClick();
           }
         }}
@@ -964,9 +997,14 @@ const ChainItem: FunctionComponent<{
 
             <Gutter size="0.5rem" />
 
-            <YAxis>
+            <XAxis>
               <Subtitle2>{chainInfo.chainName}</Subtitle2>
-            </YAxis>
+              {!isSupported && (
+                <Box marginLeft="0.5rem">
+                  <Tag text="Unsupported" />
+                </Box>
+              )}
+            </XAxis>
           </XAxis>
           <Column weight={1} />
           <XAxis alignY="center">
@@ -996,7 +1034,7 @@ const ChainItem: FunctionComponent<{
             <Checkbox
               checked={enabled}
               onChange={() => {
-                if (!blockInteraction) {
+                if (!disableInteraction) {
                   onClick();
                 }
               }}
