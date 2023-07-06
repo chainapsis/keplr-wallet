@@ -10,7 +10,9 @@ import { FormattedMessage } from "react-intl";
 export const StringToggleRadius = "12rem";
 
 const Styles = {
-  Container: styled.div`
+  Container: styled.div<{
+    isNotReady?: boolean;
+  }>`
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -27,7 +29,7 @@ const Styles = {
         : ColorPalette["gray-600"]};
 
     box-shadow: ${(props) =>
-      props.theme.mode === "light"
+      props.theme.mode === "light" && !props.isNotReady
         ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
         : "none"};
   `,
@@ -93,7 +95,7 @@ export const StringToggle: FunctionComponent<{
     <Columns sum={1} alignY="center" columnAlign="center">
       {tabStatus === "available" ? (
         <Skeleton type="stringToggle" isNotReady={isNotReady}>
-          <Styles.Container>
+          <Styles.Container isNotReady={isNotReady}>
             <Skeleton type="stringToggle" layer={1} isNotReady={isNotReady}>
               <Styles.Selected>
                 <FormattedMessage id="page.main.components.string-toggle.available-tab" />

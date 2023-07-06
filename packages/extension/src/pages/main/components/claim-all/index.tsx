@@ -49,7 +49,7 @@ const Styles = {
         : ColorPalette["gray-600"]};
 
     box-shadow: ${(props) =>
-      props.theme.mode === "light"
+      props.theme.mode === "light" && !props.isNotReady
         ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
         : "none"};
     padding: 0.75rem 0 0 0;
