@@ -106,9 +106,10 @@ export const MainPage: FunctionComponent = observer(() => {
     }
     return result;
   }, [hugeQueriesStore.allKnownBalances]);
-  const availableChartWeight = availableTotalPrice
-    ? Number.parseFloat(availableTotalPrice.toDec().toString())
-    : 0;
+  const availableChartWeight =
+    availableTotalPrice && !isNotReady
+      ? Number.parseFloat(availableTotalPrice.toDec().toString())
+      : 0;
   const stakedTotalPrice = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
@@ -131,9 +132,10 @@ export const MainPage: FunctionComponent = observer(() => {
     }
     return result;
   }, [hugeQueriesStore.delegations, hugeQueriesStore.unbondings]);
-  const stakedChartWeight = stakedTotalPrice
-    ? Number.parseFloat(stakedTotalPrice.toDec().toString())
-    : 0;
+  const stakedChartWeight =
+    stakedTotalPrice && !isNotReady
+      ? Number.parseFloat(stakedTotalPrice.toDec().toString())
+      : 0;
 
   const [isOpenMenu, setIsOpenMenu] = React.useState(false);
   const [isOpenCopyAddress, setIsOpenCopyAddress] = React.useState(false);
