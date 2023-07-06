@@ -10,7 +10,6 @@ import {
   SpecialButton,
   getSpecialButtonHeightRem,
 } from "../../components/special-button";
-import { useLocation } from "react-router-dom";
 
 const pxToRem = (px: number) => {
   const base = parseFloat(
@@ -23,15 +22,20 @@ const bottomButtonPaddingRem = 0.75;
 const Styles = {
   Container: styled.div``,
 
-  HeaderContainer: styled.div<{ path?: string }>`
+  HeaderContainer: styled.div`
     height: 3.75rem;
 
     background: ${(props) =>
       props.theme.mode === "light"
-        ? props.path?.startsWith("/setting") || props.path?.startsWith("/send")
-          ? ColorPalette.white
-          : ColorPalette["light-gradient"]
+        ? ColorPalette["light-gradient"]
         : ColorPalette["gray-700"]};
+
+    body[data-white-background="true"] & {
+      background: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["white"]
+          : ColorPalette["gray-700"]};
+    }
 
     color: ${(props) =>
       props.theme.mode === "light"
@@ -134,7 +138,6 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 }) => {
   const [height, setHeight] = React.useState(() => pxToRem(600));
   const lastSetHeight = useRef(-1);
-  const location = useLocation();
 
   useLayoutEffect(() => {
     function handleResize() {
@@ -175,7 +178,7 @@ export const HeaderLayout: FunctionComponent<HeaderProps> = ({
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
-      <Styles.HeaderContainer path={location.pathname}>
+      <Styles.HeaderContainer>
         {left && !isNotReady ? (
           <Styles.HeaderLeft>{left}</Styles.HeaderLeft>
         ) : null}
