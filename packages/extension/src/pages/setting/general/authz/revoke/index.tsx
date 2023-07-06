@@ -39,6 +39,8 @@ const Styles = {
         : ColorPalette["gray-10"]};
     word-break: keep-all;
     word-wrap: break-word;
+
+    cursor: pointer;
   `,
   JSON: styled.pre`
     overflow: auto;
@@ -201,7 +203,21 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
             <Styles.Title>
               <FormattedMessage id="page.setting.general.authz.revoke.grantee-address" />
             </Styles.Title>
-            <Styles.Paragraph>
+            <Styles.Paragraph
+              onClick={async (e) => {
+                e.preventDefault();
+
+                await navigator.clipboard.writeText(state.grant.grantee);
+
+                notification.show(
+                  "success",
+                  intl.formatMessage({
+                    id: "pages.register.components.copy-to-clipboard.button-after",
+                  }),
+                  ""
+                );
+              }}
+            >
               {state.grant.grantee}
               <CopyOutlineIcon width="0.875rem" height="0.875rem" />
             </Styles.Paragraph>
