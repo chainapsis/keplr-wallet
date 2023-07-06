@@ -1,4 +1,10 @@
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../../layouts/header";
 import { BackButton } from "../../../layouts/header/components";
@@ -34,6 +40,9 @@ import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { SendTxAndRecordMsg } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
+import { HorizontalRadioGroup } from "../../../components/radio-group";
+import { Modal } from "../../../components/modal";
+import { IBCTransferSelectDestinationModal } from "./ibc-transfer";
 
 const Styles = {
   Flex1: styled.div`
@@ -57,6 +66,12 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const coinMinimalDenom =
     initialCoinMinimalDenom ||
     chainStore.getChain(chainId).currencies[0].coinMinimalDenom;
+
+  const [isIBCTransfer, setIsIBCTransfer] = useState(false);
+  const [
+    isIBCTransferDestinationModalOpen,
+    setIsIBCTransferDestinationModalOpen,
+  ] = useState(true);
 
   useEffect(() => {
     if (addressRef.current) {
@@ -356,6 +371,28 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             />
           </YAxis>
 
+          <HorizontalRadioGroup
+            size="large"
+            selectedKey={isIBCTransfer ? "ibc-transfer" : "send"}
+            items={[
+              {
+                key: "send",
+                text: "Send",
+              },
+              {
+                key: "ibc-transfer",
+                text: "IBC Send",
+              },
+            ]}
+            onSelect={(key) => {
+              if (key === "ibc-transfer") {
+                setIsIBCTransfer(true);
+              } else {
+                setIsIBCTransfer(false);
+              }
+            }}
+          />
+
           <RecipientInput
             ref={addressRef}
             historyType={historyType}
@@ -382,6 +419,16 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           />
         </Stack>
       </Box>
+
+      <Modal
+        isOpen={isIBCTransferDestinationModalOpen}
+        align="bottom"
+        close={() => {
+          setIsIBCTransferDestinationModalOpen(false);
+        }}
+      >
+        <IBCTransferSelectDestinationModal chainId={chainId} />
+      </Modal>
     </HeaderLayout>
   );
 });
