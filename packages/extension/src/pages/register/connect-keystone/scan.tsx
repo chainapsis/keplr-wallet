@@ -12,9 +12,7 @@ import { ColorPalette } from "../../../styles";
 import { CameraIcon } from "../../../components/icon";
 import { Purpose, useAnimatedQRScanner } from "@keystonehq/animated-qr";
 import { GuideBox } from "../../../components/guide-box";
-import { Modal } from "../../../components/modal";
-import { Body2, Subtitle1 } from "../../../components/typography";
-import { Button } from "../../../components/button";
+import { KeystoneError } from "../../../components/keystone/error";
 
 export const ScanKeystoneScene: FunctionComponent<{
   name: string;
@@ -29,9 +27,8 @@ export const ScanKeystoneScene: FunctionComponent<{
   stepTotal: number;
 }> = observer(({ name, password, stepPrevious, stepTotal }) => {
   const sceneTransition = useSceneTransition();
-  const { AnimatedQRScanner, hasPermission, setIsDone } = useAnimatedQRScanner(
-    {}
-  );
+  const { AnimatedQRScanner, hasPermission, setIsDone } =
+    useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
 
   const header = useRegisterHeader();
@@ -128,57 +125,12 @@ export const ScanKeystoneScene: FunctionComponent<{
           />
         </Box>
       )}
-      <Modal isOpen={isErrorOpen} close={handleClose} align="center">
-        <Box
-          width="18.6875rem"
-          marginX="auto"
-          backgroundColor={ColorPalette["gray-600"]}
-          padding="1.5rem 1.25rem 1.25rem"
-          borderRadius="0.5rem"
-        >
-          <Subtitle1>Invalid QR code</Subtitle1>
-          <Body2
-            color={ColorPalette["gray-200"]}
-            style={{ marginTop: "0.5rem" }}
-          >
-            Please ensure you have selected a valid QR code from your Keystone
-            device.
-          </Body2>
-          <Box
-            marginTop="2rem"
-            alignX="right"
-            style={{
-              flexDirection: "row",
-              width: "100%",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            }}
-          >
-            <a
-              href="https://support.keyst.one/3rd-party-wallets/cosmos-wallets/keplr-extension?utm_source=keplr&utm_medium=moredetails&utm_id=20230419"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                marginRight: "1.75rem",
-                color: ColorPalette.white,
-                textDecoration: "none",
-                fontSize: "0.875rem",
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              Tutorial
-            </a>
-            <Button
-              size="small"
-              text="OK"
-              style={{ width: "4.8125rem" }}
-              onClick={handleClose}
-            />
-          </Box>
-        </Box>
-      </Modal>
+      <KeystoneError
+        isOpen={isErrorOpen}
+        close={handleClose}
+        title="Invalid QR code"
+        paragraph="Please ensure you have selected a valid QR code from your Keystone device."
+      />
     </RegisterSceneBox>
   );
 });

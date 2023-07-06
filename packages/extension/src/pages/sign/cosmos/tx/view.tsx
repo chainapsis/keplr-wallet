@@ -36,6 +36,7 @@ import { Gutter } from "../../../../components/gutter";
 import { GuideBox } from "../../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
+import { KeystoneSign } from "../../components/keystone";
 import { useTheme } from "styled-components";
 import { defaultProtoCodec } from "@keplr-wallet/cosmos";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
@@ -307,6 +308,9 @@ export const CosmosTxView: FunctionComponent<{
     Error | undefined
   >(undefined);
 
+  const isKeystone = interactionData.data.keyType === "keystone";
+  const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
+
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
     !signDocHelper.signDocWrapper ||
@@ -317,6 +321,9 @@ export const CosmosTxView: FunctionComponent<{
       if (interactionData.data.keyType === "ledger") {
         setIsLedgerInteracting(true);
         setLedgerInteractingError(undefined);
+      } else if (isKeystone) {
+        setIsKeystoneInteracting(true);
+        return;
       }
 
       try {
@@ -573,6 +580,12 @@ export const CosmosTxView: FunctionComponent<{
           ledgerInteractingError={ledgerInteractingError}
         />
       </Box>
+      <KeystoneSign
+        isOpen={isKeystoneInteracting}
+        close={() => {
+          setIsKeystoneInteracting(false);
+        }}
+      />
     </HeaderLayout>
   );
 });
