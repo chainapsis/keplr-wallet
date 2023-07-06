@@ -20,7 +20,7 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
 import { GlobalPopupStyle, GlobalStyle, ScrollBarStyle } from "./styles";
 import { configure } from "mobx";
@@ -76,6 +76,7 @@ import { SignEthereumTxPage } from "./pages/sign/ethereum";
 import "simplebar-react/dist/simplebar.min.css";
 import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { AppThemeProvider } from "./theme";
+import { useTheme } from "styled-components";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -250,99 +251,112 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
         keyRingStore.status === "locked" && !isURLUnlockPage ? (
           <UnlockPage />
         ) : (
-          <Routes>
-            <Route path="/unlock" element={<UnlockPage />} />
-            <Route path="/" element={<MainPage />} />
-            <Route path="/send" element={<SendAmountPage />} />
-            <Route
-              path="/send/select-asset"
-              element={<SendSelectAssetPage />}
-            />
-            <Route path="/setting" element={<SettingPage />} />
-            <Route path="/setting/general" element={<SettingGeneralPage />} />
-            <Route
-              path="/setting/general/language"
-              element={<SettingGeneralLanguagePage />}
-            />
-            <Route
-              path="/setting/general/fiat"
-              element={<SettingGeneralFiatPage />}
-            />
-            <Route
-              path="/setting/general/theme"
-              element={<SettingGeneralThemePage />}
-            />
-            <Route
-              path="/setting/general/authz"
-              element={<SettingGeneralAuthZPage />}
-            />
-            <Route
-              path="/setting/general/authz/revoke"
-              element={<SettingGeneralAuthZRevokePage />}
-            />
-            <Route
-              path="/setting/general/link-keplr-mobile"
-              element={<SettingGeneralLinkKeplrMobilePage />}
-            />
-            <Route
-              path="setting/general/delete-suggest-chain"
-              element={<SettingGeneralDeleteSuggestChainPage />}
-            />
-            <Route path="/setting/advanced" element={<SettingAdvancedPage />} />
-            <Route
-              path="/setting/advanced/endpoint"
-              element={<SettingAdvancedEndpointPage />}
-            />
-            <Route path="/setting/security" element={<SettingSecurityPage />} />
-            <Route
-              path="/setting/security/permission"
-              element={<SettingSecurityPermissionPage />}
-            />
-            <Route
-              path="/setting/security/auto-lock"
-              element={<SettingSecurityAutoLockPage />}
-            />
-            <Route
-              path="/setting/security/change-password"
-              element={<SettingSecurityChangePasswordPage />}
-            />
-            <Route
-              path="/setting/token/list"
-              element={<SettingTokenListPage />}
-            />
-            <Route
-              path="/setting/token/add"
-              element={<SettingTokenAddPage />}
-            />
-            <Route
-              path="/setting/contacts/list"
-              element={<SettingContactsList />}
-            />
-            <Route
-              path="/setting/contacts/add"
-              element={<SettingContactsAdd />}
-            />
-            <Route path="/permission" element={<PermissionPage />} />
-            <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
-            <Route
-              path="/sign-cosmos-adr36"
-              element={<SignCosmosADR36Page />}
-            />
-            <Route path="/sign-cosmos-icns" element={<SignCosmosICNSPage />} />
-            <Route path="/sign-ethereum" element={<SignEthereumTxPage />} />
-            <Route path="/wallet/select" element={<WalletSelectPage />} />
-            <Route path="/wallet/delete" element={<WalletDeletePage />} />
-            <Route
-              path="/wallet/change-name"
-              element={<WalletChangeNamePage />}
-            />
-            <Route
-              path="/wallet/show-sensitive"
-              element={<WalletShowSensitivePage />}
-            />
-            <Route path="/suggest-chain" element={<SuggestChainPage />} />
-            <Route path="/ibc-transfer" element={<IBCTransferPage />} />
-          </Routes>
+          <React.Fragment>
+            <Routes>
+              <Route path="/unlock" element={<UnlockPage />} />
+              <Route path="/" element={<MainPage />} />
+              <Route path="/send" element={<SendAmountPage />} />
+              <Route
+                path="/send/select-asset"
+                element={<SendSelectAssetPage />}
+              />
+              <Route path="/setting" element={<SettingPage />} />
+              <Route path="/setting/general" element={<SettingGeneralPage />} />
+              <Route
+                path="/setting/general/language"
+                element={<SettingGeneralLanguagePage />}
+              />
+              <Route
+                path="/setting/general/fiat"
+                element={<SettingGeneralFiatPage />}
+              />
+              <Route
+                path="/setting/general/theme"
+                element={<SettingGeneralThemePage />}
+              />
+              <Route
+                path="/setting/general/authz"
+                element={<SettingGeneralAuthZPage />}
+              />
+              <Route
+                path="/setting/general/authz/revoke"
+                element={<SettingGeneralAuthZRevokePage />}
+              />
+              <Route
+                path="/setting/general/link-keplr-mobile"
+                element={<SettingGeneralLinkKeplrMobilePage />}
+              />
+              <Route
+                path="setting/general/delete-suggest-chain"
+                element={<SettingGeneralDeleteSuggestChainPage />}
+              />
+              <Route
+                path="/setting/advanced"
+                element={<SettingAdvancedPage />}
+              />
+              <Route
+                path="/setting/advanced/endpoint"
+                element={<SettingAdvancedEndpointPage />}
+              />
+              <Route
+                path="/setting/security"
+                element={<SettingSecurityPage />}
+              />
+              <Route
+                path="/setting/security/permission"
+                element={<SettingSecurityPermissionPage />}
+              />
+              <Route
+                path="/setting/security/auto-lock"
+                element={<SettingSecurityAutoLockPage />}
+              />
+              <Route
+                path="/setting/security/change-password"
+                element={<SettingSecurityChangePasswordPage />}
+              />
+              <Route
+                path="/setting/token/list"
+                element={<SettingTokenListPage />}
+              />
+              <Route
+                path="/setting/token/add"
+                element={<SettingTokenAddPage />}
+              />
+              <Route
+                path="/setting/contacts/list"
+                element={<SettingContactsList />}
+              />
+              <Route
+                path="/setting/contacts/add"
+                element={<SettingContactsAdd />}
+              />
+              <Route path="/permission" element={<PermissionPage />} />
+              <Route path="/sign-cosmos" element={<SignCosmosTxPage />} />
+              <Route
+                path="/sign-cosmos-adr36"
+                element={<SignCosmosADR36Page />}
+              />
+              <Route
+                path="/sign-cosmos-icns"
+                element={<SignCosmosICNSPage />}
+              />
+              <Route path="/sign-ethereum" element={<SignEthereumTxPage />} />
+              <Route path="/wallet/select" element={<WalletSelectPage />} />
+              <Route path="/wallet/delete" element={<WalletDeletePage />} />
+              <Route
+                path="/wallet/change-name"
+                element={<WalletChangeNamePage />}
+              />
+              <Route
+                path="/wallet/show-sensitive"
+                element={<WalletShowSensitivePage />}
+              />
+              <Route path="/suggest-chain" element={<SuggestChainPage />} />
+              <Route path="/ibc-transfer" element={<IBCTransferPage />} />
+            </Routes>
+
+            <LightModeBackground />
+          </React.Fragment>
         )
       ) : (
         <Splash />
@@ -350,6 +364,26 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     </HashRouter>
   );
 });
+
+const LightModeBackground: FunctionComponent = () => {
+  const theme = useTheme();
+  const location = useLocation();
+
+  useLayoutEffect(() => {
+    if (
+      location.pathname.startsWith("/setting") ||
+      location.pathname.startsWith("/send")
+    ) {
+      document.body.setAttribute("data-white-background", "true");
+
+      return () => {
+        document.body.removeAttribute("data-white-background");
+      };
+    }
+  }, [location.pathname, theme]);
+
+  return null;
+};
 
 const App: FunctionComponent = () => {
   useMatchPopupSize();
