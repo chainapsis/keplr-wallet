@@ -30,7 +30,7 @@ const Styles = {
         ? ColorPalette["light-gradient"]
         : ColorPalette["gray-700"]};
 
-    body[data-white-background="true"] & {
+    body[data-white-background="true"] && {
       background: ${(props) =>
         props.theme.mode === "light"
           ? ColorPalette["white"]
