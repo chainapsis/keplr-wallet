@@ -246,7 +246,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                   color={
                     theme.mode === "light"
                       ? ColorPalette["gray-700"]
-                      : ColorPalette["gray-300"]
+                      : ColorPalette["gray-10"]
                   }
                   style={{
                     wordBreak: "break-all",
@@ -328,7 +328,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                   color={
                     theme.mode === "light"
                       ? ColorPalette["gray-700"]
-                      : ColorPalette["gray-300"]
+                      : ColorPalette["gray-10"]
                   }
                 >
                   {viewToken.token
