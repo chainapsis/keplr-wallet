@@ -174,7 +174,7 @@ const NotificationView: FunctionComponent<{
           ? ColorPalette["green-100"]
           : ColorPalette["green-700"];
       case "failed":
-        return theme.mode === "light" ? ColorPalette["orange-50"] : "#705512";
+        return theme.mode === "light" ? ColorPalette["orange-100"] : "#705512";
       default:
         return ColorPalette["gray-500"];
     }
