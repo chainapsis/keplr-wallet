@@ -575,3 +575,39 @@ export class RequestICNSAdr36SignaturesMsg extends Message<
     return RequestICNSAdr36SignaturesMsg.type();
   }
 }
+
+export class EnableVaultsWithCosmosAddressMsg extends Message<
+  {
+    vaultId: string;
+    newEnabledChains: ReadonlyArray<string>;
+  }[]
+> {
+  public static type() {
+    return "EnableVaultsWithCosmosAddressMsg";
+  }
+
+  constructor(
+    public readonly chainId: string,
+    public readonly bech32Address: string
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.chainId) {
+      throw new Error("chainId is not set");
+    }
+
+    if (!this.bech32Address) {
+      throw new Error("bech32Address is not set");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return EnableVaultsWithCosmosAddressMsg.type();
+  }
+}

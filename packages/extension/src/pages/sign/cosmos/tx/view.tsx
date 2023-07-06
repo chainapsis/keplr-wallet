@@ -34,7 +34,9 @@ import { ErrModuleLedgerSign } from "../../utils/ledger-types";
 import { LedgerGuideBox } from "../../components/ledger-guide-box";
 import { Gutter } from "../../../../components/gutter";
 import { GuideBox } from "../../../../components/guide-box";
+import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
+import { useTheme } from "styled-components";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -52,6 +54,9 @@ export const CosmosTxView: FunctionComponent<{
 }> = observer(({ interactionData }) => {
   const { chainStore, queriesStore, signInteractionStore, uiConfigStore } =
     useStore();
+
+  const intl = useIntl();
+  const theme = useTheme();
 
   const [isViewData, setIsViewData] = useState(false);
 
@@ -132,6 +137,7 @@ export const CosmosTxView: FunctionComponent<{
     feeConfig,
     gasConfig,
     interactionData,
+    intl,
     memoConfig,
     signDocHelper,
   ]);
@@ -263,7 +269,7 @@ export const CosmosTxView: FunctionComponent<{
 
   return (
     <HeaderLayout
-      title="Confirm Transaction"
+      title={intl.formatMessage({ id: "page.sign.cosmos.tx.title" })}
       fixedHeight={true}
       left={
         <BackButton
@@ -275,7 +281,7 @@ export const CosmosTxView: FunctionComponent<{
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButton={{
         isSpecial: true,
-        text: "Approve",
+        text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
         disabled: buttonDisabled,
         isLoading:
@@ -310,10 +316,13 @@ export const CosmosTxView: FunctionComponent<{
               </H5>
               <H5
                 style={{
-                  color: ColorPalette["gray-50"],
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-50"],
                 }}
               >
-                Messages
+                <FormattedMessage id="page.sign.cosmos.tx.messages" />
               </H5>
             </XAxis>
             <Column weight={1} />
@@ -333,7 +342,14 @@ export const CosmosTxView: FunctionComponent<{
             overflow: "auto",
             opacity: isLedgerAndDirect ? 0.5 : undefined,
             borderRadius: "0.375rem",
-            backgroundColor: ColorPalette["gray-600"],
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette.white
+                : ColorPalette["gray-600"],
+            boxShadow:
+              theme.mode === "light"
+                ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+                : "none",
           }}
         >
           <Box>
@@ -345,6 +361,10 @@ export const CosmosTxView: FunctionComponent<{
                 margin="0"
                 style={{
                   width: "fit-content",
+                  color:
+                    theme.mode === "light"
+                      ? ColorPalette["gray-400"]
+                      : ColorPalette["gray-200"],
                 }}
               >
                 {JSON.stringify(signDocHelper.signDocJson, null, 2)}
@@ -402,8 +422,12 @@ export const CosmosTxView: FunctionComponent<{
             <Gutter size="0.75rem" />
             <GuideBox
               color="warning"
-              title="Incompatible Signing Requested"
-              paragraph="Error: SIGN_MODE_DIRECT can’t be signed on Ledger. Contact the web app provider to fix this issue."
+              title={intl.formatMessage({
+                id: "page.sign.cosmos.tx.warning-title",
+              })}
+              paragraph={intl.formatMessage({
+                id: "page.sign.cosmos.tx.warning-paragraph",
+              })}
             />
           </React.Fragment>
         ) : null}
@@ -426,17 +450,37 @@ export const CosmosTxView: FunctionComponent<{
 const ReadonlyMemo: FunctionComponent<{
   memo: string;
 }> = ({ memo }) => {
+  const theme = useTheme();
+
   return (
     <Box
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      }
       padding="1rem"
       borderRadius="0.375rem"
     >
       <XAxis alignY="center">
-        <Subtitle3 color={ColorPalette["gray-200"]}>Memo</Subtitle3>
+        <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-500"]
+              : ColorPalette["gray-200"]
+          }
+        >
+          Memo
+        </Subtitle3>
         <Gutter size="1.5rem" direction="horizontal" />
         <Subtitle3
-          color={memo ? ColorPalette["gray-50"] : ColorPalette["gray-300"]}
+          color={
+            memo
+              ? theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-50"]
+              : theme.mode === "light"
+              ? ColorPalette["gray-200"]
+              : ColorPalette["gray-300"]
+          }
           style={{
             flex: 1,
 
@@ -446,7 +490,9 @@ const ReadonlyMemo: FunctionComponent<{
             textOverflow: "ellipsis",
           }}
         >
-          {memo || "(Empty)"}
+          {memo || (
+            <FormattedMessage id="page.sign.cosmos.tx.readonly-memo.empty" />
+          )}
         </Subtitle3>
       </XAxis>
     </Box>

@@ -4,12 +4,15 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
 import { Body3, H5 } from "../../../../components/typography";
+import { useTheme } from "styled-components";
 
 export const MessageItem: FunctionComponent<{
   icon: React.ReactElement;
-  title: string;
+  title: string | React.ReactElement;
   content: string | React.ReactElement;
 }> = ({ icon, title, content }) => {
+  const theme = useTheme();
+
   return (
     <Box padding="1rem">
       <Columns sum={1}>
@@ -27,9 +30,25 @@ export const MessageItem: FunctionComponent<{
 
         <Column weight={1}>
           <Box minHeight="3rem" alignY="center">
-            <H5 color={ColorPalette["gray-10"]}>{title}</H5>
+            <H5
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-10"]
+              }
+            >
+              {title}
+            </H5>
             <Gutter size="2px" />
-            <Body3 color={ColorPalette["gray-200"]}>{content}</Body3>
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              {content}
+            </Body3>
           </Box>
         </Column>
       </Columns>

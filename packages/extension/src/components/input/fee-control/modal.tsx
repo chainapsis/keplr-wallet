@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { Caption1, Caption2, H5, Subtitle1, Subtitle3 } from "../../typography";
 import { ColorPalette } from "../../../styles";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Stack } from "../../stack";
 import { Dropdown } from "../../dropdown";
 import { Column, Columns } from "../../column";
@@ -19,6 +19,7 @@ import { useStore } from "../../../stores";
 import { GuideBox } from "../../guide-box";
 import { Dec } from "@keplr-wallet/unit";
 import { Box } from "../../box";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -30,10 +31,17 @@ const Styles = {
     padding: 1.25rem;
     gap: 0.75rem;
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
   `,
   Divider: styled.div`
-    border: 1px solid ${ColorPalette["gray-500"]};
+    border-bottom: 1px solid
+      ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-500"]};
   `,
 };
 
@@ -46,6 +54,8 @@ export const TransactionFeeModal: FunctionComponent<{
   gasSimulator?: IGasSimulator;
 }> = observer(({ close, senderConfig, feeConfig, gasConfig, gasSimulator }) => {
   const { queriesStore } = useStore();
+  const intl = useIntl();
+  const theme = useTheme();
 
   const isGasSimulatorUsable = (() => {
     if (!gasSimulator) {
@@ -67,17 +77,29 @@ export const TransactionFeeModal: FunctionComponent<{
 
   return (
     <Styles.Container>
-      <Subtitle1 style={{ marginBottom: "1.5rem" }}>Fee Options</Subtitle1>
+      <Subtitle1 style={{ marginBottom: "1.5rem" }}>
+        <FormattedMessage id="components.input.fee-control.modal.title" />
+      </Subtitle1>
 
       <Stack gutter="0.75rem">
         <Stack gutter="0.375rem">
-          <Subtitle3>Fee</Subtitle3>
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-100"]
+            }
+          >
+            <FormattedMessage id="components.input.fee-control.modal.fee-title" />
+          </Subtitle3>
           <FeeSelector feeConfig={feeConfig} />
         </Stack>
 
         <Stack gutter="0.375rem">
           <Dropdown
-            label="Fee Token"
+            label={intl.formatMessage({
+              id: "components.input.fee-control.modal.fee-token-dropdown-label",
+            })}
             items={feeConfig.selectableFeeCurrencies
               .filter((cur, i) => {
                 if (i === 0) {
@@ -123,13 +145,17 @@ export const TransactionFeeModal: FunctionComponent<{
         <Styles.Divider />
 
         <Columns sum={1} alignY="center">
-          <Subtitle3 style={{ color: ColorPalette["gray-200"] }}>Gas</Subtitle3>
+          <Subtitle3 style={{ color: ColorPalette["gray-200"] }}>
+            <FormattedMessage id="components.input.fee-control.modal.gas-title" />
+          </Subtitle3>
 
           <Column weight={1} />
 
           {isGasSimulatorUsable && gasSimulator ? (
             <Columns sum={1} gutter="0.5rem" alignY="center">
-              <Subtitle3>Auto</Subtitle3>
+              <Subtitle3 color={ColorPalette["gray-200"]}>
+                <FormattedMessage id="components.input.fee-control.modal.auto-title" />
+              </Subtitle3>
               <Toggle
                 isOpen={gasSimulator.enabled}
                 setIsOpen={(isOpen) => {
@@ -146,7 +172,9 @@ export const TransactionFeeModal: FunctionComponent<{
               return (
                 <GuideBox
                   color="danger"
-                  title="Tx simulation failed"
+                  title={intl.formatMessage({
+                    id: "components.input.fee-control.modal.guide-title",
+                  })}
                   paragraph={
                     gasSimulator.uiProperties.error.message ||
                     gasSimulator.uiProperties.error.toString()
@@ -159,7 +187,9 @@ export const TransactionFeeModal: FunctionComponent<{
               return (
                 <GuideBox
                   color="warning"
-                  title="Tx simulation failed"
+                  title={intl.formatMessage({
+                    id: "components.input.fee-control.modal.guide-title",
+                  })}
                   paragraph={
                     gasSimulator.uiProperties.warning.message ||
                     gasSimulator.uiProperties.warning.toString()
@@ -172,7 +202,9 @@ export const TransactionFeeModal: FunctionComponent<{
 
         {isGasSimulatorEnabled ? (
           <TextInput
-            label="Gas Adjustment"
+            label={intl.formatMessage({
+              id: "components.input.fee-control.modal.gas-adjustment-label",
+            })}
             value={gasSimulator?.gasAdjustmentValue}
             onChange={(e) => {
               e.preventDefault();
@@ -182,7 +214,9 @@ export const TransactionFeeModal: FunctionComponent<{
           />
         ) : (
           <TextInput
-            label="Gas Amount"
+            label={intl.formatMessage({
+              id: "components.input.fee-control.modal.gas-amount-label",
+            })}
             value={gasConfig.value}
             onChange={(e) => {
               e.preventDefault();
@@ -194,7 +228,9 @@ export const TransactionFeeModal: FunctionComponent<{
 
         <Button
           type="button"
-          text="Close"
+          text={intl.formatMessage({
+            id: "button.close",
+          })}
           color="secondary"
           size="large"
           onClick={() => {
@@ -215,18 +251,32 @@ const FeeSelectorStyle = {
 
     cursor: pointer;
 
-    background-color: ${({ selected }) =>
-      selected ? ColorPalette["blue-400"] : ColorPalette["gray-500"]};
+    background-color: ${({ selected, theme }) =>
+      selected
+        ? ColorPalette["blue-400"]
+        : theme.mode === "light"
+        ? ColorPalette["blue-50"]
+        : ColorPalette["gray-500"]};
   `,
   Title: styled(H5)<{ selected: boolean }>`
-    color: ${({ selected }) =>
-      selected ? ColorPalette["white"] : ColorPalette["gray-50"]};
+    color: ${({ selected, theme }) =>
+      selected
+        ? theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-50"]
+        : theme.mode === "light"
+        ? ColorPalette["blue-400"]
+        : ColorPalette["gray-50"]};
   `,
   Price: styled(Caption2)<{ selected: boolean }>`
     white-space: nowrap;
     margin-top: 0.25rem;
-    color: ${({ selected }) =>
-      selected ? ColorPalette["blue-200"] : ColorPalette["gray-300"]};
+    color: ${({ selected, theme }) =>
+      selected
+        ? ColorPalette["blue-200"]
+        : theme.mode === "light"
+        ? ColorPalette["blue-500"]
+        : ColorPalette["gray-300"]};
   `,
   Amount: styled(Caption1)<{ selected: boolean }>`
     white-space: nowrap;
@@ -240,6 +290,7 @@ const FeeSelector: FunctionComponent<{
   feeConfig: IFeeConfig;
 }> = observer(({ feeConfig }) => {
   const { priceStore } = useStore();
+  const theme = useTheme();
 
   const feeCurrency =
     feeConfig.fees.length > 0
@@ -256,7 +307,11 @@ const FeeSelector: FunctionComponent<{
         <FeeSelectorStyle.Item
           style={{
             borderRadius: "0.5rem 0 0 0.5rem",
-            borderRight: `1px solid ${ColorPalette["gray-400"]}`,
+            borderRight: `1px solid ${
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-400"]
+            }`,
           }}
           onClick={() => {
             feeConfig.setFee({
@@ -269,7 +324,7 @@ const FeeSelector: FunctionComponent<{
           {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
           <Box width="1px" alignX="center">
             <FeeSelectorStyle.Title selected={feeConfig.type === "low"}>
-              Low
+              <FormattedMessage id="components.input.fee-control.modal.fee-selector.low" />
             </FeeSelectorStyle.Title>
             {feeCurrency.coinGeckoId ? (
               <FeeSelectorStyle.Price selected={feeConfig.type === "low"}>
@@ -306,7 +361,7 @@ const FeeSelector: FunctionComponent<{
           {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
           <Box width="1px" alignX="center">
             <FeeSelectorStyle.Title selected={feeConfig.type === "average"}>
-              Average
+              <FormattedMessage id="components.input.fee-control.modal.fee-selector.average" />
             </FeeSelectorStyle.Title>
             {feeCurrency.coinGeckoId ? (
               <FeeSelectorStyle.Price selected={feeConfig.type === "average"}>
@@ -337,7 +392,11 @@ const FeeSelector: FunctionComponent<{
         <FeeSelectorStyle.Item
           style={{
             borderRadius: "0 0.5rem 0.5rem 0",
-            borderLeft: `1px solid ${ColorPalette["gray-400"]}`,
+            borderLeft: `1px solid ${
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-400"]
+            }`,
           }}
           onClick={() => {
             feeConfig.setFee({
@@ -350,7 +409,7 @@ const FeeSelector: FunctionComponent<{
           {/* 텍스트의 길이 등에 의해서 레이아웃이 변하는걸 막기 위해서 가라로 1px의 너비르 가지는 Box로 감싸준다. */}
           <Box width="1px" alignX="center">
             <FeeSelectorStyle.Title selected={feeConfig.type === "high"}>
-              High
+              <FormattedMessage id="components.input.fee-control.modal.fee-selector.high" />
             </FeeSelectorStyle.Title>
             {feeCurrency.coinGeckoId ? (
               <FeeSelectorStyle.Price selected={feeConfig.type === "high"}>

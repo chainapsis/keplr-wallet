@@ -5,6 +5,7 @@ import { ColorPalette } from "../../../../styles";
 import { Box } from "../../../../components/box";
 import styled from "styled-components";
 import { HelpDeskUrl } from "../../../../config.ui";
+import { FormattedMessage } from "react-intl";
 
 const Container = styled.div`
   position: fixed;
@@ -22,17 +23,26 @@ const Styles = {
     }
   `,
   QuestionBox: styled(Box)`
-    background-color: ${ColorPalette["gray-500"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-50"]
+        : ColorPalette["gray-500"]};
 
     ${Container}:hover & {
-      background-color: ${ColorPalette["gray-400"]};
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-400"]};
     }
   `,
   QuestionText: styled(H2)`
     color: ${ColorPalette["gray-300"]};
 
     ${Container}:hover & {
-      color: ${ColorPalette["gray-100"]};
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-100"]};
     }
   `,
 };
@@ -42,7 +52,9 @@ export const HelpDeskButton: FunctionComponent = () => {
     <a href={HelpDeskUrl} target="_blank" rel="noreferrer">
       <Container>
         <Columns sum={1} gutter="0.5rem" alignY="center">
-          <Styles.Title>Help Desk</Styles.Title>
+          <Styles.Title>
+            <FormattedMessage id="pages.register.components.help-desk-button.title" />
+          </Styles.Title>
           <Styles.QuestionBox
             width="2.375rem"
             height="2.375rem"
@@ -50,7 +62,9 @@ export const HelpDeskButton: FunctionComponent = () => {
             alignX="center"
             alignY="center"
           >
-            <Styles.QuestionText>?</Styles.QuestionText>
+            <Styles.QuestionText>
+              <FormattedMessage id="pages.register.components.help-desk-button.question" />
+            </Styles.QuestionText>
           </Styles.QuestionBox>
         </Columns>
       </Container>

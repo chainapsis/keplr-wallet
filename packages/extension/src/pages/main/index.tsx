@@ -41,7 +41,9 @@ import { Tooltip } from "../../components/tooltip";
 import { Image } from "../../components/image";
 import { QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { useTheme } from "styled-components";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -71,6 +73,8 @@ export const MainPage: FunctionComponent = observer(() => {
   } = useStore();
 
   const isNotReady = useIsNotReady();
+  const intl = useIntl();
+  const theme = useTheme();
 
   const [tabStatus, setTabStatus] = React.useState<TabStatus>("available");
 
@@ -198,7 +202,9 @@ export const MainPage: FunctionComponent = observer(() => {
               >
                 <Image
                   alt="icns-icon"
-                  src={require("../../public/assets/img/icns-icon.png")}
+                  src={require(theme.mode === "light"
+                    ? "../../public/assets/img/icns-icon-light.png"
+                    : "../../public/assets/img/icns-icon.png")}
                   style={{ width: "1rem", height: "1rem" }}
                 />
               </Tooltip>
@@ -265,15 +271,18 @@ export const MainPage: FunctionComponent = observer(() => {
                   }}
                 >
                   {tabStatus === "available"
-                    ? "Total Available"
-                    : "Total Staked"}
+                    ? intl.formatMessage({ id: "page.main.chart.available" })
+                    : intl.formatMessage({ id: "page.main.chart.staked" })}
                 </Subtitle3>
               </Skeleton>
               <Gutter size="0.5rem" />
               <Skeleton isNotReady={isNotReady} dummyMinWidth="8.125rem">
                 <H1
                   style={{
-                    color: ColorPalette["gray-10"],
+                    color:
+                      theme.mode === "light"
+                        ? ColorPalette["gray-700"]
+                        : ColorPalette["gray-10"],
                   }}
                 >
                   {tabStatus === "available"
@@ -308,7 +317,7 @@ export const MainPage: FunctionComponent = observer(() => {
                 });
               }}
             >
-              Stake with Keplr Dashboard
+              <FormattedMessage id="page.main.chart.stake-with-keplr-dashboard-button" />
               <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
                 <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
               </Box>
@@ -331,7 +340,7 @@ export const MainPage: FunctionComponent = observer(() => {
                 });
               }}
             >
-              Manage Portfolio in Keplr Dashboard
+              <FormattedMessage id="page.main.chart.manage-portfolio-in-keplr-dashboard" />
               <Box color={ColorPalette["gray-300"]} marginLeft="0.5rem">
                 <ArrowTopRightOnSquareIcon width="1rem" height="1rem" />
               </Box>
@@ -372,7 +381,9 @@ export const MainPage: FunctionComponent = observer(() => {
                       }
                     }
                   }}
-                  placeholder="Search for asset or chain (i.e. ATOM, Cosmos)"
+                  placeholder={intl.formatMessage({
+                    id: "page.main.search-placeholder",
+                  })}
                 />
               ) : null}
             </Stack>

@@ -2,9 +2,10 @@ import React, { FunctionComponent, useMemo, useState } from "react";
 import { Box } from "../../../../components/box";
 import {
   Body2,
+  Body3,
   Button2,
-  Caption1,
   Subtitle1,
+  Subtitle2,
   Subtitle3,
 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
@@ -14,7 +15,7 @@ import { ChainImageFallback } from "../../../../components/image";
 import { Stack } from "../../../../components/stack";
 import { Checkbox } from "../../../../components/checkbox";
 import { ArrowDownIcon, ArrowUpIcon } from "../../../../components/icon";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
@@ -22,6 +23,7 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TokenScan } from "@keplr-wallet/background";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Gutter } from "../../../../components/gutter";
+import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { XAxis, YAxis } from "../../../../components/axis";
 
@@ -29,6 +31,8 @@ export const TokenFoundModal: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
   const { chainStore, keyRingStore } = useStore();
+  const intl = useIntl();
+  const theme = useTheme();
 
   const [checkedChainIdentifiers, setCheckedChainIdentifiers] = useState<
     string[]
@@ -132,11 +136,18 @@ export const TokenFoundModal: FunctionComponent<{
     <Box
       padding="0.75rem"
       paddingTop="0"
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      }
     >
       <Box paddingTop="1.25rem" paddingBottom="0.75rem">
         <Subtitle1 style={{ textAlign: "center" }}>
-          {numFoundToken} New Token(s) Found
+          <FormattedMessage
+            id="page.main.components.token-found-modal.title"
+            values={{
+              numFoundToken,
+            }}
+          />
         </Subtitle1>
       </Box>
 
@@ -203,7 +214,9 @@ export const TokenFoundModal: FunctionComponent<{
           }}
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-300"]}>Select All</Body2>
+            <Body2 color={ColorPalette["gray-300"]}>
+              <FormattedMessage id="text-button.select-all" />
+            </Body2>
 
             <Gutter size="0.25rem" />
 
@@ -241,7 +254,7 @@ export const TokenFoundModal: FunctionComponent<{
               }}
             >
               <Button2 color={ColorPalette["gray-300"]}>
-                Add tokens on Injective and Evmos
+                <FormattedMessage id="page.main.components.token-found-modal.add-token-on-injective-and-evmos" />
               </Button2>
             </Box>
           </Box>
@@ -252,7 +265,9 @@ export const TokenFoundModal: FunctionComponent<{
       )}
 
       <Button
-        text="Add Chains"
+        text={intl.formatMessage({
+          id: "page.main.components.token-found-modal.add-chains",
+        })}
         size="large"
         disabled={checkedChainIdentifiers.length === 0}
         onClick={buttonClicked}
@@ -268,6 +283,7 @@ const FoundChainView: FunctionComponent<{
   tokenScan: TokenScan;
 }> = observer(({ checked, onCheckbox, tokenScan }) => {
   const { chainStore } = useStore();
+  const theme = useTheme();
 
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
 
@@ -289,7 +305,11 @@ const FoundChainView: FunctionComponent<{
   return (
     <Box
       padding="0.875rem"
-      backgroundColor={ColorPalette["gray-500"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-500"]
+      }
       borderRadius="0.375rem"
     >
       <Columns sum={1} gutter="0.5rem" alignY="center">
@@ -305,12 +325,16 @@ const FoundChainView: FunctionComponent<{
         </Box>
 
         <Stack gutter="0.25rem">
-          <Subtitle1 color={ColorPalette["gray-10"]}>
+          <Subtitle2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-500"]
+                : ColorPalette["gray-10"]
+            }
+          >
             {chainStore.getChain(tokenScan.chainId).chainName}
-          </Subtitle1>
-          <Caption1 color={ColorPalette["gray-300"]}>
-            {numTokens} Tokens
-          </Caption1>
+          </Subtitle2>
+          <Body3 color={ColorPalette["gray-300"]}>{numTokens} Tokens</Body3>
         </Stack>
 
         <Column weight={1} />
@@ -324,7 +348,11 @@ const FoundChainView: FunctionComponent<{
 
       <VerticalCollapseTransition collapsed={!isDetailOpen}>
         <Box
-          backgroundColor={ColorPalette["gray-400"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-100"]
+              : ColorPalette["gray-400"]
+          }
           borderRadius="0.375rem"
           paddingY="0.75rem"
           paddingX="1rem"
@@ -357,6 +385,7 @@ const FoundTokenView: FunctionComponent<{
   asset: TokenScan["infos"][0]["assets"][0];
 }> = observer(({ chainId, asset }) => {
   const { chainStore } = useStore();
+  const theme = useTheme();
 
   return (
     <Columns sum={1} gutter="0.5rem" alignY="center">
@@ -367,7 +396,13 @@ const FoundTokenView: FunctionComponent<{
         />
       </Box>
 
-      <Subtitle3 color={ColorPalette["gray-50"]}>
+      <Subtitle3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-400"]
+            : ColorPalette["gray-50"]
+        }
+      >
         {
           chainStore
             .getChain(chainId)
@@ -377,7 +412,13 @@ const FoundTokenView: FunctionComponent<{
 
       <Column weight={1} />
 
-      <Subtitle3 color={ColorPalette["gray-50"]}>
+      <Subtitle3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-400"]
+            : ColorPalette["gray-50"]
+        }
+      >
         {new CoinPretty(
           chainStore
             .getChain(chainId)
@@ -410,6 +451,9 @@ const IconButton = styled.div`
   color: ${ColorPalette["gray-200"]};
 
   :hover {
-    background-color: ${ColorPalette["gray-550"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-100"]
+        : ColorPalette["gray-550"]};
   }
 `;

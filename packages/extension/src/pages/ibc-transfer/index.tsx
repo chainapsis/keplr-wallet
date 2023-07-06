@@ -19,6 +19,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { SendTxAndRecordMsg } from "@keplr-wallet/background";
 import { DecUtils } from "@keplr-wallet/unit";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { useIBCChannelConfigQueryString } from "../../hooks/use-ibc-channel-config-query-string";
 
@@ -28,6 +29,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const notification = useNotification();
+  const intl = useIntl();
 
   const chainId = searchParams.get("chainId");
   const coinMinimalDenom = searchParams.get("coinMinimalDenom");
@@ -126,7 +128,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="IBC Transfer"
+      title={intl.formatMessage({ id: "page.ibc-transfer.title" })}
       fixedHeight={true}
       left={
         <Box
@@ -144,7 +146,7 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
         </Box>
       }
       bottomButton={{
-        text: "Next",
+        text: intl.formatMessage({ id: "button.next" }),
         size: "large",
         onClick: async () => {
           if (isSelectChannelPhase) {
@@ -194,13 +196,31 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                     },
                   },
                   {
+                    onBroadcasted: () => {
+                      chainStore.enableVaultsWithCosmosAddress(
+                        ibcTransferConfigs.recipientConfig.chainId,
+                        ibcTransferConfigs.recipientConfig.recipient
+                      );
+                    },
                     onFulfill: (tx) => {
                       if (tx.code != null && tx.code !== 0) {
                         console.log(tx.log ?? tx.raw_log);
-                        notification.show("failed", "Transaction Failed", "");
+                        notification.show(
+                          "failed",
+                          intl.formatMessage({
+                            id: "error.transaction-failed",
+                          }),
+                          ""
+                        );
                         return;
                       }
-                      notification.show("success", "Transaction Success", "");
+                      notification.show(
+                        "success",
+                        intl.formatMessage({
+                          id: "notification.transaction-success",
+                        }),
+                        ""
+                      );
                     },
                   }
                 );
@@ -214,7 +234,13 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
                   return;
                 }
 
-                notification.show("failed", "Transaction Failed", "");
+                notification.show(
+                  "failed",
+                  intl.formatMessage({
+                    id: "error.transaction-failed",
+                  }),
+                  ""
+                );
               }
 
               navigate("/", {

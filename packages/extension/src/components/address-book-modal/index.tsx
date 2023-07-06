@@ -15,7 +15,8 @@ import { Bleed } from "../bleed";
 import { RecentSendHistory } from "@keplr-wallet/background";
 import { AddressItem } from "../address-item";
 import SimpleBar from "simplebar-react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
+import { FormattedMessage, useIntl } from "react-intl";
 
 type Type = "recent" | "contacts" | "accounts";
 
@@ -46,6 +47,8 @@ export const AddressBookModal: FunctionComponent<{
     permitSelfKeyInfo,
   }) => {
     const { analyticsStore, uiConfigStore, keyRingStore } = useStore();
+    const intl = useIntl();
+    const theme = useTheme();
 
     const [type, setType] = useState<Type>("recent");
 
@@ -66,7 +69,7 @@ export const AddressBookModal: FunctionComponent<{
 
     useEffect(() => {
       uiConfigStore.addressBookConfig
-        .getEnabledVaultCosmosKeysSettled(
+        .getVaultCosmosKeysSettled(
           recipientConfig.chainId,
           permitSelfKeyInfo ? undefined : keyRingStore.selectedKeyInfo?.id
         )
@@ -141,17 +144,17 @@ export const AddressBookModal: FunctionComponent<{
     return (
       <Modal isOpen={isOpen} close={close} align="bottom">
         <Box
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
           paddingX="0.75rem"
           paddingTop="1rem"
         >
           <Box paddingX="0.5rem" paddingY="0.375rem">
-            <Subtitle1
-              style={{
-                color: ColorPalette["white"],
-              }}
-            >
-              Address Book
+            <Subtitle1>
+              <FormattedMessage id="components.address-book-modal.title" />
             </Subtitle1>
           </Box>
 
@@ -162,15 +165,21 @@ export const AddressBookModal: FunctionComponent<{
               items={[
                 {
                   key: "recent",
-                  text: "Recent",
+                  text: intl.formatMessage({
+                    id: "components.address-book-modal.recent-tab",
+                  }),
                 },
                 {
                   key: "contacts",
-                  text: "Contacts",
+                  text: intl.formatMessage({
+                    id: "components.address-book-modal.contacts-tab",
+                  }),
                 },
                 {
                   key: "accounts",
-                  text: "My account",
+                  text: intl.formatMessage({
+                    id: "components.address-book-modal.my-account-tab",
+                  }),
                 },
               ]}
               selectedKey={type}
@@ -222,7 +231,9 @@ export const AddressBookModal: FunctionComponent<{
                     <React.Fragment>
                       {selfAccount ? (
                         <React.Fragment>
-                          <AltTypography>Current Wallet</AltTypography>
+                          <AltTypography>
+                            <FormattedMessage id="components.address-book-modal.current-wallet" />
+                          </AltTypography>
                           <AddressItem
                             name={selfAccount.name}
                             address={selfAccount.address}
@@ -237,7 +248,9 @@ export const AddressBookModal: FunctionComponent<{
                         </React.Fragment>
                       ) : null}
 
-                      <AltTypography>Other Wallets</AltTypography>
+                      <AltTypography>
+                        <FormattedMessage id="components.address-book-modal.other-wallet" />
+                      </AltTypography>
                       {otherAccounts.map((data, i) => {
                         return (
                           <AddressItem
@@ -264,7 +277,10 @@ export const AddressBookModal: FunctionComponent<{
               alignY="center"
               style={{
                 height: "14.875rem",
-                color: ColorPalette["gray-400"],
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-400"],
               }}
             >
               <Bleed top="3rem">
@@ -275,9 +291,13 @@ export const AddressBookModal: FunctionComponent<{
                     {(() => {
                       switch (type) {
                         case "accounts":
-                          return "No other wallet found";
+                          return intl.formatMessage({
+                            id: "components.address-book-modal.empty-view-accounts",
+                          });
                         default:
-                          return "No Data Yet";
+                          return intl.formatMessage({
+                            id: "components.address-book-modal.empty-view-default",
+                          });
                       }
                     })()}
                   </Subtitle3>

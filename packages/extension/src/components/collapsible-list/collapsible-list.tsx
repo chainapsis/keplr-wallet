@@ -9,7 +9,8 @@ import { Columns } from "../column";
 import { VerticalCollapseTransition } from "../transition/vertical-collapse";
 import { Gutter } from "../gutter";
 import { XAxis } from "../axis";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
+import { useIntl } from "react-intl";
 
 const Styles = {
   MoreViewContainer: styled.div`
@@ -22,7 +23,10 @@ const Styles = {
     color: ${ColorPalette["gray-300"]};
 
     :hover {
-      color: ${ColorPalette["gray-400"]};
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-400"]};
     }
   `,
 };
@@ -35,6 +39,9 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   if (!lenAlwaysShown || lenAlwaysShown < 0) {
     lenAlwaysShown = items.length;
   }
+
+  const intl = useIntl();
+  const theme = useTheme();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -51,7 +58,14 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         }}
       >
         <Columns sum={1} alignY="center">
-          <Subtitle4 style={{ color: ColorPalette["gray-50"] }}>
+          <Subtitle4
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-50"],
+            }}
+          >
             {items.length}
           </Subtitle4>
 
@@ -79,7 +93,14 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
           <Gutter size="0.75rem" />
           <XAxis alignY="center">
             <Button2>
-              {isCollapsed ? `View ${hidden.length} more tokens` : "Collapse"}
+              {isCollapsed
+                ? intl.formatMessage(
+                    { id: "components.collapsible-list.view-more-tokens" },
+                    { remain: hidden.length }
+                  )
+                : intl.formatMessage({
+                    id: "components.collapsible-list.collapse",
+                  })}
             </Button2>
 
             <Gutter size="0.25rem" />

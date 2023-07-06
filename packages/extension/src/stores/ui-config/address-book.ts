@@ -5,11 +5,11 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { Key, SettledResponses } from "@keplr-wallet/types";
 import {
   GetCosmosKeysForEachVaultSettledMsg,
-  GetVaultsByEnabledChainMsg,
   RecentSendHistory,
   GetRecentSendHistoriesMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
+import { KeyRingStore } from "@keplr-wallet/stores";
 
 export interface AddressBookData {
   name: string;
@@ -27,7 +27,8 @@ export class AddressBookConfig {
   constructor(
     kvStore: KVStore,
     protected readonly messageRequester: MessageRequester,
-    protected readonly chainStore: ChainStore
+    protected readonly chainStore: ChainStore,
+    protected readonly keyRingStore: KeyRingStore
   ) {
     makeObservable(this);
 
@@ -122,7 +123,7 @@ export class AddressBookConfig {
     return await this.messageRequester.sendMessage(BACKGROUND_PORT, msg);
   }
 
-  async getEnabledVaultCosmosKeysSettled(
+  async getVaultCosmosKeysSettled(
     chainId: string,
     exceptVaultId?: string
   ): Promise<
@@ -132,12 +133,9 @@ export class AddressBookConfig {
       }
     >
   > {
-    const vaultIds = (
-      await this.messageRequester.sendMessage(
-        BACKGROUND_PORT,
-        new GetVaultsByEnabledChainMsg(chainId)
-      )
-    ).filter((vault) => vault !== exceptVaultId);
+    const vaultIds = this.keyRingStore.keyInfos
+      .map((keyInfo) => keyInfo.id)
+      .filter((vault) => vault !== exceptVaultId);
 
     if (vaultIds.length === 0) {
       return [];

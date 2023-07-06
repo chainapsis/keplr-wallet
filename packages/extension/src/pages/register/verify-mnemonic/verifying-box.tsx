@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { Box } from "../../../components/box";
 import {
   TextInput,
@@ -6,15 +11,20 @@ import {
 } from "../../../components/input";
 import { XAxis, YAxis } from "../../../components/axis";
 import { ColorPalette } from "../../../styles";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Gutter } from "../../../components/gutter";
+import { useSceneEvents } from "../../../components/transition";
+import { FormattedMessage } from "react-intl";
 
 const Styles = {
   IndexText: styled.div`
     font-weight: 500;
     font-size: 0.875rem;
     text-align: right;
-    color: ${ColorPalette["gray-100"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-500"]
+        : ColorPalette["gray-100"]};
 
     margin-right: 0.25rem;
   `,
@@ -43,6 +53,14 @@ export const VerifyingMnemonicBox = forwardRef<
     }[];
   }
 >(({ words }, ref) => {
+  const theme = useTheme();
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
+  useSceneEvents({
+    onDidVisible: () => {
+      firstInputRef.current?.focus();
+    },
+  });
+
   const [inputs, setInputs] = useState<Record<number, string | undefined>>({});
 
   const [validatingStarted, setValidatingStarted] = useState<boolean>(false);
@@ -66,7 +84,11 @@ export const VerifyingMnemonicBox = forwardRef<
   return (
     <Box
       paddingY="1.5rem"
-      backgroundColor={ColorPalette["gray-500"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-500"]
+      }
       borderRadius="0.5rem"
     >
       <YAxis alignX="center">
@@ -75,10 +97,14 @@ export const VerifyingMnemonicBox = forwardRef<
             return (
               <React.Fragment key={word.index}>
                 <XAxis alignY="center">
-                  <Styles.IndexText>{`Word #${
-                    word.index + 1
-                  }.`}</Styles.IndexText>
+                  <Styles.IndexText>
+                    <FormattedMessage
+                      id="pages.register.verify-mnemonic.verifying-box.word"
+                      values={{ index: word.index + 1 }}
+                    />
+                  </Styles.IndexText>
                   <VerifyingWordInput
+                    ref={i === 0 ? firstInputRef : undefined}
                     value={inputs[word.index] ?? ""}
                     onChange={(e) => {
                       e.preventDefault();

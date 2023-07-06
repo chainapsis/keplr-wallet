@@ -27,6 +27,8 @@ import { Button } from "../../../components/button";
 import { useStore } from "../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { useNavigate } from "react-router";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const SelectDerivationPathScene: FunctionComponent<{
   // 한 scene 당 하나의 chain id만 다룬다.
@@ -43,14 +45,19 @@ export const SelectDerivationPathScene: FunctionComponent<{
   skipWelcome?: boolean;
 }> = observer(({ chainIds, vaultId, totalCount, skipWelcome }) => {
   const header = useRegisterHeader();
+  const intl = useIntl();
+  const theme = useTheme();
+
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Select Account Derivation Path",
+        title: intl.formatMessage({
+          id: "pages.register.select-derivation-path.title",
+        }),
         paragraphs: [
           <Body1 color={ColorPalette["gray-300"]} key="1">
-            To use both paths, you need to go through the import process twice.
+            <FormattedMessage id="pages.register.select-derivation-path.paragraph" />
           </Body1>,
         ],
         stepCurrent: 0,
@@ -91,8 +98,20 @@ export const SelectDerivationPathScene: FunctionComponent<{
   return (
     <RegisterSceneBox>
       <YAxis alignX="center">
-        <Subtitle3 color={ColorPalette["gray-200"]}>
-          {`Chains ${totalCount - chainIds.length + 1}/${totalCount}`}
+        <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"]
+          }
+        >
+          <FormattedMessage
+            id="pages.register.select-derivation-path.chain-step"
+            values={{
+              currentStep: totalCount - chainIds.length + 1,
+              totalStep: totalCount,
+            }}
+          />
         </Subtitle3>
 
         <Gutter size="0.75rem" />
@@ -100,9 +119,15 @@ export const SelectDerivationPathScene: FunctionComponent<{
         <Box
           padding="0.75rem 2rem 0.75rem 0.75rem"
           borderRadius="3.5rem"
-          backgroundColor={Color(ColorPalette["gray-500"])
-            .alpha(0.5)
-            .toString()}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : Color(ColorPalette["gray-500"]).alpha(0.5).toString()
+          }
+          borderWidth={theme.mode === "light" ? "1px" : undefined}
+          borderColor={
+            theme.mode === "light" ? ColorPalette["gray-100"] : undefined
+          }
         >
           <Columns sum={1} gutter="0.5rem">
             <Box width="2.75rem" height="2.75rem">
@@ -113,8 +138,22 @@ export const SelectDerivationPathScene: FunctionComponent<{
             </Box>
 
             <Stack gutter="0.25rem">
-              <H3>{chainInfo.chainName}</H3>
-              <Body2 color={ColorPalette["gray-200"]}>
+              <H3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette.white
+                }
+              >
+                {chainInfo.chainName}
+              </H3>
+              <Body2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              >
                 {chainInfo.stakeCurrency.coinDenom}
               </Body2>
             </Stack>
@@ -142,7 +181,9 @@ export const SelectDerivationPathScene: FunctionComponent<{
 
         <Box width="22.5rem" marginX="auto">
           <Button
-            text="Import"
+            text={intl.formatMessage({
+              id: "pages.register.select-derivation-path.import-button",
+            })}
             size="large"
             disabled={
               !keyRingStore.needMnemonicKeyCoinTypeFinalize(
@@ -201,6 +242,8 @@ const PathItem: FunctionComponent<{
 
   const queries = queriesStore.get(chainId);
 
+  const theme = useTheme();
+
   return (
     <Styles.ItemContainer
       isSelected={isSelected}
@@ -212,26 +255,62 @@ const PathItem: FunctionComponent<{
     >
       <Stack gutter="1rem">
         <Columns sum={1} alignY="center" gutter="1rem">
-          <Box padding="0.5rem" style={{ color: ColorPalette["gray-10"] }}>
+          <Box
+            padding="0.5rem"
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["gray-600"]
+                  : ColorPalette["gray-10"],
+            }}
+          >
             <WalletIcon width="1.25rem" height="1.25rem" />
           </Box>
 
           <Stack gutter="0.25rem">
             <H5>m/44’/{coinType}’</H5>
-            <Body2 color={ColorPalette["gray-200"]}>
+            <Body2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-200"]
+              }
+            >
               {Bech32Address.shortenAddress(bech32Address, 24)}
             </Body2>
           </Stack>
         </Columns>
 
-        <Box style={{ border: `1px solid ${ColorPalette["gray-400"]}` }} />
+        <Box
+          style={{
+            border: `1px solid ${
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-400"]
+            }`,
+          }}
+        />
 
         <Stack gutter="0.25rem">
           <Columns sum={1} alignY="center">
-            <Subtitle3 color={ColorPalette["gray-50"]}>Balance</Subtitle3>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-50"]
+              }
+            >
+              <FormattedMessage id="pages.register.select-derivation-path.path-item.balance" />
+            </Subtitle3>
             <Column weight={1}>
               <YAxis alignX="right">
-                <Subtitle3 color={ColorPalette["gray-50"]}>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-50"]
+                  }
+                >
                   {queries.queryBalances
                     .getQueryBech32Address(bech32Address)
                     .stakable.balance.trim(true)
@@ -245,10 +324,24 @@ const PathItem: FunctionComponent<{
           </Columns>
 
           <Columns sum={1} alignY="center">
-            <Subtitle3 color={ColorPalette["gray-50"]}>Previous txs</Subtitle3>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-50"]
+              }
+            >
+              <FormattedMessage id="pages.register.select-derivation-path.path-item.previous-txs" />
+            </Subtitle3>
             <Column weight={1}>
               <YAxis alignX="right">
-                <Subtitle3 color={ColorPalette["gray-50"]}>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-500"]
+                      : ColorPalette["gray-50"]
+                  }
+                >
                   {
                     queries.cosmos.queryAccount.getQueryBech32Address(
                       bech32Address

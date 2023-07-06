@@ -6,6 +6,7 @@ import { CopyOutlineIcon } from "../../../../components/icon";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { Skeleton } from "../../../../components/skeleton";
+import { FormattedMessage } from "react-intl";
 
 export const CopyAddressRadius = "16rem";
 
@@ -17,17 +18,26 @@ const Styles = {
 
     padding: 3.5px 0.5rem;
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-50"]
+        : ColorPalette["gray-600"]};
     border-radius: ${CopyAddressRadius};
 
     cursor: pointer;
 
-    :hover {
-      background-color: ${ColorPalette["gray-500"]};
-    }
+    color: ${ColorPalette["gray-300"]};
 
-    svg {
-      color: ${ColorPalette["gray-300"]};
+    :hover {
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-50"]
+          : ColorPalette["gray-500"]};
+
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-300"]};
     }
 
     user-select: none;
@@ -43,8 +53,8 @@ export const CopyAddress: FunctionComponent<{
       <XAxis alignY="center">
         <Skeleton type="copyAddress" isNotReady={isNotReady}>
           <Styles.Container onClick={onClick}>
-            <Caption1 style={{ color: ColorPalette["gray-300"] }}>
-              Copy Address
+            <Caption1>
+              <FormattedMessage id="page.main.components.copy-address.title" />
             </Caption1>
             <Gutter size="2px" />
             <CopyOutlineIcon width="1rem" height="1rem" />

@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle1 } from "../../../../components/typography";
 import {
@@ -11,6 +11,7 @@ import { Box } from "../../../../components/box";
 import { useStore } from "../../../../stores";
 import { ChainInfo } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { FormattedMessage } from "react-intl";
 
 const Styles = {
   Container: styled.div`
@@ -21,7 +22,10 @@ const Styles = {
 
     padding: 1.25rem 0.75rem 0.75rem 0.75rem;
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["white"]
+        : ColorPalette["gray-600"]};
 
     gap: 0.75rem;
 
@@ -35,10 +39,16 @@ const Styles = {
 
     padding: 0.75rem 0;
 
-    background-color: ${ColorPalette["gray-500"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-50"]
+        : ColorPalette["gray-500"]};
 
     :hover {
-      background-color: ${ColorPalette["gray-450"]};
+      background-color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-450"]};
     }
 
     gap: 0.25rem;
@@ -48,13 +58,17 @@ const Styles = {
     border-radius: 0.25rem;
   `,
   ItemName: styled(Subtitle1)`
-    color: ${ColorPalette["gray-10"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-10"]};
   `,
 };
 
 export const BuyCryptoModal: FunctionComponent<{
   close: () => void;
 }> = observer(({ close }) => {
+  const theme = useTheme();
   const { accountStore, chainStore } = useStore();
   const [fiatOnRampServiceInfos, setFiatOnRampServiceInfos] = useState(
     FiatOnRampServiceInfos
@@ -185,8 +199,16 @@ export const BuyCryptoModal: FunctionComponent<{
 
   return (
     <Styles.Container>
-      <Subtitle1 style={{ color: ColorPalette["white"], textAlign: "center" }}>
-        Buy Crypto
+      <Subtitle1
+        style={{
+          color:
+            theme.mode === "light"
+              ? ColorPalette["gray-700"]
+              : ColorPalette["white"],
+          textAlign: "center",
+        }}
+      >
+        <FormattedMessage id="page.main.components.buy-crypto-modal.title" />
       </Subtitle1>
 
       {buySupportServiceInfos.map((serviceInfo) => {

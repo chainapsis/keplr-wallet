@@ -15,8 +15,10 @@ import {
 } from "../../../components/transition";
 import { WalletStatus } from "@keplr-wallet/stores";
 import AnimCreating from "../../../public/assets/lottie/register/creating.json";
+import AnimCreatingLight from "../../../public/assets/lottie/register/creating-light.json";
 import lottie from "lottie-web";
 import { PlainObject } from "@keplr-wallet/background";
+import { useTheme } from "styled-components";
 
 /**
  * FinalizeKeyScene is used to create the key (account).
@@ -65,6 +67,7 @@ export const FinalizeKeyScene: FunctionComponent<{
     const { chainStore, accountStore, queriesStore, keyRingStore } = useStore();
 
     const sceneTransition = useSceneTransition();
+    const theme = useTheme();
 
     const header = useRegisterHeader();
     useSceneEvents({
@@ -294,7 +297,8 @@ export const FinalizeKeyScene: FunctionComponent<{
           renderer: "svg",
           loop: false,
           autoplay: true,
-          animationData: AnimCreating,
+          animationData:
+            theme.mode === "light" ? AnimCreatingLight : AnimCreating,
         });
 
         // When anim ends, the scene will be replaced with next scene.

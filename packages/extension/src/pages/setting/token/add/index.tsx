@@ -9,7 +9,7 @@ import React, {
 import { observer } from "mobx-react-lite";
 import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Stack } from "../../../../components/stack";
 import { TextInput } from "../../../../components/input";
 import { useStore } from "../../../../stores";
@@ -27,6 +27,7 @@ import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
 import { useNotification } from "../../../../hooks/notification";
 import { ContractAddressInput } from "../../../../components/input/contract-input";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled(Stack)`
@@ -43,6 +44,8 @@ interface FormData {
 export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore, tokensStore } = useStore();
 
+  const intl = useIntl();
+  const theme = useTheme();
   const navigate = useNavigate();
   const notification = useNotification();
   const [searchParams] = useSearchParams();
@@ -154,7 +157,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             }
 
             if (!viewingKey) {
-              reject(new Error("Viewing key is null"));
+              reject(
+                new Error(intl.formatMessage({ id: "error.viewing-key-null" }))
+              );
               return;
             }
             resolve(viewingKey);
@@ -166,7 +171,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
   return (
     <HeaderLayout
-      title="Add Token Manually"
+      title={intl.formatMessage({ id: "page.setting.token.add.title" })}
       left={
         <BackButton
           hidden={
@@ -175,7 +180,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         />
       }
       bottomButton={{
-        text: "Confirm",
+        text: intl.formatMessage({
+          id: "page.setting.token.add.confirm-button",
+        }),
         color: "secondary",
         size: "large",
         disabled:
@@ -197,7 +204,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               } catch (e) {
                 notification.show(
                   "failed",
-                  "Failed to create the viewing key",
+                  intl.formatMessage({
+                    id: "error.failed-to-create-viewing-key",
+                  }),
                   e.message || e.toString()
                 );
 
@@ -285,17 +294,23 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           register={register}
         />
         <TextInput
-          label="Name"
+          label={intl.formatMessage({
+            id: "page.setting.token.add.name-label",
+          })}
           value={queryContract.tokenInfo?.name || "-"}
           disabled
         />
         <TextInput
-          label="Symbol"
+          label={intl.formatMessage({
+            id: "page.setting.token.add.symbol-label",
+          })}
           value={queryContract.tokenInfo?.symbol || "-"}
           disabled
         />
         <TextInput
-          label="Decimals"
+          label={intl.formatMessage({
+            id: "page.setting.token.add.decimal-label",
+          })}
           value={queryContract.tokenInfo?.decimals || "-"}
           disabled
         />
@@ -303,19 +318,34 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
         {isSecretWasm ? (
           <Stack gutter="0.75rem">
             <Box
-              backgroundColor={ColorPalette["gray-600"]}
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-10"]
+                  : ColorPalette["gray-600"]
+              }
               borderRadius="0.375rem"
               padding="1rem"
             >
               <Columns sum={1} alignY="center" gutter="0.25rem">
                 <Column weight={1}>
                   <Stack>
-                    <Subtitle2 color={ColorPalette["gray-50"]}>
-                      I have my own viewing key
+                    <Subtitle2
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["gray-50"]
+                      }
+                    >
+                      <FormattedMessage id="page.setting.token.add.viewing-key-info-title" />
                     </Subtitle2>
-                    <Body3 color={ColorPalette["gray-200"]}>
-                      By enabling this toggle, you confirm that you have your
-                      viewing key and use it for adding this token.
+                    <Body3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-300"]
+                          : ColorPalette["gray-200"]
+                      }
+                    >
+                      <FormattedMessage id="page.setting.token.add.viewing-key-info-paragraph" />
                     </Body3>
                   </Stack>
                 </Column>
@@ -329,7 +359,9 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
 
             {isOpenSecret20ViewingKey ? (
               <TextInput
-                label="Viewing Key"
+                label={intl.formatMessage({
+                  id: "page.setting.token.add.viewing-key-label",
+                })}
                 error={
                   formState.errors.viewingKey
                     ? formState.errors.viewingKey.message

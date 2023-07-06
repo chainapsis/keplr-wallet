@@ -14,9 +14,12 @@ import { ChainImageFallback } from "../../../../components/image";
 import { EmptyView } from "../../../../components/empty-view";
 import { Gutter } from "../../../../components/gutter";
 import { Tooltip } from "../../../../components/tooltip";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
   () => {
+    const intl = useIntl();
     const { chainStore } = useStore();
     const suggestedChains = chainStore.chainInfos.filter(
       (chainInfo) => !chainInfo.embedded.embedded
@@ -24,7 +27,9 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
 
     return (
       <HeaderLayout
-        title="Manage Non-Native Chains"
+        title={intl.formatMessage({
+          id: "page.setting.general.manage-non-native-chains-title",
+        })}
         left={<BackButton />}
         right={
           <a href="https://chains.keplr.app/" target="_blank" rel="noreferrer">
@@ -52,7 +57,9 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
               <React.Fragment>
                 <Gutter size="9.25rem" direction="vertical" />
                 <EmptyView>
-                  <Subtitle3>Hmm.. Nothing Here!</Subtitle3>
+                  <Subtitle3>
+                    <FormattedMessage id="page.setting.general.delete-suggest-chain.empty-text" />
+                  </Subtitle3>
                 </EmptyView>
               </React.Fragment>
             )}
@@ -67,9 +74,16 @@ const ChainItem: FunctionComponent<{
   chainInfo: ChainInfo;
   onClickClose?: () => void;
 }> = ({ chainInfo, onClickClose }) => {
+  const intl = useIntl();
+  const theme = useTheme();
+
   return (
     <Box
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["gray-10"]
+          : ColorPalette["gray-600"]
+      }
       borderRadius="0.375rem"
       paddingX="1rem"
       paddingY="1rem"
@@ -85,12 +99,28 @@ const ChainItem: FunctionComponent<{
         </Box>
         <Stack gutter="0.375rem">
           <Columns sum={1} alignY="center" gutter="0.25rem">
-            <Body1 color={ColorPalette["gray-50"]}>{chainInfo.chainName}</Body1>
-            <Tooltip content="The infrastructure and setting of this chain is not configured by Keplr team. Please reach out to the chain or website team for technical support.">
+            <Body1
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-50"]
+              }
+            >
+              {chainInfo.chainName}
+            </Body1>
+            <Tooltip
+              content={intl.formatMessage({
+                id: "page.setting.general.delete-suggest-chain.chain-item.tooltip-text",
+              })}
+            >
               <QuestionIcon
                 width="1rem"
                 height="1rem"
-                color={ColorPalette["gray-300"]}
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-200"]
+                    : ColorPalette["gray-300"]
+                }
               />
             </Tooltip>
           </Columns>
@@ -102,7 +132,7 @@ const ChainItem: FunctionComponent<{
         <Column weight={1} />
 
         <Box onClick={onClickClose} cursor="pointer">
-          <CloseIcon />
+          <CloseIcon color={ColorPalette["gray-300"]} />
         </Box>
       </Columns>
     </Box>

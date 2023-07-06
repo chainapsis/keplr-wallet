@@ -11,12 +11,13 @@ import {
   toJS,
 } from "mobx";
 import { KVStore } from "@keplr-wallet/common";
-import { CoinGeckoPriceStore } from "@keplr-wallet/stores";
+import { CoinGeckoPriceStore, KeyRingStore } from "@keplr-wallet/stores";
 import { FiatCurrency } from "@keplr-wallet/types";
 import { CopyAddressConfig } from "./copy-address";
 import { ChainStore } from "../chain";
 import { AddressBookConfig } from "./address-book";
 import { MessageRequester } from "@keplr-wallet/router";
+import manifest from "../../manifest.v2.json";
 
 export interface UIConfigOptions {
   isDeveloperMode: boolean;
@@ -64,6 +65,7 @@ export class UIConfigStore {
     },
     protected readonly messageRequester: MessageRequester,
     protected readonly chainStore: ChainStore,
+    protected readonly keyRingStore: KeyRingStore,
     protected readonly priceStore: CoinGeckoPriceStore,
     _icnsInfo?: {
       readonly chainId: string;
@@ -78,7 +80,8 @@ export class UIConfigStore {
     this.addressBookConfig = new AddressBookConfig(
       kvStores.addressBookKVStore,
       messageRequester,
-      chainStore
+      chainStore,
+      keyRingStore
     );
 
     this._isBeta = navigator.userAgent.includes("Firefox");
@@ -98,6 +101,11 @@ export class UIConfigStore {
   }
 
   protected async init() {
+    // Set the last version to the kv store.
+    // At present, this is not used at all.
+    // For the future, this can be used to show the changelog.
+    await this.kvStore.set("lastVersion", manifest.version);
+
     {
       const saved = await this.kvStore.get<string>("fiatCurrency");
       this.selectFiatCurrency(saved || "usd");

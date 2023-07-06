@@ -257,7 +257,7 @@ export class RootStore {
             };
           }
 
-          if (chainId.startsWith("evmos_")) {
+          if (chainId.startsWith("evmos_") || chainId.startsWith("planq_")) {
             return {
               send: {
                 native: {
@@ -348,6 +348,7 @@ export class RootStore {
       },
       new InExtensionMessageRequester(),
       this.chainStore,
+      this.keyRingStore,
       this.priceStore,
       ICNSInfo
     );
@@ -388,7 +389,10 @@ export class RootStore {
     // XXX: Remember that userId would be set by `StoreProvider`
     this.analyticsStore = new AnalyticsStore(
       (() => {
-        if (!AmplitudeApiKey) {
+        if (
+          !AmplitudeApiKey ||
+          localStorage.getItem("disable-analytics") === "true"
+        ) {
           return new NoopAnalyticsClient();
         } else {
           return new ExtensionAnalyticsClient(AmplitudeApiKey);

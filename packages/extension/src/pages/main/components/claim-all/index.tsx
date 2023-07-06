@@ -7,7 +7,7 @@ import { VerticalCollapseTransition } from "../../../../components/transition/ve
 import { Body2, Subtitle2, Subtitle3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { ViewToken } from "../../index";
-import styled, { css } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -37,10 +37,21 @@ import { YAxis } from "../../../../components/axis";
 import Color from "color";
 import { SpecialButton } from "../../../../components/special-button";
 import { Gutter } from "../../../../components/gutter";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
-  Container: styled.div`
-    background-color: ${ColorPalette["gray-600"]};
+  Container: styled.div<{ isNotReady?: boolean }>`
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? props.isNotReady
+          ? ColorPalette["gray-100"]
+          : ColorPalette.white
+        : ColorPalette["gray-600"]};
+
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
     padding: 0.75rem 0 0 0;
     border-radius: 0.375rem;
   `,
@@ -61,15 +72,17 @@ const Styles = {
 
       return css`
         :hover {
-          background-color: ${Color(ColorPalette["gray-500"])
-            .alpha(0.5)
-            .toString()};
+          background-color: ${(props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : Color(ColorPalette["gray-500"]).alpha(0.5).toString()};
         }
 
         :active {
-          background-color: ${Color(ColorPalette["gray-500"])
-            .alpha(0.2)
-            .toString()};
+          background-color: ${(props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : Color(ColorPalette["gray-500"]).alpha(0.2).toString()};
         }
       `;
     }};
@@ -112,6 +125,8 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
       priceStore,
       keyRingStore,
     } = useStore();
+    const intl = useIntl();
+    const theme = useTheme();
 
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -269,7 +284,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 
               if (!balance) {
                 state.setFailedReason(
-                  new Error("Can't find balance for fee currency")
+                  new Error(
+                    intl.formatMessage({
+                      id: "error.can-not-find-balance-for-fee-currency",
+                    })
+                  )
                 );
                 return;
               }
@@ -280,7 +299,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 new Dec(balance.balance.toCoin().amount).lt(new Dec(fee.amount))
               ) {
                 state.setFailedReason(
-                  new Error("Not enough balance to pay fee")
+                  new Error(
+                    intl.formatMessage({
+                      id: "error.not-enough-balance-to-pay-fee",
+                    })
+                  )
                 );
                 return;
               }
@@ -298,7 +321,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 );
                 state.setFailedReason(
                   new Error(
-                    "Your claimable reward is smaller than the required fee."
+                    intl.formatMessage({
+                      id: "error.claimable-reward-is-smaller-than-the-required-fee",
+                    })
                   )
                 );
                 return;
@@ -371,7 +396,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   response.data.message.includes("invalid empty tx")
                 ) {
                   state.setFailedReason(
-                    new Error("cosmos-sdk 버전이 오래되서 지원되지 않음")
+                    new Error(
+                      intl.formatMessage({
+                        id: "error.outdated-cosmos-sdk",
+                      })
+                    )
                   );
                   return;
                 }
@@ -383,7 +412,11 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             }
           } else {
             state.setFailedReason(
-              new Error("Can't pay for fee by stake currency")
+              new Error(
+                intl.formatMessage({
+                  id: "error.can-not-pay-for-fee-by-stake-currency",
+                })
+              )
             );
             return;
           }
@@ -430,14 +463,14 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
     }, [isExpanded]);
 
     return (
-      <Styles.Container>
+      <Styles.Container isNotReady={isNotReady}>
         <Box paddingX="1rem" paddingBottom="0.25rem">
           <Columns sum={1} alignY="center">
             <Stack gutter="0.5rem">
               <YAxis alignX="left">
                 <Skeleton layer={1} isNotReady={isNotReady}>
                   <Body2 style={{ color: ColorPalette["gray-300"] }}>
-                    Unclaimed Staking Reward
+                    <FormattedMessage id="page.main.components.claim-all.title" />
                   </Body2>
                 </Skeleton>
               </YAxis>
@@ -448,7 +481,14 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                   isNotReady={isNotReady}
                   dummyMinWidth="5.125rem"
                 >
-                  <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
+                  <Subtitle2
+                    style={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-700"]
+                          : ColorPalette["gray-10"],
+                    }}
+                  >
                     {totalPrice ? totalPrice.separator(" ").toString() : "?"}
                   </Subtitle2>
                 </Skeleton>
@@ -464,7 +504,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                */}
               {isLedger ? (
                 <Button
-                  text="Claim All"
+                  text={intl.formatMessage({
+                    id: "page.main.components.claim-all.button",
+                  })}
                   size="small"
                   isLoading={claimAllIsLoading}
                   disabled={claimAllDisabled}
@@ -472,7 +514,9 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 />
               ) : (
                 <SpecialButton
-                  text="Claim All"
+                  text={intl.formatMessage({
+                    id: "page.main.components.claim-all.button",
+                  })}
                   size="small"
                   isLoading={claimAllIsLoading}
                   disabled={claimAllDisabled}
@@ -528,6 +572,7 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
                 key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
                 viewToken={viewToken}
                 state={getClaimAllEachState(viewToken.chainInfo.chainId)}
+                itemsLength={viewTokens.length}
               />
             );
           })}
@@ -540,9 +585,13 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
 const ClaimTokenItem: FunctionComponent<{
   viewToken: ViewToken;
   state: ClaimAllEachState;
-}> = observer(({ viewToken, state }) => {
+
+  itemsLength: number;
+}> = observer(({ viewToken, state, itemsLength }) => {
   const { analyticsStore, accountStore, queriesStore } = useStore();
 
+  const intl = useIntl();
+  const theme = useTheme();
   const navigate = useNavigate();
   const notification = useNotification();
 
@@ -612,10 +661,20 @@ const ClaimTokenItem: FunctionComponent<{
           onFulfill: (tx: any) => {
             if (tx.code != null && tx.code !== 0) {
               console.log(tx.log ?? tx.raw_log);
-              notification.show("failed", "Transaction Failed", "");
+              notification.show(
+                "failed",
+                intl.formatMessage({ id: "error.transaction-failed" }),
+                ""
+              );
               return;
             }
-            notification.show("success", "Transaction Success", "");
+            notification.show(
+              "success",
+              intl.formatMessage({
+                id: "notification.transaction-success",
+              }),
+              ""
+            );
           },
         }
       );
@@ -629,7 +688,11 @@ const ClaimTokenItem: FunctionComponent<{
       }
 
       console.log(e);
-      notification.show("failed", "Transaction Failed", "");
+      notification.show(
+        "failed",
+        intl.formatMessage({ id: "error.transaction-failed" }),
+        ""
+      );
       navigate("/", {
         replace: true,
       });
@@ -659,10 +722,24 @@ const ClaimTokenItem: FunctionComponent<{
 
         <Column weight={1}>
           <Stack gutter="0.375rem">
-            <Subtitle3 style={{ color: ColorPalette["gray-300"] }}>
+            <Subtitle3
+              style={{
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-700"]
+                    : ColorPalette["gray-300"],
+              }}
+            >
               {viewToken.token.currency.coinDenom}
             </Subtitle3>
-            <Subtitle2 style={{ color: ColorPalette["gray-10"] }}>
+            <Subtitle2
+              style={{
+                color:
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-10"],
+              }}
+            >
               {viewToken.token
                 .maxDecimals(6)
                 .shrink(true)
@@ -678,9 +755,16 @@ const ClaimTokenItem: FunctionComponent<{
           content={
             state.failedReason?.message || state.failedReason?.toString()
           }
+          // 아이템이 한개만 있으면 tooltip이 VerticalCollapseTransition가 overflow: hidden이라
+          // 위/아래로 나타나면 가려져서 유저가 오류 메세지를 볼 방법이 없다.
+          // VerticalCollapseTransition가 overflow: hidden이여야 하는건 필수적이므로 이 부분을 수정할 순 없기 때문에
+          // 대충 아이템이 한개면 tooltip이 왼족에 나타나도록 한다.
+          allowedPlacements={itemsLength === 1 ? ["left"] : undefined}
         >
           <Button
-            text="Claim"
+            text={intl.formatMessage({
+              id: "page.main.components.claim-all.claim-button",
+            })}
             size="small"
             color="secondary"
             isLoading={isLoading}

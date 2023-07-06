@@ -7,8 +7,12 @@ import { ColorPalette } from "../../styles";
 import { Body2, Subtitle1 } from "../../components/typography";
 import { Gutter } from "../../components/gutter";
 import { Button } from "../../components/button";
+import { FormattedMessage } from "react-intl";
+import { useTheme } from "styled-components";
+import { TextButton } from "../../components/button-text";
 
 export const ConfirmProvider: FunctionComponent = ({ children }) => {
+  const theme = useTheme();
   const [confirms, setConfirms] = useState<
     {
       id: string;
@@ -116,7 +120,11 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
               <Box
                 width="85%"
                 maxWidth="22.5rem"
-                backgroundColor={ColorPalette["gray-600"]}
+                backgroundColor={
+                  theme.mode === "light"
+                    ? ColorPalette["white"]
+                    : ColorPalette["gray-600"]
+                }
                 paddingX="1.25rem"
                 paddingY="1.5rem"
                 borderRadius="0.5rem"
@@ -126,7 +134,10 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
                     <React.Fragment>
                       <Subtitle1
                         style={{
-                          color: ColorPalette["gray-10"],
+                          color:
+                            theme.mode === "light"
+                              ? ColorPalette["gray-700"]
+                              : ColorPalette["gray-10"],
                         }}
                       >
                         {confirm.title}
@@ -137,7 +148,10 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
 
                   <Body2
                     style={{
-                      color: ColorPalette["gray-200"],
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-300"]
+                          : ColorPalette["gray-200"],
                     }}
                   >
                     {confirm.paragraph}
@@ -147,10 +161,11 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
                     <XAxis>
                       {!confirm.options.forceYes ? (
                         <React.Fragment>
-                          <Button
+                          <TextButton
                             size="small"
-                            color="secondary"
-                            text="Cancel"
+                            text={
+                              <FormattedMessage id="hooks.confirm.cancel-button" />
+                            }
                             style={{
                               minWidth: "4.875rem",
                             }}
@@ -161,7 +176,9 @@ export const ConfirmProvider: FunctionComponent = ({ children }) => {
                       ) : null}
                       <Button
                         size="small"
-                        text="Yes"
+                        text={
+                          <FormattedMessage id="hooks.confirm.yes-button" />
+                        }
                         style={{
                           minWidth: "4.875rem",
                         }}

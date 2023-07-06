@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
 import {
   FixedWidthSceneTransition,
@@ -95,6 +95,7 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
 
   const sceneRef = useRef<SceneTransitionRef | null>(null);
+  const theme = useTheme();
 
   const [searchParams] = useSearchParams();
 
@@ -172,8 +173,16 @@ const RegisterPageImpl: FunctionComponent = observer(() => {
       <Box
         position="relative"
         marginX="auto"
-        backgroundColor={ColorPalette["gray-600"]}
+        backgroundColor={
+          theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+        }
         borderRadius="1.5rem"
+        style={{
+          boxShadow:
+            theme.mode === "light"
+              ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+              : "none",
+        }}
       >
         <FixedWidthSceneTransition
           ref={sceneRef}

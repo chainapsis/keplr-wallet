@@ -11,14 +11,19 @@ import { ColorPalette } from "../../styles";
 import { H1, Subtitle4 } from "../../components/typography";
 import { Tooltip } from "../../components/tooltip";
 import AnimLogo from "../../public/assets/lottie/unlock/logo.json";
+import AnimLogoLight from "../../public/assets/lottie/unlock/logo-light.json";
 import lottie, { AnimationItem } from "lottie-web";
 import { GuideBox } from "../../components/guide-box";
 import { LoadingIcon } from "../../components/icon";
 import { XAxis } from "../../components/axis";
 import { autorun } from "mobx";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const UnlockPage: FunctionComponent = observer(() => {
   const { keyRingStore, interactionStore } = useStore();
+  const intl = useIntl();
+  const theme = useTheme();
 
   const [isStartWithMigrating] = useState(() => keyRingStore.isMigrating);
   useEffect(() => {
@@ -61,7 +66,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
         renderer: "svg",
         loop: true,
         autoplay: false,
-        animationData: AnimLogo,
+        animationData: theme.mode === "light" ? AnimLogoLight : AnimLogo,
       });
 
       animRef.current = anim;
@@ -196,7 +201,9 @@ export const UnlockPage: FunctionComponent = observer(() => {
               <Box position="relative">
                 <Button
                   type="button"
-                  text="Start Migration"
+                  text={intl.formatMessage({
+                    id: "page.unlock.star-migration-button",
+                  })}
                   size="large"
                   disabled={keyRingStore.isMigrating}
                   style={{
@@ -221,8 +228,14 @@ export const UnlockPage: FunctionComponent = observer(() => {
                     alignY="center"
                   >
                     <XAxis alignY="center">
-                      <Subtitle4 color={ColorPalette["gray-200"]}>
-                        Upgrade in progress
+                      <Subtitle4
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-300"]
+                            : ColorPalette["gray-200"]
+                        }
+                      >
+                        <FormattedMessage id="page.unlock.upgrade-in-progress" />
                       </Subtitle4>
                       <Gutter size="0.5rem" />
                       <LoadingIcon
@@ -240,7 +253,7 @@ export const UnlockPage: FunctionComponent = observer(() => {
           return (
             <Button
               type="submit"
-              text="Unlock"
+              text={intl.formatMessage({ id: "page.unlock.unlock-button" })}
               size="large"
               disabled={password.length === 0}
               isLoading={
@@ -267,7 +280,9 @@ export const UnlockPage: FunctionComponent = observer(() => {
 
         {!isMigrationSecondPhase && !keyRingStore.isMigrating ? (
           <TextButton
-            text="Forgot Password?"
+            text={intl.formatMessage({
+              id: "page.unlock.forgot-password-button",
+            })}
             type="button"
             size="small"
             color="faint"
@@ -288,6 +303,8 @@ const ParagraphSection: FunctionComponent<{
   needMigration: boolean;
   isMigrationSecondPhase: boolean;
 }> = ({ needMigration, isMigrationSecondPhase }) => {
+  const theme = useTheme();
+
   return (
     <React.Fragment>
       <Box
@@ -300,7 +317,15 @@ const ParagraphSection: FunctionComponent<{
       >
         {needMigration ? (
           <React.Fragment>
-            <H1 color={ColorPalette["white"]}>💫 Keplr 2.0 is here!</H1>
+            <H1
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
+              <FormattedMessage id="page.unlock.paragraph-section.keplr-here" />
+            </H1>
             <Gutter size="0.75rem" />
             <Subtitle4
               color={ColorPalette["gray-200"]}
@@ -308,14 +333,22 @@ const ParagraphSection: FunctionComponent<{
                 opacity: isMigrationSecondPhase ? 0 : 1,
               }}
             >
-              Enter your password to upgrade.
+              <FormattedMessage id="page.unlock.paragraph-section.enter-password-to-upgrade" />
             </Subtitle4>
 
             {/* 대충 위치를 맞추기 위해서 밑에 대충 뭐를 채운다 */}
             <Gutter size="1.25rem" />
           </React.Fragment>
         ) : (
-          <H1 color={ColorPalette["white"]}>Welcome Back</H1>
+          <H1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["white"]
+            }
+          >
+            <FormattedMessage id="page.unlock.paragraph-section.welcome-back" />
+          </H1>
         )}
       </Box>
     </React.Fragment>
@@ -331,6 +364,7 @@ const BottomFormSection: FunctionComponent<{
   // Migration second phase면 text input을 감추고 guide box를 띄워준다.
   isMigrationSecondPhase: boolean;
 }> = ({ password, setPassword, error, setError, isMigrationSecondPhase }) => {
+  const intl = useIntl();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -355,7 +389,11 @@ const BottomFormSection: FunctionComponent<{
           }}
         >
           <Tooltip
-            content={<div style={{ whiteSpace: "nowrap" }}>CapsLock is on</div>}
+            content={
+              <div style={{ whiteSpace: "nowrap" }}>
+                <FormattedMessage id="page.unlock.bottom-section.capslock-tooltip" />
+              </div>
+            }
             enabled={false}
             isAlwaysOpen={isOnCapsLock}
           >
@@ -371,7 +409,9 @@ const BottomFormSection: FunctionComponent<{
               opacity: isMigrationSecondPhase ? 0 : 1,
             }}
             ref={inputRef}
-            label="Password"
+            label={intl.formatMessage({
+              id: "page.unlock.bottom-section.password-input-label",
+            })}
             type="password"
             value={password}
             onChange={(e) => {
@@ -399,7 +439,11 @@ const BottomFormSection: FunctionComponent<{
                 setIsOnCapsLock(false);
               }
             }}
-            error={error ? "Invalid password" : undefined}
+            error={
+              error
+                ? intl.formatMessage({ id: "error.invalid-password" })
+                : undefined
+            }
           />
 
           {/*
@@ -417,8 +461,12 @@ const BottomFormSection: FunctionComponent<{
             >
               <GuideBox
                 color="warning"
-                title="Don’t close your browser during update"
-                paragraph="Migration for users with many accounts can take up to several minutes."
+                title={intl.formatMessage({
+                  id: "page.unlock.bottom-section.guide-title",
+                })}
+                paragraph={intl.formatMessage({
+                  id: "page.unlock.bottom-section.guide-paragraph",
+                })}
               />
             </Box>
           ) : null}

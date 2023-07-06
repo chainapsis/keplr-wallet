@@ -3,6 +3,7 @@ import { YAxis } from "../../../../components/axis";
 import { ColorPalette } from "../../../../styles";
 import { animated, to, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../../styles/spring";
+import { useTheme } from "styled-components";
 
 export const DualChart: FunctionComponent<{
   first: {
@@ -90,6 +91,8 @@ export const DualChart: FunctionComponent<{
     }
   );
 
+  const theme = useTheme();
+
   useLayoutEffect(() => {
     if (!firstArcVisibility && !secondArcVisibility) {
       if (highlight === "first") {
@@ -144,7 +147,11 @@ export const DualChart: FunctionComponent<{
             startAngle,
             endAngle,
           })}
-          stroke={ColorPalette["gray-500"]}
+          stroke={
+            theme.mode === "light"
+              ? ColorPalette["gray-100"]
+              : ColorPalette["gray-500"]
+          }
           strokeWidth={stroke}
           strokeLinecap="round"
         />

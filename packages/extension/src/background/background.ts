@@ -27,7 +27,7 @@ const router = new ExtensionRouter(ExtensionEnv.produceEnv);
 router.addGuard(ExtensionGuards.checkOriginIsValid);
 router.addGuard(ExtensionGuards.checkMessageIsInternal);
 
-const { initFn } = init(
+const { initFn, keyRingService } = init(
   router,
   (prefix: string) => new ExtensionKVStore(prefix),
   new ContentScriptMessageRequester(),
@@ -80,7 +80,25 @@ const { initFn } = init(
   }
 );
 
-router.listen(BACKGROUND_PORT, initFn);
+router.listen(BACKGROUND_PORT, initFn).then(() => {
+  // Open register popup on installed
+  const kvStore = new ExtensionKVStore("__background_open_register_once");
+  // "register_opened" state ensures that the register popup is opened only once.
+  kvStore.get("register_opened").then((v) => {
+    if (!v) {
+      kvStore.set("register_opened", true);
+
+      // We should open popup only if the keyring is empty.
+      // (If user already registered, and extension is updated, this case can be happened.)
+      // With waiting router is initialized, it ensures that background service is initialized.
+      if (keyRingService.keyRingStatus === "empty") {
+        browser.tabs.create({
+          url: "/register.html#",
+        });
+      }
+    }
+  });
+});
 
 browser.alarms.create("keep-alive-alarm", {
   periodInMinutes: 0.25,

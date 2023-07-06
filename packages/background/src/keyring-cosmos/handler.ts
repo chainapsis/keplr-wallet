@@ -17,6 +17,7 @@ import {
   GetCosmosKeysForEachVaultSettledMsg,
   RequestSignEIP712CosmosTxMsg_v0,
   RequestICNSAdr36SignaturesMsg,
+  EnableVaultsWithCosmosAddressMsg,
 } from "./messages";
 import { KeyRingCosmosService } from "./service";
 import { PermissionInteractiveService } from "../permission-interactive";
@@ -86,6 +87,11 @@ export const getHandler: (
           service,
           permissionInteractionService
         )(env, msg as RequestICNSAdr36SignaturesMsg);
+      case EnableVaultsWithCosmosAddressMsg:
+        return handleEnableVaultsWithCosmosAddressMsg(service)(
+          env,
+          msg as EnableVaultsWithCosmosAddressMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -340,6 +346,17 @@ const handleRequestICNSAdr36SignaturesMsg: (
       msg.owner,
       msg.username,
       msg.addressChainIds
+    );
+  };
+};
+
+const handleEnableVaultsWithCosmosAddressMsg: (
+  service: KeyRingCosmosService
+) => InternalHandler<EnableVaultsWithCosmosAddressMsg> = (service) => {
+  return async (_, msg) => {
+    return await service.enableVaultsWithCosmosAddress(
+      msg.chainId,
+      msg.bech32Address
     );
   };
 };

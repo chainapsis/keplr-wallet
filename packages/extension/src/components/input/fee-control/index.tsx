@@ -4,6 +4,7 @@ import {
   IFeeConfig,
   IGasConfig,
   IGasSimulator,
+  InsufficientFeeError,
   ISenderConfig,
 } from "@keplr-wallet/hooks";
 import styled from "styled-components";
@@ -16,22 +17,30 @@ import { Modal } from "../../modal";
 import { TransactionFeeModal } from "./modal";
 import { useStore } from "../../../stores";
 import { autorun } from "mobx";
-import { PricePretty } from "@keplr-wallet/unit";
+import { Dec, PricePretty } from "@keplr-wallet/unit";
 import { Gutter } from "../../gutter";
 import Color from "color";
 import { Box } from "../../box";
 import { VerticalResizeTransition } from "../../transition";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Styles = {
   Container: styled.div<{
     hasError: boolean;
   }>`
     padding: 1rem 0.25rem 1rem 1rem;
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
 
-    border: ${({ hasError }) =>
+    border: ${({ hasError, theme }) =>
       hasError
-        ? `1.5px solid ${Color(ColorPalette["yellow-400"])
+        ? `1.5px solid ${Color(
+            theme.mode === "light"
+              ? ColorPalette["orange-400"]
+              : ColorPalette["yellow-400"]
+          )
             .alpha(0.5)
             .toString()}`
         : `1.5px solid ${Color(ColorPalette["blue-400"])
@@ -40,16 +49,23 @@ const Styles = {
     border-radius: 0.375rem;
 
     :hover {
-      border: ${({ hasError }) =>
+      border: ${({ hasError, theme }) =>
         hasError
-          ? `1.5px solid ${ColorPalette["yellow-500"]}`
+          ? `1.5px solid ${
+              theme.mode === "light"
+                ? ColorPalette["orange-400"]
+                : ColorPalette["yellow-500"]
+            }`
           : `1.5px solid ${ColorPalette["blue-500"]};`};
     }
 
     cursor: pointer;
   `,
   IconContainer: styled.div`
-    color: ${ColorPalette["gray-300"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-200"]
+        : ColorPalette["gray-300"]};
   `,
 };
 
@@ -68,7 +84,9 @@ export const FeeControl: FunctionComponent<{
     gasSimulator,
     disableAutomaticFeeSet,
   }) => {
-    const { analyticsStore, queriesStore, priceStore } = useStore();
+    const { analyticsStore, queriesStore, priceStore, chainStore } = useStore();
+
+    const intl = useIntl();
 
     useLayoutEffect(() => {
       if (disableAutomaticFeeSet) {
@@ -129,6 +147,12 @@ export const FeeControl: FunctionComponent<{
             feeConfig.type
           );
           if (currentFeeCurrencyBal.toDec().lt(currentFee.toDec())) {
+            const isOsmosis =
+              chainStore.hasChain(feeConfig.chainId) &&
+              chainStore
+                .getChain(feeConfig.chainId)
+                .hasFeature("osmosis-txfees");
+
             // Not enough balances for fee.
             // Try to find other fee currency to send.
             for (const feeCurrency of feeConfig.selectableFeeCurrencies) {
@@ -138,6 +162,15 @@ export const FeeControl: FunctionComponent<{
                 feeCurrency,
                 feeConfig.type
               );
+
+              // Osmosis의 경우는 fee의 spot price를 알아야 fee를 계산할 수 있다.
+              // 그런데 문제는 이게 쿼리가 필요하기 때문에 비동기적이라 response를 기다려야한다.
+              // 어쨋든 스왑에 의해서만 fee 계산이 이루어지기 때문에 fee로 Osmo가 0이였다면 이 로직까지 왔을리가 없고
+              // 어떤 갯수의 Osmo던지 스왑 이후에 fee가 0이 될수는 없기 때문에
+              // 0라면 단순히 response 준비가 안된것이라 확신할 수 있다.
+              if (isOsmosis && fee.toDec().lte(new Dec(0))) {
+                continue;
+              }
 
               if (feeCurrencyBal.toDec().gte(fee.toDec())) {
                 feeConfig.setFee({
@@ -162,6 +195,7 @@ export const FeeControl: FunctionComponent<{
         disposer();
       };
     }, [
+      chainStore,
       disableAutomaticFeeSet,
       feeConfig,
       feeConfig.chainId,
@@ -185,13 +219,23 @@ export const FeeControl: FunctionComponent<{
         >
           <Columns sum={1} alignY="center">
             <Columns sum={1} alignY="center">
-              <Subtitle4>Transaction Fee</Subtitle4>
+              <Subtitle4>
+                <FormattedMessage id="components.input.fee-control.title" />
+              </Subtitle4>
               <Gutter size="0.25rem" />
               {feeConfig.uiProperties.loadingState ||
               gasSimulator?.uiProperties.loadingState ? (
-                <LoadingIcon width="1rem" height="1rem" />
+                <LoadingIcon
+                  width="1rem"
+                  height="1rem"
+                  color={ColorPalette["gray-200"]}
+                />
               ) : (
-                <SettingIcon width="1rem" height="1rem" />
+                <SettingIcon
+                  width="1rem"
+                  height="1rem"
+                  color={ColorPalette["gray-200"]}
+                />
               )}
             </Columns>
 
@@ -270,6 +314,15 @@ export const FeeControl: FunctionComponent<{
               <Caption1 color={ColorPalette["yellow-400"]}>
                 {(() => {
                   if (feeConfig.uiProperties.error) {
+                    if (
+                      feeConfig.uiProperties.error instanceof
+                      InsufficientFeeError
+                    ) {
+                      return intl.formatMessage({
+                        id: "components.input.fee-control.error.insufficient-fee",
+                      });
+                    }
+
                     return (
                       feeConfig.uiProperties.error.message ||
                       feeConfig.uiProperties.error.toString()

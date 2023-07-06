@@ -25,6 +25,8 @@ import { LedgerUtils } from "../../../utils";
 import { Checkbox } from "../../../components/checkbox";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import { useConfirm } from "../../../hooks/confirm";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 type Step = "unknown" | "connected" | "app";
 
@@ -55,6 +57,8 @@ export const ConnectLedgerScene: FunctionComponent<{
     stepPrevious,
     stepTotal,
   }) => {
+    const intl = useIntl();
+
     if (propApp !== "Cosmos" && propApp !== "Terra" && propApp !== "Ethereum") {
       throw new Error(`Unsupported app: ${propApp}`);
     }
@@ -66,9 +70,13 @@ export const ConnectLedgerScene: FunctionComponent<{
       onWillVisible: () => {
         header.setHeader({
           mode: "step",
-          title: "Please connect your Hardware wallet",
+          title: intl.formatMessage({
+            id: "pages.register.connect-ledger.title",
+          }),
           paragraphs: [
-            "You need to connect Ethereum app in Ledger software, if you want to add EVM chains(Evmos, Injective) to Keplr",
+            intl.formatMessage({
+              id: "pages.register.connect-ledger.paragraph",
+            }),
           ],
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
@@ -245,7 +253,9 @@ export const ConnectLedgerScene: FunctionComponent<{
         <Stack gutter="1.25rem">
           <StepView
             step={1}
-            paragraph="Connect and unlock your Ledger."
+            paragraph={intl.formatMessage({
+              id: "pages.register.connect-ledger.connect-ledger-step-paragraph",
+            })}
             icon={
               <Box style={{ opacity: step !== "unknown" ? 0.5 : 1 }}>
                 <LedgerIcon />
@@ -256,7 +266,10 @@ export const ConnectLedgerScene: FunctionComponent<{
           />
           <StepView
             step={2}
-            paragraph={`Open the ${propApp} app on your Ledger device.`}
+            paragraph={intl.formatMessage(
+              { id: "pages.register.connect-ledger.open-app-step-paragraph" },
+              { app: propApp }
+            )}
             icon={
               <Box style={{ opacity: step !== "connected" ? 0.5 : 1 }}>
                 {(() => {
@@ -284,8 +297,12 @@ export const ConnectLedgerScene: FunctionComponent<{
               onChange={async (checked) => {
                 if (checked && !window.navigator.hid) {
                   await confirm.confirm(
-                    "Unable to use Web HID",
-                    "Please enable ‘experimental web platform features’ to use Web HID",
+                    intl.formatMessage({
+                      id: "pages.register.connect-ledger.use-hid-confirm-title",
+                    }),
+                    intl.formatMessage({
+                      id: "pages.register.connect-ledger.use-hid-confirm-paragraph",
+                    }),
                     {
                       forceYes: true,
                     }
@@ -302,7 +319,7 @@ export const ConnectLedgerScene: FunctionComponent<{
             />
             <Gutter size="0.5rem" />
             <Subtitle2 color={ColorPalette["gray-300"]}>
-              Use alternative USB connection method(HID)
+              <FormattedMessage id="pages.register.connect-ledger.use-hid-text" />
             </Subtitle2>
           </XAxis>
         </YAxis>
@@ -311,7 +328,9 @@ export const ConnectLedgerScene: FunctionComponent<{
 
         <Box width="22.5rem" marginX="auto">
           <Button
-            text="Next"
+            text={intl.formatMessage({
+              id: "button.next",
+            })}
             size="large"
             isLoading={isLoading}
             onClick={connectLedger}
@@ -330,12 +349,22 @@ const StepView: FunctionComponent<{
   focused: boolean;
   completed: boolean;
 }> = ({ step, paragraph, icon, focused, completed }) => {
+  const theme = useTheme();
+
   return (
     <Box
       paddingX="2rem"
       paddingY="1.25rem"
       borderRadius="1.125rem"
-      backgroundColor={focused ? ColorPalette["gray-500"] : "transparent"}
+      backgroundColor={
+        focused
+          ? theme.mode === "light"
+            ? ColorPalette["gray-50"]
+            : ColorPalette["gray-500"]
+          : theme.mode === "light"
+          ? "none"
+          : "transparent"
+      }
     >
       <XAxis alignY="center">
         <div>{icon}</div>
@@ -345,11 +374,18 @@ const StepView: FunctionComponent<{
             <H2
               style={{
                 color: focused
-                  ? ColorPalette["gray-10"]
+                  ? theme.mode === "light"
+                    ? ColorPalette["gray-400"]
+                    : ColorPalette["gray-10"]
+                  : theme.mode === "light"
+                  ? ColorPalette["gray-200"]
                   : ColorPalette["gray-300"],
               }}
             >
-              Step {step}
+              <FormattedMessage
+                id="pages.register.connect-ledger.step-text"
+                values={{ step }}
+              />
             </H2>
             {completed ? (
               <React.Fragment>
@@ -366,6 +402,10 @@ const StepView: FunctionComponent<{
           <Body1
             style={{
               color: focused
+                ? theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+                : theme.mode === "light"
                 ? ColorPalette["gray-200"]
                 : ColorPalette["gray-300"],
             }}

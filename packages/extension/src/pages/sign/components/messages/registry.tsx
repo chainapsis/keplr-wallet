@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { IMessageRenderer, IMessageRenderRegistry } from "./types";
 import { Msg } from "@keplr-wallet/types";
 import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
@@ -15,6 +15,9 @@ import {
   UndelegateMessage,
   VoteMessage,
 } from "./render";
+import { FormattedMessage } from "react-intl";
+import { useTheme } from "styled-components";
+import { ColorPalette } from "../../../../styles";
 
 export class MessageRenderRegistry implements IMessageRenderRegistry {
   protected renderers: IMessageRenderer[] = [];
@@ -28,7 +31,7 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
     msg: Msg | AnyWithUnpacked
   ): {
     icon: React.ReactElement;
-    title: string;
+    title: string | React.ReactElement;
     content: string | React.ReactElement;
   } {
     try {
@@ -65,11 +68,30 @@ export class MessageRenderRegistry implements IMessageRenderRegistry {
 
     return {
       icon: <CustomIcon />,
-      title: "Custom",
-      content: <pre style={{ margin: 0 }}>{prettyMsg}</pre>,
+      title: (
+        <FormattedMessage id="page.sign.components.messages.custom.title" />
+      ),
+      content: <UnknownMessageContent>{prettyMsg}</UnknownMessageContent>,
     };
   }
 }
+
+const UnknownMessageContent: FunctionComponent = ({ children }) => {
+  const theme = useTheme();
+  return (
+    <pre
+      style={{
+        margin: 0,
+        color:
+          theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-200"],
+      }}
+    >
+      {children}
+    </pre>
+  );
+};
 
 export const defaultRegistry = new MessageRenderRegistry();
 defaultRegistry.register(ClaimRewardsMessage);

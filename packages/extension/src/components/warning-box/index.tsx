@@ -6,25 +6,47 @@ import { Columns } from "../column";
 import { Body3, H5 } from "../typography";
 import { ColorPalette } from "../../styles";
 import { Gutter } from "../gutter";
+import { useTheme } from "styled-components";
 
 export const WarningBox: FunctionComponent<Omit<GuideBoxProps, "color">> = ({
   title,
   paragraph,
 }) => {
+  const theme = useTheme();
   return (
     <Box padding="1.125rem">
       <Columns sum={1} alignY="center" gutter="0.25rem">
         <WarningIcon
           width="1.25rem"
           height="1.25rem"
-          color={ColorPalette["yellow-400"]}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["orange-400"]
+              : ColorPalette["yellow-400"]
+          }
         />
-        <H5 color={ColorPalette["yellow-500"]}>{title}</H5>
+        <H5
+          color={
+            theme.mode === "light"
+              ? ColorPalette["orange-400"]
+              : ColorPalette["yellow-500"]
+          }
+        >
+          {title}
+        </H5>
       </Columns>
 
       <Gutter size="0.375rem" />
 
-      <Body3>{paragraph}</Body3>
+      <Body3
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-400"]
+            : ColorPalette["white"]
+        }
+      >
+        {paragraph}
+      </Body3>
     </Box>
   );
 };

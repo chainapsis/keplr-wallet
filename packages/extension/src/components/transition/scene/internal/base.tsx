@@ -452,11 +452,36 @@ const SceneComponent: FunctionComponent<{
     });
   }, [targetX, x]);
 
+  const eventPerRendering: SceneEvents[] = [];
+
   return (
     <SceneEventsContextBase.Provider
       value={{
         setEvents(events: SceneEvents) {
-          eventsRef.current = events;
+          eventPerRendering.push(events);
+
+          eventsRef.current = {
+            onWillVisible: () => {
+              for (const e of eventPerRendering) {
+                e.onWillVisible?.();
+              }
+            },
+            onDidVisible: () => {
+              for (const e of eventPerRendering) {
+                e.onDidVisible?.();
+              }
+            },
+            onWillInvisible: () => {
+              for (const e of eventPerRendering) {
+                e.onWillInvisible?.();
+              }
+            },
+            onDidInvisible: () => {
+              for (const e of eventPerRendering) {
+                e.onDidInvisible?.();
+              }
+            },
+          };
         },
       }}
     >

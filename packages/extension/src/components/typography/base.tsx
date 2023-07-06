@@ -7,8 +7,6 @@ type BaseTypographyProps = {
 };
 
 export const BaseTypography = styled.div<BaseTypographyProps>`
-  font-family: "Inter", sans-serif;
-
   color: ${({ color }) => (color ? color : "inherit")};
 
   ${({ hoverColor }) => {

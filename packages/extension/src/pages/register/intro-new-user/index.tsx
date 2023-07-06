@@ -17,17 +17,25 @@ import { RegisterH4 } from "../components/typography";
 import { TextButton } from "../../../components/button-text";
 import { GoogleIcon, KeyIcon } from "../../../components/icon";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const RegisterIntroNewUserScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
+  const intl = useIntl();
+  const theme = useTheme();
 
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "welcome",
-        title: "Welcome to Keplr",
-        paragraph: "Select how you want to create your wallet",
+        title: intl.formatMessage({
+          id: "pages.register.intro-new-user.title",
+        }),
+        paragraph: intl.formatMessage({
+          id: "pages.register.intro-new-user.paragraph",
+        }),
       });
     },
   });
@@ -37,21 +45,29 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
       <Columns sum={2} gutter="2.5rem">
         <Column weight={1}>
           <Box minHeight="15.625rem">
-            <RegisterH4 color={ColorPalette["gray-50"]}>
-              Use Recovery Phrase
+            <RegisterH4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-50"]
+              }
+            >
+              <FormattedMessage id="pages.register.intro-new-user.recovery-path-title" />
             </RegisterH4>
 
             <Gutter size="0.5rem" />
 
             <Subtitle3 color={ColorPalette["gray-200"]}>
-              Maximum control & high compatibility across all wallets
+              <FormattedMessage id="pages.register.intro-new-user.recovery-path-paragraph" />
             </Subtitle3>
 
             <Gutter size="1.5rem" />
 
             <Stack gutter="0.625rem">
               <Button
-                text="Create new recovery phrase"
+                text={intl.formatMessage({
+                  id: "pages.register.intro-new-user.new-recovery-path-button",
+                })}
                 left={
                   <KeyIcon
                     width="1rem"
@@ -65,7 +81,9 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
                 }}
               />
               <TextButton
-                text="Import existing recovery phrase"
+                text={intl.formatMessage({
+                  id: "pages.register.intro-new-user.import-recovery-path-button",
+                })}
                 size="large"
                 onClick={() => {
                   sceneTransition.replace("existing-user");
@@ -83,7 +101,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
               </XAxis>
 
               <Caption1 color={ColorPalette["gray-200"]}>
-                Higher Security
+                <FormattedMessage id="pages.register.intro-new-user.high-security-text" />
               </Caption1>
             </Columns>
           </Box>
@@ -91,12 +109,18 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
         <Box width="1px" backgroundColor={ColorPalette["gray-400"]} />
         <Column weight={1}>
           <Box height="100%">
-            <RegisterH4 color={ColorPalette["gray-50"]}>
-              Sign-up with Google
+            <RegisterH4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-50"]
+              }
+            >
+              <FormattedMessage id="pages.register.intro-new-user.sign-up-social-title" />
             </RegisterH4>
             <Gutter size="0.5rem" />
             <Subtitle3 color={ColorPalette["gray-200"]}>
-              Simple & easy registration
+              <FormattedMessage id="pages.register.intro-new-user.sign-up-social-paragraph" />
               <br />
               <br />
             </Subtitle3>
@@ -104,7 +128,9 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
 
             <Stack gutter="0.625rem">
               <Button
-                text="Connect with Google"
+                text={intl.formatMessage({
+                  id: "pages.register.intro-new-user.sign-up-google-button",
+                })}
                 size="large"
                 color="secondary"
                 left={<GoogleIcon />}
@@ -112,7 +138,9 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
                   if (KeplrWalletPrivate.onGoogleSignInClick) {
                     KeplrWalletPrivate.onGoogleSignInClick(sceneTransition);
                   } else {
-                    alert("Not supported");
+                    alert(
+                      intl.formatMessage({ id: "error.not-supported-error" })
+                    );
                   }
                 }}
               />
@@ -128,7 +156,7 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
               </XAxis>
 
               <Caption1 color={ColorPalette["gray-200"]}>
-                More Convenience
+                <FormattedMessage id="pages.register.intro-new-user.more-convenience-text" />
               </Caption1>
             </Columns>
           </Box>

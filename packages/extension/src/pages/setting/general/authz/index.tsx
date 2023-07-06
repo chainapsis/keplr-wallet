@@ -12,7 +12,7 @@ import { Stack } from "../../../../components/stack";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-import { FormattedDate } from "react-intl";
+import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import { Columns } from "../../../../components/column";
 import { useNavigate } from "react-router";
 import { EmptyView } from "../../../../components/empty-view";
@@ -23,6 +23,7 @@ type grantListType = Record<string, AuthZ.Grant[]>;
 export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
   const { chainStore, accountStore, queriesStore } = useStore();
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const [chainId, setChainId] = useState<string>(
     chainStore.chainInfosInUI[0].chainId
@@ -161,7 +162,12 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
   }, [chainId, grants]);
 
   return (
-    <HeaderLayout title="Manage Authz" left={<BackButton />}>
+    <HeaderLayout
+      title={intl.formatMessage({
+        id: "page.setting.general.manage-authz-title",
+      })}
+      left={<BackButton />}
+    >
       <Box paddingX="0.75rem">
         <Box width="13rem" marginBottom="0.5rem">
           <Dropdown
@@ -203,7 +209,11 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
       ) && (
         <React.Fragment>
           <Gutter direction="vertical" size="7.5rem" />
-          <EmptyView subject="Authz" />
+          <EmptyView
+            subject={intl.formatMessage({
+              id: "page.setting.general.authz.empty-subject",
+            })}
+          />
         </React.Fragment>
       )}
     </HeaderLayout>
@@ -213,12 +223,18 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
 const Styles = {
   Container: styled(Stack)`
     padding: 0.875rem;
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-600"]};
 
     border-radius: 0.375rem;
   `,
   Title: styled(Subtitle3)`
-    color: ${ColorPalette["gray-10"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-10"]};
   `,
   Paragraph: styled(Body3)`
     color: ${ColorPalette["gray-300"]};
@@ -232,15 +248,19 @@ const GrantView: FunctionComponent<{
   return (
     <Box onClick={onClick} cursor="pointer">
       <Styles.Container gutter="0.5rem">
-        <Styles.Title>{`You authorized ${Bech32Address.shortenAddress(
-          grant.grantee,
-          20
-        )}`}</Styles.Title>
+        <Styles.Title>
+          <FormattedMessage
+            id="page.setting.general.authz.grant-view.grantee-authorized"
+            values={{
+              grantee: Bech32Address.shortenAddress(grant.grantee, 20),
+            }}
+          />
+        </Styles.Title>
         <Styles.Paragraph>
           {grant.expiration ? (
             new Date() < new Date(grant.expiration) ? (
               <Columns sum={1}>
-                <Box>Expiration Date:&nbsp;</Box>
+                <FormattedMessage id="page.setting.general.authz.grant-view.expiration-date" />
 
                 <FormattedDate
                   value={grant.expiration}
@@ -253,10 +273,10 @@ const GrantView: FunctionComponent<{
                 />
               </Columns>
             ) : (
-              "Expired"
+              <FormattedMessage id="page.setting.general.authz.grant-view.expired" />
             )
           ) : (
-            "No expiration"
+            <FormattedMessage id="page.setting.general.authz.grant-view.no-expiration" />
           )}
         </Styles.Paragraph>
       </Styles.Container>

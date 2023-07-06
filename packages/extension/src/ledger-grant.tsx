@@ -1,6 +1,4 @@
 // Shim ------------
-import { Box } from "./components/box";
-
 require("setimmediate");
 // Shim ------------
 
@@ -22,6 +20,7 @@ import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 import { Gutter } from "./components/gutter";
 import { RegisterH2 } from "./pages/register/components/typography";
 import { Body1, H3, Subtitle2 } from "./components/typography";
+import { Box } from "./components/box";
 import { Button } from "./components/button";
 import { Columns } from "./components/column";
 import { XAxis } from "./components/axis";
@@ -30,9 +29,12 @@ import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { LedgerUtils } from "./utils";
 import { CosmosApp } from "@keplr-wallet/ledger-cosmos";
+import { AppThemeProvider } from "./theme";
 import Transport from "@ledgerhq/hw-transport";
 import Eth from "@ledgerhq/hw-app-eth";
 import "simplebar-react/dist/simplebar.min.css";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -52,8 +54,10 @@ const AutoLockMonitor: FunctionComponent = observer(() => {
 
 const LedgerGrantPage: FunctionComponent = observer(() => {
   const { uiConfigStore } = useStore();
+  const theme = useTheme();
 
   const confirm = useConfirm();
+  const intl = useIntl();
 
   const [appIsLoading, setAppIsLoading] = useState("");
 
@@ -65,7 +69,9 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
     <Box width="100vw" height="100vh" alignX="center" alignY="center">
       <Box maxWidth="47.75rem">
         <img
-          src={require("./public/assets/img/intro-logo.png")}
+          src={require(theme.mode === "light"
+            ? "./public/assets/img/intro-logo-light.png"
+            : "./public/assets/img/intro-logo.png")}
           alt="Keplr logo"
           style={{
             width: "10.625rem",
@@ -73,14 +79,24 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
           }}
         />
         <Gutter size="2.25rem" />
-        <RegisterH2 color={ColorPalette["gray-50"]}>
-          Allow Browser to Connect to Ledger
+        <RegisterH2
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-700"]
+              : ColorPalette["gray-50"]
+          }
+        >
+          <FormattedMessage id="page.ledger-grant.title" />
         </RegisterH2>
         <Gutter size="1rem" />
-        <H3 color={ColorPalette["gray-300"]}>
-          You need to reapprove connection to your Ledger. Select the
-          appropriate app, and after successfully connecting with your Ledger
-          device, close this page and retry your previous transaction (signing).
+        <H3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-200"]
+              : ColorPalette["gray-300"]
+          }
+        >
+          <FormattedMessage id="page.ledger-grant.paragraph" />
         </H3>
 
         <Gutter size="1.625rem" />
@@ -134,8 +150,12 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                       onChange={async (checked) => {
                         if (checked && !window.navigator.hid) {
                           await confirm.confirm(
-                            "Unable to use Web HID",
-                            "Please enable ‘experimental web platform features’ to use Web HID",
+                            intl.formatMessage({
+                              id: "pages.register.connect-ledger.use-hid-confirm-title",
+                            }),
+                            intl.formatMessage({
+                              id: "pages.register.connect-ledger.use-hid-confirm-paragraph",
+                            }),
                             {
                               forceYes: true,
                             }
@@ -152,7 +172,7 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
                     />
                     <Gutter size="0.5rem" />
                     <Subtitle2 color={ColorPalette["gray-300"]}>
-                      Use alternative USB connection method(HID)
+                      <FormattedMessage id="pages.register.connect-ledger.use-hid-text" />
                     </Subtitle2>
                   </XAxis>
 
@@ -316,25 +336,34 @@ const LedgerGrantPage: FunctionComponent = observer(() => {
   );
 });
 
-const App: FunctionComponent = () => {
+const AppRouter: FunctionComponent = () => {
   useLoadFonts();
 
   return (
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<LedgerGrantPage />} />
+      </Routes>
+    </HashRouter>
+  );
+};
+
+const App: FunctionComponent = () => {
+  return (
     <StoreProvider>
-      <ModalRootProvider>
-        <ConfirmProvider>
-          <GlobalStyle />
-          <ScrollBarStyle />
-          <AutoLockMonitor />
-          <AppIntlProvider>
-            <HashRouter>
-              <Routes>
-                <Route path="/" element={<LedgerGrantPage />} />
-              </Routes>
-            </HashRouter>
-          </AppIntlProvider>
-        </ConfirmProvider>
-      </ModalRootProvider>
+      <AppThemeProvider>
+        <AppIntlProvider>
+          <ModalRootProvider>
+            <ConfirmProvider>
+              <GlobalStyle />
+              <ScrollBarStyle />
+              <AutoLockMonitor />
+
+              <AppRouter />
+            </ConfirmProvider>
+          </ModalRootProvider>
+        </AppIntlProvider>
+      </AppThemeProvider>
     </StoreProvider>
   );
 };

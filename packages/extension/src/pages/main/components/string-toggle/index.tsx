@@ -5,6 +5,7 @@ import { ColorPalette } from "../../../../styles";
 import { Caption1, Caption2 } from "../../../../components/typography";
 import { Skeleton } from "../../../../components/skeleton";
 import { useStore } from "../../../../stores";
+import { FormattedMessage } from "react-intl";
 
 export const StringToggleRadius = "12rem";
 
@@ -20,7 +21,15 @@ const Styles = {
     padding: 0 0.125rem;
     border-radius: ${StringToggleRadius};
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
+
+    box-shadow: ${(props) =>
+      props.theme.mode === "light"
+        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
+        : "none"};
   `,
   Selected: styled(Caption1)`
     display: flex;
@@ -31,7 +40,15 @@ const Styles = {
     width: 5.75rem;
     border-radius: ${StringToggleRadius};
 
-    background-color: ${ColorPalette["gray-400"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["blue-400"]
+        : ColorPalette.white};
+
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["blue-50"]
+        : ColorPalette["gray-400"]};
 
     cursor: pointer;
 
@@ -78,15 +95,23 @@ export const StringToggle: FunctionComponent<{
         <Skeleton type="stringToggle" isNotReady={isNotReady}>
           <Styles.Container>
             <Skeleton type="stringToggle" layer={1} isNotReady={isNotReady}>
-              <Styles.Selected>Available</Styles.Selected>
+              <Styles.Selected>
+                <FormattedMessage id="page.main.components.string-toggle.available-tab" />
+              </Styles.Selected>
             </Skeleton>
-            <Styles.UnSelected onClick={onClickTab}>Staked</Styles.UnSelected>
+            <Styles.UnSelected onClick={onClickTab}>
+              <FormattedMessage id="page.main.components.string-toggle.staked-tab" />
+            </Styles.UnSelected>
           </Styles.Container>
         </Skeleton>
       ) : (
         <Styles.Container>
-          <Styles.UnSelected onClick={onClickTab}>Available</Styles.UnSelected>
-          <Styles.Selected>Staked</Styles.Selected>
+          <Styles.UnSelected onClick={onClickTab}>
+            <FormattedMessage id="page.main.components.string-toggle.available-tab" />
+          </Styles.UnSelected>
+          <Styles.Selected>
+            <FormattedMessage id="page.main.components.string-toggle.staked-tab" />
+          </Styles.Selected>
         </Styles.Container>
       )}
     </Columns>

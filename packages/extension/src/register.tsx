@@ -20,6 +20,7 @@ import { observer } from "mobx-react-lite";
 import { useLoadFonts } from "./use-load-fonts";
 import { useAutoLockMonitoring } from "./use-auto-lock-monitoring";
 import "simplebar-react/dist/simplebar.min.css";
+import { AppThemeProvider } from "./theme";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -37,26 +38,34 @@ const AutoLockMonitor: FunctionComponent = observer(() => {
   return null;
 });
 
-const App: FunctionComponent = () => {
+const AppRouter: FunctionComponent = () => {
   useLoadFonts();
 
   return (
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<RegisterPage />} />
+        <Route path="/welcome" element={<WelcomePage />} />
+      </Routes>
+    </HashRouter>
+  );
+};
+
+const App: FunctionComponent = () => {
+  return (
     <StoreProvider>
-      <ModalRootProvider>
-        <ConfirmProvider>
-          <GlobalStyle />
-          <ScrollBarStyle />
-          <AutoLockMonitor />
-          <AppIntlProvider>
-            <HashRouter>
-              <Routes>
-                <Route path="/" element={<RegisterPage />} />
-                <Route path="/welcome" element={<WelcomePage />} />
-              </Routes>
-            </HashRouter>
-          </AppIntlProvider>
-        </ConfirmProvider>
-      </ModalRootProvider>
+      <AppThemeProvider>
+        <AppIntlProvider>
+          <ModalRootProvider>
+            <ConfirmProvider>
+              <GlobalStyle />
+              <ScrollBarStyle />
+              <AutoLockMonitor />
+              <AppRouter />
+            </ConfirmProvider>
+          </ModalRootProvider>
+        </AppIntlProvider>
+      </AppThemeProvider>
     </StoreProvider>
   );
 };

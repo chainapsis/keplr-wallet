@@ -21,7 +21,12 @@ import { Column, Columns } from "../../../components/column";
 import { XAxis, YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
 import { SearchTextInput } from "../../../components/input";
-import { Subtitle2, Subtitle3 } from "../../../components/typography";
+import {
+  Body2,
+  Subtitle2,
+  Subtitle3,
+  Subtitle4,
+} from "../../../components/typography";
 import { Button } from "../../../components/button";
 import { ColorPalette } from "../../../styles";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
@@ -30,9 +35,12 @@ import { ChainImageFallback } from "../../../components/image";
 import { Checkbox } from "../../../components/checkbox";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { WalletStatus } from "@keplr-wallet/stores";
-import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TextButton } from "../../../components/button-text";
+import { FormattedMessage, useIntl } from "react-intl";
+import { Tag } from "../../../components/tag";
+import SimpleBar from "simplebar-react";
+import { useTheme } from "styled-components";
 
 /**
  * EnableChainsScene은 finalize-key scene에서 선택한 chains를 활성화하는 scene이다.
@@ -72,19 +80,32 @@ export const EnableChainsScene: FunctionComponent<{
       useStore();
 
     const navigate = useNavigate();
+    const intl = useIntl();
+    const theme = useTheme();
+
+    const searchRef = useRef<HTMLInputElement | null>(null);
 
     const header = useRegisterHeader();
     useSceneEvents({
       onWillVisible: () => {
         header.setHeader({
           mode: "step",
-          title: "Select Chains",
+          title: intl.formatMessage({
+            id: "pages.register.enable-chains.title",
+          }),
           paragraphs: [
-            "Don’t worry, you can change your selections anytime in the Manage Chain Visibility in the sidebar menu.",
+            intl.formatMessage({
+              id: "pages.register.enable-chains.paragraph",
+            }),
           ],
           stepCurrent: stepPrevious + 1,
           stepTotal: stepTotal,
         });
+      },
+      onDidVisible: () => {
+        if (searchRef.current) {
+          searchRef.current.focus();
+        }
       },
     });
 
@@ -361,8 +382,6 @@ export const EnableChainsScene: FunctionComponent<{
       enabledChainIdentifierMap
     );
 
-    const searchRef = useFocusOnMount<HTMLInputElement>();
-
     const [search, setSearch] = useState<string>(initialSearchValue ?? "");
 
     // 검색 뿐만 아니라 로직에 따른 선택할 수 있는 체인 목록을 가지고 있다.
@@ -508,11 +527,24 @@ export const EnableChainsScene: FunctionComponent<{
       }
     };
 
+    const enabledChainIdentifiersInPage = useMemo(() => {
+      return enabledChainIdentifiers.filter((chainIdentifier) =>
+        chainInfos.some(
+          (chainInfo) => chainIdentifier === chainInfo.chainIdentifier
+        )
+      );
+    }, [enabledChainIdentifiers, chainInfos]);
+
+    const [preSelectedChainIdentifiers, setPreSelectedChainIdentifiers] =
+      useState<string[]>([]);
+
     return (
       <RegisterSceneBox>
         <SearchTextInput
           ref={searchRef}
-          placeholder="Search networks"
+          placeholder={intl.formatMessage({
+            id: "pages.register.enable-chains.search-input-placeholder",
+          })}
           value={search}
           onChange={(e) => {
             e.preventDefault();
@@ -522,16 +554,26 @@ export const EnableChainsScene: FunctionComponent<{
         />
         <Gutter size="0.75rem" />
         <Subtitle3
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-600"]
+              : ColorPalette.white
+          }
           style={{
             textAlign: "center",
           }}
         >
-          {numSelected} chain(s) selected
+          <FormattedMessage
+            id="pages.register.enable-chains.chain-selected-count"
+            values={{ numSelected }}
+          />
         </Subtitle3>
         <Gutter size="0.75rem" />
-        <Box
-          height="25.5rem"
+        <SimpleBar
           style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "25.5rem",
             overflowY: "auto",
           }}
         >
@@ -581,13 +623,117 @@ export const EnableChainsScene: FunctionComponent<{
                 />
               );
             })}
+
+            {!fallbackEthereumLedgerApp &&
+              keyType === "ledger" &&
+              chainStore.chainInfos
+                .filter((chainInfo) => {
+                  const trimSearch = search.trim();
+                  return (
+                    chainInfo.chainName
+                      .toLowerCase()
+                      .includes(trimSearch.toLowerCase()) ||
+                    chainInfo.stakeCurrency.coinDenom
+                      .toLowerCase()
+                      .includes(trimSearch.toLowerCase())
+                  );
+                })
+                .map((chainInfo) => {
+                  const isEthermintLike =
+                    chainInfo.bip44.coinType === 60 ||
+                    !!chainInfo.features?.includes("eth-address-gen") ||
+                    !!chainInfo.features?.includes("eth-key-sign");
+
+                  if (isEthermintLike) {
+                    return (
+                      <NextStepEvmChainItem
+                        key={chainInfo.chainId}
+                        chainInfo={chainInfo}
+                      />
+                    );
+                  }
+
+                  return null;
+                })}
           </Stack>
-        </Box>
+        </SimpleBar>
+
+        {!fallbackEthereumLedgerApp ? (
+          <React.Fragment>
+            <Gutter size="1.25rem" />
+
+            <YAxis alignX="center">
+              <Box
+                alignX="center"
+                cursor="pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+
+                  if (
+                    chainInfos.length === enabledChainIdentifiersInPage.length
+                  ) {
+                    if (preSelectedChainIdentifiers.length > 0) {
+                      setEnabledChainIdentifiers(preSelectedChainIdentifiers);
+                    } else {
+                      if (chainInfos.length > 0) {
+                        setEnabledChainIdentifiers([
+                          chainInfos[0].chainIdentifier,
+                        ]);
+                      }
+                    }
+                  } else {
+                    setPreSelectedChainIdentifiers([
+                      ...enabledChainIdentifiers,
+                    ]);
+                    const newEnabledChainIdentifiers: string[] =
+                      enabledChainIdentifiers.slice();
+                    for (const chainInfo of chainInfos) {
+                      if (
+                        !newEnabledChainIdentifiers.includes(
+                          chainInfo.chainIdentifier
+                        )
+                      ) {
+                        newEnabledChainIdentifiers.push(
+                          chainInfo.chainIdentifier
+                        );
+                      }
+                    }
+                    setEnabledChainIdentifiers(newEnabledChainIdentifiers);
+                  }
+                }}
+              >
+                <XAxis alignY="center">
+                  <Body2
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-200"]
+                        : ColorPalette["gray-300"]
+                    }
+                  >
+                    <FormattedMessage id="text-button.select-all" />
+                  </Body2>
+
+                  <Gutter size="0.25rem" />
+
+                  <Checkbox
+                    size="small"
+                    checked={
+                      chainInfos.length === enabledChainIdentifiersInPage.length
+                    }
+                    onChange={() => {}}
+                  />
+                </XAxis>
+              </Box>
+            </YAxis>
+          </React.Fragment>
+        ) : null}
 
         <Gutter size="1.25rem" />
         <Box width="22.5rem" marginX="auto">
           <Button
-            text="Save"
+            text={intl.formatMessage({
+              id: "button.save",
+            })}
             size="large"
             onClick={async () => {
               const enables: string[] = [];
@@ -701,7 +847,7 @@ export const EnableChainsScene: FunctionComponent<{
                       (keyInfo) => keyInfo.id === vaultId
                     );
                     if (!keyInfo) {
-                      throw new Error("Key info not found");
+                      throw new Error("KeyInfo not found");
                     }
                     if (keyInfo.insensitive["Ethereum"]) {
                       await chainStore.enableChainInfoInUI(
@@ -739,7 +885,12 @@ export const EnableChainsScene: FunctionComponent<{
           {fallbackEthereumLedgerApp ? (
             <React.Fragment>
               <Gutter size="0.75rem" />
-              <TextButton text="Skip" onClick={() => replaceToWelcomePage()} />
+              <TextButton
+                text={intl.formatMessage({
+                  id: "pages.register.enable-chains.skip-button",
+                })}
+                onClick={() => replaceToWelcomePage()}
+              />
             </React.Fragment>
           ) : null}
         </Box>
@@ -761,6 +912,7 @@ const ChainItem: FunctionComponent<{
 }> = observer(
   ({ chainInfo, balance, enabled, blockInteraction, onClick, isFresh }) => {
     const { priceStore } = useStore();
+    const theme = useTheme();
 
     const price = priceStore.calculatePrice(balance);
 
@@ -770,8 +922,13 @@ const ChainItem: FunctionComponent<{
         paddingX="1rem"
         paddingY="0.75rem"
         backgroundColor={
-          // TODO: Add alpha if needed.
-          enabled ? ColorPalette["gray-500"] : ColorPalette["gray-600"]
+          enabled
+            ? theme.mode === "light"
+              ? ColorPalette["gray-10"]
+              : ColorPalette["gray-500"]
+            : theme.mode === "light"
+            ? ColorPalette.white
+            : ColorPalette["gray-600"]
         }
         cursor={blockInteraction ? "not-allowed" : "pointer"}
         onClick={() => {
@@ -801,7 +958,13 @@ const ChainItem: FunctionComponent<{
           <XAxis alignY="center">
             {isFresh ? null : (
               <YAxis alignX="right">
-                <Subtitle3>
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-600"]
+                      : ColorPalette.white
+                  }
+                >
                   {balance
                     .maxDecimals(6)
                     .shrink(true)
@@ -830,3 +993,47 @@ const ChainItem: FunctionComponent<{
     );
   }
 );
+
+const NextStepEvmChainItem: FunctionComponent<{
+  chainInfo: ChainInfo;
+}> = ({ chainInfo }) => {
+  return (
+    <Box
+      paddingX="1rem"
+      paddingY="0.75rem"
+      cursor="not-allowed"
+      style={{ opacity: 0.5 }}
+    >
+      <Columns sum={1}>
+        <XAxis alignY="center">
+          <ChainImageFallback
+            style={{
+              width: "3rem",
+              height: "3rem",
+            }}
+            src={chainInfo.chainSymbolImageUrl}
+            alt={chainInfo.chainId}
+          />
+
+          <Gutter size="0.5rem" />
+
+          <YAxis>
+            <XAxis alignY="center">
+              <Subtitle2>{chainInfo.chainName}</Subtitle2>
+
+              <Gutter size="0.375rem" />
+
+              <Tag text="EVM" />
+            </XAxis>
+
+            <Gutter size="0.25rem" />
+
+            <Subtitle4 color={ColorPalette["gray-300"]}>
+              <FormattedMessage id="pages.register.enable-chains.guide.can-select-evm-next-step" />
+            </Subtitle4>
+          </YAxis>
+        </XAxis>
+      </Columns>
+    </Box>
+  );
+};

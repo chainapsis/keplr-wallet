@@ -19,11 +19,20 @@ export const Styles = {
 
     padding: ${({ padding }) => (padding ? padding : undefined)};
 
-    color: ${({ color }) => (color ? color : ColorPalette["gray-50"])};
+    color: ${({ color, theme }) =>
+      color
+        ? color
+        : theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-50"]};
 
     :hover {
-      background-color: ${({ hoverColor }) =>
-        hoverColor ? hoverColor : ColorPalette["gray-550"]};
+      background-color: ${({ hoverColor, theme }) =>
+        hoverColor
+          ? hoverColor
+          : theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-550"]};
     }
   `,
 };

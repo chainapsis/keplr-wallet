@@ -15,6 +15,8 @@ import { Body1, Subtitle3 } from "../../../components/typography";
 import { CopyToClipboard } from "../components/copy-to-clipboard";
 import { Buffer } from "buffer/";
 import { PlainObject } from "@keplr-wallet/background";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const BackUpPrivateKeyScene: FunctionComponent<{
   name: string;
@@ -27,13 +29,17 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
   stepTotal: number;
 }> = observer(({ name, password, privateKey, stepPrevious, stepTotal }) => {
   const sceneTransition = useSceneTransition();
+  const intl = useIntl();
+  const theme = useTheme();
 
   const header = useRegisterHeader();
   useSceneEvents({
     onWillVisible: () => {
       header.setHeader({
         mode: "step",
-        title: "Back up private key",
+        title: intl.formatMessage({
+          id: "pages.register.back-up-private-key.title",
+        }),
         stepCurrent: stepPrevious + 1,
         stepTotal: stepTotal,
       });
@@ -47,24 +53,42 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
       <Box
         maxWidth="21rem"
         position="relative"
-        backgroundColor={ColorPalette["gray-700"]}
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["white"]
+            : ColorPalette["gray-700"]
+        }
         borderRadius="0.5rem"
-        borderColor={ColorPalette["gray-400"]}
+        borderColor={
+          theme.mode === "light"
+            ? ColorPalette["gray-100"]
+            : ColorPalette["gray-400"]
+        }
         borderWidth="1px"
         padding="1.25rem"
       >
         {!isShowPrivate ? (
           <Box cursor="pointer" onClick={() => setIsShowPrivate(true)}>
             <BlurBackdrop>
-              <Subtitle3 color={ColorPalette["gray-300"]}>
-                Click here to see private key
+              <Subtitle3
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-500"]
+                    : ColorPalette["gray-300"]
+                }
+              >
+                <FormattedMessage id="pages.register.back-up-private-key.blur-text" />
               </Subtitle3>
             </BlurBackdrop>
           </Box>
         ) : null}
 
         <Body1
-          color={ColorPalette["gray-100"]}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["gray-400"]
+              : ColorPalette["gray-100"]
+          }
           style={{ wordWrap: "break-word", fontFeatureSettings: `"calt" 0` }}
         >
           {Buffer.from(privateKey.value).toString("hex")}
@@ -78,14 +102,15 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
       <Gutter size="1.25rem" />
 
       <WarningBox
-        title="Backup your private key securely."
+        title={intl.formatMessage({
+          id: "pages.register.back-up-private-key.warning-title",
+        })}
         paragraph={
           <Box>
-            Anyone with your private key can have access to your assets.
-            <br />
-            <br />
-            If you lose an access to your Gmail Account, the only way to recover
-            your wallet is using your private key. Keep this in a safe place.
+            <FormattedMessage
+              id="pages.register.back-up-private-key.warning-paragraph"
+              values={{ br: <br /> }}
+            />
           </Box>
         }
       />
@@ -93,7 +118,9 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
       <Gutter size="1.5rem" />
 
       <Button
-        text="Import"
+        text={intl.formatMessage({
+          id: "pages.register.back-up-private-key.import-button",
+        })}
         size="large"
         onClick={() => {
           sceneTransition.replaceAll("finalize-key", {
@@ -110,6 +137,8 @@ export const BackUpPrivateKeyScene: FunctionComponent<{
 });
 
 const BlurBackdrop: FunctionComponent = ({ children }) => {
+  const theme = useTheme();
+
   return (
     <div
       style={{
@@ -118,7 +147,10 @@ const BlurBackdrop: FunctionComponent = ({ children }) => {
         bottom: 0,
         left: 0,
         right: 0,
-        background: "rgba(38, 38, 38, 0.5)",
+        background:
+          theme.mode === "light"
+            ? "rgba(228, 228, 228, 0.5)"
+            : "rgba(38, 38, 38, 0.5)",
         backgroundSize: "cover",
         borderRadius: "0.5rem",
         backdropFilter: "blur(8px)",

@@ -29,12 +29,14 @@ import {
 import Long from "long";
 import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
 import { AnalyticsService } from "../analytics";
+import { ChainsUIService } from "../chains-ui";
 
 export class KeyRingCosmosService {
   constructor(
     protected readonly chainsService: ChainsService,
     protected readonly keyRingService: KeyRingService,
     protected readonly interactionService: InteractionService,
+    protected readonly chainsUIService: ChainsUIService,
     protected readonly analyticsService: AnalyticsService
   ) {}
 
@@ -988,6 +990,84 @@ Salt: ${salt}`;
       "sha256"
     );
     return new Uint8Array([..._sig.r, ..._sig.s]);
+  }
+
+  async enableVaultsWithCosmosAddress(
+    chainId: string,
+    bech32Address: string
+  ): Promise<
+    {
+      vaultId: string;
+      newEnabledChains: ReadonlyArray<string>;
+    }[]
+  > {
+    const chainInfo = this.chainsService.getChainInfo(chainId);
+    if (!chainInfo) {
+      throw new Error("ChainInfo not found");
+    }
+
+    if (!bech32Address) {
+      throw new Error("Bech32Address is empty");
+    }
+
+    Bech32Address.validate(
+      bech32Address,
+      chainInfo.bech32Config.bech32PrefixAccAddr
+    );
+
+    const changedVaults = new Set<string>();
+
+    const keyInfos = this.keyRingService.getKeyInfos();
+    for (const keyInfo of keyInfos) {
+      if (
+        !this.chainsUIService.isEnabled(keyInfo.id, chainId) &&
+        (!this.keyRingService.needMnemonicKeyCoinTypeFinalize(
+          keyInfo.id,
+          chainId
+        ) ||
+          (chainInfo.alternativeBIP44s ?? []).length === 0)
+      ) {
+        let key: Key;
+        try {
+          key = await this.getKey(keyInfo.id, chainId);
+        } catch (e) {
+          console.log(e);
+          continue;
+        }
+        if (key.bech32Address === bech32Address) {
+          if (
+            this.keyRingService.needMnemonicKeyCoinTypeFinalize(
+              keyInfo.id,
+              chainId
+            )
+          ) {
+            this.keyRingService.finalizeMnemonicKeyCoinType(
+              keyInfo.id,
+              chainId,
+              chainInfo.bip44.coinType
+            );
+          }
+          this.chainsUIService.enableChain(keyInfo.id, chainId);
+
+          changedVaults.add(keyInfo.id);
+        }
+      }
+    }
+
+    const res: {
+      vaultId: string;
+      newEnabledChains: ReadonlyArray<string>;
+    }[] = [];
+
+    for (const changedVault of changedVaults) {
+      res.push({
+        vaultId: changedVault,
+        newEnabledChains:
+          this.chainsUIService.enabledChainIdentifiersForVault(changedVault),
+      });
+    }
+
+    return res;
   }
 
   // XXX: There are other way to handle tx with ethermint on ledger.

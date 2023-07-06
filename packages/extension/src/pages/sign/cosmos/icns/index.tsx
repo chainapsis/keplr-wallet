@@ -9,9 +9,13 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { useInteractionInfo } from "../../../../hooks";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   const { icnsInteractionStore } = useStore();
+  const intl = useIntl();
+  const theme = useTheme();
 
   const interactionInfo = useInteractionInfo(() => {
     icnsInteractionStore.rejectAll();
@@ -22,7 +26,7 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
       title=""
       fixedHeight={true}
       bottomButton={{
-        text: "Approve",
+        text: intl.formatMessage({ id: "button.approve" }),
         size: "large",
         isLoading: (() => {
           if (
@@ -66,11 +70,25 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
 
           <Gutter size="1.125rem" />
 
-          <H2 color={ColorPalette["gray-10"]}>Request Registration</H2>
+          <H2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-600"]
+                : ColorPalette["gray-10"]
+            }
+          >
+            <FormattedMessage id="page.sign.icns.title" />
+          </H2>
 
           <Gutter size="1rem" />
 
-          <Body1 color={ColorPalette["gray-200"]}>
+          <Body1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
             {icnsInteractionStore.waitingData?.data.origin || ""}
           </Body1>
 
@@ -95,7 +113,11 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
                 return (
                   <Box
                     key={accountInfo.chainId}
-                    backgroundColor={ColorPalette["gray-600"]}
+                    backgroundColor={
+                      theme.mode === "light"
+                        ? ColorPalette.white
+                        : ColorPalette["gray-600"]
+                    }
                     style={{
                       overflow: "hidden",
                       borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
@@ -103,7 +125,13 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
                     }}
                   >
                     <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
-                      <Subtitle3 color={ColorPalette["gray-50"]}>
+                      <Subtitle3
+                        color={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-400"]
+                            : ColorPalette["gray-50"]
+                        }
+                      >
                         {icnsInteractionStore.waitingData?.data.username +
                           "." +
                           accountInfo.bech32Prefix}
@@ -120,7 +148,11 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
                     {isLast ? null : (
                       <Box
                         height="1px"
-                        backgroundColor={ColorPalette["gray-500"]}
+                        backgroundColor={
+                          theme.mode === "light"
+                            ? ColorPalette["gray-50"]
+                            : ColorPalette["gray-500"]
+                        }
                       />
                     )}
                   </Box>
