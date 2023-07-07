@@ -72,7 +72,7 @@ export const MainPage: FunctionComponent = observer(() => {
     queriesStore,
   } = useStore();
 
-  const isNotReady = useIsNotReady();
+  const isNotReady = true;
   const intl = useIntl();
   const theme = useTheme();
 

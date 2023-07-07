@@ -80,4 +80,6 @@ export const ColorPalette = {
   transparent: "rgba(255,255,255,0)",
 
   "light-gradient": "linear-gradient(90deg, #FCFAFF 2.44%, #FBFBFF 96.83%)",
+  "skeleton-layer-0": "#ECEBF1",
+  "skeleton-layer-1": "#F9F9FC",
 };
