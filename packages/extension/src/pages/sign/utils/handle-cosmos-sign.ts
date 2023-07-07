@@ -1,15 +1,33 @@
-import { Buffer } from "buffer/";
 import {
   connectAndSignEIP712WithLedger,
   connectAndSignWithLedger,
 } from "./cosmos-ledger-sign";
 import { SignInteractionStore } from "@keplr-wallet/stores";
-import { SignDocWrapper } from "@keplr-wallet/cosmos";
+import { SignDocWrapper, serializeSignDoc } from "@keplr-wallet/cosmos";
+import KeystoneSDK, {
+  KeystoneCosmosSDK,
+  UR,
+  utils,
+} from "@keystonehq/keystone-sdk";
+import { KeystoneKeys, KeystoneUR, getPathFromAddress } from "./keystone";
+import { PlainObject } from "@keplr-wallet/background";
+
+export interface LedgerOptions {
+  useWebHID: boolean;
+}
+
+export interface KeystoneOptions {
+  bech32Prefix: string;
+  displayQRCode: (ur: { type: string; cbor: string }) => Promise<void>;
+  scanQRCode: () => Promise<KeystoneUR>;
+}
+
+export type PreSignOptions = LedgerOptions | KeystoneOptions;
 
 export const handleCosmosPreSign = async (
-  useWebHID: boolean,
   interactionData: NonNullable<SignInteractionStore["waitingData"]>,
-  signDocWrapper: SignDocWrapper
+  signDocWrapper: SignDocWrapper,
+  options?: PreSignOptions
 ): Promise<Uint8Array | undefined> => {
   switch (interactionData.data.keyType) {
     case "ledger": {
@@ -40,7 +58,7 @@ export const handleCosmosPreSign = async (
         }
 
         return await connectAndSignEIP712WithLedger(
-          useWebHID,
+          (options as LedgerOptions).useWebHID,
           publicKey,
           bip44Path,
           signDocWrapper.aminoSignDoc,
@@ -70,12 +88,63 @@ export const handleCosmosPreSign = async (
       }
 
       return await connectAndSignWithLedger(
-        useWebHID,
+        (options as LedgerOptions).useWebHID,
         ledgerApp,
         publicKey,
         bip44Path,
         signDocWrapper.aminoSignDoc
       );
+    }
+    case "keystone": {
+      const keystoneOptions = options as KeystoneOptions;
+      const keystoneSDK = new KeystoneSDK({
+        origin: "Keplr Extension",
+      });
+      const interData = interactionData.data;
+      const address = interData.signer;
+      const path = getPathFromAddress(
+        interData.keyInsensitive["keys"] as KeystoneKeys,
+        address,
+        keystoneOptions.bech32Prefix
+      );
+      if (path === null) {
+        throw new Error("Invalid signer");
+      }
+      const requestId = utils.uuid.v4();
+      const ur = keystoneSDK.cosmos.generateSignRequest({
+        requestId,
+        signData: Buffer.from(
+          serializeSignDoc(signDocWrapper.aminoSignDoc)
+        ).toString("hex"),
+        dataType: KeystoneCosmosSDK.DataType.amino,
+        accounts: [
+          {
+            path,
+            xfp: interData.keyInsensitive["xfp"] as string,
+            address,
+          },
+        ],
+      });
+      await keystoneOptions.displayQRCode({
+        type: ur.type,
+        cbor: ur.cbor.toString("hex"),
+      });
+      const scanResult = await keystoneOptions.scanQRCode();
+      const signResult = keystoneSDK.cosmos.parseSignature(
+        new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
+      );
+      if (signResult.requestId !== requestId) {
+        throw new Error("Invalid request id");
+      }
+      if (
+        signResult.publicKey !==
+        (
+          (interData.keyInsensitive["keys"] as PlainObject)[path] as PlainObject
+        )["pubKey"]
+      ) {
+        throw new Error("Invalid public key");
+      }
+      return Buffer.from(signResult.signature, "hex");
     }
     default:
       return;

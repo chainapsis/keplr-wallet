@@ -7,14 +7,17 @@ import { CameraIcon } from "../../../../components/icon";
 import { Purpose, useAnimatedQRScanner } from "@keystonehq/animated-qr";
 import { GuideBox } from "../../../../components/guide-box";
 import { KeystoneError } from "../../../../components/keystone/error";
+import { KeystoneUR } from "../../utils/keystone";
 
-export const KeystoneScan: FunctionComponent = () => {
+export const KeystoneScan: FunctionComponent<{
+  onScan: (ur: KeystoneUR) => void;
+}> = ({ onScan }) => {
   const { AnimatedQRScanner, hasPermission, setIsDone } =
     useAnimatedQRScanner();
   const [isErrorOpen, setIsErrorOpen] = useState(false);
 
-  const handleScan = (ur: { type: string; cbor: string }) => {
-    console.log(ur);
+  const handleScan = (ur: KeystoneUR) => {
+    onScan(ur);
   };
 
   const handleError = (err: string) => {

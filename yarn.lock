@@ -5643,9 +5643,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keystonehq/animated-qr@npm:^0.8.3":
-  version: 0.8.3
-  resolution: "@keystonehq/animated-qr@npm:0.8.3"
+"@keystonehq/animated-qr@npm:^0.8.5":
+  version: 0.8.5
+  resolution: "@keystonehq/animated-qr@npm:0.8.5"
   dependencies:
     "@keystonehq/ur-decoder": ^0.12.2
     "@ngraveio/bc-ur": ^1.1.6
@@ -5655,7 +5655,7 @@ __metadata:
   peerDependencies:
     react: ">= 16.8"
     react-dom: ">= 16.8"
-  checksum: 2e5dcf06f7a98498370c9ab28ec487c29a2ed18b6e55bb0af4debc17b3707c456f0c0fde45872be0a54a10545a5d989812fc95f9b360accadb652aee90621c8b
+  checksum: 2b70c0f26d453d3d04f41b4215974170c40ee48ca435d0ba9947cbeaba86e7f1295a2e8fad5fdf76a80e37348f1a947c7a88081cc5835b0db9a0a3f077fab5c0
   languageName: node
   linkType: hard
 

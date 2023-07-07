@@ -147,9 +147,11 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
 
             try {
               const signature = await handleCosmosPreSign(
-                uiConfigStore.useWebHIDLedger,
                 signInteractionStore.waitingData,
-                signDocWrapper
+                signDocWrapper,
+                {
+                  useWebHID: uiConfigStore.useWebHIDLedger,
+                }
               );
 
               await signInteractionStore.approveWithProceedNext(

@@ -6,11 +6,14 @@ import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
 import { KeystoneScan } from "./scan";
 import { ArrowLeftIcon } from "../../../../components/icon";
+import { KeystoneUR } from "../../utils/keystone";
 
 export const KeystoneSign: FunctionComponent<{
+  ur?: KeystoneUR;
   isOpen: boolean;
   close: () => void;
-}> = ({ isOpen, close }) => {
+  onScan: (ur: KeystoneUR) => void;
+}> = ({ ur, isOpen, close, onScan }) => {
   const [step, setStep] = useState("display");
   return (
     <Modal isOpen={isOpen} close={close} align="bottom">
@@ -39,12 +42,13 @@ export const KeystoneSign: FunctionComponent<{
         >
           {step === "display" ? (
             <KeystoneDisplay
+              ur={ur}
               onGetSignature={() => {
                 setStep("scan");
               }}
             />
           ) : (
-            <KeystoneScan />
+            <KeystoneScan onScan={onScan} />
           )}
         </Box>
       </HeaderLayout>

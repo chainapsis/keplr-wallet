@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { SignInteractionStore } from "@keplr-wallet/stores";
 import { Box } from "../../../../components/box";
 import { Column, Columns } from "../../../../components/column";
@@ -37,6 +37,7 @@ import { GuideBox } from "../../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
 import { KeystoneSign } from "../../components/keystone";
+import { KeystoneUR } from "../../utils/keystone";
 import { useTheme } from "styled-components";
 import { defaultProtoCodec } from "@keplr-wallet/cosmos";
 import { MsgGrant } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
@@ -310,6 +311,8 @@ export const CosmosTxView: FunctionComponent<{
 
   const isKeystone = interactionData.data.keyType === "keystone";
   const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
+  const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
+  const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
 
   const buttonDisabled =
     txConfigsValidate.interactionBlocked ||
@@ -318,19 +321,33 @@ export const CosmosTxView: FunctionComponent<{
 
   const approve = async () => {
     if (signDocHelper.signDocWrapper) {
+      let presignOptions;
       if (interactionData.data.keyType === "ledger") {
         setIsLedgerInteracting(true);
         setLedgerInteractingError(undefined);
+        presignOptions = {
+          useWebHID: uiConfigStore.useWebHIDLedger,
+        };
       } else if (isKeystone) {
         setIsKeystoneInteracting(true);
-        return;
+        presignOptions = {
+          bech32Prefix:
+            chainStore.getChain(chainId).bech32Config.bech32PrefixAccAddr,
+          displayQRCode: async (ur: KeystoneUR) => {
+            setKeystoneUR(ur);
+          },
+          scanQRCode: () =>
+            new Promise<KeystoneUR>((resolve) => {
+              keystoneScanResolve.current = resolve;
+            }),
+        };
       }
 
       try {
         const signature = await handleCosmosPreSign(
-          uiConfigStore.useWebHIDLedger,
           interactionData,
-          signDocHelper.signDocWrapper
+          signDocHelper.signDocWrapper,
+          presignOptions
         );
 
         await signInteractionStore.approveWithProceedNext(
@@ -581,9 +598,16 @@ export const CosmosTxView: FunctionComponent<{
         />
       </Box>
       <KeystoneSign
+        ur={keystoneUR}
         isOpen={isKeystoneInteracting}
         close={() => {
           setIsKeystoneInteracting(false);
+        }}
+        onScan={(ur) => {
+          if (keystoneScanResolve.current === undefined) {
+            throw new Error("Keystone Scan Error");
+          }
+          keystoneScanResolve.current(ur);
         }}
       />
     </HeaderLayout>

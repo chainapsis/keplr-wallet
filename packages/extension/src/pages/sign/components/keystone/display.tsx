@@ -5,10 +5,12 @@ import { KeystoneTextIcon } from "../../../../components/icon/keystone-text";
 import { ColorPalette } from "../../../../styles";
 import { AnimatedQRCode } from "@keystonehq/animated-qr";
 import { Button } from "../../../../components/button";
+import { KeystoneUR } from "../../utils/keystone";
 
 export const KeystoneDisplay: FunctionComponent<{
+  ur?: KeystoneUR;
   onGetSignature: () => void;
-}> = ({ onGetSignature }) => {
+}> = ({ ur, onGetSignature }) => {
   return (
     <Stack gutter="0.75rem" alignX="center">
       <Box
@@ -27,13 +29,14 @@ export const KeystoneDisplay: FunctionComponent<{
         width="236px"
         height="236px"
       >
-        <AnimatedQRCode
-          cbor="00"
-          type="cosmos-sign-request"
-          options={{
-            size: 210,
-          }}
-        />
+        {ur && (
+          <AnimatedQRCode
+            {...ur}
+            options={{
+              size: 210,
+            }}
+          />
+        )}
       </Box>
       <Box
         style={{
