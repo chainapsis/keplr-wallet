@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { TextInput } from "../text-input";
 import { observer } from "mobx-react-lite";
 
@@ -10,7 +10,7 @@ import { useStore } from "../../../stores";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { ContractAddressBookModal } from "../../contract-address-book-modal";
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
-import { toTokenContractInfo } from "@keplr-wallet/stores";
+import { useTheme } from "styled-components";
 
 export type ContractAddressInputProps = {
   chainId: string;
@@ -31,14 +31,16 @@ export const ContractAddressInput = observer<
   HTMLInputElement
 >(
   (props) => {
-    const { chainStore, contractStore } = useStore();
+    const theme = useTheme();
+    const { chainStore, queriesStore } = useStore();
     const { chainId, isLoading, readOnly, error, setValue, register } = props;
-    const [isAddressBookModalOpen, setIsAddressBookModalOpen] =
-      React.useState(false);
+    const [isAddressBookModalOpen, setIsAddressBookModalOpen] = useState(false);
 
-    const contracts = contractStore
-      .getCommunityTokenContractsInfo(chainId)
-      .contractInfo.map(toTokenContractInfo);
+    const queries = queriesStore.get(chainId);
+    const tokenContractsQuery =
+      queries.tokenContracts.queryTokenContracts.get(chainId);
+
+    const contracts = tokenContractsQuery.getTokenContracts;
 
     return (
       <Box>
@@ -48,17 +50,27 @@ export const ContractAddressInput = observer<
           readOnly={readOnly}
           error={error}
           right={
-            contracts.length > 0 ? (
-              <IconButton
-                onClick={() => {
-                  setIsAddressBookModalOpen(true);
-                }}
-                hoverColor={ColorPalette["gray-500"]}
-                padding="0.25ralem"
-              >
-                <MenuIcon width="1.5rem" height="1.5rem" />
-              </IconButton>
-            ) : null
+            <IconButton
+              onClick={() => {
+                setIsAddressBookModalOpen(true);
+              }}
+              hoverColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-500"]
+              }
+              padding="0.25rem"
+            >
+              <MenuIcon
+                width="1.5rem"
+                height="1.5rem"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-10"]
+                }
+              />
+            </IconButton>
           }
           {...register("contractAddress", {
             required: true,
@@ -76,16 +88,15 @@ export const ContractAddressInput = observer<
           })}
         />
 
-        {contracts.length > 0 ? (
-          <ContractAddressBookModal
-            isOpen={isAddressBookModalOpen}
-            onSelect={(address: string) => {
-              setValue("contractAddress", address);
-              setIsAddressBookModalOpen(false);
-            }}
-            contracts={contracts}
-          />
-        ) : null}
+        <ContractAddressBookModal
+          isOpen={isAddressBookModalOpen}
+          onSelect={(address: string) => {
+            setValue("contractAddress", address);
+            setIsAddressBookModalOpen(false);
+          }}
+          close={() => setIsAddressBookModalOpen(false)}
+          contracts={contracts}
+        />
       </Box>
     );
   },
