@@ -2506,9 +2506,3 @@ export const CommunityChainInfoRepo = {
   repoName: "keplr-chain-registry",
   branchName: "main",
 };
-
-export const CommunityContractsInfoRepo = {
-  organizationName: "kromsten",
-  repoName: "contract-registry",
-  branchName: "main",
-};
