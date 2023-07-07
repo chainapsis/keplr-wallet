@@ -257,6 +257,11 @@
   "page.setting.token.add.viewing-key-info-title": "I have my own viewing key",
   "page.setting.token.add.viewing-key-info-paragraph": "By enabling this toggle, you confirm that you have your viewing key and use it for adding this token.",
   "page.setting.token.add.viewing-key-label": "Viewing Key",
+  "page.setting.token.add.contract-address-book-modal.title": "Contract Addresses",
+  "page.setting.token.add.contract-address-book-modal.search-placeholder": "Search by token name or ticker",
+  "page.setting.token.add.contract-address-book-modal.no-search-data": "No Search Result",
+  "page.setting.token.add.contract-address-book-modal.link": "Retrieved from this <link>repo</link>",
+  "page.setting.token.add.contract-item.select-button": "Select",
 
   "page.setting.contacts.list.add-new-button": "Add New",
   "page.setting.contacts.list.dropdown.edit-contact-label": "Edit Contact",
