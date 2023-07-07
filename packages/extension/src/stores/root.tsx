@@ -1,9 +1,5 @@
 import { ChainStore } from "./chain";
-import {
-  CommunityChainInfoRepo,
-  CommunityContractsInfoRepo,
-  EmbedChainInfos,
-} from "../config";
+import { CommunityChainInfoRepo, EmbedChainInfos } from "../config";
 import {
   AmplitudeApiKey,
   CoinGeckoAPIEndPoint,
@@ -36,7 +32,6 @@ import {
   ICNSQueries,
   PermissionManagerStore,
   SignEthereumInteractionStore,
-  ContractStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -58,6 +53,7 @@ import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
+import { TokenContractsQueries } from "./token-contracts";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -82,7 +78,8 @@ export class RootStore {
       SecretQueries,
       OsmosisQueries,
       KeplrETCQueries,
-      ICNSQueries
+      ICNSQueries,
+      TokenContractsQueries
     ]
   >;
   public readonly accountStore: AccountStore<
@@ -91,7 +88,6 @@ export class RootStore {
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly hugeQueriesStore: HugeQueriesStore;
 
-  public readonly contractStore: ContractStore;
   public readonly tokensStore: TokensStore;
 
   public readonly ibcCurrencyRegistrar: IBCCurrencyRegistrar;
@@ -186,7 +182,8 @@ export class RootStore {
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
       }),
-      ICNSQueries.use()
+      ICNSQueries.use(),
+      TokenContractsQueries.use()
     );
 
     this.accountStore = new AccountStore(
@@ -352,8 +349,6 @@ export class RootStore {
       this.priceStore,
       ICNSInfo
     );
-
-    this.contractStore = new ContractStore(CommunityContractsInfoRepo);
 
     this.tokensStore = new TokensStore(
       window,
