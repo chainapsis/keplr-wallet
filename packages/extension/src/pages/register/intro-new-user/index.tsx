@@ -106,7 +106,14 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
             </Columns>
           </Box>
         </Column>
-        <Box width="1px" backgroundColor={ColorPalette["gray-400"]} />
+        <Box
+          width="1px"
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-100"]
+              : ColorPalette["gray-400"]
+          }
+        />
         <Column weight={1}>
           <Box height="100%">
             <RegisterH4
