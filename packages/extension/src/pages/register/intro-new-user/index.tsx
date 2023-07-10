@@ -18,10 +18,12 @@ import { TextButton } from "../../../components/button-text";
 import { GoogleIcon, KeyIcon } from "../../../components/icon";
 import * as KeplrWalletPrivate from "keplr-wallet-private";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const RegisterIntroNewUserScene: FunctionComponent = () => {
   const sceneTransition = useSceneTransition();
   const intl = useIntl();
+  const theme = useTheme();
 
   const header = useRegisterHeader();
   useSceneEvents({
@@ -43,7 +45,13 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
       <Columns sum={2} gutter="2.5rem">
         <Column weight={1}>
           <Box minHeight="15.625rem">
-            <RegisterH4 color={ColorPalette["gray-50"]}>
+            <RegisterH4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-50"]
+              }
+            >
               <FormattedMessage id="pages.register.intro-new-user.recovery-path-title" />
             </RegisterH4>
 
@@ -98,10 +106,23 @@ export const RegisterIntroNewUserScene: FunctionComponent = () => {
             </Columns>
           </Box>
         </Column>
-        <Box width="1px" backgroundColor={ColorPalette["gray-400"]} />
+        <Box
+          width="1px"
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette["gray-100"]
+              : ColorPalette["gray-400"]
+          }
+        />
         <Column weight={1}>
           <Box height="100%">
-            <RegisterH4 color={ColorPalette["gray-50"]}>
+            <RegisterH4
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-50"]
+              }
+            >
               <FormattedMessage id="pages.register.intro-new-user.sign-up-social-title" />
             </RegisterH4>
             <Gutter size="0.5rem" />

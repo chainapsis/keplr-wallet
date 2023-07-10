@@ -11,6 +11,7 @@ import {
 import { ColorPalette } from "../../styles";
 import { Caption2 } from "../typography";
 import { autoPlacement, shift } from "@floating-ui/react-dom";
+import { useTheme } from "styled-components";
 
 export const Tooltip: FunctionComponent<{
   enabled?: boolean;
@@ -61,6 +62,8 @@ export const Tooltip: FunctionComponent<{
 
   const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
+  const theme = useTheme();
+
   return (
     <React.Fragment>
       <div
@@ -84,13 +87,19 @@ export const Tooltip: FunctionComponent<{
             top: y ?? 0,
             left: x ?? 0,
 
-            backgroundColor: ColorPalette["gray-500"],
+            backgroundColor:
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-500"],
             padding: "0.625rem",
             borderRadius: "0.375rem",
 
             borderStyle: "solid",
             borderWidth: "1px",
-            borderColor: ColorPalette["gray-400"],
+            borderColor:
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-400"],
 
             zIndex: 9999999,
           }}
@@ -99,7 +108,11 @@ export const Tooltip: FunctionComponent<{
           <FloatingArrow
             ref={arrowRef}
             context={context}
-            fill={ColorPalette["gray-500"]}
+            fill={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-500"]
+            }
             stroke={ColorPalette["gray-400"]}
             strokeWidth={1}
           />

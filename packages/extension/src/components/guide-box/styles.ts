@@ -14,9 +14,16 @@ export const Styles = {
       switch (color) {
         case "warning":
           return css`
-            background-color: rgba(210, 156, 17, 0.2);
+            background-color: ${(props) =>
+              props.theme.mode === "light"
+                ? ColorPalette["orange-50"]
+                : "rgba(210, 156, 17, 0.2);"};
+          }
             svg {
-              color: ${ColorPalette["yellow-400"]};
+              color: ${(props) =>
+                props.theme.mode === "light"
+                  ? ColorPalette["orange-400"]
+                  : ColorPalette["yellow-400"]};
             }
           `;
         case "danger":
@@ -25,14 +32,23 @@ export const Styles = {
               .alpha(0.1)
               .string()};
             svg {
-              color: ${ColorPalette["red-300"]};
+              color: ${(props) =>
+                props.theme.mode === "light"
+                  ? ColorPalette["red-400"]
+                  : ColorPalette["red-300"]};
             }
           `;
         default:
           return css`
-            background-color: ${ColorPalette["gray-600"]};
+            background-color: ${(props) =>
+              props.theme.mode === "light"
+                ? ColorPalette["gray-50"]
+                : ColorPalette["gray-600"]};
             svg {
-              color: ${ColorPalette["gray-100"]};
+              color: ${(props) =>
+                props.theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-100"]};
             }
           `;
       }
@@ -42,11 +58,20 @@ export const Styles = {
     color: ${({ color }) => {
       switch (color) {
         case "warning":
-          return ColorPalette["yellow-400"];
+          return (props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["orange-400"]
+              : ColorPalette["yellow-400"];
         case "danger":
-          return ColorPalette["red-300"];
+          return (props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["red-400"]
+              : ColorPalette["red-300"];
         default:
-          return ColorPalette["gray-100"];
+          return (props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["gray-500"]
+              : ColorPalette["gray-100"];
       }
     }};
   `,
@@ -54,9 +79,15 @@ export const Styles = {
     color: ${({ color }) => {
       switch (color) {
         case "warning":
-          return ColorPalette["yellow-500"];
+          return (props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["orange-400"]
+              : ColorPalette["yellow-500"];
         case "danger":
-          return ColorPalette["red-300"];
+          return (props) =>
+            props.theme.mode === "light"
+              ? ColorPalette["red-400"]
+              : ColorPalette["red-300"];
         default:
           return ColorPalette["gray-300"];
       }

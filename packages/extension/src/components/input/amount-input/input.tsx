@@ -15,6 +15,7 @@ import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
 import { Columns } from "../../column";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLanguage } from "../../../languages";
+import { useTheme } from "styled-components";
 
 export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
@@ -204,6 +205,7 @@ const PriceSymbol: FunctionComponent<{
   onTransitionEnd: () => void;
 }> = observer(({ show, onTransitionEnd }) => {
   const { priceStore } = useStore();
+  const theme = useTheme();
 
   // VerticalCollapseTransition의 문제때메... 초기에는 transition이 안되는 문제가 있어서
   // 초기에는 transition을 하지 않도록 해야함.
@@ -228,7 +230,11 @@ const PriceSymbol: FunctionComponent<{
   return (
     <Box position="relative" alignY="center">
       <Body2
-        color={ColorPalette["gray-50"]}
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-400"]
+            : ColorPalette["gray-50"]
+        }
         style={{
           opacity: 0,
         }}
@@ -244,7 +250,15 @@ const PriceSymbol: FunctionComponent<{
           }}
           onTransitionEnd={onTransitionEnd}
         >
-          <Body2 color={ColorPalette["gray-50"]}>{fiatCurrency.symbol}</Body2>
+          <Body2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-50"]
+            }
+          >
+            {fiatCurrency.symbol}
+          </Body2>
         </VerticalCollapseTransition>
       </Box>
     </Box>
@@ -255,12 +269,21 @@ const BottomPriceButton: FunctionComponent<{
   text: string;
   onClick: () => void;
 }> = ({ text, onClick }) => {
+  const theme = useTheme();
+
   return (
     <Box marginTop="0.375rem" marginLeft="0.375rem" alignX="left">
       <Box
-        color={ColorPalette["gray-300"]}
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-400"]
+            : ColorPalette["gray-300"]
+        }
         hover={{
-          color: ColorPalette["gray-200"],
+          color:
+            theme.mode === "light"
+              ? ColorPalette["gray-300"]
+              : ColorPalette["gray-200"],
         }}
         onClick={(e) => {
           e.preventDefault();
@@ -303,6 +326,7 @@ const MaxButton: FunctionComponent<{
 }> = observer(({ amountConfig }) => {
   const isMax = amountConfig.fraction === 1;
   const language = useLanguage();
+  const theme = useTheme();
 
   return (
     <Box
@@ -311,18 +335,52 @@ const MaxButton: FunctionComponent<{
       alignX="center"
       alignY="center"
       paddingX="0.4375rem"
-      color={isMax ? ColorPalette["gray-300"] : ColorPalette["gray-10"]}
-      backgroundColor={ColorPalette["gray-500"]}
+      color={
+        isMax
+          ? theme.mode === "light"
+            ? ColorPalette["blue-400"]
+            : ColorPalette["gray-300"]
+          : theme.mode === "light"
+          ? ColorPalette["blue-400"]
+          : ColorPalette["gray-10"]
+      }
+      backgroundColor={
+        theme.mode === "light"
+          ? ColorPalette["blue-50"]
+          : ColorPalette["gray-500"]
+      }
       borderRadius="0.25rem"
       borderWidth={"1px"}
-      borderColor={isMax ? ColorPalette["gray-300"] : ColorPalette["gray-500"]}
+      borderColor={
+        isMax
+          ? theme.mode === "light"
+            ? ColorPalette["blue-200"]
+            : ColorPalette["gray-300"]
+          : theme.mode === "light"
+          ? ColorPalette["blue-50"]
+          : ColorPalette["gray-500"]
+      }
       hover={{
-        color: isMax ? ColorPalette["gray-300"] : ColorPalette["white"],
+        color: isMax
+          ? theme.mode === "light"
+            ? ColorPalette["blue-500"]
+            : ColorPalette["gray-300"]
+          : theme.mode === "light"
+          ? ColorPalette["blue-400"]
+          : ColorPalette["white"],
         backgroundColor: isMax
-          ? ColorPalette["gray-500"]
+          ? theme.mode === "light"
+            ? ColorPalette["blue-100"]
+            : ColorPalette["gray-500"]
+          : theme.mode === "light"
+          ? ColorPalette["blue-100"]
           : ColorPalette["gray-550"],
         borderColor: isMax
-          ? ColorPalette["gray-400"]
+          ? theme.mode === "light"
+            ? ColorPalette["blue-300"]
+            : ColorPalette["gray-400"]
+          : theme.mode === "light"
+          ? ColorPalette["blue-100"]
           : ColorPalette["gray-550"],
       }}
       onClick={(e) => {

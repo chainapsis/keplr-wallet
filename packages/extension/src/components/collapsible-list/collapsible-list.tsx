@@ -9,7 +9,7 @@ import { Columns } from "../column";
 import { VerticalCollapseTransition } from "../transition/vertical-collapse";
 import { Gutter } from "../gutter";
 import { XAxis } from "../axis";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { useIntl } from "react-intl";
 
 const Styles = {
@@ -23,7 +23,10 @@ const Styles = {
     color: ${ColorPalette["gray-300"]};
 
     :hover {
-      color: ${ColorPalette["gray-400"]};
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-400"]};
     }
   `,
 };
@@ -38,6 +41,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
   }
 
   const intl = useIntl();
+  const theme = useTheme();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -54,7 +58,14 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         }}
       >
         <Columns sum={1} alignY="center">
-          <Subtitle4 style={{ color: ColorPalette["gray-50"] }}>
+          <Subtitle4
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["gray-50"],
+            }}
+          >
             {items.length}
           </Subtitle4>
 

@@ -3,6 +3,7 @@ import { Box } from "../box";
 import { ColorPalette } from "../../styles";
 import { Caption1 } from "../typography";
 import { Tooltip } from "../tooltip";
+import { useTheme } from "styled-components";
 
 export const Tag: FunctionComponent<{
   text: string;
@@ -10,18 +11,28 @@ export const Tag: FunctionComponent<{
 
   whiteSpace?: "normal" | "nowrap";
 }> = ({ text, tooltip, whiteSpace }) => {
+  const theme = useTheme();
+
   return (
     <Tooltip enabled={!!tooltip} content={tooltip}>
       <Box
         alignX="center"
         alignY="center"
-        backgroundColor={ColorPalette["gray-400"]}
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["blue-50"]
+            : ColorPalette["gray-400"]
+        }
         borderRadius="0.25rem"
         height="1.25rem"
         paddingX="0.625rem"
       >
         <Caption1
-          color={ColorPalette["gray-100"]}
+          color={
+            theme.mode === "light"
+              ? ColorPalette["blue-400"]
+              : ColorPalette["gray-100"]
+          }
           style={{
             whiteSpace,
           }}

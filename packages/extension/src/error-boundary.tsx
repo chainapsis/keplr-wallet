@@ -12,6 +12,7 @@ import { Gutter } from "./components/gutter";
 import { Button } from "./components/button";
 import { observer } from "mobx-react-lite";
 import { useStore } from "./stores";
+import { useTheme } from "styled-components";
 
 interface State {
   hasError: boolean;
@@ -47,6 +48,7 @@ export class ErrorBoundary extends Component<
 
 const ErrorBoundaryView: FunctionComponent = observer(() => {
   const { chainStore } = useStore();
+  const theme = useTheme();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,14 +65,30 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
       <ExclamationTriangleIcon
         width="4.75rem"
         height="4.75rem"
-        color={ColorPalette["gray-10"]}
+        color={
+          theme.mode === "light"
+            ? ColorPalette["orange-400"]
+            : ColorPalette["gray-10"]
+        }
       />
-      <H1>Error</H1>
+      <H1
+        color={
+          theme.mode === "light"
+            ? ColorPalette["orange-400"]
+            : ColorPalette["gray-10"]
+        }
+      >
+        Error
+      </H1>
 
       <Gutter size="1.5rem" />
 
       <Subtitle4
-        color={ColorPalette["gray-200"]}
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-400"]
+            : ColorPalette["gray-200"]
+        }
         style={{ textAlign: "center" }}
       >
         An error with an unknown reason has occurred. To potentially resolve the
@@ -105,7 +123,11 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
       <Gutter size="2.625rem" />
 
       <Subtitle4
-        color={ColorPalette["gray-200"]}
+        color={
+          theme.mode === "light"
+            ? ColorPalette["gray-400"]
+            : ColorPalette["gray-200"]
+        }
         style={{ textAlign: "center" }}
       >
         If the error persists, you can also try resetting the suggest chains and

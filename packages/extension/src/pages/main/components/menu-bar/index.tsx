@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { CloseIcon, LinkIcon } from "../../../../components/icon";
 import { Box } from "../../../../components/box";
@@ -15,7 +15,10 @@ import { FormattedMessage } from "react-intl";
 
 const Styles = {
   MenuItem: styled(H3)`
-    color: ${ColorPalette["white"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-700"]
+        : ColorPalette["white"]};
 
     cursor: pointer;
   `,
@@ -29,6 +32,7 @@ export const MenuBar: FunctionComponent<{
 }> = observer(({ close }) => {
   const { analyticsStore, keyRingStore } = useStore();
 
+  const theme = useTheme();
   const navigate = useNavigate();
 
   return (
@@ -36,7 +40,9 @@ export const MenuBar: FunctionComponent<{
       height="100%"
       width="fit-content"
       alignX="left"
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      }
       paddingTop="1.125rem"
       paddingX="1.75rem"
       paddingBottom="1.25rem"
@@ -53,7 +59,15 @@ export const MenuBar: FunctionComponent<{
            */}
         <Box alignX="left">
           <Box onClick={close} cursor="pointer">
-            <CloseIcon width="1.5rem" height="1.5rem" />
+            <CloseIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-50"]
+              }
+            />
           </Box>
         </Box>
       </Bleed>
@@ -83,7 +97,13 @@ export const MenuBar: FunctionComponent<{
 
         <Box
           width="6.5rem"
-          style={{ border: `1px solid ${ColorPalette["gray-400"]}` }}
+          style={{
+            border: `1px solid ${
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-400"]
+            }`,
+          }}
         />
 
         <Gutter size="1rem" />
@@ -121,7 +141,13 @@ export const MenuBar: FunctionComponent<{
 
       <Box
         width="6.5rem"
-        style={{ border: `1px solid ${ColorPalette["gray-400"]}` }}
+        style={{
+          border: `1px solid ${
+            theme.mode === "light"
+              ? ColorPalette["gray-100"]
+              : ColorPalette["gray-400"]
+          }`,
+        }}
       />
 
       <Gutter size="1rem" />
@@ -137,7 +163,13 @@ export const MenuBar: FunctionComponent<{
         }}
       >
         <XAxis alignY="center">
-          <Button2 color={ColorPalette["gray-300"]}>
+          <Button2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-200"]
+                : ColorPalette["gray-300"]
+            }
+          >
             <FormattedMessage id="page.main.components.menu-bar.go-to-keplr-chain-registry" />
           </Button2>
 
@@ -146,7 +178,11 @@ export const MenuBar: FunctionComponent<{
           <LinkIcon
             width="1.125rem"
             height="1.125rem"
-            color={ColorPalette["gray-300"]}
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-200"]
+                : ColorPalette["gray-300"]
+            }
           />
         </XAxis>
       </Box>

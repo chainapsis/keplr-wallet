@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import {
   Subtitle1,
@@ -32,7 +32,10 @@ const Styles = {
 
     padding: 1.25rem 0.75rem 0 0.75rem;
 
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette.white
+        : ColorPalette["gray-600"]};
 
     overflow-y: auto;
   `,
@@ -53,6 +56,7 @@ export const CopyAddressModal: FunctionComponent<{
   } = useStore();
 
   const intl = useIntl();
+  const theme = useTheme();
   const [search, setSearch] = useState("");
 
   const searchRef = useFocusOnMount<HTMLInputElement>();
@@ -148,7 +152,15 @@ export const CopyAddressModal: FunctionComponent<{
 
   return (
     <Styles.Container>
-      <Subtitle1 style={{ color: ColorPalette["white"], textAlign: "center" }}>
+      <Subtitle1
+        style={{
+          color:
+            theme.mode === "light"
+              ? ColorPalette["gray-700"]
+              : ColorPalette["white"],
+          textAlign: "center",
+        }}
+      >
         <FormattedMessage id="page.main.components.copy-address-modal.title" />
       </Subtitle1>
 
@@ -186,7 +198,9 @@ export const CopyAddressModal: FunctionComponent<{
             <Image
               width="140px"
               height="160px"
-              src={require("../../../../public/assets/img/copy-address-no-search-result.png")}
+              src={require(theme.mode === "light"
+                ? "../../../../public/assets/img/copy-address-no-search-result-light.png"
+                : "../../../../public/assets/img/copy-address-no-search-result.png")}
               alt="copy-address-no-search-result-image"
             />
             <Gutter size="0.75rem" />
@@ -298,6 +312,7 @@ export const ChainAddressItem: FunctionComponent<{
 }) => {
   const { analyticsStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const [hasCopied, setHasCopied] = useState(false);
 
@@ -307,10 +322,14 @@ export const ChainAddressItem: FunctionComponent<{
       paddingLeft="1rem"
       paddingRight="0.5rem"
       borderRadius="0.375rem"
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      }
       hover={{
         backgroundColor: !blockInteraction
-          ? ColorPalette["gray-550"]
+          ? theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-550"]
           : undefined,
       }}
       style={{
@@ -335,6 +354,8 @@ export const ChainAddressItem: FunctionComponent<{
           style={{
             color: isBookmarked
               ? ColorPalette["blue-400"]
+              : theme.mode === "light"
+              ? ColorPalette["gray-100"]
               : ColorPalette["gray-300"],
           }}
           onClick={(e) => {
@@ -371,7 +392,13 @@ export const ChainAddressItem: FunctionComponent<{
           />
         </Box>
         <YAxis>
-          <Subtitle3 color={ColorPalette["gray-10"]}>
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-700"]
+                : ColorPalette["gray-10"]
+            }
+          >
             {chainInfo.chainName}
           </Subtitle3>
           <Gutter size="0.25rem" />
@@ -385,6 +412,8 @@ export const ChainAddressItem: FunctionComponent<{
           style={{
             color: hasCopied
               ? ColorPalette["green-400"]
+              : theme.mode === "light"
+              ? ColorPalette["gray-300"]
               : ColorPalette["gray-10"],
           }}
         >
@@ -410,6 +439,7 @@ export const EthereumAddressItem: FunctionComponent<{
 }> = ({ chainInfo, ethereumAddress, blockInteraction, afterCopied }) => {
   const [hasCopied, setHasCopied] = useState(false);
   const intl = useIntl();
+  const theme = useTheme();
 
   return (
     <Box
@@ -417,10 +447,14 @@ export const EthereumAddressItem: FunctionComponent<{
       paddingLeft="2.75rem"
       paddingRight="0.5rem"
       borderRadius="0.375rem"
-      backgroundColor={ColorPalette["gray-600"]}
+      backgroundColor={
+        theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
+      }
       hover={{
         backgroundColor: !blockInteraction
-          ? ColorPalette["gray-550"]
+          ? theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-550"]
           : undefined,
       }}
       style={{
@@ -452,7 +486,13 @@ export const EthereumAddressItem: FunctionComponent<{
         </Box>
         <YAxis>
           <XAxis alignY="center">
-            <Subtitle3 color={ColorPalette["gray-10"]}>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-10"]
+              }
+            >
               {chainInfo.chainName}
             </Subtitle3>
 
@@ -484,6 +524,8 @@ export const EthereumAddressItem: FunctionComponent<{
           style={{
             color: hasCopied
               ? ColorPalette["green-400"]
+              : theme.mode === "light"
+              ? ColorPalette["gray-300"]
               : ColorPalette["gray-10"],
           }}
         >

@@ -223,12 +223,18 @@ export const SettingGeneralAuthZPage: FunctionComponent = observer(() => {
 const Styles = {
   Container: styled(Stack)`
     padding: 0.875rem;
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-600"]};
 
     border-radius: 0.375rem;
   `,
   Title: styled(Subtitle3)`
-    color: ${ColorPalette["gray-10"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-10"]};
   `,
   Paragraph: styled(Body3)`
     color: ${ColorPalette["gray-300"]};

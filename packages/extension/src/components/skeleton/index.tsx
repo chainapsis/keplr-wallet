@@ -6,6 +6,7 @@ import {
   CopyAddressRadius,
   StringToggleRadius,
 } from "../../pages/main/components";
+import { useTheme } from "styled-components";
 
 export interface SkeletonProps {
   isNotReady?: boolean;
@@ -18,6 +19,8 @@ export interface SkeletonProps {
 export const Skeleton: FunctionComponent<
   SkeletonProps & Omit<BoxProps, "position">
 > = ({ isNotReady, type = "default", layer = 0, dummyMinWidth, children }) => {
+  const theme = useTheme();
+
   const getBorderRadius = () => {
     switch (type) {
       case "button":
@@ -39,7 +42,13 @@ export const Skeleton: FunctionComponent<
         <Box
           position="absolute"
           backgroundColor={
-            layer === 0 ? ColorPalette["gray-600"] : ColorPalette["gray-500"]
+            layer === 0
+              ? theme.mode === "light"
+                ? ColorPalette["skeleton-layer-0"]
+                : ColorPalette["gray-600"]
+              : theme.mode === "light"
+              ? ColorPalette["skeleton-layer-1"]
+              : ColorPalette["gray-500"]
           }
           zIndex={1000}
           borderRadius={getBorderRadius()}

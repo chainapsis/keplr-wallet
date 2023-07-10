@@ -10,6 +10,7 @@ import { Body1, H2, Subtitle3 } from "../../../components/typography";
 import { ColorPalette } from "../../../styles";
 import { Gutter } from "../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 export const PermissionBasicAccessPage: FunctionComponent<{
   data: {
@@ -18,6 +19,7 @@ export const PermissionBasicAccessPage: FunctionComponent<{
 }> = observer(({ data }) => {
   const { chainStore, permissionStore } = useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const interactionInfo = useInteractionInfo();
 
@@ -65,13 +67,25 @@ export const PermissionBasicAccessPage: FunctionComponent<{
 
           <Gutter size="1.125rem" />
 
-          <H2 color={ColorPalette["gray-10"]}>
+          <H2
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-600"]
+                : ColorPalette["gray-10"]
+            }
+          >
             <FormattedMessage id="page.permission.requesting-connection-title" />
           </H2>
 
           <Gutter size="1rem" />
 
-          <Body1 color={ColorPalette["gray-200"]}>
+          <Body1
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-300"]
+                : ColorPalette["gray-200"]
+            }
+          >
             {data.origins.join(", ")}
           </Body1>
 
@@ -93,7 +107,11 @@ export const PermissionBasicAccessPage: FunctionComponent<{
               return (
                 <Box
                   key={chainId}
-                  backgroundColor={ColorPalette["gray-600"]}
+                  backgroundColor={
+                    theme.mode === "light"
+                      ? ColorPalette.white
+                      : ColorPalette["gray-600"]
+                  }
                   style={{
                     overflow: "hidden",
                     borderBottomLeftRadius: isLast ? "0.5rem" : undefined,
@@ -101,7 +119,13 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                   }}
                 >
                   <Box alignY="center" paddingX="1.5rem" minHeight="4.25rem">
-                    <Subtitle3 color={ColorPalette["gray-50"]}>
+                    <Subtitle3
+                      color={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-400"]
+                          : ColorPalette["gray-50"]
+                      }
+                    >
                       {chainInfo.chainName}
                     </Subtitle3>
                   </Box>
@@ -109,7 +133,11 @@ export const PermissionBasicAccessPage: FunctionComponent<{
                   {isLast ? null : (
                     <Box
                       height="1px"
-                      backgroundColor={ColorPalette["gray-500"]}
+                      backgroundColor={
+                        theme.mode === "light"
+                          ? ColorPalette["gray-50"]
+                          : ColorPalette["gray-500"]
+                      }
                     />
                   )}
                 </Box>

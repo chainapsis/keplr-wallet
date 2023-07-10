@@ -73,13 +73,15 @@ export const Styles = {
       right: 0;
     }
 
-    ${({ disabled }) => {
+    ${({ disabled, theme }) => {
       if (!disabled) return;
 
       return css`
         ::after {
-          background-color: ${ColorPalette["gray-600"]};
-          opacity: 0.5;
+          background-color: ${theme.mode === "light"
+            ? ColorPalette["gray-300"]
+            : ColorPalette["gray-600"]};
+          opacity: ${theme.mode === "light" ? 0.2 : 0.5};
         }
       `;
     }}

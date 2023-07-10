@@ -6,7 +6,7 @@ import { useStore } from "../../../../../stores";
 import { BackButton } from "../../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../../layouts/header";
 import { Box } from "../../../../../components/box";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Stack } from "../../../../../components/stack";
 import { ColorPalette } from "../../../../../styles";
 import { Body3, H4, Subtitle3 } from "../../../../../components/typography";
@@ -19,21 +19,37 @@ import { useNotification } from "../../../../../hooks/notification";
 const Styles = {
   Card: styled(Stack)`
     padding: 0.875rem;
-    background-color: ${ColorPalette["gray-600"]};
+    background-color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-10"]
+        : ColorPalette["gray-600"]};
 
     border-radius: 0.25rem;
   `,
   Title: styled(Subtitle3)`
-    color: ${ColorPalette["gray-200"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-200"]};
   `,
   Paragraph: styled(Body3)`
-    color: ${ColorPalette["gray-10"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-10"]};
     word-break: keep-all;
     word-wrap: break-word;
+
+    cursor: pointer;
   `,
   JSON: styled.pre`
     overflow: auto;
     white-space: pre-wrap;
+
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-400"]
+        : ColorPalette["gray-10"]};
   `,
 };
 
@@ -41,6 +57,7 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
   const { accountStore } = useStore();
 
   const intl = useIntl();
+  const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const notification = useNotification();
@@ -172,12 +189,35 @@ export const SettingGeneralAuthZRevokePage: FunctionComponent = observer(() => {
     >
       <Box paddingX="0.75rem">
         <Stack gutter="0.5rem">
-          <H4 style={{ color: ColorPalette["gray-50"] }}>{state.title}</H4>
+          <H4
+            style={{
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["gray-50"],
+            }}
+          >
+            {state.title}
+          </H4>
           <Styles.Card gutter="0.5rem">
             <Styles.Title>
               <FormattedMessage id="page.setting.general.authz.revoke.grantee-address" />
             </Styles.Title>
-            <Styles.Paragraph>
+            <Styles.Paragraph
+              onClick={async (e) => {
+                e.preventDefault();
+
+                await navigator.clipboard.writeText(state.grant.grantee);
+
+                notification.show(
+                  "success",
+                  intl.formatMessage({
+                    id: "pages.register.components.copy-to-clipboard.button-after",
+                  }),
+                  ""
+                );
+              }}
+            >
               {state.grant.grantee}
               <CopyOutlineIcon width="0.875rem" height="0.875rem" />
             </Styles.Paragraph>

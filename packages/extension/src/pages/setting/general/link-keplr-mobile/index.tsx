@@ -4,7 +4,7 @@ import { BackButton } from "../../../../layouts/header/components";
 import { HeaderLayout } from "../../../../layouts/header";
 import { GuideBox } from "../../../../components/guide-box";
 import { Stack } from "../../../../components/stack";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { Subtitle3 } from "../../../../components/typography";
 import { TextInput } from "../../../../components/input";
@@ -38,7 +38,10 @@ const Styles = {
   `,
   Paragraph: styled(Subtitle3)`
     text-align: center;
-    color: ${ColorPalette["gray-200"]};
+    color: ${(props) =>
+      props.theme.mode === "light"
+        ? ColorPalette["gray-300"]
+        : ColorPalette["gray-200"]};
     padding: 0 0.625rem;
   `,
 };
@@ -98,6 +101,7 @@ const EnterPasswordView: FunctionComponent<{
 }> = observer(({ onSubmit }) => {
   const animDivRef = useRef<HTMLDivElement | null>(null);
   const intl = useIntl();
+  const theme = useTheme();
 
   useEffect(() => {
     if (animDivRef.current) {
@@ -164,7 +168,8 @@ const EnterPasswordView: FunctionComponent<{
           <div
             ref={animDivRef}
             style={{
-              backgroundColor: ColorPalette["gray-600"],
+              backgroundColor:
+                theme.mode === "light" ? "none" : ColorPalette["gray-600"],
               borderRadius: "2.5rem",
               width: "9.375rem",
               height: "9.375rem",

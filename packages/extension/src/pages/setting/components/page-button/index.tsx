@@ -42,7 +42,7 @@ export const PageButton: FunctionComponent<PageButtonProps> = ({
             ) : null}
           </Stack>
         </Column>
-        {endIcon ? <Box>{endIcon}</Box> : null}
+        {endIcon ? <Styles.EndIcon>{endIcon}</Styles.EndIcon> : null}
       </Columns>
     </Styles.Container>
   );

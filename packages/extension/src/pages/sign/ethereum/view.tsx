@@ -16,6 +16,7 @@ import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { EthSignType } from "@keplr-wallet/types";
 import { handleEthereumPreSign } from "../utils/handle-eth-sign";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useTheme } from "styled-components";
 
 /**
  * CosmosTxView의 주석을 꼭 참고하셈
@@ -29,6 +30,7 @@ export const EthereumSigningView: FunctionComponent<{
   const { chainStore, uiConfigStore, signEthereumInteractionStore } =
     useStore();
   const intl = useIntl();
+  const theme = useTheme();
 
   const interactionInfo = useInteractionInfo(() => {
     signEthereumInteractionStore.rejectAll();
@@ -135,7 +137,11 @@ export const EthereumSigningView: FunctionComponent<{
         <Box
           height="17.5rem"
           padding="1rem"
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
           borderRadius="0.375rem"
           style={{
             overflow: "auto",
@@ -143,7 +149,10 @@ export const EthereumSigningView: FunctionComponent<{
         >
           <pre
             style={{
-              color: ColorPalette["gray-10"],
+              color:
+                theme.mode === "light"
+                  ? ColorPalette["gray-400"]
+                  : ColorPalette["gray-10"],
               // Remove normalized style of pre tag
               margin: 0,
             }}
@@ -155,15 +164,31 @@ export const EthereumSigningView: FunctionComponent<{
         <div style={{ flex: 1 }} />
         <Box
           padding="1rem"
-          backgroundColor={ColorPalette["gray-600"]}
+          backgroundColor={
+            theme.mode === "light"
+              ? ColorPalette.white
+              : ColorPalette["gray-600"]
+          }
           borderRadius="0.375rem"
         >
           <XAxis alignY="center">
-            <Body2 color={ColorPalette["gray-200"]}>
+            <Body2
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-500"]
+                  : ColorPalette["gray-200"]
+              }
+            >
               <FormattedMessage id="page.sign.ethereum.requested-network" />
             </Body2>
             <div style={{ flex: 1 }} />
-            <Subtitle3 color={ColorPalette["gray-50"]}>
+            <Subtitle3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-200"]
+                  : ColorPalette["gray-50"]
+              }
+            >
               {chainStore.getChain(interactionData.data.chainId).chainName}
             </Subtitle3>
           </XAxis>
