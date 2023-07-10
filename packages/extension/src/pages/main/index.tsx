@@ -250,6 +250,7 @@ export const MainPage: FunctionComponent = observer(() => {
                 weight: stakedChartWeight,
               }}
               highlight={tabStatus === "available" ? "first" : "second"}
+              isNotReady={isNotReady}
             />
             <Box
               position="absolute"

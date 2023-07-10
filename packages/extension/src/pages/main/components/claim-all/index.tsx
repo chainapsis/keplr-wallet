@@ -538,19 +538,25 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             }
           }}
         >
-          {!isExpanded ? (
-            <ArrowDownIcon
-              width="1.25rem"
-              height="1.25rem"
-              color={ColorPalette["gray-300"]}
-            />
-          ) : (
-            <ArrowUpIcon
-              width="1.25rem"
-              height="1.25rem"
-              color={ColorPalette["gray-300"]}
-            />
-          )}
+          <Box
+            style={{
+              opacity: isNotReady ? 0 : 1,
+            }}
+          >
+            {!isExpanded ? (
+              <ArrowDownIcon
+                width="1.25rem"
+                height="1.25rem"
+                color={ColorPalette["gray-300"]}
+              />
+            ) : (
+              <ArrowUpIcon
+                width="1.25rem"
+                height="1.25rem"
+                color={ColorPalette["gray-300"]}
+              />
+            )}
+          </Box>
         </Styles.ExpandButton>
 
         <VerticalCollapseTransition

@@ -13,7 +13,9 @@ export const DualChart: FunctionComponent<{
     weight: number;
   };
   highlight: "first" | "second";
-}> = ({ first, second, highlight }) => {
+
+  isNotReady?: boolean;
+}> = ({ first, second, highlight, isNotReady }) => {
   const width = 208;
   const height = 134;
 
@@ -149,7 +151,11 @@ export const DualChart: FunctionComponent<{
           })}
           stroke={
             theme.mode === "light"
-              ? ColorPalette["gray-100"]
+              ? isNotReady
+                ? ColorPalette["skeleton-layer-0"]
+                : ColorPalette["gray-100"]
+              : isNotReady
+              ? ColorPalette["gray-600"]
               : ColorPalette["gray-500"]
           }
           strokeWidth={stroke}
