@@ -47,9 +47,8 @@ export const ContractAddressBookModal: FunctionComponent<{
 }> = observer(({ isOpen, chainId, onSelect, close }) => {
   const { queriesStore } = useStore();
 
-  const contracts = queriesStore
-    .get(chainId)
-    .tokenContracts.queryTokenContracts.get(chainId).tokenContracts;
+  const contracts =
+    queriesStore.get(chainId).tokenContracts.queryTokenContracts.tokenContracts;
 
   const [search, setSearch] = useState("");
   const searchRef = useFocusOnMount<HTMLInputElement>();

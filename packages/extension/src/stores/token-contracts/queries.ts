@@ -1,6 +1,6 @@
 import { QueriesSetBase, QuerySharedContext } from "@keplr-wallet/stores";
 import { DeepReadonly } from "utility-types";
-import { ObservableQueryTokenContracts } from "./names";
+import { ObservableQueryTokenContracts } from "./contracts";
 
 export interface TokenContractsQueries {
   tokenContracts: TokenContractsQueriesImpl;
@@ -9,16 +9,19 @@ export interface TokenContractsQueries {
 export const TokenContractsQueries = {
   use(): (
     queriesSetBase: QueriesSetBase,
-    sharedContext: QuerySharedContext
+    sharedContext: QuerySharedContext,
+    chainId: string
   ) => TokenContractsQueries {
     return (
       queriesSetBase: QueriesSetBase,
-      sharedContext: QuerySharedContext
+      sharedContext: QuerySharedContext,
+      chainId: string
     ) => {
       return {
         tokenContracts: new TokenContractsQueriesImpl(
           queriesSetBase,
-          sharedContext
+          sharedContext,
+          chainId
         ),
       };
     };
@@ -28,7 +31,14 @@ export const TokenContractsQueries = {
 export class TokenContractsQueriesImpl {
   public readonly queryTokenContracts: DeepReadonly<ObservableQueryTokenContracts>;
 
-  constructor(_base: QueriesSetBase, sharedContext: QuerySharedContext) {
-    this.queryTokenContracts = new ObservableQueryTokenContracts(sharedContext);
+  constructor(
+    _base: QueriesSetBase,
+    sharedContext: QuerySharedContext,
+    chainId: string
+  ) {
+    this.queryTokenContracts = new ObservableQueryTokenContracts(
+      sharedContext,
+      chainId
+    );
   }
 }
