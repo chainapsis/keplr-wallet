@@ -105,12 +105,7 @@ export const ContractAddressBookModal: FunctionComponent<{
               </EmptyView>
             </React.Fragment>
           ) : (
-            <Box
-              height="21.5rem"
-              style={{
-                overflowY: "auto",
-              }}
-            >
+            <React.Fragment>
               {filtered.map((contract, index) => (
                 <ContractAddressItem
                   key={index}
@@ -122,7 +117,7 @@ export const ContractAddressBookModal: FunctionComponent<{
                   }}
                 />
               ))}
-            </Box>
+            </React.Fragment>
           )}
         </SimpleBar>
 
