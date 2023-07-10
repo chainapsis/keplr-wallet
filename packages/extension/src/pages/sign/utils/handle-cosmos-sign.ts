@@ -110,7 +110,9 @@ export const handleCosmosPreSign = async (
       if (path === null) {
         throw new Error("Invalid signer");
       }
-      const requestId = utils.uuid.v4();
+      const requestId = utils.uuid.v4({
+        random: Buffer.from(interactionData.id + "0000000000000000", "hex"),
+      });
       const ur = keystoneSDK.cosmos.generateSignRequest({
         requestId,
         signData: Buffer.from(

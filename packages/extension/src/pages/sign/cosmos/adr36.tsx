@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../stores";
 import { useInteractionInfo } from "../../../hooks";
@@ -18,6 +18,8 @@ import { LedgerGuideBox } from "../components/ledger-guide-box";
 import { GuideBox } from "../../../components/guide-box";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Image } from "../../../components/image";
+import { KeystoneUR } from "../utils/keystone";
+import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
@@ -103,6 +105,12 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
     Error | undefined
   >(undefined);
 
+  const isKeystone =
+    signInteractionStore.waitingData?.data.keyType === "keystone";
+  const [isKeystoneInteracting, setIsKeystoneInteracting] = useState(false);
+  const [keystoneUR, setKeystoneUR] = useState<KeystoneUR>();
+  const keystoneScanResolve = useRef<(ur: KeystoneUR) => void>();
+
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.adr36.title" })}
@@ -140,18 +148,34 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               throw new Error("Invalid sign doc for adr36");
             }
 
+            let presignOptions;
             if (signInteractionStore.waitingData.data.keyType === "ledger") {
               setIsLedgerInteracting(true);
               setLedgerInteractingError(undefined);
+              presignOptions = {
+                useWebHID: uiConfigStore.useWebHIDLedger,
+              };
+            } else if (isKeystone) {
+              setIsKeystoneInteracting(true);
+              presignOptions = {
+                bech32Prefix: chainStore.getChain(
+                  signInteractionStore.waitingData.data.chainId
+                ).bech32Config.bech32PrefixAccAddr,
+                displayQRCode: async (ur: KeystoneUR) => {
+                  setKeystoneUR(ur);
+                },
+                scanQRCode: () =>
+                  new Promise<KeystoneUR>((resolve) => {
+                    keystoneScanResolve.current = resolve;
+                  }),
+              };
             }
 
             try {
               const signature = await handleCosmosPreSign(
                 signInteractionStore.waitingData,
                 signDocWrapper,
-                {
-                  useWebHID: uiConfigStore.useWebHIDLedger,
-                }
+                presignOptions
               );
 
               await signInteractionStore.approveWithProceedNext(
@@ -377,6 +401,19 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
           />
         ) : null}
       </Box>
+      <KeystoneSign
+        ur={keystoneUR}
+        isOpen={isKeystoneInteracting}
+        close={() => {
+          setIsKeystoneInteracting(false);
+        }}
+        onScan={(ur) => {
+          if (keystoneScanResolve.current === undefined) {
+            throw new Error("Keystone Scan Error");
+          }
+          keystoneScanResolve.current(ur);
+        }}
+      />
     </HeaderLayout>
   );
 });
