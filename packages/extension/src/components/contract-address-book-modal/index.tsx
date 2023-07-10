@@ -13,6 +13,7 @@ import SimpleBar from "simplebar-react";
 import { EmptyView } from "../empty-view";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useStore } from "../../stores";
+import { TokenContractListRepoURL } from "../../config.ui";
 
 const Styles = {
   Container: styled.div`
@@ -131,7 +132,7 @@ export const ContractAddressBookModal: FunctionComponent<{
                       e.preventDefault();
 
                       browser.tabs.create({
-                        url: "https://github.com/chainapsis/keplr-contract-registry",
+                        url: TokenContractListRepoURL,
                       });
                     }}
                   >

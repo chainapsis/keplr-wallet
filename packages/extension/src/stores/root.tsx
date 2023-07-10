@@ -7,6 +7,7 @@ import {
   EthereumEndpoint,
   FiatCurrencies,
   ICNSInfo,
+  TokenContractListURL,
 } from "../config.ui";
 import {
   AccountStore,
@@ -183,7 +184,9 @@ export class RootStore {
         ethereumURL: EthereumEndpoint,
       }),
       ICNSQueries.use(),
-      TokenContractsQueries.use()
+      TokenContractsQueries.use({
+        tokenContractListURL: TokenContractListURL,
+      })
     );
 
     this.accountStore = new AccountStore(

@@ -5,10 +5,14 @@ import { TokenContract } from "./types";
 export class ObservableQueryTokenContracts extends ObservableQuery<
   TokenContract[]
 > {
-  constructor(sharedContext: QuerySharedContext, chainId: string) {
+  constructor(
+    sharedContext: QuerySharedContext,
+    chainId: string,
+    tokenContractListURL: string
+  ) {
     super(
       sharedContext,
-      "https://opbaqquqruxn7fdsgcncrtfrwa0qxnoj.lambda-url.us-west-2.on.aws/",
+      tokenContractListURL,
       `tokens/${ChainIdHelper.parse(chainId).identifier}`
     );
   }

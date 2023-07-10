@@ -7,7 +7,9 @@ export interface TokenContractsQueries {
 }
 
 export const TokenContractsQueries = {
-  use(): (
+  use(options: {
+    tokenContractListURL: string;
+  }): (
     queriesSetBase: QueriesSetBase,
     sharedContext: QuerySharedContext,
     chainId: string
@@ -21,7 +23,8 @@ export const TokenContractsQueries = {
         tokenContracts: new TokenContractsQueriesImpl(
           queriesSetBase,
           sharedContext,
-          chainId
+          chainId,
+          options.tokenContractListURL
         ),
       };
     };
@@ -34,11 +37,13 @@ export class TokenContractsQueriesImpl {
   constructor(
     _base: QueriesSetBase,
     sharedContext: QuerySharedContext,
-    chainId: string
+    chainId: string,
+    tokenContractListURL: string
   ) {
     this.queryTokenContracts = new ObservableQueryTokenContracts(
       sharedContext,
-      chainId
+      chainId,
+      tokenContractListURL
     );
   }
 }
