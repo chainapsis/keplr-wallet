@@ -44,10 +44,10 @@ export const Skeleton: FunctionComponent<
           backgroundColor={
             layer === 0
               ? theme.mode === "light"
-                ? ColorPalette["gray-100"]
+                ? ColorPalette["skeleton-layer-0"]
                 : ColorPalette["gray-600"]
               : theme.mode === "light"
-              ? ColorPalette["gray-10"]
+              ? ColorPalette["skeleton-layer-1"]
               : ColorPalette["gray-500"]
           }
           zIndex={1000}

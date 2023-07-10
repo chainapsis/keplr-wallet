@@ -46,7 +46,7 @@ const Styles = {
     background-color: ${(props) =>
       props.theme.mode === "light"
         ? props.isNotReady
-          ? ColorPalette["gray-100"]
+          ? ColorPalette["skeleton-layer-0"]
           : ColorPalette.white
         : ColorPalette["gray-600"]};
     padding ${({ forChange }) =>

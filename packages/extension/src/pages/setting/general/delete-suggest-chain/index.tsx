@@ -34,7 +34,7 @@ export const SettingGeneralDeleteSuggestChainPage: FunctionComponent = observer(
         right={
           <a href="https://chains.keplr.app/" target="_blank" rel="noreferrer">
             <Box paddingRight="1rem" cursor="pointer">
-              <PlusIcon color={ColorPalette["gray-50"]} />
+              <PlusIcon color={ColorPalette["gray-300"]} />
             </Box>
           </a>
         }
