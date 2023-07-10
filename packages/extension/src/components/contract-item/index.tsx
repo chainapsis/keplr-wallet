@@ -14,7 +14,7 @@ import { useIntl } from "react-intl";
 export const ContractAddressItem: FunctionComponent<{
   name: string;
   address: string;
-  imageUrl: string;
+  imageUrl: string | undefined;
   afterSelect: (address: string) => void;
 }> = ({ name, address, imageUrl, afterSelect }) => {
   const theme = useTheme();

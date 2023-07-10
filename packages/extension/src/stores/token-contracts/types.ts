@@ -1,6 +1,6 @@
 export interface TokenContract {
   contractAddress: string;
-  imageUrl: string;
+  imageUrl?: string;
   metadata: {
     name: string;
     symbol: string;
