@@ -9,10 +9,10 @@ import { useFocusOnMount } from "../../hooks/use-focus-on-mount";
 import { SearchTextInput } from "../input";
 import { ContractAddressItem } from "../contract-item";
 import styled from "styled-components";
-import { TokenContract } from "../../stores/token-contracts";
 import SimpleBar from "simplebar-react";
 import { EmptyView } from "../empty-view";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useStore } from "../../stores";
 
 const Styles = {
   Container: styled.div`
@@ -40,10 +40,17 @@ const Styles = {
 
 export const ContractAddressBookModal: FunctionComponent<{
   isOpen: boolean;
-  contracts: TokenContract[];
+
+  chainId: string;
   onSelect: (address: string) => void;
   close: () => void;
-}> = observer(({ isOpen, onSelect, contracts, close }) => {
+}> = observer(({ isOpen, chainId, onSelect, close }) => {
+  const { queriesStore } = useStore();
+
+  const contracts = queriesStore
+    .get(chainId)
+    .tokenContracts.queryTokenContracts.get(chainId).tokenContracts;
+
   const [search, setSearch] = useState("");
   const searchRef = useFocusOnMount<HTMLInputElement>();
   const intl = useIntl();

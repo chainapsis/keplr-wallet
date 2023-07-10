@@ -17,7 +17,7 @@ export class ObservableQueryTokenContractsInner extends ObservableQuery<
     );
   }
 
-  get getTokenContracts(): TokenContract[] {
+  get tokenContracts(): TokenContract[] {
     if (!this.response || !this.response.data) {
       return [];
     }

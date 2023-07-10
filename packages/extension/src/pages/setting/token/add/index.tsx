@@ -26,8 +26,11 @@ import { Body3, Subtitle2 } from "../../../../components/typography";
 import { Toggle } from "../../../../components/toggle";
 import { useForm } from "react-hook-form";
 import { useNotification } from "../../../../hooks/notification";
-import { ContractAddressInput } from "../../../../components/input/contract-input";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Bech32Address } from "@keplr-wallet/cosmos";
+import { ContractAddressBookModal } from "../../../../components/contract-address-book-modal";
+import { IconButton } from "../../../../components/icon-button";
+import { MenuIcon } from "../../../../components/icon";
 
 const Styles = {
   Container: styled(Stack)`
@@ -50,6 +53,8 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
   const notification = useNotification();
   const [searchParams] = useSearchParams();
   const paramChainId = searchParams.get("chainId");
+
+  const [isAddressBookModalOpen, setIsAddressBookModalOpen] = useState(false);
 
   const { setValue, handleSubmit, register, formState, watch } =
     useForm<FormData>({
@@ -282,16 +287,53 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           </Box>
         ) : null}
 
-        <ContractAddressInput
-          chainId={chainId}
+        <TextInput
+          label={intl.formatMessage({
+            id: "page.setting.token.add.contract-address-label",
+          })}
           isLoading={queryContract.isFetching}
           readOnly={interactionInfo.interaction}
+          right={
+            <IconButton
+              onClick={() => {
+                setIsAddressBookModalOpen(true);
+              }}
+              hoverColor={
+                theme.mode === "light"
+                  ? ColorPalette["gray-50"]
+                  : ColorPalette["gray-500"]
+              }
+              padding="0.25rem"
+            >
+              <MenuIcon
+                width="1.5rem"
+                height="1.5rem"
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-10"]
+                }
+              />
+            </IconButton>
+          }
           error={
             formState.errors.contractAddress?.message ||
             (queryContract.error?.data as any)?.message
           }
-          setValue={setValue}
-          register={register}
+          {...register("contractAddress", {
+            required: true,
+            validate: (value): string | undefined => {
+              try {
+                const chainInfo = chainStore.getChain(chainId);
+                Bech32Address.validate(
+                  value,
+                  chainInfo.bech32Config.bech32PrefixAccAddr
+                );
+              } catch (e) {
+                return e.message || e.toString();
+              }
+            },
+          })}
         />
         <TextInput
           label={intl.formatMessage({
@@ -375,6 +417,16 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
           </Stack>
         ) : null}
       </Styles.Container>
+
+      <ContractAddressBookModal
+        isOpen={isAddressBookModalOpen}
+        chainId={chainId}
+        onSelect={(address: string) => {
+          setValue("contractAddress", address);
+          setIsAddressBookModalOpen(false);
+        }}
+        close={() => setIsAddressBookModalOpen(false)}
+      />
     </HeaderLayout>
   );
 });
