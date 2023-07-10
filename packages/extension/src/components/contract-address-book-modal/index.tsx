@@ -59,12 +59,7 @@ export const ContractAddressBookModal: FunctionComponent<{
     ? contracts.filter(
         (contract) =>
           contract.metadata.name.toLowerCase().includes(search.toLowerCase()) ||
-          contract.metadata.symbol
-            .toLowerCase()
-            .includes(search.toLowerCase()) ||
-          contract.contractAddress
-            .toLowerCase()
-            .startsWith(search.toLowerCase())
+          contract.metadata.symbol.toLowerCase().includes(search.toLowerCase())
       )
     : contracts;
 
