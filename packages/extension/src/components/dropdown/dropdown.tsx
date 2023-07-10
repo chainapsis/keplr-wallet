@@ -4,6 +4,7 @@ import { DropdownProps } from "./types";
 import { Column, Columns } from "../column";
 import { ArrowDropDownIcon } from "../icon";
 import { Label } from "../input";
+import { Box } from "../box";
 
 // eslint-disable-next-line react/display-name
 export const Dropdown: FunctionComponent<DropdownProps> = ({
@@ -16,9 +17,23 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
   size = "small",
   label,
   menuContainerMaxHeight,
+  allowSearch,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const wrapperRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const [searchText, setSearchText] = React.useState("");
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchText("");
+    } else {
+      if (allowSearch) {
+        searchInputRef.current?.focus();
+      }
+    }
+  }, [allowSearch, isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -48,12 +63,44 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
         size={size}
       >
         <Columns sum={1}>
-          <Styles.Text selectedItemKey={selectedItemKey}>
-            {selectedItemKey
-              ? items.find((item) => item.key === selectedItemKey)?.label ??
-                placeholder
-              : placeholder}
-          </Styles.Text>
+          <Box position="relative">
+            <Box
+              position="absolute"
+              style={{
+                opacity: !isOpen || !allowSearch ? 0 : 1,
+                pointerEvents: !isOpen || !allowSearch ? "none" : "auto",
+              }}
+            >
+              <Styles.Text>
+                <input
+                  type="text"
+                  ref={searchInputRef}
+                  style={{
+                    padding: 0,
+                    borderWidth: 0,
+                    background: "transparent",
+                    outline: "none",
+                  }}
+                  value={searchText}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    setSearchText(e.target.value);
+                  }}
+                />
+              </Styles.Text>
+            </Box>
+            <Styles.Text
+              selectedItemKey={selectedItemKey}
+              style={{
+                opacity: isOpen && allowSearch ? 0 : 1,
+              }}
+            >
+              {selectedItemKey
+                ? items.find((item) => item.key === selectedItemKey)?.label ??
+                  placeholder
+                : placeholder}
+            </Styles.Text>
+          </Box>
           <Column weight={1} />
           <ArrowDropDownIcon width="1.25rem" height="1.25rem" />
         </Columns>
@@ -62,17 +109,35 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
         <Styles.MenuContainerScroll
           menuContainerMaxHeight={menuContainerMaxHeight}
         >
-          {items.map((item) => (
-            <Styles.MenuItem
-              key={item.key}
-              onClick={() => {
-                onSelect(item.key);
-                setIsOpen(false);
-              }}
-            >
-              {item.label}
-            </Styles.MenuItem>
-          ))}
+          {items
+            .filter((item) => {
+              if (!allowSearch) {
+                return true;
+              }
+
+              const trimmedSearchText = searchText.trim();
+              if (trimmedSearchText.length > 0) {
+                return (
+                  typeof item.label === "string" &&
+                  item.label
+                    .toLowerCase()
+                    .includes(trimmedSearchText.toLowerCase())
+                );
+              }
+
+              return true;
+            })
+            .map((item) => (
+              <Styles.MenuItem
+                key={item.key}
+                onClick={() => {
+                  onSelect(item.key);
+                  setIsOpen(false);
+                }}
+              >
+                {item.label}
+              </Styles.MenuItem>
+            ))}
         </Styles.MenuContainerScroll>
       </Styles.MenuContainer>
     </Styles.Container>

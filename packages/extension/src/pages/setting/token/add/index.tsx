@@ -283,6 +283,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
               items={items}
               selectedItemKey={chainId}
               onSelect={setChainId}
+              allowSearch={true}
             />
           </Box>
         ) : null}

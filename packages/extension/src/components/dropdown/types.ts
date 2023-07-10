@@ -15,4 +15,6 @@ export interface DropdownProps {
   size?: "small" | "large";
   label?: string;
   menuContainerMaxHeight?: string;
+
+  allowSearch?: boolean;
 }

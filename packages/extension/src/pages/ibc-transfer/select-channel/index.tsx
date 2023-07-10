@@ -158,6 +158,7 @@ export const IBCTransferSelectChannelView: FunctionComponent<{
                   }
                 }
               }}
+              allowSearch={true}
             />
           </Stack>
 
