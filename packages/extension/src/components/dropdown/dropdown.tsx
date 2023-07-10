@@ -51,6 +51,24 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
     };
   }, []);
 
+  const filteredItems = React.useMemo(() => {
+    return items.filter((item) => {
+      if (!allowSearch) {
+        return true;
+      }
+
+      const trimmedSearchText = searchText.trim();
+      if (trimmedSearchText.length > 0) {
+        return (
+          typeof item.label === "string" &&
+          item.label.toLowerCase().includes(trimmedSearchText.toLowerCase())
+        );
+      }
+
+      return true;
+    });
+  }, [allowSearch, items, searchText]);
+
   return (
     <Styles.Container ref={wrapperRef}>
       {label ? <Label content={label} /> : null}
@@ -105,39 +123,21 @@ export const Dropdown: FunctionComponent<DropdownProps> = ({
           <ArrowDropDownIcon width="1.25rem" height="1.25rem" />
         </Columns>
       </Styles.SelectedContainer>
-      <Styles.MenuContainer isOpen={isOpen}>
+      <Styles.MenuContainer isOpen={isOpen && filteredItems.length > 0}>
         <Styles.MenuContainerScroll
           menuContainerMaxHeight={menuContainerMaxHeight}
         >
-          {items
-            .filter((item) => {
-              if (!allowSearch) {
-                return true;
-              }
-
-              const trimmedSearchText = searchText.trim();
-              if (trimmedSearchText.length > 0) {
-                return (
-                  typeof item.label === "string" &&
-                  item.label
-                    .toLowerCase()
-                    .includes(trimmedSearchText.toLowerCase())
-                );
-              }
-
-              return true;
-            })
-            .map((item) => (
-              <Styles.MenuItem
-                key={item.key}
-                onClick={() => {
-                  onSelect(item.key);
-                  setIsOpen(false);
-                }}
-              >
-                {item.label}
-              </Styles.MenuItem>
-            ))}
+          {filteredItems.map((item) => (
+            <Styles.MenuItem
+              key={item.key}
+              onClick={() => {
+                onSelect(item.key);
+                setIsOpen(false);
+              }}
+            >
+              {item.label}
+            </Styles.MenuItem>
+          ))}
         </Styles.MenuContainerScroll>
       </Styles.MenuContainer>
     </Styles.Container>
