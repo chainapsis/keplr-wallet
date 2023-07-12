@@ -23,7 +23,8 @@ import { KeystoneSign } from "../components/keystone";
 import { useTheme } from "styled-components";
 
 export const SignCosmosADR36Page: FunctionComponent = observer(() => {
-  const { chainStore, signInteractionStore, uiConfigStore } = useStore();
+  const { chainStore, accountStore, signInteractionStore, uiConfigStore } =
+    useStore();
   const intl = useIntl();
   const theme = useTheme();
 
@@ -158,9 +159,14 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
             } else if (isKeystone) {
               setIsKeystoneInteracting(true);
               presignOptions = {
-                bech32Prefix: chainStore.getChain(
-                  signInteractionStore.waitingData.data.chainId
-                ).bech32Config.bech32PrefixAccAddr,
+                pubKey: Buffer.from(
+                  accountStore.getAccount(
+                    signInteractionStore.waitingData.data.chainId
+                  ).pubKey
+                ).toString("hex"),
+                isEthSigning: chainStore
+                  .getChain(signInteractionStore.waitingData.data.chainId)
+                  .features.includes("eth-key-sign"),
                 displayQRCode: async (ur: KeystoneUR) => {
                   setKeystoneUR(ur);
                 },

@@ -1,5 +1,6 @@
-import { Bech32Address } from "@keplr-wallet/cosmos";
-import { PubKeySecp256k1 } from "@keplr-wallet/crypto";
+import { serialize } from "@ethersproject/transactions";
+import { EthSignType } from "@keplr-wallet/types";
+import { KeystoneEthereumSDK } from "@keystonehq/keystone-sdk";
 
 export interface KeystoneUR {
   type: string;
@@ -14,22 +15,45 @@ export interface KeystoneKeys {
   };
 }
 
-export function getPathFromAddress(
+export function getPathFromPubKey(
   keys: KeystoneKeys,
-  bech32Address: string,
-  prefix: string
+  pubKey: string
 ): string | null {
   for (const path in keys) {
     if (Object.prototype.hasOwnProperty.call(keys, path)) {
       const key = keys[path];
-      const pubkey = new PubKeySecp256k1(Buffer.from(key.pubKey, "hex"));
-      const bech32AddressFromPubkey = new Bech32Address(
-        pubkey.getCosmosAddress()
-      );
-      if (bech32AddressFromPubkey.toBech32(prefix) === bech32Address) {
+      if (key.pubKey === pubKey) {
         return path;
       }
     }
   }
   return null;
+}
+
+export function getEthDataTypeFromSignType(signType: EthSignType) {
+  switch (signType) {
+    case EthSignType.TRANSACTION:
+      return KeystoneEthereumSDK.DataType.transaction;
+    case EthSignType.MESSAGE:
+      return KeystoneEthereumSDK.DataType.personalMessage;
+    case EthSignType.EIP712:
+      return KeystoneEthereumSDK.DataType.typedData;
+  }
+}
+
+export function encodeEthMessage(
+  message: Uint8Array,
+  signType: EthSignType
+): Buffer {
+  switch (signType) {
+    case EthSignType.TRANSACTION:
+      const tx = JSON.parse(Buffer.from(message).toString());
+      if (typeof tx.type === "string") {
+        tx.type = +tx.type.replace(/^0x/, "");
+      }
+      return Buffer.from(serialize(tx).replace(/^0x/, ""), "hex");
+    case EthSignType.MESSAGE:
+    case EthSignType.EIP712:
+      return Buffer.from(message);
+  }
 }

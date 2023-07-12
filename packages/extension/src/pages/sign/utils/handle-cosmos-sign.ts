@@ -3,13 +3,18 @@ import {
   connectAndSignWithLedger,
 } from "./cosmos-ledger-sign";
 import { SignInteractionStore } from "@keplr-wallet/stores";
-import { SignDocWrapper, serializeSignDoc } from "@keplr-wallet/cosmos";
+import {
+  EthermintChainIdHelper,
+  SignDocWrapper,
+  serializeSignDoc,
+} from "@keplr-wallet/cosmos";
 import KeystoneSDK, {
   KeystoneCosmosSDK,
+  KeystoneEvmSDK,
   UR,
   utils,
 } from "@keystonehq/keystone-sdk";
-import { KeystoneKeys, KeystoneUR, getPathFromAddress } from "./keystone";
+import { KeystoneKeys, KeystoneUR, getPathFromPubKey } from "./keystone";
 import { PlainObject } from "@keplr-wallet/background";
 
 export interface LedgerOptions {
@@ -17,7 +22,9 @@ export interface LedgerOptions {
 }
 
 export interface KeystoneOptions {
-  bech32Prefix: string;
+  pubKey: string;
+  ethereumHexAddress?: string;
+  isEthSigning: boolean;
   displayQRCode: (ur: { type: string; cbor: string }) => Promise<void>;
   scanQRCode: () => Promise<KeystoneUR>;
 }
@@ -100,12 +107,10 @@ export const handleCosmosPreSign = async (
       const keystoneSDK = new KeystoneSDK({
         origin: "Keplr Extension",
       });
-      const interData = interactionData.data;
-      const address = interData.signer;
-      const path = getPathFromAddress(
-        interData.keyInsensitive["keys"] as KeystoneKeys,
-        address,
-        keystoneOptions.bech32Prefix
+      const address = interactionData.data.signer;
+      const path = getPathFromPubKey(
+        interactionData.data.keyInsensitive["keys"] as KeystoneKeys,
+        keystoneOptions.pubKey
       );
       if (path === null) {
         throw new Error("Invalid signer");
@@ -113,36 +118,72 @@ export const handleCosmosPreSign = async (
       const requestId = utils.uuid.v4({
         random: Buffer.from(interactionData.id + "0000000000000000", "hex"),
       });
-      const ur = keystoneSDK.cosmos.generateSignRequest({
-        requestId,
-        signData: Buffer.from(
-          serializeSignDoc(signDocWrapper.aminoSignDoc)
-        ).toString("hex"),
-        dataType: KeystoneCosmosSDK.DataType.amino,
-        accounts: [
-          {
+      const isEthSigning = (options as KeystoneOptions).isEthSigning;
+      let ur;
+      const signData = Buffer.from(
+        signDocWrapper.mode === "direct"
+          ? signDocWrapper.protoSignDoc.toBytes()
+          : serializeSignDoc(signDocWrapper.aminoSignDoc)
+      ).toString("hex");
+      const xfp = interactionData.data.keyInsensitive["xfp"] as string;
+      if (isEthSigning) {
+        ur = keystoneSDK.evm.generateSignRequest({
+          requestId,
+          signData,
+          dataType: {
+            amino: KeystoneEvmSDK.DataType.cosmosAmino,
+            direct: KeystoneEvmSDK.DataType.cosmosDirect,
+          }[signDocWrapper.mode],
+          customChainIdentifier: EthermintChainIdHelper.parse(
+            interactionData.data.chainId
+          ).ethChainId,
+          account: {
             path,
-            xfp: interData.keyInsensitive["xfp"] as string,
-            address,
+            xfp,
+            address:
+              typeof keystoneOptions.ethereumHexAddress === "string"
+                ? keystoneOptions.ethereumHexAddress
+                : "",
           },
-        ],
-      });
+        });
+      } else {
+        ur = keystoneSDK.cosmos.generateSignRequest({
+          requestId,
+          signData,
+          dataType: {
+            amino: KeystoneCosmosSDK.DataType.amino,
+            direct: KeystoneCosmosSDK.DataType.direct,
+          }[signDocWrapper.mode],
+          accounts: [
+            {
+              path,
+              xfp,
+              address,
+            },
+          ],
+        });
+      }
       await keystoneOptions.displayQRCode({
         type: ur.type,
         cbor: ur.cbor.toString("hex"),
       });
       const scanResult = await keystoneOptions.scanQRCode();
-      const signResult = keystoneSDK.cosmos.parseSignature(
+      const signResult = keystoneSDK[
+        isEthSigning ? "evm" : "cosmos"
+      ].parseSignature(
         new UR(Buffer.from(scanResult.cbor, "hex"), scanResult.type)
       );
       if (signResult.requestId !== requestId) {
         throw new Error("Invalid request id");
       }
       if (
+        "publicKey" in signResult &&
         signResult.publicKey !==
-        (
-          (interData.keyInsensitive["keys"] as PlainObject)[path] as PlainObject
-        )["pubKey"]
+          (
+            (interactionData.data.keyInsensitive["keys"] as PlainObject)[
+              path
+            ] as PlainObject
+          )["pubKey"]
       ) {
         throw new Error("Invalid public key");
       }

@@ -4,7 +4,7 @@ import { Stack } from "../../../../components/stack";
 import { KeystoneTextIcon } from "../../../../components/icon/keystone-text";
 import { ColorPalette } from "../../../../styles";
 import { CameraIcon } from "../../../../components/icon";
-import { Purpose, useAnimatedQRScanner } from "@keystonehq/animated-qr";
+import { URType, useAnimatedQRScanner } from "@keystonehq/animated-qr";
 import { GuideBox } from "../../../../components/guide-box";
 import { KeystoneError } from "../../../../components/keystone/error";
 import { KeystoneUR } from "../../utils/keystone";
@@ -68,7 +68,11 @@ export const KeystoneScan: FunctionComponent<{
           />
         </Box>
         <AnimatedQRScanner
-          purpose={Purpose.COSMOS_SIGN}
+          urTypes={[
+            URType.COSMOS_SIGNATURE,
+            URType.ETH_SIGNATURE,
+            URType.EVM_SIGNATURE,
+          ]}
           handleScan={handleScan}
           handleError={handleError}
           options={{
