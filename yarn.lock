@@ -5725,6 +5725,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keystonehq/bc-ur-registry-evm@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "@keystonehq/bc-ur-registry-evm@npm:0.5.2"
+  dependencies:
+    "@keystonehq/bc-ur-registry": ^0.5.4
+    bs58check: ^2.1.2
+    uuid: ^9.0.0
+  checksum: 495d3d0bb8313daf4350b89fea823543518376379eedd54578ca8ce11863e82581e5a2a659b32b98461deb5cd1a055c3a59b0de1175274cd9fcf3a468abfb0ec
+  languageName: node
+  linkType: hard
+
 "@keystonehq/bc-ur-registry-keystone@npm:^0.1.0":
   version: 0.1.0
   resolution: "@keystonehq/bc-ur-registry-keystone@npm:0.1.0"
@@ -5810,9 +5821,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@keystonehq/keystone-sdk@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@keystonehq/keystone-sdk@npm:0.2.1"
+"@keystonehq/keystone-sdk@npm:^0.2.3":
+  version: 0.2.3
+  resolution: "@keystonehq/keystone-sdk@npm:0.2.3"
   dependencies:
     "@bufbuild/protobuf": ^1.2.0
     "@keystonehq/bc-ur-registry": ^0.6.3
@@ -5821,6 +5832,7 @@ __metadata:
     "@keystonehq/bc-ur-registry-cardano": ^0.2.0
     "@keystonehq/bc-ur-registry-cosmos": ^0.2.2
     "@keystonehq/bc-ur-registry-eth": ^0.15.2
+    "@keystonehq/bc-ur-registry-evm": ^0.5.2
     "@keystonehq/bc-ur-registry-keystone": ^0.1.0
     "@keystonehq/bc-ur-registry-near": ^0.8.0
     "@keystonehq/bc-ur-registry-sol": ^0.6.2
@@ -5830,7 +5842,7 @@ __metadata:
     pako: ^2.1.0
     ripple-binary-codec: ^1.4.3
     uuid: ^9.0.0
-  checksum: d56f55d0a6e390d35fe6f0746b897dada3a30511952d0c3fc25c80b1cc8882fa8098839ec4dd7cdd201a4aecc4a897acc27471b363c53fbae84b44c4b6175c9a
+  checksum: 0a0a6f188262ea36164fdeebc21c546c318af4b07cca80837783ea265aa0f028cc4d4e125c132d12cd339bda2fd749e0db79eb8317e032a39b104de0f80046c3
   languageName: node
   linkType: hard
 
@@ -9759,6 +9771,13 @@ __metadata:
   version: 2.0.6
   resolution: "@types/unist@npm:2.0.6"
   checksum: 25cb860ff10dde48b54622d58b23e66214211a61c84c0f15f88d38b61aa1b53d4d46e42b557924a93178c501c166aa37e28d7f6d994aba13d24685326272d5db
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^9.0.2":
+  version: 9.0.2
+  resolution: "@types/uuid@npm:9.0.2"
+  checksum: 1754bcf3444e1e3aeadd6e774fc328eb53bc956665e2e8fb6ec127aa8e1f43d9a224c3d22a9a6233dca8dd81a12dc7fed4d84b8876dd5ec82d40f574f7ff8b68
   languageName: node
   linkType: hard
 
@@ -20751,6 +20770,7 @@ __metadata:
     "@types/node": ^18.13.0
     "@types/react": ^16.14.4
     "@types/react-dom": ^16.9.11
+    "@types/uuid": ^9.0.2
     "@typescript-eslint/eslint-plugin": ^5.52.0
     "@typescript-eslint/parser": ^5.52.0
     cross-env: ^5.2.0
