@@ -30,9 +30,19 @@ export function getPathFromPubKey(
   return null;
 }
 
-export function getEthDataTypeFromSignType(signType: EthSignType) {
+export function getEthDataTypeFromSignType(
+  signType: EthSignType,
+  message?: Uint8Array
+) {
   switch (signType) {
     case EthSignType.TRANSACTION:
+      if (message) {
+        const msg = JSON.parse(Buffer.from(message).toString());
+        if (!msg.type) {
+          return KeystoneEthereumSDK.DataType.transaction;
+        }
+        return KeystoneEthereumSDK.DataType.typedTransaction;
+      }
       return KeystoneEthereumSDK.DataType.transaction;
     case EthSignType.MESSAGE:
       return KeystoneEthereumSDK.DataType.personalMessage;

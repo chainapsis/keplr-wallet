@@ -106,7 +106,10 @@ export const handleEthereumPreSign = async (
       const ur = keystoneSDK.eth.generateSignRequest({
         requestId,
         signData,
-        dataType: getEthDataTypeFromSignType(interactionData.data.signType),
+        dataType: getEthDataTypeFromSignType(
+          interactionData.data.signType,
+          interactionData.data.message
+        ),
         path,
         xfp: interactionData.data.keyInsensitive["xfp"] as string,
         chainId: EthermintChainIdHelper.parse(interactionData.data.chainId)
