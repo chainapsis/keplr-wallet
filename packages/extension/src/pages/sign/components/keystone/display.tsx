@@ -57,6 +57,9 @@ export const KeystoneDisplay: FunctionComponent<{
           color: ColorPalette.white,
           textUnderlineOffset: "3px",
         }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
         Tutorial
       </a>
