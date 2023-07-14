@@ -115,8 +115,10 @@ export const handleCosmosPreSign = async (
       if (path === null) {
         throw new Error("Invalid signer");
       }
+      const random = Buffer.alloc(16);
+      Buffer.from(interactionData.id, "hex").copy(random);
       const requestId = utils.uuid.v4({
-        random: Buffer.from(interactionData.id + "0000000000000000", "hex"),
+        random,
       });
       const isEthSigning = (options as KeystoneOptions).isEthSigning;
       let ur;

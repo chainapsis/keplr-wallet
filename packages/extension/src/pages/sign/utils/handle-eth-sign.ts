@@ -96,8 +96,10 @@ export const handleEthereumPreSign = async (
       if (path === null) {
         throw new Error("Invalid signer");
       }
+      const random = Buffer.alloc(16);
+      Buffer.from(interactionData.id, "hex").copy(random);
       const requestId = utils.uuid.v4({
-        random: Buffer.from(interactionData.id + "0000000000000000", "hex"),
+        random,
       });
       const signData = encodeEthMessage(
         interactionData.data.message,
