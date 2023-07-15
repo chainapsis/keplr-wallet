@@ -109,7 +109,6 @@ const useTorusGoogleSignIn = (): {
 
           const nodeDetailManager = new NodeDetailManager({
             network: "mainnet",
-            proxyAddress: "0x638646503746d5456209e33a2ff5e3226d698bea",
           });
           const {
             torusNodeEndpoints,
@@ -214,7 +213,6 @@ const useTorusAppleSignIn = (): {
 
         const nodeDetailManager = new NodeDetailManager({
           network: "mainnet",
-          proxyAddress: "0x638646503746d5456209e33a2ff5e3226d698bea",
         });
         const {
           torusNodeEndpoints,

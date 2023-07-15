@@ -58,7 +58,7 @@
     "@react-navigation/drawer": "^5.12.4",
     "@react-navigation/native": "^5.9.3",
     "@react-navigation/stack": "^5.14.3",
-    "@toruslabs/fetch-node-details": "^5.0.0",
+    "@toruslabs/fetch-node-details": "=11.0.1",
     "@toruslabs/torus.js": "^5.0.1",
     "@walletconnect/client": "^1.6.4",
     "@walletconnect/sign-client": "^2.2.1",
