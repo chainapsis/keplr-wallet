@@ -46,7 +46,7 @@
     "@keystonehq/animated-qr": "^0.4.1",
     "@ledgerhq/devices": "^6.20.0",
     "@react-spring/web": "^9.6.1",
-    "@toruslabs/fetch-node-details": "=6.0.1",
+    "@toruslabs/fetch-node-details": "=11.0.1",
     "@toruslabs/torus.js": "=6.4.1",
     "@walletconnect/client": "^1.6.4",
     "aes-js": "^3.1.2",
