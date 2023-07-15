@@ -21,6 +21,7 @@ import {
   IBCXItem,
   IONDaoItem,
   CalcFiItem,
+  DexterItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 
@@ -46,6 +47,7 @@ const WebpagesPerLabel: {
       IBCXItem,
       IONDaoItem,
       CalcFiItem,
+      DexterItem,
     ],
   },
   {
@@ -62,6 +64,7 @@ const WebpagesPerLabel: {
       StreamSwapItem,
       IBCXItem,
       CalcFiItem,
+      DexterItem,
     ],
   },
   {

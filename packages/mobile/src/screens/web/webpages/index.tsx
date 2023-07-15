@@ -12,3 +12,4 @@ export * from "./streamswap";
 export * from "./ibcx";
 export * from "./ion-dao";
 export * from "./calc";
+export * from "./dexter";

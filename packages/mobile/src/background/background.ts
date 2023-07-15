@@ -39,6 +39,7 @@ init(
     "https://index.ion.wtf",
     "https://ion.wtf",
     "https://app.calculated.fi",
+    "https://app.dexter.zone",
   ],
   ["https://wallet.keplr.app"],
   CommunityChainInfoRepo,

@@ -316,3 +316,23 @@ export const CalcFiItem: Item = {
   key: "CalcFi",
   component: CalcFiImage,
 };
+
+const DexterImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="Dexter"
+      source={require("../../assets/image/webpage/dexter.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.Dexter", {});
+      }}
+      imageAlignCenter={true}
+    />
+  );
+};
+
+export const DexterItem: Item = {
+  key: "Dexter",
+  component: DexterImage,
+};
