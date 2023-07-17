@@ -20,7 +20,7 @@ export const MakePrimary: React.FC<Props> = ({
   const account = accountStore.getAccount(current.chainId);
   const makePrimary = async () => {
     try {
-      await setPrimary(account, domainName);
+      await setPrimary(current.chainId, account, domainName);
       history.push("/fetch-name-service");
     } catch (error) {
       console.error("Error making domain as primary:", error);

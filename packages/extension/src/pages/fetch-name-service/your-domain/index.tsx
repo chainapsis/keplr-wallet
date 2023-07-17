@@ -24,9 +24,11 @@ export const YourDomain = () => {
     const fetchData = async () => {
       try {
         const { domains: fetchedDomains } = await getDomainsDataByOwner(
+          current.chainId,
           accountInfo.bech32Address
         );
         const primaryDom: any = await getPrimaryDomain(
+          current.chainId,
           accountInfo.bech32Address
         );
         setDomains(fetchedDomains);
@@ -34,7 +36,10 @@ export const YourDomain = () => {
         setIsLoading(false);
         await Promise.all(
           fetchedDomains.map(async (domain: string) => {
-            const domainStatus = (await getDomainStatus(domain)) as {
+            const domainStatus = (await getDomainStatus(
+              current.chainId,
+              domain
+            )) as {
               domain_status: { Owned: { registration_time: any } };
             };
             const ownedDomain = domainStatus?.domain_status?.Owned;

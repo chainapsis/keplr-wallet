@@ -1,11 +1,12 @@
 import React, { FunctionComponent } from "react";
 
-import styleMenu from "./menu.module.scss";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../stores";
+import styleMenu from "./menu.module.scss";
 
 import { FormattedMessage } from "react-intl";
 import { useNavigate } from "react-router";
+import { FNS_CONFIG } from "../../config.ui.var";
 
 export const Menu: FunctionComponent = observer(() => {
   const { chainStore, keyRingStore, analyticsStore } = useStore();
@@ -35,16 +36,18 @@ export const Menu: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.menu.settings" />
       </div>
-      <div
-        className={styleMenu.item}
-        onClick={() => {
-          history.push({
-            pathname: "/fetch-name-service",
-          });
-        }}
-      >
-        <FormattedMessage id="main.menu.fetch-name-service" />
-      </div>
+      {Object.keys(FNS_CONFIG).includes(chainStore.current.chainId) ? (
+        <div
+          className={styleMenu["item"]}
+          onClick={() => {
+            navigate({
+              pathname: "/fetch-name-service",
+            });
+          }}
+        >
+          <FormattedMessage id="main.menu.fetch-name-service" />
+        </div>
+      ) : null}
       <a
         className={styleMenu["item"]}
         href="https://docs.fetch.ai/fetch-wallet/"

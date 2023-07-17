@@ -1,55 +1,66 @@
+import { FNS_CONFIG } from "../config.ui.var";
 import { createFNSClient } from "./client";
 
-const createQueryClient = async () => {
-  return await createFNSClient();
-};
-
-export const getAllDomainsOwnedBy = async (address: string) => {
-  const queryClient = await createQueryClient();
+export const getAllDomainsOwnedBy = async (
+  chainId: string,
+  address: string
+) => {
+  const queryClient = await createFNSClient(chainId);
   const result = await queryClient.getAllDomainsOwnedBy({
     owner: address,
   });
   return result;
 };
 
-export const getDomainData = async (domain: string) => {
-  const queryClient = await createQueryClient();
+export const getDomainData = async (chainId: string, domain: string) => {
+  const queryClient = await createFNSClient(chainId);
   const domainData = await queryClient.getDomainData({ domain });
   return domainData;
 };
 
-export const getDomainStatus = async (domain: string) => {
-  const queryClient = await createQueryClient();
+export const getDomainStatus = async (chainId: string, domain: string) => {
+  const queryClient = await createFNSClient(chainId);
   const domainStatus = await queryClient.getDomainStatus({ domain });
   return domainStatus;
 };
 
-export const getDomainPrice = async (domain: string) => {
-  const queryClient = await createQueryClient();
+export const getDomainPrice = async (chainId: string, domain: string) => {
+  const queryClient = await createFNSClient(chainId);
   const domainPrice = await queryClient.getNormalizedDomainAndPrice({
     domain,
   });
   return domainPrice;
 };
 
-export const getDomainsDataByOwner = async (address: string) => {
-  const { domains } = await getAllDomainsOwnedBy(address);
+export const getDomainsDataByOwner = async (
+  chainId: string,
+  address: string
+) => {
+  const { domains } = await getAllDomainsOwnedBy(chainId, address);
   const domainsData = await Promise.all(
-    domains.map(async (domain: string) => await getDomainData(domain))
+    domains.map(async (domain: string) => await getDomainData(chainId, domain))
   );
   return { domains, domainsData };
 };
 
-export const getPrimaryDomain = async (address: string) => {
-  const queryClient = await createQueryClient();
-  const primary = await queryClient.getPrimary({ userAddress: address });
+export const getPrimaryDomain = async (
+  chainId: string,
+  userAddress: string
+) => {
+  const queryClient = await createFNSClient(chainId);
+  const primary = await queryClient.getPrimary({ userAddress });
   return primary;
 };
 
-export const mintDomain = async (account: any, domain: string, amount: any) => {
+export const mintDomain = async (
+  chainId: string,
+  account: any,
+  domain: string,
+  amount: any
+) => {
   const tx = account.cosmwasm.makeExecuteContractTx(
     "executeWasm",
-    "fetch15hq5u4susv7d064llmupeyevx6hmskkc3p8zvt8rwn0lj02yt72s88skrf",
+    FNS_CONFIG[chainId].contractAddress,
     {
       register: {
         domain,
@@ -72,10 +83,14 @@ export const mintDomain = async (account: any, domain: string, amount: any) => {
   );
 };
 
-export const setPrimary = async (account: any, domain: string) => {
+export const setPrimary = async (
+  chainId: string,
+  account: any,
+  domain: string
+) => {
   const tx = account.cosmwasm.makeExecuteContractTx(
     "executeWasm",
-    "fetch15hq5u4susv7d064llmupeyevx6hmskkc3p8zvt8rwn0lj02yt72s88skrf",
+    FNS_CONFIG[chainId].contractAddress,
     {
       set_primary: {
         domain,

@@ -34,10 +34,19 @@ export const DomainDetails = () => {
     const fetchDomainData = async () => {
       try {
         setIsLoading(true);
-        const fetchedDomainData = await getDomainData(domainName);
+        const fetchedDomainData = await getDomainData(
+          current.chainId,
+          domainName
+        );
         setSelectedDomain(fetchedDomainData);
-        const isDomainMinted = await getDomainStatus(domainName);
-        const fetchDomainPrice = await getDomainPrice(domainName);
+        const isDomainMinted = await getDomainStatus(
+          current.chainId,
+          domainName
+        );
+        const fetchDomainPrice = await getDomainPrice(
+          current.chainId,
+          domainName
+        );
         setSelectedDomainPrice(fetchDomainPrice);
         const domainStatus = isDomainMinted?.domain_status;
         if (domainStatus) {

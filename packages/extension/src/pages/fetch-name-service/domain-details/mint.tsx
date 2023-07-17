@@ -23,7 +23,12 @@ export const Mint: React.FC<MintProps> = ({
   const history = useHistory();
   const handleMintButtonClick = async () => {
     try {
-      await mintDomain(account, domainName, domainPrice.result.Success.pricing);
+      await mintDomain(
+        current.chainId,
+        account,
+        domainName,
+        domainPrice.result.Success.pricing
+      );
       history.push("/fetch-name-service");
     } catch (error) {
       console.error("Error minting domain:", error);
