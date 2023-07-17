@@ -327,7 +327,6 @@ const DexterImage: FunctionComponent = () => {
       onPress={() => {
         smartNavigation.pushSmart("Web.Dexter", {});
       }}
-      imageAlignCenter={true}
     />
   );
 };
