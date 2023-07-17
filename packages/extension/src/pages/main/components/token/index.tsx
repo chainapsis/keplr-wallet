@@ -46,7 +46,7 @@ const Styles = {
     background-color: ${(props) =>
       props.theme.mode === "light"
         ? props.isNotReady
-          ? ColorPalette["gray-100"]
+          ? ColorPalette["skeleton-layer-0"]
           : ColorPalette.white
         : ColorPalette["gray-600"]};
     padding ${({ forChange }) =>
@@ -62,7 +62,7 @@ const Styles = {
         : undefined};
 
     box-shadow: ${(props) =>
-      props.theme.mode === "light"
+      props.theme.mode === "light" && !props.isNotReady
         ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
         : "none"};;
     
@@ -246,7 +246,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                   color={
                     theme.mode === "light"
                       ? ColorPalette["gray-700"]
-                      : ColorPalette["gray-300"]
+                      : ColorPalette["gray-10"]
                   }
                   style={{
                     wordBreak: "break-all",
@@ -328,7 +328,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
                   color={
                     theme.mode === "light"
                       ? ColorPalette["gray-700"]
-                      : ColorPalette["gray-300"]
+                      : ColorPalette["gray-10"]
                   }
                 >
                   {viewToken.token

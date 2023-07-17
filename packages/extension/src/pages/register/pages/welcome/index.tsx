@@ -63,13 +63,11 @@ export const WelcomePage: FunctionComponent = observer(() => {
         <Box
           padding="0.5rem 1rem"
           borderRadius="1.5rem"
-          backgroundColor={Color(
+          backgroundColor={
             theme.mode === "light"
               ? ColorPalette["green-50"]
-              : ColorPalette["green-600"]
-          )
-            .alpha(0.25)
-            .toString()}
+              : Color(ColorPalette["green-600"]).alpha(0.25).toString()
+          }
         >
           <Columns sum={1} gutter="0.625rem">
             <CheckIcon

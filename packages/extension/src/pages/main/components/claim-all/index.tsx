@@ -44,12 +44,12 @@ const Styles = {
     background-color: ${(props) =>
       props.theme.mode === "light"
         ? props.isNotReady
-          ? ColorPalette["gray-100"]
+          ? ColorPalette["skeleton-layer-0"]
           : ColorPalette.white
         : ColorPalette["gray-600"]};
 
     box-shadow: ${(props) =>
-      props.theme.mode === "light"
+      props.theme.mode === "light" && !props.isNotReady
         ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
         : "none"};
     padding: 0.75rem 0 0 0;
@@ -538,19 +538,25 @@ export const ClaimAll: FunctionComponent<{ isNotReady?: boolean }> = observer(
             }
           }}
         >
-          {!isExpanded ? (
-            <ArrowDownIcon
-              width="1.25rem"
-              height="1.25rem"
-              color={ColorPalette["gray-300"]}
-            />
-          ) : (
-            <ArrowUpIcon
-              width="1.25rem"
-              height="1.25rem"
-              color={ColorPalette["gray-300"]}
-            />
-          )}
+          <Box
+            style={{
+              opacity: isNotReady ? 0 : 1,
+            }}
+          >
+            {!isExpanded ? (
+              <ArrowDownIcon
+                width="1.25rem"
+                height="1.25rem"
+                color={ColorPalette["gray-300"]}
+              />
+            ) : (
+              <ArrowUpIcon
+                width="1.25rem"
+                height="1.25rem"
+                color={ColorPalette["gray-300"]}
+              />
+            )}
+          </Box>
         </Styles.ExpandButton>
 
         <VerticalCollapseTransition

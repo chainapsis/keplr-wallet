@@ -68,6 +68,7 @@ export const IBCAddChannelModal: FunctionComponent<{
             setSelectedChainId(key);
             setError("");
           }}
+          allowSearch={true}
         />
 
         <Gutter size="1.125rem" />

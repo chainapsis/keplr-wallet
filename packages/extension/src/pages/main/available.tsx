@@ -26,7 +26,7 @@ import { Checkbox } from "../../components/checkbox";
 import { Caption2 } from "../../components/typography";
 import { ColorPalette } from "../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 const zeroDec = new Dec(0);
 
@@ -36,6 +36,13 @@ const NewTokenFoundButton = styled(TextButton)`
       props.theme.mode === "light"
         ? ColorPalette["blue-400"]
         : ColorPalette["gray-50"]};
+
+    :hover {
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["blue-500"]
+          : ColorPalette["gray-200"]};
+    }
   }
 `;
 
@@ -50,6 +57,7 @@ export const AvailableTabView: FunctionComponent<{
   const { hugeQueriesStore, chainStore, uiConfigStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
+  const theme = useTheme();
 
   const allBalances = hugeQueriesStore.getAllBalances(true);
   const allBalancesNonZero = useMemo(() => {
@@ -259,7 +267,9 @@ export const AvailableTabView: FunctionComponent<{
             <MainEmptyView
               image={
                 <img
-                  src={require("../../public/assets/img/main-empty-balance.png")}
+                  src={require(theme.mode === "light"
+                    ? "../../public/assets/img/main-empty-balance-light.png"
+                    : "../../public/assets/img/main-empty-balance.png")}
                   style={{
                     width: "6.25rem",
                     height: "6.25rem",

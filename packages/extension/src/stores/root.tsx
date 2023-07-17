@@ -7,6 +7,7 @@ import {
   EthereumEndpoint,
   FiatCurrencies,
   ICNSInfo,
+  TokenContractListURL,
 } from "../config.ui";
 import {
   AccountStore,
@@ -53,6 +54,7 @@ import { AnalyticsStore, NoopAnalyticsClient } from "@keplr-wallet/analytics";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { HugeQueriesStore } from "./huge-queries";
 import { ExtensionAnalyticsClient } from "../analytics";
+import { TokenContractsQueries } from "./token-contracts";
 
 export class RootStore {
   public readonly uiConfigStore: UIConfigStore;
@@ -77,7 +79,8 @@ export class RootStore {
       SecretQueries,
       OsmosisQueries,
       KeplrETCQueries,
-      ICNSQueries
+      ICNSQueries,
+      TokenContractsQueries
     ]
   >;
   public readonly accountStore: AccountStore<
@@ -181,7 +184,10 @@ export class RootStore {
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
       }),
-      ICNSQueries.use()
+      ICNSQueries.use(),
+      TokenContractsQueries.use({
+        tokenContractListURL: TokenContractListURL,
+      })
     );
 
     this.accountStore = new AccountStore(

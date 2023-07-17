@@ -20,7 +20,7 @@ import React, {
   useState,
 } from "react";
 import ReactDOM from "react-dom";
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 import { StoreProvider, useStore } from "./stores";
 import { GlobalPopupStyle, GlobalStyle, ScrollBarStyle } from "./styles";
 import { configure } from "mobx";
@@ -76,6 +76,7 @@ import { SignEthereumTxPage } from "./pages/sign/ethereum";
 import "simplebar-react/dist/simplebar.min.css";
 import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { AppThemeProvider } from "./theme";
+import { useTheme } from "styled-components";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -251,10 +252,12 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     return true;
   })();
 
+  const shouldUnlockPage = keyRingStore.status === "locked" && !isURLUnlockPage;
+
   return (
     <HashRouter>
       {isReady ? (
-        keyRingStore.status === "locked" && !isURLUnlockPage ? (
+        shouldUnlockPage ? (
           <UnlockPage />
         ) : (
           <Routes>
@@ -354,9 +357,42 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       ) : (
         <Splash />
       )}
+      <LightModeBackground
+        isReady={isReady}
+        shouldUnlockPage={shouldUnlockPage}
+      />
     </HashRouter>
   );
 });
+
+const LightModeBackground: FunctionComponent<{
+  isReady: boolean;
+  shouldUnlockPage: boolean;
+}> = ({ isReady, shouldUnlockPage }) => {
+  const theme = useTheme();
+  const location = useLocation();
+
+  useLayoutEffect(() => {
+    if (isReady && !shouldUnlockPage) {
+      if (
+        location.pathname === "/setting" ||
+        location.pathname.startsWith("/setting/") ||
+        location.pathname === "/send" ||
+        location.pathname.startsWith("/send/")
+      ) {
+        document.documentElement.setAttribute("data-white-background", "true");
+        document.body.setAttribute("data-white-background", "true");
+
+        return () => {
+          document.documentElement.removeAttribute("data-white-background");
+          document.body.removeAttribute("data-white-background");
+        };
+      }
+    }
+  }, [location.pathname, theme, isReady, shouldUnlockPage]);
+
+  return null;
+};
 
 const App: FunctionComponent = () => {
   useMatchPopupSize();

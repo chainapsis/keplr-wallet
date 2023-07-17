@@ -124,6 +124,13 @@ export const CosmosTxView: FunctionComponent<{
     feeConfig.setDisableBalanceCheck(
       !!data.data.signOptions.disableBalanceCheck
     );
+    // We can't check the fee balance if the payer is not the signer.
+    if (
+      data.data.signDocWrapper.payer &&
+      data.data.signDocWrapper.payer !== data.data.signer
+    ) {
+      feeConfig.setDisableBalanceCheck(true);
+    }
     // We can't check the fee balance if the granter is not the signer.
     if (
       data.data.signDocWrapper.granter &&

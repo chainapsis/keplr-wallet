@@ -23,7 +23,10 @@ const Styles = {
     color: ${ColorPalette["gray-300"]};
 
     :hover {
-      color: ${ColorPalette["gray-400"]};
+      color: ${(props) =>
+        props.theme.mode === "light"
+          ? ColorPalette["gray-200"]
+          : ColorPalette["gray-400"]};
     }
   `,
 };
@@ -89,7 +92,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         >
           <Gutter size="0.75rem" />
           <XAxis alignY="center">
-            <Button2 color={ColorPalette["gray-300"]}>
+            <Button2>
               {isCollapsed
                 ? intl.formatMessage(
                     { id: "components.collapsible-list.view-more-tokens" },
