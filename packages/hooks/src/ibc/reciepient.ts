@@ -1,7 +1,9 @@
-import { RecipientConfig } from "../tx";
+import { RecipientConfig, UIProperties } from "../tx";
 import { ChainGetter } from "@keplr-wallet/stores";
 import { IIBCChannelConfig } from "./types";
 import { useState } from "react";
+import { action, makeObservable, observable, override } from "mobx";
+import { ChannelNotSetError } from "./errors";
 
 /**
  * IBCRecipientConfig returns the recipient config for IBC transfer.
@@ -10,19 +12,45 @@ import { useState } from "react";
  * So, you should remember that the recipient config's chain id is equal to the sending chain id, if channel not set.
  */
 export class IBCRecipientConfig extends RecipientConfig {
+  @observable
+  protected isIBCTransfer: boolean = false;
+
   constructor(
     chainGetter: ChainGetter,
     initialChainId: string,
-    protected readonly channelConfig: IIBCChannelConfig
+    protected readonly channelConfig: IIBCChannelConfig,
+    isIBCTransfer: boolean
   ) {
     super(chainGetter, initialChainId);
+
+    this.isIBCTransfer = isIBCTransfer;
+
+    makeObservable(this);
   }
 
   override get chainId(): string {
-    return this.channelConfig.channels.length > 0
-      ? this.channelConfig.channels[this.channelConfig.channels.length - 1]
-          .counterpartyChainId
-      : super.chainId;
+    if (!this.isIBCTransfer || this.channelConfig.channels.length === 0) {
+      return super.chainId;
+    }
+
+    return this.channelConfig.channels[this.channelConfig.channels.length - 1]
+      .counterpartyChainId;
+  }
+
+  @override
+  override get uiProperties(): UIProperties {
+    if (this.isIBCTransfer && this.channelConfig.channels.length === 0) {
+      return {
+        error: new ChannelNotSetError("Channel not set"),
+      };
+    }
+
+    return super.uiProperties;
+  }
+
+  @action
+  setIsIBCTransfer(isIBCTransfer: boolean) {
+    this.isIBCTransfer = isIBCTransfer;
   }
 }
 
@@ -36,14 +64,17 @@ export const useIBCRecipientConfig = (
       chainId: string;
       resolverContractAddress: string;
     };
-  } = {}
+  } = {},
+  isIBCTransfer: boolean
 ) => {
   const [config] = useState(
-    () => new IBCRecipientConfig(chainGetter, chainId, channelConfig)
+    () =>
+      new IBCRecipientConfig(chainGetter, chainId, channelConfig, isIBCTransfer)
   );
   config.setChain(chainId);
   config.setAllowHexAddressOnEthermint(options.allowHexAddressOnEthermint);
   config.setICNS(options.icns);
+  config.setIsIBCTransfer(isIBCTransfer);
 
   return config;
 };

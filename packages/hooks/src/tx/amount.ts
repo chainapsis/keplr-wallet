@@ -13,6 +13,7 @@ import {
   InsufficientAmountError,
   InvalidNumberAmountError,
   NegativeAmountError,
+  NotSupportedCurrencyError,
   ZeroAmountError,
 } from "./errors";
 import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
@@ -150,8 +151,8 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
     this._fraction = fraction;
   }
 
-  get selectableCurrencies(): AppCurrency[] {
-    return this.chainInfo.currencies;
+  canUseCurrency(currency: AppCurrency): boolean {
+    return this.chainInfo.findCurrency(currency.coinMinimalDenom) != null;
   }
 
   @computed
@@ -188,6 +189,13 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
     for (const amount of this.amount) {
       const currency = amount.currency;
+
+      if (!this.canUseCurrency(currency)) {
+        return {
+          error: new NotSupportedCurrencyError("Not supported currency"),
+        };
+      }
+
       const bal = this.queriesStore
         .get(this.chainId)
         .queryBalances.getQueryBech32Address(this.senderConfig.sender)

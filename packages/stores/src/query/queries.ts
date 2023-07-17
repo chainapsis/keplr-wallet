@@ -49,7 +49,7 @@ export class QueriesStore<Injects extends Array<IObject>> {
     Injects
   >;
 
-  protected readonly sharedContext: QuerySharedContext;
+  public readonly sharedContext: QuerySharedContext;
 
   constructor(
     protected readonly kvStore: KVStore | (KVStore & MultiGet),

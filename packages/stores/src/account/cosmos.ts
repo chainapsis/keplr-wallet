@@ -932,6 +932,69 @@ export class CosmosAccountImpl {
     };
   }
 
+  makePacketForwardIBCTransferTx(
+    channels: {
+      portId: string;
+      channelId: string;
+      counterpartyChainId: string;
+    }[],
+    amount: string,
+    currency: AppCurrency,
+    recipient: string
+  ) {
+    if (channels.length === 0) {
+      throw new Error("No channels");
+    }
+
+    const destinationChainId =
+      channels[channels.length - 1].counterpartyChainId;
+
+    const destinationChainInfo = this.chainGetter.getChain(destinationChainId);
+
+    Bech32Address.validate(
+      recipient,
+      destinationChainInfo.bech32Config.bech32PrefixAccAddr
+    );
+
+    const memo: any = {};
+    let lastForward: any = undefined;
+    if (channels.length > 1) {
+      for (const channel of channels.slice(1)) {
+        const destChainInfo = this.chainGetter.getChain(
+          channel.counterpartyChainId
+        );
+
+        const forward = {
+          receiver: Bech32Address.fromBech32(recipient).toBech32(
+            destChainInfo.bech32Config.bech32PrefixAccAddr
+          ),
+          port: channel.portId,
+          channel: channel.channelId,
+          // TODO: Support timeout
+        };
+
+        if (!lastForward) {
+          memo["forward"] = forward;
+        } else {
+          lastForward["forward"] = forward;
+        }
+
+        lastForward = forward;
+      }
+    }
+
+    return this.makeIBCTransferTx(
+      channels[0],
+      amount,
+      currency,
+      Bech32Address.fromBech32(recipient).toBech32(
+        this.chainGetter.getChain(channels[0].counterpartyChainId).bech32Config
+          .bech32PrefixAccAddr
+      ),
+      Object.keys(memo).length > 0 ? JSON.stringify(memo) : undefined
+    );
+  }
+
   makeIBCTransferTx(
     channel: {
       portId: string;
@@ -940,7 +1003,8 @@ export class CosmosAccountImpl {
     },
     amount: string,
     currency: AppCurrency,
-    recipient: string
+    recipient: string,
+    memo?: string
   ) {
     if (new DenomHelper(currency.coinMinimalDenom).type !== "native") {
       throw new Error("Only native token can be sent via IBC");
@@ -993,6 +1057,13 @@ export class CosmosAccountImpl {
         const eip712Signing = useEthereumSign && this.base.isNanoLedger;
         const chainIsInjective = this.chainId.startsWith("injective");
 
+        if (eip712Signing && chainIsInjective) {
+          // I don't know why, but memo is required when injective and eip712
+          if (!memo) {
+            memo = "IBC Transfer";
+          }
+        }
+
         // On ledger with ethermint, eip712 types are required and we can't omit `timeoutTimestamp`.
         // Although we are not using `timeoutTimestamp` at present, just set it as mas uint64 only for eip712 cosmos tx.
         const timeoutTimestamp = eip712Signing ? "18446744073709551615" : "0";
@@ -1018,15 +1089,7 @@ export class CosmosAccountImpl {
                 .toString(),
             },
             timeout_timestamp: timeoutTimestamp as string | undefined,
-            ...(() => {
-              if (eip712Signing && chainIsInjective) {
-                return {
-                  memo: "IBC Transfer",
-                };
-              }
-
-              return;
-            })(),
+            memo,
           },
         };
 
@@ -1036,6 +1099,10 @@ export class CosmosAccountImpl {
 
         if (msg.value.timeout_timestamp === "0") {
           delete msg.value.timeout_timestamp;
+        }
+
+        if (!memo) {
+          delete msg.value.memo;
         }
 
         const forceDirectSign = (() => {
@@ -1087,7 +1154,7 @@ export class CosmosAccountImpl {
               { name: "timeout_height", type: "TypeTimeoutHeight" },
               { name: "timeout_timestamp", type: "uint64" },
               ...(() => {
-                if (eip712Signing && chainIsInjective) {
+                if (memo != null) {
                   return [
                     {
                       name: "memo",

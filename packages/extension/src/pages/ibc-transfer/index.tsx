@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { HeaderLayout } from "../../layouts/header";
 import { useLocation, useSearchParams } from "react-router-dom";
@@ -102,20 +102,11 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
 
   const isSelectChannelPhase = phase === "channel";
 
-  const _isSelectChannelInteractionBlocked = useTxConfigsValidate({
+  const isSelectChannelInteractionBlocked = useTxConfigsValidate({
     recipientConfig: ibcTransferConfigs.recipientConfig,
     memoConfig: ibcTransferConfigs.memoConfig,
+    channelConfig: ibcTransferConfigs.channelConfig,
   }).interactionBlocked;
-  const isSelectChannelInteractionBlocked = useMemo(() => {
-    if (_isSelectChannelInteractionBlocked) {
-      return true;
-    }
-
-    return ibcTransferConfigs.channelConfig.error != null;
-  }, [
-    _isSelectChannelInteractionBlocked,
-    ibcTransferConfigs.channelConfig.error,
-  ]);
 
   useTxConfigsQueryString(chainId, {
     ...ibcTransferConfigs,

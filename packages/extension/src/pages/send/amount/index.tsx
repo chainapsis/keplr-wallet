@@ -17,7 +17,7 @@ import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import {
   useGasSimulator,
-  useSendTxConfig,
+  useSendMixedIBCTransferConfig,
   useTxConfigsValidate,
 } from "@keplr-wallet/hooks";
 import { useNavigate } from "react-router";
@@ -36,13 +36,18 @@ import { CoinPretty, DecUtils } from "@keplr-wallet/unit";
 import { ColorPalette } from "../../../styles";
 import { openPopupWindow } from "@keplr-wallet/popup";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
+import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { SendTxAndRecordMsg } from "@keplr-wallet/background";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useTxConfigsQueryString } from "../../../hooks/use-tx-config-query-string";
 import { HorizontalRadioGroup } from "../../../components/radio-group";
 import { Modal } from "../../../components/modal";
-import { IBCTransferSelectDestinationModal } from "./ibc-transfer";
+import {
+  DestinationChainView,
+  IBCTransferSelectDestinationModal,
+} from "./ibc-transfer";
+import { useIBCChannelConfigQueryString } from "../../../hooks/use-ibc-channel-config-query-string";
+import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
 
 const Styles = {
   Flex1: styled.div`
@@ -51,7 +56,13 @@ const Styles = {
 };
 
 export const SendAmountPage: FunctionComponent = observer(() => {
-  const { analyticsStore, accountStore, chainStore, queriesStore } = useStore();
+  const {
+    analyticsStore,
+    accountStore,
+    chainStore,
+    queriesStore,
+    skipQueriesStore,
+  } = useStore();
   const addressRef = useRef<HTMLInputElement | null>(null);
 
   const [searchParams] = useSearchParams();
@@ -71,7 +82,7 @@ export const SendAmountPage: FunctionComponent = observer(() => {
   const [
     isIBCTransferDestinationModalOpen,
     setIsIBCTransferDestinationModalOpen,
-  ] = useState(true);
+  ] = useState(false);
 
   useEffect(() => {
     if (addressRef.current) {
@@ -97,19 +108,19 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     .queryBalances.getQueryBech32Address(sender)
     .getBalance(currency);
 
-  const sendConfigs = useSendTxConfig(
+  const sendConfigs = useSendMixedIBCTransferConfig(
     chainStore,
     queriesStore,
     chainId,
     sender,
     // TODO: 이 값을 config 밑으로 빼자
     300000,
+    isIBCTransfer,
     {
       allowHexAddressOnEthermint: !chainStore
         .getChain(chainId)
         .chainId.startsWith("injective"),
       icns: ICNSInfo,
-      computeTerraClassicTax: true,
     }
   );
 
@@ -140,10 +151,20 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     chainId,
     sendConfigs.gasConfig,
     sendConfigs.feeConfig,
-    gasSimulatorKey,
+    isIBCTransfer ? `ibc/${gasSimulatorKey}` : gasSimulatorKey,
     () => {
       if (!sendConfigs.amountConfig.currency) {
         throw new Error("Send currency not set");
+      }
+
+      if (isIBCTransfer) {
+        if (
+          sendConfigs.channelConfig.uiProperties.loadingState ===
+            "loading-block" ||
+          sendConfigs.channelConfig.uiProperties.error != null
+        ) {
+          throw new Error("Not ready to simulate tx");
+        }
       }
 
       // Prefer not to use the gas config or fee config,
@@ -166,6 +187,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
       // I don't know why, but simulation does not work for secret20
       if (denomHelper.type === "secret20") {
         throw new Error("Simulating secret wasm not supported");
+      }
+
+      if (isIBCTransfer) {
+        return account.cosmos.makePacketForwardIBCTransferTx(
+          sendConfigs.channelConfig.channels,
+          sendConfigs.amountConfig.amount[0].toDec().toString(),
+          sendConfigs.amountConfig.amount[0].currency,
+          sendConfigs.recipientConfig.recipient
+        );
       }
 
       return account.makeSendTokenTx(
@@ -208,6 +238,11 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     ...sendConfigs,
     gasSimulator,
   });
+  useIBCChannelConfigQueryString(sendConfigs.channelConfig, (channels) => {
+    if (channels && channels.length > 0) {
+      setIsIBCTransfer(true);
+    }
+  });
 
   const txConfigsValidate = useTxConfigsValidate({
     ...sendConfigs,
@@ -216,7 +251,17 @@ export const SendAmountPage: FunctionComponent = observer(() => {
 
   const isDetachedMode = searchParams.get("detached") === "true";
 
-  const historyType = "basic-send";
+  const historyType = isIBCTransfer ? "basic-send/ibc" : "basic-send";
+
+  // Prefetch IBC channels to reduce the UI flickering(?) when open ibc channel modal.
+  try {
+    skipQueriesStore.queryIBCPacketForwardingTransfer.getIBCChannels(
+      chainId,
+      currency.coinMinimalDenom
+    );
+  } catch (e) {
+    console.log(e);
+  }
 
   return (
     <HeaderLayout
@@ -246,81 +291,102 @@ export const SendAmountPage: FunctionComponent = observer(() => {
         text: intl.formatMessage({ id: "button.next" }),
         color: "primary",
         size: "large",
-        isLoading: accountStore.getAccount(chainId).isSendingMsg === "send",
+        isLoading:
+          accountStore.getAccount(chainId).isSendingMsg ===
+          (!isIBCTransfer ? "send" : "ibcTransfer"),
       }}
       onSubmit={async (e) => {
         e.preventDefault();
 
         if (!txConfigsValidate.interactionBlocked) {
+          const tx = isIBCTransfer
+            ? accountStore
+                .getAccount(chainId)
+                .cosmos.makePacketForwardIBCTransferTx(
+                  sendConfigs.channelConfig.channels,
+                  sendConfigs.amountConfig.amount[0].toDec().toString(),
+                  sendConfigs.amountConfig.amount[0].currency,
+                  sendConfigs.recipientConfig.recipient
+                )
+            : accountStore
+                .getAccount(chainId)
+                .makeSendTokenTx(
+                  sendConfigs.amountConfig.amount[0].toDec().toString(),
+                  sendConfigs.amountConfig.amount[0].currency,
+                  sendConfigs.recipientConfig.recipient
+                );
+
           try {
-            await accountStore
-              .getAccount(chainId)
-              .makeSendTokenTx(
-                sendConfigs.amountConfig.amount[0].toDec().toString(),
-                sendConfigs.amountConfig.amount[0].currency,
-                sendConfigs.recipientConfig.recipient
-              )
-              .send(
-                sendConfigs.feeConfig.toStdFee(),
-                sendConfigs.memoConfig.memo,
-                {
-                  preferNoSetFee: true,
-                  preferNoSetMemo: true,
-                  sendTx: async (chainId, tx, mode) => {
-                    const msg = new SendTxAndRecordMsg(
-                      historyType,
-                      chainId,
-                      sendConfigs.recipientConfig.chainId,
-                      tx,
-                      mode,
-                      false,
-                      sendConfigs.senderConfig.sender,
-                      sendConfigs.recipientConfig.recipient,
-                      sendConfigs.amountConfig.amount.map((amount) => {
-                        return {
-                          amount: DecUtils.getTenExponentN(
-                            amount.currency.coinDecimals
-                          )
-                            .mul(amount.toDec())
-                            .toString(),
-                          denom: amount.currency.coinMinimalDenom,
-                        };
-                      }),
-                      sendConfigs.memoConfig.memo
-                    );
-                    return await new InExtensionMessageRequester().sendMessage(
-                      BACKGROUND_PORT,
-                      msg
-                    );
-                  },
-                },
-                {
-                  onBroadcasted: () => {
-                    chainStore.enableVaultsWithCosmosAddress(
-                      sendConfigs.recipientConfig.chainId,
-                      sendConfigs.recipientConfig.recipient
-                    );
-                  },
-                  onFulfill: (tx: any) => {
-                    if (tx.code != null && tx.code !== 0) {
-                      console.log(tx.log ?? tx.raw_log);
-                      notification.show(
-                        "failed",
-                        intl.formatMessage({ id: "error.transaction-failed" }),
-                        ""
+            await tx.send(
+              sendConfigs.feeConfig.toStdFee(),
+              sendConfigs.memoConfig.memo,
+              {
+                preferNoSetFee: true,
+                preferNoSetMemo: true,
+                sendTx: async (chainId, tx, mode) => {
+                  let msg: Message<Uint8Array> = new SendTxAndRecordMsg(
+                    historyType,
+                    chainId,
+                    sendConfigs.recipientConfig.chainId,
+                    tx,
+                    mode,
+                    false,
+                    sendConfigs.senderConfig.sender,
+                    sendConfigs.recipientConfig.recipient,
+                    sendConfigs.amountConfig.amount.map((amount) => {
+                      return {
+                        amount: DecUtils.getTenExponentN(
+                          amount.currency.coinDecimals
+                        )
+                          .mul(amount.toDec())
+                          .toString(),
+                        denom: amount.currency.coinMinimalDenom,
+                      };
+                    }),
+                    sendConfigs.memoConfig.memo
+                  );
+                  if (isIBCTransfer) {
+                    if (msg instanceof SendTxAndRecordMsg) {
+                      msg = msg.withIBCPacketForwarding(
+                        sendConfigs.channelConfig.channels
                       );
-                      return;
+                    } else {
+                      throw new Error("Invalid message type");
                     }
+                  }
+                  return await new InExtensionMessageRequester().sendMessage(
+                    BACKGROUND_PORT,
+                    msg
+                  );
+                },
+              },
+              {
+                onBroadcasted: () => {
+                  chainStore.enableVaultsWithCosmosAddress(
+                    sendConfigs.recipientConfig.chainId,
+                    sendConfigs.recipientConfig.recipient
+                  );
+                },
+                onFulfill: (tx: any) => {
+                  if (tx.code != null && tx.code !== 0) {
+                    console.log(tx.log ?? tx.raw_log);
                     notification.show(
-                      "success",
-                      intl.formatMessage({
-                        id: "notification.transaction-success",
-                      }),
+                      "failed",
+                      intl.formatMessage({ id: "error.transaction-failed" }),
                       ""
                     );
-                  },
-                }
-              );
+                    return;
+                  }
+                  notification.show(
+                    "success",
+                    intl.formatMessage({
+                      id: "notification.transaction-success",
+                    }),
+                    ""
+                  );
+                },
+              }
+            );
 
             if (!isDetachedMode) {
               navigate("/", {
@@ -386,18 +452,33 @@ export const SendAmountPage: FunctionComponent = observer(() => {
             ]}
             onSelect={(key) => {
               if (key === "ibc-transfer") {
-                setIsIBCTransfer(true);
+                if (sendConfigs.channelConfig.channels.length === 0) {
+                  setIsIBCTransferDestinationModalOpen(true);
+                }
               } else {
+                sendConfigs.channelConfig.setChannels([]);
                 setIsIBCTransfer(false);
               }
             }}
           />
+
+          <VerticalCollapseTransition collapsed={!isIBCTransfer}>
+            <DestinationChainView
+              ibcChannelConfig={sendConfigs.channelConfig}
+              onClick={() => {
+                setIsIBCTransferDestinationModalOpen(true);
+              }}
+            />
+            <Gutter size="0.75rem" />
+          </VerticalCollapseTransition>
+          <Gutter size="0" />
 
           <RecipientInput
             ref={addressRef}
             historyType={historyType}
             recipientConfig={sendConfigs.recipientConfig}
             memoConfig={sendConfigs.memoConfig}
+            permitAddressBookSelfKeyInfo={isIBCTransfer}
           />
 
           <AmountInput amountConfig={sendConfigs.amountConfig} />
@@ -427,7 +508,15 @@ export const SendAmountPage: FunctionComponent = observer(() => {
           setIsIBCTransferDestinationModalOpen(false);
         }}
       >
-        <IBCTransferSelectDestinationModal chainId={chainId} />
+        <IBCTransferSelectDestinationModal
+          chainId={chainId}
+          denom={currency.coinMinimalDenom}
+          ibcChannelConfig={sendConfigs.channelConfig}
+          setIsIBCTransfer={setIsIBCTransfer}
+          close={() => {
+            setIsIBCTransferDestinationModalOpen(false);
+          }}
+        />
       </Modal>
     </HeaderLayout>
   );

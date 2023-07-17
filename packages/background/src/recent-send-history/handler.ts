@@ -5,7 +5,11 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { GetRecentSendHistoriesMsg, SendTxAndRecordMsg } from "./messages";
+import {
+  GetRecentSendHistoriesMsg,
+  SendTxAndRecordMsg,
+  SendTxAndRecordWithIBCPacketForwardingMsg,
+} from "./messages";
 import { RecentSendHistoryService } from "./service";
 
 export const getHandler: (service: RecentSendHistoryService) => Handler = (
@@ -22,6 +26,11 @@ export const getHandler: (service: RecentSendHistoryService) => Handler = (
         return handleSendTxAndRecordMsg(service)(
           env,
           msg as SendTxAndRecordMsg
+        );
+      case SendTxAndRecordWithIBCPacketForwardingMsg:
+        return handleSendTxAndRecordWithIBCPacketForwardingMsg(service)(
+          env,
+          msg as SendTxAndRecordWithIBCPacketForwardingMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -51,7 +60,28 @@ const handleSendTxAndRecordMsg: (
       msg.sender,
       msg.recipient,
       msg.amount,
-      msg.memo
+      msg.memo,
+      undefined
+    );
+  };
+};
+
+const handleSendTxAndRecordWithIBCPacketForwardingMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<SendTxAndRecordWithIBCPacketForwardingMsg> = (service) => {
+  return async (_env, msg) => {
+    return await service.sendTxAndRecord(
+      msg.historyType,
+      msg.sourceChainId,
+      msg.destinationChainId,
+      msg.tx,
+      msg.mode,
+      msg.silent,
+      msg.sender,
+      msg.recipient,
+      msg.amount,
+      msg.memo,
+      msg.channels
     );
   };
 };

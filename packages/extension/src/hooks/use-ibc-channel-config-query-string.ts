@@ -1,11 +1,12 @@
 import { useEffectOnce } from "./use-effect-once";
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { IIBCChannelConfig } from "@keplr-wallet/hooks";
+import { Channel, IIBCChannelConfig } from "@keplr-wallet/hooks";
 import { toJS } from "mobx";
 
 export const useIBCChannelConfigQueryString = (
-  channelConfig: IIBCChannelConfig
+  channelConfig: IIBCChannelConfig,
+  mounted?: (channels: Channel[] | undefined) => void
 ) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -14,6 +15,14 @@ export const useIBCChannelConfigQueryString = (
     if (initialIBCChannels) {
       const channels = JSON.parse(initialIBCChannels);
       channelConfig.setChannels(channels);
+
+      if (mounted) {
+        mounted(channels);
+      }
+    } else {
+      if (mounted) {
+        mounted(undefined);
+      }
     }
   });
 

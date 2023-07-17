@@ -18,6 +18,10 @@ type CacheIBCDenomData = {
     paths: {
       portId: string;
       channelId: string;
+
+      counterpartyChannelId?: string;
+      counterpartyPortId?: string;
+      clientChainId?: string;
     }[];
   };
   originChainId: string | undefined;
@@ -41,6 +45,10 @@ export class IBCCurrencyRegistrar {
       paths: {
         portId: string;
         channelId: string;
+
+        counterpartyChannelId?: string;
+        counterpartyPortId?: string;
+        clientChainId?: string;
       }[];
     },
     _: ChainInfo | undefined,
@@ -92,6 +100,10 @@ export class IBCCurrencyRegistrar {
         paths: {
           portId: string;
           channelId: string;
+
+          counterpartyChannelId?: string;
+          counterpartyPortId?: string;
+          clientChainId?: string;
         }[];
       },
       originChainInfo: IChainInfoImpl | undefined,
@@ -109,7 +121,9 @@ export class IBCCurrencyRegistrar {
   }
 
   protected async init() {
-    const key = `cache-ibc-denom-trace-paths`;
+    // "cache-ibc-denom-trace-paths" is already used.
+    // v2: Add "clientChainId", "counterpartyPortId", "counterpartyChannelId" fields to the paths.
+    const key = `cache-ibc-denom-trace-paths-v2`;
     const saved = await this.kvStore.get<Record<string, CacheIBCDenomData>>(
       key
     );
@@ -175,13 +189,27 @@ export class IBCCurrencyRegistrar {
           paths: {
             portId: string;
             channelId: string;
+
+            counterpartyChannelId?: string;
+            counterpartyPortId?: string;
+            clientChainId?: string;
           }[];
         }
       | undefined;
 
+    let fallbackToCache = false;
+
     const cached = this.getCacheIBCDenomData(chainId, hash);
     if (cached) {
-      if (Date.now() - cached.timestamp < this.cacheDuration) {
+      if (
+        Date.now() - cached.timestamp < this.cacheDuration &&
+        !cached.denomTrace.paths.some((path) => {
+          if (!path.clientChainId) {
+            return true;
+          }
+          return !this.chainStore.hasChain(path.clientChainId);
+        })
+      ) {
         denomTrace = cached.denomTrace;
         if (
           cached.originChainId &&
@@ -203,9 +231,15 @@ export class IBCCurrencyRegistrar {
         });
       }
     } else {
+      let isFetching = false;
+
       const queryDenomTrace =
         queries.cosmos.queryIBCDenomTrace.getDenomTrace(hash);
       denomTrace = queryDenomTrace.denomTrace;
+
+      if (queryDenomTrace.isFetching) {
+        isFetching = true;
+      }
 
       if (denomTrace) {
         const paths = denomTrace.paths;
@@ -219,10 +253,29 @@ export class IBCCurrencyRegistrar {
               path.channelId
             );
 
+          if (clientState.isFetching) {
+            isFetching = true;
+          }
+
+          const queryChannel = this.queriesStore
+            .get(chainIdBefore)
+            .cosmos.queryIBCChannel.getChannel(path.portId, path.channelId);
+          if (queryChannel.isFetching) {
+            isFetching = true;
+          }
+          if (queryChannel.response) {
+            path.counterpartyChannelId =
+              queryChannel.response.data.channel.counterparty.channel_id;
+            path.counterpartyPortId =
+              queryChannel.response.data.channel.counterparty.port_id;
+          }
+
           if (
             clientState.clientChainId &&
             this.chainStore.hasChain(clientState.clientChainId)
           ) {
+            path.clientChainId = clientState.clientChainId;
+
             chainIdBefore = clientState.clientChainId;
             originChainInfo = this.chainStore.getChain(
               clientState.clientChainId
@@ -238,13 +291,15 @@ export class IBCCurrencyRegistrar {
           }
         }
 
-        if (originChainInfo) {
+        if (originChainInfo && !isFetching) {
           this.setCacheIBCDenomData(chainId, hash, {
             counterpartyChainId: counterpartyChainInfo?.chainId,
             denomTrace,
             originChainId: originChainInfo.chainId,
             timestamp: Date.now(),
           });
+
+          fallbackToCache = true;
         }
       }
     }
@@ -298,7 +353,7 @@ export class IBCCurrencyRegistrar {
               originChainId: originChainInfo.chainId,
               originCurrency: cw20Currency,
             },
-            done: !isFetching,
+            done: fallbackToCache && !isFetching,
           };
         }
       } else {
@@ -321,7 +376,7 @@ export class IBCCurrencyRegistrar {
               originChainId: originChainInfo.chainId,
               originCurrency: currency,
             },
-            done: true,
+            done: fallbackToCache,
           };
         }
       }
