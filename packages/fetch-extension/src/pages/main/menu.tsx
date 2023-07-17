@@ -35,6 +35,16 @@ export const Menu: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.menu.settings" />
       </div>
+      <div
+        className={styleMenu.item}
+        onClick={() => {
+          history.push({
+            pathname: "/fetch-name-service",
+          });
+        }}
+      >
+        <FormattedMessage id="main.menu.fetch-name-service" />
+      </div>
       <a
         className={styleMenu["item"]}
         href="https://docs.fetch.ai/fetch-wallet/"
