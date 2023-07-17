@@ -42,6 +42,7 @@
   "main.menu.address-available": "Address is already available in the Address Book",
   "main.menu.token-list": "Token List",
   "main.menu.activity": "Activity",
+  "main.menu.fetch-name-service": ".FET Domain",
 
   "main.menu.guide": "Guide",
   "main.menu.sign-out": "Sign out",
