@@ -1,0 +1,27 @@
+@import "../../styles/var";
+
+.menu-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: $header-height;
+
+  width: $popup-size-width * 0.75;
+  height: 100%;
+  z-index: 900;
+
+  background-color: white;
+  overflow-y: auto;
+}
+
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: $popup-size-width;
+  height: 100%;
+  z-index: 899;
+
+  background-color: black;
+}

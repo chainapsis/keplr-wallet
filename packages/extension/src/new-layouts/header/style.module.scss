@@ -1,0 +1,70 @@
+@import "../../styles/var";
+
+.menu-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+$menu-icon-size: 18px;
+$menu-icon-gap: 14px;
+
+.menu-img {
+  width: $menu-icon-size;
+  height: $menu-icon-size;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.chain-list-container {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  .title {
+    font-size: 18px;
+    color: #fff;
+    font-weight: 500;
+    margin-right: 6px;
+    &.small {
+      font-size: 12px;
+    }
+  }
+
+  .title-icon-container {
+    width: 0;
+    height: 16px;
+
+    .title-icon {
+      width: 16px;
+      height: 16px;
+
+      margin-top: -6px;
+      fill: #8f8f8f;
+    }
+  }
+
+  &:hover {
+    .title {
+      // color: $primary-color;
+    }
+
+    .title-icon {
+      // fill: $primary-color;
+    }
+  }
+}
+
+:global(.show) {
+  .chain-list-container {
+    .title {
+      // color: $primary-color;
+    }
+
+    .title-icon {
+      // fill: $primary-color;
+    }
+  }
+}
