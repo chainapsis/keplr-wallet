@@ -24,7 +24,7 @@ export const FetchnameService = () => {
       canChangeChainInfo={false}
       alternativeTitle={"Fetch Name Server"}
       onBackButton={() => {
-        history.goBack();
+        history.push("/");
       }}
       showBottomMenu={true}
     >

@@ -1,9 +1,14 @@
-import React, { FunctionComponent, useCallback } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import { Address } from "@components/address";
 
 import styleAccount from "./account.module.scss";
-
+import icon from "@assets/svg/link.svg";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
 import { ToolTip } from "@components/tooltip";
@@ -11,10 +16,19 @@ import { useIntl } from "react-intl";
 import { useNotification } from "@components/notification";
 import { useStore } from "../../stores";
 import { KeplrError } from "@keplr-wallet/router";
+import { Button } from "reactstrap";
+import {
+  getDomainsDataByOwner,
+  getPrimaryDomain,
+} from "../../name-service/fns-apis";
+import { useHistory } from "react-router";
 
 export const AccountView: FunctionComponent = observer(() => {
+  const history = useHistory();
   const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+  const current = chainStore.current;
+  const [domain, setDomain] = useState<string>();
 
   const icnsPrimaryName = (() => {
     if (
@@ -55,6 +69,29 @@ export const AccountView: FunctionComponent = observer(() => {
     },
     [accountInfo.walletStatus, notification, intl]
   );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { domain }: any = await getPrimaryDomain(
+          current.chainId,
+          accountInfo.bech32Address
+        );
+        if (!domain) {
+          const { domains } = await getDomainsDataByOwner(
+            current.chainId,
+            accountInfo.bech32Address
+          );
+          if (domains.length) setDomain(domains.sort()[0]);
+          else setDomain(undefined);
+        } else setDomain(domain);
+      } catch (error) {
+        console.error("Error fetching domains:", error);
+      }
+    };
+
+    fetchData();
+  }, [accountInfo.bech32Address, current.chainId]);
 
   return (
     <div>
@@ -175,6 +212,30 @@ export const AccountView: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
         </div>
       )}
+      <div
+        className={styleAccount.containerAccount}
+        style={{ marginTop: "5px" }}
+      >
+        <div style={{ flex: 1 }} />
+        {domain ? (
+          <div
+            className={styleAccount.address}
+            onClick={() => history.push("/fetch-name-service")}
+          >
+            <i className="fas fa-link" />
+            {domain}
+          </div>
+        ) : (
+          <Button
+            color="primary"
+            size="sm"
+            onClick={() => history.push("/fetch-name-service")}
+          >
+            <img src={icon} draggable={false} /> Link .FET domain
+          </Button>
+        )}
+        <div style={{ flex: 1 }} />
+      </div>
     </div>
   );
 });

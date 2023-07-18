@@ -73,8 +73,8 @@ export const mintDomain = async (
       amount: [amount],
       gas: "6000000",
     },
-    undefined,
-    undefined,
+    "",
+    {},
     {
       onFullfilled: (txhash: any) => {
         console.log("Txn executed", txhash.toString());
@@ -86,7 +86,8 @@ export const mintDomain = async (
 export const setPrimary = async (
   chainId: string,
   account: any,
-  domain: string
+  domain: string,
+  amount: any
 ) => {
   const tx = account.cosmwasm.makeExecuteContractTx(
     "executeWasm",
@@ -96,15 +97,48 @@ export const setPrimary = async (
         domain,
       },
     },
-    []
+    [amount]
   );
   await tx.send(
     {
-      amount: [],
+      amount: [amount],
       gas: "6000000",
     },
-    undefined,
-    undefined,
+    "",
+    {},
+    {
+      onFullfilled: (txhash: any) => {
+        console.log("Txn fullfilled", txhash.toString());
+      },
+    }
+  );
+};
+
+export const updateDomain = async (
+  chainId: string,
+  account: any,
+  domain: string,
+  data: any,
+  amount: any
+) => {
+  const tx = account.cosmwasm.makeExecuteContractTx(
+    "executeWasm",
+    FNS_CONFIG[chainId].contractAddress,
+    {
+      update_record: {
+        data,
+        domain,
+      },
+    },
+    [amount]
+  );
+  await tx.send(
+    {
+      amount: [{ amount: "600000", denom: "afet" }],
+      gas: "6000000",
+    },
+    "",
+    {},
     {
       onFullfilled: (txhash: any) => {
         console.log("Txn fullfilled", txhash.toString());

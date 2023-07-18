@@ -17,11 +17,12 @@ export const ExploreDomain = () => {
         rel="noreferrer"
         className={style.moreDetails}
       >
-        <img src={allMintedDomainImage} alt="" />
+        <img src={allMintedDomainImage} alt="" draggable={false} />
         <img
           className={style.arrowIcon}
           src={require("@assets/svg/arrow-right-outline.svg")}
           alt=""
+          draggable={false}
         />
       </a>
       <div className={style.border} />
@@ -31,11 +32,12 @@ export const ExploreDomain = () => {
         rel="noreferrer"
         className={style.moreDetails}
       >
-        <img src={collectionsImage} alt="" />
+        <img src={collectionsImage} alt="" draggable={false} />
         <img
           className={style.arrowIcon}
           src={require("@assets/svg/arrow-right-outline.svg")}
           alt=""
+          draggable={false}
         />
       </a>
     </React.Fragment>

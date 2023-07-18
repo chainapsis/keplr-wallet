@@ -1,7 +1,7 @@
 import domainImage from "@assets/icon/domain-image.png";
 import { HeaderLayout } from "@new-layouts";
 import React, { useEffect, useState } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory, useRouteMatch } from "react-router-dom";
 import {
   getDomainData,
   getDomainPrice,
@@ -9,21 +9,21 @@ import {
 } from "../../../name-service/fns-apis";
 import { useStore } from "../../../stores";
 import { BuyOrBid } from "./buy-or-bid";
-import { MakePrimary } from "./make-primary";
 import { Mint } from "./mint";
 import style from "./style.module.scss";
+import { Update } from "./update";
 
 export const DomainDetails = () => {
+  const match = useRouteMatch<{ domain: string }>();
   const history = useHistory();
-  const location = useLocation();
-  const domainName = (location.state as { domainName: string })?.domainName;
+  const domainName = match.params.domain;
   const { accountStore, chainStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const sender = accountInfo.bech32Address;
 
-  const [selectedDomain, setSelectedDomain] = useState<any>(null);
-  const [selectedDomainPrice, setSelectedDomainPrice] = useState<any>(null);
+  const [domainData, setDomainData] = useState<any>({});
+  const [domainPrice, setDomainPrice] = useState<any>(null);
   const [isMinted, setIsMinted] = useState<any>(null);
   const [isOwned, setIsOwned] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +38,7 @@ export const DomainDetails = () => {
           current.chainId,
           domainName
         );
-        setSelectedDomain(fetchedDomainData);
+        setDomainData(fetchedDomainData.domain_data || {});
         const isDomainMinted = await getDomainStatus(
           current.chainId,
           domainName
@@ -47,7 +47,7 @@ export const DomainDetails = () => {
           current.chainId,
           domainName
         );
-        setSelectedDomainPrice(fetchDomainPrice);
+        setDomainPrice(fetchDomainPrice);
         const domainStatus = isDomainMinted?.domain_status;
         if (domainStatus) {
           if (
@@ -79,7 +79,7 @@ export const DomainDetails = () => {
     fetchDomainData();
   }, [domainName]);
 
-  const propertiesToIterate = [
+  const properties = [
     "address",
     "email",
     "github",
@@ -102,11 +102,7 @@ export const DomainDetails = () => {
       }}
       showBottomMenu={true}
     >
-      <div className={style.bgBiur}>
-        <div className={style.bgBiurChild} />
-        <div className={style.bgBiurItem} />
-      </div>
-      <div style={{ zIndex: 2, position: "relative" }}>
+      <div style={{ fontFamily: "monospace" }}>
         <div className={style.header}>PROPERTIES</div>
 
         {isLoading ? (
@@ -116,41 +112,44 @@ export const DomainDetails = () => {
         ) : (
           <React.Fragment>
             <div className={style.domainIntro}>
-              {selectedDomain.domain_data.background ? (
-                <img
-                  style={{ height: "130px" }}
-                  src={selectedDomain.domain_data.background}
-                  alt="Domain Image"
-                />
-              ) : (
-                <React.Fragment>
-                  <img
-                    style={{ height: "130px" }}
-                    src={domainImage}
-                    alt="Domain Image"
-                  />
-                  <div className={style.imageText}>
-                    {domainName.toUpperCase()}
-                  </div>
-                </React.Fragment>
+              <img
+                style={{ height: "130px" }}
+                src={domainData.background || domainImage}
+                alt="Domain Image"
+              />
+              {!domainData.background && (
+                <div className={style.imageText}>
+                  {domainName.toUpperCase()}
+                </div>
               )}
+
               <div className={style.availability}>
                 {isMinted ? (isOwned ? "OWNED" : "BUY") : "AVAILABLE"}
               </div>
               <div className={style.description}>
-                {selectedDomain.domain_data?.description ||
-                  "Description hasn't been set"}
+                {domainData?.description || "Description hasn't been set"}
               </div>
             </div>
 
-            {propertiesToIterate.map((property) => (
-              <div className={style.domainInfo} key={property}>
-                <div className={style.keys}>{property}</div>
-                <div className={style.values}>
-                  {selectedDomain.domain_data[property] || "Not set"}
+            {Object.keys(domainData)
+              .filter((key: string) => properties.includes(key))
+              .map((property) => (
+                <div className={style.domainInfo} key={property}>
+                  <div className={style.keys}>{property}</div>
+                  <input
+                    disabled={!isOwned}
+                    className={style.values}
+                    value={domainData[property]}
+                    placeholder="Not Set"
+                    onChange={(e) => {
+                      setDomainData({
+                        ...domainData,
+                        [property]: e.target.value,
+                      });
+                    }}
+                  />
                 </div>
-              </div>
-            ))}
+              ))}
             <a
               href={`https://www.fetns.domains/domains/${domainName}`}
               target="_blank"
@@ -167,17 +166,16 @@ export const DomainDetails = () => {
 
             {!isLoading &&
               (isOwned ? (
-                <MakePrimary
-                  sender={sender}
+                <Update
                   domainName={domainName}
-                  setError={setError}
-                  setShowCard={setShowCard}
+                  domainPrice={domainPrice}
+                  domainData={domainData}
                 />
               ) : isMinted ? (
                 <BuyOrBid domainName={domainName} />
               ) : (
                 <Mint
-                  domainPrice={selectedDomainPrice}
+                  domainPrice={domainPrice}
                   domainName={domainName}
                   setError={setError}
                   setShowCard={setShowCard}

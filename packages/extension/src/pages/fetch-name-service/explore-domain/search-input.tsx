@@ -17,12 +17,9 @@ export const SearchInput = () => {
   }
   const handleSearch = () => {
     setSearchText("");
-    history.push({
-      pathname: "/fetch-name-service/domain-details",
-      state: {
-        domainName: processString(searchText),
-      },
-    });
+    history.push(
+      `/fetch-name-service/domain-details/${processString(searchText)}`
+    );
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +39,7 @@ export const SearchInput = () => {
         className={style.inputStyle}
         onChange={handleChange}
         onKeyPress={handleKeyPress}
-        placeholder="Search for a .FET name"
+        placeholder="Search a .FET name"
       />
       <button className={style.buttonStyle} onClick={handleSearch}>
         SEARCH

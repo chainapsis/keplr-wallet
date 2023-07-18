@@ -63,7 +63,7 @@ export const YourDomain = () => {
     };
 
     fetchData();
-  }, []);
+  }, [accountInfo.bech32Address, current.chainId]);
 
   return (
     <div className={style.allDomains}>
@@ -77,10 +77,7 @@ export const YourDomain = () => {
       ) : (
         domains.map((domain: any, index: number) => (
           <Link
-            to={{
-              pathname: "/fetch-name-service/domain-details",
-              state: { domainName: domain, isOwned: true },
-            }}
+            to={`/fetch-name-service/domain-details/${domain}`}
             className={style.domainCard}
             key={index}
           >
