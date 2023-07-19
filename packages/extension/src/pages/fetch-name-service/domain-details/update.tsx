@@ -3,6 +3,7 @@ import style from "./style.module.scss";
 import { useStore } from "../../../stores";
 import { setPrimary, updateDomain } from "../../../name-service/fns-apis";
 import { useHistory } from "react-router";
+import { FNS_CONFIG } from "../../../config.ui.var";
 
 interface UpdateProps {
   domainPrice: any;
@@ -49,8 +50,13 @@ export const Update: React.FC<UpdateProps> = ({
     }
   };
 
+  const handleClick = () => {
+    const url = `https://www.fetns.domains/domains/${domainName}`;
+    window.open(url, "_blank");
+  };
+
   return (
-    <div style={{ display: "flex" }}>
+    <div className={style.buttonGroup}>
       <button
         disabled
         className={style.mint}
@@ -59,11 +65,21 @@ export const Update: React.FC<UpdateProps> = ({
           background: "transparent",
           border: "1px solid #9075ff",
         }}
-        onClick={handleMakePrimary}
+        onClick={
+          FNS_CONFIG[current.chainId].isEditable
+            ? handleMakePrimary
+            : handleClick
+        }
       >
         <span className={style.domainName}>Make Primary</span>
       </button>
-      <button disabled className={style.mint} onClick={handleUpdate}>
+      <button
+        disabled
+        className={style.mint}
+        onClick={
+          FNS_CONFIG[current.chainId].isEditable ? handleUpdate : handleClick
+        }
+      >
         <span className={style.domainName}>Update</span>
       </button>
     </div>

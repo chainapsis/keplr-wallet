@@ -19,6 +19,10 @@
   border-bottom: 1px solid gray;
   padding: 20px 8px;
 }
+
+.domainInfoGroup {
+  margin-bottom: 60px;
+}
 .keys {
   color: white;
   text-transform: capitalize;
@@ -171,9 +175,8 @@
   z-index: 200;
   top: 62px;
   left: 26px;
-  padding: 32px 18px;
+  padding: 18px 18px;
   border-radius: 20px;
-  height: 122px;
   color: white;
   .errorText {
     margin-bottom: 0;
@@ -194,9 +197,19 @@
     border-radius: 100px;
     border: 1px solid rgba(255, 255, 255, 0.4);
   }
-  button:hover {
+  button:hover:enabled {
     border-color: #9075ff;
     box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
       6px 6px 32px 0px rgba(243, 95, 73, 0.3);
   }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  position: absolute;
+  bottom: 62px;
+  width: 330px;
 }

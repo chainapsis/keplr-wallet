@@ -56,7 +56,7 @@ const getStatusIcon = (status: string): string => {
   }
 };
 
-const shortenNumber = (value: string, decimal = 18) => {
+export const shortenNumber = (value: string, decimal = 18) => {
   const number = Math.abs(parseFloat(value)) / 10 ** decimal;
   let result = "";
   if (number >= 1000000) {

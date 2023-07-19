@@ -7,38 +7,43 @@ export const SearchInput = () => {
 
   const [searchText, setSearchText] = useState("");
   const [invalidDomain, setInvalidDomain] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const validation = (string: string) => {
+    const invalidCharacters = ["$", "%", "/", "|", "\\", ":", ";", "."];
+    if (string.split("").some((char) => invalidCharacters.includes(char))) {
+      return "Invalid special characters";
+    }
+    if (string.length > 64) return "Character limit exceeded (Max : 64 chars)";
+    if (string.includes(" ")) {
+      return "Domain Name Cannot have spaces";
+    }
+    return "";
+  };
 
   function processString(input: string) {
-    const regexPattern = /^(?!.*[^\w!@$]|.*(?<!\.fet)$)(?!\S*\s)\S{1,64}$/;
-    const trimmedString = input.replace(/\s+/g, "").trim();
-    const lowercasedString = trimmedString.toLowerCase();
-
-    if (!regexPattern.test(lowercasedString)) {
-      setInvalidDomain(true);
-      if (!lowercasedString.endsWith(".fet")) {
-        return lowercasedString + ".fet";
-      } else {
-        return lowercasedString;
-      }
+    if (!input.endsWith(".fet")) {
+      return input + ".fet";
     } else {
-      setInvalidDomain(false);
-      return lowercasedString;
+      return input;
     }
   }
 
   const handleSearch = () => {
-    if (searchText.trim() !== "") {
+    if (searchText.trim() !== "" && !invalidDomain) {
+      const processedText = processString(searchText);
       setSearchText("");
-      console.log(processString(searchText));
-      history.push(
-        `/fetch-name-service/domain-details/${processString(searchText)}`
-      );
+      history.push(`/fetch-name-service/domain-details/${processedText}`);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
-    setInvalidDomain(false);
+    const value = e.target.value;
+    setSearchText(value);
+
+    const errorMessage = validation(value);
+    setInvalidDomain(!!errorMessage);
+    setErrorMessage(errorMessage);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -61,14 +66,12 @@ export const SearchInput = () => {
         <button
           className={style.buttonStyle}
           onClick={handleSearch}
-          disabled={searchText.trim() === ""}
+          disabled={searchText.trim() === "" || invalidDomain}
         >
           SEARCH
         </button>
       </div>
-      {invalidDomain && (
-        <div className={style.invalidText}>Invalid .FET domain name !</div>
-      )}
+      {errorMessage && <div className={style.invalidText}>{errorMessage}</div>}
     </React.Fragment>
   );
 };

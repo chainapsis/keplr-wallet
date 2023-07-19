@@ -22,6 +22,7 @@ import {
   getPrimaryDomain,
 } from "../../name-service/fns-apis";
 import { useHistory } from "react-router";
+import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 
 export const AccountView: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -29,6 +30,7 @@ export const AccountView: FunctionComponent = observer(() => {
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const current = chainStore.current;
   const [domain, setDomain] = useState<string>();
+  const [isDomainloading, setIsDomainloading] = useState<boolean>(true);
 
   const icnsPrimaryName = (() => {
     if (
@@ -72,6 +74,7 @@ export const AccountView: FunctionComponent = observer(() => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsDomainloading(true);
       try {
         const { domain }: any = await getPrimaryDomain(
           current.chainId,
@@ -88,6 +91,7 @@ export const AccountView: FunctionComponent = observer(() => {
       } catch (error) {
         console.error("Error fetching domains:", error);
       }
+      setIsDomainloading(false);
     };
 
     fetchData();
@@ -212,32 +216,36 @@ export const AccountView: FunctionComponent = observer(() => {
           <div style={{ flex: 1 }} />
         </div>
       )}
-      <div
-        className={styleAccount.containerAccount}
-        style={{ marginTop: "5px" }}
-      >
-        <div style={{ flex: 1 }} />
-        {domain ? (
-          <div
-            style={{ margin: "10px" }}
-            className={styleAccount.address}
-            onClick={() => history.push("/fetch-name-service")}
-          >
-            <i className="fas fa-link" />
-            {domain}
-          </div>
-        ) : (
-          <Button
-            color="primary"
-            size="sm"
-            style={{ margin: "10px" }}
-            onClick={() => history.push("/fetch-name-service")}
-          >
-            <img src={icon} draggable={false} /> Link .FET domain
-          </Button>
-        )}
-        <div style={{ flex: 1 }} />
-      </div>
+      {[CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB].includes(current.chainId) && (
+        <div
+          className={styleAccount.containerAccount}
+          style={{ marginTop: "5px" }}
+        >
+          <div style={{ flex: 1 }} />
+          {isDomainloading ? (
+            <i className="fas fa-spinner fa-spin" style={{ margin: "10px" }} />
+          ) : domain ? (
+            <div
+              style={{ margin: "10px" }}
+              className={styleAccount.address}
+              onClick={() => history.push("/fetch-name-service")}
+            >
+              <i className="fas fa-link" />
+              {domain}
+            </div>
+          ) : (
+            <Button
+              color="primary"
+              size="sm"
+              style={{ margin: "10px" }}
+              onClick={() => history.push("/fetch-name-service")}
+            >
+              <img src={icon} draggable={false} /> Link .FET domain
+            </Button>
+          )}
+          <div style={{ flex: 1 }} />
+        </div>
+      )}
     </div>
   );
 });

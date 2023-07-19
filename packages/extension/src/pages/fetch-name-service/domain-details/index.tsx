@@ -13,6 +13,7 @@ import { BuyOrBid } from "./buy-or-bid";
 import { Mint } from "./mint";
 import style from "./style.module.scss";
 import { Update } from "./update";
+import { FNS_CONFIG } from "../../../config.ui.var";
 
 export const DomainDetails = () => {
   const match = useRouteMatch<{ domain: string }>();
@@ -101,6 +102,15 @@ export const DomainDetails = () => {
       onBackButton={() => {
         history.goBack();
       }}
+      rightRenderer={
+        <a
+          href={`https://www.fetns.domains/domains/${domainName}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <i className="fas fa-external-link-alt" style={{ color: "white" }} />
+        </a>
+      }
       showBottomMenu={true}
     >
       <div style={{ fontFamily: "monospace" }}>
@@ -131,40 +141,30 @@ export const DomainDetails = () => {
                 {domainData?.description || "Description hasn't been set"}
               </div>
             </div>
-
-            {Object.keys(domainData)
-              .filter((key: string) => properties.includes(key))
-              .map((property) => (
-                <div className={style.domainInfo} key={property}>
-                  <div className={style.keys}>{property}</div>
-                  <input
-                    disabled={!isOwned && isMinted}
-                    className={style.values}
-                    value={domainData[property]}
-                    onDragStart={(e)=>e.preventDefault()}
-                    placeholder="Not Set"
-                    onChange={(e) => {
-                      setDomainData({
-                        ...domainData,
-                        [property]: e.target.value,
-                      });
-                    }}
-                  />
-                </div>
-              ))}
-            <a
-              href={`https://www.fetns.domains/domains/${domainName}`}
-              target="_blank"
-              rel="noreferrer"
-              className={style.moreDetails}
-            >
-              <div>See More Details</div>
-              <img
-                className={style.arrowIcon}
-                src={require("@assets/svg/arrow-right-outline.svg")}
-                alt=""
-              />
-            </a>
+            <div className={style.domainInfoGroup}>
+              {Object.keys(domainData)
+                .filter((key: string) => properties.includes(key))
+                .map((property) => (
+                  <div className={style.domainInfo} key={property}>
+                    <div className={style.keys}>{property}</div>
+                    <input
+                      disabled={
+                        !isOwned || !FNS_CONFIG[current.chainId].isEditable
+                      }
+                      className={style.values}
+                      value={domainData[property]}
+                      onDragStart={(e) => e.preventDefault()}
+                      placeholder="Not Set"
+                      onChange={(e) => {
+                        setDomainData({
+                          ...domainData,
+                          [property]: e.target.value,
+                        });
+                      }}
+                    />
+                  </div>
+                ))}
+            </div>
 
             {!isLoading &&
               (isOwned ? (

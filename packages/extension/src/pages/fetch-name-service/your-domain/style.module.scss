@@ -45,15 +45,15 @@
   align-self: stretch;
   border-radius: 12px;
 }
-.domainCard :hover{
+.domainDetails:hover {
   box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
-  6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+    6px 6px 32px 0px rgba(243, 95, 73, 0.3);
 }
-.domainInfo :hover{
-  box-shadow: none
+.domainInfo :hover {
+  box-shadow: none;
 }
-.domainDetails :hover{
-  box-shadow: none
+.domainDetails :hover {
+  box-shadow: none;
 }
 .domainInfo {
   display: flex;

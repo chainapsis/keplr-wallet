@@ -12,7 +12,7 @@ export const BuyOrBid: React.FC<BuyOrBidProps> = ({ domainName }) => {
   };
 
   return (
-    <div style={{ display: "flex" }}>
+    <div className={style.buttonGroup}>
       <button
         className={style.mint}
         style={{

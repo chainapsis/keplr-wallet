@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import style from "./style.module.scss";
 import { useStore } from "../../../stores";
 import { useHistory } from "react-router";
-import { getDomainPrice, mintDomain } from "../../../name-service/fns-apis";
-import { formatDomain, shortenMintingNumber } from "@utils/format";
+import { mintDomain } from "../../../name-service/fns-apis";
+import { formatDomain } from "@utils/format";
+import { AppCurrency } from "@keplr-wallet/types";
+import { shortenNumber } from "../../activity/native/activity-row";
 
 type MintProps = {
   domainPrice: any;
@@ -11,17 +13,6 @@ type MintProps = {
   setError: (value: boolean) => void;
   setShowCard: (value: boolean) => void;
 };
-
-interface DomainPriceResponse {
-  result: {
-    Success: {
-      pricing: {
-        amount: string;
-        denom: string;
-      };
-    };
-  };
-}
 
 export const Mint: React.FC<MintProps> = ({
   domainPrice,
@@ -35,47 +26,40 @@ export const Mint: React.FC<MintProps> = ({
   const history = useHistory();
 
   const [showPopUp, setShowPopUp] = useState(false);
-  const [continueMinting, setContinueMinting] = useState(true);
   const [mintingPrice, setmintingPrice] = useState("");
 
-  const handleMintButtonClick = async () => {
-    const fetchPrice = async () => {
-      try {
-        const price = await getDomainPrice(current.chainId, domainName);
-        const priceResponse = price as DomainPriceResponse;
+  const getAmount = ({ amount, denom }: { denom: string; amount: string }) => {
+    const amountCurrency = chainStore.current.currencies.find(
+      (currency: AppCurrency) => currency.coinMinimalDenom === denom
+    );
+    if (amountCurrency) {
+      const amountValue = shortenNumber(amount, amountCurrency?.coinDecimals);
 
-        if (priceResponse.result?.Success) {
-          const priceDenom = priceResponse.result.Success.pricing;
-          const shorten = shortenMintingNumber(
-            priceDenom.amount.toString(),
-            18
-          );
-          setmintingPrice(`${shorten} FET`);
-          console.log(shorten);
-        } else {
-          setmintingPrice("Not Available");
-        }
-      } catch (error) {
-        console.error("Error fetching domain price:", error);
-        setmintingPrice("Not Available");
-      }
-    };
-    fetchPrice();
+      return `${amountValue}${amountCurrency.coinDenom}`;
+    } else return `${amount} ${denom}`;
+  };
+
+  const handleMintButtonClick = async () => {
+    if (domainPrice.result.Success) {
+      const priceDenom = domainPrice.result.Success.pricing;
+      const amount = getAmount(priceDenom);
+      setmintingPrice(amount);
+    } else {
+      setmintingPrice("Not Available");
+    }
+
     setShowPopUp(true);
   };
 
   const handleContinueButtonClick = async () => {
     try {
-      if (continueMinting) {
-        await mintDomain(
-          current.chainId,
-          account,
-          domainName,
-          domainPrice.result.Success.pricing
-        );
-        history.push("/fetch-name-service");
-      }
-      setShowPopUp(false);
+      await mintDomain(
+        current.chainId,
+        account,
+        domainName,
+        domainPrice.result.Success.pricing
+      );
+      history.push("/fetch-name-service");
     } catch (error) {
       console.error("Error minting domain:", error);
       setError(true);
@@ -86,32 +70,45 @@ export const Mint: React.FC<MintProps> = ({
 
   const handleCancelButtonClick = () => {
     setShowPopUp(false);
-    setContinueMinting(false);
   };
 
   return (
-    <>
-      <button
-        className={style.mint}
-        color="primary"
-        onClick={handleMintButtonClick}
-      >
-        MINT{" "}
-        <span className={style.domainName}>{formatDomain(domainName)}</span>
-      </button>
+    <React.Fragment>
+      <div className={style.buttonGroup}>
+        <button
+          className={style.mint}
+          color="primary"
+          onClick={handleMintButtonClick}
+        >
+          MINT{" "}
+          <span className={style.domainName}>{formatDomain(domainName)}</span>
+        </button>
+      </div>
 
       {showPopUp && (
         <div className={style.popupCard}>
-          <div style={{ fontSize: "small" }}>
-            <div>Confirmation for {formatDomain(domainName)}</div>
-            Price of minting is : {mintingPrice} <br />
-            <div style={{ display: "flex", marginRight: "5px" }}>
-              <button onClick={handleContinueButtonClick}>Continue</button>
+          <div
+            style={{
+              display: "flex",
+              textAlign: "center",
+              flexDirection: "column",
+              gap: "5px",
+            }}
+          >
+            <div>Price of minting is </div>
+            {mintingPrice}
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button
+                onClick={handleContinueButtonClick}
+                disabled={mintingPrice === "Not Available"}
+              >
+                Continue
+              </button>
               <button onClick={handleCancelButtonClick}>Cancel</button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };

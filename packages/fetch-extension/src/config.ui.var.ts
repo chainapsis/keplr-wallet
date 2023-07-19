@@ -172,6 +172,7 @@ export const FNS_CONFIG: {
     network: "mainnet" | "testnet";
     rpc: string;
     contractAddress: string;
+    isEditable: boolean;
   };
 } = {
   [CHAIN_ID_DORADO]: {
@@ -179,12 +180,14 @@ export const FNS_CONFIG: {
     rpc: "https://rpc-dorado.fetch.ai:443",
     contractAddress:
       "fetch15hq5u4susv7d064llmupeyevx6hmskkc3p8zvt8rwn0lj02yt72s88skrf",
+    isEditable: false,
   },
   [CHAIN_ID_FETCHHUB]: {
     network: "mainnet",
     rpc: "https://rpc-fetchhub.fetch.ai:443",
     contractAddress:
       "fetch1cj7pfh3aqut6p2ursuqsgceadd2p09cqjklur485sce85tvw3zusy0fpy8",
+    isEditable: false,
   },
 };
 

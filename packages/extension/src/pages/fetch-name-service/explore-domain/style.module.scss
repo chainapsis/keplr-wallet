@@ -44,6 +44,12 @@
     6px 6px 32px 0px rgba(243, 95, 73, 0.3);
 }
 
+.searchContainer:focus-within {
+  border-color: #9075ff;
+  box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+    6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+}
+
 .buttonStyle {
   font-size: small;
   font-weight: bold;
@@ -93,8 +99,10 @@
   opacity: 0.4;
 }
 .invalidText {
+  width: 336px;
   color: red;
   position: fixed;
-  top: 363px;
-  left: 78px;
+  top: 64%;
+  text-align: center;
+  font-size: 14px;
 }
