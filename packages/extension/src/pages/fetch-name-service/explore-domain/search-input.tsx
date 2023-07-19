@@ -6,15 +6,22 @@ export const SearchInput = () => {
   const history = useHistory();
 
   const [searchText, setSearchText] = useState("");
+  const [invalidDomain, setInvalidDomain] = useState(false);
 
   function processString(input: string): string {
+    const regexPattern = /^(?!.*[^\w!@$]|.*(?<!\.fet)$).{1,64}$/;
     const trimmedString = input.trim();
     const lowercasedString = trimmedString.toLowerCase();
+    if (!regexPattern.test(lowercasedString)) {
+      setInvalidDomain(true);
+      return lowercasedString;
+    }
     if (lowercasedString.endsWith(".fet")) {
       return lowercasedString;
     }
     return lowercasedString + ".fet";
   }
+
   const handleSearch = () => {
     if (searchText.trim() !== "") {
       setSearchText("");
@@ -26,6 +33,7 @@ export const SearchInput = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
+    setInvalidDomain(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -35,22 +43,27 @@ export const SearchInput = () => {
   };
 
   return (
-    <div className={style.searchContainer}>
-      <input
-        type="text"
-        value={searchText}
-        className={style.inputStyle}
-        onChange={handleChange}
-        onKeyPress={handleKeyPress}
-        placeholder="Search a .FET name"
-      />
-      <button
-        className={style.buttonStyle}
-        onClick={handleSearch}
-        disabled={searchText.trim() === ""}
-      >
-        SEARCH
-      </button>
-    </div>
+    <React.Fragment>
+      <div className={style.searchContainer}>
+        <input
+          type="text"
+          value={searchText}
+          className={style.inputStyle}
+          onChange={handleChange}
+          onKeyPress={handleKeyPress}
+          placeholder="Search a .FET name"
+        />
+        <button
+          className={style.buttonStyle}
+          onClick={handleSearch}
+          disabled={searchText.trim() === ""}
+        >
+          SEARCH
+        </button>
+      </div>
+      <div className={style.invalidText}>
+        {invalidDomain && "Invalid .FET domain name !"}
+      </div>
+    </React.Fragment>
   );
 };
