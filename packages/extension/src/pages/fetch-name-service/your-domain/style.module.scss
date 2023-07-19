@@ -45,6 +45,10 @@
   align-self: stretch;
   border-radius: 12px;
 }
+.allDomains :hover{
+  box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+  6px 6px 32px 0px rgba(243, 95, 73, 0.3);
+}
 .domainInfo {
   display: flex;
   flex-direction: column;
