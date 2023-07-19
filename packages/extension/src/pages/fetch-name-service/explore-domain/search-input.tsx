@@ -8,23 +8,28 @@ export const SearchInput = () => {
   const [searchText, setSearchText] = useState("");
   const [invalidDomain, setInvalidDomain] = useState(false);
 
-  function processString(input: string): string {
-    const regexPattern = /^(?!.*[^\w!@$]|.*(?<!\.fet)$).{1,64}$/;
+  function processString(input: string) {
+    const regexPattern = /^(?!.*[^\w!@$]|.*(?<!\.fet)$)(?!\S*\s)\S{1,64}$/;
     const trimmedString = input.trim();
     const lowercasedString = trimmedString.toLowerCase();
+
     if (!regexPattern.test(lowercasedString)) {
       setInvalidDomain(true);
+      if (!lowercasedString.endsWith(".fet")) {
+        return lowercasedString + ".fet";
+      } else {
+        return lowercasedString;
+      }
+    } else {
+      setInvalidDomain(false);
       return lowercasedString;
     }
-    if (lowercasedString.endsWith(".fet")) {
-      return lowercasedString;
-    }
-    return lowercasedString + ".fet";
   }
 
   const handleSearch = () => {
     if (searchText.trim() !== "") {
       setSearchText("");
+      console.log(processString(searchText));
       history.push(
         `/fetch-name-service/domain-details/${processString(searchText)}`
       );
@@ -61,9 +66,9 @@ export const SearchInput = () => {
           SEARCH
         </button>
       </div>
-      <div className={style.invalidText}>
-        {invalidDomain && "Invalid .FET domain name !"}
-      </div>
+      {invalidDomain && (
+        <div className={style.invalidText}>Invalid .FET domain name !</div>
+      )}
     </React.Fragment>
   );
 };
