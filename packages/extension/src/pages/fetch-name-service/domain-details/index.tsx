@@ -2,6 +2,7 @@ import domainImage from "@assets/icon/domain-image.png";
 import { HeaderLayout } from "@new-layouts";
 import React, { useEffect, useState } from "react";
 import { useHistory, useRouteMatch } from "react-router-dom";
+import { formatDomain } from "@utils/format";
 import {
   getDomainData,
   getDomainPrice,
@@ -96,7 +97,7 @@ export const DomainDetails = () => {
     <HeaderLayout
       showChainName={false}
       canChangeChainInfo={false}
-      alternativeTitle={domainName.toUpperCase()}
+      alternativeTitle={formatDomain(domainName)}
       onBackButton={() => {
         history.goBack();
       }}
@@ -119,7 +120,7 @@ export const DomainDetails = () => {
               />
               {!domainData.background && (
                 <div className={style.imageText}>
-                  {domainName.toUpperCase()}
+                  {formatDomain(domainName)}
                 </div>
               )}
 
@@ -137,9 +138,10 @@ export const DomainDetails = () => {
                 <div className={style.domainInfo} key={property}>
                   <div className={style.keys}>{property}</div>
                   <input
-                    disabled={!isOwned}
+                    disabled={!isOwned && isMinted}
                     className={style.values}
                     value={domainData[property]}
+                    onDragStart={(e)=>e.preventDefault()}
                     placeholder="Not Set"
                     onChange={(e) => {
                       setDomainData({

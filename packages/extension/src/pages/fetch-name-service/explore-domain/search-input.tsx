@@ -16,10 +16,12 @@ export const SearchInput = () => {
     return lowercasedString + ".fet";
   }
   const handleSearch = () => {
-    setSearchText("");
-    history.push(
-      `/fetch-name-service/domain-details/${processString(searchText)}`
-    );
+    if (searchText.trim() !== "") {
+      setSearchText("");
+      history.push(
+        `/fetch-name-service/domain-details/${processString(searchText)}`
+      );
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,6 +33,7 @@ export const SearchInput = () => {
       handleSearch();
     }
   };
+
   return (
     <div className={style.searchContainer}>
       <input
@@ -41,7 +44,11 @@ export const SearchInput = () => {
         onKeyPress={handleKeyPress}
         placeholder="Search a .FET name"
       />
-      <button className={style.buttonStyle} onClick={handleSearch}>
+      <button
+        className={style.buttonStyle}
+        onClick={handleSearch}
+        disabled={searchText.trim() === ""}
+      >
         SEARCH
       </button>
     </div>

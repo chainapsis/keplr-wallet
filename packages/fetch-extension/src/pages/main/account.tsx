@@ -219,6 +219,7 @@ export const AccountView: FunctionComponent = observer(() => {
         <div style={{ flex: 1 }} />
         {domain ? (
           <div
+            style={{ margin: "10px" }}
             className={styleAccount.address}
             onClick={() => history.push("/fetch-name-service")}
           >
@@ -229,6 +230,7 @@ export const AccountView: FunctionComponent = observer(() => {
           <Button
             color="primary"
             size="sm"
+            style={{ margin: "10px" }}
             onClick={() => history.push("/fetch-name-service")}
           >
             <img src={icon} draggable={false} /> Link .FET domain

@@ -3,6 +3,7 @@ import style from "./style.module.scss";
 import { useStore } from "../../../stores";
 import { useHistory } from "react-router";
 import { mintDomain } from "../../../name-service/fns-apis";
+import { formatDomain } from "@utils/format";
 
 type MintProps = {
   domainPrice: any;
@@ -43,7 +44,7 @@ export const Mint: React.FC<MintProps> = ({
       color="primary"
       onClick={handleMintButtonClick}
     >
-      MINT <span className={style.domainName}>{domainName.toUpperCase()}</span>
+      MINT <span className={style.domainName}>{formatDomain(domainName)}</span>
     </button>
   );
 };

@@ -186,7 +186,6 @@
     font-size: 12px;
     font-weight: 600;
     line-height: normal;
-    letter-spacing: 0.6px;
     text-transform: uppercase;
     display: flex;
     padding: 12px 24px;
@@ -194,5 +193,10 @@
     gap: 10px;
     border-radius: 100px;
     border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  button:hover {
+    border-color: #9075ff;
+    box-shadow: -6px 6px 32px 0px rgba(157, 115, 232, 0.2),
+      6px 6px 32px 0px rgba(243, 95, 73, 0.3);
   }
 }

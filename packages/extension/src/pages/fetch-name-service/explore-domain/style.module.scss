@@ -57,6 +57,10 @@
   display: flex;
   padding: 12px 18px;
 }
+.buttonStyle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .gradientContent {
   font-weight: bold;

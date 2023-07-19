@@ -47,3 +47,15 @@ export const formatActivityHash = (address: string) => {
   if (address?.length > 12) return address.substring(0, 10) + "...";
   else return address;
 };
+
+export const formatDomain = (domainName: string): string => {
+  const maxLength = 15;
+
+  if (domainName.length <= maxLength) {
+    return domainName.toUpperCase();
+  } else {
+    const firstPart = domainName.slice(0, 4);
+    const lastPart = domainName.slice(-8);
+    return `${firstPart}...${lastPart}`.toUpperCase();
+  }
+};
