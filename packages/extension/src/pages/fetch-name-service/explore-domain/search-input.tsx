@@ -10,7 +10,7 @@ export const SearchInput = () => {
 
   function processString(input: string) {
     const regexPattern = /^(?!.*[^\w!@$]|.*(?<!\.fet)$)(?!\S*\s)\S{1,64}$/;
-    const trimmedString = input.trim();
+    const trimmedString = input.replace(/\s+/g, "").trim();
     const lowercasedString = trimmedString.toLowerCase();
 
     if (!regexPattern.test(lowercasedString)) {

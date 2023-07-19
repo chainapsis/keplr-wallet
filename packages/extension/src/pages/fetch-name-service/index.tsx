@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useHistory } from "react-router";
 import { Tab } from "@new-components/tab";
 import { YourDomain } from "./your-domain";
-import { HeaderLayout } from "@new-layouts";
+import { HeaderLayout } from "../../new-layouts";
 import { ExploreDomain } from "./explore-domain";
 
 const tabs = [

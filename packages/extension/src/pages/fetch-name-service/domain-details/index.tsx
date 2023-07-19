@@ -1,5 +1,5 @@
 import domainImage from "@assets/icon/domain-image.png";
-import { HeaderLayout } from "@new-layouts";
+import { HeaderLayout } from "../../../new-layouts";
 import React, { useEffect, useState } from "react";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import { formatDomain } from "@utils/format";
