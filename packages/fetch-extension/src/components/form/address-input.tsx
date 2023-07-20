@@ -27,6 +27,8 @@ import {
 import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { validateAgentAddress } from "@utils/validate-agent";
+import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
+import { getDomainStatus } from "../../name-service/fns-apis";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
@@ -121,7 +123,17 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
         }
       },
     };
-
+    const [isFNSFecthing, setIsFNSFecthing] = useState(false);
+    const getFETOwner = async (
+      chainId: string,
+      domainName: string
+    ): Promise<string | null> => {
+      const getStatus = await getDomainStatus(chainId, domainName);
+      const getOwnerFromStatus = getStatus.domain_status.Owned
+        ? getStatus.domain_status?.Owned.owner
+        : null;
+      return getOwnerFromStatus;
+    };
     return (
       <React.Fragment>
         <Modal
@@ -154,18 +166,45 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                 styleAddressInput["input"]
               )}
               value={recipientConfig.rawRecipient}
-              onChange={(e) => {
+              onChange={async (e) => {
                 let value = e.target.value;
                 if (
                   // If icns is possible and users enters ".", complete bech32 prefix automatically.
                   "isICNSEnabled" in recipientConfig &&
                   recipientConfig.isICNSEnabled &&
                   value.length > 0 &&
+                  ![CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB].includes(
+                    recipientConfig.chainId
+                  ) &&
                   value[value.length - 1] === "." &&
                   numOfCharacter(value, ".") === 1 &&
                   numOfCharacter(recipientConfig.rawRecipient, ".") === 0
                 ) {
                   value = value + recipientConfig.icnsExpectedBech32Prefix;
+                }
+                // If FET owner is availabe and users enters ".", complete bech32 prefix automatically.
+                if (
+                  [CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB].includes(
+                    recipientConfig.chainId
+                  ) &&
+                  value.length > 2 &&
+                  value[value.length - 1] === "." &&
+                  numOfCharacter(value, ".") === 1 &&
+                  numOfCharacter(recipientConfig.rawRecipient, ".") === 0
+                ) {
+                  value = value + "fet";
+                  setIsFNSFecthing(true);
+                  const FETOwner = await getFETOwner(
+                    recipientConfig.chainId,
+                    value
+                  );
+                  if (FETOwner === null) {
+                    setIsFNSFecthing(false);
+                    return;
+                  } else {
+                    value = FETOwner;
+                    setIsFNSFecthing(false);
+                  }
                 }
                 recipientConfig.setRawRecipient(value);
                 e.preventDefault();
@@ -186,6 +225,11 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
               </Button>
             ) : null}
           </InputGroup>
+          {isFNSFecthing ? (
+            <FormText>
+              <i className="fa fa-spinner fa-spin fa-fw" /> fetching address...
+            </FormText>
+          ) : null}
           {isICNSfetching ? (
             <FormText>
               <i className="fa fa-spinner fa-spin fa-fw" />
@@ -195,6 +239,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             <FormText>{recipientConfig.recipient}</FormText>
           ) : null}
           {errorText != null &&
+          !isFNSFecthing &&
           !recipientConfig.rawRecipient.startsWith("agent") ? (
             <div className={styleAddressInput["errorText"]}>{errorText}</div>
           ) : null}
