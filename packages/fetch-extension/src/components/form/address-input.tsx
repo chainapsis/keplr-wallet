@@ -192,9 +192,10 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                   numOfCharacter(value, ".") === 1 &&
                   numOfCharacter(recipientConfig.rawRecipient, ".") === 0
                 ) {
-                  value = value + "fet";
                   setIsFNSFecthing(true);
-                  const FETOwner = await getFETOwner(
+                  value = value + "fet";
+                  recipientConfig.setRawRecipient(value);
+                  const FETOwner: any = await getFETOwner(
                     recipientConfig.chainId,
                     value
                   );
@@ -202,6 +203,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
                     setIsFNSFecthing(false);
                     return;
                   } else {
+                    await new Promise((resolve) => setTimeout(resolve, 500));
                     value = FETOwner;
                     setIsFNSFecthing(false);
                   }
