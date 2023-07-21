@@ -3,10 +3,9 @@ import style from "./style.module.scss";
 import { useStore } from "../../../stores";
 import { useHistory } from "react-router";
 import { mintDomain } from "../../../name-service/fns-apis";
-import { formatDomain } from "@utils/format";
 import { AppCurrency } from "@keplr-wallet/types";
 import { shortenNumber } from "../../activity/native/activity-row";
-
+import { TooltipForDomainNames } from "./index";
 type MintProps = {
   domainPrice: any;
   domainName: string;
@@ -80,8 +79,10 @@ export const Mint: React.FC<MintProps> = ({
           color="primary"
           onClick={handleMintButtonClick}
         >
-          MINT{" "}
-          <span className={style.domainName}>{formatDomain(domainName)}</span>
+          MINT
+          <span style={{ color: "purple" }}>
+            <TooltipForDomainNames domainName={domainName} />
+          </span>
         </button>
       </div>
 

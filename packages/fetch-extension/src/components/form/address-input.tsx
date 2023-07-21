@@ -28,7 +28,7 @@ import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
 import { validateAgentAddress } from "@utils/validate-agent";
 import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
-import { getDomainStatus } from "../../name-service/fns-apis";
+import { getBeneficiaryAddress } from "../../name-service/fns-apis";
 
 export interface AddressInputProps {
   recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
@@ -127,12 +127,17 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
     const getFETOwner = async (
       chainId: string,
       domainName: string
-    ): Promise<string | null> => {
-      const getStatus = await getDomainStatus(chainId, domainName);
-      const getOwnerFromStatus = getStatus.domain_status.Owned
-        ? getStatus.domain_status?.Owned.owner
+    ): Promise<string | null | undefined> => {
+      const getBeneficiaryAddressObject = await getBeneficiaryAddress(
+        chainId,
+        domainName
+      );
+      console.log(getBeneficiaryAddressObject);
+      const getAddress = getBeneficiaryAddressObject
+        ? getBeneficiaryAddressObject.address
         : null;
-      return getOwnerFromStatus;
+      console.log(getAddress);
+      return getAddress;
     };
 
     const updateICNSvalue = (value: string) => {

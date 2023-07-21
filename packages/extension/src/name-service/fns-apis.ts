@@ -17,7 +17,14 @@ export const getDomainData = async (chainId: string, domain: string) => {
   const domainData = await queryClient.getDomainData({ domain });
   return domainData;
 };
-
+export const getBeneficiaryAddress = async (
+  chainId: string,
+  domain: string
+) => {
+  const queryClient = await createFNSClient(chainId);
+  const beneficiaryAddress = await queryClient.resolveName({ domain });
+  return beneficiaryAddress;
+};
 export const getDomainStatus = async (
   chainId: string,
   domain: string

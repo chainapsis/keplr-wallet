@@ -10,6 +10,7 @@ import {
 import { parseTimestampToDate } from "@utils/parse-timestamp-to-date";
 import { useStore } from "../../../stores";
 import { Badge } from "reactstrap";
+import { TooltipForDomainNames } from "../domain-details";
 
 export const YourDomain = () => {
   const { accountStore, chainStore } = useStore();
@@ -95,7 +96,7 @@ export const YourDomain = () => {
           >
             <div className={style.domainDetails}>
               <div className={style.domainInfo}>
-                <div>{domain}</div>
+                <TooltipForDomainNames domainName={domain} />
                 <div
                   style={{
                     color: "var(--text-light, #808DA0)",

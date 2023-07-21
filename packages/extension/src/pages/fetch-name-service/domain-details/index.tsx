@@ -14,6 +14,29 @@ import { Mint } from "./mint";
 import style from "./style.module.scss";
 import { Update } from "./update";
 import { FNS_CONFIG } from "../../../config.ui.var";
+import { ToolTip } from "@components/tooltip";
+
+export const TooltipForDomainNames = ({
+  domainName,
+}: {
+  domainName: string;
+}) => {
+  return domainName.length >= 15 ? (
+    <ToolTip
+      tooltip={(() => {
+        return domainName;
+      })()}
+      trigger="hover"
+      options={{
+        placement: "top",
+      }}
+    >
+      <div>{formatDomain(domainName)}</div>
+    </ToolTip>
+  ) : (
+    <div>{formatDomain(domainName)}</div>
+  );
+};
 
 export const DomainDetails = () => {
   const match = useRouteMatch<{ domain: string }>();
@@ -130,7 +153,7 @@ export const DomainDetails = () => {
               />
               {!domainData.background && (
                 <div className={style.imageText}>
-                  {formatDomain(domainName)}
+                  <TooltipForDomainNames domainName={domainName} />
                 </div>
               )}
 
