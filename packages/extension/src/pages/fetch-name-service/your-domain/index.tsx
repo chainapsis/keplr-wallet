@@ -101,6 +101,7 @@ export const YourDomain = () => {
                   style={{
                     color: "var(--text-light, #808DA0)",
                     fontWeight: "lighter",
+                    width: "142px",
                   }}
                 >
                   Minted on{" "}
@@ -112,13 +113,19 @@ export const YourDomain = () => {
                 </div>
               </div>
               {ownedDomains.includes(domain) && (
-                <Badge color="warning">Owned</Badge>
+                <Badge className={style.badge} href="#" color="warning" pill>
+                  Owned
+                </Badge>
               )}
               {primaryDomain?.domain === domain && (
-                <Badge color="danger">Primary</Badge>
+                <Badge href="#" className={style.badge} color="danger" pill>
+                  Primary
+                </Badge>
               )}
               {assignedDomains.includes(domain) && (
-                <Badge color="primary">Assigned</Badge>
+                <Badge href="#" className={style.badge} color="primary" pill>
+                  Assigned
+                </Badge>
               )}
               <img
                 className={style.arrowIcon}

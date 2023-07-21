@@ -195,6 +195,7 @@ export const DomainDetails = () => {
                   domainName={domainName}
                   domainPrice={domainPrice}
                   domainData={domainData}
+                  isOwned={isOwned}
                 />
               ) : isMinted ? (
                 <BuyOrBid domainName={domainName} />

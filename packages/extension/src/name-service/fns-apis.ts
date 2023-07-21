@@ -1,10 +1,7 @@
 import { FNS_CONFIG } from "../config.ui.var";
 import { createFNSClient } from "./client";
 
-export const getAllDomainsOwnedBy = async (
-  chainId: string,
-  address: string
-) => {
+export const getAllDomainsOwnedBy = async (chainId: string, address: any) => {
   const queryClient = await createFNSClient(chainId);
   const result = await queryClient.getAllDomainsOwnedBy({
     owner: address,
@@ -17,10 +14,7 @@ export const getDomainData = async (chainId: string, domain: string) => {
   const domainData = await queryClient.getDomainData({ domain });
   return domainData;
 };
-export const getBeneficiaryAddress = async (
-  chainId: string,
-  domain: string
-) => {
+export const getBeneficiaryAddress = async (chainId: string, domain: any) => {
   const queryClient = await createFNSClient(chainId);
   const beneficiaryAddress = await queryClient.resolveName({ domain });
   return beneficiaryAddress;
