@@ -58,7 +58,6 @@ export const Update: React.FC<UpdateProps> = ({
   return (
     <div className={style.buttonGroup}>
       <button
-        disabled
         className={style.mint}
         style={{
           marginRight: "10px",
@@ -74,7 +73,6 @@ export const Update: React.FC<UpdateProps> = ({
         <span className={style.domainName}>Make Primary</span>
       </button>
       <button
-        disabled
         className={style.mint}
         onClick={
           FNS_CONFIG[current.chainId].isEditable ? handleUpdate : handleClick

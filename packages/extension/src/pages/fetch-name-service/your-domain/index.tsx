@@ -2,28 +2,36 @@ import React, { useEffect, useState } from "react";
 import style from "./style.module.scss";
 import { Link } from "react-router-dom";
 import {
-  getDomainsDataByOwner,
+  getDomainsByOwner,
   getPrimaryDomain,
   getDomainStatus,
+  getDomainsByBeneficiery,
 } from "../../../name-service/fns-apis";
 import { parseTimestampToDate } from "@utils/parse-timestamp-to-date";
 import { useStore } from "../../../stores";
+import { Badge } from "reactstrap";
 
 export const YourDomain = () => {
   const { accountStore, chainStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
-  const [domains, setDomains] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [primaryDomain, setPrimaryDomain]: any = useState(null);
+  const [ownedDomains, setOwnedDomains] = useState<string[]>([]);
+  const [assignedDomains, setAssignedDomains] = useState<string[]>([]);
+  const [allDomains, setAllDomains] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [mintedOn, setMintedOn] = useState<any>({});
   const [isMintDateLoaded, setIsMintDateLoaded] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { domains: fetchedDomains } = await getDomainsDataByOwner(
+        const { domains: owned } = await getDomainsByOwner(
+          current.chainId,
+          accountInfo.bech32Address
+        );
+        const { domains: assigned } = await getDomainsByBeneficiery(
           current.chainId,
           accountInfo.bech32Address
         );
@@ -31,11 +39,15 @@ export const YourDomain = () => {
           current.chainId,
           accountInfo.bech32Address
         );
-        setDomains(fetchedDomains);
+        setAssignedDomains(assigned);
+        setOwnedDomains(owned);
         setPrimaryDomain(primaryDom);
+
+        const totalDomains = [...new Set([...assigned, ...owned])];
+        setAllDomains(totalDomains);
         setIsLoading(false);
         await Promise.all(
-          fetchedDomains.map(async (domain: string) => {
+          totalDomains.map(async (domain: string) => {
             const domainStatus = (await getDomainStatus(
               current.chainId,
               domain
@@ -72,10 +84,10 @@ export const YourDomain = () => {
           Loading Domains
           <i className="fas fa-spinner fa-spin ml-2" />
         </div>
-      ) : domains.length === 0 ? (
+      ) : allDomains.length === 0 ? (
         <div className={style.loader}>No domains available right now.</div>
       ) : (
-        domains.map((domain: any, index: number) => (
+        allDomains.map((domain: any, index: number) => (
           <Link
             to={`/fetch-name-service/domain-details/${domain}`}
             className={style.domainCard}
@@ -90,7 +102,6 @@ export const YourDomain = () => {
                     fontWeight: "lighter",
                   }}
                 >
-                  {" "}
                   Minted on{" "}
                   {isMintDateLoaded ? (
                     mintedOn[domain]
@@ -99,9 +110,14 @@ export const YourDomain = () => {
                   )}
                 </div>
               </div>
-
-              {primaryDomain && primaryDomain.domain === domain && (
-                <div className={style.inUse}>IN USE</div>
+              {ownedDomains.includes(domain) && (
+                <Badge color="warning">Owned</Badge>
+              )}
+              {primaryDomain?.domain === domain && (
+                <Badge color="danger">Primary</Badge>
+              )}
+              {assignedDomains.includes(domain) && (
+                <Badge color="primary">Assigned</Badge>
               )}
               <img
                 className={style.arrowIcon}

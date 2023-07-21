@@ -7,22 +7,19 @@ import React, {
 
 import { Address } from "@components/address";
 
-import styleAccount from "./account.module.scss";
 import icon from "@assets/svg/link.svg";
+import { useNotification } from "@components/notification";
+import { ToolTip } from "@components/tooltip";
+import { KeplrError } from "@keplr-wallet/router";
 import { WalletStatus } from "@keplr-wallet/stores";
 import { observer } from "mobx-react-lite";
-import { ToolTip } from "@components/tooltip";
 import { useIntl } from "react-intl";
-import { useNotification } from "@components/notification";
-import { useStore } from "../../stores";
-import { KeplrError } from "@keplr-wallet/router";
-import { Button } from "reactstrap";
-import {
-  getDomainsDataByOwner,
-  getPrimaryDomain,
-} from "../../name-service/fns-apis";
 import { useHistory } from "react-router";
+import { Button } from "reactstrap";
 import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
+import { getPrimaryDomain } from "../../name-service/fns-apis";
+import { useStore } from "../../stores";
+import styleAccount from "./account.module.scss";
 
 export const AccountView: FunctionComponent = observer(() => {
   const history = useHistory();
@@ -80,14 +77,7 @@ export const AccountView: FunctionComponent = observer(() => {
           current.chainId,
           accountInfo.bech32Address
         );
-        if (!domain) {
-          const { domains } = await getDomainsDataByOwner(
-            current.chainId,
-            accountInfo.bech32Address
-          );
-          if (domains.length) setDomain(domains.sort()[0]);
-          else setDomain(undefined);
-        } else setDomain(domain);
+        setDomain(domain);
       } catch (error) {
         console.error("Error fetching domains:", error);
       }

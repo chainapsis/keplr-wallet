@@ -35,15 +35,23 @@ export const getDomainPrice = async (chainId: string, domain: string) => {
   return domainPrice;
 };
 
-export const getDomainsDataByOwner = async (
+export const getDomainsByOwner = async (chainId: string, address: string) => {
+  const queryClient = await createFNSClient(chainId);
+  const { domains } = await queryClient.getAllDomainsOwnedBy({
+    owner: address,
+  });
+  return { domains };
+};
+
+export const getDomainsByBeneficiery = async (
   chainId: string,
   address: string
 ) => {
-  const { domains } = await getAllDomainsOwnedBy(chainId, address);
-  const domainsData = await Promise.all(
-    domains.map(async (domain: string) => await getDomainData(chainId, domain))
-  );
-  return { domains, domainsData };
+  const queryClient = await createFNSClient(chainId);
+  const { domains } = await queryClient.reverseLookUp({
+    target: address,
+  });
+  return { domains };
 };
 
 export const getPrimaryDomain = async (
