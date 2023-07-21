@@ -112,21 +112,23 @@ export const YourDomain = () => {
                   )}
                 </div>
               </div>
-              {ownedDomains.includes(domain) && (
-                <Badge className={style.badge} href="#" color="warning" pill>
-                  Owned
-                </Badge>
-              )}
-              {primaryDomain?.domain === domain && (
-                <Badge href="#" className={style.badge} color="danger" pill>
-                  Primary
-                </Badge>
-              )}
-              {assignedDomains.includes(domain) && (
-                <Badge href="#" className={style.badge} color="primary" pill>
-                  Assigned
-                </Badge>
-              )}
+              <div>
+                {ownedDomains.includes(domain) && (
+                  <Badge className={style.badge} color="warning" pill>
+                    Owned
+                  </Badge>
+                )}
+                {primaryDomain?.domain === domain && (
+                  <Badge className={style.badge} color="danger" pill>
+                    Primary
+                  </Badge>
+                )}
+                {assignedDomains.includes(domain) && (
+                  <Badge className={style.badge} color="primary" pill>
+                    Assigned
+                  </Badge>
+                )}
+              </div>
               <img
                 className={style.arrowIcon}
                 src={require("@assets/svg/arrow-right-outline.svg")}
