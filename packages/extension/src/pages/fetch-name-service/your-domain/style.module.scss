@@ -72,8 +72,10 @@
 }
 .badge {
   display: flex;
+  background: white;
   justify-content: center;
   width: 62px;
-  height: 21px;
-  margin-bottom: 2px;
+  height: 23px;
+  margin: 3px;
+  border: 1px solid;
 }

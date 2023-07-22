@@ -1,19 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import style from "./style.module.scss";
 import { useStore } from "../../../stores";
-import {
-  setPrimary,
-  updateDomain,
-  getBeneficiaryAddress,
-} from "../../../name-service/fns-apis";
+import { setPrimary, updateDomain } from "../../../name-service/fns-apis";
 import { useHistory } from "react-router";
 import { FNS_CONFIG } from "../../../config.ui.var";
-
+import { useNotification } from "@components/notification";
 interface UpdateProps {
   domainPrice: any;
   domainName: string;
   domainData: any;
   isOwned: boolean;
+  isAssigned: boolean;
 }
 
 export const Update: React.FC<UpdateProps> = ({
@@ -21,13 +18,14 @@ export const Update: React.FC<UpdateProps> = ({
   domainName,
   domainData,
   isOwned,
+  isAssigned,
 }) => {
   const { chainStore, accountStore } = useStore();
   const current = chainStore.current;
   const account = accountStore.getAccount(current.chainId);
   const history = useHistory();
+  const notification = useNotification();
 
-  const [isAssigned, setIsAssigned] = useState(false);
   const handleMakePrimary = async () => {
     try {
       await setPrimary(
@@ -37,6 +35,16 @@ export const Update: React.FC<UpdateProps> = ({
         domainPrice.result.Success.pricing
       );
       history.push("/fetch-name-service");
+      notification.push({
+        placement: "top-center",
+        type: "primary",
+        duration: 2,
+        content: `transaction braodcasted!`,
+        canDelete: true,
+        transition: {
+          duration: 0.25,
+        },
+      });
     } catch (error) {
       console.error("Error making domain as primary:", error);
     }
@@ -52,24 +60,20 @@ export const Update: React.FC<UpdateProps> = ({
         domainPrice.result.Success.pricing
       );
       history.push("/fetch-name-service");
+      notification.push({
+        placement: "top-center",
+        type: "primary",
+        duration: 2,
+        content: `transaction braodcasted!`,
+        canDelete: true,
+        transition: {
+          duration: 0.25,
+        },
+      });
     } catch (error) {
       console.error("Error making domain as primary:", error);
     }
   };
-  useEffect(() => {
-    const getAssignedAddress = async () => {
-      try {
-        const assignedDomain = await getBeneficiaryAddress(
-          current.chainId,
-          domainName
-        );
-        if (assignedDomain.address === account.toString()) setIsAssigned(true);
-      } catch (error) {
-        console.error("Error making domain as primary:", error);
-      }
-    };
-    getAssignedAddress();
-  }, []);
 
   const handleClick = () => {
     const url = `https://www.fetns.domains/domains/${domainName}`;
@@ -95,7 +99,7 @@ export const Update: React.FC<UpdateProps> = ({
           <span className={style.domainName}>Make Primary</span>
         </button>
       )}
-      {isOwned && !isAssigned && (
+      {isOwned && (
         <button
           className={style.mint}
           onClick={

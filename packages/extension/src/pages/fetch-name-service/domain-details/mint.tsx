@@ -6,6 +6,7 @@ import { mintDomain } from "../../../name-service/fns-apis";
 import { AppCurrency } from "@keplr-wallet/types";
 import { shortenNumber } from "../../activity/native/activity-row";
 import { TooltipForDomainNames } from "./index";
+import { useNotification } from "@components/notification";
 type MintProps = {
   domainPrice: any;
   domainName: string;
@@ -23,6 +24,7 @@ export const Mint: React.FC<MintProps> = ({
   const current = chainStore.current;
   const account = accountStore.getAccount(current.chainId);
   const history = useHistory();
+  const notification = useNotification();
 
   const [showPopUp, setShowPopUp] = useState(false);
   const [mintingPrice, setmintingPrice] = useState("");
@@ -59,6 +61,16 @@ export const Mint: React.FC<MintProps> = ({
         domainPrice.result.Success.pricing
       );
       history.push("/fetch-name-service");
+      notification.push({
+        placement: "top-center",
+        type: "primary",
+        duration: 2,
+        content: `transaction braodcasted!`,
+        canDelete: true,
+        transition: {
+          duration: 0.25,
+        },
+      });
     } catch (error) {
       console.error("Error minting domain:", error);
       setError(true);

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import { formatDomain } from "@utils/format";
 import {
+  getBeneficiaryAddress,
   getDomainData,
   getDomainPrice,
   getDomainStatus,
@@ -50,6 +51,7 @@ export const DomainDetails = () => {
   const [domainData, setDomainData] = useState<any>({});
   const [domainPrice, setDomainPrice] = useState<any>(null);
   const [isMinted, setIsMinted] = useState<any>(null);
+  const [isAssigned, setIsAssigned] = useState(false);
   const [isOwned, setIsOwned] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -68,6 +70,18 @@ export const DomainDetails = () => {
           current.chainId,
           domainName
         );
+        const assignedDomain = await getBeneficiaryAddress(
+          current.chainId,
+          domainName
+        );
+        if (assignedDomain.address === accountInfo.bech32Address) {
+          setIsAssigned(true);
+          console.log(
+            assignedDomain.address,
+            accountInfo.bech32Address,
+            isAssigned
+          );
+        }
         const fetchDomainPrice = await getDomainPrice(
           current.chainId,
           domainName
@@ -190,14 +204,15 @@ export const DomainDetails = () => {
             </div>
 
             {!isLoading &&
-              (isOwned ? (
+              (isOwned || isAssigned ? (
                 <Update
                   domainName={domainName}
                   domainPrice={domainPrice}
                   domainData={domainData}
                   isOwned={isOwned}
+                  isAssigned={isAssigned}
                 />
-              ) : isMinted ? (
+              ) : isMinted && !isOwned && !isAssigned ? (
                 <BuyOrBid domainName={domainName} />
               ) : (
                 <Mint
