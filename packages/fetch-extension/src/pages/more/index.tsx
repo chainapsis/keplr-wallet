@@ -34,7 +34,7 @@ export const MorePage: FunctionComponent = () => {
       )}
 
       {Object.keys(FNS_CONFIG).includes(chainStore.current.chainId) && (
-        <Card className={classnames(style.card, "shadow")}>
+        <Card className={classnames(style["card"], "shadow")}>
           <CardBody>
             <FNSView />
           </CardBody>

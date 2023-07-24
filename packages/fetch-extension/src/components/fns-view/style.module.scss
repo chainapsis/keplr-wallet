@@ -1,6 +1,6 @@
 @import "../../styles/var";
 
-.container-inner {
+.containerInner {
   display: flex;
   flex-direction: row;
 
@@ -8,11 +8,11 @@
   justify-content: center;
   align-items: center;
 
-  .paragraph-main {
+  .paragraphMain {
     line-height: 1.35;
   }
 
-  .paragraph-sub {
+  .paragraphSub {
     line-height: 1.35;
     color: #8898aa;
   }

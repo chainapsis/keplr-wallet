@@ -41,7 +41,7 @@ export const TooltipForDomainNames = ({
 };
 
 export const DomainDetails = () => {
-  const domainName = useLocation().pathname.split("/")[2];
+  const domainName = useLocation().pathname.split("/")[3];
   const navigate = useNavigate();
   const { accountStore, chainStore } = useStore();
   const current = chainStore.current;

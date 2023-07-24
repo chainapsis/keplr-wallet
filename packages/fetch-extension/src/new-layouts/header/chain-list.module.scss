@@ -1,11 +1,11 @@
-.chain-list-container {
+.chainListContainer {
   padding: 12px;
   min-width: 200px;
   text-align: center;
   max-height: 300px;
   overflow-y: auto;
 
-  .chain-name {
+  .chainName {
     cursor: pointer;
     font-size: 20px;
     color: rgba(255, 255, 255, 0.5);
@@ -31,7 +31,7 @@
       margin-top: 0;
     }
 
-    .remove-btn {
+    .removeBtn {
       position: absolute;
       right: 0;
       display: flex;
@@ -40,7 +40,7 @@
     }
   }
 
-  .add-chain {
+  .addChain {
     flex-direction: row;
     gap: 4px;
     color: rgba(255, 255, 255, 0.5);

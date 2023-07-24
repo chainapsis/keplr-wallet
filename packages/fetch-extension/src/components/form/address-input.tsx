@@ -242,7 +242,7 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
             ) : null}
           </InputGroup>
           {isFNSFecthing ? (
-            <div className={styleAddressInput.infoText}>
+            <div className={styleAddressInput["infoText"]}>
               <i className="fa fa-spinner fa-spin fa-fw" /> Fetching owner
               address
             </div>

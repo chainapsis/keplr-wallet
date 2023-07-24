@@ -1,20 +1,17 @@
+import { Address } from "@components/address";
+import { useNotification } from "@components/notification";
+import { ToolTip } from "@components/tooltip";
+import { KeplrError } from "@keplr-wallet/router";
+import { WalletStatus } from "@keplr-wallet/stores";
+import { observer } from "mobx-react-lite";
 import React, {
   FunctionComponent,
   useCallback,
   useEffect,
   useState,
 } from "react";
-
-import { Address } from "@components/address";
-
-import icon from "@assets/svg/link.svg";
-import { useNotification } from "@components/notification";
-import { ToolTip } from "@components/tooltip";
-import { KeplrError } from "@keplr-wallet/router";
-import { WalletStatus } from "@keplr-wallet/stores";
-import { observer } from "mobx-react-lite";
 import { useIntl } from "react-intl";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { Button } from "reactstrap";
 import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 import { getPrimaryDomain } from "../../name-service/fns-apis";
@@ -22,7 +19,7 @@ import { useStore } from "../../stores";
 import styleAccount from "./account.module.scss";
 
 export const AccountView: FunctionComponent = observer(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { accountStore, chainStore, queriesStore, uiConfigStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
   const current = chainStore.current;
@@ -208,7 +205,7 @@ export const AccountView: FunctionComponent = observer(() => {
       )}
       {[CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB].includes(current.chainId) && (
         <div
-          className={styleAccount.containerAccount}
+          className={styleAccount["containerAccount"]}
           style={{ marginTop: "5px" }}
         >
           <div style={{ flex: 1 }} />
@@ -217,8 +214,8 @@ export const AccountView: FunctionComponent = observer(() => {
           ) : domain ? (
             <div
               style={{ margin: "10px" }}
-              className={styleAccount.address}
-              onClick={() => history.push("/fetch-name-service")}
+              className={styleAccount["address"]}
+              onClick={() => navigate("/fetch-name-service")}
             >
               <i className="fas fa-link" />
               {domain}
@@ -228,9 +225,9 @@ export const AccountView: FunctionComponent = observer(() => {
               color="primary"
               size="sm"
               style={{ margin: "10px" }}
-              onClick={() => history.push("/fetch-name-service")}
+              onClick={() => navigate("/fetch-name-service")}
             >
-              <img src={icon} draggable={false} /> Link .FET domain
+              <i className="fas fa-link" /> Link .FET domain
             </Button>
           )}
           <div style={{ flex: 1 }} />
