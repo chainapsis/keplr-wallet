@@ -44,6 +44,7 @@ import { Skeleton } from "../../components/skeleton";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
 import { useTheme } from "styled-components";
+import { IbcHistoryView } from "./components/ibc-history-view";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -328,6 +329,7 @@ export const MainPage: FunctionComponent = observer(() => {
           ) : null}
 
           <ClaimAll isNotReady={isNotReady} />
+          <IbcHistoryView />
 
           {tabStatus === "available" && !isNotReady ? (
             <StakeWithKeplrDashboardButton

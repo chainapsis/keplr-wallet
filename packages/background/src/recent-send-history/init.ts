@@ -3,6 +3,8 @@ import {
   GetRecentSendHistoriesMsg,
   SendTxAndRecordMsg,
   SendTxAndRecordWithIBCPacketForwardingMsg,
+  GetIBCTransferHistories,
+  RemoveIBCTransferHistory,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -12,6 +14,8 @@ export function init(router: Router, service: RecentSendHistoryService): void {
   router.registerMessage(GetRecentSendHistoriesMsg);
   router.registerMessage(SendTxAndRecordMsg);
   router.registerMessage(SendTxAndRecordWithIBCPacketForwardingMsg);
+  router.registerMessage(GetIBCTransferHistories);
+  router.registerMessage(RemoveIBCTransferHistory);
 
   router.addHandler(ROUTE, getHandler(service));
 }

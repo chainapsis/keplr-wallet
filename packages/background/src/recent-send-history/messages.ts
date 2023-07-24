@@ -1,6 +1,6 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import { RecentSendHistory } from "./types";
+import { IBCTransferHistory, RecentSendHistory } from "./types";
 
 export class GetRecentSendHistoriesMsg extends Message<RecentSendHistory[]> {
   public static type() {
@@ -191,5 +191,51 @@ export class SendTxAndRecordWithIBCPacketForwardingMsg extends Message<Uint8Arra
 
   type(): string {
     return SendTxAndRecordWithIBCPacketForwardingMsg.type();
+  }
+}
+
+export class GetIBCTransferHistories extends Message<IBCTransferHistory[]> {
+  public static type() {
+    return "get-ibc-transfer-histories";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetIBCTransferHistories.type();
+  }
+}
+
+export class RemoveIBCTransferHistory extends Message<IBCTransferHistory[]> {
+  public static type() {
+    return "remove-ibc-transfer-histories";
+  }
+
+  constructor(public readonly id: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.id) {
+      throw new Error("id is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RemoveIBCTransferHistory.type();
   }
 }
