@@ -2,15 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>bugsnag</key>
-	<dict>
-		<key>apiKey</key>
-		<string>f07be1dce2391227e818fbe3e4235bf4</string>
-	</dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Keplr</string>
+	<string>Keplr for Test</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIconName</key>
@@ -80,7 +77,10 @@
 	<false/>
 	<key>XSAppIconAssets</key>
 	<string>Images.xcassets/AppIcon.appiconset</string>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-    <true/>
+	<key>bugsnag</key>
+	<dict>
+		<key>apiKey</key>
+		<string>f07be1dce2391227e818fbe3e4235bf4</string>
+	</dict>
 </dict>
 </plist>
