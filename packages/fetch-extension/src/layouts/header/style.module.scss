@@ -1,0 +1,76 @@
+@import "../../styles/var";
+
+.menuContainer {
+  height: $header-height;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  padding-left: $layout-margin;
+}
+
+$menu-icon-size: 20px;
+$menu-icon-gap: 14px;
+
+.menuImg {
+  width: $menu-icon-size;
+  height: $menu-icon-size;
+
+  margin-left: $menu-icon-gap;
+  margin-bottom: 4px;
+
+  cursor: pointer;
+}
+
+.chainListContainer {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  .title {
+    font-size: 24px;
+
+    margin-right: 6px;
+
+    &.small {
+      font-size: 18px;
+    }
+  }
+
+  .titleIconContainer {
+    width: 0;
+    height: 16px;
+
+    .titleIcon {
+      width: 16px;
+      height: 16px;
+
+      margin-top: -6px;
+      fill: #8f8f8f;
+    }
+  }
+
+  &:hover {
+    .title {
+      // color: $primary-color;
+    }
+
+    .titleIcon {
+      // fill: $primary-color;
+    }
+  }
+}
+
+:global(.show) {
+  .chainListContainer {
+    .title {
+      // color: $primary-color;
+    }
+
+    .titleIcon {
+      // fill: $primary-color;
+    }
+  }
+}

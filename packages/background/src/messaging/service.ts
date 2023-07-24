@@ -14,7 +14,7 @@ export class MessagingService {
   private _publicKeyCache = new Map<string, PubKey>();
   protected keyRingService!: KeyRingService;
 
-  init(keyRingService: KeyRingService) {
+  async init(keyRingService: KeyRingService) {
     this.keyRingService = keyRingService;
   }
 
@@ -180,6 +180,7 @@ export class MessagingService {
    * Encrypt a message using the messaging protocol key
    *
    * @param _env The extension environment
+   * @param memorandumUrl
    * @param _chainId The target chain id
    * @param targetAddress The target address
    * @param message The base64 encoded message to be processed
@@ -238,8 +239,10 @@ export class MessagingService {
    *
    * Will first check the local cache, if not present will attempt to lookup the
    * information from the memorandum service
+   * @param memorandumUrl
    * @param accessToken accessToken token to authenticate in memorandum service
    * @param targetAddress The target address to find the public key for
+   * @param chainId
    * @returns The base64 encoded public key for the target address if successful
    * @protected
    */
@@ -299,8 +302,7 @@ export class MessagingService {
               account_number: 0,
               chain_id: chainId,
               fee: [],
-              memo:
-                "Create Messaging Signing Secret encryption key. Only approve requests by Keplr.",
+              memo: "Create Messaging Signing Secret encryption key. Only approve requests by Keplr.",
               msgs: [],
               sequence: 0,
             })

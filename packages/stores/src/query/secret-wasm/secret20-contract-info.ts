@@ -8,15 +8,15 @@ import { ObservableSecretContractChainQuery } from "./contract-query";
 import { Keplr } from "@keplr-wallet/types";
 
 export class ObservableQuerySecret20ContactInfoInner extends ObservableSecretContractChainQuery<Secret20ContractTokenInfo> {
-  protected nonce?: Uint8Array;
+  protected override nonce?: Uint8Array;
 
   constructor(
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly apiGetter: () => Promise<Keplr | undefined>,
-    protected readonly contractAddress: string,
-    protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
+    protected override readonly apiGetter: () => Promise<Keplr | undefined>,
+    protected override readonly contractAddress: string,
+    protected override readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
     // Don't need to set the url initially because it can't request without encyption.
     super(
@@ -31,7 +31,7 @@ export class ObservableQuerySecret20ContactInfoInner extends ObservableSecretCon
     makeObservable(this);
   }
 
-  get error(): Readonly<QueryError<unknown>> | undefined {
+  override get error(): Readonly<QueryError<unknown>> | undefined {
     return (
       super.error ||
       this.querySecretContractCodeHash.getQueryContract(this.contractAddress)
@@ -51,9 +51,9 @@ export class ObservableQuerySecret20ContactInfoInner extends ObservableSecretCon
 
 export class ObservableQuerySecret20ContractInfo extends ObservableChainQueryMap<Secret20ContractTokenInfo> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter,
+    protected override readonly kvStore: KVStore,
+    protected override readonly chainId: string,
+    protected override readonly chainGetter: ChainGetter,
     protected readonly apiGetter: () => Promise<Keplr | undefined>,
     protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {

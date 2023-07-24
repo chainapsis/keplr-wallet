@@ -68,9 +68,8 @@ export class LedgerInitStore {
 
   @computed
   get isGetPubKeySucceeded(): boolean {
-    const datas = this.interactionStore.getEvents<LedgerInitDataType>(
-      "ledger-init"
-    );
+    const datas =
+      this.interactionStore.getEvents<LedgerInitDataType>("ledger-init");
 
     for (const data of datas) {
       if (data.data.event === "get-pubkey" && data.data.success) {
@@ -88,9 +87,8 @@ export class LedgerInitStore {
 
   @computed
   get isSignSucceeded(): boolean {
-    const datas = this.interactionStore.getEvents<LedgerInitDataType>(
-      "ledger-init"
-    );
+    const datas =
+      this.interactionStore.getEvents<LedgerInitDataType>("ledger-init");
 
     for (const data of datas) {
       if (data.data.event === "sign" && data.data.success) {
@@ -103,9 +101,8 @@ export class LedgerInitStore {
 
   @computed
   get isSignRejected(): boolean {
-    const datas = this.interactionStore.getEvents<LedgerInitDataType>(
-      "ledger-init"
-    );
+    const datas =
+      this.interactionStore.getEvents<LedgerInitDataType>("ledger-init");
 
     for (const data of datas) {
       if (data.data.event === "sign" && !data.data.success) {
@@ -118,9 +115,8 @@ export class LedgerInitStore {
 
   @computed
   get isInitAborted(): boolean {
-    const datas = this.interactionStore.getEvents<LedgerInitDataType>(
-      "ledger-init"
-    );
+    const datas =
+      this.interactionStore.getEvents<LedgerInitDataType>("ledger-init");
 
     for (const data of datas) {
       if (data.data.event === "init-aborted") {
@@ -133,9 +129,8 @@ export class LedgerInitStore {
 
   @computed
   get isInitNeeded(): boolean {
-    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
-      "ledger-init"
-    );
+    const datas =
+      this.interactionStore.getDatas<LedgerInitDataType>("ledger-init");
 
     for (const data of datas) {
       if (data.data.event === "init-failed") {
@@ -153,9 +148,8 @@ export class LedgerInitStore {
       return;
     }
 
-    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
-      "ledger-init"
-    );
+    const datas =
+      this.interactionStore.getDatas<LedgerInitDataType>("ledger-init");
 
     for (const data of datas) {
       if (data.data.event === "init-failed") {
@@ -172,9 +166,8 @@ export class LedgerInitStore {
       return;
     }
 
-    const datas = this.interactionStore.getDatas<LedgerInitDataType>(
-      "ledger-init"
-    );
+    const datas =
+      this.interactionStore.getDatas<LedgerInitDataType>("ledger-init");
 
     for (const data of datas) {
       if (data.data.event === "init-failed") {
@@ -190,9 +183,8 @@ export class LedgerInitStore {
     this._isLoading = true;
 
     try {
-      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
-        "ledger-init"
-      );
+      const datas =
+        this.interactionStore.getDatas<LedgerInitDataType>("ledger-init");
 
       for (const data of datas) {
         if (data.data.event === "init-failed") {
@@ -213,9 +205,8 @@ export class LedgerInitStore {
     this._isLoading = true;
 
     try {
-      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
-        "ledger-init"
-      );
+      const datas =
+        this.interactionStore.getDatas<LedgerInitDataType>("ledger-init");
 
       for (const data of datas) {
         if (data.data.event === "init-failed") {
@@ -235,9 +226,8 @@ export class LedgerInitStore {
     this._isLoading = true;
 
     try {
-      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
-        "ledger-init"
-      );
+      const datas =
+        this.interactionStore.getDatas<LedgerInitDataType>("ledger-init");
 
       for (const data of datas) {
         if (data.data.event === "init-failed") {
@@ -258,9 +248,8 @@ export class LedgerInitStore {
     this._isLoading = true;
 
     try {
-      const datas = this.interactionStore.getDatas<LedgerInitDataType>(
-        "ledger-init"
-      );
+      const datas =
+        this.interactionStore.getDatas<LedgerInitDataType>("ledger-init");
 
       for (const data of datas) {
         if (data.data.event === "init-failed") {

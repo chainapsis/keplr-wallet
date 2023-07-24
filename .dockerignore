@@ -12,6 +12,8 @@ yarn-error.log
 **/.cache
 **/coverage
 
+!packages/extension/noop-keplr-wallet-private/build
+
 packages/proto-types/**/*.ts
 packages/proto-types/**/*.js
 packages/proto-types/**/*.mjs

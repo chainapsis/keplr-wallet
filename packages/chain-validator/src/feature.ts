@@ -1,5 +1,5 @@
 import { ChainInfo } from "@keplr-wallet/types";
-import Axios, { AxiosInstance } from "axios";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 /**
  * Indicate the features which keplr supports.
@@ -18,6 +18,7 @@ export const SupportedChainFeatures = [
   "axelar-evm-bridge",
   "osmosis-txfees",
   "terra-classic-fee",
+  "ibc-go-v7-hot-fix",
 ];
 
 /**
@@ -32,19 +33,19 @@ export const RecognizableChainFeaturesMethod: {
   feature: string;
   fetch: (
     features: ReadonlyArray<string>,
-    rpcInstance: AxiosInstance,
-    restInstance: AxiosInstance
+    rpc: string,
+    rest: string
   ) => Promise<boolean>;
 }[] = [
   {
     feature: "ibc-go",
-    fetch: async (_features, _rpcInstance, restInstance) => {
-      const response = await restInstance.get<{
+    fetch: async (_features, _rpc, rest) => {
+      const response = await simpleFetch<{
         params: {
           receive_enabled: boolean;
           send_enabled: boolean;
         };
-      }>("/ibc/apps/transfer/v1/params", {
+      }>(rest, "/ibc/apps/transfer/v1/params", {
         validateStatus: (status) => {
           return status === 200 || status === 501;
         },
@@ -55,17 +56,17 @@ export const RecognizableChainFeaturesMethod: {
   },
   {
     feature: "ibc-transfer",
-    fetch: async (features, _rpcInstance, restInstance) => {
+    fetch: async (features, _rpc, rest) => {
       const requestUrl = features.includes("ibc-go")
         ? "/ibc/apps/transfer/v1/params"
         : "/ibc/applications/transfer/v1beta1/params";
 
-      const result = await restInstance.get<{
+      const result = await simpleFetch<{
         params: {
           receive_enabled: boolean;
           send_enabled: boolean;
         };
-      }>(requestUrl, {
+      }>(rest, requestUrl, {
         validateStatus: (status) => {
           return status === 200 || status === 501;
         },
@@ -80,9 +81,10 @@ export const RecognizableChainFeaturesMethod: {
   },
   {
     feature: "wasmd_0.24+",
-    fetch: async (features, _rpcInstance, restInstance) => {
+    fetch: async (features, _rpc, rest) => {
       if (features.includes("cosmwasm")) {
-        const result = await restInstance.get(
+        const result = await simpleFetch(
+          rest,
           "/cosmwasm/wasm/v1/contract/test/smart/test",
           {
             validateStatus: (status) => {
@@ -90,6 +92,7 @@ export const RecognizableChainFeaturesMethod: {
             },
           }
         );
+
         if (result.status === 400) {
           return true;
         }
@@ -99,8 +102,9 @@ export const RecognizableChainFeaturesMethod: {
   },
   {
     feature: "query:/cosmos/bank/v1beta1/spendable_balances",
-    fetch: async (_features, _rpcInstance, restInstance) => {
-      const result = await restInstance.get(
+    fetch: async (_features, _rpc, rest) => {
+      const result = await simpleFetch(
+        rest,
         "/cosmos/bank/v1beta1/spendable_balances/test",
         {
           validateStatus: (status) => {
@@ -108,6 +112,7 @@ export const RecognizableChainFeaturesMethod: {
           },
         }
       );
+
       return result.status === 400;
     },
   },
@@ -150,12 +155,6 @@ export async function checkChainFeatures(
 ): Promise<string[]> {
   const newFeatures: string[] = [];
   const features = chainInfo.features?.slice() ?? [];
-  const rpcInstance = Axios.create({
-    baseURL: chainInfo.rpc,
-  });
-  const restInstance = Axios.create({
-    baseURL: chainInfo.rest,
-  });
 
   for (const method of RecognizableChainFeaturesMethod) {
     if (features.includes(method.feature)) {
@@ -163,7 +162,7 @@ export async function checkChainFeatures(
     }
 
     try {
-      if (await method.fetch(features, rpcInstance, restInstance)) {
+      if (await method.fetch(features, chainInfo.rpc, chainInfo.rest)) {
         newFeatures.push(method.feature);
         features.push(method.feature);
       }
@@ -192,16 +191,9 @@ export async function hasFeature(
     throw new Error(`${feature} not exist on RecognizableChainFeaturesMethod`);
   }
 
-  const rpcInstance = Axios.create({
-    baseURL: chainInfo.rpc,
-  });
-  const restInstance = Axios.create({
-    baseURL: chainInfo.rest,
-  });
-
   return method.fetch(
     chainInfo.features?.slice() ?? [],
-    rpcInstance,
-    restInstance
+    chainInfo.rpc,
+    chainInfo.rest
   );
 }

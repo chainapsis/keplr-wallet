@@ -54,6 +54,129 @@ enum EvmSignFunction {
   Message = "signArbitrary",
 }
 
+function PubKeystoneCosmosKeyring(
+  env: Env,
+  bip44HDPath: BIP44HDPath,
+  interactionService: InteractionService
+) {
+  return useKeystoneCosmosKeyring({
+    readUR: async () => {
+      const res = (await interactionService.waitApprove(
+        env,
+        "/keystone/import-pubkey",
+        TYPE_KEYSTONE_GET_PUBKEY,
+        {
+          bip44HDPath,
+        },
+        {
+          forceOpenWindow: true,
+          channel: "keystone",
+        }
+      )) as StdPublicKeyDoc;
+      if (res.abort) {
+        throw new Error("The process has been canceled.");
+      }
+      if (!res.publicKey || !res.publicKey.cbor || !res.publicKey.type) {
+        throw new Error("Public key is empty.");
+      }
+      return res.publicKey;
+    },
+  });
+}
+
+function SignKeystoneCosmosKeyring(
+  env: Env,
+  coinType: number,
+  bip44HDPath: BIP44HDPath,
+  keyringData: KeystoneKeyringData,
+  message: Uint8Array,
+  interactionService: InteractionService
+) {
+  let signResolve: { (arg0: KeystoneUR): void };
+  let signReject: { (arg0: unknown): void };
+
+  return useKeystoneCosmosKeyring({
+    keyringData,
+    playUR: async (ur) => {
+      await (async () => {
+        try {
+          const res = (await interactionService.waitApprove(
+            env,
+            "/keystone/sign",
+            TYPE_KEYSTONE_SIGN,
+            {
+              coinType,
+              bip44HDPath,
+              ur,
+              message,
+            }
+          )) as StdSignDoc;
+          if (res.abort) {
+            throw new Error("The process has been canceled.");
+          }
+          if (!res.signature) {
+            throw new Error("Signature is empty.");
+          }
+          signResolve(res.signature);
+        } catch (err) {
+          signReject(err);
+        }
+      })();
+    },
+    readUR: () =>
+      new Promise<KeystoneUR>((resolve, reject) => {
+        signResolve = resolve;
+        signReject = reject;
+      }),
+  });
+}
+
+function SignKeystoneEthereumKeyring(
+  env: Env,
+  coinType: number,
+  bip44HDPath: BIP44HDPath,
+  keyringData: KeystoneKeyringData,
+  message: Uint8Array,
+  interactionService: InteractionService
+) {
+  let signResolve: { (arg0: KeystoneUR): void };
+  let signReject: { (arg0: unknown): void };
+  return useKeystoneEthereumKeyring({
+    keyringData,
+    playUR: async (ur) => {
+      await (async () => {
+        try {
+          const res = (await interactionService.waitApprove(
+            env,
+            "/keystone/sign",
+            TYPE_KEYSTONE_SIGN,
+            {
+              coinType,
+              bip44HDPath,
+              ur,
+              message,
+            }
+          )) as StdSignDoc;
+          if (res.abort) {
+            throw new Error("The process has been canceled.");
+          }
+          if (!res.signature) {
+            throw new Error("Signature is empty.");
+          }
+          signResolve(res.signature);
+        } catch (err) {
+          signReject(err);
+        }
+      })();
+    },
+    readUR: () =>
+      new Promise<KeystoneUR>((resolve, reject) => {
+        signResolve = resolve;
+        signReject = reject;
+      }),
+  });
+}
+
 export class KeystoneService {
   protected interactionService!: InteractionService;
 
@@ -67,29 +190,11 @@ export class KeystoneService {
     env: Env,
     bip44HDPath: BIP44HDPath
   ): Promise<KeystoneKeyringData> {
-    const keyring = useKeystoneCosmosKeyring({
-      readUR: async () => {
-        const res = (await this.interactionService.waitApprove(
-          env,
-          "/keystone/import-pubkey",
-          TYPE_KEYSTONE_GET_PUBKEY,
-          {
-            bip44HDPath,
-          },
-          {
-            forceOpenWindow: true,
-            channel: "keystone",
-          }
-        )) as StdPublicKeyDoc;
-        if (res.abort) {
-          throw new Error("The process has been canceled.");
-        }
-        if (!res.publicKey || !res.publicKey.cbor || !res.publicKey.type) {
-          throw new Error("Public key is empty.");
-        }
-        return res.publicKey;
-      },
-    });
+    const keyring = PubKeystoneCosmosKeyring(
+      env,
+      bip44HDPath,
+      this.interactionService
+    );
     await keyring.readKeyring();
     return keyring.getKeyringData();
   }
@@ -103,42 +208,14 @@ export class KeystoneService {
     message: Uint8Array,
     mode: SignMode
   ): Promise<Uint8Array> {
-    let signResolve: { (arg0: KeystoneUR): void };
-    let signReject: { (arg0: unknown): void };
-    const keyring = useKeystoneCosmosKeyring({
+    const keyring = SignKeystoneCosmosKeyring(
+      env,
+      coinType,
+      bip44HDPath,
       keyringData,
-      playUR: async (ur) => {
-        await (async () => {
-          try {
-            const res = (await this.interactionService.waitApprove(
-              env,
-              "/keystone/sign",
-              TYPE_KEYSTONE_SIGN,
-              {
-                coinType,
-                bip44HDPath,
-                ur,
-                message,
-              }
-            )) as StdSignDoc;
-            if (res.abort) {
-              throw new Error("The process has been canceled.");
-            }
-            if (!res.signature) {
-              throw new Error("Signature is empty.");
-            }
-            signResolve(res.signature);
-          } catch (err) {
-            signReject(err);
-          }
-        })();
-      },
-      readUR: () =>
-        new Promise<KeystoneUR>((resolve, reject) => {
-          signResolve = resolve;
-          signReject = reject;
-        }),
-    });
+      message,
+      this.interactionService
+    );
     const signFn: SignFunction = {
       [SignMode.Amino]: SignFunction.Amino,
       [SignMode.Direct]: SignFunction.Direct,
@@ -163,42 +240,14 @@ export class KeystoneService {
     message: Uint8Array,
     mode: EthSignType
   ): Promise<Uint8Array> {
-    let signResolve: { (arg0: KeystoneUR): void };
-    let signReject: { (arg0: unknown): void };
-    const keyring = useKeystoneEthereumKeyring({
+    const keyring = SignKeystoneEthereumKeyring(
+      env,
+      coinType,
+      bip44HDPath,
       keyringData,
-      playUR: async (ur) => {
-        await (async () => {
-          try {
-            const res = (await this.interactionService.waitApprove(
-              env,
-              "/keystone/sign",
-              TYPE_KEYSTONE_SIGN,
-              {
-                coinType,
-                bip44HDPath,
-                ur,
-                message,
-              }
-            )) as StdSignDoc;
-            if (res.abort) {
-              throw new Error("The process has been canceled.");
-            }
-            if (!res.signature) {
-              throw new Error("Signature is empty.");
-            }
-            signResolve(res.signature);
-          } catch (err) {
-            signReject(err);
-          }
-        })();
-      },
-      readUR: () =>
-        new Promise<KeystoneUR>((resolve, reject) => {
-          signResolve = resolve;
-          signReject = reject;
-        }),
-    });
+      message,
+      this.interactionService
+    );
     const signFn: EthSignFunction = {
       [EthSignType.TRANSACTION]: EthSignFunction.Transaction,
       [EthSignType.MESSAGE]: EthSignFunction.Message,
@@ -231,7 +280,7 @@ export class KeystoneService {
       data
     );
     if (mode === EthSignType.TRANSACTION) {
-      const rlpData = ((signRes as any) as TypedTransaction).serialize();
+      const rlpData = (signRes as any as TypedTransaction).serialize();
       return rlpData;
     }
     return Buffer.from((signRes as string).replace(/^0x/, ""), "hex");

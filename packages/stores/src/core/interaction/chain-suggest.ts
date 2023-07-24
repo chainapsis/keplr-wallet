@@ -53,9 +53,7 @@ export class ChainSuggestStore {
     return `${this.communityChainInfoRepoUrl}/blob/${this.communityChainInfoRepo.branchName}/cosmos/${chainIdHelper.identifier}.json`;
   }
 
-  getCommunityChainInfo(
-    chainId: string
-  ): {
+  getCommunityChainInfo(chainId: string): {
     chainInfo: ChainInfo | undefined;
     isLoading: boolean;
   } {

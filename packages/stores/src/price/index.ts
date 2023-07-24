@@ -213,7 +213,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     this.restoreDefaultVsCurrency();
   }
 
-  protected onStart() {
+  protected override onStart() {
     super.onStart();
 
     return this.init();
@@ -269,13 +269,13 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     return this._supportedVsCurrencies[currency];
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return (
       this._coinIds.values.length > 0 && this._vsCurrencies.values.length > 0
     );
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<CoinGeckoSimplePrice>; headers: any }> {
     const { response, headers } = await super.fetchResponse(abortController);
@@ -317,7 +317,7 @@ export class CoinGeckoPriceStore extends ObservableQuery<CoinGeckoSimplePrice> {
     }
   }
 
-  protected getCacheKey(): string {
+  protected override getCacheKey(): string {
     // Because the uri of the coingecko would be changed according to the coin ids and vsCurrencies.
     // Therefore, just using the uri as the cache key is not useful.
     return `${this.instance.name}-${

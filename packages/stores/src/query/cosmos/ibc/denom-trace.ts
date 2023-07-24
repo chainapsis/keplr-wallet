@@ -24,7 +24,7 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
     );
   }
 
-  protected onStart() {
+  protected override onStart() {
     super.onStart();
 
     return new Promise<void>((resolve) => {
@@ -38,7 +38,7 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
     });
   }
 
-  protected onStop() {
+  protected override onStop() {
     if (this.disposer) {
       this.disposer();
       this.disposer = undefined;
@@ -106,9 +106,9 @@ export class ObservableChainQueryDenomTrace extends ObservableChainQuery<DenomTr
 
 export class ObservableQueryDenomTrace extends ObservableChainQueryMap<DenomTraceResponse> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    protected override readonly kvStore: KVStore,
+    protected override readonly chainId: string,
+    protected override readonly chainGetter: ChainGetter
   ) {
     super(kvStore, chainId, chainGetter, (hash: string) => {
       return new ObservableChainQueryDenomTrace(

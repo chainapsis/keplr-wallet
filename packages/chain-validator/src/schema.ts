@@ -48,7 +48,9 @@ export const CW20CurrencySchema = (CurrencySchema as ObjectSchema<CW20Currency>)
     }
   });
 
-export const Secret20CurrencySchema = (CurrencySchema as ObjectSchema<Secret20Currency>)
+export const Secret20CurrencySchema = (
+  CurrencySchema as ObjectSchema<Secret20Currency>
+)
   .keys({
     type: Joi.string().equal("secret20").required(),
     contractAddress: Joi.string().required(),
@@ -89,9 +91,9 @@ const GasPriceStepSchema = Joi.object<{
   return value;
 });
 
-export const FeeCurrencySchema = (CurrencySchema as Joi.ObjectSchema<
-  WithGasPriceStep<Currency>
->).keys({
+export const FeeCurrencySchema = (
+  CurrencySchema as Joi.ObjectSchema<WithGasPriceStep<Currency>>
+).keys({
   gasPriceStep: GasPriceStepSchema,
 });
 

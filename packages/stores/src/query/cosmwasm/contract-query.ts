@@ -27,7 +27,7 @@ export class ObservableCosmwasmContractChainQuery<
     );
   }
 
-  protected onStart() {
+  protected override onStart() {
     super.onStart();
 
     return new Promise<void>((resolve) => {
@@ -48,7 +48,7 @@ export class ObservableCosmwasmContractChainQuery<
     });
   }
 
-  protected onStop() {
+  protected override onStop() {
     if (this.disposer) {
       this.disposer();
       this.disposer = undefined;
@@ -64,16 +64,16 @@ export class ObservableCosmwasmContractChainQuery<
     return `/wasm/v1/contract/${contractAddress}/smart/${query}`;
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return this.contractAddress.length !== 0;
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<T>; headers: any }> {
     const { response, headers } = await super.fetchResponse(abortController);
 
-    const wasmResult = (response.data as unknown) as
+    const wasmResult = response.data as unknown as
       | {
           data: any;
         }

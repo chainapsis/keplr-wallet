@@ -98,13 +98,15 @@ export class Keplr implements IKeplr, KeplrCoreTypes {
       const gasPriceStep = { ...chainInfo.gasPriceStep };
       for (const feeCurrency of chainInfo.feeCurrencies) {
         if (!feeCurrency.gasPriceStep) {
-          (feeCurrency as {
-            gasPriceStep?: {
-              readonly low: number;
-              readonly average: number;
-              readonly high: number;
-            };
-          }).gasPriceStep = gasPriceStep;
+          (
+            feeCurrency as {
+              gasPriceStep?: {
+                readonly low: number;
+                readonly average: number;
+                readonly high: number;
+              };
+            }
+          ).gasPriceStep = gasPriceStep;
         }
       }
       delete chainInfo.gasPriceStep;

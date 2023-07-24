@@ -1,0 +1,84 @@
+$border-radius: 6px;
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+
+  .button {
+    flex: 1;
+    padding-left: 0;
+    padding-right: 0;
+
+    box-shadow: 0 1px 3px rgba(50, 50, 93, 0.15), 0 1px 0 rgba(0, 0, 0, 0.02);
+    &:not(:global(.btn-primary)) {
+      background-color: white;
+    }
+
+    &:focus {
+      z-index: unset;
+    }
+
+    &:first-child {
+      border-radius: $border-radius $border-radius 0 0 !important;
+    }
+
+    &:last-child {
+      border-radius: 0 0 $border-radius $border-radius !important;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .fiat {
+      font-size: 10px;
+    }
+
+    .coin {
+      font-size: 10px;
+    }
+  }
+}
+.setGasButton {
+  float: right;
+}
+
+.tokenSelector {
+  width: 100%;
+  height: 46px;
+
+  button {
+    width: 100%;
+
+    background: white;
+    text-align: left;
+    font-weight: normal;
+  }
+
+  :global(.dropdown-toggle) {
+    box-shadow: 0 1px 3px rgba(50, 50, 93, 0.15), 0 1px 0 rgba(0, 0, 0, 0.02) !important;
+
+    &::after {
+      border-radius: 2px;
+      content: " ";
+      display: block;
+      height: 0.625em;
+      margin-top: -0.4375em;
+      pointer-events: none;
+      position: absolute;
+      top: 50%;
+      transform: rotate(-45deg);
+      transform-origin: center;
+      width: 0.625em;
+      border: 0 solid black;
+      border-bottom-width: 3px;
+      border-left-width: 3px;
+      right: 1.125em;
+      z-index: 4;
+    }
+  }
+
+  :global(.dropdown-menu.show) {
+    width: 100%;
+  }
+}

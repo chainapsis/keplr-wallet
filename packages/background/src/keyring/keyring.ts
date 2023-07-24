@@ -1268,9 +1268,7 @@ export class KeyRing {
     };
   }
 
-  public async changeKeyStoreFromMultiKeyStore(
-    index: number
-  ): Promise<{
+  public async changeKeyStoreFromMultiKeyStore(index: number): Promise<{
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     if (this.status !== KeyRingStatus.UNLOCKED || this.password == "") {
@@ -1467,9 +1465,7 @@ export class KeyRing {
     );
   }
 
-  private async assignKeyStoreIdMeta(meta: {
-    [key: string]: string;
-  }): Promise<{
+  private async assignKeyStoreIdMeta(meta: { [key: string]: string }): Promise<{
     [key: string]: string;
   }> {
     // `__id__` is used to distinguish the key store.
@@ -1479,7 +1475,7 @@ export class KeyRing {
   }
 
   private static getKeyStoreId(keyStore: KeyStore): string {
-    const id = keyStore.meta?.__id__;
+    const id = keyStore.meta?.["__id__"];
     if (!id) {
       throw new Error("Key store's id is empty");
     }

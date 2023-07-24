@@ -16,7 +16,7 @@ export class GetPubkeyMsg extends Message<Uint8Array> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -57,7 +57,7 @@ export class ReqeustEncryptMsg extends Message<Uint8Array> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -97,7 +97,7 @@ export class RequestDecryptMsg extends Message<Uint8Array> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -133,7 +133,7 @@ export class GetTxEncryptionKeyMsg extends Message<Uint8Array> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

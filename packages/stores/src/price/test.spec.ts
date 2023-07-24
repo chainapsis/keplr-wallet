@@ -159,12 +159,8 @@ describe("Test coin gecko price store", () => {
 
     // Query cosmos,osmosis,regen price
     await (async () => {
-      const {
-        port,
-        closeServer,
-        getTestPrice,
-        getServerRespCount,
-      } = createMockCoingeckoServer();
+      const { port, closeServer, getTestPrice, getServerRespCount } =
+        createMockCoingeckoServer();
 
       const priceStore = new CoinGeckoPriceStore(
         store,
@@ -220,12 +216,8 @@ describe("Test coin gecko price store", () => {
     })();
 
     await (async () => {
-      const {
-        port,
-        closeServer,
-        getTestPrice,
-        getServerRespCount,
-      } = createMockCoingeckoServer();
+      const { port, closeServer, getTestPrice, getServerRespCount } =
+        createMockCoingeckoServer();
 
       const priceStore = new CoinGeckoPriceStore(
         store,
@@ -281,12 +273,8 @@ describe("Test coin gecko price store", () => {
     })();
 
     await (async () => {
-      const {
-        port,
-        closeServer,
-        getTestPrice,
-        getServerRespCount,
-      } = createMockCoingeckoServer();
+      const { port, closeServer, getTestPrice, getServerRespCount } =
+        createMockCoingeckoServer();
 
       const priceStore = new CoinGeckoPriceStore(
         store,

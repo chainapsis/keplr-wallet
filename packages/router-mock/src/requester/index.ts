@@ -1,8 +1,8 @@
 import {
   MessageRequester,
   Message,
-  JSONUint8Array,
   Result,
+  JSONUint8Array,
 } from "@keplr-wallet/router";
 import { MockRouter } from "../router";
 

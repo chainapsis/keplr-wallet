@@ -11,7 +11,7 @@ export class ObservableQueryCw20Balance extends ObservableCosmwasmContractChainQ
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly contractAddress: string,
+    protected override readonly contractAddress: string,
     protected readonly bech32Address: string
   ) {
     super(kvStore, chainId, chainGetter, contractAddress, {
@@ -19,7 +19,7 @@ export class ObservableQueryCw20Balance extends ObservableCosmwasmContractChainQ
     });
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return super.canFetch() && this.bech32Address !== "";
   }
 }
@@ -55,12 +55,12 @@ export class ObservableQueryCw20BalanceInner extends ObservableQueryBalanceInner
   }
 
   // This method doesn't have the role because the fetching is actually exeucnted in the `ObservableQueryCw20Balance`.
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return false;
   }
 
   @override
-  *fetch() {
+  override *fetch() {
     yield this.queryCw20Balance.fetch();
   }
 

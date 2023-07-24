@@ -128,7 +128,7 @@ export class IBCChannelStore extends HasMapStore<IBCChannelStoreInner> {
     });
   }
 
-  get(chainId: string): IBCChannelStoreInner {
+  override get(chainId: string): IBCChannelStoreInner {
     return super.get(chainId);
   }
 }

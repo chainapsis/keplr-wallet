@@ -262,9 +262,8 @@ export class KeyRingService {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
-      chainId
-    );
+    const ethereumKeyFeatures =
+      await this.chainsService.getChainEthereumKeyFeatures(chainId);
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
@@ -307,9 +306,8 @@ export class KeyRingService {
     signDoc = sortObjectByKey(signDoc);
 
     const coinType = await this.chainsService.getChainCoinType(chainId);
-    const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
-      chainId
-    );
+    const ethereumKeyFeatures =
+      await this.chainsService.getChainEthereumKeyFeatures(chainId);
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
@@ -476,9 +474,8 @@ export class KeyRingService {
     signDoc = sortObjectByKey(signDoc);
 
     const coinType = await this.chainsService.getChainCoinType(chainId);
-    const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
-      chainId
-    );
+    const ethereumKeyFeatures =
+      await this.chainsService.getChainEthereumKeyFeatures(chainId);
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
@@ -568,9 +565,8 @@ export class KeyRingService {
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
-    const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
-      chainId
-    );
+    const ethereumKeyFeatures =
+      await this.chainsService.getChainEthereumKeyFeatures(chainId);
 
     if (ethereumKeyFeatures.address || ethereumKeyFeatures.signing) {
       // Check the comment on the method itself.
@@ -747,9 +743,10 @@ Salt: ${salt}`;
         const coinType = await this.chainsService.getChainCoinType(
           accountInfo.chainId
         );
-        const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
-          accountInfo.chainId
-        );
+        const ethereumKeyFeatures =
+          await this.chainsService.getChainEthereumKeyFeatures(
+            accountInfo.chainId
+          );
 
         const signature = await this.keyRing
           .sign(
@@ -781,9 +778,10 @@ Salt: ${salt}`;
         });
       } else {
         // If address is same with owner, there is no need to sign.
-        const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
-          accountInfo.chainId
-        );
+        const ethereumKeyFeatures =
+          await this.chainsService.getChainEthereumKeyFeatures(
+            accountInfo.chainId
+          );
 
         r.push({
           chainId: accountInfo.chainId,
@@ -811,9 +809,8 @@ Salt: ${salt}`;
     signature: StdSignature
   ): Promise<boolean> {
     const coinType = await this.chainsService.getChainCoinType(chainId);
-    const ethereumKeyFeatures = await this.chainsService.getChainEthereumKeyFeatures(
-      chainId
-    );
+    const ethereumKeyFeatures =
+      await this.chainsService.getChainEthereumKeyFeatures(chainId);
 
     const key = await this.keyRing.getKey(
       chainId,
@@ -912,9 +909,7 @@ Salt: ${salt}`;
     );
   }
 
-  public async changeKeyStoreFromMultiKeyStore(
-    index: number
-  ): Promise<{
+  public async changeKeyStoreFromMultiKeyStore(index: number): Promise<{
     multiKeyStoreInfo: MultiKeyStoreInfoWithSelected;
   }> {
     try {
@@ -971,7 +966,9 @@ Salt: ${salt}`;
     for (const path of paths) {
       const key = await this.keyRing.getKeyFromCoinType(
         path.coinType,
-        (await this.chainsService.getChainEthereumKeyFeatures(chainId)).address
+        (
+          await this.chainsService.getChainEthereumKeyFeatures(chainId)
+        ).address
       );
       const bech32Address = new Bech32Address(key.address).toBech32(
         chainInfo.bech32Config.bech32PrefixAccAddr

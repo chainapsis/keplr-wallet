@@ -53,7 +53,7 @@ export class MockOnStartObservableQuery extends ObservableQuery<number> {
     this.onStartOptions = onStartOptions;
   }
 
-  protected onStart() {
+  protected override onStart() {
     super.onStart();
 
     if (this.onStartOptions.onStartDelay == null) {
@@ -85,7 +85,7 @@ export class DelayMemoryKVStore extends MemoryKVStore {
     super(prefix);
   }
 
-  async get<T = unknown>(key: string): Promise<T | undefined> {
+  override async get<T = unknown>(key: string): Promise<T | undefined> {
     await new Promise((resolve) => {
       setTimeout(resolve, this.delay);
     });
@@ -93,7 +93,7 @@ export class DelayMemoryKVStore extends MemoryKVStore {
     return super.get(key);
   }
 
-  async set<T = unknown>(key: string, data: T | null): Promise<void> {
+  override async set<T = unknown>(key: string, data: T | null): Promise<void> {
     await new Promise((resolve) => {
       setTimeout(resolve, this.delay);
     });
@@ -1504,7 +1504,8 @@ describe("Test observable query", () => {
     const query = new MockObservableQuery(memStore, port, {}, "/invalid");
 
     const queryController = new DeferInitialQueryController();
-    ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
+    ObservableQueryBase.experimentalDeferInitialQueryController =
+      queryController;
 
     await new Promise((resolve) => {
       jest.advanceTimersByTime(150);
@@ -1608,7 +1609,8 @@ describe("Test observable query", () => {
     );
 
     const queryController = new DeferInitialQueryController();
-    ObservableQueryBase.experimentalDeferInitialQueryController = queryController;
+    ObservableQueryBase.experimentalDeferInitialQueryController =
+      queryController;
 
     await new Promise((resolve) => {
       jest.advanceTimersByTime(150);

@@ -50,68 +50,63 @@ export class ChainsService {
     this.permissionService = permissionService;
   }
 
-  readonly getChainInfos: () => Promise<
-    ChainInfoWithCoreTypes[]
-  > = Debouncer.promise(async () => {
-    if (this.cachedChainInfos) {
-      return this.cachedChainInfos;
-    }
+  readonly getChainInfos: () => Promise<ChainInfoWithCoreTypes[]> =
+    Debouncer.promise(async () => {
+      if (this.cachedChainInfos) {
+        return this.cachedChainInfos;
+      }
 
-    const chainInfos = this.embedChainInfos.map((chainInfo) => {
-      return {
-        ...chainInfo,
-        embeded: true,
-      };
-    });
-    const embedChainInfoIdentifierMap: Map<
-      string,
-      true | undefined
-    > = new Map();
-    for (const embedChainInfo of chainInfos) {
-      embedChainInfoIdentifierMap.set(
-        ChainIdHelper.parse(embedChainInfo.chainId).identifier,
-        true
-      );
-    }
-
-    const suggestedChainInfos: ChainInfoWithCoreTypes[] = (
-      await this.getSuggestedChainInfos()
-    )
-      .filter((chainInfo) => {
-        // Filter the overlaped chain info with the embeded chain infos.
-        return !embedChainInfoIdentifierMap.get(
-          ChainIdHelper.parse(chainInfo.chainId).identifier
-        );
-      })
-      .map((chainInfo: ChainInfo) => {
+      const chainInfos = this.embedChainInfos.map((chainInfo) => {
         return {
           ...chainInfo,
-          embeded: false,
+          embeded: true,
         };
       });
-
-    let result: ChainInfoWithCoreTypes[] = chainInfos.concat(
-      suggestedChainInfos
-    );
-
-    // Set the updated property of the chain.
-    result = await Promise.all(
-      result.map(async (chainInfo) => {
-        const updated: ChainInfo = await this.chainUpdaterService.replaceChainInfo(
-          chainInfo
+      const embedChainInfoIdentifierMap: Map<string, true | undefined> =
+        new Map();
+      for (const embedChainInfo of chainInfos) {
+        embedChainInfoIdentifierMap.set(
+          ChainIdHelper.parse(embedChainInfo.chainId).identifier,
+          true
         );
+      }
 
-        return {
-          ...updated,
-          embeded: chainInfo.embeded,
-        };
-      })
-    );
+      const suggestedChainInfos: ChainInfoWithCoreTypes[] = (
+        await this.getSuggestedChainInfos()
+      )
+        .filter((chainInfo) => {
+          // Filter the overlaped chain info with the embeded chain infos.
+          return !embedChainInfoIdentifierMap.get(
+            ChainIdHelper.parse(chainInfo.chainId).identifier
+          );
+        })
+        .map((chainInfo: ChainInfo) => {
+          return {
+            ...chainInfo,
+            embeded: false,
+          };
+        });
 
-    this.cachedChainInfos = result;
+      let result: ChainInfoWithCoreTypes[] =
+        chainInfos.concat(suggestedChainInfos);
 
-    return result;
-  });
+      // Set the updated property of the chain.
+      result = await Promise.all(
+        result.map(async (chainInfo) => {
+          const updated: ChainInfo =
+            await this.chainUpdaterService.replaceChainInfo(chainInfo);
+
+          return {
+            ...updated,
+            embeded: chainInfo.embeded,
+          };
+        })
+      );
+
+      this.cachedChainInfos = result;
+
+      return result;
+    });
 
   async getChainInfosWithoutEndpoints(): Promise<ChainInfoWithoutEndpoints[]> {
     return (await this.getChainInfos()).map<ChainInfoWithoutEndpoints>(
@@ -127,9 +122,7 @@ export class ChainsService {
 
         // Should remove fields not related to `ChainInfoWithoutEndpoints`
         delete chainInfoMutable.rpc;
-        delete chainInfoMutable.rpcConfig;
         delete chainInfoMutable.rest;
-        delete chainInfoMutable.restConfig;
         delete chainInfoMutable.nodeProvider;
 
         delete chainInfoMutable.updateFromRepoDisabled;

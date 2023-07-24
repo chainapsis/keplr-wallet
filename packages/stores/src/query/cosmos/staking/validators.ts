@@ -59,11 +59,11 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
     this.validator = validator;
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return this.validator.description.identity !== "";
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ response: QueryResponse<KeybaseResult>; headers: any }> {
     return await ObservableQueryValidatorThumbnail.fetchingThumbnailQueue.add(
@@ -87,10 +87,8 @@ export class ObservableQueryValidatorThumbnail extends ObservableQuery<KeybaseRe
 
 export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validators> {
   @observable.shallow
-  protected thumbnailMap: Map<
-    string,
-    ObservableQueryValidatorThumbnail
-  > = new Map();
+  protected thumbnailMap: Map<string, ObservableQueryValidatorThumbnail> =
+    new Map();
 
   constructor(
     kvStore: KVStore,
@@ -127,13 +125,15 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
     return this.response.data.validators;
   }
 
-  readonly getValidator = computedFn((validatorAddress: string):
-    | Validator
-    | undefined => {
-    const validators = this.validators;
+  readonly getValidator = computedFn(
+    (validatorAddress: string): Validator | undefined => {
+      const validators = this.validators;
 
-    return validators.find((val) => val.operator_address === validatorAddress);
-  });
+      return validators.find(
+        (val) => val.operator_address === validatorAddress
+      );
+    }
+  );
 
   @computed
   get validatorsSortedByVotingPower(): Validator[] {
@@ -176,31 +176,31 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
   /**
    * Return the validator's voting power as human friendly (considering the coin decimals).
    */
-  readonly getValidatorShare = computedFn((operatorAddress: string):
-    | CoinPretty
-    | undefined => {
-    const validators = this.validators;
-    const validator = validators.find(
-      (val) => val.operator_address === operatorAddress
-    );
-    if (!validator) {
-      return;
+  readonly getValidatorShare = computedFn(
+    (operatorAddress: string): CoinPretty | undefined => {
+      const validators = this.validators;
+      const validator = validators.find(
+        (val) => val.operator_address === operatorAddress
+      );
+      if (!validator) {
+        return;
+      }
+
+      const chainInfo = this.chainGetter.getChain(this.chainId);
+      const stakeCurrency = chainInfo.stakeCurrency;
+
+      const power = new Dec(validator.tokens).truncate();
+
+      return new CoinPretty(stakeCurrency, power);
     }
-
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const stakeCurrency = chainInfo.stakeCurrency;
-
-    const power = new Dec(validator.tokens).truncate();
-
-    return new CoinPretty(stakeCurrency, power);
-  });
+  );
 }
 
 export class ObservableQueryValidators extends ObservableChainQueryMap<Validators> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    protected override readonly kvStore: KVStore,
+    protected override readonly chainId: string,
+    protected override readonly chainGetter: ChainGetter
   ) {
     super(kvStore, chainId, chainGetter, (status: string) => {
       return new ObservableQueryValidatorsInner(

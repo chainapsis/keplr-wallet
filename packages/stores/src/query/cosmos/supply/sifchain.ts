@@ -19,7 +19,7 @@ export class ObservableQuerySifchainLiquidityAPY extends ObservableQuery<Sifchai
     makeObservable(this);
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return this.chainId.startsWith("sifchain");
   }
 

@@ -1,0 +1,16 @@
+@import "../../styles/var";
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: $background-color;
+}
+
+.innerContainer {
+  padding: 0 $layout-padding $layout-padding;
+  flex: 1;
+  margin-top: 66px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}

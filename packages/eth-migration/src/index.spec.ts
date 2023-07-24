@@ -1,5 +1,3 @@
-import "mocha";
-import assert from "assert";
 import { Buffer } from "buffer";
 import { ethPublicKeyToAddress, parseEthPrivateKey } from "./index";
 
@@ -14,17 +12,17 @@ describe("Test eth private key matches", () => {
       "02ee7bfb4e1a7346f283f568dc248dd7fc1319412cbaae90df66eabab1c41064f9";
 
     const parsed = parseEthPrivateKey(Buffer.from(privateKey, "hex"));
-    assert.strictEqual(parsed?.ethAddress, expectedAddress);
+    if (parsed) {
+      expect(parsed.ethAddress).toBe(expectedAddress);
 
-    assert.strictEqual(
-      Buffer.from(parsed?.rawPublicKey).toString("hex"),
-      expectedRawPubKey
-    );
+      expect(Buffer.from(parsed.rawPublicKey).toString("hex")).toBe(
+        expectedRawPubKey
+      );
 
-    assert.strictEqual(
-      Buffer.from(parsed?.compressedPublicKey).toString("hex"),
-      expectedCompressedPubKey
-    );
+      expect(Buffer.from(parsed.compressedPublicKey).toString("hex")).toBe(
+        expectedCompressedPubKey
+      );
+    }
   });
 
   it("can generate a fetch address from a public key", () => {
@@ -32,8 +30,7 @@ describe("Test eth private key matches", () => {
       "02ee7bfb4e1a7346f283f568dc248dd7fc1319412cbaae90df66eabab1c41064f9";
     const expectedFetchAddress = "fetch1s3rfc2n0cjgtqm4e2llvcjtq89yf6q7p2pfxw7";
 
-    assert.strictEqual(
-      ethPublicKeyToAddress(Buffer.from(publicKey, "hex")),
+    expect(ethPublicKeyToAddress(Buffer.from(publicKey, "hex"))).toBe(
       expectedFetchAddress
     );
   });

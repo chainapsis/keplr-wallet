@@ -19,11 +19,11 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
     kvStore: KVStore,
     chainId: string,
     chainGetter: ChainGetter,
-    protected readonly apiGetter: () => Promise<Keplr | undefined>,
-    protected readonly contractAddress: string,
+    protected override readonly apiGetter: () => Promise<Keplr | undefined>,
+    protected override readonly contractAddress: string,
     protected readonly bech32Address: string,
     protected readonly viewingKey: string,
-    protected readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
+    protected override readonly querySecretContractCodeHash: ObservableQuerySecretContractCodeHash
   ) {
     super(
       kvStore,
@@ -48,13 +48,13 @@ export class ObservableQuerySecret20Balance extends ObservableSecretContractChai
     }
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return (
       super.canFetch() && this.bech32Address !== "" && this.viewingKey !== ""
     );
   }
 
-  protected async fetchResponse(
+  protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{
     response: QueryResponse<{ balance: { amount: string } }>;
@@ -118,16 +118,16 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
   }
 
   // This method doesn't have the role because the fetching is actually exeucnted in the `ObservableQuerySecret20Balance`.
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return false;
   }
 
   @override
-  *fetch() {
+  override *fetch() {
     yield this.querySecret20Balance.fetch();
   }
 
-  get isFetching(): boolean {
+  override get isFetching(): boolean {
     return (
       this.querySecretContractCodeHash.getQueryContract(
         this.denomHelper.contractAddress
@@ -135,7 +135,7 @@ export class ObservableQuerySecret20BalanceInner extends ObservableQueryBalanceI
     );
   }
 
-  get error(): Readonly<QueryError<unknown>> | undefined {
+  override get error(): Readonly<QueryError<unknown>> | undefined {
     return (
       this.querySecretContractCodeHash.getQueryContract(
         this.denomHelper.contractAddress

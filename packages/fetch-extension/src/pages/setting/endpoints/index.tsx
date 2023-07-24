@@ -1,0 +1,255 @@
+import React, { FunctionComponent, useEffect, useState } from "react";
+import { HeaderLayout } from "../../../layouts";
+
+import { useNavigate } from "react-router";
+import { observer } from "mobx-react-lite";
+import { useStore } from "../../../stores";
+import {
+  Button,
+  ButtonDropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from "reactstrap";
+
+import { Input } from "@components/form";
+import style from "./style.module.scss";
+import { useForm } from "react-hook-form";
+import { useNotification } from "@components/notification";
+import { useConfirm } from "@components/confirm";
+import { AlertExperimentalFeature } from "@components/alert-experimental-feature";
+import { FormattedMessage, useIntl } from "react-intl";
+import {
+  checkRestConnectivity,
+  checkRPCConnectivity,
+  DifferentChainVersionError,
+} from "@keplr-wallet/chain-validator";
+
+interface FormData {
+  rpc: string;
+  lcd: string;
+}
+
+export const SettingEndpointsPage: FunctionComponent = observer(() => {
+  const navigate = useNavigate();
+  const intl = useIntl();
+  const notification = useNotification();
+  const confirm = useConfirm();
+
+  const { chainStore } = useStore();
+  const [selectedChainId, setSelectedChainId] = useState(
+    chainStore.current.chainId
+  );
+
+  const [dropdownOpen, setOpen] = useState(false);
+  const toggle = () => setOpen(!dropdownOpen);
+
+  const {
+    setValue,
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<FormData>({
+    defaultValues: {
+      rpc: "",
+      lcd: "",
+    },
+  });
+  useEffect(() => {
+    const chainInfo = chainStore.getChain(selectedChainId);
+    setValue("rpc", chainInfo.rpc);
+    setValue("lcd", chainInfo.rest);
+  }, [chainStore, selectedChainId, setValue]);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  return (
+    <HeaderLayout
+      showChainName={false}
+      canChangeChainInfo={false}
+      smallTitle={true}
+      alternativeTitle={intl.formatMessage({
+        id: "setting.endpoints",
+      })}
+      onBackButton={() => {
+        navigate(-1);
+      }}
+    >
+      <div className={style["container"]}>
+        <div className={style["innerTopContainer"]}>
+          <ButtonDropdown isOpen={dropdownOpen} toggle={toggle}>
+            <DropdownToggle caret style={{ boxShadow: "none" }}>
+              {chainStore.getChain(selectedChainId).chainName}
+            </DropdownToggle>
+            <DropdownMenu>
+              <div className={style["dropdownWrapper"]}>
+                {chainStore.chainInfos.map((chainInfo) => {
+                  return (
+                    <DropdownItem
+                      key={chainInfo.chainId}
+                      onClick={(e) => {
+                        e.preventDefault();
+
+                        setSelectedChainId(chainInfo.chainId);
+                      }}
+                    >
+                      {chainInfo.chainName}
+                    </DropdownItem>
+                  );
+                })}
+              </div>
+            </DropdownMenu>
+          </ButtonDropdown>
+          <div style={{ flex: 1 }} />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              color="primary"
+              size="sm"
+              onClick={async (e) => {
+                e.preventDefault();
+
+                setIsLoading(true);
+
+                try {
+                  await chainStore.resetChainEndpoints(selectedChainId);
+
+                  const chainInfo = chainStore.getChain(selectedChainId);
+                  setValue("rpc", chainInfo.rpc);
+                  setValue("lcd", chainInfo.rest);
+
+                  // To avoid confusion when the user returns to the main page, select the chain if the rpc/lcd endpoints have changed.
+                  chainStore.selectChain(selectedChainId);
+                } catch (e) {
+                  console.log(e);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+            >
+              <FormattedMessage id="setting.endpoints.button.reset" />
+            </Button>
+          </div>
+        </div>
+        <form
+          className={style["formContainer"]}
+          onSubmit={handleSubmit(async (data) => {
+            setIsLoading(true);
+
+            let rpcConnSuccess = false;
+            try {
+              try {
+                await checkRPCConnectivity(selectedChainId, data.rpc);
+                rpcConnSuccess = true;
+                await checkRestConnectivity(selectedChainId, data.lcd);
+              } catch (e) {
+                if (
+                  // In the case of this error, the chain version is different.
+                  // It gives a warning and handles it if the user wants.
+                  e instanceof DifferentChainVersionError
+                ) {
+                  if (
+                    !(await confirm.confirm({
+                      paragraph: `The ${
+                        rpcConnSuccess ? "LCD" : "RPC"
+                      } endpoint of the node might have different version with the registered chain. Do you want to proceed?`,
+                    }))
+                  ) {
+                    return;
+                  }
+                } else {
+                  notification.push({
+                    type: "warning",
+                    placement: "top-center",
+                    duration: 5,
+                    content: e.message,
+                    canDelete: true,
+                    transition: {
+                      duration: 0.25,
+                    },
+                  });
+                  return;
+                }
+              }
+
+              chainStore.setChainEndpoints(selectedChainId, data.rpc, data.lcd);
+
+              // To avoid confusion when the user returns to the main page, select the chain if the rpc/lcd endpoints have changed.
+              chainStore.selectChain(selectedChainId);
+
+              navigate("/");
+            } catch (e) {
+              notification.push({
+                type: "warning",
+                placement: "top-center",
+                duration: 5,
+                content: `Unknown error: ${e.message}`,
+                canDelete: true,
+                transition: {
+                  duration: 0.25,
+                },
+              });
+            } finally {
+              setIsLoading(false);
+            }
+          })}
+        >
+          <Input
+            label="RPC"
+            error={errors.rpc && errors.rpc.message}
+            {...register("rpc", {
+              required: "RPC endpoint is required",
+              validate: (value: string) => {
+                try {
+                  const url = new URL(value);
+                  if (url.protocol !== "http:" && url.protocol !== "https:") {
+                    return `Unsupported protocol: ${url.protocol}`;
+                  }
+                } catch {
+                  return "Invalid url";
+                }
+              },
+            })}
+          />
+          <Input
+            label="LCD"
+            error={errors.lcd && errors.lcd.message}
+            {...register("lcd", {
+              required: "LCD endpoint is required",
+              validate: (value: string) => {
+                try {
+                  const url = new URL(value);
+                  if (url.protocol !== "http:" && url.protocol !== "https:") {
+                    return `Unsupported protocol: ${url.protocol}`;
+                  }
+                } catch {
+                  return "Invalid url";
+                }
+              },
+            })}
+          />
+          <div style={{ flex: 1 }} />
+          <AlertExperimentalFeature />
+          <Button
+            type="submit"
+            color="primary"
+            block
+            data-loading={isLoading}
+            disabled={
+              chainStore.getChain(selectedChainId).rpc === watch("rpc") &&
+              chainStore.getChain(selectedChainId).rest === watch("lcd")
+            }
+          >
+            <FormattedMessage id="setting.endpoints.button.confirm" />
+          </Button>
+        </form>
+      </div>
+    </HeaderLayout>
+  );
+});

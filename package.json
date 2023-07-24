@@ -5,90 +5,104 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**/@react-native-*/**",
-      "**/react-native",
-      "**/react-native/**",
-      "**/*-react-native",
-      "**/react-native-*",
-      "**/@react-navigation/**",
-      "**/expo-*",
-      "**/@unimodules/**",
-      "**/unimodules-*",
-      "**/native-base",
-      "**/@react-native-async-storage/async-storage",
-      "**/@ledgerhq/react-native-hw-transport-ble",
-      "**/jetifier",
-      "**/@bugsnag/**"
     ]
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "dev": "lerna run dev --parallel",
-    "clean": "lerna run clean && rm -rf node_modules && rm -rf build && yarn clean:watchman",
+    "clean": "yarn clean:watchman && lerna run clean && rm -rf node_modules && rm -rf build",
     "clean:watchman": "watchman watch-del-all",
     "build": "lerna run build",
-    "build:libs": "lerna run build --ignore @keplr-wallet/extension",
+    "build:libs": "lerna run build --ignore @keplr-wallet/fetch-extension",
     "test": "lerna run test --parallel",
-    "build:clean": "yarn clean && yarn install --frozen-lockfile && lerna run build",
+    "build:clean": "yarn clean && yarn install --immutable && lerna run build",
     "lint-test": "lerna run lint-test",
     "lint-fix": "lerna run lint-fix",
-    "ci": "yarn install --frozen-lockfile && yarn build && yarn workspace mobile typecheck && yarn test",
-    "ci-lint": "yarn install --frozen-lockfile && yarn lint-test",
+    "ci": "yarn install --immutable && yarn build && yarn test",
+    "ci-lint": "yarn install --immutable && yarn lint-test",
     "pre-commit": "lint-staged",
-    "version": "zx ./scripts/lerna-lifecyle-check-version.mjs"
+    "__comment__": "There is a problem that `yarn --immutable` cannot be passed in CI because the yarn.lock file includes the monorepo package version. To solve this, check if there are any problems with the yarn.lock file in \"preversion\" and update the yarn.lock file in \"version\"",
+    "preversion": "yarn --immutable",
+    "version": "zx ./scripts/lerna-lifecyle-check-version.mjs && yarn && git add yarn.lock"
   },
   "pre-commit": [
     "pre-commit"
   ],
   "lint-staged": {
-    "*": [
+    "*.{js,ts,jsx,tsx}": [
       "eslint",
       "prettier --check"
+    ],
+    "*.mdx": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.mjs": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.json": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.{css,scss,sass}": [
+      "eslint",
+      "prettier --check"
+    ]
+  },
+  "remarkConfig": {
+    "plugins": [
+      "@1stg/remark-preset"
     ]
   },
   "keywords": [],
   "author": "chainapsis",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@1stg/remark-preset": "^2.0.0",
+    "@babel/preset-typescript": "^7.22.5",
     "@octokit/core": "^3.5.1",
-    "@types/domhandler": "^2.4.2",
-    "@types/jest": "^27.5.1",
-    "@types/node": "^16.6.2",
-    "@types/webpack": "^4.39.1",
-    "@typescript-eslint/eslint-plugin": "^4.13.0",
-    "@typescript-eslint/parser": "^4.13.0",
+    "@types/filesystem": "^0.0.32",
+    "@types/jest": "^29.5.3",
+    "@types/node": "^18.13.0",
+    "@types/react": "^16.14.4",
+    "@types/react-dom": "^16.9.11",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
     "cross-env": "^5.2.0",
-    "eslint": "^6.2.2",
-    "eslint-config-prettier": "^7.1.0",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-react": "^7.14.3",
-    "eslint-plugin-react-hooks": "^2.0.1",
-    "eslint-plugin-unicorn": "^24.0.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-mdx": "^2.0.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-unicorn": "^45.0.2",
     "eslint-plugin-unused-imports": "^2.0.0",
     "folder-hash": "^4.0.2",
-    "jest": "^27.5.1",
+    "jest": "^29.6.1",
     "lerna": "^3.22.1",
     "lint-staged": "^10.5.4",
+    "mobx": "^6.1.7",
+    "mobx-react-lite": "^3.2.0",
+    "mobx-utils": "^6.0.3",
+    "node-gyp": "^9.3.1",
     "pre-commit": "^1.2.2",
-    "prettier": "^2.2.1",
+    "prettier": "^2.8.4",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
     "semver": "^7.3.5",
-    "ts-jest": "^27.1.5",
-    "ts-loader": "^8.0.14",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.1.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^4.9.5",
     "zx": "^4.2.0"
   },
   "resolutions": {
     "@types/react": "^16.14.4",
+    "@types/react-dom": "^16.9.11",
     "@iov/crypto": "2.1.0",
     "axios": "^0.27.2",
     "libsodium": "file:./etc/noop",
     "libsodium-wrappers": "file:./etc/noop",
-    "node-sass": "file:./etc/noop",
-    "@ethereumjs/common": "2.6.2"
-  },
-  "dependencies": {}
+    "node-sass": "file:./etc/noop"
+  }
 }

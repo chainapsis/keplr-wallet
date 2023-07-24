@@ -27,16 +27,16 @@ export class CoinPretty {
 
   constructor(
     protected _currency: AppCurrency,
-    protected amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
+    amount: Dec | { toDec(): Dec } | bigInteger.BigNumber
   ) {
-    if (typeof this.amount === "object" && "toDec" in this.amount) {
-      this.amount = this.amount.toDec();
-    } else if (!(this.amount instanceof Dec)) {
-      this.amount = new Dec(this.amount);
+    if (typeof amount === "object" && "toDec" in amount) {
+      amount = amount.toDec();
+    } else if (!(amount instanceof Dec)) {
+      amount = new Dec(amount);
     }
 
     this.intPretty = new IntPretty(
-      this.amount.quoTruncate(
+      amount.quoTruncate(
         DecUtils.getTenExponentNInPrecisionRange(_currency.coinDecimals)
       )
     ).maxDecimals(_currency.coinDecimals);
@@ -330,7 +330,7 @@ export class CoinPretty {
   }
 
   clone(): CoinPretty {
-    const pretty = new CoinPretty(this._currency, this.amount);
+    const pretty = new CoinPretty(this._currency, 0);
     pretty._options = {
       ...this._options,
     };

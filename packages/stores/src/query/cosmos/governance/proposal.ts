@@ -24,7 +24,7 @@ export class ObservableQueryProposal extends ObservableChainQuery<ProposalTally>
     makeObservable(this);
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return this.proposalStatus === ProposalStatus.VOTING_PERIOD;
   }
 

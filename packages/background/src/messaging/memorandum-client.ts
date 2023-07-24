@@ -89,7 +89,8 @@ export const getPubKey = async (
   try {
     const client = getClient(memorandumURl);
     const { data } = await client.query({
-      query: gql(`query Query($address: String!, $chainId: String!  $channelId: ChannelId!) {
+      query:
+        gql(`query Query($address: String!, $chainId: String!  $channelId: ChannelId!) {
         publicKey(address: $address, chainId: $chainId, channelId: $channelId) {
           publicKey
           privacySetting

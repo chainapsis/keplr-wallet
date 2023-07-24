@@ -40,7 +40,7 @@ class MockExternalMessage extends Message<boolean> {
     // noop
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 }

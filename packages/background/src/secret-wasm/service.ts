@@ -185,8 +185,7 @@ export class SecretWasmService {
               account_number: 0,
               chain_id: chainInfo.chainId,
               fee: [],
-              memo:
-                "Create Keplr Secret encryption key. Only approve requests by Keplr.",
+              memo: "Create Keplr Secret encryption key. Only approve requests by Keplr.",
               msgs: [],
               sequence: 0,
             })

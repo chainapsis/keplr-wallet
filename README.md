@@ -8,11 +8,30 @@ The wallet is configured for the Fetch.ai Stargate network.
 
 Further information on the Keplr wallet can be found at the base [repo](https://github.com/chainapsis/keplr-extension).  
 
-## Developing
+## Official Releases
 
-### Environment Setup
+You can find the latest versions of the official managed releases on these links:
 
-To use this repository, `protoc` must be set up. For more information, see [Install protobuf](https://grpc.io/docs/protoc-installation/).
+- [Browser Extension](https://chrome.google.com/webstore/detail/fetch-wallet/ellkdbaphhldpeajbepobaecooaoafpg)
+    - Fetch officially supports Chrome, Firefox.
+
+## Building browser extension locally
+
+### Requirements
+
+- protoc v21.3 (recommended)
+
+  ```sh
+    # This script is example for mac arm64 user. for other OS, replace URL(starts with https://..) to be matched with your OS from https://github.com/protocolbuffers/protobuf/releases/tag/v21.3
+    curl -Lo protoc-21.3.zip https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-osx-aarch_64.zip 
+    unzip protoc-21.3.zip -d $HOME/protoc
+    cp -r $HOME/protoc/include /usr/local
+    cp -r $HOME/protoc/bin /usr/local
+  ```
+
+- [Node.js v18+](https://nodejs.org/)
+
+Clone this repo and run:
 
 Install global npm dependencies:
 
@@ -22,22 +41,10 @@ npm install --global yarn lerna
 # TODO: install [watchman](https://facebook.github.io/watchman/docs/install.html)
 ```
 
-[Bootstrap](https://lerna.js.org/#command-bootstrap) packages:
+Install and build packages:
 
 ```bash
-yarn bootstrap
-```
-
-Install package dependencies:
-
-```bash
-yarn install
-```
-
-Initial build:
-
-```bash
-yarn build
+yarn && yarn build
 ```
 
 ### Local dev server

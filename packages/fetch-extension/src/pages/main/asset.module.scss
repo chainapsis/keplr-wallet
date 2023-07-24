@@ -1,0 +1,180 @@
+@import "../../styles/var";
+
+.containerAsset {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+
+  padding: 14px 0;
+
+  .title {
+    font-size: 14px;
+    letter-spacing: -0.31px;
+    text-align: center;
+    color: #4a4a4a;
+  }
+
+  .fiat {
+    font-size: 36px;
+    text-align: center;
+
+    letter-spacing: -0.8px;
+    color: black;
+  }
+
+  .amount {
+    position: relative;
+    display: flex;
+
+    font-size: 18px;
+    text-align: center;
+
+    letter-spacing: -0.4px;
+    color: #8f8f8f;
+  }
+
+  :global(.popper) {
+    font-size: 14px;
+    min-width: 140px;
+  }
+}
+
+.containerChart {
+  position: relative;
+
+  .centerText {
+    z-index: 1;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+
+    .big {
+      font-size: 13px;
+      color: #32325d;
+    }
+
+    .small {
+      font-size: 20px;
+      color: #32325d;
+      font-weight: bold;
+    }
+
+    .indicatorIcon {
+      position: absolute;
+      width: 100%;
+    }
+  }
+
+  canvas {
+    position: relative;
+  }
+}
+
+.legendContainer {
+  margin: 12px;
+  width: 100%;
+
+  .legend {
+    display: flex;
+    width: 100%;
+
+    .label {
+      letter-spacing: -0.3px;
+      flex: 1;
+      display: flex;
+    }
+
+    .value {
+      letter-spacing: -0.3px;
+      flex: 1;
+      display: flex;
+      font-weight: bold;
+    }
+  }
+}
+
+.progressDiv {
+  background-color: #d43bf6;
+  border-radius: 2px;
+  position: relative;
+}
+
+.progressAvailable {
+  background-color: #3b82f6;
+  height: 20px;
+  border-radius: 2px;
+  transition: 1s ease;
+  transition-delay: 0.5s;
+  z-index: 2;
+  position: absolute;
+}
+
+.progressStake {
+  background-color: #11cdef;
+  height: 20px;
+  border-radius: 2px;
+  transition: 1.5s ease;
+  transition-delay: 0.5s;
+  position: static;
+  z-index: 1;
+}
+
+.hr {
+  margin: $main-card-padding 0;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .title {
+    margin: 24px 0 16px;
+    color: #525f7f;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .buyButton {
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  img {
+    width: 170px;
+    height: 170px;
+  }
+
+  p {
+    margin-top: 14px;
+    font-size: 16px;
+    font-weight: 400;
+    color: #525f7f;
+    text-align: center;
+  }
+
+  button {
+    width: 100%;
+    background-color: #3b82f6;
+    font-weight: 700;
+    color: #fff;
+    font-size: 14px;
+    height: 35px;
+    border: none;
+    outline: none;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+
+    img {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}

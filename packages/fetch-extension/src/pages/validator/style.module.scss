@@ -1,0 +1,149 @@
+.stakeContainer {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  height: 100%;
+}
+
+.stakedAmount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.tabList {
+  display: flex;
+  flex-direction: row;
+}
+
+.tab {
+  width: 50%;
+  text-align: center;
+  cursor: pointer;
+}
+
+.stakeValueInput {
+  padding: 8px;
+  border: none;
+  margin-bottom: 10px;
+}
+
+.nextStakedValidatorName {
+  text-align: center;
+  color: #5090ff;
+  margin-bottom: 10px;
+}
+
+.nextStakedInfo {
+  text-align: center;
+}
+
+.balance {
+  text-align: right;
+  font-weight: normal;
+  color: #555555;
+  cursor: pointer;
+
+  &:hover {
+    color: black;
+    text-decoration: underline;
+  }
+
+  &.clicked {
+    color: black;
+  }
+}
+
+.errorText {
+  color: #fb8c72;
+  font: 10px;
+}
+
+.loader {
+  display: inline-block;
+  margin: 0 16px;
+}
+
+.loader {
+  --path: #2f3545;
+  --dot: #5628ee;
+  --duration: 2s;
+  width: 44px;
+  height: 44px;
+  position: relative;
+}
+
+.loader:before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  position: absolute;
+  display: block;
+  background: var(--dot);
+  top: 37px;
+  left: 19px;
+  transform: translate(-18px, -18px);
+  animation: dotRect var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86)
+    infinite;
+}
+
+.loader svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.loader svg rect,
+.loader svg polygon,
+.loader svg circle {
+  fill: none;
+  stroke: var(--path);
+  stroke-width: 10px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.loader svg rect {
+  stroke-dasharray: 192 64 192 64;
+  stroke-dashoffset: 0;
+  animation: pathRect 2s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+@keyframes pathRect {
+  25% {
+    stroke-dashoffset: 64;
+  }
+
+  50% {
+    stroke-dashoffset: 128;
+  }
+
+  75% {
+    stroke-dashoffset: 192;
+  }
+
+  100% {
+    stroke-dashoffset: 256;
+  }
+}
+
+@keyframes dotRect {
+  25% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(18px, -18px);
+  }
+
+  75% {
+    transform: translate(0, -36px);
+  }
+
+  100% {
+    transform: translate(-18px, -18px);
+  }
+}

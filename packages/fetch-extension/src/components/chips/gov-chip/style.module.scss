@@ -1,0 +1,61 @@
+.topicChips {
+  margin: 0 5px;
+  .switch {
+    position: relative;
+    display: inline-block;
+
+    line-height: 1;
+    margin: 0;
+
+    input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+
+      &:checked + .contentInverter {
+        background-color: #3b82f6;
+        color: #ffffff;
+      }
+    }
+
+    .contentInverter {
+      width: 87px;
+      height: 31px;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+      background: #ffffff;
+      border: 1px solid #3b82f6;
+      border-radius: 33px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 22px;
+      color: #3b82f6;
+    }
+
+    .govStatus {
+      height: 26px;
+      width: 80px;
+      cursor: pointer;
+      position: absolute;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+      margin-top: -10px;
+      border-radius: 29px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 22px;
+    }
+  }
+}

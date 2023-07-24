@@ -1,10 +1,9 @@
 {
   "name": "@keplr-wallet/crypto",
-  "version": "0.11.59",
+  "version": "0.12.12",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
-  "private": false,
   "publishConfig": {
     "access": "public"
   },
@@ -23,13 +22,13 @@
   },
   "dependencies": {
     "@ethersproject/keccak256": "^5.5.0",
+    "@fetchai/blst-ts": "^0.3.1",
     "bip32": "^2.0.6",
     "bip39": "^3.0.3",
     "bs58check": "^2.1.2",
     "buffer": "^6.0.3",
     "crypto-js": "^4.0.0",
     "elliptic": "^6.5.3",
-    "sha.js": "^2.4.11",
-    "@fetchai/blst-ts": "^0.3.1"
+    "sha.js": "^2.4.11"
   }
 }

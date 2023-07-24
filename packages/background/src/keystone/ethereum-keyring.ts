@@ -14,7 +14,8 @@ interface PlayUR {
 }
 
 export class KeystoneEthereumInteractionProvider
-  implements InteractionProvider {
+  implements InteractionProvider
+{
   private readUR: ReadUR = async () => {
     throw new Error("KeystoneError#readUR function is not set.");
   };
@@ -62,7 +63,7 @@ export class KeystoneEthereumInteractionProvider
 }
 
 export class KeystoneEthereumKeyring extends BaseKeyring {
-  static type = BaseKeyring.type;
+  static override type = BaseKeyring.type;
 
   static getEmptyKeyring(): KeystoneEthereumKeyring {
     return new KeystoneEthereumKeyring();
@@ -75,7 +76,7 @@ export class KeystoneEthereumKeyring extends BaseKeyring {
     this.interaction = new KeystoneEthereumInteractionProvider();
   }
 
-  getInteraction = () => {
+  override getInteraction = () => {
     return this.interaction;
   };
 
@@ -91,7 +92,7 @@ export class KeystoneEthereumKeyring extends BaseKeyring {
     }
   }
 
-  checkKeyring() {
+  override checkKeyring() {
     if (!this.xfp || !this.hdPath) {
       throw new Error(
         "KeystoneError#invalid_keyring: keyring not fulfilled, please call function `readKeyring` firstly"

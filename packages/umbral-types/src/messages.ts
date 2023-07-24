@@ -20,7 +20,7 @@ export class UmbralGetPublicKeyMsg extends Message<Uint8Array> {
     return UmbralGetPublicKeyMsg.type();
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -48,7 +48,7 @@ export class UmbralGetSigningPublicKeyMsg extends Message<Uint8Array> {
     return UmbralGetSigningPublicKeyMsg.type();
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -79,7 +79,7 @@ export class UmbralEncryptMsg extends Message<UmbralEncryptionResult> {
     return UmbralEncryptMsg.type();
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -117,7 +117,7 @@ export class UmbralGenerateKeyFragsMsg extends Message<{
     return UmbralGenerateKeyFragsMsg.type();
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -158,7 +158,7 @@ export class UmbralDecryptMsg extends Message<Uint8Array> {
     return UmbralDecryptMsg.type();
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -195,7 +195,7 @@ export class UmbralDecryptReEncryptedMsg extends Message<Uint8Array> {
     return UmbralDecryptReEncryptedMsg.type();
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -232,7 +232,7 @@ export class UmbralVerifyCapsuleFragMsg extends Message<boolean> {
     return UmbralDecryptReEncryptedMsg.type();
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

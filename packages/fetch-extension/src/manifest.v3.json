@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+
+  "name": "Fetch Wallet",
+  "description": "The official Fetch wallet for interacting with the Fetch ledger",
+  "version": "0.13.0",
+  "icons": {
+    "16": "assets/icon-16.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Fetch Wallet"
+  },
+  "background": {
+    "service_worker": "background.bundle.js"
+  },
+  "permissions": ["storage", "notifications", "identity", "idle", "alarms"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["browser-polyfill.js", "contentScripts.bundle.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "injectedScript.bundle.js",
+        "assets/logo-256.svg",
+        "blocklist.html"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

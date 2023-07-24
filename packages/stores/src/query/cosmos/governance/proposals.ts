@@ -125,9 +125,9 @@ export class ObservableQueryGovernance extends ObservableChainQuery<GovProposals
     return result.reverse();
   }
 
-  readonly getProposal = computedFn((id: string):
-    | DeepReadonly<ObservableQueryProposal>
-    | undefined => {
-    return this.proposals.find((proposal) => proposal.id === id);
-  });
+  readonly getProposal = computedFn(
+    (id: string): DeepReadonly<ObservableQueryProposal> | undefined => {
+      return this.proposals.find((proposal) => proposal.id === id);
+    }
+  );
 }

@@ -6,7 +6,7 @@ export const domainHash = (message: {
 }): string =>
   TypedDataEncoder.hashStruct(
     "EIP712Domain",
-    { EIP712Domain: message.types.EIP712Domain },
+    { EIP712Domain: message.types["EIP712Domain"] },
     message.domain
   );
 

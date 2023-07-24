@@ -128,8 +128,9 @@ export class ChainUpdaterService {
 
         let chainInfo: ChainInfo = res.data;
 
-        const fetchedChainIdentifier = ChainIdHelper.parse(chainInfo.chainId)
-          .identifier;
+        const fetchedChainIdentifier = ChainIdHelper.parse(
+          chainInfo.chainId
+        ).identifier;
         if (chainIdentifier !== fetchedChainIdentifier) {
           console.log(
             `The chainId is not valid.(${chainId} -> ${fetchedChainIdentifier})`
@@ -247,9 +248,7 @@ export class ChainUpdaterService {
     return await this.chainsService.getChainInfos();
   }
 
-  public async getChainEndpoints(
-    chainId: string
-  ): Promise<{
+  public async getChainEndpoints(chainId: string): Promise<{
     rpc: string | undefined;
     rest: string | undefined;
   }> {

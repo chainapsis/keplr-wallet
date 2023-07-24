@@ -1,9 +1,11 @@
 **/*.png
 **/*.svg
 **/*.ttf
+**/*.woff
+**/*.woff2
 **/*.secret
 **/*.md
-**/*.py
+**/*.webm
 .DS_Store
 
 node_modules
@@ -11,11 +13,12 @@ node_modules
 dist/*
 prod/*
 build/*
+packages/extension/noop-keplr-wallet-private/build
 
 yarn.lock
 Podfile.lock
 build.gradle
-.nvmrc
+
 injected-provider.bundle.js
 
 .gitsecret/*

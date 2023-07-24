@@ -18,7 +18,7 @@ export class IBCRecipientConfig extends RecipientConfig {
     super(chainGetter, initialChainId);
   }
 
-  get chainId(): string {
+  override get chainId(): string {
     return this.channelConfig.channel
       ? this.channelConfig.channel.counterpartyChainId
       : super.chainId;

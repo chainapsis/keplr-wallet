@@ -49,9 +49,7 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
     protected readonly chainStore: ChainStore<C>,
     protected readonly accountStore: {
       hasAccount(chainId: string): boolean;
-      getAccount(
-        chainId: string
-      ): {
+      getAccount(chainId: string): {
         bech32Address: string;
       };
     },
@@ -181,9 +179,8 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
         );
       }
     } else {
-      const queryDenomTrace = queries.cosmos.queryIBCDenomTrace.getDenomTrace(
-        hash
-      );
+      const queryDenomTrace =
+        queries.cosmos.queryIBCDenomTrace.getDenomTrace(hash);
       denomTrace = queryDenomTrace.denomTrace;
 
       if (denomTrace) {
@@ -239,9 +236,10 @@ export class IBCCurrencyRegsitrarInner<C extends ChainInfo = ChainInfo> {
             originChainInfo.chainId
           );
           const contractAddress = denomTrace.denom.replace("cw20:", "");
-          const contractInfo = cosmwasmQuries.cosmwasm.querycw20ContractInfo.getQueryContract(
-            contractAddress
-          );
+          const contractInfo =
+            cosmwasmQuries.cosmwasm.querycw20ContractInfo.getQueryContract(
+              contractAddress
+            );
           if (contractInfo.response) {
             cw20Currency = {
               type: "cw20",
@@ -366,9 +364,7 @@ export class IBCCurrencyRegsitrar<C extends ChainInfo = ChainInfo> {
     protected readonly chainStore: ChainStore<C>,
     protected readonly accountStore: {
       hasAccount(chainId: string): boolean;
-      getAccount(
-        chainId: string
-      ): {
+      getAccount(chainId: string): {
         bech32Address: string;
       };
     },

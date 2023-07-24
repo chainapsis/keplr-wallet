@@ -69,20 +69,6 @@ export function init(
     commonCrypto.rng
   );
 
-  const persistentMemoryService = new PersistentMemory.PersistentMemoryService();
-
-  const permissionService = new Permission.PermissionService(
-    storeCreator("permission"),
-    privilegedOrigins
-  );
-
-  const chainUpdaterService = new Updater.ChainUpdaterService(
-    storeCreator("updator"),
-    communityChainInfoRepo
-  );
-
-  const tokensService = new Tokens.TokensService(storeCreator("tokens"));
-
   const chainsService = new Chains.ChainsService(
     storeCreator("chains"),
     embedChainInfos,
@@ -92,23 +78,14 @@ export function init(
     }
   );
 
-  const ledgerService = new Ledger.LedgerService(
-    storeCreator("ledger"),
-    ledgerOptions
-  );
+  const tokensService = new Tokens.TokensService(storeCreator("tokens"));
 
-  const keystoneService = new Keystone.KeystoneService(
-    storeCreator("keystone")
-  );
+  const persistentMemoryService =
+    new PersistentMemory.PersistentMemoryService();
 
-  const keyRingService = new KeyRing.KeyRingService(
-    storeCreator("keyring"),
-    embedChainInfos,
-    commonCrypto
-  );
-
-  const secretWasmService = new SecretWasm.SecretWasmService(
-    storeCreator("secretwasm")
+  const permissionService = new Permission.PermissionService(
+    storeCreator("permission"),
+    privilegedOrigins
   );
 
   const backgroundTxService = new BackgroundTx.BackgroundTxService(
@@ -124,66 +101,97 @@ export function init(
     retryIntervalMs: 10 * 60 * 1000, // 10 mins,
     allowTimeoutMs: 10 * 60 * 1000, // 10 mins,
   });
-  const autoLockAccountService = new AutoLocker.AutoLockAccountService(
-    storeCreator("auto-lock-account")
-  );
+
   const analyticsService = new Analytics.AnalyticsService(
     storeCreator("background.analytics"),
     commonCrypto.rng,
     analyticsPrivilegedOrigins
   );
 
-  persistentMemoryService.init();
-  permissionService.init(interactionService, chainsService, keyRingService);
-  chainUpdaterService.init(chainsService);
-  tokensService.init(
-    interactionService,
-    permissionService,
-    chainsService,
-    keyRingService
+  const keyRingService = new KeyRing.KeyRingService(
+    storeCreator("keyring"),
+    embedChainInfos,
+    commonCrypto
   );
-  chainsService.init(
-    chainUpdaterService,
-    interactionService,
-    permissionService
+
+  const autoLockAccountService = new AutoLocker.AutoLockAccountService(
+    storeCreator("auto-lock-account")
   );
-  ledgerService.init(interactionService);
-  keystoneService.init(interactionService);
-  keyRingService.init(
-    interactionService,
-    chainsService,
-    permissionService,
-    ledgerService,
-    keystoneService,
-    analyticsService
+
+  const chainUpdaterService = new Updater.ChainUpdaterService(
+    storeCreator("updator"),
+    communityChainInfoRepo
   );
-  secretWasmService.init(chainsService, keyRingService, permissionService);
-  backgroundTxService.init(chainsService, permissionService);
-  phishingListService.init();
-  // No need to wait because user can't interact with app right after launch.
-  autoLockAccountService.init(keyRingService);
-  // No need to wait because user can't interact with app right after launch.
-  analyticsService.init();
+
+  const secretWasmService = new SecretWasm.SecretWasmService(
+    storeCreator("secretwasm")
+  );
+
+  const ledgerService = new Ledger.LedgerService(
+    storeCreator("ledger"),
+    ledgerOptions
+  );
+
+  const keystoneService = new Keystone.KeystoneService(
+    storeCreator("keystone")
+  );
+
+  const umbralService = new Umbral.UmbralService(chainsService);
+
+  const messagingService = new Messaging.MessagingService();
 
   Interaction.init(router, interactionService);
   PersistentMemory.init(router, persistentMemoryService);
   Permission.init(router, permissionService);
-  Updater.init(router, chainUpdaterService);
-  Tokens.init(router, tokensService);
   Chains.init(router, chainsService);
-  Ledger.init(router, ledgerService);
-  KeyRing.init(router, keyRingService);
-  SecretWasm.init(router, secretWasmService);
   BackgroundTx.init(router, backgroundTxService);
   PhishingList.init(router, phishingListService);
   AutoLocker.init(router, autoLockAccountService);
   Analytics.init(router, analyticsService);
+  KeyRing.init(router, keyRingService);
+  SecretWasm.init(router, secretWasmService);
+  Updater.init(router, chainUpdaterService);
+  Tokens.init(router, tokensService);
+  Ledger.init(router, ledgerService);
 
-  const umbralService = new Umbral.UmbralService(chainsService);
-  umbralService.init(keyRingService, permissionService);
   Umbral.init(router, umbralService);
-
-  const messagingService = new Messaging.MessagingService();
-  messagingService.init(keyRingService);
   Messaging.init(router, messagingService);
+
+  return {
+    initFn: async () => {
+      persistentMemoryService.init();
+      permissionService.init(interactionService, chainsService, keyRingService);
+      chainUpdaterService.init(chainsService);
+      tokensService.init(
+        interactionService,
+        permissionService,
+        chainsService,
+        keyRingService
+      );
+      chainsService.init(
+        chainUpdaterService,
+        interactionService,
+        permissionService
+      );
+      ledgerService.init(interactionService);
+      keystoneService.init(interactionService);
+      keyRingService.init(
+        interactionService,
+        chainsService,
+        permissionService,
+        ledgerService,
+        keystoneService,
+        analyticsService
+      );
+      secretWasmService.init(chainsService, keyRingService, permissionService);
+      backgroundTxService.init(chainsService, permissionService);
+      phishingListService.init();
+      // No need to wait because user can't interact with app right after launch.
+      await autoLockAccountService.init(keyRingService);
+      // No need to wait because user can't interact with app right after launch.
+      await analyticsService.init();
+      await umbralService.init(keyRingService, permissionService);
+      await messagingService.init(keyRingService);
+    },
+  };
 }

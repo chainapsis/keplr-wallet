@@ -21,7 +21,10 @@ export class UmbralService {
     protected readonly chainsService: ChainsService
   ) {}
 
-  init(keyRingService: KeyRingService, permissionService: PermissionService) {
+  async init(
+    keyRingService: KeyRingService,
+    permissionService: PermissionService
+  ) {
     this.keyRingService = keyRingService;
     this.permissionService = permissionService;
   }
@@ -102,9 +105,8 @@ export class UmbralService {
     const sk = await this.getPrivateKey(env, chainId);
     const pubKey = umbral.PublicKey.fromBytes(senderPublicKey);
 
-    const initialCapsule: Umbral.Capsule = umbral.Capsule.fromBytes(
-      capsuleBytes
-    );
+    const initialCapsule: Umbral.Capsule =
+      umbral.Capsule.fromBytes(capsuleBytes);
     let capsule: Umbral.CapsuleWithFrags | undefined;
     for (const capsuleFragment of capsuleFragments) {
       if (capsule !== undefined) {
@@ -166,8 +168,7 @@ export class UmbralService {
               account_number: 0,
               chain_id: chainInfo.chainId,
               fee: [],
-              memo:
-                "Create Umbral Secret encryption key. Only approve requests by Keplr.",
+              memo: "Create Umbral Secret encryption key. Only approve requests by Keplr.",
               msgs: [],
               sequence: 0,
             })
@@ -196,8 +197,7 @@ export class UmbralService {
               account_number: 0,
               chain_id: chainInfo.chainId,
               fee: [],
-              memo:
-                "Create Umbral Signing Secret encryption key. Only approve requests by Keplr.",
+              memo: "Create Umbral Signing Secret encryption key. Only approve requests by Keplr.",
               msgs: [],
               sequence: 0,
             })

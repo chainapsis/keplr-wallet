@@ -163,7 +163,7 @@ export class ObservableQueryERC20MetadataDecimals extends ObservableJsonRPCQuery
 export class ObservableQueryERC20MetadataInner {
   protected readonly _queryName: ObservableQueryERC20MetadataName;
   protected readonly _querySymbol: ObservableQueryERC20MetadataSymbol;
-  protected readonly _queryDecimals: ObservableQueryERC20MetadataDecimals;
+  readonly _queryDecimals: ObservableQueryERC20MetadataDecimals;
 
   constructor(kvStore: KVStore, ethereumURL: string, contractAddress: string) {
     this._queryName = new ObservableQueryERC20MetadataName(
@@ -225,7 +225,7 @@ export class ObservableQueryERC20Metadata extends HasMapStore<ObservableQueryERC
     });
   }
 
-  get(contractAddress: string): ObservableQueryERC20MetadataInner {
+  override get(contractAddress: string): ObservableQueryERC20MetadataInner {
     return super.get(contractAddress);
   }
 }

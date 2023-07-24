@@ -9,17 +9,11 @@ import { EventEmitter } from "events";
 export class MockRouter extends Router {
   public static eventEmitter = new EventEmitter();
 
-  listen(port: string): void {
-    if (!port) {
-      throw new Error("Empty port");
-    }
-
-    this.port = port;
+  protected attachHandler() {
     MockRouter.eventEmitter.addListener("message", this.onMessage);
   }
 
-  unlisten(): void {
-    this.port = "";
+  protected detachHandler() {
     MockRouter.eventEmitter.removeListener("message", this.onMessage);
   }
 

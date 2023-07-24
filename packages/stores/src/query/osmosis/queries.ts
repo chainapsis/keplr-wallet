@@ -51,11 +51,8 @@ export class OsmosisQueriesImpl {
       chainId,
       chainGetter
     );
-    this.queryTxFeesSpotPriceByDenom = new ObservableQueryTxFeesSpotPriceByDenom(
-      kvStore,
-      chainId,
-      chainGetter
-    );
+    this.queryTxFeesSpotPriceByDenom =
+      new ObservableQueryTxFeesSpotPriceByDenom(kvStore, chainId, chainGetter);
     this.queryTxFeesBaseDenom = new ObservableQueryTxFeesBaseDenom(
       kvStore,
       chainId,

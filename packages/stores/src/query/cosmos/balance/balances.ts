@@ -27,24 +27,24 @@ export class ObservableQueryBalanceNative extends ObservableQueryBalanceInner {
     makeObservable(this);
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return false;
   }
 
-  get isFetching(): boolean {
+  override get isFetching(): boolean {
     return this.nativeBalances.isFetching;
   }
 
-  get error() {
+  override get error() {
     return this.nativeBalances.error;
   }
 
-  get response() {
+  override get response() {
     return this.nativeBalances.response;
   }
 
   @override
-  *fetch() {
+  override *fetch() {
     yield this.nativeBalances.fetch();
   }
 
@@ -86,13 +86,13 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
     makeObservable(this);
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
     return this.bech32Address.length > 0;
   }
 
   @override
-  *fetch() {
+  override *fetch() {
     if (!this.duplicatedFetchCheck) {
       // Because the native "bank" module's balance shares the querying result,
       // it is inefficient to fetching duplicately in the same loop.
@@ -106,7 +106,7 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
     }
   }
 
-  protected setResponse(response: Readonly<QueryResponse<Balances>>) {
+  protected override setResponse(response: Readonly<QueryResponse<Balances>>) {
     super.setResponse(response);
 
     const chainInfo = this.chainGetter.getChain(this.chainId);
@@ -119,10 +119,8 @@ export class ObservableQueryCosmosBalances extends ObservableChainQuery<Balances
 }
 
 export class ObservableQueryCosmosBalanceRegistry implements BalanceRegistry {
-  protected nativeBalances: Map<
-    string,
-    ObservableQueryCosmosBalances
-  > = new Map();
+  protected nativeBalances: Map<string, ObservableQueryCosmosBalances> =
+    new Map();
 
   constructor(protected readonly kvStore: KVStore) {}
 

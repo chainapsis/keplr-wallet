@@ -561,7 +561,7 @@ export class GetKeyMsg extends Message<Key> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -649,7 +649,7 @@ export class RequestSignAminoMsg extends Message<AminoSignResponse> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -704,9 +704,9 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
 
       const { ethChainId } = EthermintChainIdHelper.parse(this.chainId);
 
-      if (!BigNumber.from(this.eip712.domain.chainId).eq(ethChainId)) {
+      if (!BigNumber.from(this.eip712.domain["chainId"]).eq(ethChainId)) {
         throw new Error(
-          `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${this.eip712.domain.chainId})`
+          `Unmatched chain id for eth (expected: ${ethChainId}, actual: ${this.eip712.domain["chainId"]})`
         );
       }
     } else {
@@ -718,7 +718,7 @@ export class RequestSignEIP712CosmosTxMsg_v0 extends Message<AminoSignResponse> 
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -784,7 +784,7 @@ export class RequestICNSAdr36SignaturesMsg extends Message<
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -828,7 +828,7 @@ export class RequestVerifyADR36AminoSignDoc extends Message<boolean> {
     Bech32Address.validate(this.signer);
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -898,7 +898,7 @@ export class RequestSignDirectMsg extends Message<{
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 
@@ -1126,7 +1126,7 @@ export class ChangeKeyRingNameMsg extends Message<string> {
     }
   }
 
-  approveExternal(): boolean {
+  override approveExternal(): boolean {
     return true;
   }
 

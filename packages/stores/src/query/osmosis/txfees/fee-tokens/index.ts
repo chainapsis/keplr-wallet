@@ -13,7 +13,7 @@ export class ObservableQueryTxFeesFeeTokens extends ObservableChainQuery<FeeToke
     makeObservable(this);
   }
 
-  protected setResponse(response: Readonly<QueryResponse<FeeTokens>>) {
+  protected override setResponse(response: Readonly<QueryResponse<FeeTokens>>) {
     super.setResponse(response);
 
     const chainInfo = this.chainGetter.getChain(this.chainId);

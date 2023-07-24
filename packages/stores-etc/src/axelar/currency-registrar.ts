@@ -68,10 +68,8 @@ export class AxelarEVMBridgeCurrencyRegistrarInner<
 
 export class AxelarEVMBridgeCurrencyRegistrar<C extends ChainInfo = ChainInfo> {
   @observable.shallow
-  protected map: Map<
-    string,
-    AxelarEVMBridgeCurrencyRegistrarInner<C>
-  > = new Map();
+  protected map: Map<string, AxelarEVMBridgeCurrencyRegistrarInner<C>> =
+    new Map();
 
   constructor(
     protected readonly kvStore: KVStore,

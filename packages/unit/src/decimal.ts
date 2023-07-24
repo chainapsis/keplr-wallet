@@ -44,9 +44,10 @@ export class Dec {
     return multiplier;
   }
 
-  protected static reduceDecimalsFromString(
-    str: string
-  ): { res: string; isDownToZero: boolean } {
+  protected static reduceDecimalsFromString(str: string): {
+    res: string;
+    isDownToZero: boolean;
+  } {
     const decimalPointIndex = str.indexOf(".");
     if (decimalPointIndex < 0) {
       return {
@@ -261,6 +262,10 @@ export class Dec {
 
   public mulTruncate(d2: Dec): Dec {
     return new Dec(this.mulRaw(d2).chopPrecisionAndTruncate(), Dec.precision);
+  }
+
+  public mulRoundUp(d2: Dec): Dec {
+    return new Dec(this.mulRaw(d2).chopPrecisionAndRoundUp(), Dec.precision);
   }
 
   protected mulRaw(d2: Dec): Dec {

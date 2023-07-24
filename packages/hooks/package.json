@@ -1,10 +1,9 @@
 {
   "name": "@keplr-wallet/hooks",
-  "version": "0.11.59",
+  "version": "0.12.12",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
-  "private": false,
   "publishConfig": {
     "access": "public"
   },
@@ -16,28 +15,28 @@
     "lint-test": "eslint \"src/**/*\" && prettier --check \"src/**/*\"",
     "lint-fix": "eslint --fix \"src/**/*\" && prettier --write \"src/**/*\""
   },
-  "devDependencies": {
-    "@types/react": "^16.14.4"
-  },
   "dependencies": {
     "@ethersproject/address": "^5.6.0",
-    "@keplr-wallet/background": "0.11.59",
-    "@keplr-wallet/common": "0.11.59",
-    "@keplr-wallet/cosmos": "0.11.59",
-    "@keplr-wallet/crypto": "0.11.59",
-    "@keplr-wallet/popup": "0.11.59",
-    "@keplr-wallet/proto-types": "0.11.59",
-    "@keplr-wallet/stores": "0.11.59",
-    "@keplr-wallet/stores-etc": "0.11.59",
-    "@keplr-wallet/types": "0.11.59",
-    "@keplr-wallet/unit": "0.11.59",
+    "@keplr-wallet/background": "0.12.12",
+    "@keplr-wallet/common": "0.12.12",
+    "@keplr-wallet/cosmos": "0.12.12",
+    "@keplr-wallet/crypto": "0.12.12",
+    "@keplr-wallet/popup": "0.12.12",
+    "@keplr-wallet/proto-types": "0.12.12",
+    "@keplr-wallet/simple-fetch": "0.12.12",
+    "@keplr-wallet/stores": "0.12.12",
+    "@keplr-wallet/stores-etc": "0.12.12",
+    "@keplr-wallet/types": "0.12.12",
+    "@keplr-wallet/unit": "0.12.12",
     "axios": "^0.27.2",
     "buffer": "^6.0.3",
     "long": "^4.0.0",
-    "mobx": "^6.1.7",
-    "mobx-utils": "^6.0.3",
-    "react": "^16.14.0",
-    "react-router": "^5.1.2",
+    "react-router": "^6.8.1",
     "utility-types": "^3.10.0"
+  },
+  "peerDependencies": {
+    "mobx": "^6",
+    "mobx-utils": "^6",
+    "react": "^16.8.0 || ^17 || ^18"
   }
 }

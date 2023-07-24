@@ -1,10 +1,10 @@
-import Axios from "axios";
 import { ChainsService } from "../chains";
 import { PermissionService } from "../permission";
 import { TendermintTxTracer } from "@keplr-wallet/cosmos";
 import { Notification } from "./types";
 
 import { Buffer } from "buffer/";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 interface CosmosSdkError {
   codespace: string;
@@ -36,12 +36,6 @@ export class BackgroundTxService {
     mode: "async" | "sync" | "block"
   ): Promise<Uint8Array> {
     const chainInfo = await this.chainsService.getChainInfo(chainId);
-    const restInstance = Axios.create({
-      ...{
-        baseURL: chainInfo.rest,
-      },
-      ...chainInfo.restConfig,
-    });
 
     this.notification.create({
       iconRelativeUrl: "assets/logo-256.png",
@@ -73,9 +67,16 @@ export class BackgroundTxService {
         };
 
     try {
-      const result = await restInstance.post(
+      const result = await simpleFetch<any>(
+        chainInfo.rest,
         isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
-        params
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
       );
 
       const txResponse = isProtoTx ? result.data["tx_response"] : result.data;

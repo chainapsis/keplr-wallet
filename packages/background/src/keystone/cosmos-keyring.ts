@@ -78,7 +78,7 @@ export class KeystoneCosmosInteractionProvider implements InteractionProvider {
 }
 
 export class KeystoneCosmosKeyring extends BaseKeyring {
-  static type = BaseKeyring.type;
+  static override type = BaseKeyring.type;
 
   static getEmptyKeyring(): KeystoneCosmosKeyring {
     return new KeystoneCosmosKeyring();
@@ -91,7 +91,7 @@ export class KeystoneCosmosKeyring extends BaseKeyring {
     this.interaction = new KeystoneCosmosInteractionProvider();
   }
 
-  getInteraction = () => {
+  override getInteraction = () => {
     return this.interaction;
   };
 

@@ -12,7 +12,7 @@ import { makeObservable, override } from "mobx";
 import { QueriesStore } from "./internal";
 
 export class DelegateAmountConfig extends AmountConfig {
-  get sendableCurrencies(): AppCurrency[] {
+  override get sendableCurrencies(): AppCurrency[] {
     return [this.chainInfo.stakeCurrency];
   }
 }
@@ -35,7 +35,7 @@ export class DelegateGasConfig extends GasConfig {
   }
 
   @override
-  get gas(): number {
+  override get gas(): number {
     // If gas not set manually, assume that the tx is for MsgTransfer.
     if (this._gasRaw == null) {
       return this.accountStore.getAccount(this.chainId).cosmos.msgOpts.delegate

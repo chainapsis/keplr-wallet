@@ -18,16 +18,16 @@ export class ObservableQuerySecretContractCodeHashInner extends ObservableChainQ
     );
   }
 
-  protected canFetch(): boolean {
+  protected override canFetch(): boolean {
     return this.contractAddress.length > 0;
   }
 }
 
 export class ObservableQuerySecretContractCodeHash extends ObservableChainQueryMap<SecretContractCodeHash> {
   constructor(
-    protected readonly kvStore: KVStore,
-    protected readonly chainId: string,
-    protected readonly chainGetter: ChainGetter
+    protected override readonly kvStore: KVStore,
+    protected override readonly chainId: string,
+    protected override readonly chainGetter: ChainGetter
   ) {
     super(kvStore, chainId, chainGetter, (contractAddress: string) => {
       return new ObservableQuerySecretContractCodeHashInner(
