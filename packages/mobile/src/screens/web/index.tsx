@@ -22,6 +22,7 @@ import {
   IONDaoItem,
   CalcFiItem,
   DexterItem,
+  StaykingItem,
 } from "./constants";
 import { WebpageImageButton } from "./common";
 
@@ -32,6 +33,7 @@ const WebpagesPerLabel: {
   {
     label: "All",
     items: [
+      StaykingItem,
       OsmosisItem,
       StargazeItem,
       WYNDDaoItem,
@@ -53,6 +55,7 @@ const WebpagesPerLabel: {
   {
     label: "Defi",
     items: [
+      StaykingItem,
       OsmosisItem,
       WYNDDaoItem,
       InjectiveItem,

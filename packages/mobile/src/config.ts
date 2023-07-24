@@ -2395,6 +2395,50 @@ export const EmbedChainInfos: AppChainInfo[] = [
       txUrl: "https://www.mintscan.io/likecoin/txs/{txHash}",
     },
   },
+  {
+    chainId: "stayking-hub",
+    chainName: "StayKing Mainnet",
+    rpc: "https://stayking-mainnet.stayking.xyz:26657",
+    rest: "https://stayking-mainnet.stayking.xyz:1317",
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "sooho",
+      bech32PrefixAccPub: "soohopub",
+      bech32PrefixValAddr: "soohovaloper",
+      bech32PrefixValPub: "soohovaloperpub",
+      bech32PrefixConsAddr: "soohovalcons",
+      bech32PrefixConsPub: "soohovalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "STAY",
+        coinMinimalDenom: "ustay",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "STAY",
+        coinMinimalDenom: "ustay",
+        coinDecimals: 6,
+        coinGeckoId: "cosmos",
+        gasPriceStep: {
+          low: 0,
+          average: 0,
+          high: 0,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "STAY",
+      coinMinimalDenom: "ustay",
+      coinGeckoId: "cosmos",
+      coinDecimals: 6,
+    },
+  },
 ];
 
 export const LegacyAmplitudeApiKey =

@@ -335,3 +335,22 @@ export const DexterItem: Item = {
   key: "Dexter",
   component: DexterImage,
 };
+
+const StaykingImage: FunctionComponent = () => {
+  const smartNavigation = useSmartNavigation();
+
+  return (
+    <WebpageImageButton
+      name="Stayking"
+      source={require("../../assets/image/webpage/osmosis.png")}
+      onPress={() => {
+        smartNavigation.pushSmart("Web.Stayking", {});
+      }}
+    />
+  );
+};
+
+export const StaykingItem: Item = {
+  key: "Stayking",
+  component: StaykingImage,
+};
