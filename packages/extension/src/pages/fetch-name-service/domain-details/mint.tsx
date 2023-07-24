@@ -4,9 +4,11 @@ import { useStore } from "../../../stores";
 import { useHistory } from "react-router";
 import { mintDomain } from "../../../name-service/fns-apis";
 import { AppCurrency } from "@keplr-wallet/types";
-import { shortenNumber } from "../../activity/native/activity-row";
 import { TooltipForDomainNames } from "./index";
 import { useNotification } from "@components/notification";
+import { useLanguage } from "../../../languages";
+import { CoinPretty } from "@keplr-wallet/unit";
+import { shortenNumber } from "../../activity/native/activity-row";
 type MintProps = {
   domainPrice: any;
   domainName: string;
@@ -14,16 +16,13 @@ type MintProps = {
   setShowCard: (value: boolean) => void;
 };
 
-export const Mint: React.FC<MintProps> = ({
-  domainPrice,
-  domainName,
-  setError,
-  setShowCard,
-}) => {
-  const { chainStore, accountStore } = useStore();
+export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
+  const { chainStore, accountStore, priceStore } = useStore();
   const current = chainStore.current;
   const account = accountStore.getAccount(current.chainId);
   const history = useHistory();
+  const language = useLanguage();
+  const fiatCurrency = language.fiatCurrency;
   const notification = useNotification();
 
   const [showPopUp, setShowPopUp] = useState(false);
@@ -33,10 +32,21 @@ export const Mint: React.FC<MintProps> = ({
     const amountCurrency = chainStore.current.currencies.find(
       (currency: AppCurrency) => currency.coinMinimalDenom === denom
     );
-    if (amountCurrency) {
-      const amountValue = shortenNumber(amount, amountCurrency?.coinDecimals);
 
-      return `${amountValue}${amountCurrency.coinDenom}`;
+    if (amountCurrency) {
+      const amountCoin = new CoinPretty(amountCurrency, amount);
+      const amountPrice = priceStore.calculatePrice(amountCoin, fiatCurrency);
+
+      if (amountPrice)
+        return `${amountCoin
+          .shrink(true)
+          .trim(true)
+          .maxDecimals(6)
+          .toString()} (${amountPrice?.toString()})`;
+      else {
+        const amountValue = shortenNumber(amount, amountCurrency?.coinDecimals);
+        return `${amountValue}${amountCurrency.coinDenom}`;
+      }
     } else return `${amount} ${denom}`;
   };
 
@@ -60,7 +70,6 @@ export const Mint: React.FC<MintProps> = ({
         domainName,
         domainPrice.result.Success.pricing
       );
-      history.push("/fetch-name-service");
       notification.push({
         placement: "top-center",
         type: "primary",
@@ -73,10 +82,18 @@ export const Mint: React.FC<MintProps> = ({
       });
     } catch (error) {
       console.error("Error minting domain:", error);
-      setError(true);
-      setShowCard(true);
-      setShowPopUp(false);
+      notification.push({
+        placement: "top-center",
+        type: "warning",
+        duration: 2,
+        content: `transaction failed!`,
+        canDelete: true,
+        transition: {
+          duration: 0.25,
+        },
+      });
     }
+    history.push("/fetch-name-service");
   };
 
   const handleCancelButtonClick = () => {

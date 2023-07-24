@@ -6,7 +6,6 @@ import styleMenu from "./menu.module.scss";
 
 import { FormattedMessage } from "react-intl";
 import { useNavigate } from "react-router";
-import { FNS_CONFIG } from "../../config.ui.var";
 
 export const Menu: FunctionComponent = observer(() => {
   const { chainStore, keyRingStore, analyticsStore } = useStore();
@@ -36,7 +35,7 @@ export const Menu: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.menu.settings" />
       </div>
-      {Object.keys(FNS_CONFIG).includes(chainStore.current.chainId) ? (
+      {/* {Object.keys(FNS_CONFIG).includes(chainStore.current.chainId) ? (
         <div
           className={styleMenu["item"]}
           onClick={() => {
@@ -47,7 +46,7 @@ export const Menu: FunctionComponent = observer(() => {
         >
           <FormattedMessage id="main.menu.fetch-name-service" />
         </div>
-      ) : null}
+      ) : null} */}
       <a
         className={styleMenu["item"]}
         href="https://docs.fetch.ai/fetch-wallet/"

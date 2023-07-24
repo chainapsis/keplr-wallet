@@ -17,7 +17,7 @@ export const BuyOrBid: React.FC<BuyOrBidProps> = ({ domainName }) => {
         className={style.mint}
         style={{
           marginRight: "10px",
-          background: "transparent",
+          backgroundColor: "#1c0032",
           border: "1px solid #9075ff",
         }}
         onClick={handleClick}

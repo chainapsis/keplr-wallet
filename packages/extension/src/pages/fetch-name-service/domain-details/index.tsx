@@ -8,6 +8,7 @@ import {
   getDomainData,
   getDomainPrice,
   getDomainStatus,
+  getPrimaryDomain,
 } from "../../../name-service/fns-apis";
 import { useStore } from "../../../stores";
 import { BuyOrBid } from "./buy-or-bid";
@@ -52,12 +53,31 @@ export const DomainDetails = () => {
   const [domainPrice, setDomainPrice] = useState<any>(null);
   const [isMinted, setIsMinted] = useState<any>(null);
   const [isAssigned, setIsAssigned] = useState(false);
+  const [isPrimary, setIsPrimary] = useState(false);
   const [isOwned, setIsOwned] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [showCard, setShowCard] = useState(false);
 
   useEffect(() => {
+    const checkIsAssigned = async () => {
+      const beneficiery = await getBeneficiaryAddress(
+        current.chainId,
+        domainName
+      );
+      if (beneficiery.address === sender) {
+        setIsAssigned(true);
+      }
+    };
+    const checkIsPrimary = async () => {
+      const primaryDomain = await getPrimaryDomain(current.chainId, sender);
+      if (primaryDomain.domain === domainName) {
+        setIsPrimary(true);
+      }
+    };
+    checkIsAssigned();
+    checkIsPrimary();
+
     const fetchDomainData = async () => {
       try {
         setIsLoading(true);
@@ -70,18 +90,6 @@ export const DomainDetails = () => {
           current.chainId,
           domainName
         );
-        const assignedDomain = await getBeneficiaryAddress(
-          current.chainId,
-          domainName
-        );
-        if (assignedDomain.address === accountInfo.bech32Address) {
-          setIsAssigned(true);
-          console.log(
-            assignedDomain.address,
-            accountInfo.bech32Address,
-            isAssigned
-          );
-        }
         const fetchDomainPrice = await getDomainPrice(
           current.chainId,
           domainName
@@ -116,7 +124,7 @@ export const DomainDetails = () => {
     };
 
     fetchDomainData();
-  }, [domainName]);
+  }, [current.chainId, domainName, sender]);
 
   const properties = [
     "address",
@@ -211,6 +219,7 @@ export const DomainDetails = () => {
                   domainData={domainData}
                   isOwned={isOwned}
                   isAssigned={isAssigned}
+                  isPrimary={isPrimary}
                 />
               ) : isMinted && !isOwned && !isAssigned ? (
                 <BuyOrBid domainName={domainName} />

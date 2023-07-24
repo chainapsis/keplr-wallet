@@ -101,7 +101,6 @@ export const YourDomain = () => {
                   style={{
                     color: "var(--text-light, #808DA0)",
                     fontWeight: "lighter",
-                    width: "142px",
                   }}
                 >
                   Minted on{" "}
@@ -114,7 +113,6 @@ export const YourDomain = () => {
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
                   }}
                 >
                   {primaryDomain?.domain === domain && (

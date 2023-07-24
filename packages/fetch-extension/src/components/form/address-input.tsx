@@ -163,16 +163,14 @@ export const AddressInput: FunctionComponent<AddressInputProps> = observer(
         [CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB].includes(
           recipientConfig.chainId
         ) &&
+        value.length > 5 &&
+        value.endsWith(".fet") &&
         numOfCharacter(value, ".") === 1
       ) {
         setIsFNSFecthing(true);
-        if (value.length > 2 && value.endsWith(".")) {
-          value = value + "fet";
-          recipientConfig.setRawRecipient(value);
-        }
-        if (value.length > 5 && value.endsWith(".fet")) {
-          recipientConfig.setRawRecipient(value);
-        }
+
+        recipientConfig.setRawRecipient(value);
+
         const FETOwner: any = await getFETOwner(recipientConfig.chainId, value);
         if (FETOwner) {
           await new Promise((resolve) => setTimeout(resolve, 500));

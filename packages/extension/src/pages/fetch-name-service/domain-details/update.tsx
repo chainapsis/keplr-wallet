@@ -11,6 +11,7 @@ interface UpdateProps {
   domainData: any;
   isOwned: boolean;
   isAssigned: boolean;
+  isPrimary: boolean;
 }
 
 export const Update: React.FC<UpdateProps> = ({
@@ -19,6 +20,7 @@ export const Update: React.FC<UpdateProps> = ({
   domainData,
   isOwned,
   isAssigned,
+  isPrimary,
 }) => {
   const { chainStore, accountStore } = useStore();
   const current = chainStore.current;
@@ -59,7 +61,7 @@ export const Update: React.FC<UpdateProps> = ({
         domainData,
         domainPrice.result.Success.pricing
       );
-      history.push("/fetch-name-service");
+
       notification.push({
         placement: "top-center",
         type: "primary",
@@ -72,7 +74,18 @@ export const Update: React.FC<UpdateProps> = ({
       });
     } catch (error) {
       console.error("Error making domain as primary:", error);
+      notification.push({
+        placement: "top-center",
+        type: "warning",
+        duration: 2,
+        content: `transaction failed!`,
+        canDelete: true,
+        transition: {
+          duration: 0.25,
+        },
+      });
     }
+    history.push("/fetch-name-service");
   };
 
   const handleClick = () => {
@@ -82,12 +95,12 @@ export const Update: React.FC<UpdateProps> = ({
 
   return (
     <div className={style.buttonGroup}>
-      {isAssigned && (
+      {isAssigned && !isPrimary && (
         <button
           className={style.mint}
           style={{
             marginRight: "10px",
-            background: "transparent",
+            backgroundColor: "#1c0032",
             border: "1px solid #9075ff",
           }}
           onClick={
