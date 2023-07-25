@@ -12,8 +12,6 @@ import style from "./style.module.scss";
 type MintProps = {
   domainPrice: any;
   domainName: string;
-  setError: (value: boolean) => void;
-  setShowCard: (value: boolean) => void;
 };
 
 export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
@@ -68,18 +66,9 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
         current.chainId,
         account,
         domainName,
-        domainPrice.result.Success.pricing
+        domainPrice.result.Success.pricing,
+        notification
       );
-      notification.push({
-        placement: "top-center",
-        type: "primary",
-        duration: 2,
-        content: `transaction braodcasted!`,
-        canDelete: true,
-        transition: {
-          duration: 0.25,
-        },
-      });
     } catch (error) {
       console.error("Error minting domain:", error);
       notification.push({
@@ -93,7 +82,7 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
         },
       });
     }
-    navigate("/fetch-name-service");
+    navigate(-1);
   };
 
   const handleCancelButtonClick = () => {

@@ -248,7 +248,7 @@ ReactDOM.render(
                         element={<ExportToMobilePage />}
                       />
                       <Route
-                        path="/fetch-name-service"
+                        path="/fetch-name-service/:tab"
                         element={<FetchnameService />}
                       />
                       <Route

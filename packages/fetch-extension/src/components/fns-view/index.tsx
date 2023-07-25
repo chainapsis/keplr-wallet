@@ -39,7 +39,7 @@ export const FNSView: FunctionComponent = () => {
         color="primary"
         size="sm"
         onClick={() => {
-          navigate("/fetch-name-service");
+          navigate("/fetch-name-service/explore");
         }}
       >
         <FormattedMessage id="main.fns.button" />

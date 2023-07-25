@@ -1,5 +1,13 @@
+import {
+  AccountSetBase,
+  CosmosAccount,
+  CosmwasmAccount,
+  MakeTxResponse,
+  SecretAccount,
+} from "@keplr-wallet/stores";
 import { FNS_CONFIG } from "../config.ui.var";
 import { createFNSClient } from "./client";
+import { ContextProps } from "@components/notification";
 
 export const getAllDomainsOwnedBy = async (chainId: string, address: any) => {
   const queryClient = await createFNSClient(chainId);
@@ -66,12 +74,13 @@ export const getPrimaryDomain = async (
 
 export const mintDomain = async (
   chainId: string,
-  account: any,
+  account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
   domain: string,
-  amount: any
+  amount: any,
+  notification: ContextProps
 ) => {
   const tx = account.cosmwasm.makeExecuteContractTx(
-    "executeWasm",
+    `mint:${domain}`,
     FNS_CONFIG[chainId].contractAddress,
     {
       register: {
@@ -80,28 +89,17 @@ export const mintDomain = async (
     },
     [amount]
   );
-  await tx.send(
-    {
-      amount: [amount],
-      gas: "6000000",
-    },
-    "",
-    {},
-    {
-      onFullfilled: (txhash: any) => {
-        console.log("Txn executed", txhash.toString());
-      },
-    }
-  );
+  await executeTxn(tx, amount, notification);
 };
 
 export const setPrimary = async (
   chainId: string,
-  account: any,
-  domain: string
+  account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
+  domain: string,
+  notification: ContextProps
 ) => {
   const tx = account.cosmwasm.makeExecuteContractTx(
-    "executeWasm",
+    `setPrimary:${domain}`,
     FNS_CONFIG[chainId].contractAddress,
     {
       set_primary: {
@@ -110,29 +108,18 @@ export const setPrimary = async (
     },
     []
   );
-  await tx.send(
-    {
-      amount: [{ amount: "600000", denom: "afet" }],
-      gas: "6000000",
-    },
-    "",
-    {},
-    {
-      onFullfilled: (txhash: any) => {
-        console.log("Txn fullfilled", txhash.toString());
-      },
-    }
-  );
+  await executeTxn(tx, { amount: "600000", denom: "afet" }, notification);
 };
 
 export const updateDomain = async (
   chainId: string,
-  account: any,
+  account: AccountSetBase & CosmosAccount & CosmwasmAccount & SecretAccount,
   domain: string,
-  data: any
+  data: any,
+  notification: ContextProps
 ) => {
   const tx = account.cosmwasm.makeExecuteContractTx(
-    "executeWasm",
+    `updateDomain:${domain}`,
     FNS_CONFIG[chainId].contractAddress,
     {
       update_record: {
@@ -142,16 +129,48 @@ export const updateDomain = async (
     },
     []
   );
+  await executeTxn(tx, { amount: "600000", denom: "afet" }, notification);
+};
+
+const executeTxn = async (
+  tx: MakeTxResponse,
+  amount: any,
+  notification: ContextProps
+) => {
+  const gasResponse = await tx.simulate();
   await tx.send(
     {
-      amount: [{ amount: "600000", denom: "afet" }],
-      gas: "6000000",
+      amount: [amount],
+      gas: Math.floor(gasResponse.gasUsed * 1.5).toString(),
     },
     "",
     {},
     {
-      onFullfilled: (txhash: any) => {
-        console.log("Txn fullfilled", txhash.toString());
+      onFulfill: (tx: any) => {
+        console.log(tx);
+        notification.push({
+          placement: "top-center",
+          type: "success",
+          duration: 2,
+          content: `transaction successful!`,
+          canDelete: true,
+          transition: {
+            duration: 0.25,
+          },
+        });
+      },
+      onBroadcastFailed: (tx: any) => {
+        console.log(tx);
+        notification.push({
+          placement: "top-center",
+          type: "danger",
+          duration: 2,
+          content: `transaction failed!`,
+          canDelete: true,
+          transition: {
+            duration: 0.25,
+          },
+        });
       },
     }
   );

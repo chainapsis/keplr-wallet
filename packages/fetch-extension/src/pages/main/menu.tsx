@@ -35,18 +35,6 @@ export const Menu: FunctionComponent = observer(() => {
       >
         <FormattedMessage id="main.menu.settings" />
       </div>
-      {/* {Object.keys(FNS_CONFIG).includes(chainStore.current.chainId) ? (
-        <div
-          className={styleMenu["item"]}
-          onClick={() => {
-            navigate({
-              pathname: "/fetch-name-service",
-            });
-          }}
-        >
-          <FormattedMessage id="main.menu.fetch-name-service" />
-        </div>
-      ) : null} */}
       <a
         className={styleMenu["item"]}
         href="https://docs.fetch.ai/fetch-wallet/"

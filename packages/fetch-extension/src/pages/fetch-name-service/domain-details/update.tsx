@@ -29,18 +29,8 @@ export const Update: React.FC<UpdateProps> = ({
 
   const handleMakePrimary = async () => {
     try {
-      await setPrimary(current.chainId, account, domainName);
-      navigate("/fetch-name-service");
-      notification.push({
-        placement: "top-center",
-        type: "primary",
-        duration: 2,
-        content: `transaction braodcasted!`,
-        canDelete: true,
-        transition: {
-          duration: 0.25,
-        },
-      });
+      await setPrimary(current.chainId, account, domainName, notification);
+      navigate(-1);
     } catch (error) {
       console.error("Error making domain as primary:", error);
     }
@@ -48,18 +38,13 @@ export const Update: React.FC<UpdateProps> = ({
 
   const handleUpdate = async () => {
     try {
-      await updateDomain(current.chainId, account, domainName, domainData);
-
-      notification.push({
-        placement: "top-center",
-        type: "primary",
-        duration: 2,
-        content: `transaction braodcasted!`,
-        canDelete: true,
-        transition: {
-          duration: 0.25,
-        },
-      });
+      await updateDomain(
+        current.chainId,
+        account,
+        domainName,
+        domainData,
+        notification
+      );
     } catch (error) {
       console.error("Error making domain as primary:", error);
       notification.push({
@@ -73,7 +58,7 @@ export const Update: React.FC<UpdateProps> = ({
         },
       });
     }
-    navigate("/fetch-name-service");
+    navigate(-1);
   };
 
   const handleClick = () => {

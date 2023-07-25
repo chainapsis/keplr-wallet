@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router";
 import { Tab } from "@new-components/tab";
-import { YourDomain } from "./your-domain";
+import React from "react";
+import { useLocation, useNavigate } from "react-router";
 import { HeaderLayout } from "../../new-layouts";
 import { ExploreDomain } from "./explore-domain";
+import { YourDomain } from "./your-domain";
 
 const tabs = [
   { tabName: "explore", displayName: "EXPLORE" },
@@ -12,11 +12,10 @@ const tabs = [
 
 export const FetchnameService = () => {
   const navigate = useNavigate();
-
-  const [activeTab, setActiveTab] = useState(tabs[0].tabName);
+  const tabName = useLocation().pathname.split("/")[2];
 
   const handleTabChange = (tabName: React.SetStateAction<string>) => {
-    setActiveTab(tabName);
+    navigate("/fetch-name-service/" + tabName);
   };
   return (
     <HeaderLayout
@@ -28,9 +27,9 @@ export const FetchnameService = () => {
       }}
       showBottomMenu={true}
     >
-      <Tab tabs={tabs} activeTab={activeTab} onTabChange={handleTabChange} />
+      <Tab tabs={tabs} activeTab={tabName} onTabChange={handleTabChange} />
 
-      {activeTab === "explore" ? <ExploreDomain /> : <YourDomain />}
+      {tabName === "explore" ? <ExploreDomain /> : <YourDomain />}
     </HeaderLayout>
   );
 };

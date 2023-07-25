@@ -1,7 +1,14 @@
 import domainImage from "@assets/icon/domain-image.png";
-import { HeaderLayout } from "../../../new-layouts";
-import React, { useCallback, useEffect, useState } from "react";
+import { ToolTip } from "@components/tooltip";
 import { formatDomain } from "@utils/format";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import { useLocation, useNavigate } from "react-router";
+import { FNS_CONFIG } from "../../../config.ui.var";
 import {
   getBeneficiaryAddress,
   getDomainData,
@@ -9,14 +16,14 @@ import {
   getDomainStatus,
   getPrimaryDomain,
 } from "../../../name-service/fns-apis";
+import { HeaderLayout } from "../../../new-layouts";
 import { useStore } from "../../../stores";
 import { BuyOrBid } from "./buy-or-bid";
 import { Mint } from "./mint";
+import { MessagePopup } from "./popup";
 import style from "./style.module.scss";
 import { Update } from "./update";
-import { FNS_CONFIG } from "../../../config.ui.var";
-import { ToolTip } from "@components/tooltip";
-import { useLocation, useNavigate } from "react-router";
+import { observer } from "mobx-react-lite";
 
 export const TooltipForDomainNames = ({
   domainName,
@@ -40,23 +47,31 @@ export const TooltipForDomainNames = ({
   );
 };
 
-export const DomainDetails = () => {
+const properties = [
+  "address",
+  "email",
+  "github",
+  "website",
+  "twitter",
+  "background",
+];
+
+export const DomainDetails: FunctionComponent = observer(() => {
   const domainName = useLocation().pathname.split("/")[3];
   const navigate = useNavigate();
   const { accountStore, chainStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const sender = accountInfo.bech32Address;
-
   const [domainData, setDomainData] = useState<any>({});
   const [domainPrice, setDomainPrice] = useState<any>(null);
   const [isMinted, setIsMinted] = useState<any>(null);
   const [isAssigned, setIsAssigned] = useState(false);
   const [isPrimary, setIsPrimary] = useState(false);
-  const [isOwned, setIsOwned] = useState<any>(null);
+  const [isOwned, setIsOwned] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [showCard, setShowCard] = useState(false);
+  const [message, setMessage] = useState("Loading Domain Info");
+  const [showPopup, _setShowPopup] = useState(false);
 
   useEffect(() => {
     const checkIsAssigned = async () => {
@@ -74,12 +89,9 @@ export const DomainDetails = () => {
         setIsPrimary(true);
       }
     };
-    checkIsAssigned();
-    checkIsPrimary();
-
     const fetchDomainData = async () => {
       try {
-        setIsLoading(true);
+        setMessage("Loading Domain Info");
         const fetchedDomainData = await getDomainData(
           current.chainId,
           domainName
@@ -121,22 +133,29 @@ export const DomainDetails = () => {
         console.error("Error fetching domain data:", error);
       }
     };
-
-    fetchDomainData();
-  }, [current.chainId, domainName, sender]);
-
-  const properties = [
-    "address",
-    "email",
-    "github",
-    "website",
-    "twitter",
-    "background",
-  ];
-
-  const handleCancelClick = () => {
-    setShowCard(false);
-  };
+    setIsLoading(true);
+    if (accountInfo.txTypeInProgress.includes(domainName)) {
+      const type = accountInfo.txTypeInProgress.split(":")[0];
+      switch (type) {
+        case "mint":
+          setMessage("Mint Transaction in Progress");
+          break;
+        case "setPrimary":
+          setMessage("Transaction to make domain Primary in Progress");
+          break;
+        case "updateDomain":
+          setMessage("Transaction to update domain Details in Progress");
+          break;
+        default:
+          setMessage("Transaction In Progress");
+          break;
+      }
+    } else {
+      checkIsAssigned();
+      checkIsPrimary();
+      fetchDomainData();
+    }
+  }, [accountInfo.txTypeInProgress, current.chainId, domainName, sender]);
 
   return (
     <HeaderLayout
@@ -157,99 +176,76 @@ export const DomainDetails = () => {
       }
       showBottomMenu={true}
     >
-      <div style={{ fontFamily: "monospace" }}>
-        <div className={style["header"]}>PROPERTIES</div>
+      {isLoading ? (
+        <div className={style["loader"]}>
+          {message} <i className="fas fa-spinner fa-spin ml-2" />
+        </div>
+      ) : (
+        <div style={{ fontFamily: "monospace" }}>
+          <div className={style["header"]}>PROPERTIES</div>
+          <div className={style["domainIntro"]}>
+            <img
+              style={{ height: "130px" }}
+              src={domainData.background || domainImage}
+              alt="Domain Image"
+            />
+            {!domainData.background && (
+              <div className={style["imageText"]}>
+                <TooltipForDomainNames domainName={domainName} />
+              </div>
+            )}
 
-        {isLoading ? (
-          <div className={style["loader"]}>
-            Loading Domain Info <i className="fas fa-spinner fa-spin ml-2" />
+            <div className={style["availability"]}>
+              {isMinted ? (isOwned ? "OWNED" : "BUY") : "AVAILABLE"}
+            </div>
+            <div className={style["description"]}>
+              {domainData?.description || "Description hasn't been set"}
+            </div>
           </div>
-        ) : (
-          <React.Fragment>
-            <div className={style["domainIntro"]}>
-              <img
-                style={{ height: "130px" }}
-                src={domainData.background || domainImage}
-                alt="Domain Image"
-              />
-              {!domainData.background && (
-                <div className={style["imageText"]}>
-                  <TooltipForDomainNames domainName={domainName} />
+          <div className={style["domainInfoGroup"]}>
+            {Object.keys(domainData)
+              .filter((key: string) => properties.includes(key))
+              .map((property) => (
+                <div className={style["domainInfo"]} key={property}>
+                  <div className={style["keys"]}>{property}</div>
+                  <input
+                    disabled={
+                      !isOwned || !FNS_CONFIG[current.chainId].isEditable
+                    }
+                    className={style["values"]}
+                    value={domainData[property]}
+                    onDragStart={(e) => e.preventDefault()}
+                    placeholder="Not Set"
+                    onChange={(e) => {
+                      setDomainData({
+                        ...domainData,
+                        [property]: e.target.value,
+                      });
+                    }}
+                  />
                 </div>
-              )}
-
-              <div className={style["availability"]}>
-                {isMinted ? (isOwned ? "OWNED" : "BUY") : "AVAILABLE"}
-              </div>
-              <div className={style["description"]}>
-                {domainData?.description || "Description hasn't been set"}
-              </div>
-            </div>
-            <div className={style["domainInfoGroup"]}>
-              {Object.keys(domainData)
-                .filter((key: string) => properties.includes(key))
-                .map((property) => (
-                  <div className={style["domainInfo"]} key={property}>
-                    <div className={style["keys"]}>{property}</div>
-                    <input
-                      disabled={
-                        !isOwned || !FNS_CONFIG[current.chainId].isEditable
-                      }
-                      className={style["values"]}
-                      value={domainData[property]}
-                      onDragStart={(e) => e.preventDefault()}
-                      placeholder="Not Set"
-                      onChange={(e) => {
-                        setDomainData({
-                          ...domainData,
-                          [property]: e.target.value,
-                        });
-                      }}
-                    />
-                  </div>
-                ))}
-            </div>
-
-            {!isLoading &&
-              (isOwned || isAssigned ? (
-                <Update
-                  domainName={domainName}
-                  domainPrice={domainPrice}
-                  domainData={domainData}
-                  isOwned={isOwned}
-                  isAssigned={isAssigned}
-                  isPrimary={isPrimary}
-                />
-              ) : isMinted && !isOwned && !isAssigned ? (
-                <BuyOrBid domainName={domainName} />
-              ) : (
-                <Mint
-                  domainPrice={domainPrice}
-                  domainName={domainName}
-                  setError={setError}
-                  setShowCard={setShowCard}
-                />
               ))}
-          </React.Fragment>
-        )}
-      </div>
-
-      {showCard && error && (
-        <React.Fragment>
-          <div
-            className={style["errorCard"]}
-            onClick={() => handleCancelClick()}
-          />
-          <div className={style["popupCard"]}>
-            <div className={style["errorText"]}>
-              <h3 style={{ color: "white" }}>Transaction Failed!</h3>
-            </div>
-            <button type="button" onClick={() => handleCancelClick()}>
-              cancel
-            </button>
           </div>
-        </React.Fragment>
+
+          {!isLoading &&
+            (isOwned || isAssigned ? (
+              <Update
+                domainName={domainName}
+                domainPrice={domainPrice}
+                domainData={domainData}
+                isOwned={isOwned}
+                isAssigned={isAssigned}
+                isPrimary={isPrimary}
+              />
+            ) : isMinted && !isOwned && !isAssigned ? (
+              <BuyOrBid domainName={domainName} />
+            ) : (
+              <Mint domainPrice={domainPrice} domainName={domainName} />
+            ))}
+        </div>
       )}
+
+      {showPopup && <MessagePopup message={message} />}
     </HeaderLayout>
   );
-};
+});

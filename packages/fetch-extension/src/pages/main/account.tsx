@@ -215,7 +215,7 @@ export const AccountView: FunctionComponent = observer(() => {
             <div
               style={{ margin: "10px" }}
               className={styleAccount["address"]}
-              onClick={() => navigate("/fetch-name-service")}
+              onClick={() => navigate("/fetch-name-service/yourDomain")}
             >
               <i className="fas fa-link" />
               {domain}
@@ -225,7 +225,7 @@ export const AccountView: FunctionComponent = observer(() => {
               color="primary"
               size="sm"
               style={{ margin: "10px" }}
-              onClick={() => navigate("/fetch-name-service")}
+              onClick={() => navigate("/fetch-name-service/explore")}
             >
               <i className="fas fa-link" /> Link .FET domain
             </Button>
