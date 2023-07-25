@@ -25,6 +25,6 @@
       "./@types"
     ]
   },
-  "include": ["src/**/*", "window.d.ts"],
+  "include": ["src/**/*", "window.d.ts", "src/import-svg.d.ts"],
   "excluded": ["**/*.wasm"]
 }
