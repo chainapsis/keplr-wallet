@@ -15,7 +15,6 @@ interface UpdateProps {
 }
 
 export const Update: React.FC<UpdateProps> = ({
-  domainPrice,
   domainName,
   domainData,
   isOwned,
@@ -30,12 +29,7 @@ export const Update: React.FC<UpdateProps> = ({
 
   const handleMakePrimary = async () => {
     try {
-      await setPrimary(
-        current.chainId,
-        account,
-        domainName,
-        domainPrice.result.Success.pricing
-      );
+      await setPrimary(current.chainId, account, domainName);
       navigate("/fetch-name-service");
       notification.push({
         placement: "top-center",
@@ -54,13 +48,7 @@ export const Update: React.FC<UpdateProps> = ({
 
   const handleUpdate = async () => {
     try {
-      await updateDomain(
-        current.chainId,
-        account,
-        domainName,
-        domainData,
-        domainPrice.result.Success.pricing
-      );
+      await updateDomain(current.chainId, account, domainName, domainData);
 
       notification.push({
         placement: "top-center",

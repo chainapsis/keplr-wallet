@@ -98,8 +98,7 @@ export const mintDomain = async (
 export const setPrimary = async (
   chainId: string,
   account: any,
-  domain: string,
-  amount: any
+  domain: string
 ) => {
   const tx = account.cosmwasm.makeExecuteContractTx(
     "executeWasm",
@@ -109,11 +108,11 @@ export const setPrimary = async (
         domain,
       },
     },
-    [amount]
+    []
   );
   await tx.send(
     {
-      amount: [amount],
+      amount: [{ amount: "600000", denom: "afet" }],
       gas: "6000000",
     },
     "",
@@ -130,8 +129,7 @@ export const updateDomain = async (
   chainId: string,
   account: any,
   domain: string,
-  data: any,
-  amount: any
+  data: any
 ) => {
   const tx = account.cosmwasm.makeExecuteContractTx(
     "executeWasm",
@@ -142,7 +140,7 @@ export const updateDomain = async (
         domain,
       },
     },
-    [amount]
+    []
   );
   await tx.send(
     {
