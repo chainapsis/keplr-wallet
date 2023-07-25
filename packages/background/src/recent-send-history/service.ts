@@ -173,18 +173,21 @@ export class RecentSendHistoryService {
             history.txFulfilled = true;
             if (tx.code != null && tx.code !== 0) {
               history.txError = tx.log || tx.raw_log || "Unknown error";
-            }
 
-            if (history.ibcHistory.length > 0) {
-              const firstChannel = history.ibcHistory[0];
+              // TODO: In this case, it is not currently displayed in the UI. So, delete it for now.
+              this.removeRecentIBCTransferHistory(id);
+            } else {
+              if (history.ibcHistory.length > 0) {
+                const firstChannel = history.ibcHistory[0];
 
-              firstChannel.sequence = this.getIBCPacketSequenceFromTx(
-                tx,
-                firstChannel.portId,
-                firstChannel.channelId
-              );
+                firstChannel.sequence = this.getIBCPacketSequenceFromTx(
+                  tx,
+                  firstChannel.portId,
+                  firstChannel.channelId
+                );
 
-              this.trackIBCPacketForwardingRecursive(id);
+                this.trackIBCPacketForwardingRecursive(id);
+              }
             }
           });
         });

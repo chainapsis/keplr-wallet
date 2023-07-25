@@ -329,7 +329,13 @@ export const MainPage: FunctionComponent = observer(() => {
           ) : null}
 
           <ClaimAll isNotReady={isNotReady} />
-          <IbcHistoryView />
+
+          <IbcHistoryView isNotReady={isNotReady} />
+          {/*
+            IbcHistoryView 자체가 list를 그리기 때문에 여기서 gutter를 처리하기는 힘들다.
+            그러므로 IbcHistoryView에서 gutter를 처리하도록 한다.
+          */}
+          <Gutter size="0" />
 
           {tabStatus === "available" && !isNotReady ? (
             <StakeWithKeplrDashboardButton
