@@ -67,7 +67,7 @@ export const Header: FunctionComponent<Props & LocalProps> = observer(
             ) : null}
             {onBackButton ? (
               <div
-                className={style["menu-img"]}
+                className={style["menuImg"]}
                 onClick={() => {
                   if (onBackButton) {
                     onBackButton();
