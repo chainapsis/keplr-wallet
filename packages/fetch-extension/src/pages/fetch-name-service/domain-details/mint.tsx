@@ -122,13 +122,13 @@ export const Mint: React.FC<MintProps> = ({ domainPrice, domainName }) => {
             <div>Price of minting is </div>
             {mintingPrice}
             <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button onClick={handleCancelButtonClick}>Cancel</button>
               <button
                 onClick={handleContinueButtonClick}
                 disabled={mintingPrice === "Not Available"}
               >
                 Continue
               </button>
-              <button onClick={handleCancelButtonClick}>Cancel</button>
             </div>
           </div>
         </div>
